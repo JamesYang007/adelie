@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/glstudy/inst/include",
+                "/usr/lib/R/site-library/RcppEigen/include",
+                "/usr/share/R/include",
+                "${HOME}/R/x86_64-pc-linux-gnu-library/4.2/Rcpp/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
+}
