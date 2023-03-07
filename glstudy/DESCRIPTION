@@ -13,3 +13,6 @@ LinkingTo:
     RcppEigen
 Imports: 
     Rcpp
+Suggests:
+    ggplot2,
+    reshape2

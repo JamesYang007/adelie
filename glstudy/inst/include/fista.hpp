@@ -43,7 +43,7 @@ auto fista_solver(
         x_diff = x - x_old;
         y = x + (t_old - 1) / t * x_diff;
         
-        if (x_diff.norm() < tol) break;
+        if ((x_diff.array().abs() < tol * x.array().abs()).all()) break;
     }
     
     x_sol = x;
