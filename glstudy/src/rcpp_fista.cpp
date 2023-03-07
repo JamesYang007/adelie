@@ -1,8 +1,8 @@
 #include <Rcpp.h>
 #include <RcppEigen.h>
-#include <newton.hpp>
+#include <fista.hpp>
 
-//' Newton solver
+//' FISTA solver.
 //'
 //' @param   L       vector representing a diagonal PSD matrix.
 //'                  Must have max(L + s) > 0. 
@@ -14,7 +14,7 @@
 //' @param   max_iters   maximum number of iterations of Newton's method.
 //' @export
 // [[Rcpp::export]]
-Rcpp::List newton_solver(
+Rcpp::List fista_solver(
     const Eigen::Map<Eigen::VectorXd>& L,
     const Eigen::Map<Eigen::VectorXd>& v,
     double l1,
@@ -23,11 +23,9 @@ Rcpp::List newton_solver(
     size_t max_iters
 )
 {
-    Eigen::VectorXd x(L.size());
-    Eigen::VectorXd buffer1(L.size());
-    Eigen::VectorXd buffer2(L.size());
+    Eigen::VectorXd x(L.size());    
     size_t iters = 0;
-    glstudy::newton_solver(L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2);
+    glstudy::fista_solver(L, v, l1, l2, tol, max_iters, x, iters);
     return Rcpp::List::create(
         Rcpp::Named("beta")=x,
         Rcpp::Named("iters")=iters
