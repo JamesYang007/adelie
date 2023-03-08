@@ -5,6 +5,31 @@ Specifically, we hope to consolidate all empirical studies about how group-lasso
 regarding its performance based on different methods, literature overview, and application results
 to decide which implementation/application makes most sense depending on the situation.
 
+## Setup Instructions
+
+1. Install conda. We recommend installing `Mambaforge`, which is a conda installation with
+`mamba` installed by default and set to use `conda-forge` as the default set of package repositories.
+
+2. Clone the git repo:
+```
+git clone git@github.com:JamesYang007/Group-Lasso-Study.git
+```
+
+3. Set up `glstudy` conda environment. The list of packages that will be installed in the environment
+is in `pyproject.toml`.
+```
+mamba update -y conda mamba
+# create a development virtual environment with useful tools
+mamba env create
+conda activate glstudy
+# the following line makes poetry install into already activated
+# environment.
+poetry config virtualenvs.create false --local
+# install the imprint package plus development tools
+poetry install --no-root
+```
+
+
 ## References
 
 - [Strong Rules for Discarding Predictors in Lasso-type Problems](https://www.stat.cmu.edu/~ryantibs/papers/strongrules.pdf)
