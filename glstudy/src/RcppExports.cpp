@@ -11,6 +11,22 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// ista_solver
+Rcpp::List ista_solver(const Eigen::Map<Eigen::VectorXd>& L, const Eigen::Map<Eigen::VectorXd>& v, double l1, double l2, double tol, size_t max_iters);
+RcppExport SEXP _glstudy_ista_solver(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::VectorXd>& >::type L(LSEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::VectorXd>& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type l1(l1SEXP);
+    Rcpp::traits::input_parameter< double >::type l2(l2SEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< size_t >::type max_iters(max_itersSEXP);
+    rcpp_result_gen = Rcpp::wrap(ista_solver(L, v, l1, l2, tol, max_iters));
+    return rcpp_result_gen;
+END_RCPP
+}
 // fista_solver
 Rcpp::List fista_solver(const Eigen::Map<Eigen::VectorXd>& L, const Eigen::Map<Eigen::VectorXd>& v, double l1, double l2, double tol, size_t max_iters);
 RcppExport SEXP _glstudy_fista_solver(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP) {
@@ -96,6 +112,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_glstudy_ista_solver", (DL_FUNC) &_glstudy_ista_solver, 6},
     {"_glstudy_fista_solver", (DL_FUNC) &_glstudy_fista_solver, 6},
     {"_glstudy_fista_adares_solver", (DL_FUNC) &_glstudy_fista_adares_solver, 6},
     {"_glstudy_newton_solver", (DL_FUNC) &_glstudy_newton_solver, 6},
