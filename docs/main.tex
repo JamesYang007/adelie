@@ -13,6 +13,7 @@
 \usepackage{todonotes}
 \usepackage{graphicx}
 \usepackage{natbib}
+
 \bibliographystyle{plainnat}
 
 \title{A Comprehensive Study on Group Lasso Performance}
@@ -327,7 +328,7 @@ Section~\ref{ssec:newton} shows a novel approach to solving~(\ref{eq:bcd:block-u
 with a significant decrease in iterations while maintaining $O(p)$ operations per iteration.
 
 
-\subsection{Newton's Method (NM)}\label{ssec:newton}
+\subsection{Newton's Method}\label{ssec:newton}
 
 In this section, we propose a novel and simple method to solve~(\ref{eq:bcd:block-update}).
 By solving the sub-gradient problem of~(\ref{eq:bcd:block-update}),
@@ -446,23 +447,23 @@ impacted by the dimension.
 It is widely known that descent methods including Newton's Method
 is highly sensitive to the initialization.
 The question that remains is: how to choose the initial starting point $h^{(0)}$?
-Since $\varphi(0) > 0$, it is sufficient to choose $h^{(0)} = 0$.
-However, in practice, even this can be dramatically improved.
-Section~\ref{ssec:nmab} describes our most performant 
-modification to the vanilla Newton's Method.
+Despite the convergence guarantee irrespective of the choice of $h^{(0)}$,
+it is nonetheless ideal to choose an initial point close to the root for an even faster convergence.
+We recommend selecting any $h^{(0)}$ such that $\varphi(h^{(0)}) \geq 0$.
+For example, $h^{(0)} \equiv 0$ is sufficient since by definition $\varphi(0) > 0$.
+If $h^{(0)}$ is such that $\varphi(h^{(0)}) < 0$,
+then it is possible that $h^{(1)} < 0$.
+In fact, due to the flat tail of $\varphi$, it is extremely common for $h^{(1)}$ to be negative.
+In this case, after projecting back to $[0, \infty)$ (i.e. setting $h^{(1)} = 0$),
+we arrive at the same sequence as if we had started with $h^{(0)} = 0$.
+For this reason, it is almost always better to 
+set the initial point such that $\varphi(h^{(0)}) \geq 0$.
+Although $h^{(0)} = 0$ is a valid choice, it may also lead to large number of iterations,
+especially if $\lambda$ is small and $D$ is close to being semi-definite.
+In Section~\ref{ssec:nmab}, we describe our most performant and robust 
+modification to the vanilla Newton's Method that reduces iterations in nearly all cases.
 
-We end this section with a remark that if $h^{(0)}$ is such that $\varphi(h^{(0)}) < 0$,
-then we do not have the guarantee that $\varphi(h^{(k)}) \leq 0$,
-i.e. it is possible that $\varphi(h^{(k-1)}) < 0$ while $\varphi(h^{(k)}) > 0$.
-Of course, once $\varphi(h^{(k)}) > 0$, then we have the guaranteed convergence as before.
-In practice, $\varphi$ tends to have a flat tail that if $h^{(0)}$ is chosen such that
-$\varphi(h^{(0)}) < 0$, then the next Newton step will dramatically place $h^{(1)}$ towards 0,
-sometimes being largely negative.
-In this case, $h^{(1)}$ must be projected back to $[0, \infty)$.
-However, we do not recommend this approach because this possible large jump
-will usually set the user back to the case of applying Newton's Method with $h^{(0)} = 0$.
-
-\subsection{Newton's Method with Adaptive Bisection (NMAB)}\label{ssec:nmab}
+\subsection{Newton with Adaptive Bisection Starts (Newton-ABS)}\label{ssec:nmab}
 
 In this section, we improve the Newton's Method described in Section~\ref{ssec:newton}.
 Specifically, we first discuss how to find lower and upper bounds $h_\star$, $h^\star \in [0,\infty)$,
@@ -522,7 +523,7 @@ Approximating this problem, since
     +
     \sum\limits_{i: D_{ii} > 0}
     \frac{v_i^2}{(D_{ii} h + \lambda)^2}
-    \\&\leq 
+    \nonumber\\&\leq 
     \sum\limits_{i: D_{ii} = 0}
     \frac{v_i^2}{\lambda^2}
     +
@@ -550,24 +551,25 @@ In practice, $\varphi$ may decay incredibly rapidly near $h \approx 0$ and have 
 To protect against slow convergence of Newton's Method in this case,
 we may use $h_\star$ and $h^\star$ to first perform a bisection method to find the initial starting point.
 The key idea is to use bisection first for a few iterations 
-to avoid the region of slow changes in the Newton iterations.
+to avoid the region of slow changes in the Newton iterations.\todojames{refer to a figure?}
 Then, once sufficiently close to the root, we apply the Newton's Method for the fast guaranteed convergence.
 Although one may use a simple bisection method of splitting the interval $[h_\star, h^\star]$ in halves
-until sufficiently small, we propose an \emph{adaptive bisection method} that can reduce the number of bisections.
+until sufficiently small, we propose an \emph{adaptive bisection method} 
+that can significantly reduce the number of bisections.
 
 We describe the adaptive bisection method.
 Ideally, we would like to know if the root is closer to $h_\star$ or $h^\star$.
 If we believe that the root is much closer to $h_\star$,
-we do not have to bisect $[h_\star, h^\star]$ with the mid-point, 
-but perhaps with a point much closer to $h_\star$.
+we do not have to bisect $[h_\star, h^\star]$ at the mid-point, 
+but perhaps at a point closer to $h_\star$.
 Likewise, if the root were much closer to $h^\star$, 
 we would like to bisect at a point closer to $h^\star$.
-In essence, we would like to quantify a \emph{prior} of 
+Since we do not know the root, we would like to quantify a \emph{prior} of 
 the root being closer to $h_\star$.
 With this in mind, note that in~(\ref{eq:nmab:upper-approx}), we 
 approximated the problem of finding the smallest $h$ such that $\varphi(h) \leq 0$
 by solving the problem for an upper bound of $\varphi$.
-Then, the more accurate the approximation, the closer $h^\star$ is to the root.
+Then, the more accurate the approximation, the closer the approximate solution $h^\star$ is to the root.
 The approximation essentially came from using the fact that $D_{ii} h^\star \leq D_{ii} h^\star + \lambda$
 for $D_{ii} > 0$.
 This motivates us to consider the worst approximation error (rate)
@@ -578,20 +580,21 @@ This motivates us to consider the worst approximation error (rate)
     =
     \frac{\lambda}{D_\star h^\star + \lambda}
     \in 
-    [0,1]
+    (0,1)
 \end{align*}
 where $D_\star := \min\limits_{i : D_{ii} > 0} D_{ii}$.
 If $w$ is small, the approximation in~(\ref{eq:nmab:upper-approx}) is tight,
 which implies that the root is close to $h^\star$.
-Hence, $1-w$ represents the prior that the root is close to $h^\star$,
-or in other words, $w$ is the prior that the root is close to $h_\star$.
-We bisect at the new point $\tilde{h} := wh_\star + (1-w)h^\star$.
-If $\varphi(\tilde{h}) \geq 0$, we use $h^{(0)} := \tilde{h}$ as the initial point for the Newton Method.
-Otherwise, we set $h^\star := \tilde{h}$ and repeat the argument.
-Algorithm~\ref{alg:nmab:nmab} summarizes this procedure in its most basic form.
+Hence, $1-w$ represents the prior that the root is close to $h^\star$.
+We bisect at the new point $h := wh_\star + (1-w)h^\star$.
+If $\varphi(h) \geq 0$, we use $h^{(0)} := h$ as the initial point for the Newton Method.
+Otherwise, we set $h^\star := h$ and repeat the argument.
+Algorithm~\ref{alg:nmab:nmab} summarizes this procedure,
+which we call \emph{Newton with Adaptive Bisection Starts} (Newton-ABS), 
+in its most basic form.
 
 \begin{algorithm}
-    \caption{Newton Method with Adaptive Bisection}\label{alg:nmab:nmab}
+    \caption{Newton with Adaptive Bisection Starts (Newton-ABS)}\label{alg:nmab:nmab}
     \KwData{$D$, $v$, $\lambda$, $\epsilon$}
     Compute $h_\star$ that solves:
     $
@@ -620,23 +623,23 @@ Algorithm~\ref{alg:nmab:nmab} summarizes this procedure in its most basic form.
         $w \gets \frac{\lambda}{D_\star h^\star + \lambda}$\;
         $h \gets wh_\star + (1-w)h^\star$\;
     }
-    \eIf{$\abs{\varphi(h)} \leq \epsilon$}{
-        $\beta^\star \gets (D + \frac{\lambda}{h} I)^{-1} v$\;
-        return $\beta^\star$\;
-    }{
-        Apply Newton's Method starting at $h^{(0)} = h$;
+    \If{$\varphi(h) \geq 0$}{
+        Apply Newton's Method starting at $h^{(0)} = h$ and get optimal $\tilde{h}$\;
     }
+    $\beta^\star \gets (D + \lambda \tilde{h}^{-1} I)^{-1} v$\;
+    return $\beta^\star$\;
 \end{algorithm}
 
 Algorithm~\ref{alg:nmab:nmab} can be further optimized.
 For example, if $h^\star - h_\star$ is below some threshold (e.g. $0.1$),
 then we may skip bisection entirely and start Newton's Method at $h^{(0)} = h_\star$.
 This is because the adaptive bisection may move too slowly if the range is too small.
-On a similar note, one may promote enough movement towards $h_\star$
+From experimentation, this happens relatively often.
+On a similar note, one may also enforce enough movement towards $h_\star$
 by taking the max of $w$ with a minimal probability (e.g. $0.05$).
-This will ensure that at least $5\%$ of $h_\star$ is taken 
+This will ensure that at least some proportion of $h_\star$ is taken 
 if the prior is too strongly suggestive that the root is close to $h^\star$.
-It is always better to overshoot towards $h_\star$ such that $\varphi$ is non-negative,
+The idea is that it is always better to overshoot towards $h_\star$ such that $\varphi$ is non-negative,
 so that Newton's Method can quickly converge down to the root,
 than to slowly bisect to the root.
 

@@ -1,0 +1,9 @@
+name: glstudy
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+    - pip==23.0.1
+    - poetry==1.4.0
