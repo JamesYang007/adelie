@@ -16,6 +16,21 @@ fista_solver <- function(L, v, l1, l2, tol, max_iters) {
     .Call(`_glstudy_fista_solver`, L, v, l1, l2, tol, max_iters)
 }
 
+#' FISTA solver with adaptive restart.
+#'
+#' @param   L       vector representing a diagonal PSD matrix.
+#'                  Must have max(L + s) > 0. 
+#'                  L.size() <= buffer1.size().
+#' @param   v       any vector.  
+#' @param   l1      L2-norm penalty. Must be >= 0.
+#' @param   l2      L2 penalty. Must be >= 0.
+#' @param   tol         Newton's method tolerance of closeness to 0.
+#' @param   max_iters   maximum number of iterations of Newton's method.
+#' @export
+fista_adares_solver <- function(L, v, l1, l2, tol, max_iters) {
+    .Call(`_glstudy_fista_adares_solver`, L, v, l1, l2, tol, max_iters)
+}
+
 #' Newton solver
 #'
 #' @param   L       vector representing a diagonal PSD matrix.
@@ -29,6 +44,21 @@ fista_solver <- function(L, v, l1, l2, tol, max_iters) {
 #' @export
 newton_solver <- function(L, v, l1, l2, tol, max_iters) {
     .Call(`_glstudy_newton_solver`, L, v, l1, l2, tol, max_iters)
+}
+
+#' Newton solver with more information.
+#'
+#' @param   L       vector representing a diagonal PSD matrix.
+#'                  Must have max(L + s) > 0. 
+#'                  L.size() <= buffer1.size().
+#' @param   v       any vector.  
+#' @param   l1      L2-norm penalty. Must be >= 0.
+#' @param   l2      L2 penalty. Must be >= 0.
+#' @param   tol         Newton's method tolerance of closeness to 0.
+#' @param   max_iters   maximum number of iterations of Newton's method.
+#' @export
+newton_solver_debug <- function(L, v, l1, l2, tol, max_iters, smart_init = TRUE) {
+    .Call(`_glstudy_newton_solver_debug`, L, v, l1, l2, tol, max_iters, smart_init)
 }
 
 #' Computes the group-lasso objective.

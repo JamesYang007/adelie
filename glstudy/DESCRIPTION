@@ -15,4 +15,7 @@ Imports:
     Rcpp
 Suggests:
     ggplot2,
-    reshape2
+    reshape2,
+    latex2exp,
+    cowplot,
+    gridExtra
