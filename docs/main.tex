@@ -1,0 +1,645 @@
+\documentclass[fontsize=11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[ruled, vlined, linesnumbered]{algorithm2e}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{bbm}
+\usepackage[font=footnotesize,labelfont=bf]{caption}
+\usepackage{enumitem}
+\usepackage{blindtext}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{todonotes}
+\usepackage{graphicx}
+\usepackage{natbib}
+\bibliographystyle{plainnat}
+
+\title{A Comprehensive Study on Group Lasso Performance}
+\author{James Yang}
+\date{\today}
+
+\newcommand{\sA}{\mathcal{A}}
+\newcommand{\sB}{\mathcal{B}}
+\newcommand{\sD}{\mathcal{D}}
+\newcommand{\sE}{\mathcal{E}}
+\newcommand{\sF}{\mathcal{F}}
+\newcommand{\sG}{\mathcal{G}}
+\newcommand{\sH}{\mathcal{H}}
+\newcommand{\sL}{\mathcal{L}}
+\newcommand{\sP}{\mathcal{P}}
+\newcommand{\sS}{\mathcal{S}}
+\newcommand{\sT}{\mathcal{T}}
+\newcommand{\sX}{\mathcal{X}}
+\newcommand{\sY}{\mathcal{Y}}
+\newcommand{\prob}{\mathbb{P}}
+\newcommand{\inner}[1]{\left<#1\right>}
+\newcommand{\pr}[1]{\left(#1\right)}
+\newcommand{\br}[1]{\left[#1\right]}
+\newcommand{\sbr}[1]{\left\{#1\right\}}
+\newcommand{\EEE}{\mathbb{E}}
+\newcommand{\indic}[1]{\mathbbm{1}_{#1}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\norm}[1]{\|#1\|}
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\indist}{\mathcal{D}}
+\newcommand{\Normal}{\mathcal{N}}
+\newcommand{\indep}{\perp \!\!\! \perp}
+\newcommand{\floor}[1]{\lfloor#1\rfloor}
+\newcommand{\ceil}[1]{\lceil#1\rceil}
+\DeclareMathOperator{\var}{Var}
+\DeclareMathOperator{\cov}{Cov}
+\DeclareMathOperator{\bias}{Bias}
+\DeclareMathOperator{\trace}{Tr}
+\DeclareMathOperator{\Bern}{Bern}
+\DeclareMathOperator{\Binom}{Binom}
+\DeclareMathOperator{\Beta}{Beta}
+\DeclareMathOperator{\subjto}{subject\;to}
+\DeclareMathOperator*{\minimize}{minimize\;}
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\fwer}{FWER}
+\newcommand{\opnorm}[1]{\norm{#1}_{\text{op}}}
+
+\newcommand{\todojames}[1]{\todo[linecolor=blue, backgroundcolor=blue!25, bordercolor=blue]{James: #1}}
+
+\begin{document}
+\maketitle
+
+\section{Group Lasso Problem}\label{sec:glp}
+
+The lasso problem solves the following optimization problem:
+\begin{align*}
+    \minimize_{\beta \in \R^p}
+    f(\beta)
+    + \lambda \norm{\beta}_1
+\end{align*}
+where $f : \R^p \to \R$ is a convex function and $\lambda > 0$.
+Given data $X \in \R^{n\times p}$ and $y\in \R^{n}$,
+the most popular choices for $f$ are the Generalized Linear Model (GLM) 
+negative log-likelihoods under the Gaussian and Binomial family:
+\begin{align}
+    &\text{Gaussian:} \quad f(\beta) := \frac{1}{2} \norm{y - X\beta}_2^2 
+    \label{eq:glp:gaussian}\\
+    &\text{Binomial:} \quad f(\beta) := \sum\limits_{i=1}^n \pr{y_i x_i^\top \beta - \log\pr{1 + e^{x_i^\top \beta}}}
+    \label{eq:glp:binomial}
+\end{align}
+The celebrated lasso objective gained popularity for its interpretability 
+in regression settings as in the above since it tends to shrink some coefficients to zero exactly.
+
+The group lasso problem~\citep{yuan:2006} is an extension of the lasso problem
+that attempts to capture group structure within the features.
+Specifically, the group lasso attempts to zero-out \emph{groups of coefficients} rather than a single coefficient.
+The interpretation is that if a group of coefficients is zero, 
+the whole group is uninformative in predicting $y$~\citep{meier:2008}.\todojames{Cite early literature of group lasso.}
+This overcomes a major fallback of lasso with categorical features since
+lasso selects individual categorical feature (factor)
+instead of a whole group of features (e.g. one-hot encoded factors).
+\todojames{Cite GWAS and LD stuff that it makes a lot of sense to group genes.}
+
+In preparation of posing the group lasso problem, we begin with some notation.
+Let $1 \leq G \leq p$ be the number of groups among the $p$ features.
+Let $p_i$ be the group size of group $i$ for each $1\leq i \leq G$
+such that $\sum\limits_{i=1}^G p_i = p$.
+Define $\beta = \br{\beta_1 \, \beta_2 \, \ldots \, \beta_G}^\top \in \R^p$
+where each $\beta_i \in \R^{p_i}$.
+The group lasso problem is to minimize the following objective:
+\begin{align}
+    \minimize_{\beta \in \R^p}
+    f(\beta)
+    + \lambda \sum\limits_{j=1}^G \norm{\beta_j}_2
+    \label{eq:glp:objective}
+\end{align}
+for some convex function $f:\R^p \to \R$ and $\lambda > 0$.
+Similar to the lasso, given data $X$ and $y$, we may use the same Gaussian and Binomial
+log-likelihoods~(\ref{eq:glp:gaussian}),~(\ref{eq:glp:binomial}), respectively, for $f$.
+
+\section{Optimizer Algorithm}
+
+In this section, we discuss the algorithm to solve the optimization problem~(\ref{eq:glp:objective}).
+Let $X \in \R^{n\times p}$, $y\in \R^n$ be the feature matrix and response vector, respectively.
+Let $G$ be the number of groups and $p_i$ be the size of group $i$ for $1\leq i\leq G$.
+Further let $X = \br{X_1 \, X_2 \, \ldots \, X_G}$ where $X_i \in \R^{n \times p_i}$ is the feature matrix
+corresponding to group $i$ features only.
+
+In general, if the loss function $f$ is of the form $f(\beta) \equiv f(y, X\beta)$,
+the optimization problem~(\ref{eq:glp:objective}) can be reparametrized
+in terms of $\tilde{\beta} \in \R^p$ where $\tilde{\beta}_i := Q_i^\top \beta_i$
+where $Q_i \in \R^{p_i \times p_i}$ is the orthogonal matrix from the eigen-decomposition of 
+$X_i^\top X_i = Q_i D_i Q_i^\top$ for each $i=1,\ldots, G$.
+Concretely, it suffices to solve
+\begin{align}
+    \minimize_{\tilde{\beta} \in \R^p}
+    f(y, \tilde{X} \tilde{\beta})
+    + \lambda \sum\limits_{j=1}^G \norm{\tilde{\beta}_j}_2
+    \label{eq:oa:new-objective}
+\end{align}
+where $\tilde{X} = \br{X_1 Q_1 \, X_2 Q_2 \, \ldots \, X_G Q_G}$.
+Note that this was only possible because the group lasso penalty is invariant under
+the transformation from $\beta \to \tilde{\beta}$.
+Then, given a solution $\tilde{\beta}^*$ to the new problem~(\ref{eq:oa:new-objective}),
+we have the solution to the original problem $\beta^*$ given by
+$\beta^*_i := Q_i^\top \tilde{\beta}_i^*$.
+Hence, without loss of generality, we assume that 
+our feature matrix $X$ is of the form $\tilde{X}$.
+In particular, we assume that $X_i^\top X_i = D_i$ is diagonal for all $1\leq i\leq G$.
+We drop all tilde for notational simplicity.
+
+Computationally, it may seem like 
+we must construct $\tilde{X}$ from $X$ before solving~(\ref{eq:oa:new-objective}).
+However, we will shortly see that the fitting algorithm can be amended to 
+dynamically compute the necessary components of $\tilde{X}$.\todojames{Reference to later section?}
+In particular, we only need access to $\tilde{X}_i$, $D_i$,
+and $\tilde{X}_i^\top \tilde{X}_j$ for $i$ in the strong set and $j$ in the active set.
+In comparison to other proposed fitting procedures,
+we believe that the extra cost to compute $\tilde{X}_i$ and $\tilde{X}_i^\top \tilde{X}_j$
+is comparable to the cost of the other procedures.
+For example, \citet*{yuan:2006,meier:2008} rely on the fact that
+each group feature matrix $X_i$ is full-rank and therefore admits a QR decomposition with an invertible $R$.
+Under this assumption, they solve~(\ref{eq:oa:new-objective}) with $\tilde{X} = \br{Q_1 \, Q_2 \, \ldots \, Q_G}$
+and transform the solution back to the original scale by applying $R_i^{-1}$ to the $i$th group of coefficients.
+Note that these other approaches also apply a one-time decomposition of the group feature matrices.
+The benefit of this approach is that the algorithm is aided by a simple closed-form expression
+as part of the blockwise coordinate descent algorithm.
+However, there are two major downsides to this approach.
+The first is that, while the aforementioned authors primarily focused on the application of group lasso 
+on categorical data such as one-hot encoded data that easily satisfy the full-rank assumption,
+this assumption may easily be violated in other applications.
+For example,~\todojames{mention GWAS; small n, bigger group size}.
+The second is that this method does not simplify computations 
+when we add a ridge penalty as well (i.e. elastic net), 
+since in general, it introduces a Tikhonov regularization in the transformed problem.
+
+Similar to other approaches~\citep{yuan:2006,meier:2008,tseng:2001,sparsegl:2022},
+we use blockwise coordinate descent for its excellent speed and simplicity.
+Section~\ref{ssec:bcd} describes this procedure in greater detail.
+However, we take a completely different approach to fitting each block update.
+The essence of implementing a highly performant optimizer lies in 
+solving each block update~(\ref{eq:bcd:block-update}) as fast as possible.
+Aside from the orthonormalization method described above as in~\citet*{yuan:2006,meier:2008},
+many works in literature that describe group lasso fitting procedures
+use the general descent method called Proximal Gradient Descent (PGD), 
+or Iterative Soft-Thresholding Algorithm (ISTA) in this context,
+to solve~(\ref{eq:bcd:block-update})~\citep{sparsegl:2022,beck:2009,klosa:2020,wright:2009,loris:2009,sls:2016,odonoghue:2015}.
+A Nesterov acceleration can be applied on ISTA to get Fast-ISTA (FISTA)~\citep{beck:2009}.
+Section~\ref{ssec:pgd} describes the (F)ISTA procedure,
+Sections~\ref{ssec:newton}-\todojames{?} describes our proposed method to solve~(\ref{eq:bcd:block-update}),
+and Section~\todojames{?} gives a comparison of the two methodology.
+
+\subsection{Blockwise Coordinate Descent}\label{ssec:bcd}
+
+The (convex) optimization problem~(\ref{eq:oa:new-objective}) has a separable regularization,
+so blockwise coordinate descent can be applied~\cite{tseng:2001}.
+Hence, we iterate through each block $j=1,\ldots, G$,
+keeping all other blocks fixed, and solve the following problem:
+\begin{align}
+    \minimize_{\beta_j \in \R^{p_j}}
+    f(y, X\beta)
+    + \lambda \norm{\beta_j}_2
+    \label{eq:bcd:block-problem}
+\end{align}
+until convergence is reached.
+The final solution vector $\beta$ then solves~(\ref{eq:oa:new-objective}).
+
+For the remainder of the paper, we only discuss the Gaussian loss~(\ref{eq:glp:gaussian}).
+For a general $f$, we may apply Iterative Reweighted Least Squares (IRLS) 
+by iteratively reweighting the data 
+and solving~(\ref{eq:oa:new-objective}) with the Gaussian loss.
+\todojames{Cite IRLS. Yuan and Meier?}
+The Gaussian loss yields the optimization problem:
+\begin{align*}
+    \minimize_{\beta \in \R^p}
+    \frac{1}{2} \norm{y - X \beta}_2^2 
+    + \lambda \sum\limits_{j=1}^G \norm{\beta_j}_2
+\end{align*}
+with the block update for group $j$ as:
+\begin{align*}
+    \minimize_{\beta_j \in \R^{p_j}}
+    \frac{1}{2} \beta_j^\top D_j \beta_j
+    - (X_j^\top y - \sum\limits_{i \neq j} X_j^\top X_i \beta_i)^\top \beta_j
+    + \lambda \norm{\beta_j}_2
+\end{align*}
+For notational simplicity, define $v_j := X_j^\top y - \sum\limits_{i \neq j} X_j^\top X_i \beta_i$.
+Then, dropping the subscript $j$, each block update is of the form:
+\begin{align}
+    \minimize_{\beta \in \R^p}
+    \frac{1}{2} \beta^\top D \beta
+    - v^\top \beta
+    + \lambda \norm{\beta}_2
+    \label{eq:bcd:block-update}
+\end{align}
+where $D \in \R^{p \times p}$ is diagonal with non-negative entries,
+$v \in \R^p$ is any vector, and $\lambda > 0$.
+
+\subsection{Proximal Gradient Descent (PGD)}\label{ssec:pgd}
+
+In this section, we describe the PGD method, or ISTA,
+to solve the block update~(\ref{eq:bcd:block-update}).
+The progression is similar to that of~\citet{sls:2016}.
+Define
+\begin{align*}
+    f(\beta)
+    &=
+    \frac{1}{2} \beta^\top D \beta
+    - v^\top \beta
+\end{align*}
+as the convex (Gaussian) loss function in~(\ref{eq:bcd:block-update}).
+ISTA has guaranteed convergence so long as the step-size is chosen properly.
+Any step-size $\nu$ can be chosen such that
+$\nu \leq \frac{1}{L}$ where $L$ is the Lipschitz constant for $\nabla f$.
+Since 
+\begin{align*}
+    \nabla f(\beta)
+    &=
+    D \beta - v
+    \\\implies
+    \norm{
+        \nabla f(\beta)
+        - \nabla f(\tilde{\beta})
+    }_2
+    &=
+    \norm{D (\beta - \tilde{\beta})}_2
+    \leq
+    \opnorm{D} \norm{\beta-\tilde{\beta}}_2
+\end{align*}
+we have $L \equiv \opnorm{D} \equiv \lambda_{\max}(D)$ as the largest eigenvalue of $D$.
+In particular, since $D$ is diagonal, $L \equiv \max\limits_{i} D_{ii}$.
+
+The ISTA procedure is given in Algorithm~\ref{alg:pgd:ista}.
+By applying a standard Nesterov acceleration~\citep{beck:2009}, 
+we have the FISTA procedure given in Algorithm~\ref{alg:pgd:fista}.
+Additionally, we may perform adaptive restarts
+based on the proximal gradient updates~\citep{odonoghue:2015}
+for even faster convergence as outlined in Algorithm~\ref{alg:pgd:fista-adares}.
+
+\begin{algorithm}
+    \caption{ISTA}\label{alg:pgd:ista}
+    \KwData{$D$, $v$, $\lambda$, $\beta^{(0)}$}
+    $\nu \gets \pr{\max\limits_{i} D_{ii}}^{-1}$\;
+    \While{not converged}{
+        $w \gets \beta^{(k-1)} + \nu \pr{v - D \beta^{(k-1)}}$\;
+        $\beta^{(k)} \gets \pr{1-\frac{\nu\lambda}{\norm{w}_2}}_{+} w$\;
+    }
+\end{algorithm}
+
+\begin{algorithm}
+    \caption{FISTA}\label{alg:pgd:fista}
+    \KwData{$D$, $v$, $\lambda$, $\beta^{(0)}$}
+    $\nu \gets \pr{\max\limits_{i} D_{ii}}^{-1}$\;
+    $\eta^{(1)} \gets \beta^{(0)}$\;
+    $t_1 = 1$\;
+    \While{not converged}{
+        $w \gets \eta^{(k)} + \nu \pr{v - D \eta^{(k)}}$\; 
+        $\beta^{(k)} \gets \pr{1-\frac{\nu\lambda}{\norm{w}_2}}_{+} w$\;
+        $t_{k+1} \gets \frac{1 + \sqrt{1 + 4t_{k}^2}}{2}$\;
+        $\eta^{(k+1)} \gets \beta^{(k)} + \frac{t_k-1}{t_{k+1}} (\beta^{(k)} - \beta^{(k-1)})$\;
+    }
+\end{algorithm}
+
+\begin{algorithm}
+    \caption{FISTA with Adaptive Restart}\label{alg:pgd:fista-adares}
+    \KwData{$D$, $v$, $\lambda$, $\beta^{(0)}$}
+    \While{not converged}{
+        Carry out Algorithm~\ref{alg:pgd:fista} with 
+        inputs $D$, $v$, $\lambda$, $\beta^{(0)}$ until
+        \begin{align}
+            \nabla f(\eta^{(k)})^\top (\beta^{(k)} - \beta^{(k-1)}) > 0
+            \label{eq:fista-adares:cond}
+        \end{align}
+        \;
+        \If{(\ref{eq:fista-adares:cond}) holds at step $k$} {
+            Reset $\beta^{(0)} \gets \beta^{(k)}$\;
+        }
+    }
+\end{algorithm}
+
+Note that the computational cost of 
+Algorithms~\ref{alg:pgd:ista},~\ref{alg:pgd:fista},~\ref{alg:pgd:fista-adares}
+are all $O(p k)$ where $k$ is the number of iterations until convergence.
+Since we must output a vector in $\R^p$, 
+any optimizer must necessarily have $O(p)$ operations.
+Hence, the optimal optimizer of complexity $O(pk)$ must prioritize lowering 
+the number of iterations until convergence.
+While each algorithm is an improvement from the previous,
+there is still much improvement left.
+Section~\ref{ssec:newton} shows a novel approach to solving~(\ref{eq:bcd:block-update})
+with a significant decrease in iterations while maintaining $O(p)$ operations per iteration.
+
+
+\subsection{Newton's Method (NM)}\label{ssec:newton}
+
+In this section, we propose a novel and simple method to solve~(\ref{eq:bcd:block-update}).
+By solving the sub-gradient problem of~(\ref{eq:bcd:block-update}),
+we see that the solution $\beta^\star$ must satisfy
+\begin{align}
+    \beta
+    &=
+    \begin{cases}
+    \pr{D + \frac{\lambda}{\norm{\beta}_2} I}^{-1} v ,& \norm{v}_2 > \lambda \\
+    0 ,& \norm{v}_2 \leq \lambda
+    \end{cases}
+    \label{eq:newton:block-solution}
+\end{align}
+Without loss of generality, we consider the first case when $\beta^\star \neq 0$.
+Without knowing $\norm{\beta^\star}_2$, there is no closed-form solution for $\beta^\star$.
+In an endeavor to find an expression for $\norm{\beta^\star}_2$,
+we take the $\ell_2$ norm on both sides to get that $\norm{\beta^\star}_2$ must satisfy
+\begin{align}
+    \sum\limits_{i=1}^p
+    \frac{v_i^2}{(D_{ii} \norm{\beta}_2 + \lambda)^2}
+    =
+    1
+    \label{eq:newton:norm-solution}
+\end{align}
+Unfortunately, there is no closed-form solution for~(\ref{eq:newton:norm-solution}) either.
+However, we will shortly show that there is an efficient algorithm 
+to numerically solve~(\ref{eq:newton:norm-solution}).
+In turn, once we find $\norm{\beta^\star}_2$, we may substitute it
+into~(\ref{eq:newton:block-solution}) to get the full solution $\beta^\star$ in $O(p)$ time.
+We note in passing that~(\ref{eq:newton:block-solution}) and~(\ref{eq:newton:norm-solution})
+were previously discovered~\citep{sls:2016},
+however, there is no mention of how to quickly solve for $\beta^\star$ or $\norm{\beta^\star}_2$.
+
+We now discuss how to solve~(\ref{eq:newton:norm-solution}).
+First, define $\varphi : [0, \infty) \to \R$ by
+\begin{align*}
+    \varphi(h)
+    &:=
+    \sum\limits_{i=1}^p
+    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    - 1
+\end{align*}
+so that~(\ref{eq:newton:norm-solution}) is now a root-finding problem for $\varphi$.
+Upon differentiating $\varphi$,
+\begin{align*}
+    \frac{d\varphi(h)}{dh}
+    &=
+    -2 \sum\limits_{i=1}^p
+    \frac{v_i^2 D_{ii}}{(D_{ii} h + \lambda)^3}
+    \leq
+    0
+\end{align*}
+where the inequality is strict if not all $v_i^2 D_{ii} = 0$.
+Note that if all $v_i^2 D_{ii} = 0$, then we must have that $\norm{v}_2 \leq \lambda$.
+Otherwise,
+\begin{align*}
+    \varphi(h)
+    &=
+    \sum\limits_{i : D_{ii} = 0}
+    \frac{v_i^2}{\lambda^2}
+    - 1
+    =
+    \lambda^{-2} \sum\limits_{i=1}^p v_i^2 - 1
+    > 0
+\end{align*}
+In particular, $\varphi$ is constant and strictly positive so it has no roots.
+So, if $\norm{v}_2 > \lambda$, then there exists a vector $\beta$
+where $\varphi(\norm{\beta}_2) = 0$, which is a contradiction.
+Hence, without loss of generality, we may assume $\varphi'$ is strictly negative,
+so that $\varphi$ is strictly decreasing.
+Consequently, since $\varphi(0) > 0$ by hypothesis, there exists a (unique) root.
+Further, it is easy to see that $\varphi$ is convex since it is a 
+sum of convex functions.
+
+Since $\varphi$ is convex, this suggests solving~(\ref{eq:newton:norm-solution})
+via a one-dimensional Newton's Method.
+Specifically, with $h^{(0)}$ as the initial starting point, for $k\geq 1$,
+\begin{align}
+    h^{(k)} = h^{(k-1)} - \frac{\varphi(h^{(k-1)})}{\varphi'(h^{(k-1)})}
+    \label{eq:newton:newton-step}
+\end{align}
+We claim that Newton's Method is guaranteed to converge for any initial point $h^{(0)}$.
+Indeed, for every $k\geq 1$, by convexity of $\varphi$,
+\begin{align*}
+    \varphi(h^{(k)})
+    &\geq
+    \varphi(h^{(k-1)})
+    + \varphi'(h^{(k-1)}) (h^{(k)} - h^{(k-1)})
+    =
+    0
+\end{align*}
+Along with~(\ref{eq:newton:newton-step}),
+this shows that $h^{(k)}$ is an increasing sequence for $k\geq 1$ 
+and bounded above by $h^\star$, the root of $\varphi$, by monotonicity.
+Hence, $h^{(k)}$ converges to some limit $h^{(\infty)}$. 
+From~(\ref{eq:newton:newton-step}), taking limit as $k\to \infty$ and using that $\varphi'$ is non-zero,
+\begin{align*}
+    h^{(\infty)} = h^{(\infty)} - \frac{\varphi(h^{(\infty)})}{\varphi'(h^{(\infty)})}
+    \implies
+    \varphi(h^{(\infty)}) = 0
+\end{align*}
+which shows that $h^{(\infty)}$ is the root of $\varphi$.
+In summary, Newton's Method gives \emph{guaranteed convergence} to the root.
+
+Since $\varphi$ is convex, we also have quadratic convergence rate and each iteration costs $O(p)$.
+In principle, our setting is one of the best settings for Newton's Method to succeed.
+While FISTA (Algorithm~\ref{alg:pgd:fista}) and the adaptive restarted version
+(Algorithm~\ref{alg:pgd:fista-adares}) also give the same convergence rate,
+Figure~\todojames{add figure ref} 
+shows a clear improvement for the Newton's Method in practice.
+One very important benefit of Newton's Method is that the optimization domain
+remains one-dimensional \emph{regardless of the input dimensions}.
+However, FISTA optimizes over $\beta \in \R^p$ directly, so its performance is heavily
+impacted by the dimension.
+
+It is widely known that descent methods including Newton's Method
+is highly sensitive to the initialization.
+The question that remains is: how to choose the initial starting point $h^{(0)}$?
+Since $\varphi(0) > 0$, it is sufficient to choose $h^{(0)} = 0$.
+However, in practice, even this can be dramatically improved.
+Section~\ref{ssec:nmab} describes our most performant 
+modification to the vanilla Newton's Method.
+
+We end this section with a remark that if $h^{(0)}$ is such that $\varphi(h^{(0)}) < 0$,
+then we do not have the guarantee that $\varphi(h^{(k)}) \leq 0$,
+i.e. it is possible that $\varphi(h^{(k-1)}) < 0$ while $\varphi(h^{(k)}) > 0$.
+Of course, once $\varphi(h^{(k)}) > 0$, then we have the guaranteed convergence as before.
+In practice, $\varphi$ tends to have a flat tail that if $h^{(0)}$ is chosen such that
+$\varphi(h^{(0)}) < 0$, then the next Newton step will dramatically place $h^{(1)}$ towards 0,
+sometimes being largely negative.
+In this case, $h^{(1)}$ must be projected back to $[0, \infty)$.
+However, we do not recommend this approach because this possible large jump
+will usually set the user back to the case of applying Newton's Method with $h^{(0)} = 0$.
+
+\subsection{Newton's Method with Adaptive Bisection (NMAB)}\label{ssec:nmab}
+
+In this section, we improve the Newton's Method described in Section~\ref{ssec:newton}.
+Specifically, we first discuss how to find lower and upper bounds $h_\star$, $h^\star \in [0,\infty)$,
+respectively, such that the root lies in $[h_\star, h^\star]$.
+We then discuss an adaptive bisection method that preceeds the Newton's Method
+to find a clever initial point $h^{(0)}$.
+
+We first begin with the derivation of $h_\star$ and $h^\star$.
+Note that the root-finding problem for $\varphi$
+is equivalent to finding the largest value $h > 0$ such that $\varphi(h) \geq 0$, or
+\begin{align*}
+    \sum\limits_{i=1}^p
+    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    \geq
+    1
+\end{align*}
+Let $a(h), b(h) \in \R^p$ be defined by $a_k(h) := D_{kk} h + \lambda$
+and $b_k(h) := \frac{\abs{v_k}}{a_k(h)}$ for each $k=1,\ldots, p$.
+Then, by Cauchy-Schwarz,
+\begin{align*}
+    \norm{v}_1
+    &:=
+    \sum\limits_{k} \abs{v_k}
+    =
+    \sum\limits_{k} a_k(h) b_k(h)
+    \leq
+    \norm{a(h)}_{2} \norm{b(h)}_2
+\end{align*}
+Hence, if $\norm{a(h)}_2 \leq \norm{v}_1$,
+then $\varphi(h) \geq 0$.
+We see that $\norm{a(h)}_2 \leq \norm{v}_1$ if and only if
+\begin{align*}
+    \sum\limits_{i=1}^p
+    (D_{ii} h + \lambda)^2
+    \leq
+    \norm{v}_1^2
+\end{align*}
+This inequality can be solved for $h$ using the quadratic formula.
+Let $\tilde{h}$ be the solution.
+Then, we have a potentially tighter lower bound $h_\star := \max(\tilde{h}, 0)$ than zero.
+
+Next, we discuss $h^\star$.
+Similar to $h_\star$, we wish to find the smallest $h$ such that
+\begin{align*}
+    \sum\limits_{i=1}^p
+    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    \leq
+    1
+\end{align*}
+Approximating this problem, since
+\begin{align}
+    \sum\limits_{i=1}^p
+    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    &=
+    \sum\limits_{i: D_{ii} = 0}
+    \frac{v_i^2}{\lambda^2}
+    +
+    \sum\limits_{i: D_{ii} > 0}
+    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    \\&\leq 
+    \sum\limits_{i: D_{ii} = 0}
+    \frac{v_i^2}{\lambda^2}
+    +
+    h^{-2}
+    \sum\limits_{i: D_{ii} > 0}
+    \frac{v_i^2}{D_{ii}^2 }
+    \label{eq:nmab:upper-approx}
+\end{align}
+by setting 
+\begin{align*}
+    h^\star
+    := 
+    \sqrt{
+        \frac{
+            \sum\limits_{i: D_{ii} > 0} \frac{v_i^2}{D_{ii}^2}
+        }{
+            1 - \lambda^{-2} \sum\limits_{i : D_{ii} = 0} v_i^2
+        }
+    }
+\end{align*}
+we have that $\varphi(h^\star) \leq 0$.
+This shows that the root must lie in $[h_\star, h^\star]$.
+
+In practice, $\varphi$ may decay incredibly rapidly near $h \approx 0$ and have an extremely flat tail.
+To protect against slow convergence of Newton's Method in this case,
+we may use $h_\star$ and $h^\star$ to first perform a bisection method to find the initial starting point.
+The key idea is to use bisection first for a few iterations 
+to avoid the region of slow changes in the Newton iterations.
+Then, once sufficiently close to the root, we apply the Newton's Method for the fast guaranteed convergence.
+Although one may use a simple bisection method of splitting the interval $[h_\star, h^\star]$ in halves
+until sufficiently small, we propose an \emph{adaptive bisection method} that can reduce the number of bisections.
+
+We describe the adaptive bisection method.
+Ideally, we would like to know if the root is closer to $h_\star$ or $h^\star$.
+If we believe that the root is much closer to $h_\star$,
+we do not have to bisect $[h_\star, h^\star]$ with the mid-point, 
+but perhaps with a point much closer to $h_\star$.
+Likewise, if the root were much closer to $h^\star$, 
+we would like to bisect at a point closer to $h^\star$.
+In essence, we would like to quantify a \emph{prior} of 
+the root being closer to $h_\star$.
+With this in mind, note that in~(\ref{eq:nmab:upper-approx}), we 
+approximated the problem of finding the smallest $h$ such that $\varphi(h) \leq 0$
+by solving the problem for an upper bound of $\varphi$.
+Then, the more accurate the approximation, the closer $h^\star$ is to the root.
+The approximation essentially came from using the fact that $D_{ii} h^\star \leq D_{ii} h^\star + \lambda$
+for $D_{ii} > 0$.
+This motivates us to consider the worst approximation error (rate)
+\begin{align*}
+    w
+    := 
+    \max\limits_{i: D_{ii} > 0} \frac{\lambda}{D_{ii} h^\star + \lambda}
+    =
+    \frac{\lambda}{D_\star h^\star + \lambda}
+    \in 
+    [0,1]
+\end{align*}
+where $D_\star := \min\limits_{i : D_{ii} > 0} D_{ii}$.
+If $w$ is small, the approximation in~(\ref{eq:nmab:upper-approx}) is tight,
+which implies that the root is close to $h^\star$.
+Hence, $1-w$ represents the prior that the root is close to $h^\star$,
+or in other words, $w$ is the prior that the root is close to $h_\star$.
+We bisect at the new point $\tilde{h} := wh_\star + (1-w)h^\star$.
+If $\varphi(\tilde{h}) \geq 0$, we use $h^{(0)} := \tilde{h}$ as the initial point for the Newton Method.
+Otherwise, we set $h^\star := \tilde{h}$ and repeat the argument.
+Algorithm~\ref{alg:nmab:nmab} summarizes this procedure in its most basic form.
+
+\begin{algorithm}
+    \caption{Newton Method with Adaptive Bisection}\label{alg:nmab:nmab}
+    \KwData{$D$, $v$, $\lambda$, $\epsilon$}
+    Compute $h_\star$ that solves:
+    $
+        \sum\limits_{i=1}^p
+        (D_{ii} h + \lambda)^2
+        \leq
+        \norm{v}_1^2
+    $\;
+    Compute 
+    $
+        h^\star
+        := 
+        \sqrt{
+            \frac{
+                \sum\limits_{i: D_{ii} > 0} \frac{v_i^2}{D_{ii}^2}
+            }{
+                1 - \lambda^{-2} \sum\limits_{i : D_{ii} = 0} v_i^2            
+            }
+        }
+    $\;
+    $D_\star \gets \min\limits_{i : D_{ii} > 0} D_{ii}$\;
+    $w \gets \frac{\lambda}{D_\star h^\star + \lambda}$\;
+    $h \gets wh_\star + (1-w)h^\star$\;
+    \While{$\varphi(h) < 0$ and $\abs{\varphi(h)} > \epsilon$}{
+        $h^\star \gets h$\; 
+        $w \gets \frac{\lambda}{D_\star h^\star + \lambda}$\;
+        $h \gets wh_\star + (1-w)h^\star$\;
+    }
+    \eIf{$\abs{\varphi(h)} \leq \epsilon$}{
+        $\beta^\star \gets (D + \frac{\lambda}{h} I)^{-1} v$\;
+        return $\beta^\star$\;
+    }{
+        Apply Newton's Method starting at $h^{(0)} = h$;
+    }
+\end{algorithm}
+
+Algorithm~\ref{alg:nmab:nmab} can be further optimized.
+For example, if $h^\star - h_\star$ is below some threshold (e.g. $0.1$),
+then we may skip bisection entirely and start Newton's Method at $h^{(0)} = h_\star$.
+This is because the adaptive bisection may move too slowly if the range is too small.
+On a similar note, one may promote enough movement towards $h_\star$
+by taking the max of $w$ with a minimal probability (e.g. $0.05$).
+This will ensure that at least $5\%$ of $h_\star$ is taken 
+if the prior is too strongly suggestive that the root is close to $h^\star$.
+It is always better to overshoot towards $h_\star$ such that $\varphi$ is non-negative,
+so that Newton's Method can quickly converge down to the root,
+than to slowly bisect to the root.
+
+\bibliography{references}
+
+\end{document}
