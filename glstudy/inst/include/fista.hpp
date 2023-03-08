@@ -2,7 +2,51 @@
 #include <cstddef>
 
 namespace glstudy {
+
+/*
+ * ISTA solver.
+ */
+template <class LType, class VType, class ValueType, class XType>
+inline
+auto ista_solver(
+    const LType& L,
+    const VType& v,
+    ValueType l1,
+    ValueType l2,
+    ValueType tol,
+    size_t max_iters,
+    XType& x_sol,
+    size_t& iters
+)
+{
+    const auto lip = L.maxCoeff();
+    const auto nu = 1. / lip;
+    const auto p = L.size();
+    Eigen::VectorXd x_diff(p);
+    Eigen::VectorXd x_old(p);
+    Eigen::VectorXd x(p); x.setZero();
+    Eigen::VectorXd v_tilde(p);
+
+    iters = 0;
+    for (; iters < max_iters; ++iters) {
+        x_old.swap(x);
+        v_tilde.array() = x_old.array() - nu * (L.array() * x_old.array() - v.array());
+        const auto v_tilde_l2 = v_tilde.norm();
+        if (v_tilde_l2 <= l1 * nu) {
+            x.setZero();
+        } else {
+            x = ((lip /(lip + l2)) * (1 - (l1 * nu) / v_tilde_l2)) * v_tilde;
+        }
+        x_diff = x - x_old;
+        if ((x_diff.array().abs() < (tol * x.array().abs())).all()) break;
+    }
     
+    x_sol = x;
+}
+    
+/*
+ * FISTA solver.
+ */
 template <class LType, class VType, class ValueType, class XType>
 inline
 auto fista_solver(
@@ -41,7 +85,7 @@ auto fista_solver(
         x_diff = x - x_old;
         y = x + (t_old - 1) / t * x_diff;
         
-        if ((x_diff.array().abs() < tol * x.array().abs()).all()) break;
+        if ((x_diff.array().abs() < (tol * x.array().abs())).all()) break;
     }
     
     x_sol = x;
@@ -97,7 +141,7 @@ auto fista_adares_solver(
             y = x + (t_old - 1) / t * x_diff;
         }
 
-        if ((x_diff.array().abs() < tol * x.array().abs()).all()) break;
+        if ((x_diff.array().abs() < (tol * x.array().abs())).all()) break;
     }
     
     x_sol = x;
