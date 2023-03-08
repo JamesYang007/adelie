@@ -6,3 +6,4 @@
 *.fls
 *.log
 *.synctex.gz
+*.ipynb_checkpoints
