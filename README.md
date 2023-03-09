@@ -11,24 +11,28 @@ to decide which implementation/application makes most sense depending on the sit
 `mamba` installed by default and set to use `conda-forge` as the default set of package repositories.
 
 2. Clone the git repo:
-```
-git clone git@github.com:JamesYang007/Group-Lasso-Study.git
-```
+    ```
+    git clone git@github.com:JamesYang007/Group-Lasso-Study.git
+    ```
 
 3. Set up `glstudy` conda environment. The list of packages that will be installed in the environment
 is in `pyproject.toml`.
-```
-mamba update -y conda mamba
-# create a development virtual environment with useful tools
-mamba env create
-conda activate glstudy
-# the following line makes poetry install into already activated
-# environment.
-poetry config virtualenvs.create false --local
-# install the imprint package plus development tools
-poetry install --no-root
-```
+    ```
+    mamba update -y conda mamba
+    mamba env create
+    conda activate glstudy
+    poetry config virtualenvs.create false --local
+    poetry install --no-root
+    ```
 
+4. Install `pyglstudy`. If you want to install globally,
+    ```
+    pip install .
+    ```
+    Otherwise, to install in editable mode (developers),
+    ```
+    pip install -e .
+    ```
 
 ## References
 

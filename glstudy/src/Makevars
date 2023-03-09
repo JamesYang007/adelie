@@ -13,6 +13,6 @@ else
 endif
 
 PKG_CPPFLAGS = \
-    -I../inst/include \
+    -I../../src/include \
     -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS \
     -DEIGEN_MATRIXBASE_PLUGIN=\"utils/eigen/matrixbase_plugin.hpp\" 

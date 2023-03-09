@@ -1,0 +1,44 @@
+\subsection{Blockwise Coordinate Descent}\label{ssec:bcd}
+
+The (convex) optimization problem~(\ref{eq:oa:new-objective}) has a separable regularization,
+so blockwise coordinate descent can be applied~\cite{tseng:2001}.
+Hence, we iterate through each block $j=1,\ldots, G$,
+keeping all other blocks fixed, and solve the following problem:
+\begin{align}
+    \minimize_{\beta_j \in \R^{p_j}}
+    f(y, X\beta)
+    + \lambda \norm{\beta_j}_2
+    \label{eq:bcd:block-problem}
+\end{align}
+until convergence is reached.
+The final solution vector $\beta$ then solves~(\ref{eq:oa:new-objective}).
+
+For the remainder of the paper, we only discuss the Gaussian loss~(\ref{eq:glp:gaussian}).
+For a general $f$, we may apply Iterative Reweighted Least Squares (IRLS) 
+by iteratively reweighting the data 
+and solving~(\ref{eq:oa:new-objective}) with the Gaussian loss.
+\todojames{Cite IRLS. Yuan and Meier?}
+The Gaussian loss yields the optimization problem:
+\begin{align*}
+    \minimize_{\beta \in \R^p}
+    \frac{1}{2} \norm{y - X \beta}_2^2 
+    + \lambda \sum\limits_{j=1}^G \norm{\beta_j}_2
+\end{align*}
+with the block update for group $j$ as:
+\begin{align*}
+    \minimize_{\beta_j \in \R^{p_j}}
+    \frac{1}{2} \beta_j^\top D_j \beta_j
+    - (X_j^\top y - \sum\limits_{i \neq j} X_j^\top X_i \beta_i)^\top \beta_j
+    + \lambda \norm{\beta_j}_2
+\end{align*}
+For notational simplicity, define $v_j := X_j^\top y - \sum\limits_{i \neq j} X_j^\top X_i \beta_i$.
+Then, dropping the subscript $j$, each block update is of the form:
+\begin{align}
+    \minimize_{\beta \in \R^p}
+    \frac{1}{2} \beta^\top D \beta
+    - v^\top \beta
+    + \lambda \norm{\beta}_2
+    \label{eq:bcd:block-update}
+\end{align}
+where $D \in \R^{p \times p}$ is diagonal with non-negative entries,
+$v \in \R^p$ is any vector, and $\lambda > 0$.

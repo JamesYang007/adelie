@@ -1,0 +1,94 @@
+\subsection{Proximal Gradient Descent (PGD)}\label{ssec:pgd}
+
+In this section, we describe the PGD method, or ISTA,
+to solve the block update~(\ref{eq:bcd:block-update}).
+The progression is similar to that of~\citet{sls:2016}.
+Define
+\begin{align*}
+    f(\beta)
+    &=
+    \frac{1}{2} \beta^\top D \beta
+    - v^\top \beta
+\end{align*}
+as the convex (Gaussian) loss function in~(\ref{eq:bcd:block-update}).
+ISTA has guaranteed convergence so long as the step-size is chosen properly.
+Any step-size $\nu$ can be chosen such that
+$\nu \leq \frac{1}{L}$ where $L$ is the Lipschitz constant for $\nabla f$.
+Since 
+\begin{align*}
+    \nabla f(\beta)
+    &=
+    D \beta - v
+    \\\implies
+    \norm{
+        \nabla f(\beta)
+        - \nabla f(\tilde{\beta})
+    }_2
+    &=
+    \norm{D (\beta - \tilde{\beta})}_2
+    \leq
+    \opnorm{D} \norm{\beta-\tilde{\beta}}_2
+\end{align*}
+we have $L \equiv \opnorm{D} \equiv \lambda_{\max}(D)$ as the largest eigenvalue of $D$.
+In particular, since $D$ is diagonal, $L \equiv \max\limits_{i} D_{ii}$.
+
+The ISTA procedure is given in Algorithm~\ref{alg:pgd:ista}.
+By applying a standard Nesterov acceleration~\citep{beck:2009}, 
+we have the FISTA procedure given in Algorithm~\ref{alg:pgd:fista}.
+Additionally, we may perform adaptive restarts
+based on the proximal gradient updates~\citep{odonoghue:2015}
+for even faster convergence as outlined in Algorithm~\ref{alg:pgd:fista-adares}.
+
+\begin{algorithm}
+    \caption{ISTA}\label{alg:pgd:ista}
+    \KwData{$D$, $v$, $\lambda$, $\beta^{(0)}$}
+    $\nu \gets \pr{\max\limits_{i} D_{ii}}^{-1}$\;
+    \While{not converged}{
+        $w \gets \beta^{(k-1)} + \nu \pr{v - D \beta^{(k-1)}}$\;
+        $\beta^{(k)} \gets \pr{1-\frac{\nu\lambda}{\norm{w}_2}}_{+} w$\;
+    }
+\end{algorithm}
+
+\begin{algorithm}
+    \caption{FISTA}\label{alg:pgd:fista}
+    \KwData{$D$, $v$, $\lambda$, $\beta^{(0)}$}
+    $\nu \gets \pr{\max\limits_{i} D_{ii}}^{-1}$\;
+    $\eta^{(1)} \gets \beta^{(0)}$\;
+    $t_1 = 1$\;
+    \While{not converged}{
+        $w \gets \eta^{(k)} + \nu \pr{v - D \eta^{(k)}}$\; 
+        $\beta^{(k)} \gets \pr{1-\frac{\nu\lambda}{\norm{w}_2}}_{+} w$\;
+        $t_{k+1} \gets \frac{1 + \sqrt{1 + 4t_{k}^2}}{2}$\;
+        $\eta^{(k+1)} \gets \beta^{(k)} + \frac{t_k-1}{t_{k+1}} (\beta^{(k)} - \beta^{(k-1)})$\;
+    }
+\end{algorithm}
+
+\begin{algorithm}
+    \caption{FISTA with Adaptive Restart}\label{alg:pgd:fista-adares}
+    \KwData{$D$, $v$, $\lambda$, $\beta^{(0)}$}
+    \While{not converged}{
+        Carry out Algorithm~\ref{alg:pgd:fista} with 
+        inputs $D$, $v$, $\lambda$, $\beta^{(0)}$ until
+        \begin{align}
+            \nabla f(\eta^{(k)})^\top (\beta^{(k)} - \beta^{(k-1)}) > 0
+            \label{eq:fista-adares:cond}
+        \end{align}
+        \;
+        \If{(\ref{eq:fista-adares:cond}) holds at step $k$} {
+            Reset $\beta^{(0)} \gets \beta^{(k)}$\;
+        }
+    }
+\end{algorithm}
+
+Note that the computational cost of 
+Algorithms~\ref{alg:pgd:ista},~\ref{alg:pgd:fista},~\ref{alg:pgd:fista-adares}
+are all $O(p k)$ where $k$ is the number of iterations until convergence.
+Since we must output a vector in $\R^p$, 
+any optimizer must necessarily have $O(p)$ operations.
+Hence, the optimal optimizer of complexity $O(pk)$ must prioritize lowering 
+the number of iterations until convergence.
+While each algorithm is an improvement from the previous,
+there is still much improvement left.
+Section~\ref{ssec:newton} shows a novel approach to solving~(\ref{eq:bcd:block-update})
+with a significant decrease in iterations while maintaining $O(p)$ operations per iteration.
+

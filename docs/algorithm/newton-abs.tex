@@ -1,0 +1,179 @@
+\subsection{Newton with Adaptive Bisection Starts (Newton-ABS)}\label{ssec:newton-abs}
+
+In this section, we improve the Newton's Method described in Section~\ref{ssec:newton}.
+Specifically, we first discuss how to find lower and upper bounds $h_\star$, $h^\star \in [0,\infty)$,
+respectively, such that the root lies in $[h_\star, h^\star]$.
+We then discuss an adaptive bisection method that preceeds the Newton's Method
+to find a clever initial point $h^{(0)}$.
+
+We first begin with the derivation of $h_\star$ and $h^\star$.
+Note that the root-finding problem for $\varphi$
+is equivalent to finding the largest value $h > 0$ such that $\varphi(h) \geq 0$, or
+\begin{align*}
+    \sum\limits_{i=1}^p
+    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    \geq
+    1
+\end{align*}
+Let $a(h), b(h) \in \R^p$ be defined by $a_k(h) := D_{kk} h + \lambda$
+and $b_k(h) := \frac{\abs{v_k}}{a_k(h)}$ for each $k=1,\ldots, p$.
+Then, by Cauchy-Schwarz,
+\begin{align*}
+    \norm{v}_1
+    &:=
+    \sum\limits_{k} \abs{v_k}
+    =
+    \sum\limits_{k} a_k(h) b_k(h)
+    \leq
+    \norm{a(h)}_{2} \norm{b(h)}_2
+\end{align*}
+Hence, if $\norm{a(h)}_2 \leq \norm{v}_1$,
+then $\varphi(h) \geq 0$.
+We see that $\norm{a(h)}_2 \leq \norm{v}_1$ if and only if
+\begin{align*}
+    \sum\limits_{i=1}^p
+    (D_{ii} h + \lambda)^2
+    \leq
+    \norm{v}_1^2
+\end{align*}
+This inequality can be solved for $h$ using the quadratic formula.
+Let $\tilde{h}$ be the solution.
+Then, we have a potentially tighter lower bound $h_\star := \max(\tilde{h}, 0)$ than zero.
+
+Next, we discuss $h^\star$.
+Similar to $h_\star$, we wish to find the smallest $h$ such that
+\begin{align*}
+    \sum\limits_{i=1}^p
+    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    \leq
+    1
+\end{align*}
+Approximating this problem, since
+\begin{align}
+    \sum\limits_{i=1}^p
+    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    &=
+    \sum\limits_{i: D_{ii} = 0}
+    \frac{v_i^2}{\lambda^2}
+    +
+    \sum\limits_{i: D_{ii} > 0}
+    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    \nonumber\\&\leq 
+    \sum\limits_{i: D_{ii} = 0}
+    \frac{v_i^2}{\lambda^2}
+    +
+    h^{-2}
+    \sum\limits_{i: D_{ii} > 0}
+    \frac{v_i^2}{D_{ii}^2 }
+    \label{eq:nmab:upper-approx}
+\end{align}
+by setting 
+\begin{align*}
+    h^\star
+    := 
+    \sqrt{
+        \frac{
+            \sum\limits_{i: D_{ii} > 0} \frac{v_i^2}{D_{ii}^2}
+        }{
+            1 - \lambda^{-2} \sum\limits_{i : D_{ii} = 0} v_i^2
+        }
+    }
+\end{align*}
+we have that $\varphi(h^\star) \leq 0$.
+This shows that the root must lie in $[h_\star, h^\star]$.
+
+In practice, $\varphi$ may decay incredibly rapidly near $h \approx 0$ and have an extremely flat tail.
+To protect against slow convergence of Newton's Method in this case,
+we may use $h_\star$ and $h^\star$ to first perform a bisection method to find the initial starting point.
+The key idea is to use bisection first for a few iterations 
+to avoid the region of slow changes in the Newton iterations.\todojames{refer to a figure?}
+Then, once sufficiently close to the root, we apply the Newton's Method for the fast guaranteed convergence.
+Although one may use a simple bisection method of splitting the interval $[h_\star, h^\star]$ in halves
+until sufficiently small, we propose an \emph{adaptive bisection method} 
+that can significantly reduce the number of bisections.
+
+We describe the adaptive bisection method.
+Ideally, we would like to know if the root is closer to $h_\star$ or $h^\star$.
+If we believe that the root is much closer to $h_\star$,
+we do not have to bisect $[h_\star, h^\star]$ at the mid-point, 
+but perhaps at a point closer to $h_\star$.
+Likewise, if the root were much closer to $h^\star$, 
+we would like to bisect at a point closer to $h^\star$.
+Since we do not know the root, we would like to quantify a \emph{prior} of 
+the root being closer to $h_\star$.
+With this in mind, note that in~(\ref{eq:nmab:upper-approx}), we 
+approximated the problem of finding the smallest $h$ such that $\varphi(h) \leq 0$
+by solving the problem for an upper bound of $\varphi$.
+Then, the more accurate the approximation, the closer the approximate solution $h^\star$ is to the root.
+The approximation essentially came from using the fact that $D_{ii} h^\star \leq D_{ii} h^\star + \lambda$
+for $D_{ii} > 0$.
+This motivates us to consider the worst approximation error (rate)
+\begin{align*}
+    w
+    := 
+    \max\limits_{i: D_{ii} > 0} \frac{\lambda}{D_{ii} h^\star + \lambda}
+    =
+    \frac{\lambda}{D_\star h^\star + \lambda}
+    \in 
+    (0,1)
+\end{align*}
+where $D_\star := \min\limits_{i : D_{ii} > 0} D_{ii}$.
+If $w$ is small, the approximation in~(\ref{eq:nmab:upper-approx}) is tight,
+which implies that the root is close to $h^\star$.
+Hence, $1-w$ represents the prior that the root is close to $h^\star$.
+We bisect at the new point $h := wh_\star + (1-w)h^\star$.
+If $\varphi(h) \geq 0$, we use $h^{(0)} := h$ as the initial point for the Newton Method.
+Otherwise, we set $h^\star := h$ and repeat the argument.
+Algorithm~\ref{alg:nmab:nmab} summarizes this procedure,
+which we call \emph{Newton with Adaptive Bisection Starts} (Newton-ABS), 
+in its most basic form.
+
+\begin{algorithm}
+    \caption{Newton with Adaptive Bisection Starts (Newton-ABS)}\label{alg:nmab:nmab}
+    \KwData{$D$, $v$, $\lambda$, $\epsilon$}
+    Compute $h_\star$ that solves:
+    $
+        \sum\limits_{i=1}^p
+        (D_{ii} h + \lambda)^2
+        \leq
+        \norm{v}_1^2
+    $\;
+    Compute 
+    $
+        h^\star
+        := 
+        \sqrt{
+            \frac{
+                \sum\limits_{i: D_{ii} > 0} \frac{v_i^2}{D_{ii}^2}
+            }{
+                1 - \lambda^{-2} \sum\limits_{i : D_{ii} = 0} v_i^2            
+            }
+        }
+    $\;
+    $D_\star \gets \min\limits_{i : D_{ii} > 0} D_{ii}$\;
+    $w \gets \frac{\lambda}{D_\star h^\star + \lambda}$\;
+    $h \gets wh_\star + (1-w)h^\star$\;
+    \While{$\varphi(h) < 0$ and $\abs{\varphi(h)} > \epsilon$}{
+        $h^\star \gets h$\; 
+        $w \gets \frac{\lambda}{D_\star h^\star + \lambda}$\;
+        $h \gets wh_\star + (1-w)h^\star$\;
+    }
+    \If{$\varphi(h) \geq 0$}{
+        Apply Newton's Method starting at $h^{(0)} = h$ and get optimal $\tilde{h}$\;
+    }
+    $\beta^\star \gets (D + \lambda \tilde{h}^{-1} I)^{-1} v$\;
+    return $\beta^\star$\;
+\end{algorithm}
+
+Algorithm~\ref{alg:nmab:nmab} can be further optimized.
+For example, if $h^\star - h_\star$ is below some threshold (e.g. $0.1$),
+then we may skip bisection entirely and start Newton's Method at $h^{(0)} = h_\star$.
+This is because the adaptive bisection may move too slowly if the range is too small.
+From experimentation, this happens relatively often.
+On a similar note, one may also enforce enough movement towards $h_\star$
+by taking the max of $w$ with a minimal probability (e.g. $0.05$).
+This will ensure that at least some proportion of $h_\star$ is taken 
+if the prior is too strongly suggestive that the root is close to $h^\star$.
+The idea is that it is always better to overshoot towards $h_\star$ such that $\varphi$ is non-negative,
+so that Newton's Method can quickly converge down to the root,
+than to slowly bisect to the root.
