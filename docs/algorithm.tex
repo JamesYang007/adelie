@@ -56,7 +56,6 @@ since in general, it introduces a Tikhonov regularization in the transformed pro
 
 Similar to other approaches~\citep{yuan:2006,meier:2008,tseng:2001,sparsegl:2022},
 we use blockwise coordinate descent for its excellent speed and simplicity.
-Section~\ref{ssec:bcd} describes this procedure in greater detail.
 However, we take a completely different approach to fitting each block update.
 The essence of implementing a highly performant optimizer lies in 
 solving each block update~(\ref{eq:bcd:block-update}) as fast as possible.
@@ -67,9 +66,9 @@ or Iterative Soft-Thresholding Algorithm (ISTA) in this context,
 to solve~(\ref{eq:bcd:block-update})~\citep{sparsegl:2022,beck:2009,klosa:2020,wright:2009,loris:2009,sls:2016,odonoghue:2015}.
 A Nesterov acceleration can be applied on ISTA to get Fast-ISTA (FISTA)~\citep{beck:2009}.
 Further,~\citet{odonoghue:2015} showed that mild improvements can be made with an adaptive restarting strategy.
-Section~\ref{ssec:bcd} describes the blockwise coordinate descent algorithm.
-Section~\ref{ssec:pgd} describes the ISTA procedure and its variations.
-Sections~\ref{ssec:newton}-\ref{ssec:newton-abs} describes our proposed method to solve~(\ref{eq:bcd:block-update}).
+\Cref{ssec:bcd} describes the blockwise coordinate descent algorithm.
+\Cref{ssec:pgd} describes the PGD (ISTA) procedure and its variations.
+\Cref{ssec:newton,ssec:newton-abs} describe our proposed method to solve~(\ref{eq:bcd:block-update}).
 
 \input{algorithm/bcd}
 \input{algorithm/pgd}

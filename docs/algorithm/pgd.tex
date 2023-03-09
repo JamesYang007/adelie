@@ -81,7 +81,7 @@ for even faster convergence as outlined in Algorithm~\ref{alg:pgd:fista-adares}.
 \end{algorithm}
 
 Note that the computational cost of 
-Algorithms~\ref{alg:pgd:ista},~\ref{alg:pgd:fista},~\ref{alg:pgd:fista-adares}
+\Cref{alg:pgd:ista,alg:pgd:fista,alg:pgd:fista-adares}
 are all $O(p k)$ where $k$ is the number of iterations until convergence.
 Since we must output a vector in $\R^p$, 
 any optimizer must necessarily have $O(p)$ operations.
@@ -89,6 +89,6 @@ Hence, the optimal optimizer of complexity $O(pk)$ must prioritize lowering
 the number of iterations until convergence.
 While each algorithm is an improvement from the previous,
 there is still much improvement left.
-Section~\ref{ssec:newton} shows a novel approach to solving~(\ref{eq:bcd:block-update})
+\Cref{ssec:newton} shows a novel approach to solving~(\ref{eq:bcd:block-update})
 with a significant decrease in iterations while maintaining $O(p)$ operations per iteration.
 
