@@ -10,3 +10,7 @@
 *.cpython*
 *.DS_Store
 *.out
+dist/
+build/
+*__pycache__*
+*.egg-info*
