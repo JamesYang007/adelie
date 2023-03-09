@@ -8,7 +8,7 @@ namespace glstudy {
  */
 template <class LType, class VType, class ValueType, class XType>
 inline
-auto ista_solver(
+void ista_solver(
     const LType& L,
     const VType& v,
     ValueType l1,
@@ -38,7 +38,7 @@ auto ista_solver(
             x = ((lip /(lip + l2)) * (1 - (l1 * nu) / v_tilde_l2)) * v_tilde;
         }
         x_diff = x - x_old;
-        if ((x_diff.array().abs() < (tol * x.array().abs())).all()) break;
+        if ((x_diff.array().abs() <= (tol * x.array().abs())).all()) break;
     }
     
     x_sol = x;
@@ -49,7 +49,7 @@ auto ista_solver(
  */
 template <class LType, class VType, class ValueType, class XType>
 inline
-auto fista_solver(
+void fista_solver(
     const LType& L,
     const VType& v,
     ValueType l1,
@@ -85,7 +85,7 @@ auto fista_solver(
         x_diff = x - x_old;
         y = x + (t_old - 1) / t * x_diff;
         
-        if ((x_diff.array().abs() < (tol * x.array().abs())).all()) break;
+        if ((x_diff.array().abs() <= (tol * x.array().abs())).all()) break;
     }
     
     x_sol = x;
@@ -96,7 +96,7 @@ auto fista_solver(
  */
 template <class LType, class VType, class ValueType, class XType>
 inline
-auto fista_adares_solver(
+void fista_adares_solver(
     const LType& L,
     const VType& v,
     ValueType l1,
@@ -141,7 +141,7 @@ auto fista_adares_solver(
             y = x + (t_old - 1) / t * x_diff;
         }
 
-        if ((x_diff.array().abs() < (tol * x.array().abs())).all()) break;
+        if ((x_diff.array().abs() <= (tol * x.array().abs())).all()) break;
     }
     
     x_sol = x;

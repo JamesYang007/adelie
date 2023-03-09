@@ -19,6 +19,8 @@ nbformat = "^5.7.3"
 jupyter = "^1.0.0"
 jupytext = "^1.14.5"
 rpy2 = "^3.5.10"
+cppimport = "^22.8.2"
+pybind11 = "^2.10.3"
 
 [tool.jupytext]
 notebook_metadata_filter = "-all"

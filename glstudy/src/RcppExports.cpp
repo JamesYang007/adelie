@@ -75,6 +75,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// newton_abs_solver
+Rcpp::List newton_abs_solver(const Eigen::Map<Eigen::VectorXd>& L, const Eigen::Map<Eigen::VectorXd>& v, double l1, double l2, double tol, size_t max_iters);
+RcppExport SEXP _glstudy_newton_abs_solver(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::VectorXd>& >::type L(LSEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::VectorXd>& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type l1(l1SEXP);
+    Rcpp::traits::input_parameter< double >::type l2(l2SEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< size_t >::type max_iters(max_itersSEXP);
+    rcpp_result_gen = Rcpp::wrap(newton_abs_solver(L, v, l1, l2, tol, max_iters));
+    return rcpp_result_gen;
+END_RCPP
+}
 // newton_solver_debug
 Rcpp::List newton_solver_debug(const Eigen::Map<Eigen::VectorXd>& L, const Eigen::Map<Eigen::VectorXd>& v, double l1, double l2, double tol, size_t max_iters, bool smart_init);
 RcppExport SEXP _glstudy_newton_solver_debug(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP, SEXP smart_initSEXP) {
@@ -116,6 +132,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glstudy_fista_solver", (DL_FUNC) &_glstudy_fista_solver, 6},
     {"_glstudy_fista_adares_solver", (DL_FUNC) &_glstudy_fista_adares_solver, 6},
     {"_glstudy_newton_solver", (DL_FUNC) &_glstudy_newton_solver, 6},
+    {"_glstudy_newton_abs_solver", (DL_FUNC) &_glstudy_newton_abs_solver, 6},
     {"_glstudy_newton_solver_debug", (DL_FUNC) &_glstudy_newton_solver_debug, 7},
     {"_glstudy_objective", (DL_FUNC) &_glstudy_objective, 8},
     {NULL, NULL, 0}

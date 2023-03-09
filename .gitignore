@@ -6,3 +6,7 @@
 *.log
 *.synctex.gz
 *.ipynb_checkpoints
+*.rendered.*
+*.cpython*
+*.DS_Store
+*.out
