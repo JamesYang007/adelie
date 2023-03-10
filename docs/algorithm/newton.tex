@@ -102,12 +102,23 @@ From~(\ref{eq:newton:newton-step}), taking limit as $k\to \infty$ and using that
 \end{align*}
 which shows that $h^{(\infty)}$ is the root of $\varphi$.
 In summary, Newton's Method gives \emph{guaranteed convergence} to the root.
+\Cref{alg:newton:newton} summarizes Newton's Method.
+
+\begin{algorithm}
+    \caption{Newton's Method}\label{alg:newton:newton}
+    \KwData{$D$, $v$, $\lambda$, $\varepsilon$, $h^{(0)}$}
+    $h \gets h^{(0)}$\;
+    \While{$\abs{\varphi(h)} > \varepsilon$} {
+        $h \gets h - \frac{\varphi(h)}{\varphi'(h)}$\;
+    }
+    return $h$\;
+\end{algorithm}
 
 Since $\varphi$ is convex, we also have quadratic convergence rate and each iteration costs $O(p)$.
 In principle, our setting is one of the best settings for Newton's Method to succeed.
-While FISTA (Algorithm~\ref{alg:pgd:fista}) and the adaptive restarted version
-(Algorithm~\ref{alg:pgd:fista-adares}) also give the same convergence rate,
-Figure~\todojames{add figure ref} 
+While FISTA (\Cref{alg:pgd:fista}) and the adaptive restarted version
+(\Cref{alg:pgd:fista-adares}) also give the same convergence rate,
+\Cref{fig:bench:pgd-newton}
 shows a clear improvement for the Newton's Method in practice.
 One very important benefit of Newton's Method is that the optimization domain
 remains one-dimensional \emph{regardless of the input dimensions}.

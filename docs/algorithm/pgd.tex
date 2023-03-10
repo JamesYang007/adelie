@@ -15,10 +15,11 @@ ISTA has guaranteed convergence so long as the step-size is chosen properly.
 Any step-size $\nu$ can be chosen such that
 $\nu \leq \frac{1}{L}$ where $L$ is the Lipschitz constant for $\nabla f$.
 Since 
-\begin{align*}
+\begin{align}
     \nabla f(\beta)
     &=
     D \beta - v
+    \label{eq:pgd:nablaf}
     \\\implies
     \norm{
         \nabla f(\beta)
@@ -28,7 +29,8 @@ Since
     \norm{D (\beta - \tilde{\beta})}_2
     \leq
     \opnorm{D} \norm{\beta-\tilde{\beta}}_2
-\end{align*}
+    \nonumber
+\end{align}
 we have $L \equiv \opnorm{D} \equiv \lambda_{\max}(D)$ as the largest eigenvalue of $D$.
 In particular, since $D$ is diagonal, $L \equiv \max\limits_{i} D_{ii}$.
 
@@ -73,9 +75,10 @@ for even faster convergence as outlined in Algorithm~\ref{alg:pgd:fista-adares}.
             \nabla f(\eta^{(k)})^\top (\beta^{(k)} - \beta^{(k-1)}) > 0
             \label{eq:fista-adares:cond}
         \end{align}
-        \;
+        where $\nabla f(\beta)$ is given by~(\ref{eq:pgd:nablaf})\;
         \If{(\ref{eq:fista-adares:cond}) holds at step $k$} {
-            Reset $\beta^{(0)} \gets \beta^{(k)}$\;
+            $\beta^{(0)} \gets \beta^{(k)}$\;
+            $t_k \gets 1$\;
         }
     }
 \end{algorithm}
