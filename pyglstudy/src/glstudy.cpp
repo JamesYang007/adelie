@@ -3,6 +3,7 @@
 #include <pybind11/stl.h>
 #include <newton.hpp>
 #include <fista.hpp>
+#include "bisect.hpp"
 
 namespace py = pybind11;
 using namespace pybind11::literals; // to bring in the `_a` literal
@@ -127,6 +128,8 @@ py::dict fista_adares_solver(
 }
 
 PYBIND11_MODULE(pyglstudy_ext, m) {
+    m.def("brent_bu", &brent_bu);
+
     m.def("newton_solver", &newton_solver);
     m.def("newton_abs_solver", &newton_abs_solver);
     m.def("newton_solver_debug", &newton_solver_debug);
