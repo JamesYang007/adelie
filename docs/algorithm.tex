@@ -34,9 +34,9 @@ we must construct $\tilde{X}$ from $X$ before solving~(\ref{eq:oa:new-objective}
 However, we will shortly see that the fitting algorithm can be amended to 
 dynamically compute the necessary components of $\tilde{X}$.\todojames{Reference to later section?}
 In particular, we only need access to $\tilde{X}_i$, $D_i$,
-and $\tilde{X}_i^\top \tilde{X}_j$ for $i$ in the strong set and $j$ in the active set.
+and $\tilde{X}_i^\top \tilde{X}_j$ for $i=1,\ldots,G$ and $j$ in the active set.
 In comparison to other proposed fitting procedures,
-we believe that the extra cost to compute $\tilde{X}_i$ and $\tilde{X}_i^\top \tilde{X}_j$
+we believe that the extra cost to compute $\tilde{X}_i$, $D_i$, and $\tilde{X}_i^\top \tilde{X}_j$
 is comparable to the cost of the other procedures.
 For example, \citet*{yuan:2006,meier:2008} rely on the fact that
 each group feature matrix $X_i$ is full-rank and therefore admits a QR decomposition with an invertible $R$.

@@ -8,15 +8,34 @@
                 "/usr/lib/R/site-library/RcppEigen/include",
                 "/usr/share/R/include",
                 "${HOME}/R/x86_64-pc-linux-gnu-library/4.2/Rcpp/include",
-                "${HOME}/mambaforge/envs/glstudy/include",
-                "${HOME}/mambaforge/envs/glstudy/lib/python3.10/site-packages/pybind11/include",
-                "${HOME}/mambaforge/envs/glstudy/include/python3.10"
+                "${CONDA_PREFIX}/envs/glstudy/include",
+                "${CONDA_PREFIX}/envs/glstudy/lib/python3.10/site-packages/pybind11/include",
+                "${CONDA_PREFIX}/envs/glstudy/include/python3.10"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c17",
             "cppStandard": "c++14",
             "intelliSenseMode": "linux-clang-x64"
+        },
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/src/include",
+                "${CONDA_PREFIX}/envs/glstudy/include",
+                "${CONDA_PREFIX}/envs/glstudy/include/eigen3",
+                "${CONDA_PREFIX}/envs/glstudy/lib/python3.10/site-packages/pybind11/include",
+                "${CONDA_PREFIX}/envs/glstudy/include/python3.10"
+            ],
+            "defines": [],
+            "macFrameworkPath": [
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "macos-clang-arm64"
         }
     ],
     "version": 4

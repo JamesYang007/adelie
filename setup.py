@@ -5,7 +5,7 @@ import os
 
 __version__ = "0.0.9"
 
-ENVPATH = os.path.join(os.getenv('HOME'), "mambaforge/envs/glstudy")
+ENVPATH = os.getenv("CONDA_PREFIX")
 
 ext_modules = [
     Pybind11Extension(
