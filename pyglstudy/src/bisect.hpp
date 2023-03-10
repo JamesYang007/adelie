@@ -21,12 +21,16 @@ static py::dict brent_bu(
     double x = 0;
     const Eigen::VectorXd buffer1 = L.array() + l2;
     const auto a = glstudy::compute_h_min(buffer1, v, l1);
-    const auto b = std::get<0>(glstudy::compute_h_max(buffer1, v, l1));
+    const auto b = std::get<0>(glstudy::compute_h_max(buffer1, v, l1, 0.0));
     size_t iters = 0;
     const auto phi = [&](auto h) {
         return glstudy::block_norm_objective(h, buffer1, v, l1);
     };
-    glstudy::brent(phi, tol, max_iters, a, b, x, iters);
+    glstudy::brent(
+        phi, tol, max_iters, a, b, 
+        [](auto a, auto fa, auto b, auto fb) { return std::make_pair(false, 0.0); },
+        x, iters
+    );
     py::dict d("x"_a=x, "iters"_a=iters);
     return d;
 }

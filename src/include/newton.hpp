@@ -4,6 +4,155 @@
 #include <objective.hpp>
 
 namespace glstudy {
+    
+/**
+ * @brief General Newton root-finder for one-dimensional functions.
+ * 
+ * @tparam InitialType  Functor type.
+ * @tparam StepType     Functor type.
+ * @tparam ProjectType  Functor type.
+ * @tparam ValueType    float type.
+ * @param initial_f     function with no arguments that returns the initial point.
+ *                      Guaranteed to be called first.
+ * @param step_f        function with one argument (current value) that returns
+ *                      the function and derivative values.
+ *                      Guaranteed to be called after initial_f and every iteration
+ *                      after project_f is called so that the current value is feasible.
+ * @param project_f     function with one argument that projects the current value
+ *                      to the constrained set.
+ *                      Guaranteed to be called after the current value takes a step
+ *                      based on the current step_f call.
+ * @param tol           tolerance for convergence. Used to check if function value is close to 0.
+ * @param max_iters     max number of iterations
+ * @return (x, i, e) where x is the solution, i is the number of iterations, and e is the error.
+ */
+template <class InitialType, class StepType, 
+          class ProjectType, class ValueType>
+inline
+auto newton_root_find(
+    InitialType initial_f,
+    StepType step_f,
+    ProjectType project_f,
+    ValueType tol,
+    size_t max_iters
+)
+{
+    using value_t = ValueType;
+
+    const auto initial_pack = initial_f();
+    value_t h = std::get<0>(initial_pack);    // solution candidate
+    size_t iters = std::get<1>(initial_pack); // number of iterations
+    value_t fh; // function value at h
+    value_t dfh; // derivative at h
+
+    const auto step_pack = step_f(h);
+    fh = std::get<0>(step_pack);
+    dfh = std::get<1>(step_pack);
+
+    while ((std::abs(fh) > tol) && (iters < max_iters)) {
+        h -= fh / dfh;
+        h = project_f(h);
+        const auto step_pack = step_f(h);
+        fh = std::get<0>(step_pack);
+        dfh = std::get<1>(step_pack);
+        ++iters;
+    }
+
+    return std::make_tuple(h, fh, dfh, iters); 
+}
+    
+/**
+ * @brief Base Newton solver for the block update norm objective.
+ * 
+ * @tparam LType        vector type.
+ * @tparam VType        vector type.
+ * @tparam ValueType    float type.
+ * @tparam XType        vector type.
+ * @tparam BufferType   vector type.
+ * @tparam InitialType  see newton_root_find.
+ * @param L             vector with non-negative entries.
+ * @param v             any vector same length as L.
+ * @param l1            l1 regularization.
+ * @param l2            l2 regularization.
+ * @param tol           see newton_root_find.
+ * @param max_iters     see newton_root_find.
+ * @param x             solution vector.
+ *                      Also used as buffer to store (v / buffer2).square() 
+ *                      in each Newton step.
+ * @param iters         number of iterations taken. Set to 0 before anything.
+ * @param buffer1       buffer to store L + l2.
+ * @param buffer2       buffer to store buffer1 * h + l1.
+ * @param initial_f     see newton_root_find.
+ */
+template <class LType, class VType, class ValueType, 
+          class XType, class BufferType, class InitialType>
+inline
+void newton_solver_base(
+    const LType& L,
+    const VType& v,
+    ValueType l1,
+    ValueType l2,
+    ValueType tol,
+    size_t max_iters,
+    InitialType initial_f,
+    XType& x,
+    size_t& iters,
+    BufferType& buffer1,
+    BufferType& buffer2
+)
+{
+    using value_t = ValueType;
+
+    iters = 0;
+
+    // Easy case: ||v||_2 <= l1 -> x = 0
+    const auto v_l2 = v.norm();
+    if (v_l2 <= l1) {
+        x.setZero();
+        return;
+    }
+    
+    // Difficult case: ||v||_2 > l1
+    
+    // Still easy if l1 == 0.0
+    if (l1 <= 0.0) {
+        x.array() = v.array() / (L.array() + l2);
+        return;
+    }
+    
+    // First solve for h := ||x||_2
+    auto vbuffer1 = buffer1.head(L.size());
+    auto vbuffer2 = buffer2.head(L.size());
+
+    vbuffer1.array() = (L.array() + l2);
+
+    const auto step_f = [&](auto h) {
+        vbuffer2.array() = vbuffer1.array() * h + l1;
+        x.array() = (v.array() / vbuffer2.array()).square();
+        auto fh = x.sum() - 1.0;
+        auto dfh = -2.0 * (
+            x.array() * (vbuffer1.array() / vbuffer2.array())
+        ).sum();
+        return std::make_pair(fh, dfh);
+    };
+
+    const auto project_f = [&](auto h) {
+        return std::max(h, 0.0);
+    };
+
+    const auto root_find_pack = newton_root_find(
+        initial_f,
+        step_f,
+        project_f,
+        tol, 
+        max_iters
+    );
+
+    const auto h = std::get<0>(root_find_pack);
+
+    x.array() = h * v.array() / vbuffer2.array();
+    iters = std::get<3>(root_find_pack);
+}
 
 /*
  * Vanilla Newton solver.
@@ -24,59 +173,11 @@ void newton_solver(
     BufferType& buffer2
 )
 {
-    using value_t = ValueType;
-    constexpr value_t zero = 0;
-
-    iters = 0;
-
-    // Easy case: ||v||_2 <= l1 -> x = 0
-    const auto v_l2 = v.norm();
-    if (v_l2 <= l1) {
-        x.setZero();
-        return;
-    }
-    
-    // Difficult case: ||v||_2 > l1
-    if (l1 <= 0.0) {
-        x.array() = v.array() / (L.array() + l2);
-        return;
-    }
-    
-    // First solve for h := ||x||_2
-    auto vbuffer1 = buffer1.head(L.size());
-    auto vbuffer2 = buffer2.head(L.size());
-
-    vbuffer1.array() = (L.array() + l2);
-
-    value_t h = 0;
-
-    // Newton method
-    value_t fh;
-    value_t dfh;
-
-    const auto newton_update = [&]() {
-        vbuffer2.array() = vbuffer1.array() * h + l1;
-        x.array() = (v.array() / vbuffer2.array()).square();
-        fh = x.sum() - 1;
-        dfh = -2 * (
-            x.array() * (vbuffer1.array() / vbuffer2.array())
-        ).sum();
-    };
-    
-    newton_update();
-
-    while (std::abs(fh) > tol && iters < max_iters) {
-        // Newton update 
-        h -= fh / dfh;
-        newton_update();
-        ++iters;
-    }
-    
-    // numerical stability
-    h = std::max(h, zero);
-
-    // final solution
-    x.array() = h * v.array() / vbuffer2.array();
+    const auto initial_f = [](){ return std::make_pair(0.0, 0); };
+    newton_solver_base(
+        L, v, l1, l2, tol, max_iters, initial_f,
+        x, iters, buffer1, buffer2
+    );
 }
 
 /*
@@ -99,72 +200,34 @@ void newton_brent_solver(
 )
 {
     using value_t = ValueType;
-    constexpr value_t zero = 0;
-
-    iters = 0;
-
-    // Easy case: ||v||_2 <= l1 -> x = 0
-    const auto v_l2 = v.norm();
-    if (v_l2 <= l1) {
-        x.setZero();
-        return;
-    }
-    
-    // Difficult case: ||v||_2 > l1
-    if (l1 <= 0.0) {
-        x.array() = v.array() / (L.array() + l2);
-        return;
-    }
-    
-    // First solve for h := ||x||_2
     auto vbuffer1 = buffer1.head(L.size());
-    auto vbuffer2 = buffer2.head(L.size());
 
-    vbuffer1.array() = (L.array() + l2);
-
-    const value_t h_min = compute_h_min(vbuffer1, v, l1);
-    const value_t h_max_out = compute_h_max(vbuffer1, v, l1);
-    const value_t h_max = std::get<0>(h_max_out);
-    value_t h;
-    size_t iters_brent = 0;
-    brent(
-        [&](auto x) { return block_update_objective(h, vbuffer1, v, l1); },
-        1e-8, 
-        max_iters,
-        h_min,
-        h_max,
-        h,
-        iters_brent
-    );
-    iters += iters_brent;
-
-    // Newton method
-    value_t fh;
-    value_t dfh;
-
-    const auto newton_update = [&]() {
-        vbuffer2.array() = vbuffer1.array() * h + l1;
-        x.array() = (v.array() / vbuffer2.array()).square();
-        fh = x.sum() - 1;
-        dfh = -2 * (
-            x.array() * (vbuffer1.array() / vbuffer2.array())
-        ).sum();
+    const auto initial_f = [&]() {
+        const value_t h_min = compute_h_min(vbuffer1, v, l1);
+        const auto h_max_out = compute_h_max(vbuffer1, v, l1, 0.0); // IMPORTANT: NEEDS GUARANTEE
+        const value_t h_max = std::get<0>(h_max_out);
+        value_t h;
+        size_t iters_brent;
+        brent(
+            [&](auto x) { return block_norm_objective(h, vbuffer1, v, l1); },
+            1e-6, 
+            max_iters,
+            h_min,
+            h_max,
+            [](auto a, auto fa, auto b, auto fb) { 
+                bool quit = (fa >= 0 && fb >= 0); 
+                return std::make_tuple(quit, std::min(a, b));
+            },
+            h,
+            iters_brent
+        );
+        return std::make_pair(h, iters_brent); 
     };
-    
-    newton_update();
 
-    while (std::abs(fh) > tol && iters < max_iters) {
-        // Newton update 
-        h -= fh / dfh;
-        newton_update();
-        ++iters;
-    }
-    
-    // numerical stability
-    h = std::max(h, zero);
-
-    // final solution
-    x.array() = h * v.array() / vbuffer2.array();
+    newton_solver_base(
+        L, v, l1, l2, tol, max_iters, initial_f,
+        x, iters, buffer1, buffer2
+    );
 }
 
 /*

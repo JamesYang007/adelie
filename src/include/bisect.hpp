@@ -6,7 +6,7 @@ namespace glstudy {
 /*
  * Brent's Method: https://users.wpi.edu/~walker/MA3257/HANDOUTS/brents_algm.pdf
  */
-template <class F, class ValueType>
+template <class F, class ValueType, class ExtraCheckType>
 inline
 void brent(
     F f,
@@ -14,6 +14,7 @@ void brent(
     size_t max_iters,
     ValueType a,
     ValueType b,
+    ExtraCheckType extra_check_f,
     ValueType& sol,
     size_t& iters
 )
@@ -32,6 +33,12 @@ void brent(
     
     iters = 0;
     for (; iters < max_iters; ++iters) {
+        const auto extra_check_pack = extra_check_f(a, fa, b, fb);
+        if (std::get<0>(extra_check_pack)) {
+            sol = std::get<1>(extra_check_pack);
+            return;
+        }
+
         if ((std::abs(b-c) <= tol) || (std::abs(fb) <= tol)) {
             sol = b;
             return;
