@@ -3,8 +3,17 @@
 
 namespace glstudy {
 
-/*
- * Compute lower bound in h-space for block_norm_objective.
+/**
+ * @brief Compute lower bound h_min >= 0 such that 
+ * block_norm_objective(h_min) >= 0.
+ * 
+ * @tparam DiagType     vector type.
+ * @tparam VType        vector type.
+ * @tparam ValueType    float type.
+ * @param vbuffer1      vector containing L + l2.
+ * @param v             any vector of same length as vbuffer1.
+ * @param l1            l1 regularization.
+ * @return h_min 
  */
 template <class DiagType, class VType, class ValueType>
 inline
@@ -29,9 +38,22 @@ auto compute_h_min(
     return h_min;
 }
 
-/*
- * Compute upper bound in h-space for block_norm_objective.
- * NOTE: the result may NOT be a true upper bound in the sense that objective(result) <= 0.
+/**
+ * @brief 
+ * Compute upper bound h_max >= 0 such that block_norm_objective(h_max) <= 0.
+ * NOTE: if zero_tol > 0,
+ * the result may NOT be a true upper bound in the sense that objective(result) <= 0.
+ * 
+ * @tparam DiagType     vector type.
+ * @tparam VType        vector type.
+ * @tparam ValueType    float type.
+ * @param vbuffer1      vector containing L + l2.
+ * @param v             any vector of same length as vbuffer1.
+ * @param l1            l1 regularization.
+ * @param zero_tol      if a float is <= zero_tol, it is considered to be 0.
+ * @return (h_max, vbuffer1_min_nzn)
+ *  h_max: the upper bound
+ *  vbuffer1_min_nzn:   smallest value in vbuffer1 among non-zero values based on zero_tol.
  */
 template <class DiagType, class VType, class ValueType>
 inline
@@ -51,7 +73,7 @@ auto compute_h_max(
 
     // If L+l2 have entries <= threshold,
     // find h_max with more numerically-stable routine.
-    // There is NO guarantee that f(h_max) <= 0, 
+    // If threshold > 0, there is NO guarantee that f(h_max) <= 0, 
     // but we will use this to bisect and find an h where f(h) >= 0,
     // so we don't necessarily need h_max to be f(h_max) <= 0.
     if (vbuffer1_min <= zero_tol) {

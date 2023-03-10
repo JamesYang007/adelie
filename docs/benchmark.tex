@@ -19,7 +19,9 @@ $v$ any vector, and $\lambda > 0$.
 
 \Cref{fig:bench:pgd-newton} shows a set of comparisons
 of ISTA, FISTA, FISTA with adaptive restart (FISTA-ADA),
-Newton, and Newton-ABS.
+Newton, Newton-Brent, and Newton-ABS.
+Newton-Brent works exactly the same as Newton-ABS except
+the adaptive bisection is replaced with Brent's method.
 For all scenarios, the diagonal of $D$ was generated uniformly from $[0.8, 2]$.
 In \Cref{fig:bench:pgd-newton:almost_psd}, 1\% of the entries were
 regenerated uniformly from $[\num{1e-14}, \num{1e-8}]$.
@@ -35,12 +37,15 @@ number of iterations until convergence, and accuracy.
 All methods converged before max iterations was reached.
 The accuracy comparisons show that all methods properly converged,
 with Newton-ABS generally having smaller errors.
+The timings had large variance for small number of features,
+since most of the time was spent in the scripting language to dispatch the function calls.
 Overall, the Newton methods clearly outshine the PGD methods in terms of speed.
 The PGD methods generally use around 100 or even 1000 iterations,
-however Newton method is consistently using 20 to 30 iterations
-and Newton-ABS using 3 iterations.
+however Newton method is consistently using 20 to 30 iterations,
+Newton-Brent using 6 to 10 iterations,
+and Newton-ABS using 3 to 4 iterations.
 The relative speed difference shows that Newton-ABS is anywhere from 3 to 100 times faster
-than the PGD methods and 1.5 to 5 times faster than Newton,
+than the PGD methods, 1.5 to 5 times faster than Newton, and around 2 times faster than Newton-Brent,
 where the differences become stark as $p$ increases or regularization level decreases.
 We also note that the PGD methods and Newton are quite comparable in speed
 when the regularization is low. 
