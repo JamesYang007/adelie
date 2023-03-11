@@ -124,24 +124,24 @@ Hence, $1-w$ represents the prior that the root is close to $h^\star$.
 We bisect at the new point $h := wh_\star + (1-w)h^\star$.
 If $\varphi(h) \geq 0$, we use $h^{(0)} := h$ as the initial point for the Newton Method.
 Otherwise, we set $h^\star := h$ and repeat the argument.
-Algorithm~\ref{alg:nmab:nmab} summarizes this procedure,
-which we call \emph{Newton with Adaptive Bisection Starts} (Newton-ABS), 
-in its most basic form.
+\Cref{alg:nabs:ab} summarizes this procedure.
+Combining \Cref{alg:nabs:ab} with Newton's method,
+we have \Cref{alg:nabs:nabs},
+which we call \emph{Newton with Adaptive Bisection Starts} (Newton-ABS).
 
 \begin{algorithm}
-    \caption{Newton with Adaptive Bisection Starts (Newton-ABS)}\label{alg:nmab:nmab}
-    \KwData{$D$, $v$, $\lambda$, $\epsilon$}
-    Compute $h_\star$ that solves:
+    \caption{Adaptive Bisection}\label{alg:nabs:ab}
+    \KwData{$D$, $v$, $\lambda$, $\varepsilon$}
+    compute $h_\star$ that solves
     $
         \sum\limits_{i=1}^p
         (D_{ii} h + \lambda)^2
         \leq
         \norm{v}_1^2
-    $\;
-    Compute 
+    $ and take the positive part\;
     $
         h^\star
-        := 
+        \gets
         \sqrt{
             \frac{
                 \sum\limits_{i: D_{ii} > 0} \frac{v_i^2}{D_{ii}^2}
@@ -153,19 +153,26 @@ in its most basic form.
     $D_\star \gets \min\limits_{i : D_{ii} > 0} D_{ii}$\;
     $w \gets \frac{\lambda}{D_\star h^\star + \lambda}$\;
     $h \gets wh_\star + (1-w)h^\star$\;
-    \While{$\varphi(h) < 0$ and $\abs{\varphi(h)} > \epsilon$}{
+    \While{$\varphi(h) < 0$ and $\abs{\varphi(h)} > \varepsilon$}{
         $h^\star \gets h$\; 
         $w \gets \frac{\lambda}{D_\star h^\star + \lambda}$\;
         $h \gets wh_\star + (1-w)h^\star$\;
     }
+    return $h$;
+\end{algorithm}
+
+\begin{algorithm}
+    \caption{Newton with Adaptive Bisection Starts (Newton-ABS)}\label{alg:nabs:nabs}
+    \KwData{$D$, $v$, $\lambda$, $\varepsilon$}
+    $h \gets$ result of \Cref{alg:nabs:ab}\;
     \If{$\varphi(h) \geq 0$}{
-        Apply Newton's Method starting at $h^{(0)} = h$ and get optimal $\tilde{h}$\;
+        $\tilde{h} \gets$ result of Newton's Method starting at $h^{(0)} = h$\;
     }
     $\beta^\star \gets (D + \lambda \tilde{h}^{-1} I)^{-1} v$\;
     return $\beta^\star$\;
 \end{algorithm}
 
-Algorithm~\ref{alg:nmab:nmab} can be further optimized.
+Algorithm~\ref{alg:nabs:nabs} can be further optimized.
 For example, if $h^\star - h_\star$ is below some threshold (e.g. $0.1$),
 then we may skip bisection entirely and start Newton's Method at $h^{(0)} = h_\star$.
 This is because the adaptive bisection may move too slowly if the range is too small.
@@ -177,3 +184,11 @@ if the prior is too strongly suggestive that the root is close to $h^\star$.
 The idea is that it is always better to overshoot towards $h_\star$ such that $\varphi$ is non-negative,
 so that Newton's Method can quickly converge down to the root,
 than to slowly bisect to the root.
+
+Similar to our strategy in~\Cref{alg:nabs:ab},
+there are other existing methods that try to achieve adaptive bisection.
+A popular algorithm is the Brent's method.
+Although Brent's method performs extremely well for this task,
+as seen in~\Cref{fig:bench:pgd-newton},
+Newton-ABS is still superior.
+We refer to the full benchmark comparison to~\Cref{ssec:benchmark:pgd-newton}.
