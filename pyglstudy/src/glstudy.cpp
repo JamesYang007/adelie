@@ -2,6 +2,7 @@
 #include "newton.hpp"
 #include "bisect.hpp"
 #include "objective.hpp"
+#include "group_lasso.hpp"
 
 PYBIND11_MODULE(pyglstudy_ext, m) {
     m.def("brent_bu", &brent_bu);
@@ -18,4 +19,6 @@ PYBIND11_MODULE(pyglstudy_ext, m) {
     m.def("compute_h_min", &compute_h_min);
     m.def("compute_h_max", &compute_h_max);
     m.def("block_norm_objective", &block_norm_objective);
+    
+    m.def("group_lasso", &group_lasso);
 }

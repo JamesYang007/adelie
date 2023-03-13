@@ -102,8 +102,6 @@ void newton_solver_base(
     BufferType& buffer2
 )
 {
-    using value_t = ValueType;
-
     iters = 0;
 
     // Easy case: ||v||_2 <= l1 -> x = 0
