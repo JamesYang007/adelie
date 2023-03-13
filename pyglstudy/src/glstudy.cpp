@@ -1,6 +1,7 @@
 #include "fista.hpp"
 #include "newton.hpp"
 #include "bisect.hpp"
+#include "objective.hpp"
 
 PYBIND11_MODULE(pyglstudy_ext, m) {
     m.def("brent_bu", &brent_bu);
@@ -13,4 +14,8 @@ PYBIND11_MODULE(pyglstudy_ext, m) {
     m.def("ista_solver", &ista_solver);
     m.def("fista_solver", &fista_solver);
     m.def("fista_adares_solver", &fista_adares_solver);
+    
+    m.def("compute_h_min", &compute_h_min);
+    m.def("compute_h_max", &compute_h_max);
+    m.def("block_norm_objective", &block_norm_objective);
 }

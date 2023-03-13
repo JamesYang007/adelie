@@ -27,10 +27,10 @@ static py::dict brent_bu(
         return glstudy::block_norm_objective(h, buffer1, v, l1);
     };
     glstudy::brent(
-        phi, tol, max_iters, a, b, 
+        phi, tol, tol, max_iters, a, a, b, 
         [](auto a, auto fa, auto b, auto fb) { return std::make_pair(false, 0.0); },
         x, iters
     );
-    py::dict d("x"_a=x, "iters"_a=iters);
+    py::dict d("beta"_a=x, "iters"_a=iters);
     return d;
 }

@@ -7,7 +7,7 @@
 namespace py = pybind11;
 using namespace pybind11::literals; // to bring in the `_a` literal
 
-py::dict ista_solver(
+static py::dict ista_solver(
     Eigen::Ref<Eigen::VectorXd> L,
     Eigen::Ref<Eigen::VectorXd> v,
     double l1,
@@ -23,7 +23,7 @@ py::dict ista_solver(
     return d;
 }
 
-py::dict fista_solver(
+static py::dict fista_solver(
     Eigen::Ref<Eigen::VectorXd> L,
     Eigen::Ref<Eigen::VectorXd> v,
     double l1,
@@ -39,7 +39,7 @@ py::dict fista_solver(
     return d;
 }
 
-py::dict fista_adares_solver(
+static py::dict fista_adares_solver(
     Eigen::Ref<Eigen::VectorXd> L,
     Eigen::Ref<Eigen::VectorXd> v,
     double l1,

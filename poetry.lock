@@ -608,14 +608,14 @@ files = [
 
 [[package]]
 name = "identify"
-version = "2.5.19"
+version = "2.5.20"
 description = "File identification library for Python"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "identify-2.5.19-py2.py3-none-any.whl", hash = "sha256:3ee3533e7f6f5023157fbebbd5687bb4b698ce6f305259e0d24b2d7d9efb72bc"},
-    {file = "identify-2.5.19.tar.gz", hash = "sha256:4102ecd051f6884449e7359e55b38ba6cd7aafb6ef27b8e2b38495a5723ea106"},
+    {file = "identify-2.5.20-py2.py3-none-any.whl", hash = "sha256:5dfef8a745ca4f2c95f27e9db74cb4c8b6d9916383988e8791f3595868f78a33"},
+    {file = "identify-2.5.20.tar.gz", hash = "sha256:c8b288552bc5f05a08aff09af2f58e6976bf8ac87beb38498a0e3d98ba64eb18"},
 ]
 
 [package.extras]
@@ -1868,14 +1868,14 @@ files = [
 
 [[package]]
 name = "platformdirs"
-version = "3.1.0"
+version = "3.1.1"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "platformdirs-3.1.0-py3-none-any.whl", hash = "sha256:13b08a53ed71021350c9e300d4ea8668438fb0046ab3937ac9a29913a1a1350a"},
-    {file = "platformdirs-3.1.0.tar.gz", hash = "sha256:accc3665857288317f32c7bebb5a8e482ba717b474f3fc1d18ca7f9214be0cef"},
+    {file = "platformdirs-3.1.1-py3-none-any.whl", hash = "sha256:e5986afb596e4bb5bde29a79ac9061aa955b94fca2399b7aaac4090860920dd8"},
+    {file = "platformdirs-3.1.1.tar.gz", hash = "sha256:024996549ee88ec1a9aa99ff7f8fc819bb59e2c3477b410d90a16d32d6e707aa"},
 ]
 
 [package.extras]
@@ -2356,14 +2356,14 @@ cffi = {version = "*", markers = "implementation_name == \"pypy\""}
 
 [[package]]
 name = "qtconsole"
-version = "5.4.0"
+version = "5.4.1"
 description = "Jupyter Qt console"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "qtconsole-5.4.0-py3-none-any.whl", hash = "sha256:be13560c19bdb3b54ed9741a915aa701a68d424519e8341ac479a91209e694b2"},
-    {file = "qtconsole-5.4.0.tar.gz", hash = "sha256:57748ea2fd26320a0b77adba20131cfbb13818c7c96d83fafcb110ff55f58b35"},
+    {file = "qtconsole-5.4.1-py3-none-any.whl", hash = "sha256:bae8c7e10170cdcdcaf7e6d53ad7d6a7412249b9b8310a0eaa6b6f3b260f32db"},
+    {file = "qtconsole-5.4.1.tar.gz", hash = "sha256:f67a03f40f722e13261791280f73068dbaf9dafcc335cbba644ccc8f892640e5"},
 ]
 
 [package.dependencies]
@@ -2371,6 +2371,7 @@ ipykernel = ">=4.1"
 ipython-genutils = "*"
 jupyter-client = ">=4.1"
 jupyter-core = "*"
+packaging = "*"
 pygments = "*"
 pyzmq = ">=17.1"
 qtpy = ">=2.0.1"

@@ -1,6 +1,7 @@
 \subsection{Newton's Method}\label{ssec:newton}
 
-In this section, we propose a novel and simple method to solve~(\ref{eq:bcd:block-update}).
+In this section, we propose\todojames{our main?} 
+a simple and powerful method to solve~(\ref{eq:bcd:block-update}).
 By solving the sub-gradient problem of~(\ref{eq:bcd:block-update}),
 we see that the solution $\beta^\star$ must satisfy
 \begin{align}
@@ -24,8 +25,8 @@ we take the $\ell_2$ norm on both sides to get that $\norm{\beta^\star}_2$ must 
     \label{eq:newton:norm-solution}
 \end{align}
 Unfortunately, there is no closed-form solution for~(\ref{eq:newton:norm-solution}) either.
-However, we will shortly show that there is an efficient algorithm 
-to numerically solve~(\ref{eq:newton:norm-solution}).
+However, we will shortly see that a simple Newton's Method 
+can numerically solve~(\ref{eq:newton:norm-solution}) efficiently with guaranteed convergence.
 In turn, once we find $\norm{\beta^\star}_2$, we may substitute it
 into~(\ref{eq:newton:block-solution}) to get the full solution $\beta^\star$ in $O(p)$ time.
 We note in passing that~(\ref{eq:newton:block-solution}) and~(\ref{eq:newton:norm-solution})
@@ -34,77 +35,23 @@ however, there is no mention of how to quickly solve for $\beta^\star$ or $\norm
 
 We now discuss how to solve~(\ref{eq:newton:norm-solution}).
 First, define $\varphi : [0, \infty) \to \R$ by
-\begin{align*}
+\begin{align}
     \varphi(h)
     &:=
     \sum\limits_{i=1}^p
     \frac{v_i^2}{(D_{ii} h + \lambda)^2}
     - 1
-\end{align*}
-so that~(\ref{eq:newton:norm-solution}) is now a root-finding problem for $\varphi$.
-Upon differentiating $\varphi$,
-\begin{align*}
-    \frac{d\varphi(h)}{dh}
-    &=
-    -2 \sum\limits_{i=1}^p
-    \frac{v_i^2 D_{ii}}{(D_{ii} h + \lambda)^3}
-    \leq
-    0
-\end{align*}
-where the inequality is strict if not all $v_i^2 D_{ii} = 0$.
-Note that if all $v_i^2 D_{ii} = 0$, then we must have that $\norm{v}_2 \leq \lambda$.
-Otherwise,
-\begin{align*}
-    \varphi(h)
-    &=
-    \sum\limits_{i : D_{ii} = 0}
-    \frac{v_i^2}{\lambda^2}
-    - 1
-    =
-    \lambda^{-2} \sum\limits_{i=1}^p v_i^2 - 1
-    > 0
-\end{align*}
-In particular, $\varphi$ is constant and strictly positive so it has no roots.
-So, if $\norm{v}_2 > \lambda$, then there exists a vector $\beta$
-where $\varphi(\norm{\beta}_2) = 0$, which is a contradiction.
-Hence, without loss of generality, we may assume $\varphi'$ is strictly negative,
-so that $\varphi$ is strictly decreasing.
-Consequently, since $\varphi(0) > 0$ by hypothesis, there exists a (unique) root.
-Further, it is easy to see that $\varphi$ is convex since it is a 
-sum of convex functions.
-
-Since $\varphi$ is convex, this suggests solving~(\ref{eq:newton:norm-solution})
-via a one-dimensional Newton's Method.
-Specifically, with $h^{(0)}$ as the initial starting point, for $k\geq 1$,
-\begin{align}
-    h^{(k)} = h^{(k-1)} - \frac{\varphi(h^{(k-1)})}{\varphi'(h^{(k-1)})}
-    \label{eq:newton:newton-step}
+    \label{eq:varphi-def}
 \end{align}
-We claim that Newton's Method is guaranteed to converge for any initial point $h^{(0)}$.
-Indeed, for every $k\geq 1$, by convexity of $\varphi$,
-\begin{align*}
-    \varphi(h^{(k)})
-    &\geq
-    \varphi(h^{(k-1)})
-    + \varphi'(h^{(k-1)}) (h^{(k)} - h^{(k-1)})
-    =
-    0
-\end{align*}
-Along with~(\ref{eq:newton:newton-step}),
-this shows that $h^{(k)}$ is an increasing sequence for $k\geq 1$ 
-and bounded above by $h^\star$, the root of $\varphi$, by monotonicity.
-Hence, $h^{(k)}$ converges to some limit $h^{(\infty)}$. 
-From~(\ref{eq:newton:newton-step}), taking limit as $k\to \infty$ and using that $\varphi'$ is non-zero,
-\begin{align*}
-    h^{(\infty)} = h^{(\infty)} - \frac{\varphi(h^{(\infty)})}{\varphi'(h^{(\infty)})}
-    \implies
-    \varphi(h^{(\infty)}) = 0
-\end{align*}
-which shows that $h^{(\infty)}$ is the root of $\varphi$.
-In summary, Newton's Method gives \emph{guaranteed convergence} to the root.
+so that~(\ref{eq:newton:norm-solution}) is now a root-finding problem for $\varphi$.
+In~\Cref{appendix:properties-varphi}, we show that $\varphi$ is 
+convex and is, without loss of generality, 
+strictly decreasing with a unique root.
+By standard convex analysis, Newton's Method guarantees convergence to the root of $\varphi$
+for any initial point $h^{(0)}$ (see~\Cref{appendix:newton-convergence}).
 \Cref{alg:newton:newton} summarizes Newton's Method.
 
-\begin{algorithm}
+\begin{algorithm}[t]
     \caption{Newton's Method}\label{alg:newton:newton}
     \KwData{$D$, $v$, $\lambda$, $\varepsilon$, $h^{(0)}$}
     $h \gets h^{(0)}$\;
@@ -114,22 +61,60 @@ In summary, Newton's Method gives \emph{guaranteed convergence} to the root.
     return $h$\;
 \end{algorithm}
 
-Since $\varphi$ is convex, we also have quadratic convergence rate and each iteration costs $O(p)$.
+Since $\varphi$ is strongly convex with Lipschitz second derivative,
+we also have quadratic convergence and each iteration costs $O(p)$~\citep{boyd:2004}.
 In principle, our setting is one of the best settings for Newton's Method to succeed.
-While FISTA (\Cref{alg:pgd:fista}) and the adaptive restarted version
-(\Cref{alg:pgd:fista-adares}) also give the same convergence rate,
-\Cref{fig:bench:pgd-newton}
-shows a clear improvement for the Newton's Method in practice.
-One very important benefit of Newton's Method is that the optimization domain
-remains one-dimensional \emph{regardless of the input dimensions}.
-However, FISTA optimizes over $\beta \in \R^p$ directly, so its performance is heavily
-impacted by the dimension.
+While FISTA 
+%(\Cref{alg:pgd:fista}) 
+and the adaptive restarted version
+%(\Cref{alg:pgd:fista-adares}) 
+also give the same convergence rate~\citep{beck:2009,odonoghue:2015},
+\Cref{fig:newton:pgd-newton} shows a clear improvement for Newton's Method in practice.
+Here, accuracy was measured as
+\begin{align}
+    &\max\limits_{i=1,\ldots,p} 
+    \abs{\hat{\beta}_i - \beta_i}
+    \label{eq:accuracy}
+    \\
+    &\hat{\beta} 
+    :=
+    \text{ solution from algorithm}
+    \nonumber
+    \\
+    &\beta
+    :=
+    \pr{D + \frac{\lambda}{\norm{\hat{\beta}}_2} I}^{-1} v
+    \nonumber
+\end{align}
+Note that the PGD methods fail to converge as $p$ increases,
+and even when they converge, Newton's Method performs 10 to 1000 times faster.
+One very important benefit of Newton's Method 
+is that the optimization domain remains one-dimensional \emph{regardless of the input dimension $p$}.
+However, the PGD methods directly optimize in $\R^p$,
+so their instability grows with increasing $p$ due to the curse of dimensionality.
+As a result, the speed and convergence stability in Newton's Method 
+makes it the more desirable algorithm.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/pgd_newton_fista_newton.pdf}
+    \caption{Time and accuracy comparison between the PGD methods 
+    in~\Cref{ssec:pgd} and Newton's Method.
+    Overall, the PGD methods suffer from large computational overhead due to large number of iterations,
+    and fails to converge as the dimension $p$ increases.
+    Contrastingly, Newton's Method is quite stable, properly converges, and runs 10 to 1000 times faster.
+    }
+    \label{fig:newton:pgd-newton}
+\end{figure}
 
 It is widely known that descent methods including Newton's Method
 is highly sensitive to the initialization.
+A poor initialization may lead to slow convergence
+while an initialization close to the root will be rewarded with incredible convergence speed
+(see~\Cref{fig:newton-abs:stuck}).
 The question that remains is: how to choose the initial starting point $h^{(0)}$?
-Despite the convergence guarantee irrespective of the choice of $h^{(0)}$,
-it is nonetheless ideal to choose an initial point close to the root for an even faster convergence.
+%Despite the convergence guarantee irrespective of the choice of $h^{(0)}$,
+%it is nonetheless ideal to choose an initial point close to the root for an even faster convergence.
 We recommend selecting any $h^{(0)}$ such that $\varphi(h^{(0)}) \geq 0$.
 For example, $h^{(0)} \equiv 0$ is sufficient since by definition $\varphi(0) > 0$.
 If $h^{(0)}$ is such that $\varphi(h^{(0)}) < 0$,
@@ -140,6 +125,7 @@ we arrive at the same sequence as if we had started with $h^{(0)} = 0$.
 For this reason, it is almost always better to 
 set the initial point such that $\varphi(h^{(0)}) \geq 0$.
 Although $h^{(0)} = 0$ is a valid choice, it may also lead to large number of iterations,
-especially if $\lambda$ is small and $D$ is close to being semi-definite.
+especially if $\lambda$ is small
+(see~\Cref{fig:bench:newton-compare}).
 In~\Cref{ssec:newton-abs}, we describe our most performant and robust 
 modification to the vanilla Newton's Method that reduces iterations in nearly all cases.
