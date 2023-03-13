@@ -39,7 +39,7 @@ static py::dict newton_brent_solver(
     Eigen::VectorXd buffer1(L.size());
     Eigen::VectorXd buffer2(L.size());
     size_t iters = 0;
-    glstudy::newton_brent_solver(L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2);
+    glstudy::newton_brent_solver(L, v, l1, l2, tol, tol, max_iters, x, iters, buffer1, buffer2);
 
     py::dict d("beta"_a=x, "iters"_a=iters);
     return d;
@@ -83,7 +83,7 @@ static py::dict newton_solver_debug(
     std::vector<double> smart_iters;
     smart_iters.reserve(L.size());
     glstudy::newton_solver_debug(
-        L, v, l1, l2, tol, max_iters, true, 
+        L, v, l1, l2, tol, max_iters, smart_init, 
         h_min, h_max, x, iters, smart_iters, buffer1, buffer2
     );
     

@@ -1,0 +1,166 @@
+\subsection{Newton-Brent}\label{ssec:newton-brent}
+
+In this section, we improve the Newton's Method described in~\Cref{ssec:newton}.
+Specifically, we first discuss how to find lower and upper bounds $h_\star$, $h^\star \in [0,\infty)$,
+respectively, such that the root lies in $[h_\star, h^\star]$.
+We then discuss an initialization process preceeding the Newton's Method
+to find a clever initial point $h^{(0)}$.
+
+We first begin with the derivation of $h_\star$ and $h^\star$.
+Note that the root-finding problem for $\varphi$
+is equivalent to finding the largest value $h > 0$ such that $\varphi(h) \geq 0$, or
+\begin{align*}
+    \sup\set{
+        h > 0 :
+        \sum\limits_{i=1}^p
+        \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+        \geq
+        1
+    }
+\end{align*}
+We approximate the above in the following way.
+Let $a(h), b(h) \in \R^p$ be defined by $a_k(h) := D_{kk} h + \lambda$
+and $b_k(h) := \frac{\abs{v_k}}{a_k(h)}$ for each $k=1,\ldots, p$.
+Then, by Cauchy-Schwarz,
+\begin{align*}
+    \norm{v}_1
+    &:=
+    \sum\limits_{k} \abs{v_k}
+    =
+    \sum\limits_{k} a_k(h) b_k(h)
+    \leq
+    \norm{a(h)}_{2} \norm{b(h)}_2
+\end{align*}
+Hence, if $\norm{a(h)}_2 \leq \norm{v}_1$,
+then $\varphi(h) \geq 0$.
+We see that $\norm{a(h)}_2 \leq \norm{v}_1$ if and only if
+\begin{align*}
+    \sum\limits_{i=1}^p
+    (D_{ii} h + \lambda)^2
+    \leq
+    \norm{v}_1^2
+\end{align*}
+This inequality can be solved for $h$ using the quadratic formula.
+Let $\tilde{h}$ be the solution.
+Then, letting $h_\star := \max(\tilde{h}, 0)$,
+we have that $\varphi(h_{\star}) \geq 0$.
+
+Next, we discuss $h^\star$.
+Similar to $h_\star$, we wish to find the smallest $h$ such that
+$\varphi(h) \leq 0$, or
+\begin{align*}
+    \inf\set{
+        h > 0
+        :
+        \sum\limits_{i=1}^p
+        \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+        \leq
+        1
+    }
+\end{align*}
+Approximating this problem, since
+\begin{align}
+    \sum\limits_{i=1}^p
+    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    &=
+    \sum\limits_{i: D_{ii} > 0}
+    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    \leq 
+    h^{-2}
+    \sum\limits_{i: D_{ii} > 0}
+    \frac{v_i^2}{D_{ii}^2 }
+    \label{eq:nmab:upper-approx}
+\end{align}
+by setting 
+\begin{align*}
+    h^\star
+    := 
+    \sqrt{
+        \sum\limits_{i: D_{ii} > 0} \frac{v_i^2}{D_{ii}^2}
+    }
+\end{align*}
+we have that $\varphi(h^\star) \leq 0$.
+This shows that the root must lie in $[h_\star, h^\star]$.
+
+In practice, $\varphi$ may decay incredibly rapidly near $h \approx 0$ and have an extremely flat tail.\todojames{refer to a figure?}
+To protect against the possible slow convergence of Newton's Method in these cases,
+it is advantageous to find an initial point in $[h_\star, h^\star]$ that is sufficiently 
+far from the region of fast decay before applying the Newton method.
+Once we find an initial point sufficiently close to the root, 
+we apply Newton's Method for fast, guaranteed convergence.
+Although there are numerous options to find the initial point,
+e.g. a simple bisection that splits the interval in halves or the secant method,
+we found that a modification of Brent's method is most effective.
+
+We describe our proposed modified Brent's method.
+In Brent's method, there are three possible ways of interpolating to get the next candidate root:
+inverse quadratic interpolation, secant method, and bisection method.
+In all three cases, we typically benefit from being able to skip the rapidly decaying section of $\varphi$
+and find a candidate somewhere in the tail.
+If the candidate $h$ is close to the root up to some tolerance, then we may return this candidate as the solution.
+If $\varphi(h) < 0$, then from the discussion in~\Cref{ssec:newton},
+applying Newton's method will likely restart at the origin and will be inefficient.
+Hence, the optimal strategy is to perform Brent's method (at least one iteration) until
+the first time we find $h$ such that $\varphi(h) \geq 0$.
+Then, in hopes that $h$ is close to the root and in the tail region of $\varphi$,
+we apply Newton's Method for the fast guaranteed convergence.
+\Cref{alg:newton:newton-brent}
+describes our proposed strategy \emph{Newton-Brent}.
+
+\begin{algorithm}
+    \caption{Modified Brent's Method}\label{alg:newton:modified-brent}
+    \KwData{$D$, $v$, $\lambda$, $\varepsilon$, $h_\star$, $h^\star$}
+    Let $c$ be the candidate in each Brent's Method iteration\;
+    Run Brent's Method for $\varphi$ for the range $[h_\star, h^\star]$\;
+    \eIf{$\varphi(c) \geq 0$} {
+        Return $c$\;
+    }{
+        Return the solution from Brent's Method\;
+    }
+\end{algorithm}
+
+\begin{algorithm}
+    \caption{Newton-Brent}\label{alg:newton:newton-brent}
+    \KwData{$D$, $v$, $\lambda$, $\varepsilon$}
+    compute $h_\star$ that solves
+    $
+        \sum\limits_{i=1}^p
+        (D_{ii} h + \lambda)^2
+        \leq
+        \norm{v}_1^2
+    $ and take the positive part\;
+    $
+        h^\star
+        \gets
+        \sqrt{
+            \sum\limits_{i: D_{ii} > 0} \frac{v_i^2}{D_{ii}^2}
+        }
+    $\;
+    $h\gets $ result of Brent's Method for $\varphi$ using $h_\star$ and $h^\star$\;
+    \If{$\varphi(h) \geq 0$}{
+        $\tilde{h} \gets$ result of Newton's Method starting at $h^{(0)} = h$\;
+    }
+    $\beta^\star \gets (D + \lambda \tilde{h}^{-1} I)^{-1} v$\;
+    return $\beta^\star$\;
+\end{algorithm}
+
+Algorithm~\ref{alg:nabs:nabs} can be further optimized.
+For example, if $h^\star - h_\star$ is below some threshold (e.g. $0.1$),
+then we may skip bisection entirely and start Newton's Method at $h^{(0)} = h_\star$.
+This is because the adaptive bisection may move too slowly if the range is too small.
+From experimentation, this happens relatively often.
+On a similar note, one may also enforce enough movement towards $h_\star$
+by taking the max of $w$ with a minimal probability (e.g. $0.05$).
+This will ensure that at least some proportion of $h_\star$ is taken 
+if the prior is too strongly suggestive that the root is close to $h^\star$.
+The idea is that it is always better to overshoot towards $h_\star$ such that $\varphi$ is non-negative,
+so that Newton's Method can quickly converge down to the root,
+than to slowly bisect to the root.
+
+Similar to our strategy in~\Cref{alg:nabs:ab},
+there are other existing methods that try to achieve adaptive bisection.
+A popular algorithm is the Brent's method.
+Although Brent's method performs extremely well for this task,
+as seen in~\Cref{fig:bench:pgd-newton},
+Newton-ABS is still superior.
+We refer to the full benchmark comparison to~\Cref{ssec:benchmark:pgd-newton}.

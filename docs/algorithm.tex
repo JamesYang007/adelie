@@ -1,4 +1,4 @@
-\section{Optimizer Algorithm}
+\section{Optimizer Algorithm}\label{sec:optimizer}
 
 In this section, we discuss the algorithm to solve the optimization problem~(\ref{eq:glp:objective}).
 Let $X \in \R^{n\times p}$, $y\in \R^n$ be the feature matrix and response vector, respectively.
@@ -38,28 +38,42 @@ and $\tilde{X}_i^\top \tilde{X}_j$ for $i=1,\ldots,G$ and $j$ in the active set.
 In comparison to other proposed fitting procedures,
 we believe that the extra cost to compute $\tilde{X}_i$, $D_i$, and $\tilde{X}_i^\top \tilde{X}_j$
 is comparable to the cost of the other procedures.
-For example, \citet*{yuan:2006,meier:2008} rely on the fact that
+For example, \citet{yuan:2006,meier:2008} rely on the fact that
 each group feature matrix $X_i$ is full-rank and therefore admits a QR decomposition with an invertible $R$.
 Under this assumption, they solve~(\ref{eq:oa:new-objective}) with $\tilde{X} = \br{Q_1 \, Q_2 \, \ldots \, Q_G}$
 and transform the solution back to the original scale by applying $R_i^{-1}$ to the $i$th group of coefficients.
-Note that these other approaches also apply a one-time decomposition of the group feature matrices.
+Note that this also applies a one-time decomposition of the group feature matrices.
 The benefit of this approach is that the algorithm is aided by a simple closed-form expression
 as part of the blockwise coordinate descent algorithm.
 However, there are two major downsides to this approach.
 The first is that, while the aforementioned authors primarily focused on the application of group lasso 
-on categorical data such as one-hot encoded data that easily satisfy the full-rank assumption,
+on multi-level categorical data that easily satisfy the full-rank assumption,
 this assumption may easily be violated in other applications.
 For example,~\todojames{mention GWAS; small n, bigger group size}.
-The second is that this method does not simplify computations 
-when we add a ridge penalty as well (i.e. elastic net), 
-since in general, it introduces a Tikhonov regularization in the transformed problem.
+The second is that this method only gives an approximation to the original problem.
+That is, given the solution to~(\ref{eq:oa:new-objective}), $\tilde{\beta}^*$,
+the candidate $\beta^\star$ defined by $\beta^\star_i := R_i^{-1} \tilde{\beta^\star}_i$ 
+for $i=1,\ldots, G$ is not necessarily a solution to~(\ref{eq:glp:objective})
+with the original data.
+Indeed, for this approximation to be exact, 
+rather than solving~(\ref{eq:oa:new-objective}),
+one should solve
+\begin{align*}
+    \minimize_{\beta \in \R^p}
+    f(y, \tilde{X} \tilde{\beta})
+    + \lambda \sum\limits_{j=1}^G \norm{R_i^{-1} \tilde{\beta}_j}_2
+\end{align*}
+which introduces a Tikhonov regularization.
+Although this remains a convex optimization problem and can be solved,
+it does not simplify any computation since it does not enjoy the same 
+closed-form expressions as the approximation method does.
 
 Similar to other approaches~\citep{yuan:2006,meier:2008,tseng:2001,sparsegl:2022},
 we use blockwise coordinate descent for its excellent speed and simplicity.
-However, we take a completely different approach to fitting each block update.
+However, we take a completely different approach to fitting each block coordinate update.
 The essence of implementing a highly performant optimizer lies in 
 solving each block update~(\ref{eq:bcd:block-update}) as fast as possible.
-Aside from the orthonormalization method described above as in~\citet*{yuan:2006,meier:2008},
+Aside from the orthonormalization method described above as in~\citet{yuan:2006,meier:2008},
 many works in literature that describe group lasso fitting procedures
 use the general descent method called Proximal Gradient Descent (PGD), 
 or Iterative Soft-Thresholding Algorithm (ISTA) in this context,

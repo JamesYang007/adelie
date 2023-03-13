@@ -1,0 +1,133 @@
+\appendix
+
+\section{Newton Method Results}\label{appendix:newton}
+
+\subsection{Properties of Root-Finding Function}\label{appendix:properties-varphi}
+
+Let the function to root-find, $\varphi$, be as in~(\ref{eq:varphi-def}).
+Upon differentiating $\varphi$,
+\begin{align*}
+    \frac{d\varphi(h)}{dh}
+    &=
+    -2 \sum\limits_{i=1}^p
+    \frac{v_i^2 D_{ii}}{(D_{ii} h + \lambda)^3}
+    \leq
+    0
+\end{align*}
+where the inequality is strict if and only if not all $v_i^2 D_{ii} = 0$.
+Note that if all $v_i^2 D_{ii} = 0$, then we must have that $0 = \norm{v}_2 \leq \lambda$.
+This is because by assumption $v = \sqrt{D} u$ for some $u \in \R^p$
+(see~(\ref{eq:bcd:block-update})), so that 
+if $v_i^2 D_{ii} = 0$, either $v_i = 0$ or $D_{ii} = 0 \implies v_i = 0$.
+Hence, without loss of generality, we may assume 
+that, in particular, not all $D_{ii} = 0$ and
+$\varphi'$ is strictly negative so that $\varphi$ is strictly decreasing.
+Further, we have that
+\begin{align*}
+    \varphi(h)
+    &=
+    \sum\limits_{i: D_{ii} > 0}
+    \frac{v_i^2}{(D_{ii} h + \lambda)^2} - 1
+\end{align*}
+Consequently, since $\varphi(0) > 0$ by hypothesis and
+$\lim\limits_{n\to\infty} \varphi(h) = -1$,
+there exists a (unique) root.
+Further, it is easy to see that $\varphi$ is convex since it is a 
+sum of convex functions.
+
+\subsection{Convergence of Newton Method}\label{appendix:newton-convergence}
+
+Since $\varphi$ is convex, this suggests solving~(\ref{eq:newton:norm-solution})
+via a one-dimensional Newton's Method.
+Specifically, with $h^{(0)}$ as the initial starting point, for $k\geq 1$,
+\begin{align}
+    h^{(k)} = h^{(k-1)} - \frac{\varphi(h^{(k-1)})}{\varphi'(h^{(k-1)})}
+    \label{eq:newton:newton-step}
+\end{align}
+We claim that Newton's Method is guaranteed to converge for any initial point $h^{(0)}$.
+Indeed, for every $k\geq 1$, by convexity of $\varphi$,
+assuming $h^{(k)} \in [0,\infty)$,
+\begin{align*}
+    \varphi(h^{(k)})
+    &\geq
+    \varphi(h^{(k-1)})
+    + \varphi'(h^{(k-1)}) (h^{(k)} - h^{(k-1)})
+    =
+    0
+\end{align*}
+Along with~(\ref{eq:newton:newton-step}),
+this shows that $h^{(k)}$ is an increasing sequence for $k\geq 1$ 
+and bounded above by $h^\star$, the root of $\varphi$, by monotonicity.
+Hence, $h^{(k)}$ converges to some limit $h^{(\infty)}$. 
+From~(\ref{eq:newton:newton-step}), taking limit as $k\to \infty$ and using that $\varphi'$ is non-zero,
+\begin{align*}
+    h^{(\infty)} = h^{(\infty)} - \frac{\varphi(h^{(\infty)})}{\varphi'(h^{(\infty)})}
+    \implies
+    \varphi(h^{(\infty)}) = 0
+\end{align*}
+which shows that $h^{(\infty)}$ is the root of $\varphi$.
+
+\section{Newton-ABS Results}\label{appendix:newton-abs}
+
+\subsection{Lower and Upper Bounds on the Root}\label{appendix:newton-abs:bounds}
+
+In this section, we derive the lower and upper bounds on the root, $h_\star$, $h^\star \in [0,\infty)$,
+as discussed in~\Cref{ssec:newton-abs}.
+Specifically, we show that $\varphi(h_\star) \geq 0 \geq \varphi(h^\star)$,
+which implies that the root lies in $[h_\star, h^\star]$,
+since $\varphi$ is 
+(without loss of generality)
+strictly decreasing (\Cref{appendix:properties-varphi}).
+
+We first begin with the lower bound $h_\star$.
+Recall that we wish to relax the problem~(\ref{eq:newton-abs:lower-bound-problem}).
+Let $a(h), b(h) \in \R^p$ be defined by $a_k(h) := D_{kk} h + \lambda$
+and $b_k(h) := \frac{\abs{v_k}}{a_k(h)}$ for each $k=1,\ldots, p$.
+Then, by Cauchy-Schwarz,
+\begin{align*}
+    \norm{v}_1
+    &:=
+    \sum\limits_{k} \abs{v_k}
+    =
+    \sum\limits_{k} a_k(h) b_k(h)
+    \leq
+    \norm{a(h)}_{2} \norm{b(h)}_2
+\end{align*}
+Hence, if $\norm{a(h)}_2 \leq \norm{v}_1$,
+then $\varphi(h) \geq 0$.
+We see that $\norm{a(h)}_2 \leq \norm{v}_1$ if and only if
+\begin{align*}
+    \sum\limits_{i=1}^p
+    (D_{ii} h + \lambda)^2
+    \leq
+    \norm{v}_1^2
+\end{align*}
+This inequality can be solved for $h$ using the quadratic formula.
+Let $\tilde{h}$ be the solution.
+Then, letting $h_\star := \max(\tilde{h}, 0)$,
+we have that $\varphi(h_{\star}) \geq 0$.
+
+Next, we derive the upper bound $h^\star$.
+Similar to the lower bound, we approximate~(\ref{eq:newton-abs:upper-bound-problem}).
+Since
+\begin{align}
+    \sum\limits_{i=1}^p
+    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    &=
+    \sum\limits_{i: D_{ii} > 0}
+    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    \leq 
+    h^{-2}
+    \sum\limits_{i: D_{ii} > 0}
+    \frac{v_i^2}{D_{ii}^2 }
+    \label{eq:nmab:upper-approx}
+\end{align}
+by setting 
+\begin{align*}
+    h^\star
+    := 
+    \sqrt{
+        \sum\limits_{i: D_{ii} > 0} \frac{v_i^2}{D_{ii}^2}
+    }
+\end{align*}
+we have that $\varphi(h^\star) \leq 0$.

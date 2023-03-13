@@ -77,15 +77,13 @@ auto compute_h_max(
     // but we will use this to bisect and find an h where f(h) >= 0,
     // so we don't necessarily need h_max to be f(h_max) <= 0.
     if (vbuffer1_min <= zero_tol) {
-        value_t denom = 0;
         for (int i = 0; i < vbuffer1.size(); ++i) {
             const bool is_nonzero = vbuffer1[i] > zero_tol;
             const auto vi2 = v[i] * v[i];
             h_max += is_nonzero ? vi2 / (vbuffer1[i] * vbuffer1[i]) : 0;
-            denom += is_nonzero ? 0 : vi2; 
             vbuffer1_min_nzn = is_nonzero ? std::min(vbuffer1_min_nzn, vbuffer1[i]) : vbuffer1_min_nzn;
         }
-        h_max = std::sqrt(std::abs(h_max / (1.0 - denom / (l1 * l1))));
+        h_max = std::sqrt(h_max);
     } else {
         vbuffer1_min_nzn = vbuffer1_min;
         h_max = (v.array() / vbuffer1.array()).matrix().norm();

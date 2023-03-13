@@ -1,7 +1,7 @@
 \subsection{Blockwise Coordinate Descent}\label{ssec:bcd}
 
-The (convex) optimization problem~(\ref{eq:oa:new-objective}) has a separable regularization,
-so blockwise coordinate descent can be applied~\cite{tseng:2001}.
+The convex optimization problem~(\ref{eq:oa:new-objective}) has a separable regularization,
+so blockwise coordinate descent gives us guaranteed convergence~\citep{tseng:2001}.
 Hence, we iterate through each block $j=1,\ldots, G$,
 keeping all other blocks fixed, and solve the following problem:
 \begin{align}
@@ -31,7 +31,7 @@ with the block update for group $j$ as:
     - (X_j^\top y - \sum\limits_{i \neq j} X_j^\top X_i \beta_i)^\top \beta_j
     + \lambda \norm{\beta_j}_2
 \end{align*}
-For notational simplicity, define $v_j := X_j^\top y - \sum\limits_{i \neq j} X_j^\top X_i \beta_i$.
+For notational simplicity, define $v_j := X_j^\top \pr{y - \sum\limits_{i \neq j} X_i \beta_i}$.
 Then, dropping the subscript $j$, each block update is of the form:
 \begin{align}
     \minimize_{\beta \in \R^p}
@@ -41,4 +41,7 @@ Then, dropping the subscript $j$, each block update is of the form:
     \label{eq:bcd:block-update}
 \end{align}
 where $D \in \R^{p \times p}$ is diagonal with non-negative entries,
-$v \in \R^p$ is any vector, and $\lambda > 0$.
+$v \in \R^p$ is any vector of the form $\sqrt{D} u$,
+which follows from the fact that $X_j$ has the SVD of the form $U\sqrt{D}$ for an orthogonal matrix $U$ 
+based on the discussion in~\Cref{sec:optimizer},
+and $\lambda > 0$.
