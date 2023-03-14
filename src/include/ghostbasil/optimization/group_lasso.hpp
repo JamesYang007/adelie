@@ -568,8 +568,6 @@ struct UpdateResidual<1, 1>
     {
         // TODO: performance may be boosted with grad_i.noalias()
         auto buffer_ = buffer.head(A_ij.rows());
-        std::cerr << "del_j size: " << del_j.size() << std::endl;
-        std::cerr << "A_ij shape: " << A_ij.rows() << ' ' << A_ij.cols() << std::endl;
         buffer_.noalias() = A_ij * del_j;
         grad_i -= buffer_;
     }
@@ -755,7 +753,6 @@ void coordinate_descent(
         // update gradient-like quantity
         
         // iterate over the groups of size 1
-            std::cerr << "b" << std::endl;
         for (auto jt = g1_begin; jt != it; ++jt) {
             const auto ss_idx_j = *jt;
             const auto j = strong_set[ss_idx_j];
@@ -764,9 +761,7 @@ void coordinate_descent(
             auto sg_j = strong_grad.template segment<1>(strong_begins[ss_idx_j]);
             update_residual<0, 0>(A_jk, del_k, sg_j, buffer1);
         }
-            std::cerr << "bb" << std::endl;
         
-            std::cerr << "c" << std::endl;
         for (auto jt = std::next(it); jt != g1_end; ++jt) {
             const auto ss_idx_j = *jt;
             const auto j = strong_set[ss_idx_j];
@@ -775,10 +770,8 @@ void coordinate_descent(
             auto sg_j = strong_grad.template segment<1>(strong_begins[ss_idx_j]);
             update_residual<0, 0>(A_jk, del_k, sg_j, buffer1);
         }
-            std::cerr << "cc" << std::endl;
 
         // iterate over the groups of dynamic size
-            std::cerr << "d" << std::endl;
         for (auto jt = g2_begin; jt != g2_end; ++jt) {
             const auto ss_idx_j = *jt;
             const auto j = strong_set[ss_idx_j];
@@ -790,7 +783,6 @@ void coordinate_descent(
             );
             update_residual<1, 0>(A_jk, del_k, sg_j, buffer1);
         }
-            std::cerr << "dd" << std::endl;
     }
     
     // iterate over the groups of dynamic size
@@ -838,7 +830,6 @@ void coordinate_descent(
         // update gradient-like quantity
         
         // iterate over the groups of size 1
-            std::cerr << "e" << std::endl;
         for (auto jt = g1_begin; jt != g1_end; ++jt) {
             const auto ss_idx_j = *jt;
             const auto j = strong_set[ss_idx_j];
@@ -846,10 +837,8 @@ void coordinate_descent(
             auto sg_j = strong_grad.template segment<1>(strong_begins[ss_idx_j]);
             update_residual<0, 1>(A_jk, del, sg_j, buffer1);
         }
-            std::cerr << "ee" << std::endl;
 
         // iterate over the groups of dynamic size
-            std::cerr << "f" << std::endl;
         for (auto jt = g2_begin; jt != it; ++jt) {
             const auto ss_idx_j = *jt;
             const auto j = strong_set[ss_idx_j];
@@ -862,9 +851,7 @@ void coordinate_descent(
             );
             update_residual<1, 1>(A_jk, del, sg_j, buffer1);
         }
-            std::cerr << "ff" << std::endl;
 
-            std::cerr << "g" << std::endl;
         for (auto jt = std::next(it); jt != g2_end; ++jt) {
             const auto ss_idx_j = *jt;
             const auto j = strong_set[ss_idx_j];
@@ -877,7 +864,6 @@ void coordinate_descent(
             );
             update_residual<1, 1>(A_jk, del, sg_j, buffer1);
         }
-            std::cerr << "gg" << std::endl;
     }
 }
 
@@ -1178,9 +1164,7 @@ inline void fit(
                 active_g2.push_back(next_idx);
             }
             
-            std::cerr << "a" << std::endl;
             A.cache(groups[group], group_size);
-            std::cerr << "aa" << std::endl;
         }
     };
 
