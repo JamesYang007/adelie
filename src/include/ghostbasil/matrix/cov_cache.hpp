@@ -72,9 +72,6 @@ public:
     auto block(index_t i, index_t j, index_t p, index_t q) const
     {
         const auto& mat = get_cache(j);
-            std::cerr << index_map_[j] << std::endl;
-            std::cerr << mat.rows() << ", " << mat.cols() << std::endl;
-            std::cerr << i << ' ' << p << ' ' << q << std::endl;
         return mat.block(i, 0, p, q);
     }
     
