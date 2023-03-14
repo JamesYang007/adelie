@@ -21,4 +21,5 @@ PYBIND11_MODULE(pyglstudy_ext, m) {
     m.def("block_norm_objective", &block_norm_objective);
     
     m.def("group_lasso__", &group_lasso__);
+    m.def("group_lasso_data__", &group_lasso_data__);
 }

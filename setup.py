@@ -11,6 +11,9 @@ ext_modules = [
     Pybind11Extension(
         "pyglstudy.pyglstudy_ext",
         sorted(glob("pyglstudy/src/*.cpp")),  # Sort source files for reproducibility
+        define_macros = [
+            ('EIGEN_MATRIXBASE_PLUGIN', '\"ghostbasil/util/eigen/matrixbase_plugin.hpp\"'),
+        ],
         include_dirs=[
             'src/include',
             os.path.join(ENVPATH, 'include'),

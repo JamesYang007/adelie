@@ -1,12 +1,10 @@
-from pyglstudy.pyglstudy_ext import group_lasso__
+from pyglstudy.pyglstudy_ext import group_lasso__, group_lasso_data__
 import numpy as np
 from dataclasses import dataclass
 
 @dataclass
-class GroupLassoPack:
-    """Parameter pack for group lasso."""
-    A: np.ndarray
-    r: np.ndarray
+class CommonPack:
+    """Common parameter pack for group lasso."""
     groups: np.ndarray
     group_sizes: np.ndarray
     alpha: float
@@ -32,6 +30,17 @@ class GroupLassoPack:
     active_order: np.ndarray
     is_active: np.ndarray
 
+@dataclass
+class GroupLassoPack(CommonPack):
+    """Parameter pack for group lasso with full covariance matrix."""
+    A: np.ndarray 
+    r: np.ndarray 
+
+@dataclass
+class GroupLassoDataPack(CommonPack):
+    """Parameter pack for group lasso with individual-level data."""
+    X: np.ndarray 
+    y: np.ndarray
 
 def generate_group_lasso_data(
     n,
@@ -44,6 +53,9 @@ def generate_group_lasso_data(
     X = np.random.normal(size=(n, p)) @ Sigma
     beta = np.random.normal(size=(p,))
     y = X @ beta + np.random.normal(size=(n,))
+    
+    X /= np.sqrt(n)
+    y /= np.sqrt(n)
 
     order = np.arange(1, p) 
     groups = np.sort(np.random.choice(
@@ -59,25 +71,20 @@ def generate_group_lasso_data(
         _, _, vh = np.linalg.svd(X[:, begin:end])
         X[:, begin:end] = X[:, begin:end] @ vh.T
 
-    A = (X.T @ X) / n
-    A = np.asfortranarray(A)
-
-    r = (X.T @ y) / n
+    X = np.asfortranarray(X)
     
     return {
         "X": X,
         "beta": beta,
         "y": y,
-        "A": A,
-        "r": r,
         "groups": groups,
         "group_sizes": group_sizes,
     }
 
 
 def generate_group_lasso_state(
-    A,
-    r,
+    X,
+    y,
     groups,
     group_sizes,
     alpha,
@@ -105,6 +112,8 @@ def generate_group_lasso_state(
     active_order=None,
     is_active=None,
 ):
+    A_diag = np.sum(X ** 2, axis=0)
+    r = X.T @ y
     n_groups = len(groups)
 
     if penalty is None:
@@ -126,7 +135,7 @@ def generate_group_lasso_state(
     if strong_A_diag is None:
         strong_A_diag = np.concatenate(
             [
-                np.diag(A)[groups[i] : (groups[i] + group_sizes[i])]
+                A_diag[groups[i] : (groups[i] + group_sizes[i])]
                 for i in strong_set
             ]
         )
@@ -152,11 +161,15 @@ def generate_group_lasso_state(
         ])
         assert len(indices) == n_total_group_size
         
-        correction = np.concatenate([
-            A[groups[i]:(groups[i]+group_sizes[i])][:, groups[i]:(groups[i]+group_sizes[i])] @ strong_beta[strong_begins[i]:(strong_begins[i]+group_sizes[i])]
+        correction = np.array([
+            X[:, groups[i]:(groups[i]+group_sizes[i])] @ strong_beta[strong_begins[i]:(strong_begins[i]+group_sizes[i])]
             for i in strong_set
         ])
-        strong_grad = r[indices] - A[indices][:, indices] @ strong_beta + correction
+        strong_grad = X.T @ (y - np.sum(correction, axis=0))
+        strong_grad -= np.concatenate([
+            X[:, groups[i]:(groups[i]+group_sizes[i])].T @ correction[i]
+            for i in strong_set
+        ])
 
     if active_set is None:
         active_set = np.empty((0,), dtype=np.int32)
@@ -171,9 +184,7 @@ def generate_group_lasso_state(
     if is_active is None:
         is_active = np.zeros((n_groups,), dtype=bool)
         
-    return GroupLassoPack(
-        A=A,
-        r=r,
+    return CommonPack(
         groups=groups,
         group_sizes=group_sizes,
         alpha=alpha,
@@ -200,9 +211,15 @@ def generate_group_lasso_state(
         is_active=is_active,
     )
 
-def group_lasso(pack: GroupLassoPack):
-    return group_lasso__(
-        pack.A, 
+
+def group_lasso(mat: np.ndarray, pack: CommonPack, full_cov: bool):
+    if full_cov:
+        f = group_lasso__
+    else:
+        f = group_lasso_data__
+
+    return f(
+        mat, 
         pack.groups,
         pack.group_sizes,
         pack.alpha,
