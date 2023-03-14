@@ -60,6 +60,7 @@ struct GroupLassoBufferPack
  *                      so they can be used as storage for something else.
  * @param   groups      vector of indices into columns of A that define
  *                      the beginning index of the groups.
+ *                      TODO: I think the following can be removed.
  *                      groups[i] = beginning index of A columns for group i.
  *                      Must be of size I+1 where groups[I] = p.
  * @param   group_sizes vector of sizes of each group.
@@ -291,7 +292,7 @@ void get_active_indices(
         const auto group_size = group_sizes[group];
         Eigen::Map<vec_t> seg(out_begin, group_size);
         seg = vec_t::LinSpaced(
-            group_size, groups[group], groups[group+1] - 1
+            group_size, groups[group], groups[group] + group_size - 1
         );
         out_begin += group_size;
     }

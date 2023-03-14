@@ -7,18 +7,15 @@
 namespace py = pybind11;
 using namespace pybind11::literals; // to bring in the `_a` literal
 
-// NOTE: all active vectors must be prepended with a dummy value.
-// This is because pybind11 is so stupid. It doesn't know how to pass empty arrays smh.
-// An array of size of 1 for active vectors is considered to be the empty vector.
-static py::dict group_lasso(
+static py::dict group_lasso__(
     const Eigen::Ref<Eigen::MatrixXd>& A,
     const Eigen::Ref<Eigen::VectorXi>& groups, 
     const Eigen::Ref<Eigen::VectorXi>& group_sizes,
     double alpha, 
     const Eigen::Ref<Eigen::VectorXd>& penalty,
     const Eigen::Ref<Eigen::VectorXi>& strong_set, 
-    const Eigen::Ref<Eigen::VectorXi>& strong_g1,
-    const Eigen::Ref<Eigen::VectorXi>& strong_g2,
+    const std::vector<int>& strong_g1,
+    const std::vector<int>& strong_g2,
     const Eigen::Ref<Eigen::VectorXi>& strong_begins, 
     const Eigen::Ref<Eigen::VectorXd>& strong_A_diag,
     const Eigen::Ref<Eigen::VectorXd>& lmdas, 
@@ -27,28 +24,20 @@ static py::dict group_lasso(
     double newton_tol,
     size_t newton_max_iters,
     double rsq,
-    Eigen::Ref<Eigen::VectorXd>& strong_beta_,
-    Eigen::Ref<Eigen::VectorXd>& strong_grad_,
-    const Eigen::Ref<Eigen::VectorXi>& active_set_,
-    const Eigen::Ref<Eigen::VectorXi>& active_g1_,
-    const Eigen::Ref<Eigen::VectorXi>& active_g2_,
-    const Eigen::Ref<Eigen::VectorXi>& active_begins_,
-    const Eigen::Ref<Eigen::VectorXi>& active_order_,
-    Eigen::Ref<ghostbasil::util::vec_type<bool>>& is_active_
+    Eigen::Ref<Eigen::VectorXd>& strong_beta,
+    Eigen::Ref<Eigen::VectorXd>& strong_grad,
+    std::vector<int> active_set,
+    std::vector<int> active_g1,
+    std::vector<int> active_g2,
+    std::vector<int> active_begins,
+    std::vector<int> active_order,
+    Eigen::Ref<ghostbasil::util::vec_type<bool>>& is_active
 )
 {
     using namespace ghostbasil;
     using namespace ghostbasil::group_lasso;
-    std::vector<int> active_set(active_set_.data()+1, active_set_.data()+active_set_.size());
-    std::vector<int> active_g1(active_g1_.data()+1, active_g1_.data()+active_g1_.size());
-    std::vector<int> active_g2(active_g2_.data()+1, active_g2_.data()+active_g2_.size());
-    std::vector<int> active_begins(active_begins_.data()+1, active_begins_.data()+active_begins_.size());
-    std::vector<int> active_order(active_order_.data()+1, active_order_.data()+active_order_.size());
     std::vector<util::sp_vec_type<double, Eigen::ColMajor, int>> betas(lmdas.size());
-    std::vector<double> rsqs(lmdas.size());
-    Eigen::Map<Eigen::VectorXd> strong_beta(strong_beta_.data(), strong_beta_.size());
-    Eigen::Map<Eigen::VectorXd> strong_grad(strong_grad_.data(), strong_grad_.size());
-    Eigen::Map<util::vec_type<bool>> is_active(is_active_.data(), is_active_.size());
+    Eigen::VectorXd rsqs(lmdas.size());
 
     Eigen::Map<const Eigen::MatrixXd> A_map( 
         A.data(),  
@@ -70,7 +59,7 @@ static py::dict group_lasso(
         betas, rsqs, 0, 0
     );
     fit(pack);
-
+    
     Eigen::SparseMatrix<double> beta_mat;
     if (pack.n_lmdas > 0) {
         beta_mat.resize(A.rows(), pack.n_lmdas);
@@ -80,6 +69,7 @@ static py::dict group_lasso(
     }
 
     py::dict d(
+        "rsq"_a=rsq,
         "strong_beta"_a=pack.strong_beta,
         "strong_grad"_a=pack.strong_grad,
         "active_set"_a=*pack.active_set,
@@ -88,8 +78,9 @@ static py::dict group_lasso(
         "active_begins"_a=*pack.active_begins,
         "active_order"_a=*pack.active_order,
         "is_active"_a=pack.is_active,
+        "lmdas"_a=lmdas.head(pack.n_lmdas),
         "betas"_a=beta_mat,
-        "rsqs"_a=pack.rsqs,
+        "rsqs"_a=pack.rsqs.head(pack.n_lmdas),
         "n_cds"_a=pack.n_cds,
         "n_lmdas"_a=pack.n_lmdas
     );
