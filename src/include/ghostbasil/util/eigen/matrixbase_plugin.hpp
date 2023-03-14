@@ -31,3 +31,5 @@ inline Scalar inv_quad_form(Scalar s, const Eigen::SparseMatrixBase<VecType>& v)
 }
 
 inline const auto& to_dense() const { return *this; }
+
+inline void cache(Eigen::Index, Eigen::Index) const {}

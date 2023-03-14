@@ -13,5 +13,8 @@ class GroupGhostMatrix;
 
 template <class MatrixType, class DType>
 class BlockGroupGhostMatrix;
+    
+template <class XType, class ValueType>
+class CovCache;
 
 } // namespace ghostbasil

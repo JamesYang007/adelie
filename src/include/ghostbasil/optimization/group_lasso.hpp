@@ -149,7 +149,7 @@ struct GroupLassoParamPack
     using dyn_vec_index_t = DynamicVectorIndexType;
     using dyn_vec_sp_vec_t = DynamicVectorSpVecType;
 
-    const AType* A = nullptr;
+    AType* A = nullptr;
     map_cvec_index_t groups;
     map_cvec_index_t group_sizes;
     value_t alpha;
@@ -201,7 +201,7 @@ struct GroupLassoParamPack
               class SBType, class SGType,
               class IAType, class RsqsType>
     explicit GroupLassoParamPack(
-        const AType& A_,
+        AType& A_,
         const GroupsType& groups_, 
         const GroupSizesType& group_sizes_,
         value_t alpha_, 
@@ -568,6 +568,8 @@ struct UpdateResidual<1, 1>
     {
         // TODO: performance may be boosted with grad_i.noalias()
         auto buffer_ = buffer.head(A_ij.rows());
+        std::cerr << "del_j size: " << del_j.size() << std::endl;
+        std::cerr << "A_ij shape: " << A_ij.rows() << ' ' << A_ij.cols() << std::endl;
         buffer_.noalias() = A_ij * del_j;
         grad_i -= buffer_;
     }
@@ -739,6 +741,10 @@ void coordinate_descent(
 
         if (ak_old == ak) continue;
 
+        // Note: order matters! Purposely put here so that A gets updated properly if iterating over strong set.
+        // See fit() with active set update.
+        additional_step(ss_idx);
+
         auto del = ak - ak_old;
 
         // update measure of convergence
@@ -749,6 +755,7 @@ void coordinate_descent(
         // update gradient-like quantity
         
         // iterate over the groups of size 1
+            std::cerr << "b" << std::endl;
         for (auto jt = g1_begin; jt != it; ++jt) {
             const auto ss_idx_j = *jt;
             const auto j = strong_set[ss_idx_j];
@@ -757,7 +764,9 @@ void coordinate_descent(
             auto sg_j = strong_grad.template segment<1>(strong_begins[ss_idx_j]);
             update_residual<0, 0>(A_jk, del_k, sg_j, buffer1);
         }
+            std::cerr << "bb" << std::endl;
         
+            std::cerr << "c" << std::endl;
         for (auto jt = std::next(it); jt != g1_end; ++jt) {
             const auto ss_idx_j = *jt;
             const auto j = strong_set[ss_idx_j];
@@ -766,8 +775,10 @@ void coordinate_descent(
             auto sg_j = strong_grad.template segment<1>(strong_begins[ss_idx_j]);
             update_residual<0, 0>(A_jk, del_k, sg_j, buffer1);
         }
+            std::cerr << "cc" << std::endl;
 
         // iterate over the groups of dynamic size
+            std::cerr << "d" << std::endl;
         for (auto jt = g2_begin; jt != g2_end; ++jt) {
             const auto ss_idx_j = *jt;
             const auto j = strong_set[ss_idx_j];
@@ -779,9 +790,7 @@ void coordinate_descent(
             );
             update_residual<1, 0>(A_jk, del_k, sg_j, buffer1);
         }
-
-        // additional step
-        additional_step(ss_idx);
+            std::cerr << "dd" << std::endl;
     }
     
     // iterate over the groups of dynamic size
@@ -811,6 +820,10 @@ void coordinate_descent(
         //}
 
         if ((ak_old.array() == ak.array()).all()) continue;
+        
+        // Note: order matters! Purposely put here so that A gets updated properly if iterating over strong set.
+        // See fit() with active set update.
+        additional_step(ss_idx);
 
         // use same buffer as ak_old to store difference
         auto& del = ak_old;
@@ -825,6 +838,7 @@ void coordinate_descent(
         // update gradient-like quantity
         
         // iterate over the groups of size 1
+            std::cerr << "e" << std::endl;
         for (auto jt = g1_begin; jt != g1_end; ++jt) {
             const auto ss_idx_j = *jt;
             const auto j = strong_set[ss_idx_j];
@@ -832,8 +846,10 @@ void coordinate_descent(
             auto sg_j = strong_grad.template segment<1>(strong_begins[ss_idx_j]);
             update_residual<0, 1>(A_jk, del, sg_j, buffer1);
         }
+            std::cerr << "ee" << std::endl;
 
         // iterate over the groups of dynamic size
+            std::cerr << "f" << std::endl;
         for (auto jt = g2_begin; jt != it; ++jt) {
             const auto ss_idx_j = *jt;
             const auto j = strong_set[ss_idx_j];
@@ -846,7 +862,9 @@ void coordinate_descent(
             );
             update_residual<1, 1>(A_jk, del, sg_j, buffer1);
         }
+            std::cerr << "ff" << std::endl;
 
+            std::cerr << "g" << std::endl;
         for (auto jt = std::next(it); jt != g2_end; ++jt) {
             const auto ss_idx_j = *jt;
             const auto j = strong_set[ss_idx_j];
@@ -859,9 +877,7 @@ void coordinate_descent(
             );
             update_residual<1, 1>(A_jk, del, sg_j, buffer1);
         }
-        
-        // additional step
-        additional_step(ss_idx);
+            std::cerr << "gg" << std::endl;
     }
 }
 
@@ -1017,7 +1033,7 @@ void group_lasso_active(
             const auto groupi_size = group_sizes[i];
             const auto ab_begin = active_begins[i_idx];
             const auto ab_diff_view_curr = ab_diff_view.segment(ab_begin, groupi_size);
-            const auto A_ji = A.col(groups[j]).segment(
+            const auto A_ji = A.row(groups[j]).segment(
                 groups[i], groupi_size
             );
             update_residual<0, 1>(A_ji, ab_diff_view_curr, sg_j, buffer3);
@@ -1085,6 +1101,8 @@ inline void fit(
     using index_t = typename pack_t::index_t;
     using sp_vec_value_t = typename pack_t::sp_vec_value_t;
 
+    auto& A = *pack.A;
+    const auto& groups = pack.groups;
     const auto& group_sizes = pack.group_sizes;
     const auto& strong_set = pack.strong_set;
     const auto& strong_g1 = pack.strong_g1;
@@ -1104,8 +1122,7 @@ inline void fit(
     auto& rsq = pack.rsq;
     auto& n_cds = pack.n_cds;
     auto& n_lmdas = pack.n_lmdas;
-    
-    const auto p = pack.A->cols();
+    const auto p = A.cols();
 
     //internal::lasso_assert_valid_inputs(
     //        A, s, strong_set, strong_order, 
@@ -1160,6 +1177,10 @@ inline void fit(
             } else {
                 active_g2.push_back(next_idx);
             }
+            
+            std::cerr << "a" << std::endl;
+            A.cache(groups[group], group_size);
+            std::cerr << "aa" << std::endl;
         }
     };
 
