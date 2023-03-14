@@ -20,5 +20,5 @@ PYBIND11_MODULE(pyglstudy_ext, m) {
     m.def("compute_h_max", &compute_h_max);
     m.def("block_norm_objective", &block_norm_objective);
     
-    m.def("group_lasso", &group_lasso);
+    m.def("group_lasso__", &group_lasso__);
 }
