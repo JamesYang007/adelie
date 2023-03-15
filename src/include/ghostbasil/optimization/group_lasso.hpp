@@ -682,6 +682,7 @@ void update_residual(
  */
 template <class PackType, class G1Iter, class G2Iter,
           class ValueType, class BufferType,
+          class UpdateCoefficientsType,
           class AdditionalStepType=util::no_op>
 GHOSTBASIL_STRONG_INLINE
 void coordinate_descent(
@@ -695,6 +696,7 @@ void coordinate_descent(
     BufferType& buffer1,
     BufferType& buffer2,
     BufferType& buffer3,
+    UpdateCoefficientsType update_coefficients_f,
     AdditionalStepType additional_step=AdditionalStepType()
 )
 {
@@ -802,7 +804,7 @@ void coordinate_descent(
 
         // update group coefficients
         size_t iters;
-        update_coefficients(
+        update_coefficients_f(
             A_kk, gk, l1 * pk, l2 * pk, 
             newton_tol, newton_max_iters,  // try only 1 newton iteration
             ak, iters, buffer1, buffer2
@@ -884,6 +886,7 @@ void coordinate_descent(
 template <class PackType, 
           class ABDiffType,
           class BufferType, 
+          class UpdateCoefficientsType,
           class CUIType = util::no_op>
 GHOSTBASIL_STRONG_INLINE
 void group_lasso_active(
@@ -893,6 +896,7 @@ void group_lasso_active(
     BufferType& buffer1,
     BufferType& buffer2,
     BufferType& buffer3,
+    UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType())
 {
     using pack_t = std::decay_t<PackType>;
@@ -957,7 +961,8 @@ void group_lasso_active(
         value_t convg_measure;
         coordinate_descent(
             pack, ag1_begin, ag1_end, ag2_begin, ag2_end,
-            lmda_idx, convg_measure, buffer1, buffer2, buffer3
+            lmda_idx, convg_measure, buffer1, buffer2, buffer3, 
+            update_coefficients_f
         );
         if (convg_measure < thr) break;
         if (n_cds >= max_cds) throw util::max_cds_error(lmda_idx);
@@ -1077,9 +1082,11 @@ void group_lasso_active(
  * @param   check_user_interrupt    see group_lasso_active.
  */
 template <class PackType,
+          class UpdateCoefficientsType,
           class CUIType = util::no_op>
 inline void fit(
     PackType&& pack,
+    UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType())
 {
     using pack_t = std::decay_t<PackType>;
@@ -1197,6 +1204,7 @@ inline void fit(
                     buffer_pack.buffer1,
                     buffer_pack.buffer2,
                     buffer_pack.buffer3,
+                    update_coefficients_f,
                     add_active_set);
             const bool new_active_added = (old_active_size < active_set.size());
 

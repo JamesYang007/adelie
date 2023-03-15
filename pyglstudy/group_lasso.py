@@ -1,4 +1,4 @@
-from pyglstudy.pyglstudy_ext import group_lasso__, group_lasso_data__
+from pyglstudy.pyglstudy_ext import group_lasso__, group_lasso_data__, group_lasso_data_newton__
 import numpy as np
 from dataclasses import dataclass
 
@@ -212,11 +212,13 @@ def generate_group_lasso_state(
     )
 
 
-def group_lasso(mat: np.ndarray, pack: CommonPack, full_cov: bool):
-    if full_cov:
-        f = group_lasso__
-    else:
-        f = group_lasso_data__
+def group_lasso(mat: np.ndarray, pack: CommonPack, fit_type='data'):
+    f_dict = {
+        'full_cov': group_lasso__,
+        'data': group_lasso_data__,
+        'data_newton': group_lasso_data_newton__,
+    }
+    f = f_dict[fit_type]
 
     return f(
         mat, 
