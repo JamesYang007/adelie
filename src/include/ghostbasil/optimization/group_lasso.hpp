@@ -406,25 +406,21 @@ void update_convergence_measure(
  * 
  * @param   rsq     \f$R^2\f$ to update.
  * @param   del     new coefficient minus old coefficient.
- * @param   coeff_new   new coefficient.
  * @param   var     variance along each coordinate of group.
  * @param   r       current residual correlation vector for group.
- * @param   s       PGR regularization parameter.
  */
-template <class ValueType, class DelType, class CoeffNewType,
+template <class ValueType, class DelType, 
           class VarType, class RType>
 GHOSTBASIL_STRONG_INLINE
 void update_rsq(
     ValueType& rsq,
     const DelType& del,
-    const CoeffNewType& coeff_new,
     const VarType& var,
     const RType& r
 )
 {
-    const auto sum = 2 * coeff_new.array() - del.array();
     rsq += (
-        del.array() * (2 * r.array() - var.array() * sum)
+        del.array() * (2 * r.array() - var.array() * del.array())
     ).sum();
 }
 
@@ -732,11 +728,10 @@ void coordinate_descent(
         const auto pk = penalty[k];
 
         const auto ak_old = ak;
-        const auto gk_shifted = gk - A_kk * ak_old;
 
         // update coefficient
         lasso::update_coefficient(
-            ak, A_kk, l1, l2, pk, gk_shifted
+            ak, A_kk, l1, l2, pk, gk
         );
 
         if (ak_old == ak) continue;
@@ -750,12 +745,12 @@ void coordinate_descent(
         // update measure of convergence
         lasso::update_convergence_measure(convg_measure, del, A_kk);
 
-        lasso::update_rsq(rsq, ak_old, ak, A_kk, gk_shifted);
+        lasso::update_rsq(rsq, ak_old, ak, A_kk, gk);
 
         // update gradient-like quantity
         
         // iterate over the groups of size 1
-        for (auto jt = g1_begin; jt != it; ++jt) {
+        for (auto jt = g1_begin; jt != g1_end; ++jt) {
             const auto ss_idx_j = *jt;
             const auto j = strong_set[ss_idx_j];
             const auto A_jk = A.template block<1, 1>(groups[j], groups[k]);
@@ -764,15 +759,6 @@ void coordinate_descent(
             update_residual<0, 0>(A_jk, del_k, sg_j, buffer1);
         }
         
-        for (auto jt = std::next(it); jt != g1_end; ++jt) {
-            const auto ss_idx_j = *jt;
-            const auto j = strong_set[ss_idx_j];
-            const auto A_jk = A.template block<1, 1>(groups[j], groups[k]);
-            const util::vec_type<value_t, 1> del_k(del);
-            auto sg_j = strong_grad.template segment<1>(strong_begins[ss_idx_j]);
-            update_residual<0, 0>(A_jk, del_k, sg_j, buffer1);
-        }
-
         // iterate over the groups of dynamic size
         for (auto jt = g2_begin; jt != g2_end; ++jt) {
             const auto ss_idx_j = *jt;
@@ -804,11 +790,14 @@ void coordinate_descent(
 
         // update group coefficients
         size_t iters;
+        gk += A_kk.cwiseProduct(ak_old); 
         update_coefficients_f(
             A_kk, gk, l1 * pk, l2 * pk, 
             newton_tol, newton_max_iters,  // try only 1 newton iteration
             ak, iters, buffer1, buffer2
         );
+        gk -= A_kk.cwiseProduct(ak_old);
+
         //if (iters >= newton_max_iters) {
         //    throw util::group_lasso_max_newton_iters();
         //}
@@ -827,7 +816,7 @@ void coordinate_descent(
         update_convergence_measure(convg_measure, del, A_kk);
 
         // update rsq
-        update_rsq(rsq, del, ak, A_kk, gk);
+        update_rsq(rsq, del, A_kk, gk);
 
         // update gradient-like quantity
         
@@ -841,20 +830,7 @@ void coordinate_descent(
         }
 
         // iterate over the groups of dynamic size
-        for (auto jt = g2_begin; jt != it; ++jt) {
-            const auto ss_idx_j = *jt;
-            const auto j = strong_set[ss_idx_j];
-            const auto groupj_size = group_sizes[j];
-            const auto A_jk = A.block(
-                groups[j], groups[k], groupj_size, gsize
-            );
-            auto sg_j = strong_grad.segment(
-                strong_begins[ss_idx_j], groupj_size
-            );
-            update_residual<1, 1>(A_jk, del, sg_j, buffer1);
-        }
-
-        for (auto jt = std::next(it); jt != g2_end; ++jt) {
+        for (auto jt = g2_begin; jt != g2_end; ++jt) {
             const auto ss_idx_j = *jt;
             const auto j = strong_set[ss_idx_j];
             const auto groupj_size = group_sizes[j];
@@ -1270,8 +1246,6 @@ inline void fit(
 /**
  * TODO:
  *  - (nothing to change in current impl of lasso but basil will need to know this)
- *      modify A to have Q in the diagonal blocks 
- *      and off-diagonals are Q_i^T A_{ij} Q_j among the strong variables.
  */
     
 } // namespace group_lasso

@@ -1,11 +1,15 @@
 from glob import glob
 from setuptools import setup
 from pybind11.setup_helpers import Pybind11Extension 
+import sysconfig
 import os
 
 __version__ = "0.0.9"
 
 ENVPATH = os.getenv("CONDA_PREFIX")
+
+extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
+extra_compile_args += ["-Wall", "-Wextra", "-DNDEBUG", "-O3", "-fopenmp"]
 
 ext_modules = [
     Pybind11Extension(
@@ -19,6 +23,8 @@ ext_modules = [
             os.path.join(ENVPATH, 'include'),
             os.path.join(ENVPATH, 'include/eigen3'),
         ],
+        extra_compile_args=extra_compile_args,
+        libraries=['gomp'],
         cxx_std=14,
     ),
 ]

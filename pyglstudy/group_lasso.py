@@ -48,9 +48,8 @@ def generate_group_lasso_data(
     n_groups,
     rho=0.1,
 ):
-    Sigma = np.full((p, p), rho)
-    np.fill_diagonal(Sigma, 1)
-    X = np.random.normal(size=(n, p)) @ Sigma
+    X = np.random.normal(size=(n, p))
+    X = rho * np.sum(X, axis=-1)[:,None] + (1-rho) * X
     beta = np.random.normal(size=(p,))
     y = X @ beta + np.random.normal(size=(n,))
     
