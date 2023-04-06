@@ -3,13 +3,30 @@ from setuptools import setup
 from pybind11.setup_helpers import Pybind11Extension 
 import sysconfig
 import os
+import platform
 
 __version__ = "0.0.9"
 
 ENVPATH = os.getenv("CONDA_PREFIX")
 
 extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
-extra_compile_args += ["-Wall", "-Wextra", "-DNDEBUG", "-O3", "-fopenmp"]
+extra_compile_args += ["-Wall", "-Wextra", "-DNDEBUG", "-O3"]
+libraries = []
+extra_link_args = []
+
+system_name = platform.system()
+if (system_name == "Darwin"):
+    extra_compile_args += [
+        "-I/opt/homebrew/opt/libomp/include", 
+        "-Xclang",
+        "-fopenmp",
+    ]
+    extra_link_args += ['-L/opt/homebrew/opt/libomp/lib']
+    libraries = ['omp']
+    
+if (system_name == "Linux"):
+    extra_compile_args += ["-fopenmp"]
+    libraries = ['gomp']
 
 ext_modules = [
     Pybind11Extension(
@@ -24,7 +41,8 @@ ext_modules = [
             os.path.join(ENVPATH, 'include/eigen3'),
         ],
         extra_compile_args=extra_compile_args,
-        libraries=['gomp'],
+        extra_link_args=extra_link_args,
+        libraries=libraries,
         cxx_std=14,
     ),
 ]
