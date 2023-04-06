@@ -49,7 +49,6 @@ auto compute_h_min(
  * @tparam ValueType    float type.
  * @param vbuffer1      vector containing L + l2.
  * @param v             any vector of same length as vbuffer1.
- * @param l1            l1 regularization.
  * @param zero_tol      if a float is <= zero_tol, it is considered to be 0.
  * @return (h_max, vbuffer1_min_nzn)
  *  h_max: the upper bound
@@ -60,7 +59,6 @@ inline
 auto compute_h_max(
     const DiagType& vbuffer1,
     const VType& v,
-    ValueType l1,
     ValueType zero_tol=1e-10
 )
 {

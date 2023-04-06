@@ -3,6 +3,7 @@
 #include "bisect.hpp"
 #include "objective.hpp"
 #include "group_lasso.hpp"
+#include "group_basil.hpp"
 
 PYBIND11_MODULE(pyglstudy_ext, m) {
     m.def("brent_bu", &brent_bu);
@@ -23,4 +24,6 @@ PYBIND11_MODULE(pyglstudy_ext, m) {
     m.def("group_lasso__", &group_lasso__);
     m.def("group_lasso_data__", &group_lasso_data__);
     m.def("group_lasso_data_newton__", &group_lasso_data_newton__);
+    
+    m.def("transform_data", &transform_data__);
 }

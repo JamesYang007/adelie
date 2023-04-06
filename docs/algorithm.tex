@@ -20,7 +20,7 @@ Concretely, it suffices to solve
 \end{align}
 where $\tilde{X} = \br{X_1 Q_1 \, X_2 Q_2 \, \ldots \, X_G Q_G}$.
 Note that this was only possible because the group lasso penalty is invariant under
-the transformation from $\beta \to \tilde{\beta}$.
+the transformation from $\beta \mapsto \tilde{\beta}$.
 Then, given a solution $\tilde{\beta}^*$ to the new problem~(\ref{eq:oa:new-objective}),
 we have the solution to the original problem $\beta^*$ given by
 $\beta^*_i := Q_i^\top \tilde{\beta}_i^*$.
@@ -29,12 +29,37 @@ our feature matrix $X$ is of the form $\tilde{X}$.
 In particular, we assume that $X_i^\top X_i = D_i$ is diagonal for all $1\leq i\leq G$.
 We drop all tilde for notational simplicity.
 
-Computationally, it may seem like 
-we must construct $\tilde{X}$ from $X$ before solving~(\ref{eq:oa:new-objective}).
-However, we will shortly see that the fitting algorithm can be amended to 
-dynamically compute the necessary components of $\tilde{X}$.\todojames{Reference to later section?}
-In particular, we only need access to $\tilde{X}_i$, $D_i$,
-and $\tilde{X}_i^\top \tilde{X}_j$ for $i=1,\ldots,G$ and $j$ in the active set.
+Computationally, it may seem daunting to 
+construct $\tilde{X}$ from $X$ before solving~(\ref{eq:oa:new-objective}).
+However, the time taken for this pre-processing is relatively cheap compared to the full optimizing algorithm.
+Given the data matrix $X$, consider a block $X_i \in \R^{n \times p_i}$.
+we first perform the Singular Value Decomposition (SVD) such that
+$X_i = U_iD_iV_i^T$ where $U_i \in \R^{n \times m_i}$, $D_i \in \R^{m_i \times p_i}$ and $V_i \in \R^{p_i \times p_i}$,
+where $m_i = \min(n,p_i)$.
+Note that $V_i$ is precisely the $Q_i$ from the preceding discussion.
+Hence, $\tilde{X}_i \equiv U_i D_i$.
+If $n \geq p_i$, then $\tilde{X}_i$ can be computed in $O(n p_i)$ time, noting that $D_i$ is diagonal.
+Otherwise if $n < p_i$, then $D_i = [D_{i0} \; \textbf{0}_{n\times (p-n)}]$ where $D_{i0} \in \R^{n \times n}$ is the diagonal matrix.
+Then, $\tilde{X}_i = [U_i D_{i0} \; \textbf{0}_{n \times (p-n)}]$ so that the only product to be computed takes $O(n^2)$ time.
+Hence, the total complexity of the procedure is
+\begin{align*}
+    O\pr{
+        \sum\limits_{i=1}^G
+        \pr{\underbrace{\min(n,p_i) n p_i}_{\svd} + \underbrace{\min(n, p_i) n}_{\tilde{X}_i}}
+    }
+    =
+    O\pr{
+        n
+        \sum\limits_{i=1}^G
+        \min(n,p_i) p_i
+    }
+\end{align*}
+Moreover, since this algorithm is parallelizable across groups,
+we can reduce the time by the number of parallel threads.
+This pre-computation complexity is smaller than the proposed optimizer algorithm\todojames{compute?}
+and is a one-time computation.
+Thus, it is worth performing this pre-computation for the large speed-ups in the optimizing algorithm.
+
 In comparison to other proposed fitting procedures,
 we believe that the extra cost to compute $\tilde{X}_i$, $D_i$, and $\tilde{X}_i^\top \tilde{X}_j$
 is comparable to the cost of the other procedures.

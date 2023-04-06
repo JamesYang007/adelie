@@ -20,11 +20,10 @@ static double compute_h_min(
 static py::dict compute_h_max(
     const Eigen::Ref<Eigen::VectorXd>& vbuffer1,
     const Eigen::Ref<Eigen::VectorXd>& v,
-    double l1,
     double zero_tol=1e-10
 )
 {
-    const auto out = glstudy::compute_h_max(vbuffer1, v, l1, zero_tol); 
+    const auto out = glstudy::compute_h_max(vbuffer1, v, zero_tol); 
     py::dict d("h_max"_a=std::get<0>(out), "vbuffer1_min_nzn"_a=std::get<1>(out));
     return d;
 }

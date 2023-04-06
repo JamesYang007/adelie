@@ -205,7 +205,7 @@ void newton_brent_solver(
 
     const auto initial_f = [&]() {
         const value_t h_min = compute_h_min(vbuffer1, v, l1);
-        const auto h_max_out = compute_h_max(vbuffer1, v, l1, 0.0); // IMPORTANT: NEEDS GUARANTEE
+        const auto h_max_out = compute_h_max(vbuffer1, v, 0.0); // IMPORTANT: NEEDS GUARANTEE
         const value_t h_max = std::get<0>(h_max_out);
 
         value_t h;
