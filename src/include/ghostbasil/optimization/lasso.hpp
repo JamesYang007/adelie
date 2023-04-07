@@ -328,8 +328,8 @@ bool check_early_stop_rsq(
 {
     const auto delta_u = (rsq_u-rsq_m);
     const auto delta_m = (rsq_m-rsq_l);
-    return ((delta_u < cond_0_thresh*rsq_u) &&
-            ((delta_m*rsq_u-delta_u*rsq_m) < cond_1_thresh*rsq_m*rsq_u));
+    return ((delta_u <= cond_0_thresh*rsq_u) &&
+            ((delta_m*rsq_u-delta_u*rsq_m) <= cond_1_thresh*rsq_m*rsq_u));
 }
   
 /**

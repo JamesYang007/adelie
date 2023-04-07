@@ -129,7 +129,7 @@ template <class AType,
           class IndexType,
           class BoolType,
           class DynamicVectorIndexType=std::vector<IndexType>,
-          class DynamicVectorSpVecType=std::vector<
+          class DynamicVectorSpVecType=util::vec_type<
                 util::sp_vec_type<ValueType, Eigen::ColMajor, IndexType>
             > 
           >

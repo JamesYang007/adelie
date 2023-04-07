@@ -56,6 +56,7 @@ public:
     }
     
     auto cols() const { return X_.cols(); }
+    auto rows() const { return cols(); }
     
     void cache(index_t j, index_t q) 
     {

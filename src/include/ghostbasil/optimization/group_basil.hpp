@@ -2,7 +2,8 @@
 #include <vector>
 #include <Eigen/Core>
 #include <Eigen/SVD>
-#include <ghostbasil/optimization/basil.hpp>
+#include <ghostbasil/optimization/group_lasso.hpp>
+#include <ghostbasil/util/algorithm.hpp>
 #include <ghostbasil/util/types.hpp>
 
 namespace ghostbasil {
@@ -12,10 +13,10 @@ namespace group_lasso {
  * @brief Transforms the data matrix X so that each block of data corresponding to a group is 
  * replaced with the principal components. In the process, we also save the l2 norm squared of each column.
  * 
- * @tparam XType    float matrix type.
+ * @tparam XType        float matrix type.
  * @tparam GroupsType   integer vector type.
  * @tparam GroupSizesType   integer vector type.
- * @tparam DType    float vector type.
+ * @tparam DType        float vector type.
  * @param X             data matrix.
  * @param groups        indices to the beginning of each group.
  * @param group_sizes   sizes of each group.
@@ -23,6 +24,7 @@ namespace group_lasso {
  * @param d             l2 norm squared of each column.
  */
 template <class XType, class GroupsType, class GroupSizesType, class DType>
+GHOSTBASIL_STRONG_INLINE
 void transform_data(
     XType& X,
     const GroupsType& groups,
@@ -56,13 +58,75 @@ void transform_data(
 }
 
 /**
+ * @brief 
+ * Append at most max_size number of (first) elements
+ * that achieve the maximum absolute value in out.
+ * If there are at least max_size number of such elements,
+ * exactly max_size will be added.
+ * Otherwise, all such elements will be added, but no more.
+ * 
+ * NOTE: this is EXACTLY the same as the one in basil except the division by alpha logic is a bit different.
+ * 
+ * @tparam AbsGradType      float vector type.
+ * @tparam ValueType        float type.
+ * @tparam PenaltyType      float vector type.
+ * @tparam ISType           functor: int -> bool.
+ * @tparam SSType           int vector type.
+ * @param abs_grad          abs_grad[i] is group i's KKT norm value.
+ * @param lmda_prev         previous lambda.
+ * @param lmda_next         next lambda.
+ * @param alpha             elastic net.
+ * @param penalty           penalty factor.
+ * @param is_strong         functor to check if group i is strong.
+ * @param size              number of groups to add if strong-rule not used.
+ * @param strong_set        strong set.
+ * @param do_strong_rule    true if we should do strong rule.
+ */
+template <class AbsGradType, class ValueType, class PenaltyType, class ISType, class SSType>
+GHOSTBASIL_STRONG_INLINE 
+void screen(
+    const AbsGradType& abs_grad,
+    ValueType lmda_prev,
+    ValueType lmda_next,
+    ValueType alpha,
+    const PenaltyType& penalty,
+    const ISType& is_strong,
+    size_t size,
+    SSType& strong_set,
+    bool do_strong_rule
+)
+{
+    using value_t = ValueType;
+
+    assert(strong_set.size() <= abs_grad.size());
+    if (!do_strong_rule) {
+        size_t rem_size = abs_grad.size() - strong_set.size();
+        size_t size_capped = std::min(size, rem_size);
+        size_t old_strong_size = strong_set.size();
+        strong_set.insert(strong_set.end(), size_capped, 0);
+        const auto factor = (alpha <= 1e-16) ? 1e-3 : alpha;
+        const auto abs_grad_p = util::vec_type<value_t>::NullaryExpr(
+            abs_grad.size(), [&](auto i) {
+                return (penalty[i] <= 0) ? 0.0 : abs_grad[i] / penalty[i];
+            }
+        ) / factor;
+        util::k_imax(abs_grad_p, is_strong, size_capped, 
+                std::next(strong_set.begin(), old_strong_size));
+        return;
+    }
+    
+    const auto strong_rule_lmda = (2 * lmda_next - lmda_prev) * alpha;
+    for (size_t i = 0; i < abs_grad.size(); ++i) {
+        if (is_strong(i)) continue;
+        if (abs_grad[i] > strong_rule_lmda * penalty[i]) {
+            strong_set.push_back(i);
+        }
+    }
+}
+
+/**
  * Checks the KKT condition on the sequence of lambdas and the fitted coefficients.
  * 
- * NOTE: This version cannot be parallelized like in lasso.
- * The lasso version had all group sizes of 1, which makes KKT check very easy.
- * Group lasso version needs to read arbitrary groups of gradient to check KKT.
- * Then, synchronization is required, which is no bueno.
- *
  * @param   A       covariance matrix.
  * @param   r       correlation vector.
  * @param   alpha   elastic net penalty.
@@ -71,17 +135,19 @@ void transform_data(
  *                  of the solution at lmdas[i].
  * @param   is_strong   a functor that checks if feature i is strong.
  * @param   n_threads   number of threads to use in OpenMP.
- * @param   grad        a dense vector that represents the (negative) gradient
- *                      right before the first value in lmdas (going downwards)
+ * @param   grad        a dense vector that represents the r - A * beta
+ *                      right __before__ the first value in lmdas (going downwards)
  *                      that fails the KKT check.
  *                      If KKT fails at the first lambda, grad is unchanged.
- * @param   grad_next   a dense vector that represents the (negative) gradient
- *                      right at the first value in lmdas (going downwards)
+ * @param   grad_next   a dense vector that represents r - A * beta
+ *                      right __at__ the first value in lmdas (going downwards)
  *                      that fails the KKT check.
  *                      This is really used for optimizing memory allocation.
  *                      User should not need to access this directly.
  *                      It is undefined-behavior accessing this after the call.
  *                      It just has to be initialized to the same size as grad.
+ * @param   abs_grad    similar to grad but represents ||grad_i||_2 for each group i.
+ * @param   abs_grad_next   similar to grad_next, but for abs_grad.
  */
 template <class AType, class RType, class GroupsType,
           class GroupSizesType, class ValueType, class PenaltyType,
@@ -101,7 +167,8 @@ auto check_kkt(
     GradType& grad,
     GradType& grad_next,
     GradType& abs_grad,
-    GradType& abs_grad_next)
+    GradType& abs_grad_next
+)
 {
     assert(r.size() == grad.size());
     assert(grad.size() == grad_next.size());
@@ -121,9 +188,19 @@ auto check_kkt(
         const auto beta_i_value = beta_i.valuePtr();
         const auto beta_i_nnz = beta_i.nonZeros();
         grad_next = r;
-        for (size_t i = 0; i < beta_i_nnz; ++i) {
-            grad_next -= A.col(beta_i_inner[i]) * beta_i_value[i];
-        } 
+        {
+            size_t inner_idx = 0;
+            for (size_t k = 0; k < groups.size(); ++k) {
+                if (inner_idx == beta_i_nnz) break;
+                const auto gk = groups[k];
+                const auto gk_size = group_sizes[k];
+                while ((inner_idx < beta_i_nnz) && (beta_i_inner[inner_idx] < gk + gk_size)) {
+                    auto mat = A.block(0, gk, A.rows(), gk_size);
+                    grad_next -= mat.col(beta_i_inner[inner_idx] - gk) * beta_i_value[inner_idx];
+                    ++inner_idx;
+                }
+            }
+        }
 
         // check KKT
         std::atomic<bool> kkt_fail(false);
@@ -155,6 +232,103 @@ auto check_kkt(
     }
 
     return i;
+}
+
+
+/**
+ * @brief Converts the last valid beta solution into the corresponding strong_beta form
+ * and replaces the contents of old_strong_beta.
+ * 
+ * @tparam OSBType          float vector type.
+ * @tparam ValidBetaType    sparse float vector type.
+ * @tparam GroupsType       int vector type.
+ * @tparam GroupSizesType   int vector type.
+ * @tparam SSType           int vector type.
+ * @tparam SOType           int vector type.
+ * @tparam SBType           int vector type.
+ * @param old_strong_beta   old strong beta to replace with equivalent values of beta.
+ * @param beta              sparse vector with last valid beta.
+ * @param groups            see GroupBasilState.
+ * @param group_sizes       see GroupBasilState.
+ * @param strong_set        see GroupBasilState. MUST be the old version corresponding to old_strong_beta.
+ * @param strong_order      see GroupBasilState. MUST be the old version corresponding to old_strong_beta.
+ * @param strong_begins     see GroupBasilState. MUST be the old version corresponding to old_strong_beta.
+ */
+template <class OSBType, class ValidBetaType, class GroupsType,
+          class GroupSizesType, class SSType, class SOType, class SBType>
+GHOSTBASIL_STRONG_INLINE
+void last_valid_strong_beta(
+    OSBType& old_strong_beta,
+    const ValidBetaType& beta,
+    const GroupsType& groups,
+    const GroupSizesType& group_sizes,
+    const SSType& strong_set,
+    const SOType& strong_order,
+    const SBType& strong_begins
+)
+{
+    if (beta.nonZeros() == 0) {
+        old_strong_beta.setZero();
+        return;
+    }
+    
+    // NOTE: strong_order is non-empty because beta has non-zero elements.
+    // All active (non-zero) groups are in strong set, and therefore strong_order is non-empty.
+
+    auto beta_inner = beta.innerIndexPtr();
+    auto beta_value = beta.valuePtr();
+
+    size_t outer_pos = 0;
+    size_t inner_pos = 0;
+    auto so = strong_order[outer_pos];
+    auto group = groups[strong_set[so]];
+    auto group_size = group_sizes[strong_set[so]];
+
+    for (size_t i = 0; i < beta.nonZeros(); ++i) {
+        const auto idx = beta_inner[i];
+        const auto val = beta_value[i];
+
+        while (outer_pos < strong_set.size()) {
+            old_strong_beta.segment(
+                strong_begins[so] + inner_pos,
+                std::min(group_size, idx - group)
+            ).array() = 0;
+
+            if (idx < group + group_size) {
+                inner_pos = idx - group;
+                old_strong_beta[strong_begins[so] + inner_pos] = val;
+                ++inner_pos;
+                break;
+            }
+
+            inner_pos = 0;
+            outer_pos += 1;
+            if (outer_pos < strong_set.size()) {
+                so = strong_order[outer_pos];
+                group = groups[strong_set[so]];
+                group_size = group_sizes[strong_set[so]];
+            }
+        }
+    }
+
+    if (outer_pos == strong_set.size()) return;
+
+    old_strong_beta.segment(
+        strong_begins[so] + inner_pos,
+        group_size
+    ).array() = 0;
+    ++outer_pos;
+        
+    // zero out the rest
+    while (outer_pos < strong_set.size()) {
+        so = strong_order[outer_pos];
+        group_size = group_sizes[strong_set[so]];
+        old_strong_beta.segment(
+            strong_begins[so],
+            group_size
+        ).array() = 0;
+        ++outer_pos;
+    }
 }
 
 /**
@@ -246,6 +420,30 @@ struct GroupBasilCheckpoint
           grad(grad_),
           abs_grad(abs_grad_),
           rsq(rsq_)
+    {}
+    
+    template <class BasilStateType>
+    explicit GroupBasilCheckpoint(
+        const BasilStateType& bs
+    )
+        : is_initialized(true),
+          strong_set(bs.strong_set),
+          strong_g1(bs.strong_g1),
+          strong_g2(bs.strong_g2),
+          strong_begins(bs.strong_begins),
+          strong_order(bs.strong_order),
+          strong_beta(bs.strong_beta),
+          strong_grad(bs.strong_grad),
+          strong_A_diag(bs.strong_A_diag),
+          active_set(bs.active_set),
+          active_g1(bs.active_g1),
+          active_g2(bs.active_g2),
+          active_begins(bs.active_begins),
+          active_order(bs.active_order),
+          is_active(bs.is_active),
+          grad(bs.grad),
+          abs_grad(bs.abs_grad),
+          rsq(bs.rsq_prev_valid)
     {}
 
     template <class BasilStateType>
@@ -420,6 +618,7 @@ struct GroupBasilState
           rsqs_curr(1)
     { 
         /* compute abs_grad */ 
+        // TODO: I'm pretty sure this is not necessary, but just to be safe...
         for (size_t i = 0; i < groups.size(); ++i) {
             const auto k = groups[i];
             const auto size_k = group_sizes[i];
@@ -427,11 +626,10 @@ struct GroupBasilState
         }
 
         /* initialize strong_set */
-        // if no L1 penalty, every variable is active
+        // only add variables that have no l1 penalty
         if (alpha <= 0) {
             strong_set.resize(groups.size());
             std::iota(strong_set.begin(), strong_set.end(), 0);
-        // otherwise, add all non-penalized variables
         } else {
             strong_set.reserve(initial_size_groups); 
             for (size_t i = 0; i < penalty.size(); ++i) {
@@ -442,10 +640,10 @@ struct GroupBasilState
         }
         
         /* initialize g1/g2 parts */
-        update_strong_g1_2(0, initial_size_groups);
+        update_strong_g1_g2(0, initial_size_groups);
         
         /* initialize strong_begins */
-        const auto total_strong_size = update_strong_begins(0, 0, initial_size_groups);
+        const auto total_strong_size = update_strong_begins(0, initial_size_groups);
 
         /* initialize strong_hashset */
         strong_hashset.insert(strong_set.begin(), strong_set.end());
@@ -465,11 +663,12 @@ struct GroupBasilState
         for (size_t i = 0; i < strong_set.size(); ++i) {
             const auto begin_i = strong_begins[i];
             const auto size_i = group_sizes[strong_set[i]];
-            strong_grad.segment(begin_i, size_i) = grad.segment(groups[strong_set[i]], size_i);
+            Eigen::Map<vec_value_t> sg_map(strong_grad.data(), strong_grad.size());
+            sg_map.segment(begin_i, size_i) = grad.segment(groups[strong_set[i]], size_i);
         }
 
         /* initialize strong_A_diag */
-        update_strong_A_diag(0, strong_set.size(), total_strong_size, initial_size);
+        update_strong_A_diag(0, total_strong_size, initial_size);
 
         /* initialize active_set */
         active_set.reserve(initial_size_groups); 
@@ -506,9 +705,19 @@ struct GroupBasilState
         const auto beta_inner = beta.innerIndexPtr();
         const auto beta_value = beta.valuePtr();
         const auto beta_nnz = beta.nonZeros();
-        for (size_t i = 0; i < beta_nnz; ++i) {
-            grad -= A.col(beta_inner[i]) * beta_value[i];
-        } 
+        {
+            size_t inner_idx = 0;
+            for (size_t i = 0; i < groups.size(); ++i) {
+                if (inner_idx == beta_nnz) break;
+                const auto gi = groups[i];
+                const auto gi_size = group_sizes[i];
+                while ((inner_idx < beta_nnz) && (beta_inner[inner_idx] < gi + gi_size)) {
+                    auto mat = A.block(0, gi, A.rows(), gi_size);
+                    grad_next -= mat.col(beta_inner[inner_idx] - gi) * beta_value[inner_idx];
+                    ++inner_idx;
+                }
+            }
+        }
         
         /* update abs_grad */
         for (size_t i = 0; i < groups.size(); ++i) {
@@ -529,7 +738,6 @@ struct GroupBasilState
 
     GHOSTBASIL_STRONG_INLINE
     void screen(
-        size_t beta_last_valid,
         size_t current_size,
         size_t delta_strong_size,
         bool do_strong_rule,
@@ -551,7 +759,7 @@ struct GroupBasilState
         const auto old_strong_set_size = strong_set.size();
         const auto old_total_strong_size = strong_beta.size();
 
-        lasso::screen(abs_grad, lmda_prev_valid, lmda_next, 
+        group_lasso::screen(abs_grad, lmda_prev_valid, lmda_next, 
             alpha, penalty, [&](auto i) { return is_strong(i); }, 
             delta_strong_size, strong_set, do_strong_rule);
 
@@ -564,13 +772,13 @@ struct GroupBasilState
         const auto new_total_strong_size = update_strong_begins(old_total_strong_size);
 
         // update strong_g1/g2 
-        update_strong_g1_2(old_strong_set_size);
+        update_strong_g1_g2(old_strong_set_size);
 
         // Note: DO NOT UPDATE strong_order YET!
         // Updating previously valid beta requires the old order.
         
         // only need to update on the new strong variables
-        update_strong_A_diag(old_strong_set_size, strong_set.size(), new_total_strong_size);
+        update_strong_A_diag(old_strong_set_size, new_total_strong_size);
 
         // updates on these will be done later!
         strong_beta.resize(new_total_strong_size, 0);
@@ -586,7 +794,8 @@ struct GroupBasilState
             const auto sbegin_k = strong_begins[i];
             const auto begin_k = groups[k];
             const auto size_k = group_sizes[k];
-            strong_grad.segment(sbegin_k, size_k) = grad.segment(begin_k, size_k);
+            Eigen::Map<vec_value_t> sg_map(strong_grad.data(), strong_grad.size());
+            sg_map.segment(sbegin_k, size_k) = grad.segment(begin_k, size_k);
         }
 
         // At this point, strong_set is ordered for all old variables
@@ -596,9 +805,9 @@ struct GroupBasilState
         // Note: strong_grad has been updated properly to previous valid version in all cases.
 
         // create dense viewers of old strong betas
-        Eigen::Map<util::vec_type<value_t>> old_strong_beta_view(
+        Eigen::Map<vec_value_t> old_strong_beta_view(
                 strong_beta.data(), old_total_strong_size);
-        Eigen::Map<util::vec_type<value_t>> strong_beta_prev_valid_view(
+        Eigen::Map<vec_value_t> strong_beta_prev_valid_view(
                 strong_beta_prev_valid.data(),
                 old_total_strong_size);
 
@@ -612,36 +821,19 @@ struct GroupBasilState
             // save last valid solution (this logic assumes the ordering is in old one)
             assert(betas.size() > 0);
             const auto& last_valid_sol = betas.back();
-            if (last_valid_sol.nonZeros() == 0) {
-                old_strong_beta_view.setZero();
-            } else {
-                auto last_valid_sol_inner = last_valid_sol.innerIndexPtr();
-                auto last_valid_sol_value = last_valid_sol.valuePtr();
-                size_t osb_pos = 0;
-                // zero-out all entries in the range (inner[i-1], inner[i]) 
-                // and replace at inner[i] with valid solution.
-                for (size_t i = 0; i < last_valid_sol.nonZeros(); ++i) {
-                    assert(osb_pos < old_strong_beta_view.size());
-                    auto lvs_i = last_valid_sol_inner[i];
-                    auto lvs_x = last_valid_sol_value[i];
-                    for (; strong_set[strong_order[osb_pos]] < lvs_i; ++osb_pos) {
-                        assert(osb_pos < old_strong_beta_view.size());
-                        old_strong_beta_view[strong_order[osb_pos]] = 0;
-                    }
-                    // here, we exploit the fact that the last valid solution
-                    // is non-zero on the ever-active set, which is a subset
-                    // of the old strong set, so we must have hit a common position.
-                    auto ss_idx = strong_order[osb_pos];
-                    assert((osb_pos < old_strong_beta_view.size()) &&
-                           (strong_set[ss_idx] == lvs_i));
-                    old_strong_beta_view[ss_idx] = lvs_x;
-                    ++osb_pos;
-                }
-                for (; osb_pos < old_strong_beta_view.size(); ++osb_pos) {
-                    old_strong_beta_view[strong_order[osb_pos]] = 0;
-                }
-            }
-
+            Eigen::Map<const vec_index_t> ss_map(
+                strong_set.data(), old_strong_set_size
+            );
+            Eigen::Map<const vec_index_t> so_map(
+                strong_order.data(), old_strong_set_size
+            );
+            Eigen::Map<const vec_index_t> sb_map(
+                strong_begins.data(), old_strong_set_size
+            );
+            last_valid_strong_beta(
+                old_strong_beta_view, last_valid_sol,
+                groups, group_sizes, ss_map, so_map, sb_map
+            );
             strong_beta_prev_valid_view = old_strong_beta_view;
         } else {
             strong_beta_prev_valid_view = old_strong_beta_view;
@@ -666,7 +858,7 @@ struct GroupBasilState
 private:
     
     GHOSTBASIL_STRONG_INLINE
-    void update_strong_g1_2(
+    void update_strong_g1_g2(
         size_t old_strong_set_size,
         size_t capacity=0
     )
@@ -716,12 +908,11 @@ private:
 
     GHOSTBASIL_STRONG_INLINE
     void update_strong_A_diag(
-            size_t begin,
-            size_t end,
+            size_t old_strong_set_size,
             size_t new_size,
             size_t capacity=0)
     {
-        assert((begin <= end) && (end <= strong_set.size()));
+        assert(old_strong_set_size <= strong_set.size());
         
         auto old_size = strong_A_diag.size();
         
@@ -729,17 +920,482 @@ private:
         strong_A_diag.reserve(capacity);
         strong_A_diag.resize(new_size);
 
-        for (size_t i = begin; i < end; ++i) {
+        for (size_t i = old_strong_set_size; i < strong_set.size(); ++i) {
             const auto k = strong_set[i];
             const auto begin_k = groups[k];
             const auto size_k = group_sizes[k];
-            strong_A_diag.segment(old_size, size_k) = A_diag.segment(begin_k, size_k);
+            Eigen::Map<vec_value_t> sad_map(strong_A_diag.data(), strong_A_diag.size());
+            sad_map.segment(old_size, size_k) = A_diag.segment(begin_k, size_k);
             old_size += size_k;
         }
         assert(old_size == new_size);
     }
 };    
 
+struct GroupBasilDiagnostic
+{
+    using value_t = double;
+    using index_t = int;
+    using bool_t = int;
+    using dyn_vec_index_t = std::vector<index_t>;
+    using dyn_vec_bool_t = std::vector<bool_t>;
+    using dyn_vec_basil_state_t = std::vector<
+        GroupBasilCheckpoint<value_t, index_t, bool_t>
+    >;
+
+    dyn_vec_index_t strong_sizes;
+    dyn_vec_index_t active_sizes;
+    dyn_vec_bool_t used_strong_rule;
+    dyn_vec_index_t n_cds;
+    dyn_vec_index_t n_lambdas_proc;
+    dyn_vec_basil_state_t checkpoints;
+};
+
+/**
+ * @brief Computes the "max" lambda where it is the smallest lambda such that
+ * the solution vector is 0. 
+ * 
+ * @tparam ValueType        float type.
+ * @tparam AbsGradType      float vector type.
+ * @tparam PenaltyType      float vector type.
+ * @param abs_grad          abs_grad[i] is group i's KKT norm value.
+ * @param alpha             elastic net.
+ * @param penalty           penalty vector.
+ * @return the "max" lambda.
+ */
+template <class ValueType, class AbsGradType, class PenaltyType>
+GHOSTBASIL_STRONG_INLINE
+auto lambda_max(
+    const AbsGradType& abs_grad,
+    ValueType alpha,
+    const PenaltyType& penalty
+)
+{
+    using value_t = ValueType;
+    using vec_value_t = util::vec_type<value_t>;
+    const auto factor = (alpha <= 1e-16) ? 1e-3 : alpha;
+    return vec_value_t::NullaryExpr(
+        abs_grad.size(), [&](auto i) {
+            return (penalty[i] <= 0.0) ? 0.0 : abs_grad[i] / penalty[i];
+        }
+    ).maxCoeff() / factor;
+}
+
+
+/**
+ * @brief Generates the sequence of lambdas. EXACTLY the same as in basil.
+ * 
+ * @tparam ValueType 
+ * @tparam OutType 
+ * @param max_n_lambdas 
+ * @param min_ratio 
+ * @param lmda_max 
+ * @param out 
+ */
+template <class ValueType, class OutType>
+GHOSTBASIL_STRONG_INLINE
+void generate_lambdas(
+    size_t max_n_lambdas,
+    ValueType min_ratio,
+    ValueType lmda_max,
+    OutType& out
+)
+{
+    using value_t = ValueType;
+    using vec_value_t = util::vec_type<value_t>;
+
+    // lmda_seq = [l_max, l_max * f, l_max * f^2, ..., l_max * f^(max_n_lambdas-1)]
+    // l_max is the smallest lambda such that the penalized features (penalty > 0)
+    // have 0 coefficients (assuming alpha > 0). The logic is still coherent when alpha = 0.
+    auto log_factor = std::log(min_ratio) * static_cast<value_t>(1.0)/(max_n_lambdas-1);
+    out.array() = lmda_max * (
+        log_factor * vec_value_t::LinSpaced(max_n_lambdas, 0, max_n_lambdas-1)
+    ).array().exp();
+}
+
+/**
+ * @brief Solves the lasso objective for a sequence of \f$\lambda\f$ values.
+ *
+ * @param   A   covariance matrix.
+ * @param   r   covariance between covariates and response.
+ * @param   alpha   elastic net proportion.
+ * @param   penalty penalty factor for each coefficient.
+ * @param   user_lmdas      user provided lambda sequence.
+ *                          Assumes it is in decreasing order.
+ *                          If empty, then lambda sequence will be generated.
+ * @param   max_n_lambdas   max number of lambdas to compute solutions for.
+ *                          If user_lmdas is non-empty, it will be internally
+ *                          reset to user_lmdas.size().
+ *                          Assumes it is > 0.
+ * @param   n_lambdas_iter  number of lambdas per BASIL iteration for fitting lasso on strong set.
+ *                          Internally, it is capped at max_n_lambdas.
+ *                          Assumes it is > 0.
+ * @param   use_strong_rule     if true then use strong rule as the primary way of discarding variables.
+ *                              Original incremental method with delta_strong_size is used when
+ *                              the strong rule fails to get enough variables and KKT fails at
+ *                              the first lambda in the sub-sequence at every BASIL iteration.
+ * @param   delta_strong_size   number of variables to add to strong set 
+ *                              at every BASIL iteration.
+ *                              Internally, it is capped at number of non-strong variables
+ *                              at every BASIL iteration.
+ *                              Assumes it is > 0.
+ * @param   max_strong_size     max number of strong set variables.
+ *                              Internally, it is capped at number of features.
+ *                              Assumes it is > 0.
+ * @param   max_n_cds           maximum number of coordinate descent per BASIL iteration.
+ * @param   thr                 convergence threshold for coordinate descent.
+ * @param   betas               vector of sparse vectors to store a list of solutions.
+ * @param   lmdas               vector of values to store a list of lambdas
+ *                              corresponding to the solutions in betas:
+ *                              lmdas[i] is a lambda corresponding to the solution
+ *                              at betas[i].
+ * @param   rsqs                vector of values to store the list of (unnormalized) R^2 values.
+ *                              rsqs[i] is the R^2 at lmdas[i] and betas[i].
+ */
+template <class AType, class RType, class GroupsType, class GroupSizesType,
+          class ADiagType, class ValueType, class PenaltyType, class ULmdasType,
+          class BetasType, class LmdasType, class RsqsType,
+          class UpdateCoefficientsType,
+          class CheckpointType = GroupBasilCheckpoint<ValueType, int, int>,
+          class DiagnosticType = GroupBasilDiagnostic,
+          class CUIType = util::no_op>
+inline void group_basil(
+        AType& A,
+        const RType& r,
+        const GroupsType& groups,
+        const GroupSizesType& group_sizes,
+        const ADiagType& A_diag,
+        ValueType alpha,
+        const PenaltyType& penalty,
+        const ULmdasType& user_lmdas,
+        size_t max_n_lambdas,
+        size_t n_lambdas_iter,
+        bool use_strong_rule,
+        bool do_early_exit,
+        bool verbose_diagnostic,
+        size_t delta_strong_size,
+        size_t max_strong_size,
+        size_t max_n_cds,
+        ValueType thr,
+        ValueType newton_tol,
+        size_t newton_max_iters,
+        ValueType min_ratio,
+        size_t n_threads,
+        BetasType& betas_out,
+        LmdasType& lmdas,
+        RsqsType& rsqs_out,
+        UpdateCoefficientsType update_coefficients_f,
+        CheckpointType&& checkpoint = CheckpointType(),
+        DiagnosticType&& diagnostic = DiagnosticType(),
+        CUIType check_user_interrupt = CUIType())
+{
+    using A_t = std::decay_t<AType>;
+    using value_t = ValueType;
+    using index_t = int;
+    using bool_t = index_t;
+    using basil_state_t = GroupBasilState<A_t, value_t, index_t, bool_t>;
+    using vec_value_t = typename basil_state_t::vec_value_t;
+    using lasso_pack_t = GroupLassoParamPack<A_t, value_t, index_t, bool_t>;
+
+    // clear the output vectors to guarantee that it only contains produced results
+    betas_out.clear();
+    lmdas.clear();
+    rsqs_out.clear();
+    
+    const size_t n_features = r.size();
+    max_strong_size = std::min(max_strong_size, n_features);
+
+    // Initialize current state to consider non-penalized variables
+    // with 0 coefficient everywhere if checkpoint is not initialized.
+    // Otherwise, use checkpoint to initialize the state.
+    std::unique_ptr<basil_state_t> basil_state_ptr(
+        checkpoint.is_initialized ? 
+        new basil_state_t(A, r, groups, group_sizes, A_diag, alpha, penalty, checkpoint) :
+        new basil_state_t(A, r, groups, group_sizes, A_diag, alpha, penalty)
+    );
+    auto& basil_state = *basil_state_ptr;
+
+    if (verbose_diagnostic) {
+        diagnostic.checkpoints.emplace_back(basil_state);
+    }
+
+    const auto& strong_set = basil_state.strong_set;
+    const auto& strong_g1 = basil_state.strong_g1;
+    const auto& strong_g2 = basil_state.strong_g2;
+    const auto& strong_begins = basil_state.strong_begins;
+    const auto& strong_A_diag = basil_state.strong_A_diag;
+    const auto& rsq_prev_valid = basil_state.rsq_prev_valid;
+    auto& grad = basil_state.grad;
+    auto& grad_next = basil_state.grad_next;
+    auto& abs_grad = basil_state.abs_grad;
+    auto& abs_grad_next = basil_state.abs_grad_next;
+    auto& strong_beta = basil_state.strong_beta;
+    auto& strong_grad = basil_state.strong_grad;
+    auto& active_set = basil_state.active_set;
+    auto& active_g1 = basil_state.active_g1;
+    auto& active_g2 = basil_state.active_g2;
+    auto& active_begins = basil_state.active_begins;
+    auto& active_order = basil_state.active_order;
+    auto& is_active = basil_state.is_active;
+    auto& betas_curr = basil_state.betas_curr;
+    auto& rsqs_curr = basil_state.rsqs_curr;
+    auto& betas = basil_state.betas;
+    auto& rsqs = basil_state.rsqs;
+    
+    // check strong set (all features) size
+    if (strong_beta.size() > max_strong_size) throw util::max_basil_strong_set();
+
+    // current sequence of lambdas for basil iteration.
+    // If checkpoint is not provided, can keep it uninitialized.
+    vec_value_t lmdas_curr(1);
+
+    lasso_pack_t fit_pack(
+        A, groups, group_sizes, alpha, penalty, strong_set, 
+        strong_g1, strong_g2, strong_begins, strong_A_diag,
+        lmdas_curr, max_n_cds, thr, newton_tol, newton_max_iters, 0,
+        strong_beta, strong_grad,
+        active_set, active_g1, active_g2, active_begins, active_order,
+        is_active, betas_curr, rsqs_curr, 0, 0
+    );
+
+    // fit only on the non-penalized variables
+    if (!checkpoint.is_initialized) {
+        assert(betas_curr.size() == 1);
+        assert(rsqs_curr.size() == 1);
+
+        lmdas_curr[0] = std::numeric_limits<value_t>::max();
+
+        fit(fit_pack, update_coefficients_f, check_user_interrupt);
+
+        // update state after fitting on non-penalized variables
+        basil_state.update_after_initial_fit(fit_pack.rsq);
+    }     
+
+    // full lambda sequence 
+    vec_value_t lmda_seq;
+    const bool use_user_lmdas = user_lmdas.size() != 0;
+    if (!use_user_lmdas) {
+        const auto lmda_max = lambda_max(abs_grad, alpha, penalty);
+        generate_lambdas(max_n_lambdas, min_ratio, lmda_max, lmda_seq);
+    } else {
+        lmda_seq = user_lmdas;
+        max_n_lambdas = user_lmdas.size();
+    }
+    n_lambdas_iter = std::min(n_lambdas_iter, max_n_lambdas);
+
+    // number of remaining lambdas to process
+    size_t n_lambdas_rem = max_n_lambdas;
+
+    // first index of KKT failure
+    size_t idx = 1;         
+
+    const auto tidy_up = [&]() {
+        // Last screening to ensure that the basil state is at the previously valid state.
+        // We force non-strong rule and add 0 new variables to preserve the state.
+        basil_state.screen(
+            0, 0, false, idx == 0, idx < lmdas_curr.size(),
+            lmdas.back(), lmdas.back() 
+        );
+
+        betas_out = std::move(betas);
+        rsqs_out = std::move(rsqs);
+        checkpoint = std::move(basil_state);
+    };
+
+    // update diagnostic for initialization
+    diagnostic.strong_sizes.push_back(strong_set.size());
+    diagnostic.active_sizes.push_back(active_set.size());
+    diagnostic.used_strong_rule.push_back(false);
+    diagnostic.n_cds.push_back(fit_pack.n_cds);
+    diagnostic.n_lambdas_proc.push_back(1);
+
+    while (1) 
+    {
+        // check early termination 
+        if (do_early_exit && (rsqs.size() >= 3)) {
+            const auto rsq_u = rsqs[rsqs.size()-1];
+            const auto rsq_m = rsqs[rsqs.size()-2];
+            const auto rsq_l = rsqs[rsqs.size()-3];
+            if (lasso::check_early_stop_rsq(rsq_l, rsq_m, rsq_u)) break;
+        }
+
+        // finish if no more lambdas to process finished
+        if (n_lambdas_rem == 0) break;
+
+        /* Update lambda sequence */
+        const bool some_lambdas_failed = idx < lmdas_curr.size();
+
+        // if some lambdas have valid solutions, shift the next lambda sequence
+        if (idx > 0) {
+            lmdas_curr.resize(std::min(n_lambdas_iter, n_lambdas_rem));
+            auto begin = std::next(lmda_seq.data(), lmda_seq.size()-n_lambdas_rem);
+            auto end = std::next(begin, lmdas_curr.size());
+            std::copy(begin, end, lmdas_curr.data());
+        }
+
+        /* Screening */
+        const auto lmda_prev_valid = (lmdas.size() == 0) ? lmdas_curr[0] : lmdas.back(); 
+        const auto lmda_next = lmdas_curr[0]; // well-defined
+        const bool do_strong_rule = use_strong_rule && (idx != 0);
+        basil_state.screen(
+            lmdas_curr.size(), delta_strong_size,
+            do_strong_rule, idx == 0, some_lambdas_failed,
+            lmda_prev_valid, lmda_next 
+        );
+
+        if (verbose_diagnostic) {
+            diagnostic.checkpoints.emplace_back(basil_state);
+        }
+
+        if (strong_beta.size() > max_strong_size) throw util::max_basil_strong_set();
+
+        /* Fit lasso */
+        lasso_pack_t fit_pack(
+            A, groups, group_sizes, alpha, penalty, strong_set, 
+            strong_g1, strong_g2, strong_begins, strong_A_diag,
+            lmdas_curr, max_n_cds, thr, newton_tol, newton_max_iters, rsq_prev_valid,
+            strong_beta, strong_grad,
+            active_set, active_g1, active_g2, active_begins, active_order,
+            is_active, betas_curr, rsqs_curr, 0, 0
+        );
+        try {
+            fit(fit_pack, update_coefficients_f, check_user_interrupt);
+        } catch (const std::exception& e) {
+            tidy_up();
+            throw util::propagator_error(e.what());
+        }
+
+        const auto& n_lmdas = fit_pack.n_lmdas;
+
+        /* Checking KKT */
+
+        // Get index of lambda of first failure.
+        // grad will be the corresponding gradient vector at the returned lmdas_curr[index-1] if index >= 1,
+        // and if idx <= 0, then grad is unchanged.
+        // In any case, grad corresponds to the first smallest lambda where KKT check passes.
+        idx = check_kkt(
+            A, r, groups, group_sizes, alpha, penalty, lmdas_curr.head(n_lmdas), betas_curr.head(n_lmdas), 
+            [&](auto i) { return basil_state.is_strong(i); }, n_threads, grad, grad_next, abs_grad, abs_grad_next
+        );
+
+        // decrement number of remaining lambdas
+        n_lambdas_rem -= idx;
+
+        /* Save output and check for any early stopping */
+
+        // if first failure is not at the first lambda, save all previous solutions.
+        for (size_t i = 0; i < idx; ++i) {
+            betas.emplace_back(std::move(betas_curr[i]));
+            rsqs.emplace_back(std::move(rsqs_curr[i]));
+            lmdas.emplace_back(std::move(lmdas_curr[i]));
+        }
+
+        // update diagnostic 
+        diagnostic.strong_sizes.push_back(strong_set.size());
+        diagnostic.active_sizes.push_back(active_set.size());
+        diagnostic.used_strong_rule.push_back(do_strong_rule);
+        diagnostic.n_cds.push_back(fit_pack.n_cds);
+        diagnostic.n_lambdas_proc.push_back(idx);
+    }
+
+    tidy_up();
+}
+
+/*
+ * Small wrapper for individual-level data.
+ */
+template <class XType, class YType, class GroupsType, class GroupSizesType,
+          class ValueType, class PenaltyType, class ULmdasType,
+          class BetasType, class LmdasType, class RsqsType,
+          class UpdateCoefficientsType,
+          class CheckpointType = GroupBasilCheckpoint<ValueType, int, int>,
+          class DiagnosticType = GroupBasilDiagnostic,
+          class CUIType = util::no_op>
+inline void group_basil(
+    XType& X,
+    const YType& y,
+    const GroupsType& groups,
+    const GroupSizesType& group_sizes,
+    ValueType alpha,
+    const PenaltyType& penalty,
+    const ULmdasType& user_lmdas,
+    size_t max_n_lambdas,
+    size_t n_lambdas_iter,
+    bool use_strong_rule,
+    bool do_early_exit,
+    bool verbose_diagnostic,
+    size_t delta_strong_size,
+    size_t max_strong_size,
+    size_t max_n_cds,
+    ValueType thr,
+    ValueType newton_tol,
+    size_t newton_max_iters,
+    ValueType min_ratio,
+    size_t n_threads,
+    BetasType& betas_out,
+    LmdasType& lmdas,
+    RsqsType& rsqs_out,
+    UpdateCoefficientsType update_coefficients_f,
+    CheckpointType&& checkpoint = CheckpointType(),
+    DiagnosticType&& diagnostic = DiagnosticType(),
+    CUIType check_user_interrupt = CUIType()
+)
+{
+    using X_t = std::decay_t<XType>;
+    using value_t = ValueType;
+    using vec_t = util::vec_type<value_t>;
+    using mat_t = util::mat_type<value_t>;
+
+    std::vector<Eigen::BDCSVD<mat_t>> decomps;
+    vec_t A_diag(X.cols());
+    transform_data(X, groups, group_sizes, n_threads, A_diag, decomps);
+    vec_t r = X.transpose() * y;
+    CovCache<X_t, value_t> A(X);
+    
+    const auto tidy_up = [&]() {
+#pragma omp parallel for schedule(static) num_threads(n_threads)
+        for (size_t i = 0; i < betas_out.size(); ++i) {
+            auto& beta_i = betas_out[i];
+            auto inner = beta_i.innerIndexPtr();
+            const auto nzn = beta_i.nonZeros();
+            const auto inner_end = std::next(inner, nzn);
+
+            vec_t dense_beta = beta_i;
+            vec_t transformed_beta(dense_beta.size());
+            transformed_beta.setZero();
+
+            for (size_t j = 0; j < groups.size(); ++j) {
+                if (inner == inner_end) break;
+
+                const auto gj = groups[j];
+                const auto gj_size = group_sizes[j];
+                // active block
+                if (*inner < gj + gj_size) {
+                    transformed_beta.segment(gj, gj_size) = 
+                        decomps[j].matrixV() * dense_beta.segment(gj, gj_size);
+                    while ((inner != inner_end) && (*inner < gj + gj_size)) ++inner;
+                }
+            }
+            beta_i = transformed_beta.sparseView(0, 1e-14);
+        }
+    };
+    
+    try {
+        group_basil(
+            A, r, groups, group_sizes, A_diag, alpha, penalty, 
+            user_lmdas, max_n_lambdas, n_lambdas_iter,
+            use_strong_rule, do_early_exit, verbose_diagnostic, delta_strong_size,
+            max_strong_size, max_n_cds, thr, newton_tol, newton_max_iters,
+            min_ratio, n_threads, betas_out, lmdas, rsqs_out,
+            update_coefficients_f,
+            checkpoint, diagnostic, check_user_interrupt
+        );
+        tidy_up();
+    } catch (const std::exception& e) {
+        tidy_up();
+        throw util::propagator_error(e.what());
+    }
+}
 
 } // namespace group_lasso 
 } // namespace ghostbasil
