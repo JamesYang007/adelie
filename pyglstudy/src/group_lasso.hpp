@@ -38,7 +38,7 @@ static py::dict group_lasso__(
 {
     using namespace ghostbasil;
     using namespace ghostbasil::group_lasso;
-    std::vector<util::sp_vec_type<double, Eigen::ColMajor, int>> betas(lmdas.size());
+    util::vec_type<util::sp_vec_type<double, Eigen::ColMajor, int>> betas(lmdas.size());
     Eigen::VectorXd rsqs(lmdas.size());
 
     Eigen::Map<const Eigen::MatrixXd> A_map( 
@@ -142,7 +142,7 @@ static py::dict group_lasso_data__(
     
     Eigen::Map<const Eigen::MatrixXd> X_map(X.data(), X.rows(), X.cols());
     CovCache<Eigen::Map<const Eigen::MatrixXd>, double> A(X_map);
-    std::vector<util::sp_vec_type<double, Eigen::ColMajor, int>> betas(lmdas.size());
+    util::vec_type<util::sp_vec_type<double, Eigen::ColMajor, int>> betas(lmdas.size());
     Eigen::VectorXd rsqs(lmdas.size());
 
     GroupLassoParamPack<
@@ -240,7 +240,7 @@ static py::dict group_lasso_data_newton__(
     
     Eigen::Map<const Eigen::MatrixXd> X_map(X.data(), X.rows(), X.cols());
     CovCache<Eigen::Map<const Eigen::MatrixXd>, double> A(X_map);
-    std::vector<util::sp_vec_type<double, Eigen::ColMajor, int>> betas(lmdas.size());
+    util::vec_type<util::sp_vec_type<double, Eigen::ColMajor, int>> betas(lmdas.size());
     Eigen::VectorXd rsqs(lmdas.size());
 
     GroupLassoParamPack<
