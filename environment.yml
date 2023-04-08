@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - python=3.10
-  - eigen=3.4.9
+  - eigen=3.4.0
   - pip
   - pip:
     - pip==23.0.1

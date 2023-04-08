@@ -37,3 +37,16 @@ static double block_norm_objective(
 {
     return glstudy::block_norm_objective(h, D, v, l1);
 }
+
+static double objective_data(
+    const Eigen::Ref<Eigen::MatrixXd>& X,
+    const Eigen::Ref<Eigen::VectorXd>& y,
+    const Eigen::Ref<Eigen::VectorXi>& groups,
+    const Eigen::Ref<Eigen::VectorXi>& group_sizes,
+    double alpha,
+    const Eigen::Ref<Eigen::VectorXd>& penalty,
+    double lmda,
+    const Eigen::Ref<Eigen::VectorXd>& beta)
+{
+    return glstudy::objective_data(X, y, groups, group_sizes, alpha, penalty, lmda, beta);
+}
