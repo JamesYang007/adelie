@@ -369,7 +369,7 @@ auto objective(
     const BetaType& beta)
 {
     ValueType p_ = 0.0;
-    for (size_t j = 0; j < groups.size()-1; ++j) {
+    for (size_t j = 0; j < groups.size(); ++j) {
         const auto begin = groups[j];
         const auto size = group_sizes[j];
         const auto b_norm2 = beta.segment(begin, size).norm();
@@ -379,6 +379,34 @@ auto objective(
     }
     p_ *= lmda;
     return 0.5 * A.quad_form(beta) - beta.dot(r) + p_;
+}
+
+template <class XType, class YType, 
+          class GroupsType, class GroupSizesType,
+          class ValueType, class PenaltyType, class BetaType>
+GHOSTBASIL_STRONG_INLINE 
+auto objective_data(
+    const XType& X,
+    const YType& y,
+    const GroupsType& groups,
+    const GroupSizesType& group_sizes,
+    ValueType alpha,
+    const PenaltyType& penalty,
+    ValueType lmda,
+    const BetaType& beta)
+{
+    ValueType p_ = 0.0;
+    for (size_t j = 0; j < groups.size(); ++j) {
+        const auto begin = groups[j];
+        const auto size = group_sizes[j];
+        const auto b_norm2 = beta.segment(begin, size).norm();
+        p_ += penalty[j] * b_norm2 * (
+            alpha + (1-alpha) / 2 * b_norm2
+        );
+    }
+    p_ *= lmda;
+    Eigen::VectorXd resid = y - X * beta;
+    return 0.5 * resid.squaredNorm() + p_;
 }
 
 /**

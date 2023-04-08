@@ -47,6 +47,7 @@ def generate_group_lasso_data(
     p,
     n_groups,
     rho=0.1,
+    svd_transform=True,
 ):
     X = np.random.normal(size=(n, p))
     X = rho * np.sum(X, axis=-1)[:,None] + (1-rho) * X
@@ -64,11 +65,12 @@ def generate_group_lasso_data(
     group_sizes = groups[1:(n_groups+1)] - groups[:n_groups]
     groups = groups[:n_groups]
 
-    for i in range(len(groups)):
-        begin = groups[i]
-        end = begin + group_sizes[i]
-        _, _, vh = np.linalg.svd(X[:, begin:end])
-        X[:, begin:end] = X[:, begin:end] @ vh.T
+    if svd_transform:
+        for i in range(len(groups)):
+            begin = groups[i]
+            end = begin + group_sizes[i]
+            _, _, vh = np.linalg.svd(X[:, begin:end])
+            X[:, begin:end] = X[:, begin:end] @ vh.T
 
     X = np.asfortranarray(X)
     

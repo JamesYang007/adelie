@@ -289,25 +289,31 @@ void last_valid_strong_beta(
         const auto val = beta_value[i];
 
         while (outer_pos < strong_set.size()) {
+            const auto begin_ = strong_begins[so] + inner_pos;
+            inner_pos = std::min(group_size, idx - group);
             old_strong_beta.segment(
-                strong_begins[so] + inner_pos,
-                std::min(group_size, idx - group)
+                begin_,
+                strong_begins[so] + inner_pos - begin_
             ).array() = 0;
 
-            if (idx < group + group_size) {
-                inner_pos = idx - group;
+            bool do_break = false;
+            if (inner_pos < group_size) {
                 old_strong_beta[strong_begins[so] + inner_pos] = val;
                 ++inner_pos;
-                break;
+                do_break = true;
+            }
+            
+            if (inner_pos == group_size) {
+                inner_pos = 0;
+                ++outer_pos;
+                if (outer_pos < strong_set.size()) {
+                    so = strong_order[outer_pos];
+                    group = groups[strong_set[so]];
+                    group_size = group_sizes[strong_set[so]];
+                }
             }
 
-            inner_pos = 0;
-            outer_pos += 1;
-            if (outer_pos < strong_set.size()) {
-                so = strong_order[outer_pos];
-                group = groups[strong_set[so]];
-                group_size = group_sizes[strong_set[so]];
-            }
+            if (do_break) break;
         }
     }
 
@@ -315,7 +321,7 @@ void last_valid_strong_beta(
 
     old_strong_beta.segment(
         strong_begins[so] + inner_pos,
-        group_size
+        group_size - inner_pos
     ).array() = 0;
     ++outer_pos;
         
