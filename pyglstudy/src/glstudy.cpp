@@ -27,5 +27,6 @@ PYBIND11_MODULE(pyglstudy_ext, m) {
     m.def("group_lasso_data_newton__", &group_lasso_data_newton__);
     
     m.def("transform_data", &transform_data__);
-    m.def("group_basil", &group_basil__);
+    m.def("group_basil_cov__", &group_basil_cov__);
+    m.def("group_basil_naive__", &group_basil_naive__);
 }

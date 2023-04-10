@@ -24,6 +24,7 @@ pybind11 = "^2.10.3"
 tabulate = "^0.9.0"
 group-lasso = "^1.5.0"
 cvxpy = "^1.3.1"
+tqdm = "^4.65.0"
 
 [tool.jupytext]
 notebook_metadata_filter = "-all"
