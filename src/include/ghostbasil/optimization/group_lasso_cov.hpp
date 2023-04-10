@@ -4,50 +4,24 @@
 #include <numeric>
 #include <ghostbasil/util/exceptions.hpp>
 #include <ghostbasil/util/functional.hpp>
-#include <ghostbasil/util/macros.hpp>
-#include <ghostbasil/util/types.hpp>
+#include <ghostbasil/util/stopwatch.hpp>
 #include <ghostbasil/util/functor_iterator.hpp>
 #include <ghostbasil/util/counting_iterator.hpp>
-#include <ghostbasil/util/eigen/map_sparsevector.hpp>
-#include <ghostbasil/matrix/forward_decl.hpp>
+#include <ghostbasil/optimization/group_lasso_base.hpp>
 #include <ghostbasil/optimization/lasso.hpp>
-
-// TODO: probably needs to change header location
-#include <newton.hpp>
 
 namespace ghostbasil {
 namespace group_lasso {
+namespace cov {
     
-/**
- * Pack of buffers used for fit().
- * This class is purely for convenience purposes.
- */
-template <class ValueType>
-struct GroupLassoBufferPack 
+struct GroupLassoDiagnostic
 {
-    using value_t = ValueType;
+    using value_t = double;
+    using dyn_vec_value_t = std::vector<value_t>;
     
-    util::vec_type<value_t> buffer1;
-    util::vec_type<value_t> buffer2;
-    util::vec_type<value_t> buffer3;
-
-    explicit GroupLassoBufferPack(
-        size_t buffer_size
-    )
-        : GroupLassoBufferPack(
-            buffer_size, buffer_size, buffer_size
-        ) 
-    {}
-
-    explicit GroupLassoBufferPack(
-            size_t buffer1_size, 
-            size_t buffer2_size,
-            size_t buffer3_size
-    )
-        : buffer1(buffer1_size),
-          buffer2(buffer2_size),
-          buffer3(buffer3_size)
-    {}
+    dyn_vec_value_t time_strong_cd;
+    dyn_vec_value_t time_active_cd;
+    dyn_vec_value_t time_active_grad;
 };
 
 /**
@@ -123,6 +97,9 @@ struct GroupLassoBufferPack
  *                      up to (non-including) index n_lmdas.
  * @param   n_cds       number of coordinate descents.
  * @param   n_lmdas     number of values in lmdas processed.
+ * @param   cond_0_thresh   0th order threshold for early exit.
+ * @param   cond_1_thresh   1st order threshold for early exit.
+ * @param   diagnostic      instance of GroupLassoDiagnostic.
  */
 template <class AType, 
           class ValueType,
@@ -148,6 +125,7 @@ struct GroupLassoParamPack
     using map_cvec_index_t = Eigen::Map<const vec_index_t>;
     using dyn_vec_index_t = DynamicVectorIndexType;
     using dyn_vec_sp_vec_t = DynamicVectorSpVecType;
+    using diagnostic_t = GroupLassoDiagnostic;
 
     AType* A = nullptr;
     map_cvec_index_t groups;
@@ -162,6 +140,8 @@ struct GroupLassoParamPack
     map_cvec_value_t lmdas;
     size_t max_cds;
     value_t thr;
+    value_t cond_0_thresh;
+    value_t cond_1_thresh;
     value_t newton_tol;
     size_t newton_max_iters;
     value_t rsq;
@@ -177,6 +157,7 @@ struct GroupLassoParamPack
     map_vec_value_t rsqs;
     size_t n_cds;
     size_t n_lmdas;
+    diagnostic_t diagnostic;
     
     explicit GroupLassoParamPack()
         : groups(nullptr, 0),
@@ -214,6 +195,8 @@ struct GroupLassoParamPack
         const LmdasType& lmdas_, 
         size_t max_cds_,
         value_t thr_,
+        value_t cond_0_thresh,
+        value_t cond_1_thresh,
         value_t newton_tol_,
         size_t newton_max_iters_,
         value_t rsq_,
@@ -243,6 +226,8 @@ struct GroupLassoParamPack
           lmdas(lmdas_.data(), lmdas_.size()),
           max_cds(max_cds_),
           thr(thr_),
+          cond_0_thresh(cond_0_thresh),
+          cond_1_thresh(cond_1_thresh),
           newton_tol(newton_tol_),
           newton_max_iters(newton_max_iters_),
           rsq(rsq_),
@@ -260,239 +245,6 @@ struct GroupLassoParamPack
           n_lmdas(n_lmdas_)
     {}
 };
-
-/**
- * Constructs active (feature) indices in increasing order
- * expanding group ranges as a dense vector.
- * The result is stored in out.
- * 
- * @param   pack    see GroupLassoParamPack.
- * @param   out     output vector.
- */
-template <class PackType, class OutType>
-GHOSTBASIL_STRONG_INLINE
-void get_active_indices(
-    const PackType& pack,
-    OutType& out
-)
-{
-    using index_t = typename PackType::index_t;
-    using vec_t = util::vec_type<index_t>;
-    
-    const auto& active_set = *pack.active_set;
-    const auto& active_order = *pack.active_order;
-    const auto& strong_set = pack.strong_set;
-    const auto& group_sizes = pack.group_sizes;
-    const auto& groups = pack.groups;
-
-    auto out_begin = out.data();
-    for (size_t i = 0; i < active_order.size(); ++i) {
-        const auto ss_idx = active_set[active_order[i]];
-        const auto group = strong_set[ss_idx];
-        const auto group_size = group_sizes[group];
-        Eigen::Map<vec_t> seg(out_begin, group_size);
-        seg = vec_t::LinSpaced(
-            group_size, groups[group], groups[group] + group_size - 1
-        );
-        out_begin += group_size;
-    }
-    assert(out.size() == std::distance(out.data(), out_begin));
-}
-
-/**
- * Constructs active (feature) values in increasing index order.
- * The result is stored in out.
- * 
- * @param   pack    see GroupLassoParamPack.
- * @param   out     output vector.
- */
-template <class PackType, class OutType>
-GHOSTBASIL_STRONG_INLINE
-void get_active_values(
-    const PackType& pack,
-    OutType& out 
-)
-{
-    using value_t = typename PackType::value_t;
-    using vec_t = util::vec_type<value_t>;
-
-    const auto& active_set = *pack.active_set;
-    const auto& active_order = *pack.active_order;
-    const auto& strong_set = pack.strong_set;
-    const auto& group_sizes = pack.group_sizes;
-    const auto& strong_beta = pack.strong_beta;
-    const auto& strong_begins = pack.strong_begins;
-
-    auto out_begin = out.data();
-    for (size_t i = 0; i < active_order.size(); ++i) {
-        const auto ss_idx = active_set[active_order[i]];
-        const auto group = strong_set[ss_idx];
-        const auto group_size = group_sizes[group];
-        Eigen::Map<vec_t> seg(out_begin, group_size);
-        seg = strong_beta.segment(strong_begins[ss_idx], group_size);
-        out_begin += group_size;
-    }        
-    assert(out.size() == std::distance(out.data(), out_begin));
-}
-
-/**
- * Computes the objective that we wish to minimize.
- * The objective is the quadratic loss + group-lasso regularization:
- * \f[
- *      \frac{1}{2} \sum_{ij} x_i^\top A_{ij} x_j - \sum_{i} x_i^\top r 
- *          + \lambda \sum_i p_i \left(
- *              \alpha ||x_i||_2 + \frac{1-\alpha}{2} ||x_i||_2^2
- *              \right)
- * \f]
- *          
- * @param   A       any square (p, p) matrix. 
- * @param   r       any vector (p,).
- * @param   groups  see description in GroupLassoParamPack.
- * @param   group_sizes see description in GroupLassoParamPack.
- * @param   alpha       elastic net proportion.
- * @param   penalty penalty factor for each group.
- * @param   lmda    group-lasso regularization.
- * @param   beta    coefficient vector.
- */
-template <class AType, class RType, 
-          class GroupsType, class GroupSizesType,
-          class ValueType, class PenaltyType, class BetaType>
-GHOSTBASIL_STRONG_INLINE 
-auto objective(
-    const AType& A,
-    const RType& r,
-    const GroupsType& groups,
-    const GroupSizesType& group_sizes,
-    ValueType alpha,
-    const PenaltyType& penalty,
-    ValueType lmda,
-    const BetaType& beta)
-{
-    ValueType p_ = 0.0;
-    for (size_t j = 0; j < groups.size(); ++j) {
-        const auto begin = groups[j];
-        const auto size = group_sizes[j];
-        const auto b_norm2 = beta.segment(begin, size).norm();
-        p_ += penalty[j] * b_norm2 * (
-            alpha + (1-alpha) / 2 * b_norm2
-        );
-    }
-    p_ *= lmda;
-    return 0.5 * A.quad_form(beta) - beta.dot(r) + p_;
-}
-
-template <class XType, class YType, 
-          class GroupsType, class GroupSizesType,
-          class ValueType, class PenaltyType, class BetaType>
-GHOSTBASIL_STRONG_INLINE 
-auto objective_data(
-    const XType& X,
-    const YType& y,
-    const GroupsType& groups,
-    const GroupSizesType& group_sizes,
-    ValueType alpha,
-    const PenaltyType& penalty,
-    ValueType lmda,
-    const BetaType& beta)
-{
-    ValueType p_ = 0.0;
-    for (size_t j = 0; j < groups.size(); ++j) {
-        const auto begin = groups[j];
-        const auto size = group_sizes[j];
-        const auto b_norm2 = beta.segment(begin, size).norm();
-        p_ += penalty[j] * b_norm2 * (
-            alpha + (1-alpha) / 2 * b_norm2
-        );
-    }
-    p_ *= lmda;
-    Eigen::VectorXd resid = y - X * beta;
-    return 0.5 * resid.squaredNorm() + p_;
-}
-
-/**
- * Updates the convergence measure using variance of each direction.
- * 
- * @param   convg_measure   convergence measure to update.
- * @param   del             vector difference in a group coefficient.
- * @param   var             vector of variance along each direction of coefficient.
- */
-template <class ValueType, class DelType, class VarType>
-GHOSTBASIL_STRONG_INLINE 
-void update_convergence_measure(
-    ValueType& convg_measure, 
-    const DelType& del, 
-    const VarType& var)
-{
-    const auto convg_measure_curr = del.dot(var.cwiseProduct(del)) / del.size();
-    convg_measure = std::max(convg_measure, convg_measure_curr);
-}
-
-/**
- * Updates \f$R^2\f$ given the group variance vector, 
- * group coefficient difference (new minus old), 
- * and the current residual vector.
- * 
- * @param   rsq     \f$R^2\f$ to update.
- * @param   del     new coefficient minus old coefficient.
- * @param   var     variance along each coordinate of group.
- * @param   r       current residual correlation vector for group.
- */
-template <class ValueType, class DelType, 
-          class VarType, class RType>
-GHOSTBASIL_STRONG_INLINE
-void update_rsq(
-    ValueType& rsq,
-    const DelType& del,
-    const VarType& var,
-    const RType& r
-)
-{
-    rsq += (
-        del.array() * (2 * r.array() - var.array() * del.array())
-    ).sum();
-}
-
-/**
- * Solves the solution for the equation (w.r.t. \f$x\f$):
- * \f[
- *      minimize \frac{1}{2} x^\top L x - x^\top v 
- *          + l_1 ||x||_2 + \frac{l_2}{2} ||x||_2^2
- * \f]
- *      
- * @param   L       vector representing a diagonal PSD matrix.
- *                  Must have max(L + s) > 0. 
- *                  L.size() <= buffer1.size().
- * @param   v       any vector.  
- * @param   l1      L2-norm penalty. Must be >= 0.
- * @param   l2      L2 penalty. Must be >= 0.
- * @param   tol         Newton's method tolerance of closeness to 0.
- * @param   max_iters   maximum number of iterations of Newton's method.
- * @param   x           solution vector.
- * @param   iters       number of Newton's method iterations taken.
- * @param   buffer1     any vector with L.size() <= buffer1.size().
- * @param   buffer2     any vector with L.size() <= buffer2.size().
- */
-template <class LType, class VType, class ValueType, 
-          class XType, class BufferType>
-GHOSTBASIL_STRONG_INLINE
-void update_coefficients(
-    const LType& L,
-    const VType& v,
-    ValueType l1,
-    ValueType l2,
-    ValueType tol,
-    size_t max_iters,
-    XType& x,
-    size_t& iters,
-    BufferType& buffer1,
-    BufferType& buffer2
-)
-{
-    glstudy::newton_abs_solver(
-        L, v, l1, l2, tol, max_iters,
-        x, iters, buffer1, buffer2
-    );
-}
 
 namespace internal {
     
@@ -646,8 +398,6 @@ struct UpdateResidual<-1, j_pol>
         }
     }
 };
-
-
 } // namespace internal
 
 /**
@@ -906,6 +656,7 @@ void group_lasso_active(
     using pack_t = std::decay_t<PackType>;
     using value_t = typename pack_t::value_t;
     using vec_value_t = typename pack_t::vec_value_t;
+    using sw_t = util::Stopwatch;
 
     const auto& A = *pack.A;
     const auto& groups = pack.groups;
@@ -924,13 +675,7 @@ void group_lasso_active(
     const auto max_cds = pack.max_cds;
     auto& strong_grad = pack.strong_grad;
     auto& n_cds = pack.n_cds;
-
-    // TODO: write some similar assert checks
-    //internal::lasso_assert_valid_inputs(
-    //        A, s, strong_set, strong_order, 
-    //        active_set, active_order, active_set_ordered,
-    //        is_active, strong_A_diag,
-    //        strong_beta, strong_grad);
+    auto& diagnostic = pack.diagnostic;
 
     Eigen::Map<vec_value_t> ab_diff_view(
         active_beta_diff.data(), active_beta_diff.size()
@@ -959,17 +704,21 @@ void group_lasso_active(
     const auto ag2_begin = util::make_functor_iterator<size_t>(0, g2_active_f);
     const auto ag2_end = util::make_functor_iterator<size_t>(active_g2.size(), g2_active_f);
 
-    while (1) {
-        check_user_interrupt(n_cds);
-        ++n_cds;
-        value_t convg_measure;
-        coordinate_descent(
-            pack, ag1_begin, ag1_end, ag2_begin, ag2_end,
-            lmda_idx, convg_measure, buffer1, buffer2, buffer3, 
-            update_coefficients_f
-        );
-        if (convg_measure < thr) break;
-        if (n_cds >= max_cds) throw util::max_cds_error(lmda_idx);
+    diagnostic.time_active_cd.push_back(0);
+    {
+        sw_t stopwatch(diagnostic.time_active_cd.back());
+        while (1) {
+            check_user_interrupt(n_cds);
+            ++n_cds;
+            value_t convg_measure;
+            coordinate_descent(
+                pack, ag1_begin, ag1_end, ag2_begin, ag2_end,
+                lmda_idx, convg_measure, buffer1, buffer2, buffer3, 
+                update_coefficients_f
+            );
+            if (convg_measure < thr) break;
+            if (n_cds >= max_cds) throw util::max_cds_error(lmda_idx);
+        }
     }
     
     // compute new active beta - old active beta
@@ -985,6 +734,8 @@ void group_lasso_active(
     }
 
     // update strong gradient for non-active strong variables
+    diagnostic.time_active_grad.push_back(0);
+    sw_t stopwatch(diagnostic.time_active_grad.back());
 
     // optimization: if active set is empty or active set is the same as strong set.
     if ((ab_diff_view.size() == 0) ||
@@ -1097,6 +848,7 @@ inline void fit(
     using value_t = typename pack_t::value_t;
     using index_t = typename pack_t::index_t;
     using sp_vec_value_t = typename pack_t::sp_vec_value_t;
+    using sw_t = util::Stopwatch;
 
     auto& A = *pack.A;
     const auto& groups = pack.groups;
@@ -1108,6 +860,8 @@ inline void fit(
     const auto& lmdas = pack.lmdas;
     const auto thr = pack.thr;
     const auto max_cds = pack.max_cds;
+    const auto cond_0_thresh = pack.cond_0_thresh;
+    const auto cond_1_thresh = pack.cond_1_thresh;
     auto& active_set = *pack.active_set;
     auto& active_g1 = *pack.active_g1;
     auto& active_g2 = *pack.active_g2;
@@ -1119,13 +873,8 @@ inline void fit(
     auto& rsq = pack.rsq;
     auto& n_cds = pack.n_cds;
     auto& n_lmdas = pack.n_lmdas;
+    auto& diagnostic = pack.diagnostic;
     const auto p = A.cols();
-
-    //internal::lasso_assert_valid_inputs(
-    //        A, s, strong_set, strong_order, 
-    //        active_set, active_order, active_set_ordered, 
-    //        is_active, strong_A_diag,
-    //        strong_beta, strong_grad);
 
     assert(betas.size() == lmdas.size());
     assert(rsqs.size() == lmdas.size());
@@ -1200,16 +949,20 @@ inline void fit(
             ++n_cds;
             value_t convg_measure;
             const auto old_active_size = active_set.size();
-            coordinate_descent(
-                    pack,
-                    strong_g1.data(), strong_g1.data() + strong_g1.size(),
-                    strong_g2.data(), strong_g2.data() + strong_g2.size(),
-                    l, convg_measure,
-                    buffer_pack.buffer1,
-                    buffer_pack.buffer2,
-                    buffer_pack.buffer3,
-                    update_coefficients_f,
-                    add_active_set);
+            diagnostic.time_strong_cd.push_back(0);
+            {
+                sw_t stopwatch(diagnostic.time_strong_cd.back());
+                coordinate_descent(
+                        pack,
+                        strong_g1.data(), strong_g1.data() + strong_g1.size(),
+                        strong_g2.data(), strong_g2.data() + strong_g2.size(),
+                        l, convg_measure,
+                        buffer_pack.buffer1,
+                        buffer_pack.buffer2,
+                        buffer_pack.buffer3,
+                        update_coefficients_f,
+                        add_active_set);
+            }
             const bool new_active_added = (old_active_size < active_set.size());
 
             if (new_active_added) {
@@ -1267,14 +1020,10 @@ inline void fit(
         if (l < 2) continue;
 
         // early stop if R^2 criterion is fulfilled.
-        if (lasso::check_early_stop_rsq(rsqs[l-2], rsqs[l-1], rsqs[l])) break;
+        if (lasso::check_early_stop_rsq(rsqs[l-2], rsqs[l-1], rsqs[l], cond_0_thresh, cond_1_thresh)) break;
     }
 }
 
-/**
- * TODO:
- *  - (nothing to change in current impl of lasso but basil will need to know this)
- */
-    
+} // namespace cov
 } // namespace group_lasso
 } // namespace ghostbasil

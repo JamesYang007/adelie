@@ -2,9 +2,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
-#include <ghostbasil/optimization/group_lasso.hpp>
+#include <ghostbasil/optimization/group_lasso_cov.hpp>
 #include <ghostbasil/matrix/cov_cache.hpp>
-#include <newton.hpp>
 
 namespace py = pybind11;
 using namespace pybind11::literals; // to bring in the `_a` literal
@@ -23,6 +22,8 @@ static py::dict group_lasso__(
     const Eigen::Ref<Eigen::VectorXd>& lmdas, 
     size_t max_cds,
     double thr,
+    double cond_0_thresh,
+    double cond_1_thresh,
     double newton_tol,
     size_t newton_max_iters,
     double rsq,
@@ -47,7 +48,7 @@ static py::dict group_lasso__(
         A.cols()
     );
 
-    GroupLassoParamPack<
+    cov::GroupLassoParamPack<
         Eigen::Map<const Eigen::MatrixXd>,
         double,
         int,
@@ -55,7 +56,7 @@ static py::dict group_lasso__(
     > pack(
         A_map, groups, group_sizes, alpha, penalty, 
         strong_set, strong_g1, strong_g2, strong_begins, strong_A_diag,
-        lmdas, max_cds, thr, newton_tol, newton_max_iters, rsq,
+        lmdas, max_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters, rsq,
         strong_beta, strong_grad, active_set, active_g1,
         active_g2, active_begins, active_order, is_active,
         betas, rsqs, 0, 0
@@ -77,7 +78,7 @@ static py::dict group_lasso__(
 
     std::string error;
     try {
-        fit(pack, update_coefficients_f);
+        cov::fit(pack, update_coefficients_f);
     } catch(const std::exception& e) {
         error = e.what(); 
     }
@@ -124,6 +125,8 @@ static py::dict group_lasso_data__(
     const Eigen::Ref<Eigen::VectorXd>& lmdas, 
     size_t max_cds,
     double thr,
+    double cond_0_thresh,
+    double cond_1_thresh,
     double newton_tol,
     size_t newton_max_iters,
     double rsq,
@@ -145,7 +148,7 @@ static py::dict group_lasso_data__(
     util::vec_type<util::sp_vec_type<double, Eigen::ColMajor, int>> betas(lmdas.size());
     Eigen::VectorXd rsqs(lmdas.size());
 
-    GroupLassoParamPack<
+    cov::GroupLassoParamPack<
         std::decay_t<decltype(A)>,
         double,
         int,
@@ -153,7 +156,7 @@ static py::dict group_lasso_data__(
     > pack(
         A, groups, group_sizes, alpha, penalty, 
         strong_set, strong_g1, strong_g2, strong_begins, strong_A_diag,
-        lmdas, max_cds, thr, newton_tol, newton_max_iters, rsq,
+        lmdas, max_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters, rsq,
         strong_beta, strong_grad, active_set, active_g1,
         active_g2, active_begins, active_order, is_active,
         betas, rsqs, 0, 0
@@ -175,7 +178,7 @@ static py::dict group_lasso_data__(
     
     std::string error;
     try {
-        fit(pack, update_coefficients_f);
+        cov::fit(pack, update_coefficients_f);
     } catch(const std::exception& e) {
         error = e.what(); 
     }
@@ -222,6 +225,8 @@ static py::dict group_lasso_data_newton__(
     const Eigen::Ref<Eigen::VectorXd>& lmdas, 
     size_t max_cds,
     double thr,
+    double cond_0_thresh,
+    double cond_1_thresh,
     double newton_tol,
     size_t newton_max_iters,
     double rsq,
@@ -243,7 +248,7 @@ static py::dict group_lasso_data_newton__(
     util::vec_type<util::sp_vec_type<double, Eigen::ColMajor, int>> betas(lmdas.size());
     Eigen::VectorXd rsqs(lmdas.size());
 
-    GroupLassoParamPack<
+    cov::GroupLassoParamPack<
         std::decay_t<decltype(A)>,
         double,
         int,
@@ -251,7 +256,7 @@ static py::dict group_lasso_data_newton__(
     > pack(
         A, groups, group_sizes, alpha, penalty, 
         strong_set, strong_g1, strong_g2, strong_begins, strong_A_diag,
-        lmdas, max_cds, thr, newton_tol, newton_max_iters, rsq,
+        lmdas, max_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters, rsq,
         strong_beta, strong_grad, active_set, active_g1,
         active_g2, active_begins, active_order, is_active,
         betas, rsqs, 0, 0
@@ -273,7 +278,7 @@ static py::dict group_lasso_data_newton__(
 
     std::string error;
     try {
-        fit(pack, update_coefficients_f);
+        cov::fit(pack, update_coefficients_f);
     } catch(const std::exception& e) {
         error = e.what(); 
     }

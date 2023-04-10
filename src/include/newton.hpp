@@ -218,7 +218,7 @@ void newton_brent_solver(
             h_min,
             h_min,
             h_max,
-            [](auto a, auto fa, auto b, auto fb) { 
+            [](auto, auto, auto, auto) { 
                 return std::make_tuple(false, 0.0);
             },
             h,
