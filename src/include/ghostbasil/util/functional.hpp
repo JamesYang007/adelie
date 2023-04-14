@@ -9,8 +9,11 @@ namespace util {
  */
 struct no_op
 {
-    template <class... Args>
-    void operator()(Args&&... args) {}
+    // This hides a lot of bugs with multiple functor passed in...
+    //template <class... Args>
+    //void operator()(Args&&... args) {}
+    template <class T>
+    void operator()(T) {}
 };
 
 } // namespace util
