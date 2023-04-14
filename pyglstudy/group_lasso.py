@@ -48,6 +48,7 @@ def generate_group_lasso_data(
     n_groups,
     rho=0.1,
     svd_transform=True,
+    group_split_type="random",
 ):
     X = np.random.normal(size=(n, p))
     X = rho * np.sum(X, axis=-1)[:,None] + (1-rho) * X
@@ -57,13 +58,28 @@ def generate_group_lasso_data(
     X /= np.sqrt(n)
     y /= np.sqrt(n)
 
-    order = np.arange(1, p) 
-    groups = np.sort(np.random.choice(
-        order, (n_groups-1,), replace=False,
-    ))
-    groups = np.concatenate([[0], groups, [p]], dtype=np.int32)
-    group_sizes = groups[1:(n_groups+1)] - groups[:n_groups]
-    groups = groups[:n_groups]
+    if group_split_type == "random":
+        order = np.arange(1, p) 
+        groups = np.sort(np.random.choice(
+            order, (n_groups-1,), replace=False,
+        ))
+        groups = np.concatenate([[0], groups, [p]], dtype=np.int32)
+        group_sizes = groups[1:(n_groups+1)] - groups[:n_groups]
+        groups = groups[:n_groups]
+
+    elif group_split_type == "even":
+        full_group_size = p // n_groups
+        groups = full_group_size * np.arange(0, n_groups)
+        groups = np.concatenate(
+            [groups, [p]],
+            dtype=np.int32,
+        )
+        assert len(groups) == n_groups + 1
+        group_sizes = groups[1:(n_groups+1)] - groups[:n_groups]
+        groups = groups[:n_groups]
+    
+    else:
+        raise RuntimeError(f"Not a valid group_split_type: {group_split_type}")
 
     if svd_transform:
         for i in range(len(groups)):
