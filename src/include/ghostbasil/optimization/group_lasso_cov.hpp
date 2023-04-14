@@ -935,6 +935,7 @@ inline void fit(
                 buffer_pack.buffer1,
                 buffer_pack.buffer2,
                 buffer_pack.buffer3,
+                update_coefficients_f,
                 check_user_interrupt);
         lasso_active_called = true;
     };

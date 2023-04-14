@@ -435,7 +435,7 @@ void group_lasso_active(
     const auto ag1_end = util::make_functor_iterator<size_t>(active_g1.size(), g1_active_f);
     const auto ag2_begin = util::make_functor_iterator<size_t>(0, g2_active_f);
     const auto ag2_end = util::make_functor_iterator<size_t>(active_g2.size(), g2_active_f);
-
+    
     diagnostic.time_active_cd.push_back(0);
     {
         sw_t stopwatch(diagnostic.time_active_cd.back());
@@ -561,6 +561,7 @@ inline void fit(
                 buffer_pack.buffer1,
                 buffer_pack.buffer2,
                 buffer_pack.buffer3,
+                update_coefficients_f,
                 check_user_interrupt);
         lasso_active_called = true;
     };
