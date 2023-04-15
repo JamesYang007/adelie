@@ -696,6 +696,7 @@ struct GroupBasilDiagnostic
     >;
     using dyn_vec_group_lasso_diagnostic_t = std::vector<GroupLassoDiagnostic>;
 
+    dyn_vec_index_t strong_sizes_total;
     dyn_vec_index_t strong_sizes;
     dyn_vec_index_t active_sizes;
     dyn_vec_bool_t used_strong_rule;
@@ -904,11 +905,12 @@ inline void group_basil(
     size_t idx = 1;         
 
     const auto tidy_up = [&]() {
+        const auto last_lmda = (lmdas.size() == 0) ? std::numeric_limits<value_t>::max() : lmdas.back();
         // Last screening to ensure that the basil state is at the previously valid state.
         // We force non-strong rule and add 0 new variables to preserve the state.
         basil_state.screen(
             0, 0, false, idx == 0, idx < lmdas_curr.size(),
-            lmdas.back(), lmdas.back() 
+            last_lmda, last_lmda
         );
 
         betas_out = std::move(betas);
@@ -1016,6 +1018,7 @@ inline void group_basil(
             betas.emplace_back(std::move(betas_curr[i]));
             rsqs.emplace_back(std::move(rsqs_curr[i]));
             lmdas.emplace_back(std::move(lmdas_curr[i]));
+            diagnostic.strong_sizes_total.push_back(strong_beta.size());
         }
 
         // update diagnostic 

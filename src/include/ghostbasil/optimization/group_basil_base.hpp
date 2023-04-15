@@ -299,6 +299,8 @@ void untransform_solutions(
     using value_t = typename std::decay_t<XType>::Scalar;
     using mat_t = util::mat_type<value_t>;
     using vec_t = util::vec_type<value_t>;
+    
+    if (betas.size() <= 0) return;
 
     // Parallelize over groups so that we can save time on SVD.
     vec_t transformed_beta(X.cols());
@@ -321,33 +323,35 @@ void untransform_solutions(
             gj
         ) - inner;
         if (idx == nzn || inner[idx] >= gj + gj_size) continue;
-        
+
         Eigen::BDCSVD<mat_t> solver(X.block(0, gj, X.rows(), gj_size), Eigen::ComputeFullV);
 
         for (size_t i = 0; i < betas.size(); ++i) {
             auto& beta_i = betas[i];
-            const auto inner = beta_i.innerIndexPtr();
-            const auto value = beta_i.valuePtr();
-            const auto nzn = beta_i.nonZeros();
+            const auto inner_i = beta_i.innerIndexPtr();
+            const auto value_i = beta_i.valuePtr();
+            const auto nzn_i = beta_i.nonZeros();
 
-            if (nzn == 0) continue;
+            if (nzn_i == 0) continue;
 
             const auto idx = std::lower_bound(
-                inner,
-                inner + nzn,
+                inner_i,
+                inner_i + nzn_i,
                 gj
-            ) - inner;
+            ) - inner_i;
             
-            if (idx == nzn || inner[idx] >= gj + gj_size) continue;
+            if (idx == nzn_i || inner_i[idx] >= gj + gj_size) continue;
             
             // guaranteed that gj <= inner[idx] < gj + gj_size
             // By construction of beta_i, it only contains active group coefficients.
             // So, we must have that gj == inner[idx].
             // Moreover, value[idx : idx + gj_size] should be the beta_i's jth group coefficients.
-            if (inner[idx] != gj) throw std::runtime_error("Index of non-zero block does not start at expected position. This is an indication that there is a bug! Please report this.");
+            if (inner_i[idx] != gj) throw std::runtime_error("Index of non-zero block does not start at expected position. This is an indication that there is a bug! Please report this.");
+            if (idx + gj_size > nzn_i) throw std::runtime_error("Index of non-zero block are not fully active. This is an indication that there is a bug! Please report this.");
+            if (inner_i[idx + gj_size - 1] != gj + gj_size - 1) throw std::runtime_error("Index of non-zero block does not end at expected position. This is an indication that there is a bug! Please report this.");
 
             Eigen::Map<vec_t> beta_i_j_map(
-                value + idx, gj_size
+                value_i + idx, gj_size
             );
             trans_beta_j.noalias() = solver.matrixV() * beta_i_j_map;
             beta_i_j_map = trans_beta_j;

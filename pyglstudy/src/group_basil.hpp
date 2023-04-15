@@ -105,6 +105,7 @@ inline py::dict convert_diagnostic(
         );
     }
     return py::dict(
+        "strong_sizes_total"_a=diag.strong_sizes_total,
         "strong_sizes"_a=diag.strong_sizes,
         "active_sizes"_a=diag.active_sizes,
         "used_strong_rule"_a=diag.used_strong_rule,
