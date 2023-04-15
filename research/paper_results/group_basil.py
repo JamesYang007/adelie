@@ -14,5 +14,5 @@ X, beta, y, groups, group_sizes = generate_group_lasso_data(
     n, p, n_groups, rho=0.5, svd_transform=False, group_split_type="random",
 ).values()
 
-out_naive = group_basil(X, y, groups, group_sizes, method='naive', max_n_cds=int(1))
+out_naive = group_basil(X, y, groups, group_sizes, method='naive', max_n_cds=int(1e6), n_threads=1)
 diag_naive = out_naive['diagnostic']

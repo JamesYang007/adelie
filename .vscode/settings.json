@@ -116,7 +116,8 @@
         "autodiff": "cpp",
         "eulerangles": "cpp",
         "specialfunctions": "cpp",
-        "csetjmp": "cpp"
+        "csetjmp": "cpp",
+        "__verbose_abort": "cpp"
     },
     "python.testing.pytestArgs": [
         "test"
