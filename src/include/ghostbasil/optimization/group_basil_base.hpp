@@ -54,6 +54,12 @@ void transform_data(
     }
 }
 
+GHOSTBASIL_STRONG_INLINE
+void screen_edpp(
+)
+{
+}
+
 /**
  * @brief 
  * Append at most max_size number of (first) elements

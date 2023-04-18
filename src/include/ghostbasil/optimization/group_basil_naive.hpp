@@ -136,6 +136,7 @@ struct GroupBasilCheckpoint
     using dyn_vec_bool_t = dyn_vec_t<bool_t>;
 
     bool is_initialized = false;
+    dyn_vec_index_t edpp_safe_set;
     dyn_vec_index_t strong_set; 
     dyn_vec_index_t strong_g1; 
     dyn_vec_index_t strong_g2; 
@@ -162,6 +163,7 @@ struct GroupBasilCheckpoint
               class VecBoolType, class ResidType,
               class GradType, class AbsGradType>
     explicit GroupBasilCheckpoint(
+        const VecIndexType& edpp_safe_set_,
         const VecIndexType& strong_set_,
         const VecIndexType& strong_g1_,
         const VecIndexType& strong_g2_,
@@ -183,6 +185,7 @@ struct GroupBasilCheckpoint
         value_t rsq_
     )
         : is_initialized(true),
+          edpp_safe_set(edpp_safe_set_),
           strong_set(strong_set_),
           strong_g1(strong_g1_),
           strong_g2(strong_g2_),
@@ -209,6 +212,7 @@ struct GroupBasilCheckpoint
         const BasilStateType& bs
     )
         : is_initialized(true),
+          edpp_safe_set(bs.edpp_safe_set),
           strong_set(bs.strong_set),
           strong_g1(bs.strong_g1),
           strong_g2(bs.strong_g2),
@@ -233,6 +237,7 @@ struct GroupBasilCheckpoint
     GroupBasilCheckpoint& operator=(BasilStateType&& bs)
     {
         is_initialized = true;
+        edpp_safe_set = std::move(bs.edpp_safe_set);
         strong_set = std::move(bs.strong_set);
         strong_g1 = std::move(bs.strong_g1);
         strong_g2 = std::move(bs.strong_g2);
@@ -301,6 +306,10 @@ struct GroupBasilState
     const map_cvec_index_t groups;
     const map_cvec_index_t group_sizes;
     const map_cvec_value_t A_diag;
+    const map_cvec_value_t X_group_norm_sq;
+
+    std::unordered_set<index_t> edpp_safe_hashset;
+    dyn_vec_index_t edpp_safe_set;
 
     std::unordered_set<index_t> strong_hashset;
     dyn_vec_index_t strong_set; 
@@ -317,9 +326,9 @@ struct GroupBasilState
     dyn_vec_index_t active_g2;
     dyn_vec_index_t active_begins;
     dyn_vec_index_t active_order;
-    //dyn_vec_index_t active_set_ordered;
     dyn_vec_bool_t is_active;
     vec_value_t resid;
+    vec_value_t resid_prev_valid;
     vec_value_t grad;       // buffer
     vec_value_t grad_next;  // buffer
     vec_value_t abs_grad;   // this is the one that needs to remain invariant
@@ -332,12 +341,13 @@ struct GroupBasilState
     dyn_vec_value_t rsqs;
 
     template <class GroupsType, class GroupSizesType, 
-              class ADiagType, class PenaltyType>
+              class ADiagType, class XGNType, class PenaltyType>
     explicit GroupBasilState(
         const XType& X_,
         const GroupsType& groups_,
         const GroupSizesType& group_sizes_,
         const ADiagType& A_diag_,
+        const XGNType& X_group_norm_sq_,
         value_t alpha_,
         const PenaltyType& penalty_,
         const GroupBasilCheckpoint<value_t, index_t, bool_t>& bc
@@ -350,6 +360,9 @@ struct GroupBasilState
           groups(groups_.data(), groups_.size()),
           group_sizes(group_sizes_.data(), group_sizes_.size()),
           A_diag(A_diag_.data(), A_diag_.size()),
+          X_group_norm_sq(X_group_norm_sq_.data(), X_group_norm_sq_.size()),
+          edpp_safe_hashset(bc.edpp_safe_set.begin(), bc.edpp_safe_set.end()),
+          edpp_safe_set(bc.edpp_safe_set),
           strong_hashset(bc.strong_set.begin(), bc.strong_set.end()),
           strong_set(bc.strong_set),
           strong_g1(bc.strong_g1),
@@ -368,6 +381,7 @@ struct GroupBasilState
           //active_set_ordered(bc.active_set_ordered),
           is_active(bc.is_active),
           resid(bc.resid),
+          resid_prev_valid(bc.resid),
           grad(bc.grad),
           grad_next(bc.grad.size()),
           abs_grad(bc.abs_grad),
@@ -376,13 +390,14 @@ struct GroupBasilState
     {}
 
     template <class YType, class GroupsType, class GroupSizesType, 
-              class ADiagType, class PenaltyType>
+              class ADiagType, class XGNType, class PenaltyType>
     explicit GroupBasilState(
         const XType& X_,
         const YType& y_,
         const GroupsType& groups_,
         const GroupSizesType& group_sizes_,
         const ADiagType& A_diag_,
+        const XGNType& X_group_norm_sq_,
         value_t alpha_,
         const PenaltyType& penalty_
     )
@@ -394,8 +409,10 @@ struct GroupBasilState
           groups(groups_.data(), groups_.size()),
           group_sizes(group_sizes_.data(), group_sizes_.size()),
           A_diag(A_diag_.data(), A_diag_.size()),
+          X_group_norm_sq(X_group_norm_sq_.data(), X_group_norm_sq_.size()),
           strong_grad(X_.cols()),
           resid(y_),
+          resid_prev_valid(resid),
           grad(X_.transpose() * y_),
           grad_next(X_.cols()),
           abs_grad(groups.size()),
@@ -411,6 +428,24 @@ struct GroupBasilState
             const auto size_k = group_sizes[i];
             abs_grad[i] = grad.segment(k, size_k).norm();
         }
+        
+        /* initialize edpp_safe_set */
+        // only add variables that have no l1 penalty
+        // TODO: combine into strong_set construction once this is approved?
+        if (alpha <= 0) {
+            edpp_safe_set.resize(groups.size());
+            std::iota(edpp_safe_set.begin(), edpp_safe_set.end(), 0);
+        } else {
+            edpp_safe_set.reserve(initial_size_groups);
+            for (size_t i = 0; i < penalty.size(); ++i) {
+                if (penalty[i] <= 0.0) {
+                    edpp_safe_set.push_back(i);
+                }
+            }
+        }
+        
+        /* initialize edpp_safe_hashset */
+        edpp_safe_hashset.insert(edpp_safe_set.begin(), edpp_safe_set.end());
 
         /* initialize strong_set */
         // only add variables that have no l1 penalty
@@ -478,6 +513,8 @@ struct GroupBasilState
     ) 
     {
         resid = resids_curr.col(0);
+        resid_prev_valid = resid;
+
         grad = X.transpose() * resid;
         
         /* update abs_grad */
@@ -487,7 +524,7 @@ struct GroupBasilState
             // strong means it has no l1 penalty for initial fit
             // otherwise, coef == 0 because lambda was chosen like that for initial fit,
             // so the KKT check quantity doesn't have any correction and is equivalent to grad.
-            abs_grad[i] = is_strong(i) ? 0 : grad.segment(k, size_k).norm();
+            abs_grad[i] = grad.segment(k, size_k).norm();
         }
 
         /* update rsq_prev_valid */
@@ -520,6 +557,9 @@ struct GroupBasilState
         bool new_strong_added = false;
         const auto old_strong_set_size = strong_set.size();
         const auto old_total_strong_size = strong_beta.size();
+        
+        // TODO
+        //screen_edpp();
 
         group_lasso::screen(abs_grad, lmda_prev_valid, lmda_next, 
             alpha, penalty, [&](auto i) { return is_strong(i); }, 
@@ -548,6 +588,9 @@ struct GroupBasilState
 
         // update is_active to set the new strong variables to false
         is_active.resize(strong_set.size(), false);
+
+        // update residual to previous valid
+        resid = resid_prev_valid;
 
         // At this point, strong_set is ordered for all old variables
         // and unordered for the last few (new variables).
@@ -604,6 +647,12 @@ struct GroupBasilState
     bool is_strong(size_t i) const
     {
         return strong_hashset.find(i) != strong_hashset.end();
+    }
+
+    GHOSTBASIL_STRONG_INLINE
+    bool is_edpp_safe(size_t i) const
+    {
+        return edpp_safe_hashset.find(i) != edpp_safe_hashset.end();
     }
 
 private:
@@ -696,6 +745,7 @@ struct GroupBasilDiagnostic
     >;
     using dyn_vec_group_lasso_diagnostic_t = std::vector<GroupLassoDiagnostic>;
 
+    // TODO: edpp_sizes_total
     dyn_vec_index_t strong_sizes_total;
     dyn_vec_index_t strong_sizes;
     dyn_vec_index_t active_sizes;
@@ -754,7 +804,7 @@ struct GroupBasilDiagnostic
  *                              rsqs[i] is the R^2 at lmdas[i] and betas[i].
  */
 template <class XType, class YType, class GroupsType, class GroupSizesType,
-          class ADiagType, class ValueType, class PenaltyType, class ULmdasType,
+          class ADiagType, class XGNType, class ValueType, class PenaltyType, class ULmdasType,
           class BetasType, class LmdasType, class RsqsType,
           class UpdateCoefficientsType,
           class CheckpointType = GroupBasilCheckpoint<ValueType, int, int>,
@@ -766,6 +816,7 @@ inline void group_basil(
         const GroupsType& groups,
         const GroupSizesType& group_sizes,
         const ADiagType& A_diag,
+        const XGNType& X_group_norm_sq,
         ValueType alpha,
         const PenaltyType& penalty,
         const ULmdasType& user_lmdas,
@@ -818,8 +869,8 @@ inline void group_basil(
         sw_t stopwatch(diagnostic.time_init.back());
         basil_state_ptr = (
             checkpoint.is_initialized ? 
-            std::make_unique<basil_state_t>(X, groups, group_sizes, A_diag, alpha, penalty, checkpoint) :
-            std::make_unique<basil_state_t>(X, y, groups, group_sizes, A_diag, alpha, penalty)
+            std::make_unique<basil_state_t>(X, groups, group_sizes, A_diag, X_group_norm_sq, alpha, penalty, checkpoint) :
+            std::make_unique<basil_state_t>(X, y, groups, group_sizes, A_diag, X_group_norm_sq, alpha, penalty)
         );
     }
     auto& basil_state = *basil_state_ptr;
@@ -835,6 +886,7 @@ inline void group_basil(
     const auto& strong_A_diag = basil_state.strong_A_diag;
     const auto& rsq_prev_valid = basil_state.rsq_prev_valid;
     auto& resid = basil_state.resid;
+    auto& resid_prev_valid = basil_state.resid_prev_valid;
     auto& grad = basil_state.grad;
     auto& grad_next = basil_state.grad_next;
     auto& abs_grad = basil_state.abs_grad;
@@ -950,6 +1002,7 @@ inline void group_basil(
         }
 
         /* Screening */
+        // TODO: only screen if some lmda failed?
         const auto lmda_prev_valid = (lmdas.size() == 0) ? lmdas_curr[0] : lmdas.back(); 
         const auto lmda_next = lmdas_curr[0]; // well-defined
         const bool do_strong_rule = use_strong_rule && (idx != 0);
@@ -1004,7 +1057,7 @@ inline void group_basil(
                 [&](auto i) { return basil_state.is_strong(i); }, n_threads, grad, grad_next, abs_grad, abs_grad_next
             );
             if (idx) {
-                resid = resids_curr.col(idx-1);
+                resid_prev_valid = resids_curr.col(idx-1);
             }
         }
 
@@ -1086,6 +1139,13 @@ inline void group_basil(
         sw_t stopwatch(diagnostic.time_transform.back());
         transform_data(X_trans, groups, group_sizes, n_threads, A_diag);    
     }
+    
+    vec_t X_group_norm_sq(groups.size());
+    for (size_t i = 0; i < groups.size(); ++i) {
+        const auto g = groups[i];
+        const auto gs = group_sizes[i];
+        X_group_norm_sq[i] = A_diag.segment(g, gs).sum();
+    }
 
     const auto tidy_up = [&]() {
         diagnostic.time_untransform.push_back(0);
@@ -1095,7 +1155,7 @@ inline void group_basil(
     
     try {
         group_basil(
-            X_trans, y, groups, group_sizes, A_diag, alpha, penalty, 
+            X_trans, y, groups, group_sizes, A_diag, X_group_norm_sq, alpha, penalty, 
             user_lmdas, max_n_lambdas, n_lambdas_iter,
             use_strong_rule, do_early_exit, verbose_diagnostic, delta_strong_size,
             max_strong_size, max_n_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters,
