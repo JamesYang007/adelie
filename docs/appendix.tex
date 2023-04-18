@@ -10,27 +10,27 @@ Upon differentiating $\varphi$,
     \frac{d\varphi(h)}{dh}
     &=
     -2 \sum\limits_{i=1}^p
-    \frac{v_i^2 D_{ii}}{(D_{ii} h + \lambda)^3}
+    \frac{v_i^2 \Sigma_{ii}}{(\Sigma_{ii} h + \lambda)^3}
     \leq
     0
 \end{align*}
-where the inequality is strict if and only if not all $v_i^2 D_{ii} = 0$.
-Note that if all $v_i^2 D_{ii} = 0$, then we must have that $0 = \norm{v}_2 \leq \lambda$.
-This is because by assumption $v = \sqrt{D} u$ for some $u \in \R^p$
+where the inequality is strict if and only if not all $v_i^2 \Sigma_{ii} = 0$.
+Note that if all $v_i^2 \Sigma_{ii} = 0$, then we must have that $0 = \norm{v}_2 \leq \lambda$.
+This is because by assumption $v = D^\top u$ for some $u \in \R^p$
 (see~(\ref{eq:bcd:block-update})), so that 
-if $v_i^2 D_{ii} = 0$, either $v_i = 0$ or $D_{ii} = 0 \implies v_i = 0$.
+if $v_i^2 \Sigma_{ii} = 0$, either $v_i = 0$ or $\Sigma_{ii} = 0 \implies v_i = 0$.
 Hence, without loss of generality, we may assume 
-that, in particular, not all $D_{ii} = 0$ and
+that, in particular, not all $\Sigma_{ii} = 0$ and
 $\varphi'$ is strictly negative so that $\varphi$ is strictly decreasing.
 Further, we have that
 \begin{align*}
     \varphi(h)
     &=
-    \sum\limits_{i: D_{ii} > 0}
-    \frac{v_i^2}{(D_{ii} h + \lambda)^2} - 1
+    \sum\limits_{i: \Sigma_{ii} > 0}
+    \frac{v_i^2}{(\Sigma_{ii} h + \lambda)^2} - 1
 \end{align*}
 Consequently, since $\varphi(0) > 0$ by hypothesis and
-$\lim\limits_{n\to\infty} \varphi(h) = -1$,
+$\lim\limits_{h\to\infty} \varphi(h) = -1$,
 there exists a (unique) root.
 Further, it is easy to see that $\varphi$ is convex since it is a 
 sum of convex functions.
@@ -81,7 +81,7 @@ strictly decreasing (\Cref{appendix:properties-varphi}).
 
 We first begin with the lower bound $h_\star$.
 Recall that we wish to relax the problem~(\ref{eq:newton-abs:lower-bound-problem}).
-Let $a(h), b(h) \in \R^p$ be defined by $a_k(h) := D_{kk} h + \lambda$
+Let $a(h), b(h) \in \R^p$ be defined by $a_k(h) := \Sigma_{kk} h + \lambda$
 and $b_k(h) := \frac{\abs{v_k}}{a_k(h)}$ for each $k=1,\ldots, p$.
 Then, by Cauchy-Schwarz,
 \begin{align*}
@@ -98,7 +98,7 @@ then $\varphi(h) \geq 0$.
 We see that $\norm{a(h)}_2 \leq \norm{v}_1$ if and only if
 \begin{align*}
     \sum\limits_{i=1}^p
-    (D_{ii} h + \lambda)^2
+    (\Sigma_{ii} h + \lambda)^2
     \leq
     \norm{v}_1^2
 \end{align*}
@@ -112,14 +112,14 @@ Similar to the lower bound, we approximate~(\ref{eq:newton-abs:upper-bound-probl
 Since
 \begin{align}
     \sum\limits_{i=1}^p
-    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    \frac{v_i^2}{(\Sigma_{ii} h + \lambda)^2}
     &=
-    \sum\limits_{i: D_{ii} > 0}
-    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    \sum\limits_{i: \Sigma_{ii} > 0}
+    \frac{v_i^2}{(\Sigma_{ii} h + \lambda)^2}
     \leq 
     h^{-2}
-    \sum\limits_{i: D_{ii} > 0}
-    \frac{v_i^2}{D_{ii}^2 }
+    \sum\limits_{i: \Sigma_{ii} > 0}
+    \frac{v_i^2}{\Sigma_{ii}^2 }
     \label{eq:nmab:upper-approx}
 \end{align}
 by setting 
@@ -127,7 +127,449 @@ by setting
     h^\star
     := 
     \sqrt{
-        \sum\limits_{i: D_{ii} > 0} \frac{v_i^2}{D_{ii}^2}
+        \sum\limits_{i: \Sigma_{ii} > 0} \frac{v_i^2}{\Sigma_{ii}^2}
     }
 \end{align*}
 we have that $\varphi(h^\star) \leq 0$.
+
+
+%\section{EDPP Derivations}\label{appendix:edpp}
+%
+%We use the EDPP result as described in~\citet{wang:2015}
+%to generalize the result for our objective with elastic net and arbitrary group-wise penalty~\labelcref{eq:glp:objective-general}.
+%We note that we are still working under the assumption that the data matrix $X$ has been transformed
+%as described in~\Cref{sec:optimizer}.
+%
+%We first transform the problem~\labelcref{eq:glp:objective-general} 
+%using augmented data to pose it as the objective in~\citet{wang:2015}.
+%The group-lasso problem that~\citet{wang:2015} solves is
+%\begin{align}
+%    \minimize_{\beta \in \R^p}
+%    \frac{1}{2} \norm{y-X\beta}_2^2
+%    + \lambda \sum\limits_{i=1}^G w_i \norm{\beta_i}_2
+%    \label{eq:appendix:edpp:objective}
+%\end{align}
+%where $w_i := \sqrt{n_i}$ and $n_i$ is the size of group $i$.
+%While the authors assumed this particular choice of $w_i$,
+%their results generalize to any penalty with non-negative values. 
+%Now, define the augmented data 
+%\begin{align}
+%    \tilde{X} :=
+%    \begin{bmatrix}
+%        X \\
+%        \sqrt{\lambda (1-\alpha)} \sqrt{P}
+%    \end{bmatrix}
+%    ,
+%    \quad
+%    \tilde{y} :=
+%    \begin{bmatrix}
+%        y \\
+%        0
+%    \end{bmatrix}
+%    ,
+%    \quad
+%    P
+%    :=
+%    \begin{bmatrix}
+%        w_1 I_{p_1} & 0 & \ldots & 0 \\
+%        0 & w_2 I_{p_2} & \ldots & 0 \\
+%        \vdots & \vdots & \ddots & \vdots \\
+%        0 & 0 & \ldots & w_G I_{p_G}  
+%    \end{bmatrix}
+%    ,
+%    \quad
+%    \tilde{\lambda} := \lambda \alpha
+%    \label{eq:appendix:edpp:transformed-data}
+%\end{align}
+%Then, we write~\labelcref{eq:glp:objective-general} as
+%\begin{align}
+%    \minimize_{\beta \in \R^p}
+%    \frac{1}{2} \norm{\tilde{y} - \tilde{X} \beta}_2^2
+%    + \tilde{\lambda} \sum\limits_{i=1}^G w_i \norm{\beta_i}_2
+%    \label{eq:appendix:edpp:transformed-objective}
+%\end{align}
+%which matches~\labelcref{eq:appendix:edpp:objective}.
+%Without loss of generality, we may assume $w_i > 0$ for all $i$.
+%Otherwise, for the groups with $w_i = 0$, 
+%we may solve for $\beta^\star_i$ as an unpenalized optimization problem,
+%which remains optimal for any $\lambda$.
+%Hence, we may first compute the residual $y - \sum\limits_{i : w_i = 0} X_i \beta^\star_i$
+%and optimize over this residual and the sub-data matrix containing only the feature blocks where $w_i > 0$.
+%
+%Next, following~\citet[Corollary 24 EDPP]{wang:2015},
+%consider a given sequence of regularization parameters 
+%$\lambda_{\max} = \lambda_0 > \lambda_1 > \ldots > \lambda_{\sK} > 0$
+%to solve~\labelcref{eq:appendix:edpp:objective}.
+%Here, $\lambda_{\max}$ is the smallest $\lambda$ such that 
+%the solution at $\lambda_{\max}$ is the zero vector.
+%Without loss of generality, we assume not all $w_i$ are zero,
+%since otherwise, we simply have a least-squares problem.
+%For any $0 \leq k < \sK$ and group $1 \leq g \leq G$,
+%we have that $\beta_g^\star(\lambda_{k+1}) = 0$ if $\beta^\star(\lambda_k)$ is known and
+%the EDPP condition is satisfied:
+%\begin{align}
+%    \norm{X_g^\top \pr{\theta^\star(\lambda_k) + \frac{1}{2} \overline{v}_2^\perp(\lambda_{k+1}, \lambda_k)}}_2
+%    &<
+%    w_g - \frac{1}{2} \norm{\overline{v}_2^\perp(\lambda_{k+1}, \lambda_k)}_2 \norm{X_g}_2
+%    \label{eq:appendix:edpp:condition}
+%    \tag{EDPP Condition}
+%\end{align}
+%where (with a slight abuse of notation)
+%\begin{align}
+%    \theta^\star(\lambda_0) 
+%    &:= 
+%    \lambda_0^{-1} \pr{y - X \beta^\star(\lambda_0)}
+%    \label{eq:appendix:edpp:theta}
+%    \\
+%    \overline{v}_2^\perp(\lambda, \lambda_0)
+%    &:=
+%    \overline{v}_2(\lambda, \lambda_0)
+%    -
+%    \frac{\overline{v}_1(\lambda_0)^\top \overline{v}_2(\lambda, \lambda_0)}{\norm{\overline{v}_1(\lambda_0)}_2^2}
+%    \overline{v}_1(\lambda_0)
+%    \label{eq:appendix:edpp:v2perp}
+%    \\
+%    \overline{v}_2(\lambda, \lambda_0)
+%    &:=
+%    \lambda^{-1} y - \theta^\star(\lambda_0)
+%    \label{eq:appendix:edpp:v2}
+%    \\
+%    \overline{v}_1(\lambda_0)
+%    &:=
+%    \begin{cases}
+%        \lambda_0^{-1} y - \theta^\star(\lambda_0) ,& \lambda_0 \in (0, \lambda_{\max}) \\
+%        X_{g_\star} X_{g_\star}^\top y ,& \lambda_0 = \lambda_{\max}
+%    \end{cases}
+%    \label{eq:appendix:edpp:v1}
+%    \\
+%    g_\star
+%    &:= 
+%    \argmax\limits_{1\leq g \leq G}
+%    \frac{\norm{X_g^\top y}_2}{w_g}
+%    \label{eq:appendix:edpp:xstar}
+%    \\
+%    \lambda_{\max}
+%    &:=
+%    \frac{\norm{X_{g_\star}^\top y}_2}{w_{g_\star}}
+%    \label{eq:appendix:edpp:lmdamax}
+%\end{align}
+%Similarly, define $\tilde{\theta}^\star$,
+%$\tilde{\overline{v}}_2^\perp$,
+%$\tilde{\overline{v}}_2$,
+%and $\tilde{\overline{v}}_1$.
+%where all quantities are replaced with their tilde versions
+%using the augmented data~\labelcref{eq:appendix:edpp:transformed-data}
+%to solve~\labelcref{eq:appendix:edpp:transformed-objective}.
+%Note that $g_\star$ remains invariant under this data transformation,
+%however, $\tilde{\lambda}_{\max} = w_{g_\star}^{-1} \norm{X_{g_\star}^\top y}_2$.
+%On the original scale, $\lambda_{\max} \equiv \alpha^{-1} \tilde{\lambda}_{\max}$.
+%
+%Our goal is to simplify~\labelcref{eq:appendix:edpp:condition}
+%for the transformed problem~\labelcref{eq:appendix:edpp:transformed-objective}
+%using quantities from~\labelcref{%
+%eq:appendix:edpp:theta,%
+%eq:appendix:edpp:v2perp,%
+%eq:appendix:edpp:v2,%
+%eq:appendix:edpp:v1,%
+%eq:appendix:edpp:xstar,%
+%eq:appendix:edpp:lmdamax%
+%}.
+%To generalize the discussion, we define $\lambda_0$ to be the point at which
+%we know the solution $\beta^\star(\lambda_0)$ and that implicitly defines the transformed data.
+%We let $\lambda$ be the new regularization at which we wish to deduce the zero coefficients.
+%Note that we work in the $\tilde{\lambda}$ space so that
+%\begin{align*}
+%    \tilde{X}
+%    \equiv
+%    \begin{bmatrix}
+%        X \\
+%        \sqrt{\lambda_0 \alpha^{-1} (1-\alpha)} \sqrt{P}
+%    \end{bmatrix}
+%\end{align*}
+%First,
+%\begin{align*}
+%    \tilde{X}^\top \tilde{\theta}^\star(\lambda_0)
+%    &=
+%    \lambda_0^{-1} (\tilde{X}^\top \tilde{y} - \tilde{X}^\top \tilde{X} \beta^\star(\lambda_0))
+%    \\&=
+%    \lambda_0^{-1} \pr{X^\top y - \pr{X^\top X + \lambda_0 \alpha^{-1} (1-\alpha) P} \beta^\star(\lambda_0)}
+%    \\&=
+%    X^\top \theta^\star(\lambda_0)
+%    -
+%    \alpha^{-1} (1-\alpha) P \beta^\star(\lambda_0)
+%\end{align*}
+%Next,
+%\begin{align*}
+%    \tilde{X}^\top \tilde{\overline{v}}_2(\lambda, \lambda_0)
+%    &=
+%    \lambda^{-1} X^\top y - \tilde{X}^\top \tilde{\theta}^\star(\lambda_0)
+%    \\&=
+%    X^\top \overline{v}_2(\lambda, \lambda_0)
+%    +
+%    \alpha^{-1} (1-\alpha) P \beta^\star(\lambda_0)
+%    \\
+%    \tilde{X}^\top \tilde{\overline{v}}_1(\lambda_0)
+%    &=
+%    \begin{cases}
+%        X^\top \overline{v}_1(\lambda_0) + \alpha^{-1} (1-\alpha) P\beta^\star(\lambda_0) ,& \lambda_0 \in (0, \tilde{\lambda}_{\max}) \\
+%        \tilde{X}^\top \tilde{X}_{g_\star} X_{g_\star}^\top y ,& \lambda_0 = \tilde{\lambda}_{\max}
+%    \end{cases}
+%    \\
+%    \tilde{X}_i^\top \tilde{X}_j
+%    &=
+%    \begin{cases}
+%        X_i^\top X_i + \lambda_0 \alpha^{-1} (1-\alpha) w_i I ,&  i=j \\
+%        X_i^\top X_j ,&  i\neq j
+%    \end{cases}
+%\end{align*}
+%Now, we simplify $\tilde{\overline{v}}_1(\lambda_0)^\top \tilde{\overline{v}}_2(\lambda,\lambda_0)$.
+%Consider first the case when $\lambda_0 = \lambda_{\max}$.
+%\begin{align*}
+%    \tilde{\overline{v}}_1(\lambda_0)^\top 
+%    \tilde{\overline{v}}_2(\lambda, \lambda_0)
+%    &=
+%    \lambda^{-1} \norm{X_{g_\star}^\top y}_2^2
+%    - 
+%    y^\top X_{g_\star} \tilde{X}_{g_\star}^\top \tilde{\theta}^\star(\lambda_0)
+%    \\&=
+%    \overline{v}_1(\lambda_0)^\top \overline{v}_2(\lambda,\lambda_0)
+%    +
+%    w_{g_\star} \alpha^{-1} (1-\alpha) y^\top X_{g_\star} \beta^\star_{g_\star}(\lambda_0)
+%\end{align*}
+%Next, if $\lambda_0 \in (0, \lambda_{\max})$,
+%\begin{align*}
+%    \tilde{\overline{v}}_1(\lambda_0)^\top 
+%    \tilde{\overline{v}}_2(\lambda, \lambda_0)
+%    &=
+%    \overline{v}_1(\lambda_0)^\top
+%    \overline{v}_2(\lambda,\lambda_0)
+%    +
+%    \lambda_0^{-1} \alpha^{-1} (1-\alpha) \beta^\star(\lambda_0)^\top P \beta^\star(\lambda_0)
+%\end{align*}
+%Finally,
+%\begin{align*}
+%    \norm{\tilde{\overline{v}}_1(\lambda_0)}_2^2
+%    &=
+%    \begin{cases}
+%        \norm{\overline{v}_1(\lambda_0)}_2^2 + 
+%        \lambda_0^{-1} \alpha^{-1} (1-\alpha) \beta^\star(\lambda_0)^\top P \beta^\star(\lambda_0)
+%        ,& \lambda_0 \in (0, \tilde{\lambda}_{\max}) \\
+%        \norm{X_{g_\star} X_{g_\star}^\top y}_2^2 ,& \lambda_0 = \tilde{\lambda}_{\max}
+%    \end{cases}
+%\end{align*}
+%Thus, these formulas simplify~\labelcref{eq:appendix:edpp:condition} for the augmented data case.
+%Note also that
+%\begin{align*}
+%    \norm{\tilde{X}_g}_2^2
+%    &=
+%    \trace\pr{\tilde{X}_g^\top \tilde{X}_g}
+%    =
+%    \norm{X_g}_2^2 + \lambda_0 \alpha^{-1} (1-\alpha) w_g p_g
+%\end{align*}
+
+\section{EDPP Derivations}
+
+Recall that the group lasso problem in full generality is given by
+\begin{align}
+    \minimize\limits_{\beta \in \R^p}
+    \frac{1}{2}
+    \norm{y - X\beta}_2^2 
+    + 
+    \lambda \sum\limits_{i=1}^G w_i \pr{\alpha \norm{\beta_i}_2 + \frac{1-\alpha}{2} \norm{\beta_i}_2^2}
+    \label{eq:appendix:edpp:objective}
+\end{align}
+We assume that $\alpha \in (0,1)$ and all $w_i > 0$.
+If $\alpha = 0$, then there is no point of discussing ways to remove variables since
+all variables must be active.
+If $\alpha = 1$, then the EDPP rule is given by~\citet[Corollary 24]{wang:2015}.
+If $w_i = 0$ for some $i$, then we may first optimize over such $\beta_i$,
+which is an unpenalized optimization problem whose solutions do not depend on $\lambda$.
+Afterwards, we may replace $y$ by the residual
+and $X$ by the sub-matrix containing only the group features
+whose corresponding $w_i > 0$.
+
+Let $z = y - X\beta$ so that~\labelcref{eq:appendix:edpp:objective} becomes
+\begin{align}
+    &\minimize\limits_{\beta \in \R^p, z \in \R^n}
+    \frac{1}{2} \norm{z}_2^2
+    +
+    \lambda \sum\limits_{i=1}^G w_i \pr{\alpha \norm{\beta_i}_2 + \frac{1-\alpha}{2} \norm{\beta_i}_2^2}
+    \\
+    &\subjto \quad z = y - X\beta
+    \label{eq:appendix:edpp:objective-transformed}
+\end{align}
+We introduce the dual variables $\eta \in \R^n$ such that 
+the Lagrangian of~\labelcref{eq:appendix:edpp:objective-transformed}
+is given by
+\begin{align*}
+    L(\beta, z, \eta)
+    :=
+    \frac{1}{2} \norm{z}_2^2 
+    +
+    \lambda \sum\limits_{i=1}^G w_i \pr{\alpha \norm{\beta_i}_2 + \frac{1-\alpha}{2} \norm{\beta_i}_2^2}
+    + \eta^\top \pr{y - X\beta - z}
+\end{align*}
+Thus, the dual function $g(\eta)$ is given by
+\begin{align*}
+    g(\eta)
+    &:=
+    \inf\limits_{\beta, z} L(\beta, \eta)
+    \\&=
+    \eta^\top y + 
+    \inf\limits_{\beta} 
+    \pr{-\eta^\top X \beta + \lambda \sum\limits_{i=1}^G w_i \pr{\alpha \norm{\beta_i}_2 + \frac{1-\alpha}{2} \norm{\beta_i}_2^2}}
+    +
+    \inf\limits_{z}
+    \pr{
+        \frac{1}{2} \norm{z}_2^2 - \eta^\top z
+    }
+\end{align*}
+We now solve for the two minimization problems.
+First, define
+\begin{align*}
+    \varphi(\beta)
+    &:=
+    -\eta^\top X \beta + \lambda \sum\limits_{i=1}^G w_i \pr{\alpha \norm{\beta_i}_2 + \frac{1-\alpha}{2} \norm{\beta_i}_2^2}
+    \\&=
+    \sum\limits_{i=1}^G
+    \pr{
+        -\eta^\top X_i \beta_i + \lambda w_i \pr{\alpha \norm{\beta_i}_2 + \frac{1-\alpha}{2} \norm{\beta_i}_2^2}
+    }
+    =:
+    \sum\limits_{i=1}^G \varphi_i(\beta_i)
+\end{align*}
+Since $\varphi$ is separable, we minimize each $\varphi_i$ separately.
+For any fixed $i$, the optimal point $\beta_i^\star$ for minimizing $\varphi_i$ satisfies
+\begin{align}
+    -X_i^\top \eta + \lambda \alpha w_i u_i + \lambda (1-\alpha) w_i \beta_i = 0
+    \label{eq:appendix:edpp:subg1}
+\end{align}
+where 
+\begin{align*}
+    u_i
+    &\in
+    \begin{cases}
+        \set{\frac{\beta_i}{\norm{\beta_i}_2}} ,& \beta_i \neq 0 \\
+        \set{u \in \R^{p_i} : \norm{u}_2 \leq 1} ,& \beta_i = 0
+    \end{cases}
+\end{align*}
+If $\beta_i^\star = 0$, note that $\varphi_i(\beta_i^\star) = 0$.
+Otherwise, 
+\begin{align*}
+    \varphi_i(\beta_i)
+    &=
+    \beta_i^\top \pr{
+        -X_i^\top \eta + \lambda \alpha w_i \frac{\beta_i}{\norm{\beta_i}_2} + \lambda \frac{1-\alpha}{2} w_i \beta_i   
+    }
+    \\
+    \implies
+    \varphi_i(\beta_i^\star)
+    &=
+    -\lambda \frac{1-\alpha}{2} w_i \norm{\beta_i^\star}_2^2
+\end{align*}
+Now, recall that we also have from~\labelcref{eq:appendix:edpp:subg1} that
+\begin{align*}
+    \lambda w_i \pr{\frac{\alpha}{\norm{\beta_i^\star}_2} + (1-\alpha)} \beta_i^\star
+    &=
+    X_i^\top \eta
+    \\\implies
+    \norm{\beta_i^\star}_2
+    &=
+    \frac{\norm{X_i^\top \eta}_2}{\lambda (1-\alpha) w_i} - \frac{\alpha}{1-\alpha}
+    \\&=
+    \frac{\norm{X_i^\top \eta}_2 - \lambda \alpha w_i}{\lambda (1-\alpha) w_i}
+\end{align*}
+Note that this also gives us
+\begin{align*}
+    \beta_i^\star
+    &=
+    \frac{1}{\lambda (1-\alpha) w_i}
+    \pr{1 - \frac{\lambda \alpha w_i}{\norm{X_i^\top \eta}_2}}
+    X_i^\top \eta
+\end{align*}
+Hence, in either case, we have that
+\begin{align*}
+    \varphi_i(\beta_i^\star)
+    =
+    -\frac{\pr{\norm{X_i^\top \eta}_2 - \lambda \alpha w_i}_+^2}{2\lambda (1-\alpha) w_i}
+\end{align*}
+Note that unlike when $\alpha = 1$, we do not have any constraints on $\eta$ when $\alpha \in (0,1)$.
+This shows that
+\begin{align*}
+    \inf\limits_{\beta}
+    \varphi(\beta)
+    &=
+    -\frac{1}{2\lambda (1-\alpha)}
+    \sum\limits_{i=1}^G
+    \frac{\pr{\norm{X_i^\top \eta}_2 - \lambda \alpha w_i}_+^2}{w_i}
+\end{align*}
+
+Next,
+\begin{align*}
+    \inf\limits_{z} \frac{1}{2} \norm{z}_2^2 - \eta^\top z
+    =
+    - \frac{1}{2} \norm{\eta}_2^2
+\end{align*}
+
+Combining, the dual function simplifies to
+\begin{align*}
+    g(\eta)
+    &=
+    \eta^\top y 
+    - \frac{1}{2} \norm{\eta}_2^2
+    -\frac{1}{2\lambda (1-\alpha)}
+    \sum\limits_{i=1}^G
+    \frac{\pr{\norm{X_i^\top \eta}_2 - \lambda \alpha w_i}_+^2}{w_i}
+\end{align*}
+So, the dual formulation is
+\begin{align*}
+    &\maximize\limits_{\eta} 
+    \eta^\top y 
+    - \frac{1}{2} \norm{\eta}_2^2
+    -\frac{1}{2\lambda (1-\alpha)}
+    \sum\limits_{i=1}^G
+    \frac{\pr{\norm{X_i^\top \eta}_2 - \lambda \alpha w_i}_+^2}{w_i}
+\end{align*}
+which is equivalent to
+\begin{align*}
+    &\maximize\limits_{\eta} 
+    \frac{1}{2} \norm{y}_2^2
+    - \frac{1}{2} \norm{\eta-y}_2^2
+    -\frac{1}{2\lambda (1-\alpha)}
+    \sum\limits_{i=1}^G
+    \frac{\pr{\norm{X_i^\top \eta}_2 - \lambda \alpha w_i}_+^2}{w_i}
+\end{align*}
+By a rescaling of the dual variables $\eta$ such that $\theta = \lambda^{-1} \eta$,
+the dual formulation can be written as 
+\begin{align}
+    \maximize\limits_{\theta} 
+    \frac{1}{2} \norm{y}_2^2
+    - \frac{\lambda^2}{2} \norm{\theta-\frac{y}{\lambda}}_2^2
+    -\frac{\lambda}{2(1-\alpha)}
+    \sum\limits_{i=1}^G
+    \frac{\pr{\norm{X_i^\top \theta}_2 - \alpha w_i}_+^2}{w_i}
+    \label{eq:appendix:edpp:final}
+\end{align}
+Following the proof in~\citet[Appendix B.2]{wang:2015},
+the KKT conditions are given by
+\begin{align*}
+    y &= X\beta^\star(\lambda) + \lambda \theta^\star(\lambda) \\
+    X_i^\top \theta^\star(\lambda) - (1-\alpha) w_i \beta^\star_i(\lambda)
+    &\in
+    \begin{cases}
+        \set{\alpha w_i \frac{\beta_i^\star(\lambda)}{\norm{\beta_i^\star(\lambda)}_2}} ,& \beta_i^\star(\lambda) \neq 0 \\
+        \set{\alpha w_i u : \norm{u}_2 \leq 1} ,& \beta_i^\star(\lambda) = 0 
+    \end{cases}
+\end{align*}
+
+It is difficult to devise a safe screening rule because of the penalty in~\labelcref{eq:appendix:edpp:final}.
+Specifically, if $\alpha < 1$, then we have an unconstrained problem that tends to pull more coefficients to be non-zero.
+The penalty becomes a bona fide barrier function when $\alpha \uparrow 1$.
+This is precisely the case that~\citet{wang:2015} studies.
+When $\alpha = 1$, the maximization can only occur non-trivially if 
+$\norm{X_i^\top \theta} \leq \lambda w_i$.
+This constraint also agrees with the derivation in~\citet{wang:2015}.
+In such a case, the maximization problem is simply a projection onto a closed, non-empty convex set,
+which was the critical observation.
+This cannot generalize when $\alpha < 1$.
+

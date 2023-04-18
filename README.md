@@ -41,3 +41,5 @@ is in `pyproject.toml`.
 - [Hybrid safe-strong rules for efficient optimization in lasso-type problems](https://arxiv.org/abs/1704.08742)
 - [A Fast Iterative Shrinkage-Thresholding Algorithm
 for Linear Inverse Problems](https://www.cs.cmu.edu/afs/cs/Web/People/airg/readings/2012_02_21_a_fast_iterative_shrinkage-thresholding.pdf)
+- [STANDARDIZATION AND THE GROUP LASSO PENALTY](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4527185/)
+    - `Many works explicitly do not sphere (Puig, Wiesel, and Hero (2009), Foygel and Drton (2010), Jacob, Obozinski, and Vert (2009), Hastie, Tibshirani, and Friedman (2008), among others), and many more make no mention of normalization`.

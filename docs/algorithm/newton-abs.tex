@@ -13,7 +13,7 @@ is equivalent to finding the largest value $h > 0$ such that $\varphi(h) \geq 0$
     \sup\set{
         h > 0 :
         \sum\limits_{i=1}^p
-        \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+        \frac{v_i^2}{(\Sigma_{ii} h + \lambda)^2}
         \geq
         1
     }
@@ -29,7 +29,7 @@ $\varphi(h) \leq 0$, or
         h > 0
         :
         \sum\limits_{i=1}^p
-        \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+        \frac{v_i^2}{(\Sigma_{ii} h + \lambda)^2}
         \leq
         1
     }
@@ -65,18 +65,18 @@ in~\Cref{appendix:newton-abs:bounds}, we
 approximated the problem of finding the smallest $h$ such that $\varphi(h) \leq 0$
 by solving the problem for an upper bound of $\varphi$ (see~(\ref{eq:nmab:upper-approx})).
 Then, the more accurate the approximation, the closer the approximate solution $h^\star$ is to the root.
-The approximation essentially came from using the trivial fact that $D_{ii} h^\star \leq D_{ii} h^\star + \lambda$.
+The approximation essentially came from using the trivial fact that $\Sigma_{ii} h^\star \leq \Sigma_{ii} h^\star + \lambda$.
 This motivates us to consider the worst approximation error (rate)
 \begin{align*}
     w
     := 
-    \max\limits_{i: D_{ii} > 0} \frac{\lambda}{D_{ii} h^\star + \lambda}
+    \max\limits_{i: \Sigma_{ii} > 0} \frac{\lambda}{\Sigma_{ii} h^\star + \lambda}
     =
-    \frac{\lambda}{D_\star h^\star + \lambda}
+    \frac{\lambda}{\Sigma_\star h^\star + \lambda}
     \in 
     (0,1)
 \end{align*}
-where $D_\star := \min\limits_{i : D_{ii} > 0} D_{ii}$.
+where $\Sigma_\star := \min\limits_{i : \Sigma_{ii} > 0} \Sigma_{ii}$.
 If $w$ is small, the approximation in~(\ref{eq:nmab:upper-approx}) is tight,
 which implies that the root is close to $h^\star$.
 Hence, $1-w$ represents the prior that the root is close to $h^\star$.
@@ -90,11 +90,11 @@ which we call \emph{Newton with Adaptive Bisection Starts} (Newton-ABS).
 
 \begin{algorithm}[t]
     \caption{Adaptive Bisection}\label{alg:nabs:ab}
-    \KwData{$D$, $v$, $\lambda$, $\varepsilon$}
+    \KwData{$\Sigma$, $v$, $\lambda$, $\varepsilon$}
     compute $h_\star$ that solves
     $
         \sum\limits_{i=1}^p
-        (D_{ii} h + \lambda)^2
+        (\Sigma_{ii} h + \lambda)^2
         \leq
         \norm{v}_1^2
     $ and take the positive part\;
@@ -102,15 +102,15 @@ which we call \emph{Newton with Adaptive Bisection Starts} (Newton-ABS).
         h^\star
         \gets
         \sqrt{
-            \sum\limits_{i: D_{ii} > 0} \frac{v_i^2}{D_{ii}^2}
+            \sum\limits_{i: \Sigma_{ii} > 0} \frac{v_i^2}{\Sigma_{ii}^2}
         }
     $\;
-    $D_\star \gets \min\limits_{i : D_{ii} > 0} D_{ii}$\;
-    $w \gets \frac{\lambda}{D_\star h^\star + \lambda}$\;
+    $\Sigma_\star \gets \min\limits_{i : \Sigma_{ii} > 0} \Sigma_{ii}$\;
+    $w \gets \frac{\lambda}{\Sigma_\star h^\star + \lambda}$\;
     $h \gets wh_\star + (1-w)h^\star$\;
     \While{$\varphi(h) < 0$ and $\abs{\varphi(h)} > \varepsilon$}{
         $h^\star \gets h$\; 
-        $w \gets \frac{\lambda}{D_\star h^\star + \lambda}$\;
+        $w \gets \frac{\lambda}{\Sigma_\star h^\star + \lambda}$\;
         $h \gets wh_\star + (1-w)h^\star$\;
     }
     return $h$;
@@ -118,12 +118,12 @@ which we call \emph{Newton with Adaptive Bisection Starts} (Newton-ABS).
 
 \begin{algorithm}[t]
     \caption{Newton with Adaptive Bisection Starts (Newton-ABS)}\label{alg:nabs:nabs}
-    \KwData{$D$, $v$, $\lambda$, $\varepsilon$}
+    \KwData{$\Sigma$, $v$, $\lambda$, $\varepsilon$}
     $h \gets$ result of \Cref{alg:nabs:ab}\;
     \If{$\abs{\varphi(h)} > \varepsilon$} {
         $h \gets$ result of Newton's Method starting at $h^{(0)} = h$\;
     }
-    $\beta^\star \gets (D + \lambda h^{-1} I)^{-1} v$\;
+    $\beta^\star \gets (\Sigma + \lambda h^{-1} I)^{-1} v$\;
     return $\beta^\star$\;
 \end{algorithm}
 

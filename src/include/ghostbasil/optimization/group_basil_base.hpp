@@ -4,6 +4,7 @@
 #include <ghostbasil/util/types.hpp>
 #include <ghostbasil/util/macros.hpp>
 #include <ghostbasil/util/algorithm.hpp>
+#include <omp.h>
 
 namespace ghostbasil {
 namespace group_lasso {
@@ -54,10 +55,64 @@ void transform_data(
     }
 }
 
+template <class XType, class GroupsType, class GroupSizesType, 
+          class XGNType, class PenaltyType, class GradType, 
+          class Resid0Type, class ResidType, class ValueType, class V1Type,
+          class IESType, class ESSType>
 GHOSTBASIL_STRONG_INLINE
 void screen_edpp(
+    const XType& X,
+    const GroupsType& groups,
+    const GroupSizesType& group_sizes,
+    const XGNType& X_group_norms,
+    ValueType alpha,
+    const PenaltyType& penalty,
+    const GradType& grad,
+    const Resid0Type& resid_0,
+    const ResidType& resid,
+    ValueType lmda_curr,
+    ValueType lmda_prev,
+    bool is_lmda_curr_max,
+    const V1Type& v1_0,
+    IESType is_edpp_safe,
+    size_t n_threads,
+    ESSType& edpp_safe_set
 )
 {
+    if (alpha != 1) return;
+
+    Eigen::VectorXd v1 = (
+        (is_lmda_curr_max) ?
+        v1_0 :
+        (resid_0 - resid) / lmda_prev
+    );
+    Eigen::VectorXd v2 = resid_0 / lmda_curr - resid / lmda_prev;
+    Eigen::VectorXd v2_perp = v2 - ((v1.dot(v2)) / v1.squaredNorm()) * v1;
+    const auto v2_perp_norm = v2_perp.norm();
+    Eigen::VectorXd buffer(X.cols());    
+    
+    std::vector<std::vector<int>> edpp_new_safe_threads(n_threads);
+
+#pragma omp parallel for schedule(auto) num_threads(n_threads)
+    for (size_t i = 0; i < groups.size(); ++i) {
+        if (is_edpp_safe(i)) continue;
+        const auto g = groups[i];
+        const auto gs = group_sizes[i];
+        const auto Xg = X.block(0, g, X.rows(), gs);
+        const auto grad_g = grad.segment(g, gs);
+        auto buff_g = buffer.segment(g, gs);
+        buff_g.noalias() = 0.5 * (Xg.transpose() * v2_perp);
+        buff_g += grad_g / lmda_prev;
+        const auto buff_g_norm = buff_g.norm();
+        if (buff_g_norm >= penalty[i] - 0.5 * v2_perp_norm * X_group_norms[i]) {
+            const auto thread_i = omp_get_thread_num();
+            edpp_new_safe_threads[thread_i].push_back(i);
+        }
+    }    
+    
+    for (const auto& edpp_new_safe : edpp_new_safe_threads) {
+        edpp_safe_set.insert(edpp_safe_set.end(), edpp_new_safe.begin(), edpp_new_safe.end());
+    }
 }
 
 /**

@@ -8,7 +8,7 @@ we see that the solution $\beta^\star$ must satisfy
     \beta
     &=
     \begin{cases}
-    \pr{D + \frac{\lambda}{\norm{\beta}_2} I}^{-1} v ,& \norm{v}_2 > \lambda \\
+    \pr{\Sigma + \frac{\lambda}{\norm{\beta}_2} I}^{-1} v ,& \norm{v}_2 > \lambda \\
     0 ,& \norm{v}_2 \leq \lambda
     \end{cases}
     \label{eq:newton:block-solution}
@@ -19,7 +19,7 @@ In an endeavor to find an expression for $\norm{\beta^\star}_2$,
 we take the $\ell_2$ norm on both sides to get that $\norm{\beta^\star}_2$ must satisfy
 \begin{align}
     \sum\limits_{i=1}^p
-    \frac{v_i^2}{(D_{ii} \norm{\beta}_2 + \lambda)^2}
+    \frac{v_i^2}{(\Sigma_{ii} \norm{\beta}_2 + \lambda)^2}
     =
     1
     \label{eq:newton:norm-solution}
@@ -39,7 +39,7 @@ First, define $\varphi : [0, \infty) \to \R$ by
     \varphi(h)
     &:=
     \sum\limits_{i=1}^p
-    \frac{v_i^2}{(D_{ii} h + \lambda)^2}
+    \frac{v_i^2}{(\Sigma_{ii} h + \lambda)^2}
     - 1
     \label{eq:varphi-def}
 \end{align}
@@ -53,7 +53,7 @@ for any initial point $h^{(0)}$ (see~\Cref{appendix:newton-convergence}).
 
 \begin{algorithm}[t]
     \caption{Newton's Method}\label{alg:newton:newton}
-    \KwData{$D$, $v$, $\lambda$, $\varepsilon$, $h^{(0)}$}
+    \KwData{$\Sigma$, $v$, $\lambda$, $\varepsilon$, $h^{(0)}$}
     $h \gets h^{(0)}$\;
     \While{$\abs{\varphi(h)} > \varepsilon$} {
         $h \gets h - \frac{\varphi(h)}{\varphi'(h)}$\;
@@ -83,7 +83,7 @@ Here, accuracy was measured as
     \\
     &\beta
     :=
-    \pr{D + \frac{\lambda}{\norm{\hat{\beta}}_2} I}^{-1} v
+    \pr{\Sigma + \frac{\lambda}{\norm{\hat{\beta}}_2} I}^{-1} v
     \nonumber
 \end{align}
 Note that the PGD methods fail to converge as $p$ increases,

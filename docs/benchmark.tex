@@ -10,12 +10,10 @@ that solve the block update~(\ref{eq:bcd:block-update}).
 Recall the objective to solve is
 \begin{align*}
     \minimize_{\beta \in \R^p}
-    \frac{1}{2} \beta^\top D \beta
+    \frac{1}{2} \beta^\top \Sigma \beta
     - v^\top \beta
     + \lambda \norm{\beta}_2
 \end{align*}
-where $D$ is a diagonal matrix with non-negative entries,
-$v$ any vector of the form $\sqrt{D} u$, and $\lambda > 0$.
 
 \Cref{fig:bench:newton-compare} shows a set of comparisons
 Newton, Brent, and Newton-ABS
@@ -23,13 +21,13 @@ Newton, Brent, and Newton-ABS
 Although we also ran ISTA, FISTA, and FISTA with adaptive restart (FISTA-ADA)
 (see~\Cref{ssec:pgd}), they failed to converge, so we omit their benchmark results.
 All Newton methods properly converged.
-For all scenarios, the diagonal of $D$ was generated uniformly from $[0, 1]$.
+For all scenarios, the diagonal of $\Sigma$ was generated uniformly from $[0, 1]$.
 In addition,
 \begin{enumerate}
     \item[(b)] \textbf{Almost PSD:} 1\% of the entries were regenerated uniformly from $[\num{1e-14}, \num{1e-8}]$.
     \item[(c)] \textbf{Very PSD:} 20\% of the entries were set exactly to zero and 10\% were regenerated from $[\num{1e-14}, \num{1e-8}]$.
 \end{enumerate}
-The vector $v$ was generated from $\Normal\pr{0, D}$.
+The vector $v$ was generated from $\Normal\pr{0, \Sigma}$.
 Figures (a) to (c) used $\lambda=\num{1e-1}$ while (d) used $\lambda=\num{1e-4}$.
 Both Newton-ABS and Brent methods are asymptotically faster than Newton,
 however, Brent has the poorest performance for small to moderate $p$ ($\leq 100$).
