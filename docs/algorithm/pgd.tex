@@ -7,7 +7,7 @@ Define
 \begin{align*}
     f(\beta)
     &=
-    \frac{1}{2} \beta^\top D \beta
+    \frac{1}{2} \beta^\top \Sigma \beta
     - v^\top \beta
 \end{align*}
 as the convex (Gaussian) loss function in~(\ref{eq:bcd:block-update}).
@@ -18,7 +18,7 @@ Since
 \begin{align}
     \nabla f(\beta)
     &=
-    D \beta - v
+    \Sigma \beta - v
     \label{eq:pgd:nablaf}
     \\\implies
     \norm{
@@ -26,13 +26,13 @@ Since
         - \nabla f(\tilde{\beta})
     }_2
     &=
-    \norm{D (\beta - \tilde{\beta})}_2
+    \norm{\Sigma (\beta - \tilde{\beta})}_2
     \leq
-    \opnorm{D} \norm{\beta-\tilde{\beta}}_2
+    \opnorm{\Sigma} \norm{\beta-\tilde{\beta}}_2
     \nonumber
 \end{align}
-we have $L \equiv \opnorm{D} \equiv \lambda_{\max}(D)$ as the largest eigenvalue of $D$.
-In particular, since $D$ is diagonal, $L \equiv \max\limits_{i} D_{ii}$.
+we have $L \equiv \opnorm{\Sigma} \equiv \lambda_{\max}(\Sigma)$ as the largest eigenvalue of $\Sigma$.
+In particular, since $\Sigma$ is diagonal, $L \equiv \max\limits_{i} \Sigma_{ii}$.
 
 The ISTA procedure is given in Algorithm~\ref{alg:pgd:ista}.
 By applying a standard Nesterov acceleration~\citep{beck:2009}, 
@@ -43,10 +43,10 @@ for even faster convergence~\citep{odonoghue:2015}. % as outlined in Algorithm~\
 
 \begin{algorithm}[t]
     \caption{ISTA}\label{alg:pgd:ista}
-    \KwData{$D$, $v$, $\lambda$, $\beta^{(0)}$}
-    $\nu \gets \pr{\max\limits_{i} D_{ii}}^{-1}$\;
+    \KwData{$\Sigma$, $v$, $\lambda$, $\beta^{(0)}$}
+    $\nu \gets \pr{\max\limits_{i} \Sigma_{ii}}^{-1}$\;
     \While{not converged}{
-        $w \gets \beta^{(k-1)} + \nu \pr{v - D \beta^{(k-1)}}$\;
+        $w \gets \beta^{(k-1)} + \nu \pr{v - \Sigma \beta^{(k-1)}}$\;
         $\beta^{(k)} \gets \pr{1-\frac{\nu\lambda}{\norm{w}_2}}_{+} w$\;
     }
 \end{algorithm}

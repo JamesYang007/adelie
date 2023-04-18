@@ -48,3 +48,16 @@ The group lasso problem is to minimize the following objective:
 for some convex function $f:\R^p \to \R$ and $\lambda > 0$.
 Similar to the lasso, given data $X$ and $y$, we may use the same Gaussian and Binomial
 log-likelihoods~(\ref{eq:glp:gaussian}),~(\ref{eq:glp:binomial}), respectively, for $f$.
+We note in passing that group lasso can be generalized 
+to elastic net with penalty factors just as in lasso~\citep{zou:2005}:
+\begin{align}
+    \minimize_{\beta \in \R^p}
+    f(\beta)
+    + \lambda \sum\limits_{j=1}^G w_j \pr{\alpha \norm{\beta_j}_2 + \frac{1-\alpha}{2} \norm{\beta_j}_2^2}
+    \label{eq:glp:objective-general}
+\end{align}
+where $w_j \in \R$ is a penalty factor for group $j$ and $\alpha \in [0,1]$ is the elastic net weight.
+While our software\todojames{cite} works in this full generality,
+for simplicity of the discussion,
+we limit ourselves to the case when $\alpha = 1$ and $w_j = 1$ for all $j$.
+

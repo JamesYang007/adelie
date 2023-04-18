@@ -285,6 +285,7 @@ static py::dict group_basil_naive__(
     rsqs_map /= y.squaredNorm();
     
     Eigen::SparseMatrix<double> beta_mat;
+    beta_mat.setZero();
     if (betas_out.size()) {
         beta_mat.resize(X.cols(), betas_out.size());
         for (size_t i = 0; i < betas_out.size(); ++i) {

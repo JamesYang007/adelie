@@ -306,10 +306,12 @@ struct GroupBasilState
     const map_cvec_index_t groups;
     const map_cvec_index_t group_sizes;
     const map_cvec_value_t A_diag;
-    const map_cvec_value_t X_group_norm_sq;
 
+    // NOTE: EDPP is only used when alpha == 1!
+    const map_cvec_value_t X_group_norms;
     std::unordered_set<index_t> edpp_safe_hashset;
     dyn_vec_index_t edpp_safe_set;
+    vec_value_t v1_0;
 
     std::unordered_set<index_t> strong_hashset;
     dyn_vec_index_t strong_set; 
@@ -329,6 +331,7 @@ struct GroupBasilState
     dyn_vec_bool_t is_active;
     vec_value_t resid;
     vec_value_t resid_prev_valid;
+    vec_value_t resid_0;
     vec_value_t grad;       // buffer
     vec_value_t grad_next;  // buffer
     vec_value_t abs_grad;   // this is the one that needs to remain invariant
@@ -347,7 +350,7 @@ struct GroupBasilState
         const GroupsType& groups_,
         const GroupSizesType& group_sizes_,
         const ADiagType& A_diag_,
-        const XGNType& X_group_norm_sq_,
+        const XGNType& X_group_norms_,
         value_t alpha_,
         const PenaltyType& penalty_,
         const GroupBasilCheckpoint<value_t, index_t, bool_t>& bc
@@ -360,7 +363,7 @@ struct GroupBasilState
           groups(groups_.data(), groups_.size()),
           group_sizes(group_sizes_.data(), group_sizes_.size()),
           A_diag(A_diag_.data(), A_diag_.size()),
-          X_group_norm_sq(X_group_norm_sq_.data(), X_group_norm_sq_.size()),
+          X_group_norms(X_group_norms_.data(), X_group_norms_.size()),
           edpp_safe_hashset(bc.edpp_safe_set.begin(), bc.edpp_safe_set.end()),
           edpp_safe_set(bc.edpp_safe_set),
           strong_hashset(bc.strong_set.begin(), bc.strong_set.end()),
@@ -397,7 +400,7 @@ struct GroupBasilState
         const GroupsType& groups_,
         const GroupSizesType& group_sizes_,
         const ADiagType& A_diag_,
-        const XGNType& X_group_norm_sq_,
+        const XGNType& X_group_norms_,
         value_t alpha_,
         const PenaltyType& penalty_
     )
@@ -409,7 +412,7 @@ struct GroupBasilState
           groups(groups_.data(), groups_.size()),
           group_sizes(group_sizes_.data(), group_sizes_.size()),
           A_diag(A_diag_.data(), A_diag_.size()),
-          X_group_norm_sq(X_group_norm_sq_.data(), X_group_norm_sq_.size()),
+          X_group_norms(X_group_norms_.data(), X_group_norms_.size()),
           strong_grad(X_.cols()),
           resid(y_),
           resid_prev_valid(resid),
@@ -430,12 +433,8 @@ struct GroupBasilState
         }
         
         /* initialize edpp_safe_set */
-        // only add variables that have no l1 penalty
-        // TODO: combine into strong_set construction once this is approved?
-        if (alpha <= 0) {
-            edpp_safe_set.resize(groups.size());
-            std::iota(edpp_safe_set.begin(), edpp_safe_set.end(), 0);
-        } else {
+        // only add variables that have no l1 penalty.
+        if (alpha == 1) {
             edpp_safe_set.reserve(initial_size_groups);
             for (size_t i = 0; i < penalty.size(); ++i) {
                 if (penalty[i] <= 0.0) {
@@ -514,6 +513,7 @@ struct GroupBasilState
     {
         resid = resids_curr.col(0);
         resid_prev_valid = resid;
+        resid_0 = resid;
 
         grad = X.transpose() * resid;
         
@@ -527,6 +527,18 @@ struct GroupBasilState
             abs_grad[i] = grad.segment(k, size_k).norm();
         }
 
+        if (alpha == 1) {
+            Eigen::Index g_star;
+            vec_value_t::NullaryExpr(
+                abs_grad.size(),
+                [&](auto i) {
+                    return (penalty[i] <= 0.0) ? 0.0 : abs_grad[i] / penalty[i];
+                }
+            ).maxCoeff(&g_star);
+            const auto X_g_star = X.block(0, groups[g_star], X.rows(), group_sizes[g_star]);
+            v1_0 = X_g_star * X_g_star.transpose() * resid;
+        }
+        
         /* update rsq_prev_valid */
         rsq_prev_valid = rsq;
 
@@ -542,7 +554,9 @@ struct GroupBasilState
         bool all_lambdas_failed,
         bool some_lambdas_failed,
         value_t lmda_prev_valid,
-        value_t lmda_next
+        value_t lmda_next,
+        bool is_lmda_prev_valid_max,
+        size_t n_threads
     )
     {
         // reset current lasso estimates to next lambda sequence length
@@ -558,12 +572,26 @@ struct GroupBasilState
         const auto old_strong_set_size = strong_set.size();
         const auto old_total_strong_size = strong_beta.size();
         
-        // TODO
-        //screen_edpp();
+        // TODO: currently, if this function is called to tidy_up, it may add new variables.
+        const auto old_edpp_safe_set_size = edpp_safe_set.size();
+        screen_edpp(
+            X, groups, group_sizes, X_group_norms, alpha, penalty,            
+            grad, resid_0, resid, lmda_next, lmda_prev_valid, 
+            is_lmda_prev_valid_max, v1_0,
+            [&](auto i) { return is_edpp_safe(i); },
+            n_threads, edpp_safe_set
+        );
 
-        group_lasso::screen(abs_grad, lmda_prev_valid, lmda_next, 
-            alpha, penalty, [&](auto i) { return is_strong(i); }, 
-            delta_strong_size, strong_set, do_strong_rule);
+        const auto edpp_safe_set_new_begin = std::next(edpp_safe_set.begin(), old_edpp_safe_set_size); 
+        edpp_safe_hashset.insert(edpp_safe_set_new_begin, edpp_safe_set.end());
+
+        // TODO: verify if this screws up anything?
+        // screen for new variables only if some lambda failed.
+        if (some_lambdas_failed) {
+            group_lasso::screen(abs_grad, lmda_prev_valid, lmda_next, 
+                alpha, penalty, [&](auto i) { return is_strong(i) || ((alpha == 1) && !is_edpp_safe(i)); }, 
+                delta_strong_size, strong_set, do_strong_rule);
+        }
 
         new_strong_added = (old_strong_set_size < strong_set.size());
 
@@ -588,9 +616,6 @@ struct GroupBasilState
 
         // update is_active to set the new strong variables to false
         is_active.resize(strong_set.size(), false);
-
-        // update residual to previous valid
-        resid = resid_prev_valid;
 
         // At this point, strong_set is ordered for all old variables
         // and unordered for the last few (new variables).
@@ -632,6 +657,9 @@ struct GroupBasilState
         } else {
             strong_beta_prev_valid_view = old_strong_beta_view;
         }
+
+        // update residual to previous valid
+        resid = resid_prev_valid;
 
         // save last valid R^2
         rsq_prev_valid = (rsqs.size() == 0) ? rsq_prev_valid : rsqs.back();
@@ -816,7 +844,7 @@ inline void group_basil(
         const GroupsType& groups,
         const GroupSizesType& group_sizes,
         const ADiagType& A_diag,
-        const XGNType& X_group_norm_sq,
+        const XGNType& X_group_norms,
         ValueType alpha,
         const PenaltyType& penalty,
         const ULmdasType& user_lmdas,
@@ -869,8 +897,8 @@ inline void group_basil(
         sw_t stopwatch(diagnostic.time_init.back());
         basil_state_ptr = (
             checkpoint.is_initialized ? 
-            std::make_unique<basil_state_t>(X, groups, group_sizes, A_diag, X_group_norm_sq, alpha, penalty, checkpoint) :
-            std::make_unique<basil_state_t>(X, y, groups, group_sizes, A_diag, X_group_norm_sq, alpha, penalty)
+            std::make_unique<basil_state_t>(X, groups, group_sizes, A_diag, X_group_norms, alpha, penalty, checkpoint) :
+            std::make_unique<basil_state_t>(X, y, groups, group_sizes, A_diag, X_group_norms, alpha, penalty)
         );
     }
     auto& basil_state = *basil_state_ptr;
@@ -961,8 +989,8 @@ inline void group_basil(
         // Last screening to ensure that the basil state is at the previously valid state.
         // We force non-strong rule and add 0 new variables to preserve the state.
         basil_state.screen(
-            0, 0, false, idx == 0, idx < lmdas_curr.size(),
-            last_lmda, last_lmda
+            0, 0, false, true, true,
+            last_lmda, last_lmda, n_lambdas_rem == max_n_lambdas, n_threads
         );
 
         betas_out = std::move(betas);
@@ -1002,7 +1030,6 @@ inline void group_basil(
         }
 
         /* Screening */
-        // TODO: only screen if some lmda failed?
         const auto lmda_prev_valid = (lmdas.size() == 0) ? lmdas_curr[0] : lmdas.back(); 
         const auto lmda_next = lmdas_curr[0]; // well-defined
         const bool do_strong_rule = use_strong_rule && (idx != 0);
@@ -1012,7 +1039,7 @@ inline void group_basil(
             basil_state.screen(
                 lmdas_curr.size(), delta_strong_size,
                 do_strong_rule, idx == 0, some_lambdas_failed,
-                lmda_prev_valid, lmda_next 
+                lmda_prev_valid, lmda_next, n_lambdas_rem == max_n_lambdas, n_threads
             );
         }
 
@@ -1054,7 +1081,8 @@ inline void group_basil(
             sw_t stopwatch(diagnostic.time_kkt.back());
             idx = check_kkt(
                 X, groups, group_sizes, alpha, penalty, lmdas_curr.head(n_lmdas), betas_curr.head(n_lmdas), resids_curr.block(0, 0, resids_curr.rows(), n_lmdas),
-                [&](auto i) { return basil_state.is_strong(i); }, n_threads, grad, grad_next, abs_grad, abs_grad_next
+                [&](auto i) { return basil_state.is_strong(i) || ((alpha == 1) && !basil_state.is_edpp_safe(i)); }, 
+                n_threads, grad, grad_next, abs_grad, abs_grad_next
             );
             if (idx) {
                 resid_prev_valid = resids_curr.col(idx-1);
@@ -1140,11 +1168,11 @@ inline void group_basil(
         transform_data(X_trans, groups, group_sizes, n_threads, A_diag);    
     }
     
-    vec_t X_group_norm_sq(groups.size());
+    vec_t X_group_norms(groups.size());
     for (size_t i = 0; i < groups.size(); ++i) {
         const auto g = groups[i];
         const auto gs = group_sizes[i];
-        X_group_norm_sq[i] = A_diag.segment(g, gs).sum();
+        X_group_norms[i] = std::sqrt(A_diag.segment(g, gs).sum());
     }
 
     const auto tidy_up = [&]() {
@@ -1155,7 +1183,7 @@ inline void group_basil(
     
     try {
         group_basil(
-            X_trans, y, groups, group_sizes, A_diag, X_group_norm_sq, alpha, penalty, 
+            X_trans, y, groups, group_sizes, A_diag, X_group_norms, alpha, penalty, 
             user_lmdas, max_n_lambdas, n_lambdas_iter,
             use_strong_rule, do_early_exit, verbose_diagnostic, delta_strong_size,
             max_strong_size, max_n_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters,
