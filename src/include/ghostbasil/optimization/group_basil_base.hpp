@@ -150,6 +150,7 @@ void screen(
     const PenaltyType& penalty,
     const ISType& is_strong,
     size_t size,
+    size_t rem_size,
     SSType& strong_set,
     bool do_strong_rule
 )
@@ -158,10 +159,9 @@ void screen(
 
     assert(strong_set.size() <= abs_grad.size());
     if (!do_strong_rule) {
-        size_t rem_size = abs_grad.size() - strong_set.size();
         size_t size_capped = std::min(size, rem_size);
         size_t old_strong_size = strong_set.size();
-        strong_set.insert(strong_set.end(), size_capped, 0);
+        strong_set.insert(strong_set.end(), size_capped, -1);
         const auto factor = (alpha <= 1e-16) ? 1e-3 : alpha;
         const auto abs_grad_p = util::vec_type<value_t>::NullaryExpr(
             abs_grad.size(), [&](auto i) {
@@ -418,11 +418,6 @@ void untransform_solutions(
             beta_i_j_map = trans_beta_j;
         }
     }
-    
-    //for (size_t i = 0; i < betas.size(); ++i) {
-    //    auto& beta_i = betas[i];
-    //    beta_i.prune(0, 1e-14);
-    //}
 }
 
 } // namespace group_lasso

@@ -515,7 +515,7 @@ struct GroupBasilState
         resid_prev_valid = resid;
         resid_0 = resid;
 
-        grad = X.transpose() * resid;
+        grad.noalias() = X.transpose() * resid;
         
         /* update abs_grad */
         for (size_t i = 0; i < groups.size(); ++i) {
@@ -536,7 +536,7 @@ struct GroupBasilState
                 }
             ).maxCoeff(&g_star);
             const auto X_g_star = X.block(0, groups[g_star], X.rows(), group_sizes[g_star]);
-            v1_0 = X_g_star * X_g_star.transpose() * resid;
+            v1_0.noalias() = X_g_star * X_g_star.transpose() * resid;
         }
         
         /* update rsq_prev_valid */
@@ -589,8 +589,9 @@ struct GroupBasilState
         // screen for new variables only if some lambda failed.
         if (some_lambdas_failed) {
             group_lasso::screen(abs_grad, lmda_prev_valid, lmda_next, 
-                alpha, penalty, [&](auto i) { return is_strong(i) || ((alpha == 1) && !is_edpp_safe(i)); }, 
-                delta_strong_size, strong_set, do_strong_rule);
+                alpha, penalty, [&](auto i) { return skip_screen(i); }, 
+                delta_strong_size, edpp_safe_set.size() - old_strong_set_size,
+                strong_set, do_strong_rule);
         }
 
         new_strong_added = (old_strong_set_size < strong_set.size());
@@ -681,6 +682,12 @@ struct GroupBasilState
     bool is_edpp_safe(size_t i) const
     {
         return edpp_safe_hashset.find(i) != edpp_safe_hashset.end();
+    }
+    
+    GHOSTBASIL_STRONG_INLINE
+    bool skip_screen(size_t i) const 
+    {
+        return is_strong(i) || ((alpha == 1) && !is_edpp_safe(i));
     }
 
 private:
@@ -1081,7 +1088,7 @@ inline void group_basil(
             sw_t stopwatch(diagnostic.time_kkt.back());
             idx = check_kkt(
                 X, groups, group_sizes, alpha, penalty, lmdas_curr.head(n_lmdas), betas_curr.head(n_lmdas), resids_curr.block(0, 0, resids_curr.rows(), n_lmdas),
-                [&](auto i) { return basil_state.is_strong(i) || ((alpha == 1) && !basil_state.is_edpp_safe(i)); }, 
+                [&](auto i) { return basil_state.skip_screen(i); }, 
                 n_threads, grad, grad_next, abs_grad, abs_grad_next
             );
             if (idx) {

@@ -551,7 +551,8 @@ struct GroupBasilState
 
         group_lasso::screen(abs_grad, lmda_prev_valid, lmda_next, 
             alpha, penalty, [&](auto i) { return is_strong(i); }, 
-            delta_strong_size, strong_set, do_strong_rule);
+            delta_strong_size, abs_grad.size() - old_strong_set_size, 
+            strong_set, do_strong_rule);
 
         new_strong_added = (old_strong_set_size < strong_set.size());
 
