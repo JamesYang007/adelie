@@ -72,7 +72,7 @@ void screen_edpp(
     const ResidType& resid,
     ValueType lmda_curr,
     ValueType lmda_prev,
-    bool is_lmda_curr_max,
+    bool is_lmda_prev_max,
     const V1Type& v1_0,
     IESType is_edpp_safe,
     size_t n_threads,
@@ -82,7 +82,7 @@ void screen_edpp(
     if (alpha != 1) return;
 
     Eigen::VectorXd v1 = (
-        (is_lmda_curr_max) ?
+        (is_lmda_prev_max) ?
         v1_0 :
         (resid_0 - resid) / lmda_prev
     );
@@ -419,10 +419,10 @@ void untransform_solutions(
         }
     }
     
-    for (size_t i = 0; i < betas.size(); ++i) {
-        auto& beta_i = betas[i];
-        beta_i.prune(0, 1e-14);
-    }
+    //for (size_t i = 0; i < betas.size(); ++i) {
+    //    auto& beta_i = betas[i];
+    //    beta_i.prune(0, 1e-14);
+    //}
 }
 
 } // namespace group_lasso

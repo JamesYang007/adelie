@@ -52,7 +52,8 @@ def generate_group_lasso_data(
 ):
     X = np.random.normal(size=(n, p))
     X = rho * np.sum(X, axis=-1)[:,None] + (1-rho) * X
-    beta = np.random.normal(size=(p,))
+    beta = np.random.normal(size=(p,)) / np.sqrt(p * 0.99)
+    beta[:int(p * 0.99)] = 0
     y = X @ beta + np.random.normal(size=(n,))
     
     X /= np.sqrt(n)
