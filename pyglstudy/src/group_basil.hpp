@@ -44,6 +44,7 @@ inline py::dict convert_checkpoint(
 {
     return py::dict(
         "is_initialized"_a=checkpoint.is_initialized,
+        "edpp_safe_set"_a=checkpoint.edpp_safe_set,
         "strong_set"_a=checkpoint.strong_set,
         "strong_g1"_a=checkpoint.strong_g1,
         "strong_g2"_a=checkpoint.strong_g2,
