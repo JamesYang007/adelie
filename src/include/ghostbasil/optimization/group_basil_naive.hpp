@@ -992,6 +992,7 @@ inline void group_basil(
     size_t idx = 1;         
 
     const auto tidy_up = [&]() {
+        // TODO: not sure if the arguments are correct in screen.
         const auto last_lmda = (lmdas.size() == 0) ? std::numeric_limits<value_t>::max() : lmdas.back();
         // Last screening to ensure that the basil state is at the previously valid state.
         // We force non-strong rule and add 0 new variables to preserve the state.
