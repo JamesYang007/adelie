@@ -1534,6 +1534,35 @@ files = [
 ]
 
 [[package]]
+name = "mosek"
+version = "10.0.40"
+description = "Python API for Mosek"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "Mosek-10.0.40-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:4b637883493b8a15b2332843df24810ed3c0fc478f458a446266b51a167080cc"},
+    {file = "Mosek-10.0.40-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:e7d75e16d58105be0ee3968b89965aec7b8ef4fde6d9a0f45e88d8aad00cd4f8"},
+    {file = "Mosek-10.0.40-cp310-cp310-manylinux2014_aarch64.whl", hash = "sha256:6d69a024b99fa1f070aaf26ed60cb2d9e2fd1cfeb9b373cf3dd22e53cf2f15af"},
+    {file = "Mosek-10.0.40-cp310-cp310-manylinux2014_x86_64.whl", hash = "sha256:e9e7f3208fedc0fbdcae10dc48667acc713b20ff5fe0c0760f6343bc7c9766a8"},
+    {file = "Mosek-10.0.40-cp310-cp310-win_amd64.whl", hash = "sha256:cb663b7ec86df65c9289d4a6131f22fbe3be6125d05b6a0029eaabfa25b81827"},
+    {file = "Mosek-10.0.40-cp37-cp37m-macosx_10_15_x86_64.whl", hash = "sha256:cf381d1e913d8910f841be02d20ed8896fdfb1e725eb65bf68784805d4cfffaf"},
+    {file = "Mosek-10.0.40-cp37-cp37m-manylinux2014_aarch64.whl", hash = "sha256:fe4dd9b372042e7408e0f5c4d989f2cd4eace67121f90db880eecfae3547a15a"},
+    {file = "Mosek-10.0.40-cp37-cp37m-manylinux2014_x86_64.whl", hash = "sha256:7c2660ecb701622bb1c13a145da164fb3b68269b68bf19c549c36d5e9350dee6"},
+    {file = "Mosek-10.0.40-cp37-cp37m-win_amd64.whl", hash = "sha256:58f09f78816637c4c82d3412ea390cdec00e0ef81496ba393688b8c7fbe0b953"},
+    {file = "Mosek-10.0.40-cp38-cp38-macosx_10_15_x86_64.whl", hash = "sha256:6e39516ec62845bcda9be04f18e9b622b50a6f0870598fdfe83547fc5b3d9ba7"},
+    {file = "Mosek-10.0.40-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:73ad586a33653e2d742f6a8c938e363ec7901ea81b6797934c389be88f6c8716"},
+    {file = "Mosek-10.0.40-cp38-cp38-manylinux2014_aarch64.whl", hash = "sha256:3c87f52b96ac9384d41471c343d65c7c129537ffa3fedba93a60c750401d488b"},
+    {file = "Mosek-10.0.40-cp38-cp38-manylinux2014_x86_64.whl", hash = "sha256:378e4a89c0655544d7fd6602d11c86e8f9223b7eb20cb43ceedec2352db9203a"},
+    {file = "Mosek-10.0.40-cp38-cp38-win_amd64.whl", hash = "sha256:ef867320808bd12cd7aaeb98b9c4f2267135eccefaf022fcfb09cf67d88cf4ff"},
+    {file = "Mosek-10.0.40-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:7cbd1005e582cfeba9279d6d930d5584a3f19d17fb37570af86fbda49c74a25e"},
+    {file = "Mosek-10.0.40-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:e485ee9e59f01a6b9632dc29d0db07d4b3ec34762cc2488e2201c3275e7bb860"},
+    {file = "Mosek-10.0.40-cp39-cp39-manylinux2014_aarch64.whl", hash = "sha256:5a37a269e0f8d57c8b197389efa46e945bfe747a30bcef1413bd8e691e62130e"},
+    {file = "Mosek-10.0.40-cp39-cp39-manylinux2014_x86_64.whl", hash = "sha256:39f98894b3ee31011f36b6dccbff735b0fc463b0ce75883e9cb89ec114a35a99"},
+    {file = "Mosek-10.0.40-cp39-cp39-win_amd64.whl", hash = "sha256:7ec3c3846a34643941d09675977b1c6bef44191cd778bc2d9dfdf42f56cfeabf"},
+]
+
+[[package]]
 name = "nbclassic"
 version = "0.5.5"
 description = "Jupyter Notebook as a Jupyter Server extension."
@@ -3156,4 +3185,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.11"
-content-hash = "9d6aec3005fa720b056b1066e89e00cec55344223890236dd374bdeb0043ab58"
+content-hash = "ee8384145b6981749e0bd9f803d384ce7c2f90d052e720d8b89aa3053c2bf34e"
