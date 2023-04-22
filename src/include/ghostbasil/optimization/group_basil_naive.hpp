@@ -425,7 +425,6 @@ struct GroupBasilState
           resids_curr(X_.rows(), 1)
     { 
         /* compute abs_grad */ 
-        // TODO: I'm pretty sure this is not necessary, but just to be safe...
         for (size_t i = 0; i < groups.size(); ++i) {
             const auto k = groups[i];
             const auto size_k = group_sizes[i];
@@ -433,7 +432,9 @@ struct GroupBasilState
         }
         
         /* initialize edpp_safe_set */
-        // only add variables that have no l1 penalty.
+        // Activated only when alpha == 1.
+        // In this case, it only add variables that have no l1 penalty.
+        // Otherwise, all groups are considered safe, since no EDPP rule can prune them out.
         if (alpha == 1) {
             edpp_safe_set.reserve(initial_size_groups);
             for (size_t i = 0; i < penalty.size(); ++i) {
@@ -441,6 +442,9 @@ struct GroupBasilState
                     edpp_safe_set.push_back(i);
                 }
             }
+        } else {
+            edpp_safe_set.resize(groups.size());
+            std::iota(edpp_safe_set.begin(), edpp_safe_set.end(), 0);
         }
         
         /* initialize edpp_safe_hashset */
@@ -564,6 +568,10 @@ struct GroupBasilState
         rsqs_curr.resize(current_size);
         resids_curr.resize(resids_curr.rows(), current_size);
 
+        // update residual to previous valid
+        // NOTE: MUST come first before screen_edpp!!
+        resid = resid_prev_valid;
+
         // screen to append to strong set and strong hashset.
         // Must use the previous valid gradient vector.
         // Only screen if KKT failure happened somewhere in the current lambda vector.
@@ -659,11 +667,10 @@ struct GroupBasilState
             strong_beta_prev_valid_view = old_strong_beta_view;
         }
 
-        // update residual to previous valid
-        resid = resid_prev_valid;
-
         // save last valid R^2
-        rsq_prev_valid = (rsqs.size() == 0) ? rsq_prev_valid : rsqs.back();
+        // TODO: with the new change to initial fitting, we can just take rsqs.back().
+        assert(rsqs.size());
+        rsq_prev_valid = rsqs.back();
 
         // update strong_order for new order of strong_set
         // only if new variables were added to the strong set.
@@ -886,6 +893,9 @@ inline void group_basil(
     using vec_value_t = typename basil_state_t::vec_value_t;
     using lasso_pack_t = GroupLassoParamPack<X_t, value_t, index_t, bool_t>;
     using sw_t = util::Stopwatch;
+    
+    const auto y_mean = y.sum() / y.size();
+    const auto rsq_null = y.squaredNorm() - y.size() * y_mean * y_mean;
 
     // clear the output vectors to guarantee that it only contains produced results
     betas_out.clear();
@@ -964,7 +974,14 @@ inline void group_basil(
             assert(betas_curr.size() == 1);
             assert(rsqs_curr.size() == 1);
 
-            lmdas_curr[0] = std::numeric_limits<value_t>::max();
+            // If alpha == 0, we have no l1 penalty but possibly l2 penalty.
+            // Use current absolute gradient as a heuristic to find a reasonable starting point.
+            // Otherwise, we start with the largest lambda value.
+            lmdas_curr[0] = (
+                (alpha == 0) ? 
+                vec_value_t::NullaryExpr(abs_grad.size(), [&](auto i) { return (penalty[i] == 0) ? 0 : abs_grad[i] / penalty[i]; }).maxCoeff() / 1e-3 :
+                std::numeric_limits<value_t>::max()
+            );
 
             fit(fit_pack, update_coefficients_f, check_user_interrupt);
 
@@ -976,13 +993,17 @@ inline void group_basil(
     // full lambda sequence 
     vec_value_t lmda_seq;
     const bool use_user_lmdas = user_lmdas.size() != 0;
+    const auto lmda_max = (alpha == 0) ? lmdas_curr[0] : lambda_max(abs_grad, alpha, penalty);
     if (!use_user_lmdas) {
-        const auto lmda_max = lambda_max(abs_grad, alpha, penalty);
-        generate_lambdas(max_n_lambdas, min_ratio, lmda_max, lmda_seq);
+        vec_value_t lmda_seq_tmp;
+        generate_lambdas(max_n_lambdas, min_ratio, lmda_max, lmda_seq_tmp);
+        lmda_seq = lmda_seq_tmp.tail(lmda_seq_tmp.size() - 1);
+        --max_n_lambdas; // found solution for lmda_max already
     } else {
         lmda_seq = user_lmdas;
         max_n_lambdas = user_lmdas.size();
     }
+
     n_lambdas_iter = std::min(n_lambdas_iter, max_n_lambdas);
 
     // number of remaining lambdas to process
@@ -990,6 +1011,21 @@ inline void group_basil(
 
     // first index of KKT failure
     size_t idx = 1;         
+    
+    // save the first fit
+    // TODO: currently only works without checkpoint.
+    assert(!checkpoint.is_initialized);
+    betas.emplace_back(betas_curr[0]);
+    rsqs.emplace_back(rsqs_curr[0]);
+    lmdas.emplace_back(lmda_max);
+    diagnostic.strong_sizes_total.push_back(strong_beta.size());
+
+    // update diagnostic for initialization
+    diagnostic.strong_sizes.push_back(strong_set.size());
+    diagnostic.active_sizes.push_back(active_set.size());
+    diagnostic.used_strong_rule.push_back(false);
+    diagnostic.n_cds.push_back(fit_pack.n_cds);
+    diagnostic.n_lambdas_proc.push_back(1);
 
     const auto tidy_up = [&]() {
         // TODO: not sure if the arguments are correct in screen.
@@ -1006,13 +1042,6 @@ inline void group_basil(
         checkpoint = std::move(basil_state);
     };
 
-    // update diagnostic for initialization
-    diagnostic.strong_sizes.push_back(strong_set.size());
-    diagnostic.active_sizes.push_back(active_set.size());
-    diagnostic.used_strong_rule.push_back(false);
-    diagnostic.n_cds.push_back(fit_pack.n_cds);
-    diagnostic.n_lambdas_proc.push_back(1);
-
     while (1) 
     {
         // check early termination 
@@ -1020,7 +1049,7 @@ inline void group_basil(
             const auto rsq_u = rsqs[rsqs.size()-1];
             const auto rsq_m = rsqs[rsqs.size()-2];
             const auto rsq_l = rsqs[rsqs.size()-3];
-            if (lasso::check_early_stop_rsq(rsq_l, rsq_m, rsq_u, cond_0_thresh, cond_1_thresh)) break;
+            if (lasso::check_early_stop_rsq(rsq_l, rsq_m, rsq_u, cond_0_thresh, cond_1_thresh) || (rsqs.back() >= 0.99 * rsq_null)) break;
         }
 
         // finish if no more lambdas to process finished
@@ -1038,16 +1067,17 @@ inline void group_basil(
         }
 
         /* Screening */
-        const auto lmda_prev_valid = (lmdas.size() == 0) ? lmdas_curr[0] : lmdas.back(); 
-        const auto lmda_next = lmdas_curr[0]; // well-defined
         const bool do_strong_rule = use_strong_rule && (idx != 0);
         diagnostic.time_screen.push_back(0);
         {
+            const auto is_lmda_prev_max = n_lambdas_rem == max_n_lambdas;
+            const auto lmda_prev_valid = lmdas.back();
+            const auto lmda_next = lmdas_curr[0];
             sw_t stopwatch(diagnostic.time_screen.back());
             basil_state.screen(
                 lmdas_curr.size(), delta_strong_size,
                 do_strong_rule, idx == 0, some_lambdas_failed,
-                lmda_prev_valid, lmda_next, n_lambdas_rem == max_n_lambdas, n_threads
+                lmda_prev_valid, lmda_next, is_lmda_prev_max, n_threads
             );
         }
 

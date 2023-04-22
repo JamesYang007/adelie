@@ -90,7 +90,7 @@ void screen_edpp(
     Eigen::VectorXd v2_perp = v2 - ((v1.dot(v2)) / v1.squaredNorm()) * v1;
     const auto v2_perp_norm = v2_perp.norm();
     Eigen::VectorXd buffer(X.cols());    
-    
+
     std::vector<std::vector<int>> edpp_new_safe_threads(n_threads);
 
 #pragma omp parallel for schedule(auto) num_threads(n_threads)
