@@ -715,7 +715,7 @@ that is, we have a descent method.
 We now prove~\labelcref{thm:parallel-bcd:convg}.
 Note that since the level sets are compact 
 and~\labelcref{thm:parallel-bcd:descent} has been established, $x^{(k)}$ is bounded.
-Consider any convergent subsequence $x^{(n_k)} \to x^\star$.
+Consider any convergent subsequence $x^{(n_k)} \to x^\star$, which must be finite.
 
 We first begin with an inequality that holds for any $k \geq 0$.
 For any $j=1,\ldots, G$ and $d_j \in \R^{p_j}$,
@@ -729,13 +729,13 @@ For any $j=1,\ldots, G$ and $d_j \in \R^{p_j}$,
     \alpha_i^{(k)}
     f(x^{(k)} + \pi_i(y_i^{(k)}-x_i^{(k)}))
     \nonumber
-    \\&\leq
+    \\&=
     \sum\limits_{i\neq j}
     \alpha_i^{(k)}
-    f(x^{(k)} + \pi_i(y_i^{(k)}-x_i^{(k)}))
+    \underbrace{f(x^{(k)} + \pi_i(y_i^{(k)}-x_i^{(k)}))}_{\leq f(x^{(k)})}
     +
     \alpha_j^{(k)}
-    f(x^{(k)} + \pi_j(d_j))
+    \underbrace{f(x^{(k)} + \pi_j(y_j^{(k)}-x_j^{(k)}))}_{\leq f(x^{(k)} + \pi_j(d_j))}
     \nonumber
     \\&\leq
     (1-\alpha_j^{(k)}) f(x^{(k)})
@@ -785,6 +785,8 @@ We emphasize that in~\Cref{thm:parallel-bcd},
 one can choose $\alpha_i^{(k)}$ 
 in \emph{any fashion} so long as the conditions are satisfied.
 In particular, one may choose $\alpha_i^{(k)}$ \emph{adaptively} based on the current iterate $x^{(k)}$.
+It is quite easy to satisfy the condition that $\liminf\limits_{k\to\infty} \alpha_i^{(k)} > 0$.
+For example, one could arbitrarily set $\alpha_i^{(k)}$ uniformly bounded away from $0$.
 
 Turning to our original discussion of the group lasso objective~\labelcref{eq:glp:objective-general},
 we give a convergence guarantee using~\Cref{thm:parallel-bcd} in~\Cref{cor:parallel-bcd}. 
