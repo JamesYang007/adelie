@@ -1,10 +1,12 @@
 name: glstudy
 channels:
   - conda-forge
+  - nvidia
 dependencies:
   - python=3.10
   - eigen=3.4.0
   - pip
+  - cuda
   - pip:
     - pip==23.0.1
     - poetry==1.4.0

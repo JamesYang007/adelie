@@ -918,6 +918,37 @@ files = [
 arrow = ">=0.15.0"
 
 [[package]]
+name = "jax"
+version = "0.4.8"
+description = "Differentiate, compile, and transform Numpy code."
+category = "main"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "jax-0.4.8.tar.gz", hash = "sha256:08116481f7336db16c24812bfb5e6f9786915f4c2f6ff4028331fa69e7535202"},
+]
+
+[package.dependencies]
+ml_dtypes = ">=0.0.3"
+numpy = ">=1.21"
+opt_einsum = "*"
+scipy = ">=1.7"
+
+[package.extras]
+australis = ["protobuf (>=3.13,<4)"]
+ci = ["jaxlib (==0.4.7)"]
+cpu = ["jaxlib (==0.4.7)"]
+cuda = ["jaxlib (==0.4.7+cuda11.cudnn86)"]
+cuda11-cudnn82 = ["jaxlib (==0.4.7+cuda11.cudnn82)"]
+cuda11-cudnn86 = ["jaxlib (==0.4.7+cuda11.cudnn86)"]
+cuda11-local = ["jaxlib (==0.4.7+cuda11.cudnn86)"]
+cuda11-pip = ["jaxlib (==0.4.7+cuda11.cudnn86)", "nvidia-cublas-cu11 (>=11.11)", "nvidia-cuda-nvcc-cu11 (>=11.8)", "nvidia-cuda-runtime-cu11 (>=11.8)", "nvidia-cudnn-cu11 (>=8.6)", "nvidia-cufft-cu11 (>=10.9)", "nvidia-cusolver-cu11 (>=11.4)", "nvidia-cusparse-cu11 (>=11.7)"]
+cuda12-local = ["jaxlib (==0.4.7+cuda12.cudnn88)"]
+cuda12-pip = ["jaxlib (==0.4.7+cuda12.cudnn88)", "nvidia-cublas-cu12", "nvidia-cuda-nvcc-cu12", "nvidia-cuda-runtime-cu12", "nvidia-cudnn-cu12", "nvidia-cufft-cu12", "nvidia-cusolver-cu12", "nvidia-cusparse-cu12"]
+minimum-jaxlib = ["jaxlib (==0.4.7)"]
+tpu = ["jaxlib (==0.4.7)", "libtpu-nightly (==0.1.dev20230327)", "requests"]
+
+[[package]]
 name = "jedi"
 version = "0.18.2"
 description = "An autocompletion tool for Python that can be used for text editors."
@@ -1534,6 +1565,42 @@ files = [
 ]
 
 [[package]]
+name = "ml-dtypes"
+version = "0.1.0"
+description = ""
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "ml_dtypes-0.1.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:377f2d5cfbf809b59188e0bfda4a0774e658541f575b637fee4850d99c2f9fdc"},
+    {file = "ml_dtypes-0.1.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:87aa1cf83d41fed5a40fc27ee57ac4c1bf904e940f082531d3d58f1c318b5928"},
+    {file = "ml_dtypes-0.1.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:dee8ea629b8e3e20c6649852c1b9deacfa13384ab9337f2c9e717e401d102f23"},
+    {file = "ml_dtypes-0.1.0-cp310-cp310-win_amd64.whl", hash = "sha256:ad765159ac6c18d5ee7d325fcf34d3106a9d9d7a49713d998f5cfa330a1459b4"},
+    {file = "ml_dtypes-0.1.0-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:b9c5578dffd85637a7dd437192de18bc1a14eb6ba7d53ef40de3f84c51c789e5"},
+    {file = "ml_dtypes-0.1.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:36e8518c8fd2c38729f020125f39ef07b045f5c16d0846320c7252d7773285ee"},
+    {file = "ml_dtypes-0.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:99fab8262d175c49bf1655c229244f301274e8289449c350ba4d5b95ade07d9a"},
+    {file = "ml_dtypes-0.1.0-cp311-cp311-win_amd64.whl", hash = "sha256:8de9bbf5bed587a1166699447ea14d1e8fe66d4e812811e37bf2f4d988475476"},
+    {file = "ml_dtypes-0.1.0-cp38-cp38-macosx_10_9_universal2.whl", hash = "sha256:a29fbf128583673eca0f43def1dbe77e02c1e8b8a8331db2877bbb57d091ef11"},
+    {file = "ml_dtypes-0.1.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:273c306db846005b83a98c9c7ec3dc8fa20e8f11c3772c8e8c20cc12d8abfd4b"},
+    {file = "ml_dtypes-0.1.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:41b6beeaea47e2466b94068664c9a45b2a65dd023aa4e5deeb5a73303661344e"},
+    {file = "ml_dtypes-0.1.0-cp38-cp38-win_amd64.whl", hash = "sha256:2de6c81b0da398d54aabdd7de599f2dfc43e30b65d9fad379a69f4cc4ae165d3"},
+    {file = "ml_dtypes-0.1.0-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:77970beeb3cf6ac559c4b6b393f24778a5abd34fafbaad82d5a0d17d0f148936"},
+    {file = "ml_dtypes-0.1.0-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:ffb7882dd46399217dc54f37affc899e0a29a4cfb63e5bf733ac0baf4a179c77"},
+    {file = "ml_dtypes-0.1.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8c5c9fe086756fbc1bf51296431d64429536093cf6e2ba592e042d7fc07c8514"},
+    {file = "ml_dtypes-0.1.0-cp39-cp39-win_amd64.whl", hash = "sha256:c9218175b06764b8ddc95cb18d11a6c4b48a4b103a31c9ea2b2c3cd0cfc369f8"},
+    {file = "ml_dtypes-0.1.0.tar.gz", hash = "sha256:c1fc0afe63ce99069f9d7e0693a61cfd0aea90241fc3821af9953d0c11f4048a"},
+]
+
+[package.dependencies]
+numpy = [
+    {version = ">1.20", markers = "python_version <= \"3.9\""},
+    {version = ">=1.21.2", markers = "python_version > \"3.9\""},
+]
+
+[package.extras]
+dev = ["absl-py", "pyink", "pylint (>=2.6.0)", "pytest", "pytest-xdist"]
+
+[[package]]
 name = "mosek"
 version = "10.0.40"
 description = "Python API for Mosek"
@@ -1799,6 +1866,25 @@ files = [
     {file = "numpy-1.24.2-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:150947adbdfeceec4e5926d956a06865c1c690f2fd902efede4ca6fe2e657c3f"},
     {file = "numpy-1.24.2.tar.gz", hash = "sha256:003a9f530e880cb2cd177cba1af7220b9aa42def9c4afc2a2fc3ee6be7eb2b22"},
 ]
+
+[[package]]
+name = "opt-einsum"
+version = "3.3.0"
+description = "Optimizing numpys einsum function"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "opt_einsum-3.3.0-py3-none-any.whl", hash = "sha256:2455e59e3947d3c275477df7f5205b30635e266fe6dc300e3d9f9646bfcea147"},
+    {file = "opt_einsum-3.3.0.tar.gz", hash = "sha256:59f6475f77bbc37dcf7cd748519c0ec60722e91e63ca114e68821c0c54a46549"},
+]
+
+[package.dependencies]
+numpy = ">=1.7"
+
+[package.extras]
+docs = ["numpydoc", "sphinx (==1.2.3)", "sphinx-rtd-theme", "sphinxcontrib-napoleon"]
+tests = ["pytest", "pytest-cov", "pytest-pep8"]
 
 [[package]]
 name = "osqp"
@@ -3185,4 +3271,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.11"
-content-hash = "ee8384145b6981749e0bd9f803d384ce7c2f90d052e720d8b89aa3053c2bf34e"
+content-hash = "599b2021fb8fc5a1b84fc3a792b2602c80c367a9f85bcdc2edf45f87ffe4e2d1"
