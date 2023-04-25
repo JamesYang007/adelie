@@ -573,3 +573,245 @@ In such a case, the maximization problem is simply a projection onto a closed, n
 which was the critical observation.
 This cannot generalize when $\alpha < 1$.
 
+\section{Parallel Block Coordinate Descent}
+
+In this section, we describe a new algorithm for minimizing a loss function 
+$f : \R^p \to \overline{\R}$ of the form
+\begin{align}
+    f(x)
+    &=
+    f_0(x)
+    +
+    \sum\limits_{i=1}^G f_i(x_i) 
+    \label{eq:bcd:separability}
+\end{align}
+where $f_0 : \R^p \to \overline{\R}$ is a smooth function,
+$f_i: \R^{p_i} \to \overline{\R}$ is any arbitrary (measurable) function
+that only depends on a block $x_i$,
+and $x = (x_1,\ldots, x_G) \in \R^p$ where $x_i \in \R^{p_i}$.
+Note that we are in the same setup as in~\citet{tseng:2001}.
+
+\begin{algorithm}[t]
+    \caption{Parallel Block Coordinate Descent}\label{alg:parallel-bcd}
+    \KwData{$x^{(0)}$}
+    \For{$k=0,1,\ldots$} {
+        \For{$i=1,\ldots,G$ in parallel} {
+            $y_i^{(k)} \gets \argmin\limits_{x_i} f(x^{(k)}_1,\ldots, x_i, \ldots, x^{(k)}_G)$\;
+        }
+        \For{$i=1,\ldots,G$ in parallel} {
+            compute $\alpha_i^{(k)}$\;
+            $x_i^{(k+1)} \gets (1-\alpha_i^{(k)}) x_i^{(k)} + \alpha_i^{(k)} y_i^{(k)}$\;
+        }
+    }
+    return $x^{\star}$\;
+\end{algorithm}
+
+We describe our algorithm for parallel block coordinate descent
+given in~\Cref{alg:parallel-bcd}.
+Suppose at step $k \geq 0$, we are given a point $x^{(k)}$.
+The usual cyclic coordinate descent iterates through each block of coefficients 
+\emph{sequentially} in the following manner:
+\begin{align*}
+    x_i^{(k+1)} &= \argmin\limits_{x_i} f(x^{(k+1)}_1,\ldots, x_i, \ldots, x^{(k)}_G)
+\end{align*}
+where the current block $i$ is optimized while fixing other blocks at their current updates. 
+This dependence across the block updates makes this algorithm impossible to parallelize.
+However, with a slight modification to the algorithm, it becomes easily parallelizable.
+
+Consider the following new update scheme:
+\begin{align}
+    y_i^{(k)} &= \argmin\limits_{x_i} f(x^{(k)}_1,\ldots, x_i, \ldots, x^{(k)}_G) 
+    \label{eq:parallel-bcd:parallel-update}
+    \\
+    x_i^{(k+1)} &= (1-\alpha_i^{(k)}) x^{(k)}_i + \alpha_i^{(k)} y^{(k)}_i
+    \label{eq:parallel-bcd:combine-update}
+\end{align}
+where we let $\alpha_i^{(k)} \in [0,1]$ be any set of weights for now.
+Note the key difference that
+$y_i^{(k)}$ as in~\labelcref{eq:parallel-bcd:parallel-update}
+can be computed \emph{in parallel},
+since we fix all other coordinates at $x^{(k)}$ rather than at their new updates.
+To give convergence guarantees, we must impose some conditions on $f$
+and $\alpha_i^{(k)}$, however, these conditions hold for the group lasso objective~\labelcref{eq:glp:objective-general}.
+More generally, \Cref{thm:parallel-bcd} shows that
+every cluster point of $\set{x^{(k)}}_{k=0}^\infty$
+converges to a coordinate-wise minimum point under some mild conditions.
+
+\begin{theorem}[Properties of Parallel BCD]\label{thm:parallel-bcd}
+Consider the sequences $\set{x^{(k)}}_{k=0}^\infty$ and $\set{y^{(k)}}_{k=0}^\infty$
+defined by~\labelcref{eq:parallel-bcd:combine-update,eq:parallel-bcd:parallel-update}
+where $\alpha_i^{(k)} \in [0,1]$.
+Assume that $f$ is convex.
+Suppose also that $\sum\limits_{i=1}^G \alpha_i^{(k)} = 1$
+for each $k \geq 0$.
+Then, we have the following guarantees:
+\begin{enumerate}[label=(\roman*)]
+\item\label{thm:parallel-bcd:descent}
+    $x^{(k)}$ is a bona fide descent, i.e. $f(x^{(k+1)}) \leq f(x^{(k)})$.
+    
+\item\label{thm:parallel-bcd:convg}
+    Suppose that for each $i$,
+    $\liminf\limits_{k\to\infty} \alpha_i^{(k)} > 0$.
+    Assume that the level sets $\sL_a := \set{x : f(x) \leq f(a)}$ are compact.
+    Then, every cluster point of $\set{x^{(k)}}_{k=0}^\infty$ is a coordinate-wise minimum point.
+    That is, if $x^{(n_k)} \to x^\star$ along a subsequence $n_k$, 
+    then for any $i =1,\ldots, G$ and $d_i \in \R^{p_i}$,
+    \begin{align*}
+        f(x^\star) \leq f(x^\star + \pi_i(d_i))
+    \end{align*}
+    where $\pi_i(d_i) := (0,\ldots, d_i, \ldots, 0)$.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+
+Let $\pi_i: \R^{p_i} \to \R^p$ such that $\pi_i(d) = (0,\ldots, d,\ldots, 0)$
+so that $d \in \R^{p_i}$ is embedded in the $i$th block.
+
+We first prove~\labelcref{thm:parallel-bcd:descent}.
+Fix any $k\geq 0$ and consider $x^{(k)}$.
+By definition of $y^{(k)}$, we have for each $i=1,\ldots, G$ that
+\begin{align*}
+    f(x^{(k)} + \pi_i(y_i^{(k)} - x_i^{(k)}))
+    \leq
+    f(x^{(k)})
+\end{align*}
+Hence, by hypothesis that $\sum\limits_{i=1}^G \alpha_i^{(k)} = 1$,
+\begin{align*}
+    \sum\limits_{i=1}^G 
+    \alpha_i^{(k)}
+    f(x^{(k)} + \pi_i(y_i^{(k)} - x_i^{(k)}))
+    \leq
+    f(x^{(k)})
+\end{align*}
+Next, by convexity of $f$, 
+\begin{align*}
+    f\pr{
+        x^{(k)}
+        +
+        \sum\limits_{i=1}^G
+        \alpha_i^{(k)}
+        \pi_i(y_i^{(k)} - x_i^{(k)})
+    }
+    \leq
+    \sum\limits_{i=1}^G 
+    \alpha_i^{(k)}
+    f(x^{(k)} + \pi_i(y_i^{(k)} - x_i^{(k)}))
+    \leq
+    f(x^{(k)})
+\end{align*}
+Upon inspection, we see that
+\begin{align*}
+    x^{(k+1)}
+    &=
+    x^{(k)}
+    +
+    \sum\limits_{i=1}^G
+    \alpha_i^{(k)}
+    \pi_i(y_i^{(k)} - x_i^{(k)})
+\end{align*}
+Hence, we have shown that $f(x^{(k+1)}) \leq f(x^{(k)})$,
+that is, we have a descent method.
+
+We now prove~\labelcref{thm:parallel-bcd:convg}.
+Note that since the level sets are compact 
+and~\labelcref{thm:parallel-bcd:descent} has been established, $x^{(k)}$ is bounded.
+Consider any convergent subsequence $x^{(n_k)} \to x^\star$.
+
+We first begin with an inequality that holds for any $k \geq 0$.
+For any $j=1,\ldots, G$ and $d_j \in \R^{p_j}$,
+\begin{align}
+    f(x^{(k+1)})
+    &=
+    f\pr{x^{(k)} + \sum\limits_{i=1}^G \alpha_i^{(k)} \pi_i(y_i^{(k)}-x_i^{(k)})}
+    \nonumber
+    \\&\leq
+    \sum\limits_{i=1}^G
+    \alpha_i^{(k)}
+    f(x^{(k)} + \pi_i(y_i^{(k)}-x_i^{(k)}))
+    \nonumber
+    \\&\leq
+    \sum\limits_{i\neq j}
+    \alpha_i^{(k)}
+    f(x^{(k)} + \pi_i(y_i^{(k)}-x_i^{(k)}))
+    +
+    \alpha_j^{(k)}
+    f(x^{(k)} + \pi_j(d_j))
+    \nonumber
+    \\&\leq
+    (1-\alpha_j^{(k)}) f(x^{(k)})
+    + 
+    \alpha_j^{(k)}
+    f(x^{(k)} + \pi_j(d_j))
+    \label{eq:thm:parallel-bcd:key-inequality}
+\end{align}
+where we used convexity and that $y_i^{(k)}$ minimizes along the $i$th coordinate
+with all other coordinates fixed at $x^{(k)}$.
+
+Now, since $f(x^{(k)})$ is monotonically decreasing by~\labelcref{thm:parallel-bcd:descent}
+and $n_{k+1} \geq n_k+1$,
+we have that
+\begin{align*}
+    f(x^{(n_{k+1})}) \leq f(x^{(n_k+1)}) \leq f(x^{(n_k)})
+\end{align*}
+Since $k\mapsto f(x^{n_k+1})$ is also monotonically decreasing,
+taking limit as $k\to\infty$ shows that
+\begin{align*}
+    f(x^\star) \leq \lim\limits_{k\to\infty} f(x^{(n_k+1)}) \leq f(x^\star)
+\end{align*}
+by continuity of $f$, which is implied by convexity.
+
+By possibly passing through a further subsequence of $n_k$,
+we may assume without loss of generality that $\alpha_i^{(n_k)}$ converges
+to a finite limit $\alpha_i^\star$ for every $i=1,\ldots, G$.
+Since $\liminf\limits_{k\to\infty} \alpha_i^{(k)} > 0$,
+we have that $\alpha_i^\star > 0$ for every $i=1,\ldots, G$.
+Then, taking limit as $k\to\infty$ in~\labelcref{eq:thm:parallel-bcd:key-inequality}
+restricted to the subsequence $n_k$,
+\begin{align*}
+    f(x^\star)
+    &\leq 
+    (1-\alpha_j^\star) f(x^\star)
+    + \alpha_j^\star f(x^\star + \pi_j(d_j))
+    \\ \implies
+    f(x^\star)
+    &\leq
+    f(x^\star + \pi_j(d_j))
+\end{align*}
+Since this is true for any $j$ and $d_j$,
+by definition, we have that $x^\star$ is a coordinate-wise minimum point.
+\end{proof}
+
+We emphasize that in~\Cref{thm:parallel-bcd},
+one can choose $\alpha_i^{(k)}$ 
+in \emph{any fashion} so long as the conditions are satisfied.
+In particular, one may choose $\alpha_i^{(k)}$ \emph{adaptively} based on the current iterate $x^{(k)}$.
+
+Turning to our original discussion of the group lasso objective~\labelcref{eq:glp:objective-general},
+we give a convergence guarantee using~\Cref{thm:parallel-bcd} in~\Cref{cor:parallel-bcd}. 
+
+\begin{corollary}[Convergence of Parallel BCD for Group Lasso]
+\label{cor:parallel-bcd}
+Let $\alpha_i^{(k)} \in [0,1]$ be such that $\liminf\limits_{k\to\infty} \alpha_i^{(k)} > 0$
+for every $i=1,\ldots, G$ and $\sum\limits_{i=1}^G \alpha_i^{(k)}$ for all $k\geq 0$.
+If the group lasso objective~\labelcref{eq:glp:objective-general}
+admits a unique minimizer, then the parallel BCD iterates $\set{x^{(k)}}$ 
+given by~\labelcref{eq:parallel-bcd:parallel-update,eq:parallel-bcd:combine-update}
+converges to the global minimium.
+\end{corollary}
+\begin{proof}
+
+Note that the group lasso objective~\labelcref{eq:glp:objective-general}
+is indeed convex and has compact level sets.
+\Cref{thm:parallel-bcd} then shows that every cluster point of $\set{x^{(k)}}_{k=0}^\infty$
+is a coordinate-wise minimum point.
+Following~\citet[Lemma 3.1]{tseng:2001}, since the objective also 
+satisfies the separability condition~\labelcref{eq:bcd:separability}
+with a differentiable component $f_0$, the objective is \emph{regular}.
+Hence, every coordinate-wise minimum point $z$ is a stationary point,
+that is, $f'(z; d) \geq 0$ for all $d \in \R^p$.
+By convexity, we have that $z$ is a global minimum.
+As soon as the group lasso objective admits a unique minimizer,
+the sequence $\set{x^{(k)}}_{k=0}^\infty$ then
+converges to the global minimum.
+
+\end{proof}
