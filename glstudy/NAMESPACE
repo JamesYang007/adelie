@@ -3,6 +3,8 @@
 export(fista_adares_solver)
 export(fista_solver)
 export(gen.data)
+export(group_basil)
+export(group_basil_naive__)
 export(ista_solver)
 export(newton_abs_solver)
 export(newton_solver)
