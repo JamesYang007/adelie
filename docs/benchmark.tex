@@ -51,63 +51,38 @@ we expect significant improvement to the overall optimizer using Newton-ABS.
     \label{fig:bench:newton-compare}
 \end{figure}
 
-%\begin{figure}[t]
-%    \centering
-%    \begin{subfigure}[b]{0.49\textwidth}
-%        \centering
-%        \includegraphics[width=\textwidth]{figures/pgd_newton_pd.pdf}
-%        \caption{Positive definite}
-%        \label{fig:bench:pgd-newton:pd}
-%    \end{subfigure} 
-%    \hfill
-%    \begin{subfigure}[b]{0.49\textwidth}
-%        \centering
-%        \includegraphics[width=\textwidth]{figures/pgd_newton_almost_psd.pdf}
-%        \caption{Almost semi-definite}
-%        \label{fig:bench:pgd-newton:almost_psd}
-%    \end{subfigure} 
-%    \\
-%    \begin{subfigure}[b]{0.49\textwidth}
-%        \centering
-%        \includegraphics[width=\textwidth]{figures/pgd_newton_very_psd.pdf}
-%        \caption{Very semi-definite}
-%        \label{fig:bench:pgd-newton:very_psd}
-%    \end{subfigure} 
-%    \hfill
-%    \begin{subfigure}[b]{0.49\textwidth}
-%        \centering
-%        \includegraphics[width=\textwidth]{figures/pgd_newton_low_regul.pdf}
-%        \caption{Positive definite and low regularization}
-%        \label{fig:bench:pgd-newton:low_regul}
-%    \end{subfigure} 
-%    \caption{%
-%        \Cref{%
-%            fig:bench:pgd-newton:low_regul,%
-%            fig:bench:pgd-newton:almost_psd,%
-%            fig:bench:pgd-newton:pd,%
-%            fig:bench:pgd-newton:very_psd%
-%        }
-%        show a comparison of time, relative time, number of iterations, and accuracy
-%        across different algorithms.
-%        \Cref{%
-%            fig:bench:pgd-newton:almost_psd,%
-%            fig:bench:pgd-newton:pd,%
-%            fig:bench:pgd-newton:very_psd%
-%        } fixed $\lambda=\num{1e-1}$ while 
-%        \Cref{fig:bench:pgd-newton:pd} fixed $\lambda=\num{1e-4}$.
-%        The difference across
-%        \Cref{%
-%            fig:bench:pgd-newton:almost_psd,%
-%            fig:bench:pgd-newton:pd,%
-%            fig:bench:pgd-newton:very_psd%
-%        } is the degree of singularity of $D$.
-%        \Cref{fig:bench:pgd-newton:pd} used a positive definite $D$,
-%        \Cref{fig:bench:pgd-newton:almost_psd} used a positive definite $D$ with
-%        some eigenvalues close to $0$ (but not exactly), and
-%        \Cref{fig:bench:pgd-newton:very_psd} used a positive semi-definite $D$
-%        with some eigenvalues exactly at $0$, some close to $0$, and some sufficiently positive.
-%        Overall, the Newton methods clearly outshine the PGD methods in terms of speed
-%        with Newton-ABS in the obvious lead.
-%    }
-%    \label{fig:bench:pgd-newton}
-%\end{figure}
+\subsection{Benchmark against Other Packages}\label{ssec:benchmark:packages}
+
+\begin{figure}[t]
+    \centering 
+    \includegraphics[width=\textwidth]{figures/package_comparison.pdf}
+    \caption{Plot of runtimes and objective values for our package against other packages.
+    The left plot shows that all packages perform well for small values of $p$,
+    however, we quickly see a noticeable difference as $p$ grows.
+    All packages converged as shown on the right plot.
+    }
+    \label{fig:bench:packages}
+\end{figure}
+
+\Cref{fig:bench:packages} shows a comparison of our package\todojames{name?}
+against other packages: \texttt{grpreg}, \texttt{grplasso}, \texttt{sparsegl}, and \texttt{gglasso}.
+We generate $X \in \R^{n \times p}$ where $n = 100$ and $p \in \set{2^4, \ldots, 2^{20}}$
+and each entry is drawn from $\Normal(0,1)$.
+The true coefficient vector $\beta$ is generated from $\Unif(-1,1)$ with 95\% of the entries
+set to zero randomly.
+Finally, we generate $y$ from the linear model: $y = X \beta + \epsilon$ where $\epsilon \sim \Normal(0, I_n)$.
+The groups are generated with a group size of 10 
+by grouping consecutive coefficients with the possible exception
+of the last group, which may contain any remaining coefficients.
+We center both $X$ and $y$, and scale each column of $X$ such that its norm is 1.
+The regularization path was kept the same across all packages for each data generation.
+\texttt{grpreg} produced an error for $p \geq 2^{19}$
+and \texttt{grplasso} took too long for large $p$, so we omit these results.
+All packages converged, however, \texttt{grpreg} generally had a larger objective.
+We clearly see that our package\todojames{name?}
+performs significantly faster, especially with large $p$.
+With $p = 2^{20}$ (approximately 1 million features), our package\todojames{name?}
+fits a path of about 55 regularization values in \textbf{3 seconds},
+while the next fastest package, \texttt{sparsegl}, runs in \textbf{13 seconds},
+and the next fastest, \texttt{gglasso}, runs in \textbf{27 seconds}.
+
