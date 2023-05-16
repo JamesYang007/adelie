@@ -3,13 +3,16 @@ import jax.numpy as jnp
 import numpy as np
 
 
-def ols_bcd(X, y, tol=1e-8, max_iters=10000):
+def ols_bcd(X, y, beta0, tol=1e-8, max_iters=10000):
     p = X.shape[-1]
-    beta = np.zeros(p)
+    if beta0 is None:
+        beta = np.zeros(p)
+    else:
+        beta = beta0
     X_norm_sq = np.sum(X ** 2, axis=0)
     delta = np.inf
     i = 0
-    resid = np.copy(y)
+    resid = y - X @ beta
     
     while (i < max_iters) and (delta > tol):
         delta = 0
@@ -58,9 +61,10 @@ def ols_pbcd(X, y, tol=1e-8, max_iters=10000):
     return beta, resid, delta, i
 
 
-def ols_epbcd(X, y, n_batches=16, tol=1e-8, max_iters=10000):
+def ols_epbcd(X, y, n_batches=16, tol=1e-8, max_iters=10000, method='greedy', epochs=1):
     n, p = X.shape
     X_norm_sq = jnp.sum(X ** 2, axis=0)
+    y_norm_sq = np.linalg.norm(y) ** 2
     batch_size = p // n_batches
     remainder = p - n_batches * batch_size
 
@@ -70,7 +74,7 @@ def ols_epbcd(X, y, n_batches=16, tol=1e-8, max_iters=10000):
     #deltas = np.zeros(n_batches)
     delta = jnp.inf
     alphas = np.zeros(n_batches)
-    y_hats = np.zeros((n_batches, n))
+    resid_diffs = np.zeros((n_batches, n))
     
     while (i < max_iters) and (delta > tol):
         curr_beta = np.copy(beta)
@@ -81,19 +85,25 @@ def ols_epbcd(X, y, n_batches=16, tol=1e-8, max_iters=10000):
             end = begin + batch_size + (b == n_batches-1) * remainder
 
             # coordinate descent on the batch
-            y_hats[b] = resid
-            for epoch in range(1):
+            resid_diffs[b] = resid
+            for _ in range(epochs):
                 for j in range(begin, end):
-                    bj_new = (X[:, j] @ y_hats[b]) / X_norm_sq[j] + curr_beta[j]
+                    bj_new = (X[:, j] @ resid_diffs[b]) / X_norm_sq[j] + curr_beta[j]
                     beta_diff = bj_new - curr_beta[j]
                     #deltas[b] += beta_diff ** 2 * X_norm_sq[j]
-                    y_hats[b] -= X[:, j] * beta_diff
+                    resid_diffs[b] -= X[:, j] * beta_diff
                     curr_beta[j] = bj_new
-            y_hats[b] = resid - y_hats[b]
+            resid_diffs[b] = resid - resid_diffs[b]
 
             #deltas[b] /= end - begin
     
-        alphas = np.linalg.solve(y_hats @ y_hats.T, y_hats @ resid)
+        if method == 'greedy':
+            i_star = np.argmin(np.linalg.norm(resid[None] - resid_diffs, axis=-1))
+            alphas = np.zeros(n_batches)
+            alphas[i_star] = 1
+        else:
+            alphas = np.linalg.solve(resid_diffs @ resid_diffs.T, resid_diffs @ resid)
+
         #eta = np.copy(resid)
         #y_hat_norm_sq = np.linalg.norm(y_hats, axis=-1) ** 2
         #alphas[...] = 0
@@ -120,12 +130,17 @@ def ols_epbcd(X, y, n_batches=16, tol=1e-8, max_iters=10000):
             end = begin + batch_size + (b == n_batches-1) * remainder
             curr_beta[begin:end] = beta[begin:end] + alphas[b] * (curr_beta[begin:end] - beta[begin:end])
 
-        resid_new = X @ (curr_beta - beta)
-        delta = np.mean((resid_new-resid) ** 2)
-        resid -= resid_new
+        curr_fit = np.linalg.norm(resid) ** 2
+        resid -= X @ (curr_beta - beta)
+        delta = (curr_fit - np.linalg.norm(resid) ** 2) / y_norm_sq
         beta = curr_beta
         #deltas[...] = 0
         i += 1
         print(delta)
 
     return beta, resid, delta, i
+
+
+def ols_combined(X, y, n_batches=16, tol=1e-5, max_iters=10000, method='opt', epochs=1):
+    beta, resid, delta, i = ols_epbcd(X, y, n_batches, tol, max_iters, method, epochs)
+    return ols_bcd(X, y, beta, tol=1e-9, max_iters=max_iters)
