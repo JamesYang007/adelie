@@ -3,6 +3,7 @@
 #include <unordered_set>
 #include <memory>
 #include <vector>
+#include <ghostbasil/matrix/cov_cache.hpp>
 #include <ghostbasil/optimization/group_basil_base.hpp>
 #include <ghostbasil/optimization/group_lasso_cov.hpp>
 #include <ghostbasil/util/stopwatch.hpp>
@@ -519,6 +520,8 @@ struct GroupBasilState
             abs_grad[i] = is_strong(i) ? 0 : grad.segment(k, size_k).norm();
         }
 
+        // TODO: EDPP rule!!! Maybe not needed cuz this is only used when p is small.
+
         /* update rsq_prev_valid */
         rsq_prev_valid = rsq;
 
@@ -1004,7 +1007,10 @@ inline void group_basil(
             diagnostic.checkpoints.emplace_back(basil_state);
         }
 
-        if (strong_beta.size() > max_strong_size) throw util::max_basil_strong_set();
+        if (strong_beta.size() > max_strong_size) {
+            tidy_up();
+            throw util::max_basil_strong_set();
+        }
 
         /* Fit lasso */
         lasso_pack_t fit_pack(
@@ -1122,7 +1128,7 @@ inline void group_basil(
         transform_data(X_trans, groups, group_sizes, n_threads, A_diag);    
     }
     vec_t r = X_trans.transpose() * y;
-    CovCache<X_t, value_t> A(X_trans);
+    CovCache<mat_t, value_t> A(X_trans);
     
     const auto tidy_up = [&]() {
         diagnostic.time_untransform.push_back(0);

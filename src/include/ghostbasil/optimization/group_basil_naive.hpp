@@ -540,7 +540,7 @@ struct GroupBasilState
                 }
             ).maxCoeff(&g_star);
             const auto X_g_star = X.block(0, groups[g_star], X.rows(), group_sizes[g_star]);
-            v1_0.noalias() = X_g_star * X_g_star.transpose() * resid;
+            v1_0.noalias() = X_g_star * (X_g_star.transpose() * resid);
         }
         
         /* update rsq_prev_valid */
