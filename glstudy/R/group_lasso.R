@@ -8,6 +8,7 @@ group_basil <- function(
     group_sizes,
     alpha=1,
     penalty=sqrt(group_sizes),
+    method=ifelse(ncol(X) <= 500, 'cov', 'naive'),
     user_lmdas=double(0),
     max_n_lambdas=100,
     n_lambdas_iter=5,
@@ -26,7 +27,15 @@ group_basil <- function(
     n_threads=16
 )
 {
-    group_basil_naive__(
+    if (method == 'cov') {
+        method_f__ = group_basil_cov__
+    } else if (method == 'naive') {
+        method_f__ = group_basil_naive__
+    } else {
+        stop("Unknown method type.")
+    }
+
+    method_f__(
         X, y, as.integer(groups), as.integer(group_sizes), alpha, penalty,
         user_lmdas, max_n_lambdas, n_lambdas_iter,
         use_strong_rule, do_early_exit, verbose_diagnostic,

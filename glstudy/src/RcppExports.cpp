@@ -59,6 +59,38 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// group_basil_cov__
+Rcpp::List group_basil_cov__(const Eigen::Map<Eigen::MatrixXd>& X, const Eigen::Map<Eigen::VectorXd>& y, const Eigen::Map<Eigen::VectorXi>& groups, const Eigen::Map<Eigen::VectorXi>& group_sizes, double alpha, const Eigen::Map<Eigen::VectorXd>& penalty, const Eigen::Map<Eigen::VectorXd>& user_lmdas_, size_t max_n_lambdas, size_t n_lambdas_iter, bool use_strong_rule, bool do_early_exit, bool verbose_diagnostic, size_t delta_strong_size, size_t max_strong_size, size_t max_n_cds, double thr, double cond_0_thresh, double cond_1_thresh, double newton_tol, size_t newton_max_iters, double min_ratio, size_t n_threads);
+RcppExport SEXP _glstudy_group_basil_cov__(SEXP XSEXP, SEXP ySEXP, SEXP groupsSEXP, SEXP group_sizesSEXP, SEXP alphaSEXP, SEXP penaltySEXP, SEXP user_lmdas_SEXP, SEXP max_n_lambdasSEXP, SEXP n_lambdas_iterSEXP, SEXP use_strong_ruleSEXP, SEXP do_early_exitSEXP, SEXP verbose_diagnosticSEXP, SEXP delta_strong_sizeSEXP, SEXP max_strong_sizeSEXP, SEXP max_n_cdsSEXP, SEXP thrSEXP, SEXP cond_0_threshSEXP, SEXP cond_1_threshSEXP, SEXP newton_tolSEXP, SEXP newton_max_itersSEXP, SEXP min_ratioSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd>& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::VectorXd>& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::VectorXi>& >::type groups(groupsSEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::VectorXi>& >::type group_sizes(group_sizesSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::VectorXd>& >::type penalty(penaltySEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::VectorXd>& >::type user_lmdas_(user_lmdas_SEXP);
+    Rcpp::traits::input_parameter< size_t >::type max_n_lambdas(max_n_lambdasSEXP);
+    Rcpp::traits::input_parameter< size_t >::type n_lambdas_iter(n_lambdas_iterSEXP);
+    Rcpp::traits::input_parameter< bool >::type use_strong_rule(use_strong_ruleSEXP);
+    Rcpp::traits::input_parameter< bool >::type do_early_exit(do_early_exitSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose_diagnostic(verbose_diagnosticSEXP);
+    Rcpp::traits::input_parameter< size_t >::type delta_strong_size(delta_strong_sizeSEXP);
+    Rcpp::traits::input_parameter< size_t >::type max_strong_size(max_strong_sizeSEXP);
+    Rcpp::traits::input_parameter< size_t >::type max_n_cds(max_n_cdsSEXP);
+    Rcpp::traits::input_parameter< double >::type thr(thrSEXP);
+    Rcpp::traits::input_parameter< double >::type cond_0_thresh(cond_0_threshSEXP);
+    Rcpp::traits::input_parameter< double >::type cond_1_thresh(cond_1_threshSEXP);
+    Rcpp::traits::input_parameter< double >::type newton_tol(newton_tolSEXP);
+    Rcpp::traits::input_parameter< size_t >::type newton_max_iters(newton_max_itersSEXP);
+    Rcpp::traits::input_parameter< double >::type min_ratio(min_ratioSEXP);
+    Rcpp::traits::input_parameter< size_t >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(group_basil_cov__(X, y, groups, group_sizes, alpha, penalty, user_lmdas_, max_n_lambdas, n_lambdas_iter, use_strong_rule, do_early_exit, verbose_diagnostic, delta_strong_size, max_strong_size, max_n_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters, min_ratio, n_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
 // group_basil_naive__
 Rcpp::List group_basil_naive__(const Eigen::Map<Eigen::MatrixXd>& X, const Eigen::Map<Eigen::VectorXd>& y, const Eigen::Map<Eigen::VectorXi>& groups, const Eigen::Map<Eigen::VectorXi>& group_sizes, double alpha, const Eigen::Map<Eigen::VectorXd>& penalty, const Eigen::Map<Eigen::VectorXd>& user_lmdas_, size_t max_n_lambdas, size_t n_lambdas_iter, bool use_strong_rule, bool do_early_exit, bool verbose_diagnostic, size_t delta_strong_size, size_t max_strong_size, size_t max_n_cds, double thr, double cond_0_thresh, double cond_1_thresh, double newton_tol, size_t newton_max_iters, double min_ratio, size_t n_threads);
 RcppExport SEXP _glstudy_group_basil_naive__(SEXP XSEXP, SEXP ySEXP, SEXP groupsSEXP, SEXP group_sizesSEXP, SEXP alphaSEXP, SEXP penaltySEXP, SEXP user_lmdas_SEXP, SEXP max_n_lambdasSEXP, SEXP n_lambdas_iterSEXP, SEXP use_strong_ruleSEXP, SEXP do_early_exitSEXP, SEXP verbose_diagnosticSEXP, SEXP delta_strong_sizeSEXP, SEXP max_strong_sizeSEXP, SEXP max_n_cdsSEXP, SEXP thrSEXP, SEXP cond_0_threshSEXP, SEXP cond_1_threshSEXP, SEXP newton_tolSEXP, SEXP newton_max_itersSEXP, SEXP min_ratioSEXP, SEXP n_threadsSEXP) {
@@ -163,6 +195,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glstudy_ista_solver", (DL_FUNC) &_glstudy_ista_solver, 6},
     {"_glstudy_fista_solver", (DL_FUNC) &_glstudy_fista_solver, 6},
     {"_glstudy_fista_adares_solver", (DL_FUNC) &_glstudy_fista_adares_solver, 6},
+    {"_glstudy_group_basil_cov__", (DL_FUNC) &_glstudy_group_basil_cov__, 22},
     {"_glstudy_group_basil_naive__", (DL_FUNC) &_glstudy_group_basil_naive__, 22},
     {"_glstudy_newton_solver", (DL_FUNC) &_glstudy_newton_solver, 6},
     {"_glstudy_newton_abs_solver", (DL_FUNC) &_glstudy_newton_abs_solver, 6},
