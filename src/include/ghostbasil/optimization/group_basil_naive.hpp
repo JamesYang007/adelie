@@ -1085,7 +1085,10 @@ inline void group_basil(
             diagnostic.checkpoints.emplace_back(basil_state);
         }
 
-        if (strong_beta.size() > max_strong_size) throw util::max_basil_strong_set();
+        if (strong_beta.size() > max_strong_size) {
+            tidy_up();
+            throw util::max_basil_strong_set();
+        }
 
         /* Fit lasso */
         lasso_pack_t fit_pack(
