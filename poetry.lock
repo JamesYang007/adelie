@@ -1338,6 +1338,21 @@ files = [
 ]
 
 [[package]]
+name = "latextable"
+version = "1.0.0"
+description = "An extension to the texttable library that exports tables directly to Latex."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "latextable-1.0.0-py3-none-any.whl", hash = "sha256:14243bda215a408e725e5f999aa3fb889a7f05b9f1e9fc013ff099cafc44df98"},
+    {file = "latextable-1.0.0.tar.gz", hash = "sha256:a9ab424e0fa6d8546600f951c297db5e8c6770745ecb4c451bb99ff6ffd9ffc9"},
+]
+
+[package.dependencies]
+texttable = "*"
+
+[[package]]
 name = "mako"
 version = "1.2.4"
 description = "A super-fast templating language that borrows the best ideas from the existing templating languages."
@@ -2991,6 +3006,18 @@ docs = ["myst-parser", "pydata-sphinx-theme", "sphinx"]
 test = ["pre-commit", "pytest (>=7.0)", "pytest-timeout"]
 
 [[package]]
+name = "texttable"
+version = "1.6.7"
+description = "module to create simple ASCII tables"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "texttable-1.6.7-py2.py3-none-any.whl", hash = "sha256:b7b68139aa8a6339d2c320ca8b1dc42d13a7831a346b446cb9eb385f0c76310c"},
+    {file = "texttable-1.6.7.tar.gz", hash = "sha256:290348fb67f7746931bcdfd55ac7584ecd4e5b0846ab164333f0794b121760f2"},
+]
+
+[[package]]
 name = "threadpoolctl"
 version = "3.1.0"
 description = "threadpoolctl"
@@ -3271,4 +3298,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.11"
-content-hash = "599b2021fb8fc5a1b84fc3a792b2602c80c367a9f85bcdc2edf45f87ffe4e2d1"
+content-hash = "1932ce1aba02eee8c90cc22bc4c5ce85fd4cf89e0a5f7c9b99055c0d1b6eb993"
