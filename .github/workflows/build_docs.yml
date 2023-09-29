@@ -24,7 +24,7 @@ jobs:
     - name: Set up dependencies
       run: |
         conda activate grpglmnet
-        poetry install --only doc --no-root
+        poetry install --without test,dev --no-root
     - name: Install grpglmnet
       run: |
         pip install -e .
