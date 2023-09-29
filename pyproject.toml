@@ -42,9 +42,11 @@ cell_metadata_filter = "-all"
 
 [build-system]
 requires = [
-    "setuptools",
     "poetry-core>=1.0.0",
+    "setuptools>=42", 
+    "wheel", 
+    "pybind11~=2.6.1",
 ]
-build-backend = "poetry.core.masonry.api"
+build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
