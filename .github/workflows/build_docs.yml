@@ -18,14 +18,16 @@ jobs:
     - uses: conda-incubator/setup-miniconda@v2
       with:
         mamba-version: "*"
-        channels: conda-forge,defaults
         activate-environment: grpglmnet
         environment-file: environment.yml
         auto-activate-base: false
+    - name: Set up dependencies
+      run: |
+        conda activate grpglmnet
+        poetry install --only doc --no-root
     # Standard drop-in approach that should work for most people.
     - uses: ammaraskar/sphinx-action@master
       with:
-        pre-build-command: "conda activate grpglmnet && poetry install --only doc --no-root"
         docs-folder: "docs/sphinx"
     # Great extra actions to compose with:
     # Create an artifact of the html output.
