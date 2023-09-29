@@ -5,7 +5,7 @@ import sysconfig
 import os
 import platform
 
-__version__ = "0.0.9"
+__version__ = "1.1.0"
 
 ENVPATH = os.getenv("CONDA_PREFIX")
 
@@ -30,13 +30,13 @@ if (system_name == "Linux"):
 
 ext_modules = [
     Pybind11Extension(
-        "pyglstudy.pyglstudy_ext",
-        sorted(glob("pyglstudy/src/*.cpp")),  # Sort source files for reproducibility
+        "grpglmnet.grpglmnet_core",
+        sorted(glob("grpglmnet/src/*.cpp")),  # Sort source files for reproducibility
         define_macros = [
-            ('EIGEN_MATRIXBASE_PLUGIN', '\"ghostbasil/util/eigen/matrixbase_plugin.hpp\"'),
+            ('EIGEN_MATRIXBASE_PLUGIN', '\"grpglmnet_core/util/eigen/matrixbase_plugin.hpp\"'),
         ],
         include_dirs=[
-            'src/include',
+            'grpglmnet_core/include',
             os.path.join(ENVPATH, 'include'),
             os.path.join(ENVPATH, 'include/eigen3'),
         ],
@@ -48,7 +48,7 @@ ext_modules = [
 ]
 
 setup(
-    name='pyglstudy', 
+    name='grpglmnet', 
     version=__version__,
     description='A comprehensive test-bed library for group lasso.',
     long_description='',

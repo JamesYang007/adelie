@@ -1,4 +1,4 @@
-name: glstudy
+name: grpglmnet
 channels:
   - conda-forge
   - nvidia
@@ -8,5 +8,5 @@ dependencies:
   - pip
   - cuda
   - pip:
-    - pip==23.0.1
-    - poetry==1.4.0
+    - pip
+    - poetry
