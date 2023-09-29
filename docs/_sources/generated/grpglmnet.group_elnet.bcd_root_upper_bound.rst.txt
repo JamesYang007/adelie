@@ -1,0 +1,6 @@
+﻿grpglmnet.group\_elnet.bcd\_root\_upper\_bound
+==============================================
+
+.. currentmodule:: grpglmnet.group_elnet
+
+.. autofunction:: bcd_root_upper_bound

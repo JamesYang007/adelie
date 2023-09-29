@@ -1,0 +1,6 @@
+﻿grpglmnet.group\_elnet.bcd\_root\_function
+==========================================
+
+.. currentmodule:: grpglmnet.group_elnet
+
+.. autofunction:: bcd_root_function
