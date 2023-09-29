@@ -216,9 +216,24 @@ class GroupElnetResult:
         The residual :math:`y-X\\beta` using ``strong_beta``.
     strong_beta : np.ndarray
         The last-updated coefficient for strong groups.
-        ``strong_beta[b:b+p]`` is the coefficient for group ``i``
-        where ``b = strong_begins[i]
-        
+        ``strong_beta[b:b+p]`` is the coefficient for group ``k`` 
+        where
+        ``k = strong_set[i]``,
+        ``b = strong_begins[i]``,
+        and ``p = group_sizes[k]``.
+    strong_grad : np.ndarray
+        The last-updated gradient :math:`X_k^\\top (y - X\\beta)` for all strong groups :math:`k`.
+        ``strong_grad[b:b+p]`` is the gradient for group ``k``
+        where 
+        ``k = strong_set[i]``,
+        ``b = strong_begins[i]``,
+        and ``p = group_sizes[k]``.
+    active_set : np.ndarray
+        The last-updated active set among the strong groups.
+        ``active_set[i]`` is the *index* to ``strong_set`` that indicates the ``i``th active group.
+    active_g1 : np.ndarray
+        The last-updated active set with group sizes of 1.
+        Similar description as ``active_set``.
     """
     rsq: float
     resid: np.ndarray
