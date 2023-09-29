@@ -234,6 +234,15 @@ class GroupElnetResult:
     active_g1 : np.ndarray
         The last-updated active set with group sizes of 1.
         Similar description as ``active_set``.
+    active_g2 : np.ndarray
+        The last-updated active set with group sizes > 1.
+        Similar description as ``active_set``.
+    active_begins : np.ndarray
+        The last-updated indices to values for the active set.
+        ``active_begins[i]`` is the starting index to read values in ``strong_beta``
+        for the ``i``th active group.
+    active_order : np.ndarray
+        The last-updated indices in such that ``strong_set`` is sorted in ascending order for the active groups.
     """
     rsq: float
     resid: np.ndarray
