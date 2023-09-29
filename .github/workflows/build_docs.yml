@@ -15,7 +15,7 @@ jobs:
     # Standard drop-in approach that should work for most people.
     - uses: ammaraskar/sphinx-action@master
       with:
-        pre-build-command: "pip install -U jinja2==3.1 numpydoc"
+        pre-build-command: "pip install -U jinja2==3.1 numpydoc pydata_sphinx_theme"
         docs-folder: "docs/sphinx"
     # Great extra actions to compose with:
     # Create an artifact of the html output.
