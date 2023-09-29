@@ -1,4 +1,4 @@
-import pyglstudy as gl
+import grpglmnet as gl
 import numpy as np
 
 def test_newton_abs():

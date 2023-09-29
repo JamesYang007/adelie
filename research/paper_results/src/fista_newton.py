@@ -1,4 +1,4 @@
-import pyglstudy as gl
+import grpglmnet as gl
 import matplotlib.pyplot as plt
 import timeit
 import numpy as np
