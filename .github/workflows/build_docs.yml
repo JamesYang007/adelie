@@ -30,7 +30,9 @@ jobs:
       run: |
         git checkout gh-pages
         git merge -X theirs origin/main
-        sphinx-build docs/sphinx docs/html
+        cd docs
+        sphinx-build sphinx html
+        cd ..
     # Great extra actions to compose with:
     # Create an artifact of the html output.
     - uses: actions/upload-artifact@v1
