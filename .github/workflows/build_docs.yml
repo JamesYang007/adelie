@@ -9,11 +9,16 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        shell: bash -l {0}
+        
     steps:
     - uses: actions/checkout@v1
     - uses: conda-incubator/setup-miniconda@v2
       with:
+        mamba-version: "*"
+        channels: conda-forge,defaults
         activate-environment: grpglmnet
         environment-file: environment.yml
         auto-activate-base: false
