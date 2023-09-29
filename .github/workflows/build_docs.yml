@@ -25,6 +25,9 @@ jobs:
       run: |
         conda activate grpglmnet
         poetry install --only doc --no-root
+    - name: Install grpglmnet
+      run: |
+        pip install -e .
     # Standard drop-in approach that should work for most people.
     - name: Build documentation
       run: |
