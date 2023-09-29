@@ -203,8 +203,23 @@ def objective(
         beta, X, y, groups, group_sizes, lmda, alpha, penalty
     )
 
+
 @dataclass
 class GroupElnetResult:
+    """Group elastic net result.
+
+    Parameters
+    ----------
+    rsq : float
+        :math:`R^2` value using ``strong_beta``.
+    resid : np.ndarray
+        The residual :math:`y-X\\beta` using ``strong_beta``.
+    strong_beta : np.ndarray
+        The last-updated coefficient for strong groups.
+        ``strong_beta[b:b+p]`` is the coefficient for group ``i``
+        where ``b = strong_begins[i]
+        
+    """
     rsq: float
     resid: np.ndarray
     strong_beta: np.ndarray
