@@ -15,7 +15,7 @@ jobs:
     # Standard drop-in approach that should work for most people.
     - uses: ammaraskar/sphinx-action@master
       with:
-        pre-build-command: "pip install poetry && poetry install --only doc --no-root"
+        pre-build-command: "conda env create && conda activate grpglmnet && poetry install --only doc --no-root"
         docs-folder: "docs/sphinx"
     # Great extra actions to compose with:
     # Create an artifact of the html output.
