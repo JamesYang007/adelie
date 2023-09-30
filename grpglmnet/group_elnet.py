@@ -3,24 +3,20 @@ import numpy as np
 from dataclasses import dataclass, asdict
 
 
-def bcd_update(
+def bcd_objective(
+    beta: np.ndarray,
+    *,
     quad: np.ndarray,
     linear: np.ndarray,
     l1: float,
     l2: float,
-    tol: float,
-    max_iters: int,
-    *,
-    solver: str ="newton_abs",
-    **kwargs,
 ):
-    """Solves the block-coordinate descent update.
+    """Computes the BCD objective.
 
-    The block-coordinate descent update for the group elastic net is obtained by solving:
+    The BCD objective is given by
 
     .. math::
         \\begin{align*}
-            \\mathrm{minimize}_\\beta \\quad&
             \\frac{1}{2} \\beta^\\top \\Sigma \\beta - v^\\top \\beta 
             + \\lambda_1 \\|\\beta\\|_2
             + \\frac{\\lambda_2}{2} \\|\\beta\\|_2^2
@@ -34,6 +30,8 @@ def bcd_update(
 
     Parameters
     ----------
+    beta : (p,) np.ndarray
+        The input value in which the objective is evaluated.
     quad : (p,) np.ndarray
         The quadratic component :math:`\\Sigma`.
     linear : (p,) np.ndarray
@@ -42,6 +40,46 @@ def bcd_update(
         The :math:`\\ell_1` component :math:`\\lambda_1`.
     l2 : float
         The :math:`\\ell_2` component :math:`\\lambda_2`.
+
+    Returns
+    -------
+    out : float
+        The BCD objective.
+
+    See Also
+    --------
+    grpglmnet.group_elnet.bcd_update
+    """
+    beta_norm = np.linalg.norm(beta)
+    return 0.5 * quad @ beta ** 2 - linear @ beta + l1 * beta_norm + 0.5 * l2 * beta_norm ** 2
+
+
+def bcd_update(
+    *,
+    quad: np.ndarray,
+    linear: np.ndarray,
+    l1: float,
+    l2: float,
+    tol: float,
+    max_iters: int,
+    solver: str ="newton_abs",
+    **kwargs,
+):
+    """Solves the BCD update.
+
+    The BCD update for the group elastic net is obtained by minimizing
+    the BCD objective given in ``bcd_objective()``.
+
+    Parameters
+    ----------
+    quad : (p,) np.ndarray
+        See ``bcd_objective()``.
+    linear : (p,) np.ndarray
+        See ``bcd_objective()``.
+    l1 : float
+        See ``bcd_objective()``.
+    l2 : float
+        See ``bcd_objective()``.
     tol : float
         Convergence tolerance.
     max_iters : int
@@ -50,6 +88,11 @@ def bcd_update(
         Solver type must be one of 
         ``["brent", "newton", "newton_brent", "newton_abs", "newton_abs_debug", "ista", "fista", "fista_adares"]``.
         Default is ``"newton_abs"``.
+
+        .. warning::
+            The following methods are known to have poor convergence:
+            ``["brent", "ista", "fista", "fista_adares"]``.
+
     smart_init : bool
         If ``True``, the ABS method is invoked to find a smart initial point before starting Newton's method.
         It is only used when ``solver`` is ``"newton_abs_debug"``.
@@ -57,8 +100,12 @@ def bcd_update(
     Returns
     -------
     out : Dict[str, Any]
-        - ``out["x"]``: solution vector.
-        - ``out["it"]``: number of iterations taken.
+        - ``out["beta"]``: solution vector.
+        - ``out["iters"]``: number of iterations taken.
+
+    See Also
+    --------
+    grpglmnet.group_elnet.bcd_objective
     """
     solver_dict = {
         "brent": core.brent_solver,
@@ -70,10 +117,11 @@ def bcd_update(
         "fista": core.fista_solver,
         "fista_adares": core.fista_adares_solver,
     }
-    return solver_dict[solver](L, v, l1, l2, tol, max_iters, **kwargs)
+    return solver_dict[solver](quad, linear, l1, l2, tol, max_iters, **kwargs)
 
 
 def bcd_root_lower_bound(
+    *,
     quad: np.ndarray,
     linear: np.ndarray,
     l1: float,
@@ -82,7 +130,7 @@ def bcd_root_lower_bound(
 
     The lower bound :math:`h` is guaranteed to be non-negative
     and satisfies :math:`\\varphi(h) \\geq 0` where :math:`\\varphi`
-    is given by ``bcd_root_function()``.
+    is given by ``bcd_root_function()`` whenever :math:`\\|v\\|_2 > \\lambda`.
 
     Parameters
     ----------
@@ -106,6 +154,7 @@ def bcd_root_lower_bound(
 
 
 def bcd_root_upper_bound(
+    *,
     quad: np.ndarray,
     linear: np.ndarray,
     zero_tol: float=1e-10,
@@ -115,6 +164,8 @@ def bcd_root_upper_bound(
     The upper bound :math:`h` is guaranteed to be non-negative.
     However, it *may not satisfy* :math:`\\varphi(h) \\leq 0` where :math:`\\varphi`
     is given by ``bcd_root_function()`` if ``zero_tol`` is too large.
+    Even when ``zero_tol`` is small enough, 
+    we assume that :math:`\\|v\\|_2 > \\lambda` and :math:`v_i=0` whenever :math:`\\Sigma_{ii} = 0`.
 
     Parameters
     ----------
@@ -122,8 +173,9 @@ def bcd_root_upper_bound(
         See ``bcd_root_function()``.
     linear : (p,) np.ndarray
         See ``bcd_root_function()``.
-    zero_tol : float
+    zero_tol : float, optional
         A value is considered zero if its absolute value is less than or equal to ``zero_tol``.
+        Default is ``1e-10``.
     
     See Also
     --------
@@ -139,6 +191,7 @@ def bcd_root_upper_bound(
 
 def bcd_root_function(
     h: float, 
+    *,
     quad: np.ndarray,
     linear: np.ndarray,
     l1: float,
@@ -179,7 +232,15 @@ def bcd_root_function(
 
 
 def objective(
-    beta, X, y, groups, group_sizes, lmda, alpha, penalty
+    beta: np.ndarray, 
+    *,
+    X: np.ndarray, 
+    y: np.ndarray, 
+    groups: np.ndarray, 
+    group_sizes: np.ndarray, 
+    lmda: float, 
+    alpha: float, 
+    penalty: np.ndarray,
 ):
     """Group elastic net objective.
 
@@ -193,9 +254,9 @@ def objective(
         Feature matrix.
     y : (n,) np.ndarray
         Response vector.
-    groups : (G,) array-like
+    groups : (G,) np.ndarray
         List of starting indices to each group.
-    group_sizes : (G,) array-like
+    group_sizes : (G,) np.ndarray
         List of group sizes corresponding to the same position as in ``groups``.
     lmda : float
         Regularization parameter.
@@ -349,8 +410,6 @@ class GroupElnetNaiveDenseState(GroupElnetNaiveBaseState):
     ----------
     X : (n, p) np.ndarray
         Feature matrix.
-    args
-        See ``grpglmnet.group_elnet.GroupElnetNaiveBaseState``.
     kwargs
         See ``grpglmnet.group_elnet.GroupElnetNaiveBaseState``.
 
@@ -361,11 +420,11 @@ class GroupElnetNaiveDenseState(GroupElnetNaiveBaseState):
     """
     def __init__(
         self,
+        *,
         X: np.ndarray,
-        *args,
         **kwargs,
     ):
-        super(GroupElnetNaiveBaseState, self).__init__(*args, **kwargs)
+        super(GroupElnetNaiveBaseState, self).__init__(**kwargs)
         self._state = core.GroupElnetNaiveDenseState(
             X=X,
             **asdict(super(GroupElnetNaiveBaseState, self)),
@@ -423,7 +482,9 @@ class GroupElnetResult:
     n_cds: int
 
 
-def group_elnet(state):
+def group_elnet(
+    state: GroupElnetNaiveDenseState,
+):
     """Group elastic net solver.
 
     The group elastic net solves the following problem:
@@ -450,6 +511,16 @@ def group_elnet(state):
     ----------
     state : GroupElnetNaiveDenseState
         See the documentation for one of the listed types.
+
+    Returns
+    -------
+    result : GroupElnetResult
+        See ``grpglmnet.group_elnet.GroupElnetResult`` for details.
+
+    See Also
+    --------
+    grpglmnet.group_elnet.GroupElnetNaiveDenseState
+    grpglmnet.group_elnet.GroupElnetResult
     """
     # mapping of each state type to the corresponding solver
     f_dict = {
@@ -461,7 +532,7 @@ def group_elnet(state):
 
     # solve group elastic net
     f = f_dict[type(state)]
-    out = f(state)
+    out = f(state._state)
 
     # raise any errors
     if out["error"] != "":

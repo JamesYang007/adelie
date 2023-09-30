@@ -64,23 +64,22 @@ static py::dict fista_adares_solver(
 }
 
 static double bcd_root_lower_bound(
-    const Eigen::Ref<gg::util::rowvec_type<double>>& vbuffer1,
-    const Eigen::Ref<gg::util::rowvec_type<double>>& v,
+    const Eigen::Ref<gg::util::rowvec_type<double>>& quad,
+    const Eigen::Ref<gg::util::rowvec_type<double>>& linear,
     double l1
 ) 
 {
-    return gg::bcd_root_lower_bound(vbuffer1, v, l1); 
+    return gg::bcd_root_lower_bound(quad, linear, l1); 
 }
 
-static py::dict bcd_root_upper_bound(
-    const Eigen::Ref<gg::util::rowvec_type<double>>& vbuffer1,
-    const Eigen::Ref<gg::util::rowvec_type<double>>& v,
+static double bcd_root_upper_bound(
+    const Eigen::Ref<gg::util::rowvec_type<double>>& quad,
+    const Eigen::Ref<gg::util::rowvec_type<double>>& linear,
     double zero_tol=1e-10
 )
 {
-    const auto out = gg::bcd_root_upper_bound(vbuffer1, v, zero_tol); 
-    py::dict d("h_max"_a=std::get<0>(out), "vbuffer1_min_nzn"_a=std::get<1>(out));
-    return d;
+    const auto out = gg::bcd_root_upper_bound(quad, linear, zero_tol); 
+    return std::get<0>(out);
 }
 
 static double bcd_root_function(
