@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>grpglmnet.group_elnet.bcd_root_function &#8212; grpglmnet 1.1.0 documentation</title>
+    <title>grpglmnet.group_elnet.group_elnet &#8212; grpglmnet 1.1.0 documentation</title>
   
   
   
@@ -40,11 +40,11 @@
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/grpglmnet.group_elnet.bcd_root_function';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/grpglmnet.group_elnet.group_elnet';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="grpglmnet.group_elnet.GroupElnetNaiveBaseState" href="grpglmnet.group_elnet.GroupElnetNaiveBaseState.html" />
-    <link rel="prev" title="grpglmnet.group_elnet.bcd_root_upper_bound" href="grpglmnet.group_elnet.bcd_root_upper_bound.html" />
+    <link rel="next" title="grpglmnet.group_elnet.objective" href="grpglmnet.group_elnet.objective.html" />
+    <link rel="prev" title="grpglmnet.group_elnet.GroupElnetNaiveDenseState" href="grpglmnet.group_elnet.GroupElnetNaiveDenseState.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -292,10 +292,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_update.html">grpglmnet.group_elnet.bcd_update</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_root_lower_bound.html">grpglmnet.group_elnet.bcd_root_lower_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_root_upper_bound.html">grpglmnet.group_elnet.bcd_root_upper_bound</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">grpglmnet.group_elnet.bcd_root_function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_root_function.html">grpglmnet.group_elnet.bcd_root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.GroupElnetNaiveBaseState.html">grpglmnet.group_elnet.GroupElnetNaiveBaseState</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.GroupElnetNaiveDenseState.html">grpglmnet.group_elnet.GroupElnetNaiveDenseState</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.group_elnet.html">grpglmnet.group_elnet.group_elnet</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">grpglmnet.group_elnet.group_elnet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.objective.html">grpglmnet.group_elnet.objective</a></li>
 </ul>
 </div>
@@ -354,39 +354,33 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="grpglmnet-group-elnet-bcd-root-function">
-<h1>grpglmnet.group_elnet.bcd_root_function<a class="headerlink" href="#grpglmnet-group-elnet-bcd-root-function" title="Link to this heading">#</a></h1>
+  <section id="grpglmnet-group-elnet-group-elnet">
+<h1>grpglmnet.group_elnet.group_elnet<a class="headerlink" href="#grpglmnet-group-elnet-group-elnet" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="grpglmnet.group_elnet.bcd_root_function">
-<span class="sig-prename descclassname"><span class="pre">grpglmnet.group_elnet.</span></span><span class="sig-name descname"><span class="pre">bcd_root_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grpglmnet.group_elnet.bcd_root_function" title="Link to this definition">#</a></dt>
-<dd><p>Computes the BCD root function.</p>
-<p>The BCD root function is given by</p>
+<dt class="sig sig-object py" id="grpglmnet.group_elnet.group_elnet">
+<span class="sig-prename descclassname"><span class="pre">grpglmnet.group_elnet.</span></span><span class="sig-name descname"><span class="pre">group_elnet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grpglmnet.group_elnet.group_elnet" title="Link to this definition">#</a></dt>
+<dd><p>Group elastic net solver.</p>
+<p>The group elastic net solves the following problem:</p>
 <div class="math notranslate nohighlight">
 \[\begin{align*}
-    \varphi(h) := 
-    \sum\limits_{i=1}^p \frac{v_i^2}{(\Sigma_{ii} h + \lambda)^2} - 1
+    \mathrm{minimize}_\beta \quad&amp;
+    \frac{1}{2} \|y - X\beta\|_2^2
+    + \lambda \sum\limits_{j=1}^G w_j \left(
+        \alpha \|\beta_j\|_2 + \frac{1-\alpha}{2} \|\beta_j\|_2^2
+    \right)
 \end{align*}\]</div>
-<p>where
-<span class="math notranslate nohighlight">\(h \geq 0\)</span>,
-<span class="math notranslate nohighlight">\(\Sigma \in \mathbb{R}_+^{p\times p}\)</span> diagonal,
-<span class="math notranslate nohighlight">\(v \in \mathbb{R}^p\)</span>,
-and <span class="math notranslate nohighlight">\(\lambda \geq 0\)</span>.</p>
+<p>where 
+<span class="math notranslate nohighlight">\(X\)</span> is the feature matrix,
+<span class="math notranslate nohighlight">\(y\)</span> is the response vector,
+<span class="math notranslate nohighlight">\(w\)</span> is the penalty factor,
+<span class="math notranslate nohighlight">\(\lambda\)</span> is the regularization parameter,
+<span class="math notranslate nohighlight">\(\alpha\)</span> is the elastic net parameter,
+<span class="math notranslate nohighlight">\(G\)</span> is the number of groups,
+and <span class="math notranslate nohighlight">\(\beta_j\)</span> are the coefficients for the <span class="math notranslate nohighlight">\(j\)</span> th group.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>h</strong><span class="classifier">float</span></dt><dd><p>The value at which to evaluate the BCD root function.</p>
-</dd>
-<dt><strong>quad</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>The quadratic component <span class="math notranslate nohighlight">\(\Sigma\)</span>.</p>
-</dd>
-<dt><strong>linear</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>The linear component <span class="math notranslate nohighlight">\(v\)</span>.</p>
-</dd>
-<dt><strong>l1</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(\ell_1\)</span> component <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>out</strong><span class="classifier">float</span></dt><dd><p>The BCD root function value.</p>
+<dt><strong>state</strong><span class="classifier">GroupElnetNaiveDenseState</span></dt><dd><p>See the documentation for one of the listed types.</p>
 </dd>
 </dl>
 </dd>
@@ -406,20 +400,20 @@ and <span class="math notranslate nohighlight">\(\lambda \geq 0\)</span>.</p>
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="grpglmnet.group_elnet.bcd_root_upper_bound.html"
+       href="grpglmnet.group_elnet.GroupElnetNaiveDenseState.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">grpglmnet.group_elnet.bcd_root_upper_bound</p>
+        <p class="prev-next-title">grpglmnet.group_elnet.GroupElnetNaiveDenseState</p>
       </div>
     </a>
     <a class="right-next"
-       href="grpglmnet.group_elnet.GroupElnetNaiveBaseState.html"
+       href="grpglmnet.group_elnet.objective.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">grpglmnet.group_elnet.GroupElnetNaiveBaseState</p>
+        <p class="prev-next-title">grpglmnet.group_elnet.objective</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -438,13 +432,13 @@ and <span class="math notranslate nohighlight">\(\lambda \geq 0\)</span>.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#grpglmnet.group_elnet.bcd_root_function"><code class="docutils literal notranslate"><span class="pre">bcd_root_function()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#grpglmnet.group_elnet.group_elnet"><code class="docutils literal notranslate"><span class="pre">group_elnet()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/grpglmnet.group_elnet.bcd_root_function.rst.txt">
+    <a href="../_sources/generated/grpglmnet.group_elnet.group_elnet.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

@@ -1,0 +1,6 @@
+﻿grpglmnet.group\_elnet.objective
+================================
+
+.. currentmodule:: grpglmnet.group_elnet
+
+.. autofunction:: objective

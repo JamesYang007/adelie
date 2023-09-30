@@ -1,0 +1,56 @@
+﻿grpglmnet.group\_elnet.GroupElnetNaiveDenseState
+================================================
+
+.. currentmodule:: grpglmnet.group_elnet
+
+.. autoclass:: GroupElnetNaiveDenseState
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GroupElnetNaiveDenseState.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GroupElnetNaiveDenseState.groups
+      ~GroupElnetNaiveDenseState.group_sizes
+      ~GroupElnetNaiveDenseState.alpha
+      ~GroupElnetNaiveDenseState.penalty
+      ~GroupElnetNaiveDenseState.strong_set
+      ~GroupElnetNaiveDenseState.strong_g1
+      ~GroupElnetNaiveDenseState.strong_g2
+      ~GroupElnetNaiveDenseState.strong_begins
+      ~GroupElnetNaiveDenseState.strong_A_diag
+      ~GroupElnetNaiveDenseState.lmdas
+      ~GroupElnetNaiveDenseState.max_cds
+      ~GroupElnetNaiveDenseState.thr
+      ~GroupElnetNaiveDenseState.cond_0_thresh
+      ~GroupElnetNaiveDenseState.cond_1_thresh
+      ~GroupElnetNaiveDenseState.newton_tol
+      ~GroupElnetNaiveDenseState.newton_max_iters
+      ~GroupElnetNaiveDenseState.rsq
+      ~GroupElnetNaiveDenseState.resid
+      ~GroupElnetNaiveDenseState.strong_beta
+      ~GroupElnetNaiveDenseState.strong_grad
+      ~GroupElnetNaiveDenseState.active_set
+      ~GroupElnetNaiveDenseState.active_g1
+      ~GroupElnetNaiveDenseState.active_g2
+      ~GroupElnetNaiveDenseState.active_begins
+      ~GroupElnetNaiveDenseState.active_order
+      ~GroupElnetNaiveDenseState.is_active
+      ~GroupElnetNaiveDenseState.betas
+      ~GroupElnetNaiveDenseState.rsqs
+      ~GroupElnetNaiveDenseState.resids
+   
+   

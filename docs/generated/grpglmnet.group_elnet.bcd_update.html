@@ -293,6 +293,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_root_lower_bound.html">grpglmnet.group_elnet.bcd_root_lower_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_root_upper_bound.html">grpglmnet.group_elnet.bcd_root_upper_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_root_function.html">grpglmnet.group_elnet.bcd_root_function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.GroupElnetNaiveBaseState.html">grpglmnet.group_elnet.GroupElnetNaiveBaseState</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.GroupElnetNaiveDenseState.html">grpglmnet.group_elnet.GroupElnetNaiveDenseState</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.group_elnet.html">grpglmnet.group_elnet.group_elnet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.objective.html">grpglmnet.group_elnet.objective</a></li>
 </ul>
 </div>
 </nav></div>
@@ -354,7 +358,7 @@ document.write(`
 <h1>grpglmnet.group_elnet.bcd_update<a class="headerlink" href="#grpglmnet-group-elnet-bcd-update" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="grpglmnet.group_elnet.bcd_update">
-<span class="sig-prename descclassname"><span class="pre">grpglmnet.group_elnet.</span></span><span class="sig-name descname"><span class="pre">bcd_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'newton_abs'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grpglmnet.group_elnet.bcd_update" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">grpglmnet.group_elnet.</span></span><span class="sig-name descname"><span class="pre">bcd_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'newton_abs'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grpglmnet.group_elnet.bcd_update" title="Link to this definition">#</a></dt>
 <dd><p>Solves the block-coordinate descent update.</p>
 <p>The block-coordinate descent update for the group elastic net is obtained by solving:</p>
 <div class="math notranslate nohighlight">
@@ -372,9 +376,9 @@ and <span class="math notranslate nohighlight">\(\lambda_i \geq 0\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>L</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>The quadratic component <span class="math notranslate nohighlight">\(\Sigma\)</span>.</p>
+<dt><strong>quad</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>The quadratic component <span class="math notranslate nohighlight">\(\Sigma\)</span>.</p>
 </dd>
-<dt><strong>v</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>The linear component <span class="math notranslate nohighlight">\(v\)</span>.</p>
+<dt><strong>linear</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>The linear component <span class="math notranslate nohighlight">\(v\)</span>.</p>
 </dd>
 <dt><strong>l1</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(\ell_1\)</span> component <span class="math notranslate nohighlight">\(\lambda_1\)</span>.</p>
 </dd>
@@ -390,6 +394,15 @@ Default is <code class="docutils literal notranslate"><span class="pre">&quot;ne
 </dd>
 <dt><strong>smart_init</strong><span class="classifier">bool</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the ABS method is invoked to find a smart initial point before starting Newton’s method.
 It is only used when <code class="docutils literal notranslate"><span class="pre">solver</span></code> is <code class="docutils literal notranslate"><span class="pre">&quot;newton_abs_debug&quot;</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>out</strong><span class="classifier">Dict[str, Any]</span></dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">out[&quot;x&quot;]</span></code>: solution vector.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">out[&quot;it&quot;]</span></code>: number of iterations taken.</p></li>
+</ul>
 </dd>
 </dl>
 </dd>
