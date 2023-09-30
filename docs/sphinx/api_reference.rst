@@ -13,6 +13,7 @@ grpglmnet.group_elnet
     :toctree: generated/
 
 
+    bcd_objective
     bcd_update
     bcd_root_lower_bound
     bcd_root_upper_bound
