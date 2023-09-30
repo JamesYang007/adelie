@@ -17,3 +17,7 @@ grpglmnet.group_elnet
     bcd_root_lower_bound
     bcd_root_upper_bound
     bcd_root_function
+    GroupElnetNaiveBaseState
+    GroupElnetNaiveDenseState
+    group_elnet
+    objective
