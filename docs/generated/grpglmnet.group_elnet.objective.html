@@ -287,6 +287,7 @@ document.write(`
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_objective.html">grpglmnet.group_elnet.bcd_objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_update.html">grpglmnet.group_elnet.bcd_update</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_root_lower_bound.html">grpglmnet.group_elnet.bcd_root_lower_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_root_upper_bound.html">grpglmnet.group_elnet.bcd_root_upper_bound</a></li>
@@ -356,7 +357,7 @@ document.write(`
 <h1>grpglmnet.group_elnet.objective<a class="headerlink" href="#grpglmnet-group-elnet-objective" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="grpglmnet.group_elnet.objective">
-<span class="sig-prename descclassname"><span class="pre">grpglmnet.group_elnet.</span></span><span class="sig-name descname"><span class="pre">objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grpglmnet.group_elnet.objective" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">grpglmnet.group_elnet.</span></span><span class="sig-name descname"><span class="pre">objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grpglmnet.group_elnet.objective" title="Link to this definition">#</a></dt>
 <dd><p>Group elastic net objective.</p>
 <p>Computes the group elastic net objective.</p>
 <dl class="field-list simple">
@@ -368,9 +369,9 @@ document.write(`
 </dd>
 <dt><strong>y</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Response vector.</p>
 </dd>
-<dt><strong>groups</strong><span class="classifier">(G,) array-like</span></dt><dd><p>List of starting indices to each group.</p>
+<dt><strong>groups</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>List of starting indices to each group.</p>
 </dd>
-<dt><strong>group_sizes</strong><span class="classifier">(G,) array-like</span></dt><dd><p>List of group sizes corresponding to the same position as in <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p>
+<dt><strong>group_sizes</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>List of group sizes corresponding to the same position as in <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p>
 </dd>
 <dt><strong>lmda</strong><span class="classifier">float</span></dt><dd><p>Regularization parameter.</p>
 </dd>

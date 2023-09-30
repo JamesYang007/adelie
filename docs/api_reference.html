@@ -42,7 +42,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'api_reference';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="grpglmnet.group_elnet.bcd_update" href="generated/grpglmnet.group_elnet.bcd_update.html" />
+    <link rel="next" title="grpglmnet.group_elnet.bcd_objective" href="generated/grpglmnet.group_elnet.bcd_objective.html" />
     <link rel="prev" title="GrpGlmnet’s Documentation" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -288,6 +288,7 @@ document.write(`
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/grpglmnet.group_elnet.bcd_objective.html">grpglmnet.group_elnet.bcd_objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/grpglmnet.group_elnet.bcd_update.html">grpglmnet.group_elnet.bcd_update</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/grpglmnet.group_elnet.bcd_root_lower_bound.html">grpglmnet.group_elnet.bcd_root_lower_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/grpglmnet.group_elnet.bcd_root_upper_bound.html">grpglmnet.group_elnet.bcd_root_upper_bound</a></li>
@@ -356,28 +357,31 @@ document.write(`
 <h2>grpglmnet.group_elnet<a class="headerlink" href="#grpglmnet-group-elnet" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.bcd_update.html#grpglmnet.group_elnet.bcd_update" title="grpglmnet.group_elnet.bcd_update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bcd_update</span></code></a>(quad, linear, l1, l2, tol, ...[, ...])</p></td>
-<td><p>Solves the block-coordinate descent update.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.bcd_objective.html#grpglmnet.group_elnet.bcd_objective" title="grpglmnet.group_elnet.bcd_objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bcd_objective</span></code></a>(beta, *, quad, linear, l1, l2)</p></td>
+<td><p>Computes the BCD objective.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.bcd_root_lower_bound.html#grpglmnet.group_elnet.bcd_root_lower_bound" title="grpglmnet.group_elnet.bcd_root_lower_bound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bcd_root_lower_bound</span></code></a>(quad, linear, l1)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.bcd_update.html#grpglmnet.group_elnet.bcd_update" title="grpglmnet.group_elnet.bcd_update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bcd_update</span></code></a>(*, quad, linear, l1, l2, tol, ...)</p></td>
+<td><p>Solves the BCD update.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.bcd_root_lower_bound.html#grpglmnet.group_elnet.bcd_root_lower_bound" title="grpglmnet.group_elnet.bcd_root_lower_bound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bcd_root_lower_bound</span></code></a>(*, quad, linear, l1)</p></td>
 <td><p>Computes a lower bound on the root of BCD root function.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.bcd_root_upper_bound.html#grpglmnet.group_elnet.bcd_root_upper_bound" title="grpglmnet.group_elnet.bcd_root_upper_bound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bcd_root_upper_bound</span></code></a>(quad, linear[, zero_tol])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.bcd_root_upper_bound.html#grpglmnet.group_elnet.bcd_root_upper_bound" title="grpglmnet.group_elnet.bcd_root_upper_bound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bcd_root_upper_bound</span></code></a>(*, quad, linear[, zero_tol])</p></td>
 <td><p>Computes an upper bound on the root of BCD root function.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.bcd_root_function.html#grpglmnet.group_elnet.bcd_root_function" title="grpglmnet.group_elnet.bcd_root_function"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bcd_root_function</span></code></a>(h, quad, linear, l1)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.bcd_root_function.html#grpglmnet.group_elnet.bcd_root_function" title="grpglmnet.group_elnet.bcd_root_function"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bcd_root_function</span></code></a>(h, *, quad, linear, l1)</p></td>
 <td><p>Computes the BCD root function.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.GroupElnetNaiveBaseState.html#grpglmnet.group_elnet.GroupElnetNaiveBaseState" title="grpglmnet.group_elnet.GroupElnetNaiveBaseState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GroupElnetNaiveBaseState</span></code></a>(groups, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.GroupElnetNaiveBaseState.html#grpglmnet.group_elnet.GroupElnetNaiveBaseState" title="grpglmnet.group_elnet.GroupElnetNaiveBaseState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GroupElnetNaiveBaseState</span></code></a>(groups, ...)</p></td>
 <td><p>Group elastic net naive base state class.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.GroupElnetNaiveDenseState.html#grpglmnet.group_elnet.GroupElnetNaiveDenseState" title="grpglmnet.group_elnet.GroupElnetNaiveDenseState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GroupElnetNaiveDenseState</span></code></a>(X, *args, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.GroupElnetNaiveDenseState.html#grpglmnet.group_elnet.GroupElnetNaiveDenseState" title="grpglmnet.group_elnet.GroupElnetNaiveDenseState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GroupElnetNaiveDenseState</span></code></a>(*, X, **kwargs)</p></td>
 <td><p>Group elastic net state class for naive method dense feature matrix.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.group_elnet.html#grpglmnet.group_elnet.group_elnet" title="grpglmnet.group_elnet.group_elnet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_elnet</span></code></a>(state)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.group_elnet.html#grpglmnet.group_elnet.group_elnet" title="grpglmnet.group_elnet.group_elnet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_elnet</span></code></a>(state)</p></td>
 <td><p>Group elastic net solver.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.objective.html#grpglmnet.group_elnet.objective" title="grpglmnet.group_elnet.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">objective</span></code></a>(beta, X, y, groups, group_sizes, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/grpglmnet.group_elnet.objective.html#grpglmnet.group_elnet.objective" title="grpglmnet.group_elnet.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">objective</span></code></a>(beta, *, X, y, groups, ...)</p></td>
 <td><p>Group elastic net objective.</p></td>
 </tr>
 </tbody>
@@ -405,11 +409,11 @@ document.write(`
       </div>
     </a>
     <a class="right-next"
-       href="generated/grpglmnet.group_elnet.bcd_update.html"
+       href="generated/grpglmnet.group_elnet.bcd_objective.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">grpglmnet.group_elnet.bcd_update</p>
+        <p class="prev-next-title">grpglmnet.group_elnet.bcd_objective</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>grpglmnet.group_elnet.GroupElnetNaiveDenseState &#8212; grpglmnet 1.1.0 documentation</title>
+    <title>grpglmnet.group_elnet.bcd_objective &#8212; grpglmnet 1.1.0 documentation</title>
   
   
   
@@ -40,11 +40,11 @@
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/grpglmnet.group_elnet.GroupElnetNaiveDenseState';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/grpglmnet.group_elnet.bcd_objective';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="grpglmnet.group_elnet.group_elnet" href="grpglmnet.group_elnet.group_elnet.html" />
-    <link rel="prev" title="grpglmnet.group_elnet.GroupElnetNaiveBaseState" href="grpglmnet.group_elnet.GroupElnetNaiveBaseState.html" />
+    <link rel="next" title="grpglmnet.group_elnet.bcd_update" href="grpglmnet.group_elnet.bcd_update.html" />
+    <link rel="prev" title="API Reference" href="../api_reference.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -289,13 +289,13 @@ document.write(`
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_objective.html">grpglmnet.group_elnet.bcd_objective</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">grpglmnet.group_elnet.bcd_objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_update.html">grpglmnet.group_elnet.bcd_update</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_root_lower_bound.html">grpglmnet.group_elnet.bcd_root_lower_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_root_upper_bound.html">grpglmnet.group_elnet.bcd_root_upper_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_root_function.html">grpglmnet.group_elnet.bcd_root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.GroupElnetNaiveBaseState.html">grpglmnet.group_elnet.GroupElnetNaiveBaseState</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">grpglmnet.group_elnet.GroupElnetNaiveDenseState</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.GroupElnetNaiveDenseState.html">grpglmnet.group_elnet.GroupElnetNaiveDenseState</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.group_elnet.html">grpglmnet.group_elnet.group_elnet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.objective.html">grpglmnet.group_elnet.objective</a></li>
 </ul>
@@ -355,20 +355,42 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="grpglmnet-group-elnet-groupelnetnaivedensestate">
-<h1>grpglmnet.group_elnet.GroupElnetNaiveDenseState<a class="headerlink" href="#grpglmnet-group-elnet-groupelnetnaivedensestate" title="Link to this heading">#</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="grpglmnet.group_elnet.GroupElnetNaiveDenseState">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grpglmnet.group_elnet.</span></span><span class="sig-name descname"><span class="pre">GroupElnetNaiveDenseState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grpglmnet.group_elnet.GroupElnetNaiveDenseState" title="Link to this definition">#</a></dt>
-<dd><p>Group elastic net state class for naive method dense feature matrix.</p>
-<p>This state class is for the case of using the naive method to solve group elastic net
-and <span class="math notranslate nohighlight">\(X\)</span> feature matrix is given as a full dense matrix.</p>
+  <section id="grpglmnet-group-elnet-bcd-objective">
+<h1>grpglmnet.group_elnet.bcd_objective<a class="headerlink" href="#grpglmnet-group-elnet-bcd-objective" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="grpglmnet.group_elnet.bcd_objective">
+<span class="sig-prename descclassname"><span class="pre">grpglmnet.group_elnet.</span></span><span class="sig-name descname"><span class="pre">bcd_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grpglmnet.group_elnet.bcd_objective" title="Link to this definition">#</a></dt>
+<dd><p>Computes the BCD objective.</p>
+<p>The BCD objective is given by</p>
+<div class="math notranslate nohighlight">
+\[\begin{align*}
+    \frac{1}{2} \beta^\top \Sigma \beta - v^\top \beta 
+    + \lambda_1 \|\beta\|_2
+    + \frac{\lambda_2}{2} \|\beta\|_2^2
+\end{align*}\]</div>
+<p>where 
+<span class="math notranslate nohighlight">\(\beta \in \mathbb{R}^p\)</span>,
+<span class="math notranslate nohighlight">\(\Sigma \in \mathbb{R}_+^{p\times p}\)</span> diagonal,
+<span class="math notranslate nohighlight">\(v \in \mathbb{R}^p\)</span>,
+and <span class="math notranslate nohighlight">\(\lambda_i \geq 0\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>X</strong><span class="classifier">(n, p) np.ndarray</span></dt><dd><p>Feature matrix.</p>
+<dt><strong>beta</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>The input value in which the objective is evaluated.</p>
 </dd>
-<dt><strong>kwargs</strong></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">grpglmnet.group_elnet.GroupElnetNaiveBaseState</span></code>.</p>
+<dt><strong>quad</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>The quadratic component <span class="math notranslate nohighlight">\(\Sigma\)</span>.</p>
+</dd>
+<dt><strong>linear</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>The linear component <span class="math notranslate nohighlight">\(v\)</span>.</p>
+</dd>
+<dt><strong>l1</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(\ell_1\)</span> component <span class="math notranslate nohighlight">\(\lambda_1\)</span>.</p>
+</dd>
+<dt><strong>l2</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(\ell_2\)</span> component <span class="math notranslate nohighlight">\(\lambda_2\)</span>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>out</strong><span class="classifier">float</span></dt><dd><p>The BCD objective.</p>
 </dd>
 </dl>
 </dd>
@@ -376,115 +398,9 @@ and <span class="math notranslate nohighlight">\(X\)</span> feature matrix is gi
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="grpglmnet.group_elnet.GroupElnetNaiveBaseState.html#grpglmnet.group_elnet.GroupElnetNaiveBaseState" title="grpglmnet.group_elnet.GroupElnetNaiveBaseState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grpglmnet.group_elnet.GroupElnetNaiveBaseState</span></code></a></dt><dd></dd>
-<dt><a class="reference internal" href="grpglmnet.group_elnet.objective.html#grpglmnet.group_elnet.objective" title="grpglmnet.group_elnet.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grpglmnet.group_elnet.objective</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="grpglmnet.group_elnet.bcd_update.html#grpglmnet.group_elnet.bcd_update" title="grpglmnet.group_elnet.bcd_update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grpglmnet.group_elnet.bcd_update</span></code></a></dt><dd></dd>
 </dl>
 </div>
-<dl class="py method">
-<dt class="sig sig-object py" id="grpglmnet.group_elnet.GroupElnetNaiveDenseState.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grpglmnet.group_elnet.GroupElnetNaiveDenseState.__init__" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<p class="rubric">Methods</p>
-<table class="autosummary longtable table autosummary">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#grpglmnet.group_elnet.GroupElnetNaiveDenseState.__init__" title="grpglmnet.group_elnet.GroupElnetNaiveDenseState.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*, X, **kwargs)</p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Attributes</p>
-<table class="autosummary longtable table autosummary">
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">groups</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_sizes</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">alpha</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">penalty</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_set</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_g1</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_g2</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_begins</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_A_diag</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_cds</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">thr</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cond_0_thresh</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cond_1_thresh</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_tol</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_max_iters</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resid</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_beta</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_grad</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_set</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_g1</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_g2</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_begins</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_order</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_active</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">betas</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsqs</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resids</span></code></p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 </section>
@@ -500,20 +416,20 @@ and <span class="math notranslate nohighlight">\(X\)</span> feature matrix is gi
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="grpglmnet.group_elnet.GroupElnetNaiveBaseState.html"
+       href="../api_reference.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">grpglmnet.group_elnet.GroupElnetNaiveBaseState</p>
+        <p class="prev-next-title">API Reference</p>
       </div>
     </a>
     <a class="right-next"
-       href="grpglmnet.group_elnet.group_elnet.html"
+       href="grpglmnet.group_elnet.bcd_update.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">grpglmnet.group_elnet.group_elnet</p>
+        <p class="prev-next-title">grpglmnet.group_elnet.bcd_update</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -532,16 +448,13 @@ and <span class="math notranslate nohighlight">\(X\)</span> feature matrix is gi
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#grpglmnet.group_elnet.GroupElnetNaiveDenseState"><code class="docutils literal notranslate"><span class="pre">GroupElnetNaiveDenseState</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#grpglmnet.group_elnet.GroupElnetNaiveDenseState.__init__"><code class="docutils literal notranslate"><span class="pre">GroupElnetNaiveDenseState.__init__()</span></code></a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#grpglmnet.group_elnet.bcd_objective"><code class="docutils literal notranslate"><span class="pre">bcd_objective()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/grpglmnet.group_elnet.GroupElnetNaiveDenseState.rst.txt">
+    <a href="../_sources/generated/grpglmnet.group_elnet.bcd_objective.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

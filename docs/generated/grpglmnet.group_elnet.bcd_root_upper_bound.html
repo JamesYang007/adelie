@@ -289,6 +289,7 @@ document.write(`
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_objective.html">grpglmnet.group_elnet.bcd_objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_update.html">grpglmnet.group_elnet.bcd_update</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpglmnet.group_elnet.bcd_root_lower_bound.html">grpglmnet.group_elnet.bcd_root_lower_bound</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">grpglmnet.group_elnet.bcd_root_upper_bound</a></li>
@@ -358,11 +359,13 @@ document.write(`
 <h1>grpglmnet.group_elnet.bcd_root_upper_bound<a class="headerlink" href="#grpglmnet-group-elnet-bcd-root-upper-bound" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="grpglmnet.group_elnet.bcd_root_upper_bound">
-<span class="sig-prename descclassname"><span class="pre">grpglmnet.group_elnet.</span></span><span class="sig-name descname"><span class="pre">bcd_root_upper_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grpglmnet.group_elnet.bcd_root_upper_bound" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">grpglmnet.group_elnet.</span></span><span class="sig-name descname"><span class="pre">bcd_root_upper_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grpglmnet.group_elnet.bcd_root_upper_bound" title="Link to this definition">#</a></dt>
 <dd><p>Computes an upper bound on the root of BCD root function.</p>
 <p>The upper bound <span class="math notranslate nohighlight">\(h\)</span> is guaranteed to be non-negative.
 However, it <em>may not satisfy</em> <span class="math notranslate nohighlight">\(\varphi(h) \leq 0\)</span> where <span class="math notranslate nohighlight">\(\varphi\)</span>
-is given by <code class="docutils literal notranslate"><span class="pre">bcd_root_function()</span></code> if <code class="docutils literal notranslate"><span class="pre">zero_tol</span></code> is too large.</p>
+is given by <code class="docutils literal notranslate"><span class="pre">bcd_root_function()</span></code> if <code class="docutils literal notranslate"><span class="pre">zero_tol</span></code> is too large.
+Even when <code class="docutils literal notranslate"><span class="pre">zero_tol</span></code> is small enough, 
+we assume that <span class="math notranslate nohighlight">\(\|v\|_2 &gt; \lambda\)</span> and <span class="math notranslate nohighlight">\(v_i=0\)</span> whenever <span class="math notranslate nohighlight">\(\Sigma_{ii} = 0\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -370,7 +373,8 @@ is given by <code class="docutils literal notranslate"><span class="pre">bcd_roo
 </dd>
 <dt><strong>linear</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">bcd_root_function()</span></code>.</p>
 </dd>
-<dt><strong>zero_tol</strong><span class="classifier">float</span></dt><dd><p>A value is considered zero if its absolute value is less than or equal to <code class="docutils literal notranslate"><span class="pre">zero_tol</span></code>.</p>
+<dt><strong>zero_tol</strong><span class="classifier">float, optional</span></dt><dd><p>A value is considered zero if its absolute value is less than or equal to <code class="docutils literal notranslate"><span class="pre">zero_tol</span></code>.
+Default is <code class="docutils literal notranslate"><span class="pre">1e-10</span></code>.</p>
 </dd>
 </dl>
 </dd>
