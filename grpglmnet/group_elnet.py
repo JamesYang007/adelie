@@ -1,11 +1,11 @@
 from . import grpglmnet_core as core
 import numpy as np
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 
 def bcd_update(
-    L: np.ndarray,
-    v: np.ndarray,
+    quad: np.ndarray,
+    linear: np.ndarray,
     l1: float,
     l2: float,
     tol: float,
@@ -34,9 +34,9 @@ def bcd_update(
 
     Parameters
     ----------
-    L : (p,) np.ndarray
+    quad : (p,) np.ndarray
         The quadratic component :math:`\\Sigma`.
-    v : (p,) np.ndarray
+    linear : (p,) np.ndarray
         The linear component :math:`v`.
     l1 : float
         The :math:`\\ell_1` component :math:`\\lambda_1`.
@@ -53,6 +53,12 @@ def bcd_update(
     smart_init : bool
         If ``True``, the ABS method is invoked to find a smart initial point before starting Newton's method.
         It is only used when ``solver`` is ``"newton_abs_debug"``.
+
+    Returns
+    -------
+    out : Dict[str, Any]
+        - ``out["x"]``: solution vector.
+        - ``out["it"]``: number of iterations taken.
     """
     solver_dict = {
         "brent": core.brent_solver,
@@ -93,7 +99,8 @@ def bcd_root_lower_bound(
 
     Returns
     -------
-    Lower bound on the root.
+    out : float
+        Lower bound on the root.
     """
     return core.bcd_root_lower_bound(quad, linear, l1)
 
@@ -124,7 +131,8 @@ def bcd_root_upper_bound(
 
     Returns
     -------
-    Upper bound on the root.
+    out : float
+        Upper bound on the root.
     """
     return core.bcd_root_upper_bound(quad, linear, zero_tol)
 
@@ -164,7 +172,8 @@ def bcd_root_function(
 
     Returns
     -------
-    The BCD root function value.
+    out : float
+        The BCD root function value.
     """
     return core.bcd_root_function(h, quad, linear, l1)
 
@@ -197,11 +206,170 @@ def objective(
     
     Returns
     -------
-    Group elastic net objective
+    out : float
+        Group elastic net objective
     """
     return core.group_elnet_objective(
         beta, X, y, groups, group_sizes, lmda, alpha, penalty
     )
+
+
+@dataclass
+class GroupElnetNaiveBaseState:
+    """Group elastic net naive base state class.
+
+    This is the base state class for all naive method states.
+
+    Parameters
+    ----------
+    groups : (G,) np.ndarray
+        List of starting indices to each group.
+    group_sizes : (G,) np.ndarray
+        List of group sizes corresponding to each element in ``groups``.
+    alpha : float
+        Elastic net parameter.
+    penalty : (G,) np.ndarray
+        Penalty factor for each group.
+    strong_set : (s,) np.ndarray
+        List of strong groups taking on values in ``[0, G)``.
+        ``strong_set[i]`` is ``i`` th strong group.
+    strong_g1 : (s1,) np.ndarray
+        Subset of ``strong_set`` that correspond to groups of size ``1``.
+        ``strong_g1[i]`` is the ``i`` th strong group of size ``1``.
+    strong_g2 : (s2,) np.ndarray
+        Subset of ``strong_set`` that correspond to groups more than size ``1``.
+        ``strong_g2[i]`` is the ``i`` th strong group of size more than ``1``.
+    strong_begins : (s,) np.ndarray
+        List of indices that index a corresponding list of values for each strong group.
+        ``strong_begins[i]`` is the index to start reading ``strong_beta``, for example,
+        for the ``i`` th group.
+    strong_A_diag : (ws,) np.ndarray
+        List of the diagonal of :math:`X_k^\\top X_k` along the strong groups.
+        ``strong_A_diag[b:b+p]`` is the diagonal of :math:`X_k^\\top X_k` for the ``i`` th strong group where
+        ``k = strong_set[i]``,
+        ``b = strong_begins[i]``,
+        and ``p = group_sizes[k]``.
+    lmdas : (l,) np.ndarray
+        List of the regularization sequence.
+    max_cds : int
+        Maximum number of coordinate descents.
+    thr : float
+        Convergence tolerance.
+    cond_0_thresh : float
+        Early stopping rule check on slope.
+    cond_1_thresh : float
+        Early stopping rule check on curvature.
+    newton_tol : float
+        Tolerance for the Newton step.
+    newton_max_iters : int
+        Maximum number of iterations for the Newton step.
+    rsq : float
+        Initial :math:`R^2` value at ``strong_beta``.
+    resid : (n,) np.ndarray
+        Initial residual :math:`y-X\\beta` at ``strong_beta``.
+    strong_beta : (ws,) np.ndarray
+        Initial coefficient vector on the strong set.
+        ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        where
+        ``k = strong_set[i]``,
+        ``b = strong_begins[i]``,
+        and ``p = group_sizes[k]``.
+    strong_grad : (ws,) np.ndarray
+        Initial gradient :math:`X_k^\\top (y-X\\beta)` at ``strong_beta`` on the strong set.
+        ``strong_grad[b:b+p]`` is the gradient for the ``i`` th strong group
+        where 
+        ``k = strong_set[i]``,
+        ``b = strong_begins[i]``,
+        and ``p = group_sizes[k]``.
+    active_set : (a,) np.ndarray
+        Initial active set among the strong groups.
+        ``active_set[i]`` is the *index* to ``strong_set`` that indicates the ``i`` th active group.
+    active_g1 : (a1,) np.ndarray
+        Initial active set with group sizes of ``1``.
+        Similar description as ``active_set``.
+    active_g2 : (a2,) np.ndarray
+        Initial active set with group sizes more than ``1``.
+        Similar description as ``active_set``.
+    active_begins : (a,) np.ndarray
+        Initial indices to values for the active set.
+        ``active_begins[i]`` is the starting index to read values in ``strong_beta``
+        for the ``i`` th active group.
+    active_order : (a,) np.ndarray
+        Initial indices in such that ``strong_set`` is sorted in ascending order for the active groups.
+        ``active_order[i]`` is the ``i`` th active group in sorted order
+        such that ``strong_set[active_order[i]]`` is the corresponding group number.
+    is_active : (s,) np.ndarray
+        Initial boolean vector that indicates whether each strong group is active or not.
+        ``is_active[i]`` is True if and only if ``strong_set[i]`` is active.
+    betas : (l, p) np.ndarray
+        ``betas[i]`` corresponds to the solution as a dense vector corresponding to ``lmdas[i]``.
+    rsqs : (l,) np.ndarray
+        ``rsqs[i]`` corresponds to the solution :math:`R^2` corresponding to ``lmdas[i]``.
+    resids : (l, n) np.ndarray
+        ``resids[i]`` corresponds to the solution residual corresponding to ``lmdas[i]``.
+    """
+    groups: np.ndarray
+    group_sizes: np.ndarray
+    alpha: float
+    penalty: np.ndarray
+    strong_set: np.ndarray
+    strong_g1: np.ndarray
+    strong_g2: np.ndarray
+    strong_begins: np.ndarray
+    strong_A_diag: np.ndarray
+    lmdas: np.ndarray
+    max_cds: int
+    thr: float
+    cond_0_thresh: float
+    cond_1_thresh: float
+    newton_tol: float
+    newton_max_iters: int
+    rsq: float
+    resid: np.ndarray
+    strong_beta: np.ndarray
+    strong_grad: np.ndarray
+    active_set: np.ndarray
+    active_g1: np.ndarray
+    active_g2: np.ndarray
+    active_begins: np.ndarray
+    active_order: np.ndarray
+    is_active: np.ndarray
+    betas: list[np.ndarray]
+    rsqs: list[float]
+    resids: list[np.ndarray]
+
+
+class GroupElnetNaiveDenseState(GroupElnetNaiveBaseState):
+    """Group elastic net state class for naive method dense feature matrix.
+
+    This state class is for the case of using the naive method to solve group elastic net
+    and :math:`X` feature matrix is given as a full dense matrix.
+
+    Parameters
+    ----------
+    X : (n, p) np.ndarray
+        Feature matrix.
+    args
+        See ``grpglmnet.group_elnet.GroupElnetNaiveBaseState``.
+    kwargs
+        See ``grpglmnet.group_elnet.GroupElnetNaiveBaseState``.
+
+    See Also
+    --------
+    grpglmnet.group_elnet.GroupElnetNaiveBaseState
+    grpglmnet.group_elnet.objective
+    """
+    def __init__(
+        self,
+        X: np.ndarray,
+        *args,
+        **kwargs,
+    ):
+        super(GroupElnetNaiveBaseState, self).__init__(*args, **kwargs)
+        self._state = core.GroupElnetNaiveDenseState(
+            X=X,
+            **asdict(super(GroupElnetNaiveBaseState, self)),
+        )
 
 
 @dataclass
@@ -216,38 +384,20 @@ class GroupElnetResult:
         The residual :math:`y-X\\beta` using ``strong_beta``.
     strong_beta : (w,) np.ndarray
         The last-updated coefficient for strong groups.
-        ``strong_beta[b:b+p]`` is the coefficient for group ``k`` 
-        where
-        ``k = strong_set[i]``,
-        ``b = strong_begins[i]``,
-        and ``p = group_sizes[k]``.
     strong_grad : (w,) np.ndarray
         The last-updated gradient :math:`X_k^\\top (y - X\\beta)` for all strong groups :math:`k`.
-        ``strong_grad[b:b+p]`` is the gradient for group ``k``
-        where 
-        ``k = strong_set[i]``,
-        ``b = strong_begins[i]``,
-        and ``p = group_sizes[k]``.
     active_set : (a,) np.ndarray
         The last-updated active set among the strong groups.
-        ``active_set[i]`` is the *index* to ``strong_set`` that indicates the ``i``th active group.
     active_g1 : (a1,) np.ndarray
         The last-updated active set with group sizes of 1.
-        Similar description as ``active_set``.
     active_g2 : (a2,) np.ndarray
         The last-updated active set with group sizes > 1.
-        Similar description as ``active_set``.
     active_begins : (a,) np.ndarray
         The last-updated indices to values for the active set.
-        ``active_begins[i]`` is the starting index to read values in ``strong_beta``
-        for the ``i``th active group.
     active_order : (a,) np.ndarray
         The last-updated indices in such that ``strong_set`` is sorted in ascending order for the active groups.
-        ``active_order[i]`` is the ``i``th active group in sorted order
-        such that ``strong_set[active_order[i]]`` is the corresponding group number.
     is_active : (s,) np.ndarray
         The last-updated boolean vector that indicates whether each strong group is active or not.
-        ``is_active[i]`` is True if and only if ``strong_set[i]`` is active.
     betas : (l, p) np.ndarray
         ``betas[i]`` corresponds to the solution as a dense vector corresponding to ``lmdas[i]``.
     rsqs : (l,) np.ndarray
@@ -269,41 +419,69 @@ class GroupElnetResult:
     is_active: np.ndarray
     betas: np.ndarray
     rsqs: np.ndarray
-    resids: list[np.ndarray]
+    resids: np.ndarray
     n_cds: int
 
 
-def group_elnet(
-    state, 
-    fit_type="naive_dense",
-):
+def group_elnet(state):
+    """Group elastic net solver.
+
+    The group elastic net solves the following problem:
+    
+    .. math::
+        \\begin{align*}
+            \\mathrm{minimize}_\\beta \\quad&
+            \\frac{1}{2} \\|y - X\\beta\\|_2^2
+            + \\lambda \\sum\\limits_{j=1}^G w_j \\left(
+                \\alpha \\|\\beta_j\\|_2 + \\frac{1-\\alpha}{2} \\|\\beta_j\\|_2^2
+            \\right)
+        \\end{align*}
+
+    where 
+    :math:`X` is the feature matrix,
+    :math:`y` is the response vector,
+    :math:`w` is the penalty factor,
+    :math:`\\lambda` is the regularization parameter,
+    :math:`\\alpha` is the elastic net parameter,
+    :math:`G` is the number of groups,
+    and :math:`\\beta_j` are the coefficients for the :math:`j` th group.
+
+    Parameters
+    ----------
+    state : GroupElnetNaiveDenseState
+        See the documentation for one of the listed types.
+    """
+    # mapping of each state type to the corresponding solver
     f_dict = {
-        "naive_dense": core.group_elnet_naive_dense,
+        GroupElnetNaiveDenseState: core.group_elnet_naive_dense,
         #'full_cov': group_elnet__,
         #'data': group_elnet_data__,
         #'data_newton': group_elnet_data_newton__,
     }
 
-    f = f_dict[fit_type]
-
+    # solve group elastic net
+    f = f_dict[type(state)]
     out = f(state)
+
+    # raise any errors
     if out["error"] != "":
         raise RuntimeError(out["error"])
 
+    # return a subsetted Python result object
     state = out["state"]
     return GroupElnetResult(
         rsq=state.rsq,
-        resid=state.resid,
-        strong_beta=state.strong_beta,
-        strong_grad=state.strong_grad,
-        active_set=state.active_set,
-        active_g1=state.active_g1,
-        active_g2=state.active_g2,
-        active_begins=state.active_begins,
-        active_order=state.active_order,
-        is_active=state.is_active,
-        betas=state.betas,
-        rsqs=state.rsqs,
-        resids=state.resids,
+        resid=np.array(state.resid),
+        strong_beta=np.array(state.strong_beta),
+        strong_grad=np.array(state.strong_grad),
+        active_set=np.array(state.active_set),
+        active_g1=np.array(state.active_g1),
+        active_g2=np.array(state.active_g2),
+        active_begins=np.array(state.active_begins),
+        active_order=np.array(state.active_order),
+        is_active=np.array(state.is_active),
+        betas=np.array(state.betas),
+        rsqs=np.array(state.rsqs),
+        resids=np.array(state.resids),
         n_cds=state.n_cds,
     )
