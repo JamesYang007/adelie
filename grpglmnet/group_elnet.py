@@ -155,9 +155,9 @@ def bcd_root_function(
     ----------
     h : float
         The value at which to evaluate the BCD root function.
-    quad : np.ndarray
+    quad : (p,) np.ndarray
         The quadratic component :math:`\\Sigma`.
-    linear : np.ndarray
+    linear : (p,) np.ndarray
         The linear component :math:`v`.
     l1 : float
         The :math:`\\ell_1` component :math:`\\lambda`.
@@ -206,43 +206,56 @@ def objective(
 
 @dataclass
 class GroupElnetResult:
-    """Group elastic net result.
+    """Group elastic net result pack.
 
     Parameters
     ----------
     rsq : float
         :math:`R^2` value using ``strong_beta``.
-    resid : np.ndarray
+    resid : (n,) np.ndarray
         The residual :math:`y-X\\beta` using ``strong_beta``.
-    strong_beta : np.ndarray
+    strong_beta : (w,) np.ndarray
         The last-updated coefficient for strong groups.
         ``strong_beta[b:b+p]`` is the coefficient for group ``k`` 
         where
         ``k = strong_set[i]``,
         ``b = strong_begins[i]``,
         and ``p = group_sizes[k]``.
-    strong_grad : np.ndarray
+    strong_grad : (w,) np.ndarray
         The last-updated gradient :math:`X_k^\\top (y - X\\beta)` for all strong groups :math:`k`.
         ``strong_grad[b:b+p]`` is the gradient for group ``k``
         where 
         ``k = strong_set[i]``,
         ``b = strong_begins[i]``,
         and ``p = group_sizes[k]``.
-    active_set : np.ndarray
+    active_set : (a,) np.ndarray
         The last-updated active set among the strong groups.
         ``active_set[i]`` is the *index* to ``strong_set`` that indicates the ``i``th active group.
-    active_g1 : np.ndarray
+    active_g1 : (a1,) np.ndarray
         The last-updated active set with group sizes of 1.
         Similar description as ``active_set``.
-    active_g2 : np.ndarray
+    active_g2 : (a2,) np.ndarray
         The last-updated active set with group sizes > 1.
         Similar description as ``active_set``.
-    active_begins : np.ndarray
+    active_begins : (a,) np.ndarray
         The last-updated indices to values for the active set.
         ``active_begins[i]`` is the starting index to read values in ``strong_beta``
         for the ``i``th active group.
-    active_order : np.ndarray
+    active_order : (a,) np.ndarray
         The last-updated indices in such that ``strong_set`` is sorted in ascending order for the active groups.
+        ``active_order[i]`` is the ``i``th active group in sorted order
+        such that ``strong_set[active_order[i]]`` is the corresponding group number.
+    is_active : (s,) np.ndarray
+        The last-updated boolean vector that indicates whether each strong group is active or not.
+        ``is_active[i]`` is True if and only if ``strong_set[i]`` is active.
+    betas : (l, p) np.ndarray
+        ``betas[i]`` corresponds to the solution as a dense vector corresponding to ``lmdas[i]``.
+    rsqs : (l,) np.ndarray
+        ``rsqs[i]`` corresponds to the solution :math:`R^2` corresponding to ``lmdas[i]``.
+    resids : (l, n) np.ndarray
+        ``resids[i]`` corresponds to the solution residual corresponding to ``lmdas[i]``.
+    n_cds : int
+        Number of coordinate descents taken.
     """
     rsq: float
     resid: np.ndarray
@@ -258,6 +271,7 @@ class GroupElnetResult:
     rsqs: np.ndarray
     resids: list[np.ndarray]
     n_cds: int
+
 
 def group_elnet(
     state, 
