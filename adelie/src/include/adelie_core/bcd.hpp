@@ -181,11 +181,11 @@ auto root_lower_bound(
     const value_t c = l1 * l1 * vbuffer1.size() - v_l1 * v_l1;
     const value_t discr = b*b - a*c;
     value_t h_min = (discr > -1e-12) ? 
-        (-b + std::sqrt(std::max(discr, 0.0))) / a : 0.0;
+        (-b + std::sqrt(std::max<value_t>(discr, 0.0))) / a : 0.0;
     
     // Otherwise, if h <= 0, we know at least 0 is a reasonable solution.
     // The only case h <= 0 is when 0 is already close to the solution.
-    h_min = std::max(h_min, 0.0);
+    h_min = std::max<value_t>(h_min, 0.0);
     return h_min;
 }
 
@@ -295,6 +295,7 @@ void newton_solver_base(
     BufferType& buffer2
 )
 {
+    using value_t = ValueType;
     iters = 0;
 
     // Easy case: ||v||_2 <= l1 -> x = 0
@@ -330,7 +331,7 @@ void newton_solver_base(
     };
 
     const auto project_f = [&](auto h) {
-        return std::max(h, 0.0);
+        return std::max<value_t>(h, 0.0);
     };
 
     const auto root_find_pack = newton_root_find(
@@ -470,7 +471,7 @@ void newton_abs_solver(
 
             const auto ada_bisect = [&]() {
                 // enforce some movement towards h_min for safety.
-                w = std::max(l1 / (vbuffer1_min_nzn * h_cand + l1), 0.05);
+                w = std::max<value_t>(l1 / (vbuffer1_min_nzn * h_cand + l1), 0.05);
                 h_cand = w * h_min + (1-w) * h_cand;
                 fh = root_function(h_cand, vbuffer1, v, l1);
             };
@@ -557,11 +558,11 @@ void newton_abs_debug_solver(
             const value_t c = l1 * l1 * L.size() - v_l1 * v_l1;
             const value_t discr = b*b - a*c;
             h_min = (discr > -1e-12) ? 
-                (-b + std::sqrt(std::max(discr, zero))) / a : 0.0;
+                (-b + std::sqrt(std::max<value_t>(discr, zero))) / a : 0.0;
             
             // Otherwise, if h <= 0, we know at least 0 is a reasonable solution.
             // The only case h <= 0 is when 0 is already close to the solution.
-            h_min = std::max(h_min, zero);
+            h_min = std::max<value_t>(h_min, zero);
         }
         
         // compute h_max
@@ -580,7 +581,7 @@ void newton_abs_debug_solver(
                 const bool is_nonzero = vbuffer1[i] > 1e-10;
                 const auto vi2 = v[i] * v[i];
                 h_max += is_nonzero ? vi2 / (vbuffer1[i] * vbuffer1[i]) : 0;
-                vbuffer1_min_nzn = is_nonzero ? std::min(vbuffer1_min_nzn, vbuffer1[i]) : vbuffer1_min_nzn;
+                vbuffer1_min_nzn = is_nonzero ? std::min<value_t>(vbuffer1_min_nzn, vbuffer1[i]) : vbuffer1_min_nzn;
             }
             h_max = std::sqrt(h_max);
         } else {
@@ -597,21 +598,21 @@ void newton_abs_debug_solver(
             //// NEW METHOD: bisection
             // Adaptive method enforces some movement towards h_min for safety.
 
-            value_t w = std::max(l1 / (vbuffer1_min_nzn * h_max + l1), 0.05);
+            value_t w = std::max<value_t>(l1 / (vbuffer1_min_nzn * h_max + l1), 0.05);
             h = w * h_min + (1-w) * h_max;
             value_t fh = (v / (vbuffer1 * h + l1)).matrix().squaredNorm() - 1;
             
             smart_iters.push_back(h);
 
             while ((fh < 0) && std::abs(fh) > tol) {
-                w = std::max(l1 / (vbuffer1_min_nzn * h + l1), 0.05);
+                w = std::max<value_t>(l1 / (vbuffer1_min_nzn * h + l1), 0.05);
                 h = w * h_min + (1-w) * h;
                 fh = (v / (vbuffer1 * h + l1)).matrix().squaredNorm() - 1;
                 smart_iters.push_back(h);
             }
 
             if (std::abs(fh) <= tol) {
-                h = std::max(h, zero);
+                h = std::max<value_t>(h, zero);
                 x = h * v / vbuffer2;
                 return;
             }
@@ -641,7 +642,7 @@ void newton_abs_debug_solver(
     }
     
     // numerical stability
-    h = std::max(h, zero);
+    h = std::max<value_t>(h, zero);
 
     // final solution
     x = h * v / vbuffer2;

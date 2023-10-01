@@ -1,18 +1,31 @@
 from . import adelie_core as core
+from . import matrix
 import numpy as np
 import scipy
 from dataclasses import dataclass 
 
 
+class base:
+    def __init__(self, core_state):
+        self._core_state = core_state
+
+    def internal(self):
+        return self._core_state
+
+    def initialize(self, core_state):
+        self._core_state = core_state
+
+
 @dataclass
-class pin_base:
+class pin_base(base):
     """Base state class for pin methods.
 
     Parameters
     ----------
-    X : (n, p) array-like
+    X : Union[adelie.matrix.base, adelie.matrix.Base64, adelie.matrix.Base32]
         Feature matrix where each column blocks :math:`X_k` defined by the groups
         is such that :math:`X_k^\\top X_k` is diagonal.
+        It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -96,13 +109,13 @@ class pin_base:
         ``rsqs[i]`` corresponds to the :math:`R^2` at ``betas[i]``.
     n_cds : int
         Number of coordinate descents taken.
-    time_strong_cd : np.ndarray # TODO
+    time_strong_cd : np.ndarray
         Benchmark time for performing coordinate-descent on the strong set at every iteration.
-    time_active_cd : np.ndarray # TODO
+    time_active_cd : np.ndarray
         Benchmark time for performing coordinate-descent on the active set at every iteration.
     """
     # Static states
-    X: np.ndarray # TODO: add more types
+    X: matrix.base | matrix.Base64 | matrix.Base32
     groups: np.ndarray
     group_sizes: np.ndarray
     alpha: float
@@ -138,7 +151,8 @@ class pin_base:
     time_strong_cd: np.ndarray
     time_active_cd: np.ndarray
     
-    def propagate_core_state(self, core_state):
+    def initialize(self, core_state):
+        super().initialize(core_state)
         self.X = core_state.X
         self.groups = core_state.groups
         self.group_sizes = core_state.group_sizes
@@ -181,7 +195,7 @@ class pin_naive(pin_base):
 
     Parameters
     ----------
-    X : np.ndarray
+    X : array-like
     groups : np.ndarray
     group_sizes : np.ndarray
     alpha : float
@@ -213,14 +227,14 @@ class pin_naive(pin_base):
     --------
     adelie.state.pin_base
     """
-    #: Residual :math:`y-X\\beta` at ``strong_beta``.
+    #: Residual :math:`y-X\beta` at ``strong_beta``.
     resid: np.ndarray
     #: ``resids[i]`` corresponds to the residual at ``betas[i]``.
     resids: np.ndarray
 
     def __init__(
         self, 
-        X: np.ndarray,
+        X: matrix.base | matrix.Base64 | matrix.Base32,
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -248,7 +262,16 @@ class pin_naive(pin_base):
         active_order: np.ndarray,
         is_active: np.ndarray,
     ):
-        self._core_state = core.state.PinNaive(
+        if isinstance(X, matrix.base):
+            X = X._core_mat
+
+        State = (
+            core.state.PinNaive64 
+            if isinstance(X, matrix.Base64) else 
+            core.state.PinNaive32
+        )
+
+        self._core_state = State(
             X=X,
             groups=groups,
             group_sizes=group_sizes,
@@ -281,41 +304,15 @@ class pin_naive(pin_base):
             resids=[],
         )
 
-        super().__init__(
-            X=X,
-            groups=groups,
-            group_sizes=group_sizes,
-            alpha=alpha,
-            penalty=penalty,
-            strong_set=strong_set,
-            strong_g1=strong_g1,
-            strong_g2=strong_g2,
-            strong_begins=strong_begins,
-            strong_A_diag=strong_A_diag,
-            lmdas=lmdas,
-            max_cds=max_cds,
-            thr=thr,
-            cond_0_thresh=cond_0_thresh,
-            cond_1_thresh=cond_1_thresh,
-            newton_tol=newton_tol,
-            newton_max_iters=newton_max_iters,
-            rsq=rsq,
-            strong_beta=strong_beta,
-            strong_grad=strong_grad,
-            active_set=active_set,
-            active_g1=active_g1,
-            active_g2=active_g2,
-            active_begins=active_begins,
-            active_order=active_order,
-            is_active=is_active,
-            betas=self._core_state.betas,
-            rsqs=self._core_state.rsqs,
-            n_cds=self._core_state.n_cds,
-            time_strong_cd=self._core_state.time_strong_cd,
-            time_active_cd=self._core_state.time_active_cd,
-        )
+        self.initialize(self._core_state)
 
-    def propagate_core_state(self, core_state):
-        super().propagate_core_state(core_state)
+
+    def initialize(self, core_state):
+        super().initialize(core_state)
         self.resid = core_state.resid 
         self.resids = core_state.resids
+
+
+# ================================================
+# Consistency checks
+# ================================================

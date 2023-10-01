@@ -1,5 +1,5 @@
 import adelie as gl
-from adelie.solver import *
+from adelie.grpnet import *
 from adelie.group_basil import group_basil
 import numpy as np
 import matplotlib.pyplot as plt

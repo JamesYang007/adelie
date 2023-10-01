@@ -8,15 +8,14 @@ namespace matrix {
  * @brief Base class for all matrix classes for fitting group elastic net.
  * 
  * @tparam ValueType  underlying value type.
- * @tparam StorageOrder     storage order.  
  */
-template <class ValueType, int StorageOrder> 
+template <class ValueType> 
 class MatrixBase
 {
 public:
     using value_t = ValueType;
     using vec_t = Eigen::Matrix<value_t, Eigen::Dynamic, 1>;
-    using mat_t = Eigen::Matrix<value_t, Eigen::Dynamic, Eigen::Dynamic, StorageOrder>;
+    using mat_t = Eigen::Matrix<value_t, Eigen::Dynamic, Eigen::Dynamic>;
     
     virtual ~MatrixBase() {}
     
@@ -36,6 +35,11 @@ public:
      * @param j     column index.
      */
     virtual Eigen::Ref<const vec_t> col(int j) const =0;
+
+    /**
+     * @brief Returns the number of rows of the represented matrix.
+     */
+    virtual int rows() const =0;
     
     /**
      * @brief Returns the number of columns of the represented matrix.

@@ -14,3 +14,4 @@ dist/
 build/
 *__pycache__*
 *.egg-info*
+adelie/src/third_party

@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'adelie'
 copyright = '2023, James Yang'
 author = 'James Yang'
-release = '1.1.0'
+release = open("../../VERSION", "r").read()
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

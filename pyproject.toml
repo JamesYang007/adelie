@@ -1,7 +1,37 @@
+[project]
+name = "adelie"
+dynamic = ["version"]
+authors = [
+    { name="James Yang", email="jamesyang916@gmail.com" },
+]
+maintainers = [
+    { name="James Yang", email="jamesyang916@gmail.com" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+description = "A fast, flexible package for group elastic net."
+license = {file = "LICENSE"}
+keywords = ["group lasso", "group elastic net", "lasso", "elastic net"]
+readme = "README.md"
+requires-python = ">=3.9,<3.11"
+dependencies = [
+    "numpy",
+    "scipy",
+    "pybind11",
+]
+
+[project.urls]
+Homepage = "https://github.com/JamesYang007/adelie"
+Documentation = "https://jamesyang007.github.io/adelie"
+Repository = "https://github.com/JamesYang007/adelie"
+
 [tool.poetry]
 name = "adelie"
-version = "1.1.0"
-description = ""
+version = "0.0.0"
+description = "A fast, flexible package for group elastic net."
 authors = [
     "James Yang <jamesyang916@gmail.com>",
 ]
@@ -9,6 +39,7 @@ authors = [
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
 numpy = "^1.24.2"
+scipy = "^1.10.1"
 pybind11 = "^2.10.3"
 
 [tool.poetry.group.test.dependencies]
@@ -21,7 +52,6 @@ pydata-sphinx-theme = "^0.14.1"
 numpydoc = "^1.6.0"
 
 [tool.poetry.group.dev.dependencies]
-scipy = "^1.10.1"
 matplotlib = "^3.7.0"
 pandas = "^1.5.3"
 pre-commit = "^3.1.1"
@@ -35,6 +65,8 @@ group-lasso = "^1.5.0"
 tqdm = "^4.65.0"
 mosek = "^10.0.40"
 latextable = "^1.0.0"
+dbus-python = "^1.3.2"
+twine = "^4.0.2"
 
 [tool.jupytext]
 notebook_metadata_filter = "-all"
@@ -42,10 +74,8 @@ cell_metadata_filter = "-all"
 
 [build-system]
 requires = [
-    "poetry-core>=1.0.0",
-    "setuptools>=42", 
-    "wheel", 
-    "pybind11~=2.6.1",
+    "setuptools", 
+    "pybind11",
 ]
 build-backend = "setuptools.build_meta"
 

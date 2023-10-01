@@ -8,15 +8,15 @@
 #include <adelie_core/util/functor_iterator.hpp>
 #include <adelie_core/util/counting_iterator.hpp>
 #include <adelie_core/util/eigen/map_sparsevector.hpp>
-#include <adelie_core/optimization/group_elnet_base.hpp>
+#include <adelie_core/grpnet/solve_pin_base.hpp>
 
 namespace adelie_core {
-namespace naive {
+namespace grpnet {
     
 /**
  * One blockwise coordinate descent loop to solve the objective.
  *  
- * @param   pack            see GroupElnetState.
+ * @param   pack            see PinNaive.
  * @param   g1_begin        begin iterator to indices into strong set of group type 1, i.e.
  *                          strong_set[*begin] is the current group to descend.
  * @param   g1_end          end iterator to indices into strong set of group type 1.
@@ -51,7 +51,7 @@ void coordinate_descent(
     AdditionalStepType additional_step=AdditionalStepType()
 )
 {
-    const auto& X = pack.X;
+    const auto& X = *pack.X;
     const auto& penalty = pack.penalty;
     const auto& strong_set = pack.strong_set;
     const auto& strong_begins = pack.strong_begins;
@@ -120,7 +120,7 @@ void coordinate_descent(
         const auto Xk = X.block(0, groups[k], X.rows(), gsize);
 
         // TODO: parallelize
-        gk.matrix().noalias() = Xk.transpose() * resid.matrix();
+        gk.matrix().noalias() = resid.matrix() * Xk;
 
         // save old beta in buffer
         auto ak_old = buffer3.head(ak.size());
@@ -155,7 +155,7 @@ void coordinate_descent(
         // update residual
         // TODO: dot-product may allocate new array!!
         // TODO: parallelize
-        resid.matrix() -= Xk * del.matrix(); 
+        resid.matrix() -= del.matrix() * Xk.transpose(); 
     }
 }
 
@@ -164,7 +164,7 @@ void coordinate_descent(
  * to minimize the adelie_core objective with group-lasso penalty.
  * See "objective" function for the objective of interest.
  *
- * @param   pack        see GroupElnetState.
+ * @param   pack        see PinNaive.
  * @param   lmda_idx    index into the lambda sequence for logging purposes.
  * @param   buffer1     see coordinate_descent.
  * @param   buffer2     see coordinate_descent.
@@ -177,7 +177,7 @@ template <class PackType,
           class UpdateCoefficientsType,
           class CUIType = util::no_op>
 ADELIE_CORE_STRONG_INLINE
-void fit_active(
+void solve_pin_naive_active(
     PackType&& pack,
     size_t lmda_idx,
     BufferType& buffer1,
@@ -197,7 +197,7 @@ void fit_active(
     const auto thr = pack.thr;
     const auto max_cds = pack.max_cds;
     auto& n_cds = pack.n_cds;
-    auto& diagnostic = pack.diagnostic;
+    auto& time_active_cd = pack.time_active_cd;
 
     const auto g1_active_f = [&](auto i) {
         return active_set[active_g1[i]];
@@ -210,9 +210,9 @@ void fit_active(
     const auto ag2_begin = util::make_functor_iterator<size_t>(0, g2_active_f);
     const auto ag2_end = util::make_functor_iterator<size_t>(active_g2.size(), g2_active_f);
     
-    diagnostic.time_active_cd.push_back(0);
+    time_active_cd.push_back(0);
     {
-        sw_t stopwatch(diagnostic.time_active_cd.back());
+        sw_t stopwatch(time_active_cd.back());
         while (1) {
             check_user_interrupt(n_cds);
             ++n_cds;
@@ -236,14 +236,14 @@ void fit_active(
  * \f]
  * i.e. all betas not in the strong set \f$S\f$ are fixed to be 0.
  * 
- * @param   pack                    see GroupElnetState.
- * @param   update_coefficients_f   see fit_active
- * @param   check_user_interrupt    see fit_active.
+ * @param   pack                    see PinNaive.
+ * @param   update_coefficients_f   see solve_pin_naive_active
+ * @param   check_user_interrupt    see solve_pin_naive_active.
  */
 template <class PackType,
           class UpdateCoefficientsType,
           class CUIType = util::no_op>
-inline void fit(
+inline void solve_pin_naive(
     PackType&& pack,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
@@ -255,7 +255,7 @@ inline void fit(
     using sp_vec_value_t = typename pack_t::sp_vec_value_t;
     using sw_t = util::Stopwatch;
 
-    const auto& X = pack.X;
+    const auto& X = *pack.X;
     const auto& group_sizes = pack.group_sizes;
     const auto& strong_set = pack.strong_set;
     const auto& strong_g1 = pack.strong_g1;
@@ -278,7 +278,7 @@ inline void fit(
     auto& resids = pack.resids;
     auto& rsq = pack.rsq;
     auto& n_cds = pack.n_cds;
-    auto& diagnostic = pack.diagnostic;
+    auto& time_strong_cd = pack.time_strong_cd;
     
     const auto p = X.cols();
 
@@ -287,7 +287,7 @@ inline void fit(
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
-    GroupElnetBufferPack<value_t> buffer_pack(max_group_size);
+    GrpnetPinBufferPack<value_t> buffer_pack(max_group_size);
     
     // buffer to store final result
     std::vector<index_t> active_beta_indices;
@@ -326,7 +326,7 @@ inline void fit(
     };
 
     const auto lasso_active_and_update = [&](size_t l) {
-        fit_active(
+        solve_pin_naive_active(
             pack, l, 
             buffer_pack.buffer1,
             buffer_pack.buffer2,
@@ -347,9 +347,9 @@ inline void fit(
             ++n_cds;
             value_t convg_measure;
             const auto old_active_size = active_set.size();
-            diagnostic.time_strong_cd.push_back(0);
+            time_strong_cd.push_back(0);
             {
-                sw_t stopwatch(diagnostic.time_strong_cd.back());
+                sw_t stopwatch(time_strong_cd.back());
                 coordinate_descent(
                     pack,
                     strong_g1.data(), strong_g1.data() + strong_g1.size(),
@@ -416,5 +416,5 @@ inline void fit(
     }
 }
 
-} // namespace naive
+} // namespace grpnet
 } // namespace adelie_core

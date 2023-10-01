@@ -5,10 +5,10 @@
 namespace py = pybind11;
 namespace ad = adelie_core;
 
-template <class T, int S>
-class PyMatrixBase : public ad::matrix::MatrixBase<T, S>
+template <class T>
+class PyMatrixBase : public ad::matrix::MatrixBase<T>
 {
-    using base_t = ad::matrix::MatrixBase<T, S>;
+    using base_t = ad::matrix::MatrixBase<T>;
 public:
     /* Inherit the constructors */
     using base_t::base_t;
@@ -34,6 +34,14 @@ public:
             j
         );
     }
+    int rows() const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            int,
+            base_t,
+            rows
+        );
+    }
     int cols() const override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -44,24 +52,25 @@ public:
     }
 };
 
-template <class T, int S>
+template <class T>
 void matrix_base(py::module_& m, const char* name)
 {
-    using trampoline_t = PyMatrixBase<T, S>;
-    using internal_t = ad::matrix::MatrixBase<T, S>;
+    using trampoline_t = PyMatrixBase<T>;
+    using internal_t = ad::matrix::MatrixBase<T>;
     py::class_<internal_t, trampoline_t>(m, name)
         .def(py::init<>())
         .def("block", &internal_t::block)
         .def("col", &internal_t::col)
+        .def("rows", &internal_t::rows)
         .def("cols", &internal_t::cols)
         ;
 }
 
-template <class T, int S>
+template <class T>
 void matrix_dense(py::module_& m, const char* name)
 {
-    using internal_t = ad::matrix::MatrixDense<T, S>;
-    using base_t = ad::matrix::MatrixBase<T, S>;
+    using internal_t = ad::matrix::MatrixDense<T>;
+    using base_t = ad::matrix::MatrixBase<T>;
     using mat_t = typename internal_t::mat_t;
     py::class_<internal_t, base_t>(m, name)
         .def(
@@ -73,13 +82,9 @@ void matrix_dense(py::module_& m, const char* name)
 
 void register_matrix(py::module_& m)
 {
-    matrix_base<double, Eigen::ColMajor>(m, "Base64F");
-    matrix_base<double, Eigen::RowMajor>(m, "Base64C");
-    matrix_base<float, Eigen::ColMajor>(m, "Base32F");
-    matrix_base<float, Eigen::RowMajor>(m, "Base32C");
+    matrix_base<double>(m, "Base64");
+    matrix_base<float>(m, "Base32");
 
-    matrix_dense<double, Eigen::ColMajor>(m, "Dense64F");
-    matrix_dense<double, Eigen::RowMajor>(m, "Dense64C");
-    matrix_dense<float, Eigen::ColMajor>(m, "Dense32F");
-    matrix_dense<float, Eigen::RowMajor>(m, "Dense32C");
+    matrix_dense<double>(m, "Dense64");
+    matrix_dense<float>(m, "Dense32");
 }
