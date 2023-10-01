@@ -1,0 +1,22 @@
+﻿adelie.matrix.dense
+===================
+
+.. currentmodule:: adelie.matrix
+
+.. autoclass:: dense
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~dense.__init__
+   
+   
+
+   
+   
+   
