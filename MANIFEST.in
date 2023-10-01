@@ -1,0 +1,12 @@
+include VERSION
+
+prune .github
+prune .pytest_cache
+prune .vscode
+prune *.egg-info
+prune build
+prune dist
+prune docs
+prune r-adelie
+prune research
+prune tests

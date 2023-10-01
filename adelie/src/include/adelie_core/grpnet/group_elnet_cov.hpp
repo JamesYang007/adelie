@@ -880,7 +880,7 @@ inline void fit(
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
-    GroupElnetBufferPack<value_t> buffer_pack(max_group_size);
+    GrpnetPinBufferPack<value_t> buffer_pack(max_group_size);
     
     // buffer to store final result
     std::vector<index_t> active_beta_indices;

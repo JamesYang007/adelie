@@ -1,16 +1,17 @@
 #pragma once
 #include <adelie_core/util/types.hpp>
 #include <adelie_core/util/macros.hpp>
-#include <adelie_core/optimization/newton.hpp>
+#include <adelie_core/bcd.hpp>
 
 namespace adelie_core {
+namespace grpnet {
 
 /**
- * Pack of buffers used for fit().
+ * Pack of buffers used in solvers.
  * This class is purely for convenience purposes.
  */
 template <class ValueType>
-struct GroupElnetBufferPack 
+struct GrpnetPinBufferPack 
 {
     using value_t = ValueType;
     
@@ -18,15 +19,15 @@ struct GroupElnetBufferPack
     util::rowvec_type<value_t> buffer2;
     util::rowvec_type<value_t> buffer3;
 
-    explicit GroupElnetBufferPack(
+    explicit GrpnetPinBufferPack(
         size_t buffer_size
     )
-        : GroupElnetBufferPack(
+        : GrpnetPinBufferPack(
             buffer_size, buffer_size, buffer_size
         ) 
     {}
 
-    explicit GroupElnetBufferPack(
+    explicit GrpnetPinBufferPack(
             size_t buffer1_size, 
             size_t buffer2_size,
             size_t buffer3_size
@@ -40,7 +41,7 @@ struct GroupElnetBufferPack
 /**
  * Constructs a sparse vector containing all active values.
  * 
- * @param   pack    see GroupElnetState.
+ * @param   pack    see PinNaive.
  * @param   indices     increasing order of indices with active values.
  * @param   values      corresponding active values to indices.
  */
@@ -162,11 +163,12 @@ void update_rsq(
 template <class ValueType>
 ADELIE_CORE_STRONG_INLINE
 void update_rsq(
-        ValueType& rsq, 
-        ValueType old_coeff, 
-        ValueType new_coeff, 
-        ValueType x_var, 
-        ValueType grad)
+    ValueType& rsq, 
+    ValueType old_coeff, 
+    ValueType new_coeff, 
+    ValueType x_var, 
+    ValueType grad
+)
 {
     const auto del = new_coeff - old_coeff;
     rsq += del * (2 * grad - del * x_var);
@@ -209,7 +211,7 @@ void update_coefficients(
     BufferType& buffer2
 )
 {
-    adelie_core::newton_abs_solver(
+    bcd::newton_abs_solver(
         L, v, l1, l2, tol, max_iters,
         x, iters, buffer1, buffer2
     );
@@ -279,7 +281,7 @@ template <class XType, class YType,
           class GroupsType, class GroupSizesType,
           class ValueType, class PenaltyType, class BetaType>
 inline
-auto group_elnet_objective(
+auto objective(
     const BetaType& beta,
     const XType& X,
     const YType& y,
@@ -303,4 +305,5 @@ auto group_elnet_objective(
     return 0.5 * (y.matrix() - X * beta.matrix()).squaredNorm() + p_;
 }
 
+} // namespace grpnet
 } // namespace adelie_core

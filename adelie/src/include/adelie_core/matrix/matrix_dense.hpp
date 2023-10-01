@@ -4,10 +4,10 @@
 namespace adelie_core {
 namespace matrix {
     
-template <class ValueType, int StorageOrder>
-class MatrixDense: public MatrixBase<ValueType, StorageOrder>
+template <class ValueType>
+class MatrixDense: public MatrixBase<ValueType>
 {
-    using base_t = MatrixBase<ValueType, StorageOrder>;
+    using base_t = MatrixBase<ValueType>;
 
 public:
     using typename base_t::value_t;
@@ -30,6 +30,11 @@ public:
     Eigen::Ref<const vec_t> col(int j) const override
     {
         return _mat.col(j);    
+    }
+
+    int rows() const override
+    {
+        return _mat.rows();
     }
     
     int cols() const override

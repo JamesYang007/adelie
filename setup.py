@@ -1,5 +1,6 @@
 from glob import glob
-from setuptools import setup
+from setuptools import setup, find_packages
+from distutils.dir_util import copy_tree
 from pybind11.setup_helpers import Pybind11Extension 
 from pybind11.setup_helpers import ParallelCompile
 import sysconfig
@@ -9,9 +10,22 @@ import platform
 # Optional multithreaded build
 ParallelCompile("NPY_NUM_BUILD_JOBS").install()
 
-__version__ = "1.1.0"
+__version__ = open("VERSION", "r").read()
 
 ENVPATH = os.getenv("CONDA_PREFIX")
+ROOTPATH = os.path.abspath(os.getcwd())
+
+# copy Eigen header files to src/third_party if Eigen exists in conda
+EIGENPATH = os.path.join(ENVPATH, "include/eigen3")
+if os.path.exists(EIGENPATH):
+    if not os.path.exists("adelie/src/third_party"):
+        os.mkdir("adelie/src/third_party")
+    if not os.path.exists("adelie/src/third_party/eigen3"):
+        os.mkdir("adelie/src/third_party/eigen3")
+    copy_tree(
+        EIGENPATH,
+        os.path.abspath("adelie/src/third_party/eigen3"),
+    )
 
 extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
 extra_compile_args += ["-Wall", "-Wextra", "-DNDEBUG", "-O3"]
@@ -40,9 +54,10 @@ ext_modules = [
             ('EIGEN_MATRIXBASE_PLUGIN', '\"adelie_core/util/eigen/matrixbase_plugin.hpp\"'),
         ],
         include_dirs=[
-            'adelie_core/include',
+            "adelie/src",
+            "adelie/src/include",
+            "adelie/src/third_party/eigen3",
             os.path.join(ENVPATH, 'include'),
-            os.path.join(ENVPATH, 'include/eigen3'),
         ],
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
@@ -60,6 +75,14 @@ setup(
     author_email='jamesyang916@gmail.com',
     maintainer='James Yang',
     maintainer_email='jamesyang916@gmail.com',
+    packages=["adelie"], 
+    package_data={
+        "adelie": [
+            "src/**/*.hpp", 
+            "src/third_party/**/*",
+            "adelie_core.cpython*",
+        ],
+    },
     ext_modules=ext_modules,
     zip_safe=False,
 )

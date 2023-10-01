@@ -1,11 +1,26 @@
-# Group-Lasso-Study
+# Adelie
 
 This repository contains research about group-lasso.
 Specifically, we hope to consolidate all empirical studies about how group-lasso
 regarding its performance based on different methods, literature overview, and application results
 to decide which implementation/application makes most sense depending on the situation.
 
-## Setup Instructions
+## Installation
+
+MacOS users must have `OpenMP` installed in their system as a prerequisite.
+The simplest method is to install with `brew`:
+```
+brew install libomp
+```
+
+Install the stable version with `pip`:
+```
+pip install adelie
+```
+
+For the bleeding edge version, follow the instructions in [Developer Installation](#developer-installation).
+
+## Developer Installation
 
 1. Install conda. We recommend installing `Mambaforge`, which is a conda installation with
 `mamba` installed by default and set to use `conda-forge` as the default set of package repositories.
@@ -25,11 +40,7 @@ is in `pyproject.toml`.
     poetry install --no-root
     ```
 
-4. Install `adelie`. If you want to install globally,
-    ```
-    pip install .
-    ```
-    Otherwise, to install in editable mode (developers),
+4. Install `adelie` in editable mode:
     ```
     pip install -e .
     ```
