@@ -6,9 +6,6 @@
 import os
 import sys
 
-import grpglmnet
-import grpglmnet.group_elnet
-
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('../..'))
@@ -16,7 +13,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'grpglmnet'
+project = 'adelie'
 copyright = '2023, James Yang'
 author = 'James Yang'
 release = '1.1.0'
@@ -38,7 +35,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'pydata_sphinx_theme'
 html_theme_options = {
-    "github_url": "https://github.com/JamesYang007/grpglmnet",
+    "github_url": "https://github.com/JamesYang007/adelie",
     "collapse_navigation": True,
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
 }
