@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "grpglmnet"
+name = "adelie"
 version = "1.1.0"
 description = ""
 authors = [

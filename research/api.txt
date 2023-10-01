@@ -1,0 +1,22 @@
+import adelie as ad
+
+
+ad.grpnet(
+    X=...,
+    y=...,
+    method=...,
+    ...
+):
+    # create state object
+    # this own should own all storage
+    state = ad.state.create(
+        ...
+    )
+
+    # call correct grpnet_core_routine with state
+    core_out = ...
+
+    # output should be another state object
+    state = convert(core_out)
+
+    return state

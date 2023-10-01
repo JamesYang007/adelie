@@ -1,4 +1,4 @@
-import grpglmnet as gl
+import adelie as gl
 import matplotlib.pyplot as plt
 import timeit
 import numpy as np

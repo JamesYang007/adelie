@@ -13,7 +13,7 @@
 #' @param   max_iters   maximum number of iterations of Newton's method.
 #' @export
 ista_solver <- function(L, v, l1, l2, tol, max_iters) {
-    .Call(`_grpglmnet_ista_solver`, L, v, l1, l2, tol, max_iters)
+    .Call(`_adelie_ista_solver`, L, v, l1, l2, tol, max_iters)
 }
 
 #' FISTA solver.
@@ -28,7 +28,7 @@ ista_solver <- function(L, v, l1, l2, tol, max_iters) {
 #' @param   max_iters   maximum number of iterations of Newton's method.
 #' @export
 fista_solver <- function(L, v, l1, l2, tol, max_iters) {
-    .Call(`_grpglmnet_fista_solver`, L, v, l1, l2, tol, max_iters)
+    .Call(`_adelie_fista_solver`, L, v, l1, l2, tol, max_iters)
 }
 
 #' FISTA solver with adaptive restart.
@@ -43,17 +43,17 @@ fista_solver <- function(L, v, l1, l2, tol, max_iters) {
 #' @param   max_iters   maximum number of iterations of Newton's method.
 #' @export
 fista_adares_solver <- function(L, v, l1, l2, tol, max_iters) {
-    .Call(`_grpglmnet_fista_adares_solver`, L, v, l1, l2, tol, max_iters)
+    .Call(`_adelie_fista_adares_solver`, L, v, l1, l2, tol, max_iters)
 }
 
 #' @export
 group_basil_cov__ <- function(X, y, groups, group_sizes, alpha, penalty, user_lmdas_, max_n_lambdas, n_lambdas_iter, use_strong_rule, do_early_exit, verbose_diagnostic, delta_strong_size, max_strong_size, max_n_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters, min_ratio, n_threads) {
-    .Call(`_grpglmnet_group_basil_cov__`, X, y, groups, group_sizes, alpha, penalty, user_lmdas_, max_n_lambdas, n_lambdas_iter, use_strong_rule, do_early_exit, verbose_diagnostic, delta_strong_size, max_strong_size, max_n_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters, min_ratio, n_threads)
+    .Call(`_adelie_group_basil_cov__`, X, y, groups, group_sizes, alpha, penalty, user_lmdas_, max_n_lambdas, n_lambdas_iter, use_strong_rule, do_early_exit, verbose_diagnostic, delta_strong_size, max_strong_size, max_n_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters, min_ratio, n_threads)
 }
 
 #' @export
 group_basil_naive__ <- function(X, y, groups, group_sizes, alpha, penalty, user_lmdas_, max_n_lambdas, n_lambdas_iter, use_strong_rule, do_early_exit, verbose_diagnostic, delta_strong_size, max_strong_size, max_n_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters, min_ratio, n_threads) {
-    .Call(`_grpglmnet_group_basil_naive__`, X, y, groups, group_sizes, alpha, penalty, user_lmdas_, max_n_lambdas, n_lambdas_iter, use_strong_rule, do_early_exit, verbose_diagnostic, delta_strong_size, max_strong_size, max_n_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters, min_ratio, n_threads)
+    .Call(`_adelie_group_basil_naive__`, X, y, groups, group_sizes, alpha, penalty, user_lmdas_, max_n_lambdas, n_lambdas_iter, use_strong_rule, do_early_exit, verbose_diagnostic, delta_strong_size, max_strong_size, max_n_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters, min_ratio, n_threads)
 }
 
 #' Newton solver
@@ -68,7 +68,7 @@ group_basil_naive__ <- function(X, y, groups, group_sizes, alpha, penalty, user_
 #' @param   max_iters   maximum number of iterations of Newton's method.
 #' @export
 newton_solver <- function(L, v, l1, l2, tol, max_iters) {
-    .Call(`_grpglmnet_newton_solver`, L, v, l1, l2, tol, max_iters)
+    .Call(`_adelie_newton_solver`, L, v, l1, l2, tol, max_iters)
 }
 
 #' Newton-ABS solver
@@ -83,7 +83,7 @@ newton_solver <- function(L, v, l1, l2, tol, max_iters) {
 #' @param   max_iters   maximum number of iterations of Newton's method.
 #' @export
 newton_abs_solver <- function(L, v, l1, l2, tol, max_iters) {
-    .Call(`_grpglmnet_newton_abs_solver`, L, v, l1, l2, tol, max_iters)
+    .Call(`_adelie_newton_abs_solver`, L, v, l1, l2, tol, max_iters)
 }
 
 #' Newton solver with more information.
@@ -98,7 +98,7 @@ newton_abs_solver <- function(L, v, l1, l2, tol, max_iters) {
 #' @param   max_iters   maximum number of iterations of Newton's method.
 #' @export
 newton_abs_debug_solver <- function(L, v, l1, l2, tol, max_iters, smart_init = TRUE) {
-    .Call(`_grpglmnet_newton_abs_debug_solver`, L, v, l1, l2, tol, max_iters, smart_init)
+    .Call(`_adelie_newton_abs_debug_solver`, L, v, l1, l2, tol, max_iters, smart_init)
 }
 
 #' Computes the group-lasso objective.
@@ -113,6 +113,6 @@ newton_abs_debug_solver <- function(L, v, l1, l2, tol, max_iters, smart_init = T
 #' @param   beta    coefficient vector.
 #' @export
 objective <- function(A, r, groups, group_sizes, alpha, penalty, lmda, beta) {
-    .Call(`_grpglmnet_objective`, A, r, groups, group_sizes, alpha, penalty, lmda, beta)
+    .Call(`_adelie_objective`, A, r, groups, group_sizes, alpha, penalty, lmda, beta)
 }
 

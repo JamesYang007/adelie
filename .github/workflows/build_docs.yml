@@ -18,14 +18,14 @@ jobs:
     - uses: conda-incubator/setup-miniconda@v2
       with:
         mamba-version: "*"
-        activate-environment: grpglmnet
+        activate-environment: adelie
         environment-file: environment.yml
         auto-activate-base: false
     - name: Set up dependencies
       run: |
-        conda activate grpglmnet
+        conda activate adelie
         poetry install --without test,dev --no-root
-    - name: Install grpglmnet
+    - name: Install adelie
       run: |
         pip install -e .
     # Standard drop-in approach that should work for most people.

@@ -1,6 +1,6 @@
-import grpglmnet as gl
-from grpglmnet.group_elnet import *
-from grpglmnet.group_basil import group_basil
+import adelie as gl
+from adelie.solver import *
+from adelie.group_basil import group_basil
 import numpy as np
 import matplotlib.pyplot as plt
 
