@@ -1,0 +1,60 @@
+﻿adelie.state.pin\_base
+======================
+
+.. currentmodule:: adelie.state
+
+.. autoclass:: pin_base
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~pin_base.__init__
+      ~pin_base.initialize
+      ~pin_base.internal
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~pin_base.X
+      ~pin_base.groups
+      ~pin_base.group_sizes
+      ~pin_base.alpha
+      ~pin_base.penalty
+      ~pin_base.strong_set
+      ~pin_base.strong_g1
+      ~pin_base.strong_g2
+      ~pin_base.strong_begins
+      ~pin_base.strong_A_diag
+      ~pin_base.lmdas
+      ~pin_base.max_cds
+      ~pin_base.thr
+      ~pin_base.cond_0_thresh
+      ~pin_base.cond_1_thresh
+      ~pin_base.newton_tol
+      ~pin_base.newton_max_iters
+      ~pin_base.rsq
+      ~pin_base.strong_beta
+      ~pin_base.strong_grad
+      ~pin_base.active_set
+      ~pin_base.active_g1
+      ~pin_base.active_g2
+      ~pin_base.active_begins
+      ~pin_base.active_order
+      ~pin_base.is_active
+      ~pin_base.betas
+      ~pin_base.rsqs
+      ~pin_base.n_cds
+      ~pin_base.time_strong_cd
+      ~pin_base.time_active_cd
+   
+   

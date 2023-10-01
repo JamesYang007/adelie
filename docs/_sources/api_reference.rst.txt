@@ -33,3 +33,33 @@ adelie.matrix
 
 
     dense
+
+
+adelie.state
+------------
+
+
+.. currentmodule:: adelie.state
+
+
+.. autosummary::
+    :toctree: generated/
+
+
+    pin_base
+    pin_naive
+
+
+adelie.grpnet
+-------------
+
+
+.. currentmodule:: adelie.grpnet
+
+
+.. autosummary::
+    :toctree: generated/
+
+
+    objective
+    solve_pin
