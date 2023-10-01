@@ -82,7 +82,7 @@ template <class MatrixType,
           class DynamicVectorValueType=std::vector<ValueType>,
           class DynamicVectorVecValueType=std::vector<util::rowvec_type<ValueType>>,
           class DynamicVectorSpVecType=std::vector<
-                util::sp_vec_type<ValueType, Eigen::ColMajor, IndexType>
+                util::sp_vec_type<ValueType, Eigen::RowMajor, IndexType>
             > 
           >
 struct PinNaive
@@ -90,7 +90,7 @@ struct PinNaive
     using value_t = ValueType;
     using index_t = IndexType;
     using bool_t = BoolType;
-    using sp_vec_value_t = util::sp_vec_type<value_t, Eigen::ColMajor, index_t>;
+    using sp_vec_value_t = util::sp_vec_type<value_t, Eigen::RowMajor, index_t>;
     using vec_value_t = util::rowvec_type<value_t>;
     using vec_index_t = util::rowvec_type<index_t>;
     using vec_bool_t = util::rowvec_type<bool_t>;
@@ -103,10 +103,9 @@ struct PinNaive
     using dyn_vec_value_t = DynamicVectorValueType;
     using dyn_vec_vec_value_t = DynamicVectorVecValueType;
     using dyn_vec_sp_vec_t = DynamicVectorSpVecType;
-    using diagnostic_t = GroupElnetDiagnostic;
 
-    // Static states
-    const MatrixType X;
+    /* Static states */
+    const MatrixType* X;
     const map_cvec_index_t groups;
     const map_cvec_index_t group_sizes;
     const value_t alpha;
@@ -118,7 +117,7 @@ struct PinNaive
     const map_cvec_value_t strong_A_diag;
     const map_cvec_value_t lmdas;
 
-    // Configurations
+    /* Configurations */
     const size_t max_cds;
     const value_t thr;
     const value_t cond_0_thresh;
@@ -126,7 +125,7 @@ struct PinNaive
     const value_t newton_tol;
     const size_t newton_max_iters;
 
-    // Dynamic states
+    /* Dynamic states */
     value_t rsq;
     map_vec_value_t resid;
     map_vec_value_t strong_beta;
@@ -141,8 +140,10 @@ struct PinNaive
     dyn_vec_value_t rsqs;
     dyn_vec_vec_value_t resids;
     size_t n_cds = 0;
-    dyn_vec_value_t time_strong_cd;
-    dyn_vec_value_t time_active_cd;
+
+    // Benchmark information
+    std::vector<double> time_strong_cd;
+    std::vector<double> time_active_cd;
     
     explicit PinNaive(
         const MatrixType& X,
@@ -176,7 +177,7 @@ struct PinNaive
         dyn_vec_value_t rsqs,
         dyn_vec_vec_value_t resids
     )
-        : X(X),
+        : X(&X),
           groups(groups.data(), groups.size()),
           group_sizes(group_sizes.data(), group_sizes.size()),
           alpha(alpha),
