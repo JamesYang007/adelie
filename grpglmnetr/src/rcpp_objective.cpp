@@ -25,5 +25,5 @@ double objective(
     const Eigen::Map<Eigen::VectorXd>& beta
 )
 {
-    return grpglmnet_core::objective(A, r, groups, group_sizes, alpha, penalty, lmda, beta);
+    return adelie_core::objective(A, r, groups, group_sizes, alpha, penalty, lmda, beta);
 }

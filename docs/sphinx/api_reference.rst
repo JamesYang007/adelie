@@ -2,23 +2,34 @@ API Reference
 =============
 
 
-grpglmnet.group_elnet
-----------------------
+adelie.bcd
+----------
 
 
-.. currentmodule:: grpglmnet.group_elnet
+.. currentmodule:: adelie.bcd
 
 
 .. autosummary::
     :toctree: generated/
 
 
-    bcd_objective
-    bcd_update
-    bcd_root_lower_bound
-    bcd_root_upper_bound
-    bcd_root_function
-    GroupElnetNaiveBaseState
-    GroupElnetNaiveDenseState
-    group_elnet
+    root_lower_bound
+    root_upper_bound
+    root_function
     objective
+    solve
+    root
+
+
+adelie.matrix
+-------------
+
+
+.. currentmodule:: adelie.matrix
+
+
+.. autosummary::
+    :toctree: generated/
+
+
+    dense

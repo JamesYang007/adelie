@@ -4,14 +4,14 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/grpglmnet_core/include",
+                "${workspaceFolder}/adelie_core/include",
                 "/usr/lib/R/site-library/RcppEigen/include",
                 "/usr/share/R/include",
                 "${HOME}/R/x86_64-pc-linux-gnu-library/4.2/Rcpp/include",
-                "${CONDA_PREFIX}/envs/grpglmnet/include",
-                "${CONDA_PREFIX}/envs/grpglmnet/include/eigen3",
-                "${CONDA_PREFIX}/envs/grpglmnet/lib/python3.10/site-packages/pybind11/include",
-                "${CONDA_PREFIX}/envs/grpglmnet/include/python3.10"
+                "${CONDA_PREFIX}/envs/adelie/include",
+                "${CONDA_PREFIX}/envs/adelie/include/eigen3",
+                "${CONDA_PREFIX}/envs/adelie/lib/python3.10/site-packages/pybind11/include",
+                "${CONDA_PREFIX}/envs/adelie/include/python3.10"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",
@@ -24,10 +24,10 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/src/include",
-                "${CONDA_PREFIX}/envs/grpglmnet/include",
-                "${CONDA_PREFIX}/envs/grpglmnet/include/eigen3",
-                "${CONDA_PREFIX}/envs/grpglmnet/lib/python3.10/site-packages/pybind11/include",
-                "${CONDA_PREFIX}/envs/grpglmnet/include/python3.10"
+                "${CONDA_PREFIX}/envs/adelie/include",
+                "${CONDA_PREFIX}/envs/adelie/include/eigen3",
+                "${CONDA_PREFIX}/envs/adelie/lib/python3.10/site-packages/pybind11/include",
+                "${CONDA_PREFIX}/envs/adelie/include/python3.10"
             ],
             "defines": [],
             "macFrameworkPath": [

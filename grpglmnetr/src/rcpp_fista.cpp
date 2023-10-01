@@ -25,7 +25,7 @@ Rcpp::List ista_solver(
 {
     Eigen::VectorXd x(L.size());    
     size_t iters = 0;
-    grpglmnet_core::ista_solver(L, v, l1, l2, tol, max_iters, x, iters);
+    adelie_core::ista_solver(L, v, l1, l2, tol, max_iters, x, iters);
     return Rcpp::List::create(
         Rcpp::Named("beta")=x,
         Rcpp::Named("iters")=iters
@@ -55,7 +55,7 @@ Rcpp::List fista_solver(
 {
     Eigen::VectorXd x(L.size());    
     size_t iters = 0;
-    grpglmnet_core::fista_solver(L, v, l1, l2, tol, max_iters, x, iters);
+    adelie_core::fista_solver(L, v, l1, l2, tol, max_iters, x, iters);
     return Rcpp::List::create(
         Rcpp::Named("beta")=x,
         Rcpp::Named("iters")=iters
@@ -85,7 +85,7 @@ Rcpp::List fista_adares_solver(
 {
     Eigen::VectorXd x(L.size());    
     size_t iters = 0;
-    grpglmnet_core::fista_adares_solver(L, v, l1, l2, tol, max_iters, x, iters);
+    adelie_core::fista_adares_solver(L, v, l1, l2, tol, max_iters, x, iters);
     return Rcpp::List::create(
         Rcpp::Named("beta")=x,
         Rcpp::Named("iters")=iters

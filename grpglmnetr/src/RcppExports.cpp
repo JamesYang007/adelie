@@ -13,7 +13,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // ista_solver
 Rcpp::List ista_solver(const Eigen::Map<Eigen::VectorXd>& L, const Eigen::Map<Eigen::VectorXd>& v, double l1, double l2, double tol, size_t max_iters);
-RcppExport SEXP _grpglmnet_ista_solver(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP) {
+RcppExport SEXP _adelie_ista_solver(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -29,7 +29,7 @@ END_RCPP
 }
 // fista_solver
 Rcpp::List fista_solver(const Eigen::Map<Eigen::VectorXd>& L, const Eigen::Map<Eigen::VectorXd>& v, double l1, double l2, double tol, size_t max_iters);
-RcppExport SEXP _grpglmnet_fista_solver(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP) {
+RcppExport SEXP _adelie_fista_solver(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -45,7 +45,7 @@ END_RCPP
 }
 // fista_adares_solver
 Rcpp::List fista_adares_solver(const Eigen::Map<Eigen::VectorXd>& L, const Eigen::Map<Eigen::VectorXd>& v, double l1, double l2, double tol, size_t max_iters);
-RcppExport SEXP _grpglmnet_fista_adares_solver(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP) {
+RcppExport SEXP _adelie_fista_adares_solver(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -61,7 +61,7 @@ END_RCPP
 }
 // group_basil_cov__
 Rcpp::List group_basil_cov__(const Eigen::Map<Eigen::MatrixXd>& X, const Eigen::Map<Eigen::VectorXd>& y, const Eigen::Map<Eigen::VectorXi>& groups, const Eigen::Map<Eigen::VectorXi>& group_sizes, double alpha, const Eigen::Map<Eigen::VectorXd>& penalty, const Eigen::Map<Eigen::VectorXd>& user_lmdas_, size_t max_n_lambdas, size_t n_lambdas_iter, bool use_strong_rule, bool do_early_exit, bool verbose_diagnostic, size_t delta_strong_size, size_t max_strong_size, size_t max_n_cds, double thr, double cond_0_thresh, double cond_1_thresh, double newton_tol, size_t newton_max_iters, double min_ratio, size_t n_threads);
-RcppExport SEXP _grpglmnet_group_basil_cov__(SEXP XSEXP, SEXP ySEXP, SEXP groupsSEXP, SEXP group_sizesSEXP, SEXP alphaSEXP, SEXP penaltySEXP, SEXP user_lmdas_SEXP, SEXP max_n_lambdasSEXP, SEXP n_lambdas_iterSEXP, SEXP use_strong_ruleSEXP, SEXP do_early_exitSEXP, SEXP verbose_diagnosticSEXP, SEXP delta_strong_sizeSEXP, SEXP max_strong_sizeSEXP, SEXP max_n_cdsSEXP, SEXP thrSEXP, SEXP cond_0_threshSEXP, SEXP cond_1_threshSEXP, SEXP newton_tolSEXP, SEXP newton_max_itersSEXP, SEXP min_ratioSEXP, SEXP n_threadsSEXP) {
+RcppExport SEXP _adelie_group_basil_cov__(SEXP XSEXP, SEXP ySEXP, SEXP groupsSEXP, SEXP group_sizesSEXP, SEXP alphaSEXP, SEXP penaltySEXP, SEXP user_lmdas_SEXP, SEXP max_n_lambdasSEXP, SEXP n_lambdas_iterSEXP, SEXP use_strong_ruleSEXP, SEXP do_early_exitSEXP, SEXP verbose_diagnosticSEXP, SEXP delta_strong_sizeSEXP, SEXP max_strong_sizeSEXP, SEXP max_n_cdsSEXP, SEXP thrSEXP, SEXP cond_0_threshSEXP, SEXP cond_1_threshSEXP, SEXP newton_tolSEXP, SEXP newton_max_itersSEXP, SEXP min_ratioSEXP, SEXP n_threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -93,7 +93,7 @@ END_RCPP
 }
 // group_basil_naive__
 Rcpp::List group_basil_naive__(const Eigen::Map<Eigen::MatrixXd>& X, const Eigen::Map<Eigen::VectorXd>& y, const Eigen::Map<Eigen::VectorXi>& groups, const Eigen::Map<Eigen::VectorXi>& group_sizes, double alpha, const Eigen::Map<Eigen::VectorXd>& penalty, const Eigen::Map<Eigen::VectorXd>& user_lmdas_, size_t max_n_lambdas, size_t n_lambdas_iter, bool use_strong_rule, bool do_early_exit, bool verbose_diagnostic, size_t delta_strong_size, size_t max_strong_size, size_t max_n_cds, double thr, double cond_0_thresh, double cond_1_thresh, double newton_tol, size_t newton_max_iters, double min_ratio, size_t n_threads);
-RcppExport SEXP _grpglmnet_group_basil_naive__(SEXP XSEXP, SEXP ySEXP, SEXP groupsSEXP, SEXP group_sizesSEXP, SEXP alphaSEXP, SEXP penaltySEXP, SEXP user_lmdas_SEXP, SEXP max_n_lambdasSEXP, SEXP n_lambdas_iterSEXP, SEXP use_strong_ruleSEXP, SEXP do_early_exitSEXP, SEXP verbose_diagnosticSEXP, SEXP delta_strong_sizeSEXP, SEXP max_strong_sizeSEXP, SEXP max_n_cdsSEXP, SEXP thrSEXP, SEXP cond_0_threshSEXP, SEXP cond_1_threshSEXP, SEXP newton_tolSEXP, SEXP newton_max_itersSEXP, SEXP min_ratioSEXP, SEXP n_threadsSEXP) {
+RcppExport SEXP _adelie_group_basil_naive__(SEXP XSEXP, SEXP ySEXP, SEXP groupsSEXP, SEXP group_sizesSEXP, SEXP alphaSEXP, SEXP penaltySEXP, SEXP user_lmdas_SEXP, SEXP max_n_lambdasSEXP, SEXP n_lambdas_iterSEXP, SEXP use_strong_ruleSEXP, SEXP do_early_exitSEXP, SEXP verbose_diagnosticSEXP, SEXP delta_strong_sizeSEXP, SEXP max_strong_sizeSEXP, SEXP max_n_cdsSEXP, SEXP thrSEXP, SEXP cond_0_threshSEXP, SEXP cond_1_threshSEXP, SEXP newton_tolSEXP, SEXP newton_max_itersSEXP, SEXP min_ratioSEXP, SEXP n_threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -125,7 +125,7 @@ END_RCPP
 }
 // newton_solver
 Rcpp::List newton_solver(const Eigen::Map<Eigen::VectorXd>& L, const Eigen::Map<Eigen::VectorXd>& v, double l1, double l2, double tol, size_t max_iters);
-RcppExport SEXP _grpglmnet_newton_solver(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP) {
+RcppExport SEXP _adelie_newton_solver(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -141,7 +141,7 @@ END_RCPP
 }
 // newton_abs_solver
 Rcpp::List newton_abs_solver(const Eigen::Map<Eigen::VectorXd>& L, const Eigen::Map<Eigen::VectorXd>& v, double l1, double l2, double tol, size_t max_iters);
-RcppExport SEXP _grpglmnet_newton_abs_solver(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP) {
+RcppExport SEXP _adelie_newton_abs_solver(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -157,7 +157,7 @@ END_RCPP
 }
 // newton_abs_debug_solver
 Rcpp::List newton_abs_debug_solver(const Eigen::Map<Eigen::VectorXd>& L, const Eigen::Map<Eigen::VectorXd>& v, double l1, double l2, double tol, size_t max_iters, bool smart_init);
-RcppExport SEXP _grpglmnet_newton_abs_debug_solver(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP, SEXP smart_initSEXP) {
+RcppExport SEXP _adelie_newton_abs_debug_solver(SEXP LSEXP, SEXP vSEXP, SEXP l1SEXP, SEXP l2SEXP, SEXP tolSEXP, SEXP max_itersSEXP, SEXP smart_initSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -174,7 +174,7 @@ END_RCPP
 }
 // objective
 double objective(const Eigen::Map<Eigen::MatrixXd>& A, const Eigen::Map<Eigen::VectorXd>& r, const Eigen::Map<Eigen::VectorXi>& groups, const Eigen::Map<Eigen::VectorXi>& group_sizes, double alpha, const Eigen::Map<Eigen::VectorXd>& penalty, double lmda, const Eigen::Map<Eigen::VectorXd>& beta);
-RcppExport SEXP _grpglmnet_objective(SEXP ASEXP, SEXP rSEXP, SEXP groupsSEXP, SEXP group_sizesSEXP, SEXP alphaSEXP, SEXP penaltySEXP, SEXP lmdaSEXP, SEXP betaSEXP) {
+RcppExport SEXP _adelie_objective(SEXP ASEXP, SEXP rSEXP, SEXP groupsSEXP, SEXP group_sizesSEXP, SEXP alphaSEXP, SEXP penaltySEXP, SEXP lmdaSEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -192,19 +192,19 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_grpglmnet_ista_solver", (DL_FUNC) &_grpglmnet_ista_solver, 6},
-    {"_grpglmnet_fista_solver", (DL_FUNC) &_grpglmnet_fista_solver, 6},
-    {"_grpglmnet_fista_adares_solver", (DL_FUNC) &_grpglmnet_fista_adares_solver, 6},
-    {"_grpglmnet_group_basil_cov__", (DL_FUNC) &_grpglmnet_group_basil_cov__, 22},
-    {"_grpglmnet_group_basil_naive__", (DL_FUNC) &_grpglmnet_group_basil_naive__, 22},
-    {"_grpglmnet_newton_solver", (DL_FUNC) &_grpglmnet_newton_solver, 6},
-    {"_grpglmnet_newton_abs_solver", (DL_FUNC) &_grpglmnet_newton_abs_solver, 6},
-    {"_grpglmnet_newton_abs_debug_solver", (DL_FUNC) &_grpglmnet_newton_abs_debug_solver, 7},
-    {"_grpglmnet_objective", (DL_FUNC) &_grpglmnet_objective, 8},
+    {"_adelie_ista_solver", (DL_FUNC) &_adelie_ista_solver, 6},
+    {"_adelie_fista_solver", (DL_FUNC) &_adelie_fista_solver, 6},
+    {"_adelie_fista_adares_solver", (DL_FUNC) &_adelie_fista_adares_solver, 6},
+    {"_adelie_group_basil_cov__", (DL_FUNC) &_adelie_group_basil_cov__, 22},
+    {"_adelie_group_basil_naive__", (DL_FUNC) &_adelie_group_basil_naive__, 22},
+    {"_adelie_newton_solver", (DL_FUNC) &_adelie_newton_solver, 6},
+    {"_adelie_newton_abs_solver", (DL_FUNC) &_adelie_newton_abs_solver, 6},
+    {"_adelie_newton_abs_debug_solver", (DL_FUNC) &_adelie_newton_abs_debug_solver, 7},
+    {"_adelie_objective", (DL_FUNC) &_adelie_objective, 8},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_grpglmnet(DllInfo *dll) {
+RcppExport void R_init_adelie(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

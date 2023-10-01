@@ -12,20 +12,20 @@ to decide which implementation/application makes most sense depending on the sit
 
 2. Clone the git repo:
     ```
-    git clone git@github.com:JamesYang007/grpglmnet.git
+    git clone git@github.com:JamesYang007/adelie.git
     ```
 
-3. Set up `grpglmnet` conda environment. The list of packages that will be installed in the environment
+3. Set up `adelie` conda environment. The list of packages that will be installed in the environment
 is in `pyproject.toml`.
     ```
     mamba update -y conda mamba
     mamba env create
-    conda activate grpglmnet
+    conda activate adelie
     poetry config virtualenvs.create false --local
     poetry install --no-root
     ```
 
-4. Install `grpglmnet`. If you want to install globally,
+4. Install `adelie`. If you want to install globally,
     ```
     pip install .
     ```

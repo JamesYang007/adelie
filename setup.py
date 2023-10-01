@@ -1,9 +1,13 @@
 from glob import glob
 from setuptools import setup
 from pybind11.setup_helpers import Pybind11Extension 
+from pybind11.setup_helpers import ParallelCompile
 import sysconfig
 import os
 import platform
+
+# Optional multithreaded build
+ParallelCompile("NPY_NUM_BUILD_JOBS").install()
 
 __version__ = "1.1.0"
 
@@ -30,13 +34,13 @@ if (system_name == "Linux"):
 
 ext_modules = [
     Pybind11Extension(
-        "grpglmnet.grpglmnet_core",
-        sorted(glob("grpglmnet/src/*.cpp")),  # Sort source files for reproducibility
+        "adelie.adelie_core",
+        sorted(glob("adelie/src/*.cpp")),  # Sort source files for reproducibility
         define_macros = [
-            ('EIGEN_MATRIXBASE_PLUGIN', '\"grpglmnet_core/util/eigen/matrixbase_plugin.hpp\"'),
+            ('EIGEN_MATRIXBASE_PLUGIN', '\"adelie_core/util/eigen/matrixbase_plugin.hpp\"'),
         ],
         include_dirs=[
-            'grpglmnet_core/include',
+            'adelie_core/include',
             os.path.join(ENVPATH, 'include'),
             os.path.join(ENVPATH, 'include/eigen3'),
         ],
@@ -48,7 +52,7 @@ ext_modules = [
 ]
 
 setup(
-    name='grpglmnet', 
+    name='adelie', 
     version=__version__,
     description='A comprehensive test-bed library for group lasso.',
     long_description='',

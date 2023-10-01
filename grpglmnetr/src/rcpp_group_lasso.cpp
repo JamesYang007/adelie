@@ -1,12 +1,12 @@
 #include <Rcpp.h>
 #include <RcppEigen.h>
-#include <grpglmnet_core/optimization/group_basil_cov.hpp>
-#include <grpglmnet_core/optimization/group_elnet_cov.hpp>
-#include <grpglmnet_core/optimization/group_basil_naive.hpp>
-#include <grpglmnet_core/optimization/group_elnet_naive.hpp>
+#include <adelie_core/optimization/group_basil_cov.hpp>
+#include <adelie_core/optimization/group_elnet_cov.hpp>
+#include <adelie_core/optimization/group_basil_naive.hpp>
+#include <adelie_core/optimization/group_elnet_naive.hpp>
 
-namespace gl_naive = grpglmnet_core::naive;
-namespace gl_cov = grpglmnet_core::cov;
+namespace gl_naive = adelie_core::naive;
+namespace gl_cov = adelie_core::cov;
 
 //' @export
 // [[Rcpp::export]]

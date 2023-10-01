@@ -27,7 +27,7 @@ Rcpp::List newton_solver(
     Eigen::VectorXd buffer1(L.size());
     Eigen::VectorXd buffer2(L.size());
     size_t iters = 0;
-    grpglmnet_core::newton_solver(L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2);
+    adelie_core::newton_solver(L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2);
     return Rcpp::List::create(
         Rcpp::Named("beta")=x,
         Rcpp::Named("iters")=iters
@@ -59,7 +59,7 @@ Rcpp::List newton_abs_solver(
     Eigen::VectorXd buffer1(L.size());
     Eigen::VectorXd buffer2(L.size());
     size_t iters = 0;
-    grpglmnet_core::newton_abs_solver(L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2);
+    adelie_core::newton_abs_solver(L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2);
     return Rcpp::List::create(
         Rcpp::Named("beta")=x,
         Rcpp::Named("iters")=iters
@@ -97,7 +97,7 @@ Rcpp::List newton_abs_debug_solver(
     Eigen::VectorXd x(L.size());
     Eigen::VectorXd buffer1(L.size());
     Eigen::VectorXd buffer2(L.size());
-    grpglmnet_core::newton_abs_debug_solver(L, v, l1, l2, tol, max_iters, smart_init, h_min, h_max, x, iters, smart_iters, buffer1, buffer2);
+    adelie_core::newton_abs_debug_solver(L, v, l1, l2, tol, max_iters, smart_init, h_min, h_max, x, iters, smart_iters, buffer1, buffer2);
     return Rcpp::List::create(
         Rcpp::Named("beta")=x,
         Rcpp::Named("h_min")=h_min,
