@@ -7,3 +7,4 @@
 namespace py = pybind11;
 
 void register_bcd(py::module_&);
+void register_matrix(py::module_&);

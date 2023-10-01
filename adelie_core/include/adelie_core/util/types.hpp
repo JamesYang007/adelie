@@ -4,7 +4,7 @@
 
 namespace adelie_core {
 namespace util {
-
+    
 template <class Scalar_, int Rows_=Eigen::Dynamic, int Cols_=Eigen::Dynamic>
 using colmat_type = Eigen::Matrix<Scalar_, Rows_, Cols_, Eigen::ColMajor>;
 
