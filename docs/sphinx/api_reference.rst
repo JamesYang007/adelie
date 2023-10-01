@@ -21,16 +21,15 @@ adelie.bcd
     root
 
 
-adelie.state
-------------
+adelie.matrix
+-------------
 
 
-.. currentmodule:: adelie.state
+.. currentmodule:: adelie.matrix
 
 
 .. autosummary::
     :toctree: generated/
 
 
-    pin_naive_base
-    pin_naive_dense
+    dense
