@@ -12,28 +12,75 @@ class PyMatrixBase : public ad::matrix::MatrixBase<T>
 public:
     /* Inherit the constructors */
     using base_t::base_t;
-    using typename base_t::vec_t;
-    using typename base_t::mat_t;
+    using typename base_t::value_t;
+    using typename base_t::rowvec_t;
 
     /* Trampoline (need one for each virtual function) */
-    Eigen::Ref<const mat_t> block(int i, int j, int p, int q) const override
+    value_t cmul(
+        int j, 
+        const Eigen::Ref<const rowvec_t>& v
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
-            Eigen::Ref<const mat_t>,
+            value_t,
             base_t,
-            block,
-            i, j, p, q
+            cmul,
+            j, v 
         );
     }
-    Eigen::Ref<const vec_t> col(int j) const override
+
+    void ctmul(
+        int j, 
+        value_t v, 
+        Eigen::Ref<rowvec_t> out
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
-            Eigen::Ref<const vec_t>,
+            void,
             base_t,
-            col,
+            ctmul,
+            j, v, out
+        );
+    }
+
+    void bmul(
+        int i, int j, int p, int q, 
+        const Eigen::Ref<const rowvec_t>& v, 
+        Eigen::Ref<rowvec_t> out
+    ) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            bmul,
+            i, j, p, q, v, out
+        );
+    }
+
+    void btmul(
+        int i, int j, int p, int q, 
+        const Eigen::Ref<const rowvec_t>& v, 
+        Eigen::Ref<rowvec_t> out
+    ) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            btmul,
+            i, j, p, q, v, out
+        );
+    }
+
+    value_t cnormsq(int j) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            value_t,
+            base_t,
+            cnormsq,
             j
         );
     }
+
     int rows() const override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -42,6 +89,7 @@ public:
             rows
         );
     }
+
     int cols() const override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -59,32 +107,40 @@ void matrix_base(py::module_& m, const char* name)
     using internal_t = ad::matrix::MatrixBase<T>;
     py::class_<internal_t, trampoline_t>(m, name)
         .def(py::init<>())
-        .def("block", &internal_t::block)
-        .def("col", &internal_t::col)
+        .def("cmul", &internal_t::cmul)
+        .def("ctmul", &internal_t::ctmul)
+        .def("bmul", &internal_t::bmul)
+        .def("btmul", &internal_t::btmul)
+        .def("cnormsq", &internal_t::cnormsq)
         .def("rows", &internal_t::rows)
         .def("cols", &internal_t::cols)
         ;
 }
 
-template <class T>
+template <class DenseType>
 void matrix_dense(py::module_& m, const char* name)
 {
-    using internal_t = ad::matrix::MatrixDense<T>;
-    using base_t = ad::matrix::MatrixBase<T>;
-    using mat_t = typename internal_t::mat_t;
+    using internal_t = ad::matrix::MatrixDense<DenseType>;
+    using base_t = typename internal_t::base_t;
+    using dense_t = typename internal_t::dense_t;
     py::class_<internal_t, base_t>(m, name)
         .def(
-            py::init<const Eigen::Ref<const mat_t>&>(), 
+            py::init<const Eigen::Ref<const dense_t>&>(), 
             py::arg("mat").noconvert()
         )
         ;
 }
+
+template <class T, int Storage>
+using dense_type = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Storage>;
 
 void register_matrix(py::module_& m)
 {
     matrix_base<double>(m, "Base64");
     matrix_base<float>(m, "Base32");
 
-    matrix_dense<double>(m, "Dense64");
-    matrix_dense<float>(m, "Dense32");
+    matrix_dense<dense_type<double, Eigen::RowMajor>>(m, "Dense64C");
+    matrix_dense<dense_type<double, Eigen::ColMajor>>(m, "Dense64F");
+    matrix_dense<dense_type<float, Eigen::RowMajor>>(m, "Dense32C");
+    matrix_dense<dense_type<float, Eigen::ColMajor>>(m, "Dense32F");
 }

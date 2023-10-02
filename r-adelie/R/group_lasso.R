@@ -18,9 +18,9 @@ group_basil <- function(
     delta_strong_size=5,
     max_strong_size=ncol(X),
     max_n_cds=as.integer(1e5),
-    thr=1e-7,
-    cond_0_thresh=1e-3,
-    cond_1_thresh=1e-3,
+    tol=1e-7,
+    rsq_slope_tol=1e-3,
+    rsq_curv_tol=1e-3,
     newton_tol=1e-8,
     newton_max_iters=100,
     min_ratio=1e-2,
@@ -40,7 +40,7 @@ group_basil <- function(
         user_lmdas, max_n_lambdas, n_lambdas_iter,
         use_strong_rule, do_early_exit, verbose_diagnostic,
         delta_strong_size, max_strong_size,
-        max_n_cds, thr, cond_0_thresh, cond_1_thresh,
+        max_n_cds, tol, rsq_slope_tol, rsq_curv_tol,
         newton_tol, newton_max_iters, min_ratio, n_threads
     )
 }

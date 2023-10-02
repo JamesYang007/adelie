@@ -143,7 +143,7 @@ struct GroupBasilCheckpoint
     dyn_vec_index_t strong_order;
     dyn_vec_value_t strong_beta;
     dyn_vec_value_t strong_grad;
-    dyn_vec_value_t strong_A_diag;
+    dyn_vec_value_t strong_var;
     dyn_vec_index_t active_set;
     dyn_vec_index_t active_g1;
     dyn_vec_index_t active_g2;
@@ -170,7 +170,7 @@ struct GroupBasilCheckpoint
         const VecIndexType& strong_order_,
         const VecValueType& strong_beta_,
         const VecValueType& strong_grad_,
-        const VecValueType& strong_A_diag_,
+        const VecValueType& strong_var_,
         const VecIndexType& active_set_,
         const VecIndexType& active_g1_,
         const VecIndexType& active_g2_,
@@ -192,7 +192,7 @@ struct GroupBasilCheckpoint
           strong_order(strong_order_),
           strong_beta(strong_beta_),
           strong_grad(strong_grad_),
-          strong_A_diag(strong_A_diag_),
+          strong_var(strong_var_),
           active_set(active_set_),
           active_g1(active_g1_),
           active_g2(active_g2_),
@@ -219,7 +219,7 @@ struct GroupBasilCheckpoint
           strong_order(bs.strong_order),
           strong_beta(bs.strong_beta),
           strong_grad(bs.strong_grad),
-          strong_A_diag(bs.strong_A_diag),
+          strong_var(bs.strong_var),
           active_set(bs.active_set),
           active_g1(bs.active_g1),
           active_g2(bs.active_g2),
@@ -244,7 +244,7 @@ struct GroupBasilCheckpoint
         strong_order = std::move(bs.strong_order);
         strong_beta = std::move(bs.strong_beta);
         strong_grad = std::move(bs.strong_grad);
-        strong_A_diag = std::move(bs.strong_A_diag);
+        strong_var = std::move(bs.strong_var);
         active_set = std::move(bs.active_set);
         active_g1 = std::move(bs.active_g1);
         active_g2 = std::move(bs.active_g2);
@@ -321,7 +321,7 @@ struct GroupBasilState
     dyn_vec_value_t strong_beta;
     dyn_vec_value_t strong_beta_prev_valid;
     dyn_vec_value_t strong_grad;    // just a buffer here!
-    dyn_vec_value_t strong_A_diag;
+    dyn_vec_value_t strong_var;
     dyn_vec_index_t active_set;
     dyn_vec_index_t active_g1;
     dyn_vec_index_t active_g2;
@@ -374,7 +374,7 @@ struct GroupBasilState
           strong_beta(bc.strong_beta),
           strong_beta_prev_valid(strong_beta),
           strong_grad(bc.strong_grad),
-          strong_A_diag(bc.strong_A_diag),
+          strong_var(bc.strong_var),
           active_set(bc.active_set),
           active_g1(bc.active_g1),
           active_g2(bc.active_g2),
@@ -481,8 +481,8 @@ struct GroupBasilState
         
         /* OK to leave strong_beta_prev uninitialized (see update_after_initial_fit) */
 
-        /* initialize strong_A_diag */
-        update_strong_A_diag(0, total_strong_size, initial_size);
+        /* initialize strong_var */
+        update_strong_var(0, total_strong_size, initial_size);
 
         /* initialize active_set */
         active_set.reserve(initial_size_groups); 
@@ -617,7 +617,7 @@ struct GroupBasilState
         // Updating previously valid beta requires the old order.
         
         // only need to update on the new strong variables
-        update_strong_A_diag(old_strong_set_size, new_total_strong_size);
+        update_strong_var(old_strong_set_size, new_total_strong_size);
 
         // updates on these will be done later!
         strong_beta.resize(new_total_strong_size, 0);
@@ -628,7 +628,7 @@ struct GroupBasilState
 
         // At this point, strong_set is ordered for all old variables
         // and unordered for the last few (new variables).
-        // But all referencing quantities (strong_beta, strong_grad, is_active, strong_A_diag)
+        // But all referencing quantities (strong_beta, strong_grad, is_active, strong_var)
         // match up in size and positions with strong_set.
         // Note: strong_grad has been updated properly to previous valid version in all cases.
 
@@ -749,24 +749,24 @@ private:
     }
 
     ADELIE_CORE_STRONG_INLINE
-    void update_strong_A_diag(
+    void update_strong_var(
             size_t old_strong_set_size,
             size_t new_size,
             size_t capacity=0)
     {
         assert(old_strong_set_size <= strong_set.size());
         
-        auto old_size = strong_A_diag.size();
+        auto old_size = strong_var.size();
         
         // subsequent calls does not affect capacity
-        strong_A_diag.reserve(capacity);
-        strong_A_diag.resize(new_size);
+        strong_var.reserve(capacity);
+        strong_var.resize(new_size);
 
         for (size_t i = old_strong_set_size; i < strong_set.size(); ++i) {
             const auto k = strong_set[i];
             const auto begin_k = groups[k];
             const auto size_k = group_sizes[k];
-            Eigen::Map<vec_value_t> sad_map(strong_A_diag.data(), strong_A_diag.size());
+            Eigen::Map<vec_value_t> sad_map(strong_var.data(), strong_var.size());
             sad_map.segment(old_size, size_k) = A_diag.segment(begin_k, size_k);
             old_size += size_k;
         }
@@ -836,7 +836,7 @@ struct GroupBasilDiagnostic
  *                              Internally, it is capped at number of features.
  *                              Assumes it is > 0.
  * @param   max_n_cds           maximum number of coordinate descent per BASIL iteration.
- * @param   thr                 convergence threshold for coordinate descent.
+ * @param   tol                 convergence threshold for coordinate descent.
  * @param   betas               vector of sparse vectors to store a list of solutions.
  * @param   lmdas               vector of values to store a list of lambdas
  *                              corresponding to the solutions in betas:
@@ -870,9 +870,9 @@ inline void group_basil(
         size_t delta_strong_size,
         size_t max_strong_size,
         size_t max_n_cds,
-        ValueType thr,
-        ValueType cond_0_thresh,
-        ValueType cond_1_thresh,
+        ValueType tol,
+        ValueType rsq_slope_tol,
+        ValueType rsq_curv_tol,
         ValueType newton_tol,
         size_t newton_max_iters,
         ValueType min_ratio,
@@ -928,7 +928,7 @@ inline void group_basil(
     const auto& strong_g1 = basil_state.strong_g1;
     const auto& strong_g2 = basil_state.strong_g2;
     const auto& strong_begins = basil_state.strong_begins;
-    const auto& strong_A_diag = basil_state.strong_A_diag;
+    const auto& strong_var = basil_state.strong_var;
     const auto& rsq_prev_valid = basil_state.rsq_prev_valid;
     auto& resid = basil_state.resid;
     auto& resid_prev_valid = basil_state.resid_prev_valid;
@@ -959,8 +959,8 @@ inline void group_basil(
 
     lasso_pack_t fit_pack(
         X, groups, group_sizes, alpha, penalty, strong_set, 
-        strong_g1, strong_g2, strong_begins, strong_A_diag,
-        lmdas_curr, max_n_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters, 0,
+        strong_g1, strong_g2, strong_begins, strong_var,
+        lmdas_curr, max_n_cds, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, 0,
         resid, strong_beta, strong_grad,
         active_set, active_g1, active_g2, active_begins, active_order,
         is_active, betas_curr, rsqs_curr, resids_curr, 0, 0
@@ -1049,7 +1049,7 @@ inline void group_basil(
             const auto rsq_u = rsqs[rsqs.size()-1];
             const auto rsq_m = rsqs[rsqs.size()-2];
             const auto rsq_l = rsqs[rsqs.size()-3];
-            if (check_early_stop_rsq(rsq_l, rsq_m, rsq_u, cond_0_thresh, cond_1_thresh) || (rsqs.back() >= 0.99 * rsq_null)) break;
+            if (check_early_stop_rsq(rsq_l, rsq_m, rsq_u, rsq_slope_tol, rsq_curv_tol) || (rsqs.back() >= 0.99 * rsq_null)) break;
         }
 
         // finish if no more lambdas to process finished
@@ -1093,8 +1093,8 @@ inline void group_basil(
         /* Fit lasso */
         lasso_pack_t fit_pack(
             X, groups, group_sizes, alpha, penalty, strong_set, 
-            strong_g1, strong_g2, strong_begins, strong_A_diag,
-            lmdas_curr, max_n_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters, rsq_prev_valid,
+            strong_g1, strong_g2, strong_begins, strong_var,
+            lmdas_curr, max_n_cds, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, rsq_prev_valid,
             resid, strong_beta, strong_grad,
             active_set, active_g1, active_g2, active_begins, active_order,
             is_active, betas_curr, rsqs_curr, resids_curr, 0, 0
@@ -1180,9 +1180,9 @@ inline void group_basil(
     size_t delta_strong_size,
     size_t max_strong_size,
     size_t max_n_cds,
-    ValueType thr,
-    ValueType cond_0_thresh,
-    ValueType cond_1_thresh,
+    ValueType tol,
+    ValueType rsq_slope_tol,
+    ValueType rsq_curv_tol,
     ValueType newton_tol,
     size_t newton_max_iters,
     ValueType min_ratio,
@@ -1227,7 +1227,7 @@ inline void group_basil(
             X_trans, y, groups, group_sizes, A_diag, X_group_norms, alpha, penalty, 
             user_lmdas, max_n_lambdas, n_lambdas_iter,
             use_strong_rule, do_early_exit, verbose_diagnostic, delta_strong_size,
-            max_strong_size, max_n_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters,
+            max_strong_size, max_n_cds, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters,
             min_ratio, n_threads, betas_out, lmdas, rsqs_out,
             update_coefficients_f,
             checkpoint, diagnostic, check_user_interrupt
