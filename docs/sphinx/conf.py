@@ -42,3 +42,5 @@ html_theme_options = {
 html_context = {"default_mode": "dark"}
 html_static_path = ['_static']
 html_css_files = ["numpy.css"]
+
+numpydoc_show_class_members = False
