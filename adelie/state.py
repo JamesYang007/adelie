@@ -49,6 +49,10 @@ def deduce_states(
         See ``pin_base``.
     is_active : (s,) np.ndarray
         See ``pin_base``.
+
+    See Also
+    --------
+    adelie.state.pin_base
     """
     strong_g1 = strong_set[group_sizes[strong_set] == 1]
     strong_g2 = strong_set[group_sizes[strong_set] > 1]
@@ -121,15 +125,17 @@ class base:
         ----------
         method : str, optional
             Must be one of the following options:
-            - ``None``: every check is logged only. 
-                The function does not raise or assert any failed checks.
-            - ``"assert"``: every check is logged and asserted.
+
+                - ``None``: every check is logged only. 
+                    The function does not raise or assert any failed checks.
+                - ``"assert"``: every check is logged and asserted.
+
             Default is ``None``.
         logger : optional
             Logger object that behaves like a logger object in ``logging``.
             Default is ``logging.getLogger()``.
         """
-        pass
+        return
 
 
 @dataclass(kw_only=True)
@@ -218,8 +224,8 @@ class pin_base(base):
         List of indices that index a corresponding list of values for each active group.
         ``active_begins[i]`` is the starting index corresponding to the ``i`` th active group.
     active_order : (a,) np.ndarray
-        Ordering such that ``strong_set`` is sorted in ascending order for the active groups.
-        ``strong_set[active_order[i]]`` is the ``i`` th active group in ascending order.
+        Ordering such that ``groups`` is sorted in ascending order for the active groups.
+        ``groups[strong_set[active_order[i]]]`` is the ``i`` th active group in ascending order.
     is_active : (s,) np.ndarray
         Boolean vector that indicates whether each strong group in ``groups`` is active or not.
         ``is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
@@ -236,40 +242,166 @@ class pin_base(base):
     """
     # Static states
     X: matrix.Base64 | matrix.Base32
+    """
+    Feature matrix where each column block :math:`X_k` defined by the groups
+    is such that :math:`X_k^\\top X_k` is diagonal.
+    It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
+    """
     groups: np.ndarray
+    """
+    List of starting indices to each group where `G` is the number of groups.
+    ``groups[i]`` is the starting index of the ``i`` th group. 
+    """
     group_sizes: np.ndarray
+    """
+    List of group sizes corresponding to each element in ``groups``.
+    ``group_sizes[i]`` is the group size of the ``i`` th group. 
+    """
     alpha: float
+    """
+    Elastic net parameter.
+    It must be in the range :math:`[0,1]`.
+    """
     penalty: np.ndarray
+    """
+    Penalty factor for each group in the same order as ``groups``.
+    It must be a non-negative vector.
+    """
     strong_set: np.ndarray
+    """
+    List of indices into ``groups`` that correspond to the strong groups.
+    ``strong_set[i]`` is ``i`` th strong group.
+    """
     strong_g1: np.ndarray
+    """
+    Subset of ``strong_set`` that correspond to groups of size ``1``.
+    ``strong_g1[i]`` is the ``i`` th strong group of size ``1``
+    such that ``group_sizes[strong_g1[i]]`` is ``1``.
+    """
     strong_g2: np.ndarray
+    """
+    Subset of ``strong_set`` that correspond to groups more than size ``1``.
+    ``strong_g2[i]`` is the ``i`` th strong group of size more than ``1``
+    such that ``group_sizes[strong_g2[i]]`` is more than ``1``.
+    """
     strong_begins: np.ndarray
+    """
+    List of indices that index a corresponding list of values for each strong group.
+    ``strong_begins[i]`` is the starting index corresponding to the ``i`` th strong group.
+    From this index, reading ``group_sizes[strong_set[i]]`` number of elements
+    will grab values corresponding to the full ``i`` th strong group block.
+    """
     strong_var: np.ndarray
+    """
+    List of the diagonal of :math:`X_k^\\top X_k` along the strong groups :math:`k`.
+    ``strong_var[b:b+p]`` is the diagonal of :math:`X_k^\\top X_k` for the ``i`` th strong group where
+    ``k = strong_set[i]``,
+    ``b = strong_begins[i]``,
+    and ``p = group_sizes[k]``.
+    """
     lmdas: np.ndarray
+    """
+    Regularization sequence to fit on.
+    """
 
     # Configuration
     max_cds: int
+    """
+    Maximum number of coordinate descents.
+    """
     tol: float
+    """
+    Convergence tolerance.
+    """
     rsq_slope_tol: float
+    """
+    Early stopping rule check on slope of :math:`R^2`.
+    """
     rsq_curv_tol: float
+    """
+    Early stopping rule check on curvature of :math:`R^2`.
+    """
     newton_tol: float
+    """
+    Convergence tolerance for the BCD update.
+    """
     newton_max_iters: int
+    """
+    Maximum number of iterations for the BCD update.
+    """
 
     # Dynamic states
     rsq: float
+    """
+    :math:`R^2` value at ``strong_beta``.
+    """
     strong_beta: np.ndarray
+    """
+    Coefficient vector on the strong set.
+    ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+    where
+    ``k = strong_set[i]``,
+    ``b = strong_begins[i]``,
+    and ``p = group_sizes[k]``.
+    """
     strong_grad: np.ndarray
+    """
+    Gradient :math:`X_k^\\top (y-X\\beta)` on the strong groups :math:`k` where :math:`beta` is given by ``strong_beta``.
+    ``strong_grad[b:b+p]`` is the gradient for the ``i`` th strong group
+    where 
+    ``k = strong_set[i]``,
+    ``b = strong_begins[i]``,
+    and ``p = group_sizes[k]``.
+    """
     active_set: np.ndarray
+    """
+    List of active groups taking on values in ``[0, s)``.
+    ``strong_set[active_set[i]]`` is the ``i`` th active group.
+    An active group is one with non-zero coefficient block.
+    """
     active_g1: np.ndarray
+    """
+    Subset of ``active_set`` that correspond to groups of size ``1``.
+    """
     active_g2: np.ndarray
+    """
+    Subset of ``active_set`` that correspond to groups of size more than ``1``.
+    """
     active_begins: np.ndarray
+    """
+    List of indices that index a corresponding list of values for each active group.
+    ``active_begins[i]`` is the starting index corresponding to the ``i`` th active group.
+    """
     active_order: np.ndarray
+    """
+    Ordering such that ``groups`` is sorted in ascending order for the active groups.
+    ``groups[strong_set[active_order[i]]]`` is the ``i`` th active group in ascending order.
+    """
     is_active: np.ndarray
+    """
+    Boolean vector that indicates whether each strong group in ``groups`` is active or not.
+    ``is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
+    """
     betas: scipy.sparse.csr_matrix
+    """
+    ``betas[i]`` corresponds to the solution corresponding to ``lmdas[i]``.
+    """
     rsqs: np.ndarray
+    """
+    ``rsqs[i]`` corresponds to the :math:`R^2` at ``betas[i]``.
+    """
     n_cds: int
+    """
+    Number of coordinate descents taken.
+    """
     time_strong_cd: np.ndarray
+    """
+    Benchmark time for performing coordinate-descent on the strong set at every iteration.
+    """
     time_active_cd: np.ndarray
+    """
+    Benchmark time for performing coordinate-descent on the active set at every iteration.
+    """
     
     def initialize(self, core_state):
         """Propagate core state members to current object's members.
@@ -667,48 +799,72 @@ class pin_base(base):
 @dataclass
 class pin_naive(pin_base):
     """State class for pin, naive method.
-    
-    For descriptions on the parameters,
-    see ``pin_base``.
 
     Parameters
     ----------
-    X : array-like
-    groups : np.ndarray
-    group_sizes : np.ndarray
+    X : Union[adelie.matrix.Base64, adelie.matrix.Base32]
+        Feature matrix where each column block :math:`X_k` defined by the groups
+        is such that :math:`X_k^\\top X_k` is diagonal.
+        It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
+    groups : (G,) np.ndarray
+        List of starting indices to each group where `G` is the number of groups.
+        ``groups[i]`` is the starting index of the ``i`` th group. 
+    group_sizes : (G,) np.ndarray
+        List of group sizes corresponding to each element in ``groups``.
+        ``group_sizes[i]`` is the group size of the ``i`` th group. 
     alpha : float
-    penalty : np.ndarray
-    strong_set : np.ndarray
-    strong_g1 : np.ndarray
-    strong_g2 : np.ndarray
-    strong_begins : np.ndarray
-    strong_var : np.ndarray
-    lmdas : np.ndarray
-    max_cds : int, optional
-    tol : float, optional
-    rsq_slope_tol : float, optional
-    rsq_curv_tol : float, optional
-    newton_tol : float, optional
-    newton_max_iters : int, optional
+        Elastic net parameter.
+        It must be in the range :math:`[0,1]`.
+    penalty : (G,) np.ndarray
+        Penalty factor for each group in the same order as ``groups``.
+        It must be a non-negative vector.
+    strong_set : (s,) np.ndarray
+        List of indices into ``groups`` that correspond to the strong groups.
+        ``strong_set[i]`` is ``i`` th strong group.
+    lmdas : (l,) np.ndarray
+        Regularization sequence to fit on.
     rsq : float
+        :math:`R^2` value at ``strong_beta``.
     resid : np.ndarray
-    strong_beta : np.ndarray
-    strong_grad : np.ndarray
-    active_set : np.ndarray
-    active_g1 : np.ndarray
-    active_g2 : np.ndarray
-    active_begins : np.ndarray
-    active_order : np.ndarray
-    is_active : np.ndarray
+        Residual :math:`y-X\\beta` at ``strong_beta``.
+    strong_beta : (ws,) np.ndarray
+        Coefficient vector on the strong set.
+        ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        where
+        ``k = strong_set[i]``,
+        ``b = strong_begins[i]``,
+        and ``p = group_sizes[k]``.
+    active_set : (a,) np.ndarray
+        List of active groups taking on values in ``[0, s)``.
+        ``strong_set[active_set[i]]`` is the ``i`` th active group.
+        An active group is one with non-zero coefficient block.
+    max_cds : int, optional
+        Maximum number of coordinate descents.
+        Default is ``int(1e5)``.
+    tol : float, optional
+        Convergence tolerance.
+        Default is ``1e-12``.
+    rsq_slope_tol : float, optional
+        Early stopping rule check on slope of :math:`R^2`.
+        Default is ``1e-2``.
+    rsq_curv_tol : float, optional
+        Early stopping rule check on curvature of :math:`R^2`.
+        Default is ``1e-2``.
+    newton_tol : float, optional
+        Convergence tolerance for the BCD update.
+        Default is ``1e-12``.
+    newton_max_iters : int, optional
+        Maximum number of iterations for the BCD update.
+        Default is ``1000``.
         
     See Also
     --------
     adelie.state.pin_base
     """
-    #: Residual :math:`y-X\beta` at ``strong_beta``.
     resid: np.ndarray
-    #: ``resids[i]`` corresponds to the residual at ``betas[i]``.
+    """Residual :math:`y-X\\beta` at ``strong_beta``."""
     resids: np.ndarray
+    """``resids[i]`` corresponds to the residual at ``betas[i]``."""
 
     def __init__(
         self, 
@@ -720,10 +876,10 @@ class pin_naive(pin_base):
         penalty: np.ndarray,
         strong_set: np.ndarray,
         lmdas: np.ndarray,
+        rsq: float,
         resid: np.ndarray,
         strong_beta: np.ndarray,
         active_set: np.ndarray,
-        rsq: float,
         max_cds: int =int(1e5),
         tol: float =1e-12,
         rsq_slope_tol: float =1e-2,
