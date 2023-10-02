@@ -1,19 +1,23 @@
 # Adelie
 
-This repository contains research about group-lasso.
-Specifically, we hope to consolidate all empirical studies about how group-lasso
-regarding its performance based on different methods, literature overview, and application results
-to decide which implementation/application makes most sense depending on the situation.
+_A fast, flexible Python package for group elastic net._
+
+TODO: details.
 
 ## Installation
 
-MacOS users must have `OpenMP` installed in their system as a prerequisite.
-The simplest method is to install with `brew`:
+Users must have `OpenMP` installed in their system as a prerequisite.
+
+For MacOS/Linux users using `gcc` compiler,
+there is nothing to do since
+`OpenMP` is already shipped with `gcc`.
+
+For MacOS users using `clang` compiler, the simplest method is to install with `brew`:
 ```
 brew install libomp
 ```
 
-Install the stable version with `pip`:
+Install `adelie` (stable) with `pip`:
 ```
 pip install adelie
 ```

@@ -47,6 +47,7 @@ void coordinate_descent(
     BufferType& buffer1,
     BufferType& buffer2,
     BufferType& buffer3,
+    BufferType& buffer4_n,
     UpdateCoefficientsType update_coefficients_f,
     AdditionalStepType additional_step=AdditionalStepType()
 )
@@ -55,7 +56,7 @@ void coordinate_descent(
     const auto& penalty = pack.penalty;
     const auto& strong_set = pack.strong_set;
     const auto& strong_begins = pack.strong_begins;
-    const auto& strong_A_diag = pack.strong_A_diag;
+    const auto& strong_var = pack.strong_var;
     const auto& groups = pack.groups;
     const auto& group_sizes = pack.group_sizes;
     const auto alpha = pack.alpha;
@@ -78,12 +79,11 @@ void coordinate_descent(
         const auto ss_value_begin = strong_begins[ss_idx]; // value begin index at ss_idx
         auto& ak = strong_beta[ss_value_begin]; // corresponding beta
         auto& gk = strong_grad[ss_value_begin]; // corresponding residuals
-        const auto A_kk = strong_A_diag[ss_value_begin];  // corresponding A diagonal 
+        const auto A_kk = strong_var[ss_value_begin];  // corresponding A diagonal 
         const auto pk = penalty[k]; // corresponding penalty
 
-        const auto Xk = X.col(groups[k]);
-
-        gk = Xk.dot(resid.matrix());
+        // compute current gradient
+        gk = X.cmul(groups[k], resid);
         const auto ak_old = ak;
 
         // update coefficient
@@ -103,7 +103,9 @@ void coordinate_descent(
         update_rsq(rsq, ak_old, ak, A_kk, gk);
 
         // update residual 
-        resid.matrix() -= del * Xk;
+        X.ctmul(groups[k], del, buffer4_n);
+        // TODO: parallelize
+        resid -= buffer4_n;
     }
     
     // iterate over the groups of dynamic size
@@ -114,13 +116,11 @@ void coordinate_descent(
         const auto gsize = group_sizes[k]; // group size  
         auto ak = strong_beta.segment(ss_value_begin, gsize); // corresponding beta
         auto gk = strong_grad.segment(ss_value_begin, gsize); // corresponding residuals
-        const auto A_kk = strong_A_diag.segment(ss_value_begin, gsize);  // corresponding A diagonal 
+        const auto A_kk = strong_var.segment(ss_value_begin, gsize);  // corresponding A diagonal 
         const auto pk = penalty[k]; // corresponding penalty
 
-        const auto Xk = X.block(0, groups[k], X.rows(), gsize);
-
-        // TODO: parallelize
-        gk.matrix().noalias() = resid.matrix() * Xk;
+        // compute current gradient
+        X.bmul(0, groups[k], X.rows(), gsize, resid, gk);
 
         // save old beta in buffer
         auto ak_old = buffer3.head(ak.size());
@@ -153,9 +153,9 @@ void coordinate_descent(
         update_rsq(rsq, del, A_kk, gk);
 
         // update residual
-        // TODO: dot-product may allocate new array!!
+        X.btmul(0, groups[k], X.rows(), gsize, del, buffer4_n);
         // TODO: parallelize
-        resid.matrix() -= del.matrix() * Xk.transpose(); 
+        resid -= buffer4_n; 
     }
 }
 
@@ -183,6 +183,7 @@ void solve_pin_naive_active(
     BufferType& buffer1,
     BufferType& buffer2,
     BufferType& buffer3,
+    BufferType& buffer4_n,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
@@ -194,7 +195,7 @@ void solve_pin_naive_active(
     const auto& active_set = pack.active_set;
     const auto& active_g1 = pack.active_g1;
     const auto& active_g2 = pack.active_g2;
-    const auto thr = pack.thr;
+    const auto tol = pack.tol;
     const auto max_cds = pack.max_cds;
     auto& n_cds = pack.n_cds;
     auto& time_active_cd = pack.time_active_cd;
@@ -219,10 +220,10 @@ void solve_pin_naive_active(
             value_t convg_measure;
             coordinate_descent(
                 pack, ag1_begin, ag1_end, ag2_begin, ag2_end,
-                lmda_idx, convg_measure, buffer1, buffer2, buffer3, 
+                lmda_idx, convg_measure, buffer1, buffer2, buffer3, buffer4_n,
                 update_coefficients_f
             );
-            if (convg_measure < thr) break;
+            if (convg_measure < tol) break;
             if (n_cds >= max_cds) throw util::max_cds_error(lmda_idx);
         }
     }
@@ -263,10 +264,10 @@ inline void solve_pin_naive(
     const auto& strong_beta = pack.strong_beta;
     const auto& lmdas = pack.lmdas;
     const auto& resid = pack.resid;
-    const auto thr = pack.thr;
+    const auto tol = pack.tol;
     const auto max_cds = pack.max_cds;
-    const auto cond_0_thresh = pack.cond_0_thresh;
-    const auto cond_1_thresh = pack.cond_1_thresh;
+    const auto rsq_slope_tol = pack.rsq_slope_tol;
+    const auto rsq_curv_tol = pack.rsq_curv_tol;
     auto& active_set = pack.active_set;
     auto& active_g1 = pack.active_g1;
     auto& active_g2 = pack.active_g2;
@@ -280,6 +281,7 @@ inline void solve_pin_naive(
     auto& n_cds = pack.n_cds;
     auto& time_strong_cd = pack.time_strong_cd;
     
+    const auto n = X.rows();
     const auto p = X.cols();
 
     assert(betas.size() == lmdas.size());
@@ -287,7 +289,7 @@ inline void solve_pin_naive(
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
-    GrpnetPinBufferPack<value_t> buffer_pack(max_group_size);
+    GrpnetPinBufferPack<value_t> buffer_pack(max_group_size, n);
     
     // buffer to store final result
     std::vector<index_t> active_beta_indices;
@@ -331,6 +333,7 @@ inline void solve_pin_naive(
             buffer_pack.buffer1,
             buffer_pack.buffer2,
             buffer_pack.buffer3,
+            buffer_pack.buffer4,
             update_coefficients_f,
             check_user_interrupt
         );
@@ -358,6 +361,7 @@ inline void solve_pin_naive(
                     buffer_pack.buffer1,
                     buffer_pack.buffer2,
                     buffer_pack.buffer3,
+                    buffer_pack.buffer4,
                     update_coefficients_f,
                     add_active_set
                 );
@@ -374,7 +378,7 @@ inline void solve_pin_naive(
                 }
             }
 
-            if (convg_measure < thr) break;
+            if (convg_measure < tol) break;
             if (n_cds >= max_cds) throw util::max_cds_error(l);
 
             lasso_active_and_update(l);
@@ -412,7 +416,7 @@ inline void solve_pin_naive(
         if (l < 2) continue;
 
         // early stop if R^2 criterion is fulfilled.
-        if (check_early_stop_rsq(rsqs[l-2], rsqs[l-1], rsqs[l], cond_0_thresh, cond_1_thresh)) break;
+        if (check_early_stop_rsq(rsqs[l-2], rsqs[l-1], rsqs[l], rsq_slope_tol, rsq_curv_tol)) break;
     }
 }
 

@@ -8,8 +8,17 @@ maintainers = [
     { name="James Yang", email="jamesyang916@gmail.com" },
 ]
 classifiers = [
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3 :: Only",
     "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development",
+    "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
     "Operating System :: OS Independent",
 ]
 description = "A fast, flexible package for group elastic net."
@@ -20,7 +29,6 @@ requires-python = ">=3.9,<3.11"
 dependencies = [
     "numpy",
     "scipy",
-    "pybind11",
 ]
 
 [project.urls]
@@ -40,7 +48,6 @@ authors = [
 python = ">=3.9,<3.11"
 numpy = "^1.24.2"
 scipy = "^1.10.1"
-pybind11 = "^2.10.3"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.2.1"
@@ -52,6 +59,7 @@ pydata-sphinx-theme = "^0.14.1"
 numpydoc = "^1.6.0"
 
 [tool.poetry.group.dev.dependencies]
+pybind11 = "^2.11.1"
 matplotlib = "^3.7.0"
 pandas = "^1.5.3"
 pre-commit = "^3.1.1"
@@ -59,7 +67,6 @@ ipython = "^8.11.0"
 nbformat = "^5.7.3"
 jupyter = "^1.0.0"
 jupytext = "^1.14.5"
-cppimport = "^22.8.2"
 tabulate = "^0.9.0"
 group-lasso = "^1.5.0"
 tqdm = "^4.65.0"

@@ -13,13 +13,16 @@ where the `...` is replaced with the API token given [here](https://github.com/J
 
 ## Versioning
 
-There is only one file that specifies the version of the package.
-- [VERSION](../../VERSION)
+Specify the version in [VERSION](../../VERSION).
 Make sure to update this file before a release!
 
 ## Git Tag
 
 Make sure to tag the commit before a release!
+```
+git tag -a vx.x.x -m "vx.x.x"
+git push --tags
+```
 
 ## Uploading to PyPI
 

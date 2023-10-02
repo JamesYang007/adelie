@@ -62,12 +62,12 @@ void pin_naive(py::module_& m, const char* name)
             py::arg("strong_g1"),
             py::arg("strong_g2"),
             py::arg("strong_begins"),
-            py::arg("strong_A_diag"),
+            py::arg("strong_var"),
             py::arg("lmdas"),
             py::arg("max_cds"),
-            py::arg("thr"),
-            py::arg("cond_0_thresh"),
-            py::arg("cond_1_thresh"),
+            py::arg("tol"),
+            py::arg("rsq_slope_tol"),
+            py::arg("rsq_curv_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("rsq"),
@@ -93,12 +93,12 @@ void pin_naive(py::module_& m, const char* name)
         .def_readonly("strong_g1", &state_t::strong_g1)
         .def_readonly("strong_g2", &state_t::strong_g2)
         .def_readonly("strong_begins", &state_t::strong_begins)
-        .def_readonly("strong_A_diag", &state_t::strong_A_diag)
+        .def_readonly("strong_var", &state_t::strong_var)
         .def_readonly("lmdas", &state_t::lmdas)
         .def_readonly("max_cds", &state_t::max_cds)
-        .def_readonly("thr", &state_t::thr)
-        .def_readonly("cond_0_thresh", &state_t::cond_0_thresh)
-        .def_readonly("cond_1_thresh", &state_t::cond_1_thresh)
+        .def_readonly("tol", &state_t::tol)
+        .def_readonly("rsq_slope_tol", &state_t::rsq_slope_tol)
+        .def_readonly("rsq_curv_tol", &state_t::rsq_curv_tol)
         .def_readonly("newton_tol", &state_t::newton_tol)
         .def_readonly("newton_max_iters", &state_t::newton_max_iters)
         .def_readonly("rsq", &state_t::rsq)

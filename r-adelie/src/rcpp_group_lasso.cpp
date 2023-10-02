@@ -26,9 +26,9 @@ Rcpp::List group_basil_cov__(
     size_t delta_strong_size,
     size_t max_strong_size,
     size_t max_n_cds,
-    double thr,
-    double cond_0_thresh,
-    double cond_1_thresh,
+    double tol,
+    double rsq_slope_tol,
+    double rsq_curv_tol,
     double newton_tol,
     size_t newton_max_iters,
     double min_ratio,
@@ -62,7 +62,7 @@ Rcpp::List group_basil_cov__(
         gl_cov::group_basil(
             X, y, groups, group_sizes, alpha, penalty, user_lmdas, 
             max_n_lambdas, n_lambdas_iter, use_strong_rule, do_early_exit, verbose_diagnostic, delta_strong_size, max_strong_size,
-            max_n_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters, min_ratio, n_threads,
+            max_n_cds, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, min_ratio, n_threads,
             betas_out, lmdas, rsqs_out, update_coefficients_f, checkpoint, diagnostic
         );
     } catch (const std::exception& e) {
@@ -107,9 +107,9 @@ Rcpp::List group_basil_naive__(
     size_t delta_strong_size,
     size_t max_strong_size,
     size_t max_n_cds,
-    double thr,
-    double cond_0_thresh,
-    double cond_1_thresh,
+    double tol,
+    double rsq_slope_tol,
+    double rsq_curv_tol,
     double newton_tol,
     size_t newton_max_iters,
     double min_ratio,
@@ -143,7 +143,7 @@ Rcpp::List group_basil_naive__(
         gl_naive::group_basil(
             X, y, groups, group_sizes, alpha, penalty, user_lmdas, 
             max_n_lambdas, n_lambdas_iter, use_strong_rule, do_early_exit, verbose_diagnostic, delta_strong_size, max_strong_size,
-            max_n_cds, thr, cond_0_thresh, cond_1_thresh, newton_tol, newton_max_iters, min_ratio, n_threads,
+            max_n_cds, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, min_ratio, n_threads,
             betas_out, lmdas, rsqs_out, update_coefficients_f, checkpoint, diagnostic
         );
     } catch (const std::exception& e) {

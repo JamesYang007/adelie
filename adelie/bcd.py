@@ -10,9 +10,10 @@ def root_lower_bound(
 ):
     """Computes a lower bound on the root of BCD root function.
 
-    The lower bound :math:`h` is guaranteed to be non-negative
-    and satisfies :math:`\\varphi(h) \\geq 0` where :math:`\\varphi`
+    The lower bound :math:`h_\\star` is guaranteed to be non-negative
+    and satisfies :math:`\\varphi(h_\\star) \\geq 0` where :math:`\\varphi`
     is given by ``root_function()`` whenever :math:`\\|v\\|_2 > \\lambda`.
+    It is undefined behavior if the condition is not satisfied.
 
     Parameters
     ----------
@@ -25,11 +26,12 @@ def root_lower_bound(
     
     See Also
     --------
+    adelie.bcd.root_upper_bound
     adelie.bcd.root_function
 
     Returns
     -------
-    out : float
+    lower : float
         Lower bound on the root.
     """
     return core.bcd.root_lower_bound(quad, linear, l1)
@@ -43,11 +45,12 @@ def root_upper_bound(
 ):
     """Computes an upper bound on the root of BCD root function.
 
-    The upper bound :math:`h` is guaranteed to be non-negative.
-    However, it *may not satisfy* :math:`\\varphi(h) \\leq 0` where :math:`\\varphi`
+    The upper bound :math:`h^\\star` is guaranteed to be non-negative.
+    However, it *may not satisfy* :math:`\\varphi(h^\\star) \\leq 0` where :math:`\\varphi`
     is given by ``root_function()`` if ``zero_tol`` is too large.
     Even when ``zero_tol`` is small enough, 
-    we assume that :math:`\\|v\\|_2 > \\lambda` and :math:`v_i=0` whenever :math:`\\Sigma_{ii} = 0`.
+    we assume that :math:`v_i=0` whenever :math:`\\Sigma_{ii} = 0`.
+    It is undefined behavior if the condition is not satisfied.
 
     Parameters
     ----------
@@ -61,11 +64,12 @@ def root_upper_bound(
     
     See Also
     --------
+    adelie.bcd.root_lower_bound
     adelie.bcd.root_function
 
     Returns
     -------
-    out : float
+    upper : float
         Upper bound on the root.
     """
     return core.bcd.root_upper_bound(quad, linear, zero_tol)
@@ -107,7 +111,7 @@ def root_function(
 
     Returns
     -------
-    out : float
+    func : float
         The BCD root function value.
     """
     return core.bcd.root_function(h, quad, linear, l1)
@@ -153,7 +157,7 @@ def objective(
 
     Returns
     -------
-    out : float
+    obj : float
         The BCD objective.
     """
     beta_norm = np.linalg.norm(beta)
@@ -187,9 +191,10 @@ def solve(
 
     The BCD update for the group elastic net is obtained by minimizing
     the BCD objective given in ``objective()``.
-    The solution only exists when :math:`\\|v\\|_2 \\geq \\lambda_1`
-    and :math:`\\|v_S\\|_2 < \\lambda_1`. where :math:`S` is the subset of indices
-    where :math:`\\Sigma_{ii} + \\lambda_2 = 0`.
+    The solution only exists when :math:`\\|v\\|_2 < \\lambda_1`
+    or :math:`\\|v_S\\|_2 < \\lambda_1`,
+    where :math:`S` is the subset of indices
+    such that :math:`\\Sigma_{ii} + \\lambda_2 = 0`.
 
     Parameters
     ----------
@@ -219,9 +224,9 @@ def solve(
 
     Returns
     -------
-    out : Dict[str, Any]
-        - ``out["beta"]``: solution vector.
-        - ``out["iters"]``: number of iterations taken.
+    result : Dict[str, Any]
+        - ``result["beta"]``: solution vector.
+        - ``result["iters"]``: number of iterations taken.
 
     See Also
     --------
@@ -236,7 +241,6 @@ def root(
     quad: np.ndarray,
     linear: np.ndarray,
     l1: float,
-    l2: float,
     tol: float =1e-12,
     max_iters: int =1000,
     solver: str ="newton_abs",
@@ -244,18 +248,19 @@ def root(
     """Solves the non-negative root of the BCD root function.
 
     The BCD root function is given in ``root_function()``.
-    The non-negative root only exists ``solve()`` is well-defined.
+    The non-negative root only exists when
+    :math:`\\|v_S\\|_2 < \\lambda_1 < \\|v\\|_2`
+    where :math:`S` is the subset of indices
+    such that :math:`\\Sigma_{ii} = 0`.
 
     Parameters
     ----------
     quad : (p,) np.ndarray
-        See ``objective()``.
+        See ``root_function()``.
     linear : (p,) np.ndarray
-        See ``objective()``.
+        See ``root_function()``.
     l1 : float
-        See ``objective()``.
-    l2 : float
-        See ``objective()``.
+        See ``root_function()``.
     tol : float, optional
         Convergence tolerance. Default is ``1e-12``.
     max_iters : int, optional
@@ -271,17 +276,16 @@ def root(
 
     Returns
     -------
-    out : Dict[str, Any]
-        - ``out["root"]``: root.
-        - ``out["iters"]``: number of iterations taken.
+    result : Dict[str, Any]
+        - ``result["root"]``: root.
+        - ``result["iters"]``: number of iterations taken.
 
     See Also
     --------
-    adelie.bcd.objective
-    adelie.bcd.solve
+    adelie.bcd.root_function
     """
-    if (np.linalg.norm(linear) < l1) or \
-        (np.linalg.norm(linear[quad + l2 <= 0]) >= l1):
+    if (np.linalg.norm(linear) <= l1) or \
+        (np.linalg.norm(linear[quad <= 0]) >= l1):
         return {
             "root": None,
             "iters": 0,
@@ -290,7 +294,7 @@ def root(
         quad=quad,
         linear=linear,
         l1=l1,
-        l2=l2,
+        l2=0,
         tol=tol,
         max_iters=max_iters,
         solver=solver,
