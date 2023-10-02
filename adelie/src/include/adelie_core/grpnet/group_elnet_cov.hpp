@@ -49,18 +49,18 @@ struct GroupElnetDiagnostic
  * @param   strong_begins   vector of indices that define the beginning index to values
  *                          corresponding to the strong groups.
  *                          MUST have strong_begins.size() == strong_set.size().
- * @param   strong_A_diag       dense vector representing diagonal of A restricted to strong_set.
- *                              strong_A_diag[b:(b+p)] = diag(A_{kk})
+ * @param   strong_var       dense vector representing diagonal of A restricted to strong_set.
+ *                              strong_var[b:(b+p)] = diag(A_{kk})
  *                              where k := strong_set[i], b := strong_begins[i], p := group_sizes[k].
  * @param   lmdas       regularization parameter lambda sequence.
  * @param   max_cds     max number of coordinate descents.
- * @param   thr         convergence threshold.
+ * @param   tol         convergence threshold.
  * @param   newton_tol  see update_coefficients argument tol.
  * @param   newton_max_iters     see update_coefficients argument max_iters.
  * @param   rsq         unnormalized R^2 estimate.
  *                      It is only well-defined if it is (approximately) 
  *                      the R^2 that corresponds to strong_beta.
- * @param   strong_beta dense vector of coefficients of size strong_A_diag.size().
+ * @param   strong_beta dense vector of coefficients of size strong_var.size().
  *                      strong_beta[b:(b+p)] = coefficient for group i,
  *                      where i := strong_set[j], b := strong_begins[j], and p := group_sizes[i].
  *                      The updated coefficients will be stored here.
@@ -96,8 +96,8 @@ struct GroupElnetDiagnostic
  *                      up to (non-including) index n_lmdas.
  * @param   n_cds       number of coordinate descents.
  * @param   n_lmdas     number of values in lmdas processed.
- * @param   cond_0_thresh   0th order threshold for early exit.
- * @param   cond_1_thresh   1st order threshold for early exit.
+ * @param   rsq_slope_tol   0th order threshold for early exit.
+ * @param   rsq_curv_tol   1st order threshold for early exit.
  * @param   diagnostic      instance of GroupElnetDiagnostic.
  */
 template <class AType, 
@@ -135,12 +135,12 @@ struct GroupElnetParamPack
     map_cvec_index_t strong_g1;
     map_cvec_index_t strong_g2;
     map_cvec_index_t strong_begins;
-    map_cvec_value_t strong_A_diag;
+    map_cvec_value_t strong_var;
     map_cvec_value_t lmdas;
     size_t max_cds;
-    value_t thr;
-    value_t cond_0_thresh;
-    value_t cond_1_thresh;
+    value_t tol;
+    value_t rsq_slope_tol;
+    value_t rsq_curv_tol;
     value_t newton_tol;
     size_t newton_max_iters;
     value_t rsq;
@@ -166,7 +166,7 @@ struct GroupElnetParamPack
           strong_g1(nullptr, 0),
           strong_g2(nullptr, 0),
           strong_begins(nullptr, 0),
-          strong_A_diag(nullptr, 0),
+          strong_var(nullptr, 0),
           lmdas(nullptr, 0),
           strong_beta(nullptr, 0),
           strong_grad(nullptr, 0),
@@ -190,12 +190,12 @@ struct GroupElnetParamPack
         const SG1Type& strong_g1_,
         const SG2Type& strong_g2_,
         const SBeginsType& strong_begins_, 
-        const SADType& strong_A_diag_,
+        const SADType& strong_var_,
         const LmdasType& lmdas_, 
         size_t max_cds_,
         value_t thr_,
-        value_t cond_0_thresh,
-        value_t cond_1_thresh,
+        value_t rsq_slope_tol,
+        value_t rsq_curv_tol,
         value_t newton_tol_,
         size_t newton_max_iters_,
         value_t rsq_,
@@ -221,12 +221,12 @@ struct GroupElnetParamPack
           strong_g1(strong_g1_.data(), strong_g1_.size()),
           strong_g2(strong_g2_.data(), strong_g2_.size()),
           strong_begins(strong_begins_.data(), strong_begins_.size()),
-          strong_A_diag(strong_A_diag_.data(), strong_A_diag_.size()),
+          strong_var(strong_var_.data(), strong_var_.size()),
           lmdas(lmdas_.data(), lmdas_.size()),
           max_cds(max_cds_),
-          thr(thr_),
-          cond_0_thresh(cond_0_thresh),
-          cond_1_thresh(cond_1_thresh),
+          tol(thr_),
+          rsq_slope_tol(rsq_slope_tol),
+          rsq_curv_tol(rsq_curv_tol),
           newton_tol(newton_tol_),
           newton_max_iters(newton_max_iters_),
           rsq(rsq_),
@@ -480,7 +480,7 @@ void coordinate_descent(
     const auto& penalty = pack.penalty;
     const auto& strong_set = pack.strong_set;
     const auto& strong_begins = pack.strong_begins;
-    const auto& strong_A_diag = pack.strong_A_diag;
+    const auto& strong_var = pack.strong_var;
     const auto& groups = pack.groups;
     const auto& group_sizes = pack.group_sizes;
     const auto alpha = pack.alpha;
@@ -501,7 +501,7 @@ void coordinate_descent(
         const auto ss_value_begin = strong_begins[ss_idx]; // value begin index at ss_idx
         auto& ak = strong_beta[ss_value_begin]; // corresponding beta
         const auto gk = strong_grad[ss_value_begin]; // corresponding residuals
-        const auto A_kk = strong_A_diag[ss_value_begin];  // corresponding A diagonal 
+        const auto A_kk = strong_var[ss_value_begin];  // corresponding A diagonal 
         const auto pk = penalty[k];
 
         const auto ak_old = ak;
@@ -558,7 +558,7 @@ void coordinate_descent(
         const auto gsize = group_sizes[k]; // group size  
         auto ak = strong_beta.segment(ss_value_begin, gsize); // corresponding beta
         auto gk = strong_grad.segment(ss_value_begin, gsize); // corresponding residuals
-        const auto A_kk = strong_A_diag.segment(ss_value_begin, gsize);  // corresponding A diagonal 
+        const auto A_kk = strong_var.segment(ss_value_begin, gsize);  // corresponding A diagonal 
         const auto pk = penalty[k];
 
         // save old beta in buffer
@@ -670,7 +670,7 @@ void group_elnet_active(
     const auto& active_begins = *pack.active_begins;
     const auto& strong_beta = pack.strong_beta;
     const auto& is_active = pack.is_active;
-    const auto thr = pack.thr;
+    const auto tol = pack.tol;
     const auto max_cds = pack.max_cds;
     auto& strong_grad = pack.strong_grad;
     auto& n_cds = pack.n_cds;
@@ -715,7 +715,7 @@ void group_elnet_active(
                 lmda_idx, convg_measure, buffer1, buffer2, buffer3, 
                 update_coefficients_f
             );
-            if (convg_measure < thr) break;
+            if (convg_measure < tol) break;
             if (n_cds >= max_cds) throw util::max_cds_error(lmda_idx);
         }
     }
@@ -857,10 +857,10 @@ inline void fit(
     const auto& strong_g2 = pack.strong_g2;
     const auto& strong_beta = pack.strong_beta;
     const auto& lmdas = pack.lmdas;
-    const auto thr = pack.thr;
+    const auto tol = pack.tol;
     const auto max_cds = pack.max_cds;
-    const auto cond_0_thresh = pack.cond_0_thresh;
-    const auto cond_1_thresh = pack.cond_1_thresh;
+    const auto rsq_slope_tol = pack.rsq_slope_tol;
+    const auto rsq_curv_tol = pack.rsq_curv_tol;
     auto& active_set = *pack.active_set;
     auto& active_g1 = *pack.active_g1;
     auto& active_g2 = *pack.active_g2;
@@ -980,7 +980,7 @@ inline void fit(
                 active_beta_diff.resize(new_abd_size);
             }
 
-            if (convg_measure < thr) break;
+            if (convg_measure < tol) break;
             if (n_cds >= max_cds) throw util::max_cds_error(l);
 
             lasso_active_and_update(l);
@@ -1020,7 +1020,7 @@ inline void fit(
         if (l < 2) continue;
 
         // early stop if R^2 criterion is fulfilled.
-        if (check_early_stop_rsq(rsqs[l-2], rsqs[l-1], rsqs[l], cond_0_thresh, cond_1_thresh)) break;
+        if (check_early_stop_rsq(rsqs[l-2], rsqs[l-1], rsqs[l], rsq_slope_tol, rsq_curv_tol)) break;
     }
 }
 

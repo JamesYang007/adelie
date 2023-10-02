@@ -69,7 +69,7 @@ ext_modules = [
 setup(
     name='adelie', 
     version=__version__,
-    description='A comprehensive test-bed library for group lasso.',
+    description='A fast, flexible package for group elastic net.',
     long_description='',
     author='James Yang',
     author_email='jamesyang916@gmail.com',

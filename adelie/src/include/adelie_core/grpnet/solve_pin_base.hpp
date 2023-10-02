@@ -18,23 +18,27 @@ struct GrpnetPinBufferPack
     util::rowvec_type<value_t> buffer1;
     util::rowvec_type<value_t> buffer2;
     util::rowvec_type<value_t> buffer3;
+    util::rowvec_type<value_t> buffer4;
 
     explicit GrpnetPinBufferPack(
-        size_t buffer_size
+        size_t buffer_size,
+        size_t n
     )
         : GrpnetPinBufferPack(
-            buffer_size, buffer_size, buffer_size
+            buffer_size, buffer_size, buffer_size, n
         ) 
     {}
 
     explicit GrpnetPinBufferPack(
             size_t buffer1_size, 
             size_t buffer2_size,
-            size_t buffer3_size
+            size_t buffer3_size,
+            size_t n
     )
         : buffer1(buffer1_size),
           buffer2(buffer2_size),
-          buffer3(buffer3_size)
+          buffer3(buffer3_size),
+          buffer4(n)
     {}
 };
 
@@ -251,15 +255,15 @@ void update_coefficient(
  *
  *      delta_u := (R^2_u - R^2_m)/R^2_u
  *      delta_m := (R^2_m - R^2_l)/R^2_m 
- *      delta_u < cond_0_thresh 
+ *      delta_u < rsq_slope_tol 
  *      AND
- *      (delta_u - delta_m) < cond_1_thresh
+ *      (delta_u - delta_m) < rsq_curv_tol
  *
  * @param   rsq_l   third to last R^2 value.
  * @param   rsq_m   second to last R^2 value.
  * @param   rsq_u   last R^2 value.
- * @param   cond_0_thresh   threshold for derivative condition.
- * @param   cond_1_thresh   threshold for second derivative condition.
+ * @param   rsq_slope_tol   threshold for derivative condition.
+ * @param   rsq_curv_tol   threshold for second derivative condition.
  */
 template <class ValueType>
 ADELIE_CORE_STRONG_INLINE
@@ -267,14 +271,14 @@ bool check_early_stop_rsq(
     ValueType rsq_l,
     ValueType rsq_m,
     ValueType rsq_u,
-    ValueType cond_0_thresh = 1e-5,
-    ValueType cond_1_thresh = 1e-5
+    ValueType rsq_slope_tol = 1e-5,
+    ValueType rsq_curv_tol = 1e-5
 )
 {
     const auto delta_u = (rsq_u-rsq_m);
     const auto delta_m = (rsq_m-rsq_l);
-    return ((delta_u <= cond_0_thresh*rsq_u) &&
-            ((delta_m*rsq_u-delta_u*rsq_m) <= cond_1_thresh*rsq_m*rsq_u));
+    return ((delta_u <= rsq_slope_tol*rsq_u) &&
+            ((delta_m*rsq_u-delta_u*rsq_m) <= rsq_curv_tol*rsq_m*rsq_u));
 }
 
 template <class XType, class YType, 

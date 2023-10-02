@@ -33,10 +33,10 @@ def objective(
     :math:`\\beta` is the coefficient vector,
     :math:`X` is the feature matrix,
     :math:`y` is the response vector,
-    :math:`\\lambda` is the regularization parameter,
+    :math:`\\lambda \\geq 0` is the regularization parameter,
     :math:`G` is the number of groups,
-    :math:`w` is the penalty factor,
-    :math:`\\alpha` is the elastic net parameter,
+    :math:`w \\geq 0` is the penalty factor,
+    :math:`\\alpha \\in [0,1]` is the elastic net parameter,
     and :math:`\\beta_j` are the coefficients for the :math:`j` th group.
 
     Parameters
@@ -60,7 +60,7 @@ def objective(
     
     Returns
     -------
-    out : float
+    obj : float
         Group elastic net objective.
     """
     return core.grpnet.objective(
@@ -79,6 +79,8 @@ def solve_pin(
     where :math:`S` denotes the strong set,
     that is, the coefficient vector is forced to be zero
     for groups outside the strong set.
+    We also assume that :math:`X` is such that the column blocks :math:`X_k`
+    defined by the groups have diagonal :math:`X_k^\\top X_k`.
 
     Parameters
     ----------
@@ -87,8 +89,9 @@ def solve_pin(
 
     Returns
     -------
-    result : same as ``state``
+    result
         The resulting state after running the solver.
+        The type is the same as that of ``state``.
 
     See Also
     --------
@@ -97,7 +100,7 @@ def solve_pin(
     """
     # mapping of each state type to the corresponding solver
     f_dict = {
-        pin_naive: core.grpnet.solve_pin_naive,
+        pin_naive: core.grpnet.solve_pin_naive_64,
     }
 
     # solve group elastic net

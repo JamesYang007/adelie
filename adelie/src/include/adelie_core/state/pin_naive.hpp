@@ -23,12 +23,12 @@ namespace state {
  * @param   strong_begins   vector of indices that define the beginning index to values
  *                          corresponding to the strong groups.
  *                          MUST have strong_begins.size() == strong_set.size().
- * @param   strong_A_diag       dense vector representing diagonal of A restricted to strong_set.
- *                              strong_A_diag[b:(b+p)] = diag(A_{kk})
+ * @param   strong_var       dense vector representing diagonal of A restricted to strong_set.
+ *                              strong_var[b:(b+p)] = diag(A_{kk})
  *                              where k := strong_set[i], b := strong_begins[i], p := group_sizes[k].
  * @param   lmdas       regularization parameter lambda sequence.
  * @param   max_cds     max number of coordinate descents.
- * @param   thr         convergence threshold.
+ * @param   tol         convergence threshold.
  * @param   newton_tol  see update_coefficients argument tol.
  * @param   newton_max_iters     see update_coefficients argument max_iters.
  * @param   rsq         unnormalized R^2 estimate.
@@ -36,7 +36,7 @@ namespace state {
  *                      the R^2 that corresponds to strong_beta.
  * @param   resid       residual vector y - X * beta where beta is all 0 on non-strong groups 
  *                      and the rest correspond to strong_beta.
- * @param   strong_beta dense vector of coefficients of size strong_A_diag.size().
+ * @param   strong_beta dense vector of coefficients of size strong_var.size().
  *                      strong_beta[b:(b+p)] = coefficient for group i,
  *                      where i := strong_set[j], b := strong_begins[j], and p := group_sizes[i].
  *                      The updated coefficients will be stored here.
@@ -70,8 +70,8 @@ namespace state {
  *                      resids[j] = residual using betas[j].
  *                      fit() will emplace_back only the solved resid.
  * @param   n_cds       number of coordinate descents.
- * @param   cond_0_thresh   0th order threshold for early exit.
- * @param   cond_1_thresh   1st order threshold for early exit.
+ * @param   rsq_slope_tol   0th order threshold for early exit.
+ * @param   rsq_curv_tol   1st order threshold for early exit.
  * @param   diagnostic      instance of GroupElnetDiagnostic.
  */
 template <class MatrixType, 
@@ -114,14 +114,14 @@ struct PinNaive
     const map_cvec_index_t strong_g1;
     const map_cvec_index_t strong_g2;
     const map_cvec_index_t strong_begins;
-    const map_cvec_value_t strong_A_diag;
+    const map_cvec_value_t strong_var;
     const map_cvec_value_t lmdas;
 
     /* Configurations */
     const size_t max_cds;
-    const value_t thr;
-    const value_t cond_0_thresh;
-    const value_t cond_1_thresh;
+    const value_t tol;
+    const value_t rsq_slope_tol;
+    const value_t rsq_curv_tol;
     const value_t newton_tol;
     const size_t newton_max_iters;
 
@@ -155,12 +155,12 @@ struct PinNaive
         const Eigen::Ref<const vec_index_t>& strong_g1,
         const Eigen::Ref<const vec_index_t>& strong_g2,
         const Eigen::Ref<const vec_index_t>& strong_begins, 
-        const Eigen::Ref<const vec_value_t>& strong_A_diag,
+        const Eigen::Ref<const vec_value_t>& strong_var,
         const Eigen::Ref<const vec_value_t>& lmdas, 
         size_t max_cds,
-        value_t thr,
-        value_t cond_0_thresh,
-        value_t cond_1_thresh,
+        value_t tol,
+        value_t rsq_slope_tol,
+        value_t rsq_curv_tol,
         value_t newton_tol,
         size_t newton_max_iters,
         value_t rsq,
@@ -186,12 +186,12 @@ struct PinNaive
           strong_g1(strong_g1.data(), strong_g1.size()),
           strong_g2(strong_g2.data(), strong_g2.size()),
           strong_begins(strong_begins.data(), strong_begins.size()),
-          strong_A_diag(strong_A_diag.data(), strong_A_diag.size()),
+          strong_var(strong_var.data(), strong_var.size()),
           lmdas(lmdas.data(), lmdas.size()),
           max_cds(max_cds),
-          thr(thr),
-          cond_0_thresh(cond_0_thresh),
-          cond_1_thresh(cond_1_thresh),
+          tol(tol),
+          rsq_slope_tol(rsq_slope_tol),
+          rsq_curv_tol(rsq_curv_tol),
           newton_tol(newton_tol),
           newton_max_iters(newton_max_iters),
           rsq(rsq),

@@ -51,12 +51,11 @@ def test_root_upper_bound():
         np.random.seed(seed)
         quad = np.random.uniform(quad_lower, quad_upper, p)
         linear = np.random.normal(0, 1, p)
+        l1 = np.random.uniform(0, 1)
 
         zero_idx = np.random.choice(np.arange(p), size=int(sparsity * p), replace=False)
         quad[zero_idx] = 0
         linear[zero_idx] = 0
-
-        l1 = np.random.uniform(0, np.linalg.norm(linear))
 
         out = mod.root_upper_bound(
             quad=quad, 
@@ -183,7 +182,6 @@ def test_root():
         sparsity,
         quad_lower, 
         quad_upper,
-        l2_upper,
         seed=0,
         tol=1e-16,
         max_iters=10000,
@@ -192,15 +190,12 @@ def test_root():
         np.random.seed(seed)
         quad = np.random.uniform(quad_lower, quad_upper, p)
         linear = np.random.normal(0, 1, p)
-        l2 = np.random.uniform(0, l2_upper)
         l1 = np.random.uniform(0, 1)
 
         # zero-out some components of quad
         zero_idx = np.random.choice(np.arange(p), size=int(sparsity * p), replace=False)
         quad[zero_idx] = 0
-        # if no l2 regularization, must zero-out same positions of linear
-        if l2 <= 0:
-            linear[zero_idx] = 0
+        linear[zero_idx] = 0
 
         # test each solver
         for solver in solvers:
@@ -209,7 +204,6 @@ def test_root():
                 quad=quad,
                 linear=linear,
                 l1=l1,
-                l2=l2,
                 tol=tol,
                 max_iters=max_iters,
                 solver=solver,
@@ -221,7 +215,7 @@ def test_root():
             assert not x_actual is None
             f_x_actual = mod.root_function(
                 x_actual,
-                quad=quad + l2,
+                quad=quad,
                 linear=linear,
                 l1=l1,
             )
@@ -238,9 +232,9 @@ def test_root():
     # non-trivial l2 regularization
     for sp in sps:
         for p in ps:
-            _test(p, sp, 0, 1, 1e-2, solvers=solvers)
+            _test(p, sp, 0, 1, solvers=solvers)
 
     # no l2 regularization
     for sp in sps:
         for p in ps:
-            _test(p, sp, 0, 1, 0, solvers=solvers)
+            _test(p, sp, 0, 1, solvers=solvers)
