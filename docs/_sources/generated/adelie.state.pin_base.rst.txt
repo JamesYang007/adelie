@@ -14,6 +14,7 @@
    .. autosummary::
    
       ~pin_base.__init__
+      ~pin_base.check
       ~pin_base.initialize
       ~pin_base.internal
    
@@ -34,12 +35,12 @@
       ~pin_base.strong_g1
       ~pin_base.strong_g2
       ~pin_base.strong_begins
-      ~pin_base.strong_A_diag
+      ~pin_base.strong_var
       ~pin_base.lmdas
       ~pin_base.max_cds
-      ~pin_base.thr
-      ~pin_base.cond_0_thresh
-      ~pin_base.cond_1_thresh
+      ~pin_base.tol
+      ~pin_base.rsq_slope_tol
+      ~pin_base.rsq_curv_tol
       ~pin_base.newton_tol
       ~pin_base.newton_max_iters
       ~pin_base.rsq

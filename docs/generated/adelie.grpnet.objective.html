@@ -297,9 +297,12 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root.html">adelie.bcd.root</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_base.html">adelie.state.pin_base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
 </ul>
@@ -381,10 +384,10 @@ document.write(`
 <span class="math notranslate nohighlight">\(\beta\)</span> is the coefficient vector,
 <span class="math notranslate nohighlight">\(X\)</span> is the feature matrix,
 <span class="math notranslate nohighlight">\(y\)</span> is the response vector,
-<span class="math notranslate nohighlight">\(\lambda\)</span> is the regularization parameter,
+<span class="math notranslate nohighlight">\(\lambda \geq 0\)</span> is the regularization parameter,
 <span class="math notranslate nohighlight">\(G\)</span> is the number of groups,
-<span class="math notranslate nohighlight">\(w\)</span> is the penalty factor,
-<span class="math notranslate nohighlight">\(\alpha\)</span> is the elastic net parameter,
+<span class="math notranslate nohighlight">\(w \geq 0\)</span> is the penalty factor,
+<span class="math notranslate nohighlight">\(\alpha \in [0,1]\)</span> is the elastic net parameter,
 and <span class="math notranslate nohighlight">\(\beta_j\)</span> are the coefficients for the <span class="math notranslate nohighlight">\(j\)</span> th group.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -409,7 +412,7 @@ and <span class="math notranslate nohighlight">\(\beta_j\)</span> are the coeffi
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>out</strong><span class="classifier">float</span></dt><dd><p>Group elastic net objective.</p>
+<dt><strong>obj</strong><span class="classifier">float</span></dt><dd><p>Group elastic net objective.</p>
 </dd>
 </dl>
 </dd>

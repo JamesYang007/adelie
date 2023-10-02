@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.bcd.solve &#8212; adelie 1.1.4 documentation</title>
+    <title>adelie.state.base &#8212; adelie 1.1.4 documentation</title>
   
   
   
@@ -39,12 +39,11 @@
     <script src="../_static/documentation_options.js?v=e2e28a39"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.bcd.solve';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.state.base';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.bcd.root" href="adelie.bcd.root.html" />
-    <link rel="prev" title="adelie.bcd.objective" href="adelie.bcd.objective.html" />
+    <link rel="next" title="adelie.state.pin_base" href="adelie.state.pin_base.html" />
+    <link rel="prev" title="adelie.state.deduce_states" href="adelie.state.deduce_states.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -288,21 +287,21 @@ document.write(`
         <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_lower_bound.html">adelie.bcd.root_lower_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.objective.html">adelie.bcd.objective</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.bcd.solve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root.html">adelie.bcd.root</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.state.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_base.html">adelie.state.pin_base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
 </ul>
@@ -349,7 +348,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.bcd.solve</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.state.base</li>
   </ul>
 </nav>
 </div>
@@ -366,64 +365,57 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-bcd-solve">
-<h1>adelie.bcd.solve<a class="headerlink" href="#adelie-bcd-solve" title="Link to this heading">#</a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="adelie.bcd.solve">
-<span class="sig-prename descclassname"><span class="pre">adelie.bcd.</span></span><span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'newton_abs'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.bcd.solve" title="Link to this definition">#</a></dt>
-<dd><p>Solves the BCD update.</p>
-<p>The BCD update for the group elastic net is obtained by minimizing
-the BCD objective given in <code class="docutils literal notranslate"><span class="pre">objective()</span></code>.
-The solution only exists when <span class="math notranslate nohighlight">\(\|v\|_2 &lt; \lambda_1\)</span>
-or <span class="math notranslate nohighlight">\(\|v_S\|_2 &lt; \lambda_1\)</span>,
-where <span class="math notranslate nohighlight">\(S\)</span> is the subset of indices
-such that <span class="math notranslate nohighlight">\(\Sigma_{ii} + \lambda_2 = 0\)</span>.</p>
-<dl class="field-list">
+  <section id="adelie-state-base">
+<h1>adelie.state.base<a class="headerlink" href="#adelie-state-base" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="adelie.state.base">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.state.</span></span><span class="sig-name descname"><span class="pre">base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">core_state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.base" title="Link to this definition">#</a></dt>
+<dd><p>Base wrapper state class.</p>
+<p>All Python wrapper classes for core state classes must inherit from this class.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>quad</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">objective()</span></code>.</p>
-</dd>
-<dt><strong>linear</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">objective()</span></code>.</p>
-</dd>
-<dt><strong>l1</strong><span class="classifier">float</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">objective()</span></code>.</p>
-</dd>
-<dt><strong>l2</strong><span class="classifier">float</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">objective()</span></code>.</p>
-</dd>
-<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Convergence tolerance. Default is <code class="docutils literal notranslate"><span class="pre">1e-12</span></code>.</p>
-</dd>
-<dt><strong>max_iters</strong><span class="classifier">int, optional</span></dt><dd><p>Max number of iterations. Default is <code class="docutils literal notranslate"><span class="pre">1000</span></code>.</p>
-</dd>
-<dt><strong>solver</strong><span class="classifier">str, optional</span></dt><dd><p>Solver type must be one of 
-<code class="docutils literal notranslate"><span class="pre">[&quot;brent&quot;,</span> <span class="pre">&quot;newton&quot;,</span> <span class="pre">&quot;newton_brent&quot;,</span> <span class="pre">&quot;newton_abs&quot;,</span> <span class="pre">&quot;newton_abs_debug&quot;,</span> <span class="pre">&quot;ista&quot;,</span> <span class="pre">&quot;fista&quot;,</span> <span class="pre">&quot;fista_adares&quot;]</span></code>.
-Default is <code class="docutils literal notranslate"><span class="pre">&quot;newton_abs&quot;</span></code>.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>The following methods are known to have poor convergence:
-<code class="docutils literal notranslate"><span class="pre">[&quot;brent&quot;,</span> <span class="pre">&quot;ista&quot;,</span> <span class="pre">&quot;fista&quot;,</span> <span class="pre">&quot;fista_adares&quot;]</span></code>.</p>
-</div>
-</dd>
-<dt><strong>smart_init</strong><span class="classifier">bool</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the ABS method is invoked to find a smart initial point before starting Newton’s method.
-It is only used when <code class="docutils literal notranslate"><span class="pre">solver</span></code> is <code class="docutils literal notranslate"><span class="pre">&quot;newton_abs_debug&quot;</span></code>.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>result</strong><span class="classifier">Dict[str, Any]</span></dt><dd><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">result[&quot;beta&quot;]</span></code>: solution vector.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">result[&quot;iters&quot;]</span></code>: number of iterations taken.</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>core_state</strong></dt><dd><p>Usually a C++ exported state class.</p>
 </dd>
 </dl>
 </dd>
 </dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="adelie.bcd.objective.html#adelie.bcd.objective" title="adelie.bcd.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.bcd.objective</span></code></a></dt><dd></dd>
-<dt><a class="reference internal" href="adelie.bcd.root.html#adelie.bcd.root" title="adelie.bcd.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.bcd.root</span></code></a></dt><dd></dd>
-</dl>
-</div>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code>([method, logger])</p></td>
+<td><p>Checks consistency of the members.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code>(core_state)</p></td>
+<td><p>Saves the core state object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">internal</span></code>()</p></td>
+<td><p>Returns the core state object.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.state.base.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">core_state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.base.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.base.__init__" title="adelie.state.base.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(core_state)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code>([method, logger])</p></td>
+<td><p>Checks consistency of the members.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code>(core_state)</p></td>
+<td><p>Saves the core state object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">internal</span></code>()</p></td>
+<td><p>Returns the core state object.</p></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </section>
@@ -439,20 +431,20 @@ It is only used when <code class="docutils literal notranslate"><span class="pre
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.bcd.objective.html"
+       href="adelie.state.deduce_states.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.bcd.objective</p>
+        <p class="prev-next-title">adelie.state.deduce_states</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.bcd.root.html"
+       href="adelie.state.pin_base.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.bcd.root</p>
+        <p class="prev-next-title">adelie.state.pin_base</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -471,13 +463,16 @@ It is only used when <code class="docutils literal notranslate"><span class="pre
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.bcd.solve"><code class="docutils literal notranslate"><span class="pre">solve()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base"><code class="docutils literal notranslate"><span class="pre">base</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base.__init__"><code class="docutils literal notranslate"><span class="pre">base.__init__()</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.bcd.solve.rst.txt">
+    <a href="../_sources/generated/adelie.state.base.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

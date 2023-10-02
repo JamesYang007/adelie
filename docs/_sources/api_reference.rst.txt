@@ -32,6 +32,7 @@ adelie.matrix
     :toctree: generated/
 
 
+    base
     dense
 
 
@@ -46,6 +47,8 @@ adelie.state
     :toctree: generated/
 
 
+    deduce_states
+    base
     pin_base
     pin_naive
 

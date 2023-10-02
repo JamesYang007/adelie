@@ -14,6 +14,7 @@
    .. autosummary::
    
       ~pin_naive.__init__
+      ~pin_naive.check
       ~pin_naive.initialize
       ~pin_naive.internal
    
@@ -36,12 +37,12 @@
       ~pin_naive.strong_g1
       ~pin_naive.strong_g2
       ~pin_naive.strong_begins
-      ~pin_naive.strong_A_diag
+      ~pin_naive.strong_var
       ~pin_naive.lmdas
       ~pin_naive.max_cds
-      ~pin_naive.thr
-      ~pin_naive.cond_0_thresh
-      ~pin_naive.cond_1_thresh
+      ~pin_naive.tol
+      ~pin_naive.rsq_slope_tol
+      ~pin_naive.rsq_curv_tol
       ~pin_naive.newton_tol
       ~pin_naive.newton_max_iters
       ~pin_naive.rsq

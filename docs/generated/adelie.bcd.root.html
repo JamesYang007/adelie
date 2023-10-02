@@ -39,10 +39,11 @@
     <script src="../_static/documentation_options.js?v=e2e28a39"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.bcd.root';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.matrix.dense" href="adelie.matrix.dense.html" />
+    <link rel="next" title="adelie.matrix.base" href="adelie.matrix.base.html" />
     <link rel="prev" title="adelie.bcd.solve" href="adelie.bcd.solve.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -296,9 +297,12 @@ document.write(`
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.bcd.root</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_base.html">adelie.state.pin_base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
 </ul>
@@ -366,20 +370,21 @@ document.write(`
 <h1>adelie.bcd.root<a class="headerlink" href="#adelie-bcd-root" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.bcd.root">
-<span class="sig-prename descclassname"><span class="pre">adelie.bcd.</span></span><span class="sig-name descname"><span class="pre">root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'newton_abs'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.bcd.root" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.bcd.</span></span><span class="sig-name descname"><span class="pre">root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'newton_abs'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.bcd.root" title="Link to this definition">#</a></dt>
 <dd><p>Solves the non-negative root of the BCD root function.</p>
 <p>The BCD root function is given in <code class="docutils literal notranslate"><span class="pre">root_function()</span></code>.
-The non-negative root only exists <code class="docutils literal notranslate"><span class="pre">solve()</span></code> is well-defined.</p>
+The non-negative root only exists when
+<span class="math notranslate nohighlight">\(\|v_S\|_2 &lt; \lambda_1 &lt; \|v\|_2\)</span>
+where <span class="math notranslate nohighlight">\(S\)</span> is the subset of indices
+such that <span class="math notranslate nohighlight">\(\Sigma_{ii} = 0\)</span>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>quad</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">objective()</span></code>.</p>
+<dt><strong>quad</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">root_function()</span></code>.</p>
 </dd>
-<dt><strong>linear</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">objective()</span></code>.</p>
+<dt><strong>linear</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">root_function()</span></code>.</p>
 </dd>
-<dt><strong>l1</strong><span class="classifier">float</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">objective()</span></code>.</p>
-</dd>
-<dt><strong>l2</strong><span class="classifier">float</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">objective()</span></code>.</p>
+<dt><strong>l1</strong><span class="classifier">float</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">root_function()</span></code>.</p>
 </dd>
 <dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Convergence tolerance. Default is <code class="docutils literal notranslate"><span class="pre">1e-12</span></code>.</p>
 </dd>
@@ -398,9 +403,9 @@ Default is <code class="docutils literal notranslate"><span class="pre">&quot;ne
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>out</strong><span class="classifier">Dict[str, Any]</span></dt><dd><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">out[&quot;root&quot;]</span></code>: root.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">out[&quot;iters&quot;]</span></code>: number of iterations taken.</p></li>
+<dt><strong>result</strong><span class="classifier">Dict[str, Any]</span></dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">result[&quot;root&quot;]</span></code>: root.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">result[&quot;iters&quot;]</span></code>: number of iterations taken.</p></li>
 </ul>
 </dd>
 </dl>
@@ -409,8 +414,7 @@ Default is <code class="docutils literal notranslate"><span class="pre">&quot;ne
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="adelie.bcd.objective.html#adelie.bcd.objective" title="adelie.bcd.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.bcd.objective</span></code></a></dt><dd></dd>
-<dt><a class="reference internal" href="adelie.bcd.solve.html#adelie.bcd.solve" title="adelie.bcd.solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.bcd.solve</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.bcd.root_function.html#adelie.bcd.root_function" title="adelie.bcd.root_function"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.bcd.root_function</span></code></a></dt><dd></dd>
 </dl>
 </div>
 </dd></dl>
@@ -437,11 +441,11 @@ Default is <code class="docutils literal notranslate"><span class="pre">&quot;ne
       </div>
     </a>
     <a class="right-next"
-       href="adelie.matrix.dense.html"
+       href="adelie.matrix.base.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.matrix.dense</p>
+        <p class="prev-next-title">adelie.matrix.base</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

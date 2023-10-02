@@ -1,0 +1,25 @@
+﻿adelie.state.base
+=================
+
+.. currentmodule:: adelie.state
+
+.. autoclass:: base
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~base.__init__
+      ~base.check
+      ~base.initialize
+      ~base.internal
+   
+   
+
+   
+   
+   

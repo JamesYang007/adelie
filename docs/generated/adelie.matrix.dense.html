@@ -42,8 +42,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.matrix.dense';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.state.pin_base" href="adelie.state.pin_base.html" />
-    <link rel="prev" title="adelie.bcd.root" href="adelie.bcd.root.html" />
+    <link rel="next" title="adelie.state.deduce_states" href="adelie.state.deduce_states.html" />
+    <link rel="prev" title="adelie.matrix.base" href="adelie.matrix.base.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -296,9 +296,12 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root.html">adelie.bcd.root</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.matrix.dense</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_base.html">adelie.state.pin_base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
 </ul>
@@ -366,32 +369,37 @@ document.write(`
 <h1>adelie.matrix.dense<a class="headerlink" href="#adelie-matrix-dense" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="adelie.matrix.dense">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">~numpy.float64</span> <span class="pre">|</span> <span class="pre">~numpy.float32</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.matrix.dense" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.matrix.dense" title="Link to this definition">#</a></dt>
 <dd><p>Creates a viewer of a dense matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>mat</strong><span class="classifier">np.ndarray</span></dt><dd><p>The matrix to view. A copy is made if <code class="docutils literal notranslate"><span class="pre">dtype</span></code>
-is inconsistent with that of <code class="docutils literal notranslate"><span class="pre">mat</span></code> or the storage order is not column-major. 
-See documentation for <code class="docutils literal notranslate"><span class="pre">numpy.array</span></code> for details
-on when exactly a copy is made.</p>
-</dd>
-<dt><strong>dtype</strong><span class="classifier">Union[np.float64, np.float32], optional</span></dt><dd><p>The underlying data type.
-Default is <code class="docutils literal notranslate"><span class="pre">np.float64</span></code>.</p>
+<dt><strong>mat</strong><span class="classifier">np.ndarray</span></dt><dd><p>The matrix to view.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">internal</span></code>()</p></td>
+<td><p>Returns the core matrix object.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.matrix.dense.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">~numpy.float64</span> <span class="pre">|</span> <span class="pre">~numpy.float32</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.matrix.dense.__init__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.matrix.dense.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.dense.__init__" title="adelie.matrix.dense.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(mat, *[, dtype])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.dense.__init__" title="adelie.matrix.dense.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(mat)</p></td>
 <td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">internal</span></code>()</p></td>
+<td><p>Returns the core matrix object.</p></td>
 </tr>
 </tbody>
 </table>
@@ -410,20 +418,20 @@ Default is <code class="docutils literal notranslate"><span class="pre">np.float
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.bcd.root.html"
+       href="adelie.matrix.base.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.bcd.root</p>
+        <p class="prev-next-title">adelie.matrix.base</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.state.pin_base.html"
+       href="adelie.state.deduce_states.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.state.pin_base</p>
+        <p class="prev-next-title">adelie.state.deduce_states</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

@@ -296,9 +296,12 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root.html">adelie.bcd.root</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_base.html">adelie.state.pin_base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
 </ul>
@@ -373,8 +376,10 @@ minimizing the objective defined in <code class="docutils literal notranslate"><
 with the constraint that <span class="math notranslate nohighlight">\(\beta_{-S} = 0\)</span>
 where <span class="math notranslate nohighlight">\(S\)</span> denotes the strong set,
 that is, the coefficient vector is forced to be zero
-for groups outside the strong set.</p>
-<dl class="field-list">
+for groups outside the strong set.
+We also assume that <span class="math notranslate nohighlight">\(X\)</span> is such that the column blocks <span class="math notranslate nohighlight">\(X_k\)</span>
+defined by the groups have diagonal <span class="math notranslate nohighlight">\(X_k^\top X_k\)</span>.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>state</strong><span class="classifier">pin_naive</span></dt><dd><p>See the documentation for one of the listed types.</p>
@@ -382,8 +387,9 @@ for groups outside the strong set.</p>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier">same as <code class="docutils literal notranslate"><span class="pre">state</span></code></span></dt><dd><p>The resulting state after running the solver.</p>
+<dd class="field-even"><dl class="simple">
+<dt>result</dt><dd><p>The resulting state after running the solver.
+The type is the same as that of <code class="docutils literal notranslate"><span class="pre">state</span></code>.</p>
 </dd>
 </dl>
 </dd>

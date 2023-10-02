@@ -1,9 +1,9 @@
-﻿adelie.matrix.dense
-===================
+﻿adelie.matrix.base
+==================
 
 .. currentmodule:: adelie.matrix
 
-.. autoclass:: dense
+.. autoclass:: base
 
    
    .. automethod:: __init__
@@ -13,8 +13,8 @@
 
    .. autosummary::
    
-      ~dense.__init__
-      ~dense.internal
+      ~base.__init__
+      ~base.internal
    
    
 

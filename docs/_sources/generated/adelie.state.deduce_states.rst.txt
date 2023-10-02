@@ -1,0 +1,6 @@
+﻿adelie.state.deduce\_states
+===========================
+
+.. currentmodule:: adelie.state
+
+.. autofunction:: deduce_states
