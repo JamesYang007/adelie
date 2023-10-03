@@ -9,7 +9,7 @@ def test_dense():
 
         for dtype in dtypes:
             X = np.array(X, dtype=dtype, order=order)
-            wrap = mod.dense(X)
+            wrap = mod.dense(X, n_threads=4)
             cX = wrap._core_mat
 
             # test cmul

@@ -70,9 +70,6 @@ void sparsify_active_beta(
     const auto& strong_beta = pack.strong_beta;
     const auto& strong_begins = pack.strong_begins;
 
-    indices.resize(active_order.size());
-    values.resize(active_order.size());
-
     auto idxs_begin = indices.data();
     auto vals_begin = values.data();
     for (size_t i = 0; i < active_order.size(); ++i) {
@@ -281,19 +278,17 @@ bool check_early_stop_rsq(
             ((delta_m*rsq_u-delta_u*rsq_m) <= rsq_curv_tol*rsq_m*rsq_u));
 }
 
-template <class XType, class YType, 
-          class GroupsType, class GroupSizesType,
-          class ValueType, class PenaltyType, class BetaType>
+template <class ValueType, class IndexType> 
 inline
 auto objective(
-    const BetaType& beta,
-    const XType& X,
-    const YType& y,
-    const GroupsType& groups,
-    const GroupSizesType& group_sizes,
+    const Eigen::Ref<const util::rowvec_type<ValueType>>& beta,
+    const Eigen::Ref<const util::rowmat_type<ValueType>>& X,
+    const Eigen::Ref<const util::rowvec_type<ValueType>>& y,
+    const Eigen::Ref<const util::rowvec_type<IndexType>>& groups,
+    const Eigen::Ref<const util::rowvec_type<IndexType>>& group_sizes,
     ValueType lmda,
     ValueType alpha,
-    const PenaltyType& penalty
+    const Eigen::Ref<const util::rowvec_type<ValueType>>& penalty
 )
 {
     ValueType p_ = 0.0;
@@ -306,7 +301,7 @@ auto objective(
         );
     }
     p_ *= lmda;
-    return 0.5 * (y.matrix() - X * beta.matrix()).squaredNorm() + p_;
+    return 0.5 * (y.matrix() - beta.matrix() * X.transpose()).squaredNorm() + p_;
 }
 
 } // namespace grpnet

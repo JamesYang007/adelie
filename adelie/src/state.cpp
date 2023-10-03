@@ -54,32 +54,32 @@ void pin_naive(py::module_& m, const char* name)
             dyn_vec_vec_value_t 
         >(),
             py::arg("X"),
-            py::arg("groups"),
-            py::arg("group_sizes"),
+            py::arg("groups").noconvert(),
+            py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
-            py::arg("penalty"),
-            py::arg("strong_set"),
-            py::arg("strong_g1"),
-            py::arg("strong_g2"),
-            py::arg("strong_begins"),
-            py::arg("strong_var"),
-            py::arg("lmdas"),
-            py::arg("max_cds"),
+            py::arg("penalty").noconvert(),
+            py::arg("strong_set").noconvert(),
+            py::arg("strong_g1").noconvert(),
+            py::arg("strong_g2").noconvert(),
+            py::arg("strong_begins").noconvert(),
+            py::arg("strong_var").noconvert(),
+            py::arg("lmdas").noconvert(),
+            py::arg("max_iters"),
             py::arg("tol"),
             py::arg("rsq_slope_tol"),
             py::arg("rsq_curv_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("rsq"),
-            py::arg("resid"),
-            py::arg("strong_beta"),
-            py::arg("strong_grad"),
+            py::arg("resid").noconvert(),
+            py::arg("strong_beta").noconvert(),
+            py::arg("strong_grad").noconvert(),
             py::arg("active_set"),
             py::arg("active_g1"),
             py::arg("active_g2"),
             py::arg("active_begins"),
             py::arg("active_order"),
-            py::arg("is_active"),
+            py::arg("is_active").noconvert(),
             py::arg("betas"),
             py::arg("rsqs"),
             py::arg("resids")
@@ -95,7 +95,7 @@ void pin_naive(py::module_& m, const char* name)
         .def_readonly("strong_begins", &state_t::strong_begins)
         .def_readonly("strong_var", &state_t::strong_var)
         .def_readonly("lmdas", &state_t::lmdas)
-        .def_readonly("max_cds", &state_t::max_cds)
+        .def_readonly("max_iters", &state_t::max_iters)
         .def_readonly("tol", &state_t::tol)
         .def_readonly("rsq_slope_tol", &state_t::rsq_slope_tol)
         .def_readonly("rsq_curv_tol", &state_t::rsq_curv_tol)

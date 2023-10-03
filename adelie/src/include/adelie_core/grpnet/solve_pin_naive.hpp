@@ -192,25 +192,13 @@ void solve_pin_naive_active(
     using value_t = typename pack_t::value_t;
     using sw_t = util::Stopwatch;
 
-    const auto& active_set = pack.active_set;
     const auto& active_g1 = pack.active_g1;
     const auto& active_g2 = pack.active_g2;
     const auto tol = pack.tol;
-    const auto max_cds = pack.max_cds;
+    const auto max_iters = pack.max_iters;
     auto& n_cds = pack.n_cds;
     auto& time_active_cd = pack.time_active_cd;
 
-    const auto g1_active_f = [&](auto i) {
-        return active_set[active_g1[i]];
-    };
-    const auto g2_active_f = [&](auto i) {
-        return active_set[active_g2[i]];
-    };
-    const auto ag1_begin = util::make_functor_iterator<size_t>(0, g1_active_f);
-    const auto ag1_end = util::make_functor_iterator<size_t>(active_g1.size(), g1_active_f);
-    const auto ag2_begin = util::make_functor_iterator<size_t>(0, g2_active_f);
-    const auto ag2_end = util::make_functor_iterator<size_t>(active_g2.size(), g2_active_f);
-    
     time_active_cd.push_back(0);
     {
         sw_t stopwatch(time_active_cd.back());
@@ -219,12 +207,14 @@ void solve_pin_naive_active(
             ++n_cds;
             value_t convg_measure;
             coordinate_descent(
-                pack, ag1_begin, ag1_end, ag2_begin, ag2_end,
+                pack, 
+                active_g1.data(), active_g1.data() + active_g1.size(),
+                active_g2.data(), active_g2.data() + active_g2.size(),
                 lmda_idx, convg_measure, buffer1, buffer2, buffer3, buffer4_n,
                 update_coefficients_f
             );
             if (convg_measure < tol) break;
-            if (n_cds >= max_cds) throw util::max_cds_error(lmda_idx);
+            if (n_cds >= max_iters) throw util::max_cds_error(lmda_idx);
         }
     }
 }
@@ -257,6 +247,7 @@ inline void solve_pin_naive(
     using sw_t = util::Stopwatch;
 
     const auto& X = *pack.X;
+    const auto& groups = pack.groups;
     const auto& group_sizes = pack.group_sizes;
     const auto& strong_set = pack.strong_set;
     const auto& strong_g1 = pack.strong_g1;
@@ -265,7 +256,7 @@ inline void solve_pin_naive(
     const auto& lmdas = pack.lmdas;
     const auto& resid = pack.resid;
     const auto tol = pack.tol;
-    const auto max_cds = pack.max_cds;
+    const auto max_iters = pack.max_iters;
     const auto rsq_slope_tol = pack.rsq_slope_tol;
     const auto rsq_curv_tol = pack.rsq_curv_tol;
     auto& active_set = pack.active_set;
@@ -283,9 +274,6 @@ inline void solve_pin_naive(
     
     const auto n = X.rows();
     const auto p = X.cols();
-
-    assert(betas.size() == lmdas.size());
-    assert(rsqs.size() == lmdas.size());
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
@@ -314,15 +302,14 @@ inline void solve_pin_naive(
         if (!is_active[ss_idx]) {
             is_active[ss_idx] = true;
 
-            const auto next_idx = active_set.size();
             active_set.push_back(ss_idx);
 
             const auto group = strong_set[ss_idx];
             const auto group_size = group_sizes[group];
             if (group_size == 1) {
-                active_g1.push_back(next_idx);
+                active_g1.push_back(ss_idx);
             } else {
-                active_g2.push_back(next_idx);
+                active_g2.push_back(ss_idx);
             }
         }
     };
@@ -379,7 +366,7 @@ inline void solve_pin_naive(
             }
 
             if (convg_measure < tol) break;
-            if (n_cds >= max_cds) throw util::max_cds_error(l);
+            if (n_cds >= max_iters) throw util::max_cds_error(l);
 
             lasso_active_and_update(l);
         }
@@ -392,10 +379,12 @@ inline void solve_pin_naive(
                   old_active_size);
         std::sort(active_order.begin(), active_order.end(),
                   [&](auto i, auto j) { 
-                        return strong_set[active_set[i]] < strong_set[active_set[j]];
+                        return groups[strong_set[active_set[i]]] < groups[strong_set[active_set[j]]];
                     });
 
         // order the active betas
+        active_beta_indices.resize(active_beta_size);
+        active_beta_ordered.resize(active_beta_size);
         sparsify_active_beta(
             pack,
             active_beta_indices,
