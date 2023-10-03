@@ -930,7 +930,7 @@ inline void group_basil(
     const bool use_user_lmdas = user_lmdas.size() != 0;
     if (!use_user_lmdas) {
         const auto lmda_max = lambda_max(abs_grad, alpha, penalty);
-        generate_lambdas(max_n_lambdas, min_ratio, lmda_max, lmda_seq);
+        create_lambdas(max_n_lambdas, min_ratio, lmda_max, lmda_seq);
     } else {
         lmda_seq = user_lmdas;
         max_n_lambdas = user_lmdas.size();

@@ -125,8 +125,9 @@ void matrix_dense(py::module_& m, const char* name)
     using dense_t = typename internal_t::dense_t;
     py::class_<internal_t, base_t>(m, name)
         .def(
-            py::init<const Eigen::Ref<const dense_t>&>(), 
-            py::arg("mat").noconvert()
+            py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
+            py::arg("mat").noconvert(),
+            py::arg("n_threads")
         )
         ;
 }

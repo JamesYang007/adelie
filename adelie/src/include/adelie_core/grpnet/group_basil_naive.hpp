@@ -996,7 +996,7 @@ inline void group_basil(
     const auto lmda_max = (alpha == 0) ? lmdas_curr[0] : lambda_max(abs_grad, alpha, penalty);
     if (!use_user_lmdas) {
         vec_value_t lmda_seq_tmp;
-        generate_lambdas(max_n_lambdas, min_ratio, lmda_max, lmda_seq_tmp);
+        create_lambdas(max_n_lambdas, min_ratio, lmda_max, lmda_seq_tmp);
         lmda_seq = lmda_seq_tmp.tail(lmda_seq_tmp.size() - 1);
         --max_n_lambdas; // found solution for lmda_max already
     } else {

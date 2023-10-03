@@ -1,4 +1,5 @@
 from . import adelie_core as core
+from . import logger
 from .state import (
     pin_naive,
 )
@@ -68,8 +69,69 @@ def objective(
     )
 
 
+def lambda_max(
+    *,
+    X: np.ndarray,
+    y: np.ndarray,
+    groups: np.ndarray,
+    group_sizes: np.ndarray,
+    alpha: float,
+    penalty: np.ndarray,
+):
+    """Computes the largest :math:`\\lambda` in the regularization sequence.
+
+    The largest :math:`\\lambda` in the sequence is the smallest
+    :math:`\\lambda` such that the optimal coefficient vector :math:`\\beta \\equiv 0`.
+
+    TODO
+    """
+    grad = X.T @ y
+    abs_grad = np.array([
+        np.linalg.norm(grad[g:g+gs])
+        for g, gs in zip(groups, group_sizes)
+    ])
+    return core.grpnet.lambda_max(
+        abs_grad, alpha, penalty,
+    )
+
+
+def create_lambdas(
+    *,
+    X: np.ndarray,
+    y: np.ndarray,
+    groups: np.ndarray,
+    group_sizes: np.ndarray,
+    alpha: float,
+    penalty: np.ndarray,
+    n_lambdas: int =100,
+    min_ratio: float =1e-4,
+):
+    """Creates a log-spaced regularization sequence.
+
+    The generated sequence has length ``n_lambdas``.
+    It is decreasing and equally-spaced
+    in log-scale such that the ratio of the smallest to largest is given by ``min_ratio``.
+
+    TODO
+    """
+    lmda_max = lambda_max(
+        X=X, 
+        y=y, 
+        groups=groups, 
+        group_sizes=group_sizes, 
+        alpha=alpha, 
+        penalty=penalty,
+    )
+    return core.grpnet.create_lambdas(
+        n_lambdas,
+        min_ratio,
+        lmda_max,
+    )
+
+
 def solve_pin(
     state: pin_naive,
+    logger=logger.logger,
 ):
     """Solves the pinned group elastic net problem.
 
@@ -109,7 +171,7 @@ def solve_pin(
 
     # raise any errors
     if out["error"] != "":
-        raise RuntimeError(out["error"])
+        logger.warning(RuntimeError(out["error"]))
 
     # return a subsetted Python result object
     core_state = out["state"]

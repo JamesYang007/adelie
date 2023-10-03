@@ -4,20 +4,21 @@
 #include <adelie_core/matrix/matrix_base.hpp>
 #include <adelie_core/state/pin_naive.hpp>
 #include <adelie_core/grpnet/solve_pin_naive.hpp>
+#include <adelie_core/grpnet/solve_base.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
 using namespace pybind11::literals; // to bring in the `_a` literal
 
 double objective(
-    const Eigen::Ref<ad::util::rowvec_type<double>>& beta,
-    const Eigen::Ref<ad::util::rowmat_type<double>>& X,
-    const Eigen::Ref<ad::util::rowvec_type<double>>& y,
-    const Eigen::Ref<ad::util::rowvec_type<int>>& groups,
-    const Eigen::Ref<ad::util::rowvec_type<int>>& group_sizes,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& beta,
+    const Eigen::Ref<const ad::util::rowmat_type<double>>& X,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& y,
+    const Eigen::Ref<const ad::util::rowvec_type<int>>& groups,
+    const Eigen::Ref<const ad::util::rowvec_type<int>>& group_sizes,
     double lmda,
     double alpha,
-    const Eigen::Ref<ad::util::rowvec_type<double>>& penalty
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& penalty
 )
 {
     return ad::grpnet::objective(
@@ -59,12 +60,42 @@ py::dict solve_pin_naive(StateType state)
     return py::dict("state"_a=state, "error"_a=error);
 } 
 
+// =================================================================
+// Solve Method
+// =================================================================
+
+double lambda_max(
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& abs_grad,
+    double alpha,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& penalty
+)
+{
+    return ad::grpnet::lambda_max(abs_grad, alpha, penalty);
+}
+
+auto create_lambdas(
+    size_t n_lambdas,
+    double min_ratio,
+    double lmda_max
+)
+{
+    ad::util::rowvec_type<double> lmdas(n_lambdas);
+    ad::grpnet::create_lambdas(n_lambdas, min_ratio, lmda_max, lmdas);
+    return lmdas;
+}
+
 template <class T> 
 using pin_naive_t = ad::state::PinNaive<ad::matrix::MatrixBase<T>>;
 
 void register_grpnet(py::module_& m)
 {
     m.def("objective", &objective);
+
+    /* solve pinned method */
     m.def("solve_pin_naive_64", &solve_pin_naive<pin_naive_t<double>>);
     m.def("solve_pin_naive_32", &solve_pin_naive<pin_naive_t<float>>);
+
+    /* solve method */
+    m.def("lambda_max", &lambda_max);
+    m.def("create_lambdas", &create_lambdas);
 }

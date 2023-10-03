@@ -53,7 +53,7 @@ struct GroupElnetDiagnostic
  *                              strong_var[b:(b+p)] = diag(A_{kk})
  *                              where k := strong_set[i], b := strong_begins[i], p := group_sizes[k].
  * @param   lmdas       regularization parameter lambda sequence.
- * @param   max_cds     max number of coordinate descents.
+ * @param   max_iters     max number of coordinate descents.
  * @param   tol         convergence threshold.
  * @param   newton_tol  see update_coefficients argument tol.
  * @param   newton_max_iters     see update_coefficients argument max_iters.
@@ -137,7 +137,7 @@ struct GroupElnetParamPack
     map_cvec_index_t strong_begins;
     map_cvec_value_t strong_var;
     map_cvec_value_t lmdas;
-    size_t max_cds;
+    size_t max_iters;
     value_t tol;
     value_t rsq_slope_tol;
     value_t rsq_curv_tol;
@@ -223,7 +223,7 @@ struct GroupElnetParamPack
           strong_begins(strong_begins_.data(), strong_begins_.size()),
           strong_var(strong_var_.data(), strong_var_.size()),
           lmdas(lmdas_.data(), lmdas_.size()),
-          max_cds(max_cds_),
+          max_iters(max_cds_),
           tol(thr_),
           rsq_slope_tol(rsq_slope_tol),
           rsq_curv_tol(rsq_curv_tol),
@@ -671,7 +671,7 @@ void group_elnet_active(
     const auto& strong_beta = pack.strong_beta;
     const auto& is_active = pack.is_active;
     const auto tol = pack.tol;
-    const auto max_cds = pack.max_cds;
+    const auto max_iters = pack.max_iters;
     auto& strong_grad = pack.strong_grad;
     auto& n_cds = pack.n_cds;
     auto& diagnostic = pack.diagnostic;
@@ -716,7 +716,7 @@ void group_elnet_active(
                 update_coefficients_f
             );
             if (convg_measure < tol) break;
-            if (n_cds >= max_cds) throw util::max_cds_error(lmda_idx);
+            if (n_cds >= max_iters) throw util::max_cds_error(lmda_idx);
         }
     }
     
@@ -858,7 +858,7 @@ inline void fit(
     const auto& strong_beta = pack.strong_beta;
     const auto& lmdas = pack.lmdas;
     const auto tol = pack.tol;
-    const auto max_cds = pack.max_cds;
+    const auto max_iters = pack.max_iters;
     const auto rsq_slope_tol = pack.rsq_slope_tol;
     const auto rsq_curv_tol = pack.rsq_curv_tol;
     auto& active_set = *pack.active_set;
@@ -981,7 +981,7 @@ inline void fit(
             }
 
             if (convg_measure < tol) break;
-            if (n_cds >= max_cds) throw util::max_cds_error(l);
+            if (n_cds >= max_iters) throw util::max_cds_error(l);
 
             lasso_active_and_update(l);
         }
