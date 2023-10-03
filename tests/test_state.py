@@ -1,3 +1,7 @@
+from adelie.logger import logger
+import logging
+logger.setLevel(logging.DEBUG)
+
 import adelie.state as mod
 import adelie.matrix as matrix
 import numpy as np
@@ -34,9 +38,6 @@ def test_pin_naive():
         active_set=active_set,
     )
 
-    from adelie.logger import logger
-    import logging
-    logger.setLevel(logging.DEBUG)
     state.check(method="assert")
 
     assert id(X._core_mat) == id(state.X)

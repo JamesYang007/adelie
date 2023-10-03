@@ -6,8 +6,8 @@ namespace ad = adelie_core;
 using namespace pybind11::literals; // to bring in the `_a` literal
 
 py::dict ista_solver(
-    Eigen::Ref<ad::util::rowvec_type<double>> L,
-    Eigen::Ref<ad::util::rowvec_type<double>> v,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
     double l1,
     double l2,
     double tol,
@@ -22,8 +22,8 @@ py::dict ista_solver(
 }
 
 py::dict fista_solver(
-    Eigen::Ref<ad::util::rowvec_type<double>> L,
-    Eigen::Ref<ad::util::rowvec_type<double>> v,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
     double l1,
     double l2,
     double tol,
@@ -38,8 +38,8 @@ py::dict fista_solver(
 }
 
 py::dict fista_adares_solver(
-    Eigen::Ref<ad::util::rowvec_type<double>> L,
-    Eigen::Ref<ad::util::rowvec_type<double>> v,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
     double l1,
     double l2,
     double tol,
@@ -54,8 +54,8 @@ py::dict fista_adares_solver(
 }
 
 double root_lower_bound(
-    const Eigen::Ref<ad::util::rowvec_type<double>>& quad,
-    const Eigen::Ref<ad::util::rowvec_type<double>>& linear,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& quad,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& linear,
     double l1
 ) 
 {
@@ -63,8 +63,8 @@ double root_lower_bound(
 }
 
 double root_upper_bound(
-    const Eigen::Ref<ad::util::rowvec_type<double>>& quad,
-    const Eigen::Ref<ad::util::rowvec_type<double>>& linear,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& quad,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& linear,
     double zero_tol=1e-10
 )
 {
@@ -74,8 +74,8 @@ double root_upper_bound(
 
 double root_function(
     double h,
-    const Eigen::Ref<ad::util::rowvec_type<double>>& D,
-    const Eigen::Ref<ad::util::rowvec_type<double>>& v,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& D,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
     double l1
 )
 {
@@ -83,8 +83,8 @@ double root_function(
 }
 
 py::dict newton_solver(
-    Eigen::Ref<ad::util::rowvec_type<double>> L,
-    Eigen::Ref<ad::util::rowvec_type<double>> v,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
     double l1,
     double l2,
     double tol,
@@ -102,8 +102,8 @@ py::dict newton_solver(
 }
 
 py::dict newton_brent_solver(
-    Eigen::Ref<ad::util::rowvec_type<double>> L,
-    Eigen::Ref<ad::util::rowvec_type<double>> v,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
     double l1,
     double l2,
     double tol,
@@ -121,8 +121,8 @@ py::dict newton_brent_solver(
 }
 
 py::dict newton_abs_solver(
-    Eigen::Ref<ad::util::rowvec_type<double>> L,
-    Eigen::Ref<ad::util::rowvec_type<double>> v,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
     double l1,
     double l2,
     double tol,
@@ -140,8 +140,8 @@ py::dict newton_abs_solver(
 }
 
 py::dict newton_abs_debug_solver(
-    Eigen::Ref<ad::util::rowvec_type<double>> L,
-    Eigen::Ref<ad::util::rowvec_type<double>> v,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
     double l1,
     double l2,
     double tol,
@@ -173,8 +173,8 @@ py::dict newton_abs_debug_solver(
 }
 
 py::dict brent_solver(
-    Eigen::Ref<ad::util::rowvec_type<double>> L,
-    Eigen::Ref<ad::util::rowvec_type<double>> v,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
     double l1,
     double l2,
     double tol,

@@ -31,10 +31,14 @@ class dense(base):
     ----------
     mat : np.ndarray
         The matrix to view.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``0``.
     """
     def __init__(
         self,
         mat: np.ndarray,
+        n_threads: int =0,
     ):
         self.mat = mat
         dispatcher = {
@@ -54,4 +58,4 @@ class dense(base):
             if self.mat.flags.c_contiguous else
             "F"
         )
-        super().__init__(dispatcher[dtype][order](self.mat))
+        super().__init__(dispatcher[dtype][order](self.mat, n_threads))

@@ -65,4 +65,6 @@ adelie.grpnet
 
 
     objective
+    lambda_max
+    create_lambdas
     solve_pin

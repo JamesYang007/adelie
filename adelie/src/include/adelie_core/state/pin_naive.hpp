@@ -5,74 +5,7 @@ namespace adelie_core {
 namespace state {
 
 /**
- * Parameter pack for group lasso procedure.
- * 
- * @param   X           data matrix (n, p) with diagonal covariance blocks X_i^T X_i. 
- * @param   groups      vector of indices into columns of X that define
- *                      the beginning index of the groups.
- * @param   group_sizes vector of sizes of each group.
- *                      group_sizes[i] = size of group i.
- * @param   alpha       elastic net proportion. 
- *                      It is undefined behavior if alpha is not in [0,1].
- * @param   penalty     penalty factor for each group.
- * @param   strong_set  strong set as a dense vector of indices in [0, G),
- *                      where G is the total number of groups.
- *                      strong_set[i] = ith strong group.
- * @param   strong_g1   indices into strong_set that correspond to groups of size 1.
- * @param   strong_g2   indices into strong_set that correspond to groups of size > 1.
- * @param   strong_begins   vector of indices that define the beginning index to values
- *                          corresponding to the strong groups.
- *                          MUST have strong_begins.size() == strong_set.size().
- * @param   strong_var       dense vector representing diagonal of A restricted to strong_set.
- *                              strong_var[b:(b+p)] = diag(A_{kk})
- *                              where k := strong_set[i], b := strong_begins[i], p := group_sizes[k].
- * @param   lmdas       regularization parameter lambda sequence.
- * @param   max_cds     max number of coordinate descents.
- * @param   tol         convergence threshold.
- * @param   newton_tol  see update_coefficients argument tol.
- * @param   newton_max_iters     see update_coefficients argument max_iters.
- * @param   rsq         unnormalized R^2 estimate.
- *                      It is only well-defined if it is (approximately) 
- *                      the R^2 that corresponds to strong_beta.
- * @param   resid       residual vector y - X * beta where beta is all 0 on non-strong groups 
- *                      and the rest correspond to strong_beta.
- * @param   strong_beta dense vector of coefficients of size strong_var.size().
- *                      strong_beta[b:(b+p)] = coefficient for group i,
- *                      where i := strong_set[j], b := strong_begins[j], and p := group_sizes[i].
- *                      The updated coefficients will be stored here.
- * @param   strong_grad dense vector gradients. It is simply a computation buffer.
- *                      Only needs to be at least the size of strong_beta.
- * @param   active_set  active set as a dense vector of indices in [0, strong_set.size()).
- *                      strong_set[active_set[i]] = ith active group.
- *                      This set must at least contain ALL indices into strong_set 
- *                      where the corresponding strong_beta is non-zero, that is,
- *                      if strong_beta[b:(b+p)] != 0, then i is in active_set,
- *                      where i := strong_set[j], b := strong_begins[j], and p := group_sizes[i].
- * @param   active_g1   indices into active_set that correspond to groups of size 1.
- * @param   active_g2   indices into active_set that correspond to groups of size > 1.
- * @param   active_begins   vector of indices that define the beginning index to values
- *                          corresponding to the active groups.
- *                          MUST have active_begins.size() == active_set.size().
- * @param   active_order    order of active_set that results in sorted (ascending) 
- *                          values of strong_set.
- *                          strong_set[active_set[active_order[i]]] < 
- *                              strong_set[active_set[active_order[j]]] if i < j.
- * @param   is_active   dense vector of bool of size strong_set.size(). 
- *                      is_active[i] = true if group strong_set[i] is active.
- *                      active_set should contain i.
- * @param   betas       vector of solution coefficients for each lambda in lmdas.
- *                      betas[j](i) = ith coefficient for jth lambda.
- *                      fit() will emplace_back only the solved coefficients.
- * @param   rsqs        vector of (unnormalized) R^2 values for each lambda in lmdas.
- *                      rsqs[j] = R^2 for jth lambda.
- *                      fit() will emplace_back only the solved rsq.
- * @param   resids      vector of residuals at the solution coefficient for each lambda in lmdas.
- *                      resids[j] = residual using betas[j].
- *                      fit() will emplace_back only the solved resid.
- * @param   n_cds       number of coordinate descents.
- * @param   rsq_slope_tol   0th order threshold for early exit.
- * @param   rsq_curv_tol   1st order threshold for early exit.
- * @param   diagnostic      instance of GroupElnetDiagnostic.
+ * State class for solve_pin_naive method.
  */
 template <class MatrixType, 
           class ValueType=typename std::decay_t<MatrixType>::value_t,
@@ -118,7 +51,7 @@ struct PinNaive
     const map_cvec_value_t lmdas;
 
     /* Configurations */
-    const size_t max_cds;
+    const size_t max_iters;
     const value_t tol;
     const value_t rsq_slope_tol;
     const value_t rsq_curv_tol;
@@ -157,7 +90,7 @@ struct PinNaive
         const Eigen::Ref<const vec_index_t>& strong_begins, 
         const Eigen::Ref<const vec_value_t>& strong_var,
         const Eigen::Ref<const vec_value_t>& lmdas, 
-        size_t max_cds,
+        size_t max_iters,
         value_t tol,
         value_t rsq_slope_tol,
         value_t rsq_curv_tol,
@@ -188,7 +121,7 @@ struct PinNaive
           strong_begins(strong_begins.data(), strong_begins.size()),
           strong_var(strong_var.data(), strong_var.size()),
           lmdas(lmdas.data(), lmdas.size()),
-          max_cds(max_cds),
+          max_iters(max_iters),
           tol(tol),
           rsq_slope_tol(rsq_slope_tol),
           rsq_curv_tol(rsq_curv_tol),
