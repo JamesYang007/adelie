@@ -370,40 +370,65 @@ document.write(`
 <h1>adelie.state.pin_naive<a class="headerlink" href="#adelie-state-pin-naive" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="adelie.state.pin_naive">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.state.</span></span><span class="sig-name descname"><span class="pre">pin_naive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="adelie.matrix.base.html#adelie.matrix.base" title="adelie.matrix.base"><span class="pre">base</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Base64</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Base32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_slope_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_curv_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.pin_naive" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.state.</span></span><span class="sig-name descname"><span class="pre">pin_naive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="adelie.matrix.base.html#adelie.matrix.base" title="adelie.matrix.base"><span class="pre">base</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Base64</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Base32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_slope_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_curv_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.pin_naive" title="Link to this definition">#</a></dt>
 <dd><p>State class for pin, naive method.</p>
-<p>For descriptions on the parameters,
-see <code class="docutils literal notranslate"><span class="pre">pin_base</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>X</strong><span class="classifier">array-like</span></dt><dd></dd>
-<dt><strong>groups</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>group_sizes</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>alpha</strong><span class="classifier">float</span></dt><dd></dd>
-<dt><strong>penalty</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>strong_set</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>strong_g1</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>strong_g2</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>strong_begins</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>strong_var</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>lmdas</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>max_cds</strong><span class="classifier">int, optional</span></dt><dd></dd>
-<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd></dd>
-<dt><strong>rsq_slope_tol</strong><span class="classifier">float, optional</span></dt><dd></dd>
-<dt><strong>rsq_curv_tol</strong><span class="classifier">float, optional</span></dt><dd></dd>
-<dt><strong>newton_tol</strong><span class="classifier">float, optional</span></dt><dd></dd>
-<dt><strong>newton_max_iters</strong><span class="classifier">int, optional</span></dt><dd></dd>
-<dt><strong>rsq</strong><span class="classifier">float</span></dt><dd></dd>
-<dt><strong>resid</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>strong_beta</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>strong_grad</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>active_set</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>active_g1</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>active_g2</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>active_begins</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>active_order</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>is_active</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
+<dt><strong>X</strong><span class="classifier">Union[adelie.matrix.Base64, adelie.matrix.Base32]</span></dt><dd><p>Feature matrix where each column block <span class="math notranslate nohighlight">\(X_k\)</span> defined by the groups
+is such that <span class="math notranslate nohighlight">\(X_k^\top X_k\)</span> is diagonal.
+It is typically one of the matrices defined in <code class="docutils literal notranslate"><span class="pre">adelie.matrix</span></code> sub-module.</p>
+</dd>
+<dt><strong>groups</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>List of starting indices to each group where <cite>G</cite> is the number of groups.
+<code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group.</p>
+</dd>
+<dt><strong>group_sizes</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>List of group sizes corresponding to each element in <code class="docutils literal notranslate"><span class="pre">groups</span></code>.
+<code class="docutils literal notranslate"><span class="pre">group_sizes[i]</span></code> is the group size of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group.</p>
+</dd>
+<dt><strong>alpha</strong><span class="classifier">float</span></dt><dd><p>Elastic net parameter.
+It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</span>.</p>
+</dd>
+<dt><strong>penalty</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.
+It must be a non-negative vector.</p>
+</dd>
+<dt><strong>strong_set</strong><span class="classifier">(s,) np.ndarray</span></dt><dd><p>List of indices into <code class="docutils literal notranslate"><span class="pre">groups</span></code> that correspond to the strong groups.
+<code class="docutils literal notranslate"><span class="pre">strong_set[i]</span></code> is <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group.</p>
+</dd>
+<dt><strong>lmdas</strong><span class="classifier">(l,) np.ndarray</span></dt><dd><p>Regularization sequence to fit on.</p>
+</dd>
+<dt><strong>rsq</strong><span class="classifier">float</span></dt><dd><p><span class="math notranslate nohighlight">\(R^2\)</span> value at <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p>
+</dd>
+<dt><strong>resid</strong><span class="classifier">np.ndarray</span></dt><dd><p>Residual <span class="math notranslate nohighlight">\(y-X\beta\)</span> at <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p>
+</dd>
+<dt><strong>strong_beta</strong><span class="classifier">(ws,) np.ndarray</span></dt><dd><p>Coefficient vector on the strong set.
+<code class="docutils literal notranslate"><span class="pre">strong_beta[b:b+p]</span></code> is the coefficient for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group 
+where
+<code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">strong_set[i]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">strong_begins[i]</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">group_sizes[k]</span></code>.</p>
+</dd>
+<dt><strong>active_set</strong><span class="classifier">(a,) np.ndarray</span></dt><dd><p>List of active groups taking on values in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">s)</span></code>.
+<code class="docutils literal notranslate"><span class="pre">strong_set[active_set[i]]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th active group.
+An active group is one with non-zero coefficient block.</p>
+</dd>
+<dt><strong>max_cds</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum number of coordinate descents.
+Default is <code class="docutils literal notranslate"><span class="pre">int(1e5)</span></code>.</p>
+</dd>
+<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Convergence tolerance.
+Default is <code class="docutils literal notranslate"><span class="pre">1e-12</span></code>.</p>
+</dd>
+<dt><strong>rsq_slope_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Early stopping rule check on slope of <span class="math notranslate nohighlight">\(R^2\)</span>.
+Default is <code class="docutils literal notranslate"><span class="pre">1e-2</span></code>.</p>
+</dd>
+<dt><strong>rsq_curv_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Early stopping rule check on curvature of <span class="math notranslate nohighlight">\(R^2\)</span>.
+Default is <code class="docutils literal notranslate"><span class="pre">1e-2</span></code>.</p>
+</dd>
+<dt><strong>newton_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Convergence tolerance for the BCD update.
+Default is <code class="docutils literal notranslate"><span class="pre">1e-12</span></code>.</p>
+</dd>
+<dt><strong>newton_max_iters</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum number of iterations for the BCD update.
+Default is <code class="docutils literal notranslate"><span class="pre">1000</span></code>.</p>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -416,35 +441,16 @@ see <code class="docutils literal notranslate"><span class="pre">pin_base</span>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code>([method, logger])</p></td>
-<td><p>Checks consistency of the members.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code>(core_state)</p></td>
-<td><p>Propagate core state members to current object's members.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">internal</span></code>()</p></td>
-<td><p>Returns the core state object.</p></td>
-</tr>
-</tbody>
-</table>
-<dl class="py method">
-<dt class="sig sig-object py" id="adelie.state.pin_naive.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="adelie.matrix.base.html#adelie.matrix.base" title="adelie.matrix.base"><span class="pre">base</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Base64</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Base32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_slope_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_curv_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.pin_naive.__init__" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<p class="rubric">Methods</p>
-<table class="autosummary longtable table autosummary">
-<tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.__init__" title="adelie.state.pin_naive.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*, X, groups, group_sizes, alpha, ...)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code>([method, logger])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.check" title="adelie.state.pin_naive.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>([method, logger])</p></td>
 <td><p>Checks consistency of the members.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code>(core_state)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.initialize" title="adelie.state.pin_naive.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code></a>(core_state)</p></td>
 <td><p>Propagate core state members to current object's members.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">internal</span></code>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.internal" title="adelie.state.pin_naive.internal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">internal</span></code></a>()</p></td>
 <td><p>Returns the core state object.</p></td>
 </tr>
 </tbody>
@@ -452,107 +458,393 @@ see <code class="docutils literal notranslate"><span class="pre">pin_base</span>
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resid</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.resid" title="adelie.state.pin_naive.resid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resid</span></code></a></p></td>
 <td><p>Residual <span class="math notranslate nohighlight">\(y-X\beta\)</span> at <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resids</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.resids" title="adelie.state.pin_naive.resids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resids</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">resids[i]</span></code> corresponds to the residual at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.X" title="adelie.state.pin_naive.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a></p></td>
+<td><p>Feature matrix where each column block <span class="math notranslate nohighlight">\(X_k\)</span> defined by the groups is such that <span class="math notranslate nohighlight">\(X_k^\top X_k\)</span> is diagonal.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">groups</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.groups" title="adelie.state.pin_naive.groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">groups</span></code></a></p></td>
+<td><p>List of starting indices to each group where <cite>G</cite> is the number of groups.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_sizes</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.group_sizes" title="adelie.state.pin_naive.group_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_sizes</span></code></a></p></td>
+<td><p>List of group sizes corresponding to each element in <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">alpha</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.alpha" title="adelie.state.pin_naive.alpha"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alpha</span></code></a></p></td>
+<td><p>Elastic net parameter.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">penalty</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.penalty" title="adelie.state.pin_naive.penalty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">penalty</span></code></a></p></td>
+<td><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_set</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.strong_set" title="adelie.state.pin_naive.strong_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_set</span></code></a></p></td>
+<td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">groups</span></code> that correspond to the strong groups.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_g1</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.strong_g1" title="adelie.state.pin_naive.strong_g1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_g1</span></code></a></p></td>
+<td><p>Subset of <code class="docutils literal notranslate"><span class="pre">strong_set</span></code> that correspond to groups of size <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_g2</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.strong_g2" title="adelie.state.pin_naive.strong_g2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_g2</span></code></a></p></td>
+<td><p>Subset of <code class="docutils literal notranslate"><span class="pre">strong_set</span></code> that correspond to groups more than size <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_begins</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.strong_begins" title="adelie.state.pin_naive.strong_begins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_begins</span></code></a></p></td>
+<td><p>List of indices that index a corresponding list of values for each strong group.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_var</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.strong_var" title="adelie.state.pin_naive.strong_var"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_var</span></code></a></p></td>
+<td><p>List of the diagonal of <span class="math notranslate nohighlight">\(X_k^\top X_k\)</span> along the strong groups <span class="math notranslate nohighlight">\(k\)</span>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.lmdas" title="adelie.state.pin_naive.lmdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></a></p></td>
+<td><p>Regularization sequence to fit on.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_cds</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.max_cds" title="adelie.state.pin_naive.max_cds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_cds</span></code></a></p></td>
+<td><p>Maximum number of coordinate descents.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tol</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.tol" title="adelie.state.pin_naive.tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tol</span></code></a></p></td>
+<td><p>Convergence tolerance.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq_slope_tol</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.rsq_slope_tol" title="adelie.state.pin_naive.rsq_slope_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq_slope_tol</span></code></a></p></td>
+<td><p>Early stopping rule check on slope of <span class="math notranslate nohighlight">\(R^2\)</span>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq_curv_tol</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.rsq_curv_tol" title="adelie.state.pin_naive.rsq_curv_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq_curv_tol</span></code></a></p></td>
+<td><p>Early stopping rule check on curvature of <span class="math notranslate nohighlight">\(R^2\)</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_tol</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.newton_tol" title="adelie.state.pin_naive.newton_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_tol</span></code></a></p></td>
+<td><p>Convergence tolerance for the BCD update.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_max_iters</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.newton_max_iters" title="adelie.state.pin_naive.newton_max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_max_iters</span></code></a></p></td>
+<td><p>Maximum number of iterations for the BCD update.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.rsq" title="adelie.state.pin_naive.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(R^2\)</span> value at <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_beta</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.strong_beta" title="adelie.state.pin_naive.strong_beta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_beta</span></code></a></p></td>
+<td><p>Coefficient vector on the strong set.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_grad</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.strong_grad" title="adelie.state.pin_naive.strong_grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_grad</span></code></a></p></td>
+<td><p>Gradient <span class="math notranslate nohighlight">\(X_k^\top (y-X\beta)\)</span> on the strong groups <span class="math notranslate nohighlight">\(k\)</span> where <span class="math notranslate nohighlight">\(beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_set</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.active_set" title="adelie.state.pin_naive.active_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_set</span></code></a></p></td>
+<td><p>List of active groups taking on values in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">s)</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_g1</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.active_g1" title="adelie.state.pin_naive.active_g1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_g1</span></code></a></p></td>
+<td><p>Subset of <code class="docutils literal notranslate"><span class="pre">active_set</span></code> that correspond to groups of size <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_g2</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.active_g2" title="adelie.state.pin_naive.active_g2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_g2</span></code></a></p></td>
+<td><p>Subset of <code class="docutils literal notranslate"><span class="pre">active_set</span></code> that correspond to groups of size more than <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_begins</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.active_begins" title="adelie.state.pin_naive.active_begins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_begins</span></code></a></p></td>
+<td><p>List of indices that index a corresponding list of values for each active group.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_order</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.active_order" title="adelie.state.pin_naive.active_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_order</span></code></a></p></td>
+<td><p>Ordering such that <code class="docutils literal notranslate"><span class="pre">groups</span></code> is sorted in ascending order for the active groups.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_active</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.is_active" title="adelie.state.pin_naive.is_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_active</span></code></a></p></td>
+<td><p>Boolean vector that indicates whether each strong group in <code class="docutils literal notranslate"><span class="pre">groups</span></code> is active or not.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">betas</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.betas" title="adelie.state.pin_naive.betas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">betas</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> corresponds to the solution corresponding to <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsqs</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.rsqs" title="adelie.state.pin_naive.rsqs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsqs</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rsqs[i]</span></code> corresponds to the <span class="math notranslate nohighlight">\(R^2\)</span> at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_cds</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.n_cds" title="adelie.state.pin_naive.n_cds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_cds</span></code></a></p></td>
+<td><p>Number of coordinate descents taken.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">time_strong_cd</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive.time_strong_cd" title="adelie.state.pin_naive.time_strong_cd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">time_strong_cd</span></code></a></p></td>
+<td><p>Benchmark time for performing coordinate-descent on the strong set at every iteration.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">time_active_cd</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive.time_active_cd" title="adelie.state.pin_naive.time_active_cd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">time_active_cd</span></code></a></p></td>
+<td><p>Benchmark time for performing coordinate-descent on the active set at every iteration.</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="adelie.matrix.base.html#adelie.matrix.base" title="adelie.matrix.base"><span class="pre">base</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Base64</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Base32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_slope_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_curv_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.pin_naive.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.check">
+<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;RootLogger</span> <span class="pre">root</span> <span class="pre">(WARNING)&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.pin_naive.check" title="Link to this definition">#</a></dt>
+<dd><p>Checks consistency of the members.</p>
+<p>All information is logged using <code class="docutils literal notranslate"><span class="pre">logging</span></code>.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>method</strong><span class="classifier">str, optional</span></dt><dd><p>Must be one of the following options:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">None</span></code>: every check is logged only. </dt><dd><p>The function does not raise or assert any failed checks.</p>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;assert&quot;</span></code>: every check is logged and asserted.</p></li>
+</ul>
+</div></blockquote>
+<p>Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+<dt><strong>logger</strong><span class="classifier">optional</span></dt><dd><p>Logger object that behaves like a logger object in <code class="docutils literal notranslate"><span class="pre">logging</span></code>.
+Default is <code class="docutils literal notranslate"><span class="pre">logging.getLogger()</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">core_state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.pin_naive.initialize" title="Link to this definition">#</a></dt>
+<dd><p>Propagate core state members to current object’s members.</p>
+<p>Most values view the contents of the members of <code class="docutils literal notranslate"><span class="pre">core_state</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>core_state</strong></dt><dd><p>The core state object to reflect.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.internal">
+<span class="sig-name descname"><span class="pre">internal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.pin_naive.internal" title="Link to this definition">#</a></dt>
+<dd><p>Returns the core state object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.resid">
+<span class="sig-name descname"><span class="pre">resid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.resid" title="Link to this definition">#</a></dt>
+<dd><p>Residual <span class="math notranslate nohighlight">\(y-X\beta\)</span> at <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.resids">
+<span class="sig-name descname"><span class="pre">resids</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.resids" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">resids[i]</span></code> corresponds to the residual at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.X">
+<span class="sig-name descname"><span class="pre">X</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Base64</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Base32</span></em><a class="headerlink" href="#adelie.state.pin_naive.X" title="Link to this definition">#</a></dt>
+<dd><p>Feature matrix where each column block <span class="math notranslate nohighlight">\(X_k\)</span> defined by the groups
+is such that <span class="math notranslate nohighlight">\(X_k^\top X_k\)</span> is diagonal.
+It is typically one of the matrices defined in <code class="docutils literal notranslate"><span class="pre">adelie.matrix</span></code> sub-module.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.groups">
+<span class="sig-name descname"><span class="pre">groups</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.groups" title="Link to this definition">#</a></dt>
+<dd><p>List of starting indices to each group where <cite>G</cite> is the number of groups.
+<code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.group_sizes">
+<span class="sig-name descname"><span class="pre">group_sizes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.group_sizes" title="Link to this definition">#</a></dt>
+<dd><p>List of group sizes corresponding to each element in <code class="docutils literal notranslate"><span class="pre">groups</span></code>.
+<code class="docutils literal notranslate"><span class="pre">group_sizes[i]</span></code> is the group size of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.alpha">
+<span class="sig-name descname"><span class="pre">alpha</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#adelie.state.pin_naive.alpha" title="Link to this definition">#</a></dt>
+<dd><p>Elastic net parameter.
+It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</span>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.penalty">
+<span class="sig-name descname"><span class="pre">penalty</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.penalty" title="Link to this definition">#</a></dt>
+<dd><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.
+It must be a non-negative vector.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.strong_set">
+<span class="sig-name descname"><span class="pre">strong_set</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.strong_set" title="Link to this definition">#</a></dt>
+<dd><p>List of indices into <code class="docutils literal notranslate"><span class="pre">groups</span></code> that correspond to the strong groups.
+<code class="docutils literal notranslate"><span class="pre">strong_set[i]</span></code> is <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.strong_g1">
+<span class="sig-name descname"><span class="pre">strong_g1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.strong_g1" title="Link to this definition">#</a></dt>
+<dd><p>Subset of <code class="docutils literal notranslate"><span class="pre">strong_set</span></code> that correspond to groups of size <code class="docutils literal notranslate"><span class="pre">1</span></code>.
+<code class="docutils literal notranslate"><span class="pre">strong_g1[i]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group of size <code class="docutils literal notranslate"><span class="pre">1</span></code>
+such that <code class="docutils literal notranslate"><span class="pre">group_sizes[strong_g1[i]]</span></code> is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.strong_g2">
+<span class="sig-name descname"><span class="pre">strong_g2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.strong_g2" title="Link to this definition">#</a></dt>
+<dd><p>Subset of <code class="docutils literal notranslate"><span class="pre">strong_set</span></code> that correspond to groups more than size <code class="docutils literal notranslate"><span class="pre">1</span></code>.
+<code class="docutils literal notranslate"><span class="pre">strong_g2[i]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group of size more than <code class="docutils literal notranslate"><span class="pre">1</span></code>
+such that <code class="docutils literal notranslate"><span class="pre">group_sizes[strong_g2[i]]</span></code> is more than <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.strong_begins">
+<span class="sig-name descname"><span class="pre">strong_begins</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.strong_begins" title="Link to this definition">#</a></dt>
+<dd><p>List of indices that index a corresponding list of values for each strong group.
+<code class="docutils literal notranslate"><span class="pre">strong_begins[i]</span></code> is the starting index corresponding to the <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group.
+From this index, reading <code class="docutils literal notranslate"><span class="pre">group_sizes[strong_set[i]]</span></code> number of elements
+will grab values corresponding to the full <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group block.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.strong_var">
+<span class="sig-name descname"><span class="pre">strong_var</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.strong_var" title="Link to this definition">#</a></dt>
+<dd><p>List of the diagonal of <span class="math notranslate nohighlight">\(X_k^\top X_k\)</span> along the strong groups <span class="math notranslate nohighlight">\(k\)</span>.
+<code class="docutils literal notranslate"><span class="pre">strong_var[b:b+p]</span></code> is the diagonal of <span class="math notranslate nohighlight">\(X_k^\top X_k\)</span> for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group where
+<code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">strong_set[i]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">strong_begins[i]</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">group_sizes[k]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.lmdas">
+<span class="sig-name descname"><span class="pre">lmdas</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.lmdas" title="Link to this definition">#</a></dt>
+<dd><p>Regularization sequence to fit on.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.max_cds">
+<span class="sig-name descname"><span class="pre">max_cds</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#adelie.state.pin_naive.max_cds" title="Link to this definition">#</a></dt>
+<dd><p>Maximum number of coordinate descents.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.tol">
+<span class="sig-name descname"><span class="pre">tol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#adelie.state.pin_naive.tol" title="Link to this definition">#</a></dt>
+<dd><p>Convergence tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.rsq_slope_tol">
+<span class="sig-name descname"><span class="pre">rsq_slope_tol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#adelie.state.pin_naive.rsq_slope_tol" title="Link to this definition">#</a></dt>
+<dd><p>Early stopping rule check on slope of <span class="math notranslate nohighlight">\(R^2\)</span>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.rsq_curv_tol">
+<span class="sig-name descname"><span class="pre">rsq_curv_tol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#adelie.state.pin_naive.rsq_curv_tol" title="Link to this definition">#</a></dt>
+<dd><p>Early stopping rule check on curvature of <span class="math notranslate nohighlight">\(R^2\)</span>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.newton_tol">
+<span class="sig-name descname"><span class="pre">newton_tol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#adelie.state.pin_naive.newton_tol" title="Link to this definition">#</a></dt>
+<dd><p>Convergence tolerance for the BCD update.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.newton_max_iters">
+<span class="sig-name descname"><span class="pre">newton_max_iters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#adelie.state.pin_naive.newton_max_iters" title="Link to this definition">#</a></dt>
+<dd><p>Maximum number of iterations for the BCD update.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.rsq">
+<span class="sig-name descname"><span class="pre">rsq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#adelie.state.pin_naive.rsq" title="Link to this definition">#</a></dt>
+<dd><p><span class="math notranslate nohighlight">\(R^2\)</span> value at <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.strong_beta">
+<span class="sig-name descname"><span class="pre">strong_beta</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.strong_beta" title="Link to this definition">#</a></dt>
+<dd><p>Coefficient vector on the strong set.
+<code class="docutils literal notranslate"><span class="pre">strong_beta[b:b+p]</span></code> is the coefficient for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group 
+where
+<code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">strong_set[i]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">strong_begins[i]</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">group_sizes[k]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.strong_grad">
+<span class="sig-name descname"><span class="pre">strong_grad</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.strong_grad" title="Link to this definition">#</a></dt>
+<dd><p>Gradient <span class="math notranslate nohighlight">\(X_k^\top (y-X\beta)\)</span> on the strong groups <span class="math notranslate nohighlight">\(k\)</span> where <span class="math notranslate nohighlight">\(beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.
+<code class="docutils literal notranslate"><span class="pre">strong_grad[b:b+p]</span></code> is the gradient for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group
+where 
+<code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">strong_set[i]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">strong_begins[i]</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">group_sizes[k]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.active_set">
+<span class="sig-name descname"><span class="pre">active_set</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.active_set" title="Link to this definition">#</a></dt>
+<dd><p>List of active groups taking on values in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">s)</span></code>.
+<code class="docutils literal notranslate"><span class="pre">strong_set[active_set[i]]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th active group.
+An active group is one with non-zero coefficient block.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.active_g1">
+<span class="sig-name descname"><span class="pre">active_g1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.active_g1" title="Link to this definition">#</a></dt>
+<dd><p>Subset of <code class="docutils literal notranslate"><span class="pre">active_set</span></code> that correspond to groups of size <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.active_g2">
+<span class="sig-name descname"><span class="pre">active_g2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.active_g2" title="Link to this definition">#</a></dt>
+<dd><p>Subset of <code class="docutils literal notranslate"><span class="pre">active_set</span></code> that correspond to groups of size more than <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.active_begins">
+<span class="sig-name descname"><span class="pre">active_begins</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.active_begins" title="Link to this definition">#</a></dt>
+<dd><p>List of indices that index a corresponding list of values for each active group.
+<code class="docutils literal notranslate"><span class="pre">active_begins[i]</span></code> is the starting index corresponding to the <code class="docutils literal notranslate"><span class="pre">i</span></code> th active group.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.active_order">
+<span class="sig-name descname"><span class="pre">active_order</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.active_order" title="Link to this definition">#</a></dt>
+<dd><p>Ordering such that <code class="docutils literal notranslate"><span class="pre">groups</span></code> is sorted in ascending order for the active groups.
+<code class="docutils literal notranslate"><span class="pre">groups[strong_set[active_order[i]]]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th active group in ascending order.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.is_active">
+<span class="sig-name descname"><span class="pre">is_active</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.is_active" title="Link to this definition">#</a></dt>
+<dd><p>Boolean vector that indicates whether each strong group in <code class="docutils literal notranslate"><span class="pre">groups</span></code> is active or not.
+<code class="docutils literal notranslate"><span class="pre">is_active[i]</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> if and only if <code class="docutils literal notranslate"><span class="pre">strong_set[i]</span></code> is active.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.betas">
+<span class="sig-name descname"><span class="pre">betas</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">csr_matrix</span></em><a class="headerlink" href="#adelie.state.pin_naive.betas" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> corresponds to the solution corresponding to <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.rsqs">
+<span class="sig-name descname"><span class="pre">rsqs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.rsqs" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">rsqs[i]</span></code> corresponds to the <span class="math notranslate nohighlight">\(R^2\)</span> at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.n_cds">
+<span class="sig-name descname"><span class="pre">n_cds</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#adelie.state.pin_naive.n_cds" title="Link to this definition">#</a></dt>
+<dd><p>Number of coordinate descents taken.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.time_strong_cd">
+<span class="sig-name descname"><span class="pre">time_strong_cd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.time_strong_cd" title="Link to this definition">#</a></dt>
+<dd><p>Benchmark time for performing coordinate-descent on the strong set at every iteration.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive.time_active_cd">
+<span class="sig-name descname"><span class="pre">time_active_cd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.state.pin_naive.time_active_cd" title="Link to this definition">#</a></dt>
+<dd><p>Benchmark time for performing coordinate-descent on the active set at every iteration.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -602,6 +894,42 @@ see <code class="docutils literal notranslate"><span class="pre">pin_base</span>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive"><code class="docutils literal notranslate"><span class="pre">pin_naive</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.__init__"><code class="docutils literal notranslate"><span class="pre">pin_naive.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.check"><code class="docutils literal notranslate"><span class="pre">pin_naive.check()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.initialize"><code class="docutils literal notranslate"><span class="pre">pin_naive.initialize()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.internal"><code class="docutils literal notranslate"><span class="pre">pin_naive.internal()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.resid"><code class="docutils literal notranslate"><span class="pre">pin_naive.resid</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.resids"><code class="docutils literal notranslate"><span class="pre">pin_naive.resids</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.X"><code class="docutils literal notranslate"><span class="pre">pin_naive.X</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.groups"><code class="docutils literal notranslate"><span class="pre">pin_naive.groups</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.group_sizes"><code class="docutils literal notranslate"><span class="pre">pin_naive.group_sizes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.alpha"><code class="docutils literal notranslate"><span class="pre">pin_naive.alpha</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.penalty"><code class="docutils literal notranslate"><span class="pre">pin_naive.penalty</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.strong_set"><code class="docutils literal notranslate"><span class="pre">pin_naive.strong_set</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.strong_g1"><code class="docutils literal notranslate"><span class="pre">pin_naive.strong_g1</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.strong_g2"><code class="docutils literal notranslate"><span class="pre">pin_naive.strong_g2</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.strong_begins"><code class="docutils literal notranslate"><span class="pre">pin_naive.strong_begins</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.strong_var"><code class="docutils literal notranslate"><span class="pre">pin_naive.strong_var</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.lmdas"><code class="docutils literal notranslate"><span class="pre">pin_naive.lmdas</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.max_cds"><code class="docutils literal notranslate"><span class="pre">pin_naive.max_cds</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.tol"><code class="docutils literal notranslate"><span class="pre">pin_naive.tol</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.rsq_slope_tol"><code class="docutils literal notranslate"><span class="pre">pin_naive.rsq_slope_tol</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.rsq_curv_tol"><code class="docutils literal notranslate"><span class="pre">pin_naive.rsq_curv_tol</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.newton_tol"><code class="docutils literal notranslate"><span class="pre">pin_naive.newton_tol</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.newton_max_iters"><code class="docutils literal notranslate"><span class="pre">pin_naive.newton_max_iters</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.rsq"><code class="docutils literal notranslate"><span class="pre">pin_naive.rsq</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.strong_beta"><code class="docutils literal notranslate"><span class="pre">pin_naive.strong_beta</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.strong_grad"><code class="docutils literal notranslate"><span class="pre">pin_naive.strong_grad</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.active_set"><code class="docutils literal notranslate"><span class="pre">pin_naive.active_set</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.active_g1"><code class="docutils literal notranslate"><span class="pre">pin_naive.active_g1</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.active_g2"><code class="docutils literal notranslate"><span class="pre">pin_naive.active_g2</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.active_begins"><code class="docutils literal notranslate"><span class="pre">pin_naive.active_begins</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.active_order"><code class="docutils literal notranslate"><span class="pre">pin_naive.active_order</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.is_active"><code class="docutils literal notranslate"><span class="pre">pin_naive.is_active</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.betas"><code class="docutils literal notranslate"><span class="pre">pin_naive.betas</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.rsqs"><code class="docutils literal notranslate"><span class="pre">pin_naive.rsqs</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.n_cds"><code class="docutils literal notranslate"><span class="pre">pin_naive.n_cds</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.time_strong_cd"><code class="docutils literal notranslate"><span class="pre">pin_naive.time_strong_cd</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive.time_active_cd"><code class="docutils literal notranslate"><span class="pre">pin_naive.time_active_cd</span></code></a></li>
 </ul>
 </li>
 </ul>

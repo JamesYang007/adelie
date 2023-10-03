@@ -383,13 +383,16 @@ document.write(`
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code>([method, logger])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.base.__init__" title="adelie.state.base.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(core_state)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.base.check" title="adelie.state.base.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>([method, logger])</p></td>
 <td><p>Checks consistency of the members.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code>(core_state)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.base.initialize" title="adelie.state.base.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code></a>(core_state)</p></td>
 <td><p>Saves the core state object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">internal</span></code>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.base.internal" title="adelie.state.base.internal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">internal</span></code></a>()</p></td>
 <td><p>Returns the core state object.</p></td>
 </tr>
 </tbody>
@@ -399,23 +402,47 @@ document.write(`
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">core_state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.base.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
-<p class="rubric">Methods</p>
-<table class="autosummary longtable table autosummary">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.base.__init__" title="adelie.state.base.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(core_state)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code>([method, logger])</p></td>
-<td><p>Checks consistency of the members.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code>(core_state)</p></td>
-<td><p>Saves the core state object.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">internal</span></code>()</p></td>
-<td><p>Returns the core state object.</p></td>
-</tr>
-</tbody>
-</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.state.base.check">
+<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;RootLogger</span> <span class="pre">root</span> <span class="pre">(WARNING)&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.base.check" title="Link to this definition">#</a></dt>
+<dd><p>Checks consistency of the members.</p>
+<p>All information is logged using <code class="docutils literal notranslate"><span class="pre">logging</span></code>.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>method</strong><span class="classifier">str, optional</span></dt><dd><p>Must be one of the following options:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">None</span></code>: every check is logged only. </dt><dd><p>The function does not raise or assert any failed checks.</p>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;assert&quot;</span></code>: every check is logged and asserted.</p></li>
+</ul>
+</div></blockquote>
+<p>Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+<dt><strong>logger</strong><span class="classifier">optional</span></dt><dd><p>Logger object that behaves like a logger object in <code class="docutils literal notranslate"><span class="pre">logging</span></code>.
+Default is <code class="docutils literal notranslate"><span class="pre">logging.getLogger()</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.state.base.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">core_state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.base.initialize" title="Link to this definition">#</a></dt>
+<dd><p>Saves the core state object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.state.base.internal">
+<span class="sig-name descname"><span class="pre">internal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.base.internal" title="Link to this definition">#</a></dt>
+<dd><p>Returns the core state object.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -465,6 +492,9 @@ document.write(`
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base"><code class="docutils literal notranslate"><span class="pre">base</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base.__init__"><code class="docutils literal notranslate"><span class="pre">base.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base.check"><code class="docutils literal notranslate"><span class="pre">base.check()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base.initialize"><code class="docutils literal notranslate"><span class="pre">base.initialize()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base.internal"><code class="docutils literal notranslate"><span class="pre">base.internal()</span></code></a></li>
 </ul>
 </li>
 </ul>

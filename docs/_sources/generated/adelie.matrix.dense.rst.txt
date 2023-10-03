@@ -6,8 +6,6 @@
 .. autoclass:: dense
 
    
-   .. automethod:: __init__
-
    
    .. rubric:: Methods
 
@@ -15,6 +13,18 @@
    
       ~dense.__init__
       ~dense.internal
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: internal
    
    
 

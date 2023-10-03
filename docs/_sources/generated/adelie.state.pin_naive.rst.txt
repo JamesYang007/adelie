@@ -6,8 +6,6 @@
 .. autoclass:: pin_naive
 
    
-   .. automethod:: __init__
-
    
    .. rubric:: Methods
 
@@ -59,5 +57,54 @@
       ~pin_naive.n_cds
       ~pin_naive.time_strong_cd
       ~pin_naive.time_active_cd
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: check
+   .. automethod:: initialize
+   .. automethod:: internal
+   
+   
+
+   
+   
+   
+   .. autoattribute:: resid
+   .. autoattribute:: resids
+   .. autoattribute:: X
+   .. autoattribute:: groups
+   .. autoattribute:: group_sizes
+   .. autoattribute:: alpha
+   .. autoattribute:: penalty
+   .. autoattribute:: strong_set
+   .. autoattribute:: strong_g1
+   .. autoattribute:: strong_g2
+   .. autoattribute:: strong_begins
+   .. autoattribute:: strong_var
+   .. autoattribute:: lmdas
+   .. autoattribute:: max_cds
+   .. autoattribute:: tol
+   .. autoattribute:: rsq_slope_tol
+   .. autoattribute:: rsq_curv_tol
+   .. autoattribute:: newton_tol
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: rsq
+   .. autoattribute:: strong_beta
+   .. autoattribute:: strong_grad
+   .. autoattribute:: active_set
+   .. autoattribute:: active_g1
+   .. autoattribute:: active_g2
+   .. autoattribute:: active_begins
+   .. autoattribute:: active_order
+   .. autoattribute:: is_active
+   .. autoattribute:: betas
+   .. autoattribute:: rsqs
+   .. autoattribute:: n_cds
+   .. autoattribute:: time_strong_cd
+   .. autoattribute:: time_active_cd
    
    

@@ -6,8 +6,6 @@
 .. autoclass:: base
 
    
-   .. automethod:: __init__
-
    
    .. rubric:: Methods
 
@@ -15,6 +13,18 @@
    
       ~base.__init__
       ~base.internal
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: internal
    
    
 
