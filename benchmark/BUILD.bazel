@@ -1,0 +1,10 @@
+[cc_binary(
+    name = type_,
+    srcs = ["{}.cpp".format(type_)],
+    deps = [
+        "//:adelie_core",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+) for type_ in [
+    "bench_omp",
+]]
