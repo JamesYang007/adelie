@@ -15,3 +15,8 @@ build/
 *__pycache__*
 *.egg-info*
 adelie/src/third_party
+bazel-adelie
+bazel-bin
+bazel-out
+bazel-testlogs
+.bazelrc

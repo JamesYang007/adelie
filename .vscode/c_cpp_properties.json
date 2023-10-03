@@ -5,6 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/adelie/src/include",
+                "${workspaceFolder}/bazel-adelie/external/com_github_google_benchmark/include",
                 "/usr/lib/R/site-library/RcppEigen/include",
                 "/usr/share/R/include",
                 "${HOME}/R/x86_64-pc-linux-gnu-library/4.2/Rcpp/include",
