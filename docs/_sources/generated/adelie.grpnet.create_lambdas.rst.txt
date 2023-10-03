@@ -1,0 +1,6 @@
+﻿adelie.grpnet.create\_lambdas
+=============================
+
+.. currentmodule:: adelie.grpnet
+
+.. autofunction:: create_lambdas

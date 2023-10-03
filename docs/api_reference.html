@@ -39,6 +39,7 @@
     <script src="_static/documentation_options.js?v=e2e28a39"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api_reference';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -307,6 +308,8 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.grpnet.objective.html">adelie.grpnet.objective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.grpnet.lambda_max.html">adelie.grpnet.lambda_max</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.grpnet.create_lambdas.html">adelie.grpnet.create_lambdas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.grpnet.solve_pin.html">adelie.grpnet.solve_pin</a></li>
 </ul>
 </div>
@@ -396,7 +399,7 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.base.html#adelie.matrix.base" title="adelie.matrix.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base</span></code></a>(core_mat)</p></td>
 <td><p>Base matrix wrapper class.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.dense.html#adelie.matrix.dense" title="adelie.matrix.dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dense</span></code></a>(mat)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.dense.html#adelie.matrix.dense" title="adelie.matrix.dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dense</span></code></a>(mat[, n_threads])</p></td>
 <td><p>Creates a viewer of a dense matrix.</p></td>
 </tr>
 </tbody>
@@ -428,7 +431,13 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.grpnet.objective.html#adelie.grpnet.objective" title="adelie.grpnet.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">objective</span></code></a>(beta, *, X, y, groups, ...)</p></td>
 <td><p>Computes the group elastic net objective.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.grpnet.solve_pin.html#adelie.grpnet.solve_pin" title="adelie.grpnet.solve_pin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_pin</span></code></a>(state)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.grpnet.lambda_max.html#adelie.grpnet.lambda_max" title="adelie.grpnet.lambda_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lambda_max</span></code></a>(*, X, y, groups, group_sizes, ...)</p></td>
+<td><p>Computes the largest <span class="math notranslate nohighlight">\(\lambda\)</span> in the regularization sequence.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.grpnet.create_lambdas.html#adelie.grpnet.create_lambdas" title="adelie.grpnet.create_lambdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_lambdas</span></code></a>(*, X, y, groups, group_sizes, ...)</p></td>
+<td><p>Creates a log-spaced regularization sequence.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.grpnet.solve_pin.html#adelie.grpnet.solve_pin" title="adelie.grpnet.solve_pin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_pin</span></code></a>(state[, logger])</p></td>
 <td><p>Solves the pinned group elastic net problem.</p></td>
 </tr>
 </tbody>

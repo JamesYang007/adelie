@@ -35,7 +35,7 @@
       ~pin_base.strong_begins
       ~pin_base.strong_var
       ~pin_base.lmdas
-      ~pin_base.max_cds
+      ~pin_base.max_iters
       ~pin_base.tol
       ~pin_base.rsq_slope_tol
       ~pin_base.rsq_curv_tol
@@ -82,7 +82,7 @@
    .. autoattribute:: strong_begins
    .. autoattribute:: strong_var
    .. autoattribute:: lmdas
-   .. autoattribute:: max_cds
+   .. autoattribute:: max_iters
    .. autoattribute:: tol
    .. autoattribute:: rsq_slope_tol
    .. autoattribute:: rsq_curv_tol

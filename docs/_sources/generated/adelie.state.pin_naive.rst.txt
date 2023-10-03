@@ -37,7 +37,7 @@
       ~pin_naive.strong_begins
       ~pin_naive.strong_var
       ~pin_naive.lmdas
-      ~pin_naive.max_cds
+      ~pin_naive.max_iters
       ~pin_naive.tol
       ~pin_naive.rsq_slope_tol
       ~pin_naive.rsq_curv_tol
@@ -86,7 +86,7 @@
    .. autoattribute:: strong_begins
    .. autoattribute:: strong_var
    .. autoattribute:: lmdas
-   .. autoattribute:: max_cds
+   .. autoattribute:: max_iters
    .. autoattribute:: tol
    .. autoattribute:: rsq_slope_tol
    .. autoattribute:: rsq_curv_tol

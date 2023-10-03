@@ -307,6 +307,8 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.objective.html">adelie.grpnet.objective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.lambda_max.html">adelie.grpnet.lambda_max</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.create_lambdas.html">adelie.grpnet.create_lambdas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.solve_pin.html">adelie.grpnet.solve_pin</a></li>
 </ul>
 </div>
@@ -390,7 +392,7 @@ document.write(`
 <td><p>Checks consistency of the members.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.base.initialize" title="adelie.state.base.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code></a>(core_state)</p></td>
-<td><p>Saves the core state object.</p></td>
+<td><p>Initializes the current object with core state object.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.base.internal" title="adelie.state.base.internal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">internal</span></code></a>()</p></td>
 <td><p>Returns the core state object.</p></td>
@@ -406,19 +408,17 @@ document.write(`
 <dt class="sig sig-object py" id="adelie.state.base.check">
 <span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;RootLogger</span> <span class="pre">root</span> <span class="pre">(WARNING)&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.base.check" title="Link to this definition">#</a></dt>
 <dd><p>Checks consistency of the members.</p>
-<p>All information is logged using <code class="docutils literal notranslate"><span class="pre">logging</span></code>.</p>
+<p>All information is logged using the <code class="docutils literal notranslate"><span class="pre">logging</span></code> module.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
 <dt><strong>method</strong><span class="classifier">str, optional</span></dt><dd><p>Must be one of the following options:</p>
 <blockquote>
 <div><ul class="simple">
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">None</span></code>: every check is logged only. </dt><dd><p>The function does not raise or assert any failed checks.</p>
-</dd>
-</dl>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;assert&quot;</span></code>: every check is logged and asserted.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: every check is logged only. 
+The function does not raise exceptions or assert on failed checks.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;assert&quot;</span></code>: every check is logged and asserted.
+The function does not raise exceptions on failed checks.</p></li>
 </ul>
 </div></blockquote>
 <p>Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
@@ -434,7 +434,25 @@ Default is <code class="docutils literal notranslate"><span class="pre">logging.
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.state.base.initialize">
 <span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">core_state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.base.initialize" title="Link to this definition">#</a></dt>
-<dd><p>Saves the core state object.</p>
+<dd><p>Initializes the current object with core state object.</p>
+<p>A reference to the core state object will be saved so that
+the lifetime of the object remains until the lifetime of the current object.
+The members of the core state object will then be exposed
+as members of the current object, often viewing rather than copying them.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The core state object will usually reference existing objects.
+It is the user’s responsibility that the lifetime of the referenced objects
+surpasses that of the core state object.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>core_state</strong></dt><dd><p>Usually a C++ exported state class.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
