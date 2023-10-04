@@ -24,11 +24,13 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/src/include",
+                "${workspaceFolder}/adelie/src/include",
+                "${workspaceFolder}/bazel-adelie/external/com_github_google_benchmark/include",
                 "${CONDA_PREFIX}/envs/adelie/include",
                 "${CONDA_PREFIX}/envs/adelie/include/eigen3",
                 "${CONDA_PREFIX}/envs/adelie/lib/python3.10/site-packages/pybind11/include",
-                "${CONDA_PREFIX}/envs/adelie/include/python3.10"
+                "${CONDA_PREFIX}/envs/adelie/include/python3.10",
+                "/opt/homebrew/opt/libomp/include"
             ],
             "defines": [],
             "macFrameworkPath": [

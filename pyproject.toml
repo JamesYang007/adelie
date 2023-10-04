@@ -72,7 +72,6 @@ group-lasso = "^1.5.0"
 tqdm = "^4.65.0"
 mosek = "^10.0.40"
 latextable = "^1.0.0"
-dbus-python = "^1.3.2"
 twine = "^4.0.2"
 
 [tool.jupytext]
