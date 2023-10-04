@@ -3,8 +3,8 @@ import os
 import subprocess
 from sys import platform
 
+
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-OUT_PATH = os.path.join(ROOT_DIR, ".bazelrc")
 
 
 def run_cmd(cmd):
@@ -19,7 +19,9 @@ def run_cmd(cmd):
 
 
 def main():
-    with open(OUT_PATH, "w") as f:
+    # create .bazelrc
+    bazelrc_path = os.path.join(ROOT_DIR, ".bazelrc")
+    with open(bazelrc_path, "w") as f:
         # TODO: add ubsan + msan builds also
         f.write(
             """
@@ -39,32 +41,17 @@ build:asan --linkopt -fsanitize=address
 
         # MacOS
         if platform == "darwin":
-            # get canonical brew path
-            conda_prefix = os.environ["CONDA_PREFIX"]
-            conda_bin = os.path.join(conda_prefix, "bin")
-            conda_inc = os.path.join(conda_prefix, "include")
-            conda_lib = os.path.join(conda_prefix, "lib")
-
-            # get canonical omp path
-            sdk_path = run_cmd("xcrun --sdk macosx --show-sdk-path")
-            
             # get omp path
             omp_prefix = run_cmd("brew --prefix libomp")
-            omp_path = os.path.join(omp_prefix, "lib")
+            omp_lib = os.path.join(omp_prefix, "lib")
             f.write(
                 f"""
-# Use clang from conda-forge
-#build --action_env=CC={conda_bin}/clang
-#build --action_env=CXX={conda_bin}/clang++
-#build --action_env=BAZEL_CXXOPTS=-isystem{conda_inc}
-#build --action_env=BAZEL_LINKOPTS=-L{conda_lib}:-Wl,-rpath,{conda_lib}
-#build --cxxopt -Xclang 
-build --action_env=SDKROOT={sdk_path}
-build --cxxopt -fopenmp
-build --linkopt -L{omp_path}
-build --linkopt -lomp
 # Tell Bazel not to use the full Xcode toolchain on Mac OS
 build --repo_env=BAZEL_USE_CPP_ONLY_TOOLCHAIN=1
+build --cxxopt -Xclang 
+build --cxxopt -fopenmp
+build --linkopt -L{omp_lib}
+build --linkopt -lomp
 build:gcc --action_env=CC=gcc-11
 build:gcc --action_env=CXX=g++-11"""
             )

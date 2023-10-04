@@ -1,3 +1,16 @@
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+bool_flag(
+    name = "mac",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+config_setting(
+    name = "is_mac",
+    flag_values = {
+        ":mac": "true",
+    },
+)
+
 [cc_binary(
     name = type_,
     srcs = ["{}.cpp".format(type_)],
@@ -5,8 +18,10 @@
     deps = [
         "//:adelie_core",
         "@com_github_google_benchmark//:benchmark_main",
-        "@omp//:headers",
-    ],
+    ] + select({
+        "@platforms//os:osx": ["@omp//:headers"],
+        "//conditions:default": [],
+    }),
 ) for type_ in [
     "bench_omp",
 ]]
