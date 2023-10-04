@@ -25,8 +25,6 @@ def main():
             """
 build --cxxopt="-std=c++14"
 build --cxxopt="-Wall"
-build --cxxopt="-fopenmp"
-build --linkopt -fopenmp
 # ASAN build
 # TODO: add ubsan + msan builds also
 build:asan --strip=never
@@ -49,22 +47,34 @@ build:asan --linkopt -fsanitize=address
 
             # get canonical omp path
             sdk_path = run_cmd("xcrun --sdk macosx --show-sdk-path")
+            
+            # get omp path
+            omp_prefix = run_cmd("brew --prefix libomp")
+            omp_path = os.path.join(omp_prefix, "lib")
             f.write(
                 f"""
 # Use clang from conda-forge
-build --action_env=CC={conda_bin}/clang
-build --action_env=CXX={conda_bin}/clang++
-build --action_env=BAZEL_CXXOPTS=-isystem{conda_inc}
-build --action_env=BAZEL_LINKOPTS=-L{conda_lib}:-Wl,-rpath,{conda_lib}
+#build --action_env=CC={conda_bin}/clang
+#build --action_env=CXX={conda_bin}/clang++
+#build --action_env=BAZEL_CXXOPTS=-isystem{conda_inc}
+#build --action_env=BAZEL_LINKOPTS=-L{conda_lib}:-Wl,-rpath,{conda_lib}
+#build --cxxopt -Xclang 
 build --action_env=SDKROOT={sdk_path}
+build --cxxopt -fopenmp
+build --linkopt -L{omp_path}
+build --linkopt -lomp
 # Tell Bazel not to use the full Xcode toolchain on Mac OS
-build --repo_env=BAZEL_USE_CPP_ONLY_TOOLCHAIN=1"""
+build --repo_env=BAZEL_USE_CPP_ONLY_TOOLCHAIN=1
+build:gcc --action_env=CC=gcc-11
+build:gcc --action_env=CXX=g++-11"""
             )
         else:
             # Linux
             f.write(
                 """
 # Linux Clang
+build --cxxopt -fopenmp
+build --linkopt -fopenmp
 build:clang --action_env=CC=clang
 build:clang --action_env=CXX=clang++
 # Linux GCC (default)
