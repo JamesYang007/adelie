@@ -1,10 +1,14 @@
 [cc_binary(
     name = type_,
     srcs = ["{}.cpp".format(type_)],
+    copts = ["-Iexternal/omp"],
     deps = [
         "//:adelie_core",
         "@com_github_google_benchmark//:benchmark_main",
-    ],
+    ] + select({
+        "@platforms//os:osx": ["@omp//:headers"],
+        "//conditions:default": [],
+    }),
 ) for type_ in [
     "bench_omp",
 ]]

@@ -6,6 +6,19 @@ from pybind11.setup_helpers import ParallelCompile
 import sysconfig
 import os
 import platform
+import subprocess
+
+
+def run_cmd(cmd):
+    try:
+        output = subprocess.check_output(
+            cmd.split(" "), stderr=subprocess.STDOUT
+        ).decode()
+    except subprocess.CalledProcessError as e:
+        output = e.output.decode()
+        raise RuntimeError(output)
+    return output.rstrip()
+
 
 # Optional multithreaded build
 ParallelCompile("NPY_NUM_BUILD_JOBS").install()
@@ -34,12 +47,15 @@ extra_link_args = []
 
 system_name = platform.system()
 if (system_name == "Darwin"):
+    omp_prefix = run_cmd("brew --prefix libomp")
+    omp_include = os.path.join(omp_prefix, "include")
+    omp_lib = os.path.join(omp_prefix, "lib")
     extra_compile_args += [
-        "-I/opt/homebrew/opt/libomp/include", 
+        f"-I{omp_include}",
         "-Xclang",
         "-fopenmp",
     ]
-    extra_link_args += ['-L/opt/homebrew/opt/libomp/lib']
+    extra_link_args += [f'-L{omp_lib}']
     libraries = ['omp']
     
 if (system_name == "Linux"):
