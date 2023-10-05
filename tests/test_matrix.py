@@ -8,6 +8,8 @@ def test_dense():
         X = np.random.normal(0, 1, (n, p))
 
         for dtype in dtypes:
+            atol = 1e-6 if dtype == np.float32 else 1e-14
+
             X = np.array(X, dtype=dtype, order=order)
             wrap = mod.dense(X, n_threads=4)
             cX = wrap._core_mat
@@ -15,25 +17,29 @@ def test_dense():
             # test cmul
             v = np.random.normal(0, 1, n).astype(dtype)
             out = cX.cmul(p//2, v)
-            assert np.allclose(v @ X[:, p//2], out)
+            assert np.allclose(v @ X[:, p//2], out, atol=atol)
 
             # test ctmul
             v = np.random.normal(0, 1)
             out = np.empty(n, dtype=dtype)
             cX.ctmul(p//2, v, out)
-            assert np.allclose(v * X[:, p//2], out)
+            assert np.allclose(v * X[:, p//2], out, atol=atol)
 
             # test bmul
             v = np.random.normal(0, 1, n).astype(dtype)
             out = np.empty(p // 2, dtype=dtype)
             cX.bmul(0, 0, n, p // 2, v, out)
-            assert np.allclose(v.T @ X[:, :p//2], out)
+            assert np.allclose(v.T @ X[:, :p//2], out, atol=atol)
 
             # test btmul
             v = np.random.normal(0, 1, p//2).astype(dtype)
             out = np.empty(n, dtype=dtype)
             cX.btmul(0, 0, n, p // 2, v, out)
-            assert np.allclose(v.T @ X[:, :p//2].T, out)
+            assert np.allclose(v.T @ X[:, :p//2].T, out, atol=atol)
+
+            # test cnormsq
+            out = np.array([cX.cnormsq(j) for j in range(p)])
+            assert np.allclose(np.sum(X ** 2, axis=0), out)
 
             assert cX.rows() == n
             assert cX.cols() == p
@@ -42,4 +48,6 @@ def test_dense():
     orders = ["C", "F"]
     for dtype in dtypes:
         for order in orders:
+            _test(2, 2, dtype, order)
             _test(100, 20, dtype, order)
+            _test(20, 100, dtype, order)

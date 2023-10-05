@@ -38,8 +38,10 @@ class dense(base):
     def __init__(
         self,
         mat: np.ndarray,
-        n_threads: int =0,
+        n_threads: int =1,
     ):
+        if n_threads < 1:
+            raise ValueError("Number of threads must be >= 1.")
         self.mat = mat
         dispatcher = {
             np.dtype("float64"): {
