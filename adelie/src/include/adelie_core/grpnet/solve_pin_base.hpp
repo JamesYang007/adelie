@@ -23,8 +23,8 @@ struct GrpnetPinBufferPack
     explicit GrpnetPinBufferPack(
         size_t buffer_size,
         size_t n
-    )
-        : GrpnetPinBufferPack(
+    ): 
+        GrpnetPinBufferPack(
             buffer_size, buffer_size, buffer_size, n
         ) 
     {}
@@ -34,11 +34,11 @@ struct GrpnetPinBufferPack
             size_t buffer2_size,
             size_t buffer3_size,
             size_t n
-    )
-        : buffer1(buffer1_size),
-          buffer2(buffer2_size),
-          buffer3(buffer3_size),
-          buffer4(n)
+    ): 
+        buffer1(buffer1_size),
+        buffer2(buffer2_size),
+        buffer3(buffer3_size),
+        buffer4(n)
     {}
 };
 

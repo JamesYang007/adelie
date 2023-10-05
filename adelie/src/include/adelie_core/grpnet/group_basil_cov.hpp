@@ -742,7 +742,7 @@ struct GroupBasilDiagnostic
     dyn_vec_index_t strong_sizes;
     dyn_vec_index_t active_sizes;
     dyn_vec_bool_t used_strong_rule;
-    dyn_vec_index_t n_cds;
+    dyn_vec_index_t iters;
     dyn_vec_index_t n_lambdas_proc;
     dyn_vec_basil_state_t checkpoints;
     dyn_vec_value_t time_init;
@@ -961,7 +961,7 @@ inline void group_basil(
     diagnostic.strong_sizes.push_back(strong_set.size());
     diagnostic.active_sizes.push_back(active_set.size());
     diagnostic.used_strong_rule.push_back(false);
-    diagnostic.n_cds.push_back(fit_pack.n_cds);
+    diagnostic.iters.push_back(fit_pack.iters);
     diagnostic.n_lambdas_proc.push_back(1);
 
     while (1) 
@@ -1064,7 +1064,7 @@ inline void group_basil(
         diagnostic.strong_sizes.push_back(strong_set.size());
         diagnostic.active_sizes.push_back(active_set.size());
         diagnostic.used_strong_rule.push_back(do_strong_rule);
-        diagnostic.n_cds.push_back(fit_pack.n_cds);
+        diagnostic.iters.push_back(fit_pack.iters);
         diagnostic.n_lambdas_proc.push_back(idx);
     }
 

@@ -5,7 +5,13 @@ namespace adelie_core {
 namespace state {
 
 /**
- * State class for solve_pin_naive method.
+ * State class for solve_pin_cov method.
+ * 
+ * @param   A           PSD matrix (p, p) with diagonal blocks A_{ii}. 
+ *                      This matrix only needs to satisfy the properties
+ *                      when looking at the sub-matrix of all strong_set groups.
+ *                      The diagonal blocks are never read, 
+ *                      so they can be used as storage for something else.
  */
 template <class MatrixType, 
           class ValueType=typename std::decay_t<MatrixType>::value_t,
@@ -18,7 +24,7 @@ template <class MatrixType,
                 util::sp_vec_type<ValueType, Eigen::RowMajor, IndexType>
             > 
           >
-struct PinNaive : PinBase<
+struct PinCov : PinBase<
         ValueType,
         IndexType,
         BoolType,
@@ -54,12 +60,10 @@ struct PinNaive : PinBase<
     /* Static states */
 
     /* Dynamic states */
-    MatrixType* X;
-    map_vec_value_t resid;
-    dyn_vec_vec_value_t resids;
+    MatrixType* A;    // covariance matrix-like
 
-    explicit PinNaive(
-        MatrixType& X,
+    explicit PinCov(
+        MatrixType& A,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
@@ -78,7 +82,6 @@ struct PinNaive : PinBase<
         size_t newton_max_iters,
         size_t n_threads,
         value_t rsq,
-        Eigen::Ref<vec_value_t> resid,
         Eigen::Ref<vec_value_t> strong_beta, 
         Eigen::Ref<vec_value_t> strong_grad,
         dyn_vec_index_t active_set,
@@ -88,8 +91,7 @@ struct PinNaive : PinBase<
         dyn_vec_index_t active_order,
         Eigen::Ref<vec_bool_t> is_active,
         dyn_vec_sp_vec_t betas, 
-        dyn_vec_value_t rsqs,
-        dyn_vec_vec_value_t resids
+        dyn_vec_value_t rsqs
     ): 
         base_t(
             groups, group_sizes, alpha, penalty, 
@@ -99,9 +101,7 @@ struct PinNaive : PinBase<
             active_set, active_g1, active_g2, active_begins, active_order, is_active,
             betas, rsqs
         ),
-        X(&X),
-        resid(resid.data(), resid.size()),
-        resids(resids)
+        A(&A)
     {}
 };
 

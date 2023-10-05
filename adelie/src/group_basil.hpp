@@ -110,7 +110,7 @@ inline py::dict convert_diagnostic(
         "strong_sizes"_a=diag.strong_sizes,
         "active_sizes"_a=diag.active_sizes,
         "used_strong_rule"_a=diag.used_strong_rule,
-        "n_cds"_a=diag.n_cds,
+        "iters"_a=diag.iters,
         "n_lambdas_proc"_a=diag.n_lambdas_proc,
         "time_init"_a=diag.time_init,
         "time_init_fit"_a=diag.time_init_fit,

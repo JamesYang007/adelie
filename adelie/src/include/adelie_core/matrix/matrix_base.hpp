@@ -57,7 +57,7 @@ public:
         int i, int j, int p, int q, 
         const Eigen::Ref<const rowvec_t>& v, 
         Eigen::Ref<rowvec_t> out
-    ) const =0;
+    ) =0;
 
     /**
      * @brief Computes v^T X[i:i+p, j:j+q]^T where X is the current matrix.
@@ -73,7 +73,7 @@ public:
         int i, int j, int p, int q, 
         const Eigen::Ref<const rowvec_t>& v, 
         Eigen::Ref<rowvec_t> out
-    ) const =0;
+    ) =0;
 
     /**
      * @brief Computes the squared norm of a column of the matrix.
