@@ -3,12 +3,12 @@ from . import matrix
 from . import logger
 import numpy as np
 import scipy
+import os
 from dataclasses import dataclass 
 
 
 def deduce_states(
     *,
-    X: matrix.Base64 | matrix.Base32,
     groups: np.ndarray,
     group_sizes: np.ndarray,
     strong_set: np.ndarray,
@@ -18,8 +18,6 @@ def deduce_states(
 
     Parameters
     ----------
-    X : matrix.Base64 | matrix.Base32
-        See ``pin_base``.
     groups : (G,) np.ndarray
         See ``pin_base``.
     group_sizes : (G,) np.ndarray
@@ -61,10 +59,6 @@ def deduce_states(
         np.concatenate([[0], group_sizes[strong_set]]),
         dtype=int,
     )[:-1]
-    strong_var = np.concatenate([
-        [X.cnormsq(jj) for jj in range(g, g + gs)]
-        for g, gs in zip(groups[strong_set], group_sizes[strong_set])
-    ])
     active_g1 = active_set[group_sizes[strong_set[active_set]] == 1]
     active_g2 = active_set[group_sizes[strong_set[active_set]] > 1]
     active_begins = np.cumsum(
@@ -78,14 +72,12 @@ def deduce_states(
         strong_g1,
         strong_g2,
         strong_begins,
-        strong_var,
         active_g1,
         active_g2,
         active_begins,
         active_order,
         is_active,
     )
-
 
 class base:
     """Base wrapper state class.
@@ -166,10 +158,6 @@ class pin_base(base):
 
     Parameters
     ----------
-    X : Union[adelie.matrix.Base64, adelie.matrix.Base32]
-        Feature matrix where each column block :math:`X_k` defined by the groups
-        is such that :math:`X_k^\\top X_k` is diagonal.
-        It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -218,6 +206,8 @@ class pin_base(base):
         Convergence tolerance for the BCD update.
     newton_max_iters : int
         Maximum number of iterations for the BCD update.
+    n_threads : int
+        Number of threads.
     rsq : float
         Unnormalized :math:`R^2` value at ``strong_beta``.
         The unnormalized :math:`R^2` is given by :math:`\\|y\\|_2^2 - \\|y-X\\beta\\|_2^2`.
@@ -262,7 +252,7 @@ class pin_base(base):
         ``betas[i]`` corresponds to the solution corresponding to ``lmdas[i]``.
     rsqs : (l,) np.ndarray
         ``rsqs[i]`` corresponds to the unnormalized :math:`R^2` at ``betas[i]``.
-    n_cds : int
+    iters : int
         Number of coordinate descents taken.
     time_strong_cd : np.ndarray
         Benchmark time for performing coordinate-descent on the strong set at every iteration.
@@ -270,12 +260,6 @@ class pin_base(base):
         Benchmark time for performing coordinate-descent on the active set at every iteration.
     """
     # Static states
-    X: matrix.Base64 | matrix.Base32
-    """
-    Feature matrix where each column block :math:`X_k` defined by the groups
-    is such that :math:`X_k^\\top X_k` is diagonal.
-    It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
-    """
     groups: np.ndarray
     """
     List of starting indices to each group where `G` is the number of groups.
@@ -358,6 +342,10 @@ class pin_base(base):
     """
     Maximum number of iterations for the BCD update.
     """
+    n_threads: int
+    """
+    Number of threads.
+    """
 
     # Dynamic states
     rsq: float
@@ -426,7 +414,7 @@ class pin_base(base):
     """
     ``rsqs[i]`` corresponds to the :math:`R^2` at ``betas[i]``.
     """
-    n_cds: int
+    iters: int
     """
     Number of coordinate descents taken.
     """
@@ -441,7 +429,6 @@ class pin_base(base):
     
     def initialize(self, core_state):
         super().initialize(core_state)
-        self.X = core_state.X
         self.groups = core_state.groups
         self.group_sizes = core_state.group_sizes
         self.alpha = core_state.alpha
@@ -458,6 +445,7 @@ class pin_base(base):
         self.rsq_curv_tol = core_state.rsq_curv_tol
         self.newton_tol = core_state.newton_tol
         self.newton_max_iters = core_state.newton_max_iters
+        self.n_threads = core_state.n_threads
         self.rsq = core_state.rsq
         self.strong_beta = core_state.strong_beta
         self.strong_grad = core_state.strong_grad
@@ -469,7 +457,7 @@ class pin_base(base):
         self.is_active = core_state.is_active
         self.betas = core_state.betas
         self.rsqs = core_state.rsqs
-        self.n_cds = core_state.n_cds
+        self.iters = core_state.iters
         self.time_strong_cd = core_state.time_strong_cd
         self.time_active_cd = core_state.time_active_cd
 
@@ -478,13 +466,7 @@ class pin_base(base):
         method: str =None, 
         logger=logger.logger,
     ):
-        # ================ X check ====================
-        self._check(
-            isinstance(self.X, matrix.Base32) or isinstance(self.X, matrix.Base64),
-            "check X type",
-            method, logger,
-        )
-        n, p = self.X.rows(), self.X.cols()
+        p = np.sum(self.group_sizes)
 
         # ================ groups check ====================
         self._check(
@@ -690,6 +672,13 @@ class pin_base(base):
         self._check(
             self.newton_max_iters >= 0,
             "check newton_max_iters >= 0",
+            method, logger,
+        )
+
+        # ================ newton_max_iters check ====================
+        self._check(
+            self.n_threads > 0,
+            "check n_threads > 0",
             method, logger,
         )
 
@@ -920,10 +909,19 @@ class pin_naive(pin_base):
     newton_max_iters : int, optional
         Maximum number of iterations for the BCD update.
         Default is ``1000``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``os.cpu_count()``.
         
     See Also
     --------
     adelie.state.pin_base
+    """
+    X: matrix.Base64 | matrix.Base32
+    """
+    Feature matrix where each column block :math:`X_k` defined by the groups
+    is such that :math:`X_k^\\top X_k` is diagonal.
+    It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
     """
     resid: np.ndarray
     """Residual :math:`y-X\\beta` at ``strong_beta``."""
@@ -950,6 +948,7 @@ class pin_naive(pin_base):
         rsq_curv_tol: float =1e-2,
         newton_tol: float =1e-12,
         newton_max_iters: int =1000,
+        n_threads: int =os.cpu_count(),
     ):
         ## save inputs due to lifetime issues
         # static inputs require a reference to input
@@ -980,19 +979,22 @@ class pin_naive(pin_base):
             self._strong_g1,
             self._strong_g2,
             self._strong_begins,
-            self._strong_var,
             self._active_g1,
             self._active_g2,
             self._active_begins,
             self._active_order,
             self._is_active,
         ) = deduce_states(
-            X=X,
             groups=groups,
             group_sizes=group_sizes,
             strong_set=strong_set,
             active_set=active_set,
         )
+
+        self._strong_var = np.concatenate([
+            [X.cnormsq(jj) for jj in range(g, g + gs)]
+            for g, gs in zip(groups[strong_set], group_sizes[strong_set])
+        ])
 
         self._strong_grad = []
         for k in strong_set:
@@ -1025,6 +1027,7 @@ class pin_naive(pin_base):
             rsq_curv_tol=rsq_curv_tol,
             newton_tol=newton_tol,
             newton_max_iters=newton_max_iters,
+            n_threads=n_threads,
             rsq=rsq,
             resid=self._resid,
             strong_beta=self._strong_beta,
@@ -1044,6 +1047,7 @@ class pin_naive(pin_base):
 
     def initialize(self, core_state):
         super().initialize(core_state)
+        self.X = core_state.X
         self.resid = core_state.resid 
         self.resids = core_state.resids
 
@@ -1053,6 +1057,227 @@ class pin_naive(pin_base):
         logger=logger.logger,
     ):
         super().check(method=method, logger=logger)
+        self._check(
+            isinstance(self.X, matrix.Base32) or isinstance(self.X, matrix.Base64),
+            "check X type",
+            method, logger,
+        )
+        self._check(
+            self.resid.shape[0] == self.X.rows(),
+            "check resid shape",
+            method, logger,
+        )
+        self._check(
+            self.resids.shape == (self.betas.shape[0], self.X.rows()),
+            "check resids shape",
+            method, logger,
+        )
+
+
+@dataclass
+class pin_cov(pin_base):
+    """State class for pin, cov method.
+
+    Parameters
+    ----------
+    A : Union[adelie.matrix.Base64, adelie.matrix.Base32]
+        Covariance matrix where each diagonal block :math:`A_{kk}` defined by the groups
+        is a diagonal matrix.
+        It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
+    groups : (G,) np.ndarray
+        List of starting indices to each group where `G` is the number of groups.
+        ``groups[i]`` is the starting index of the ``i`` th group. 
+    group_sizes : (G,) np.ndarray
+        List of group sizes corresponding to each element in ``groups``.
+        ``group_sizes[i]`` is the group size of the ``i`` th group. 
+    alpha : float
+        Elastic net parameter.
+        It must be in the range :math:`[0,1]`.
+    penalty : (G,) np.ndarray
+        Penalty factor for each group in the same order as ``groups``.
+        It must be a non-negative vector.
+    strong_set : (s,) np.ndarray
+        List of indices into ``groups`` that correspond to the strong groups.
+        ``strong_set[i]`` is ``i`` th strong group.
+    lmdas : (l,) np.ndarray
+        Regularization sequence to fit on.
+    rsq : float
+        Unnormalized :math:`R^2` value at ``strong_beta``.
+        The unnormalized :math:`R^2` is given by :math:`\\|y\\|_2^2 - \\|y-X\\beta\\|_2^2`.
+    strong_beta : (ws,) np.ndarray
+        Coefficient vector on the strong set.
+        ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        where
+        ``k = strong_set[i]``,
+        ``b = strong_begins[i]``,
+        and ``p = group_sizes[k]``.
+    strong_grad : (ws,) np.ndarray
+        Gradient :math:`X_k^\\top (y-X\\beta)` on the strong groups :math:`k` where :math:`beta` is given by ``strong_beta``.
+        ``strong_grad[b:b+p]`` is the gradient for the ``i`` th strong group
+        where 
+        ``k = strong_set[i]``,
+        ``b = strong_begins[i]``,
+        and ``p = group_sizes[k]``.
+    active_set : (a,) np.ndarray
+        List of indices into ``strong_set`` that correspond to active groups.
+        ``strong_set[active_set[i]]`` is the ``i`` th active group.
+        An active group is one with non-zero coefficient block,
+        that is, for every ``i`` th active group, 
+        ``strong_beta[b:b+p] == 0`` where 
+        ``j = active_set[i]``,
+        ``k = strong_set[j]``,
+        ``b = strong_begins[j]``,
+        and ``p = group_sizes[k]``.
+    max_iters : int, optional
+        Maximum number of coordinate descents.
+        Default is ``int(1e5)``.
+    tol : float, optional
+        Convergence tolerance.
+        Default is ``1e-12``.
+    rsq_slope_tol : float, optional
+        Early stopping rule check on slope of :math:`R^2`.
+        Default is ``1e-2``.
+    rsq_curv_tol : float, optional
+        Early stopping rule check on curvature of :math:`R^2`.
+        Default is ``1e-2``.
+    newton_tol : float, optional
+        Convergence tolerance for the BCD update.
+        Default is ``1e-12``.
+    newton_max_iters : int, optional
+        Maximum number of iterations for the BCD update.
+        Default is ``1000``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``os.cpu_count()``.
+        
+    See Also
+    --------
+    adelie.state.pin_base
+    """
+    A: matrix.base | matrix.Base64 | matrix.Base32
+
+    def __init__(
+        self, 
+        *,
+        A: matrix.base | matrix.Base64 | matrix.Base32,
+        groups: np.ndarray,
+        group_sizes: np.ndarray,
+        alpha: float,
+        penalty: np.ndarray,
+        strong_set: np.ndarray,
+        lmdas: np.ndarray,
+        rsq: float,
+        strong_beta: np.ndarray,
+        strong_grad: np.ndarray,
+        active_set: np.ndarray,
+        max_iters: int =int(1e5),
+        tol: float =1e-12,
+        rsq_slope_tol: float =1e-2,
+        rsq_curv_tol: float =1e-2,
+        newton_tol: float =1e-12,
+        newton_max_iters: int =1000,
+        n_threads: int =os.cpu_count(),
+    ):
+        ## save inputs due to lifetime issues
+        # static inputs require a reference to input
+        # or copy if it must be made
+        self._A = A
+
+        if isinstance(A, matrix.base):
+            A = A.internal()
+
+        dtype = (
+            np.float64
+            if isinstance(A, matrix.Base64) else
+            np.float32
+        )
+
+        self._groups = np.array(groups, copy=False, dtype=int)
+        self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
+        self._penalty = np.array(penalty, copy=False, dtype=dtype)
+        self._strong_set = np.array(strong_set, copy=False, dtype=int)
+        self._lmdas = np.array(lmdas, copy=False, dtype=dtype)
+
+        # dynamic inputs require a copy to not modify user's inputs
+        self._strong_beta = np.copy(strong_beta).astype(dtype)
+        self._strong_grad = np.copy(strong_grad).astype(dtype)
+        self._active_set = np.copy(active_set).astype(int)
+
+        (
+            self._strong_g1,
+            self._strong_g2,
+            self._strong_begins,
+            self._active_g1,
+            self._active_g2,
+            self._active_begins,
+            self._active_order,
+            self._is_active,
+        ) = deduce_states(
+            groups=groups,
+            group_sizes=group_sizes,
+            strong_set=strong_set,
+            active_set=active_set,
+        )
+
+        self._strong_var = np.array([
+            A.coeff(j, j) for j in range(A.cols())
+        ])
+
+        State = (
+            core.state.PinCov64 
+            if isinstance(A, matrix.Base64) else 
+            core.state.PinCov32
+        )
+
+        self._core_state = State(
+            A=A,
+            groups=self._groups,
+            group_sizes=self._group_sizes,
+            alpha=alpha,
+            penalty=self._penalty,
+            strong_set=self._strong_set,
+            strong_g1=self._strong_g1,
+            strong_g2=self._strong_g2,
+            strong_begins=self._strong_begins,
+            strong_var=self._strong_var,
+            lmdas=self._lmdas,
+            max_iters=max_iters,
+            tol=tol,
+            rsq_slope_tol=rsq_slope_tol,
+            rsq_curv_tol=rsq_curv_tol,
+            newton_tol=newton_tol,
+            newton_max_iters=newton_max_iters,
+            n_threads=n_threads,
+            rsq=rsq,
+            strong_beta=self._strong_beta,
+            strong_grad=self._strong_grad,
+            active_set=self._active_set,
+            active_g1=self._active_g1,
+            active_g2=self._active_g2,
+            active_begins=self._active_begins,
+            active_order=self._active_order,
+            is_active=self._is_active,
+            betas=[],
+            rsqs=[],
+        )
+
+        self.initialize(self._core_state)
+
+    def initialize(self, core_state):
+        super().initialize(core_state)
+        self.A = core_state.A
+
+    def check(
+        self, 
+        method: str =None, 
+        logger=logger.logger,
+    ):
+        super().check(method=method, logger=logger)
+        self._check(
+            isinstance(self.A, matrix.Base32) or isinstance(self.X, matrix.Base64),
+            "check A type",
+            method, logger,
+        )
         self._check(
             self.resid.shape[0] == self.X.rows(),
             "check resid shape",

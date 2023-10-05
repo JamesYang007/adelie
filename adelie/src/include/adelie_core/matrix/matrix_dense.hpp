@@ -17,14 +17,16 @@ public:
 private:
     const Eigen::Map<const dense_t> _mat;   // underlying dense matrix
     const size_t _n_threads;                // number of threads
+    util::rowmat_type<value_t> _buff;
     
 public:
     MatrixDense(
         const Eigen::Ref<const dense_t>& mat,
         size_t n_threads
-    )
-        : _mat(mat.data(), mat.rows(), mat.cols()),
-          _n_threads(n_threads)
+    ): 
+        _mat(mat.data(), mat.rows(), mat.cols()),
+        _n_threads(n_threads),
+        _buff(_n_threads, std::min(mat.rows(), mat.cols()))
     {}
     
     value_t cmul(
@@ -48,15 +50,14 @@ public:
         int i, int j, int p, int q, 
         const Eigen::Ref<const rowvec_t>& v, 
         Eigen::Ref<rowvec_t> out
-    ) const override
+    ) override
     {
-        util::rowmat_type<value_t> buff(_n_threads, std::min(p, q));
         auto outm = out.matrix();
         dgemv(
             _mat.block(i, j, p, q),
             v.matrix(),
             _n_threads,
-            buff,
+            _buff,
             outm
         );
     }
@@ -65,15 +66,14 @@ public:
         int i, int j, int p, int q, 
         const Eigen::Ref<const rowvec_t>& v, 
         Eigen::Ref<rowvec_t> out
-    ) const override
+    ) override
     {
-        util::rowmat_type<value_t> buff(_n_threads, std::min(p, q));
         auto outm = out.matrix();
         dgemv(
             _mat.block(i, j, p, q).transpose(),
             v.matrix(),
             _n_threads,
-            buff,
+            _buff,
             outm
         );
     }

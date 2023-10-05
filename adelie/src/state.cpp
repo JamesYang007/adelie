@@ -1,15 +1,15 @@
 #include "decl.hpp"
 #include <adelie_core/matrix/matrix_base.hpp>
 #include <adelie_core/state/pin_naive.hpp>
+#include <adelie_core/state/pin_cov.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
 
-template <class MatrixType>
-void pin_naive(py::module_& m, const char* name)
+template <class ValueType>
+void pin_base(py::module_& m, const char* name)
 {
-    using matrix_t = MatrixType;
-    using state_t = ad::state::PinNaive<matrix_t>;
+    using state_t = ad::state::PinBase<ValueType>;
     using index_t = typename state_t::index_t;
     using value_t = typename state_t::value_t;
     using vec_index_t = typename state_t::vec_index_t;
@@ -17,12 +17,10 @@ void pin_naive(py::module_& m, const char* name)
     using vec_bool_t = typename state_t::vec_bool_t;
     using dyn_vec_index_t = typename state_t::dyn_vec_index_t;
     using dyn_vec_value_t = typename state_t::dyn_vec_value_t;
-    using dyn_vec_vec_value_t = typename state_t::dyn_vec_vec_value_t;
     using dyn_vec_sp_vec_t = typename state_t::dyn_vec_sp_vec_t;
 
     py::class_<state_t>(m, name)
         .def(py::init<
-            const matrix_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
@@ -39,8 +37,8 @@ void pin_naive(py::module_& m, const char* name)
             value_t,
             value_t,
             size_t,
+            size_t,
             value_t,
-            Eigen::Ref<vec_value_t>,
             Eigen::Ref<vec_value_t>, 
             Eigen::Ref<vec_value_t>,
             dyn_vec_index_t,
@@ -50,10 +48,8 @@ void pin_naive(py::module_& m, const char* name)
             dyn_vec_index_t,
             Eigen::Ref<vec_bool_t>,
             dyn_vec_sp_vec_t, 
-            dyn_vec_value_t,
-            dyn_vec_vec_value_t 
+            dyn_vec_value_t
         >(),
-            py::arg("X"),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
@@ -70,8 +66,8 @@ void pin_naive(py::module_& m, const char* name)
             py::arg("rsq_curv_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
+            py::arg("n_threads"),
             py::arg("rsq"),
-            py::arg("resid").noconvert(),
             py::arg("strong_beta").noconvert(),
             py::arg("strong_grad").noconvert(),
             py::arg("active_set"),
@@ -81,10 +77,8 @@ void pin_naive(py::module_& m, const char* name)
             py::arg("active_order"),
             py::arg("is_active").noconvert(),
             py::arg("betas"),
-            py::arg("rsqs"),
-            py::arg("resids")
+            py::arg("rsqs")
         )
-        .def_readonly("X", &state_t::X)
         .def_readonly("groups", &state_t::groups)
         .def_readonly("group_sizes", &state_t::group_sizes)
         .def_readonly("alpha", &state_t::alpha)
@@ -101,8 +95,8 @@ void pin_naive(py::module_& m, const char* name)
         .def_readonly("rsq_curv_tol", &state_t::rsq_curv_tol)
         .def_readonly("newton_tol", &state_t::newton_tol)
         .def_readonly("newton_max_iters", &state_t::newton_max_iters)
+        .def_readonly("n_threads", &state_t::n_threads)
         .def_readonly("rsq", &state_t::rsq)
-        .def_readonly("resid", &state_t::resid)
         .def_readonly("strong_beta", &state_t::strong_beta)
         .def_readonly("strong_grad", &state_t::strong_grad)
         .def_property_readonly("active_set", [](const state_t& s) {
@@ -137,7 +131,8 @@ void pin_naive(py::module_& m, const char* name)
         })
         .def_readonly("is_active", &state_t::is_active)
         .def_property_readonly("betas", [](const state_t& s) {
-            Eigen::SparseMatrix<value_t, Eigen::RowMajor> betas(s.betas.size(), s.X->cols());
+            const auto p = s.group_sizes.sum();
+            Eigen::SparseMatrix<value_t, Eigen::RowMajor> betas(s.betas.size(), p);
             for (size_t i = 0; i < s.betas.size(); ++i) {
                 const auto& curr = s.betas[i];
                 for (int j = 0; j < curr.nonZeros(); ++j) {
@@ -154,14 +149,7 @@ void pin_naive(py::module_& m, const char* name)
                 s.rsqs.size()
             );
         })
-        .def_property_readonly("resids", [](const state_t& s) {
-            ad::util::rowarr_type<value_t> resids(s.resids.size(), s.resid.size());
-            for (size_t i = 0; i < s.resids.size(); ++i) {
-                resids.row(i) = s.resids[i];
-            }
-            return resids;
-        })
-        .def_readonly("n_cds", &state_t::n_cds)
+        .def_readonly("iters", &state_t::iters)
         .def_property_readonly("time_strong_cd", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<double>>(
                 s.time_strong_cd.data(),
@@ -177,8 +165,185 @@ void pin_naive(py::module_& m, const char* name)
         ;
 }
 
+template <class MatrixType>
+void pin_naive(py::module_& m, const char* name)
+{
+    using matrix_t = MatrixType;
+    using state_t = ad::state::PinNaive<matrix_t>;
+    using base_t = typename state_t::base_t;
+    using value_t = typename state_t::value_t;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    using vec_bool_t = typename state_t::vec_bool_t;
+    using dyn_vec_index_t = typename state_t::dyn_vec_index_t;
+    using dyn_vec_value_t = typename state_t::dyn_vec_value_t;
+    using dyn_vec_vec_value_t = typename state_t::dyn_vec_vec_value_t;
+    using dyn_vec_sp_vec_t = typename state_t::dyn_vec_sp_vec_t;
+
+    py::class_<state_t, base_t>(m, name)
+        .def(py::init<
+            matrix_t&,
+            const Eigen::Ref<const vec_index_t>&, 
+            const Eigen::Ref<const vec_index_t>&,
+            value_t, 
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_index_t>&, 
+            const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_index_t>&, 
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&, 
+            size_t,
+            value_t,
+            value_t,
+            value_t,
+            value_t,
+            size_t,
+            size_t,
+            value_t,
+            Eigen::Ref<vec_value_t>,
+            Eigen::Ref<vec_value_t>, 
+            Eigen::Ref<vec_value_t>,
+            dyn_vec_index_t,
+            dyn_vec_index_t,
+            dyn_vec_index_t,
+            dyn_vec_index_t,
+            dyn_vec_index_t,
+            Eigen::Ref<vec_bool_t>,
+            dyn_vec_sp_vec_t, 
+            dyn_vec_value_t,
+            dyn_vec_vec_value_t 
+        >(),
+            py::arg("X"),
+            py::arg("groups").noconvert(),
+            py::arg("group_sizes").noconvert(),
+            py::arg("alpha"),
+            py::arg("penalty").noconvert(),
+            py::arg("strong_set").noconvert(),
+            py::arg("strong_g1").noconvert(),
+            py::arg("strong_g2").noconvert(),
+            py::arg("strong_begins").noconvert(),
+            py::arg("strong_var").noconvert(),
+            py::arg("lmdas").noconvert(),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("rsq_slope_tol"),
+            py::arg("rsq_curv_tol"),
+            py::arg("newton_tol"),
+            py::arg("newton_max_iters"),
+            py::arg("n_threads"),
+            py::arg("rsq"),
+            py::arg("resid").noconvert(),
+            py::arg("strong_beta").noconvert(),
+            py::arg("strong_grad").noconvert(),
+            py::arg("active_set"),
+            py::arg("active_g1"),
+            py::arg("active_g2"),
+            py::arg("active_begins"),
+            py::arg("active_order"),
+            py::arg("is_active").noconvert(),
+            py::arg("betas"),
+            py::arg("rsqs"),
+            py::arg("resids")
+        )
+        .def_readonly("X", &state_t::X)
+        .def_readonly("resid", &state_t::resid)
+        .def_property_readonly("resids", [](const state_t& s) {
+            ad::util::rowarr_type<value_t> resids(s.resids.size(), s.resid.size());
+            for (size_t i = 0; i < s.resids.size(); ++i) {
+                resids.row(i) = s.resids[i];
+            }
+            return resids;
+        })
+        ;
+}
+
+template <class MatrixType>
+void pin_cov(py::module_& m, const char* name)
+{
+    using matrix_t = MatrixType;
+    using state_t = ad::state::PinCov<matrix_t>;
+    using base_t = typename state_t::base_t;
+    using value_t = typename state_t::value_t;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    using vec_bool_t = typename state_t::vec_bool_t;
+    using dyn_vec_index_t = typename state_t::dyn_vec_index_t;
+    using dyn_vec_value_t = typename state_t::dyn_vec_value_t;
+    using dyn_vec_sp_vec_t = typename state_t::dyn_vec_sp_vec_t;
+
+    py::class_<state_t, base_t>(m, name)
+        .def(py::init<
+            matrix_t&,
+            const Eigen::Ref<const vec_index_t>&, 
+            const Eigen::Ref<const vec_index_t>&,
+            value_t, 
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_index_t>&, 
+            const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_index_t>&, 
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&, 
+            size_t,
+            value_t,
+            value_t,
+            value_t,
+            value_t,
+            size_t,
+            size_t,
+            value_t,
+            Eigen::Ref<vec_value_t>, 
+            Eigen::Ref<vec_value_t>,
+            dyn_vec_index_t,
+            dyn_vec_index_t,
+            dyn_vec_index_t,
+            dyn_vec_index_t,
+            dyn_vec_index_t,
+            Eigen::Ref<vec_bool_t>,
+            dyn_vec_sp_vec_t, 
+            dyn_vec_value_t
+        >(),
+            py::arg("A"),
+            py::arg("groups").noconvert(),
+            py::arg("group_sizes").noconvert(),
+            py::arg("alpha"),
+            py::arg("penalty").noconvert(),
+            py::arg("strong_set").noconvert(),
+            py::arg("strong_g1").noconvert(),
+            py::arg("strong_g2").noconvert(),
+            py::arg("strong_begins").noconvert(),
+            py::arg("strong_var").noconvert(),
+            py::arg("lmdas").noconvert(),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("rsq_slope_tol"),
+            py::arg("rsq_curv_tol"),
+            py::arg("newton_tol"),
+            py::arg("newton_max_iters"),
+            py::arg("n_threads"),
+            py::arg("rsq"),
+            py::arg("strong_beta").noconvert(),
+            py::arg("strong_grad").noconvert(),
+            py::arg("active_set"),
+            py::arg("active_g1"),
+            py::arg("active_g2"),
+            py::arg("active_begins"),
+            py::arg("active_order"),
+            py::arg("is_active").noconvert(),
+            py::arg("betas"),
+            py::arg("rsqs")
+        )
+        .def_readonly("A", &state_t::A)
+        ;
+}
+
 void register_state(py::module_& m)
 {
+    pin_base<double>(m, "PinBase64");
+    pin_base<float>(m, "PinBase32");
     pin_naive<ad::matrix::MatrixBase<double>>(m, "PinNaive64");
     pin_naive<ad::matrix::MatrixBase<float>>(m, "PinNaive32");
+    pin_cov<ad::matrix::MatrixBase<double>>(m, "PinCov64");
+    pin_cov<ad::matrix::MatrixBase<float>>(m, "PinCov32");
 }

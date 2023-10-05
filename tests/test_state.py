@@ -50,4 +50,4 @@ def test_pin_naive():
     assert np.allclose(rsq, state.rsq)
     assert np.allclose(strong_beta, state.strong_beta)
     assert np.allclose(active_set, state.active_set)
-    assert state.n_cds == 0
+    assert state.iters == 0

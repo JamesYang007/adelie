@@ -47,7 +47,7 @@ public:
         int i, int j, int p, int q, 
         const Eigen::Ref<const rowvec_t>& v, 
         Eigen::Ref<rowvec_t> out
-    ) const override
+    ) override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -61,7 +61,7 @@ public:
         int i, int j, int p, int q, 
         const Eigen::Ref<const rowvec_t>& v, 
         Eigen::Ref<rowvec_t> out
-    ) const override
+    ) override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
