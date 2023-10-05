@@ -402,7 +402,7 @@ void newton_brent_solver(
         const auto h_max_out = root_upper_bound(vbuffer1, v, 0.0); // IMPORTANT: NEEDS GUARANTEE
         const value_t h_max = std::get<0>(h_max_out);
 
-        value_t h;
+        value_t h = 0;
         size_t iters_brent;
         brent(
             [&](auto x) { return root_function(x, vbuffer1, v, l1); },

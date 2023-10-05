@@ -18,6 +18,32 @@ static void BM_cmul_seq(benchmark::State& state) {
     }
 }
 
+
+inline double cmul_par(
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& v1,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& v2,
+    size_t nt
+)
+{
+    const auto n = v1.size();
+    const size_t n_threads_cap = std::min<size_t>(nt, n);
+    const int n_blocks = std::max<int>(n_threads_cap, 1);
+    const int block_size = n / n_blocks;
+    const int remainder = n % n_blocks;
+    ad::util::rowvec_type<double> buff(n_blocks);
+    #pragma omp parallel for schedule(static) num_threads(n_threads_cap)
+    for (int t = 0; t < n_blocks; ++t)
+    {
+        const auto begin = (
+            std::min<int>(t, remainder) * (block_size + 1) 
+            + std::max<int>(t-remainder, 0) * block_size
+        );
+        const auto size = block_size + (t < remainder);
+        buff[t] = v1.matrix().segment(begin, size).dot(v2.matrix().segment(begin, size));
+    }
+    return buff.sum();
+}
+
 static void BM_cmul_par(benchmark::State& state) {
     const auto n = state.range(0);
     const auto nt = state.range(1);
@@ -27,21 +53,10 @@ static void BM_cmul_par(benchmark::State& state) {
     double out;
 
     for (auto _ : state) {
-        const size_t n_threads_cap = std::min<size_t>(nt, n);
-        const int n_blocks = std::max<int>(n_threads_cap, 1);
-        const int block_size = n / n_blocks;
-        const int remainder = n % n_blocks;
-        #pragma omp parallel for schedule(static) num_threads(n_threads_cap) reduction(+:out)
-        for (int t = 0; t < n_blocks; ++t)
-        {
-            const auto begin = (
-                std::min<int>(t, remainder) * (block_size + 1) 
-                + std::max<int>(t-remainder, 0) * block_size
-            );
-            const auto size = block_size + (t < remainder);
-            out += v1.matrix().segment(begin, size).dot(v2.matrix().segment(begin, size));
-        }
-        out = 0;
+        out = cmul_par(
+            v1, v2, nt 
+        );
+        benchmark::DoNotOptimize(out);
     }
 }
 
@@ -144,28 +159,8 @@ static void BM_bmul_par_cs(benchmark::State& state) {
     for (auto _ : state) {
         #pragma omp parallel num_threads(n_threads_cap)
         {
-            //int c = 0;
-            //while (c < p) {
-            //    int c_size = std::min<int>(3, p-c);
-            //    #pragma omp for schedule(static) nowait
-            //    for (int t = 0; t < n_blocks; ++t)
-            //    {
-            //        const auto begin = (
-            //            std::min<int>(t, remainder) * (block_size + 1) 
-            //            + std::max<int>(t-remainder, 0) * block_size
-            //        );
-            //        const auto size = block_size + (t < remainder);
-            //        s.row(t).segment(c, c_size).matrix().noalias() = (
-            //            v.matrix().segment(begin, size) * m.block(begin, c, size, c_size)
-            //        );
-            //    }
-            //    c += c_size;
-            //}
-
-            //#pragma omp for schedule(static) nowait
-            //for (int t = 0; t < n_blocks; ++t)
             #pragma omp for schedule(static) nowait
-            for (int t = 0; t < std::min(n_blocks, 4); ++t)
+            for (int t = 0; t < n_blocks; ++t)
             {
                 const auto begin = (
                     std::min<int>(t, remainder) * (block_size + 1) 
@@ -177,7 +172,7 @@ static void BM_bmul_par_cs(benchmark::State& state) {
                 );
             }
         }
-        //out = s.rowwise().sum();
+        out = s.rowwise().sum();
     }
 }
 
@@ -227,14 +222,14 @@ static void BM_btmul_par_c(benchmark::State& state) {
 }
 
 BENCHMARK(BM_cmul_seq)
-    -> Args({1000000})
+    -> Args({10000000})
     ;
 BENCHMARK(BM_cmul_par)
-    -> Args({2000000, 1})
-    -> Args({2000000, 2})
-    -> Args({2000000, 4})
-    -> Args({2000000, 8})
-    -> Args({2000000, 16})
+    -> Args({10000000, 1})
+    -> Args({10000000, 2})
+    -> Args({10000000, 4})
+    -> Args({10000000, 8})
+    -> Args({10000000, 16})
     ;
 BENCHMARK(BM_ctmul_seq)
     -> Args({1000000})
@@ -258,11 +253,11 @@ BENCHMARK(BM_bmul_par_c)
     -> Args({1000000, 8, 16})
     ;
 BENCHMARK(BM_bmul_par_cs)
-    -> Args({1000000, 8, 1})
-    -> Args({1000000, 8, 2})
-    -> Args({1000000, 8, 4})
-    -> Args({1000000, 8, 8})
-    -> Args({1000000, 8, 16})
+    -> Args({500000, 8, 1})
+    -> Args({500000, 8, 2})
+    -> Args({500000, 8, 4})
+    -> Args({500000, 8, 8})
+    -> Args({500000, 8, 16})
     ;
 BENCHMARK(BM_btmul_seq)
     -> Args({1000000, 8})
