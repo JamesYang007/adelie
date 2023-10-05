@@ -24,7 +24,6 @@
 
    .. autosummary::
    
-      ~pin_base.X
       ~pin_base.groups
       ~pin_base.group_sizes
       ~pin_base.alpha
@@ -41,6 +40,7 @@
       ~pin_base.rsq_curv_tol
       ~pin_base.newton_tol
       ~pin_base.newton_max_iters
+      ~pin_base.n_threads
       ~pin_base.rsq
       ~pin_base.strong_beta
       ~pin_base.strong_grad
@@ -52,7 +52,7 @@
       ~pin_base.is_active
       ~pin_base.betas
       ~pin_base.rsqs
-      ~pin_base.n_cds
+      ~pin_base.iters
       ~pin_base.time_strong_cd
       ~pin_base.time_active_cd
    
@@ -71,7 +71,6 @@
    
    
    
-   .. autoattribute:: X
    .. autoattribute:: groups
    .. autoattribute:: group_sizes
    .. autoattribute:: alpha
@@ -88,6 +87,7 @@
    .. autoattribute:: rsq_curv_tol
    .. autoattribute:: newton_tol
    .. autoattribute:: newton_max_iters
+   .. autoattribute:: n_threads
    .. autoattribute:: rsq
    .. autoattribute:: strong_beta
    .. autoattribute:: strong_grad
@@ -99,7 +99,7 @@
    .. autoattribute:: is_active
    .. autoattribute:: betas
    .. autoattribute:: rsqs
-   .. autoattribute:: n_cds
+   .. autoattribute:: iters
    .. autoattribute:: time_strong_cd
    .. autoattribute:: time_active_cd
    

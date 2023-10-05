@@ -24,9 +24,9 @@
 
    .. autosummary::
    
+      ~pin_naive.X
       ~pin_naive.resid
       ~pin_naive.resids
-      ~pin_naive.X
       ~pin_naive.groups
       ~pin_naive.group_sizes
       ~pin_naive.alpha
@@ -43,6 +43,7 @@
       ~pin_naive.rsq_curv_tol
       ~pin_naive.newton_tol
       ~pin_naive.newton_max_iters
+      ~pin_naive.n_threads
       ~pin_naive.rsq
       ~pin_naive.strong_beta
       ~pin_naive.strong_grad
@@ -54,7 +55,7 @@
       ~pin_naive.is_active
       ~pin_naive.betas
       ~pin_naive.rsqs
-      ~pin_naive.n_cds
+      ~pin_naive.iters
       ~pin_naive.time_strong_cd
       ~pin_naive.time_active_cd
    
@@ -73,9 +74,9 @@
    
    
    
+   .. autoattribute:: X
    .. autoattribute:: resid
    .. autoattribute:: resids
-   .. autoattribute:: X
    .. autoattribute:: groups
    .. autoattribute:: group_sizes
    .. autoattribute:: alpha
@@ -92,6 +93,7 @@
    .. autoattribute:: rsq_curv_tol
    .. autoattribute:: newton_tol
    .. autoattribute:: newton_max_iters
+   .. autoattribute:: n_threads
    .. autoattribute:: rsq
    .. autoattribute:: strong_beta
    .. autoattribute:: strong_grad
@@ -103,7 +105,7 @@
    .. autoattribute:: is_active
    .. autoattribute:: betas
    .. autoattribute:: rsqs
-   .. autoattribute:: n_cds
+   .. autoattribute:: iters
    .. autoattribute:: time_strong_cd
    .. autoattribute:: time_active_cd
    
