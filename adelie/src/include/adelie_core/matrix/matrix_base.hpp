@@ -76,6 +76,14 @@ public:
     ) =0;
 
     /**
+     * @brief Returns the coefficient at (i, j).
+     * 
+     * @param i     row index.
+     * @param j     column index.
+     */
+    virtual value_t coeff(int i, int j) const =0;
+
+    /**
      * @brief Computes the squared norm of a column of the matrix.
      * 
      * @param j     column index.

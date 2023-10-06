@@ -78,6 +78,11 @@ public:
         );
     }
 
+    value_t coeff(int i, int j) const override 
+    {
+        return _mat(i, j);
+    }
+
     value_t cnormsq(int j) const override
     {
         return _mat.col(j).squaredNorm();

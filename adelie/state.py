@@ -1219,8 +1219,9 @@ class pin_cov(pin_base):
             active_set=active_set,
         )
 
-        self._strong_var = np.array([
-            A.coeff(j, j) for j in range(A.cols())
+        self._strong_var = np.concatenate([
+            [A.coeff(j, j) for j in range(g, g+gs)]
+            for g, gs in zip(groups[strong_set], group_sizes[strong_set])
         ])
 
         State = (
@@ -1274,17 +1275,7 @@ class pin_cov(pin_base):
     ):
         super().check(method=method, logger=logger)
         self._check(
-            isinstance(self.A, matrix.Base32) or isinstance(self.X, matrix.Base64),
+            isinstance(self.A, matrix.Base32) or isinstance(self.A, matrix.Base64),
             "check A type",
-            method, logger,
-        )
-        self._check(
-            self.resid.shape[0] == self.X.rows(),
-            "check resid shape",
-            method, logger,
-        )
-        self._check(
-            self.resids.shape == (self.betas.shape[0], self.X.rows()),
-            "check resids shape",
             method, logger,
         )
