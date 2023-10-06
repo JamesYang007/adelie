@@ -71,6 +71,16 @@ public:
         );
     }
 
+    value_t coeff(int i, int j) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            value_t,
+            base_t,
+            coeff,
+            i, j
+        );
+    }
+
     value_t cnormsq(int j) const override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -111,6 +121,7 @@ void matrix_base(py::module_& m, const char* name)
         .def("ctmul", &internal_t::ctmul)
         .def("bmul", &internal_t::bmul)
         .def("btmul", &internal_t::btmul)
+        .def("coeff", &internal_t::coeff)
         .def("cnormsq", &internal_t::cnormsq)
         .def("rows", &internal_t::rows)
         .def("cols", &internal_t::cols)
