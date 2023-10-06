@@ -304,6 +304,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_base.html">adelie.state.pin_base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov.html">adelie.state.pin_cov</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.objective.html">adelie.grpnet.objective</a></li>
@@ -371,7 +372,7 @@ document.write(`
 <h1>adelie.grpnet.solve_pin<a class="headerlink" href="#adelie-grpnet-solve-pin" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.grpnet.solve_pin">
-<span class="sig-prename descclassname"><span class="pre">adelie.grpnet.</span></span><span class="sig-name descname"><span class="pre">solve_pin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state:</span> <span class="pre">~adelie.state.pin_naive</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;RootLogger</span> <span class="pre">root</span> <span class="pre">(WARNING)&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.grpnet.solve_pin" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.grpnet.</span></span><span class="sig-name descname"><span class="pre">solve_pin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state:</span> <span class="pre">~adelie.state.pin_naive</span> <span class="pre">|</span> <span class="pre">~adelie.state.pin_cov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;RootLogger</span> <span class="pre">root</span> <span class="pre">(WARNING)&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.grpnet.solve_pin" title="Link to this definition">#</a></dt>
 <dd><p>Solves the pinned group elastic net problem.</p>
 <p>The pinned group elastic net problem is given by
 minimizing the objective defined in <code class="docutils literal notranslate"><span class="pre">objective()</span></code>

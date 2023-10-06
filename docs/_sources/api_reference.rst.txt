@@ -51,6 +51,7 @@ adelie.state
     base
     pin_base
     pin_naive
+    pin_cov
 
 
 adelie.grpnet

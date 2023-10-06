@@ -1,0 +1,108 @@
+﻿adelie.state.pin\_cov
+=====================
+
+.. currentmodule:: adelie.state
+
+.. autoclass:: pin_cov
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~pin_cov.__init__
+      ~pin_cov.check
+      ~pin_cov.initialize
+      ~pin_cov.internal
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~pin_cov.A
+      ~pin_cov.groups
+      ~pin_cov.group_sizes
+      ~pin_cov.alpha
+      ~pin_cov.penalty
+      ~pin_cov.strong_set
+      ~pin_cov.strong_g1
+      ~pin_cov.strong_g2
+      ~pin_cov.strong_begins
+      ~pin_cov.strong_var
+      ~pin_cov.lmdas
+      ~pin_cov.max_iters
+      ~pin_cov.tol
+      ~pin_cov.rsq_slope_tol
+      ~pin_cov.rsq_curv_tol
+      ~pin_cov.newton_tol
+      ~pin_cov.newton_max_iters
+      ~pin_cov.n_threads
+      ~pin_cov.rsq
+      ~pin_cov.strong_beta
+      ~pin_cov.strong_grad
+      ~pin_cov.active_set
+      ~pin_cov.active_g1
+      ~pin_cov.active_g2
+      ~pin_cov.active_begins
+      ~pin_cov.active_order
+      ~pin_cov.is_active
+      ~pin_cov.betas
+      ~pin_cov.rsqs
+      ~pin_cov.iters
+      ~pin_cov.time_strong_cd
+      ~pin_cov.time_active_cd
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: check
+   .. automethod:: initialize
+   .. automethod:: internal
+   
+   
+
+   
+   
+   
+   .. autoattribute:: A
+   .. autoattribute:: groups
+   .. autoattribute:: group_sizes
+   .. autoattribute:: alpha
+   .. autoattribute:: penalty
+   .. autoattribute:: strong_set
+   .. autoattribute:: strong_g1
+   .. autoattribute:: strong_g2
+   .. autoattribute:: strong_begins
+   .. autoattribute:: strong_var
+   .. autoattribute:: lmdas
+   .. autoattribute:: max_iters
+   .. autoattribute:: tol
+   .. autoattribute:: rsq_slope_tol
+   .. autoattribute:: rsq_curv_tol
+   .. autoattribute:: newton_tol
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: n_threads
+   .. autoattribute:: rsq
+   .. autoattribute:: strong_beta
+   .. autoattribute:: strong_grad
+   .. autoattribute:: active_set
+   .. autoattribute:: active_g1
+   .. autoattribute:: active_g2
+   .. autoattribute:: active_begins
+   .. autoattribute:: active_order
+   .. autoattribute:: is_active
+   .. autoattribute:: betas
+   .. autoattribute:: rsqs
+   .. autoattribute:: iters
+   .. autoattribute:: time_strong_cd
+   .. autoattribute:: time_active_cd
+   
+   
