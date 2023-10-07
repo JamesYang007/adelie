@@ -405,8 +405,6 @@ void solve_pin_cov_active(
     const auto& groups = pack.groups;
     const auto& group_sizes = pack.group_sizes;
     const auto& strong_set = pack.strong_set;
-    const auto& strong_g1 = pack.strong_g1;
-    const auto& strong_g2 = pack.strong_g2;
     const auto& strong_begins = pack.strong_begins;
     const auto& active_set = pack.active_set;
     const auto& active_g1 = pack.active_g1;
@@ -474,7 +472,7 @@ void solve_pin_cov_active(
     if ((ab_diff_view.size() == 0) ||
         (active_set.size() == strong_set.size())) return;
 
-    for (int j_idx = 0; j_idx < strong_set.size(); ++j_idx) {
+    for (size_t j_idx = 0; j_idx < strong_set.size(); ++j_idx) {
         if (is_active[j_idx]) continue;
 
         const auto j = strong_set[j_idx];
@@ -484,7 +482,7 @@ void solve_pin_cov_active(
         );
         auto new_gk = buffer3.head(groupj_size);
 
-        for (int i_idx = 0; i_idx < active_set.size(); ++i_idx) {
+        for (size_t i_idx = 0; i_idx < active_set.size(); ++i_idx) {
             const auto i = strong_set[active_set[i_idx]];
             const auto groupi_size = group_sizes[i];
             const auto ab_begin = active_begins[i_idx];

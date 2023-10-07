@@ -1,10 +1,11 @@
 from . import adelie_core as core
 from . import logger
 from .state import (
-    pin_naive,
-    pin_cov,
+    pin_naive_64,
+    pin_naive_32,
+    pin_cov_64,
+    pin_cov_32,
 )
-from copy import copy
 import numpy as np
 
 
@@ -131,7 +132,7 @@ def create_lambdas(
 
 
 def solve_pin(
-    state: pin_naive | pin_cov,
+    state,
     logger=logger.logger,
 ):
     """Solves the pinned group elastic net problem.
@@ -147,7 +148,7 @@ def solve_pin(
 
     Parameters
     ----------
-    state : pin_naive
+    state
         See the documentation for one of the listed types.
 
     Returns
@@ -163,13 +164,15 @@ def solve_pin(
     """
     # mapping of each state type to the corresponding solver
     f_dict = {
-        pin_naive: core.grpnet.solve_pin_naive_64,
-        pin_cov: core.grpnet.solve_pin_cov_64,
+        pin_naive_64: core.grpnet.solve_pin_naive_64,
+        pin_naive_32: core.grpnet.solve_pin_naive_32,
+        pin_cov_64: core.grpnet.solve_pin_cov_64,
+        pin_cov_32: core.grpnet.solve_pin_cov_32,
     }
 
     # solve group elastic net
     f = f_dict[type(state)]
-    out = f(state.internal())
+    out = f(state)
 
     # raise any errors
     if out["error"] != "":
@@ -177,7 +180,6 @@ def solve_pin(
 
     # return a subsetted Python result object
     core_state = out["state"]
-    state = copy(state)
-    state.initialize(core_state)
+    state = type(state).create_from_core(state, core_state)
 
     return state

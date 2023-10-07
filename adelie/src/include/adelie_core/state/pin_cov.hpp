@@ -4,15 +4,6 @@
 namespace adelie_core {
 namespace state {
 
-/**
- * State class for solve_pin_cov method.
- * 
- * @param   A           PSD matrix (p, p) with diagonal blocks A_{ii}. 
- *                      This matrix only needs to satisfy the properties
- *                      when looking at the sub-matrix of all strong_set groups.
- *                      The diagonal blocks are never read, 
- *                      so they can be used as storage for something else.
- */
 template <class MatrixType, 
           class ValueType=typename std::decay_t<MatrixType>::value_t,
           class IndexType=Eigen::Index,

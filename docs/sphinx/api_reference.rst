@@ -33,7 +33,12 @@ adelie.matrix
 
 
     base
-    dense
+    NaiveBase64
+    NaiveBase32
+    CovBase64
+    CovBase32
+    naive_dense
+    cov_dense
 
 
 adelie.state
@@ -49,7 +54,6 @@ adelie.state
 
     deduce_states
     base
-    pin_base
     pin_naive
     pin_cov
 
@@ -69,3 +73,18 @@ adelie.grpnet
     lambda_max
     create_lambdas
     solve_pin
+
+
+adelie.adelie_core
+------------------
+
+
+.. currentmodule:: adelie.adelie_core
+
+
+.. autosummary::
+    :toctree: generated/
+
+
+    state.PinBase64
+    state.PinBase32
