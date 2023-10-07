@@ -66,8 +66,8 @@ ext_modules = [
     Pybind11Extension(
         "adelie.adelie_core",
         sorted(glob("adelie/src/*.cpp")),  # Sort source files for reproducibility
-        define_macros = [
-            ('EIGEN_MATRIXBASE_PLUGIN', '\"adelie_core/util/eigen/matrixbase_plugin.hpp\"'),
+        defines=[
+            ("PYBIND11_DETAILED_ERROR_MESSAGES", None),
         ],
         include_dirs=[
             "adelie/src",

@@ -4,9 +4,6 @@
 namespace adelie_core {
 namespace state {
 
-/**
- * State class for solve_pin_naive method.
- */
 template <class MatrixType, 
           class ValueType=typename std::decay_t<MatrixType>::value_t,
           class IndexType=Eigen::Index,
@@ -49,12 +46,13 @@ struct PinNaive : PinBase<
     using typename base_t::dyn_vec_index_t;
     using typename base_t::dyn_vec_value_t;
     using typename base_t::dyn_vec_sp_vec_t;
+    using matrix_t = MatrixType;
     using dyn_vec_vec_value_t = DynamicVectorVecValueType;
 
     /* Static states */
 
     /* Dynamic states */
-    MatrixType* X;
+    matrix_t* X;
     map_vec_value_t resid;
     dyn_vec_vec_value_t resids;
 

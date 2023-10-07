@@ -12,7 +12,7 @@ def test_pin_naive():
     p = 100
     G = 2
 
-    X = matrix.dense(np.random.normal(0, 1, (n, p)))
+    X = matrix.naive_dense(np.random.normal(0, 1, (n, p)), n_threads=4)
     groups = np.array([0, 1])
     group_sizes = np.array([1, p-1])
     alpha = 1.0
@@ -59,7 +59,7 @@ def test_pin_cov():
     G = 2
 
     X = np.random.normal(0, 1, (n, p))
-    A = matrix.dense(X.T @ X / n)
+    A = matrix.cov_dense(X.T @ X / n, n_threads=4)
     groups = np.array([0, 1])
     group_sizes = np.array([1, p-1])
     alpha = 1.0

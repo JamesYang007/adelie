@@ -12,6 +12,63 @@ import cvxpy as cp
 import numpy as np
 
 
+def create_test_data(
+    n, p, G, S, 
+    alpha=1,
+    sparsity=0.95,
+    seed=0,
+):
+    np.random.seed(seed)
+
+    # define groups
+    groups = np.concatenate([
+        [0],
+        np.random.choice(np.arange(1, p), size=G-1, replace=False)
+    ])
+    groups = np.sort(groups).astype(int)
+    group_sizes = np.concatenate([groups, [p]], dtype=int)
+    group_sizes = group_sizes[1:] - group_sizes[:-1]
+
+    # generate raw data
+    X = np.random.normal(0, 1, (n, p))
+
+    # NOTE: MUST modify X such that each block has diagonal variance.
+    for g, gs in zip(groups, group_sizes):
+        block = X[:, g:g+gs]
+        _, _, vh = np.linalg.svd(block, full_matrices=True)
+        X[:, g:g+gs] = block @ vh.T
+
+    beta = np.random.normal(0, 1, p)
+    beta[np.random.choice(p, int(sparsity * p), replace=False)] = 0
+    y = X @ beta + np.random.normal(0, 1, n)
+    X /= np.sqrt(n)
+    y /= np.sqrt(n)
+
+    strong_set = np.random.choice(G, S, replace=False)
+    active_set = np.empty(0, dtype=int)
+    penalty = np.random.uniform(0, 1, G)
+    penalty /= np.sum(penalty)
+    lmdas = create_lambdas(
+        X=X, y=y, groups=groups, group_sizes=group_sizes,
+        alpha=alpha, penalty=penalty, 
+    )
+    rsq = 0
+    strong_beta = np.zeros(np.sum(group_sizes[strong_set]))
+
+    return (
+        X, 
+        y, 
+        groups, 
+        group_sizes, 
+        penalty,
+        lmdas,
+        strong_set, 
+        active_set, 
+        rsq,
+        strong_beta,
+    )
+
+
 def solve_cvxpy(
     X: np.ndarray,
     y: np.ndarray,
@@ -22,7 +79,7 @@ def solve_cvxpy(
     penalty: np.ndarray,
     strong_set: np.ndarray,
 ):
-    n, p = X.shape
+    _, p = X.shape
     beta = cp.Variable(p)
     expr = (
         0.5 * cp.sum_squares(y - X @ beta)
@@ -98,63 +155,40 @@ def run_solve_pin(state, X, y):
 
 
 def test_solve_pin_naive():
-    def _test(n, p, G, S, alpha=1, seed=0):
-        np.random.seed(seed)
-
-        # define groups
-        groups = np.concatenate([
-            [0],
-            np.random.choice(np.arange(1, p), size=G-1, replace=False)
-        ])
-        groups = np.sort(groups).astype(int)
-        group_sizes = np.concatenate([groups, [p]], dtype=int)
-        group_sizes = group_sizes[1:] - group_sizes[:-1]
-
-        # generate raw data
-        _X = np.random.normal(0, 1, (n, p))
-
-        # NOTE: MUST modify X such that each block has diagonal variance.
-        for g, gs in zip(groups, group_sizes):
-            block = _X[:, g:g+gs]
-            u, d, vh = np.linalg.svd(block, full_matrices=True)
-            _X[:, g:g+gs] = block @ vh.T
-
-        beta = np.random.normal(0, 1, p)
-        beta[np.random.choice(p, int(0.95 * p), replace=False)] = 0
-        y = _X @ beta + np.random.normal(0, 1, n)
-        _X /= np.sqrt(n)
-        y /= np.sqrt(n)
-
-        X = ad.matrix.dense(_X, n_threads=2)
-        strong_set = np.random.choice(G, S, replace=False)
-        active_set = np.empty(0, dtype=int)
-        penalty = np.random.uniform(0, 1, G)
-        penalty /= np.sum(penalty)
-        lmdas = create_lambdas(
-            X=_X, y=y, groups=groups, group_sizes=group_sizes,
-            alpha=alpha, penalty=penalty, 
+    def _test(n, p, G, S, alpha=1, sparsity=0.95, seed=0):
+        (
+            X, 
+            y, 
+            groups, 
+            group_sizes, 
+            penalty,
+            lmdas,
+            strong_set, 
+            active_set, 
+            rsq,
+            strong_beta,
+        ) = create_test_data(
+            n, p, G, S, alpha, sparsity, seed,
         )
-        rsq = 0
         resid = y
-        strong_beta = np.zeros(np.sum(group_sizes[strong_set]))
-
-        state = pin_naive(
-            X=X,
-            groups=groups,
-            group_sizes=group_sizes,
-            alpha=alpha,
-            penalty=penalty,
-            strong_set=strong_set,
-            lmdas=lmdas,
-            rsq=rsq,
-            resid=resid,
-            strong_beta=strong_beta,
-            active_set=active_set,
-            newton_tol=1e-16,
-            newton_max_iters=1000,
-            tol=1e-30,
-        )
-        run_solve_pin(state, _X, y)
+        Xs = [
+            ad.matrix.naive_dense(X, n_threads=2)
+        ]
+        for Xpy in Xs:
+            state = pin_naive(
+                X=Xpy,
+                groups=groups,
+                group_sizes=group_sizes,
+                alpha=alpha,
+                penalty=penalty,
+                strong_set=strong_set,
+                lmdas=lmdas,
+                rsq=rsq,
+                resid=resid,
+                strong_beta=strong_beta,
+                active_set=active_set,
+            )
+            run_solve_pin(state, X, y)
 
     _test(10, 4, 2, 2)
     _test(10, 100, 10, 2)
@@ -164,68 +198,50 @@ def test_solve_pin_naive():
 
 
 def test_solve_pin_cov():
-    def _test(n, p, G, S, alpha=1, seed=0):
-        np.random.seed(seed)
-
-        # define groups
-        groups = np.concatenate([
-            [0],
-            np.random.choice(np.arange(1, p), size=G-1, replace=False)
-        ])
-        groups = np.sort(groups).astype(int)
-        group_sizes = np.concatenate([groups, [p]], dtype=int)
-        group_sizes = group_sizes[1:] - group_sizes[:-1]
-
-        # generate raw data
-        _X = np.random.normal(0, 1, (n, p))
-
-        # NOTE: MUST modify X such that each block has diagonal variance.
-        for g, gs in zip(groups, group_sizes):
-            block = _X[:, g:g+gs]
-            u, d, vh = np.linalg.svd(block, full_matrices=True)
-            _X[:, g:g+gs] = block @ vh.T
-
-        beta = np.random.normal(0, 1, p)
-        beta[np.random.choice(p, int(0.95 * p), replace=False)] = 0
-        y = _X @ beta + np.random.normal(0, 1, n)
-        _X /= np.sqrt(n)
-        A = _X.T @ _X
-        y /= np.sqrt(n)
-
-        A = ad.matrix.dense(A, n_threads=3)
-        strong_set = np.random.choice(G, S, replace=False)
-        active_set = np.empty(0, dtype=int)
-        penalty = np.random.uniform(0, 1, G)
-        penalty /= np.sum(penalty)
-        lmdas = create_lambdas(
-            X=_X, y=y, groups=groups, group_sizes=group_sizes,
-            alpha=alpha, penalty=penalty, 
+    def _test(n, p, G, S, alpha=1, sparsity=0.95, seed=0):
+        (
+            X, 
+            y, 
+            groups, 
+            group_sizes, 
+            penalty,
+            lmdas,
+            strong_set, 
+            active_set, 
+            rsq,
+            strong_beta,
+        ) = create_test_data(
+            n, p, G, S, alpha, sparsity, seed,
         )
-        rsq = 0
-        strong_beta = np.zeros(np.sum(group_sizes[strong_set]))
-        grad = _X.T @ y
+
+        A = X.T @ X
+        grad = X.T @ y
         strong_grad = np.concatenate([
             grad[g:g+gs]
             for g, gs in zip(groups[strong_set], group_sizes[strong_set])
         ])
 
-        state = pin_cov(
-            A=A,
-            groups=groups,
-            group_sizes=group_sizes,
-            alpha=alpha,
-            penalty=penalty,
-            strong_set=strong_set,
-            lmdas=lmdas,
-            rsq=rsq,
-            strong_beta=strong_beta,
-            strong_grad=strong_grad,
-            active_set=active_set,
-            newton_tol=1e-16,
-            newton_max_iters=1000,
-            tol=1e-30,
-        )
-        run_solve_pin(state, _X, y)
+        # list of different types of cov matrices to test
+        As = [
+            ad.matrix.cov_dense(A, n_threads=3),
+            ad.matrix.cov_lazy(X, n_threads=3),
+        ]
+
+        for Apy in As:
+            state = pin_cov(
+                A=Apy,
+                groups=groups,
+                group_sizes=group_sizes,
+                alpha=alpha,
+                penalty=penalty,
+                strong_set=strong_set,
+                lmdas=lmdas,
+                rsq=rsq,
+                strong_beta=strong_beta,
+                strong_grad=strong_grad,
+                active_set=active_set,
+            )
+            run_solve_pin(state, X, y)
 
     _test(10, 4, 2, 2)
     _test(10, 100, 10, 2)

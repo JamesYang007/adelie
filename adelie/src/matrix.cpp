@@ -1,14 +1,16 @@
 #include "decl.hpp"
 #include <adelie_core/matrix/matrix_base.hpp>
-#include <adelie_core/matrix/matrix_dense.hpp>
+#include <adelie_core/matrix/matrix_naive_dense.hpp>
+#include <adelie_core/matrix/matrix_cov_dense.hpp>
+#include <adelie_core/matrix/matrix_cov_lazy.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
 
 template <class T>
-class PyMatrixBase : public ad::matrix::MatrixBase<T>
+class PyMatrixNaiveBase : public ad::matrix::MatrixNaiveBase<T>
 {
-    using base_t = ad::matrix::MatrixBase<T>;
+    using base_t = ad::matrix::MatrixNaiveBase<T>;
 public:
     /* Inherit the constructors */
     using base_t::base_t;
@@ -71,16 +73,6 @@ public:
         );
     }
 
-    value_t coeff(int i, int j) const override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            value_t,
-            base_t,
-            coeff,
-            i, j
-        );
-    }
-
     value_t cnormsq(int j) const override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -111,27 +103,249 @@ public:
 };
 
 template <class T>
-void matrix_base(py::module_& m, const char* name)
+void matrix_naive_base(py::module_& m, const char* name)
 {
-    using trampoline_t = PyMatrixBase<T>;
-    using internal_t = ad::matrix::MatrixBase<T>;
-    py::class_<internal_t, trampoline_t>(m, name)
+    using trampoline_t = PyMatrixNaiveBase<T>;
+    using internal_t = ad::matrix::MatrixNaiveBase<T>;
+    py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
+        Base class naive method matrices.
+        )delimiter")
         .def(py::init<>())
-        .def("cmul", &internal_t::cmul)
-        .def("ctmul", &internal_t::ctmul)
-        .def("bmul", &internal_t::bmul)
-        .def("btmul", &internal_t::btmul)
-        .def("coeff", &internal_t::coeff)
-        .def("cnormsq", &internal_t::cnormsq)
-        .def("rows", &internal_t::rows)
-        .def("cols", &internal_t::cols)
+        .def("cmul", &internal_t::cmul, R"delimiter(
+        Column vector multiplication.
+
+        Computes the dot-product ``v.T @ X[:,j]`` for a column ``j``.
+
+        Parameters
+        ----------
+        j : int
+            Column index.
+        v : (n,) np.ndarray
+            Vector to multiply the ``j`` th column with.
+        )delimiter")
+        .def("ctmul", &internal_t::ctmul, R"delimiter(
+        Column scalar multiplication.
+
+        Computes the scalar-vector multiplication ``v * X[:,j]`` for a column ``j``.
+
+        Parameters
+        ----------
+        j : int
+            Column index.
+        v : float
+            Scalar to multiply the ``j`` th column with.
+        out : (n,) np.ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("bmul", &internal_t::bmul, R"delimiter(
+        Block matrix-vector multiplication.
+
+        Computes the matrix-vector multiplication
+        ``v.T @ X[i:i+p, j:j+q]``.
+
+        Parameters
+        ----------
+        i : int
+            Row index.
+        j : int
+            Column index.
+        p : int
+            Number of rows.
+        q : int
+            Number of columns.
+        v : (p,) np.ndarray
+            Vector to multiply with the block matrix.
+        out : (q,) np.ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("btmul", &internal_t::btmul, R"delimiter(
+        Block matrix transpose-vector multiplication.
+
+        Computes the matrix-vector multiplication
+        ``v.T @ X[i:i+p, j:j+q].T``.
+
+        Parameters
+        ----------
+        i : int
+            Row index.
+        j : int
+            Column index.
+        p : int
+            Number of rows.
+        q : int
+            Number of columns.
+        v : (q,) np.ndarray
+            Vector to multiply with the block matrix.
+        out : (p,) np.ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("cnormsq", &internal_t::cnormsq, R"delimiter(
+        Column norm-squared.
+
+        Computes the :math:`\ell_2` norm square of a column.
+
+        Parameters
+        ----------
+        j : int
+            Column index.
+
+        Returns
+        -------
+        normsq
+            :math:`\ell_2` norm square of column ``j``.
+        )delimiter")
+        .def("rows", &internal_t::rows, R"delimiter(
+        Number of rows.
+        )delimiter")
+        .def("cols", &internal_t::cols, R"delimiter(
+        Number of columns.
+        )delimiter")
+        ;
+}
+
+template <class T>
+class PyMatrixCovBase : public ad::matrix::MatrixCovBase<T>
+{
+    using base_t = ad::matrix::MatrixCovBase<T>;
+public:
+    /* Inherit the constructors */
+    using base_t::base_t;
+    using typename base_t::value_t;
+    using typename base_t::rowvec_t;
+
+    void bmul(
+        int i, int j, int p, int q, 
+        const Eigen::Ref<const rowvec_t>& v, 
+        Eigen::Ref<rowvec_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            bmul,
+            i, j, p, q, v, out
+        );
+    }
+
+    value_t coeff(int i, int j) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            value_t,
+            base_t,
+            coeff,
+            i, j
+        );
+    }
+
+    int rows() const override
+    {
+        PYBIND11_OVERRIDE(
+            int,
+            base_t,
+            rows
+        );
+    }
+
+    int cols() const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            int,
+            base_t,
+            cols
+        );
+    }
+};
+
+template <class T>
+void matrix_cov_base(py::module_& m, const char* name)
+{
+    using trampoline_t = PyMatrixCovBase<T>;
+    using internal_t = ad::matrix::MatrixCovBase<T>;
+    py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
+        Base class for covariance method matrices.
+    )delimiter")
+        .def(py::init<>())
+        .def("bmul", &internal_t::bmul, R"delimiter(
+        Block matrix-vector multiplication.
+
+        Computes the matrix-vector multiplication
+        ``v.T @ A[i:i+p, j:j+q]``.
+
+        Parameters
+        ----------
+        i : int
+            Row index.
+        j : int
+            Column index.
+        p : int
+            Number of rows.
+        q : int
+            Number of columns.
+        v : (p,) np.ndarray
+            Vector to multiply with the block matrix.
+        out : (q,) np.ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("coeff", &internal_t::coeff, R"delimiter(
+        Coefficient of the matrix.
+
+        Computes the coefficient at index ``(i, j)``.
+
+        Parameters
+        ----------
+        i : int
+            Row index.
+        j : int
+            Column index.
+
+        Returns
+        -------
+        coeff
+            Coefficient at index ``(i, j)``.
+        )delimiter")
+        .def("rows", &internal_t::rows, R"delimiter(
+        Number of rows.
+        )delimiter")
+        .def("cols", &internal_t::cols, R"delimiter(
+        Number of columns.
+        )delimiter")
         ;
 }
 
 template <class DenseType>
-void matrix_dense(py::module_& m, const char* name)
+void matrix_naive_dense(py::module_& m, const char* name)
 {
-    using internal_t = ad::matrix::MatrixDense<DenseType>;
+    using internal_t = ad::matrix::MatrixNaiveDense<DenseType>;
+    using base_t = typename internal_t::base_t;
+    using dense_t = typename internal_t::dense_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(
+            py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
+            py::arg("mat").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+template <class DenseType>
+void matrix_cov_dense(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixCovDense<DenseType>;
+    using base_t = typename internal_t::base_t;
+    using dense_t = typename internal_t::dense_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(
+            py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
+            py::arg("mat").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+template <class DenseType>
+void matrix_cov_lazy(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixCovLazy<DenseType>;
     using base_t = typename internal_t::base_t;
     using dense_t = typename internal_t::dense_t;
     py::class_<internal_t, base_t>(m, name)
@@ -148,11 +362,22 @@ using dense_type = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Storage>;
 
 void register_matrix(py::module_& m)
 {
-    matrix_base<double>(m, "Base64");
-    matrix_base<float>(m, "Base32");
+    matrix_naive_base<double>(m, "NaiveBase64");
+    matrix_naive_base<float>(m, "NaiveBase32");
+    matrix_cov_base<double>(m, "CovBase64");
+    matrix_cov_base<float>(m, "CovBase32");
 
-    matrix_dense<dense_type<double, Eigen::RowMajor>>(m, "Dense64C");
-    matrix_dense<dense_type<double, Eigen::ColMajor>>(m, "Dense64F");
-    matrix_dense<dense_type<float, Eigen::RowMajor>>(m, "Dense32C");
-    matrix_dense<dense_type<float, Eigen::ColMajor>>(m, "Dense32F");
+    matrix_naive_dense<dense_type<double, Eigen::RowMajor>>(m, "NaiveDense64C");
+    matrix_naive_dense<dense_type<double, Eigen::ColMajor>>(m, "NaiveDense64F");
+    matrix_naive_dense<dense_type<float, Eigen::RowMajor>>(m, "NaiveDense32C");
+    matrix_naive_dense<dense_type<float, Eigen::ColMajor>>(m, "NaiveDense32F");
+
+    matrix_cov_dense<dense_type<double, Eigen::RowMajor>>(m, "CovDense64C");
+    matrix_cov_dense<dense_type<double, Eigen::ColMajor>>(m, "CovDense64F");
+    matrix_cov_dense<dense_type<float, Eigen::RowMajor>>(m, "CovDense32C");
+    matrix_cov_dense<dense_type<float, Eigen::ColMajor>>(m, "CovDense32F");
+    matrix_cov_lazy<dense_type<double, Eigen::RowMajor>>(m, "CovLazy64C");
+    matrix_cov_lazy<dense_type<double, Eigen::ColMajor>>(m, "CovLazy64F");
+    matrix_cov_lazy<dense_type<float, Eigen::RowMajor>>(m, "CovLazy32C");
+    matrix_cov_lazy<dense_type<float, Eigen::ColMajor>>(m, "CovLazy32F");
 }

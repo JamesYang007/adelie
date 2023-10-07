@@ -5,9 +5,6 @@
 namespace adelie_core {
 namespace state {
 
-/**
- * State base class for pin method.
- */
 template <class ValueType,
           class IndexType=Eigen::Index,
           class BoolType=bool,
@@ -72,6 +69,8 @@ struct PinBase
     // Benchmark information
     std::vector<double> time_strong_cd;
     std::vector<double> time_active_cd;
+
+    virtual ~PinBase() =default;
     
     explicit PinBase(
         const Eigen::Ref<const vec_index_t>& groups, 

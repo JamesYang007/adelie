@@ -19,38 +19,38 @@ def deduce_states(
     Parameters
     ----------
     groups : (G,) np.ndarray
-        See ``pin_base``.
+        See ``adelie.adelie_core.state.PinBase64``.
     group_sizes : (G,) np.ndarray
-        See ``pin_base``.
+        See ``adelie.adelie_core.state.PinBase64``.
     strong_set : (s,) np.ndarray
-        See ``pin_base``.
+        See ``adelie.adelie_core.state.PinBase64``.
     active_set : (a,) np.ndarray
-        See ``pin_base``.
+        See ``adelie.adelie_core.state.PinBase64``.
 
     Returns
     -------
     strong_g1 : (s1,) np.ndarray
-        See ``pin_base``.
+        See ``adelie.adelie_core.state.PinBase64``.
     strong_g2 : (s2,) np.ndarray
-        See ``pin_base``.
+        See ``adelie.adelie_core.state.PinBase64``.
     strong_begins : (s,) np.ndarray
-        See ``pin_base``.
+        See ``adelie.adelie_core.state.PinBase64``.
     strong_var : (ws,) np.ndarray
-        See ``pin_base``.
+        See ``adelie.adelie_core.state.PinBase64``.
     active_g1 : (a1,) np.ndarray
-        See ``pin_base``.
+        See ``adelie.adelie_core.state.PinBase64``.
     active_g2 : (a2,) np.ndarray
-        See ``pin_base``.
+        See ``adelie.adelie_core.state.PinBase64``.
     active_begins : (a,) np.ndarray
-        See ``pin_base``.
+        See ``adelie.adelie_core.state.PinBase64``.
     active_order : (a,) np.ndarray
-        See ``pin_base``.
+        See ``adelie.adelie_core.state.PinBase64``.
     is_active : (s,) np.ndarray
-        See ``pin_base``.
+        See ``adelie.adelie_core.state.PinBase64``.
 
     See Also
     --------
-    adelie.state.pin_base
+    adelie.adelie_core.state.PinBase64
     """
     S = strong_set.shape[0]
     strong_g1 = np.arange(S)[group_sizes[strong_set] == 1]
@@ -83,40 +83,7 @@ class base:
     """Base wrapper state class.
 
     All Python wrapper classes for core state classes must inherit from this class.
-
-    Parameters
-    ----------
-    core_state
-        Usually a C++ exported state class.
     """
-    def __init__(self, core_state):
-        self._core_state = core_state
-
-    def internal(self):
-        """Returns the core state object."""
-        return self._core_state
-
-    def initialize(self, core_state):
-        """Initializes the current object with core state object.
-        
-        A reference to the core state object will be saved so that
-        the lifetime of the object remains until the lifetime of the current object.
-        The members of the core state object will then be exposed
-        as members of the current object, often viewing rather than copying them.
-        
-        .. note::
-            The core state object will usually reference existing objects.
-            It is the user's responsibility that the lifetime of the referenced objects
-            surpasses that of the core state object.
-            
-        
-        Parameters
-        ----------
-        core_state
-            Usually a C++ exported state class.
-        """
-        self._core_state = core_state
-
     def _check(self, passed, msg, method, logger, *args, **kwargs):
         if passed:
             logger.info(msg, *args, **kwargs)
@@ -152,315 +119,7 @@ class base:
         return
 
 
-@dataclass(kw_only=True)
 class pin_base(base):
-    """Base state class for pin methods.
-
-    Parameters
-    ----------
-    groups : (G,) np.ndarray
-        List of starting indices to each group where `G` is the number of groups.
-        ``groups[i]`` is the starting index of the ``i`` th group. 
-    group_sizes : (G,) np.ndarray
-        List of group sizes corresponding to each element in ``groups``.
-        ``group_sizes[i]`` is the group size of the ``i`` th group. 
-    alpha : float
-        Elastic net parameter.
-        It must be in the range :math:`[0,1]`.
-    penalty : (G,) np.ndarray
-        Penalty factor for each group in the same order as ``groups``.
-        It must be a non-negative vector.
-    strong_set : (s,) np.ndarray
-        List of indices into ``groups`` that correspond to the strong groups.
-        ``strong_set[i]`` is ``i`` th strong group.
-    strong_g1 : (s1,) np.ndarray
-        List of indices into ``strong_set`` that correspond to groups of size ``1``.
-        ``strong_set[strong_g1[i]]`` is the ``i`` th strong group of size ``1``
-        such that ``group_sizes[strong_set[strong_g1[i]]]`` is ``1``.
-    strong_g2 : (s2,) np.ndarray
-        List of indices into ``strong_set`` that correspond to groups more than size ``1``.
-        ``strong_set[strong_g2[i]]`` is the ``i`` th strong group of size more than ``1``
-        such that ``group_sizes[strong_set[strong_g2[i]]]`` is more than ``1``.
-    strong_begins : (s,) np.ndarray
-        List of indices that index a corresponding list of values for each strong group.
-        ``strong_begins[i]`` is the starting index corresponding to the ``i`` th strong group.
-        From this index, reading ``group_sizes[strong_set[i]]`` number of elements
-        will grab values corresponding to the full ``i`` th strong group block.
-    strong_var : (ws,) np.ndarray
-        List of the diagonal of :math:`X_k^\\top X_k` along the strong groups :math:`k`.
-        ``strong_var[b:b+p]`` is the diagonal of :math:`X_k^\\top X_k` for the ``i`` th strong group where
-        ``k = strong_set[i]``,
-        ``b = strong_begins[i]``,
-        and ``p = group_sizes[k]``.
-    lmdas : (l,) np.ndarray
-        Regularization sequence to fit on.
-    max_iters : int
-        Maximum number of coordinate descents.
-    tol : float
-        Convergence tolerance.
-    rsq_slope_tol : float
-        Early stopping rule check on slope of :math:`R^2`.
-    rsq_curv_tol : float
-        Early stopping rule check on curvature of :math:`R^2`.
-    newton_tol : float
-        Convergence tolerance for the BCD update.
-    newton_max_iters : int
-        Maximum number of iterations for the BCD update.
-    n_threads : int
-        Number of threads.
-    rsq : float
-        Unnormalized :math:`R^2` value at ``strong_beta``.
-        The unnormalized :math:`R^2` is given by :math:`\\|y\\|_2^2 - \\|y-X\\beta\\|_2^2`.
-    strong_beta : (ws,) np.ndarray
-        Coefficient vector on the strong set.
-        ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
-        where
-        ``k = strong_set[i]``,
-        ``b = strong_begins[i]``,
-        and ``p = group_sizes[k]``.
-    strong_grad : (ws,) np.ndarray
-        Gradient :math:`X_k^\\top (y-X\\beta)` on the strong groups :math:`k` where :math:`beta` is given by ``strong_beta``.
-        ``strong_grad[b:b+p]`` is the gradient for the ``i`` th strong group
-        where 
-        ``k = strong_set[i]``,
-        ``b = strong_begins[i]``,
-        and ``p = group_sizes[k]``.
-    active_set : (a,) np.ndarray
-        List of indices into ``strong_set`` that correspond to active groups.
-        ``strong_set[active_set[i]]`` is the ``i`` th active group.
-        An active group is one with non-zero coefficient block,
-        that is, for every ``i`` th active group, 
-        ``strong_beta[b:b+p] == 0`` where 
-        ``j = active_set[i]``,
-        ``k = strong_set[j]``,
-        ``b = strong_begins[j]``,
-        and ``p = group_sizes[k]``.
-    active_g1 : (a1,) np.ndarray
-        Subset of ``active_set`` that correspond to groups of size ``1``.
-    active_g2 : (a2,) np.ndarray
-        Subset of ``active_set`` that correspond to groups of size more than ``1``.
-    active_begins : (a,) np.ndarray
-        List of indices that index a corresponding list of values for each active group.
-        ``active_begins[i]`` is the starting index corresponding to the ``i`` th active group.
-    active_order : (a,) np.ndarray
-        Ordering such that ``groups`` is sorted in ascending order for the active groups.
-        ``groups[strong_set[active_order[i]]]`` is the ``i`` th active group in ascending order.
-    is_active : (s,) np.ndarray
-        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
-        ``is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
-    betas : (l, p) scipy.sparse.csr_matrix
-        ``betas[i]`` corresponds to the solution corresponding to ``lmdas[i]``.
-    rsqs : (l,) np.ndarray
-        ``rsqs[i]`` corresponds to the unnormalized :math:`R^2` at ``betas[i]``.
-    iters : int
-        Number of coordinate descents taken.
-    time_strong_cd : np.ndarray
-        Benchmark time for performing coordinate-descent on the strong set at every iteration.
-    time_active_cd : np.ndarray
-        Benchmark time for performing coordinate-descent on the active set at every iteration.
-    """
-    # Static states
-    groups: np.ndarray
-    """
-    List of starting indices to each group where `G` is the number of groups.
-    ``groups[i]`` is the starting index of the ``i`` th group. 
-    """
-    group_sizes: np.ndarray
-    """
-    List of group sizes corresponding to each element in ``groups``.
-    ``group_sizes[i]`` is the group size of the ``i`` th group. 
-    """
-    alpha: float
-    """
-    Elastic net parameter.
-    It must be in the range :math:`[0,1]`.
-    """
-    penalty: np.ndarray
-    """
-    Penalty factor for each group in the same order as ``groups``.
-    It must be a non-negative vector.
-    """
-    strong_set: np.ndarray
-    """
-    List of indices into ``groups`` that correspond to the strong groups.
-    ``strong_set[i]`` is ``i`` th strong group.
-    """
-    strong_g1: np.ndarray
-    """
-    List of indices into ``strong_set`` that correspond to groups of size ``1``.
-    ``strong_set[strong_g1[i]]`` is the ``i`` th strong group of size ``1``
-    such that ``group_sizes[strong_set[strong_g1[i]]]`` is ``1``.
-    """
-    strong_g2: np.ndarray
-    """
-    List of indices into ``strong_set`` that correspond to groups more than size ``1``.
-    ``strong_set[strong_g2[i]]`` is the ``i`` th strong group of size more than ``1``
-    such that ``group_sizes[strong_set[strong_g2[i]]]`` is more than ``1``.
-    """
-    strong_begins: np.ndarray
-    """
-    List of indices that index a corresponding list of values for each strong group.
-    ``strong_begins[i]`` is the starting index corresponding to the ``i`` th strong group.
-    From this index, reading ``group_sizes[strong_set[i]]`` number of elements
-    will grab values corresponding to the full ``i`` th strong group block.
-    """
-    strong_var: np.ndarray
-    """
-    List of the diagonal of :math:`X_k^\\top X_k` along the strong groups :math:`k`.
-    ``strong_var[b:b+p]`` is the diagonal of :math:`X_k^\\top X_k` for the ``i`` th strong group where
-    ``k = strong_set[i]``,
-    ``b = strong_begins[i]``,
-    and ``p = group_sizes[k]``.
-    """
-    lmdas: np.ndarray
-    """
-    Regularization sequence to fit on.
-    """
-
-    # Configuration
-    max_iters: int
-    """
-    Maximum number of coordinate descents.
-    """
-    tol: float
-    """
-    Convergence tolerance.
-    """
-    rsq_slope_tol: float
-    """
-    Early stopping rule check on slope of :math:`R^2`.
-    """
-    rsq_curv_tol: float
-    """
-    Early stopping rule check on curvature of :math:`R^2`.
-    """
-    newton_tol: float
-    """
-    Convergence tolerance for the BCD update.
-    """
-    newton_max_iters: int
-    """
-    Maximum number of iterations for the BCD update.
-    """
-    n_threads: int
-    """
-    Number of threads.
-    """
-
-    # Dynamic states
-    rsq: float
-    """
-    Unnormalized :math:`R^2` value at ``strong_beta``.
-    The unnormalized :math:`R^2` is given by :math:`\\|y\\|_2^2 - \\|y-X\\beta\\|_2^2`.
-    """
-    strong_beta: np.ndarray
-    """
-    Coefficient vector on the strong set.
-    ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
-    where
-    ``k = strong_set[i]``,
-    ``b = strong_begins[i]``,
-    and ``p = group_sizes[k]``.
-    """
-    strong_grad: np.ndarray
-    """
-    Gradient :math:`X_k^\\top (y-X\\beta)` on the strong groups :math:`k` where :math:`beta` is given by ``strong_beta``.
-    ``strong_grad[b:b+p]`` is the gradient for the ``i`` th strong group
-    where 
-    ``k = strong_set[i]``,
-    ``b = strong_begins[i]``,
-    and ``p = group_sizes[k]``.
-    """
-    active_set: np.ndarray
-    """
-    List of indices into ``strong_set`` that correspond to active groups.
-    ``strong_set[active_set[i]]`` is the ``i`` th active group.
-    An active group is one with non-zero coefficient block,
-    that is, for every ``i`` th active group, 
-    ``strong_beta[b:b+p] == 0`` where 
-    ``j = active_set[i]``,
-    ``k = strong_set[j]``,
-    ``b = strong_begins[j]``,
-    and ``p = group_sizes[k]``.
-    """
-    active_g1: np.ndarray
-    """
-    Subset of ``active_set`` that correspond to groups of size ``1``.
-    """
-    active_g2: np.ndarray
-    """
-    Subset of ``active_set`` that correspond to groups of size more than ``1``.
-    """
-    active_begins: np.ndarray
-    """
-    List of indices that index a corresponding list of values for each active group.
-    ``active_begins[i]`` is the starting index corresponding to the ``i`` th active group.
-    """
-    active_order: np.ndarray
-    """
-    Ordering such that ``groups`` is sorted in ascending order for the active groups.
-    ``groups[strong_set[active_order[i]]]`` is the ``i`` th active group in ascending order.
-    """
-    is_active: np.ndarray
-    """
-    Boolean vector that indicates whether each strong group in ``groups`` is active or not.
-    ``is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
-    """
-    betas: scipy.sparse.csr_matrix
-    """
-    ``betas[i]`` corresponds to the solution corresponding to ``lmdas[i]``.
-    """
-    rsqs: np.ndarray
-    """
-    ``rsqs[i]`` corresponds to the :math:`R^2` at ``betas[i]``.
-    """
-    iters: int
-    """
-    Number of coordinate descents taken.
-    """
-    time_strong_cd: np.ndarray
-    """
-    Benchmark time for performing coordinate-descent on the strong set at every iteration.
-    """
-    time_active_cd: np.ndarray
-    """
-    Benchmark time for performing coordinate-descent on the active set at every iteration.
-    """
-    
-    def initialize(self, core_state):
-        super().initialize(core_state)
-        self.groups = core_state.groups
-        self.group_sizes = core_state.group_sizes
-        self.alpha = core_state.alpha
-        self.penalty = core_state.penalty
-        self.strong_set = core_state.strong_set
-        self.strong_g1 = core_state.strong_g1
-        self.strong_g2 = core_state.strong_g2
-        self.strong_begins = core_state.strong_begins
-        self.strong_var = core_state.strong_var
-        self.lmdas = core_state.lmdas
-        self.max_iters = core_state.max_iters
-        self.tol = core_state.tol
-        self.rsq_slope_tol = core_state.rsq_slope_tol
-        self.rsq_curv_tol = core_state.rsq_curv_tol
-        self.newton_tol = core_state.newton_tol
-        self.newton_max_iters = core_state.newton_max_iters
-        self.n_threads = core_state.n_threads
-        self.rsq = core_state.rsq
-        self.strong_beta = core_state.strong_beta
-        self.strong_grad = core_state.strong_grad
-        self.active_set = core_state.active_set
-        self.active_g1 = core_state.active_g1
-        self.active_g2 = core_state.active_g2
-        self.active_begins = core_state.active_begins
-        self.active_order = core_state.active_order
-        self.is_active = core_state.is_active
-        self.betas = core_state.betas
-        self.rsqs = core_state.rsqs
-        self.iters = core_state.iters
-        self.time_strong_cd = core_state.time_strong_cd
-        self.time_active_cd = core_state.time_active_cd
-
     def check(
         self, 
         method: str =None, 
@@ -842,13 +501,327 @@ class pin_base(base):
         )
         
 
-@dataclass
-class pin_naive(pin_base):
-    """State class for pin, naive method.
+class pin_naive_base(pin_base):
+    """State wrapper base class for all pin, naive method."""
+    def default_init(
+        self, 
+        base_type: core.state.PinNaive64 | core.state.PinNaive32,
+        *,
+        X: matrix.base | matrix.NaiveBase64 | matrix.NaiveBase32,
+        groups: np.ndarray,
+        group_sizes: np.ndarray,
+        alpha: float,
+        penalty: np.ndarray,
+        strong_set: np.ndarray,
+        lmdas: np.ndarray,
+        rsq: float,
+        resid: np.ndarray,
+        strong_beta: np.ndarray,
+        active_set: np.ndarray,
+        max_iters: int,
+        tol: float,
+        rsq_slope_tol: float,
+        rsq_curv_tol: float,
+        newton_tol: float,
+        newton_max_iters: int,
+        n_threads: int,
+        dtype: np.float32 | np.float64,
+    ):
+        """Default initialization method.
+        """
+        ## save inputs due to lifetime issues
+        # static inputs require a reference to input
+        # or copy if it must be made
+        self._X = X
+
+        if isinstance(X, matrix.base):
+            X = X.internal()
+
+        self._groups = np.array(groups, copy=False, dtype=int)
+        self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
+        self._penalty = np.array(penalty, copy=False, dtype=dtype)
+        self._strong_set = np.array(strong_set, copy=False, dtype=int)
+        self._lmdas = np.array(lmdas, copy=False, dtype=dtype)
+
+        # dynamic inputs require a copy to not modify user's inputs
+        self._resid = np.copy(resid).astype(dtype)
+        self._strong_beta = np.copy(strong_beta).astype(dtype)
+        self._active_set = np.copy(active_set).astype(int)
+
+        (
+            self._strong_g1,
+            self._strong_g2,
+            self._strong_begins,
+            self._active_g1,
+            self._active_g2,
+            self._active_begins,
+            self._active_order,
+            self._is_active,
+        ) = deduce_states(
+            groups=groups,
+            group_sizes=group_sizes,
+            strong_set=strong_set,
+            active_set=active_set,
+        )
+
+        self._strong_var = np.concatenate([
+            [X.cnormsq(jj) for jj in range(g, g + gs)]
+            for g, gs in zip(groups[strong_set], group_sizes[strong_set])
+        ])
+
+        self._strong_grad = []
+        for k in strong_set:
+            out = np.empty(group_sizes[k], dtype=dtype)
+            X.bmul(0, groups[k], X.rows(), group_sizes[k], resid, out)
+            self._strong_grad.append(out)
+        self._strong_grad = np.concatenate(self._strong_grad, dtype=dtype)
+
+        # MUST call constructor directly and not use super()!
+        # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
+        base_type.__init__(
+            self,
+            X=X,
+            groups=self._groups,
+            group_sizes=self._group_sizes,
+            alpha=alpha,
+            penalty=self._penalty,
+            strong_set=self._strong_set,
+            strong_g1=self._strong_g1,
+            strong_g2=self._strong_g2,
+            strong_begins=self._strong_begins,
+            strong_var=self._strong_var,
+            lmdas=self._lmdas,
+            max_iters=max_iters,
+            tol=tol,
+            rsq_slope_tol=rsq_slope_tol,
+            rsq_curv_tol=rsq_curv_tol,
+            newton_tol=newton_tol,
+            newton_max_iters=newton_max_iters,
+            n_threads=n_threads,
+            rsq=rsq,
+            resid=self._resid,
+            strong_beta=self._strong_beta,
+            strong_grad=self._strong_grad,
+            active_set=self._active_set,
+            active_g1=self._active_g1,
+            active_g2=self._active_g2,
+            active_begins=self._active_begins,
+            active_order=self._active_order,
+            is_active=self._is_active,
+            betas=[],
+            rsqs=[],
+            resids=[],
+        )
+
+    @staticmethod
+    def create_from_core(cls, state, core_state, pycls, corecls):
+        """Create a new instance of a pin naive state using given state and new core state.
+
+        Parameters
+        ---------- 
+        cls
+            Class to instantiate an object for.
+        state
+            State object to grab static members from.
+        core_state
+            New core state to initialize with.
+        pycls
+            Python derived pin naive class type.
+        corecls
+            Core state class type.
+        """
+        # allocate new object cls casted to pycls type
+        obj = super(pycls, cls).__new__(cls)
+        # keep reference to static members to extend lifetime
+        # all static members are of the form: _name.
+        for a in dir(state):
+            if a.startswith("_") and not a.startswith("__") and not callable(getattr(state, a)):
+                setattr(obj, a, getattr(state, a))
+        # initialize pin_naive_base (no-op, but here for completion)    
+        pin_naive_base.__init__(obj)
+        # initialize core state
+        corecls.__init__(obj, core_state)
+        return obj
+
+    def check(
+        self, 
+        method: str =None, 
+        logger=logger.logger,
+    ):
+        super().check(method=method, logger=logger)
+        self._check(
+            isinstance(self.X, matrix.NaiveBase64) or isinstance(self.X, matrix.NaiveBase32),
+            "check X type",
+            method, logger,
+        )
+        self._check(
+            self.resid.shape[0] == self.X.rows(),
+            "check resid shape",
+            method, logger,
+        )
+        self._check(
+            self.resids.shape == (self.betas.shape[0], self.X.rows()),
+            "check resids shape",
+            method, logger,
+        )
+
+
+class pin_naive_64(pin_naive_base, core.state.PinNaive64):
+    """State class for pin, naive method using 64-bit floating point."""
+
+    def __init__(
+        self, 
+        *,
+        X: matrix.base | matrix.NaiveBase64,
+        groups: np.ndarray,
+        group_sizes: np.ndarray,
+        alpha: float,
+        penalty: np.ndarray,
+        strong_set: np.ndarray,
+        lmdas: np.ndarray,
+        rsq: float,
+        resid: np.ndarray,
+        strong_beta: np.ndarray,
+        active_set: np.ndarray,
+        max_iters: int,
+        tol: float,
+        rsq_slope_tol: float,
+        rsq_curv_tol: float,
+        newton_tol: float,
+        newton_max_iters: int,
+        n_threads: int,
+    ):
+        pin_naive_base.default_init(
+            self,
+            core.state.PinNaive64,
+            X=X,
+            groups=groups,
+            group_sizes=group_sizes,
+            alpha=alpha,
+            penalty=penalty,
+            strong_set=strong_set,
+            lmdas=lmdas,
+            rsq=rsq,
+            resid=resid,
+            strong_beta=strong_beta,
+            active_set=active_set,
+            max_iters=max_iters,
+            tol=tol,
+            rsq_slope_tol=rsq_slope_tol,
+            rsq_curv_tol=rsq_curv_tol,
+            newton_tol=newton_tol,
+            newton_max_iters=newton_max_iters,
+            n_threads=n_threads,
+            dtype=np.float64,
+        )
+
+    @classmethod
+    def create_from_core(cls, state, core_state):
+        """Create a new instance of a pin naive state using given state and new core state.
+
+        Parameters
+        ---------- 
+        state
+            State object to grab static members from.
+        core_state
+            New core state to initialize with.
+        """
+        return pin_naive_base.create_from_core(
+            cls, state, core_state, pin_naive_64, core.state.PinNaive64,
+        )
+
+
+class pin_naive_32(pin_naive_base, core.state.PinNaive32):
+    """State class for pin, naive method using 32-bit floating point."""
+
+    def __init__(
+        self, 
+        *,
+        X: matrix.base | matrix.NaiveBase32,
+        groups: np.ndarray,
+        group_sizes: np.ndarray,
+        alpha: float,
+        penalty: np.ndarray,
+        strong_set: np.ndarray,
+        lmdas: np.ndarray,
+        rsq: float,
+        resid: np.ndarray,
+        strong_beta: np.ndarray,
+        active_set: np.ndarray,
+        max_iters: int,
+        tol: float,
+        rsq_slope_tol: float,
+        rsq_curv_tol: float,
+        newton_tol: float,
+        newton_max_iters: int,
+        n_threads: int,
+    ):
+        pin_naive_base.default_init(
+            self,
+            core.state.PinNaive32,
+            X=X,
+            groups=groups,
+            group_sizes=group_sizes,
+            alpha=alpha,
+            penalty=penalty,
+            strong_set=strong_set,
+            lmdas=lmdas,
+            rsq=rsq,
+            resid=resid,
+            strong_beta=strong_beta,
+            active_set=active_set,
+            max_iters=max_iters,
+            tol=tol,
+            rsq_slope_tol=rsq_slope_tol,
+            rsq_curv_tol=rsq_curv_tol,
+            newton_tol=newton_tol,
+            newton_max_iters=newton_max_iters,
+            n_threads=n_threads,
+            dtype=np.float32,
+        )
+
+    @classmethod
+    def create_from_core(cls, state, core_state):
+        """Create a new instance of a pin naive state using given state and new core state.
+
+        Parameters
+        ---------- 
+        state
+            State object to grab static members from.
+        core_state
+            New core state to initialize with.
+        """
+        return pin_naive_base.create_from_core(
+            cls, state, core_state, pin_naive_32, core.state.PinNaive32,
+        )
+
+
+def pin_naive(
+    *,
+    X: matrix.base | matrix.NaiveBase64 | matrix.NaiveBase32,
+    groups: np.ndarray,
+    group_sizes: np.ndarray,
+    alpha: float,
+    penalty: np.ndarray,
+    strong_set: np.ndarray,
+    lmdas: np.ndarray,
+    rsq: float,
+    resid: np.ndarray,
+    strong_beta: np.ndarray,
+    active_set: np.ndarray,
+    max_iters: int =int(1e5),
+    tol: float =1e-12,
+    rsq_slope_tol: float =1e-2,
+    rsq_curv_tol: float =1e-2,
+    newton_tol: float =1e-12,
+    newton_max_iters: int =1000,
+    n_threads: int =os.cpu_count(),
+):
+    """Creates a pin, naive method state object.
 
     Parameters
     ----------
-    X : Union[adelie.matrix.Base64, adelie.matrix.Base32]
+    X : Union[adelie.matrix.base, adelie.matrix.NaiveBase64, adelie.matrix.NaiveBase32]
         Feature matrix where each column block :math:`X_k` defined by the groups
         is such that :math:`X_k^\\top X_k` is diagonal.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
@@ -912,26 +885,61 @@ class pin_naive(pin_base):
     n_threads : int, optional
         Number of threads.
         Default is ``os.cpu_count()``.
-        
+
     See Also
     --------
-    adelie.state.pin_base
+    adelie.state.pin_naive_64
+    adelie.state.pin_naive_32
     """
-    X: matrix.Base64 | matrix.Base32
-    """
-    Feature matrix where each column block :math:`X_k` defined by the groups
-    is such that :math:`X_k^\\top X_k` is diagonal.
-    It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
-    """
-    resid: np.ndarray
-    """Residual :math:`y-X\\beta` at ``strong_beta``."""
-    resids: np.ndarray
-    """``resids[i]`` corresponds to the residual at ``betas[i]``."""
+    if isinstance(X, matrix.base):
+        X_intr = X.internal()
+    else:
+        X_intr = X
 
-    def __init__(
+    if not (isinstance(X_intr, matrix.NaiveBase64) or isinstance(X_intr, matrix.NaiveBase32)):
+        raise ValueError(
+            "X must be an instance of matrix.NaiveBase32 or matrix.NaiveBase64."
+        )
+
+    dtype = (
+        np.float64
+        if isinstance(X_intr, matrix.NaiveBase64) else
+        np.float32
+    )
+        
+    dispatcher = {
+        np.float64: pin_naive_64,
+        np.float32: pin_naive_32,
+    }
+    return dispatcher[dtype](
+        X=X,
+        groups=groups,
+        group_sizes=group_sizes,
+        alpha=alpha,
+        penalty=penalty,
+        strong_set=strong_set,
+        lmdas=lmdas,
+        rsq=rsq,
+        resid=resid,
+        strong_beta=strong_beta,
+        active_set=active_set,
+        max_iters=max_iters,
+        tol=tol,
+        rsq_slope_tol=rsq_slope_tol,
+        rsq_curv_tol=rsq_curv_tol,
+        newton_tol=newton_tol,
+        newton_max_iters=newton_max_iters,
+        n_threads=n_threads,
+    )
+
+
+class pin_cov_base(pin_base):
+    """State wrapper base class for all pin, covariance method."""
+    def default_init(
         self, 
+        base_type: core.state.PinCov64 | core.state.PinCov32,
         *,
-        X: matrix.base | matrix.Base64 | matrix.Base32,
+        A: matrix.base | matrix.CovBase64 | matrix.CovBase32,
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -939,30 +947,27 @@ class pin_naive(pin_base):
         strong_set: np.ndarray,
         lmdas: np.ndarray,
         rsq: float,
-        resid: np.ndarray,
         strong_beta: np.ndarray,
+        strong_grad: np.ndarray,
         active_set: np.ndarray,
-        max_iters: int =int(1e5),
-        tol: float =1e-12,
-        rsq_slope_tol: float =1e-2,
-        rsq_curv_tol: float =1e-2,
-        newton_tol: float =1e-12,
-        newton_max_iters: int =1000,
-        n_threads: int =os.cpu_count(),
+        max_iters: int,
+        tol: float,
+        rsq_slope_tol: float,
+        rsq_curv_tol: float,
+        newton_tol: float,
+        newton_max_iters: int,
+        n_threads: int,
+        dtype: np.float32 | np.float64,
     ):
+        """Default initialization method.
+        """
         ## save inputs due to lifetime issues
         # static inputs require a reference to input
         # or copy if it must be made
-        self._X = X
+        self._A = A
 
-        if isinstance(X, matrix.base):
-            X = X.internal()
-
-        dtype = (
-            np.float64
-            if isinstance(X, matrix.Base64) else
-            np.float32
-        )
+        if isinstance(A, matrix.base):
+            A = A.internal()
 
         self._groups = np.array(groups, copy=False, dtype=int)
         self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
@@ -971,8 +976,8 @@ class pin_naive(pin_base):
         self._lmdas = np.array(lmdas, copy=False, dtype=dtype)
 
         # dynamic inputs require a copy to not modify user's inputs
-        self._resid = np.copy(resid).astype(dtype)
         self._strong_beta = np.copy(strong_beta).astype(dtype)
+        self._strong_grad = np.copy(strong_grad).astype(dtype)
         self._active_set = np.copy(active_set).astype(int)
 
         (
@@ -992,25 +997,13 @@ class pin_naive(pin_base):
         )
 
         self._strong_var = np.concatenate([
-            [X.cnormsq(jj) for jj in range(g, g + gs)]
+            [A.coeff(j, j) for j in range(g, g+gs)]
             for g, gs in zip(groups[strong_set], group_sizes[strong_set])
         ])
 
-        self._strong_grad = []
-        for k in strong_set:
-            out = np.empty(group_sizes[k], dtype=dtype)
-            X.bmul(0, groups[k], X.rows(), group_sizes[k], resid, out)
-            self._strong_grad.append(out)
-        self._strong_grad = np.concatenate(self._strong_grad, dtype=dtype)
-
-        State = (
-            core.state.PinNaive64 
-            if isinstance(X, matrix.Base64) else 
-            core.state.PinNaive32
-        )
-
-        self._core_state = State(
-            X=X,
+        base_type.__init__(
+            self,
+            A=A,
             groups=self._groups,
             group_sizes=self._group_sizes,
             alpha=alpha,
@@ -1029,7 +1022,6 @@ class pin_naive(pin_base):
             newton_max_iters=newton_max_iters,
             n_threads=n_threads,
             rsq=rsq,
-            resid=self._resid,
             strong_beta=self._strong_beta,
             strong_grad=self._strong_grad,
             active_set=self._active_set,
@@ -1040,16 +1032,37 @@ class pin_naive(pin_base):
             is_active=self._is_active,
             betas=[],
             rsqs=[],
-            resids=[],
         )
 
-        self.initialize(self._core_state)
+    @staticmethod
+    def create_from_core(cls, state, core_state, pycls, corecls):
+        """Create a new instance of a pin naive state using given state and new core state.
 
-    def initialize(self, core_state):
-        super().initialize(core_state)
-        self.X = core_state.X
-        self.resid = core_state.resid 
-        self.resids = core_state.resids
+        Parameters
+        ---------- 
+        cls
+            Class to instantiate an object for.
+        state
+            State object to grab static members from.
+        core_state
+            New core state to initialize with.
+        pycls
+            Python derived pin naive class type.
+        corecls
+            Core state class type.
+        """
+        # allocate new object cls casted to pycls type
+        obj = super(pycls, cls).__new__(cls)
+        # keep reference to static members to extend lifetime
+        # all static members are of the form: _name.
+        for a in dir(state):
+            if a.startswith("_") and not a.startswith("__") and not callable(getattr(state, a)):
+                setattr(obj, a, getattr(state, a))
+        # initialize pin_cov_base (no-op, but here for completion)    
+        pin_cov_base.__init__(obj)
+        # initialize core state
+        corecls.__init__(obj, core_state)
+        return obj
 
     def check(
         self, 
@@ -1058,29 +1071,168 @@ class pin_naive(pin_base):
     ):
         super().check(method=method, logger=logger)
         self._check(
-            isinstance(self.X, matrix.Base32) or isinstance(self.X, matrix.Base64),
-            "check X type",
-            method, logger,
-        )
-        self._check(
-            self.resid.shape[0] == self.X.rows(),
-            "check resid shape",
-            method, logger,
-        )
-        self._check(
-            self.resids.shape == (self.betas.shape[0], self.X.rows()),
-            "check resids shape",
+            isinstance(self.A, matrix.CovBase32) or isinstance(self.A, matrix.CovBase64),
+            "check A type",
             method, logger,
         )
 
 
-@dataclass
-class pin_cov(pin_base):
-    """State class for pin, cov method.
+class pin_cov_64(pin_cov_base, core.state.PinCov64):
+    """State class for pin, covariance method using 64-bit floating point."""
+
+    def __init__(
+        self, 
+        *,
+        A: matrix.base | matrix.CovBase64,
+        groups: np.ndarray,
+        group_sizes: np.ndarray,
+        alpha: float,
+        penalty: np.ndarray,
+        strong_set: np.ndarray,
+        lmdas: np.ndarray,
+        rsq: float,
+        strong_beta: np.ndarray,
+        strong_grad: np.ndarray,
+        active_set: np.ndarray,
+        max_iters: int,
+        tol: float,
+        rsq_slope_tol: float,
+        rsq_curv_tol: float,
+        newton_tol: float,
+        newton_max_iters: int,
+        n_threads: int,
+    ):
+        pin_cov_base.default_init(
+            self,
+            core.state.PinCov64,
+            A=A,
+            groups=groups,
+            group_sizes=group_sizes,
+            alpha=alpha,
+            penalty=penalty,
+            strong_set=strong_set,
+            lmdas=lmdas,
+            rsq=rsq,
+            strong_beta=strong_beta,
+            strong_grad=strong_grad,
+            active_set=active_set,
+            max_iters=max_iters,
+            tol=tol,
+            rsq_slope_tol=rsq_slope_tol,
+            rsq_curv_tol=rsq_curv_tol,
+            newton_tol=newton_tol,
+            newton_max_iters=newton_max_iters,
+            n_threads=n_threads,
+            dtype=np.float64,
+        )
+
+    @classmethod
+    def create_from_core(cls, state, core_state):
+        """Create a new instance of a pin covariance state using given state and new core state.
+
+        Parameters
+        ---------- 
+        state
+            State object to grab static members from.
+        core_state
+            New core state to initialize with.
+        """
+        return pin_naive_base.create_from_core(
+            cls, state, core_state, pin_cov_64, core.state.PinCov64,
+        )
+
+
+class pin_cov_32(pin_cov_base, core.state.PinCov32):
+    """State class for pin, cov method using 32-bit floating point."""
+
+    def __init__(
+        self, 
+        *,
+        A: matrix.base | matrix.CovBase32,
+        groups: np.ndarray,
+        group_sizes: np.ndarray,
+        alpha: float,
+        penalty: np.ndarray,
+        strong_set: np.ndarray,
+        lmdas: np.ndarray,
+        rsq: float,
+        strong_beta: np.ndarray,
+        strong_grad: np.ndarray,
+        active_set: np.ndarray,
+        max_iters: int,
+        tol: float,
+        rsq_slope_tol: float,
+        rsq_curv_tol: float,
+        newton_tol: float,
+        newton_max_iters: int,
+        n_threads: int,
+    ):
+        pin_cov_base.default_init(
+            self,
+            core.state.PinCov32,
+            A=A,
+            groups=groups,
+            group_sizes=group_sizes,
+            alpha=alpha,
+            penalty=penalty,
+            strong_set=strong_set,
+            lmdas=lmdas,
+            rsq=rsq,
+            strong_beta=strong_beta,
+            strong_grad=strong_grad,
+            active_set=active_set,
+            max_iters=max_iters,
+            tol=tol,
+            rsq_slope_tol=rsq_slope_tol,
+            rsq_curv_tol=rsq_curv_tol,
+            newton_tol=newton_tol,
+            newton_max_iters=newton_max_iters,
+            n_threads=n_threads,
+            dtype=np.float32,
+        )
+
+    @classmethod
+    def create_from_core(cls, state, core_state):
+        """Create a new instance of a pin cov state using given state and new core state.
+
+        Parameters
+        ---------- 
+        state
+            State object to grab static members from.
+        core_state
+            New core state to initialize with.
+        """
+        return pin_cov_base.create_from_core(
+            cls, state, core_state, pin_cov_32, core.state.PinCov32,
+        )
+
+
+def pin_cov(
+    *,
+    A: matrix.base | matrix.CovBase64 | matrix.CovBase32,
+    groups: np.ndarray,
+    group_sizes: np.ndarray,
+    alpha: float,
+    penalty: np.ndarray,
+    strong_set: np.ndarray,
+    lmdas: np.ndarray,
+    rsq: float,
+    strong_beta: np.ndarray,
+    strong_grad: np.ndarray,
+    active_set: np.ndarray,
+    max_iters: int =int(1e5),
+    tol: float =1e-12,
+    rsq_slope_tol: float =1e-2,
+    rsq_curv_tol: float =1e-2,
+    newton_tol: float =1e-12,
+    newton_max_iters: int =1000,
+    n_threads: int =os.cpu_count(),
+):
+    """Creates a pin, covariance method state object.
 
     Parameters
     ----------
-    A : Union[adelie.matrix.Base64, adelie.matrix.Base32]
+    A : Union[adelie.matrix.base, adelie.matrix.CovBase64, adelie.matrix.CovBase32]
         Covariance matrix where each diagonal block :math:`A_{kk}` defined by the groups
         is a diagonal matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
@@ -1104,6 +1256,8 @@ class pin_cov(pin_base):
     rsq : float
         Unnormalized :math:`R^2` value at ``strong_beta``.
         The unnormalized :math:`R^2` is given by :math:`\\|y\\|_2^2 - \\|y-X\\beta\\|_2^2`.
+    resid : np.ndarray
+        Residual :math:`y-X\\beta` at ``strong_beta``.
     strong_beta : (ws,) np.ndarray
         Coefficient vector on the strong set.
         ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
@@ -1149,133 +1303,49 @@ class pin_cov(pin_base):
     n_threads : int, optional
         Number of threads.
         Default is ``os.cpu_count()``.
-        
+
     See Also
     --------
-    adelie.state.pin_base
+    adelie.state.pin_cov_64
+    adelie.state.pin_cov_32
     """
-    A: matrix.base | matrix.Base64 | matrix.Base32
+    if isinstance(A, matrix.base):
+        A_intr = A.internal()
+    else:
+        A_intr = A
 
-    def __init__(
-        self, 
-        *,
-        A: matrix.base | matrix.Base64 | matrix.Base32,
-        groups: np.ndarray,
-        group_sizes: np.ndarray,
-        alpha: float,
-        penalty: np.ndarray,
-        strong_set: np.ndarray,
-        lmdas: np.ndarray,
-        rsq: float,
-        strong_beta: np.ndarray,
-        strong_grad: np.ndarray,
-        active_set: np.ndarray,
-        max_iters: int =int(1e5),
-        tol: float =1e-12,
-        rsq_slope_tol: float =1e-2,
-        rsq_curv_tol: float =1e-2,
-        newton_tol: float =1e-12,
-        newton_max_iters: int =1000,
-        n_threads: int =os.cpu_count(),
-    ):
-        ## save inputs due to lifetime issues
-        # static inputs require a reference to input
-        # or copy if it must be made
-        self._A = A
-
-        if isinstance(A, matrix.base):
-            A = A.internal()
-
-        dtype = (
-            np.float64
-            if isinstance(A, matrix.Base64) else
-            np.float32
+    if not (isinstance(A_intr, matrix.CovBase64) or isinstance(A_intr, matrix.CovBase32)):
+        raise ValueError(
+            "X must be an instance of matrix.CovBase32 or matrix.CovBase64."
         )
 
-        self._groups = np.array(groups, copy=False, dtype=int)
-        self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
-        self._penalty = np.array(penalty, copy=False, dtype=dtype)
-        self._strong_set = np.array(strong_set, copy=False, dtype=int)
-        self._lmdas = np.array(lmdas, copy=False, dtype=dtype)
-
-        # dynamic inputs require a copy to not modify user's inputs
-        self._strong_beta = np.copy(strong_beta).astype(dtype)
-        self._strong_grad = np.copy(strong_grad).astype(dtype)
-        self._active_set = np.copy(active_set).astype(int)
-
-        (
-            self._strong_g1,
-            self._strong_g2,
-            self._strong_begins,
-            self._active_g1,
-            self._active_g2,
-            self._active_begins,
-            self._active_order,
-            self._is_active,
-        ) = deduce_states(
-            groups=groups,
-            group_sizes=group_sizes,
-            strong_set=strong_set,
-            active_set=active_set,
-        )
-
-        self._strong_var = np.concatenate([
-            [A.coeff(j, j) for j in range(g, g+gs)]
-            for g, gs in zip(groups[strong_set], group_sizes[strong_set])
-        ])
-
-        State = (
-            core.state.PinCov64 
-            if isinstance(A, matrix.Base64) else 
-            core.state.PinCov32
-        )
-
-        self._core_state = State(
-            A=A,
-            groups=self._groups,
-            group_sizes=self._group_sizes,
-            alpha=alpha,
-            penalty=self._penalty,
-            strong_set=self._strong_set,
-            strong_g1=self._strong_g1,
-            strong_g2=self._strong_g2,
-            strong_begins=self._strong_begins,
-            strong_var=self._strong_var,
-            lmdas=self._lmdas,
-            max_iters=max_iters,
-            tol=tol,
-            rsq_slope_tol=rsq_slope_tol,
-            rsq_curv_tol=rsq_curv_tol,
-            newton_tol=newton_tol,
-            newton_max_iters=newton_max_iters,
-            n_threads=n_threads,
-            rsq=rsq,
-            strong_beta=self._strong_beta,
-            strong_grad=self._strong_grad,
-            active_set=self._active_set,
-            active_g1=self._active_g1,
-            active_g2=self._active_g2,
-            active_begins=self._active_begins,
-            active_order=self._active_order,
-            is_active=self._is_active,
-            betas=[],
-            rsqs=[],
-        )
-
-        self.initialize(self._core_state)
-
-    def initialize(self, core_state):
-        super().initialize(core_state)
-        self.A = core_state.A
-
-    def check(
-        self, 
-        method: str =None, 
-        logger=logger.logger,
-    ):
-        super().check(method=method, logger=logger)
-        self._check(
-            isinstance(self.A, matrix.Base32) or isinstance(self.A, matrix.Base64),
-            "check A type",
-            method, logger,
-        )
+    dtype = (
+        np.float64
+        if isinstance(A_intr, matrix.CovBase64) else
+        np.float32
+    )
+        
+    dispatcher = {
+        np.float64: pin_cov_64,
+        np.float32: pin_cov_32,
+    }
+    return dispatcher[dtype](
+        A=A,
+        groups=groups,
+        group_sizes=group_sizes,
+        alpha=alpha,
+        penalty=penalty,
+        strong_set=strong_set,
+        lmdas=lmdas,
+        rsq=rsq,
+        strong_beta=strong_beta,
+        strong_grad=strong_grad,
+        active_set=active_set,
+        max_iters=max_iters,
+        tol=tol,
+        rsq_slope_tol=rsq_slope_tol,
+        rsq_curv_tol=rsq_curv_tol,
+        newton_tol=newton_tol,
+        newton_max_iters=newton_max_iters,
+        n_threads=n_threads,
+    )

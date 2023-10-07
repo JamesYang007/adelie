@@ -117,9 +117,9 @@ auto create_lambdas(
 }
 
 template <class T> 
-using pin_naive_t = ad::state::PinNaive<ad::matrix::MatrixBase<T>>;
+using pin_naive_t = ad::state::PinNaive<ad::matrix::MatrixNaiveBase<T>>;
 template <class T> 
-using pin_cov_t = ad::state::PinCov<ad::matrix::MatrixBase<T>>;
+using pin_cov_t = ad::state::PinCov<ad::matrix::MatrixCovBase<T>>;
 
 void register_grpnet(py::module_& m)
 {

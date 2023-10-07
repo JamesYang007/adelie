@@ -6,6 +6,16 @@
 namespace py = pybind11;
 namespace ad = adelie_core;
 
+/**
+ * @brief Registers PinBase instantiations.
+ * 
+ * The purpose for exposing this class is to expose the attributes,
+ * and create common docstrings for all derived classes.
+ * 
+ * @tparam ValueType 
+ * @param m 
+ * @param name 
+ */
 template <class ValueType>
 void pin_base(py::module_& m, const char* name)
 {
@@ -19,7 +29,9 @@ void pin_base(py::module_& m, const char* name)
     using dyn_vec_value_t = typename state_t::dyn_vec_value_t;
     using dyn_vec_sp_vec_t = typename state_t::dyn_vec_sp_vec_t;
 
-    py::class_<state_t>(m, name)
+    py::class_<state_t>(m, name, R"delimiter(
+        Base core state class for all pin methods.
+        )delimiter")
         .def(py::init<
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
@@ -79,57 +91,147 @@ void pin_base(py::module_& m, const char* name)
             py::arg("betas"),
             py::arg("rsqs")
         )
-        .def_readonly("groups", &state_t::groups)
-        .def_readonly("group_sizes", &state_t::group_sizes)
-        .def_readonly("alpha", &state_t::alpha)
-        .def_readonly("penalty", &state_t::penalty)
-        .def_readonly("strong_set", &state_t::strong_set)
-        .def_readonly("strong_g1", &state_t::strong_g1)
-        .def_readonly("strong_g2", &state_t::strong_g2)
-        .def_readonly("strong_begins", &state_t::strong_begins)
-        .def_readonly("strong_var", &state_t::strong_var)
-        .def_readonly("lmdas", &state_t::lmdas)
-        .def_readonly("max_iters", &state_t::max_iters)
-        .def_readonly("tol", &state_t::tol)
-        .def_readonly("rsq_slope_tol", &state_t::rsq_slope_tol)
-        .def_readonly("rsq_curv_tol", &state_t::rsq_curv_tol)
-        .def_readonly("newton_tol", &state_t::newton_tol)
-        .def_readonly("newton_max_iters", &state_t::newton_max_iters)
-        .def_readonly("n_threads", &state_t::n_threads)
-        .def_readonly("rsq", &state_t::rsq)
-        .def_readonly("strong_beta", &state_t::strong_beta)
-        .def_readonly("strong_grad", &state_t::strong_grad)
+        .def_readonly("groups", &state_t::groups, R"delimiter(
+        List of starting indices to each group where `G` is the number of groups.
+        ``groups[i]`` is the starting index of the ``i`` th group. 
+        )delimiter")
+        .def_readonly("group_sizes", &state_t::group_sizes, R"delimiter(
+        List of group sizes corresponding to each element in ``groups``.
+        ``group_sizes[i]`` is the group size of the ``i`` th group. 
+        )delimiter")
+        .def_readonly("alpha", &state_t::alpha, R"delimiter(
+        Elastic net parameter.
+        It must be in the range :math:`[0,1]`.
+        )delimiter")
+        .def_readonly("penalty", &state_t::penalty, R"delimiter(
+        Penalty factor for each group in the same order as ``groups``.
+        It must be a non-negative vector.
+        )delimiter")
+        .def_readonly("strong_set", &state_t::strong_set, R"delimiter(
+        List of indices into ``groups`` that correspond to the strong groups.
+        ``strong_set[i]`` is ``i`` th strong group.
+        )delimiter")
+        .def_readonly("strong_g1", &state_t::strong_g1, R"delimiter(
+        List of indices into ``strong_set`` that correspond to groups of size ``1``.
+        ``strong_set[strong_g1[i]]`` is the ``i`` th strong group of size ``1``
+        such that ``group_sizes[strong_set[strong_g1[i]]]`` is ``1``.
+        )delimiter")
+        .def_readonly("strong_g2", &state_t::strong_g2, R"delimiter(
+        List of indices into ``strong_set`` that correspond to groups more than size ``1``.
+        ``strong_set[strong_g2[i]]`` is the ``i`` th strong group of size more than ``1``
+        such that ``group_sizes[strong_set[strong_g2[i]]]`` is more than ``1``.
+        )delimiter")
+        .def_readonly("strong_begins", &state_t::strong_begins, R"delimiter(
+        List of indices that index a corresponding list of values for each strong group.
+        ``strong_begins[i]`` is the starting index corresponding to the ``i`` th strong group.
+        From this index, reading ``group_sizes[strong_set[i]]`` number of elements
+        will grab values corresponding to the full ``i`` th strong group block.
+        )delimiter")
+        .def_readonly("strong_var", &state_t::strong_var, R"delimiter(
+        List of the diagonal of :math:`X_k^\top X_k` along the strong groups :math:`k`.
+        ``strong_var[b:b+p]`` is the diagonal of :math:`X_k^\top X_k` for the ``i`` th strong group where
+        ``k = strong_set[i]``,
+        ``b = strong_begins[i]``,
+        and ``p = group_sizes[k]``.
+        )delimiter")
+        .def_readonly("lmdas", &state_t::lmdas, R"delimiter(
+        Regularization sequence to fit on.
+        )delimiter")
+        .def_readonly("max_iters", &state_t::max_iters, R"delimiter(
+        Maximum number of coordinate descents.
+        )delimiter")
+        .def_readonly("tol", &state_t::tol, R"delimiter(
+        Convergence tolerance.
+        )delimiter")
+        .def_readonly("rsq_slope_tol", &state_t::rsq_slope_tol, R"delimiter(
+        Early stopping rule check on slope of :math:`R^2`.
+        )delimiter")
+        .def_readonly("rsq_curv_tol", &state_t::rsq_curv_tol, R"delimiter(
+        Early stopping rule check on curvature of :math:`R^2`.
+        )delimiter")
+        .def_readonly("newton_tol", &state_t::newton_tol, R"delimiter(
+        Convergence tolerance for the BCD update.
+        )delimiter")
+        .def_readonly("newton_max_iters", &state_t::newton_max_iters, R"delimiter(
+        Maximum number of iterations for the BCD update.
+        )delimiter")
+        .def_readonly("n_threads", &state_t::n_threads, R"delimiter(
+        Number of threads.
+        )delimiter")
+        .def_readonly("rsq", &state_t::rsq, R"delimiter(
+        Unnormalized :math:`R^2` value at ``strong_beta``.
+        The unnormalized :math:`R^2` is given by :math:`\|y\|_2^2 - \|y-X\beta\|_2^2`.
+        )delimiter")
+        .def_readonly("strong_beta", &state_t::strong_beta, R"delimiter(
+        Coefficient vector on the strong set.
+        ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        where
+        ``k = strong_set[i]``,
+        ``b = strong_begins[i]``,
+        and ``p = group_sizes[k]``.
+        )delimiter")
+        .def_readonly("strong_grad", &state_t::strong_grad, R"delimiter(
+        Gradient :math:`X_k^\top (y-X\beta)` on the strong groups :math:`k` where :math:`\beta` is given by ``strong_beta``.
+        ``strong_grad[b:b+p]`` is the gradient for the ``i`` th strong group
+        where 
+        ``k = strong_set[i]``,
+        ``b = strong_begins[i]``,
+        and ``p = group_sizes[k]``.
+        )delimiter")
         .def_property_readonly("active_set", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<index_t>>(
                 s.active_set.data(),
                 s.active_set.size()
             );
-        })
+        }, R"delimiter(
+        List of indices into ``strong_set`` that correspond to active groups.
+        ``strong_set[active_set[i]]`` is the ``i`` th active group.
+        An active group is one with non-zero coefficient block,
+        that is, for every ``i`` th active group, 
+        ``strong_beta[b:b+p] == 0`` where 
+        ``j = active_set[i]``,
+        ``k = strong_set[j]``,
+        ``b = strong_begins[j]``,
+        and ``p = group_sizes[k]``.
+        )delimiter")
         .def_property_readonly("active_g1", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<index_t>>(
                 s.active_g1.data(),
                 s.active_g1.size()
             );
-        })
+        }, R"delimiter(
+        Subset of ``active_set`` that correspond to groups of size ``1``.
+        )delimiter")
         .def_property_readonly("active_g2", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<index_t>>(
                 s.active_g2.data(),
                 s.active_g2.size()
             );
-        })
+        }, R"delimiter(
+        Subset of ``active_set`` that correspond to groups of size more than ``1``.
+        )delimiter")
         .def_property_readonly("active_begins", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<index_t>>(
                 s.active_begins.data(),
                 s.active_begins.size()
             );
-        })
+        }, R"delimiter(
+        List of indices that index a corresponding list of values for each active group.
+        ``active_begins[i]`` is the starting index corresponding to the ``i`` th active group.
+        )delimiter")
         .def_property_readonly("active_order", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<index_t>>(
                 s.active_order.data(),
                 s.active_order.size()
             );
-        })
-        .def_readonly("is_active", &state_t::is_active)
+        }, R"delimiter(
+        Ordering such that ``groups`` is sorted in ascending order for the active groups.
+        ``groups[strong_set[active_order[i]]]`` is the ``i`` th active group in ascending order.
+        )delimiter")
+        .def_readonly("is_active", &state_t::is_active, R"delimiter(
+        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
+        ``is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
+        )delimiter")
         .def_property_readonly("betas", [](const state_t& s) {
             const auto p = s.group_sizes.sum();
             Eigen::SparseMatrix<value_t, Eigen::RowMajor> betas(s.betas.size(), p);
@@ -142,28 +244,47 @@ void pin_base(py::module_& m, const char* name)
             }
             betas.makeCompressed();
             return betas;
-        })
+        }, R"delimiter(
+        ``betas[i]`` corresponds to the solution corresponding to ``lmdas[i]``.
+        )delimiter")
         .def_property_readonly("rsqs", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<value_t>>(
                 s.rsqs.data(),
                 s.rsqs.size()
             );
-        })
-        .def_readonly("iters", &state_t::iters)
+        }, R"delimiter(
+        ``rsqs[i]`` corresponds to the unnormalized :math:`R^2` at ``betas[i]``.
+        )delimiter")
+        .def_readonly("iters", &state_t::iters, R"delimiter(
+        Number of coordinate descents taken.
+        )delimiter")
         .def_property_readonly("time_strong_cd", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<double>>(
                 s.time_strong_cd.data(),
                 s.time_strong_cd.size()
             );
-        })
+        }, R"delimiter(
+        Benchmark time for performing coordinate-descent on the strong set at every iteration.
+        )delimiter")
         .def_property_readonly("time_active_cd", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<double>>(
                 s.time_active_cd.data(),
                 s.time_active_cd.size()
             );
-        })
+        }, R"delimiter(
+        Benchmark time for performing coordinate-descent on the active set at every iteration.
+        )delimiter")
         ;
 }
+
+template <class MatrixType>
+class PyPinNaive : public ad::state::PinNaive<MatrixType>
+{
+    using base_t = ad::state::PinNaive<MatrixType>;
+public:
+    using base_t::base_t;
+    PyPinNaive(base_t&& base) : base_t(std::move(base)) {}
+};
 
 template <class MatrixType>
 void pin_naive(py::module_& m, const char* name)
@@ -180,7 +301,7 @@ void pin_naive(py::module_& m, const char* name)
     using dyn_vec_vec_value_t = typename state_t::dyn_vec_vec_value_t;
     using dyn_vec_sp_vec_t = typename state_t::dyn_vec_sp_vec_t;
 
-    py::class_<state_t, base_t>(m, name)
+    py::class_<state_t, base_t, PyPinNaive<matrix_t>>(m, name)
         .def(py::init<
             matrix_t&,
             const Eigen::Ref<const vec_index_t>&, 
@@ -246,17 +367,34 @@ void pin_naive(py::module_& m, const char* name)
             py::arg("rsqs"),
             py::arg("resids")
         )
-        .def_readonly("X", &state_t::X)
-        .def_readonly("resid", &state_t::resid)
+        .def(py::init([](const state_t& s) { return new state_t(s); }))
+        .def_readonly("X", &state_t::X, R"delimiter(
+        Feature matrix where each column block :math:`X_k` defined by the groups
+        is such that :math:`X_k^\top X_k` is diagonal.
+        )delimiter")
+        .def_readonly("resid", &state_t::resid, R"delimiter(
+        Residual :math:`y-X\beta` at ``strong_beta``.
+        )delimiter")
         .def_property_readonly("resids", [](const state_t& s) {
             ad::util::rowarr_type<value_t> resids(s.resids.size(), s.resid.size());
             for (size_t i = 0; i < s.resids.size(); ++i) {
                 resids.row(i) = s.resids[i];
             }
             return resids;
-        })
+        }, R"delimiter(
+        ``resids[i]`` is the residual at ``betas[i]``.
+        )delimiter")
         ;
 }
+
+template <class MatrixType>
+class PyPinCov : public ad::state::PinCov<MatrixType>
+{
+    using base_t = ad::state::PinCov<MatrixType>;
+public:
+    using base_t::base_t;
+    PyPinCov(base_t&& base) : base_t(std::move(base)) {}
+};
 
 template <class MatrixType>
 void pin_cov(py::module_& m, const char* name)
@@ -272,7 +410,7 @@ void pin_cov(py::module_& m, const char* name)
     using dyn_vec_value_t = typename state_t::dyn_vec_value_t;
     using dyn_vec_sp_vec_t = typename state_t::dyn_vec_sp_vec_t;
 
-    py::class_<state_t, base_t>(m, name)
+    py::class_<state_t, base_t, PyPinCov<matrix_t>>(m, name)
         .def(py::init<
             matrix_t&,
             const Eigen::Ref<const vec_index_t>&, 
@@ -334,7 +472,11 @@ void pin_cov(py::module_& m, const char* name)
             py::arg("betas"),
             py::arg("rsqs")
         )
-        .def_readonly("A", &state_t::A)
+        .def(py::init([](const state_t& s) { return new state_t(s); }))
+        .def_readonly("A", &state_t::A, R"delimiter(
+        Feature covariance matrix :math:`X^\top X` 
+        with diagonal blocks :math:`X_k^\top X_k` for each strong group :math:`k`. 
+        )delimiter")
         ;
 }
 
@@ -342,8 +484,8 @@ void register_state(py::module_& m)
 {
     pin_base<double>(m, "PinBase64");
     pin_base<float>(m, "PinBase32");
-    pin_naive<ad::matrix::MatrixBase<double>>(m, "PinNaive64");
-    pin_naive<ad::matrix::MatrixBase<float>>(m, "PinNaive32");
-    pin_cov<ad::matrix::MatrixBase<double>>(m, "PinCov64");
-    pin_cov<ad::matrix::MatrixBase<float>>(m, "PinCov32");
+    pin_naive<ad::matrix::MatrixNaiveBase<double>>(m, "PinNaive64");
+    pin_naive<ad::matrix::MatrixNaiveBase<float>>(m, "PinNaive32");
+    pin_cov<ad::matrix::MatrixCovBase<double>>(m, "PinCov64");
+    pin_cov<ad::matrix::MatrixCovBase<float>>(m, "PinCov32");
 }

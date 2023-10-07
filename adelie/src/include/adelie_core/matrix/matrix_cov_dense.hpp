@@ -6,10 +6,10 @@ namespace adelie_core {
 namespace matrix {
 
 template <class DenseType>
-class MatrixDense: public MatrixBase<typename DenseType::Scalar>
+class MatrixCovDense: public MatrixCovBase<typename DenseType::Scalar>
 {
 public:
-    using base_t = MatrixBase<typename DenseType::Scalar>;
+    using base_t = MatrixCovBase<typename DenseType::Scalar>;
     using dense_t = DenseType;
     using typename base_t::value_t;
     using typename base_t::rowvec_t;
@@ -20,7 +20,7 @@ private:
     util::rowmat_type<value_t> _buff;
     
 public:
-    MatrixDense(
+    MatrixCovDense(
         const Eigen::Ref<const dense_t>& mat,
         size_t n_threads
     ): 
@@ -29,23 +29,6 @@ public:
         _buff(_n_threads, std::min(mat.rows(), mat.cols()))
     {}
     
-    value_t cmul(
-        int j, 
-        const Eigen::Ref<const rowvec_t>& v
-    ) const override
-    {
-        return ddot(_mat.col(j).matrix(), v.matrix(), _n_threads);
-    }
-
-    void ctmul(
-        int j, 
-        value_t v, 
-        Eigen::Ref<rowvec_t> out
-    ) const override
-    {
-        dax(v, _mat.col(j), _n_threads, out);
-    }
-
     void bmul(
         int i, int j, int p, int q, 
         const Eigen::Ref<const rowvec_t>& v, 
@@ -62,37 +45,11 @@ public:
         );
     }
 
-    void btmul(
-        int i, int j, int p, int q, 
-        const Eigen::Ref<const rowvec_t>& v, 
-        Eigen::Ref<rowvec_t> out
-    ) override
-    {
-        auto outm = out.matrix();
-        dgemv(
-            _mat.block(i, j, p, q).transpose(),
-            v.matrix(),
-            _n_threads,
-            _buff,
-            outm
-        );
-    }
-
     value_t coeff(int i, int j) const override 
     {
-        return _mat(i, j);
+        return _mat.coeff(i, j);
     }
 
-    value_t cnormsq(int j) const override
-    {
-        return _mat.col(j).squaredNorm();
-    }
-
-    int rows() const override
-    {
-        return _mat.rows();
-    }
-    
     int cols() const override
     {
         return _mat.cols();
