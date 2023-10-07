@@ -9,24 +9,6 @@
 namespace adelie_core {
 namespace grpnet {
     
-/**
- * One blockwise coordinate descent loop to solve the objective.
- *  
- * @param   pack            see PinNaive.
- * @param   g1_begin        begin iterator to indices into strong set of group type 1, i.e.
- *                          strong_set[*begin] is the current group to descend.
- * @param   g1_end          end iterator to indices into strong set of group type 1.
- * @param   g2_begin        begin iterator to indices into strong set of group type 2, i.e.
- *                          strong_set[*begin] is the current group to descend.
- * @param   g2_end          end iterator to indices into strong set of group type 2.
- * @param   lmda_idx        index into lambda sequence.
- * @param   convg_measure   stores the convergence measure of the call.
- * @param   buffer1         see update_coefficient.
- * @param   buffer2         see update_coefficient.
- * @param   buffer3         any vector of size larger than the largest strong set group size.
- * @param   update_coefficients_f  any functor that updates the coefficient for group 2.
- * @param   additional_step     any functor to run at the end of each loop given current looping value. 
- */
 template <class PackType, class G1Iter, class G2Iter,
           class ValueType, class BufferType,
           class UpdateCoefficientsType,
@@ -155,17 +137,7 @@ void coordinate_descent(
 }
 
 /**
- * Applies multiple blockwise coordinate descent on the active set 
- * to minimize the adelie_core objective with group-lasso penalty.
- * See "objective" function for the objective of interest.
- *
- * @param   pack        see PinNaive.
- * @param   lmda_idx    index into the lambda sequence for logging purposes.
- * @param   buffer1     see coordinate_descent.
- * @param   buffer2     see coordinate_descent.
- * @param   buffer3     see coordinate_descent.
- * @param   update_coefficients_f  any functor that updates the coefficient for group 2.
- * @param   check_user_interrupt    functor that checks for user interruption.
+ * Applies multiple blockwise coordinate descent on the active set.
  */
 template <class PackType, 
           class BufferType, 
@@ -260,7 +232,7 @@ inline void solve_pin_naive(
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
-    GrpnetPinBufferPack<value_t> buffer_pack(max_group_size, n);
+    SolvePinBufferPack<value_t> buffer_pack(max_group_size, n);
     
     // buffer to store final result
     std::vector<index_t> active_beta_indices;

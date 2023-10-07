@@ -1,6 +1,4 @@
 #include "decl.hpp"
-//#include <adelie_core/optimization/grpelnet_pin_cov.hpp>
-//#include <adelie_core/matrix/cov_cache.hpp>
 #include <adelie_core/matrix/matrix_base.hpp>
 #include <adelie_core/state/pin_naive.hpp>
 #include <adelie_core/state/pin_cov.hpp>

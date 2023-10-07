@@ -5,7 +5,6 @@
 namespace adelie_core {
 namespace grpnet {
 
-
 template <class ValueType, class AbsGradType, class PenaltyType>
 ADELIE_CORE_STRONG_INLINE
 auto lambda_max(
@@ -44,8 +43,6 @@ void create_lambdas(
         log_factor * vec_value_t::LinSpaced(max_n_lambdas, 0, max_n_lambdas-1)
     ).exp();
 }
-
-
 
 } // namespace grpnet
 } // namespace adelie_core
