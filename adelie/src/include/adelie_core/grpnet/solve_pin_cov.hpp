@@ -8,214 +8,6 @@
 namespace adelie_core {
 namespace grpnet {
     
-namespace internal {
-    
-template <int i_pol=-1, int j_pol=-1>
-struct UpdateResidual;
-
-template <>
-struct UpdateResidual<0, 0>
-{
-    template <class AijType, class DelType, 
-              class GradType, class BufferType>
-    ADELIE_CORE_STRONG_INLINE
-    static void eval(
-        const AijType& A_ij,
-        const DelType& del_j,
-        GradType& grad_i,
-        BufferType& 
-    )
-    {
-        grad_i[0] -= A_ij(0, 0) * del_j[0];
-    }
-};
-
-template <>
-struct UpdateResidual<0, 1>
-{
-    template <class AijType, class DelType, 
-              class GradType, class BufferType>
-    ADELIE_CORE_STRONG_INLINE
-    static void eval(
-        const AijType& A_ij,
-        const DelType& del_j,
-        GradType& grad_i,
-        BufferType& 
-    )
-    {
-        const auto A_ij_ = A_ij.row(0);
-        grad_i[0] -= A_ij_.dot(del_j);
-    }
-};
-
-template <>
-struct UpdateResidual<0, -1>
-{
-    template <class AijType, class DelType, 
-              class GradType, class BufferType>
-    ADELIE_CORE_STRONG_INLINE
-    static void eval(
-        const AijType& A_ij,
-        const DelType& del_j,
-        GradType& grad_i,
-        BufferType& buffer
-    )
-    {
-        if (A_ij.cols() == 1) {
-            UpdateResidual<0,0>::eval(
-                A_ij, del_j, grad_i, buffer
-            );
-        } else {
-            UpdateResidual<0,1>::eval(
-                A_ij, del_j, grad_i, buffer
-            );
-        }
-    }
-};
-
-template <>
-struct UpdateResidual<1, 0>
-{
-    template <class AijType, class DelType, 
-              class GradType, class BufferType>
-    ADELIE_CORE_STRONG_INLINE
-    static void eval(
-        const AijType& A_ij,
-        const DelType& del_j,
-        GradType& grad_i,
-        BufferType& 
-    )
-    {
-        const auto A_ij_ = A_ij.col(0);
-        grad_i -= A_ij_ * del_j[0];
-    }
-};
-
-template <>
-struct UpdateResidual<1, 1>
-{
-    template <class AijType, class DelType, 
-              class GradType, class BufferType>
-    ADELIE_CORE_STRONG_INLINE
-    static void eval(
-        const AijType& A_ij,
-        const DelType& del_j,
-        GradType& grad_i,
-        BufferType& buffer
-    )
-    {
-        // TODO: performance may be boosted with grad_i.noalias()
-        auto buffer_ = buffer.head(A_ij.rows());
-        buffer_.noalias() = A_ij * del_j;
-        grad_i -= buffer_;
-    }
-};
-
-template <>
-struct UpdateResidual<1, -1>
-{
-    template <class AijType, class DelType, 
-              class GradType, class BufferType>
-    ADELIE_CORE_STRONG_INLINE
-    static void eval(
-        const AijType& A_ij,
-        const DelType& del_j,
-        GradType& grad_i,
-        BufferType& buffer
-    )
-    {
-        if (A_ij.cols() == 1) {
-            UpdateResidual<1,0>::eval(
-                A_ij, del_j, grad_i, buffer
-            );
-        } else {
-            UpdateResidual<1,1>::eval(
-                A_ij, del_j, grad_i, buffer
-            );
-        }
-    }
-};
-
-template <int j_pol>
-struct UpdateResidual<-1, j_pol>
-{
-    template <class AijType, class DelType, 
-              class GradType, class BufferType>
-    ADELIE_CORE_STRONG_INLINE
-    static void eval(
-        const AijType& A_ij,
-        const DelType& del_j,
-        GradType& grad_i,
-        BufferType& buffer
-    )
-    {
-        if (A_ij.rows() == 1) {
-            UpdateResidual<0, j_pol>::eval(
-                A_ij, del_j, grad_i, buffer
-            );
-        } else {
-            UpdateResidual<1, j_pol>::eval(
-                A_ij, del_j, grad_i, buffer
-            );
-        }
-    }
-};
-} // namespace internal
-
-/**
- * Updates residual vector
- * for block i with the updated block j coefficient.
- * This function assumes that i != j.
- * The current residual vector for block i is:
- * \f[
- *      r_i - \sum_{k\neq i} A_{ik} \beta_k
- * \f]
- *
- * The template parameters denote policies for the two group sizes.
- * A value of:
- *  - -1 == dynamically check if group is size 1 or not.
- *  - 0 == group is size 1.
- *  - 1 == group is size > 1.
- *
- * @tparam  i_pol       policy for group i based on size.
- * @tparam  j_pol       policy for group j based on size.
- * @param   A_ij        matrix in objective.
- * @param   del_j       \beta_j^{new} - \beta_j^{old}.
- * @param   grad_i      vector of current residual vector for block i.
- */
-template <int i_pol=-1, int j_pol=-1,
-          class AijType, class DelType, 
-          class GradType, class BufferType>
-ADELIE_CORE_STRONG_INLINE
-void update_residual(
-    const AijType& A_ij,
-    const DelType& del_j,
-    GradType& grad_i,
-    BufferType& buffer
-)
-{
-    internal::UpdateResidual<i_pol, j_pol>::eval(
-        A_ij, del_j, grad_i, buffer
-    );
-}
-
-/**
- * One blockwise coordinate descent loop to solve the objective.
- *  
- * @param   pack            see GroupElnetParamPack.
- * @param   g1_begin        begin iterator to indices into strong set of group type 1, i.e.
- *                          strong_set[*begin] is the current group to descend.
- * @param   g1_end          end iterator to indices into strong set of group type 1.
- * @param   g2_begin        begin iterator to indices into strong set of group type 2, i.e.
- *                          strong_set[*begin] is the current group to descend.
- * @param   g2_end          end iterator to indices into strong set of group type 2.
- * @param   lmda_idx        index into lambda sequence.
- * @param   convg_measure   stores the convergence measure of the call.
- * @param   buffer1         see update_coefficient.
- * @param   buffer2         see update_coefficient.
- * @param   buffer3         any vector of size larger than the largest strong set group size.
- * @param   additional_step     any functor to run at the end of each loop given current looping value. 
- */
 template <class PackType, class G1Iter, class G2Iter,
           class ValueType, class BufferType,
           class UpdateCoefficientsType,
@@ -380,6 +172,9 @@ void coordinate_descent(
     }
 }
 
+/**
+ * Applies multiple blockwise coordinate descent on the active set.
+ */
 template <class PackType, 
           class ABDiffType,
           class BufferType, 
@@ -466,7 +261,7 @@ void solve_pin_cov_active(
         ab_diff_view_curr = sb - ab_diff_view_curr;
     }
 
-    // update strong gradient for non-active strong variables
+    /* update strong gradient for non-active strong variables */
 
     // optimization: if active set is empty or active set is the same as strong set.
     if ((ab_diff_view.size() == 0) ||
@@ -537,7 +332,7 @@ inline void solve_pin_cov(
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
-    GrpnetPinBufferPack<value_t> buffer_pack(max_group_size, 0);
+    SolvePinBufferPack<value_t> buffer_pack(max_group_size, 0);
     
     // buffer to store final result
     std::vector<index_t> active_beta_indices;

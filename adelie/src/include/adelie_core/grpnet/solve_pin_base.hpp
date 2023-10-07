@@ -11,7 +11,7 @@ namespace grpnet {
  * This class is purely for convenience purposes.
  */
 template <class ValueType>
-struct GrpnetPinBufferPack 
+struct SolvePinBufferPack 
 {
     using value_t = ValueType;
     
@@ -20,25 +20,25 @@ struct GrpnetPinBufferPack
     util::rowvec_type<value_t> buffer3;
     util::rowvec_type<value_t> buffer4;
 
-    explicit GrpnetPinBufferPack(
+    explicit SolvePinBufferPack(
         size_t buffer_size,
         size_t n
     ): 
-        GrpnetPinBufferPack(
+        SolvePinBufferPack(
             buffer_size, buffer_size, buffer_size, n
         ) 
     {}
 
-    explicit GrpnetPinBufferPack(
+    explicit SolvePinBufferPack(
             size_t buffer1_size, 
             size_t buffer2_size,
             size_t buffer3_size,
-            size_t n
+            size_t buffer4_size
     ): 
         buffer1(buffer1_size),
         buffer2(buffer2_size),
         buffer3(buffer3_size),
-        buffer4(n)
+        buffer4(buffer4_size)
     {}
 };
 
