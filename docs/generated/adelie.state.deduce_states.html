@@ -43,7 +43,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="adelie.state.base" href="adelie.state.base.html" />
-    <link rel="prev" title="adelie.matrix.dense" href="adelie.matrix.dense.html" />
+    <link rel="prev" title="adelie.matrix.cov_dense" href="adelie.matrix.cov_dense.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -297,12 +297,16 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.NaiveBase64.html">adelie.matrix.NaiveBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.NaiveBase32.html">adelie.matrix.NaiveBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.CovBase64.html">adelie.matrix.CovBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.CovBase32.html">adelie.matrix.CovBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.naive_dense.html">adelie.matrix.naive_dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_dense.html">adelie.matrix.cov_dense</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.state.deduce_states</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_base.html">adelie.state.pin_base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov.html">adelie.state.pin_cov</a></li>
 </ul>
@@ -311,6 +315,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.lambda_max.html">adelie.grpnet.lambda_max</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.create_lambdas.html">adelie.grpnet.create_lambdas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.solve_pin.html">adelie.grpnet.solve_pin</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.PinBase64.html">adelie.adelie_core.state.PinBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.PinBase32.html">adelie.adelie_core.state.PinBase32</a></li>
 </ul>
 </div>
 </nav></div>
@@ -377,35 +385,35 @@ document.write(`
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>groups</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">pin_base</span></code>.</p>
+<dt><strong>groups</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.PinBase64</span></code>.</p>
 </dd>
-<dt><strong>group_sizes</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">pin_base</span></code>.</p>
+<dt><strong>group_sizes</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.PinBase64</span></code>.</p>
 </dd>
-<dt><strong>strong_set</strong><span class="classifier">(s,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">pin_base</span></code>.</p>
+<dt><strong>strong_set</strong><span class="classifier">(s,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.PinBase64</span></code>.</p>
 </dd>
-<dt><strong>active_set</strong><span class="classifier">(a,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">pin_base</span></code>.</p>
+<dt><strong>active_set</strong><span class="classifier">(a,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.PinBase64</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>strong_g1</strong><span class="classifier">(s1,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">pin_base</span></code>.</p>
+<dt><strong>strong_g1</strong><span class="classifier">(s1,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.PinBase64</span></code>.</p>
 </dd>
-<dt><strong>strong_g2</strong><span class="classifier">(s2,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">pin_base</span></code>.</p>
+<dt><strong>strong_g2</strong><span class="classifier">(s2,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.PinBase64</span></code>.</p>
 </dd>
-<dt><strong>strong_begins</strong><span class="classifier">(s,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">pin_base</span></code>.</p>
+<dt><strong>strong_begins</strong><span class="classifier">(s,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.PinBase64</span></code>.</p>
 </dd>
-<dt><strong>strong_var</strong><span class="classifier">(ws,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">pin_base</span></code>.</p>
+<dt><strong>strong_var</strong><span class="classifier">(ws,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.PinBase64</span></code>.</p>
 </dd>
-<dt><strong>active_g1</strong><span class="classifier">(a1,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">pin_base</span></code>.</p>
+<dt><strong>active_g1</strong><span class="classifier">(a1,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.PinBase64</span></code>.</p>
 </dd>
-<dt><strong>active_g2</strong><span class="classifier">(a2,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">pin_base</span></code>.</p>
+<dt><strong>active_g2</strong><span class="classifier">(a2,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.PinBase64</span></code>.</p>
 </dd>
-<dt><strong>active_begins</strong><span class="classifier">(a,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">pin_base</span></code>.</p>
+<dt><strong>active_begins</strong><span class="classifier">(a,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.PinBase64</span></code>.</p>
 </dd>
-<dt><strong>active_order</strong><span class="classifier">(a,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">pin_base</span></code>.</p>
+<dt><strong>active_order</strong><span class="classifier">(a,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.PinBase64</span></code>.</p>
 </dd>
-<dt><strong>is_active</strong><span class="classifier">(s,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">pin_base</span></code>.</p>
+<dt><strong>is_active</strong><span class="classifier">(s,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.PinBase64</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -413,7 +421,7 @@ document.write(`
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="adelie.state.pin_base.html#adelie.state.pin_base" title="adelie.state.pin_base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.state.pin_base</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.adelie_core.state.PinBase64.html#adelie.adelie_core.state.PinBase64" title="adelie.adelie_core.state.PinBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.state.PinBase64</span></code></a></dt><dd></dd>
 </dl>
 </div>
 </dd></dl>
@@ -431,12 +439,12 @@ document.write(`
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.matrix.dense.html"
+       href="adelie.matrix.cov_dense.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.matrix.dense</p>
+        <p class="prev-next-title">adelie.matrix.cov_dense</p>
       </div>
     </a>
     <a class="right-next"

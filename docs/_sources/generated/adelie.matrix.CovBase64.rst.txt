@@ -1,0 +1,39 @@
+﻿adelie.matrix.CovBase64
+=======================
+
+.. currentmodule:: adelie.matrix
+
+.. autoclass:: CovBase64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CovBase64.__init__
+      ~CovBase64.bmul
+      ~CovBase64.coeff
+      ~CovBase64.cols
+      ~CovBase64.rows
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: coeff
+   .. automethod:: cols
+   .. automethod:: rows
+   
+   
+
+   
+   
+   

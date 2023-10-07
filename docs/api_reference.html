@@ -298,12 +298,16 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.base.html">adelie.matrix.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.dense.html">adelie.matrix.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.NaiveBase64.html">adelie.matrix.NaiveBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.NaiveBase32.html">adelie.matrix.NaiveBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.CovBase64.html">adelie.matrix.CovBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.CovBase32.html">adelie.matrix.CovBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.naive_dense.html">adelie.matrix.naive_dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.cov_dense.html">adelie.matrix.cov_dense</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.base.html">adelie.state.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_base.html">adelie.state.pin_base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_cov.html">adelie.state.pin_cov</a></li>
 </ul>
@@ -312,6 +316,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.grpnet.lambda_max.html">adelie.grpnet.lambda_max</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.grpnet.create_lambdas.html">adelie.grpnet.create_lambdas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.grpnet.solve_pin.html">adelie.grpnet.solve_pin</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.PinBase64.html">adelie.adelie_core.state.PinBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.PinBase32.html">adelie.adelie_core.state.PinBase32</a></li>
 </ul>
 </div>
 </nav></div>
@@ -400,8 +408,23 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.base.html#adelie.matrix.base" title="adelie.matrix.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base</span></code></a>(core_mat)</p></td>
 <td><p>Base matrix wrapper class.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.dense.html#adelie.matrix.dense" title="adelie.matrix.dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dense</span></code></a>(mat[, n_threads])</p></td>
-<td><p>Creates a viewer of a dense matrix.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.NaiveBase64.html#adelie.matrix.NaiveBase64" title="adelie.matrix.NaiveBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NaiveBase64</span></code></a></p></td>
+<td><p>Base class naive method matrices.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.NaiveBase32.html#adelie.matrix.NaiveBase32" title="adelie.matrix.NaiveBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NaiveBase32</span></code></a></p></td>
+<td><p>Base class naive method matrices.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.CovBase64.html#adelie.matrix.CovBase64" title="adelie.matrix.CovBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CovBase64</span></code></a></p></td>
+<td><p>Base class for covariance method matrices.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.CovBase32.html#adelie.matrix.CovBase32" title="adelie.matrix.CovBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CovBase32</span></code></a></p></td>
+<td><p>Base class for covariance method matrices.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.naive_dense.html#adelie.matrix.naive_dense" title="adelie.matrix.naive_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">naive_dense</span></code></a>(mat[, n_threads])</p></td>
+<td><p>Creates a viewer of a dense matrix for naive method.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.cov_dense.html#adelie.matrix.cov_dense" title="adelie.matrix.cov_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cov_dense</span></code></a>(mat[, n_threads])</p></td>
+<td><p>Creates a viewer of a dense matrix for covariance method.</p></td>
 </tr>
 </tbody>
 </table>
@@ -413,17 +436,14 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.deduce_states.html#adelie.state.deduce_states" title="adelie.state.deduce_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deduce_states</span></code></a>(*, groups, group_sizes, ...)</p></td>
 <td><p>Deduce state variables.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.base.html#adelie.state.base" title="adelie.state.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base</span></code></a>(core_state)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.base.html#adelie.state.base" title="adelie.state.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base</span></code></a>()</p></td>
 <td><p>Base wrapper state class.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.pin_base.html#adelie.state.pin_base" title="adelie.state.pin_base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pin_base</span></code></a>(*, groups, group_sizes, alpha, ...)</p></td>
-<td><p>Base state class for pin methods.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.pin_naive.html#adelie.state.pin_naive" title="adelie.state.pin_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pin_naive</span></code></a>(*, X, groups, group_sizes, alpha, ...)</p></td>
+<td><p>Creates a pin, naive method state object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.pin_naive.html#adelie.state.pin_naive" title="adelie.state.pin_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pin_naive</span></code></a>(*, X, groups, group_sizes, alpha, ...)</p></td>
-<td><p>State class for pin, naive method.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.pin_cov.html#adelie.state.pin_cov" title="adelie.state.pin_cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pin_cov</span></code></a>(*, A, groups, group_sizes, alpha, ...)</p></td>
-<td><p>State class for pin, cov method.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.pin_cov.html#adelie.state.pin_cov" title="adelie.state.pin_cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pin_cov</span></code></a>(*, A, groups, group_sizes, alpha, ...)</p></td>
+<td><p>Creates a pin, covariance method state object.</p></td>
 </tr>
 </tbody>
 </table>
@@ -443,6 +463,19 @@ document.write(`
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.grpnet.solve_pin.html#adelie.grpnet.solve_pin" title="adelie.grpnet.solve_pin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_pin</span></code></a>(state[, logger])</p></td>
 <td><p>Solves the pinned group elastic net problem.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="adelie-adelie-core">
+<h2>adelie.adelie_core<a class="headerlink" href="#adelie-adelie-core" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.PinBase64.html#adelie.adelie_core.state.PinBase64" title="adelie.adelie_core.state.PinBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.PinBase64</span></code></a></p></td>
+<td><p>Base core state class for all pin methods.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.PinBase32.html#adelie.adelie_core.state.PinBase32" title="adelie.adelie_core.state.PinBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.PinBase32</span></code></a></p></td>
+<td><p>Base core state class for all pin methods.</p></td>
 </tr>
 </tbody>
 </table>
@@ -496,6 +529,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-matrix">adelie.matrix</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-state">adelie.state</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-grpnet">adelie.grpnet</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-adelie-core">adelie.adelie_core</a></li>
 </ul>
   </nav></div>
 

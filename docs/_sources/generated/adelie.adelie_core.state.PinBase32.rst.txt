@@ -1,0 +1,100 @@
+﻿adelie.adelie\_core.state.PinBase32
+===================================
+
+.. currentmodule:: adelie.adelie_core.state
+
+.. autoclass:: PinBase32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PinBase32.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PinBase32.active_begins
+      ~PinBase32.active_g1
+      ~PinBase32.active_g2
+      ~PinBase32.active_order
+      ~PinBase32.active_set
+      ~PinBase32.alpha
+      ~PinBase32.betas
+      ~PinBase32.group_sizes
+      ~PinBase32.groups
+      ~PinBase32.is_active
+      ~PinBase32.iters
+      ~PinBase32.lmdas
+      ~PinBase32.max_iters
+      ~PinBase32.n_threads
+      ~PinBase32.newton_max_iters
+      ~PinBase32.newton_tol
+      ~PinBase32.penalty
+      ~PinBase32.rsq
+      ~PinBase32.rsq_curv_tol
+      ~PinBase32.rsq_slope_tol
+      ~PinBase32.rsqs
+      ~PinBase32.strong_begins
+      ~PinBase32.strong_beta
+      ~PinBase32.strong_g1
+      ~PinBase32.strong_g2
+      ~PinBase32.strong_grad
+      ~PinBase32.strong_set
+      ~PinBase32.strong_var
+      ~PinBase32.time_active_cd
+      ~PinBase32.time_strong_cd
+      ~PinBase32.tol
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   
+   
+
+   
+   
+   
+   .. autoattribute:: active_begins
+   .. autoattribute:: active_g1
+   .. autoattribute:: active_g2
+   .. autoattribute:: active_order
+   .. autoattribute:: active_set
+   .. autoattribute:: alpha
+   .. autoattribute:: betas
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: is_active
+   .. autoattribute:: iters
+   .. autoattribute:: lmdas
+   .. autoattribute:: max_iters
+   .. autoattribute:: n_threads
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: newton_tol
+   .. autoattribute:: penalty
+   .. autoattribute:: rsq
+   .. autoattribute:: rsq_curv_tol
+   .. autoattribute:: rsq_slope_tol
+   .. autoattribute:: rsqs
+   .. autoattribute:: strong_begins
+   .. autoattribute:: strong_beta
+   .. autoattribute:: strong_g1
+   .. autoattribute:: strong_g2
+   .. autoattribute:: strong_grad
+   .. autoattribute:: strong_set
+   .. autoattribute:: strong_var
+   .. autoattribute:: time_active_cd
+   .. autoattribute:: time_strong_cd
+   .. autoattribute:: tol
+   
+   

@@ -42,7 +42,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.state.base';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.state.pin_base" href="adelie.state.pin_base.html" />
+    <link rel="next" title="adelie.state.pin_naive" href="adelie.state.pin_naive.html" />
     <link rel="prev" title="adelie.state.deduce_states" href="adelie.state.deduce_states.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -297,12 +297,16 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.NaiveBase64.html">adelie.matrix.NaiveBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.NaiveBase32.html">adelie.matrix.NaiveBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.CovBase64.html">adelie.matrix.CovBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.CovBase32.html">adelie.matrix.CovBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.naive_dense.html">adelie.matrix.naive_dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_dense.html">adelie.matrix.cov_dense</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.state.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_base.html">adelie.state.pin_base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov.html">adelie.state.pin_cov</a></li>
 </ul>
@@ -311,6 +315,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.lambda_max.html">adelie.grpnet.lambda_max</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.create_lambdas.html">adelie.grpnet.create_lambdas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.solve_pin.html">adelie.grpnet.solve_pin</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.PinBase64.html">adelie.adelie_core.state.PinBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.PinBase32.html">adelie.adelie_core.state.PinBase32</a></li>
 </ul>
 </div>
 </nav></div>
@@ -372,37 +380,23 @@ document.write(`
 <h1>adelie.state.base<a class="headerlink" href="#adelie-state-base" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="adelie.state.base">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.state.</span></span><span class="sig-name descname"><span class="pre">base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">core_state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.base" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.state.</span></span><span class="sig-name descname"><span class="pre">base</span></span><a class="headerlink" href="#adelie.state.base" title="Link to this definition">#</a></dt>
 <dd><p>Base wrapper state class.</p>
 <p>All Python wrapper classes for core state classes must inherit from this class.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>core_state</strong></dt><dd><p>Usually a C++ exported state class.</p>
-</dd>
-</dl>
-</dd>
-</dl>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.base.__init__" title="adelie.state.base.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(core_state)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.base.__init__" title="adelie.state.base.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*args, **kwargs)</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.base.check" title="adelie.state.base.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>([method, logger])</p></td>
 <td><p>Checks consistency of the members.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.base.initialize" title="adelie.state.base.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code></a>(core_state)</p></td>
-<td><p>Initializes the current object with core state object.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.base.internal" title="adelie.state.base.internal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">internal</span></code></a>()</p></td>
-<td><p>Returns the core state object.</p></td>
-</tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.state.base.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">core_state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.base.__init__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.base.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -432,36 +426,6 @@ Default is <code class="docutils literal notranslate"><span class="pre">logging.
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="adelie.state.base.initialize">
-<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">core_state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.base.initialize" title="Link to this definition">#</a></dt>
-<dd><p>Initializes the current object with core state object.</p>
-<p>A reference to the core state object will be saved so that
-the lifetime of the object remains until the lifetime of the current object.
-The members of the core state object will then be exposed
-as members of the current object, often viewing rather than copying them.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The core state object will usually reference existing objects.
-It is the user’s responsibility that the lifetime of the referenced objects
-surpasses that of the core state object.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>core_state</strong></dt><dd><p>Usually a C++ exported state class.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="adelie.state.base.internal">
-<span class="sig-name descname"><span class="pre">internal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.base.internal" title="Link to this definition">#</a></dt>
-<dd><p>Returns the core state object.</p>
-</dd></dl>
-
 </dd></dl>
 
 </section>
@@ -486,11 +450,11 @@ surpasses that of the core state object.</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.state.pin_base.html"
+       href="adelie.state.pin_naive.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.state.pin_base</p>
+        <p class="prev-next-title">adelie.state.pin_naive</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -512,8 +476,6 @@ surpasses that of the core state object.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base"><code class="docutils literal notranslate"><span class="pre">base</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base.__init__"><code class="docutils literal notranslate"><span class="pre">base.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base.check"><code class="docutils literal notranslate"><span class="pre">base.check()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base.initialize"><code class="docutils literal notranslate"><span class="pre">base.initialize()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base.internal"><code class="docutils literal notranslate"><span class="pre">base.internal()</span></code></a></li>
 </ul>
 </li>
 </ul>

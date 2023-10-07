@@ -43,6 +43,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.grpnet.solve_pin';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="adelie.adelie_core.state.PinBase64" href="adelie.adelie_core.state.PinBase64.html" />
     <link rel="prev" title="adelie.grpnet.create_lambdas" href="adelie.grpnet.create_lambdas.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -297,12 +298,16 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.NaiveBase64.html">adelie.matrix.NaiveBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.NaiveBase32.html">adelie.matrix.NaiveBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.CovBase64.html">adelie.matrix.CovBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.CovBase32.html">adelie.matrix.CovBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.naive_dense.html">adelie.matrix.naive_dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_dense.html">adelie.matrix.cov_dense</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_base.html">adelie.state.pin_base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov.html">adelie.state.pin_cov</a></li>
 </ul>
@@ -311,6 +316,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.lambda_max.html">adelie.grpnet.lambda_max</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.create_lambdas.html">adelie.grpnet.create_lambdas</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.grpnet.solve_pin</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.PinBase64.html">adelie.adelie_core.state.PinBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.PinBase32.html">adelie.adelie_core.state.PinBase32</a></li>
 </ul>
 </div>
 </nav></div>
@@ -372,7 +381,7 @@ document.write(`
 <h1>adelie.grpnet.solve_pin<a class="headerlink" href="#adelie-grpnet-solve-pin" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.grpnet.solve_pin">
-<span class="sig-prename descclassname"><span class="pre">adelie.grpnet.</span></span><span class="sig-name descname"><span class="pre">solve_pin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state:</span> <span class="pre">~adelie.state.pin_naive</span> <span class="pre">|</span> <span class="pre">~adelie.state.pin_cov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;RootLogger</span> <span class="pre">root</span> <span class="pre">(WARNING)&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.grpnet.solve_pin" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.grpnet.</span></span><span class="sig-name descname"><span class="pre">solve_pin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;RootLogger</span> <span class="pre">root</span> <span class="pre">(WARNING)&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.grpnet.solve_pin" title="Link to this definition">#</a></dt>
 <dd><p>Solves the pinned group elastic net problem.</p>
 <p>The pinned group elastic net problem is given by
 minimizing the objective defined in <code class="docutils literal notranslate"><span class="pre">objective()</span></code>
@@ -385,7 +394,7 @@ defined by the groups have diagonal <span class="math notranslate nohighlight">\
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>state</strong><span class="classifier">pin_naive</span></dt><dd><p>See the documentation for one of the listed types.</p>
+<dt><strong>state</strong></dt><dd><p>See the documentation for one of the listed types.</p>
 </dd>
 </dl>
 </dd>
@@ -426,6 +435,15 @@ The type is the same as that of <code class="docutils literal notranslate"><span
         <p class="prev-next-subtitle">previous</p>
         <p class="prev-next-title">adelie.grpnet.create_lambdas</p>
       </div>
+    </a>
+    <a class="right-next"
+       href="adelie.adelie_core.state.PinBase64.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">adelie.adelie_core.state.PinBase64</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>

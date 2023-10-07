@@ -1,0 +1,45 @@
+﻿adelie.matrix.NaiveBase32
+=========================
+
+.. currentmodule:: adelie.matrix
+
+.. autoclass:: NaiveBase32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~NaiveBase32.__init__
+      ~NaiveBase32.bmul
+      ~NaiveBase32.btmul
+      ~NaiveBase32.cmul
+      ~NaiveBase32.cnormsq
+      ~NaiveBase32.cols
+      ~NaiveBase32.ctmul
+      ~NaiveBase32.rows
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cnormsq
+   .. automethod:: cols
+   .. automethod:: ctmul
+   .. automethod:: rows
+   
+   
+
+   
+   
+   

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.bcd.objective &#8212; adelie 1.1.4 documentation</title>
+    <title>adelie.matrix.cov_dense &#8212; adelie 1.1.4 documentation</title>
   
   
   
@@ -39,12 +39,11 @@
     <script src="../_static/documentation_options.js?v=e2e28a39"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.bcd.objective';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.matrix.cov_dense';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.bcd.solve" href="adelie.bcd.solve.html" />
-    <link rel="prev" title="adelie.bcd.root_function" href="adelie.bcd.root_function.html" />
+    <link rel="next" title="adelie.state.deduce_states" href="adelie.state.deduce_states.html" />
+    <link rel="prev" title="adelie.matrix.naive_dense" href="adelie.matrix.naive_dense.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -288,22 +287,22 @@ document.write(`
         <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_lower_bound.html">adelie.bcd.root_lower_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.bcd.objective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.objective.html">adelie.bcd.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root.html">adelie.bcd.root</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.NaiveBase64.html">adelie.matrix.NaiveBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.NaiveBase32.html">adelie.matrix.NaiveBase32</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.CovBase64.html">adelie.matrix.CovBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.CovBase32.html">adelie.matrix.CovBase32</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.naive_dense.html">adelie.matrix.naive_dense</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_dense.html">adelie.matrix.cov_dense</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.matrix.cov_dense</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
@@ -360,7 +359,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.bcd.objective</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.matri...</li>
   </ul>
 </nav>
 </div>
@@ -377,46 +376,45 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-bcd-objective">
-<h1>adelie.bcd.objective<a class="headerlink" href="#adelie-bcd-objective" title="Link to this heading">#</a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="adelie.bcd.objective">
-<span class="sig-prename descclassname"><span class="pre">adelie.bcd.</span></span><span class="sig-name descname"><span class="pre">objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.bcd.objective" title="Link to this definition">#</a></dt>
-<dd><p>Computes the BCD objective.</p>
-<p>The BCD objective is given by</p>
-<div class="math notranslate nohighlight">
-\[\begin{align*}
-    \frac{1}{2} \beta^\top \Sigma \beta - v^\top \beta 
-    + \lambda_1 \|\beta\|_2
-    + \frac{\lambda_2}{2} \|\beta\|_2^2
-\end{align*}\]</div>
-<p>where 
-<span class="math notranslate nohighlight">\(\beta \in \mathbb{R}^p\)</span>,
-<span class="math notranslate nohighlight">\(\Sigma \in \mathbb{R}_+^{p\times p}\)</span> diagonal,
-<span class="math notranslate nohighlight">\(v \in \mathbb{R}^p\)</span>,
-and <span class="math notranslate nohighlight">\(\lambda_i \geq 0\)</span>.</p>
+  <section id="adelie-matrix-cov-dense">
+<h1>adelie.matrix.cov_dense<a class="headerlink" href="#adelie-matrix-cov-dense" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="adelie.matrix.cov_dense">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">cov_dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.matrix.cov_dense" title="Link to this definition">#</a></dt>
+<dd><p>Creates a viewer of a dense matrix for covariance method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>beta</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>The input value in which the objective is evaluated.</p>
+<dt><strong>mat</strong><span class="classifier">np.ndarray</span></dt><dd><p>The matrix to view.</p>
 </dd>
-<dt><strong>quad</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>The quadratic component <span class="math notranslate nohighlight">\(\Sigma\)</span>.</p>
-</dd>
-<dt><strong>linear</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>The linear component <span class="math notranslate nohighlight">\(v\)</span>.</p>
-</dd>
-<dt><strong>l1</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(\ell_1\)</span> component <span class="math notranslate nohighlight">\(\lambda_1\)</span>.</p>
-</dd>
-<dt><strong>l2</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(\ell_2\)</span> component <span class="math notranslate nohighlight">\(\lambda_2\)</span>.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>obj</strong><span class="classifier">float</span></dt><dd><p>The BCD objective.</p>
+<dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
+Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.cov_dense.__init__" title="adelie.matrix.cov_dense.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(mat[, n_threads])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.cov_dense.internal" title="adelie.matrix.cov_dense.internal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">internal</span></code></a>()</p></td>
+<td><p>Returns the core matrix object.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.matrix.cov_dense.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.matrix.cov_dense.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.matrix.cov_dense.internal">
+<span class="sig-name descname"><span class="pre">internal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.matrix.cov_dense.internal" title="Link to this definition">#</a></dt>
+<dd><p>Returns the core matrix object.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -432,20 +430,20 @@ and <span class="math notranslate nohighlight">\(\lambda_i \geq 0\)</span>.</p>
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.bcd.root_function.html"
+       href="adelie.matrix.naive_dense.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.bcd.root_function</p>
+        <p class="prev-next-title">adelie.matrix.naive_dense</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.bcd.solve.html"
+       href="adelie.state.deduce_states.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.bcd.solve</p>
+        <p class="prev-next-title">adelie.state.deduce_states</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -464,13 +462,17 @@ and <span class="math notranslate nohighlight">\(\lambda_i \geq 0\)</span>.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.bcd.objective"><code class="docutils literal notranslate"><span class="pre">objective()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.cov_dense"><code class="docutils literal notranslate"><span class="pre">cov_dense</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.cov_dense.__init__"><code class="docutils literal notranslate"><span class="pre">cov_dense.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.cov_dense.internal"><code class="docutils literal notranslate"><span class="pre">cov_dense.internal()</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.bcd.objective.rst.txt">
+    <a href="../_sources/generated/adelie.matrix.cov_dense.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>
