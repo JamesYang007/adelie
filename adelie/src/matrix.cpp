@@ -1,16 +1,17 @@
 #include "decl.hpp"
-#include <adelie_core/matrix/matrix_base.hpp>
-#include <adelie_core/matrix/matrix_naive_dense.hpp>
-#include <adelie_core/matrix/matrix_cov_dense.hpp>
-#include <adelie_core/matrix/matrix_cov_lazy.hpp>
+#include <adelie_core/matrix/matrix_pin_cov_base.hpp>
+#include <adelie_core/matrix/matrix_pin_cov_dense.hpp>
+#include <adelie_core/matrix/matrix_pin_cov_lazy.hpp>
+#include <adelie_core/matrix/matrix_pin_naive_base.hpp>
+#include <adelie_core/matrix/matrix_pin_naive_dense.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
 
 template <class T>
-class PyMatrixNaiveBase : public ad::matrix::MatrixNaiveBase<T>
+class PyMatrixPinNaiveBase : public ad::matrix::MatrixPinNaiveBase<T>
 {
-    using base_t = ad::matrix::MatrixNaiveBase<T>;
+    using base_t = ad::matrix::MatrixPinNaiveBase<T>;
 public:
     /* Inherit the constructors */
     using base_t::base_t;
@@ -46,7 +47,7 @@ public:
     }
 
     void bmul(
-        int i, int j, int p, int q, 
+        int j, int q, 
         const Eigen::Ref<const rowvec_t>& v, 
         Eigen::Ref<rowvec_t> out
     ) override
@@ -55,12 +56,12 @@ public:
             void,
             base_t,
             bmul,
-            i, j, p, q, v, out
+            j, q, v, out
         );
     }
 
     void btmul(
-        int i, int j, int p, int q, 
+        int j, int q, 
         const Eigen::Ref<const rowvec_t>& v, 
         Eigen::Ref<rowvec_t> out
     ) override
@@ -69,7 +70,7 @@ public:
             void,
             base_t,
             btmul,
-            i, j, p, q, v, out
+            j, q, v, out
         );
     }
 
@@ -103,12 +104,12 @@ public:
 };
 
 template <class T>
-void matrix_naive_base(py::module_& m, const char* name)
+void matrix_pin_naive_base(py::module_& m, const char* name)
 {
-    using trampoline_t = PyMatrixNaiveBase<T>;
-    using internal_t = ad::matrix::MatrixNaiveBase<T>;
+    using trampoline_t = PyMatrixPinNaiveBase<T>;
+    using internal_t = ad::matrix::MatrixPinNaiveBase<T>;
     py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
-        Base class naive method matrices.
+        Base matrix class for pin, naive method.
         )delimiter")
         .def(py::init<>())
         .def("cmul", &internal_t::cmul, R"delimiter(
@@ -141,19 +142,15 @@ void matrix_naive_base(py::module_& m, const char* name)
         Block matrix-vector multiplication.
 
         Computes the matrix-vector multiplication
-        ``v.T @ X[i:i+p, j:j+q]``.
+        ``v.T @ X[:, j:j+q]``.
 
         Parameters
         ----------
-        i : int
-            Row index.
         j : int
             Column index.
-        p : int
-            Number of rows.
         q : int
             Number of columns.
-        v : (p,) np.ndarray
+        v : (n,) np.ndarray
             Vector to multiply with the block matrix.
         out : (q,) np.ndarray
             Vector to store in-place the result.
@@ -162,21 +159,17 @@ void matrix_naive_base(py::module_& m, const char* name)
         Block matrix transpose-vector multiplication.
 
         Computes the matrix-vector multiplication
-        ``v.T @ X[i:i+p, j:j+q].T``.
+        ``v.T @ X[:, j:j+q].T``.
 
         Parameters
         ----------
-        i : int
-            Row index.
         j : int
             Column index.
-        p : int
-            Number of rows.
         q : int
             Number of columns.
         v : (q,) np.ndarray
             Vector to multiply with the block matrix.
-        out : (p,) np.ndarray
+        out : (n,) np.ndarray
             Vector to store in-place the result.
         )delimiter")
         .def("cnormsq", &internal_t::cnormsq, R"delimiter(
@@ -204,9 +197,9 @@ void matrix_naive_base(py::module_& m, const char* name)
 }
 
 template <class T>
-class PyMatrixCovBase : public ad::matrix::MatrixCovBase<T>
+class PyMatrixPinCovBase : public ad::matrix::MatrixPinCovBase<T>
 {
-    using base_t = ad::matrix::MatrixCovBase<T>;
+    using base_t = ad::matrix::MatrixPinCovBase<T>;
 public:
     /* Inherit the constructors */
     using base_t::base_t;
@@ -227,13 +220,13 @@ public:
         );
     }
 
-    value_t coeff(int i, int j) const override
+    value_t diag(int i) const override
     {
         PYBIND11_OVERRIDE_PURE(
             value_t,
             base_t,
-            coeff,
-            i, j
+            diag,
+            i
         );
     }
 
@@ -257,12 +250,12 @@ public:
 };
 
 template <class T>
-void matrix_cov_base(py::module_& m, const char* name)
+void matrix_pin_cov_base(py::module_& m, const char* name)
 {
-    using trampoline_t = PyMatrixCovBase<T>;
-    using internal_t = ad::matrix::MatrixCovBase<T>;
+    using trampoline_t = PyMatrixPinCovBase<T>;
+    using internal_t = ad::matrix::MatrixPinCovBase<T>;
     py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
-        Base class for covariance method matrices.
+        Base matrix class for pin, covariance method.
     )delimiter")
         .def(py::init<>())
         .def("bmul", &internal_t::bmul, R"delimiter(
@@ -286,22 +279,20 @@ void matrix_cov_base(py::module_& m, const char* name)
         out : (q,) np.ndarray
             Vector to store in-place the result.
         )delimiter")
-        .def("coeff", &internal_t::coeff, R"delimiter(
-        Coefficient of the matrix.
+        .def("diag", &internal_t::diag, R"delimiter(
+        Diagonal entry.
 
-        Computes the coefficient at index ``(i, j)``.
+        Returns the diagonal entry at index ``(i, i)``.
 
         Parameters
         ----------
         i : int
             Row index.
-        j : int
-            Column index.
 
         Returns
         -------
-        coeff
-            Coefficient at index ``(i, j)``.
+        diag
+            Diagonal entry at ``(i, i)``.
         )delimiter")
         .def("rows", &internal_t::rows, R"delimiter(
         Number of rows.
@@ -313,9 +304,9 @@ void matrix_cov_base(py::module_& m, const char* name)
 }
 
 template <class DenseType>
-void matrix_naive_dense(py::module_& m, const char* name)
+void matrix_pin_naive_dense(py::module_& m, const char* name)
 {
-    using internal_t = ad::matrix::MatrixNaiveDense<DenseType>;
+    using internal_t = ad::matrix::MatrixPinNaiveDense<DenseType>;
     using base_t = typename internal_t::base_t;
     using dense_t = typename internal_t::dense_t;
     py::class_<internal_t, base_t>(m, name)
@@ -328,9 +319,9 @@ void matrix_naive_dense(py::module_& m, const char* name)
 }
 
 template <class DenseType>
-void matrix_cov_dense(py::module_& m, const char* name)
+void matrix_pin_cov_dense(py::module_& m, const char* name)
 {
-    using internal_t = ad::matrix::MatrixCovDense<DenseType>;
+    using internal_t = ad::matrix::MatrixPinCovDense<DenseType>;
     using base_t = typename internal_t::base_t;
     using dense_t = typename internal_t::dense_t;
     py::class_<internal_t, base_t>(m, name)
@@ -343,9 +334,9 @@ void matrix_cov_dense(py::module_& m, const char* name)
 }
 
 template <class DenseType>
-void matrix_cov_lazy(py::module_& m, const char* name)
+void matrix_pin_cov_lazy(py::module_& m, const char* name)
 {
-    using internal_t = ad::matrix::MatrixCovLazy<DenseType>;
+    using internal_t = ad::matrix::MatrixPinCovLazy<DenseType>;
     using base_t = typename internal_t::base_t;
     using dense_t = typename internal_t::dense_t;
     py::class_<internal_t, base_t>(m, name)
@@ -362,22 +353,25 @@ using dense_type = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Storage>;
 
 void register_matrix(py::module_& m)
 {
-    matrix_naive_base<double>(m, "NaiveBase64");
-    matrix_naive_base<float>(m, "NaiveBase32");
-    matrix_cov_base<double>(m, "CovBase64");
-    matrix_cov_base<float>(m, "CovBase32");
+    /* pin base matrices */
+    matrix_pin_naive_base<double>(m, "MatrixPinNaiveBase64");
+    matrix_pin_naive_base<float>(m, "MatrixPinNaiveBase32");
+    matrix_pin_cov_base<double>(m, "MatrixPinCovBase64");
+    matrix_pin_cov_base<float>(m, "MatrixPinCovBase32");
 
-    matrix_naive_dense<dense_type<double, Eigen::RowMajor>>(m, "NaiveDense64C");
-    matrix_naive_dense<dense_type<double, Eigen::ColMajor>>(m, "NaiveDense64F");
-    matrix_naive_dense<dense_type<float, Eigen::RowMajor>>(m, "NaiveDense32C");
-    matrix_naive_dense<dense_type<float, Eigen::ColMajor>>(m, "NaiveDense32F");
+    /* pin naive matrices */
+    matrix_pin_naive_dense<dense_type<double, Eigen::RowMajor>>(m, "MatrixPinNaiveDense64C");
+    matrix_pin_naive_dense<dense_type<double, Eigen::ColMajor>>(m, "MatrixPinNaiveDense64F");
+    matrix_pin_naive_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixPinNaiveDense32C");
+    matrix_pin_naive_dense<dense_type<float, Eigen::ColMajor>>(m, "MatrixPinNaiveDense32F");
 
-    matrix_cov_dense<dense_type<double, Eigen::RowMajor>>(m, "CovDense64C");
-    matrix_cov_dense<dense_type<double, Eigen::ColMajor>>(m, "CovDense64F");
-    matrix_cov_dense<dense_type<float, Eigen::RowMajor>>(m, "CovDense32C");
-    matrix_cov_dense<dense_type<float, Eigen::ColMajor>>(m, "CovDense32F");
-    matrix_cov_lazy<dense_type<double, Eigen::RowMajor>>(m, "CovLazy64C");
-    matrix_cov_lazy<dense_type<double, Eigen::ColMajor>>(m, "CovLazy64F");
-    matrix_cov_lazy<dense_type<float, Eigen::RowMajor>>(m, "CovLazy32C");
-    matrix_cov_lazy<dense_type<float, Eigen::ColMajor>>(m, "CovLazy32F");
+    /* pin cov matrices */
+    matrix_pin_cov_dense<dense_type<double, Eigen::RowMajor>>(m, "MatrixPinCovDense64C");
+    matrix_pin_cov_dense<dense_type<double, Eigen::ColMajor>>(m, "MatrixPinCovDense64F");
+    matrix_pin_cov_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixPinCovDense32C");
+    matrix_pin_cov_dense<dense_type<float, Eigen::ColMajor>>(m, "MatrixPinCovDense32F");
+    matrix_pin_cov_lazy<dense_type<double, Eigen::RowMajor>>(m, "MatrixPinCovLazy64C");
+    matrix_pin_cov_lazy<dense_type<double, Eigen::ColMajor>>(m, "MatrixPinCovLazy64F");
+    matrix_pin_cov_lazy<dense_type<float, Eigen::RowMajor>>(m, "MatrixPinCovLazy32C");
+    matrix_pin_cov_lazy<dense_type<float, Eigen::ColMajor>>(m, "MatrixPinCovLazy32F");
 }

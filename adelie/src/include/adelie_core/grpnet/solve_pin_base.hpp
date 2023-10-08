@@ -45,30 +45,30 @@ struct SolvePinBufferPack
 /**
  * Constructs a sparse vector containing all active values.
  * 
- * @param   pack    see PinNaive.
+ * @param   state    see StatePinNaive.
  * @param   indices     increasing order of indices with active values.
  * @param   values      corresponding active values to indices.
  */
-template <class PackType, class VecIndexType, class VecValueType>
+template <class StateType, class VecIndexType, class VecValueType>
 ADELIE_CORE_STRONG_INLINE
 void sparsify_active_beta(
-    const PackType& pack,
+    const StateType& state,
     VecIndexType& indices,
     VecValueType& values
 )
 {
-    using index_t = typename PackType::index_t;
-    using value_t = typename PackType::value_t;
+    using index_t = typename StateType::index_t;
+    using value_t = typename StateType::value_t;
     using vec_index_t = util::rowvec_type<index_t>;
     using vec_value_t = util::rowvec_type<value_t>;
 
-    const auto& active_set = pack.active_set;
-    const auto& active_order = pack.active_order;
-    const auto& strong_set = pack.strong_set;
-    const auto& group_sizes = pack.group_sizes;
-    const auto& groups = pack.groups;
-    const auto& strong_beta = pack.strong_beta;
-    const auto& strong_begins = pack.strong_begins;
+    const auto& active_set = state.active_set;
+    const auto& active_order = state.active_order;
+    const auto& strong_set = state.strong_set;
+    const auto& group_sizes = state.group_sizes;
+    const auto& groups = state.groups;
+    const auto& strong_beta = state.strong_beta;
+    const auto& strong_begins = state.strong_begins;
 
     auto idxs_begin = indices.data();
     auto vals_begin = values.data();

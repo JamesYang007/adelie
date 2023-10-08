@@ -37,22 +37,22 @@ auto newton_root_find(
 {
     using value_t = ValueType;
 
-    const auto initial_pack = initial_f();
-    value_t h = std::get<0>(initial_pack);    // solution candidate
-    size_t iters = std::get<1>(initial_pack); // number of iterations
+    const auto initial_state = initial_f();
+    value_t h = std::get<0>(initial_state);    // solution candidate
+    size_t iters = std::get<1>(initial_state); // number of iterations
     value_t fh; // function value at h
     value_t dfh; // derivative at h
 
-    const auto step_pack = step_f(h);
-    fh = std::get<0>(step_pack);
-    dfh = std::get<1>(step_pack);
+    const auto step_state = step_f(h);
+    fh = std::get<0>(step_state);
+    dfh = std::get<1>(step_state);
 
     while ((std::abs(fh) > tol) && (iters < max_iters)) {
         h -= fh / dfh;
         h = project_f(h);
-        const auto step_pack = step_f(h);
-        fh = std::get<0>(step_pack);
-        dfh = std::get<1>(step_pack);
+        const auto step_state = step_f(h);
+        fh = std::get<0>(step_state);
+        dfh = std::get<1>(step_state);
         ++iters;
     }
 

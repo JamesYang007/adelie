@@ -1,15 +1,15 @@
 #pragma once
-#include <adelie_core/matrix/matrix_base.hpp>
+#include <adelie_core/matrix/matrix_pin_cov_base.hpp>
 #include <adelie_core/matrix/utils.hpp>
 
 namespace adelie_core {
 namespace matrix {
 
 template <class DenseType>
-class MatrixCovDense: public MatrixCovBase<typename DenseType::Scalar>
+class MatrixPinCovDense: public MatrixPinCovBase<typename DenseType::Scalar>
 {
 public:
-    using base_t = MatrixCovBase<typename DenseType::Scalar>;
+    using base_t = MatrixPinCovBase<typename DenseType::Scalar>;
     using dense_t = DenseType;
     using typename base_t::value_t;
     using typename base_t::rowvec_t;
@@ -20,7 +20,7 @@ private:
     util::rowmat_type<value_t> _buff;
     
 public:
-    MatrixCovDense(
+    MatrixPinCovDense(
         const Eigen::Ref<const dense_t>& mat,
         size_t n_threads
     ): 
@@ -45,9 +45,9 @@ public:
         );
     }
 
-    value_t coeff(int i, int j) const override 
+    value_t diag(int i) const override 
     {
-        return _mat.coeff(i, j);
+        return _mat.coeff(i, i);
     }
 
     int cols() const override

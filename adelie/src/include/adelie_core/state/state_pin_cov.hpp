@@ -1,5 +1,5 @@
 #pragma once
-#include <adelie_core/state/pin_base.hpp>
+#include <adelie_core/state/state_pin_base.hpp>
 
 namespace adelie_core {
 namespace state {
@@ -15,7 +15,7 @@ template <class MatrixType,
                 util::sp_vec_type<ValueType, Eigen::RowMajor, IndexType>
             > 
           >
-struct PinCov : PinBase<
+struct StatePinCov : StatePinBase<
         ValueType,
         IndexType,
         BoolType,
@@ -24,7 +24,7 @@ struct PinCov : PinBase<
         DynamicVectorSpVecType
     >
 {
-    using base_t = PinBase<
+    using base_t = StatePinBase<
         ValueType,
         IndexType,
         BoolType,
@@ -46,15 +46,16 @@ struct PinCov : PinBase<
     using typename base_t::dyn_vec_index_t;
     using typename base_t::dyn_vec_value_t;
     using typename base_t::dyn_vec_sp_vec_t;
+    using matrix_t = MatrixType;
     using dyn_vec_vec_value_t = DynamicVectorVecValueType;
 
     /* Static states */
 
     /* Dynamic states */
-    MatrixType* A;    // covariance matrix-like
+    matrix_t* A;    // covariance matrix-like
 
-    explicit PinCov(
-        MatrixType& A,
+    explicit StatePinCov(
+        matrix_t& A,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
@@ -63,7 +64,7 @@ struct PinCov : PinBase<
         const Eigen::Ref<const vec_index_t>& strong_g1,
         const Eigen::Ref<const vec_index_t>& strong_g2,
         const Eigen::Ref<const vec_index_t>& strong_begins, 
-        const Eigen::Ref<const vec_value_t>& strong_var,
+        const Eigen::Ref<const vec_value_t>& strong_vars,
         const Eigen::Ref<const vec_value_t>& lmdas, 
         size_t max_iters,
         value_t tol,
@@ -86,7 +87,7 @@ struct PinCov : PinBase<
     ): 
         base_t(
             groups, group_sizes, alpha, penalty, 
-            strong_set, strong_g1, strong_g2, strong_begins, strong_var, lmdas, 
+            strong_set, strong_g1, strong_g2, strong_begins, strong_vars, lmdas, 
             max_iters, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, n_threads,
             rsq, strong_beta, strong_grad, 
             active_set, active_g1, active_g2, active_begins, active_order, is_active,

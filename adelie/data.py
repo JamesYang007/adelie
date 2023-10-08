@@ -82,7 +82,7 @@ def generate_bcd_state(
     strong_g1=None,
     strong_g2=None,
     strong_begins=None,
-    strong_var=None,
+    strong_vars=None,
     lmda_max=None,
     lmdas=None,
     log10_min_ratio=-2,
@@ -121,8 +121,8 @@ def generate_bcd_state(
             [[0], np.array([group_sizes[i] for i in range(len(strong_set))], dtype=np.int32)],
         ), dtype=np.int32)[:-1]
 
-    if strong_var is None:
-        strong_var = np.concatenate(
+    if strong_vars is None:
+        strong_vars = np.concatenate(
             [
                 A_diag[groups[i] : (groups[i] + group_sizes[i])]
                 for i in strong_set
@@ -139,7 +139,7 @@ def generate_bcd_state(
         lmdas = lmda_max * np.logspace(0, log10_min_ratio, n_lmdas)
         
     n_total_group_size = np.sum(group_sizes)
-    assert len(strong_var) == n_total_group_size
+    assert len(strong_vars) == n_total_group_size
 
     if strong_beta is None: 
         strong_beta = np.zeros((n_total_group_size,))
@@ -182,7 +182,7 @@ def generate_bcd_state(
         strong_g1=strong_g1,
         strong_g2=strong_g2,
         strong_begins=strong_begins,
-        strong_var=strong_var,
+        strong_vars=strong_vars,
         lmda_max=lmda_max,
         lmdas=lmdas,
         max_iters=max_iters,

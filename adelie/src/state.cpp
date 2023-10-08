@@ -1,13 +1,14 @@
 #include "decl.hpp"
-#include <adelie_core/matrix/matrix_base.hpp>
-#include <adelie_core/state/pin_naive.hpp>
-#include <adelie_core/state/pin_cov.hpp>
+#include <adelie_core/matrix/matrix_pin_cov_base.hpp>
+#include <adelie_core/matrix/matrix_pin_naive_base.hpp>
+#include <adelie_core/state/state_pin_cov.hpp>
+#include <adelie_core/state/state_pin_naive.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
 
 /**
- * @brief Registers PinBase instantiations.
+ * @brief Registers StatePinBase instantiations.
  * 
  * The purpose for exposing this class is to expose the attributes,
  * and create common docstrings for all derived classes.
@@ -17,9 +18,9 @@ namespace ad = adelie_core;
  * @param name 
  */
 template <class ValueType>
-void pin_base(py::module_& m, const char* name)
+void state_pin_base(py::module_& m, const char* name)
 {
-    using state_t = ad::state::PinBase<ValueType>;
+    using state_t = ad::state::StatePinBase<ValueType>;
     using index_t = typename state_t::index_t;
     using value_t = typename state_t::value_t;
     using vec_index_t = typename state_t::vec_index_t;
@@ -70,7 +71,7 @@ void pin_base(py::module_& m, const char* name)
             py::arg("strong_g1").noconvert(),
             py::arg("strong_g2").noconvert(),
             py::arg("strong_begins").noconvert(),
-            py::arg("strong_var").noconvert(),
+            py::arg("strong_vars").noconvert(),
             py::arg("lmdas").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
@@ -127,9 +128,9 @@ void pin_base(py::module_& m, const char* name)
         From this index, reading ``group_sizes[strong_set[i]]`` number of elements
         will grab values corresponding to the full ``i`` th strong group block.
         )delimiter")
-        .def_readonly("strong_var", &state_t::strong_var, R"delimiter(
+        .def_readonly("strong_vars", &state_t::strong_vars, R"delimiter(
         List of the diagonal of :math:`X_k^\top X_k` along the strong groups :math:`k`.
-        ``strong_var[b:b+p]`` is the diagonal of :math:`X_k^\top X_k` for the ``i`` th strong group where
+        ``strong_vars[b:b+p]`` is the diagonal of :math:`X_k^\top X_k` for the ``i`` th strong group where
         ``k = strong_set[i]``,
         ``b = strong_begins[i]``,
         and ``p = group_sizes[k]``.
@@ -278,19 +279,19 @@ void pin_base(py::module_& m, const char* name)
 }
 
 template <class MatrixType>
-class PyPinNaive : public ad::state::PinNaive<MatrixType>
+class PyStatePinNaive : public ad::state::StatePinNaive<MatrixType>
 {
-    using base_t = ad::state::PinNaive<MatrixType>;
+    using base_t = ad::state::StatePinNaive<MatrixType>;
 public:
     using base_t::base_t;
-    PyPinNaive(base_t&& base) : base_t(std::move(base)) {}
+    PyStatePinNaive(base_t&& base) : base_t(std::move(base)) {}
 };
 
 template <class MatrixType>
-void pin_naive(py::module_& m, const char* name)
+void state_pin_naive(py::module_& m, const char* name)
 {
     using matrix_t = MatrixType;
-    using state_t = ad::state::PinNaive<matrix_t>;
+    using state_t = ad::state::StatePinNaive<matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_index_t = typename state_t::vec_index_t;
@@ -301,7 +302,7 @@ void pin_naive(py::module_& m, const char* name)
     using dyn_vec_vec_value_t = typename state_t::dyn_vec_vec_value_t;
     using dyn_vec_sp_vec_t = typename state_t::dyn_vec_sp_vec_t;
 
-    py::class_<state_t, base_t, PyPinNaive<matrix_t>>(m, name)
+    py::class_<state_t, base_t, PyStatePinNaive<matrix_t>>(m, name)
         .def(py::init<
             matrix_t&,
             const Eigen::Ref<const vec_index_t>&, 
@@ -344,7 +345,7 @@ void pin_naive(py::module_& m, const char* name)
             py::arg("strong_g1").noconvert(),
             py::arg("strong_g2").noconvert(),
             py::arg("strong_begins").noconvert(),
-            py::arg("strong_var").noconvert(),
+            py::arg("strong_vars").noconvert(),
             py::arg("lmdas").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
@@ -388,19 +389,19 @@ void pin_naive(py::module_& m, const char* name)
 }
 
 template <class MatrixType>
-class PyPinCov : public ad::state::PinCov<MatrixType>
+class PyStatePinCov : public ad::state::StatePinCov<MatrixType>
 {
-    using base_t = ad::state::PinCov<MatrixType>;
+    using base_t = ad::state::StatePinCov<MatrixType>;
 public:
     using base_t::base_t;
-    PyPinCov(base_t&& base) : base_t(std::move(base)) {}
+    PyStatePinCov(base_t&& base) : base_t(std::move(base)) {}
 };
 
 template <class MatrixType>
-void pin_cov(py::module_& m, const char* name)
+void state_pin_cov(py::module_& m, const char* name)
 {
     using matrix_t = MatrixType;
-    using state_t = ad::state::PinCov<matrix_t>;
+    using state_t = ad::state::StatePinCov<matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_index_t = typename state_t::vec_index_t;
@@ -410,7 +411,7 @@ void pin_cov(py::module_& m, const char* name)
     using dyn_vec_value_t = typename state_t::dyn_vec_value_t;
     using dyn_vec_sp_vec_t = typename state_t::dyn_vec_sp_vec_t;
 
-    py::class_<state_t, base_t, PyPinCov<matrix_t>>(m, name)
+    py::class_<state_t, base_t, PyStatePinCov<matrix_t>>(m, name)
         .def(py::init<
             matrix_t&,
             const Eigen::Ref<const vec_index_t>&, 
@@ -451,7 +452,7 @@ void pin_cov(py::module_& m, const char* name)
             py::arg("strong_g1").noconvert(),
             py::arg("strong_g2").noconvert(),
             py::arg("strong_begins").noconvert(),
-            py::arg("strong_var").noconvert(),
+            py::arg("strong_vars").noconvert(),
             py::arg("lmdas").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
@@ -482,10 +483,10 @@ void pin_cov(py::module_& m, const char* name)
 
 void register_state(py::module_& m)
 {
-    pin_base<double>(m, "PinBase64");
-    pin_base<float>(m, "PinBase32");
-    pin_naive<ad::matrix::MatrixNaiveBase<double>>(m, "PinNaive64");
-    pin_naive<ad::matrix::MatrixNaiveBase<float>>(m, "PinNaive32");
-    pin_cov<ad::matrix::MatrixCovBase<double>>(m, "PinCov64");
-    pin_cov<ad::matrix::MatrixCovBase<float>>(m, "PinCov32");
+    state_pin_base<double>(m, "StatePinBase64");
+    state_pin_base<float>(m, "StatePinBase32");
+    state_pin_naive<ad::matrix::MatrixPinNaiveBase<double>>(m, "StatePinNaive64");
+    state_pin_naive<ad::matrix::MatrixPinNaiveBase<float>>(m, "StatePinNaive32");
+    state_pin_cov<ad::matrix::MatrixPinCovBase<double>>(m, "StatePinCov64");
+    state_pin_cov<ad::matrix::MatrixPinCovBase<float>>(m, "StatePinCov32");
 }

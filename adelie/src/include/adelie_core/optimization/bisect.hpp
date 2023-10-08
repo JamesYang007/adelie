@@ -37,9 +37,9 @@ void brent(
     
     iters = 0;
     for (; iters < max_iters; ++iters) {
-        const auto extra_check_pack = extra_check_f(a, fa, b, fb);
-        if (std::get<0>(extra_check_pack)) {
-            sol = std::get<1>(extra_check_pack);
+        const auto extra_check_state = extra_check_f(a, fa, b, fb);
+        if (std::get<0>(extra_check_state)) {
+            sol = std::get<1>(extra_check_state);
             return;
         }
 

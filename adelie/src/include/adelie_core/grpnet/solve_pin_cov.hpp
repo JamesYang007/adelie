@@ -8,13 +8,13 @@
 namespace adelie_core {
 namespace grpnet {
     
-template <class PackType, class G1Iter, class G2Iter,
+template <class StateType, class G1Iter, class G2Iter,
           class ValueType, class BufferType,
           class UpdateCoefficientsType,
           class AdditionalStepType=util::no_op>
 ADELIE_CORE_STRONG_INLINE
 void coordinate_descent(
-    PackType&& pack,
+    StateType&& state,
     G1Iter g1_begin,
     G1Iter g1_end,
     G2Iter g2_begin,
@@ -28,23 +28,23 @@ void coordinate_descent(
     AdditionalStepType additional_step=AdditionalStepType()
 )
 {
-    using pack_t = std::decay_t<PackType>;
-    using value_t = typename pack_t::value_t;
+    using state_t = std::decay_t<StateType>;
+    using value_t = typename state_t::value_t;
 
-    auto& A = *pack.A;
-    const auto& penalty = pack.penalty;
-    const auto& strong_set = pack.strong_set;
-    const auto& strong_begins = pack.strong_begins;
-    const auto& strong_var = pack.strong_var;
-    const auto& groups = pack.groups;
-    const auto& group_sizes = pack.group_sizes;
-    const auto alpha = pack.alpha;
-    const auto lmda = pack.lmdas[lmda_idx];
-    const auto newton_tol = pack.newton_tol;
-    const auto newton_max_iters = pack.newton_max_iters;
-    auto& strong_beta = pack.strong_beta;
-    auto& strong_grad = pack.strong_grad;
-    auto& rsq = pack.rsq;
+    auto& A = *state.A;
+    const auto& penalty = state.penalty;
+    const auto& strong_set = state.strong_set;
+    const auto& strong_begins = state.strong_begins;
+    const auto& strong_vars = state.strong_vars;
+    const auto& groups = state.groups;
+    const auto& group_sizes = state.group_sizes;
+    const auto alpha = state.alpha;
+    const auto lmda = state.lmdas[lmda_idx];
+    const auto newton_tol = state.newton_tol;
+    const auto newton_max_iters = state.newton_max_iters;
+    auto& strong_beta = state.strong_beta;
+    auto& strong_grad = state.strong_grad;
+    auto& rsq = state.rsq;
 
     const auto l1 = lmda * alpha;
     const auto l2 = lmda * (1-alpha);
@@ -57,7 +57,7 @@ void coordinate_descent(
         const auto ss_value_begin = strong_begins[ss_idx]; // value begin index at ss_idx
         auto& ak = strong_beta[ss_value_begin]; // corresponding beta
         const auto gk = strong_grad[ss_value_begin]; // corresponding gradient
-        const auto A_kk = strong_var[ss_value_begin];  // corresponding A diagonal 
+        const auto A_kk = strong_vars[ss_value_begin];  // corresponding A diagonal 
         const auto pk = penalty[k];
 
         const auto ak_old = ak;
@@ -114,7 +114,7 @@ void coordinate_descent(
         const auto gsize = group_sizes[k]; // group size  
         auto ak = strong_beta.segment(ss_value_begin, gsize); // corresponding beta
         auto gk = strong_grad.segment(ss_value_begin, gsize); // corresponding gradient
-        const auto A_kk = strong_var.segment(ss_value_begin, gsize);  // corresponding A diagonal 
+        const auto A_kk = strong_vars.segment(ss_value_begin, gsize);  // corresponding A diagonal 
         const auto pk = penalty[k];
 
         // save old beta in buffer
@@ -175,14 +175,14 @@ void coordinate_descent(
 /**
  * Applies multiple blockwise coordinate descent on the active set.
  */
-template <class PackType, 
+template <class StateType, 
           class ABDiffType,
           class BufferType, 
           class UpdateCoefficientsType,
           class CUIType = util::no_op>
 ADELIE_CORE_STRONG_INLINE
 void solve_pin_cov_active(
-    PackType&& pack,
+    StateType&& state,
     size_t lmda_idx,
     ABDiffType& active_beta_diff,
     BufferType& buffer1,
@@ -191,27 +191,27 @@ void solve_pin_cov_active(
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType())
 {
-    using pack_t = std::decay_t<PackType>;
-    using value_t = typename pack_t::value_t;
-    using vec_value_t = typename pack_t::vec_value_t;
+    using state_t = std::decay_t<StateType>;
+    using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
     using sw_t = util::Stopwatch;
 
-    auto& A = *pack.A;
-    const auto& groups = pack.groups;
-    const auto& group_sizes = pack.group_sizes;
-    const auto& strong_set = pack.strong_set;
-    const auto& strong_begins = pack.strong_begins;
-    const auto& active_set = pack.active_set;
-    const auto& active_g1 = pack.active_g1;
-    const auto& active_g2 = pack.active_g2;
-    const auto& active_begins = pack.active_begins;
-    const auto& strong_beta = pack.strong_beta;
-    const auto& is_active = pack.is_active;
-    const auto tol = pack.tol;
-    const auto max_iters = pack.max_iters;
-    auto& strong_grad = pack.strong_grad;
-    auto& iters = pack.iters;
-    auto& time_active_cd = pack.time_active_cd;
+    auto& A = *state.A;
+    const auto& groups = state.groups;
+    const auto& group_sizes = state.group_sizes;
+    const auto& strong_set = state.strong_set;
+    const auto& strong_begins = state.strong_begins;
+    const auto& active_set = state.active_set;
+    const auto& active_g1 = state.active_g1;
+    const auto& active_g2 = state.active_g2;
+    const auto& active_begins = state.active_begins;
+    const auto& strong_beta = state.strong_beta;
+    const auto& is_active = state.is_active;
+    const auto tol = state.tol;
+    const auto max_iters = state.max_iters;
+    auto& strong_grad = state.strong_grad;
+    auto& iters = state.iters;
+    auto& time_active_cd = state.time_active_cd;
 
     Eigen::Map<vec_value_t> ab_diff_view(
         active_beta_diff.data(), 
@@ -238,7 +238,7 @@ void solve_pin_cov_active(
             ++iters;
             value_t convg_measure;
             coordinate_descent(
-                pack, 
+                state, 
                 active_g1.data(), active_g1.data() + active_g1.size(),
                 active_g2.data(), active_g2.data() + active_g2.size(),
                 lmda_idx, convg_measure, buffer1, buffer2, buffer3, 
@@ -290,43 +290,43 @@ void solve_pin_cov_active(
     }
 }
 
-template <class PackType,
+template <class StateType,
           class UpdateCoefficientsType,
           class CUIType = util::no_op>
 inline void solve_pin_cov(
-    PackType&& pack,
+    StateType&& state,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType())
 {
-    using pack_t = std::decay_t<PackType>;
-    using value_t = typename pack_t::value_t;
-    using index_t = typename pack_t::index_t;
-    using sp_vec_value_t = typename pack_t::sp_vec_value_t;
+    using state_t = std::decay_t<StateType>;
+    using value_t = typename state_t::value_t;
+    using index_t = typename state_t::index_t;
+    using sp_vec_value_t = typename state_t::sp_vec_value_t;
     using sw_t = util::Stopwatch;
 
-    auto& A = *pack.A;
-    const auto& groups = pack.groups;
-    const auto& group_sizes = pack.group_sizes;
-    const auto& strong_set = pack.strong_set;
-    const auto& strong_g1 = pack.strong_g1;
-    const auto& strong_g2 = pack.strong_g2;
-    const auto& strong_beta = pack.strong_beta;
-    const auto& lmdas = pack.lmdas;
-    const auto tol = pack.tol;
-    const auto max_iters = pack.max_iters;
-    const auto rsq_slope_tol = pack.rsq_slope_tol;
-    const auto rsq_curv_tol = pack.rsq_curv_tol;
-    auto& active_set = pack.active_set;
-    auto& active_g1 = pack.active_g1;
-    auto& active_g2 = pack.active_g2;
-    auto& active_begins = pack.active_begins;
-    auto& active_order = pack.active_order;
-    auto& is_active = pack.is_active;
-    auto& betas = pack.betas;
-    auto& rsqs = pack.rsqs;
-    auto& rsq = pack.rsq;
-    auto& iters = pack.iters;
-    auto& time_strong_cd = pack.time_strong_cd;
+    auto& A = *state.A;
+    const auto& groups = state.groups;
+    const auto& group_sizes = state.group_sizes;
+    const auto& strong_set = state.strong_set;
+    const auto& strong_g1 = state.strong_g1;
+    const auto& strong_g2 = state.strong_g2;
+    const auto& strong_beta = state.strong_beta;
+    const auto& lmdas = state.lmdas;
+    const auto tol = state.tol;
+    const auto max_iters = state.max_iters;
+    const auto rsq_slope_tol = state.rsq_slope_tol;
+    const auto rsq_curv_tol = state.rsq_curv_tol;
+    auto& active_set = state.active_set;
+    auto& active_g1 = state.active_g1;
+    auto& active_g2 = state.active_g2;
+    auto& active_begins = state.active_begins;
+    auto& active_order = state.active_order;
+    auto& is_active = state.is_active;
+    auto& betas = state.betas;
+    auto& rsqs = state.rsqs;
+    auto& rsq = state.rsq;
+    auto& iters = state.iters;
+    auto& time_strong_cd = state.time_strong_cd;
 
     const auto p = A.cols();
 
@@ -376,7 +376,7 @@ inline void solve_pin_cov(
 
     const auto lasso_active_and_update = [&](size_t l) {
         solve_pin_cov_active(
-            pack, l, 
+            state, l, 
             active_beta_diff, 
             buffer_pack.buffer1,
             buffer_pack.buffer2,
@@ -401,7 +401,7 @@ inline void solve_pin_cov(
             {
                 sw_t stopwatch(time_strong_cd.back());
                 coordinate_descent(
-                    pack,
+                    state,
                     strong_g1.data(), strong_g1.data() + strong_g1.size(),
                     strong_g2.data(), strong_g2.data() + strong_g2.size(),
                     l, convg_measure,
@@ -452,7 +452,7 @@ inline void solve_pin_cov(
         active_beta_indices.resize(active_beta_size);
         active_beta_ordered.resize(active_beta_size);
         sparsify_active_beta(
-            pack,
+            state,
             active_beta_indices,
             active_beta_ordered
         );
