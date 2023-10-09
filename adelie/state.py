@@ -8,22 +8,16 @@ import os
 
 def deduce_states(
     *,
-    groups: np.ndarray,
     group_sizes: np.ndarray,
     strong_set: np.ndarray,
-    active_set: np.ndarray,
 ):
     """Deduce state variables.
 
     Parameters
     ----------
-    groups : (G,) np.ndarray
-        See ``adelie.adelie_core.state.StatePinBase64``.
     group_sizes : (G,) np.ndarray
         See ``adelie.adelie_core.state.StatePinBase64``.
     strong_set : (s,) np.ndarray
-        See ``adelie.adelie_core.state.StatePinBase64``.
-    active_set : (a,) np.ndarray
         See ``adelie.adelie_core.state.StatePinBase64``.
 
     Returns
@@ -33,18 +27,6 @@ def deduce_states(
     strong_g2 : (s2,) np.ndarray
         See ``adelie.adelie_core.state.StatePinBase64``.
     strong_begins : (s,) np.ndarray
-        See ``adelie.adelie_core.state.StatePinBase64``.
-    strong_vars : (ws,) np.ndarray
-        See ``adelie.adelie_core.state.StatePinBase64``.
-    active_g1 : (a1,) np.ndarray
-        See ``adelie.adelie_core.state.StatePinBase64``.
-    active_g2 : (a2,) np.ndarray
-        See ``adelie.adelie_core.state.StatePinBase64``.
-    active_begins : (a,) np.ndarray
-        See ``adelie.adelie_core.state.StatePinBase64``.
-    active_order : (a,) np.ndarray
-        See ``adelie.adelie_core.state.StatePinBase64``.
-    is_active : (s,) np.ndarray
         See ``adelie.adelie_core.state.StatePinBase64``.
 
     See Also
@@ -58,24 +40,10 @@ def deduce_states(
         np.concatenate([[0], group_sizes[strong_set]]),
         dtype=int,
     )[:-1]
-    active_g1 = active_set[group_sizes[strong_set[active_set]] == 1]
-    active_g2 = active_set[group_sizes[strong_set[active_set]] > 1]
-    active_begins = np.cumsum(
-        np.concatenate([[0], group_sizes[strong_set[active_set]]]),
-        dtype=int,
-    )[:-1]
-    active_order = np.argsort(groups[strong_set[active_set]])
-    is_active = np.zeros(strong_set.shape[0], dtype=bool)
-    is_active[active_set] = True
     return (
         strong_g1,
         strong_g2,
         strong_begins,
-        active_g1,
-        active_g2,
-        active_begins,
-        active_order,
-        is_active,
     )
 
 class base:
@@ -458,15 +426,15 @@ class pin_base(base):
             method, logger,
         )
 
-        # ================ is_active check ====================
+        # ================ strong_is_active check ====================
         self._check(
-            np.all(np.arange(S)[self.is_active] == np.sort(self.active_set)),
-            "check is_active is consistent with active_set",
+            np.all(np.arange(S)[self.strong_is_active] == np.sort(self.active_set)),
+            "check strong_is_active is consistent with active_set",
             method, logger,
         )
         self._check(
-            self.is_active.dtype == np.dtype("bool"),
-            "check is_active dtype is bool",
+            self.strong_is_active.dtype == np.dtype("bool"),
+            "check strong_is_active dtype is bool",
             method, logger,
         )
 
@@ -516,7 +484,7 @@ class pin_naive_base(pin_base):
         rsq: float,
         resid: np.ndarray,
         strong_beta: np.ndarray,
-        active_set: np.ndarray,
+        strong_is_active: np.ndarray,
         max_iters: int,
         tol: float,
         rsq_slope_tol: float,
@@ -545,22 +513,15 @@ class pin_naive_base(pin_base):
         # dynamic inputs require a copy to not modify user's inputs
         self._resid = np.copy(resid).astype(dtype)
         self._strong_beta = np.copy(strong_beta).astype(dtype)
-        self._active_set = np.copy(active_set).astype(int)
+        self._strong_is_active = np.copy(strong_is_active).astype(bool)
 
         (
             self._strong_g1,
             self._strong_g2,
             self._strong_begins,
-            self._active_g1,
-            self._active_g2,
-            self._active_begins,
-            self._active_order,
-            self._is_active,
         ) = deduce_states(
-            groups=groups,
             group_sizes=group_sizes,
             strong_set=strong_set,
-            active_set=active_set,
         )
 
         self._strong_vars = np.concatenate([
@@ -601,15 +562,7 @@ class pin_naive_base(pin_base):
             resid=self._resid,
             strong_beta=self._strong_beta,
             strong_grad=self._strong_grad,
-            active_set=self._active_set,
-            active_g1=self._active_g1,
-            active_g2=self._active_g2,
-            active_begins=self._active_begins,
-            active_order=self._active_order,
-            is_active=self._is_active,
-            betas=[],
-            rsqs=[],
-            resids=[],
+            strong_is_active=self._strong_is_active,
         )
 
     @staticmethod
@@ -681,7 +634,7 @@ class pin_naive_64(pin_naive_base, core.state.StatePinNaive64):
         rsq: float,
         resid: np.ndarray,
         strong_beta: np.ndarray,
-        active_set: np.ndarray,
+        strong_is_active: np.ndarray,
         max_iters: int,
         tol: float,
         rsq_slope_tol: float,
@@ -703,7 +656,7 @@ class pin_naive_64(pin_naive_base, core.state.StatePinNaive64):
             rsq=rsq,
             resid=resid,
             strong_beta=strong_beta,
-            active_set=active_set,
+            strong_is_active=strong_is_active,
             max_iters=max_iters,
             tol=tol,
             rsq_slope_tol=rsq_slope_tol,
@@ -746,7 +699,7 @@ class pin_naive_32(pin_naive_base, core.state.StatePinNaive32):
         rsq: float,
         resid: np.ndarray,
         strong_beta: np.ndarray,
-        active_set: np.ndarray,
+        strong_is_active: np.ndarray,
         max_iters: int,
         tol: float,
         rsq_slope_tol: float,
@@ -768,7 +721,7 @@ class pin_naive_32(pin_naive_base, core.state.StatePinNaive32):
             rsq=rsq,
             resid=resid,
             strong_beta=strong_beta,
-            active_set=active_set,
+            strong_is_active=strong_is_active,
             max_iters=max_iters,
             tol=tol,
             rsq_slope_tol=rsq_slope_tol,
@@ -807,7 +760,7 @@ def pin_naive(
     rsq: float,
     resid: np.ndarray,
     strong_beta: np.ndarray,
-    active_set: np.ndarray,
+    strong_is_active: np.ndarray,
     max_iters: int =int(1e5),
     tol: float =1e-12,
     rsq_slope_tol: float =1e-2,
@@ -853,16 +806,9 @@ def pin_naive(
         ``k = strong_set[i]``,
         ``b = strong_begins[i]``,
         and ``p = group_sizes[k]``.
-    active_set : (a,) np.ndarray
-        List of indices into ``strong_set`` that correspond to active groups.
-        ``strong_set[active_set[i]]`` is the ``i`` th active group.
-        An active group is one with non-zero coefficient block,
-        that is, for every ``i`` th active group, 
-        ``strong_beta[b:b+p] == 0`` where 
-        ``j = active_set[i]``,
-        ``k = strong_set[j]``,
-        ``b = strong_begins[j]``,
-        and ``p = group_sizes[k]``.
+    strong_is_active : (a,) np.ndarray
+        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
+        ``strong_is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
     max_iters : int, optional
         Maximum number of coordinate descents.
         Default is ``int(1e5)``.
@@ -921,7 +867,7 @@ def pin_naive(
         rsq=rsq,
         resid=resid,
         strong_beta=strong_beta,
-        active_set=active_set,
+        strong_is_active=strong_is_active,
         max_iters=max_iters,
         tol=tol,
         rsq_slope_tol=rsq_slope_tol,
@@ -948,7 +894,7 @@ class pin_cov_base(pin_base):
         rsq: float,
         strong_beta: np.ndarray,
         strong_grad: np.ndarray,
-        active_set: np.ndarray,
+        strong_is_active: np.ndarray,
         max_iters: int,
         tol: float,
         rsq_slope_tol: float,
@@ -977,22 +923,15 @@ class pin_cov_base(pin_base):
         # dynamic inputs require a copy to not modify user's inputs
         self._strong_beta = np.copy(strong_beta).astype(dtype)
         self._strong_grad = np.copy(strong_grad).astype(dtype)
-        self._active_set = np.copy(active_set).astype(int)
+        self._strong_is_active = np.copy(strong_is_active).astype(bool)
 
         (
             self._strong_g1,
             self._strong_g2,
             self._strong_begins,
-            self._active_g1,
-            self._active_g2,
-            self._active_begins,
-            self._active_order,
-            self._is_active,
         ) = deduce_states(
-            groups=groups,
             group_sizes=group_sizes,
             strong_set=strong_set,
-            active_set=active_set,
         )
 
         self._strong_vars = np.concatenate([
@@ -1023,14 +962,7 @@ class pin_cov_base(pin_base):
             rsq=rsq,
             strong_beta=self._strong_beta,
             strong_grad=self._strong_grad,
-            active_set=self._active_set,
-            active_g1=self._active_g1,
-            active_g2=self._active_g2,
-            active_begins=self._active_begins,
-            active_order=self._active_order,
-            is_active=self._is_active,
-            betas=[],
-            rsqs=[],
+            strong_is_active=self._strong_is_active,
         )
 
     @staticmethod
@@ -1092,7 +1024,7 @@ class pin_cov_64(pin_cov_base, core.state.StatePinCov64):
         rsq: float,
         strong_beta: np.ndarray,
         strong_grad: np.ndarray,
-        active_set: np.ndarray,
+        strong_is_active: np.ndarray,
         max_iters: int,
         tol: float,
         rsq_slope_tol: float,
@@ -1114,7 +1046,7 @@ class pin_cov_64(pin_cov_base, core.state.StatePinCov64):
             rsq=rsq,
             strong_beta=strong_beta,
             strong_grad=strong_grad,
-            active_set=active_set,
+            strong_is_active=strong_is_active,
             max_iters=max_iters,
             tol=tol,
             rsq_slope_tol=rsq_slope_tol,
@@ -1157,7 +1089,7 @@ class pin_cov_32(pin_cov_base, core.state.StatePinCov32):
         rsq: float,
         strong_beta: np.ndarray,
         strong_grad: np.ndarray,
-        active_set: np.ndarray,
+        strong_is_active: np.ndarray,
         max_iters: int,
         tol: float,
         rsq_slope_tol: float,
@@ -1179,7 +1111,7 @@ class pin_cov_32(pin_cov_base, core.state.StatePinCov32):
             rsq=rsq,
             strong_beta=strong_beta,
             strong_grad=strong_grad,
-            active_set=active_set,
+            strong_is_active=strong_is_active,
             max_iters=max_iters,
             tol=tol,
             rsq_slope_tol=rsq_slope_tol,
@@ -1218,7 +1150,7 @@ def pin_cov(
     rsq: float,
     strong_beta: np.ndarray,
     strong_grad: np.ndarray,
-    active_set: np.ndarray,
+    strong_is_active: np.ndarray,
     max_iters: int =int(1e5),
     tol: float =1e-12,
     rsq_slope_tol: float =1e-2,
@@ -1271,16 +1203,9 @@ def pin_cov(
         ``k = strong_set[i]``,
         ``b = strong_begins[i]``,
         and ``p = group_sizes[k]``.
-    active_set : (a,) np.ndarray
-        List of indices into ``strong_set`` that correspond to active groups.
-        ``strong_set[active_set[i]]`` is the ``i`` th active group.
-        An active group is one with non-zero coefficient block,
-        that is, for every ``i`` th active group, 
-        ``strong_beta[b:b+p] == 0`` where 
-        ``j = active_set[i]``,
-        ``k = strong_set[j]``,
-        ``b = strong_begins[j]``,
-        and ``p = group_sizes[k]``.
+    strong_is_active : (a,) np.ndarray
+        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
+        ``strong_is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
     max_iters : int, optional
         Maximum number of coordinate descents.
         Default is ``int(1e5)``.
@@ -1339,7 +1264,7 @@ def pin_cov(
         rsq=rsq,
         strong_beta=strong_beta,
         strong_grad=strong_grad,
-        active_set=active_set,
+        strong_is_active=strong_is_active,
         max_iters=max_iters,
         tol=tol,
         rsq_slope_tol=rsq_slope_tol,

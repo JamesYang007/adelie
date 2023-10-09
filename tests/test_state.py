@@ -22,7 +22,7 @@ def test_state_pin_naive():
     rsq = 0.0
     resid = np.random.normal(0, 1, n)
     strong_beta = np.zeros(p)
-    active_set = np.empty(0, dtype=int)
+    strong_is_active = np.zeros(strong_set.shape[0], dtype=bool)
 
     state = mod.pin_naive(
         X=X,
@@ -35,7 +35,7 @@ def test_state_pin_naive():
         rsq=rsq,
         resid=resid,
         strong_beta=strong_beta,
-        active_set=active_set,
+        strong_is_active=strong_is_active,
     )
 
     state.check(method="assert")
@@ -49,7 +49,7 @@ def test_state_pin_naive():
     assert np.allclose(lmdas, state.lmdas)
     assert np.allclose(rsq, state.rsq)
     assert np.allclose(strong_beta, state.strong_beta)
-    assert np.allclose(active_set, state.active_set)
+    assert np.allclose(strong_is_active, state.strong_is_active)
     assert state.iters == 0
 
 
@@ -69,7 +69,7 @@ def test_state_pin_cov():
     rsq = 0.0
     strong_beta = np.zeros(p)
     strong_grad = X.T @ np.random.normal(0, 1, n)
-    active_set = np.empty(0, dtype=int)
+    strong_is_active = np.zeros(strong_set.shape[0], dtype=bool)
 
     state = mod.pin_cov(
         A=A,
@@ -82,7 +82,7 @@ def test_state_pin_cov():
         rsq=rsq,
         strong_beta=strong_beta,
         strong_grad=strong_grad,
-        active_set=active_set,
+        strong_is_active=strong_is_active,
     )
 
     state.check(method="assert")
@@ -97,5 +97,5 @@ def test_state_pin_cov():
     assert np.allclose(rsq, state.rsq)
     assert np.allclose(strong_beta, state.strong_beta)
     assert np.allclose(strong_grad, state.strong_grad)
-    assert np.allclose(active_set, state.active_set)
+    assert np.allclose(strong_is_active, state.strong_is_active)
     assert state.iters == 0

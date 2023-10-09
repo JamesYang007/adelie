@@ -1,4 +1,4 @@
-from adelie.grpnet import (
+from adelie.solver import (
     objective,
     solve_pin,
     create_lambdas,
@@ -48,7 +48,7 @@ def create_test_data(
     y /= np.sqrt(n)
 
     strong_set = np.random.choice(G, S, replace=False)
-    active_set = np.empty(0, dtype=int)
+    strong_is_active = np.zeros(strong_set.shape[0], dtype=bool)
     penalty = np.random.uniform(0, 1, G)
     penalty /= np.sum(penalty)
     lmdas = create_lambdas(
@@ -66,7 +66,7 @@ def create_test_data(
         penalty,
         lmdas,
         strong_set, 
-        active_set, 
+        strong_is_active, 
         rsq,
         strong_beta,
     )
@@ -156,6 +156,8 @@ def run_solve_pin(state, X, y):
         ])
         assert np.all(my_objs <= cvxpy_objs)
 
+    return state
+
 
 def test_solve_pin_naive():
     def _test(n, p, G, S, alpha=1, sparsity=0.95, seed=0):
@@ -167,7 +169,7 @@ def test_solve_pin_naive():
             penalty,
             lmdas,
             strong_set, 
-            active_set, 
+            strong_is_active, 
             rsq,
             strong_beta,
         ) = create_test_data(
@@ -189,7 +191,21 @@ def test_solve_pin_naive():
                 rsq=rsq,
                 resid=resid,
                 strong_beta=strong_beta,
-                active_set=active_set,
+                strong_is_active=strong_is_active,
+            )
+            state = run_solve_pin(state, X, y)
+            state = ad.state.pin_naive(
+                X=Xpy,
+                groups=groups,
+                group_sizes=group_sizes,
+                alpha=alpha,
+                penalty=penalty,
+                strong_set=strong_set,
+                lmdas=[state.lmdas[:len(state.rsqs)][-1] * 0.8],
+                rsq=state.rsq,
+                resid=state.resid,
+                strong_beta=state.strong_beta,
+                strong_is_active=state.strong_is_active
             )
             run_solve_pin(state, X, y)
 
@@ -210,7 +226,7 @@ def test_solve_pin_cov():
             penalty,
             lmdas,
             strong_set, 
-            active_set, 
+            strong_is_active, 
             rsq,
             strong_beta,
         ) = create_test_data(
@@ -242,7 +258,21 @@ def test_solve_pin_cov():
                 rsq=rsq,
                 strong_beta=strong_beta,
                 strong_grad=strong_grad,
-                active_set=active_set,
+                strong_is_active=strong_is_active,
+            )
+            state = run_solve_pin(state, X, y)
+            state = ad.state.pin_cov(
+                A=Apy,
+                groups=groups,
+                group_sizes=group_sizes,
+                alpha=alpha,
+                penalty=penalty,
+                strong_set=strong_set,
+                lmdas=[state.lmdas[:len(state.rsqs)][-1] * 0.8],
+                rsq=state.rsq,
+                strong_beta=state.strong_beta,
+                strong_grad=state.strong_grad,
+                strong_is_active=state.strong_is_active
             )
             run_solve_pin(state, X, y)
 

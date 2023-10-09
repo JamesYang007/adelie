@@ -99,7 +99,7 @@ def generate_bcd_state(
     active_g2=None,
     active_begins=None,
     active_order=None,
-    is_active=None,
+    strong_is_active=None,
 ):
     A_diag = np.sum(X ** 2, axis=0)
     r = X.T @ y
@@ -170,8 +170,8 @@ def generate_bcd_state(
         active_begins = np.empty((0,), dtype=np.int32)
     if active_order is None:
         active_order = np.empty((0,), dtype=np.int32)
-    if is_active is None:
-        is_active = np.zeros((n_groups,), dtype=bool)
+    if strong_is_active is None:
+        strong_is_active = np.zeros((n_groups,), dtype=bool)
         
     return CommonPack(
         groups=groups,
@@ -197,5 +197,5 @@ def generate_bcd_state(
         active_g2=active_g2,
         active_begins=active_begins,
         active_order=active_order,
-        is_active=is_active,
+        strong_is_active=strong_is_active,
     )

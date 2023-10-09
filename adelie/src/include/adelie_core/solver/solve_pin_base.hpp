@@ -4,7 +4,7 @@
 #include <adelie_core/bcd.hpp>
 
 namespace adelie_core {
-namespace grpnet {
+namespace solver {
 
 /**
  * Pack of buffers used in solvers.
@@ -304,5 +304,5 @@ auto objective(
     return 0.5 * (y.matrix() - beta.matrix() * X.transpose()).squaredNorm() + p_;
 }
 
-} // namespace grpnet
+} // namespace solver
 } // namespace adelie_core

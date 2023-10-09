@@ -3,11 +3,11 @@
 #include <adelie_core/util/functional.hpp>
 #include <adelie_core/util/stopwatch.hpp>
 #include <adelie_core/util/eigen/map_sparsevector.hpp>
-#include <adelie_core/grpnet/solve_pin_base.hpp>
+#include <adelie_core/solver/solve_pin_base.hpp>
 #include <adelie_core/matrix/utils.hpp>
 
 namespace adelie_core {
-namespace grpnet {
+namespace solver {
     
 template <class StateType, class G1Iter, class G2Iter,
           class ValueType, class BufferType,
@@ -112,11 +112,11 @@ void coordinate_descent(
             newton_tol, newton_max_iters,
             ak, iters, buffer1, buffer2
         );
-
-        if ((ak_old - ak).abs().maxCoeff() <= 1e-14) continue;
         
         // NOTE: MUST undo the correction from before
         gk -= A_kk * ak_old; 
+
+        if ((ak_old - ak).abs().maxCoeff() <= 1e-14) continue;
 
         additional_step(ss_idx);
 
@@ -208,6 +208,7 @@ inline void solve_pin_naive(
     const auto& strong_g1 = state.strong_g1;
     const auto& strong_g2 = state.strong_g2;
     const auto& strong_beta = state.strong_beta;
+    const auto& strong_grad = state.strong_grad;
     const auto& lmdas = state.lmdas;
     const auto& resid = state.resid;
     const auto tol = state.tol;
@@ -219,10 +220,11 @@ inline void solve_pin_naive(
     auto& active_g2 = state.active_g2;
     auto& active_begins = state.active_begins;
     auto& active_order = state.active_order;
-    auto& is_active = state.is_active;
+    auto& strong_is_active = state.strong_is_active;
     auto& betas = state.betas;
     auto& rsqs = state.rsqs;
     auto& resids = state.resids;
+    auto& strong_grads = state.strong_grads;
     auto& rsq = state.rsq;
     auto& iters = state.iters;
     auto& time_strong_cd = state.time_strong_cd;
@@ -254,8 +256,8 @@ inline void solve_pin_naive(
     bool lasso_active_called = false;
 
     const auto add_active_set = [&](auto ss_idx) {
-        if (!is_active[ss_idx]) {
-            is_active[ss_idx] = true;
+        if (!strong_is_active[ss_idx]) {
+            strong_is_active[ss_idx] = true;
 
             active_set.push_back(ss_idx);
 
@@ -359,6 +361,7 @@ inline void solve_pin_naive(
         betas.emplace_back(beta_map);
         rsqs.emplace_back(rsq);
         resids.emplace_back(resid);
+        strong_grads.emplace_back(strong_grad);
 
         // make sure to do at least 3 lambdas.
         if (l < 2) continue;
@@ -368,5 +371,5 @@ inline void solve_pin_naive(
     }
 }
 
-} // namespace grpnet
+} // namespace solver
 } // namespace adelie_core

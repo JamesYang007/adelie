@@ -7,13 +7,8 @@ namespace state {
 
 template <class ValueType,
           class IndexType=Eigen::Index,
-          class BoolType=bool,
-          class DynamicVectorIndexType=std::vector<IndexType>,
-          class DynamicVectorValueType=std::vector<ValueType>,
-          class DynamicVectorSpVecType=std::vector<
-                util::sp_vec_type<ValueType, Eigen::RowMajor, IndexType>
-            > 
-          >
+          class BoolType=bool
+        >
 struct StatePinBase
 {
     using value_t = ValueType;
@@ -27,11 +22,12 @@ struct StatePinBase
     using map_vec_bool_t = Eigen::Map<vec_bool_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
     using map_cvec_index_t = Eigen::Map<const vec_index_t>;
-    using dyn_vec_index_t = DynamicVectorIndexType;
-    using dyn_vec_value_t = DynamicVectorValueType;
-    using dyn_vec_sp_vec_t = DynamicVectorSpVecType;
+    using dyn_vec_index_t = std::vector<IndexType>;
+    using dyn_vec_value_t = std::vector<ValueType>;
+    using dyn_vec_sp_vec_t = std::vector<sp_vec_value_t>;
+    using dyn_vec_vec_value_t = std::vector<vec_value_t>;
 
-    /* Static states */
+    /* static states */
     const map_cvec_index_t groups;
     const map_cvec_index_t group_sizes;
     const value_t alpha;
@@ -43,7 +39,7 @@ struct StatePinBase
     const map_cvec_value_t strong_vars;
     const map_cvec_value_t lmdas;
 
-    /* Configurations */
+    /* configurations */
     const size_t max_iters;
     const value_t tol;
     const value_t rsq_slope_tol;
@@ -52,18 +48,19 @@ struct StatePinBase
     const size_t newton_max_iters;
     const size_t n_threads;
 
-    /* Dynamic states */
+    /* dynamic states */
     value_t rsq;
     map_vec_value_t strong_beta;
     map_vec_value_t strong_grad;
+    map_vec_bool_t strong_is_active;
     dyn_vec_index_t active_set;
     dyn_vec_index_t active_g1;
     dyn_vec_index_t active_g2;
     dyn_vec_index_t active_begins;
     dyn_vec_index_t active_order;
-    map_vec_bool_t is_active;
     dyn_vec_sp_vec_t betas;
     dyn_vec_value_t rsqs;
+    dyn_vec_vec_value_t strong_grads;
     size_t iters = 0;
 
     /* diagnostics */
@@ -93,14 +90,7 @@ struct StatePinBase
         value_t rsq,
         Eigen::Ref<vec_value_t> strong_beta, 
         Eigen::Ref<vec_value_t> strong_grad,
-        dyn_vec_index_t active_set,
-        dyn_vec_index_t active_g1,
-        dyn_vec_index_t active_g2,
-        dyn_vec_index_t active_begins,
-        dyn_vec_index_t active_order,
-        Eigen::Ref<vec_bool_t> is_active,
-        dyn_vec_sp_vec_t betas, 
-        dyn_vec_value_t rsqs
+        Eigen::Ref<vec_bool_t> strong_is_active
     ): 
         groups(groups.data(), groups.size()),
         group_sizes(group_sizes.data(), group_sizes.size()),
@@ -122,15 +112,42 @@ struct StatePinBase
         rsq(rsq),
         strong_beta(strong_beta.data(), strong_beta.size()),
         strong_grad(strong_grad.data(), strong_grad.size()),
-        active_set(active_set),
-        active_g1(active_g1),
-        active_g2(active_g2),
-        active_begins(active_begins),
-        active_order(active_order),
-        is_active(is_active.data(), is_active.size()),
-        betas(betas),
-        rsqs(rsqs)
-    {}
+        strong_is_active(strong_is_active.data(), strong_is_active.size())
+    {
+        active_set.reserve(strong_set.size());
+        active_g1.reserve(strong_set.size());
+        active_g2.reserve(strong_set.size());
+        active_begins.reserve(strong_beta.size());
+        int active_begin = 0;
+        for (int i = 0; i < strong_is_active.size(); ++i) {
+            if (!strong_is_active[i]) continue;
+            active_set.push_back(i);
+            int curr_size = group_sizes[strong_set[i]];
+            if (curr_size == 1) {
+                active_g1.push_back(i);
+            } else {
+                active_g2.push_back(i);
+            }
+            active_begins.push_back(active_begin);
+            active_begin += curr_size;
+        }
+
+        active_order.resize(active_set.size());
+        std::iota(active_order.begin(), active_order.end(), 0);
+        std::sort(
+            active_order.begin(),
+            active_order.end(),
+            [&](auto i, auto j) { 
+                return groups[strong_set[active_set[i]]] < groups[strong_set[active_set[j]]]; 
+            }
+        );
+
+        betas.reserve(lmdas.size());
+        rsqs.reserve(lmdas.size());
+        strong_grads.reserve(lmdas.size());
+        time_strong_cd.reserve(1000);
+        time_active_cd.reserve(1000);
+    }
 };
 
 } // namespace state

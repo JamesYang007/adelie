@@ -30,7 +30,7 @@ inline py::dict convert_checkpoint(
         "active_g2"_a=checkpoint.active_g2,
         "active_begins"_a=checkpoint.active_begins,
         "active_order"_a=checkpoint.active_order,
-        "is_active"_a=checkpoint.is_active,
+        "strong_is_active"_a=checkpoint.strong_is_active,
         "grad"_a=checkpoint.grad,
         "abs_grad"_a=checkpoint.abs_grad,
         "rsq"_a=checkpoint.rsq
@@ -58,7 +58,7 @@ inline py::dict convert_checkpoint(
         "active_g2"_a=checkpoint.active_g2,
         "active_begins"_a=checkpoint.active_begins,
         "active_order"_a=checkpoint.active_order,
-        "is_active"_a=checkpoint.is_active,
+        "strong_is_active"_a=checkpoint.strong_is_active,
         "resid"_a=checkpoint.resid,
         "grad"_a=checkpoint.grad,
         "abs_grad"_a=checkpoint.abs_grad,

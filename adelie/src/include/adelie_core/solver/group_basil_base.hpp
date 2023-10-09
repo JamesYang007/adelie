@@ -7,66 +7,6 @@
 #include <omp.h>
 
 namespace adelie_core {
-    
-template <class XType, class GroupsType, class GroupSizesType, 
-          class XGNType, class PenaltyType, class GradType, 
-          class Resid0Type, class ResidType, class ValueType, class V1Type,
-          class IESType, class ESSType>
-ADELIEE
-void screen_edpp(
-    const XType& X,
-    const GroupsType& groups,
-    const GroupSizesType& group_sizes,
-    const XGNType& X_group_norms,
-    ValueType alpha,
-    const PenaltyType& penalty,
-    const GradType& grad,
-    const Resid0Type& resid_0,
-    const ResidType& resid,
-    ValueType lmda_curr,
-    ValueType lmda_prev,
-    bool is_lmda_prev_max,
-    const V1Type& v1_0,
-    IESType is_edpp_safe,
-    size_t n_threads,
-    ESSType& edpp_safe_set
-)
-{
-    if (alpha != 1) return;
-
-    Eigen::VectorXd v1 = (
-        (is_lmda_prev_max) ?
-        v1_0 :
-        (resid_0 - resid) / lmda_prev
-    );
-    Eigen::VectorXd v2 = resid_0 / lmda_curr - resid / lmda_prev;
-    Eigen::VectorXd v2_perp = v2 - ((v1.dot(v2)) / v1.squaredNorm()) * v1;
-    const auto v2_perp_norm = v2_perp.norm();
-    Eigen::VectorXd buffer(X.cols());    
-
-    std::vector<std::vector<int>> edpp_new_safe_threads(n_threads);
-
-#pragma omp parallel for schedule(auto) num_threads(n_threads)
-    for (size_t i = 0; i < groups.size(); ++i) {
-        if (is_edpp_safe(i)) continue;
-        const auto g = groups[i];
-        const auto gs = group_sizes[i];
-        const auto Xg = X.block(0, g, X.rows(), gs);
-        const auto grad_g = grad.segment(g, gs);
-        auto buff_g = buffer.segment(g, gs);
-        buff_g.noalias() = 0.5 * (Xg.transpose() * v2_perp);
-        buff_g += grad_g / lmda_prev;
-        const auto buff_g_norm = buff_g.norm();
-        if (buff_g_norm >= penalty[i] - 0.5 * v2_perp_norm * X_group_norms[i]) {
-            const auto thread_i = omp_get_thread_num();
-            edpp_new_safe_threads[thread_i].push_back(i);
-        }
-    }    
-    
-    for (const auto& edpp_new_safe : edpp_new_safe_threads) {
-        edpp_safe_set.insert(edpp_safe_set.end(), edpp_new_safe.begin(), edpp_new_safe.end());
-    }
-}
 
 /**
  * @brief 
@@ -93,47 +33,6 @@ void screen_edpp(
  * @param strong_set        strong set.
  * @param do_strong_rule    true if we should do strong rule.
  */
-template <class AbsGradType, class ValueType, class PenaltyType, class ISType, class SSType>
-ADELIEE 
-void screen(
-    const AbsGradType& abs_grad,
-    ValueType lmda_prev,
-    ValueType lmda_next,
-    ValueType alpha,
-    const PenaltyType& penalty,
-    const ISType& is_strong,
-    size_t size,
-    size_t rem_size,
-    SSType& strong_set,
-    bool do_strong_rule
-)
-{
-    using value_t = ValueType;
-
-    assert(strong_set.size() <= abs_grad.size());
-    if (!do_strong_rule) {
-        size_t size_capped = std::min(size, rem_size);
-        size_t old_strong_size = strong_set.size();
-        strong_set.insert(strong_set.end(), size_capped, -1);
-        const auto factor = (alpha <= 1e-16) ? 1e-3 : alpha;
-        const auto abs_grad_p = util::vec_type<value_t>::NullaryExpr(
-            abs_grad.size(), [&](auto i) {
-                return (penalty[i] <= 0) ? 0.0 : abs_grad[i] / penalty[i];
-            }
-        ) / factor;
-        util::k_imax(abs_grad_p, is_strong, size_capped, 
-                std::next(strong_set.begin(), old_strong_size));
-        return;
-    }
-    
-    const auto strong_rule_lmda = (2 * lmda_next - lmda_prev) * alpha;
-    for (size_t i = 0; i < abs_grad.size(); ++i) {
-        if (is_strong(i)) continue;
-        if (abs_grad[i] > strong_rule_lmda * penalty[i]) {
-            strong_set.push_back(i);
-        }
-    }
-}
 
 /**
  * @brief Converts the last valid beta solution into the corresponding strong_beta form

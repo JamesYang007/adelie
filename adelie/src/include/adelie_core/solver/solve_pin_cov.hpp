@@ -3,10 +3,10 @@
 #include <adelie_core/util/functional.hpp>
 #include <adelie_core/util/stopwatch.hpp>
 #include <adelie_core/util/eigen/map_sparsevector.hpp>
-#include <adelie_core/grpnet/solve_pin_base.hpp>
+#include <adelie_core/solver/solve_pin_base.hpp>
 
 namespace adelie_core {
-namespace grpnet {
+namespace solver {
     
 template <class StateType, class G1Iter, class G2Iter,
           class ValueType, class BufferType,
@@ -206,7 +206,7 @@ void solve_pin_cov_active(
     const auto& active_g2 = state.active_g2;
     const auto& active_begins = state.active_begins;
     const auto& strong_beta = state.strong_beta;
-    const auto& is_active = state.is_active;
+    const auto& strong_is_active = state.strong_is_active;
     const auto tol = state.tol;
     const auto max_iters = state.max_iters;
     auto& strong_grad = state.strong_grad;
@@ -268,7 +268,7 @@ void solve_pin_cov_active(
         (active_set.size() == strong_set.size())) return;
 
     for (size_t j_idx = 0; j_idx < strong_set.size(); ++j_idx) {
-        if (is_active[j_idx]) continue;
+        if (strong_is_active[j_idx]) continue;
 
         const auto j = strong_set[j_idx];
         const auto groupj_size = group_sizes[j];
@@ -311,6 +311,7 @@ inline void solve_pin_cov(
     const auto& strong_g1 = state.strong_g1;
     const auto& strong_g2 = state.strong_g2;
     const auto& strong_beta = state.strong_beta;
+    const auto& strong_grad = state.strong_grad;
     const auto& lmdas = state.lmdas;
     const auto tol = state.tol;
     const auto max_iters = state.max_iters;
@@ -321,9 +322,10 @@ inline void solve_pin_cov(
     auto& active_g2 = state.active_g2;
     auto& active_begins = state.active_begins;
     auto& active_order = state.active_order;
-    auto& is_active = state.is_active;
+    auto& strong_is_active = state.strong_is_active;
     auto& betas = state.betas;
     auto& rsqs = state.rsqs;
+    auto& strong_grads = state.strong_grads;
     auto& rsq = state.rsq;
     auto& iters = state.iters;
     auto& time_strong_cd = state.time_strong_cd;
@@ -359,8 +361,8 @@ inline void solve_pin_cov(
     bool lasso_active_called = false;
 
     const auto add_active_set = [&](auto ss_idx) {
-        if (!is_active[ss_idx]) {
-            is_active[ss_idx] = true;
+        if (!strong_is_active[ss_idx]) {
+            strong_is_active[ss_idx] = true;
 
             active_set.push_back(ss_idx);
 
@@ -387,7 +389,7 @@ inline void solve_pin_cov(
         lasso_active_called = true;
     };
 
-    for (size_t l = 0; l < lmdas.size(); ++l) {
+    for (int l = 0; l < lmdas.size(); ++l) {
         if (lasso_active_called) {
             lasso_active_and_update(l);
         }
@@ -465,6 +467,7 @@ inline void solve_pin_cov(
 
         betas.emplace_back(beta_map);
         rsqs.emplace_back(rsq);
+        strong_grads.emplace_back(strong_grad);
 
         // make sure to do at least 3 lambdas.
         if (l < 2) continue;
@@ -474,5 +477,5 @@ inline void solve_pin_cov(
     }
 }
 
-} // namespace grpnet
+} // namespace solver
 } // namespace adelie_core

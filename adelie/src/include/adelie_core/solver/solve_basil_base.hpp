@@ -4,40 +4,7 @@
 #include <adelie_core/util/macros.hpp>
 
 namespace adelie_core {
-namespace grpnet {
-
-template <class XType, class GroupsType, class GroupSizesType, class DType>
-ADELIE_CORE_STRONG_INLINE
-void transform_data(
-    XType& X,
-    const GroupsType& groups,
-    const GroupSizesType& group_sizes,
-    size_t n_threads,
-    DType& d
-) 
-{
-    using value_t = typename std::decay_t<XType>::Scalar;
-#pragma omp parallel for schedule(auto) num_threads(n_threads)
-    for (size_t i = 0; i < groups.size(); ++i) {
-        const auto gi = groups[i];
-        const auto gi_size = group_sizes[i];
-        auto Xi = X.block(0, gi, X.rows(), gi_size);
-        const auto n = Xi.rows();
-        const auto p = Xi.cols();
-        const auto m = std::min(n, p);
-
-        Eigen::BDCSVD<util::colmat_type<value_t>> solver;
-        solver.compute(Xi, Eigen::ComputeThinU);
-        const auto& U = solver.matrixU();
-        const auto& D = solver.singularValues();
-
-        Xi.block(0, m, n, p-m).setZero();
-        auto Xi_sub = Xi.block(0, 0, n, m);
-        Xi_sub.array() = U.array().rowwise() * D.transpose().array();
-        d.segment(gi, m) = D.array().square();
-        d.segment(gi + m, p-m).setZero();
-    }
-}
+namespace solver {
 
 //template <class XType, class GroupsType, class GroupSizesType, class BetasType>
 //ADELIE_CORE_STRONG_INLINE
@@ -151,5 +118,5 @@ void create_lambdas(
     ).exp();
 }
 
-} // namespace grpnet
+} // namespace solver
 } // namespace adelie_core
