@@ -1,0 +1,33 @@
+﻿adelie.matrix.pin\_cov\_dense
+=============================
+
+.. currentmodule:: adelie.matrix
+
+.. autoclass:: pin_cov_dense
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~pin_cov_dense.__init__
+      ~pin_cov_dense.internal
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: internal
+   
+   
+
+   
+   
+   

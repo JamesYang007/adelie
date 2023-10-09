@@ -1,0 +1,45 @@
+﻿adelie.matrix.MatrixPinNaiveBase64
+==================================
+
+.. currentmodule:: adelie.matrix
+
+.. autoclass:: MatrixPinNaiveBase64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixPinNaiveBase64.__init__
+      ~MatrixPinNaiveBase64.bmul
+      ~MatrixPinNaiveBase64.btmul
+      ~MatrixPinNaiveBase64.cmul
+      ~MatrixPinNaiveBase64.cnormsq
+      ~MatrixPinNaiveBase64.cols
+      ~MatrixPinNaiveBase64.ctmul
+      ~MatrixPinNaiveBase64.rows
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cnormsq
+   .. automethod:: cols
+   .. automethod:: ctmul
+   .. automethod:: rows
+   
+   
+
+   
+   
+   

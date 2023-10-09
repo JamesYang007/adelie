@@ -1,0 +1,112 @@
+﻿adelie.state.pin\_naive\_64
+===========================
+
+.. currentmodule:: adelie.state
+
+.. autoclass:: pin_naive_64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~pin_naive_64.__init__
+      ~pin_naive_64.check
+      ~pin_naive_64.create_from_core
+      ~pin_naive_64.default_init
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~pin_naive_64.X
+      ~pin_naive_64.active_begins
+      ~pin_naive_64.active_g1
+      ~pin_naive_64.active_g2
+      ~pin_naive_64.active_order
+      ~pin_naive_64.active_set
+      ~pin_naive_64.alpha
+      ~pin_naive_64.betas
+      ~pin_naive_64.group_sizes
+      ~pin_naive_64.groups
+      ~pin_naive_64.is_active
+      ~pin_naive_64.iters
+      ~pin_naive_64.lmdas
+      ~pin_naive_64.max_iters
+      ~pin_naive_64.n_threads
+      ~pin_naive_64.newton_max_iters
+      ~pin_naive_64.newton_tol
+      ~pin_naive_64.penalty
+      ~pin_naive_64.resid
+      ~pin_naive_64.resids
+      ~pin_naive_64.rsq
+      ~pin_naive_64.rsq_curv_tol
+      ~pin_naive_64.rsq_slope_tol
+      ~pin_naive_64.rsqs
+      ~pin_naive_64.strong_begins
+      ~pin_naive_64.strong_beta
+      ~pin_naive_64.strong_g1
+      ~pin_naive_64.strong_g2
+      ~pin_naive_64.strong_grad
+      ~pin_naive_64.strong_set
+      ~pin_naive_64.strong_vars
+      ~pin_naive_64.time_active_cd
+      ~pin_naive_64.time_strong_cd
+      ~pin_naive_64.tol
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: check
+   .. automethod:: create_from_core
+   .. automethod:: default_init
+   
+   
+
+   
+   
+   
+   .. autoattribute:: X
+   .. autoattribute:: active_begins
+   .. autoattribute:: active_g1
+   .. autoattribute:: active_g2
+   .. autoattribute:: active_order
+   .. autoattribute:: active_set
+   .. autoattribute:: alpha
+   .. autoattribute:: betas
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: is_active
+   .. autoattribute:: iters
+   .. autoattribute:: lmdas
+   .. autoattribute:: max_iters
+   .. autoattribute:: n_threads
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: newton_tol
+   .. autoattribute:: penalty
+   .. autoattribute:: resid
+   .. autoattribute:: resids
+   .. autoattribute:: rsq
+   .. autoattribute:: rsq_curv_tol
+   .. autoattribute:: rsq_slope_tol
+   .. autoattribute:: rsqs
+   .. autoattribute:: strong_begins
+   .. autoattribute:: strong_beta
+   .. autoattribute:: strong_g1
+   .. autoattribute:: strong_g2
+   .. autoattribute:: strong_grad
+   .. autoattribute:: strong_set
+   .. autoattribute:: strong_vars
+   .. autoattribute:: time_active_cd
+   .. autoattribute:: time_strong_cd
+   .. autoattribute:: tol
+   
+   

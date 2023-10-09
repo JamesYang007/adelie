@@ -1,0 +1,108 @@
+﻿adelie.state.pin\_cov\_64
+=========================
+
+.. currentmodule:: adelie.state
+
+.. autoclass:: pin_cov_64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~pin_cov_64.__init__
+      ~pin_cov_64.check
+      ~pin_cov_64.create_from_core
+      ~pin_cov_64.default_init
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~pin_cov_64.A
+      ~pin_cov_64.active_begins
+      ~pin_cov_64.active_g1
+      ~pin_cov_64.active_g2
+      ~pin_cov_64.active_order
+      ~pin_cov_64.active_set
+      ~pin_cov_64.alpha
+      ~pin_cov_64.betas
+      ~pin_cov_64.group_sizes
+      ~pin_cov_64.groups
+      ~pin_cov_64.is_active
+      ~pin_cov_64.iters
+      ~pin_cov_64.lmdas
+      ~pin_cov_64.max_iters
+      ~pin_cov_64.n_threads
+      ~pin_cov_64.newton_max_iters
+      ~pin_cov_64.newton_tol
+      ~pin_cov_64.penalty
+      ~pin_cov_64.rsq
+      ~pin_cov_64.rsq_curv_tol
+      ~pin_cov_64.rsq_slope_tol
+      ~pin_cov_64.rsqs
+      ~pin_cov_64.strong_begins
+      ~pin_cov_64.strong_beta
+      ~pin_cov_64.strong_g1
+      ~pin_cov_64.strong_g2
+      ~pin_cov_64.strong_grad
+      ~pin_cov_64.strong_set
+      ~pin_cov_64.strong_vars
+      ~pin_cov_64.time_active_cd
+      ~pin_cov_64.time_strong_cd
+      ~pin_cov_64.tol
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: check
+   .. automethod:: create_from_core
+   .. automethod:: default_init
+   
+   
+
+   
+   
+   
+   .. autoattribute:: A
+   .. autoattribute:: active_begins
+   .. autoattribute:: active_g1
+   .. autoattribute:: active_g2
+   .. autoattribute:: active_order
+   .. autoattribute:: active_set
+   .. autoattribute:: alpha
+   .. autoattribute:: betas
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: is_active
+   .. autoattribute:: iters
+   .. autoattribute:: lmdas
+   .. autoattribute:: max_iters
+   .. autoattribute:: n_threads
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: newton_tol
+   .. autoattribute:: penalty
+   .. autoattribute:: rsq
+   .. autoattribute:: rsq_curv_tol
+   .. autoattribute:: rsq_slope_tol
+   .. autoattribute:: rsqs
+   .. autoattribute:: strong_begins
+   .. autoattribute:: strong_beta
+   .. autoattribute:: strong_g1
+   .. autoattribute:: strong_g2
+   .. autoattribute:: strong_grad
+   .. autoattribute:: strong_set
+   .. autoattribute:: strong_vars
+   .. autoattribute:: time_active_cd
+   .. autoattribute:: time_strong_cd
+   .. autoattribute:: tol
+   
+   
