@@ -7,12 +7,12 @@ import adelie.matrix as matrix
 import numpy as np
 
 
-def test_pin_naive():
+def test_state_pin_naive():
     n = 1000
     p = 100
     G = 2
 
-    X = matrix.naive_dense(np.random.normal(0, 1, (n, p)), n_threads=4)
+    X = matrix.pin_naive_dense(np.random.normal(0, 1, (n, p)), n_threads=4)
     groups = np.array([0, 1])
     group_sizes = np.array([1, p-1])
     alpha = 1.0
@@ -53,13 +53,13 @@ def test_pin_naive():
     assert state.iters == 0
 
 
-def test_pin_cov():
+def test_state_pin_cov():
     n = 1000
     p = 100
     G = 2
 
     X = np.random.normal(0, 1, (n, p))
-    A = matrix.cov_dense(X.T @ X / n, n_threads=4)
+    A = matrix.pin_cov_dense(X.T @ X / n, n_threads=4)
     groups = np.array([0, 1])
     group_sizes = np.array([1, p-1])
     alpha = 1.0

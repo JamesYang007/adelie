@@ -1,9 +1,9 @@
 from . import adelie_core as core
 from .adelie_core.matrix import (
-    NaiveBase64,
-    NaiveBase32,
-    CovBase64,
-    CovBase32,
+    MatrixPinNaiveBase64,
+    MatrixPinNaiveBase32,
+    MatrixPinCovBase64,
+    MatrixPinCovBase32,
 )
 import numpy as np
 
@@ -26,8 +26,8 @@ class base:
         return self._core_mat
 
 
-class naive_dense(base):
-    """Creates a viewer of a dense matrix for naive method.
+class pin_naive_dense(base):
+    """Creates a viewer of a dense matrix for pin, naive method.
     
     Parameters
     ----------
@@ -47,12 +47,12 @@ class naive_dense(base):
         self.mat = mat
         dispatcher = {
             np.dtype("float64"): {
-                "C": core.matrix.NaiveDense64C,
-                "F": core.matrix.NaiveDense64F,
+                "C": core.matrix.MatrixPinNaiveDense64C,
+                "F": core.matrix.MatrixPinNaiveDense64F,
             },
             np.dtype("float32"): {
-                "C": core.matrix.NaiveDense32C,
-                "F": core.matrix.NaiveDense32F,
+                "C": core.matrix.MatrixPinNaiveDense32C,
+                "F": core.matrix.MatrixPinNaiveDense32F,
             },
         }
 
@@ -65,8 +65,8 @@ class naive_dense(base):
         super().__init__(dispatcher[dtype][order](self.mat, n_threads))
 
 
-class cov_dense(base):
-    """Creates a viewer of a dense matrix for covariance method.
+class pin_cov_dense(base):
+    """Creates a viewer of a dense matrix for pin, covariance method.
     
     Parameters
     ----------
@@ -86,12 +86,12 @@ class cov_dense(base):
         self.mat = mat
         dispatcher = {
             np.dtype("float64"): {
-                "C": core.matrix.CovDense64C,
-                "F": core.matrix.CovDense64F,
+                "C": core.matrix.MatrixPinCovDense64C,
+                "F": core.matrix.MatrixPinCovDense64F,
             },
             np.dtype("float32"): {
-                "C": core.matrix.CovDense32C,
-                "F": core.matrix.CovDense32F,
+                "C": core.matrix.MatrixPinCovDense32C,
+                "F": core.matrix.MatrixPinCovDense32F,
             },
         }
 
@@ -104,8 +104,8 @@ class cov_dense(base):
         super().__init__(dispatcher[dtype][order](self.mat, n_threads))
 
 
-class cov_lazy(base):
-    """Creates a viewer of a lazy matrix for covariance method.
+class pin_cov_lazy(base):
+    """Creates a viewer of a lazy matrix for pin, covariance method.
     
     Parameters
     ----------
@@ -125,12 +125,12 @@ class cov_lazy(base):
         self.mat = mat
         dispatcher = {
             np.dtype("float64"): {
-                "C": core.matrix.CovLazy64C,
-                "F": core.matrix.CovLazy64F,
+                "C": core.matrix.MatrixPinCovLazy64C,
+                "F": core.matrix.MatrixPinCovLazy64F,
             },
             np.dtype("float32"): {
-                "C": core.matrix.CovLazy32C,
-                "F": core.matrix.CovLazy32F,
+                "C": core.matrix.MatrixPinCovLazy32C,
+                "F": core.matrix.MatrixPinCovLazy32F,
             },
         }
 

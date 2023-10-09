@@ -3,13 +3,13 @@
 #include <unordered_set>
 #include <memory>
 #include <vector>
-#include <adelie_core/optimization/group_basil_base.hpp>
-#include <adelie_core/optimization/group_elnet_naive.hpp>
+#include <adelie_core/grpnet/solve_base.hpp>
+#include <adelie_core/grpnet/solve_pin_naive.hpp>
 #include <adelie_core/util/algorithm.hpp>
 #include <adelie_core/util/stopwatch.hpp>
 
 namespace adelie_core {
-namespace naive {
+namespace grpnet {
 
 /**
  * Checks the KKT condition on the sequence of lambdas and the fitted coefficients.
@@ -108,203 +108,14 @@ auto check_kkt(
     return i;
 }
 
-/**
- * @brief 
- * Checkpoint class for group basil routine.
- * This class contains the minimal state variables that must be provided
- * to generate a full group basil state object.
- * 
- * @tparam ValueType    float type.
- * @tparam IndexType    index type.
- * @tparam BoolType     boolean type.
- */
-template <class ValueType,
-          class IndexType,
-          class BoolType>
-struct GroupBasilCheckpoint
-{
-    using value_t = ValueType;
-    using index_t = IndexType;
-    using bool_t = BoolType;
-    using vec_value_t = util::vec_type<value_t>;
 
-    template <class T>
-    using dyn_vec_t = std::vector<T>;
-    using dyn_vec_value_t = dyn_vec_t<value_t>;
-    using dyn_vec_index_t = dyn_vec_t<index_t>;
-    using dyn_vec_bool_t = dyn_vec_t<bool_t>;
-
-    bool is_initialized = false;
-    dyn_vec_index_t edpp_safe_set;
-    dyn_vec_index_t strong_set; 
-    dyn_vec_index_t strong_g1; 
-    dyn_vec_index_t strong_g2; 
-    dyn_vec_index_t strong_begins; 
-    dyn_vec_index_t strong_order;
-    dyn_vec_value_t strong_beta;
-    dyn_vec_value_t strong_grad;
-    dyn_vec_value_t strong_var;
-    dyn_vec_index_t active_set;
-    dyn_vec_index_t active_g1;
-    dyn_vec_index_t active_g2;
-    dyn_vec_index_t active_begins;
-    dyn_vec_index_t active_order;
-    //dyn_vec_index_t active_set_ordered;
-    dyn_vec_bool_t is_active;
-    vec_value_t resid;
-    vec_value_t grad;
-    vec_value_t abs_grad;
-    value_t rsq;
-
-    explicit GroupBasilCheckpoint() =default;
-
-    template <class VecIndexType, class VecValueType, 
-              class VecBoolType, class ResidType,
-              class GradType, class AbsGradType>
-    explicit GroupBasilCheckpoint(
-        const VecIndexType& edpp_safe_set_,
-        const VecIndexType& strong_set_,
-        const VecIndexType& strong_g1_,
-        const VecIndexType& strong_g2_,
-        const VecIndexType& strong_begins_,
-        const VecIndexType& strong_order_,
-        const VecValueType& strong_beta_,
-        const VecValueType& strong_grad_,
-        const VecValueType& strong_var_,
-        const VecIndexType& active_set_,
-        const VecIndexType& active_g1_,
-        const VecIndexType& active_g2_,
-        const VecIndexType& active_begins_,
-        const VecIndexType& active_order_,
-        //const VecIndexType& active_set_ordered_,
-        const VecBoolType& is_active_,
-        const ResidType& resid_,
-        const GradType& grad_,
-        const AbsGradType& abs_grad_,
-        value_t rsq_
-    )
-        : is_initialized(true),
-          edpp_safe_set(edpp_safe_set_),
-          strong_set(strong_set_),
-          strong_g1(strong_g1_),
-          strong_g2(strong_g2_),
-          strong_begins(strong_begins_),
-          strong_order(strong_order_),
-          strong_beta(strong_beta_),
-          strong_grad(strong_grad_),
-          strong_var(strong_var_),
-          active_set(active_set_),
-          active_g1(active_g1_),
-          active_g2(active_g2_),
-          active_begins(active_begins_),
-          active_order(active_order_),
-          //active_set_ordered(active_set_ordered_),
-          is_active(is_active_),
-          resid(resid_),
-          grad(grad_),
-          abs_grad(abs_grad_),
-          rsq(rsq_)
-    {}
-    
-    template <class BasilStateType>
-    explicit GroupBasilCheckpoint(
-        const BasilStateType& bs
-    )
-        : is_initialized(true),
-          edpp_safe_set(bs.edpp_safe_set),
-          strong_set(bs.strong_set),
-          strong_g1(bs.strong_g1),
-          strong_g2(bs.strong_g2),
-          strong_begins(bs.strong_begins),
-          strong_order(bs.strong_order),
-          strong_beta(bs.strong_beta),
-          strong_grad(bs.strong_grad),
-          strong_var(bs.strong_var),
-          active_set(bs.active_set),
-          active_g1(bs.active_g1),
-          active_g2(bs.active_g2),
-          active_begins(bs.active_begins),
-          active_order(bs.active_order),
-          is_active(bs.is_active),
-          resid(bs.resid),
-          grad(bs.grad),
-          abs_grad(bs.abs_grad),
-          rsq(bs.rsq_prev_valid)
-    {}
-
-    template <class BasilStateType>
-    GroupBasilCheckpoint& operator=(BasilStateType&& bs)
-    {
-        is_initialized = true;
-        edpp_safe_set = std::move(bs.edpp_safe_set);
-        strong_set = std::move(bs.strong_set);
-        strong_g1 = std::move(bs.strong_g1);
-        strong_g2 = std::move(bs.strong_g2);
-        strong_begins = std::move(bs.strong_begins);
-        strong_order = std::move(bs.strong_order);
-        strong_beta = std::move(bs.strong_beta);
-        strong_grad = std::move(bs.strong_grad);
-        strong_var = std::move(bs.strong_var);
-        active_set = std::move(bs.active_set);
-        active_g1 = std::move(bs.active_g1);
-        active_g2 = std::move(bs.active_g2);
-        active_begins = std::move(bs.active_begins);
-        active_order = std::move(bs.active_order);
-        //active_set_ordered = std::move(bs.active_set_ordered);
-        is_active = std::move(bs.is_active);
-        resid = std::move(bs.resid);
-        grad = std::move(bs.grad);
-        abs_grad = std::move(bs.abs_grad);
-        rsq = std::move(bs.rsq_prev_valid);
-        return *this;
-    }
-};
-
-/**
- * @brief 
- * State class for the group basil routine.
- * This class contains the full state variables that describes the state of the group basil algorithm.
- * 
- * @tparam XType        float matrix type.
- * @tparam ValueType    float type.
- * @tparam IndexType    index type.
- * @tparam BoolType     boolean type.
- */
 template <class XType,
           class ValueType,
           class IndexType,
           class BoolType>
 struct GroupBasilState
 {
-    using value_t = ValueType;
-    using index_t = IndexType;
-    using bool_t = BoolType;
-    using sp_vec_value_t = util::sp_vec_type<value_t, Eigen::ColMajor, index_t>;
-    using vec_value_t = util::vec_type<value_t>;
-    using vec_index_t = util::vec_type<index_t>;
-    using vec_bool_t = util::vec_type<bool_t>;
-    using mat_value_t = util::mat_type<value_t>;
-    using map_vec_value_t = Eigen::Map<vec_value_t>;
-    using map_vec_index_t = Eigen::Map<vec_index_t>;
-    using map_vec_bool_t = Eigen::Map<vec_bool_t>;
-    using map_cvec_value_t = Eigen::Map<const vec_value_t>;
-    using map_cvec_index_t = Eigen::Map<const vec_index_t>;
-
-    template <class T>
-    using dyn_vec_t = std::vector<T>;
-    using dyn_vec_value_t = dyn_vec_t<value_t>;
-    using dyn_vec_index_t = dyn_vec_t<index_t>;
-    using dyn_vec_bool_t = dyn_vec_t<bool_t>;
-    using dyn_vec_sp_vec_value_t = dyn_vec_t<sp_vec_value_t>;
-
-    const size_t initial_size;
-    const size_t initial_size_groups;
-    const value_t alpha;
-    const map_cvec_value_t penalty;
     const XType& X;
-    const map_cvec_index_t groups;
-    const map_cvec_index_t group_sizes;
-    const map_cvec_value_t A_diag;
 
     // NOTE: EDPP is only used when alpha == 1!
     const map_cvec_value_t X_group_norms;
@@ -312,84 +123,10 @@ struct GroupBasilState
     dyn_vec_index_t edpp_safe_set;
     vec_value_t v1_0;
 
-    std::unordered_set<index_t> strong_hashset;
-    dyn_vec_index_t strong_set; 
-    dyn_vec_index_t strong_g1;
-    dyn_vec_index_t strong_g2;
-    dyn_vec_index_t strong_begins;
-    dyn_vec_index_t strong_order;
-    dyn_vec_value_t strong_beta;
-    dyn_vec_value_t strong_beta_prev_valid;
-    dyn_vec_value_t strong_grad;    // just a buffer here!
-    dyn_vec_value_t strong_var;
-    dyn_vec_index_t active_set;
-    dyn_vec_index_t active_g1;
-    dyn_vec_index_t active_g2;
-    dyn_vec_index_t active_begins;
-    dyn_vec_index_t active_order;
-    dyn_vec_bool_t is_active;
     vec_value_t resid;
     vec_value_t resid_prev_valid;
     vec_value_t resid_0;
-    vec_value_t grad;       // buffer
-    vec_value_t grad_next;  // buffer
-    vec_value_t abs_grad;   // this is the one that needs to remain invariant
-    vec_value_t abs_grad_next;  // buffer
-    util::vec_type<sp_vec_value_t> betas_curr;
-    vec_value_t rsqs_curr;
     mat_value_t resids_curr;
-    value_t rsq_prev_valid = 0;
-    dyn_vec_sp_vec_value_t betas;
-    dyn_vec_value_t rsqs;
-
-    template <class GroupsType, class GroupSizesType, 
-              class ADiagType, class XGNType, class PenaltyType>
-    explicit GroupBasilState(
-        const XType& X_,
-        const GroupsType& groups_,
-        const GroupSizesType& group_sizes_,
-        const ADiagType& A_diag_,
-        const XGNType& X_group_norms_,
-        value_t alpha_,
-        const PenaltyType& penalty_,
-        const GroupBasilCheckpoint<value_t, index_t, bool_t>& bc
-    )
-        : initial_size(std::min(static_cast<size_t>(X_.cols()), 1uL << 20)),
-          initial_size_groups(groups_.size()),
-          alpha(alpha_),
-          penalty(penalty_.data(), penalty_.size()),
-          X(X_),
-          groups(groups_.data(), groups_.size()),
-          group_sizes(group_sizes_.data(), group_sizes_.size()),
-          A_diag(A_diag_.data(), A_diag_.size()),
-          X_group_norms(X_group_norms_.data(), X_group_norms_.size()),
-          edpp_safe_hashset(bc.edpp_safe_set.begin(), bc.edpp_safe_set.end()),
-          edpp_safe_set(bc.edpp_safe_set),
-          strong_hashset(bc.strong_set.begin(), bc.strong_set.end()),
-          strong_set(bc.strong_set),
-          strong_g1(bc.strong_g1),
-          strong_g2(bc.strong_g2),
-          strong_begins(bc.strong_begins),
-          strong_order(bc.strong_order),
-          strong_beta(bc.strong_beta),
-          strong_beta_prev_valid(strong_beta),
-          strong_grad(bc.strong_grad),
-          strong_var(bc.strong_var),
-          active_set(bc.active_set),
-          active_g1(bc.active_g1),
-          active_g2(bc.active_g2),
-          active_begins(bc.active_begins),
-          active_order(bc.active_order),
-          //active_set_ordered(bc.active_set_ordered),
-          is_active(bc.is_active),
-          resid(bc.resid),
-          resid_prev_valid(bc.resid),
-          grad(bc.grad),
-          grad_next(bc.grad.size()),
-          abs_grad(bc.abs_grad),
-          abs_grad_next(bc.abs_grad.size()),
-          rsq_prev_valid(bc.rsq)
-    {}
 
     template <class YType, class GroupsType, class GroupSizesType, 
               class ADiagType, class XGNType, class PenaltyType>
@@ -481,8 +218,8 @@ struct GroupBasilState
         
         /* OK to leave strong_beta_prev uninitialized (see update_after_initial_fit) */
 
-        /* initialize strong_var */
-        update_strong_var(0, total_strong_size, initial_size);
+        /* initialize strong_vars */
+        update_strong_vars(0, total_strong_size, initial_size);
 
         /* initialize active_set */
         active_set.reserve(initial_size_groups); 
@@ -617,7 +354,7 @@ struct GroupBasilState
         // Updating previously valid beta requires the old order.
         
         // only need to update on the new strong variables
-        update_strong_var(old_strong_set_size, new_total_strong_size);
+        update_strong_vars(old_strong_set_size, new_total_strong_size);
 
         // updates on these will be done later!
         strong_beta.resize(new_total_strong_size, 0);
@@ -628,7 +365,7 @@ struct GroupBasilState
 
         // At this point, strong_set is ordered for all old variables
         // and unordered for the last few (new variables).
-        // But all referencing quantities (strong_beta, strong_grad, is_active, strong_var)
+        // But all referencing quantities (strong_beta, strong_grad, is_active, strong_vars)
         // match up in size and positions with strong_set.
         // Note: strong_grad has been updated properly to previous valid version in all cases.
 
@@ -749,24 +486,24 @@ private:
     }
 
     ADELIE_CORE_STRONG_INLINE
-    void update_strong_var(
+    void update_strong_vars(
             size_t old_strong_set_size,
             size_t new_size,
             size_t capacity=0)
     {
         assert(old_strong_set_size <= strong_set.size());
         
-        auto old_size = strong_var.size();
+        auto old_size = strong_vars.size();
         
         // subsequent calls does not affect capacity
-        strong_var.reserve(capacity);
-        strong_var.resize(new_size);
+        strong_vars.reserve(capacity);
+        strong_vars.resize(new_size);
 
         for (size_t i = old_strong_set_size; i < strong_set.size(); ++i) {
             const auto k = strong_set[i];
             const auto begin_k = groups[k];
             const auto size_k = group_sizes[k];
-            Eigen::Map<vec_value_t> sad_map(strong_var.data(), strong_var.size());
+            Eigen::Map<vec_value_t> sad_map(strong_vars.data(), strong_vars.size());
             sad_map.segment(old_size, size_k) = A_diag.segment(begin_k, size_k);
             old_size += size_k;
         }
@@ -806,84 +543,14 @@ struct GroupBasilDiagnostic
 };
 
 
-/**
- * @brief Solves the lasso objective for a sequence of \f$\lambda\f$ values.
- *
- * @param   X   data matrix.
- * @param   y   response vector.
- * @param   alpha   elastic net proportion.
- * @param   penalty penalty factor for each coefficient.
- * @param   user_lmdas      user provided lambda sequence.
- *                          Assumes it is in decreasing order.
- *                          If empty, then lambda sequence will be generated.
- * @param   max_n_lambdas   max number of lambdas to compute solutions for.
- *                          If user_lmdas is non-empty, it will be internally
- *                          reset to user_lmdas.size().
- *                          Assumes it is > 0.
- * @param   n_lambdas_iter  number of lambdas per BASIL iteration for fitting lasso on strong set.
- *                          Internally, it is capped at max_n_lambdas.
- *                          Assumes it is > 0.
- * @param   use_strong_rule     if true then use strong rule as the primary way of discarding variables.
- *                              Original incremental method with delta_strong_size is used when
- *                              the strong rule fails to get enough variables and KKT fails at
- *                              the first lambda in the sub-sequence at every BASIL iteration.
- * @param   delta_strong_size   number of variables to add to strong set 
- *                              at every BASIL iteration.
- *                              Internally, it is capped at number of non-strong variables
- *                              at every BASIL iteration.
- *                              Assumes it is > 0.
- * @param   max_strong_size     max number of strong set variables.
- *                              Internally, it is capped at number of features.
- *                              Assumes it is > 0.
- * @param   max_n_cds           maximum number of coordinate descent per BASIL iteration.
- * @param   tol                 convergence threshold for coordinate descent.
- * @param   betas               vector of sparse vectors to store a list of solutions.
- * @param   lmdas               vector of values to store a list of lambdas
- *                              corresponding to the solutions in betas:
- *                              lmdas[i] is a lambda corresponding to the solution
- *                              at betas[i].
- * @param   rsqs                vector of values to store the list of (unnormalized) R^2 values.
- *                              rsqs[i] is the R^2 at lmdas[i] and betas[i].
- */
-template <class XType, class YType, class GroupsType, class GroupSizesType,
-          class ADiagType, class XGNType, class ValueType, class PenaltyType, class ULmdasType,
-          class BetasType, class LmdasType, class RsqsType,
+template <class StateType,
           class UpdateCoefficientsType,
-          class CheckpointType = GroupBasilCheckpoint<ValueType, int, int>,
-          class DiagnosticType = GroupBasilDiagnostic,
           class CUIType = util::no_op>
-inline void group_basil(
-        const XType& X,
-        const YType& y,
-        const GroupsType& groups,
-        const GroupSizesType& group_sizes,
-        const ADiagType& A_diag,
-        const XGNType& X_group_norms,
-        ValueType alpha,
-        const PenaltyType& penalty,
-        const ULmdasType& user_lmdas,
-        size_t max_n_lambdas,
-        size_t n_lambdas_iter,
-        bool use_strong_rule,
-        bool do_early_exit,
-        bool verbose_diagnostic,
-        size_t delta_strong_size,
-        size_t max_strong_size,
-        size_t max_n_cds,
-        ValueType tol,
-        ValueType rsq_slope_tol,
-        ValueType rsq_curv_tol,
-        ValueType newton_tol,
-        size_t newton_max_iters,
-        ValueType min_ratio,
-        size_t n_threads,
-        BetasType& betas_out,
-        LmdasType& lmdas,
-        RsqsType& rsqs_out,
-        UpdateCoefficientsType update_coefficients_f,
-        CheckpointType&& checkpoint = CheckpointType(),
-        DiagnosticType&& diagnostic = DiagnosticType(),
-        CUIType check_user_interrupt = CUIType())
+inline void solve_naive(
+    StateType&& state,
+    UpdateCoefficientsType update_coefficients_f,
+    CUIType check_user_interrupt = CUIType()
+)
 {
     using X_t = std::decay_t<XType>;
     using value_t = ValueType;
@@ -891,7 +558,7 @@ inline void group_basil(
     using bool_t = index_t;
     using basil_state_t = GroupBasilState<X_t, value_t, index_t, bool_t>;
     using vec_value_t = typename basil_state_t::vec_value_t;
-    using lasso_pack_t = GroupElnetParamPack<X_t, value_t, index_t, bool_t>;
+    using lasso_state_t = GroupElnetParamPack<X_t, value_t, index_t, bool_t>;
     using sw_t = util::Stopwatch;
     
     const auto y_mean = y.sum() / y.size();
@@ -928,7 +595,7 @@ inline void group_basil(
     const auto& strong_g1 = basil_state.strong_g1;
     const auto& strong_g2 = basil_state.strong_g2;
     const auto& strong_begins = basil_state.strong_begins;
-    const auto& strong_var = basil_state.strong_var;
+    const auto& strong_vars = basil_state.strong_vars;
     const auto& rsq_prev_valid = basil_state.rsq_prev_valid;
     auto& resid = basil_state.resid;
     auto& resid_prev_valid = basil_state.resid_prev_valid;
@@ -957,9 +624,9 @@ inline void group_basil(
     // If checkpoint is not provided, can keep it uninitialized.
     vec_value_t lmdas_curr(1);
 
-    lasso_pack_t fit_pack(
+    lasso_state_t fit_state(
         X, groups, group_sizes, alpha, penalty, strong_set, 
-        strong_g1, strong_g2, strong_begins, strong_var,
+        strong_g1, strong_g2, strong_begins, strong_vars,
         lmdas_curr, max_n_cds, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, 0,
         resid, strong_beta, strong_grad,
         active_set, active_g1, active_g2, active_begins, active_order,
@@ -983,10 +650,10 @@ inline void group_basil(
                 std::numeric_limits<value_t>::max()
             );
 
-            fit(fit_pack, update_coefficients_f, check_user_interrupt);
+            fit(fit_state, update_coefficients_f, check_user_interrupt);
 
             // update state after fitting on non-penalized variables
-            basil_state.update_after_initial_fit(fit_pack.rsq);
+            basil_state.update_after_initial_fit(fit_state.rsq);
         }     
     }
 
@@ -1024,7 +691,7 @@ inline void group_basil(
     diagnostic.strong_sizes.push_back(strong_set.size());
     diagnostic.active_sizes.push_back(active_set.size());
     diagnostic.used_strong_rule.push_back(false);
-    diagnostic.iters.push_back(fit_pack.iters);
+    diagnostic.iters.push_back(fit_state.iters);
     diagnostic.n_lambdas_proc.push_back(1);
 
     const auto tidy_up = [&]() {
@@ -1091,9 +758,9 @@ inline void group_basil(
         }
 
         /* Fit lasso */
-        lasso_pack_t fit_pack(
+        lasso_state_t fit_state(
             X, groups, group_sizes, alpha, penalty, strong_set, 
-            strong_g1, strong_g2, strong_begins, strong_var,
+            strong_g1, strong_g2, strong_begins, strong_vars,
             lmdas_curr, max_n_cds, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, rsq_prev_valid,
             resid, strong_beta, strong_grad,
             active_set, active_g1, active_g2, active_begins, active_order,
@@ -1102,14 +769,14 @@ inline void group_basil(
         diagnostic.time_fit.push_back(0);
         try {
             sw_t stopwatch(diagnostic.time_fit.back());
-            fit(fit_pack, update_coefficients_f, check_user_interrupt);
+            fit(fit_state, update_coefficients_f, check_user_interrupt);
         } catch (const std::exception& e) {
             tidy_up();
             throw util::propagator_error(e.what());
         }
-        diagnostic.time_group_elnet.emplace_back(std::move(fit_pack.diagnostic));
+        diagnostic.time_group_elnet.emplace_back(std::move(fit_state.diagnostic));
 
-        const auto& n_lmdas = fit_pack.n_lmdas;
+        const auto& n_lmdas = fit_state.n_lmdas;
 
         /* Checking KKT */
 
@@ -1147,7 +814,7 @@ inline void group_basil(
         diagnostic.strong_sizes.push_back(strong_set.size());
         diagnostic.active_sizes.push_back(active_set.size());
         diagnostic.used_strong_rule.push_back(do_strong_rule);
-        diagnostic.iters.push_back(fit_pack.iters);
+        diagnostic.iters.push_back(fit_state.iters);
         diagnostic.n_lambdas_proc.push_back(idx);
     }
 
@@ -1239,5 +906,5 @@ inline void group_basil(
     }
 }
 
-} // namespace naive
+} // namespace grpnet
 } // namespace adelie_core

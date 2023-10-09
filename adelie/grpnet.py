@@ -1,11 +1,9 @@
 from . import adelie_core as core
-from . import logger
-from .state import (
-    pin_naive_64,
-    pin_naive_32,
-    pin_cov_64,
-    pin_cov_32,
+from .adelie_core.grpnet import (
+    transform_data,
 )
+from . import logger
+import adelie as ad
 import numpy as np
 
 
@@ -159,15 +157,15 @@ def solve_pin(
 
     See Also
     --------
-    adelie.state.pin_naive
+    adelie.state.state_pin_naive
     adelie.grpnet.objective
     """
     # mapping of each state type to the corresponding solver
     f_dict = {
-        pin_naive_64: core.grpnet.solve_pin_naive_64,
-        pin_naive_32: core.grpnet.solve_pin_naive_32,
-        pin_cov_64: core.grpnet.solve_pin_cov_64,
-        pin_cov_32: core.grpnet.solve_pin_cov_32,
+        ad.state.pin_naive_64: core.grpnet.solve_pin_naive_64,
+        ad.state.pin_naive_32: core.grpnet.solve_pin_naive_32,
+        ad.state.pin_cov_64: core.grpnet.solve_pin_cov_64,
+        ad.state.pin_cov_32: core.grpnet.solve_pin_cov_32,
     }
 
     # solve group elastic net

@@ -4,7 +4,6 @@ from . import logger
 import numpy as np
 import scipy
 import os
-from dataclasses import dataclass 
 
 
 def deduce_states(
@@ -19,38 +18,38 @@ def deduce_states(
     Parameters
     ----------
     groups : (G,) np.ndarray
-        See ``adelie.adelie_core.state.PinBase64``.
+        See ``adelie.adelie_core.state.StatePinBase64``.
     group_sizes : (G,) np.ndarray
-        See ``adelie.adelie_core.state.PinBase64``.
+        See ``adelie.adelie_core.state.StatePinBase64``.
     strong_set : (s,) np.ndarray
-        See ``adelie.adelie_core.state.PinBase64``.
+        See ``adelie.adelie_core.state.StatePinBase64``.
     active_set : (a,) np.ndarray
-        See ``adelie.adelie_core.state.PinBase64``.
+        See ``adelie.adelie_core.state.StatePinBase64``.
 
     Returns
     -------
     strong_g1 : (s1,) np.ndarray
-        See ``adelie.adelie_core.state.PinBase64``.
+        See ``adelie.adelie_core.state.StatePinBase64``.
     strong_g2 : (s2,) np.ndarray
-        See ``adelie.adelie_core.state.PinBase64``.
+        See ``adelie.adelie_core.state.StatePinBase64``.
     strong_begins : (s,) np.ndarray
-        See ``adelie.adelie_core.state.PinBase64``.
-    strong_var : (ws,) np.ndarray
-        See ``adelie.adelie_core.state.PinBase64``.
+        See ``adelie.adelie_core.state.StatePinBase64``.
+    strong_vars : (ws,) np.ndarray
+        See ``adelie.adelie_core.state.StatePinBase64``.
     active_g1 : (a1,) np.ndarray
-        See ``adelie.adelie_core.state.PinBase64``.
+        See ``adelie.adelie_core.state.StatePinBase64``.
     active_g2 : (a2,) np.ndarray
-        See ``adelie.adelie_core.state.PinBase64``.
+        See ``adelie.adelie_core.state.StatePinBase64``.
     active_begins : (a,) np.ndarray
-        See ``adelie.adelie_core.state.PinBase64``.
+        See ``adelie.adelie_core.state.StatePinBase64``.
     active_order : (a,) np.ndarray
-        See ``adelie.adelie_core.state.PinBase64``.
+        See ``adelie.adelie_core.state.StatePinBase64``.
     is_active : (s,) np.ndarray
-        See ``adelie.adelie_core.state.PinBase64``.
+        See ``adelie.adelie_core.state.StatePinBase64``.
 
     See Also
     --------
-    adelie.adelie_core.state.PinBase64
+    adelie.adelie_core.state.StatePinBase64
     """
     S = strong_set.shape[0]
     strong_g1 = np.arange(S)[group_sizes[strong_set] == 1]
@@ -270,15 +269,15 @@ class pin_base(base):
             method, logger,
         )
 
-        # ================ strong_var check ====================
+        # ================ strong_vars check ====================
         self._check(
-            len(self.strong_var) == WS,
-            "check strong_var size",
+            len(self.strong_vars) == WS,
+            "check strong_vars size",
             method, logger,
         )
         self._check(
-            np.all(0 <= self.strong_var),
-            "check strong_var is non-negative",
+            np.all(0 <= self.strong_vars),
+            "check strong_vars is non-negative",
             method, logger,
         )
         
@@ -505,9 +504,9 @@ class pin_naive_base(pin_base):
     """State wrapper base class for all pin, naive method."""
     def default_init(
         self, 
-        base_type: core.state.PinNaive64 | core.state.PinNaive32,
+        base_type: core.state.StatePinNaive64 | core.state.StatePinNaive32,
         *,
-        X: matrix.base | matrix.NaiveBase64 | matrix.NaiveBase32,
+        X: matrix.base | matrix.MatrixPinNaiveBase64 | matrix.MatrixPinNaiveBase32,
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -564,7 +563,7 @@ class pin_naive_base(pin_base):
             active_set=active_set,
         )
 
-        self._strong_var = np.concatenate([
+        self._strong_vars = np.concatenate([
             [X.cnormsq(jj) for jj in range(g, g + gs)]
             for g, gs in zip(groups[strong_set], group_sizes[strong_set])
         ])
@@ -572,7 +571,7 @@ class pin_naive_base(pin_base):
         self._strong_grad = []
         for k in strong_set:
             out = np.empty(group_sizes[k], dtype=dtype)
-            X.bmul(0, groups[k], X.rows(), group_sizes[k], resid, out)
+            X.bmul(groups[k], group_sizes[k], resid, out)
             self._strong_grad.append(out)
         self._strong_grad = np.concatenate(self._strong_grad, dtype=dtype)
 
@@ -589,7 +588,7 @@ class pin_naive_base(pin_base):
             strong_g1=self._strong_g1,
             strong_g2=self._strong_g2,
             strong_begins=self._strong_begins,
-            strong_var=self._strong_var,
+            strong_vars=self._strong_vars,
             lmdas=self._lmdas,
             max_iters=max_iters,
             tol=tol,
@@ -650,7 +649,7 @@ class pin_naive_base(pin_base):
     ):
         super().check(method=method, logger=logger)
         self._check(
-            isinstance(self.X, matrix.NaiveBase64) or isinstance(self.X, matrix.NaiveBase32),
+            isinstance(self.X, matrix.MatrixPinNaiveBase64) or isinstance(self.X, matrix.MatrixPinNaiveBase32),
             "check X type",
             method, logger,
         )
@@ -666,13 +665,13 @@ class pin_naive_base(pin_base):
         )
 
 
-class pin_naive_64(pin_naive_base, core.state.PinNaive64):
+class pin_naive_64(pin_naive_base, core.state.StatePinNaive64):
     """State class for pin, naive method using 64-bit floating point."""
 
     def __init__(
         self, 
         *,
-        X: matrix.base | matrix.NaiveBase64,
+        X: matrix.base | matrix.MatrixPinNaiveBase64,
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -693,7 +692,7 @@ class pin_naive_64(pin_naive_base, core.state.PinNaive64):
     ):
         pin_naive_base.default_init(
             self,
-            core.state.PinNaive64,
+            core.state.StatePinNaive64,
             X=X,
             groups=groups,
             group_sizes=group_sizes,
@@ -727,17 +726,17 @@ class pin_naive_64(pin_naive_base, core.state.PinNaive64):
             New core state to initialize with.
         """
         return pin_naive_base.create_from_core(
-            cls, state, core_state, pin_naive_64, core.state.PinNaive64,
+            cls, state, core_state, pin_naive_64, core.state.StatePinNaive64,
         )
 
 
-class pin_naive_32(pin_naive_base, core.state.PinNaive32):
+class pin_naive_32(pin_naive_base, core.state.StatePinNaive32):
     """State class for pin, naive method using 32-bit floating point."""
 
     def __init__(
         self, 
         *,
-        X: matrix.base | matrix.NaiveBase32,
+        X: matrix.base | matrix.MatrixPinNaiveBase32,
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -758,7 +757,7 @@ class pin_naive_32(pin_naive_base, core.state.PinNaive32):
     ):
         pin_naive_base.default_init(
             self,
-            core.state.PinNaive32,
+            core.state.StatePinNaive32,
             X=X,
             groups=groups,
             group_sizes=group_sizes,
@@ -792,13 +791,13 @@ class pin_naive_32(pin_naive_base, core.state.PinNaive32):
             New core state to initialize with.
         """
         return pin_naive_base.create_from_core(
-            cls, state, core_state, pin_naive_32, core.state.PinNaive32,
+            cls, state, core_state, pin_naive_32, core.state.StatePinNaive32,
         )
 
 
 def pin_naive(
     *,
-    X: matrix.base | matrix.NaiveBase64 | matrix.NaiveBase32,
+    X: matrix.base | matrix.MatrixPinNaiveBase64 | matrix.MatrixPinNaiveBase32,
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -821,7 +820,7 @@ def pin_naive(
 
     Parameters
     ----------
-    X : Union[adelie.matrix.base, adelie.matrix.NaiveBase64, adelie.matrix.NaiveBase32]
+    X : Union[adelie.matrix.base, adelie.matrix.MatrixPinNaiveBase64, adelie.matrix.MatrixPinNaiveBase32]
         Feature matrix where each column block :math:`X_k` defined by the groups
         is such that :math:`X_k^\\top X_k` is diagonal.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
@@ -896,14 +895,14 @@ def pin_naive(
     else:
         X_intr = X
 
-    if not (isinstance(X_intr, matrix.NaiveBase64) or isinstance(X_intr, matrix.NaiveBase32)):
+    if not (isinstance(X_intr, matrix.MatrixPinNaiveBase64) or isinstance(X_intr, matrix.MatrixPinNaiveBase32)):
         raise ValueError(
-            "X must be an instance of matrix.NaiveBase32 or matrix.NaiveBase64."
+            "X must be an instance of matrix.MatrixPinNaiveBase32 or matrix.MatrixPinNaiveBase64."
         )
 
     dtype = (
         np.float64
-        if isinstance(X_intr, matrix.NaiveBase64) else
+        if isinstance(X_intr, matrix.MatrixPinNaiveBase64) else
         np.float32
     )
         
@@ -937,9 +936,9 @@ class pin_cov_base(pin_base):
     """State wrapper base class for all pin, covariance method."""
     def default_init(
         self, 
-        base_type: core.state.PinCov64 | core.state.PinCov32,
+        base_type: core.state.StatePinCov64 | core.state.StatePinCov32,
         *,
-        A: matrix.base | matrix.CovBase64 | matrix.CovBase32,
+        A: matrix.base | matrix.MatrixPinCovBase64 | matrix.MatrixPinCovBase32,
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -996,8 +995,8 @@ class pin_cov_base(pin_base):
             active_set=active_set,
         )
 
-        self._strong_var = np.concatenate([
-            [A.coeff(j, j) for j in range(g, g+gs)]
+        self._strong_vars = np.concatenate([
+            [A.diag(j) for j in range(g, g+gs)]
             for g, gs in zip(groups[strong_set], group_sizes[strong_set])
         ])
 
@@ -1012,7 +1011,7 @@ class pin_cov_base(pin_base):
             strong_g1=self._strong_g1,
             strong_g2=self._strong_g2,
             strong_begins=self._strong_begins,
-            strong_var=self._strong_var,
+            strong_vars=self._strong_vars,
             lmdas=self._lmdas,
             max_iters=max_iters,
             tol=tol,
@@ -1071,19 +1070,19 @@ class pin_cov_base(pin_base):
     ):
         super().check(method=method, logger=logger)
         self._check(
-            isinstance(self.A, matrix.CovBase32) or isinstance(self.A, matrix.CovBase64),
+            isinstance(self.A, matrix.MatrixPinCovBase32) or isinstance(self.A, matrix.MatrixPinCovBase64),
             "check A type",
             method, logger,
         )
 
 
-class pin_cov_64(pin_cov_base, core.state.PinCov64):
+class pin_cov_64(pin_cov_base, core.state.StatePinCov64):
     """State class for pin, covariance method using 64-bit floating point."""
 
     def __init__(
         self, 
         *,
-        A: matrix.base | matrix.CovBase64,
+        A: matrix.base | matrix.MatrixPinCovBase64,
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -1104,7 +1103,7 @@ class pin_cov_64(pin_cov_base, core.state.PinCov64):
     ):
         pin_cov_base.default_init(
             self,
-            core.state.PinCov64,
+            core.state.StatePinCov64,
             A=A,
             groups=groups,
             group_sizes=group_sizes,
@@ -1138,17 +1137,17 @@ class pin_cov_64(pin_cov_base, core.state.PinCov64):
             New core state to initialize with.
         """
         return pin_naive_base.create_from_core(
-            cls, state, core_state, pin_cov_64, core.state.PinCov64,
+            cls, state, core_state, pin_cov_64, core.state.StatePinCov64,
         )
 
 
-class pin_cov_32(pin_cov_base, core.state.PinCov32):
+class pin_cov_32(pin_cov_base, core.state.StatePinCov32):
     """State class for pin, cov method using 32-bit floating point."""
 
     def __init__(
         self, 
         *,
-        A: matrix.base | matrix.CovBase32,
+        A: matrix.base | matrix.MatrixPinCovBase32,
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -1169,7 +1168,7 @@ class pin_cov_32(pin_cov_base, core.state.PinCov32):
     ):
         pin_cov_base.default_init(
             self,
-            core.state.PinCov32,
+            core.state.StatePinCov32,
             A=A,
             groups=groups,
             group_sizes=group_sizes,
@@ -1203,13 +1202,13 @@ class pin_cov_32(pin_cov_base, core.state.PinCov32):
             New core state to initialize with.
         """
         return pin_cov_base.create_from_core(
-            cls, state, core_state, pin_cov_32, core.state.PinCov32,
+            cls, state, core_state, pin_cov_32, core.state.StatePinCov32,
         )
 
 
 def pin_cov(
     *,
-    A: matrix.base | matrix.CovBase64 | matrix.CovBase32,
+    A: matrix.base | matrix.MatrixPinCovBase64 | matrix.MatrixPinCovBase32,
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -1232,7 +1231,7 @@ def pin_cov(
 
     Parameters
     ----------
-    A : Union[adelie.matrix.base, adelie.matrix.CovBase64, adelie.matrix.CovBase32]
+    A : Union[adelie.matrix.base, adelie.matrix.MatrixPinCovBase64, adelie.matrix.MatrixPinCovBase32]
         Covariance matrix where each diagonal block :math:`A_{kk}` defined by the groups
         is a diagonal matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
@@ -1314,14 +1313,14 @@ def pin_cov(
     else:
         A_intr = A
 
-    if not (isinstance(A_intr, matrix.CovBase64) or isinstance(A_intr, matrix.CovBase32)):
+    if not (isinstance(A_intr, matrix.MatrixPinCovBase64) or isinstance(A_intr, matrix.MatrixPinCovBase32)):
         raise ValueError(
-            "X must be an instance of matrix.CovBase32 or matrix.CovBase64."
+            "X must be an instance of matrix.MatrixPinCovBase32 or matrix.MatrixPinCovBase64."
         )
 
     dtype = (
         np.float64
-        if isinstance(A_intr, matrix.CovBase64) else
+        if isinstance(A_intr, matrix.MatrixPinCovBase64) else
         np.float32
     )
         

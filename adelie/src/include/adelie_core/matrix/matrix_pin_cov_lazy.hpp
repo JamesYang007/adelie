@@ -1,18 +1,18 @@
 #pragma once
 #include <vector>
 #include <adelie_core/util/types.hpp>
-#include <adelie_core/matrix/matrix_base.hpp>
+#include <adelie_core/matrix/matrix_pin_cov_base.hpp>
 #include <adelie_core/matrix/utils.hpp>
 
 namespace adelie_core {
 namespace matrix {
 
 template <class DenseType>
-class MatrixCovLazy: 
-    public MatrixCovBase<typename std::decay_t<DenseType>::Scalar>
+class MatrixPinCovLazy: 
+    public MatrixPinCovBase<typename std::decay_t<DenseType>::Scalar>
 {
 public: 
-    using base_t = MatrixCovBase<typename std::decay_t<DenseType>::Scalar>;
+    using base_t = MatrixPinCovBase<typename std::decay_t<DenseType>::Scalar>;
     using typename base_t::value_t;
     using typename base_t::rowvec_t;
     using dense_t = DenseType;
@@ -35,7 +35,7 @@ private:
             _slice_map[i + k] = k;
         }
 
-        const auto block = _X.block(0, i, _X.rows(), p);
+        const auto block = _X.middleCols(i, p);
 
         const int n_blocks = std::min<size_t>(_n_threads, p);
         const int block_size = p / n_blocks;
@@ -56,7 +56,7 @@ private:
     }
 
 public: 
-    MatrixCovLazy(
+    MatrixPinCovLazy(
         const Eigen::Ref<const dense_t>& X,
         size_t n_threads
     ): 
@@ -93,19 +93,19 @@ public:
         out.matrix().noalias() = v.matrix() * mat.block(_slice_map[i], j, p, q);
     }
 
-    value_t coeff(int i, int j) const override
+    value_t diag(int i) const override
     {
-        if (i < 0 || j < 0) {
+        if (i < 0 || i > _index_map.size()) {
             throw std::runtime_error(
-                "Indices must be all non-negative."
+                "Index is out of range."
             );
         }
         const index_t ci = _index_map[i];
         if (ci < 0) {
-            return ddot(_X.col(i), _X.col(j), _n_threads);
+            return ddot(_X.col(i), _X.col(i), _n_threads);
         }
         const auto& mat = _cache[ci];
-        return mat(_slice_map[i], j);
+        return mat(_slice_map[i], i);
     }
 
     int cols() const override { return _X.cols(); }

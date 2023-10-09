@@ -14,7 +14,7 @@ template <class ValueType,
                 util::sp_vec_type<ValueType, Eigen::RowMajor, IndexType>
             > 
           >
-struct PinBase
+struct StatePinBase
 {
     using value_t = ValueType;
     using index_t = IndexType;
@@ -40,7 +40,7 @@ struct PinBase
     const map_cvec_index_t strong_g1;
     const map_cvec_index_t strong_g2;
     const map_cvec_index_t strong_begins;
-    const map_cvec_value_t strong_var;
+    const map_cvec_value_t strong_vars;
     const map_cvec_value_t lmdas;
 
     /* Configurations */
@@ -66,13 +66,13 @@ struct PinBase
     dyn_vec_value_t rsqs;
     size_t iters = 0;
 
-    // Benchmark information
+    /* diagnostics */
     std::vector<double> time_strong_cd;
     std::vector<double> time_active_cd;
 
-    virtual ~PinBase() =default;
+    virtual ~StatePinBase() =default;
     
-    explicit PinBase(
+    explicit StatePinBase(
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
@@ -81,7 +81,7 @@ struct PinBase
         const Eigen::Ref<const vec_index_t>& strong_g1,
         const Eigen::Ref<const vec_index_t>& strong_g2,
         const Eigen::Ref<const vec_index_t>& strong_begins, 
-        const Eigen::Ref<const vec_value_t>& strong_var,
+        const Eigen::Ref<const vec_value_t>& strong_vars,
         const Eigen::Ref<const vec_value_t>& lmdas, 
         size_t max_iters,
         value_t tol,
@@ -110,7 +110,7 @@ struct PinBase
         strong_g1(strong_g1.data(), strong_g1.size()),
         strong_g2(strong_g2.data(), strong_g2.size()),
         strong_begins(strong_begins.data(), strong_begins.size()),
-        strong_var(strong_var.data(), strong_var.size()),
+        strong_vars(strong_vars.data(), strong_vars.size()),
         lmdas(lmdas.data(), lmdas.size()),
         max_iters(max_iters),
         tol(tol),

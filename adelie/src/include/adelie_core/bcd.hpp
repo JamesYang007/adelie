@@ -334,7 +334,7 @@ void newton_solver_base(
         return std::max<value_t>(h, 0.0);
     };
 
-    const auto root_find_pack = newton_root_find(
+    const auto root_find_state = newton_root_find(
         initial_f,
         step_f,
         project_f,
@@ -342,10 +342,10 @@ void newton_solver_base(
         max_iters
     );
 
-    const auto h = std::get<0>(root_find_pack);
+    const auto h = std::get<0>(root_find_state);
 
     x = h * v / vbuffer2;
-    iters = std::get<3>(root_find_pack);
+    iters = std::get<3>(root_find_state);
 }
 
 /*

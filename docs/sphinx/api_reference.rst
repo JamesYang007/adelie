@@ -13,12 +13,12 @@ adelie.bcd
     :toctree: generated/
 
 
+    objective
+    root
     root_lower_bound
     root_upper_bound
     root_function
-    objective
     solve
-    root
 
 
 adelie.matrix
@@ -33,12 +33,13 @@ adelie.matrix
 
 
     base
-    NaiveBase64
-    NaiveBase32
-    CovBase64
-    CovBase32
-    naive_dense
-    cov_dense
+    pin_naive_dense
+    pin_cov_dense
+    pin_cov_lazy
+    MatrixPinCovBase32
+    MatrixPinCovBase64
+    MatrixPinNaiveBase32
+    MatrixPinNaiveBase64
 
 
 adelie.state
@@ -54,8 +55,12 @@ adelie.state
 
     deduce_states
     base
-    pin_naive
     pin_cov
+    pin_cov_32
+    pin_cov_64
+    pin_naive
+    pin_naive_32
+    pin_naive_64
 
 
 adelie.grpnet
@@ -69,9 +74,9 @@ adelie.grpnet
     :toctree: generated/
 
 
-    objective
-    lambda_max
     create_lambdas
+    lambda_max
+    objective
     solve_pin
 
 
@@ -86,5 +91,5 @@ adelie.adelie_core
     :toctree: generated/
 
 
-    state.PinBase64
-    state.PinBase32
+    state.StatePinBase32
+    state.StatePinBase64

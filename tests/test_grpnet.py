@@ -1,7 +1,3 @@
-from adelie.state import (
-    pin_naive,
-    pin_cov,
-)
 from adelie.grpnet import (
     objective,
     solve_pin,
@@ -11,6 +7,13 @@ import adelie as ad
 import cvxpy as cp
 import numpy as np
 
+# ========================================================================
+# TEST helpers
+# ========================================================================
+
+# ========================================================================
+# TEST solve_pin
+# ========================================================================
 
 def create_test_data(
     n, p, G, S, 
@@ -172,10 +175,10 @@ def test_solve_pin_naive():
         )
         resid = y
         Xs = [
-            ad.matrix.naive_dense(X, n_threads=2)
+            ad.matrix.pin_naive_dense(X, n_threads=2)
         ]
         for Xpy in Xs:
-            state = pin_naive(
+            state = ad.state.pin_naive(
                 X=Xpy,
                 groups=groups,
                 group_sizes=group_sizes,
@@ -223,12 +226,12 @@ def test_solve_pin_cov():
 
         # list of different types of cov matrices to test
         As = [
-            ad.matrix.cov_dense(A, n_threads=3),
-            ad.matrix.cov_lazy(X, n_threads=3),
+            ad.matrix.pin_cov_dense(A, n_threads=3),
+            ad.matrix.pin_cov_lazy(X, n_threads=3),
         ]
 
         for Apy in As:
-            state = pin_cov(
+            state = ad.state.pin_cov(
                 A=Apy,
                 groups=groups,
                 group_sizes=group_sizes,
