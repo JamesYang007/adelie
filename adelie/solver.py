@@ -1,7 +1,6 @@
 from . import adelie_core as core
-from .adelie_core.grpnet import (
-    transform_data,
-)
+#from .adelie_core.solver import (
+#)
 from . import logger
 import adelie as ad
 import numpy as np
@@ -64,7 +63,7 @@ def objective(
     obj : float
         Group elastic net objective.
     """
-    return core.grpnet.objective(
+    return core.solver.objective(
         beta, X, y, groups, group_sizes, lmda, alpha, penalty,
     )
 
@@ -90,9 +89,9 @@ def lambda_max(
         np.linalg.norm(grad[g:g+gs])
         for g, gs in zip(groups, group_sizes)
     ])
-    return core.grpnet.lambda_max(
-        abs_grad, alpha, penalty,
-    )
+    factor = 1e-3 if alpha <= 0 else alpha
+    lmdas = abs_grad / (factor * penalty)
+    return np.max(lmdas[~np.isnan(lmdas)])
 
 
 def create_lambdas(
@@ -122,11 +121,8 @@ def create_lambdas(
         alpha=alpha, 
         penalty=penalty,
     )
-    return core.grpnet.create_lambdas(
-        n_lambdas,
-        min_ratio,
-        lmda_max,
-    )
+    log_factor = np.log(min_ratio) /(n_lambdas-1)
+    return lmda_max * np.exp(log_factor * np.arange(n_lambdas))
 
 
 def solve_pin(
@@ -158,14 +154,14 @@ def solve_pin(
     See Also
     --------
     adelie.state.state_pin_naive
-    adelie.grpnet.objective
+    adelie.solver.objective
     """
     # mapping of each state type to the corresponding solver
     f_dict = {
-        ad.state.pin_naive_64: core.grpnet.solve_pin_naive_64,
-        ad.state.pin_naive_32: core.grpnet.solve_pin_naive_32,
-        ad.state.pin_cov_64: core.grpnet.solve_pin_cov_64,
-        ad.state.pin_cov_32: core.grpnet.solve_pin_cov_32,
+        ad.state.pin_naive_64: core.solver.solve_pin_naive_64,
+        ad.state.pin_naive_32: core.solver.solve_pin_naive_32,
+        ad.state.pin_cov_64: core.solver.solve_pin_cov_64,
+        ad.state.pin_cov_32: core.solver.solve_pin_cov_32,
     }
 
     # solve group elastic net
@@ -181,3 +177,15 @@ def solve_pin(
     state = type(state).create_from_core(state, core_state)
 
     return state
+
+
+def grpnet():
+    """
+    TODO:
+    - cap max_strong_size by number of features
+    - decreasing order of lmdas
+    - cap max number of lambdas per iter
+    - alpha <= 0: add all variables to strong_set
+    - alpha > 0: add all variables with penalty <= 0 to strong_set
+    """
+    pass

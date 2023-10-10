@@ -7,30 +7,18 @@ namespace state {
 template <class MatrixType, 
           class ValueType=typename std::decay_t<MatrixType>::value_t,
           class IndexType=Eigen::Index,
-          class BoolType=bool,
-          class DynamicVectorIndexType=std::vector<IndexType>,
-          class DynamicVectorValueType=std::vector<ValueType>,
-          class DynamicVectorVecValueType=std::vector<util::rowvec_type<ValueType>>,
-          class DynamicVectorSpVecType=std::vector<
-                util::sp_vec_type<ValueType, Eigen::RowMajor, IndexType>
-            > 
-          >
+          class BoolType=bool
+        >
 struct StatePinCov : StatePinBase<
         ValueType,
         IndexType,
-        BoolType,
-        DynamicVectorIndexType,
-        DynamicVectorValueType,
-        DynamicVectorSpVecType
+        BoolType
     >
 {
     using base_t = StatePinBase<
         ValueType,
         IndexType,
-        BoolType,
-        DynamicVectorIndexType,
-        DynamicVectorValueType,
-        DynamicVectorSpVecType
+        BoolType
     >;
     using typename base_t::value_t;
     using typename base_t::index_t;
@@ -47,7 +35,6 @@ struct StatePinCov : StatePinBase<
     using typename base_t::dyn_vec_value_t;
     using typename base_t::dyn_vec_sp_vec_t;
     using matrix_t = MatrixType;
-    using dyn_vec_vec_value_t = DynamicVectorVecValueType;
 
     /* Static states */
 
@@ -76,22 +63,13 @@ struct StatePinCov : StatePinBase<
         value_t rsq,
         Eigen::Ref<vec_value_t> strong_beta, 
         Eigen::Ref<vec_value_t> strong_grad,
-        dyn_vec_index_t active_set,
-        dyn_vec_index_t active_g1,
-        dyn_vec_index_t active_g2,
-        dyn_vec_index_t active_begins,
-        dyn_vec_index_t active_order,
-        Eigen::Ref<vec_bool_t> is_active,
-        dyn_vec_sp_vec_t betas, 
-        dyn_vec_value_t rsqs
+        Eigen::Ref<vec_bool_t> strong_is_active
     ): 
         base_t(
             groups, group_sizes, alpha, penalty, 
             strong_set, strong_g1, strong_g2, strong_begins, strong_vars, lmdas, 
             max_iters, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, n_threads,
-            rsq, strong_beta, strong_grad, 
-            active_set, active_g1, active_g2, active_begins, active_order, is_active,
-            betas, rsqs
+            rsq, strong_beta, strong_grad, strong_is_active
         ),
         A(&A)
     {}

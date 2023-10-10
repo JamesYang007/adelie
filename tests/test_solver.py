@@ -1,4 +1,4 @@
-from adelie.grpnet import (
+from adelie.solver import (
     objective,
     solve_pin,
     create_lambdas,
@@ -48,10 +48,10 @@ def create_test_data(
     y /= np.sqrt(n)
 
     strong_set = np.random.choice(G, S, replace=False)
-    active_set = np.empty(0, dtype=int)
+    strong_is_active = np.zeros(strong_set.shape[0], dtype=bool)
     penalty = np.random.uniform(0, 1, G)
     penalty /= np.sum(penalty)
-    lmdas = create_lambdas(
+    lmda_path = create_lambdas(
         X=X, y=y, groups=groups, group_sizes=group_sizes,
         alpha=alpha, penalty=penalty, 
     )
@@ -64,9 +64,9 @@ def create_test_data(
         groups, 
         group_sizes, 
         penalty,
-        lmdas,
+        lmda_path,
         strong_set, 
-        active_set, 
+        strong_is_active, 
         rsq,
         strong_beta,
     )
@@ -108,11 +108,10 @@ def run_solve_pin(state, X, y):
     state = solve_pin(state)    
 
     # get solved lmdas
-    n_lmdas = len(state.rsqs)
-    lmdas = state.lmdas[:n_lmdas]
+    lmdas = state.lmdas
 
     # check beta matches (if not, at least that objective is better)
-    betas = state.betas.toarray()[:n_lmdas]
+    betas = state.betas.toarray()
     cvxpy_betas = np.array([
         solve_cvxpy(
             X=X,
@@ -156,6 +155,8 @@ def run_solve_pin(state, X, y):
         ])
         assert np.all(my_objs <= cvxpy_objs)
 
+    return state
+
 
 def test_solve_pin_naive():
     def _test(n, p, G, S, alpha=1, sparsity=0.95, seed=0):
@@ -165,9 +166,9 @@ def test_solve_pin_naive():
             groups, 
             group_sizes, 
             penalty,
-            lmdas,
+            lmda_path,
             strong_set, 
-            active_set, 
+            strong_is_active, 
             rsq,
             strong_beta,
         ) = create_test_data(
@@ -185,11 +186,25 @@ def test_solve_pin_naive():
                 alpha=alpha,
                 penalty=penalty,
                 strong_set=strong_set,
-                lmdas=lmdas,
+                lmda_path=lmda_path,
                 rsq=rsq,
                 resid=resid,
                 strong_beta=strong_beta,
-                active_set=active_set,
+                strong_is_active=strong_is_active,
+            )
+            state = run_solve_pin(state, X, y)
+            state = ad.state.pin_naive(
+                X=Xpy,
+                groups=groups,
+                group_sizes=group_sizes,
+                alpha=alpha,
+                penalty=penalty,
+                strong_set=strong_set,
+                lmda_path=[state.lmdas[-1] * 0.8],
+                rsq=state.rsq,
+                resid=state.resid,
+                strong_beta=state.strong_beta,
+                strong_is_active=state.strong_is_active
             )
             run_solve_pin(state, X, y)
 
@@ -208,9 +223,9 @@ def test_solve_pin_cov():
             groups, 
             group_sizes, 
             penalty,
-            lmdas,
+            lmda_path,
             strong_set, 
-            active_set, 
+            strong_is_active, 
             rsq,
             strong_beta,
         ) = create_test_data(
@@ -238,11 +253,25 @@ def test_solve_pin_cov():
                 alpha=alpha,
                 penalty=penalty,
                 strong_set=strong_set,
-                lmdas=lmdas,
+                lmda_path=lmda_path,
                 rsq=rsq,
                 strong_beta=strong_beta,
                 strong_grad=strong_grad,
-                active_set=active_set,
+                strong_is_active=strong_is_active,
+            )
+            state = run_solve_pin(state, X, y)
+            state = ad.state.pin_cov(
+                A=Apy,
+                groups=groups,
+                group_sizes=group_sizes,
+                alpha=alpha,
+                penalty=penalty,
+                strong_set=strong_set,
+                lmda_path=[state.lmdas[-1] * 0.8],
+                rsq=state.rsq,
+                strong_beta=state.strong_beta,
+                strong_grad=state.strong_grad,
+                strong_is_active=state.strong_is_active
             )
             run_solve_pin(state, X, y)
 

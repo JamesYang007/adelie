@@ -3,11 +3,10 @@
 #include <adelie_core/util/functional.hpp>
 #include <adelie_core/util/stopwatch.hpp>
 #include <adelie_core/util/eigen/map_sparsevector.hpp>
-#include <adelie_core/grpnet/solve_pin_base.hpp>
-#include <adelie_core/matrix/utils.hpp>
+#include <adelie_core/solver/solve_pin_base.hpp>
 
 namespace adelie_core {
-namespace grpnet {
+namespace solver {
     
 template <class StateType, class G1Iter, class G2Iter,
           class ValueType, class BufferType,
@@ -25,12 +24,14 @@ void coordinate_descent(
     BufferType& buffer1,
     BufferType& buffer2,
     BufferType& buffer3,
-    BufferType& buffer4_n,
     UpdateCoefficientsType update_coefficients_f,
     AdditionalStepType additional_step=AdditionalStepType()
 )
 {
-    auto& X = *state.X;
+    using state_t = std::decay_t<StateType>;
+    using value_t = typename state_t::value_t;
+
+    auto& A = *state.A;
     const auto& penalty = state.penalty;
     const auto& strong_set = state.strong_set;
     const auto& strong_begins = state.strong_begins;
@@ -38,13 +39,11 @@ void coordinate_descent(
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto alpha = state.alpha;
-    const auto lmda = state.lmdas[lmda_idx];
+    const auto lmda = state.lmda_path[lmda_idx];
     const auto newton_tol = state.newton_tol;
     const auto newton_max_iters = state.newton_max_iters;
-    const auto n_threads = state.n_threads;
     auto& strong_beta = state.strong_beta;
     auto& strong_grad = state.strong_grad;
-    auto& resid = state.resid;
     auto& rsq = state.rsq;
 
     const auto l1 = lmda * alpha;
@@ -57,12 +56,10 @@ void coordinate_descent(
         const auto k = strong_set[ss_idx];    // actual group index
         const auto ss_value_begin = strong_begins[ss_idx]; // value begin index at ss_idx
         auto& ak = strong_beta[ss_value_begin]; // corresponding beta
-        auto& gk = strong_grad[ss_value_begin]; // corresponding gradient
+        const auto gk = strong_grad[ss_value_begin]; // corresponding gradient
         const auto A_kk = strong_vars[ss_value_begin];  // corresponding A diagonal 
-        const auto pk = penalty[k]; // corresponding penalty
+        const auto pk = penalty[k];
 
-        // compute current gradient
-        gk = X.cmul(groups[k], resid);
         const auto ak_old = ak;
 
         // update coefficient
@@ -81,9 +78,32 @@ void coordinate_descent(
 
         update_rsq(rsq, ak_old, ak, A_kk, gk);
 
-        // update residual 
-        X.ctmul(groups[k], del, buffer4_n);
-        matrix::dvsubi(resid, buffer4_n, n_threads);
+        // update gradient 
+        
+        // iterate over the groups of size 1
+        for (auto jt = g1_begin; jt != g1_end; ++jt) {
+            const auto ss_idx_j = *jt;
+            const auto j = strong_set[ss_idx_j];
+            const util::rowvec_type<value_t, 1> del_k(del);
+            auto new_gk = buffer1.template head<1>();
+            A.bmul(groups[k], groups[j], 1, 1, del_k, new_gk);
+            auto sg_j = strong_grad.template segment<1>(strong_begins[ss_idx_j]);
+            sg_j -= new_gk;
+        }
+        
+        // iterate over the groups of dynamic size
+        for (auto jt = g2_begin; jt != g2_end; ++jt) {
+            const auto ss_idx_j = *jt;
+            const auto j = strong_set[ss_idx_j];
+            const auto groupj_size = group_sizes[j];
+            const util::rowvec_type<value_t, 1> del_k(del);
+            auto new_gk = buffer1.head(groupj_size);
+            A.bmul(groups[k], groups[j], 1, groupj_size, del_k, new_gk);
+            auto sg_j = strong_grad.segment(
+                strong_begins[ss_idx_j], groupj_size
+            );
+            sg_j -= new_gk;
+        }
     }
     
     // iterate over the groups of dynamic size
@@ -95,10 +115,7 @@ void coordinate_descent(
         auto ak = strong_beta.segment(ss_value_begin, gsize); // corresponding beta
         auto gk = strong_grad.segment(ss_value_begin, gsize); // corresponding gradient
         const auto A_kk = strong_vars.segment(ss_value_begin, gsize);  // corresponding A diagonal 
-        const auto pk = penalty[k]; // corresponding penalty
-
-        // compute current gradient
-        X.bmul(groups[k], gsize, resid, gk);
+        const auto pk = penalty[k];
 
         // save old beta in buffer
         auto ak_old = buffer3.head(ak.size());
@@ -106,18 +123,16 @@ void coordinate_descent(
 
         // update group coefficients
         size_t iters;
-        gk += A_kk * ak_old; 
+        gk += A_kk * ak_old;
         update_coefficients_f(
             A_kk, gk, l1 * pk, l2 * pk, 
             newton_tol, newton_max_iters,
             ak, iters, buffer1, buffer2
         );
+        gk -= A_kk * ak_old;
 
         if ((ak_old - ak).abs().maxCoeff() <= 1e-14) continue;
         
-        // NOTE: MUST undo the correction from before
-        gk -= A_kk * ak_old; 
-
         additional_step(ss_idx);
 
         // use same buffer as ak_old to store difference
@@ -130,9 +145,30 @@ void coordinate_descent(
         // update rsq
         update_rsq(rsq, del, A_kk, gk);
 
-        // update residual
-        X.btmul(groups[k], gsize, del, buffer4_n);
-        matrix::dvsubi(resid, buffer4_n, n_threads);
+        // update gradient-like quantity
+        
+        // iterate over the groups of size 1
+        for (auto jt = g1_begin; jt != g1_end; ++jt) {
+            const auto ss_idx_j = *jt;
+            const auto j = strong_set[ss_idx_j];
+            auto new_gk = buffer1.template head<1>();
+            A.bmul(groups[k], groups[j], gsize, 1, del, new_gk);
+            auto sg_j = strong_grad.template segment<1>(strong_begins[ss_idx_j]);
+            sg_j -= new_gk;
+        }
+
+        // iterate over the groups of dynamic size
+        for (auto jt = g2_begin; jt != g2_end; ++jt) {
+            const auto ss_idx_j = *jt;
+            const auto j = strong_set[ss_idx_j];
+            const auto groupj_size = group_sizes[j];
+            auto new_gk = buffer1.head(groupj_size);
+            A.bmul(groups[k], groups[j], gsize, groupj_size, del, new_gk);
+            auto sg_j = strong_grad.segment(
+                strong_begins[ss_idx_j], groupj_size
+            );
+            sg_j -= new_gk;
+        }
     }
 }
 
@@ -140,32 +176,60 @@ void coordinate_descent(
  * Applies multiple blockwise coordinate descent on the active set.
  */
 template <class StateType, 
+          class ABDiffType,
           class BufferType, 
           class UpdateCoefficientsType,
           class CUIType = util::no_op>
 ADELIE_CORE_STRONG_INLINE
-void solve_pin_naive_active(
+void solve_pin_cov_active(
     StateType&& state,
     size_t lmda_idx,
+    ABDiffType& active_beta_diff,
     BufferType& buffer1,
     BufferType& buffer2,
     BufferType& buffer3,
-    BufferType& buffer4_n,
     UpdateCoefficientsType update_coefficients_f,
-    CUIType check_user_interrupt = CUIType()
-)
+    CUIType check_user_interrupt = CUIType())
 {
     using state_t = std::decay_t<StateType>;
     using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
     using sw_t = util::Stopwatch;
 
+    auto& A = *state.A;
+    const auto& groups = state.groups;
+    const auto& group_sizes = state.group_sizes;
+    const auto& strong_set = state.strong_set;
+    const auto& strong_begins = state.strong_begins;
+    const auto& active_set = state.active_set;
     const auto& active_g1 = state.active_g1;
     const auto& active_g2 = state.active_g2;
+    const auto& active_begins = state.active_begins;
+    const auto& strong_beta = state.strong_beta;
+    const auto& strong_is_active = state.strong_is_active;
     const auto tol = state.tol;
     const auto max_iters = state.max_iters;
+    auto& strong_grad = state.strong_grad;
     auto& iters = state.iters;
     auto& time_active_cd = state.time_active_cd;
 
+    Eigen::Map<vec_value_t> ab_diff_view(
+        active_beta_diff.data(), 
+        active_beta_diff.size()
+    );
+    
+    // save old active beta
+    for (size_t i = 0; i < active_set.size(); ++i) {
+        const auto ss_idx_group = active_set[i];
+        const auto ss_group = strong_set[ss_idx_group];
+        const auto ss_group_size = group_sizes[ss_group];
+        const auto sb_begin = strong_begins[ss_idx_group];
+        const auto sb = strong_beta.segment(sb_begin, ss_group_size);
+        const auto ab_begin = active_begins[i];
+        auto ab_diff_view_curr = ab_diff_view.segment(ab_begin, ss_group_size);
+        ab_diff_view_curr = sb;
+    }
+    
     time_active_cd.push_back(0);
     {
         sw_t stopwatch(time_active_cd.back());
@@ -177,11 +241,51 @@ void solve_pin_naive_active(
                 state, 
                 active_g1.data(), active_g1.data() + active_g1.size(),
                 active_g2.data(), active_g2.data() + active_g2.size(),
-                lmda_idx, convg_measure, buffer1, buffer2, buffer3, buffer4_n,
+                lmda_idx, convg_measure, buffer1, buffer2, buffer3, 
                 update_coefficients_f
             );
             if (convg_measure < tol) break;
             if (iters >= max_iters) throw util::max_cds_error(lmda_idx);
+        }
+    }
+    
+    // compute new active beta - old active beta
+    for (size_t i = 0; i < active_set.size(); ++i) {
+        const auto ss_idx_group = active_set[i];
+        const auto ss_group = strong_set[ss_idx_group];
+        const auto ss_group_size = group_sizes[ss_group];
+        const auto sb_begin = strong_begins[ss_idx_group];
+        const auto sb = strong_beta.segment(sb_begin, ss_group_size);
+        const auto ab_begin = active_begins[i];
+        auto ab_diff_view_curr = ab_diff_view.segment(ab_begin, ss_group_size);
+        ab_diff_view_curr = sb - ab_diff_view_curr;
+    }
+
+    /* update strong gradient for non-active strong variables */
+
+    // optimization: if active set is empty or active set is the same as strong set.
+    if ((ab_diff_view.size() == 0) ||
+        (active_set.size() == strong_set.size())) return;
+
+    for (size_t j_idx = 0; j_idx < strong_set.size(); ++j_idx) {
+        if (strong_is_active[j_idx]) continue;
+
+        const auto j = strong_set[j_idx];
+        const auto groupj_size = group_sizes[j];
+        auto sg_j = strong_grad.segment(
+            strong_begins[j_idx], groupj_size
+        );
+        auto new_gk = buffer3.head(groupj_size);
+
+        for (size_t i_idx = 0; i_idx < active_set.size(); ++i_idx) {
+            const auto i = strong_set[active_set[i_idx]];
+            const auto groupi_size = group_sizes[i];
+            const auto ab_begin = active_begins[i_idx];
+            const auto ab_diff_view_curr = ab_diff_view.segment(
+                ab_begin, groupi_size
+            );
+            A.bmul(groups[i], groups[j], groupi_size, groupj_size, ab_diff_view_curr, new_gk);
+            sg_j -= new_gk;
         }
     }
 }
@@ -189,11 +293,10 @@ void solve_pin_naive_active(
 template <class StateType,
           class UpdateCoefficientsType,
           class CUIType = util::no_op>
-inline void solve_pin_naive(
+inline void solve_pin_cov(
     StateType&& state,
     UpdateCoefficientsType update_coefficients_f,
-    CUIType check_user_interrupt = CUIType()
-)
+    CUIType check_user_interrupt = CUIType())
 {
     using state_t = std::decay_t<StateType>;
     using value_t = typename state_t::value_t;
@@ -201,15 +304,15 @@ inline void solve_pin_naive(
     using sp_vec_value_t = typename state_t::sp_vec_value_t;
     using sw_t = util::Stopwatch;
 
-    auto& X = *state.X;
+    auto& A = *state.A;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto& strong_set = state.strong_set;
     const auto& strong_g1 = state.strong_g1;
     const auto& strong_g2 = state.strong_g2;
     const auto& strong_beta = state.strong_beta;
-    const auto& lmdas = state.lmdas;
-    const auto& resid = state.resid;
+    const auto& strong_grad = state.strong_grad;
+    const auto& lmda_path = state.lmda_path;
     const auto tol = state.tol;
     const auto max_iters = state.max_iters;
     const auto rsq_slope_tol = state.rsq_slope_tol;
@@ -219,29 +322,35 @@ inline void solve_pin_naive(
     auto& active_g2 = state.active_g2;
     auto& active_begins = state.active_begins;
     auto& active_order = state.active_order;
-    auto& is_active = state.is_active;
+    auto& strong_is_active = state.strong_is_active;
     auto& betas = state.betas;
     auto& rsqs = state.rsqs;
-    auto& resids = state.resids;
+    auto& lmdas = state.lmdas;
+    auto& strong_is_actives = state.strong_is_actives;
+    auto& strong_betas = state.strong_betas;
+    auto& strong_grads = state.strong_grads;
     auto& rsq = state.rsq;
     auto& iters = state.iters;
     auto& time_strong_cd = state.time_strong_cd;
-    
-    const auto n = X.rows();
-    const auto p = X.cols();
+
+    const auto p = A.cols();
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
-    SolvePinBufferPack<value_t> buffer_pack(max_group_size, n);
+    SolvePinBufferPack<value_t> buffer_pack(max_group_size, 0);
     
     // buffer to store final result
     std::vector<index_t> active_beta_indices;
     std::vector<value_t> active_beta_ordered;
+    
+    // buffer for internal routine 
+    std::vector<value_t> active_beta_diff;
 
     // allocate buffers for optimization
     active_beta_indices.reserve(strong_beta.size());
     active_beta_ordered.reserve(strong_beta.size());
-
+    active_beta_diff.reserve(strong_beta.size());
+    
     // compute number of active coefficients
     size_t active_beta_size = 0;
     if (active_set.size()) {
@@ -250,12 +359,13 @@ inline void solve_pin_naive(
         const auto group_size = group_sizes[last_group];
         active_beta_size = active_begins[last_idx] + group_size;
     }
+    active_beta_diff.resize(active_beta_size);
     
     bool lasso_active_called = false;
 
     const auto add_active_set = [&](auto ss_idx) {
-        if (!is_active[ss_idx]) {
-            is_active[ss_idx] = true;
+        if (!strong_is_active[ss_idx]) {
+            strong_is_active[ss_idx] = true;
 
             active_set.push_back(ss_idx);
 
@@ -270,19 +380,19 @@ inline void solve_pin_naive(
     };
 
     const auto lasso_active_and_update = [&](size_t l) {
-        solve_pin_naive_active(
+        solve_pin_cov_active(
             state, l, 
+            active_beta_diff, 
             buffer_pack.buffer1,
             buffer_pack.buffer2,
             buffer_pack.buffer3,
-            buffer_pack.buffer4,
             update_coefficients_f,
             check_user_interrupt
         );
         lasso_active_called = true;
     };
 
-    for (int l = 0; l < lmdas.size(); ++l) {
+    for (int l = 0; l < lmda_path.size(); ++l) {
         if (lasso_active_called) {
             lasso_active_and_update(l);
         }
@@ -303,7 +413,6 @@ inline void solve_pin_naive(
                     buffer_pack.buffer1,
                     buffer_pack.buffer2,
                     buffer_pack.buffer3,
-                    buffer_pack.buffer4,
                     update_coefficients_f,
                     add_active_set
                 );
@@ -318,6 +427,9 @@ inline void solve_pin_naive(
                     const auto curr_size = group_sizes[curr_group];
                     active_beta_size += curr_size;
                 }
+
+                // update active_beta_diff size
+                active_beta_diff.resize(active_beta_size);
             }
 
             if (convg_measure < tol) break;
@@ -358,7 +470,10 @@ inline void solve_pin_naive(
 
         betas.emplace_back(beta_map);
         rsqs.emplace_back(rsq);
-        resids.emplace_back(resid);
+        lmdas.emplace_back(lmda_path[l]);
+        strong_is_actives.emplace_back(strong_is_active);
+        strong_betas.emplace_back(strong_beta);
+        strong_grads.emplace_back(strong_grad);
 
         // make sure to do at least 3 lambdas.
         if (l < 2) continue;
@@ -368,5 +483,5 @@ inline void solve_pin_naive(
     }
 }
 
-} // namespace grpnet
+} // namespace solver
 } // namespace adelie_core

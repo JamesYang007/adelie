@@ -10,6 +10,6 @@ PYBIND11_MODULE(adelie_core, m) {
     auto m_state = m.def_submodule("state", "State submodule.");
     register_state(m_state);
 
-    auto m_grpnet = m.def_submodule("grpnet", "Grpnet submodule.");
-    register_grpnet(m_grpnet);
+    auto m_solver = m.def_submodule("solver", "Grpnet submodule.");
+    register_solver(m_solver);
 }
