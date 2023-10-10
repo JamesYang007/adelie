@@ -414,7 +414,7 @@ document.write(`
 <td><p>Number of regularizations to batch per BASIL iteration.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.delta_strong_size" title="adelie.adelie_core.state.StateBasilBase32.delta_strong_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delta_strong_size</span></code></a></p></td>
-<td><p>TODO: check! Number of strong groups to include per BASIL iteration  if strong rule and EDPP rules do not include new groups but optimality is not reached.</p></td>
+<td><p>Number of strong groups to include per BASIL iteration  if strong rule does not include new groups but optimality is not reached.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.early_exit" title="adelie.adelie_core.state.StateBasilBase32.early_exit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">early_exit</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if BASIL should early exit based on training <span class="math notranslate nohighlight">\(R^2\)</span>.</p></td>
@@ -543,9 +543,8 @@ It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</sp
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase32.delta_strong_size">
 <span class="sig-name descname"><span class="pre">delta_strong_size</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase32.delta_strong_size" title="Link to this definition">#</a></dt>
-<dd><p>TODO: check!
-Number of strong groups to include per BASIL iteration 
-if strong rule and EDPP rules do not include new groups but optimality is not reached.</p>
+<dd><p>Number of strong groups to include per BASIL iteration 
+if strong rule does not include new groups but optimality is not reached.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -694,9 +693,9 @@ will grab values corresponding to the full <code class="docutils literal notrans
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase32.strong_beta">
 <span class="sig-name descname"><span class="pre">strong_beta</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase32.strong_beta" title="Link to this definition">#</a></dt>
 <dd><p>Transformed coefficient vector on the strong set.
-Note that the coefficient is in the transformed space of <code class="docutils literal notranslate"><span class="pre">X_c</span></code>
-where <code class="docutils literal notranslate"><span class="pre">X_c</span></code> is column-mean centered version of <code class="docutils literal notranslate"><span class="pre">X</span></code> if <code class="docutils literal notranslate"><span class="pre">intercept</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>
-and <code class="docutils literal notranslate"><span class="pre">X</span></code> otherwise.
+Note that the coefficient is in the transformed space of <span class="math notranslate nohighlight">\(X_c\)</span>
+where <span class="math notranslate nohighlight">\(X_c\)</span> is column-mean centered version of <span class="math notranslate nohighlight">\(X\)</span> if <code class="docutils literal notranslate"><span class="pre">intercept</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>
+and <span class="math notranslate nohighlight">\(X\)</span> otherwise.
 <code class="docutils literal notranslate"><span class="pre">strong_beta[b:b+p]</span></code> is the coefficient for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group 
 where
 <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">strong_set[i]</span></code>,

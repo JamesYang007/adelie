@@ -399,6 +399,9 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.base.check" title="adelie.state.base.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>([method, logger])</p></td>
 <td><p>Checks consistency of the members.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.base.create_from_core" title="adelie.state.base.create_from_core"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_from_core</span></code></a>(cls, state, core_state, ...)</p></td>
+<td><p>Create a new instance of a pin naive state using given state and new core state.</p></td>
+</tr>
 </tbody>
 </table>
 <dl class="py method">
@@ -427,6 +430,28 @@ The function does not raise exceptions on failed checks.</p></li>
 </dd>
 <dt><strong>logger</strong><span class="classifier">optional</span></dt><dd><p>Logger object that behaves like a logger object in <code class="docutils literal notranslate"><span class="pre">logging</span></code>.
 Default is <code class="docutils literal notranslate"><span class="pre">logging.getLogger()</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.state.base.create_from_core">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_from_core</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">core_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pycls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corecls</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.base.create_from_core" title="Link to this definition">#</a></dt>
+<dd><p>Create a new instance of a pin naive state using given state and new core state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>cls</strong></dt><dd><p>Class to instantiate an object for.</p>
+</dd>
+<dt><strong>state</strong></dt><dd><p>State object to grab static members from.</p>
+</dd>
+<dt><strong>core_state</strong></dt><dd><p>New core state to initialize with.</p>
+</dd>
+<dt><strong>pycls</strong></dt><dd><p>Python derived class type.</p>
+</dd>
+<dt><strong>corecls</strong></dt><dd><p>Core state class type.</p>
 </dd>
 </dl>
 </dd>
@@ -483,6 +508,7 @@ Default is <code class="docutils literal notranslate"><span class="pre">logging.
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base"><code class="docutils literal notranslate"><span class="pre">base</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base.__init__"><code class="docutils literal notranslate"><span class="pre">base.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base.check"><code class="docutils literal notranslate"><span class="pre">base.check()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base.create_from_core"><code class="docutils literal notranslate"><span class="pre">base.create_from_core()</span></code></a></li>
 </ul>
 </li>
 </ul>

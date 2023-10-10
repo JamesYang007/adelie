@@ -13,6 +13,7 @@
    
       ~base.__init__
       ~base.check
+      ~base.create_from_core
    
    
 
@@ -25,6 +26,7 @@
    
    .. automethod:: __init__
    .. automethod:: check
+   .. automethod:: create_from_core
    
    
 
