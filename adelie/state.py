@@ -85,6 +85,40 @@ class base:
         """
         return
 
+    @staticmethod
+    def create_from_core(
+        cls, 
+        state, 
+        core_state, 
+        pycls, 
+        corecls,
+    ):
+        """Create a new instance of a pin naive state using given state and new core state.
+
+        Parameters
+        ---------- 
+        cls
+            Class to instantiate an object for.
+        state
+            State object to grab static members from.
+        core_state
+            New core state to initialize with.
+        pycls
+            Python derived class type.
+        corecls
+            Core state class type.
+        """
+        # allocate new object cls casted to pycls type
+        obj = super(pycls, cls).__new__(cls)
+        # keep reference to static members to extend lifetime
+        # all static members are of the form: _name.
+        for a in dir(state):
+            if a.startswith("_") and not a.startswith("__") and not callable(getattr(state, a)):
+                setattr(obj, a, getattr(state, a))
+        # initialize core state
+        corecls.__init__(obj, core_state)
+        return obj
+
 
 class pin_base(base):
     def check(
@@ -586,36 +620,6 @@ class pin_naive_base(pin_base):
             strong_is_active=self._strong_is_active,
         )
 
-    @staticmethod
-    def create_from_core(cls, state, core_state, pycls, corecls):
-        """Create a new instance of a pin naive state using given state and new core state.
-
-        Parameters
-        ---------- 
-        cls
-            Class to instantiate an object for.
-        state
-            State object to grab static members from.
-        core_state
-            New core state to initialize with.
-        pycls
-            Python derived pin naive class type.
-        corecls
-            Core state class type.
-        """
-        # allocate new object cls casted to pycls type
-        obj = super(pycls, cls).__new__(cls)
-        # keep reference to static members to extend lifetime
-        # all static members are of the form: _name.
-        for a in dir(state):
-            if a.startswith("_") and not a.startswith("__") and not callable(getattr(state, a)):
-                setattr(obj, a, getattr(state, a))
-        # initialize pin_naive_base (no-op, but here for completion)    
-        pin_naive_base.__init__(obj)
-        # initialize core state
-        corecls.__init__(obj, core_state)
-        return obj
-
     def check(
         self, 
         method: str =None, 
@@ -642,131 +646,41 @@ class pin_naive_base(pin_base):
 class pin_naive_64(pin_naive_base, core.state.StatePinNaive64):
     """State class for pin, naive method using 64-bit floating point."""
 
-    def __init__(
-        self, 
-        *,
-        X: matrix.base | matrix.MatrixPinNaiveBase64,
-        groups: np.ndarray,
-        group_sizes: np.ndarray,
-        alpha: float,
-        penalty: np.ndarray,
-        strong_set: np.ndarray,
-        lmda_path: np.ndarray,
-        rsq: float,
-        resid: np.ndarray,
-        strong_beta: np.ndarray,
-        strong_is_active: np.ndarray,
-        max_iters: int,
-        tol: float,
-        rsq_slope_tol: float,
-        rsq_curv_tol: float,
-        newton_tol: float,
-        newton_max_iters: int,
-        n_threads: int,
-    ):
+    def __init__(self, *args, **kwargs):
         pin_naive_base.default_init(
             self,
             core.state.StatePinNaive64,
-            X=X,
-            groups=groups,
-            group_sizes=group_sizes,
-            alpha=alpha,
-            penalty=penalty,
-            strong_set=strong_set,
-            lmda_path=lmda_path,
-            rsq=rsq,
-            resid=resid,
-            strong_beta=strong_beta,
-            strong_is_active=strong_is_active,
-            max_iters=max_iters,
-            tol=tol,
-            rsq_slope_tol=rsq_slope_tol,
-            rsq_curv_tol=rsq_curv_tol,
-            newton_tol=newton_tol,
-            newton_max_iters=newton_max_iters,
-            n_threads=n_threads,
+            *args,
             dtype=np.float64,
+            **kwargs,
         )
 
     @classmethod
     def create_from_core(cls, state, core_state):
-        """Create a new instance of a pin naive state using given state and new core state.
-
-        Parameters
-        ---------- 
-        state
-            State object to grab static members from.
-        core_state
-            New core state to initialize with.
-        """
-        return pin_naive_base.create_from_core(
+        obj = base.create_from_core(
             cls, state, core_state, pin_naive_64, core.state.StatePinNaive64,
         )
+        pin_naive_base.__init__(obj)
 
 
 class pin_naive_32(pin_naive_base, core.state.StatePinNaive32):
     """State class for pin, naive method using 32-bit floating point."""
 
-    def __init__(
-        self, 
-        *,
-        X: matrix.base | matrix.MatrixPinNaiveBase32,
-        groups: np.ndarray,
-        group_sizes: np.ndarray,
-        alpha: float,
-        penalty: np.ndarray,
-        strong_set: np.ndarray,
-        lmda_path: np.ndarray,
-        rsq: float,
-        resid: np.ndarray,
-        strong_beta: np.ndarray,
-        strong_is_active: np.ndarray,
-        max_iters: int,
-        tol: float,
-        rsq_slope_tol: float,
-        rsq_curv_tol: float,
-        newton_tol: float,
-        newton_max_iters: int,
-        n_threads: int,
-    ):
+    def __init__(self, *args, **kwargs):
         pin_naive_base.default_init(
             self,
             core.state.StatePinNaive32,
-            X=X,
-            groups=groups,
-            group_sizes=group_sizes,
-            alpha=alpha,
-            penalty=penalty,
-            strong_set=strong_set,
-            lmda_path=lmda_path,
-            rsq=rsq,
-            resid=resid,
-            strong_beta=strong_beta,
-            strong_is_active=strong_is_active,
-            max_iters=max_iters,
-            tol=tol,
-            rsq_slope_tol=rsq_slope_tol,
-            rsq_curv_tol=rsq_curv_tol,
-            newton_tol=newton_tol,
-            newton_max_iters=newton_max_iters,
-            n_threads=n_threads,
+            *args,
             dtype=np.float32,
+            **kwargs,
         )
 
     @classmethod
     def create_from_core(cls, state, core_state):
-        """Create a new instance of a pin naive state using given state and new core state.
-
-        Parameters
-        ---------- 
-        state
-            State object to grab static members from.
-        core_state
-            New core state to initialize with.
-        """
-        return pin_naive_base.create_from_core(
+        obj = base.create_from_core(
             cls, state, core_state, pin_naive_32, core.state.StatePinNaive32,
         )
+        pin_naive_base.__init__(obj)
 
 
 def pin_naive(
@@ -862,7 +776,10 @@ def pin_naive(
     else:
         X_intr = X
 
-    if not (isinstance(X_intr, matrix.MatrixPinNaiveBase64) or isinstance(X_intr, matrix.MatrixPinNaiveBase32)):
+    if not (
+        isinstance(X_intr, matrix.MatrixPinNaiveBase64) or
+        isinstance(X_intr, matrix.MatrixPinNaiveBase32)
+    ):
         raise ValueError(
             "X must be an instance of matrix.MatrixPinNaiveBase32 or matrix.MatrixPinNaiveBase64."
         )
@@ -986,36 +903,6 @@ class pin_cov_base(pin_base):
             strong_is_active=self._strong_is_active,
         )
 
-    @staticmethod
-    def create_from_core(cls, state, core_state, pycls, corecls):
-        """Create a new instance of a pin naive state using given state and new core state.
-
-        Parameters
-        ---------- 
-        cls
-            Class to instantiate an object for.
-        state
-            State object to grab static members from.
-        core_state
-            New core state to initialize with.
-        pycls
-            Python derived pin naive class type.
-        corecls
-            Core state class type.
-        """
-        # allocate new object cls casted to pycls type
-        obj = super(pycls, cls).__new__(cls)
-        # keep reference to static members to extend lifetime
-        # all static members are of the form: _name.
-        for a in dir(state):
-            if a.startswith("_") and not a.startswith("__") and not callable(getattr(state, a)):
-                setattr(obj, a, getattr(state, a))
-        # initialize pin_cov_base (no-op, but here for completion)    
-        pin_cov_base.__init__(obj)
-        # initialize core state
-        corecls.__init__(obj, core_state)
-        return obj
-
     def check(
         self, 
         method: str =None, 
@@ -1032,131 +919,41 @@ class pin_cov_base(pin_base):
 class pin_cov_64(pin_cov_base, core.state.StatePinCov64):
     """State class for pin, covariance method using 64-bit floating point."""
 
-    def __init__(
-        self, 
-        *,
-        A: matrix.base | matrix.MatrixPinCovBase64,
-        groups: np.ndarray,
-        group_sizes: np.ndarray,
-        alpha: float,
-        penalty: np.ndarray,
-        strong_set: np.ndarray,
-        lmda_path: np.ndarray,
-        rsq: float,
-        strong_beta: np.ndarray,
-        strong_grad: np.ndarray,
-        strong_is_active: np.ndarray,
-        max_iters: int,
-        tol: float,
-        rsq_slope_tol: float,
-        rsq_curv_tol: float,
-        newton_tol: float,
-        newton_max_iters: int,
-        n_threads: int,
-    ):
+    def __init__(self, *args, **kwargs):
         pin_cov_base.default_init(
             self,
             core.state.StatePinCov64,
-            A=A,
-            groups=groups,
-            group_sizes=group_sizes,
-            alpha=alpha,
-            penalty=penalty,
-            strong_set=strong_set,
-            lmda_path=lmda_path,
-            rsq=rsq,
-            strong_beta=strong_beta,
-            strong_grad=strong_grad,
-            strong_is_active=strong_is_active,
-            max_iters=max_iters,
-            tol=tol,
-            rsq_slope_tol=rsq_slope_tol,
-            rsq_curv_tol=rsq_curv_tol,
-            newton_tol=newton_tol,
-            newton_max_iters=newton_max_iters,
-            n_threads=n_threads,
+            *args,
             dtype=np.float64,
+            **kwargs,
         )
 
     @classmethod
     def create_from_core(cls, state, core_state):
-        """Create a new instance of a pin covariance state using given state and new core state.
-
-        Parameters
-        ---------- 
-        state
-            State object to grab static members from.
-        core_state
-            New core state to initialize with.
-        """
-        return pin_naive_base.create_from_core(
+        obj = base.create_from_core(
             cls, state, core_state, pin_cov_64, core.state.StatePinCov64,
         )
+        pin_cov_base.__init__(obj)
 
 
 class pin_cov_32(pin_cov_base, core.state.StatePinCov32):
     """State class for pin, cov method using 32-bit floating point."""
 
-    def __init__(
-        self, 
-        *,
-        A: matrix.base | matrix.MatrixPinCovBase32,
-        groups: np.ndarray,
-        group_sizes: np.ndarray,
-        alpha: float,
-        penalty: np.ndarray,
-        strong_set: np.ndarray,
-        lmda_path: np.ndarray,
-        rsq: float,
-        strong_beta: np.ndarray,
-        strong_grad: np.ndarray,
-        strong_is_active: np.ndarray,
-        max_iters: int,
-        tol: float,
-        rsq_slope_tol: float,
-        rsq_curv_tol: float,
-        newton_tol: float,
-        newton_max_iters: int,
-        n_threads: int,
-    ):
+    def __init__(self, *args, **kwargs):
         pin_cov_base.default_init(
             self,
             core.state.StatePinCov32,
-            A=A,
-            groups=groups,
-            group_sizes=group_sizes,
-            alpha=alpha,
-            penalty=penalty,
-            strong_set=strong_set,
-            lmda_path=lmda_path,
-            rsq=rsq,
-            strong_beta=strong_beta,
-            strong_grad=strong_grad,
-            strong_is_active=strong_is_active,
-            max_iters=max_iters,
-            tol=tol,
-            rsq_slope_tol=rsq_slope_tol,
-            rsq_curv_tol=rsq_curv_tol,
-            newton_tol=newton_tol,
-            newton_max_iters=newton_max_iters,
-            n_threads=n_threads,
+            *args,
             dtype=np.float32,
+            **kwargs,
         )
 
     @classmethod
     def create_from_core(cls, state, core_state):
-        """Create a new instance of a pin cov state using given state and new core state.
-
-        Parameters
-        ---------- 
-        state
-            State object to grab static members from.
-        core_state
-            New core state to initialize with.
-        """
-        return pin_cov_base.create_from_core(
+        obj = base.create_from_core(
             cls, state, core_state, pin_cov_32, core.state.StatePinCov32,
         )
+        pin_cov_base.__init__(obj)
 
 
 def pin_cov(
@@ -1259,7 +1056,10 @@ def pin_cov(
     else:
         A_intr = A
 
-    if not (isinstance(A_intr, matrix.MatrixPinCovBase64) or isinstance(A_intr, matrix.MatrixPinCovBase32)):
+    if not (
+        isinstance(A_intr, matrix.MatrixPinCovBase64) or 
+        isinstance(A_intr, matrix.MatrixPinCovBase32)
+    ):
         raise ValueError(
             "X must be an instance of matrix.MatrixPinCovBase32 or matrix.MatrixPinCovBase64."
         )
@@ -1293,4 +1093,389 @@ def pin_cov(
         newton_tol=newton_tol,
         newton_max_iters=newton_max_iters,
         n_threads=n_threads,
+    )
+
+
+class basil_base(base):
+    def check(
+        self, 
+        method: str =None, 
+        logger=logger.logger,
+    ):
+        # TODO: fill
+        return
+
+
+class basil_naive_base(basil_base):
+    """State wrapper base class for all basil, naive method."""
+    def default_init(
+        self, 
+        base_type: core.state.StateBasilNaive64 | core.state.StateBasilNaive32,
+        *,
+        X: matrix.base | matrix.MatrixBasilNaiveBase64 | matrix.MatrixBasilNaiveBase32,
+        X_means: np.ndarray,
+        X_group_norms: np.ndarray,
+        y_mean: float,
+        y_var: float,
+        setup_edpp: bool,
+        resid: np.ndarray,
+        edpp_safe_set: np.ndarray,
+        edpp_v1_0: np.ndarray,
+        edpp_resid_0: np.ndarray,
+        groups: np.ndarray,
+        group_sizes: np.ndarray,
+        alpha: float,
+        penalty: np.ndarray,
+        lmda_path: np.ndarray,
+        lmda_max: float,
+        delta_lmda_path_size: int,
+        delta_strong_size: int,
+        max_strong_size: int,
+        strong_rule: bool,
+        max_iters: int,
+        tol: float,
+        rsq_slope_tol: float,
+        rsq_curv_tol: float,
+        newton_tol: float,
+        newton_max_iters: int,
+        early_exit: bool,
+        intercept: bool,
+        n_threads: int,
+        strong_set: np.ndarray,
+        strong_beta: np.ndarray,
+        strong_is_active: np.ndarray,
+        rsq: float,
+        lmda: float,
+        grad: np.ndarray,
+        dtype: np.float32 | np.float64,
+    ):
+        """Default initialization method.
+        """
+        ## save inputs due to lifetime issues
+        # static inputs require a reference to input
+        # or copy if it must be made
+        self._X = X
+
+        if isinstance(X, matrix.base):
+            X = X.internal()
+
+        self._X_means = np.array(X_means, copy=False, dtype=dtype)
+        self._X_group_norms = np.array(X_group_norms, copy=False, dtype=dtype)
+        self._groups = np.array(groups, copy=False, dtype=int)
+        self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
+        self._penalty = np.array(penalty, copy=False, dtype=dtype)
+        self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
+
+        # MUST call constructor directly and not use super()!
+        # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
+        base_type.__init__(
+            self,
+            X=X,
+            X_means=self._X_means,
+            X_group_norms=self._X_group_norms,
+            y_mean=y_mean,
+            y_var=y_var,
+            setup_edpp=setup_edpp,
+            resid=resid,
+            edpp_safe_set=edpp_safe_set,
+            edpp_v1_0=edpp_v1_0,
+            edpp_resid_0=edpp_resid_0,
+            groups=self._groups,
+            group_sizes=self._group_sizes,
+            alpha=alpha,
+            penalty=self._penalty,
+            lmda_path=self._lmda_path,
+            lmda_max=lmda_max,
+            delta_lmda_path_size=delta_lmda_path_size,
+            delta_strong_size=delta_strong_size,
+            max_strong_size=max_strong_size,
+            strong_rule=strong_rule,
+            max_iters=max_iters,
+            tol=tol,
+            rsq_slope_tol=rsq_slope_tol,
+            rsq_curv_tol=rsq_curv_tol,
+            newton_tol=newton_tol,
+            newton_max_iters=newton_max_iters,
+            early_exit=early_exit,
+            intercept=intercept,
+            n_threads=n_threads,
+            strong_set=strong_set,
+            strong_beta=strong_beta,
+            strong_is_active=strong_is_active,
+            rsq=rsq,
+            lmda=lmda,
+            grad=grad,
+        )
+
+    def check(
+        self, 
+        method: str =None, 
+        logger=logger.logger,
+    ):
+        # TODO: fill
+        return
+
+
+class basil_naive_64(basil_naive_base, core.state.StateBasilNaive64):
+    """State class for basil, naive method using 64-bit floating point."""
+
+    def __init__(self, *args, **kwargs):
+        basil_naive_base.default_init(
+            self,
+            core.state.StateBasilNaive64,
+            *args,
+            dtype=np.float64,
+            **kwargs,
+        )
+
+    @classmethod
+    def create_from_core(cls, state, core_state):
+        obj = base.create_from_core(
+            cls, state, core_state, basil_naive_64, core.state.StateBasilNaive64,
+        )
+        basil_naive_base.__init__(obj)
+
+
+class basil_naive_32(basil_naive_base, core.state.StateBasilNaive32):
+    """State class for basil, naive method using 32-bit floating point."""
+
+    def __init__(self, *args, **kwargs):
+        basil_naive_base.default_init(
+            self,
+            core.state.StateBasilNaive32,
+            *args,
+            dtype=np.float32,
+            **kwargs,
+        )
+
+    @classmethod
+    def create_from_core(cls, state, core_state):
+        obj = base.create_from_core(
+            cls, state, core_state, basil_naive_32, core.state.StateBasilNaive32,
+        )
+        basil_naive_base.__init__(obj)
+
+
+def basil_naive(
+    *,
+    X: matrix.base | matrix.MatrixBasilNaiveBase64 | matrix.MatrixBasilNaiveBase32,
+    X_means: np.ndarray,
+    X_group_norms: np.ndarray,
+    y_mean: float,
+    y_var: float,
+    setup_edpp: bool,
+    resid: np.ndarray,
+    edpp_safe_set: np.ndarray,
+    edpp_v1_0: np.ndarray,
+    edpp_resid_0: np.ndarray,
+    groups: np.ndarray,
+    group_sizes: np.ndarray,
+    alpha: float,
+    penalty: np.ndarray,
+    lmda_path: np.ndarray,
+    lmda_max: float,
+    strong_set: np.ndarray,
+    strong_beta: np.ndarray,
+    strong_is_active: np.ndarray,
+    rsq: float,
+    lmda: float,
+    grad: np.ndarray,
+    max_iters: int =int(1e5),
+    tol: float =1e-12,
+    rsq_slope_tol: float =1e-2,
+    rsq_curv_tol: float =1e-2,
+    newton_tol: float =1e-12,
+    newton_max_iters: int =1000,
+    n_threads: int =os.cpu_count(),
+    early_exit: bool =True,
+    intercept: bool =True,
+    strong_rule: bool =True,
+    delta_lmda_path_size: int =5,
+    delta_strong_size: int =5,
+    max_strong_size: int =1000,
+):
+    """Creates a basil, naive method state object.
+
+    Parameters
+    ----------
+    X : Union[adelie.matrix.base, adelie.matrix.MatrixBasilNaiveBase64, adelie.matrix.MatrixBasilNaiveBase32]
+        Feature matrix.
+        It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
+    X_means : (p,) np.ndarray
+        Column means of ``X``.
+    X_group_norms : (G,) np.ndarray
+        Group Frobenius norm of ``X``.
+        ``X_group_norms[i]`` is :math:`\\|X[:, g:g+gs]\\|_F`` 
+        where ``g = groups[i]`` and ``gs = group_sizes[i]``.
+    y_mean : float
+        The mean of the response vector :math:`y`.
+    y_var : float
+        The variance of the response vector :math:`y`, i.e. :math:`\\|y - \overline{y} 1\\|_2^2`.
+    setup_edpp : bool
+        ``True`` if EDPP setup is required,
+        in which case, the solver will always solve at :math:`\lambda_\max`.
+        See ``edpp_v1_0`` and ``edpp_resid_0``.
+    resid : (n,) np.ndarray
+        Residual :math:`y_c - X_c \\beta` where :math:`\\beta` is given by ``strong_beta``
+        *inverse-transformed*.
+    edpp_safe_set : (E,) np.ndarray
+        A list of EDPP safe groups.
+    edpp_v1_0: (n,) np.ndarray
+        The :math:`v_1` vector in EDPP rule at :math:`\\lambda_\\max`.
+    edpp_resid_0: (n,) np.ndarray
+        The residual at :math:`\\lambda_\\max`.
+    groups : (G,) np.ndarray
+        List of starting indices to each group where `G` is the number of groups.
+        ``groups[i]`` is the starting index of the ``i`` th group. 
+    group_sizes : (G,) np.ndarray
+        List of group sizes corresponding to each element in ``groups``.
+        ``group_sizes[i]`` is the group size of the ``i`` th group. 
+    alpha : float
+        Elastic net parameter.
+        It must be in the range :math:`[0,1]`.
+    penalty : (G,) np.ndarray
+        Penalty factor for each group in the same order as ``groups``.
+        It must be a non-negative vector.
+    lmda_path : (l,) np.ndarray
+        The regularization path to solve for.
+        The full path is not considered if ``early_exit`` is ``True``.
+        It is recommended that the path is sorted in decreasing order.
+    lmda_max : float
+        The smallest :math:`\\lambda` such that the true solution is zero
+        for all coefficients that have a non-vanishing group lasso penalty (:math:`\\ell_2`-norm).
+    strong_set : (s,) np.ndarray
+        List of indices into ``groups`` that correspond to the strong groups.
+        ``strong_set[i]`` is ``i`` th strong group.
+        ``strong_set`` must contain at least the true (optimal) active groups
+        when the regularization is given by ``lmda``.
+    strong_beta : (ws,) np.ndarray
+        Transformed coefficient vector on the strong set.
+        Note that the coefficient is in the transformed space of :math:`X_c`
+        where :math:`X_c` is column-mean centered version of :math:`X` if ``intercept`` is ``True``
+        and :math:`X` otherwise.
+        ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        where
+        ``k = strong_set[i]``,
+        ``b = strong_begins[i]``,
+        and ``p = group_sizes[k]``.
+        This must contain the true solution values for the strong groups.
+    strong_is_active : (a,) np.ndarray
+        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
+        ``strong_is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
+    rsq : float
+        The true unnormalized :math:`R^2` given by :math:`\\|y_c\\|_2^2 - \\|y_c-X_c\\beta\\|_2^2`
+        where :math:`\\beta` is given by ``strong_beta`` *inverse-transformed*.
+    lmda: float,
+        The regularization parameter at which the true solution is given by ``strong_beta``
+        (in the transformed space).
+    grad: np.ndarray,
+        The true full gradient :math:`X_c^\\top (y_c - X_c\\beta)` in the original space where
+        :math:`\\beta` is given by ``strong_beta`` *inverse-transformed*.
+    max_iters : int, optional
+        Maximum number of coordinate descents.
+        Default is ``int(1e5)``.
+    tol : float, optional
+        Convergence tolerance.
+        Default is ``1e-12``.
+    rsq_slope_tol : float, optional
+        Early stopping rule check on slope of :math:`R^2`.
+        Default is ``1e-2``.
+    rsq_curv_tol : float, optional
+        Early stopping rule check on curvature of :math:`R^2`.
+        Default is ``1e-2``.
+    newton_tol : float, optional
+        Convergence tolerance for the BCD update.
+        Default is ``1e-12``.
+    newton_max_iters : int, optional
+        Maximum number of iterations for the BCD update.
+        Default is ``1000``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``os.cpu_count()``.
+    early_exit : bool, optional
+        ``True`` if BASIL should early exit based on training :math:`R^2`.
+        Default is ``True``.
+    intercept : bool, optional 
+        ``True`` if BASIL should fit with intercept.
+        Default is ``True``.
+    strong_rule : bool, optional
+        ``True`` if strong rule should be used (only a heuristic!).
+        Default is ``True``.
+    delta_lmda_path_size : int, optional 
+        Number of regularizations to batch per BASIL iteration.
+        Default is ``5``.
+    delta_strong_size : int, optional
+        Number of strong groups to include per BASIL iteration 
+        if strong rule does not include new groups but optimality is not reached.
+        Default is ``5``.
+    max_strong_size: int, optional
+        Maximum number of strong groups allowed.
+        The function will return a valid state and guaranteed to have strong set size
+        less than or equal to ``max_strong_size``.
+        Default is ``1000``.
+
+    See Also
+    --------
+    adelie.state.basil_naive_64
+    adelie.state.basil_naive_32
+    """
+    if isinstance(X, matrix.base):
+        X_intr = X.internal()
+    else:
+        X_intr = X
+
+    if not (
+        isinstance(X_intr, matrix.MatrixBasilNaiveBase64) or 
+        isinstance(X_intr, matrix.MatrixBasilNaiveBase32)
+    ):
+        raise ValueError(
+            "X must be an instance of matrix.MatrixBasilNaiveBase32 or matrix.MatrixBasilNaiveBase64."
+        )
+
+    dtype = (
+        np.float64
+        if isinstance(X_intr, matrix.MatrixBasilNaiveBase64) else
+        np.float32
+    )
+        
+    dispatcher = {
+        np.float64: basil_naive_64,
+        np.float32: basil_naive_32,
+    }
+    return dispatcher[dtype](
+        X=X,
+        X_means=X_means,
+        X_group_norms=X_group_norms,
+        y_mean=y_mean,
+        y_var=y_var,
+        setup_edpp=setup_edpp,
+        resid=resid,
+        edpp_safe_set=edpp_safe_set,
+        edpp_v1_0=edpp_v1_0,
+        edpp_resid_0=edpp_resid_0,
+        groups=groups,
+        group_sizes=group_sizes,
+        alpha=alpha,
+        penalty=penalty,
+        lmda_path=lmda_path,
+        lmda_max=lmda_max,
+        delta_lmda_path_size=delta_lmda_path_size,
+        delta_strong_size=delta_strong_size,
+        max_strong_size=max_strong_size,
+        strong_rule=strong_rule,
+        max_iters=max_iters,
+        tol=tol,
+        rsq_slope_tol=rsq_slope_tol,
+        rsq_curv_tol=rsq_curv_tol,
+        newton_tol=newton_tol,
+        newton_max_iters=newton_max_iters,
+        early_exit=early_exit,
+        intercept=intercept,
+        n_threads=n_threads,
+        strong_set=strong_set,
+        strong_beta=strong_beta,
+        strong_is_active=strong_is_active,
+        rsq=rsq,
+        lmda=lmda,
+        grad=grad,
     )
