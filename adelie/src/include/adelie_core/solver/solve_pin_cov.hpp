@@ -39,7 +39,7 @@ void coordinate_descent(
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto alpha = state.alpha;
-    const auto lmda = state.lmdas[lmda_idx];
+    const auto lmda = state.lmda_path[lmda_idx];
     const auto newton_tol = state.newton_tol;
     const auto newton_max_iters = state.newton_max_iters;
     auto& strong_beta = state.strong_beta;
@@ -312,7 +312,7 @@ inline void solve_pin_cov(
     const auto& strong_g2 = state.strong_g2;
     const auto& strong_beta = state.strong_beta;
     const auto& strong_grad = state.strong_grad;
-    const auto& lmdas = state.lmdas;
+    const auto& lmda_path = state.lmda_path;
     const auto tol = state.tol;
     const auto max_iters = state.max_iters;
     const auto rsq_slope_tol = state.rsq_slope_tol;
@@ -325,6 +325,9 @@ inline void solve_pin_cov(
     auto& strong_is_active = state.strong_is_active;
     auto& betas = state.betas;
     auto& rsqs = state.rsqs;
+    auto& lmdas = state.lmdas;
+    auto& strong_is_actives = state.strong_is_actives;
+    auto& strong_betas = state.strong_betas;
     auto& strong_grads = state.strong_grads;
     auto& rsq = state.rsq;
     auto& iters = state.iters;
@@ -389,7 +392,7 @@ inline void solve_pin_cov(
         lasso_active_called = true;
     };
 
-    for (int l = 0; l < lmdas.size(); ++l) {
+    for (int l = 0; l < lmda_path.size(); ++l) {
         if (lasso_active_called) {
             lasso_active_and_update(l);
         }
@@ -467,6 +470,9 @@ inline void solve_pin_cov(
 
         betas.emplace_back(beta_map);
         rsqs.emplace_back(rsq);
+        lmdas.emplace_back(lmda_path[l]);
+        strong_is_actives.emplace_back(strong_is_active);
+        strong_betas.emplace_back(strong_beta);
         strong_grads.emplace_back(strong_grad);
 
         // make sure to do at least 3 lambdas.

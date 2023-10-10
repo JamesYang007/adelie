@@ -89,9 +89,9 @@ def lambda_max(
         np.linalg.norm(grad[g:g+gs])
         for g, gs in zip(groups, group_sizes)
     ])
-    return core.solver.lambda_max(
-        abs_grad, alpha, penalty,
-    )
+    factor = 1e-3 if alpha <= 0 else alpha
+    lmdas = abs_grad / (factor * penalty)
+    return np.max(lmdas[~np.isnan(lmdas)])
 
 
 def create_lambdas(
@@ -121,11 +121,8 @@ def create_lambdas(
         alpha=alpha, 
         penalty=penalty,
     )
-    return core.solver.create_lambdas(
-        n_lambdas,
-        min_ratio,
-        lmda_max,
-    )
+    log_factor = np.log(min_ratio) /(n_lambdas-1)
+    return lmda_max * np.exp(log_factor * np.arange(n_lambdas))
 
 
 def solve_pin(

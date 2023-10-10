@@ -98,26 +98,6 @@ py::dict solve_pin_cov(StateType state)
 // Solve Method
 // =================================================================
 
-double lambda_max(
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& abs_grad,
-    double alpha,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& penalty
-)
-{
-    return ad::solver::lambda_max(abs_grad, alpha, penalty);
-}
-
-auto create_lambdas(
-    size_t n_lambdas,
-    double min_ratio,
-    double lmda_max
-)
-{
-    ad::util::rowvec_type<double> lmdas(n_lambdas);
-    ad::solver::create_lambdas(n_lambdas, min_ratio, lmda_max, lmdas);
-    return lmdas;
-}
-
 template <class T> 
 using state_pin_naive_t = ad::state::StatePinNaive<ad::matrix::MatrixPinNaiveBase<T>>;
 template <class T> 
@@ -135,6 +115,4 @@ void register_solver(py::module_& m)
     m.def("solve_pin_cov_32", &solve_pin_cov<state_pin_cov_t<float>>);
 
     /* solve method */
-    m.def("lambda_max", &lambda_max);
-    m.def("create_lambdas", &create_lambdas);
 }

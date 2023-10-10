@@ -77,9 +77,7 @@ struct StatePinNaive : StatePinBase<
         ),
         X(&X),
         resid(resid.data(), resid.size())
-    {
-        resids.reserve(base_t::betas.size());
-    }
+    {}
 };
 
 } // namespace state

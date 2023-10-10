@@ -114,6 +114,8 @@ void update_edpp_states(
 
     if (!state.setup_edpp || !state.use_edpp) return;
 
+    const auto& groups = state.groups;
+    const auto& group_sizes = state.group_sizes;
     const auto& penalty = state.penalty;
     const auto& resid = state.resid;
     const auto& abs_grad = state.abs_grad;

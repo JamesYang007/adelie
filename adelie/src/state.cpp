@@ -63,7 +63,7 @@ void state_pin_base(py::module_& m, const char* name)
             py::arg("strong_g2").noconvert(),
             py::arg("strong_begins").noconvert(),
             py::arg("strong_vars").noconvert(),
-            py::arg("lmdas").noconvert(),
+            py::arg("lmda_path").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("rsq_slope_tol"),
@@ -119,7 +119,7 @@ void state_pin_base(py::module_& m, const char* name)
         ``b = strong_begins[i]``,
         and ``p = group_sizes[k]``.
         )delimiter")
-        .def_readonly("lmdas", &state_t::lmdas, R"delimiter(
+        .def_readonly("lmda_path", &state_t::lmda_path, R"delimiter(
         Regularization sequence to fit on.
         )delimiter")
         .def_readonly("max_iters", &state_t::max_iters, R"delimiter(
@@ -162,6 +162,10 @@ void state_pin_base(py::module_& m, const char* name)
         ``k = strong_set[i]``,
         ``b = strong_begins[i]``,
         and ``p = group_sizes[k]``.
+        )delimiter")
+        .def_readonly("strong_is_active", &state_t::strong_is_active, R"delimiter(
+        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
+        ``strong_is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
         )delimiter")
         .def_property_readonly("active_set", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<index_t>>(
@@ -213,10 +217,6 @@ void state_pin_base(py::module_& m, const char* name)
         Ordering such that ``groups`` is sorted in ascending order for the active groups.
         ``groups[strong_set[active_order[i]]]`` is the ``i`` th active group in ascending order.
         )delimiter")
-        .def_readonly("strong_is_active", &state_t::strong_is_active, R"delimiter(
-        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
-        ``strong_is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
-        )delimiter")
         .def_property_readonly("betas", [](const state_t& s) {
             const auto p = s.group_sizes.sum();
             Eigen::SparseMatrix<value_t, Eigen::RowMajor> betas(s.betas.size(), p);
@@ -239,6 +239,27 @@ void state_pin_base(py::module_& m, const char* name)
             );
         }, R"delimiter(
         ``rsqs[i]`` corresponds to the unnormalized :math:`R^2` at ``betas[i]``.
+        )delimiter")
+        .def_property_readonly("lmdas", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<value_t>>(
+                s.lmdas.data(),
+                s.lmdas.size()
+            );
+        }, R"delimiter(
+        ``lmdas[i]`` corresponds to the regularization :math:`\lambda`
+        used for the ``i`` th outputted solution.
+        )delimiter")
+        .def_readonly("strong_is_actives", &state_t::strong_is_actives, R"delimiter(
+        ``strong_is_actives[i]`` is the state of ``strong_is_active`` 
+        when the ``i`` th solution is computed.
+        )delimiter")
+        .def_readonly("strong_betas", &state_t::strong_betas, R"delimiter(
+        ``strong_betas[i]`` is the state of ``strong_beta`` 
+        when the ``i`` th solution is computed.
+        )delimiter")
+        .def_readonly("strong_grads", &state_t::strong_grads, R"delimiter(
+        ``strong_grads[i]`` is the state of ``strong_grad`` 
+        when the ``i`` th solution is computed.
         )delimiter")
         .def_readonly("iters", &state_t::iters, R"delimiter(
         Number of coordinate descents taken.
@@ -318,7 +339,7 @@ void state_pin_naive(py::module_& m, const char* name)
             py::arg("strong_g2").noconvert(),
             py::arg("strong_begins").noconvert(),
             py::arg("strong_vars").noconvert(),
-            py::arg("lmdas").noconvert(),
+            py::arg("lmda_path").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("rsq_slope_tol"),
@@ -407,7 +428,7 @@ void state_pin_cov(py::module_& m, const char* name)
             py::arg("strong_g2").noconvert(),
             py::arg("strong_begins").noconvert(),
             py::arg("strong_vars").noconvert(),
-            py::arg("lmdas").noconvert(),
+            py::arg("lmda_path").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("rsq_slope_tol"),
@@ -446,6 +467,7 @@ void state_basil_base(py::module_& m, const char* name)
             value_t, 
             const Eigen::Ref<const vec_value_t>,
             const Eigen::Ref<const vec_value_t>,
+            value_t,
             size_t,
             size_t,
             size_t,
@@ -462,6 +484,8 @@ void state_basil_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
+            value_t,
+            value_t,
             const Eigen::Ref<const vec_value_t>& 
         >(),
             py::arg("groups").noconvert(),
@@ -469,6 +493,7 @@ void state_basil_base(py::module_& m, const char* name)
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("lmda_path").noconvert(),
+            py::arg("lmda_max").noconvert(),
             py::arg("delta_lmda_path_size"),
             py::arg("delta_strong_size"),
             py::arg("max_strong_size"),
@@ -485,6 +510,8 @@ void state_basil_base(py::module_& m, const char* name)
             py::arg("strong_set"),
             py::arg("strong_beta"),
             py::arg("strong_is_active"),
+            py::arg("rsq"),
+            py::arg("lmda"),
             py::arg("grad")
         )
         .def_readonly("groups", &state_t::groups, R"delimiter(
@@ -507,6 +534,10 @@ void state_basil_base(py::module_& m, const char* name)
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
+        )delimiter")
+        .def_readonly("lmda_max", &state_t::lmda_max, R"delimiter(
+        The smallest :math:`\lambda` such that the true solution is zero
+        for all coefficients that have a non-vanishing group lasso penalty (:math:`\ell_2`-norm).
         )delimiter")
         .def_readonly("delta_lmda_path_size", &state_t::delta_lmda_path_size, R"delimiter(
         Number of regularizations to batch per BASIL iteration.
@@ -694,12 +725,17 @@ void state_basil_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>,
             value_t,
             value_t,
+            bool,
             const Eigen::Ref<const vec_value_t>,
             const Eigen::Ref<const vec_index_t>, 
+            const Eigen::Ref<const vec_value_t>,
+            const Eigen::Ref<const vec_value_t>,
+            const Eigen::Ref<const vec_index_t>,
             const Eigen::Ref<const vec_index_t>,
             value_t, 
             const Eigen::Ref<const vec_value_t>,
             const Eigen::Ref<const vec_value_t>,
+            value_t,
             size_t,
             size_t,
             size_t,
@@ -716,6 +752,8 @@ void state_basil_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
+            value_t,
+            value_t,
             const Eigen::Ref<const vec_value_t>& 
         >(),
             py::arg("X"),
@@ -723,12 +761,17 @@ void state_basil_naive(py::module_& m, const char* name)
             py::arg("X_group_norms").noconvert(),
             py::arg("y_mean"),
             py::arg("y_var"),
+            py::arg("setup_edpp"),
             py::arg("resid"),
+            py::arg("edpp_safe_set"),
+            py::arg("edpp_v1_0"),
+            py::arg("edpp_resid_0"),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("lmda_path").noconvert(),
+            py::arg("lmda_max").noconvert(),
             py::arg("delta_lmda_path_size"),
             py::arg("delta_strong_size"),
             py::arg("max_strong_size"),
@@ -745,11 +788,50 @@ void state_basil_naive(py::module_& m, const char* name)
             py::arg("strong_set"),
             py::arg("strong_beta"),
             py::arg("strong_is_active"),
+            py::arg("rsq"),
+            py::arg("lmda"),
             py::arg("grad")
         )
-        .def_readonly("resid", R"delimiter(
+        .def_readonly("X_means", &state_t::X_means, R"delimiter(
+        Column means of ``X``.
+        )delimiter")
+        .def_readonly("X_group_norms", &state_t::X_group_norms, R"delimiter(
+        Group Frobenius norm of ``X``.
+        )delimiter")
+        .def_readonly("y_mean", &state_t::y_mean, R"delimiter(
+        The mean of the response vector :math:`y`.
+        )delimiter")
+        .def_readonly("y_var", &state_t::y_var, R"delimiter(
+        The variance of the response vector :math:`y`, i.e. :math:`\|y - \overline{y} 1\|_2^2`.
+        )delimiter")
+        .def_readonly("use_edpp", &state_t::use_edpp, R"delimiter(
+        ``True`` if EDPP should be used.
+        )delimiter")
+        .def_readonly("setup_edpp", &state_t::setup_edpp, R"delimiter(
+        ``True`` if EDPP setup is required,
+        in which case, the solver will always solve at :math:`\lambda_\max`.
+        See ``edpp_v1_0`` and ``edpp_resid_0``.
+        )delimiter")
+        .def_readonly("X", &state_t::X, R"delimiter(
+        Feature matrix.
+        )delimiter")
+        .def_readonly("resid", &state_t::resid, R"delimiter(
         Residual :math:`y_c - X_c \beta` where :math:`\beta` is given by ``strong_beta``
         *inverse-transformed*.
+        )delimiter")
+        .def_readonly("strong_X_blocks", &state_t::strong_X_blocks, R"delimiter(
+        The :math:`UD` from the SVD of :math:`X_{c,k}` where :math:`X_c` 
+        is the possibly centered feature matrix and :math:`k` is an index to ``strong_set``.
+        )delimiter")
+        .def_readonly("strong_X_block_vs", &state_t::strong_X_block_vs, R"delimiter(
+        The :math:`V` from the SVD of :math:`X_{c,k}` where :math:`X_c` 
+        is the possibly centered feature matrix and :math:`k` is an index to ``strong_set``.
+        )delimiter")
+        .def_property_readonly("strong_vars", [](const state_t& s) {
+            return Eigen::Map<const vec_value_t>(s.strong_vars.data(), s.strong_vars.size());
+        }, R"delimiter(
+        The :math:`D^2` from the SVD of :math:`X_{c,k}` where :math:`X_c` 
+        is the possibly centered feature matrix and :math:`k` is an index to ``strong_set``.
         )delimiter")
         .def_property_readonly("strong_grad", [](const state_t& s) {
             return Eigen::Map<const vec_value_t>(s.strong_grad.data(), s.strong_grad.size());
@@ -762,6 +844,21 @@ void state_basil_naive(py::module_& m, const char* name)
         ``k = strong_set[i]``,
         ``b = strong_begins[i]``,
         and ``p = group_sizes[k]``.
+        )delimiter")
+        .def_readonly("edpp_safe_hashset", &state_t::edpp_safe_hashset, R"delimiter(
+        Hashset containing all the safe groups.
+        If EDPP is not used, it contains all the variables.
+        )delimiter")
+        .def_property_readonly("edpp_safe_set", [](const state_t& s) {
+            return Eigen::Map<const vec_index_t>(s.edpp_safe_set.data(), s.edpp_safe_set.size());
+        }, R"delimiter(
+        A list of EDPP safe groups.
+        )delimiter")
+        .def_readonly("edpp_v1_0", &state_t::edpp_v1_0, R"delimiter(
+        The :math:`v_1` vector in EDPP rule at :math:`\lambda_\max`.
+        )delimiter")
+        .def_readonly("edpp_resid_0", &state_t::edpp_resid_0, R"delimiter(
+        The residual at :math:`\lambda_\max`.
         )delimiter")
         ;
 }

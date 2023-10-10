@@ -249,15 +249,15 @@ class pin_base(base):
             method, logger,
         )
         
-        # ================ lmdas check ====================
+        # ================ lmda_path check ====================
         self._check(
-            np.all(0 <= self.lmdas),
-            "check lmdas is non-negative",
+            np.all(0 <= self.lmda_path),
+            "check lmda_path is non-negative",
             method, logger,
         )
         # if not sorted in decreasing order
-        if np.any(self.lmdas != np.sort(self.lmdas)[::-1]):
-            logger.warning("lmdas are not sorted in decreasing order")
+        if np.any(self.lmda_path != np.sort(self.lmda_path)[::-1]):
+            logger.warning("lmda_path are not sorted in decreasing order")
 
         # ================ max_iters check ====================
         self._check(
@@ -326,6 +326,18 @@ class pin_base(base):
         self._check(
             len(self.strong_grad) == WS,
             "check strong_grad size",
+            method, logger,
+        )
+
+        # ================ strong_is_active check ====================
+        self._check(
+            np.all(np.arange(S)[self.strong_is_active] == np.sort(self.active_set)),
+            "check strong_is_active is consistent with active_set",
+            method, logger,
+        )
+        self._check(
+            self.strong_is_active.dtype == np.dtype("bool"),
+            "check strong_is_active dtype is bool",
             method, logger,
         )
 
@@ -426,22 +438,10 @@ class pin_base(base):
             method, logger,
         )
 
-        # ================ strong_is_active check ====================
-        self._check(
-            np.all(np.arange(S)[self.strong_is_active] == np.sort(self.active_set)),
-            "check strong_is_active is consistent with active_set",
-            method, logger,
-        )
-        self._check(
-            self.strong_is_active.dtype == np.dtype("bool"),
-            "check strong_is_active dtype is bool",
-            method, logger,
-        )
-
         # ================ betas check ====================
         self._check(
-            self.betas.shape[0] <= self.lmdas.shape[0],
-            "check betas rows is no more than the number of lmdas",
+            self.betas.shape[0] <= self.lmda_path.shape[0],
+            "check betas rows is no more than the number of lmda_path",
             method, logger,
         )
         self._check(
@@ -466,7 +466,28 @@ class pin_base(base):
             "check rsqs is non-negative",
             method, logger,
         )
-        
+
+        # ================ strong_is_actives check ====================
+        self._check(
+            len(self.strong_is_actives) == self.betas.shape[0],
+            "check strong_is_actives shape",
+            method, logger,
+        )
+
+        # ================ strong_betas check ====================
+        self._check(
+            len(self.strong_betas) == self.betas.shape[0],
+            "check strong_betas shape",
+            method, logger,
+        )
+
+        # ================ strong_grads check ====================
+        self._check(
+            len(self.strong_grads) == self.betas.shape[0],
+            "check strong_grads shape",
+            method, logger,
+        )
+
 
 class pin_naive_base(pin_base):
     """State wrapper base class for all pin, naive method."""
@@ -480,7 +501,7 @@ class pin_naive_base(pin_base):
         alpha: float,
         penalty: np.ndarray,
         strong_set: np.ndarray,
-        lmdas: np.ndarray,
+        lmda_path: np.ndarray,
         rsq: float,
         resid: np.ndarray,
         strong_beta: np.ndarray,
@@ -508,7 +529,7 @@ class pin_naive_base(pin_base):
         self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
         self._penalty = np.array(penalty, copy=False, dtype=dtype)
         self._strong_set = np.array(strong_set, copy=False, dtype=int)
-        self._lmdas = np.array(lmdas, copy=False, dtype=dtype)
+        self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
 
         # dynamic inputs require a copy to not modify user's inputs
         self._resid = np.copy(resid).astype(dtype)
@@ -550,7 +571,7 @@ class pin_naive_base(pin_base):
             strong_g2=self._strong_g2,
             strong_begins=self._strong_begins,
             strong_vars=self._strong_vars,
-            lmdas=self._lmdas,
+            lmda_path=self._lmda_path,
             max_iters=max_iters,
             tol=tol,
             rsq_slope_tol=rsq_slope_tol,
@@ -630,7 +651,7 @@ class pin_naive_64(pin_naive_base, core.state.StatePinNaive64):
         alpha: float,
         penalty: np.ndarray,
         strong_set: np.ndarray,
-        lmdas: np.ndarray,
+        lmda_path: np.ndarray,
         rsq: float,
         resid: np.ndarray,
         strong_beta: np.ndarray,
@@ -652,7 +673,7 @@ class pin_naive_64(pin_naive_base, core.state.StatePinNaive64):
             alpha=alpha,
             penalty=penalty,
             strong_set=strong_set,
-            lmdas=lmdas,
+            lmda_path=lmda_path,
             rsq=rsq,
             resid=resid,
             strong_beta=strong_beta,
@@ -695,7 +716,7 @@ class pin_naive_32(pin_naive_base, core.state.StatePinNaive32):
         alpha: float,
         penalty: np.ndarray,
         strong_set: np.ndarray,
-        lmdas: np.ndarray,
+        lmda_path: np.ndarray,
         rsq: float,
         resid: np.ndarray,
         strong_beta: np.ndarray,
@@ -717,7 +738,7 @@ class pin_naive_32(pin_naive_base, core.state.StatePinNaive32):
             alpha=alpha,
             penalty=penalty,
             strong_set=strong_set,
-            lmdas=lmdas,
+            lmda_path=lmda_path,
             rsq=rsq,
             resid=resid,
             strong_beta=strong_beta,
@@ -756,7 +777,7 @@ def pin_naive(
     alpha: float,
     penalty: np.ndarray,
     strong_set: np.ndarray,
-    lmdas: np.ndarray,
+    lmda_path: np.ndarray,
     rsq: float,
     resid: np.ndarray,
     strong_beta: np.ndarray,
@@ -792,7 +813,7 @@ def pin_naive(
     strong_set : (s,) np.ndarray
         List of indices into ``groups`` that correspond to the strong groups.
         ``strong_set[i]`` is ``i`` th strong group.
-    lmdas : (l,) np.ndarray
+    lmda_path : (l,) np.ndarray
         Regularization sequence to fit on.
     rsq : float
         Unnormalized :math:`R^2` value at ``strong_beta``.
@@ -863,7 +884,7 @@ def pin_naive(
         alpha=alpha,
         penalty=penalty,
         strong_set=strong_set,
-        lmdas=lmdas,
+        lmda_path=lmda_path,
         rsq=rsq,
         resid=resid,
         strong_beta=strong_beta,
@@ -890,7 +911,7 @@ class pin_cov_base(pin_base):
         alpha: float,
         penalty: np.ndarray,
         strong_set: np.ndarray,
-        lmdas: np.ndarray,
+        lmda_path: np.ndarray,
         rsq: float,
         strong_beta: np.ndarray,
         strong_grad: np.ndarray,
@@ -918,7 +939,7 @@ class pin_cov_base(pin_base):
         self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
         self._penalty = np.array(penalty, copy=False, dtype=dtype)
         self._strong_set = np.array(strong_set, copy=False, dtype=int)
-        self._lmdas = np.array(lmdas, copy=False, dtype=dtype)
+        self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
 
         # dynamic inputs require a copy to not modify user's inputs
         self._strong_beta = np.copy(strong_beta).astype(dtype)
@@ -951,7 +972,7 @@ class pin_cov_base(pin_base):
             strong_g2=self._strong_g2,
             strong_begins=self._strong_begins,
             strong_vars=self._strong_vars,
-            lmdas=self._lmdas,
+            lmda_path=self._lmda_path,
             max_iters=max_iters,
             tol=tol,
             rsq_slope_tol=rsq_slope_tol,
@@ -1020,7 +1041,7 @@ class pin_cov_64(pin_cov_base, core.state.StatePinCov64):
         alpha: float,
         penalty: np.ndarray,
         strong_set: np.ndarray,
-        lmdas: np.ndarray,
+        lmda_path: np.ndarray,
         rsq: float,
         strong_beta: np.ndarray,
         strong_grad: np.ndarray,
@@ -1042,7 +1063,7 @@ class pin_cov_64(pin_cov_base, core.state.StatePinCov64):
             alpha=alpha,
             penalty=penalty,
             strong_set=strong_set,
-            lmdas=lmdas,
+            lmda_path=lmda_path,
             rsq=rsq,
             strong_beta=strong_beta,
             strong_grad=strong_grad,
@@ -1085,7 +1106,7 @@ class pin_cov_32(pin_cov_base, core.state.StatePinCov32):
         alpha: float,
         penalty: np.ndarray,
         strong_set: np.ndarray,
-        lmdas: np.ndarray,
+        lmda_path: np.ndarray,
         rsq: float,
         strong_beta: np.ndarray,
         strong_grad: np.ndarray,
@@ -1107,7 +1128,7 @@ class pin_cov_32(pin_cov_base, core.state.StatePinCov32):
             alpha=alpha,
             penalty=penalty,
             strong_set=strong_set,
-            lmdas=lmdas,
+            lmda_path=lmda_path,
             rsq=rsq,
             strong_beta=strong_beta,
             strong_grad=strong_grad,
@@ -1146,7 +1167,7 @@ def pin_cov(
     alpha: float,
     penalty: np.ndarray,
     strong_set: np.ndarray,
-    lmdas: np.ndarray,
+    lmda_path: np.ndarray,
     rsq: float,
     strong_beta: np.ndarray,
     strong_grad: np.ndarray,
@@ -1182,7 +1203,7 @@ def pin_cov(
     strong_set : (s,) np.ndarray
         List of indices into ``groups`` that correspond to the strong groups.
         ``strong_set[i]`` is ``i`` th strong group.
-    lmdas : (l,) np.ndarray
+    lmda_path : (l,) np.ndarray
         Regularization sequence to fit on.
     rsq : float
         Unnormalized :math:`R^2` value at ``strong_beta``.
@@ -1260,7 +1281,7 @@ def pin_cov(
         alpha=alpha,
         penalty=penalty,
         strong_set=strong_set,
-        lmdas=lmdas,
+        lmda_path=lmda_path,
         rsq=rsq,
         strong_beta=strong_beta,
         strong_grad=strong_grad,

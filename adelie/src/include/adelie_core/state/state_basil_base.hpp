@@ -25,7 +25,7 @@ void update_abs_grad(
     auto& abs_grad = state.abs_grad;
 
     const auto n_threads_capped = std::min<size_t>(n_threads, groups.size());
-    #pragma omp parallel schedule(static) num_threads(n_threads_capped)
+    #pragma omp parallel for schedule(static) num_threads(n_threads_capped)
     for (size_t i = 0; i < groups.size(); ++i) 
     {
         const auto k = groups[i];
@@ -58,6 +58,8 @@ void update_strong_derived_base(
     auto& strong_g2 = state.strong_g2;
     auto& strong_begins = state.strong_begins;
     auto& strong_order = state.strong_order;
+    auto& strong_beta = state.strong_beta;
+    auto& strong_is_active = state.strong_is_active;
 
     /* update strong_hashset */
     const auto strong_set_new_begin = std::next(strong_set.begin(), old_strong_size);
@@ -241,7 +243,7 @@ struct StateBasilBase
         update_strong_derived_base(*this, 0);
 
         /* initialize abs_grad */
-        update_abs_grad(groups, group_sizes, grad, abs_grad, n_threads);
+        update_abs_grad(*this);
 
         /* optimize for output storage size */
         betas.reserve(lmda_path.size());

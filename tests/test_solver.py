@@ -51,7 +51,7 @@ def create_test_data(
     strong_is_active = np.zeros(strong_set.shape[0], dtype=bool)
     penalty = np.random.uniform(0, 1, G)
     penalty /= np.sum(penalty)
-    lmdas = create_lambdas(
+    lmda_path = create_lambdas(
         X=X, y=y, groups=groups, group_sizes=group_sizes,
         alpha=alpha, penalty=penalty, 
     )
@@ -64,7 +64,7 @@ def create_test_data(
         groups, 
         group_sizes, 
         penalty,
-        lmdas,
+        lmda_path,
         strong_set, 
         strong_is_active, 
         rsq,
@@ -108,11 +108,10 @@ def run_solve_pin(state, X, y):
     state = solve_pin(state)    
 
     # get solved lmdas
-    n_lmdas = len(state.rsqs)
-    lmdas = state.lmdas[:n_lmdas]
+    lmdas = state.lmdas
 
     # check beta matches (if not, at least that objective is better)
-    betas = state.betas.toarray()[:n_lmdas]
+    betas = state.betas.toarray()
     cvxpy_betas = np.array([
         solve_cvxpy(
             X=X,
@@ -167,7 +166,7 @@ def test_solve_pin_naive():
             groups, 
             group_sizes, 
             penalty,
-            lmdas,
+            lmda_path,
             strong_set, 
             strong_is_active, 
             rsq,
@@ -187,7 +186,7 @@ def test_solve_pin_naive():
                 alpha=alpha,
                 penalty=penalty,
                 strong_set=strong_set,
-                lmdas=lmdas,
+                lmda_path=lmda_path,
                 rsq=rsq,
                 resid=resid,
                 strong_beta=strong_beta,
@@ -201,7 +200,7 @@ def test_solve_pin_naive():
                 alpha=alpha,
                 penalty=penalty,
                 strong_set=strong_set,
-                lmdas=[state.lmdas[:len(state.rsqs)][-1] * 0.8],
+                lmda_path=[state.lmdas[-1] * 0.8],
                 rsq=state.rsq,
                 resid=state.resid,
                 strong_beta=state.strong_beta,
@@ -224,7 +223,7 @@ def test_solve_pin_cov():
             groups, 
             group_sizes, 
             penalty,
-            lmdas,
+            lmda_path,
             strong_set, 
             strong_is_active, 
             rsq,
@@ -254,7 +253,7 @@ def test_solve_pin_cov():
                 alpha=alpha,
                 penalty=penalty,
                 strong_set=strong_set,
-                lmdas=lmdas,
+                lmda_path=lmda_path,
                 rsq=rsq,
                 strong_beta=strong_beta,
                 strong_grad=strong_grad,
@@ -268,7 +267,7 @@ def test_solve_pin_cov():
                 alpha=alpha,
                 penalty=penalty,
                 strong_set=strong_set,
-                lmdas=[state.lmdas[:len(state.rsqs)][-1] * 0.8],
+                lmda_path=[state.lmdas[-1] * 0.8],
                 rsq=state.rsq,
                 strong_beta=state.strong_beta,
                 strong_grad=state.strong_grad,

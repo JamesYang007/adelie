@@ -1,9 +1,8 @@
 #pragma once
-#include <atomic>
-#include <omp.h>
 #include <adelie_core/solver/solve_basil_base.hpp>
 #include <adelie_core/solver/solve_pin_naive.hpp>
 #include <adelie_core/state/state_pin_naive.hpp>
+#include <adelie_core/state/state_basil_naive.hpp>
 #include <adelie_core/util/algorithm.hpp>
 #include <adelie_core/util/stopwatch.hpp>
 
@@ -11,26 +10,39 @@ namespace adelie_core {
 namespace solver {
 namespace basil_naive {
 
-template <class StateType, class StatePinType>
+template <class StateType, class StatePinType, class ValueType>
 ADELIE_CORE_STRONG_INLINE
 void update_solutions(
     StateType& state,
-    StatePinType& state_pin,
+    StatePinType& state_pin_naive,
+    const Eigen::Ref<const util::rowvec_type<ValueType>>& lmda_path,
     size_t n_sols
 )
 {
     const auto X = *state.X;
     const auto y_mean = state.y_mean;
+    const auto y_var = state.y_var;
     const auto& X_mean = state.X_mean;
     const auto intercept = state.intercept;
     auto& betas = state.betas;
     auto& rsqs = state.rsqs;
     auto& lmdas = state.lmdas;
     auto& intercepts = state.intercepts;
+
+    // first, rotate all betas to the original space
+    untransform_beta(
+        state_pin_naive.betas,
+        state.strong_X_block_vs,
+        state.group_sizes,
+        state.strong_set,
+        state_pin_naive.active_set,
+        state_pin_naive.active_order
+    );
+
     for (size_t i = 0; i < n_sols; ++i) {
         betas.emplace_back(std::move(state_pin_naive.betas[i]));
+        lmdas.emplace_back(lmda_path[i]);
         rsqs.emplace_back(state_pin_naive.rsqs[i]);
-        lmdas.emplace_back(state_pin_naive.lmdas[i]);
         const auto b0 = y_mean - X_mean.matrix().dot(betas.back());
         if (intercept) {
             intercepts.emplace_back(b0);
@@ -40,6 +52,7 @@ void update_solutions(
             const auto n = X.rows();
             rsqs.back() += n * (b0 * b0 - y_mean * y_mean);
         }
+        rsqs.back() /= y_var;
     }
 }
 
@@ -67,6 +80,7 @@ void screen_edpp(
     const auto& X_group_norms = state.X_group_norms;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
+    const auto& penalty = state.penalty;
     const auto lmda = state.lmda;
     const auto lmda_max = state.lmda_max;
     const auto& edpp_v1_0 = state.edpp_v1_0;
@@ -106,7 +120,6 @@ void screen_edpp(
         }
     }    
 }
-
 
 /**
  * Screens for new variables to include in the strong set
@@ -215,6 +228,9 @@ auto fit(
     using state_t = std::decay_t<StateType>;
     using index_t = typename state_t::index_t;
     using safe_bool_t = typename state_t::safe_bool_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_bool_t = typename state_t::vec_bool_t;
     // TODO: using matrix_pin_naive_t = 
     using state_pin_naive_t = state::StatePinNaive<
         matrix_pin_naive_t,
@@ -277,39 +293,73 @@ auto fit(
 /**
  * Checks the KKT condition on the proposed solutions in state_pin_naive.
  */
-template <class StateType, class StatePinNaiveType>
+template <class StateType, class StatePinNaiveType, class GradsType>
 ADELIE_CORE_STRONG_INLINE
 size_t kkt(
     StateType& state,
-    const StatePinNaiveType& state_pin_naive
+    const StatePinNaiveType& state_pin_naive,
+    GradsType& grads
 )
 {
     using state_t = std::decay_t<StateType>;
     using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    using dyn_vec_value_t = typename state_t::dyn_vec_value_t;
 
     const auto& groups = state.groups;
+    const auto& group_sizes = state.group_sizes;
+    const auto alpha = state.alpha;
+    const auto& penalty = state.penalty;
+    const auto& strong_begins = state.strong_begins;
+    const auto& strong_hashset = state.strong_hashset;
+    const auto& strong_hashmap = state.strong_hashmap;
+    const auto& strong_X_block_vs = state.strong_X_block_vs;
+    const auto& resid = state.resid;
     auto& X = state.X;
 
     const auto n_lmdas = state_pin_naive.lmdas.size();
+    const auto p = X.cols();
 
-    // compute all gradients for the current batch
-    util::rowarr_type<value_t> grads(n_lmdas, X.cols());
+    // Keep track of the number of lmdas that are viable.
+    // Viable means KKT hasn't failed yet for this lmda.
+    int n_valid_solutions = n_lmdas;
 
+    // Important to loop over groups first.
+    // X usually loads new matrices when column blocks change.
+    // If we loop over lmdas first, we will re-read column blocks multiple time.
+    // Better to read once and process on all lmdas.
     for (int k = 0; k < groups.size(); ++k) {
         const auto gk = groups[k];
         const auto gk_size = group_sizes[k];
+        const auto pk = penalty[k];
 
-        
+        for (int l = 0; l < n_valid_solutions; ++l) {
+            auto grad_lk = grads[l].segment(gk, gk_size);
 
-        auto grad_k = grad
+            if (strong_hashset.find(k) != strong_hashset.end()) {
+                const auto strong_idx = strong_hashmap[k];
+                const auto& strong_grad_l = state_pin_naive.strong_grads[l];
+                const auto strong_grad_lk = strong_grad_l.segment(
+                    strong_begins[strong_idx], gk_size
+                );
+                grad_lk.noalias() = (
+                    strong_grad_lk.matrix() * strong_X_block_vs[strong_idx].transpose()
+                );
+            } else {
+                X.bmul(gk, gk_size, state_pin_naive.resids[l], grad_lk);
+                const auto abs_grad_lk = grad_lk.matrix().norm();
+                const auto lmda_l = state_pin_naive.lmdas[l];
+                if (abs_grad_lk > lmda_l * alpha * pk) {
+                    n_valid_solutions = l;
+                    break;
+                }
+            }
+        }
+         
+        if (n_valid_solutions <= 0) break;
     }
-    X.bmul()
 
-    size_t i = 0;
-    for (; i < n_lmdas; ++i) 
-    {
-
-    }
+    return n_valid_solutions;
 }
 
 } // namespace basil_naive
@@ -324,28 +374,13 @@ inline void solve_basil_naive(
 )
 {
     using state_t = std::decay_t<StateType>;
-    using index_t = typename state_t::index_t;
-    using safe_bool_t = typename state_t::safe_bool_t;
     using vec_value_t = typename state_t::vec_value_t;
-    using vec_index_t = typename state_t::vec_index_t;
-    using vec_bool_t = typename state_t::vec_bool_t;
+    using dyn_vec_bool_t = typename state_t::dyn_vec_bool_t;
     using dyn_vec_value_t = typename state_t::dyn_vec_value_t;
-    // TODO: using matrix_pin_naive_t = 
-    using state_pin_naive_t = state::StatePinNaive<
-        matrix_pin_naive_t,
-        typename std::decay_t<matrix_pin_naive_t>::value_t,
-        index_t,
-        safe_bool_t
-    >;
 
     const auto y_var = state.y_var;
     const auto& lmda_path = state.lmda_path;
     const auto& strong_set = state.strong_set;
-    const auto& strong_beta = state.strong_beta;
-    const auto& resid = state.resid;
-    const auto& grad = state.grad;
-    const auto& abs_grad = state.abs_grad;
-    const auto& betas = state.betas;
     const auto& rsqs = state.rsqs;
     const auto delta_lmda_path_size = state.delta_lmda_path_size;
     const auto early_exit = state.early_exit;
@@ -354,30 +389,16 @@ inline void solve_basil_naive(
     const auto rsq_curv_tol = state.rsq_curv_tol;
     const auto lmda_max = state.lmda_max;
     const auto setup_edpp = state.setup_edpp;
+    auto& strong_is_active = state.strong_is_active;
+    auto& strong_beta = state.strong_beta;
+    auto& strong_grad = state.strong_grad;
+    auto& resid = state.resid;
+    auto& grad = state.grad;
+    auto& abs_grad = state.abs_grad;
     auto& rsq = state.rsq;
     auto& lmda = state.lmda;
 
-    const auto y_mean = state.y_mean;
-    const auto& X_mean = state.X_mean;
-    const auto alpha = state.alpha;
-    const auto& penalty = state.penalty;
-    const auto& groups = state.groups;
-    const auto& group_sizes = state.group_sizes;
-    const auto& strong_g1 = state.strong_g1;
-    const auto& strong_g2 = state.strong_g2;
-    const auto& strong_begins = state.strong_begins;
-    const auto& strong_vars = state.strong_vars;
-    const auto max_iters = state.max_iters;
-    const auto tol = state.tol;
-    const auto newton_tol = state.newton_tol;
-    const auto newton_max_iters = state.newton_max_iters;
-    const auto n_threads = state.n_threads;
-    auto& X = state.X;
-    auto& strong_grad = state.strong_grad;
-    auto& strong_is_active = state.strong_is_active;
-    auto& edpp_resid_0 = state.edpp_resid_0;
-    auto& lmdas = state.lmdas;
-    auto& intercepts = state.intercepts;
+    const auto p = grad.size();
 
     if (strong_set.size() > max_strong_size) throw util::max_basil_strong_set();
 
@@ -418,16 +439,17 @@ inline void solve_basil_naive(
         /* Invariance */
         rsq = state_pin_naive.rsq;
         lmda = lmda_max;
-        X.bmul(0, grad.size(), resid, grad);
+        X.bmul(0, p, resid, grad);
         state::update_abs_grad(state);
         basil_naive::update_solutions(
             state, 
             state_pin_naive, 
+            large_lmda_path,
             state_pin_naive.lmdas.size()-1
         );
     }
 
-    size_t lmda_path_idx = betas.size();
+    size_t lmda_path_idx = rsqs.size();
 
     // ==================================================================================== 
     // Update state after initial fit
@@ -447,6 +469,11 @@ inline void solve_basil_naive(
     // We must go through BASIL iterations to solve each lambda.
     const auto lmda_path_size = lmda_path.size();
     vec_value_t lmda_batch;
+    vec_value_t resid_prev_valid;
+    dyn_vec_bool_t strong_is_active_prev_valid;
+    dyn_vec_value_t strong_beta_prev_valid; 
+    dyn_vec_value_t strong_grad_prev_valid;
+    std::vector<vec_value_t> grads;
 
     while (1) 
     {
@@ -479,7 +506,13 @@ inline void solve_basil_naive(
         // ==================================================================================== 
         // Fit step
         // ==================================================================================== 
-        const auto& state_pin_naive = basil_naive::fit(
+        // Save all current valid quantities that will be modified in-place by fit.
+        // This is needed for the invariance step in case no valid solutions are found.
+        strong_beta_prev_valid = strong_beta;
+        strong_is_active_prev_valid = strong_is_active;
+        strong_grad_prev_valid = strong_grad;
+        resid_prev_valid = resid;
+        auto& state_pin_naive = basil_naive::fit(
             state,
             lmda_batch,
             update_coefficients_f,
@@ -489,18 +522,41 @@ inline void solve_basil_naive(
         // ==================================================================================== 
         // KKT step
         // ==================================================================================== 
+        grads.resize(lmda_batch.size());
+        for (auto& g : grads) g.resize(p);
         const auto n_valid_solutions = basil_naive::kkt(
             state,
-            state_pin_naive
+            state_pin_naive,
+            grads
         );
 
         // ==================================================================================== 
         // Invariance step
         // ==================================================================================== 
         lmda_path_idx += n_valid_solutions;
+        // If no valid solutions found, restore to the previous valid state,
+        // so that we can start over after screening more variables.
+        if (n_valid_solutions <= 0) {
+            std::swap(strong_beta, strong_beta_prev_valid);
+            std::swap(strong_is_active, strong_is_active_prev_valid);
+            std::swap(strong_grad, strong_grad_prev_valid);
+            std::swap(resid, resid_prev_valid);
+        // Otherwise, use the last valid state found in kkt.
+        } else {
+            const auto idx = n_valid_solutions - 1;
+            std::swap(strong_beta, state_pin_naive.strong_betas[idx]);
+            std::swap(strong_is_active, state_pin_naive.strong_is_actives[idx]);
+            std::swap(strong_grad, state_pin_naive.strong_grads[idx]);
+            std::swap(resid, state_pin_naive.resids[idx]);
+            rsq = state_pin_naive.rsqs[idx];
+            lmda = lmda_batch[idx];
+            grad.swap(grads[idx]);
+            state::update_abs_grad(state);
+        }
         basil_naive::update_solutions(
             state, 
             state_pin_naive, 
+            lmda_batch,
             n_valid_solutions
         );
     }

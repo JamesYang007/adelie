@@ -22,10 +22,11 @@ struct StatePinBase
     using map_vec_bool_t = Eigen::Map<vec_bool_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
     using map_cvec_index_t = Eigen::Map<const vec_index_t>;
-    using dyn_vec_index_t = std::vector<IndexType>;
-    using dyn_vec_value_t = std::vector<ValueType>;
+    using dyn_vec_value_t = std::vector<value_t>;
+    using dyn_vec_index_t = std::vector<index_t>;
     using dyn_vec_sp_vec_t = std::vector<sp_vec_value_t>;
     using dyn_vec_vec_value_t = std::vector<vec_value_t>;
+    using dyn_vec_vec_bool_t = std::vector<vec_bool_t>;
 
     /* static states */
     const map_cvec_index_t groups;
@@ -37,7 +38,7 @@ struct StatePinBase
     const map_cvec_index_t strong_g2;
     const map_cvec_index_t strong_begins;
     const map_cvec_value_t strong_vars;
-    const map_cvec_value_t lmdas;
+    const map_cvec_value_t lmda_path;
 
     /* configurations */
     const size_t max_iters;
@@ -60,6 +61,9 @@ struct StatePinBase
     dyn_vec_index_t active_order;
     dyn_vec_sp_vec_t betas;
     dyn_vec_value_t rsqs;
+    dyn_vec_value_t lmdas;
+    dyn_vec_vec_bool_t strong_is_actives;
+    dyn_vec_vec_value_t strong_betas;
     dyn_vec_vec_value_t strong_grads;
     size_t iters = 0;
 
@@ -79,7 +83,7 @@ struct StatePinBase
         const Eigen::Ref<const vec_index_t>& strong_g2,
         const Eigen::Ref<const vec_index_t>& strong_begins, 
         const Eigen::Ref<const vec_value_t>& strong_vars,
-        const Eigen::Ref<const vec_value_t>& lmdas, 
+        const Eigen::Ref<const vec_value_t>& lmda_path, 
         size_t max_iters,
         value_t tol,
         value_t rsq_slope_tol,
@@ -101,7 +105,7 @@ struct StatePinBase
         strong_g2(strong_g2.data(), strong_g2.size()),
         strong_begins(strong_begins.data(), strong_begins.size()),
         strong_vars(strong_vars.data(), strong_vars.size()),
-        lmdas(lmdas.data(), lmdas.size()),
+        lmda_path(lmda_path.data(), lmda_path.size()),
         max_iters(max_iters),
         tol(tol),
         rsq_slope_tol(rsq_slope_tol),
@@ -142,9 +146,12 @@ struct StatePinBase
             }
         );
 
-        betas.reserve(lmdas.size());
-        rsqs.reserve(lmdas.size());
-        strong_grads.reserve(lmdas.size());
+        betas.reserve(lmda_path.size());
+        rsqs.reserve(lmda_path.size());
+        lmdas.reserve(lmda_path.size());
+        strong_is_actives.reserve(lmda_path.size());
+        strong_betas.reserve(lmda_path.size());
+        strong_grads.reserve(lmda_path.size());
         time_strong_cd.reserve(1000);
         time_active_cd.reserve(1000);
     }
