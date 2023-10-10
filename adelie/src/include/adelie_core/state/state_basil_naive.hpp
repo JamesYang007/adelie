@@ -1,6 +1,7 @@
 #pragma once
 #include <numeric>
 #include <unordered_map>
+#include <Eigen/SVD>
 #include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/state/state_basil_base.hpp>
 
@@ -31,7 +32,6 @@ void update_strong_derived_naive(
     const auto& group_sizes = state.group_sizes;
     const auto& strong_set = state.strong_set;
     const auto& strong_begins = state.strong_begins;
-    const auto& resid = state.resid;
     const auto& grad = state.grad;
     const auto intercept = state.intercept;
     const auto n_threads = state.n_threads;
@@ -77,7 +77,7 @@ void update_strong_derived_naive(
         // if intercept, must center first
         if (intercept) {
             // TODO: PARALLELIZE!!
-            Xi.rowwise().array() -= X_means.segment(g, gs);
+            Xi.rowwise() -= X_means.segment(g, gs).matrix();
         }
 
         // transform data
@@ -87,7 +87,7 @@ void update_strong_derived_naive(
         );
         const auto& U = solver.matrixU();
         const auto& D = solver.singularValues();
-        const auto m = std::min(n, gs);
+        const auto m = std::min<int>(n, gs);
 
         /* update strong_X_blocks */
         const auto n_threads_capped = std::min<size_t>(n_threads, n);
@@ -262,8 +262,8 @@ struct StateBasilNaive : StateBasilBase<
         setup_edpp(setup_edpp),
         X(&X),
         resid(resid),
-        edpp_safe_hashset(edpp_safe_set.data(), edpp_safe_set.data(), edpp_safe_set.size()),
-        edpp_safe_set(edpp_safe_set.data(), edpp_safe_set.data(), edpp_safe_set.size()),
+        edpp_safe_hashset(edpp_safe_set.data(), edpp_safe_set.data() + edpp_safe_set.size()),
+        edpp_safe_set(edpp_safe_set.data(), edpp_safe_set.data() + edpp_safe_set.size()),
         edpp_v1_0(edpp_v1_0),
         edpp_resid_0(edpp_resid_0)
     { 
@@ -277,7 +277,7 @@ struct StateBasilNaive : StateBasilBase<
     void initialize() 
     {
         /* initialize the rest of the strong quantities */
-        update_strong_derived_naive(*this); 
+        update_strong_derived_naive(*this, 0); 
 
         /* initialize edpp_safe_set */
         if (setup_edpp) {
@@ -288,7 +288,11 @@ struct StateBasilNaive : StateBasilBase<
                 // EDPP safe set must be a super-set of strong set.
                 // Since strong_set is guaranteed to contain the true active set,
                 // everything outside strong_set has 0 coefficient.
-                edpp_safe_set.insert(strong_set.begin(), strong_set.end());
+                edpp_safe_set.insert(
+                    edpp_safe_set.end(),
+                    strong_set.begin(), 
+                    strong_set.end()
+                );
             } else {
                 // If EDPP is not used, every variable is safe.
                 edpp_safe_set.resize(groups.size());

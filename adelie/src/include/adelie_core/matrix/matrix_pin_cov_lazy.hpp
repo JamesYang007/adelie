@@ -95,7 +95,7 @@ public:
 
     value_t diag(int i) const override
     {
-        if (i < 0 || i > _index_map.size()) {
+        if (i < 0 || i > static_cast<int>(_index_map.size())) {
             throw std::runtime_error(
                 "Index is out of range."
             );

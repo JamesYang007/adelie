@@ -265,9 +265,10 @@ void solve_pin_cov_active(
 
     // optimization: if active set is empty or active set is the same as strong set.
     if ((ab_diff_view.size() == 0) ||
-        (active_set.size() == strong_set.size())) return;
+        (static_cast<size_t>(active_set.size()) 
+            == static_cast<size_t>(strong_set.size()))) return;
 
-    for (size_t j_idx = 0; j_idx < strong_set.size(); ++j_idx) {
+    for (int j_idx = 0; j_idx < strong_set.size(); ++j_idx) {
         if (strong_is_active[j_idx]) continue;
 
         const auto j = strong_set[j_idx];

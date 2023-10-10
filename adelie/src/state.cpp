@@ -1,6 +1,7 @@
 #include "decl.hpp"
 #include <adelie_core/matrix/matrix_pin_cov_base.hpp>
 #include <adelie_core/matrix/matrix_pin_naive_base.hpp>
+#include <adelie_core/matrix/matrix_basil_naive_base.hpp>
 #include <adelie_core/state/state_pin_cov.hpp>
 #include <adelie_core/state/state_pin_naive.hpp>
 #include <adelie_core/state/state_basil_naive.hpp>
@@ -8,16 +9,10 @@
 namespace py = pybind11;
 namespace ad = adelie_core;
 
-/**
- * @brief Registers StatePinBase instantiations.
- * 
- * The purpose for exposing this class is to expose the attributes,
- * and create common docstrings for all derived classes.
- * 
- * @tparam ValueType 
- * @param m 
- * @param name 
- */
+// ========================================================================
+// Pin State 
+// ========================================================================
+
 template <class ValueType>
 void state_pin_base(py::module_& m, const char* name)
 {
@@ -449,6 +444,10 @@ void state_pin_cov(py::module_& m, const char* name)
         ;
 }
 
+// ========================================================================
+// Basil State 
+// ========================================================================
+
 template <class ValueType>
 void state_basil_base(py::module_& m, const char* name)
 {
@@ -543,9 +542,8 @@ void state_basil_base(py::module_& m, const char* name)
         Number of regularizations to batch per BASIL iteration.
         )delimiter")
         .def_readonly("delta_strong_size", &state_t::delta_strong_size, R"delimiter(
-        TODO: check!
         Number of strong groups to include per BASIL iteration 
-        if strong rule and EDPP rules do not include new groups but optimality is not reached.
+        if strong rule does not include new groups but optimality is not reached.
         )delimiter")
         .def_readonly("max_strong_size", &state_t::max_strong_size, R"delimiter(
         Maximum number of strong groups allowed.
@@ -626,9 +624,9 @@ void state_basil_base(py::module_& m, const char* name)
             return Eigen::Map<const vec_value_t>(s.strong_beta.data(), s.strong_beta.size());
         }, R"delimiter(
         Transformed coefficient vector on the strong set.
-        Note that the coefficient is in the transformed space of ``X_c``
-        where ``X_c`` is column-mean centered version of ``X`` if ``intercept`` is ``True``
-        and ``X`` otherwise.
+        Note that the coefficient is in the transformed space of :math:`X_c`
+        where :math:`X_c` is column-mean centered version of :math:`X` if ``intercept`` is ``True``
+        and :math:`X` otherwise.
         ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
         where
         ``k = strong_set[i]``,
@@ -797,6 +795,8 @@ void state_basil_naive(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("X_group_norms", &state_t::X_group_norms, R"delimiter(
         Group Frobenius norm of ``X``.
+        ``X_group_norms[i]`` is :math:`\|X[:, g:g+gs]\|_F`` 
+        where ``g = groups[i]`` and ``gs = group_sizes[i]``.
         )delimiter")
         .def_readonly("y_mean", &state_t::y_mean, R"delimiter(
         The mean of the response vector :math:`y`.
@@ -818,6 +818,18 @@ void state_basil_naive(py::module_& m, const char* name)
         .def_readonly("resid", &state_t::resid, R"delimiter(
         Residual :math:`y_c - X_c \beta` where :math:`\beta` is given by ``strong_beta``
         *inverse-transformed*.
+        )delimiter")
+        .def_readonly("strong_idx_map", &state_t::strong_idx_map, R"delimiter(
+        Mapping from feature index to strong index.
+        ``strong_idx_map[groups[strong_set[i]]+j] == i`` 
+        for every ``i`` that indexes ``strong_set``
+        and ``j`` in the range ``[0, gs)`` where ``gs = group_sizes[strong_set[i]]``.
+        )delimiter")
+        .def_readonly("strong_slice_map", &state_t::strong_slice_map, R"delimiter(
+        Mapping from feature index to column index respective to the group's block.
+        ``strong_slice_map[groups[strong_set[i]]+j] == j`` 
+        for every ``i`` that indexes ``strong_set``
+        and ``j`` in the range ``[0, gs)`` where ``gs = group_sizes[strong_set[i]]``.
         )delimiter")
         .def_readonly("strong_X_blocks", &state_t::strong_X_blocks, R"delimiter(
         The :math:`UD` from the SVD of :math:`X_{c,k}` where :math:`X_c` 
@@ -874,6 +886,6 @@ void register_state(py::module_& m)
 
     state_basil_base<double>(m, "StateBasilBase64");
     state_basil_base<float>(m, "StateBasilBase32");
-    //state_basil_naive<ad::matrix::MatrixBasilNaiveBase<double>>(m, "StateBasilNaive64");
-    //state_basil_naive<ad::matrix::MatrixBasilNaiveBase<float>>(m, "StateBasilNaive32");
+    state_basil_naive<ad::matrix::MatrixBasilNaiveBase<double>>(m, "StateBasilNaive64");
+    state_basil_naive<ad::matrix::MatrixBasilNaiveBase<float>>(m, "StateBasilNaive32");
 }

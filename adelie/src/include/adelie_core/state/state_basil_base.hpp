@@ -26,7 +26,7 @@ void update_abs_grad(
 
     const auto n_threads_capped = std::min<size_t>(n_threads, groups.size());
     #pragma omp parallel for schedule(static) num_threads(n_threads_capped)
-    for (size_t i = 0; i < groups.size(); ++i) 
+    for (int i = 0; i < groups.size(); ++i) 
     {
         const auto k = groups[i];
         const auto size_k = group_sizes[i];
