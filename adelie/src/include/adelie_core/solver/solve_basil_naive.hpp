@@ -1,4 +1,5 @@
 #pragma once
+#include <adelie_core/matrix/matrix_pin_naive_subset.hpp>
 #include <adelie_core/solver/solve_basil_base.hpp>
 #include <adelie_core/solver/solve_pin_naive.hpp>
 #include <adelie_core/state/state_pin_naive.hpp>
@@ -151,7 +152,7 @@ void screen_strong(
     auto& strong_set = state.strong_set;
 
     const auto old_strong_set_size = strong_set.size();
-    const auto new_safe_size = edpp_safe_set.size() - old_strong_set_size,
+    const auto new_safe_size = edpp_safe_set.size() - old_strong_set_size;
 
     assert(strong_set.size() <= abs_grad.size());
 
@@ -226,12 +227,16 @@ auto fit(
 )
 {
     using state_t = std::decay_t<StateType>;
+    using value_t = typename state_t::value_t;
     using index_t = typename state_t::index_t;
     using safe_bool_t = typename state_t::safe_bool_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
-    // TODO: using matrix_pin_naive_t = 
+    using matrix_pin_naive_t = matrix::MatrixPinNaiveSubset<
+        util::colmat_type<value_t>,
+        index_t
+    >;
     using state_pin_naive_t = state::StatePinNaive<
         matrix_pin_naive_t,
         typename std::decay_t<matrix_pin_naive_t>::value_t,
@@ -239,10 +244,14 @@ auto fit(
         safe_bool_t
     >;
 
+    const auto& X = *state.X;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
+    const auto& strong_X_blocks = state.strong_X_blocks;
+    const auto& strong_idx_map = state.strong_idx_map;
+    const auto& strong_slice_map = state.strong_slice_map;
     const auto& strong_set = state.strong_set;
     const auto& strong_g1 = state.strong_g1;
     const auto& strong_g2 = state.strong_g2;
@@ -259,9 +268,18 @@ auto fit(
     auto& strong_grad = state.strong_grad;
     auto& strong_is_active = state.strong_is_active;
 
+    matrix_pin_naive_t X_subset(
+        X.rows(),
+        X.cols(),
+        strong_X_blocks,
+        strong_idx_map,
+        strong_slice_map,
+        n_threads
+    );
+
     // create a pin, naive state object
     state_pin_naive_t state_pin_naive(
-        // TODO: plug in matrix_pin_naive_t object,
+        X_subset,
         groups, 
         group_sizes,
         alpha, 
@@ -389,6 +407,7 @@ inline void solve_basil_naive(
     const auto rsq_curv_tol = state.rsq_curv_tol;
     const auto lmda_max = state.lmda_max;
     const auto setup_edpp = state.setup_edpp;
+    auto& X = *state.X;
     auto& strong_is_active = state.strong_is_active;
     auto& strong_beta = state.strong_beta;
     auto& strong_grad = state.strong_grad;
@@ -458,7 +477,7 @@ inline void solve_basil_naive(
     // is right at the solution at lambda_max if it needed to be fit from before.
     // The latter state is needed if EDPP states need to be updated.
     // Otherwise, EDPP states are unmodified.
-    basil_naive::update_edpp_states(state);
+    state::update_edpp_states(state);
 
     // From this point on, all EDPP states are valid, whether they were updated or not.
 

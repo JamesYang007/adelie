@@ -4,6 +4,8 @@ from .adelie_core.matrix import (
     MatrixPinNaiveBase32,
     MatrixPinCovBase64,
     MatrixPinCovBase32,
+    MatrixBasilNaiveBase64,
+    MatrixBasilNaiveBase32,
 )
 import numpy as np
 
@@ -131,6 +133,45 @@ class pin_cov_lazy(base):
             np.dtype("float32"): {
                 "C": core.matrix.MatrixPinCovLazy32C,
                 "F": core.matrix.MatrixPinCovLazy32F,
+            },
+        }
+
+        dtype = self.mat.dtype
+        order = (
+            "C"
+            if self.mat.flags.c_contiguous else
+            "F"
+        )
+        super().__init__(dispatcher[dtype][order](self.mat, n_threads))
+
+
+class basil_naive_dense(base):
+    """Creates a viewer of a dense matrix for basil, naive method.
+    
+    Parameters
+    ----------
+    mat : np.ndarray
+        The matrix to view.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+    """
+    def __init__(
+        self,
+        mat: np.ndarray,
+        n_threads: int =1,
+    ):
+        if n_threads < 1:
+            raise ValueError("Number of threads must be >= 1.")
+        self.mat = mat
+        dispatcher = {
+            np.dtype("float64"): {
+                "C": core.matrix.MatrixBasilNaiveDense64C,
+                "F": core.matrix.MatrixBasilNaiveDense64F,
+            },
+            np.dtype("float32"): {
+                "C": core.matrix.MatrixBasilNaiveDense32C,
+                "F": core.matrix.MatrixBasilNaiveDense32F,
             },
         }
 

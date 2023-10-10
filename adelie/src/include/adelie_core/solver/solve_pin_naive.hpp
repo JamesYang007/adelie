@@ -1,4 +1,5 @@
 #pragma once
+#include <numeric>
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/functional.hpp>
 #include <adelie_core/util/stopwatch.hpp>

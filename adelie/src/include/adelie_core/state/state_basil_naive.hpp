@@ -1,5 +1,6 @@
 #pragma once
 #include <numeric>
+#include <unordered_map>
 #include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/state/state_basil_base.hpp>
 
@@ -35,6 +36,8 @@ void update_strong_derived_naive(
     const auto intercept = state.intercept;
     const auto n_threads = state.n_threads;
     auto& X = *state.X;
+    auto& strong_idx_map = state.strong_idx_map;
+    auto& strong_slice_map = state.strong_slice_map;
     auto& strong_X_blocks = state.strong_X_blocks;
     auto& strong_X_block_vs = state.strong_X_block_vs;
     auto& strong_vars = state.strong_vars;
@@ -47,6 +50,8 @@ void update_strong_derived_naive(
         )
     );
 
+    strong_idx_map.reserve(new_strong_value_size);
+    strong_slice_map.reserve(new_strong_value_size);
     strong_X_blocks.resize(new_strong_size);
     strong_X_block_vs.resize(new_strong_size);
     strong_vars.resize(new_strong_value_size, 0);
@@ -58,6 +63,12 @@ void update_strong_derived_naive(
         const auto sb = strong_begins[i];
         const auto n = X.rows();
         auto& Xi = strong_X_blocks[i];
+
+        /* update strong_idx_map, strong_slice_map */
+        for (int j = 0; j < gs; ++j) {
+            strong_idx_map[g + j] = i;
+            strong_slice_map[g + j] = j;
+        }
 
         // get dense version of the group matrix block
         Xi.resize(n, gs);
@@ -157,6 +168,7 @@ struct StateBasilNaive : StateBasilBase<
         BoolType
     >;
     using typename base_t::value_t;
+    using typename base_t::index_t;
     using typename base_t::uset_index_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_index_t;
@@ -164,6 +176,7 @@ struct StateBasilNaive : StateBasilBase<
     using typename base_t::map_cvec_value_t;
     using typename base_t::dyn_vec_value_t;
     using typename base_t::dyn_vec_index_t;
+    using umap_index_t = std::unordered_map<index_t, index_t>;
     using matrix_t = MatrixType;
     using arr_value_t = util::rowarr_type<value_t>;
     using dyn_vec_mat_t = std::vector<util::colmat_type<value_t>>;
@@ -185,6 +198,8 @@ struct StateBasilNaive : StateBasilBase<
     /* dynamic states */
     matrix_t* X;
     vec_value_t resid;
+    umap_index_t strong_idx_map;
+    umap_index_t strong_slice_map;
     dyn_vec_mat_t strong_X_blocks;
     dyn_vec_mat_t strong_X_block_vs;
     dyn_vec_value_t strong_vars;

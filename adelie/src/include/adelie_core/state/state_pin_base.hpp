@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <numeric>
 #include <adelie_core/util/types.hpp>
 
 namespace adelie_core {

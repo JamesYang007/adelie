@@ -1,4 +1,6 @@
 #include "decl.hpp"
+#include <adelie_core/matrix/matrix_basil_naive_base.hpp>
+#include <adelie_core/matrix/matrix_basil_naive_dense.hpp>
 #include <adelie_core/matrix/matrix_pin_cov_base.hpp>
 #include <adelie_core/matrix/matrix_pin_cov_dense.hpp>
 #include <adelie_core/matrix/matrix_pin_cov_lazy.hpp>
@@ -7,6 +9,10 @@
 
 namespace py = pybind11;
 namespace ad = adelie_core;
+
+// ========================================================================
+// Pin Matrix
+// ========================================================================
 
 template <class T>
 class PyMatrixPinNaiveBase : public ad::matrix::MatrixPinNaiveBase<T>
@@ -348,6 +354,163 @@ void matrix_pin_cov_lazy(py::module_& m, const char* name)
         ;
 }
 
+// ========================================================================
+// Basil Matrix
+// ========================================================================
+
+template <class T>
+class PyMatrixBasilNaiveBase : public ad::matrix::MatrixBasilNaiveBase<T>
+{
+    using base_t = ad::matrix::MatrixBasilNaiveBase<T>;
+public:
+    /* Inherit the constructors */
+    using base_t::base_t;
+    using typename base_t::value_t;
+    using typename base_t::rowvec_t;
+    using typename base_t::colmat_t;
+
+    /* Trampoline (need one for each virtual function) */
+    void bmul(
+        int j, int q, 
+        const Eigen::Ref<const rowvec_t>& v, 
+        Eigen::Ref<rowvec_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            bmul,
+            j, q, v, out
+        );
+    }
+
+    void btmul(
+        int j, int q, 
+        const Eigen::Ref<const rowvec_t>& v, 
+        Eigen::Ref<rowvec_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            btmul,
+            j, q, v, out
+        );
+    }
+
+    void to_dense(
+        int j, int q,
+        Eigen::Ref<colmat_t> out
+    ) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            to_dense,
+            j, q, out
+        );
+    }
+
+    int rows() const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            int,
+            base_t,
+            rows
+        );
+    }
+
+    int cols() const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            int,
+            base_t,
+            cols
+        );
+    }
+};
+
+template <class T>
+void matrix_basil_naive_base(py::module_& m, const char* name)
+{
+    using trampoline_t = PyMatrixBasilNaiveBase<T>;
+    using internal_t = ad::matrix::MatrixBasilNaiveBase<T>;
+    py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
+        Base matrix class for basil, naive method.
+        )delimiter")
+        .def(py::init<>())
+        .def("bmul", &internal_t::bmul, R"delimiter(
+        Block matrix-vector multiplication.
+
+        Computes the matrix-vector multiplication
+        ``v.T @ X[:, j:j+q]``.
+
+        Parameters
+        ----------
+        j : int
+            Column index.
+        q : int
+            Number of columns.
+        v : (n,) np.ndarray
+            Vector to multiply with the block matrix.
+        out : (q,) np.ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("btmul", &internal_t::btmul, R"delimiter(
+        Block matrix transpose-vector multiplication.
+
+        Computes the matrix-vector multiplication
+        ``v.T @ X[:, j:j+q].T``.
+
+        Parameters
+        ----------
+        j : int
+            Column index.
+        q : int
+            Number of columns.
+        v : (q,) np.ndarray
+            Vector to multiply with the block matrix.
+        out : (n,) np.ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("to_dense", &internal_t::to_dense, R"delimiter(
+        Converts block to a dense matrix.
+
+        Converts the block ``X[:, j:j+q]`` into a dense matrix.
+
+        Parameters
+        ----------
+        j : int
+            Column index.
+        q : int
+            Number of columns.
+        out : (n, q) np.ndarray
+            Matrix to store the dense result.
+        )delimiter")
+        .def("rows", &internal_t::rows, R"delimiter(
+        Number of rows.
+        )delimiter")
+        .def("cols", &internal_t::cols, R"delimiter(
+        Number of columns.
+        )delimiter")
+        ;
+}
+
+template <class DenseType>
+void matrix_basil_naive_dense(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixBasilNaiveDense<DenseType>;
+    using base_t = typename internal_t::base_t;
+    using dense_t = typename internal_t::dense_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(
+            py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
+            py::arg("mat").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
 template <class T, int Storage>
 using dense_type = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Storage>;
 
@@ -374,4 +537,14 @@ void register_matrix(py::module_& m)
     matrix_pin_cov_lazy<dense_type<double, Eigen::ColMajor>>(m, "MatrixPinCovLazy64F");
     matrix_pin_cov_lazy<dense_type<float, Eigen::RowMajor>>(m, "MatrixPinCovLazy32C");
     matrix_pin_cov_lazy<dense_type<float, Eigen::ColMajor>>(m, "MatrixPinCovLazy32F");
+
+    /* basil base matrices */
+    matrix_basil_naive_base<double>(m, "MatrixBasilNaiveBase64");
+    matrix_basil_naive_base<float>(m, "MatrixBasilNaiveBase32");
+
+    /* basil naive matrices */
+    matrix_basil_naive_dense<dense_type<double, Eigen::RowMajor>>(m, "MatrixBasilNaiveDense64C");
+    matrix_basil_naive_dense<dense_type<double, Eigen::ColMajor>>(m, "MatrixBasilNaiveDense64F");
+    matrix_basil_naive_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixBasilNaiveDense32C");
+    matrix_basil_naive_dense<dense_type<float, Eigen::ColMajor>>(m, "MatrixBasilNaiveDense32F");
 }
