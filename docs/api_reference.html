@@ -317,12 +317,14 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_naive_64.html">adelie.state.pin_naive_64</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.grpnet.create_lambdas.html">adelie.grpnet.create_lambdas</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.grpnet.lambda_max.html">adelie.grpnet.lambda_max</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.grpnet.objective.html">adelie.grpnet.objective</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.grpnet.solve_pin.html">adelie.grpnet.solve_pin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.create_lambdas.html">adelie.solver.create_lambdas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.lambda_max.html">adelie.solver.lambda_max</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.objective.html">adelie.solver.objective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.solve_pin.html">adelie.solver.solve_pin</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StateBasilBase32.html">adelie.adelie_core.state.StateBasilBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StateBasilBase64.html">adelie.adelie_core.state.StateBasilBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinBase32.html">adelie.adelie_core.state.StatePinBase32</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinBase64.html">adelie.adelie_core.state.StatePinBase64</a></li>
 </ul>
@@ -441,7 +443,7 @@ document.write(`
 <h2>adelie.state<a class="headerlink" href="#adelie-state" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.deduce_states.html#adelie.state.deduce_states" title="adelie.state.deduce_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deduce_states</span></code></a>(*, groups, group_sizes, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.deduce_states.html#adelie.state.deduce_states" title="adelie.state.deduce_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deduce_states</span></code></a>(*, group_sizes, strong_set)</p></td>
 <td><p>Deduce state variables.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.base.html#adelie.state.base" title="adelie.state.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base</span></code></a>()</p></td>
@@ -468,20 +470,20 @@ document.write(`
 </tbody>
 </table>
 </section>
-<section id="adelie-grpnet">
-<h2>adelie.grpnet<a class="headerlink" href="#adelie-grpnet" title="Link to this heading">#</a></h2>
+<section id="adelie-solver">
+<h2>adelie.solver<a class="headerlink" href="#adelie-solver" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.grpnet.create_lambdas.html#adelie.grpnet.create_lambdas" title="adelie.grpnet.create_lambdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_lambdas</span></code></a>(*, X, y, groups, group_sizes, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.create_lambdas.html#adelie.solver.create_lambdas" title="adelie.solver.create_lambdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_lambdas</span></code></a>(*, X, y, groups, group_sizes, ...)</p></td>
 <td><p>Creates a log-spaced regularization sequence.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.grpnet.lambda_max.html#adelie.grpnet.lambda_max" title="adelie.grpnet.lambda_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lambda_max</span></code></a>(*, X, y, groups, group_sizes, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.solver.lambda_max.html#adelie.solver.lambda_max" title="adelie.solver.lambda_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lambda_max</span></code></a>(*, X, y, groups, group_sizes, ...)</p></td>
 <td><p>Computes the largest <span class="math notranslate nohighlight">\(\lambda\)</span> in the regularization sequence.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.grpnet.objective.html#adelie.grpnet.objective" title="adelie.grpnet.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">objective</span></code></a>(beta, *, X, y, groups, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.objective.html#adelie.solver.objective" title="adelie.solver.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">objective</span></code></a>(beta, *, X, y, groups, ...)</p></td>
 <td><p>Computes the group elastic net objective.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.grpnet.solve_pin.html#adelie.grpnet.solve_pin" title="adelie.grpnet.solve_pin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_pin</span></code></a>(state[, logger])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.solver.solve_pin.html#adelie.solver.solve_pin" title="adelie.solver.solve_pin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_pin</span></code></a>(state[, logger])</p></td>
 <td><p>Solves the pinned group elastic net problem.</p></td>
 </tr>
 </tbody>
@@ -491,6 +493,12 @@ document.write(`
 <h2>adelie.adelie_core<a class="headerlink" href="#adelie-adelie-core" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateBasilBase32.html#adelie.adelie_core.state.StateBasilBase32" title="adelie.adelie_core.state.StateBasilBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.StateBasilBase32</span></code></a></p></td>
+<td><p>Base core state class for all basil methods.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateBasilBase64.html#adelie.adelie_core.state.StateBasilBase64" title="adelie.adelie_core.state.StateBasilBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.StateBasilBase64</span></code></a></p></td>
+<td><p>Base core state class for all basil methods.</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinBase32.html#adelie.adelie_core.state.StatePinBase32" title="adelie.adelie_core.state.StatePinBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.StatePinBase32</span></code></a></p></td>
 <td><p>Base core state class for all pin methods.</p></td>
 </tr>
@@ -548,7 +556,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-bcd">adelie.bcd</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-matrix">adelie.matrix</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-state">adelie.state</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-grpnet">adelie.grpnet</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-solver">adelie.solver</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-adelie-core">adelie.adelie_core</a></li>
 </ul>
   </nav></div>

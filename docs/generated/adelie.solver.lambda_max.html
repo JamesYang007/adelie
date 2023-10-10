@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.bcd.root_function &#8212; adelie 1.1.4 documentation</title>
+    <title>adelie.solver.lambda_max &#8212; adelie 1.1.4 documentation</title>
   
   
   
@@ -40,11 +40,11 @@
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.bcd.root_function';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.solver.lambda_max';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.bcd.solve" href="adelie.bcd.solve.html" />
-    <link rel="prev" title="adelie.bcd.root_upper_bound" href="adelie.bcd.root_upper_bound.html" />
+    <link rel="next" title="adelie.solver.objective" href="adelie.solver.objective.html" />
+    <link rel="prev" title="adelie.solver.create_lambdas" href="adelie.solver.create_lambdas.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -288,12 +288,12 @@ document.write(`
         <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.objective.html">adelie.bcd.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root.html">adelie.bcd.root</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_lower_bound.html">adelie.bcd.root_lower_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.bcd.root_function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -316,9 +316,9 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive_32.html">adelie.state.pin_naive_32</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive_64.html">adelie.state.pin_naive_64</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.create_lambdas.html">adelie.solver.create_lambdas</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.lambda_max.html">adelie.solver.lambda_max</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.solver.lambda_max</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_pin.html">adelie.solver.solve_pin</a></li>
 </ul>
@@ -367,7 +367,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.bcd.r...</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.solve...</li>
   </ul>
 </nav>
 </div>
@@ -384,43 +384,15 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-bcd-root-function">
-<h1>adelie.bcd.root_function<a class="headerlink" href="#adelie-bcd-root-function" title="Link to this heading">#</a></h1>
+  <section id="adelie-solver-lambda-max">
+<h1>adelie.solver.lambda_max<a class="headerlink" href="#adelie-solver-lambda-max" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="adelie.bcd.root_function">
-<span class="sig-prename descclassname"><span class="pre">adelie.bcd.</span></span><span class="sig-name descname"><span class="pre">root_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.bcd.root_function" title="Link to this definition">#</a></dt>
-<dd><p>Computes the BCD root function.</p>
-<p>The BCD root function is given by</p>
-<div class="math notranslate nohighlight">
-\[\begin{align*}
-    \varphi(h) := 
-    \sum\limits_{i=1}^p \frac{v_i^2}{(\Sigma_{ii} h + \lambda)^2} - 1
-\end{align*}\]</div>
-<p>where
-<span class="math notranslate nohighlight">\(h \geq 0\)</span>,
-<span class="math notranslate nohighlight">\(\Sigma \in \mathbb{R}_+^{p\times p}\)</span> diagonal,
-<span class="math notranslate nohighlight">\(v \in \mathbb{R}^p\)</span>,
-and <span class="math notranslate nohighlight">\(\lambda \geq 0\)</span>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>h</strong><span class="classifier">float</span></dt><dd><p>The value at which to evaluate the BCD root function.</p>
-</dd>
-<dt><strong>quad</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>The quadratic component <span class="math notranslate nohighlight">\(\Sigma\)</span>.</p>
-</dd>
-<dt><strong>linear</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>The linear component <span class="math notranslate nohighlight">\(v\)</span>.</p>
-</dd>
-<dt><strong>l1</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(\ell_1\)</span> component <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>func</strong><span class="classifier">float</span></dt><dd><p>The BCD root function value.</p>
-</dd>
-</dl>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="adelie.solver.lambda_max">
+<span class="sig-prename descclassname"><span class="pre">adelie.solver.</span></span><span class="sig-name descname"><span class="pre">lambda_max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.solver.lambda_max" title="Link to this definition">#</a></dt>
+<dd><p>Computes the largest <span class="math notranslate nohighlight">\(\lambda\)</span> in the regularization sequence.</p>
+<p>The largest <span class="math notranslate nohighlight">\(\lambda\)</span> in the sequence is the smallest
+<span class="math notranslate nohighlight">\(\lambda\)</span> such that the optimal coefficient vector <span class="math notranslate nohighlight">\(\beta \equiv 0\)</span>.</p>
+<p>TODO</p>
 </dd></dl>
 
 </section>
@@ -436,20 +408,20 @@ and <span class="math notranslate nohighlight">\(\lambda \geq 0\)</span>.</p>
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.bcd.root_upper_bound.html"
+       href="adelie.solver.create_lambdas.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.bcd.root_upper_bound</p>
+        <p class="prev-next-title">adelie.solver.create_lambdas</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.bcd.solve.html"
+       href="adelie.solver.objective.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.bcd.solve</p>
+        <p class="prev-next-title">adelie.solver.objective</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -468,13 +440,13 @@ and <span class="math notranslate nohighlight">\(\lambda \geq 0\)</span>.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.bcd.root_function"><code class="docutils literal notranslate"><span class="pre">root_function()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.solver.lambda_max"><code class="docutils literal notranslate"><span class="pre">lambda_max()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.bcd.root_function.rst.txt">
+    <a href="../_sources/generated/adelie.solver.lambda_max.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

@@ -316,12 +316,14 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive_64.html">adelie.state.pin_naive_64</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.create_lambdas.html">adelie.grpnet.create_lambdas</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.lambda_max.html">adelie.grpnet.lambda_max</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.objective.html">adelie.grpnet.objective</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.grpnet.solve_pin.html">adelie.grpnet.solve_pin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.create_lambdas.html">adelie.solver.create_lambdas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.lambda_max.html">adelie.solver.lambda_max</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_pin.html">adelie.solver.solve_pin</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateBasilBase32.html">adelie.adelie_core.state.StateBasilBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateBasilBase64.html">adelie.adelie_core.state.StateBasilBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StatePinBase32.html">adelie.adelie_core.state.StatePinBase32</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StatePinBase64.html">adelie.adelie_core.state.StatePinBase64</a></li>
 </ul>
@@ -385,18 +387,14 @@ document.write(`
 <h1>adelie.state.deduce_states<a class="headerlink" href="#adelie-state-deduce-states" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.state.deduce_states">
-<span class="sig-prename descclassname"><span class="pre">adelie.state.</span></span><span class="sig-name descname"><span class="pre">deduce_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.deduce_states" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.state.</span></span><span class="sig-name descname"><span class="pre">deduce_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.deduce_states" title="Link to this definition">#</a></dt>
 <dd><p>Deduce state variables.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>groups</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
-</dd>
 <dt><strong>group_sizes</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
 </dd>
 <dt><strong>strong_set</strong><span class="classifier">(s,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
-</dd>
-<dt><strong>active_set</strong><span class="classifier">(a,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -407,18 +405,6 @@ document.write(`
 <dt><strong>strong_g2</strong><span class="classifier">(s2,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
 </dd>
 <dt><strong>strong_begins</strong><span class="classifier">(s,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
-</dd>
-<dt><strong>strong_vars</strong><span class="classifier">(ws,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
-</dd>
-<dt><strong>active_g1</strong><span class="classifier">(a1,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
-</dd>
-<dt><strong>active_g2</strong><span class="classifier">(a2,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
-</dd>
-<dt><strong>active_begins</strong><span class="classifier">(a,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
-</dd>
-<dt><strong>active_order</strong><span class="classifier">(a,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
-</dd>
-<dt><strong>is_active</strong><span class="classifier">(s,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
 </dd>
 </dl>
 </dd>

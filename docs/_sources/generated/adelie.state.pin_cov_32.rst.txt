@@ -34,8 +34,8 @@
       ~pin_cov_32.betas
       ~pin_cov_32.group_sizes
       ~pin_cov_32.groups
-      ~pin_cov_32.is_active
       ~pin_cov_32.iters
+      ~pin_cov_32.lmda_path
       ~pin_cov_32.lmdas
       ~pin_cov_32.max_iters
       ~pin_cov_32.n_threads
@@ -48,9 +48,13 @@
       ~pin_cov_32.rsqs
       ~pin_cov_32.strong_begins
       ~pin_cov_32.strong_beta
+      ~pin_cov_32.strong_betas
       ~pin_cov_32.strong_g1
       ~pin_cov_32.strong_g2
       ~pin_cov_32.strong_grad
+      ~pin_cov_32.strong_grads
+      ~pin_cov_32.strong_is_active
+      ~pin_cov_32.strong_is_actives
       ~pin_cov_32.strong_set
       ~pin_cov_32.strong_vars
       ~pin_cov_32.time_active_cd
@@ -82,8 +86,8 @@
    .. autoattribute:: betas
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
-   .. autoattribute:: is_active
    .. autoattribute:: iters
+   .. autoattribute:: lmda_path
    .. autoattribute:: lmdas
    .. autoattribute:: max_iters
    .. autoattribute:: n_threads
@@ -96,9 +100,13 @@
    .. autoattribute:: rsqs
    .. autoattribute:: strong_begins
    .. autoattribute:: strong_beta
+   .. autoattribute:: strong_betas
    .. autoattribute:: strong_g1
    .. autoattribute:: strong_g2
    .. autoattribute:: strong_grad
+   .. autoattribute:: strong_grads
+   .. autoattribute:: strong_is_active
+   .. autoattribute:: strong_is_actives
    .. autoattribute:: strong_set
    .. autoattribute:: strong_vars
    .. autoattribute:: time_active_cd

@@ -30,8 +30,8 @@
       ~StatePinBase32.betas
       ~StatePinBase32.group_sizes
       ~StatePinBase32.groups
-      ~StatePinBase32.is_active
       ~StatePinBase32.iters
+      ~StatePinBase32.lmda_path
       ~StatePinBase32.lmdas
       ~StatePinBase32.max_iters
       ~StatePinBase32.n_threads
@@ -44,9 +44,13 @@
       ~StatePinBase32.rsqs
       ~StatePinBase32.strong_begins
       ~StatePinBase32.strong_beta
+      ~StatePinBase32.strong_betas
       ~StatePinBase32.strong_g1
       ~StatePinBase32.strong_g2
       ~StatePinBase32.strong_grad
+      ~StatePinBase32.strong_grads
+      ~StatePinBase32.strong_is_active
+      ~StatePinBase32.strong_is_actives
       ~StatePinBase32.strong_set
       ~StatePinBase32.strong_vars
       ~StatePinBase32.time_active_cd
@@ -74,8 +78,8 @@
    .. autoattribute:: betas
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
-   .. autoattribute:: is_active
    .. autoattribute:: iters
+   .. autoattribute:: lmda_path
    .. autoattribute:: lmdas
    .. autoattribute:: max_iters
    .. autoattribute:: n_threads
@@ -88,9 +92,13 @@
    .. autoattribute:: rsqs
    .. autoattribute:: strong_begins
    .. autoattribute:: strong_beta
+   .. autoattribute:: strong_betas
    .. autoattribute:: strong_g1
    .. autoattribute:: strong_g2
    .. autoattribute:: strong_grad
+   .. autoattribute:: strong_grads
+   .. autoattribute:: strong_is_active
+   .. autoattribute:: strong_is_actives
    .. autoattribute:: strong_set
    .. autoattribute:: strong_vars
    .. autoattribute:: time_active_cd

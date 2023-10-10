@@ -63,11 +63,11 @@ adelie.state
     pin_naive_64
 
 
-adelie.grpnet
+adelie.solver
 -------------
 
 
-.. currentmodule:: adelie.grpnet
+.. currentmodule:: adelie.solver
 
 
 .. autosummary::
@@ -91,5 +91,7 @@ adelie.adelie_core
     :toctree: generated/
 
 
+    state.StateBasilBase32
+    state.StateBasilBase64
     state.StatePinBase32
     state.StatePinBase64

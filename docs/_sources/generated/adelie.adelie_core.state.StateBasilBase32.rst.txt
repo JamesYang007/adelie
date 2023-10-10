@@ -1,0 +1,108 @@
+﻿adelie.adelie\_core.state.StateBasilBase32
+==========================================
+
+.. currentmodule:: adelie.adelie_core.state
+
+.. autoclass:: StateBasilBase32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~StateBasilBase32.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StateBasilBase32.abs_grad
+      ~StateBasilBase32.alpha
+      ~StateBasilBase32.betas
+      ~StateBasilBase32.delta_lmda_path_size
+      ~StateBasilBase32.delta_strong_size
+      ~StateBasilBase32.early_exit
+      ~StateBasilBase32.grad
+      ~StateBasilBase32.group_sizes
+      ~StateBasilBase32.groups
+      ~StateBasilBase32.intercept
+      ~StateBasilBase32.intercepts
+      ~StateBasilBase32.lmda
+      ~StateBasilBase32.lmda_max
+      ~StateBasilBase32.lmda_path
+      ~StateBasilBase32.lmdas
+      ~StateBasilBase32.max_iters
+      ~StateBasilBase32.max_strong_size
+      ~StateBasilBase32.n_threads
+      ~StateBasilBase32.newton_max_iters
+      ~StateBasilBase32.newton_tol
+      ~StateBasilBase32.penalty
+      ~StateBasilBase32.rsq
+      ~StateBasilBase32.rsq_curv_tol
+      ~StateBasilBase32.rsq_slope_tol
+      ~StateBasilBase32.rsqs
+      ~StateBasilBase32.strong_begins
+      ~StateBasilBase32.strong_beta
+      ~StateBasilBase32.strong_g1
+      ~StateBasilBase32.strong_g2
+      ~StateBasilBase32.strong_hashset
+      ~StateBasilBase32.strong_is_active
+      ~StateBasilBase32.strong_order
+      ~StateBasilBase32.strong_rule
+      ~StateBasilBase32.strong_set
+      ~StateBasilBase32.tol
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   
+   
+
+   
+   
+   
+   .. autoattribute:: abs_grad
+   .. autoattribute:: alpha
+   .. autoattribute:: betas
+   .. autoattribute:: delta_lmda_path_size
+   .. autoattribute:: delta_strong_size
+   .. autoattribute:: early_exit
+   .. autoattribute:: grad
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: intercept
+   .. autoattribute:: intercepts
+   .. autoattribute:: lmda
+   .. autoattribute:: lmda_max
+   .. autoattribute:: lmda_path
+   .. autoattribute:: lmdas
+   .. autoattribute:: max_iters
+   .. autoattribute:: max_strong_size
+   .. autoattribute:: n_threads
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: newton_tol
+   .. autoattribute:: penalty
+   .. autoattribute:: rsq
+   .. autoattribute:: rsq_curv_tol
+   .. autoattribute:: rsq_slope_tol
+   .. autoattribute:: rsqs
+   .. autoattribute:: strong_begins
+   .. autoattribute:: strong_beta
+   .. autoattribute:: strong_g1
+   .. autoattribute:: strong_g2
+   .. autoattribute:: strong_hashset
+   .. autoattribute:: strong_is_active
+   .. autoattribute:: strong_order
+   .. autoattribute:: strong_rule
+   .. autoattribute:: strong_set
+   .. autoattribute:: tol
+   
+   
