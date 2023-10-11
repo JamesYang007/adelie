@@ -661,6 +661,7 @@ class pin_naive_64(pin_naive_base, core.state.StatePinNaive64):
             cls, state, core_state, pin_naive_64, core.state.StatePinNaive64,
         )
         pin_naive_base.__init__(obj)
+        return obj
 
 
 class pin_naive_32(pin_naive_base, core.state.StatePinNaive32):
@@ -681,6 +682,7 @@ class pin_naive_32(pin_naive_base, core.state.StatePinNaive32):
             cls, state, core_state, pin_naive_32, core.state.StatePinNaive32,
         )
         pin_naive_base.__init__(obj)
+        return obj
 
 
 def pin_naive(
@@ -934,6 +936,7 @@ class pin_cov_64(pin_cov_base, core.state.StatePinCov64):
             cls, state, core_state, pin_cov_64, core.state.StatePinCov64,
         )
         pin_cov_base.__init__(obj)
+        return obj
 
 
 class pin_cov_32(pin_cov_base, core.state.StatePinCov32):
@@ -954,6 +957,7 @@ class pin_cov_32(pin_cov_base, core.state.StatePinCov32):
             cls, state, core_state, pin_cov_32, core.state.StatePinCov32,
         )
         pin_cov_base.__init__(obj)
+        return obj
 
 
 def pin_cov(
@@ -1165,9 +1169,17 @@ class basil_naive_base(basil_base):
         self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
         self._penalty = np.array(penalty, copy=False, dtype=dtype)
         self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
+        edpp_safe_set = np.array(edpp_safe_set, copy=False, dtype=int)
+        edpp_v1_0 = np.array(edpp_v1_0, copy=False, dtype=dtype)
+        edpp_resid_0 = np.array(edpp_resid_0, copy=False, dtype=dtype)
+        strong_set = np.array(strong_set, copy=False, dtype=int)
+        strong_beta = np.array(strong_beta, copy=False, dtype=dtype)
+        strong_is_active = np.array(strong_is_active, copy=False, dtype=bool)
+        grad = np.array(grad, copy=False, dtype=dtype)
 
         # MUST call constructor directly and not use super()!
         # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
+        # TODO:
         base_type.__init__(
             self,
             X=X,
@@ -1234,6 +1246,7 @@ class basil_naive_64(basil_naive_base, core.state.StateBasilNaive64):
             cls, state, core_state, basil_naive_64, core.state.StateBasilNaive64,
         )
         basil_naive_base.__init__(obj)
+        return obj
 
 
 class basil_naive_32(basil_naive_base, core.state.StateBasilNaive32):
@@ -1254,6 +1267,7 @@ class basil_naive_32(basil_naive_base, core.state.StateBasilNaive32):
             cls, state, core_state, basil_naive_32, core.state.StateBasilNaive32,
         )
         basil_naive_base.__init__(obj)
+        return obj
 
 
 def basil_naive(

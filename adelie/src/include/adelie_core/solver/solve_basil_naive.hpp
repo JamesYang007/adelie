@@ -200,7 +200,9 @@ void screen_strong(
     }
 
     /* update derived strong quantities */
+    state::update_strong_derived_base(state, old_strong_set_size);
     state::update_strong_derived_naive(state, old_strong_set_size);
+
 }
 
 template <class StateType, class ValueType>
