@@ -47,11 +47,10 @@
       ~StatePinBase64.strong_betas
       ~StatePinBase64.strong_g1
       ~StatePinBase64.strong_g2
-      ~StatePinBase64.strong_grad
-      ~StatePinBase64.strong_grads
       ~StatePinBase64.strong_is_active
       ~StatePinBase64.strong_is_actives
       ~StatePinBase64.strong_set
+      ~StatePinBase64.strong_transforms
       ~StatePinBase64.strong_vars
       ~StatePinBase64.time_active_cd
       ~StatePinBase64.time_strong_cd
@@ -95,11 +94,10 @@
    .. autoattribute:: strong_betas
    .. autoattribute:: strong_g1
    .. autoattribute:: strong_g2
-   .. autoattribute:: strong_grad
-   .. autoattribute:: strong_grads
    .. autoattribute:: strong_is_active
    .. autoattribute:: strong_is_actives
    .. autoattribute:: strong_set
+   .. autoattribute:: strong_transforms
    .. autoattribute:: strong_vars
    .. autoattribute:: time_active_cd
    .. autoattribute:: time_strong_cd

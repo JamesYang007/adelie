@@ -34,6 +34,8 @@
       ~pin_naive_32.betas
       ~pin_naive_32.group_sizes
       ~pin_naive_32.groups
+      ~pin_naive_32.intercept
+      ~pin_naive_32.intercepts
       ~pin_naive_32.iters
       ~pin_naive_32.lmda_path
       ~pin_naive_32.lmdas
@@ -43,25 +45,27 @@
       ~pin_naive_32.newton_tol
       ~pin_naive_32.penalty
       ~pin_naive_32.resid
+      ~pin_naive_32.resid_sum
       ~pin_naive_32.resids
       ~pin_naive_32.rsq
       ~pin_naive_32.rsq_curv_tol
       ~pin_naive_32.rsq_slope_tol
       ~pin_naive_32.rsqs
+      ~pin_naive_32.strong_X_means
       ~pin_naive_32.strong_begins
       ~pin_naive_32.strong_beta
       ~pin_naive_32.strong_betas
       ~pin_naive_32.strong_g1
       ~pin_naive_32.strong_g2
-      ~pin_naive_32.strong_grad
-      ~pin_naive_32.strong_grads
       ~pin_naive_32.strong_is_active
       ~pin_naive_32.strong_is_actives
       ~pin_naive_32.strong_set
+      ~pin_naive_32.strong_transforms
       ~pin_naive_32.strong_vars
       ~pin_naive_32.time_active_cd
       ~pin_naive_32.time_strong_cd
       ~pin_naive_32.tol
+      ~pin_naive_32.y_mean
    
    
 
@@ -88,6 +92,8 @@
    .. autoattribute:: betas
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
+   .. autoattribute:: intercept
+   .. autoattribute:: intercepts
    .. autoattribute:: iters
    .. autoattribute:: lmda_path
    .. autoattribute:: lmdas
@@ -97,24 +103,26 @@
    .. autoattribute:: newton_tol
    .. autoattribute:: penalty
    .. autoattribute:: resid
+   .. autoattribute:: resid_sum
    .. autoattribute:: resids
    .. autoattribute:: rsq
    .. autoattribute:: rsq_curv_tol
    .. autoattribute:: rsq_slope_tol
    .. autoattribute:: rsqs
+   .. autoattribute:: strong_X_means
    .. autoattribute:: strong_begins
    .. autoattribute:: strong_beta
    .. autoattribute:: strong_betas
    .. autoattribute:: strong_g1
    .. autoattribute:: strong_g2
-   .. autoattribute:: strong_grad
-   .. autoattribute:: strong_grads
    .. autoattribute:: strong_is_active
    .. autoattribute:: strong_is_actives
    .. autoattribute:: strong_set
+   .. autoattribute:: strong_transforms
    .. autoattribute:: strong_vars
    .. autoattribute:: time_active_cd
    .. autoattribute:: time_strong_cd
    .. autoattribute:: tol
+   .. autoattribute:: y_mean
    
    

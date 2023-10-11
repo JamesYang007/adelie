@@ -56,6 +56,7 @@
       ~pin_cov_32.strong_is_active
       ~pin_cov_32.strong_is_actives
       ~pin_cov_32.strong_set
+      ~pin_cov_32.strong_transforms
       ~pin_cov_32.strong_vars
       ~pin_cov_32.time_active_cd
       ~pin_cov_32.time_strong_cd
@@ -108,6 +109,7 @@
    .. autoattribute:: strong_is_active
    .. autoattribute:: strong_is_actives
    .. autoattribute:: strong_set
+   .. autoattribute:: strong_transforms
    .. autoattribute:: strong_vars
    .. autoattribute:: time_active_cd
    .. autoattribute:: time_strong_cd
