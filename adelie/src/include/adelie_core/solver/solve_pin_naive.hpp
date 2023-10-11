@@ -9,7 +9,8 @@
 
 namespace adelie_core {
 namespace solver {
-    
+namespace naive {
+
 template <class StateType, class G1Iter, class G2Iter,
           class ValueType, class BufferType,
           class UpdateCoefficientsType,
@@ -35,9 +36,12 @@ void coordinate_descent(
     const auto& penalty = state.penalty;
     const auto& strong_set = state.strong_set;
     const auto& strong_begins = state.strong_begins;
+    const auto& strong_X_means = state.strong_X_means;
+    const auto& strong_transforms = *state.strong_transforms;
     const auto& strong_vars = state.strong_vars;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
+    const auto intercept = state.intercept;
     const auto alpha = state.alpha;
     const auto lmda = state.lmda_path[lmda_idx];
     const auto newton_tol = state.newton_tol;
@@ -46,8 +50,10 @@ void coordinate_descent(
     auto& strong_beta = state.strong_beta;
     auto& strong_grad = state.strong_grad;
     auto& resid = state.resid;
+    auto& resid_sum = state.resid_sum;
     auto& rsq = state.rsq;
 
+    const auto n = X.rows();
     const auto l1 = lmda * alpha;
     const auto l2 = lmda * (1-alpha);
 
@@ -59,32 +65,33 @@ void coordinate_descent(
         const auto ss_value_begin = strong_begins[ss_idx]; // value begin index at ss_idx
         auto& ak = strong_beta[ss_value_begin]; // corresponding beta
         auto& gk = strong_grad[ss_value_begin]; // corresponding gradient
+        const auto Xk_mean = strong_X_means[ss_value_begin]; // corresponding X[:,k] mean
         const auto A_kk = strong_vars[ss_value_begin];  // corresponding A diagonal 
         const auto pk = penalty[k]; // corresponding penalty
 
-        // compute current gradient
-        gk = X.cmul(groups[k], resid);
         const auto ak_old = ak;
 
-        // update coefficient
+        // compute gradient
+        gk = X.cmul(groups[k], resid) - Xk_mean * resid_sum * intercept;
+
         update_coefficient(
             ak, A_kk, l1, l2, pk, gk
         );
 
         if (ak_old == ak) continue;
 
-        additional_step(ss_idx);
+        const auto del = ak - ak_old;
 
-        auto del = ak - ak_old;
-
-        // update measure of convergence
         update_convergence_measure(convg_measure, del, A_kk);
 
-        update_rsq(rsq, ak_old, ak, A_kk, gk);
+        update_rsq(rsq, del, A_kk, gk);
 
         // update residual 
         X.ctmul(groups[k], del, buffer4_n);
         matrix::dvsubi(resid, buffer4_n, n_threads);
+        resid_sum -= n * Xk_mean * del;
+
+        additional_step(ss_idx);
     }
     
     // iterate over the groups of dynamic size
@@ -95,45 +102,57 @@ void coordinate_descent(
         const auto gsize = group_sizes[k]; // group size  
         auto ak = strong_beta.segment(ss_value_begin, gsize); // corresponding beta
         auto gk = strong_grad.segment(ss_value_begin, gsize); // corresponding gradient
+        const auto Xk_mean = strong_X_means.segment(ss_value_begin, gsize); // corresponding X[:, g:g+gs] means
+        const auto& Vk = strong_transforms[ss_idx]; // corresponding V in SVD of X_c
         const auto A_kk = strong_vars.segment(ss_value_begin, gsize);  // corresponding A diagonal 
         const auto pk = penalty[k]; // corresponding penalty
 
         // compute current gradient
         X.bmul(groups[k], gsize, resid, gk);
+        gk -= resid_sum * Xk_mean;
 
-        // save old beta in buffer
-        auto ak_old = buffer3.head(ak.size());
-        ak_old = ak; 
+        auto gk_transformed = buffer3.head(ak.size());
+        gk_transformed.matrix().noalias() = (
+            gk.matrix() * Vk
+        );
+
+        // save old beta in buffer with transformation
+        auto ak_old = buffer4_n.head(ak.size());
+        ak_old = ak;
+        auto ak_old_transformed = buffer4_n.segment(ak.size(), ak.size());
+        ak_old_transformed.matrix().noalias() = ak_old.matrix() * Vk; 
+        auto ak_transformed = buffer4_n.segment(2 * ak.size(), ak.size());
 
         // update group coefficients
         size_t iters;
-        gk += A_kk * ak_old; 
+        gk_transformed += A_kk * ak_old_transformed; 
         update_coefficients_f(
-            A_kk, gk, l1 * pk, l2 * pk, 
+            A_kk, gk_transformed, l1 * pk, l2 * pk, 
             newton_tol, newton_max_iters,
-            ak, iters, buffer1, buffer2
+            ak_transformed, iters, buffer1, buffer2
         );
+        gk_transformed -= A_kk * ak_old_transformed; 
         
-        // NOTE: MUST undo the correction from before
-        gk -= A_kk * ak_old; 
+        if ((ak_old_transformed - ak_transformed).matrix().norm() <= 1e-12 * std::sqrt(gsize)) continue;
 
-        if ((ak_old - ak).abs().maxCoeff() <= 1e-14) continue;
+        auto del_transformed = buffer1.head(ak.size());
+        del_transformed = ak_transformed - ak_old_transformed;
 
-        additional_step(ss_idx);
+        update_convergence_measure(convg_measure, del_transformed, A_kk);
 
-        // use same buffer as ak_old to store difference
-        auto& del = ak_old;
-        del = ak - ak_old;
+        update_rsq(rsq, del_transformed, A_kk, gk_transformed);
 
-        // update measure of convergence
-        update_convergence_measure(convg_measure, del, A_kk);
-
-        // update rsq
-        update_rsq(rsq, del, A_kk, gk);
+        // update new coefficient
+        ak.matrix().noalias() = ak_transformed.matrix() * Vk.transpose();
 
         // update residual
+        auto del = buffer1.head(ak.size());
+        del = ak - ak_old;
         X.btmul(groups[k], gsize, del, buffer4_n);
         matrix::dvsubi(resid, buffer4_n, n_threads);
+        resid_sum -= n * (Xk_mean * del).sum();
+
+        additional_step(ss_idx);
     }
 }
 
@@ -145,7 +164,7 @@ template <class StateType,
           class UpdateCoefficientsType,
           class CUIType = util::no_op>
 ADELIE_CORE_STRONG_INLINE
-void solve_pin_naive_active(
+void solve_pin_active(
     StateType&& state,
     size_t lmda_idx,
     BufferType& buffer1,
@@ -190,7 +209,7 @@ void solve_pin_naive_active(
 template <class StateType,
           class UpdateCoefficientsType,
           class CUIType = util::no_op>
-inline void solve_pin_naive(
+inline void solve_pin(
     StateType&& state,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
@@ -203,15 +222,17 @@ inline void solve_pin_naive(
     using sw_t = util::Stopwatch;
 
     auto& X = *state.X;
+    const auto y_mean = state.y_mean;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto& strong_set = state.strong_set;
     const auto& strong_g1 = state.strong_g1;
     const auto& strong_g2 = state.strong_g2;
     const auto& strong_beta = state.strong_beta;
-    const auto& strong_grad = state.strong_grad;
+    const auto& strong_X_means = state.strong_X_means;
     const auto& lmda_path = state.lmda_path;
     const auto& resid = state.resid;
+    const auto intercept = state.intercept;
     const auto tol = state.tol;
     const auto max_iters = state.max_iters;
     const auto rsq_slope_tol = state.rsq_slope_tol;
@@ -223,12 +244,12 @@ inline void solve_pin_naive(
     auto& active_order = state.active_order;
     auto& strong_is_active = state.strong_is_active;
     auto& betas = state.betas;
+    auto& intercepts = state.intercepts;
     auto& rsqs = state.rsqs;
     auto& lmdas = state.lmdas;
     auto& resids = state.resids;
     auto& strong_is_actives = state.strong_is_actives;
     auto& strong_betas = state.strong_betas;
-    auto& strong_grads = state.strong_grads;
     auto& rsq = state.rsq;
     auto& iters = state.iters;
     auto& time_strong_cd = state.time_strong_cd;
@@ -238,7 +259,10 @@ inline void solve_pin_naive(
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
-    SolvePinBufferPack<value_t> buffer_pack(max_group_size, n);
+    SolvePinBufferPack<value_t> buffer_pack(
+        max_group_size, 
+        std::max<size_t>(3 * max_group_size, n)
+    );
     
     // buffer to store final result
     std::vector<index_t> active_beta_indices;
@@ -276,7 +300,7 @@ inline void solve_pin_naive(
     };
 
     const auto lasso_active_and_update = [&](size_t l) {
-        solve_pin_naive_active(
+        solve_pin_active(
             state, l, 
             buffer_pack.buffer1,
             buffer_pack.buffer2,
@@ -363,12 +387,16 @@ inline void solve_pin_naive(
         );
 
         betas.emplace_back(beta_map);
+        if (intercept) {
+            intercepts.emplace_back(y_mean - (strong_X_means * strong_beta).sum());
+        } else {
+            intercepts.emplace_back(0);
+        }
         rsqs.emplace_back(rsq);
         lmdas.emplace_back(lmda_path[l]);
         resids.emplace_back(resid);
         strong_is_actives.emplace_back(strong_is_active);
         strong_betas.emplace_back(strong_beta);
-        strong_grads.emplace_back(strong_grad);
 
         // make sure to do at least 3 lambdas.
         if (l < 2) continue;
@@ -378,5 +406,6 @@ inline void solve_pin_naive(
     }
 }
 
+} // namespace naive    
 } // namespace solver
 } // namespace adelie_core

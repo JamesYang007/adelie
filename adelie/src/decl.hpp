@@ -3,6 +3,10 @@
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
+#include <adelie_core/util/types.hpp>
+
+PYBIND11_MAKE_OPAQUE(std::vector<adelie_core::util::rowmat_type<double>>);
+PYBIND11_MAKE_OPAQUE(std::vector<adelie_core::util::rowmat_type<float>>);
 
 namespace py = pybind11;
 

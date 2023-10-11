@@ -28,6 +28,7 @@ struct StatePinBase
     using dyn_vec_sp_vec_t = std::vector<sp_vec_value_t>;
     using dyn_vec_vec_value_t = std::vector<vec_value_t>;
     using dyn_vec_vec_bool_t = std::vector<vec_bool_t>;
+    using dyn_vec_mat_value_t = std::vector<util::rowmat_type<value_t>>;
 
     /* static states */
     const map_cvec_index_t groups;
@@ -39,6 +40,7 @@ struct StatePinBase
     const map_cvec_index_t strong_g2;
     const map_cvec_index_t strong_begins;
     const map_cvec_value_t strong_vars;
+    const dyn_vec_mat_value_t* strong_transforms;
     const map_cvec_value_t lmda_path;
 
     /* configurations */
@@ -53,7 +55,6 @@ struct StatePinBase
     /* dynamic states */
     value_t rsq;
     map_vec_value_t strong_beta;
-    map_vec_value_t strong_grad;
     map_vec_bool_t strong_is_active;
     dyn_vec_index_t active_set;
     dyn_vec_index_t active_g1;
@@ -65,7 +66,6 @@ struct StatePinBase
     dyn_vec_value_t lmdas;
     dyn_vec_vec_bool_t strong_is_actives;
     dyn_vec_vec_value_t strong_betas;
-    dyn_vec_vec_value_t strong_grads;
     size_t iters = 0;
 
     /* diagnostics */
@@ -84,6 +84,7 @@ struct StatePinBase
         const Eigen::Ref<const vec_index_t>& strong_g2,
         const Eigen::Ref<const vec_index_t>& strong_begins, 
         const Eigen::Ref<const vec_value_t>& strong_vars,
+        const dyn_vec_mat_value_t& strong_transforms,
         const Eigen::Ref<const vec_value_t>& lmda_path, 
         size_t max_iters,
         value_t tol,
@@ -94,7 +95,6 @@ struct StatePinBase
         size_t n_threads,
         value_t rsq,
         Eigen::Ref<vec_value_t> strong_beta, 
-        Eigen::Ref<vec_value_t> strong_grad,
         Eigen::Ref<vec_bool_t> strong_is_active
     ): 
         groups(groups.data(), groups.size()),
@@ -106,6 +106,7 @@ struct StatePinBase
         strong_g2(strong_g2.data(), strong_g2.size()),
         strong_begins(strong_begins.data(), strong_begins.size()),
         strong_vars(strong_vars.data(), strong_vars.size()),
+        strong_transforms(&strong_transforms),
         lmda_path(lmda_path.data(), lmda_path.size()),
         max_iters(max_iters),
         tol(tol),
@@ -116,7 +117,6 @@ struct StatePinBase
         n_threads(n_threads),
         rsq(rsq),
         strong_beta(strong_beta.data(), strong_beta.size()),
-        strong_grad(strong_grad.data(), strong_grad.size()),
         strong_is_active(strong_is_active.data(), strong_is_active.size())
     {
         active_set.reserve(strong_set.size());
@@ -152,7 +152,6 @@ struct StatePinBase
         lmdas.reserve(lmda_path.size());
         strong_is_actives.reserve(lmda_path.size());
         strong_betas.reserve(lmda_path.size());
-        strong_grads.reserve(lmda_path.size());
         time_strong_cd.reserve(1000);
         time_active_cd.reserve(1000);
     }

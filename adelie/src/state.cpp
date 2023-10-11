@@ -1,7 +1,6 @@
 #include "decl.hpp"
-#include <adelie_core/matrix/matrix_pin_cov_base.hpp>
-#include <adelie_core/matrix/matrix_pin_naive_base.hpp>
-#include <adelie_core/matrix/matrix_basil_naive_base.hpp>
+#include <adelie_core/matrix/matrix_cov_base.hpp>
+#include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/state/state_pin_cov.hpp>
 #include <adelie_core/state/state_pin_naive.hpp>
 #include <adelie_core/state/state_basil_naive.hpp>
@@ -22,6 +21,7 @@ void state_pin_base(py::module_& m, const char* name)
     using vec_index_t = typename state_t::vec_index_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_bool_t = typename state_t::vec_bool_t;
+    using dyn_vec_mat_value_t = typename state_t::dyn_vec_mat_value_t;
 
     py::class_<state_t>(m, name, R"delimiter(
         Base core state class for all pin methods.
@@ -36,6 +36,7 @@ void state_pin_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&,
+            const dyn_vec_mat_value_t&,
             const Eigen::Ref<const vec_value_t>&, 
             size_t,
             value_t,
@@ -45,7 +46,6 @@ void state_pin_base(py::module_& m, const char* name)
             size_t,
             size_t,
             value_t,
-            Eigen::Ref<vec_value_t>, 
             Eigen::Ref<vec_value_t>,
             Eigen::Ref<vec_bool_t>
         >(),
@@ -58,6 +58,7 @@ void state_pin_base(py::module_& m, const char* name)
             py::arg("strong_g2").noconvert(),
             py::arg("strong_begins").noconvert(),
             py::arg("strong_vars").noconvert(),
+            py::arg("strong_transforms").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
@@ -68,7 +69,6 @@ void state_pin_base(py::module_& m, const char* name)
             py::arg("n_threads"),
             py::arg("rsq"),
             py::arg("strong_beta").noconvert(),
-            py::arg("strong_grad").noconvert(),
             py::arg("strong_is_active").noconvert()
         )
         .def_readonly("groups", &state_t::groups, R"delimiter(
@@ -108,11 +108,19 @@ void state_pin_base(py::module_& m, const char* name)
         will grab values corresponding to the full ``i`` th strong group block.
         )delimiter")
         .def_readonly("strong_vars", &state_t::strong_vars, R"delimiter(
-        List of the diagonal of :math:`X_k^\top X_k` along the strong groups :math:`k`.
-        ``strong_vars[b:b+p]`` is the diagonal of :math:`X_k^\top X_k` for the ``i`` th strong group where
+        List of :math:`D_k^2` where :math:`D_k` is from the SVD of :math:`X_{c,k}` 
+        along the strong groups :math:`k` and for possibly column-centered :math:`X_k`.
+        ``strong_vars[b:b+p]`` is :math:`D_k` for the ``i`` th strong group where
         ``k = strong_set[i]``,
         ``b = strong_begins[i]``,
         and ``p = group_sizes[k]``.
+        )delimiter")
+        .def_readonly("strong_transforms", &state_t::strong_transforms, R"delimiter(
+        List of :math:`V_k` where :math:`V_k` is from the SVD of :math:`X_{c,k}`
+        along the strong groups :math:`k` and for possibly column-centered :math:`X_k`.
+        It *only* needs to be properly initialized for groups with size > 1.
+        ``strong_transforms[i]`` is :math:`V_k` for the ``i`` th strong group where
+        ``k = strong_set[i]``.
         )delimiter")
         .def_readonly("lmda_path", &state_t::lmda_path, R"delimiter(
         Regularization sequence to fit on.
@@ -140,20 +148,12 @@ void state_pin_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("rsq", &state_t::rsq, R"delimiter(
         Unnormalized :math:`R^2` value at ``strong_beta``.
-        The unnormalized :math:`R^2` is given by :math:`\|y\|_2^2 - \|y-X\beta\|_2^2`.
+        The unnormalized :math:`R^2` is given by :math:`\|y_c\|_2^2 - \|y_c-X_c\beta\|_2^2`.
         )delimiter")
         .def_readonly("strong_beta", &state_t::strong_beta, R"delimiter(
         Coefficient vector on the strong set.
         ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
         where
-        ``k = strong_set[i]``,
-        ``b = strong_begins[i]``,
-        and ``p = group_sizes[k]``.
-        )delimiter")
-        .def_readonly("strong_grad", &state_t::strong_grad, R"delimiter(
-        Gradient :math:`X_k^\top (y-X\beta)` on the strong groups :math:`k` where :math:`\beta` is given by ``strong_beta``.
-        ``strong_grad[b:b+p]`` is the gradient for the ``i`` th strong group
-        where 
         ``k = strong_set[i]``,
         ``b = strong_begins[i]``,
         and ``p = group_sizes[k]``.
@@ -252,10 +252,6 @@ void state_pin_base(py::module_& m, const char* name)
         ``strong_betas[i]`` is the state of ``strong_beta`` 
         when the ``i`` th solution is computed.
         )delimiter")
-        .def_readonly("strong_grads", &state_t::strong_grads, R"delimiter(
-        ``strong_grads[i]`` is the state of ``strong_grad`` 
-        when the ``i`` th solution is computed.
-        )delimiter")
         .def_readonly("iters", &state_t::iters, R"delimiter(
         Number of coordinate descents taken.
         )delimiter")
@@ -297,10 +293,12 @@ void state_pin_naive(py::module_& m, const char* name)
     using vec_index_t = typename state_t::vec_index_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_bool_t = typename state_t::vec_bool_t;
+    using dyn_vec_mat_value_t = typename state_t::dyn_vec_mat_value_t;
 
     py::class_<state_t, base_t, PyStatePinNaive<matrix_t>>(m, name)
         .def(py::init<
             matrix_t&,
+            value_t,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
@@ -310,7 +308,10 @@ void state_pin_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const dyn_vec_mat_value_t&,
             const Eigen::Ref<const vec_value_t>&, 
+            bool,
             size_t,
             value_t,
             value_t,
@@ -320,11 +321,12 @@ void state_pin_naive(py::module_& m, const char* name)
             size_t,
             value_t,
             Eigen::Ref<vec_value_t>,
+            value_t,
             Eigen::Ref<vec_value_t>, 
-            Eigen::Ref<vec_value_t>,
             Eigen::Ref<vec_bool_t>
         >(),
             py::arg("X"),
+            py::arg("y_mean"),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
@@ -334,7 +336,10 @@ void state_pin_naive(py::module_& m, const char* name)
             py::arg("strong_g2").noconvert(),
             py::arg("strong_begins").noconvert(),
             py::arg("strong_vars").noconvert(),
+            py::arg("strong_X_means").noconvert(),
+            py::arg("strong_transforms").noconvert(),
             py::arg("lmda_path").noconvert(),
+            py::arg("intercept"),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("rsq_slope_tol"),
@@ -344,17 +349,34 @@ void state_pin_naive(py::module_& m, const char* name)
             py::arg("n_threads"),
             py::arg("rsq"),
             py::arg("resid").noconvert(),
+            py::arg("resid_sum"),
             py::arg("strong_beta").noconvert(),
-            py::arg("strong_grad").noconvert(),
             py::arg("strong_is_active").noconvert()
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
+        .def_readonly("y_mean", &state_t::y_mean, R"delimiter(
+        Mean of :math:`y`.
+        )delimiter")
+        .def_readonly("strong_X_means", &state_t::strong_X_means, R"delimiter(
+        Column means of :math:`X` for strong groups.
+        )delimiter")
+        .def_readonly("intercept", &state_t::intercept, R"delimiter(
+        ``True`` to fit with intercept.
+        )delimiter")
         .def_readonly("X", &state_t::X, R"delimiter(
-        Feature matrix where each column block :math:`X_k` defined by the groups
-        is such that :math:`X_k^\top X_k` is diagonal.
+        Feature matrix.
         )delimiter")
         .def_readonly("resid", &state_t::resid, R"delimiter(
-        Residual :math:`y-X\beta` at ``strong_beta``.
+        Residual :math:`y_c-X\beta` at ``strong_beta`` 
+        (note that it always uses uncentered :math:`X`!).
+        )delimiter")
+        .def_readonly("resid_sum", &state_t::resid_sum, R"delimiter(
+        Sum of the residual.
+        )delimiter")
+        .def_property_readonly("intercepts", [](const state_t& s) {
+            return Eigen::Map<const vec_value_t>(s.intercepts.data(), s.intercepts.size());
+        }, R"delimiter(
+        ``intercepts[i]`` is the intercept at ``lmdas[i]``.
         )delimiter")
         .def_property_readonly("resids", [](const state_t& s) {
             ad::util::rowarr_type<value_t> resids(s.resids.size(), s.resid.size());
@@ -387,6 +409,7 @@ void state_pin_cov(py::module_& m, const char* name)
     using vec_index_t = typename state_t::vec_index_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_bool_t = typename state_t::vec_bool_t;
+    using dyn_vec_mat_value_t = typename state_t::dyn_vec_mat_value_t;
 
     py::class_<state_t, base_t, PyStatePinCov<matrix_t>>(m, name)
         .def(py::init<
@@ -400,6 +423,7 @@ void state_pin_cov(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&,
+            const dyn_vec_mat_value_t&,
             const Eigen::Ref<const vec_value_t>&, 
             size_t,
             value_t,
@@ -423,6 +447,7 @@ void state_pin_cov(py::module_& m, const char* name)
             py::arg("strong_g2").noconvert(),
             py::arg("strong_begins").noconvert(),
             py::arg("strong_vars").noconvert(),
+            py::arg("strong_transforms").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
@@ -438,8 +463,20 @@ void state_pin_cov(py::module_& m, const char* name)
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
         .def_readonly("A", &state_t::A, R"delimiter(
-        Feature covariance matrix :math:`X^\top X` 
-        with diagonal blocks :math:`X_k^\top X_k` for each strong group :math:`k`. 
+        Covariance matrix :math:`X_c^\\top X_c` where `X_c` is column-centered to fit with intercept.
+        It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
+        )delimiter")
+        .def_readonly("strong_grad", &state_t::strong_grad, R"delimiter(
+        Gradient :math:`X_{c,k}^\top (y_c-X_c\beta)` on the strong groups :math:`k` where :math:`\beta` is given by ``strong_beta``.
+        ``strong_grad[b:b+p]`` is the gradient for the ``i`` th strong group
+        where 
+        ``k = strong_set[i]``,
+        ``b = strong_begins[i]``,
+        and ``p = group_sizes[k]``.
+        )delimiter")
+        .def_readonly("strong_grads", &state_t::strong_grads, R"delimiter(
+        ``strong_grads[i]`` is the state of ``strong_grad`` 
+        when the ``i`` th solution is computed.
         )delimiter")
         ;
 }
@@ -889,13 +926,13 @@ void register_state(py::module_& m)
 {
     state_pin_base<double>(m, "StatePinBase64");
     state_pin_base<float>(m, "StatePinBase32");
-    state_pin_naive<ad::matrix::MatrixPinNaiveBase<double>>(m, "StatePinNaive64");
-    state_pin_naive<ad::matrix::MatrixPinNaiveBase<float>>(m, "StatePinNaive32");
-    state_pin_cov<ad::matrix::MatrixPinCovBase<double>>(m, "StatePinCov64");
-    state_pin_cov<ad::matrix::MatrixPinCovBase<float>>(m, "StatePinCov32");
+    state_pin_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StatePinNaive64");
+    state_pin_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StatePinNaive32");
+    state_pin_cov<ad::matrix::MatrixCovBase<double>>(m, "StatePinCov64");
+    state_pin_cov<ad::matrix::MatrixCovBase<float>>(m, "StatePinCov32");
 
     state_basil_base<double>(m, "StateBasilBase64");
     state_basil_base<float>(m, "StateBasilBase32");
-    state_basil_naive<ad::matrix::MatrixBasilNaiveBase<double>>(m, "StateBasilNaive64");
-    state_basil_naive<ad::matrix::MatrixBasilNaiveBase<float>>(m, "StateBasilNaive32");
+    state_basil_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateBasilNaive64");
+    state_basil_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateBasilNaive32");
 }

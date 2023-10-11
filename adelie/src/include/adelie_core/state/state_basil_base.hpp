@@ -36,9 +36,8 @@ void update_abs_grad(
 
 /**
  * Updates all derived quantities from strong_set in the base class. 
- * The state must be such that strong_set is either unchanged from invariance,
+ * The state must be such that only the strong_set is either unchanged from invariance,
  * or appended with new groups.
- * In any other way, the state DOES NOT have to be in its invariance.
  * After the function finishes, all strong quantities in the base class
  * will be consistent with strong_set, and the state is otherwise effectively
  * unchanged in the sense that other quantities dependent on strong states are unchanged.
@@ -46,8 +45,7 @@ void update_abs_grad(
 template <class StateType>
 ADELIE_CORE_STRONG_INLINE
 void update_strong_derived_base(
-    StateType& state,
-    size_t old_strong_size
+    StateType& state
 )
 {
     const auto& groups = state.groups;
@@ -62,6 +60,7 @@ void update_strong_derived_base(
     auto& strong_is_active = state.strong_is_active;
 
     /* update strong_hashset */
+    const auto old_strong_size = strong_begins.size();
     const auto strong_set_new_begin = std::next(strong_set.begin(), old_strong_size);
     strong_hashset.insert(strong_set_new_begin, strong_set.end());
 
@@ -240,7 +239,7 @@ struct StateBasilBase
         strong_g2.reserve(strong_set.size());
         strong_begins.reserve(strong_set.size());
         strong_order.reserve(strong_set.size());
-        update_strong_derived_base(*this, 0);
+        update_strong_derived_base(*this);
 
         /* initialize abs_grad */
         update_abs_grad(*this);
