@@ -25,8 +25,6 @@ void update_strong_derived_naive(
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
 
-    update_strong_derived_base(state, old_strong_size);
-
     const auto& X_means = state.X_means;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
@@ -74,12 +72,14 @@ void update_strong_derived_naive(
         Xi.resize(n, gs);
         X.to_dense(g, gs, Xi);
 
+    throw std::runtime_error("ass");
         // if intercept, must center first
         if (intercept) {
             // TODO: PARALLELIZE!!
             Xi.rowwise() -= X_means.segment(g, gs).matrix();
         }
 
+    PRINT("d");
         // transform data
         Eigen::BDCSVD<util::colmat_type<value_t>> solver(
             Xi,
@@ -88,6 +88,7 @@ void update_strong_derived_naive(
         const auto& U = solver.matrixU();
         const auto& D = solver.singularValues();
         const auto m = std::min<int>(n, gs);
+    PRINT("e");
 
         /* update strong_X_blocks */
         const auto n_threads_capped = std::min<size_t>(n_threads, n);
@@ -96,16 +97,20 @@ void update_strong_derived_naive(
         auto Xi_sub = Xi.middleCols(0, m);
         Xi_sub.array() = U.array().rowwise() * D.transpose().array();
 
+    PRINT("f");
         /* update strong_X_block_vs */
         strong_X_block_vs[i] = std::move(solver.matrixV());
 
+    PRINT("g");
         /* update strong_vars */
         Eigen::Map<vec_value_t> svars(strong_vars.data() + sb, gs);
         svars.head(m) = D.array().square();
 
+    PRINT("h");
         /* update strong_grad */
         Eigen::Map<vec_value_t> sgrad(strong_grad.data() + sb, gs);
         sgrad = grad.segment(g, gs).matrix() * strong_X_block_vs[i];
+    PRINT("i");
     }
 }
 
@@ -178,12 +183,7 @@ struct StateBasilNaive : StateBasilBase<
     using typename base_t::dyn_vec_index_t;
     using umap_index_t = std::unordered_map<index_t, index_t>;
     using matrix_t = MatrixType;
-    using arr_value_t = util::rowarr_type<value_t>;
     using dyn_vec_mat_t = std::vector<util::colmat_type<value_t>>;
-
-    using base_t::groups;
-    using base_t::alpha;
-    using base_t::strong_set;
 
     /* static states */
     const map_cvec_value_t X_means;
@@ -205,8 +205,8 @@ struct StateBasilNaive : StateBasilBase<
     dyn_vec_value_t strong_vars;
     dyn_vec_value_t strong_grad;
 
-    uset_index_t edpp_safe_hashset;
     dyn_vec_index_t edpp_safe_set;
+    uset_index_t edpp_safe_hashset;
     vec_value_t edpp_v1_0;
     vec_value_t edpp_resid_0;
 
@@ -262,8 +262,8 @@ struct StateBasilNaive : StateBasilBase<
         setup_edpp(setup_edpp),
         X(&X),
         resid(resid),
-        edpp_safe_hashset(edpp_safe_set.data(), edpp_safe_set.data() + edpp_safe_set.size()),
         edpp_safe_set(edpp_safe_set.data(), edpp_safe_set.data() + edpp_safe_set.size()),
+        edpp_safe_hashset(edpp_safe_set.data(), edpp_safe_set.data() + edpp_safe_set.size()),
         edpp_v1_0(edpp_v1_0),
         edpp_resid_0(edpp_resid_0)
     { 
@@ -281,6 +281,7 @@ struct StateBasilNaive : StateBasilBase<
 
         /* initialize edpp_safe_set */
         if (setup_edpp) {
+    PRINT("g");
             edpp_safe_hashset.clear();
             edpp_safe_set.clear();
 
@@ -288,17 +289,20 @@ struct StateBasilNaive : StateBasilBase<
                 // EDPP safe set must be a super-set of strong set.
                 // Since strong_set is guaranteed to contain the true active set,
                 // everything outside strong_set has 0 coefficient.
+    PRINT("h");
                 edpp_safe_set.insert(
                     edpp_safe_set.end(),
-                    strong_set.begin(), 
-                    strong_set.end()
+                    base_t::strong_set.begin(), 
+                    base_t::strong_set.end()
                 );
             } else {
+    PRINT("h");
                 // If EDPP is not used, every variable is safe.
-                edpp_safe_set.resize(groups.size());
+                edpp_safe_set.resize(base_t::groups.size());
                 std::iota(edpp_safe_set.begin(), edpp_safe_set.end(), 0);
             }
             
+    PRINT("i");
             /* initialize edpp_safe_hashset */
             edpp_safe_hashset.insert(edpp_safe_set.begin(), edpp_safe_set.end());
 

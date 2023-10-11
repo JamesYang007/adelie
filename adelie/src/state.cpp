@@ -461,11 +461,11 @@ void state_basil_base(py::module_& m, const char* name)
         Base core state class for all basil methods.
         )delimiter")
         .def(py::init<
-            const Eigen::Ref<const vec_index_t>, 
-            const Eigen::Ref<const vec_index_t>,
+            const Eigen::Ref<const vec_index_t>&, 
+            const Eigen::Ref<const vec_index_t>&,
             value_t, 
-            const Eigen::Ref<const vec_value_t>,
-            const Eigen::Ref<const vec_value_t>,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
             value_t,
             size_t,
             size_t,
@@ -492,7 +492,7 @@ void state_basil_base(py::module_& m, const char* name)
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("lmda_path").noconvert(),
-            py::arg("lmda_max").noconvert(),
+            py::arg("lmda_max"),
             py::arg("delta_lmda_path_size"),
             py::arg("delta_strong_size"),
             py::arg("max_strong_size"),
@@ -506,12 +506,12 @@ void state_basil_base(py::module_& m, const char* name)
             py::arg("early_exit"),
             py::arg("intercept"),
             py::arg("n_threads"),
-            py::arg("strong_set"),
-            py::arg("strong_beta"),
-            py::arg("strong_is_active"),
+            py::arg("strong_set").noconvert(),
+            py::arg("strong_beta").noconvert(),
+            py::arg("strong_is_active").noconvert(),
             py::arg("rsq"),
             py::arg("lmda"),
-            py::arg("grad")
+            py::arg("grad").noconvert()
         )
         .def_readonly("groups", &state_t::groups, R"delimiter(
         List of starting indices to each group where `G` is the number of groups.
@@ -705,6 +705,15 @@ void state_basil_base(py::module_& m, const char* name)
 }
 
 template <class MatrixType>
+class PyStateBasilNaive : public ad::state::StateBasilNaive<MatrixType>
+{
+    using base_t = ad::state::StateBasilNaive<MatrixType>;
+public:
+    using base_t::base_t;
+    PyStateBasilNaive(base_t&& base) : base_t(std::move(base)) {}
+};
+
+template <class MatrixType>
 void state_basil_naive(py::module_& m, const char* name)
 {
     using matrix_t = MatrixType;
@@ -714,25 +723,25 @@ void state_basil_naive(py::module_& m, const char* name)
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
-    py::class_<state_t, base_t>(m, name, R"delimiter(
+    py::class_<state_t, base_t, PyStateBasilNaive<matrix_t>>(m, name, R"delimiter(
         State class for basil, naive method.
         )delimiter")
         .def(py::init<
             matrix_t&,
-            const Eigen::Ref<const vec_value_t>,
-            const Eigen::Ref<const vec_value_t>,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
             value_t,
             value_t,
             bool,
-            const Eigen::Ref<const vec_value_t>,
-            const Eigen::Ref<const vec_index_t>, 
-            const Eigen::Ref<const vec_value_t>,
-            const Eigen::Ref<const vec_value_t>,
-            const Eigen::Ref<const vec_index_t>,
-            const Eigen::Ref<const vec_index_t>,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_index_t>&, 
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_index_t>&,
             value_t, 
-            const Eigen::Ref<const vec_value_t>,
-            const Eigen::Ref<const vec_value_t>,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
             value_t,
             size_t,
             size_t,
@@ -760,16 +769,16 @@ void state_basil_naive(py::module_& m, const char* name)
             py::arg("y_mean"),
             py::arg("y_var"),
             py::arg("setup_edpp"),
-            py::arg("resid"),
-            py::arg("edpp_safe_set"),
-            py::arg("edpp_v1_0"),
-            py::arg("edpp_resid_0"),
+            py::arg("resid").noconvert(),
+            py::arg("edpp_safe_set").noconvert(),
+            py::arg("edpp_v1_0").noconvert(),
+            py::arg("edpp_resid_0").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("lmda_path").noconvert(),
-            py::arg("lmda_max").noconvert(),
+            py::arg("lmda_max"),
             py::arg("delta_lmda_path_size"),
             py::arg("delta_strong_size"),
             py::arg("max_strong_size"),
@@ -783,13 +792,14 @@ void state_basil_naive(py::module_& m, const char* name)
             py::arg("early_exit"),
             py::arg("intercept"),
             py::arg("n_threads"),
-            py::arg("strong_set"),
-            py::arg("strong_beta"),
-            py::arg("strong_is_active"),
+            py::arg("strong_set").noconvert(),
+            py::arg("strong_beta").noconvert(),
+            py::arg("strong_is_active").noconvert(),
             py::arg("rsq"),
             py::arg("lmda"),
-            py::arg("grad")
+            py::arg("grad").noconvert()
         )
+        .def(py::init([](const state_t& s) { return new state_t(s); }))
         .def_readonly("X_means", &state_t::X_means, R"delimiter(
         Column means of ``X``.
         )delimiter")

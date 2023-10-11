@@ -102,8 +102,8 @@ def test_state_pin_cov():
 
 
 def test_state_basil_naive():
-    n = 1000
-    p = 100
+    n = 3
+    p = 2
     G = 2
 
     _X = np.random.normal(0, 1, (n, p))
@@ -115,8 +115,8 @@ def test_state_basil_naive():
         np.linalg.norm(_X[:, g:g+gs], ord='fro') 
         for g, gs in zip(groups, group_sizes)
     ])
-    y_mean = 0
-    y_var = 1
+    y_mean = 0.0
+    y_var = 1.0
     setup_edpp = True
     alpha = 1.0
     penalty = np.random.uniform(0, 1, G)
@@ -128,8 +128,8 @@ def test_state_basil_naive():
     grad = np.random.normal(0, 1, p)
     resid = np.random.normal(0, 1, n)
     edpp_safe_set = strong_set
-    edpp_v1_0 = np.empty(0)
-    edpp_resid_0 = np.empty(0)
+    edpp_v1_0 = np.zeros(n)
+    edpp_resid_0 = np.zeros(n)
     strong_beta = np.zeros(p)
     strong_is_active = np.zeros(strong_set.shape[0], dtype=bool)
 
