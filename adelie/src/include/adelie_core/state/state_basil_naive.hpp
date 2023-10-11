@@ -17,13 +17,14 @@ namespace state {
  */
 template <class StateType>
 void update_strong_derived_naive(
-    StateType& state,
-    size_t old_strong_size
+    StateType& state
 )
 {
     using state_t = std::decay_t<StateType>;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
+
+    update_strong_derived_base(state);
 
     const auto& X_means = state.X_means;
     const auto& groups = state.groups;
@@ -41,6 +42,7 @@ void update_strong_derived_naive(
     auto& strong_vars = state.strong_vars;
     auto& strong_grad = state.strong_grad;
 
+    const auto old_strong_size = strong_vars.size();
     const auto new_strong_size = strong_set.size();
     const int new_strong_value_size = (
         (strong_begins.size() == 0) ? 0 : (
@@ -72,29 +74,30 @@ void update_strong_derived_naive(
         Xi.resize(n, gs);
         X.to_dense(g, gs, Xi);
 
-    throw std::runtime_error("ass");
         // if intercept, must center first
         if (intercept) {
             // TODO: PARALLELIZE!!
             Xi.rowwise() -= X_means.segment(g, gs).matrix();
         }
 
-    PRINT("d");
         // transform data
         Eigen::BDCSVD<util::colmat_type<value_t>> solver(
             Xi,
-            Eigen::ComputeThinU & Eigen::ComputeFullV
+            Eigen::ComputeThinU | Eigen::ComputeFullV
         );
         const auto& U = solver.matrixU();
         const auto& D = solver.singularValues();
         const auto m = std::min<int>(n, gs);
-    PRINT("e");
 
         /* update strong_X_blocks */
         const auto n_threads_capped = std::min<size_t>(n_threads, n);
         // TODO: PARALLELIZE!!
         Xi.middleCols(m, gs-m).setZero();
-        auto Xi_sub = Xi.middleCols(0, m);
+        std::cerr << U.rows() << " " << U.cols() << std::endl;
+        std::cerr << D.size() << std::endl;
+        std::cerr << solver.matrixV().rows() << " " << solver.matrixV().cols() << std::endl;
+        std::cerr << m << std::endl;
+        auto Xi_sub = Xi.leftCols(m);
         Xi_sub.array() = U.array().rowwise() * D.transpose().array();
 
     PRINT("f");
@@ -109,7 +112,7 @@ void update_strong_derived_naive(
     PRINT("h");
         /* update strong_grad */
         Eigen::Map<vec_value_t> sgrad(strong_grad.data() + sb, gs);
-        sgrad = grad.segment(g, gs).matrix() * strong_X_block_vs[i];
+        sgrad.matrix().noalias() = grad.segment(g, gs).matrix() * strong_X_block_vs[i];
     PRINT("i");
     }
 }
@@ -277,7 +280,7 @@ struct StateBasilNaive : StateBasilBase<
     void initialize() 
     {
         /* initialize the rest of the strong quantities */
-        update_strong_derived_naive(*this, 0); 
+        update_strong_derived_naive(*this); 
 
         /* initialize edpp_safe_set */
         if (setup_edpp) {

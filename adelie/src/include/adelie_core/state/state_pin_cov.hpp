@@ -34,12 +34,16 @@ struct StatePinCov : StatePinBase<
     using typename base_t::dyn_vec_index_t;
     using typename base_t::dyn_vec_value_t;
     using typename base_t::dyn_vec_sp_vec_t;
+    using typename base_t::dyn_vec_mat_value_t;
+    using typename base_t::dyn_vec_vec_value_t;
     using matrix_t = MatrixType;
 
     /* Static states */
 
     /* Dynamic states */
     matrix_t* A;    // covariance matrix-like
+    map_vec_value_t strong_grad;
+    dyn_vec_vec_value_t strong_grads;
 
     explicit StatePinCov(
         matrix_t& A,
@@ -52,7 +56,8 @@ struct StatePinCov : StatePinBase<
         const Eigen::Ref<const vec_index_t>& strong_g2,
         const Eigen::Ref<const vec_index_t>& strong_begins, 
         const Eigen::Ref<const vec_value_t>& strong_vars,
-        const Eigen::Ref<const vec_value_t>& lmdas, 
+        const dyn_vec_mat_value_t& strong_transforms,
+        const Eigen::Ref<const vec_value_t>& lmda_path, 
         size_t max_iters,
         value_t tol,
         value_t rsq_slope_tol,
@@ -67,12 +72,15 @@ struct StatePinCov : StatePinBase<
     ): 
         base_t(
             groups, group_sizes, alpha, penalty, 
-            strong_set, strong_g1, strong_g2, strong_begins, strong_vars, lmdas, 
+            strong_set, strong_g1, strong_g2, strong_begins, strong_vars, strong_transforms, lmda_path, 
             max_iters, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, n_threads,
-            rsq, strong_beta, strong_grad, strong_is_active
+            rsq, strong_beta, strong_is_active
         ),
-        A(&A)
-    {}
+        A(&A),
+        strong_grad(strong_grad.data(), strong_grad.size())
+    {
+        strong_grads.reserve(lmda_path.size());
+    }
 };
 
 } // namespace state

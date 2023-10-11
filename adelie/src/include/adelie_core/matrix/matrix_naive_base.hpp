@@ -5,13 +5,14 @@ namespace adelie_core {
 namespace matrix {
 
 template <class ValueType> 
-class MatrixPinNaiveBase
+class MatrixNaiveBase
 {
 public:
     using value_t = ValueType;
     using rowvec_t = util::rowvec_type<value_t>;
+    using colmat_t = util::colmat_type<value_t>;
     
-    virtual ~MatrixPinNaiveBase() {}
+    virtual ~MatrixNaiveBase() {}
     
     /**
      * @brief Computes v^T X[:, j] where X is the current matrix.
@@ -70,8 +71,13 @@ public:
      * @brief Computes the squared norm of a column of the matrix.
      * 
      * @param j     column index.
+     * @param q     number of columns.
+     * @param out   resulting dense matrix (n, q).
      */
-    virtual value_t cnormsq(int j) const =0;
+    virtual void to_dense(
+        int j, int q,
+        Eigen::Ref<colmat_t> out
+    ) const =0;
 
     /**
      * @brief Returns the number of rows of the represented matrix.

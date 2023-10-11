@@ -1,18 +1,19 @@
 #pragma once
-#include <adelie_core/matrix/matrix_pin_naive_base.hpp>
+#include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/matrix/utils.hpp>
 
 namespace adelie_core {
 namespace matrix {
 
 template <class DenseType>
-class MatrixPinNaiveDense: public MatrixPinNaiveBase<typename DenseType::Scalar>
+class MatrixNaiveDense: public MatrixNaiveBase<typename DenseType::Scalar>
 {
 public:
-    using base_t = MatrixPinNaiveBase<typename DenseType::Scalar>;
+    using base_t = MatrixNaiveBase<typename DenseType::Scalar>;
     using dense_t = DenseType;
     using typename base_t::value_t;
     using typename base_t::rowvec_t;
+    using typename base_t::colmat_t;
     
 private:
     const Eigen::Map<const dense_t> _mat;   // underlying dense matrix
@@ -20,7 +21,7 @@ private:
     util::rowmat_type<value_t> _buff;
     
 public:
-    MatrixPinNaiveDense(
+    MatrixNaiveDense(
         const Eigen::Ref<const dense_t>& mat,
         size_t n_threads
     ): 
@@ -78,9 +79,12 @@ public:
         );
     }
 
-    value_t cnormsq(int j) const override
+    void to_dense(
+        int j, int q,
+        Eigen::Ref<colmat_t> out
+    ) const override
     {
-        return _mat.col(j).squaredNorm();
+        out = _mat.middleCols(j, q);
     }
 
     int rows() const override

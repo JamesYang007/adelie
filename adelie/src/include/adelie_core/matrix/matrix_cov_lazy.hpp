@@ -1,20 +1,21 @@
 #pragma once
 #include <vector>
 #include <adelie_core/util/types.hpp>
-#include <adelie_core/matrix/matrix_pin_cov_base.hpp>
+#include <adelie_core/matrix/matrix_cov_base.hpp>
 #include <adelie_core/matrix/utils.hpp>
 
 namespace adelie_core {
 namespace matrix {
 
 template <class DenseType>
-class MatrixPinCovLazy: 
-    public MatrixPinCovBase<typename std::decay_t<DenseType>::Scalar>
+class MatrixCovLazy: 
+    public MatrixCovBase<typename std::decay_t<DenseType>::Scalar>
 {
 public: 
-    using base_t = MatrixPinCovBase<typename std::decay_t<DenseType>::Scalar>;
+    using base_t = MatrixCovBase<typename std::decay_t<DenseType>::Scalar>;
     using typename base_t::value_t;
     using typename base_t::rowvec_t;
+    using typename base_t::colmat_t;
     using dense_t = DenseType;
     using index_t = Eigen::Index;
     
@@ -56,7 +57,7 @@ private:
     }
 
 public: 
-    MatrixPinCovLazy(
+    MatrixCovLazy(
         const Eigen::Ref<const dense_t>& X,
         size_t n_threads
     ): 
@@ -93,7 +94,10 @@ public:
         out.matrix().noalias() = v.matrix() * mat.block(_slice_map[i], j, p, q);
     }
 
-    value_t diag(int i) const override
+    void to_dense(
+        int i, int j, int p, int q,
+        Eigen::Ref<colmat_t> out
+    ) const override
     {
         if (i < 0 || i > static_cast<int>(_index_map.size())) {
             throw std::runtime_error(
@@ -102,10 +106,14 @@ public:
         }
         const index_t ci = _index_map[i];
         if (ci < 0) {
-            return ddot(_X.col(i), _X.col(i), _n_threads);
+            const auto Xi = _X.middleCols(i, p);
+            const auto Xj = _X.middleCols(j, q);
+            out.noalias() = Xi.transpose() * Xj;
+            return;
         }
         const auto& mat = _cache[ci];
-        return mat(_slice_map[i], i);
+        out.noalias() = mat.block(_slice_map[i], p, j, q);
+        return;
     }
 
     int cols() const override { return _X.cols(); }

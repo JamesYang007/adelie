@@ -12,7 +12,7 @@ def test_state_pin_naive():
     p = 100
     G = 2
 
-    X = matrix.pin_naive_dense(np.random.normal(0, 1, (n, p)), n_threads=4)
+    X = matrix.naive_dense(np.random.normal(0, 1, (n, p)), n_threads=4)
     groups = np.array([0, 1])
     group_sizes = np.array([1, p-1])
     alpha = 1.0
@@ -21,11 +21,13 @@ def test_state_pin_naive():
     lmda_path = np.array([0.1, 1.0, 0.5])
     rsq = 0.0
     resid = np.random.normal(0, 1, n)
+    y_mean = 0
     strong_beta = np.zeros(p)
     strong_is_active = np.zeros(strong_set.shape[0], dtype=bool)
 
     state = mod.pin_naive(
         X=X,
+        y_mean=y_mean,
         groups=groups,
         group_sizes=group_sizes,
         alpha=alpha,
@@ -59,7 +61,7 @@ def test_state_pin_cov():
     G = 2
 
     X = np.random.normal(0, 1, (n, p))
-    A = matrix.pin_cov_dense(X.T @ X / n, n_threads=4)
+    A = matrix.cov_dense(X.T @ X / n, n_threads=4)
     groups = np.array([0, 1])
     group_sizes = np.array([1, p-1])
     alpha = 1.0
@@ -103,7 +105,7 @@ def test_state_pin_cov():
 
 def test_state_basil_naive():
     n = 3
-    p = 2
+    p = 100
     G = 2
 
     _X = np.random.normal(0, 1, (n, p))
@@ -183,4 +185,4 @@ def test_state_basil_naive():
     assert np.allclose(strong_is_active, state.strong_is_active)
     assert np.allclose(grad, state.grad)
     assert np.allclose(resid, state.resid)
-    assert state.iters == 0
+    assert False

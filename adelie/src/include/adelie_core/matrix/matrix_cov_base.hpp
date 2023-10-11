@@ -4,40 +4,28 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType> 
-class MatrixBasilNaiveBase
+template <class ValueType>
+class MatrixCovBase
 {
 public:
     using value_t = ValueType;
     using rowvec_t = util::rowvec_type<value_t>;
     using colmat_t = util::colmat_type<value_t>;
     
-    virtual ~MatrixBasilNaiveBase() {}
-    
+    virtual ~MatrixCovBase() {}
+
     /**
-     * @brief Computes v^T X[:, j:j+q] where X is the current matrix.
+     * @brief Computes v^T X[i:i+p, j:j+q]^T where X is the current matrix.
      * 
+     * @param i     begin row index.
      * @param j     begin column index. 
+     * @param p     number of rows. 
      * @param q     number of columns.
      * @param v     vector to multiply with.
      * @param out   resulting row vector.
      */
     virtual void bmul(
-        int j, int q, 
-        const Eigen::Ref<const rowvec_t>& v, 
-        Eigen::Ref<rowvec_t> out
-    ) =0;
-
-    /**
-     * @brief Computes v^T X[:, j:j+q]^T where X is the current matrix.
-     * 
-     * @param j     begin column index. 
-     * @param q     number of columns.
-     * @param v     vector to multiply with.
-     * @param out   resulting row vector.
-     */
-    virtual void btmul(
-        int j, int q, 
+        int i, int j, int p, int q, 
         const Eigen::Ref<const rowvec_t>& v, 
         Eigen::Ref<rowvec_t> out
     ) =0;
@@ -45,19 +33,21 @@ public:
     /**
      * @brief Computes the squared norm of a column of the matrix.
      * 
+     * @param i     row index.
      * @param j     column index.
+     * @param p     number of rows.
      * @param q     number of columns.
      * @param out   resulting dense matrix (n, q).
      */
     virtual void to_dense(
-        int j, int q,
+        int i, int j, int p, int q,
         Eigen::Ref<colmat_t> out
     ) const =0;
 
     /**
      * @brief Returns the number of rows of the represented matrix.
      */
-    virtual int rows() const =0;
+    virtual int rows() const { return cols(); };
     
     /**
      * @brief Returns the number of columns of the represented matrix.

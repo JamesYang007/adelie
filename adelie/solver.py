@@ -1,6 +1,4 @@
 from . import adelie_core as core
-#from .adelie_core.solver import (
-#)
 from . import logger
 import adelie as ad
 import numpy as np

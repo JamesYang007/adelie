@@ -282,6 +282,13 @@ class pin_base(base):
             "check strong_vars is non-negative",
             method, logger,
         )
+
+        # ================ strong_transforms check ====================
+        self._check(
+            len(self.strong_transforms) == S,
+            "check strong_transforms size",
+            method, logger,
+        )
         
         # ================ lmda_path check ====================
         self._check(
@@ -353,13 +360,6 @@ class pin_base(base):
         self._check(
             len(self.strong_beta) == WS,
             "check strong_beta size",
-            method, logger,
-        )
-
-        # ================ strong_grad check ====================
-        self._check(
-            len(self.strong_grad) == WS,
-            "check strong_grad size",
             method, logger,
         )
 
@@ -501,6 +501,13 @@ class pin_base(base):
             method, logger,
         )
 
+        # ================ rsqs check ====================
+        self._check(
+            self.lmdas.shape == (self.betas.shape[0],),
+            "check lmdas shape",
+            method, logger,
+        )
+
         # ================ strong_is_actives check ====================
         self._check(
             len(self.strong_is_actives) == self.betas.shape[0],
@@ -515,13 +522,6 @@ class pin_base(base):
             method, logger,
         )
 
-        # ================ strong_grads check ====================
-        self._check(
-            len(self.strong_grads) == self.betas.shape[0],
-            "check strong_grads shape",
-            method, logger,
-        )
-
 
 class pin_naive_base(pin_base):
     """State wrapper base class for all pin, naive method."""
@@ -529,7 +529,8 @@ class pin_naive_base(pin_base):
         self, 
         base_type: core.state.StatePinNaive64 | core.state.StatePinNaive32,
         *,
-        X: matrix.base | matrix.MatrixPinNaiveBase64 | matrix.MatrixPinNaiveBase32,
+        X: matrix.base | matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
+        y_mean: float,
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -540,6 +541,7 @@ class pin_naive_base(pin_base):
         resid: np.ndarray,
         strong_beta: np.ndarray,
         strong_is_active: np.ndarray,
+        intercept: bool,
         max_iters: int,
         tol: float,
         rsq_slope_tol: float,
@@ -579,23 +581,36 @@ class pin_naive_base(pin_base):
             strong_set=strong_set,
         )
 
-        self._strong_vars = np.concatenate([
-            [X.cnormsq(jj) for jj in range(g, g + gs)]
-            for g, gs in zip(groups[strong_set], group_sizes[strong_set])
-        ])
+        self._strong_vars = []
+        self._strong_X_means = []
+        self._strong_transforms = []
+        for i in self._strong_set:
+            g, gs = groups[i], group_sizes[i]
+            Xi = np.empty((X.rows(), gs), dtype=dtype, order="F")
+            X.to_dense(g, gs, Xi)
+            _, d, vh = np.linalg.svd(Xi, full_matrices=True, compute_uv=True)
+            vars = np.zeros(gs)
+            vars[:len(d)] = d ** 2
+            self._strong_vars.append(vars)
+            self._strong_X_means.append(np.mean(Xi, axis=0))
+            self._strong_transforms.append(np.array(vh.T, copy=False, dtype=dtype, order="F"))
+        self._strong_vars = np.concatenate(self._strong_vars, dtype=dtype)
+        self._strong_X_means = np.concatenate(self._strong_X_means, dtype=dtype)
+        vecmat_type = (
+            core.VectorMatrix64
+            if dtype == np.float64 else
+            core.VectorMatrix32
+        )
+        self._strong_transforms = vecmat_type(self._strong_transforms)
 
-        self._strong_grad = []
-        for k in strong_set:
-            out = np.empty(group_sizes[k], dtype=dtype)
-            X.bmul(groups[k], group_sizes[k], resid, out)
-            self._strong_grad.append(out)
-        self._strong_grad = np.concatenate(self._strong_grad, dtype=dtype)
+        resid_sum = np.sum(self._resid)
 
         # MUST call constructor directly and not use super()!
         # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
         base_type.__init__(
             self,
             X=X,
+            y_mean=y_mean,
             groups=self._groups,
             group_sizes=self._group_sizes,
             alpha=alpha,
@@ -605,7 +620,10 @@ class pin_naive_base(pin_base):
             strong_g2=self._strong_g2,
             strong_begins=self._strong_begins,
             strong_vars=self._strong_vars,
+            strong_X_means=self._strong_X_means,
+            strong_transforms=self._strong_transforms,
             lmda_path=self._lmda_path,
+            intercept=intercept,
             max_iters=max_iters,
             tol=tol,
             rsq_slope_tol=rsq_slope_tol,
@@ -615,8 +633,8 @@ class pin_naive_base(pin_base):
             n_threads=n_threads,
             rsq=rsq,
             resid=self._resid,
+            resid_sum=resid_sum,
             strong_beta=self._strong_beta,
-            strong_grad=self._strong_grad,
             strong_is_active=self._strong_is_active,
         )
 
@@ -627,7 +645,7 @@ class pin_naive_base(pin_base):
     ):
         super().check(method=method, logger=logger)
         self._check(
-            isinstance(self.X, matrix.MatrixPinNaiveBase64) or isinstance(self.X, matrix.MatrixPinNaiveBase32),
+            isinstance(self.X, matrix.MatrixNaiveBase64) or isinstance(self.X, matrix.MatrixNaiveBase32),
             "check X type",
             method, logger,
         )
@@ -687,7 +705,8 @@ class pin_naive_32(pin_naive_base, core.state.StatePinNaive32):
 
 def pin_naive(
     *,
-    X: matrix.base | matrix.MatrixPinNaiveBase64 | matrix.MatrixPinNaiveBase32,
+    X: matrix.base | matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
+    y_mean: float,
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -698,6 +717,7 @@ def pin_naive(
     resid: np.ndarray,
     strong_beta: np.ndarray,
     strong_is_active: np.ndarray,
+    intercept: bool =True,
     max_iters: int =int(1e5),
     tol: float =1e-12,
     rsq_slope_tol: float =1e-2,
@@ -710,10 +730,11 @@ def pin_naive(
 
     Parameters
     ----------
-    X : Union[adelie.matrix.base, adelie.matrix.MatrixPinNaiveBase64, adelie.matrix.MatrixPinNaiveBase32]
-        Feature matrix where each column block :math:`X_k` defined by the groups
-        is such that :math:`X_k^\\top X_k` is diagonal.
+    X : Union[adelie.matrix.base, adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
+        Feature matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
+    y_mean : float
+        Mean of :math:`y`.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -733,9 +754,9 @@ def pin_naive(
         Regularization sequence to fit on.
     rsq : float
         Unnormalized :math:`R^2` value at ``strong_beta``.
-        The unnormalized :math:`R^2` is given by :math:`\\|y\\|_2^2 - \\|y-X\\beta\\|_2^2`.
+        The unnormalized :math:`R^2` is given by :math:`\\|y_c\\|_2^2 - \\|y_c-X_c\\beta\\|_2^2`.
     resid : np.ndarray
-        Residual :math:`y-X\\beta` at ``strong_beta``.
+        Residual :math:`y_c-X\\beta` at ``strong_beta``.
     strong_beta : (ws,) np.ndarray
         Coefficient vector on the strong set.
         ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
@@ -746,6 +767,9 @@ def pin_naive(
     strong_is_active : (a,) np.ndarray
         Boolean vector that indicates whether each strong group in ``groups`` is active or not.
         ``strong_is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
+    intercept : bool, optional
+        ``True`` to fit with intercept.
+        Default is ``True``.
     max_iters : int, optional
         Maximum number of coordinate descents.
         Default is ``int(1e5)``.
@@ -779,16 +803,16 @@ def pin_naive(
         X_intr = X
 
     if not (
-        isinstance(X_intr, matrix.MatrixPinNaiveBase64) or
-        isinstance(X_intr, matrix.MatrixPinNaiveBase32)
+        isinstance(X_intr, matrix.MatrixNaiveBase64) or
+        isinstance(X_intr, matrix.MatrixNaiveBase32)
     ):
         raise ValueError(
-            "X must be an instance of matrix.MatrixPinNaiveBase32 or matrix.MatrixPinNaiveBase64."
+            "X must be an instance of matrix.MatrixNaiveBase32 or matrix.MatrixNaiveBase64."
         )
 
     dtype = (
         np.float64
-        if isinstance(X_intr, matrix.MatrixPinNaiveBase64) else
+        if isinstance(X_intr, matrix.MatrixNaiveBase64) else
         np.float32
     )
         
@@ -798,6 +822,7 @@ def pin_naive(
     }
     return dispatcher[dtype](
         X=X,
+        y_mean=y_mean,
         groups=groups,
         group_sizes=group_sizes,
         alpha=alpha,
@@ -808,6 +833,7 @@ def pin_naive(
         resid=resid,
         strong_beta=strong_beta,
         strong_is_active=strong_is_active,
+        intercept=intercept,
         max_iters=max_iters,
         tol=tol,
         rsq_slope_tol=rsq_slope_tol,
@@ -824,7 +850,7 @@ class pin_cov_base(pin_base):
         self, 
         base_type: core.state.StatePinCov64 | core.state.StatePinCov32,
         *,
-        A: matrix.base | matrix.MatrixPinCovBase64 | matrix.MatrixPinCovBase32,
+        A: matrix.base | matrix.MatrixCovBase64 | matrix.MatrixCovBase32,
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -874,10 +900,22 @@ class pin_cov_base(pin_base):
             strong_set=strong_set,
         )
 
-        self._strong_vars = np.concatenate([
-            [A.diag(j) for j in range(g, g+gs)]
-            for g, gs in zip(groups[strong_set], group_sizes[strong_set])
-        ])
+        self._strong_vars = []
+        self._strong_transforms = []
+        for i in self._strong_set:
+            g, gs = groups[i], group_sizes[i]
+            Aii = np.empty((gs, gs), dtype=dtype, order="F")
+            A.to_dense(g, g, gs, gs, Aii)  
+            dsq, v = np.linalg.eigh(Aii)
+            self._strong_vars.append(dsq)
+            self._strong_transforms.append(v)
+        self._strong_vars = np.concatenate(self._strong_vars, dtype=dtype)
+        vecmat_type = (
+            core.VectorMatrix64
+            if dtype == np.float64 else
+            core.VectorMatrix32
+        )
+        self._strong_transforms = vecmat_type(self._strong_transforms)
 
         base_type.__init__(
             self,
@@ -891,6 +929,7 @@ class pin_cov_base(pin_base):
             strong_g2=self._strong_g2,
             strong_begins=self._strong_begins,
             strong_vars=self._strong_vars,
+            strong_transforms=self._strong_transforms,
             lmda_path=self._lmda_path,
             max_iters=max_iters,
             tol=tol,
@@ -912,7 +951,7 @@ class pin_cov_base(pin_base):
     ):
         super().check(method=method, logger=logger)
         self._check(
-            isinstance(self.A, matrix.MatrixPinCovBase32) or isinstance(self.A, matrix.MatrixPinCovBase64),
+            isinstance(self.A, matrix.MatrixCovBase32) or isinstance(self.A, matrix.MatrixCovBase64),
             "check A type",
             method, logger,
         )
@@ -962,7 +1001,7 @@ class pin_cov_32(pin_cov_base, core.state.StatePinCov32):
 
 def pin_cov(
     *,
-    A: matrix.base | matrix.MatrixPinCovBase64 | matrix.MatrixPinCovBase32,
+    A: matrix.base | matrix.MatrixCovBase64 | matrix.MatrixCovBase32,
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -985,9 +1024,8 @@ def pin_cov(
 
     Parameters
     ----------
-    A : Union[adelie.matrix.base, adelie.matrix.MatrixPinCovBase64, adelie.matrix.MatrixPinCovBase32]
-        Covariance matrix where each diagonal block :math:`A_{kk}` defined by the groups
-        is a diagonal matrix.
+    A : Union[adelie.matrix.base, adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]
+        Covariance matrix :math:`X_c^\\top X_c` where `X_c` is column-centered to fit with intercept.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
@@ -1008,9 +1046,9 @@ def pin_cov(
         Regularization sequence to fit on.
     rsq : float
         Unnormalized :math:`R^2` value at ``strong_beta``.
-        The unnormalized :math:`R^2` is given by :math:`\\|y\\|_2^2 - \\|y-X\\beta\\|_2^2`.
+        The unnormalized :math:`R^2` is given by :math:`\\|y_c\\|_2^2 - \\|y_c-X_c\\beta\\|_2^2`.
     resid : np.ndarray
-        Residual :math:`y-X\\beta` at ``strong_beta``.
+        Residual :math:`y_c-X\\beta` at ``strong_beta``.
     strong_beta : (ws,) np.ndarray
         Coefficient vector on the strong set.
         ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
@@ -1019,7 +1057,7 @@ def pin_cov(
         ``b = strong_begins[i]``,
         and ``p = group_sizes[k]``.
     strong_grad : (ws,) np.ndarray
-        Gradient :math:`X_k^\\top (y-X\\beta)` on the strong groups :math:`k` where :math:`beta` is given by ``strong_beta``.
+        Gradient :math:`X_{c,k}^\\top (y_c-X_c\\beta)` on the strong groups :math:`k` where :math:`beta` is given by ``strong_beta``.
         ``strong_grad[b:b+p]`` is the gradient for the ``i`` th strong group
         where 
         ``k = strong_set[i]``,
@@ -1061,16 +1099,16 @@ def pin_cov(
         A_intr = A
 
     if not (
-        isinstance(A_intr, matrix.MatrixPinCovBase64) or 
-        isinstance(A_intr, matrix.MatrixPinCovBase32)
+        isinstance(A_intr, matrix.MatrixCovBase64) or 
+        isinstance(A_intr, matrix.MatrixCovBase32)
     ):
         raise ValueError(
-            "X must be an instance of matrix.MatrixPinCovBase32 or matrix.MatrixPinCovBase64."
+            "X must be an instance of matrix.MatrixCovBase32 or matrix.MatrixCovBase64."
         )
 
     dtype = (
         np.float64
-        if isinstance(A_intr, matrix.MatrixPinCovBase64) else
+        if isinstance(A_intr, matrix.MatrixCovBase64) else
         np.float32
     )
         
@@ -1116,7 +1154,7 @@ class basil_naive_base(basil_base):
         self, 
         base_type: core.state.StateBasilNaive64 | core.state.StateBasilNaive32,
         *,
-        X: matrix.base | matrix.MatrixBasilNaiveBase64 | matrix.MatrixBasilNaiveBase32,
+        X: matrix.base | matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
         X_means: np.ndarray,
         X_group_norms: np.ndarray,
         y_mean: float,
@@ -1272,7 +1310,7 @@ class basil_naive_32(basil_naive_base, core.state.StateBasilNaive32):
 
 def basil_naive(
     *,
-    X: matrix.base | matrix.MatrixBasilNaiveBase64 | matrix.MatrixBasilNaiveBase32,
+    X: matrix.base | matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
     X_means: np.ndarray,
     X_group_norms: np.ndarray,
     y_mean: float,
@@ -1312,7 +1350,7 @@ def basil_naive(
 
     Parameters
     ----------
-    X : Union[adelie.matrix.base, adelie.matrix.MatrixBasilNaiveBase64, adelie.matrix.MatrixBasilNaiveBase32]
+    X : Union[adelie.matrix.base, adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
         Feature matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
     X_means : (p,) np.ndarray

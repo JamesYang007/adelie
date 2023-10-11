@@ -7,7 +7,8 @@
 
 namespace adelie_core {
 namespace solver {
-    
+namespace cov {
+
 template <class StateType, class G1Iter, class G2Iter,
           class ValueType, class BufferType,
           class UpdateCoefficientsType,
@@ -24,6 +25,7 @@ void coordinate_descent(
     BufferType& buffer1,
     BufferType& buffer2,
     BufferType& buffer3,
+    BufferType& buffer4,
     UpdateCoefficientsType update_coefficients_f,
     AdditionalStepType additional_step=AdditionalStepType()
 )
@@ -36,6 +38,7 @@ void coordinate_descent(
     const auto& strong_set = state.strong_set;
     const auto& strong_begins = state.strong_begins;
     const auto& strong_vars = state.strong_vars;
+    const auto& strong_transforms = *state.strong_transforms;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto alpha = state.alpha;
@@ -69,17 +72,14 @@ void coordinate_descent(
 
         if (ak_old == ak) continue;
 
-        additional_step(ss_idx);
-
         auto del = ak - ak_old;
 
         // update measure of convergence
         update_convergence_measure(convg_measure, del, A_kk);
 
-        update_rsq(rsq, ak_old, ak, A_kk, gk);
+        update_rsq(rsq, del, A_kk, gk);
 
         // update gradient 
-        
         // iterate over the groups of size 1
         for (auto jt = g1_begin; jt != g1_end; ++jt) {
             const auto ss_idx_j = *jt;
@@ -104,6 +104,8 @@ void coordinate_descent(
             );
             sg_j -= new_gk;
         }
+
+        additional_step(ss_idx);
     }
     
     // iterate over the groups of dynamic size
@@ -114,39 +116,48 @@ void coordinate_descent(
         const auto gsize = group_sizes[k]; // group size  
         auto ak = strong_beta.segment(ss_value_begin, gsize); // corresponding beta
         auto gk = strong_grad.segment(ss_value_begin, gsize); // corresponding gradient
+        const auto& Vk = strong_transforms[ss_idx]; // corresponding V in SVD of X_c
         const auto A_kk = strong_vars.segment(ss_value_begin, gsize);  // corresponding A diagonal 
         const auto pk = penalty[k];
 
-        // save old beta in buffer
-        auto ak_old = buffer3.head(ak.size());
-        ak_old = ak; 
+        auto gk_transformed = buffer3.head(ak.size());
+        gk_transformed.matrix().noalias() = (
+            gk.matrix() * Vk
+        );
+
+        // save old beta in buffer with transformation
+        auto ak_old = buffer4.head(ak.size());
+        ak_old = ak;
+        auto ak_old_transformed = buffer4.segment(ak.size(), ak.size());
+        ak_old_transformed.matrix().noalias() = ak_old.matrix() * Vk; 
+        auto ak_transformed = buffer4.segment(2 * ak.size(), ak.size());
 
         // update group coefficients
         size_t iters;
-        gk += A_kk * ak_old;
+        gk_transformed += A_kk * ak_old_transformed; 
         update_coefficients_f(
-            A_kk, gk, l1 * pk, l2 * pk, 
+            A_kk, gk_transformed, l1 * pk, l2 * pk, 
             newton_tol, newton_max_iters,
-            ak, iters, buffer1, buffer2
+            ak_transformed, iters, buffer1, buffer2
         );
-        gk -= A_kk * ak_old;
+        gk_transformed -= A_kk * ak_old_transformed; 
 
-        if ((ak_old - ak).abs().maxCoeff() <= 1e-14) continue;
+        if ((ak_old_transformed - ak_transformed).matrix().norm() <= 1e-12 * std::sqrt(gsize)) continue;
         
-        additional_step(ss_idx);
+        auto del_transformed = buffer1.head(ak.size());
+        del_transformed = ak_transformed - ak_old_transformed;
 
-        // use same buffer as ak_old to store difference
-        auto& del = ak_old;
+        update_convergence_measure(convg_measure, del_transformed, A_kk);
+
+        update_rsq(rsq, del_transformed, A_kk, gk_transformed);
+
+        // update new coefficient
+        ak.matrix().noalias() = ak_transformed.matrix() * Vk.transpose();
+
+        // update gradient
+        auto del = buffer1.head(ak.size());
         del = ak - ak_old;
 
-        // update measure of convergence
-        update_convergence_measure(convg_measure, del, A_kk);
-
-        // update rsq
-        update_rsq(rsq, del, A_kk, gk);
-
-        // update gradient-like quantity
-        
         // iterate over the groups of size 1
         for (auto jt = g1_begin; jt != g1_end; ++jt) {
             const auto ss_idx_j = *jt;
@@ -169,6 +180,8 @@ void coordinate_descent(
             );
             sg_j -= new_gk;
         }
+
+        additional_step(ss_idx);
     }
 }
 
@@ -181,13 +194,14 @@ template <class StateType,
           class UpdateCoefficientsType,
           class CUIType = util::no_op>
 ADELIE_CORE_STRONG_INLINE
-void solve_pin_cov_active(
+void solve_pin_active(
     StateType&& state,
     size_t lmda_idx,
     ABDiffType& active_beta_diff,
     BufferType& buffer1,
     BufferType& buffer2,
     BufferType& buffer3,
+    BufferType& buffer4,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType())
 {
@@ -241,7 +255,7 @@ void solve_pin_cov_active(
                 state, 
                 active_g1.data(), active_g1.data() + active_g1.size(),
                 active_g2.data(), active_g2.data() + active_g2.size(),
-                lmda_idx, convg_measure, buffer1, buffer2, buffer3, 
+                lmda_idx, convg_measure, buffer1, buffer2, buffer3, buffer4,
                 update_coefficients_f
             );
             if (convg_measure < tol) break;
@@ -294,7 +308,7 @@ void solve_pin_cov_active(
 template <class StateType,
           class UpdateCoefficientsType,
           class CUIType = util::no_op>
-inline void solve_pin_cov(
+inline void solve_pin(
     StateType&& state,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType())
@@ -338,7 +352,10 @@ inline void solve_pin_cov(
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
-    SolvePinBufferPack<value_t> buffer_pack(max_group_size, 0);
+    SolvePinBufferPack<value_t> buffer_pack(
+        max_group_size, 
+        3 * max_group_size
+    );
     
     // buffer to store final result
     std::vector<index_t> active_beta_indices;
@@ -381,12 +398,13 @@ inline void solve_pin_cov(
     };
 
     const auto lasso_active_and_update = [&](size_t l) {
-        solve_pin_cov_active(
+        solve_pin_active(
             state, l, 
             active_beta_diff, 
             buffer_pack.buffer1,
             buffer_pack.buffer2,
             buffer_pack.buffer3,
+            buffer_pack.buffer4,
             update_coefficients_f,
             check_user_interrupt
         );
@@ -414,6 +432,7 @@ inline void solve_pin_cov(
                     buffer_pack.buffer1,
                     buffer_pack.buffer2,
                     buffer_pack.buffer3,
+                    buffer_pack.buffer4,
                     update_coefficients_f,
                     add_active_set
                 );
@@ -484,5 +503,6 @@ inline void solve_pin_cov(
     }
 }
 
+} // namespace cov    
 } // namespace solver
 } // namespace adelie_core

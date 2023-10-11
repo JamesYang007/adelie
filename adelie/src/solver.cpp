@@ -1,6 +1,6 @@
 #include "decl.hpp"
-#include <adelie_core/matrix/matrix_pin_cov_base.hpp>
-#include <adelie_core/matrix/matrix_pin_naive_base.hpp>
+#include <adelie_core/matrix/matrix_cov_base.hpp>
+#include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/state/state_pin_cov.hpp>
 #include <adelie_core/state/state_pin_naive.hpp>
 #include <adelie_core/solver/solve_basil_base.hpp>
@@ -56,7 +56,7 @@ py::dict solve_pin_naive(StateType state)
 
     std::string error;
     try {
-        ad::solver::solve_pin_naive(state, update_coefficients_f);
+        ad::solver::naive::solve_pin(state, update_coefficients_f);
     } catch(const std::exception& e) {
         error = e.what(); 
     }
@@ -86,7 +86,7 @@ py::dict solve_pin_cov(StateType state)
 
     std::string error;
     try {
-        ad::solver::solve_pin_cov(state, update_coefficients_f);
+        ad::solver::cov::solve_pin(state, update_coefficients_f);
     } catch(const std::exception& e) {
         error = e.what(); 
     }
@@ -99,9 +99,9 @@ py::dict solve_pin_cov(StateType state)
 // =================================================================
 
 template <class T> 
-using state_pin_naive_t = ad::state::StatePinNaive<ad::matrix::MatrixPinNaiveBase<T>>;
+using state_pin_naive_t = ad::state::StatePinNaive<ad::matrix::MatrixNaiveBase<T>>;
 template <class T> 
-using state_pin_cov_t = ad::state::StatePinCov<ad::matrix::MatrixPinCovBase<T>>;
+using state_pin_cov_t = ad::state::StatePinCov<ad::matrix::MatrixCovBase<T>>;
 
 void register_solver(py::module_& m)
 {

@@ -89,32 +89,18 @@ void sparsify_active_beta(
     assert(values.size() == std::distance(values.data(), vals_begin));
 }
 
-/**
- * Updates the convergence measure using variance of each direction.
- * 
- * @param   convg_measure   convergence measure to update.
- * @param   del             vector difference in a group coefficient.
- * @param   var             vector of variance along each direction of coefficient.
- */
 template <class ValueType, class DelType, class VarType>
 ADELIE_CORE_STRONG_INLINE 
 void update_convergence_measure(
     ValueType& convg_measure, 
     const DelType& del, 
-    const VarType& var)
+    const VarType& var
+)
 {
     const auto convg_measure_curr = (var * del.square()).sum() / del.size();
     convg_measure = std::max(convg_measure, convg_measure_curr);
 }
 
-/**
- * Updates the convergence measure using variance of feature and coefficient change.
- * NOTE: this is for lasso specifically.
- *
- * @param   convg_measure   current convergence measure to update.
- * @param   coeff_diff      new coefficient minus old coefficient.
- * @param   x_var           variance of feature. A[k,k] where k is the feature corresponding to coeff_diff.
- */
 template <class ValueType>
 ADELIE_CORE_STRONG_INLINE
 void update_convergence_measure(
@@ -127,75 +113,30 @@ void update_convergence_measure(
     convg_measure = std::max(convg_measure_curr, convg_measure);
 }
 
-/**
- * Updates \f$R^2\f$ given the group variance vector, 
- * group coefficient difference (new minus old), 
- * and the current residual vector.
- * 
- * @param   rsq     \f$R^2\f$ to update.
- * @param   del     new coefficient minus old coefficient.
- * @param   var     variance along each coordinate of group.
- * @param   r       current residual correlation vector for group.
- */
-template <class ValueType, class DelType, 
-          class VarType, class RType>
+template <class ValueType, class DelType, class XVarType, class GradType>
 ADELIE_CORE_STRONG_INLINE
 void update_rsq(
     ValueType& rsq,
     const DelType& del,
-    const VarType& var,
-    const RType& r
+    const XVarType& x_var,
+    const GradType& grad
 )
 {
-    rsq += (del * (2 * r - var * del)).sum();
+    rsq += (del * (2 * grad - del * x_var)).sum();
 }
 
-/**
- * Increments rsq with the difference in R^2.
- * NOTE: this is for lasso specifically.
- *
- * @param   rsq         R^2 to update.
- * @param   old_coeff   old coefficient.
- * @param   new_coeff   new coefficient.
- * @param   x_var       variance of feature (A[k,k]).
- * @param   grad        (negative) gradient corresponding to the coefficient.
- * @param   s           regularization of A towards identity.
- */
 template <class ValueType>
 ADELIE_CORE_STRONG_INLINE
 void update_rsq(
     ValueType& rsq, 
-    ValueType old_coeff, 
-    ValueType new_coeff, 
+    ValueType del,
     ValueType x_var, 
     ValueType grad
 )
 {
-    const auto del = new_coeff - old_coeff;
     rsq += del * (2 * grad - del * x_var);
 }
 
-
-/**
- * Solves the solution for the equation (w.r.t. \f$x\f$):
- * \f[
- *      minimize \frac{1}{2} x^\top L x - x^\top v 
- *          + l_1 ||x||_2 + \frac{l_2}{2} ||x||_2^2
- * \f]
- *      
- * @param   L       vector representing a diagonal PSD matrix.
- *                  Must have max(L + s) > 0. 
- *                  L.size() <= buffer1.size().
- * @param   v       any vector.  
- * @param   l1      L2-norm penalty. Must be >= 0.
- * @param   l2      L2 penalty. Must be >= 0.
- * @param   tol         Newton's method tolerance of closeness to 0.
- * @param   max_iters   maximum number of iterations of Newton's method.
- * @param   x           solution vector.
- * @param   iters       number of Newton's method iterations taken.
- * @param   buffer1     any vector with L.size() <= buffer1.size().
- * @param   buffer2     any vector with L.size() <= buffer2.size().
- */
 template <class LType, class VType, class ValueType, 
           class XType, class BufferType>
 ADELIE_CORE_STRONG_INLINE
@@ -218,17 +159,6 @@ void update_coefficients(
     );
 }
 
-/**
- * Updates the coefficient given the current state via coordinate descent rule.
- * NOTE: this is for lasso specifically.
- *
- * @param   coeff   current coefficient to update.
- * @param   x_var   variance of feature. A[k,k] where k is the feature corresponding to coeff.
- * @param   l1      L1 regularization part in elastic net.
- * @param   l2      L2 regularization part in elastic net.
- * @param   penalty penalty value for current coefficient.
- * @param   grad    current (negative) gradient for coeff.
- */
 template <class ValueType>
 ADELIE_CORE_STRONG_INLINE
 void update_coefficient(
