@@ -155,7 +155,7 @@ void coordinate_descent(
         ak.matrix().noalias() = ak_transformed.matrix() * Vk.transpose();
 
         // update gradient
-        auto del = buffer1.head(ak.size());
+        auto del = buffer2.head(ak.size());
         del = ak - ak_old;
 
         // iterate over the groups of size 1
@@ -339,6 +339,7 @@ inline void solve_pin(
     auto& active_order = state.active_order;
     auto& strong_is_active = state.strong_is_active;
     auto& betas = state.betas;
+    auto& intercepts = state.intercepts;
     auto& rsqs = state.rsqs;
     auto& lmdas = state.lmdas;
     auto& strong_is_actives = state.strong_is_actives;
@@ -489,6 +490,7 @@ inline void solve_pin(
         );
 
         betas.emplace_back(beta_map);
+        intercepts.emplace_back(0);
         rsqs.emplace_back(rsq);
         lmdas.emplace_back(lmda_path[l]);
         strong_is_actives.emplace_back(strong_is_active);

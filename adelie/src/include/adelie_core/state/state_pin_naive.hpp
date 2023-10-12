@@ -42,14 +42,10 @@ struct StatePinNaive : StatePinBase<
     const value_t y_mean;
     const map_cvec_value_t strong_X_means;
 
-    /* Configurations */
-    const bool intercept;
-
     /* Dynamic states */
     matrix_t* X;
     map_vec_value_t resid;
     value_t resid_sum;
-    dyn_vec_value_t intercepts;
     dyn_vec_vec_value_t resids;
 
     /* buffer */
@@ -87,18 +83,16 @@ struct StatePinNaive : StatePinBase<
         base_t(
             groups, group_sizes, alpha, penalty, 
             strong_set, strong_g1, strong_g2, strong_begins, strong_vars, strong_transforms, lmda_path, 
-            max_iters, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, n_threads,
+            intercept, max_iters, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, n_threads,
             rsq, strong_beta, strong_is_active
         ),
         y_mean(y_mean),
         strong_X_means(strong_X_means.data(), strong_X_means.size()),
-        intercept(intercept),
         X(&X),
         resid(resid.data(), resid.size()),
         resid_sum(resid_sum),
         strong_grad(strong_beta.size())
     {
-        intercepts.reserve(lmda_path.size());
         resids.reserve(lmda_path.size());
     }
 };

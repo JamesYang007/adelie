@@ -121,6 +121,9 @@ class base:
 
 
 class pin_base(base):
+    def __init__(self):
+        self.solver = "pin"
+
     def check(
         self, 
         method: str =None, 
@@ -551,6 +554,8 @@ class pin_naive_base(pin_base):
         n_threads: int,
         dtype: np.float32 | np.float64,
     ):
+        self.method = "naive"
+
         """Default initialization method.
         """
         ## save inputs due to lifetime issues
@@ -588,11 +593,14 @@ class pin_naive_base(pin_base):
             g, gs = groups[i], group_sizes[i]
             Xi = np.empty((X.rows(), gs), dtype=dtype, order="F")
             X.to_dense(g, gs, Xi)
+            Xi_means = np.mean(Xi, axis=0)
+            if intercept:
+                Xi -= Xi_means[None]
             _, d, vh = np.linalg.svd(Xi, full_matrices=True, compute_uv=True)
             vars = np.zeros(gs)
             vars[:len(d)] = d ** 2
             self._strong_vars.append(vars)
-            self._strong_X_means.append(np.mean(Xi, axis=0))
+            self._strong_X_means.append(Xi_means)
             self._strong_transforms.append(np.array(vh.T, copy=False, dtype=dtype, order="F"))
         self._strong_vars = np.concatenate(self._strong_vars, dtype=dtype)
         self._strong_X_means = np.concatenate(self._strong_X_means, dtype=dtype)
@@ -870,6 +878,8 @@ class pin_cov_base(pin_base):
         n_threads: int,
         dtype: np.float32 | np.float64,
     ):
+        self.method = "cov"
+
         """Default initialization method.
         """
         ## save inputs due to lifetime issues
@@ -907,7 +917,7 @@ class pin_cov_base(pin_base):
             Aii = np.empty((gs, gs), dtype=dtype, order="F")
             A.to_dense(g, g, gs, gs, Aii)  
             dsq, v = np.linalg.eigh(Aii)
-            self._strong_vars.append(dsq)
+            self._strong_vars.append(np.maximum(dsq, 0))
             self._strong_transforms.append(v)
         self._strong_vars = np.concatenate(self._strong_vars, dtype=dtype)
         vecmat_type = (
@@ -1477,16 +1487,16 @@ def basil_naive(
         X_intr = X
 
     if not (
-        isinstance(X_intr, matrix.MatrixBasilNaiveBase64) or 
-        isinstance(X_intr, matrix.MatrixBasilNaiveBase32)
+        isinstance(X_intr, matrix.MatrixNaiveBase64) or 
+        isinstance(X_intr, matrix.MatrixNaiveBase32)
     ):
         raise ValueError(
-            "X must be an instance of matrix.MatrixBasilNaiveBase32 or matrix.MatrixBasilNaiveBase64."
+            "X must be an instance of matrix.MatrixNaiveBase32 or matrix.MatrixNaiveBase64."
         )
 
     dtype = (
         np.float64
-        if isinstance(X_intr, matrix.MatrixBasilNaiveBase64) else
+        if isinstance(X_intr, matrix.MatrixNaiveBase64) else
         np.float32
     )
         

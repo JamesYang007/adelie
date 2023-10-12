@@ -109,7 +109,9 @@ void coordinate_descent(
 
         // compute current gradient
         X.bmul(groups[k], gsize, resid, gk);
-        gk -= resid_sum * Xk_mean;
+        if (intercept) {
+            gk -= resid_sum * Xk_mean;
+        }
 
         auto gk_transformed = buffer3.head(ak.size());
         gk_transformed.matrix().noalias() = (

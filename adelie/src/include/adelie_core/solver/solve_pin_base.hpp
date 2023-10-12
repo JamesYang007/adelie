@@ -211,6 +211,7 @@ bool check_early_stop_rsq(
 template <class ValueType, class IndexType> 
 inline
 auto objective(
+    ValueType beta0, 
     const Eigen::Ref<const util::rowvec_type<ValueType>>& beta,
     const Eigen::Ref<const util::rowmat_type<ValueType>>& X,
     const Eigen::Ref<const util::rowvec_type<ValueType>>& y,
@@ -231,7 +232,9 @@ auto objective(
         );
     }
     p_ *= lmda;
-    return 0.5 * (y.matrix() - beta.matrix() * X.transpose()).squaredNorm() + p_;
+    return 0.5 * (
+        (y.matrix() - beta.matrix() * X.transpose()).array() - beta0
+    ).matrix().squaredNorm() + p_;
 }
 
 } // namespace solver

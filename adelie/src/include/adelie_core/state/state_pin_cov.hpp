@@ -73,7 +73,7 @@ struct StatePinCov : StatePinBase<
         base_t(
             groups, group_sizes, alpha, penalty, 
             strong_set, strong_g1, strong_g2, strong_begins, strong_vars, strong_transforms, lmda_path, 
-            max_iters, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, n_threads,
+            false, max_iters, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, n_threads,
             rsq, strong_beta, strong_is_active
         ),
         A(&A),

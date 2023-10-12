@@ -15,6 +15,7 @@ using namespace pybind11::literals; // to bring in the `_a` literal
 // Helper functions
 // =================================================================
 double objective(
+    double beta0,
     const Eigen::Ref<const ad::util::rowvec_type<double>>& beta,
     const Eigen::Ref<const ad::util::rowmat_type<double>>& X,
     const Eigen::Ref<const ad::util::rowvec_type<double>>& y,
@@ -26,7 +27,7 @@ double objective(
 )
 {
     return ad::solver::objective(
-        beta, X, y, groups, group_sizes, lmda, alpha, penalty
+        beta0, beta, X, y, groups, group_sizes, lmda, alpha, penalty
     );
 }
 
