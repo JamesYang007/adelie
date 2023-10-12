@@ -38,6 +38,7 @@ void state_pin_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             const dyn_vec_mat_value_t&,
             const Eigen::Ref<const vec_value_t>&, 
+            bool,
             size_t,
             value_t,
             value_t,
@@ -60,6 +61,7 @@ void state_pin_base(py::module_& m, const char* name)
             py::arg("strong_vars").noconvert(),
             py::arg("strong_transforms").noconvert(),
             py::arg("lmda_path").noconvert(),
+            py::arg("intercept"),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("rsq_slope_tol"),
@@ -124,6 +126,9 @@ void state_pin_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("lmda_path", &state_t::lmda_path, R"delimiter(
         Regularization sequence to fit on.
+        )delimiter")
+        .def_readonly("intercept", &state_t::intercept, R"delimiter(
+        ``True`` to fit with intercept.
         )delimiter")
         .def_readonly("max_iters", &state_t::max_iters, R"delimiter(
         Maximum number of coordinate descents.
@@ -226,6 +231,11 @@ void state_pin_base(py::module_& m, const char* name)
             return betas;
         }, R"delimiter(
         ``betas[i]`` corresponds to the solution corresponding to ``lmdas[i]``.
+        )delimiter")
+        .def_property_readonly("intercepts", [](const state_t& s) {
+            return Eigen::Map<const vec_value_t>(s.intercepts.data(), s.intercepts.size());
+        }, R"delimiter(
+        ``intercepts[i]`` is the intercept at ``lmdas[i]``.
         )delimiter")
         .def_property_readonly("rsqs", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<value_t>>(
@@ -360,9 +370,6 @@ void state_pin_naive(py::module_& m, const char* name)
         .def_readonly("strong_X_means", &state_t::strong_X_means, R"delimiter(
         Column means of :math:`X` for strong groups.
         )delimiter")
-        .def_readonly("intercept", &state_t::intercept, R"delimiter(
-        ``True`` to fit with intercept.
-        )delimiter")
         .def_readonly("X", &state_t::X, R"delimiter(
         Feature matrix.
         )delimiter")
@@ -372,11 +379,6 @@ void state_pin_naive(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("resid_sum", &state_t::resid_sum, R"delimiter(
         Sum of the residual.
-        )delimiter")
-        .def_property_readonly("intercepts", [](const state_t& s) {
-            return Eigen::Map<const vec_value_t>(s.intercepts.data(), s.intercepts.size());
-        }, R"delimiter(
-        ``intercepts[i]`` is the intercept at ``lmdas[i]``.
         )delimiter")
         .def_property_readonly("resids", [](const state_t& s) {
             ad::util::rowarr_type<value_t> resids(s.resids.size(), s.resid.size());

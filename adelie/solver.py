@@ -5,6 +5,7 @@ import numpy as np
 
 
 def objective(
+    beta0: float,
     beta: np.ndarray, 
     *,
     X: np.ndarray, 
@@ -21,13 +22,14 @@ def objective(
 
     .. math::
         \\begin{align*}
-            \\frac{1}{2} \\|y - X\\beta\\|_2^2
+            \\frac{1}{2} \\|y - X\\beta - \\beta_0 \\textbf{1}\\|_2^2
             + \\lambda \\sum\\limits_{j=1}^G w_j \\left(
                 \\alpha \\|\\beta_j\\|_2 + \\frac{1-\\alpha}{2} \\|\\beta_j\\|_2^2
             \\right)
         \\end{align*}
 
     where 
+    :math:`\\beta_0` is the intercept,
     :math:`\\beta` is the coefficient vector,
     :math:`X` is the feature matrix,
     :math:`y` is the response vector,
@@ -39,6 +41,8 @@ def objective(
 
     Parameters
     ----------
+    beta0 : float
+        Intercept.
     beta : (p,) np.ndarray
         Coefficient vector :math:`\\beta`.
     X : (n, p) np.ndarray
@@ -62,7 +66,7 @@ def objective(
         Group elastic net objective.
     """
     return core.solver.objective(
-        beta, X, y, groups, group_sizes, lmda, alpha, penalty,
+        beta0, beta, X, y, groups, group_sizes, lmda, alpha, penalty,
     )
 
 

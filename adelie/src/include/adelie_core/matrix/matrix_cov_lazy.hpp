@@ -112,8 +112,7 @@ public:
             return;
         }
         const auto& mat = _cache[ci];
-        out.noalias() = mat.block(_slice_map[i], p, j, q);
-        return;
+        out.noalias() = mat.block(_slice_map[i], j, p, q);
     }
 
     int cols() const override { return _X.cols(); }

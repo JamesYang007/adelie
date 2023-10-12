@@ -109,7 +109,7 @@ def test_state_basil_naive():
     G = 2
 
     _X = np.random.normal(0, 1, (n, p))
-    X = matrix.basil_naive_dense(_X, n_threads=4)
+    X = matrix.naive_dense(_X, n_threads=4)
     X_means = np.mean(_X, axis=0)
     groups = np.array([0, 1])
     group_sizes = np.array([1, p-1])
@@ -185,4 +185,3 @@ def test_state_basil_naive():
     assert np.allclose(strong_is_active, state.strong_is_active)
     assert np.allclose(grad, state.grad)
     assert np.allclose(resid, state.resid)
-    assert False

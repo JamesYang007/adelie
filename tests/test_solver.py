@@ -34,13 +34,6 @@ def create_test_data(
 
     # generate raw data
     X = np.random.normal(0, 1, (n, p))
-
-    # NOTE: MUST modify X such that each block has diagonal variance.
-    for g, gs in zip(groups, group_sizes):
-        block = X[:, g:g+gs]
-        _, _, vh = np.linalg.svd(block, full_matrices=True)
-        X[:, g:g+gs] = block @ vh.T
-
     beta = np.random.normal(0, 1, p)
     beta[np.random.choice(p, int(sparsity * p), replace=False)] = 0
     y = X @ beta + np.random.normal(0, 1, n)
@@ -81,11 +74,13 @@ def solve_cvxpy(
     alpha: float,
     penalty: np.ndarray,
     strong_set: np.ndarray,
+    intercept: bool,
 ):
     _, p = X.shape
     beta = cp.Variable(p)
+    beta0 = cp.Variable(1)
     expr = (
-        0.5 * cp.sum_squares(y - X @ beta)
+        0.5 * cp.sum_squares(y - X @ beta - beta0)
     )
     for g, gs, w in zip(groups, group_sizes, penalty):
         expr += lmda * w * (
@@ -97,9 +92,11 @@ def solve_cvxpy(
         for i in range(len(groups))
         if not (i in strong_set)
     ]
+    if not intercept:
+        constraints += [ beta0 == 0 ]
     prob = cp.Problem(cp.Minimize(expr), constraints)
     prob.solve()
-    return beta.value
+    return beta0.value, beta.value
 
 
 def run_solve_pin(state, X, y):
@@ -112,7 +109,8 @@ def run_solve_pin(state, X, y):
 
     # check beta matches (if not, at least that objective is better)
     betas = state.betas.toarray()
-    cvxpy_betas = np.array([
+    beta0s = state.intercepts
+    cvxpy_res = [
         solve_cvxpy(
             X=X,
             y=y,
@@ -122,13 +120,18 @@ def run_solve_pin(state, X, y):
             alpha=state.alpha,
             penalty=state.penalty,
             strong_set=state.strong_set,
+            intercept=state.intercept,
         )
         for lmda in lmdas
-    ])
+    ]
+    cvxpy_beta0s = [out[0] for out in cvxpy_res]
+    cvxpy_betas = [out[1] for out in cvxpy_res]
+
     is_beta_close = np.allclose(betas, cvxpy_betas, atol=1e-6)
     if not is_beta_close:
         my_objs = np.array([
             objective(
+                beta0,
                 beta,
                 X=X,
                 y=y,
@@ -138,10 +141,11 @@ def run_solve_pin(state, X, y):
                 alpha=state.alpha,
                 penalty=state.penalty,
             )
-            for beta, lmda in zip(betas, lmdas)
+            for beta0, beta, lmda in zip(beta0s, betas, lmdas)
         ])
         cvxpy_objs = np.array([
             objective(
+                beta0,
                 beta,
                 X=X,
                 y=y,
@@ -151,7 +155,7 @@ def run_solve_pin(state, X, y):
                 alpha=state.alpha,
                 penalty=state.penalty,
             )
-            for beta, lmda in zip(cvxpy_betas, lmdas)
+            for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
         ])
         assert np.all(my_objs <= cvxpy_objs)
 
@@ -159,7 +163,7 @@ def run_solve_pin(state, X, y):
 
 
 def test_solve_pin_naive():
-    def _test(n, p, G, S, alpha=1, sparsity=0.95, seed=0):
+    def _test(n, p, G, S, intercept=True, alpha=1, sparsity=0.95, seed=0):
         (
             X, 
             y, 
@@ -174,13 +178,15 @@ def test_solve_pin_naive():
         ) = create_test_data(
             n, p, G, S, alpha, sparsity, seed,
         )
-        resid = y
+        y_mean = np.mean(y)
+        resid = y - intercept * y_mean
         Xs = [
-            ad.matrix.pin_naive_dense(X, n_threads=2)
+            ad.matrix.naive_dense(X, n_threads=2)
         ]
         for Xpy in Xs:
             state = ad.state.pin_naive(
                 X=Xpy,
+                y_mean=y_mean,
                 groups=groups,
                 group_sizes=group_sizes,
                 alpha=alpha,
@@ -191,10 +197,12 @@ def test_solve_pin_naive():
                 resid=resid,
                 strong_beta=strong_beta,
                 strong_is_active=strong_is_active,
+                intercept=intercept,
             )
             state = run_solve_pin(state, X, y)
             state = ad.state.pin_naive(
                 X=Xpy,
+                y_mean=y_mean,
                 groups=groups,
                 group_sizes=group_sizes,
                 alpha=alpha,
@@ -204,7 +212,8 @@ def test_solve_pin_naive():
                 rsq=state.rsq,
                 resid=state.resid,
                 strong_beta=state.strong_beta,
-                strong_is_active=state.strong_is_active
+                strong_is_active=state.strong_is_active,
+                intercept=intercept,
             )
             run_solve_pin(state, X, y)
 
@@ -241,8 +250,8 @@ def test_solve_pin_cov():
 
         # list of different types of cov matrices to test
         As = [
-            ad.matrix.pin_cov_dense(A, n_threads=3),
-            ad.matrix.pin_cov_lazy(X, n_threads=3),
+            ad.matrix.cov_dense(A, n_threads=3),
+            ad.matrix.cov_lazy(X, n_threads=3),
         ]
 
         for Apy in As:

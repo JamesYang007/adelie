@@ -44,6 +44,7 @@ struct StatePinBase
     const map_cvec_value_t lmda_path;
 
     /* configurations */
+    const bool intercept;
     const size_t max_iters;
     const value_t tol;
     const value_t rsq_slope_tol;
@@ -62,6 +63,7 @@ struct StatePinBase
     dyn_vec_index_t active_begins;
     dyn_vec_index_t active_order;
     dyn_vec_sp_vec_t betas;
+    dyn_vec_value_t intercepts;
     dyn_vec_value_t rsqs;
     dyn_vec_value_t lmdas;
     dyn_vec_vec_bool_t strong_is_actives;
@@ -86,6 +88,7 @@ struct StatePinBase
         const Eigen::Ref<const vec_value_t>& strong_vars,
         const dyn_vec_mat_value_t& strong_transforms,
         const Eigen::Ref<const vec_value_t>& lmda_path, 
+        bool intercept,
         size_t max_iters,
         value_t tol,
         value_t rsq_slope_tol,
@@ -108,6 +111,7 @@ struct StatePinBase
         strong_vars(strong_vars.data(), strong_vars.size()),
         strong_transforms(&strong_transforms),
         lmda_path(lmda_path.data(), lmda_path.size()),
+        intercept(intercept),
         max_iters(max_iters),
         tol(tol),
         rsq_slope_tol(rsq_slope_tol),
@@ -148,6 +152,7 @@ struct StatePinBase
         );
 
         betas.reserve(lmda_path.size());
+        intercepts.reserve(lmda_path.size());
         rsqs.reserve(lmda_path.size());
         lmdas.reserve(lmda_path.size());
         strong_is_actives.reserve(lmda_path.size());
