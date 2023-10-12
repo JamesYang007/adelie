@@ -34,6 +34,8 @@
       ~pin_cov_64.betas
       ~pin_cov_64.group_sizes
       ~pin_cov_64.groups
+      ~pin_cov_64.intercept
+      ~pin_cov_64.intercepts
       ~pin_cov_64.iters
       ~pin_cov_64.lmda_path
       ~pin_cov_64.lmdas
@@ -87,6 +89,8 @@
    .. autoattribute:: betas
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
+   .. autoattribute:: intercept
+   .. autoattribute:: intercepts
    .. autoattribute:: iters
    .. autoattribute:: lmda_path
    .. autoattribute:: lmdas

@@ -30,6 +30,8 @@
       ~StatePinBase64.betas
       ~StatePinBase64.group_sizes
       ~StatePinBase64.groups
+      ~StatePinBase64.intercept
+      ~StatePinBase64.intercepts
       ~StatePinBase64.iters
       ~StatePinBase64.lmda_path
       ~StatePinBase64.lmdas
@@ -77,6 +79,8 @@
    .. autoattribute:: betas
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
+   .. autoattribute:: intercept
+   .. autoattribute:: intercepts
    .. autoattribute:: iters
    .. autoattribute:: lmda_path
    .. autoattribute:: lmdas

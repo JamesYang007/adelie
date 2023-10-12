@@ -396,7 +396,7 @@ document.write(`
 <td><p>Create a new instance of a pin naive state using given state and new core state.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_cov_32.default_init" title="adelie.state.pin_cov_32.default_init"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_init</span></code></a>(base_type, *, A, groups, ...)</p></td>
-<td><p>Default initialization method.</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -432,6 +432,12 @@ document.write(`
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_cov_32.groups" title="adelie.state.pin_cov_32.groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">groups</span></code></a></p></td>
 <td><p>List of starting indices to each group where <cite>G</cite> is the number of groups.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_cov_32.intercept" title="adelie.state.pin_cov_32.intercept"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercept</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> to fit with intercept.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_cov_32.intercepts" title="adelie.state.pin_cov_32.intercepts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercepts</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">intercepts[i]</span></code> is the intercept at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_cov_32.iters" title="adelie.state.pin_cov_32.iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iters</span></code></a></p></td>
 <td><p>Number of coordinate descents taken.</p></td>
@@ -573,8 +579,7 @@ Default is <code class="docutils literal notranslate"><span class="pre">logging.
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.state.pin_cov_32.default_init">
 <span class="sig-name descname"><span class="pre">default_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StatePinCov64</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">StatePinCov32</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="adelie.matrix.base.html#adelie.matrix.base" title="adelie.matrix.base"><span class="pre">base</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">MatrixCovBase64</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">MatrixCovBase32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_grad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_is_active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_slope_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_curv_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float32</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float64</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.pin_cov_32.default_init" title="Link to this definition">#</a></dt>
-<dd><p>Default initialization method.</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.state.pin_cov_32.A">
@@ -648,6 +653,18 @@ It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</sp
 <span class="sig-name descname"><span class="pre">groups</span></span><a class="headerlink" href="#adelie.state.pin_cov_32.groups" title="Link to this definition">#</a></dt>
 <dd><p>List of starting indices to each group where <cite>G</cite> is the number of groups.
 <code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_cov_32.intercept">
+<span class="sig-name descname"><span class="pre">intercept</span></span><a class="headerlink" href="#adelie.state.pin_cov_32.intercept" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> to fit with intercept.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_cov_32.intercepts">
+<span class="sig-name descname"><span class="pre">intercepts</span></span><a class="headerlink" href="#adelie.state.pin_cov_32.intercepts" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">intercepts[i]</span></code> is the intercept at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -908,6 +925,8 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_cov_32.betas"><code class="docutils literal notranslate"><span class="pre">pin_cov_32.betas</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_cov_32.group_sizes"><code class="docutils literal notranslate"><span class="pre">pin_cov_32.group_sizes</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_cov_32.groups"><code class="docutils literal notranslate"><span class="pre">pin_cov_32.groups</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_cov_32.intercept"><code class="docutils literal notranslate"><span class="pre">pin_cov_32.intercept</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_cov_32.intercepts"><code class="docutils literal notranslate"><span class="pre">pin_cov_32.intercepts</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_cov_32.iters"><code class="docutils literal notranslate"><span class="pre">pin_cov_32.iters</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_cov_32.lmda_path"><code class="docutils literal notranslate"><span class="pre">pin_cov_32.lmda_path</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_cov_32.lmdas"><code class="docutils literal notranslate"><span class="pre">pin_cov_32.lmdas</span></code></a></li>

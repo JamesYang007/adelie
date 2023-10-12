@@ -34,6 +34,8 @@
       ~pin_cov_32.betas
       ~pin_cov_32.group_sizes
       ~pin_cov_32.groups
+      ~pin_cov_32.intercept
+      ~pin_cov_32.intercepts
       ~pin_cov_32.iters
       ~pin_cov_32.lmda_path
       ~pin_cov_32.lmdas
@@ -87,6 +89,8 @@
    .. autoattribute:: betas
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
+   .. autoattribute:: intercept
+   .. autoattribute:: intercepts
    .. autoattribute:: iters
    .. autoattribute:: lmda_path
    .. autoattribute:: lmdas
