@@ -70,63 +70,6 @@ def objective(
     )
 
 
-def lambda_max(
-    *,
-    X: np.ndarray,
-    y: np.ndarray,
-    groups: np.ndarray,
-    group_sizes: np.ndarray,
-    alpha: float,
-    penalty: np.ndarray,
-):
-    """Computes the largest :math:`\\lambda` in the regularization sequence.
-
-    The largest :math:`\\lambda` in the sequence is the smallest
-    :math:`\\lambda` such that the optimal coefficient vector :math:`\\beta \\equiv 0`.
-
-    TODO
-    """
-    grad = X.T @ y
-    abs_grad = np.array([
-        np.linalg.norm(grad[g:g+gs])
-        for g, gs in zip(groups, group_sizes)
-    ])
-    factor = 1e-3 if alpha <= 0 else alpha
-    lmdas = abs_grad / (factor * penalty)
-    return np.max(lmdas[~np.isnan(lmdas)])
-
-
-def create_lambdas(
-    *,
-    X: np.ndarray,
-    y: np.ndarray,
-    groups: np.ndarray,
-    group_sizes: np.ndarray,
-    alpha: float,
-    penalty: np.ndarray,
-    n_lambdas: int =100,
-    min_ratio: float =1e-4,
-):
-    """Creates a log-spaced regularization sequence.
-
-    The generated sequence has length ``n_lambdas``.
-    It is decreasing and equally-spaced
-    in log-scale such that the ratio of the smallest to largest is given by ``min_ratio``.
-
-    TODO
-    """
-    lmda_max = lambda_max(
-        X=X, 
-        y=y, 
-        groups=groups, 
-        group_sizes=group_sizes, 
-        alpha=alpha, 
-        penalty=penalty,
-    )
-    log_factor = np.log(min_ratio) /(n_lambdas-1)
-    return lmda_max * np.exp(log_factor * np.arange(n_lambdas))
-
-
 def solve_pin(
     state,
     logger=logger.logger,
@@ -139,8 +82,6 @@ def solve_pin(
     where :math:`S` denotes the strong set,
     that is, the coefficient vector is forced to be zero
     for groups outside the strong set.
-    We also assume that :math:`X` is such that the column blocks :math:`X_k`
-    defined by the groups have diagonal :math:`X_k^\\top X_k`.
 
     Parameters
     ----------
@@ -155,7 +96,7 @@ def solve_pin(
 
     See Also
     --------
-    adelie.state.state_pin_naive
+    adelie.state.pin_naive
     adelie.solver.objective
     """
     # mapping of each state type to the corresponding solver
@@ -173,6 +114,49 @@ def solve_pin(
     # raise any errors
     if out["error"] != "":
         logger.warning(RuntimeError(out["error"]))
+
+    # return a subsetted Python result object
+    core_state = out["state"]
+    state = type(state).create_from_core(state, core_state)
+
+    return state
+
+
+def solve_basil(
+    state,
+    logger=logger.logger,
+):
+    """Solves the group elastic net problem using BASIL.
+
+    Parameters
+    ----------
+    state
+        A basil state object.
+
+    Returns
+    -------
+    result
+        The resulting state after running the solver.
+        The type is the same as that of ``state``.
+
+    See Also
+    --------
+    adelie.state.basil_naive
+    adelie.solver.objective
+    """
+    # mapping of each state type to the corresponding solver
+    f_dict = {
+        ad.state.basil_naive_64: core.solver.solve_basil_naive_64,
+        ad.state.basil_naive_32: core.solver.solve_basil_naive_32,
+    }
+
+    # solve group elastic net
+    f = f_dict[type(state)]
+    out = f(state)
+
+    # raise any errors
+    if out["error"] != "":
+        logger.error(RuntimeError(out["error"]))
 
     # return a subsetted Python result object
     core_state = out["state"]

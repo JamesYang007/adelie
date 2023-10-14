@@ -31,18 +31,14 @@ void update_strong_derived_naive(
     const auto& group_sizes = state.group_sizes;
     const auto& strong_set = state.strong_set;
     const auto& strong_begins = state.strong_begins;
-    const auto& grad = state.grad;
     const auto intercept = state.intercept;
     const auto n_threads = state.n_threads;
     auto& X = *state.X;
-    auto& strong_idx_map = state.strong_idx_map;
-    auto& strong_slice_map = state.strong_slice_map;
-    auto& strong_X_blocks = state.strong_X_blocks;
-    auto& strong_X_block_vs = state.strong_X_block_vs;
+    auto& strong_X_means = state.strong_X_means;
+    auto& strong_transforms = state.strong_transforms;
     auto& strong_vars = state.strong_vars;
-    auto& strong_grad = state.strong_grad;
 
-    const auto old_strong_size = strong_vars.size();
+    const auto old_strong_size = strong_transforms.size();
     const auto new_strong_size = strong_set.size();
     const int new_strong_value_size = (
         (strong_begins.size() == 0) ? 0 : (
@@ -50,70 +46,47 @@ void update_strong_derived_naive(
         )
     );
 
-    strong_idx_map.reserve(new_strong_value_size);
-    strong_slice_map.reserve(new_strong_value_size);
-    strong_X_blocks.resize(new_strong_size);
-    strong_X_block_vs.resize(new_strong_size);
+    strong_X_means.resize(new_strong_value_size);    
+    strong_transforms.resize(new_strong_size);
     strong_vars.resize(new_strong_value_size, 0);
-    strong_grad.resize(new_strong_value_size);
+
+    util::colmat_type<value_t> Xi; // buffer
 
     for (size_t i = old_strong_size; i < new_strong_size; ++i) {
         const auto g = groups[strong_set[i]];
         const auto gs = group_sizes[strong_set[i]];
         const auto sb = strong_begins[i];
         const auto n = X.rows();
-        auto& Xi = strong_X_blocks[i];
-
-        /* update strong_idx_map, strong_slice_map */
-        for (int j = 0; j < gs; ++j) {
-            strong_idx_map[g + j] = i;
-            strong_slice_map[g + j] = j;
-        }
 
         // get dense version of the group matrix block
         Xi.resize(n, gs);
         X.to_dense(g, gs, Xi);
 
+        // compute column-means
+        Eigen::Map<vec_value_t> Xi_means(
+            strong_X_means.data() + sb, gs
+        );
+        Xi_means = X_means.segment(g, gs);
+
         // if intercept, must center first
         if (intercept) {
             // TODO: PARALLELIZE!!
-            Xi.rowwise() -= X_means.segment(g, gs).matrix();
+            Xi.rowwise() -= Xi_means.matrix();
         }
 
         // transform data
         Eigen::BDCSVD<util::colmat_type<value_t>> solver(
             Xi,
-            Eigen::ComputeThinU | Eigen::ComputeFullV
+            Eigen::ComputeFullV
         );
-        const auto& U = solver.matrixU();
         const auto& D = solver.singularValues();
-        const auto m = std::min<int>(n, gs);
 
-        /* update strong_X_blocks */
-        const auto n_threads_capped = std::min<size_t>(n_threads, n);
-        // TODO: PARALLELIZE!!
-        Xi.middleCols(m, gs-m).setZero();
-        std::cerr << U.rows() << " " << U.cols() << std::endl;
-        std::cerr << D.size() << std::endl;
-        std::cerr << solver.matrixV().rows() << " " << solver.matrixV().cols() << std::endl;
-        std::cerr << m << std::endl;
-        auto Xi_sub = Xi.leftCols(m);
-        Xi_sub.array() = U.array().rowwise() * D.transpose().array();
+        /* update strong_transforms */
+        strong_transforms[i] = std::move(solver.matrixV());
 
-    PRINT("f");
-        /* update strong_X_block_vs */
-        strong_X_block_vs[i] = std::move(solver.matrixV());
-
-    PRINT("g");
         /* update strong_vars */
         Eigen::Map<vec_value_t> svars(strong_vars.data() + sb, gs);
-        svars.head(m) = D.array().square();
-
-    PRINT("h");
-        /* update strong_grad */
-        Eigen::Map<vec_value_t> sgrad(strong_grad.data() + sb, gs);
-        sgrad.matrix().noalias() = grad.segment(g, gs).matrix() * strong_X_block_vs[i];
-    PRINT("i");
+        svars.head(D.size()) = D.array().square();
     }
 }
 
@@ -133,16 +106,28 @@ void update_edpp_states(
 
     if (!state.setup_edpp || !state.use_edpp) return;
 
+    const auto& X_means = state.X_means;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto& penalty = state.penalty;
     const auto& resid = state.resid;
     const auto& abs_grad = state.abs_grad;
+    const auto& strong_X_means = state.strong_X_means;
+    const auto& strong_beta = state.strong_beta;
+    const auto intercept = state.intercept;
     auto& X = *state.X;
     auto& edpp_resid_0 = state.edpp_resid_0;
     auto& edpp_v1_0 = state.edpp_v1_0;
 
     edpp_resid_0 = resid;
+    if (intercept) {
+        const auto xbar_beta = (
+            Eigen::Map<const vec_value_t>(strong_X_means.data(), strong_X_means.size()) * 
+            Eigen::Map<const vec_value_t>(strong_beta.data(), strong_beta.size())
+        ).sum();
+        // TODO: parallelize
+        edpp_resid_0 += xbar_beta;
+    }
 
     Eigen::Index g_star;
     vec_value_t::NullaryExpr(
@@ -153,9 +138,16 @@ void update_edpp_states(
     ).maxCoeff(&g_star);
 
     vec_value_t out(group_sizes[g_star]);
-    X.bmul(groups[g_star], group_sizes[g_star], resid, out);
+    X.bmul(groups[g_star], group_sizes[g_star], edpp_resid_0, out);
     edpp_v1_0.resize(resid.size());
     X.btmul(groups[g_star], group_sizes[g_star], out, edpp_v1_0);
+    if (intercept) {
+        const auto xbar_star_out = (
+            out * X_means.segment(groups[g_star], group_sizes[g_star])
+        ).sum();
+        // TODO: parallelize
+        edpp_v1_0 -= xbar_star_out;
+    }
 }
 
 
@@ -184,9 +176,10 @@ struct StateBasilNaive : StateBasilBase<
     using typename base_t::map_cvec_value_t;
     using typename base_t::dyn_vec_value_t;
     using typename base_t::dyn_vec_index_t;
+    using typename base_t::dyn_vec_bool_t;
     using umap_index_t = std::unordered_map<index_t, index_t>;
     using matrix_t = MatrixType;
-    using dyn_vec_mat_t = std::vector<util::colmat_type<value_t>>;
+    using dyn_vec_mat_value_t = std::vector<util::rowmat_type<value_t>>;
 
     /* static states */
     const map_cvec_value_t X_means;
@@ -201,17 +194,20 @@ struct StateBasilNaive : StateBasilBase<
     /* dynamic states */
     matrix_t* X;
     vec_value_t resid;
-    umap_index_t strong_idx_map;
-    umap_index_t strong_slice_map;
-    dyn_vec_mat_t strong_X_blocks;
-    dyn_vec_mat_t strong_X_block_vs;
+    value_t resid_sum;
+    dyn_vec_value_t strong_X_means;
+    dyn_vec_mat_value_t strong_transforms;
     dyn_vec_value_t strong_vars;
-    dyn_vec_value_t strong_grad;
 
     dyn_vec_index_t edpp_safe_set;
     uset_index_t edpp_safe_hashset;
     vec_value_t edpp_v1_0;
     vec_value_t edpp_resid_0;
+
+    /* buffers */
+    vec_value_t resid_prev_valid;
+    dyn_vec_value_t strong_beta_prev_valid; 
+    dyn_vec_bool_t strong_is_active_prev_valid;
 
     explicit StateBasilNaive(
         matrix_t& X,
@@ -230,10 +226,12 @@ struct StateBasilNaive : StateBasilBase<
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_value_t>& lmda_path,
         value_t lmda_max,
+        value_t min_ratio,
+        size_t lmda_path_size,
         size_t delta_lmda_path_size,
         size_t delta_strong_size,
         size_t max_strong_size,
-        bool strong_rule,
+        const std::string& strong_rule,
         size_t max_iters,
         value_t tol,
         value_t rsq_slope_tol,
@@ -241,6 +239,8 @@ struct StateBasilNaive : StateBasilBase<
         value_t newton_tol,
         size_t newton_max_iters,
         bool early_exit,
+        bool setup_lmda_max,
+        bool setup_lmda_path,
         bool intercept,
         size_t n_threads,
         const Eigen::Ref<const vec_index_t>& strong_set,
@@ -251,10 +251,10 @@ struct StateBasilNaive : StateBasilBase<
         const Eigen::Ref<const vec_value_t>& grad
     ):
         base_t(
-            groups, group_sizes, alpha, penalty, lmda_path, lmda_max,
+            groups, group_sizes, alpha, penalty, lmda_path, lmda_max, min_ratio, lmda_path_size,
             delta_lmda_path_size, delta_strong_size, max_strong_size, strong_rule,
             max_iters, tol, rsq_slope_tol, rsq_curv_tol, 
-            newton_tol, newton_max_iters, early_exit, intercept, n_threads,
+            newton_tol, newton_max_iters, early_exit, setup_lmda_max, setup_lmda_path, intercept, n_threads,
             strong_set, strong_beta, strong_is_active, rsq, lmda, grad
         ),
         X_means(X_means.data(), X_means.size()),
@@ -265,6 +265,7 @@ struct StateBasilNaive : StateBasilBase<
         setup_edpp(setup_edpp),
         X(&X),
         resid(resid),
+        resid_sum(resid.sum()),
         edpp_safe_set(edpp_safe_set.data(), edpp_safe_set.data() + edpp_safe_set.size()),
         edpp_safe_hashset(edpp_safe_set.data(), edpp_safe_set.data() + edpp_safe_set.size()),
         edpp_v1_0(edpp_v1_0),
@@ -284,7 +285,6 @@ struct StateBasilNaive : StateBasilBase<
 
         /* initialize edpp_safe_set */
         if (setup_edpp) {
-    PRINT("g");
             edpp_safe_hashset.clear();
             edpp_safe_set.clear();
 
@@ -292,20 +292,17 @@ struct StateBasilNaive : StateBasilBase<
                 // EDPP safe set must be a super-set of strong set.
                 // Since strong_set is guaranteed to contain the true active set,
                 // everything outside strong_set has 0 coefficient.
-    PRINT("h");
                 edpp_safe_set.insert(
                     edpp_safe_set.end(),
                     base_t::strong_set.begin(), 
                     base_t::strong_set.end()
                 );
             } else {
-    PRINT("h");
                 // If EDPP is not used, every variable is safe.
                 edpp_safe_set.resize(base_t::groups.size());
                 std::iota(edpp_safe_set.begin(), edpp_safe_set.end(), 0);
             }
             
-    PRINT("i");
             /* initialize edpp_safe_hashset */
             edpp_safe_hashset.insert(edpp_safe_set.begin(), edpp_safe_set.end());
 

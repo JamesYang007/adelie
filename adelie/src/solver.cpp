@@ -1,9 +1,11 @@
 #include "decl.hpp"
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
+#include <adelie_core/state/state_basil_naive.hpp>
 #include <adelie_core/state/state_pin_cov.hpp>
 #include <adelie_core/state/state_pin_naive.hpp>
 #include <adelie_core/solver/solve_basil_base.hpp>
+#include <adelie_core/solver/solve_basil_naive.hpp>
 #include <adelie_core/solver/solve_pin_cov.hpp>
 #include <adelie_core/solver/solve_pin_naive.hpp>
 
@@ -96,13 +98,45 @@ py::dict solve_pin_cov(StateType state)
 } 
 
 // =================================================================
-// Solve Method
+// Solve Basil Method
 // =================================================================
+
+template <class StateType>
+py::dict solve_basil_naive(StateType state)
+{
+    const auto update_coefficients_f = [](
+        const auto& L,
+        const auto& v,
+        auto l1,
+        auto l2,
+        auto tol,
+        size_t max_iters,
+        auto& x,
+        auto& iters,
+        auto& buffer1,
+        auto& buffer2
+    ){
+        ad::solver::update_coefficients(
+            L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
+        );
+    };
+
+    std::string error;
+    try {
+        ad::solver::naive::solve_basil(state, update_coefficients_f);
+    } catch(const std::exception& e) {
+        error = e.what(); 
+    }
+
+    return py::dict("state"_a=state, "error"_a=error);
+} 
 
 template <class T> 
 using state_pin_naive_t = ad::state::StatePinNaive<ad::matrix::MatrixNaiveBase<T>>;
 template <class T> 
 using state_pin_cov_t = ad::state::StatePinCov<ad::matrix::MatrixCovBase<T>>;
+template <class T> 
+using state_basil_naive_t = ad::state::StateBasilNaive<ad::matrix::MatrixNaiveBase<T>>;
 
 void register_solver(py::module_& m)
 {
@@ -115,5 +149,7 @@ void register_solver(py::module_& m)
     m.def("solve_pin_cov_64", &solve_pin_cov<state_pin_cov_t<double>>);
     m.def("solve_pin_cov_32", &solve_pin_cov<state_pin_cov_t<float>>);
 
-    /* solve method */
+    /* solve basil method */
+    m.def("solve_basil_naive_64", &solve_basil_naive<state_basil_naive_t<double>>);
+    m.def("solve_basil_naive_32", &solve_basil_naive<state_basil_naive_t<float>>);
 }

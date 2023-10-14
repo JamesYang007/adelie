@@ -32,14 +32,9 @@ adelie.matrix
     :toctree: generated/
 
 
-    base
-    pin_naive_dense
-    pin_cov_dense
-    pin_cov_lazy
-    MatrixPinCovBase32
-    MatrixPinCovBase64
-    MatrixPinNaiveBase32
-    MatrixPinNaiveBase64
+    naive_dense
+    cov_dense
+    cov_lazy
 
 
 adelie.state
@@ -54,13 +49,9 @@ adelie.state
 
 
     deduce_states
-    base
     pin_cov
-    pin_cov_32
-    pin_cov_64
     pin_naive
-    pin_naive_32
-    pin_naive_64
+    basil_naive
 
 
 adelie.solver
@@ -74,24 +65,35 @@ adelie.solver
     :toctree: generated/
 
 
-    create_lambdas
-    lambda_max
     objective
     solve_pin
+    solve_basil
 
 
-adelie.adelie_core
-------------------
+Internal
+--------
 
 
-.. currentmodule:: adelie.adelie_core
+.. currentmodule:: adelie
 
 
 .. autosummary::
     :toctree: generated/
+    
 
-
-    state.StateBasilBase32
-    state.StateBasilBase64
-    state.StatePinBase32
-    state.StatePinBase64
+    matrix.base
+    matrix.MatrixCovBase32
+    matrix.MatrixCovBase64
+    matrix.MatrixNaiveBase32
+    matrix.MatrixNaiveBase64
+    state.base
+    state.pin_cov_32
+    state.pin_cov_64
+    state.pin_naive_32
+    state.pin_naive_64
+    state.basil_naive_32
+    state.basil_naive_64
+    adelie_core.state.StateBasilBase32
+    adelie_core.state.StateBasilBase64
+    adelie_core.state.StatePinBase32
+    adelie_core.state.StatePinBase64

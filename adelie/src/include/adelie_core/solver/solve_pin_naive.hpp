@@ -234,25 +234,27 @@ inline void solve_pin(
     const auto& strong_X_means = state.strong_X_means;
     const auto& lmda_path = state.lmda_path;
     const auto& resid = state.resid;
+    const auto& resid_sum = state.resid_sum;
+    const auto& rsq = state.rsq;
     const auto intercept = state.intercept;
     const auto tol = state.tol;
     const auto max_iters = state.max_iters;
     const auto rsq_slope_tol = state.rsq_slope_tol;
     const auto rsq_curv_tol = state.rsq_curv_tol;
+    auto& strong_is_active = state.strong_is_active;
     auto& active_set = state.active_set;
     auto& active_g1 = state.active_g1;
     auto& active_g2 = state.active_g2;
     auto& active_begins = state.active_begins;
     auto& active_order = state.active_order;
-    auto& strong_is_active = state.strong_is_active;
     auto& betas = state.betas;
     auto& intercepts = state.intercepts;
     auto& rsqs = state.rsqs;
     auto& lmdas = state.lmdas;
     auto& resids = state.resids;
+    auto& resid_sums = state.resid_sums;
     auto& strong_is_actives = state.strong_is_actives;
     auto& strong_betas = state.strong_betas;
-    auto& rsq = state.rsq;
     auto& iters = state.iters;
     auto& time_strong_cd = state.time_strong_cd;
     
@@ -397,6 +399,7 @@ inline void solve_pin(
         rsqs.emplace_back(rsq);
         lmdas.emplace_back(lmda_path[l]);
         resids.emplace_back(resid);
+        resid_sums.emplace_back(resid_sum);
         strong_is_actives.emplace_back(strong_is_active);
         strong_betas.emplace_back(strong_beta);
 
