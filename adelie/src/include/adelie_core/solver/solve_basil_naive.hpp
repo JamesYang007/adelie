@@ -351,8 +351,6 @@ size_t kkt(
             const auto abs_grad_lk = grad_lk.matrix().norm();
             const auto lmda_l = state_pin_naive.lmdas[l];
             if (abs_grad_lk > lmda_l * alpha * pk * (1 + 1e-6)) {
-PRINT(abs_grad_lk);
-PRINT(lmda_l * alpha * pk * (1 + 1e-6));
                 n_valid_solutions = l;
                 break;
             }
@@ -518,7 +516,7 @@ inline void solve_basil(
         lmda_path.data() + lmda_path.size(),
         [&](auto x) { return x <= lmda_max; }
     ) - lmda_path.data();
-PRINT(large_lmda_path_size);
+
     // if there is some large lambda or EDPP setup is needed, do initial fit.
     if (large_lmda_path_size || setup_edpp) {
         // create a lambda path containing only lmdas > lambda_max
@@ -579,9 +577,7 @@ PRINT(large_lmda_path_size);
     // is right at the solution at lambda_max if it needed to be fit from before.
     // The latter state is needed if EDPP states need to be updated.
     // Otherwise, EDPP states are unmodified.
-PRINT(Eigen::Map<const vec_index_t>(state.edpp_safe_set.data(), state.edpp_safe_set.size()));
     state::update_edpp_states(state);
-PRINT(Eigen::Map<const vec_index_t>(state.edpp_safe_set.data(), state.edpp_safe_set.size()));
 
     // From this point on, all EDPP states are valid, whether they were updated or not.
 
@@ -613,20 +609,14 @@ PRINT(Eigen::Map<const vec_index_t>(state.edpp_safe_set.data(), state.edpp_safe_
             lmda_path_idx, 
             std::min(delta_lmda_path_size, lmda_path.size() - lmda_path_idx)
         );
-PRINT(lmda_batch);
 
         // ==================================================================================== 
         // Screening step
         // ==================================================================================== 
-PRINT(Eigen::Map<const vec_index_t>(state.strong_set.data(), state.strong_set.size()));
         naive::screen(
             state,
             lmda_batch[0]
         );
-PRINT(Eigen::Map<const vec_index_t>(state.strong_set.data(), state.strong_set.size()));
-for (const auto& tr : state.strong_transforms) {
-    PRINT(tr);
-}
 
         try {
             // ==================================================================================== 
@@ -635,17 +625,12 @@ for (const auto& tr : state.strong_transforms) {
             // Save all current valid quantities that will be modified in-place by fit.
             // This is needed for the invariance step in case no valid solutions are found.
             save_prev_valid();
-PRINT(Eigen::Map<const vec_safe_bool_t>(strong_is_active.data(), strong_is_active.size()));
             auto&& state_pin_naive = naive::fit(
                 state,
                 lmda_batch,
                 update_coefficients_f,
                 check_user_interrupt
             );
-PRINT(Eigen::Map<const vec_safe_bool_t>(strong_is_active.data(), strong_is_active.size()));
-for (int i = 0; i < state_pin_naive.betas.size(); ++i) {
-    PRINT(state_pin_naive.betas[i]);
-}
 
             // ==================================================================================== 
             // KKT step
@@ -658,10 +643,6 @@ for (int i = 0; i < state_pin_naive.betas.size(); ++i) {
                 grads
             );
 
-PRINT(n_valid_solutions);
-for (int i = 0; i < n_valid_solutions; ++i) {
-    PRINT(grads[i]);
-}
             // ==================================================================================== 
             // Invariance step
             // ==================================================================================== 
