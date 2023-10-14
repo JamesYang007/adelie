@@ -1504,12 +1504,20 @@ class basil_naive_base(basil_base):
         )
 
         # ================ strong_is_active check ====================
-        expected = np.array([
-            np.any(self.strong_beta[i:i+s] != 0)
-            for i, s in zip(self.strong_begins, self.group_sizes[self.strong_set])
-        ])
+        # This one is tricky! Since we keep track of ever-active set,
+        # some coefficients may have once been active but now zero'ed out.
+        # We can only check that if the non-zero coefficient blocks are active.
+        nzn_idxs = np.array([
+            i 
+            for i, sb, gs in zip(
+                np.arange(len(self.strong_set)),
+                self.strong_begins, 
+                self.group_sizes[self.strong_set],
+            )
+            if np.any(self.strong_beta[sb:sb+gs] != 0)
+        ], dtype=int)
         self._check(
-            np.all(self.strong_is_active == expected),
+            np.all(self.strong_is_active[nzn_idxs]),
             "check strong_is_active is only active on non-zeros of strong_beta",
             method, logger,
         )
