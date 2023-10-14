@@ -119,7 +119,6 @@ def test_state_basil_naive():
     ])
     y_mean = 0.0
     y_var = 1.0
-    setup_edpp = True
     alpha = 1.0
     penalty = np.random.uniform(0, 1, G)
     strong_set = np.array([0, 1])
@@ -141,7 +140,6 @@ def test_state_basil_naive():
         X_group_norms=X_group_norms,
         y_mean=y_mean,
         y_var=y_var,
-        setup_edpp=setup_edpp,
         resid=resid,
         edpp_safe_set=edpp_safe_set,
         edpp_v1_0=edpp_v1_0,
@@ -167,7 +165,6 @@ def test_state_basil_naive():
     assert np.allclose(X_group_norms, state.X_group_norms)
     assert np.allclose(y_mean, state.y_mean)
     assert np.allclose(y_var, state.y_var)
-    assert np.allclose(setup_edpp, state.setup_edpp)
     assert np.allclose(edpp_safe_set, state.edpp_safe_set)
     assert np.allclose(edpp_v1_0, state.edpp_v1_0)
     assert np.allclose(edpp_resid_0, state.edpp_resid_0)

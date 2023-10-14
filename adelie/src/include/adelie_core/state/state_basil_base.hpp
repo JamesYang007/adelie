@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <string>
 #include <unordered_set>
 #include <adelie_core/util/types.hpp>
 
@@ -66,7 +67,7 @@ void update_strong_derived_base(
 
     /* update strong_g1, strong_g2, strong_begins */
     size_t strong_value_size = (
-        (strong_begins.size() == 0) ? 
+        (old_strong_size == 0) ? 
         0 : (strong_begins.back() + group_sizes[strong_set[old_strong_size-1]])
     );
     for (size_t i = old_strong_size; i < strong_set.size(); ++i) {
@@ -91,7 +92,7 @@ void update_strong_derived_base(
         strong_order.begin(),
         strong_order.end(),
         [&](auto i, auto j) {
-            return groups[strong_set[strong_order[i]]] < groups[strong_set[strong_order[j]]];
+            return groups[strong_set[i]] < groups[strong_set[j]];
         }
     );
 
@@ -101,6 +102,13 @@ void update_strong_derived_base(
     /* update strong_is_active */
     strong_is_active.resize(strong_set.size(), false);
 }
+
+enum class strong_rule_type
+{
+    _default,
+    _fixed_greedy,
+    _safe
+};
 
 template <class ValueType,
           class IndexType=Eigen::Index,
@@ -116,6 +124,7 @@ struct StateBasilBase
     using vec_value_t = util::rowvec_type<value_t>;
     using vec_index_t = util::rowvec_type<index_t>;
     using vec_bool_t = util::rowvec_type<bool_t>;
+    using vec_safe_bool_t = util::rowvec_type<safe_bool_t>;
     using sp_vec_value_t = util::sp_vec_type<value_t, Eigen::RowMajor, index_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
     using map_cvec_index_t = Eigen::Map<const vec_index_t>;
@@ -129,15 +138,17 @@ struct StateBasilBase
     const map_cvec_index_t group_sizes;
     const value_t alpha;
     const map_cvec_value_t penalty;
-    const map_cvec_value_t lmda_path;
-    const value_t lmda_max;
 
     /* configurations */
+    // lambda path configs
+    const value_t min_ratio;
+    const size_t lmda_path_size;
+
     // basil iteration configs
     const size_t delta_lmda_path_size;
     const size_t delta_strong_size;
     const size_t max_strong_size;
-    const bool strong_rule;
+    const strong_rule_type strong_rule;
 
     // convergence configs
     const size_t max_iters;
@@ -149,10 +160,14 @@ struct StateBasilBase
     const bool early_exit;
 
     // other configs
+    const bool setup_lmda_max;
+    const bool setup_lmda_path;
     const bool intercept;
     const size_t n_threads;
 
     /* dynamic states */
+    value_t lmda_max;
+    vec_value_t lmda_path;
     uset_index_t strong_hashset;
     dyn_vec_index_t strong_set; 
     dyn_vec_index_t strong_g1;
@@ -166,9 +181,9 @@ struct StateBasilBase
     vec_value_t grad;
     vec_value_t abs_grad;
     dyn_vec_sp_vec_t betas;
+    dyn_vec_value_t intercepts;
     dyn_vec_value_t rsqs;
     dyn_vec_value_t lmdas;
-    dyn_vec_value_t intercepts;
 
     /* diagnostics */
     // TODO: fill
@@ -182,10 +197,12 @@ struct StateBasilBase
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_value_t>& lmda_path,
         value_t lmda_max,
+        value_t min_ratio,
+        size_t lmda_path_size,
         size_t delta_lmda_path_size,
         size_t delta_strong_size,
         size_t max_strong_size,
-        bool strong_rule,
+        const std::string& strong_rule,
         size_t max_iters,
         value_t tol,
         value_t rsq_slope_tol,
@@ -193,6 +210,8 @@ struct StateBasilBase
         value_t newton_tol,
         size_t newton_max_iters,
         bool early_exit,
+        bool setup_lmda_max,
+        bool setup_lmda_path,
         bool intercept,
         size_t n_threads,
         const Eigen::Ref<const vec_index_t>& strong_set,
@@ -206,12 +225,12 @@ struct StateBasilBase
         group_sizes(group_sizes.data(), group_sizes.size()),
         alpha(alpha),
         penalty(penalty.data(), penalty.size()),
-        lmda_path(lmda_path.data(), lmda_path.size()),
-        lmda_max(lmda_max),
+        min_ratio(min_ratio),
+        lmda_path_size(lmda_path_size),
         delta_lmda_path_size(delta_lmda_path_size),
         delta_strong_size(delta_strong_size),
         max_strong_size(max_strong_size),
-        strong_rule(strong_rule),
+        strong_rule(convert_strong_rule(strong_rule)),
         max_iters(max_iters),
         tol(tol),
         rsq_slope_tol(rsq_slope_tol),
@@ -219,8 +238,12 @@ struct StateBasilBase
         newton_tol(newton_tol),
         newton_max_iters(newton_max_iters),
         early_exit(early_exit),
+        setup_lmda_max(setup_lmda_max),
+        setup_lmda_path(setup_lmda_path),
         intercept(intercept),
         n_threads(n_threads),
+        lmda_max(lmda_max),
+        lmda_path(lmda_path),
         strong_set(strong_set.data(), strong_set.data() + strong_set.size()),
         strong_beta(strong_beta.data(), strong_beta.data() + strong_beta.size()),
         strong_is_active(strong_is_active.data(), strong_is_active.data() + strong_is_active.size()),
@@ -232,9 +255,20 @@ struct StateBasilBase
         initialize();
     }
 
+    strong_rule_type convert_strong_rule(
+        const std::string& rule
+    )
+    {
+        if (rule == "default") return strong_rule_type::_default;
+        if (rule == "fixed_greedy") return strong_rule_type::_fixed_greedy;
+        if (rule == "safe") return strong_rule_type::_safe;
+        throw std::runtime_error("Invalid strong rule type: " + rule);
+    }
+
     void initialize()
     {
         /* initialize strong_set derived quantities */
+        strong_begins.reserve(strong_set.size());
         strong_g1.reserve(strong_set.size());
         strong_g2.reserve(strong_set.size());
         strong_begins.reserve(strong_set.size());
@@ -245,10 +279,11 @@ struct StateBasilBase
         update_abs_grad(*this);
 
         /* optimize for output storage size */
-        betas.reserve(lmda_path.size());
-        rsqs.reserve(lmda_path.size());
-        lmdas.reserve(lmda_path.size());
-        intercepts.reserve(lmda_path.size());
+        const auto n_lmdas = std::max<size_t>(lmda_path.size(), lmda_path_size);
+        betas.reserve(n_lmdas);
+        intercepts.reserve(n_lmdas);
+        rsqs.reserve(n_lmdas);
+        lmdas.reserve(n_lmdas);
     }
 };
 

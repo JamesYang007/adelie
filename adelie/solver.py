@@ -181,6 +181,49 @@ def solve_pin(
     return state
 
 
+def solve_basil(
+    state,
+    logger=logger.logger,
+):
+    """Solves the group elastic net problem using BASIL.
+
+    Parameters
+    ----------
+    state
+        A basil state object.
+
+    Returns
+    -------
+    result
+        The resulting state after running the solver.
+        The type is the same as that of ``state``.
+
+    See Also
+    --------
+    adelie.state.state_basil_naive
+    adelie.solver.objective
+    """
+    # mapping of each state type to the corresponding solver
+    f_dict = {
+        ad.state.basil_naive_64: core.solver.solve_basil_naive_64,
+        ad.state.basil_naive_32: core.solver.solve_basil_naive_32,
+    }
+
+    # solve group elastic net
+    f = f_dict[type(state)]
+    out = f(state)
+
+    # raise any errors
+    if out["error"] != "":
+        logger.error(RuntimeError(out["error"]))
+
+    # return a subsetted Python result object
+    core_state = out["state"]
+    state = type(state).create_from_core(state, core_state)
+
+    return state
+
+
 def grpnet():
     """
     TODO:

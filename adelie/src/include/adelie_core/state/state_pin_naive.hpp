@@ -47,6 +47,7 @@ struct StatePinNaive : StatePinBase<
     map_vec_value_t resid;
     value_t resid_sum;
     dyn_vec_vec_value_t resids;
+    dyn_vec_value_t resid_sums;
 
     /* buffer */
     vec_value_t strong_grad;
@@ -94,6 +95,7 @@ struct StatePinNaive : StatePinBase<
         strong_grad(strong_beta.size())
     {
         resids.reserve(lmda_path.size());
+        resid_sums.reserve(lmda_path.size());
     }
 };
 

@@ -378,7 +378,7 @@ void state_pin_naive(py::module_& m, const char* name)
         (note that it always uses uncentered :math:`X`!).
         )delimiter")
         .def_readonly("resid_sum", &state_t::resid_sum, R"delimiter(
-        Sum of the residual.
+        Sum of ``resid``.
         )delimiter")
         .def_property_readonly("resids", [](const state_t& s) {
             ad::util::rowarr_type<value_t> resids(s.resids.size(), s.resid.size());
@@ -388,6 +388,11 @@ void state_pin_naive(py::module_& m, const char* name)
             return resids;
         }, R"delimiter(
         ``resids[i]`` is the residual at ``betas[i]``.
+        )delimiter")
+        .def_property_readonly("resid_sums", [](const state_t& s) {
+            return Eigen::Map<const vec_value_t>(s.resid_sums.data(), s.resid_sums.size());
+        }, R"delimiter(
+        ``resid_sums[i]`` is the sum of ``resids[i]``.
         )delimiter")
         ;
 }
@@ -496,9 +501,7 @@ void state_basil_base(py::module_& m, const char* name)
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
-    py::class_<state_t>(m, name, R"delimiter(
-        Base core state class for all basil methods.
-        )delimiter")
+    py::class_<state_t>(m, name) 
         .def(py::init<
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
@@ -506,16 +509,20 @@ void state_basil_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             value_t,
+            value_t,
             size_t,
             size_t,
+            size_t,
+            size_t,
+            const std::string&,
+            size_t,
+            value_t,
+            value_t,
+            value_t,
+            value_t,
             size_t,
             bool,
-            size_t,
-            value_t,
-            value_t,
-            value_t,
-            value_t,
-            size_t,
+            bool,
             bool,
             bool,
             size_t,
@@ -532,6 +539,8 @@ void state_basil_base(py::module_& m, const char* name)
             py::arg("penalty").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("lmda_max"),
+            py::arg("min_ratio"),
+            py::arg("lmda_path_size"),
             py::arg("delta_lmda_path_size"),
             py::arg("delta_strong_size"),
             py::arg("max_strong_size"),
@@ -543,6 +552,8 @@ void state_basil_base(py::module_& m, const char* name)
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("early_exit"),
+            py::arg("setup_lmda_max"),
+            py::arg("setup_lmda_path"),
             py::arg("intercept"),
             py::arg("n_threads"),
             py::arg("strong_set").noconvert(),
@@ -568,14 +579,16 @@ void state_basil_base(py::module_& m, const char* name)
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
         )delimiter")
-        .def_readonly("lmda_path", &state_t::lmda_path, R"delimiter(
-        The regularization path to solve for.
-        The full path is not considered if ``early_exit`` is ``True``.
-        It is recommended that the path is sorted in decreasing order.
-        )delimiter")
         .def_readonly("lmda_max", &state_t::lmda_max, R"delimiter(
         The smallest :math:`\lambda` such that the true solution is zero
         for all coefficients that have a non-vanishing group lasso penalty (:math:`\ell_2`-norm).
+        )delimiter")
+        .def_readonly("min_ratio", &state_t::min_ratio, R"delimiter(
+        The ratio between the largest and smallest :math:`\lambda` in the regularization sequence
+        if it is to be generated.
+        )delimiter")
+        .def_readonly("lmda_path_size", &state_t::lmda_path_size, R"delimiter(
+        Number of regularizations in the path if it is to be generated.
         )delimiter")
         .def_readonly("delta_lmda_path_size", &state_t::delta_lmda_path_size, R"delimiter(
         Number of regularizations to batch per BASIL iteration.
@@ -589,7 +602,17 @@ void state_basil_base(py::module_& m, const char* name)
         The function will return a valid state and guaranteed to have strong set size
         less than or equal to ``max_strong_size``.
         )delimiter")
-        .def_readonly("strong_rule", &state_t::strong_rule, R"delimiter(
+        .def_property_readonly("strong_rule", [](const state_t& s) -> std::string {
+            switch (s.strong_rule) {
+                case ad::state::strong_rule_type::_default:
+                    return "default";
+                case ad::state::strong_rule_type::_fixed_greedy:
+                    return "fixed_greedy";
+                case ad::state::strong_rule_type::_safe:
+                    return "safe";
+            }
+            throw std::runtime_error("Invalid strong rule type!");
+        }, R"delimiter(
         ``True`` if strong rule should be used (only a heuristic!).
         )delimiter")
         .def_readonly("max_iters", &state_t::max_iters, R"delimiter(
@@ -611,13 +634,24 @@ void state_basil_base(py::module_& m, const char* name)
         Maximum number of iterations for the BCD update.
         )delimiter")
         .def_readonly("early_exit", &state_t::early_exit, R"delimiter(
-        ``True`` if BASIL should early exit based on training :math:`R^2`.
+        ``True`` if the function should early exit based on training :math:`R^2`.
+        )delimiter")
+        .def_readonly("setup_lmda_max", &state_t::setup_lmda_max, R"delimiter(
+        ``True`` if the function should setup :math:`\lambda_\max`.
+        )delimiter")
+        .def_readonly("setup_lmda_path", &state_t::setup_lmda_path, R"delimiter(
+        ``True`` if the function should setup the regularization path.
         )delimiter")
         .def_readonly("intercept", &state_t::intercept, R"delimiter(
-        ``True`` if BASIL should fit with intercept.
+        ``True`` if the function should fit with intercept.
         )delimiter")
         .def_readonly("n_threads", &state_t::n_threads, R"delimiter(
         Number of threads.
+        )delimiter")
+        .def_readonly("lmda_path", &state_t::lmda_path, R"delimiter(
+        The regularization path to solve for.
+        The full path is not considered if ``early_exit`` is ``True``.
+        It is recommended that the path is sorted in decreasing order.
         )delimiter")
         .def_readonly("strong_hashset", &state_t::strong_hashset, R"delimiter(
         Hashmap containing the same values as ``strong_set``.
@@ -662,10 +696,7 @@ void state_basil_base(py::module_& m, const char* name)
         .def_property_readonly("strong_beta", [](const state_t& s) {
             return Eigen::Map<const vec_value_t>(s.strong_beta.data(), s.strong_beta.size());
         }, R"delimiter(
-        Transformed coefficient vector on the strong set.
-        Note that the coefficient is in the transformed space of :math:`X_c`
-        where :math:`X_c` is column-mean centered version of :math:`X` if ``intercept`` is ``True``
-        and :math:`X` otherwise.
+        Coefficient vector on the strong set.
         ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
         where
         ``k = strong_set[i]``,
@@ -684,15 +715,14 @@ void state_basil_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("rsq", &state_t::rsq, R"delimiter(
         The true unnormalized :math:`R^2` given by :math:`\|y_c\|_2^2 - \|y_c-X_c\beta\|_2^2`
-        where :math:`\beta` is given by ``strong_beta`` *inverse-transformed*.
+        where :math:`\beta` is given by ``strong_beta``.
         )delimiter")
         .def_readonly("lmda", &state_t::lmda, R"delimiter(
-        The regularization parameter at which the true solution is given by ``strong_beta``
-        (in the transformed space).
+        The regularization parameter at which the true solution is given by ``strong_beta``.
         )delimiter")
         .def_readonly("grad", &state_t::grad, R"delimiter(
-        The true full gradient :math:`X_c^\top (y_c - X_c\beta)` in the original space where
-        :math:`\beta` is given by ``strong_beta`` *inverse-transformed*.
+        The true full gradient :math:`X_c^\top (y_c - X_c\beta)` where
+        :math:`\beta` is given by ``strong_beta``.
         )delimiter")
         .def_readonly("abs_grad", &state_t::abs_grad, R"delimiter(
         The :math:`\ell_2` norms of ``grad`` across each group.
@@ -721,8 +751,6 @@ void state_basil_base(py::module_& m, const char* name)
             );
         }, R"delimiter(
         ``rsqs[i]`` is the (normalized) :math:`R^2` at ``betas[i]``.
-        Note that these values always use the centered versions of ``X`` and ``y``
-        so that the values lie in the range :math:`[0,1]`.
         )delimiter")
         .def_property_readonly("lmdas", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<value_t>>(
@@ -762,9 +790,7 @@ void state_basil_naive(py::module_& m, const char* name)
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
-    py::class_<state_t, base_t, PyStateBasilNaive<matrix_t>>(m, name, R"delimiter(
-        State class for basil, naive method.
-        )delimiter")
+    py::class_<state_t, base_t, PyStateBasilNaive<matrix_t>>(m, name)
         .def(py::init<
             matrix_t&,
             const Eigen::Ref<const vec_value_t>&,
@@ -782,16 +808,20 @@ void state_basil_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             value_t,
+            value_t,
             size_t,
             size_t,
+            size_t,
+            size_t,
+            const std::string&,
+            size_t,
+            value_t,
+            value_t,
+            value_t,
+            value_t,
             size_t,
             bool,
-            size_t,
-            value_t,
-            value_t,
-            value_t,
-            value_t,
-            size_t,
+            bool,
             bool,
             bool,
             size_t,
@@ -818,6 +848,8 @@ void state_basil_naive(py::module_& m, const char* name)
             py::arg("penalty").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("lmda_max"),
+            py::arg("min_ratio"),
+            py::arg("lmda_path_size"),
             py::arg("delta_lmda_path_size"),
             py::arg("delta_strong_size"),
             py::arg("max_strong_size"),
@@ -829,6 +861,8 @@ void state_basil_naive(py::module_& m, const char* name)
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("early_exit"),
+            py::arg("setup_lmda_max"),
+            py::arg("setup_lmda_path"),
             py::arg("intercept"),
             py::arg("n_threads"),
             py::arg("strong_set").noconvert(),
@@ -844,14 +878,16 @@ void state_basil_naive(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("X_group_norms", &state_t::X_group_norms, R"delimiter(
         Group Frobenius norm of ``X``.
-        ``X_group_norms[i]`` is :math:`\|X[:, g:g+gs]\|_F`` 
-        where ``g = groups[i]`` and ``gs = group_sizes[i]``.
+        ``X_group_norms[i]`` is :math:`\|X_{c, g}\|_F`` 
+        where :math:`g` corresponds to the group index ``i``.
         )delimiter")
         .def_readonly("y_mean", &state_t::y_mean, R"delimiter(
         The mean of the response vector :math:`y`.
         )delimiter")
         .def_readonly("y_var", &state_t::y_var, R"delimiter(
-        The variance of the response vector :math:`y`, i.e. :math:`\|y - \overline{y} 1\|_2^2`.
+        The variance of the response vector :math:`y`, i.e. 
+        :math:`\|y - \overline{y} 1\|_2^2` if fitting with intercept and
+        :math:`\|y\|_2^2` otherwise.
         )delimiter")
         .def_readonly("use_edpp", &state_t::use_edpp, R"delimiter(
         ``True`` if EDPP should be used.
@@ -865,26 +901,16 @@ void state_basil_naive(py::module_& m, const char* name)
         Feature matrix.
         )delimiter")
         .def_readonly("resid", &state_t::resid, R"delimiter(
-        Residual :math:`y_c - X_c \beta` where :math:`\beta` is given by ``strong_beta``
+        Residual :math:`y_c - X \beta` where :math:`\beta` is given by ``strong_beta``
         *inverse-transformed*.
         )delimiter")
-        .def_readonly("strong_idx_map", &state_t::strong_idx_map, R"delimiter(
-        Mapping from feature index to strong index.
-        ``strong_idx_map[groups[strong_set[i]]+j] == i`` 
-        for every ``i`` that indexes ``strong_set``
-        and ``j`` in the range ``[0, gs)`` where ``gs = group_sizes[strong_set[i]]``.
+        .def_readonly("resid_sum", &state_t::resid_sum, R"delimiter(
+        Sum of ``resid``.
         )delimiter")
-        .def_readonly("strong_slice_map", &state_t::strong_slice_map, R"delimiter(
-        Mapping from feature index to column index respective to the group's block.
-        ``strong_slice_map[groups[strong_set[i]]+j] == j`` 
-        for every ``i`` that indexes ``strong_set``
-        and ``j`` in the range ``[0, gs)`` where ``gs = group_sizes[strong_set[i]]``.
+        .def_readonly("strong_X_means", &state_t::strong_X_means, R"delimiter(
+        Column means of ``X`` on the strong set.
         )delimiter")
-        .def_readonly("strong_X_blocks", &state_t::strong_X_blocks, R"delimiter(
-        The :math:`UD` from the SVD of :math:`X_{c,k}` where :math:`X_c` 
-        is the possibly centered feature matrix and :math:`k` is an index to ``strong_set``.
-        )delimiter")
-        .def_readonly("strong_X_block_vs", &state_t::strong_X_block_vs, R"delimiter(
+        .def_readonly("strong_transforms", &state_t::strong_transforms, R"delimiter(
         The :math:`V` from the SVD of :math:`X_{c,k}` where :math:`X_c` 
         is the possibly centered feature matrix and :math:`k` is an index to ``strong_set``.
         )delimiter")
@@ -893,18 +919,6 @@ void state_basil_naive(py::module_& m, const char* name)
         }, R"delimiter(
         The :math:`D^2` from the SVD of :math:`X_{c,k}` where :math:`X_c` 
         is the possibly centered feature matrix and :math:`k` is an index to ``strong_set``.
-        )delimiter")
-        .def_property_readonly("strong_grad", [](const state_t& s) {
-            return Eigen::Map<const vec_value_t>(s.strong_grad.data(), s.strong_grad.size());
-        }, R"delimiter(
-        Transformed gradient :math:`V_{c,k}^\top X_{c,k}^\top (y_c-X_c\beta)` on the strong groups 
-        :math:`k` where :math:`\beta` is given by ``strong_beta`` *inverse-transformed*
-        and :math:`V_{c,k}` is the transformation to the original space.
-        ``strong_grad[b:b+p]`` is the gradient for the ``i`` th strong group
-        where 
-        ``k = strong_set[i]``,
-        ``b = strong_begins[i]``,
-        and ``p = group_sizes[k]``.
         )delimiter")
         .def_readonly("edpp_safe_hashset", &state_t::edpp_safe_hashset, R"delimiter(
         Hashset containing all the safe groups.
@@ -919,7 +933,7 @@ void state_basil_naive(py::module_& m, const char* name)
         The :math:`v_1` vector in EDPP rule at :math:`\lambda_\max`.
         )delimiter")
         .def_readonly("edpp_resid_0", &state_t::edpp_resid_0, R"delimiter(
-        The residual at :math:`\lambda_\max`.
+        The residual :math:`y_c - X_c\beta` where :math:`\beta` is the solution at :math:`\lambda_\max`.
         )delimiter")
         ;
 }

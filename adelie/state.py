@@ -554,10 +554,10 @@ class pin_naive_base(pin_base):
         n_threads: int,
         dtype: np.float32 | np.float64,
     ):
-        self.method = "naive"
-
         """Default initialization method.
         """
+        self.method = "naive"
+
         ## save inputs due to lifetime issues
         # static inputs require a reference to input
         # or copy if it must be made
@@ -727,12 +727,12 @@ def pin_naive(
     strong_is_active: np.ndarray,
     intercept: bool =True,
     max_iters: int =int(1e5),
-    tol: float =1e-12,
+    tol: float =1e-16,
     rsq_slope_tol: float =1e-2,
     rsq_curv_tol: float =1e-2,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
-    n_threads: int =os.cpu_count(),
+    n_threads: int =1,
 ):
     """Creates a pin, naive method state object.
 
@@ -783,7 +783,7 @@ def pin_naive(
         Default is ``int(1e5)``.
     tol : float, optional
         Convergence tolerance.
-        Default is ``1e-12``.
+        Default is ``1e-16``.
     rsq_slope_tol : float, optional
         Early stopping rule check on slope of :math:`R^2`.
         Default is ``1e-2``.
@@ -798,7 +798,7 @@ def pin_naive(
         Default is ``1000``.
     n_threads : int, optional
         Number of threads.
-        Default is ``os.cpu_count()``.
+        Default is ``1``.
 
     See Also
     --------
@@ -878,10 +878,10 @@ class pin_cov_base(pin_base):
         n_threads: int,
         dtype: np.float32 | np.float64,
     ):
-        self.method = "cov"
-
         """Default initialization method.
         """
+        self.method = "cov"
+
         ## save inputs due to lifetime issues
         # static inputs require a reference to input
         # or copy if it must be made
@@ -1023,12 +1023,12 @@ def pin_cov(
     strong_grad: np.ndarray,
     strong_is_active: np.ndarray,
     max_iters: int =int(1e5),
-    tol: float =1e-12,
+    tol: float =1e-16,
     rsq_slope_tol: float =1e-2,
     rsq_curv_tol: float =1e-2,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
-    n_threads: int =os.cpu_count(),
+    n_threads: int =1,
 ):
     """Creates a pin, covariance method state object.
 
@@ -1081,7 +1081,7 @@ def pin_cov(
         Default is ``int(1e5)``.
     tol : float, optional
         Convergence tolerance.
-        Default is ``1e-12``.
+        Default is ``1e-16``.
     rsq_slope_tol : float, optional
         Early stopping rule check on slope of :math:`R^2`.
         Default is ``1e-2``.
@@ -1096,7 +1096,7 @@ def pin_cov(
         Default is ``1000``.
     n_threads : int, optional
         Number of threads.
-        Default is ``os.cpu_count()``.
+        Default is ``1``.
 
     See Also
     --------
@@ -1149,13 +1149,7 @@ def pin_cov(
 
 
 class basil_base(base):
-    def check(
-        self, 
-        method: str =None, 
-        logger=logger.logger,
-    ):
-        # TODO: fill
-        return
+    pass
 
 
 class basil_naive_base(basil_base):
@@ -1180,10 +1174,12 @@ class basil_naive_base(basil_base):
         penalty: np.ndarray,
         lmda_path: np.ndarray,
         lmda_max: float,
+        min_ratio: float,
+        lmda_path_size: int,
         delta_lmda_path_size: int,
         delta_strong_size: int,
         max_strong_size: int,
-        strong_rule: bool,
+        strong_rule: str,
         max_iters: int,
         tol: float,
         rsq_slope_tol: float,
@@ -1191,6 +1187,8 @@ class basil_naive_base(basil_base):
         newton_tol: float,
         newton_max_iters: int,
         early_exit: bool,
+        setup_lmda_max: bool,
+        setup_lmda_path: bool,
         intercept: bool,
         n_threads: int,
         strong_set: np.ndarray,
@@ -1246,6 +1244,8 @@ class basil_naive_base(basil_base):
             penalty=self._penalty,
             lmda_path=self._lmda_path,
             lmda_max=lmda_max,
+            min_ratio=min_ratio,
+            lmda_path_size=lmda_path_size,
             delta_lmda_path_size=delta_lmda_path_size,
             delta_strong_size=delta_strong_size,
             max_strong_size=max_strong_size,
@@ -1257,6 +1257,8 @@ class basil_naive_base(basil_base):
             newton_tol=newton_tol,
             newton_max_iters=newton_max_iters,
             early_exit=early_exit,
+            setup_lmda_max=setup_lmda_max,
+            setup_lmda_path=setup_lmda_path,
             intercept=intercept,
             n_threads=n_threads,
             strong_set=strong_set,
@@ -1268,12 +1270,329 @@ class basil_naive_base(basil_base):
         )
 
     def check(
-        self, 
+        self,
+        X,
+        y, 
         method: str =None, 
         logger=logger.logger,
     ):
-        # TODO: fill
-        return
+        p = X.shape[1]
+
+        Xc = X 
+        yc = y
+        if self.intercept:
+            Xc = Xc - np.mean(X, axis=0)[None]
+            yc = yc - np.mean(yc)
+
+        # ================ groups check ====================
+        self._check(
+            np.all((0 <= self.groups) & (self.groups <= p)),
+            "check groups is in [0, p)",
+            method, logger,
+        )
+        self._check(
+            len(self.groups) == len(np.unique(self.groups)),
+            "check groups has unique values",
+            method, logger,
+        )
+        self._check(
+            self.groups.dtype == np.dtype("int"),
+            "check groups dtype is int",
+            method, logger,
+        )
+        G = len(self.groups)
+
+        # ================ group_sizes check ====================
+        self._check(
+            len(self.group_sizes) == G,
+            "check groups and group_sizes have same length",
+            method, logger,
+        )
+        self._check(
+            np.sum(self.group_sizes) == p,
+            "check sum of group_sizes is p",
+            method, logger,
+        )
+        self._check(
+            np.all((0 < self.group_sizes) & (self.group_sizes <= p)),
+            "check group_sizes is in (0, p]",
+            method, logger,
+        )
+        self._check(
+            self.group_sizes.dtype == np.dtype("int"),
+            "check group_sizes dtype is int",
+            method, logger,
+        )
+
+        # ================ alpha check ====================
+        self._check(
+            (self.alpha >= 0) and (self.alpha <= 1),
+            "check alpha is in [0, 1]",
+            method, logger,
+        )
+
+        # ================ penalty check ====================
+        self._check(
+            np.all(self.penalty >= 0),
+            "check penalty is non-negative",
+            method, logger,
+        )
+        self._check(
+            len(self.penalty) == G,
+            "check penalty and groups have same length",
+            method, logger,
+        )
+
+        # ================ configurations check ====================
+        self._check(
+            0 < self.min_ratio,
+            "check min_ratio is > 0",
+            method, logger,
+        )
+        self._check(
+            ~self.setup_lmda_path | (self.lmda_path_size > 0),
+            "check either lmda_path is not setup or if it is, then path size is > 0",
+            method, logger,
+        )
+        self._check(
+            self.delta_lmda_path_size > 0,
+            "check delta_lmda_path_size > 0",
+            method, logger,
+        )
+        self._check(
+            (self.strong_rule != "fixed_greedy") | (self.delta_strong_size > 0),
+            "check if strong rule is fixed_greedy, then delta_strong_size > 0",
+            method, logger,
+        )
+        self._check(
+            self.max_strong_size >= 0,
+            "check max_strong_size >= 0",
+            method, logger,
+        )
+        self._check(
+            self.max_iters >= 0,
+            "check max_iters >= 0",
+            method, logger,
+        )
+        self._check(
+            self.tol >= 0,
+            "check tol >= 0",
+            method, logger,
+        )
+        self._check(
+            self.rsq_slope_tol >= 0,
+            "check rsq_slope_tol >= 0",
+            method, logger,
+        )
+        self._check(
+            self.rsq_curv_tol >= 0,
+            "check rsq_curv_tol >= 0",
+            method, logger,
+        )
+        self._check(
+            self.newton_tol >= 0,
+            "check newton_tol >= 0",
+            method, logger,
+        )
+        self._check(
+            self.newton_max_iters >= 0,
+            "check newton_max_iters >= 0",
+            method, logger,
+        )
+        self._check(
+            self.n_threads > 0,
+            "check n_threads > 0",
+            method, logger,
+        )
+
+        # ================ strong_set check ====================
+        self._check(
+            np.all((0 <= self.strong_set) & (self.strong_set < G)),
+            "check strong_set is a subset of [0, G)",
+            method, logger,
+        )
+        self._check(
+            len(self.strong_set) == len(np.unique(self.strong_set)),
+            "check strong_set has unique values",
+            method, logger,
+        )
+        self._check(
+            self.strong_set.dtype == np.dtype("int"),
+            "check strong_set dtype is int",
+            method, logger,
+        )
+        S = len(self.strong_set)
+
+        # ================ strong_g1 check ====================
+        self._check(
+            np.all((0 <= self.strong_g1) & (self.strong_g1 < S)),
+            "check strong_g1 is in [0, S)",
+            method, logger,
+        )
+        self._check(
+            len(self.strong_g1) == len(np.unique(self.strong_g1)),
+            "check strong_g1 has unique values",
+            method, logger,
+        )
+        self._check(
+            np.all(self.group_sizes[self.strong_set[self.strong_g1]] == 1),
+            "check strong_g1 has group sizes of 1",
+            method, logger,
+        )
+        self._check(
+            self.strong_g1.dtype == np.dtype("int"),
+            "check strong_g1 dtype is int",
+            method, logger,
+        )
+
+        # ================ strong_g2 check ====================
+        self._check(
+            np.all((0 <= self.strong_g2) & (self.strong_g2 < S)),
+            "check strong_g2 is in [0, S)",
+            method, logger,
+        )
+        self._check(
+            len(self.strong_g2) == len(np.unique(self.strong_g2)),
+            "check strong_g2 has unique values",
+            method, logger,
+        )
+        self._check(
+            np.all(self.group_sizes[self.strong_set[self.strong_g2]] > 1),
+            "check strong_g2 has group sizes more than 1",
+            method, logger,
+        )
+        self._check(
+            self.strong_g2.dtype == np.dtype("int"),
+            "check strong_g2 dtype is int",
+            method, logger,
+        )
+        self._check(
+            len(self.strong_g1) + len(self.strong_g2) == S,
+            "check strong_g1 and strong_g2 combined have length S",
+            method, logger,
+        )
+
+        # ================ strong_begins check ====================
+        expected = np.cumsum(
+            np.concatenate([[0], self.group_sizes[self.strong_set]], dtype=int)
+        )
+        WS = expected[-1]
+        expected = expected[:-1]
+        self._check(
+            np.all(self.strong_begins == expected),
+            "check strong_begins is [0, g1, g2, ...] where gi is the group size of (i-1)th strong group.",
+            method, logger,
+        )
+        self._check(
+            self.strong_begins.dtype == np.dtype("int"),
+            "check strong_begins dtype is int",
+            method, logger,
+        )
+
+        # ================ strong_order check ====================
+        self._check(
+            np.all(self.strong_set[self.strong_order] == np.sort(self.strong_set)),
+            "check strong_order is correctly sorting strong_set",
+            method, logger,
+        )
+
+        # ================ strong_beta check ====================
+        self._check(
+            len(self.strong_beta) == WS,
+            "check strong_beta size",
+            method, logger,
+        )
+
+        # ================ strong_is_active check ====================
+        expected = np.array([
+            np.any(self.strong_beta[i:i+s] != 0)
+            for i, s in zip(self.strong_begins, self.group_sizes[self.strong_set])
+        ])
+        self._check(
+            np.all(self.strong_is_active == expected),
+            "check strong_is_active is only active on non-zeros of strong_beta",
+            method, logger,
+        )
+
+        # ================ rsq check ====================
+        strong_indices = np.array([], dtype=int)
+        if len(self.strong_set) > 0:
+            strong_indices = np.concatenate([
+                np.arange(g, g + gs)
+                for g, gs in zip(self.groups[self.strong_set], self.group_sizes[self.strong_set])
+            ], dtype=int)
+        Xcbeta = Xc[:, strong_indices] @ self.strong_beta
+        Xbeta = Xcbeta
+        if self.intercept:
+            Xbeta = Xbeta + self.X_means[strong_indices] @ self.strong_beta
+        resid = yc - Xbeta
+        grad = Xc.T @ resid
+        expected = 2 * np.sum(yc * Xcbeta) - np.linalg.norm(Xcbeta) ** 2
+        self._check(
+            np.allclose(self.rsq, expected),
+            "check rsq",
+            method, logger,
+        )
+
+        # ================ grad check ====================
+        self._check(
+            np.allclose(self.grad, grad),
+            "check grad",
+            method, logger,
+        )
+
+        # ================ abs_grad check ====================
+        abs_grad = np.array([
+            np.linalg.norm(grad[g:g+gs])
+            for g, gs in zip(self.groups, self.group_sizes)
+        ])
+        self._check(
+            np.allclose(self.abs_grad, abs_grad),
+            "check abs_grad",
+            method, logger,
+        )
+
+        # ================ resid check ====================
+        self._check(
+            np.allclose(self.resid, resid),
+            "check resid",
+            method, logger,
+        )
+
+        # ================ resid_sum check ====================
+        self._check(
+            np.allclose(self.resid_sum, np.sum(resid)),
+            "check resid_sum",
+            method, logger,
+        )
+
+        # ================ strong_X_means check ====================
+        self._check(
+            np.allclose(self.strong_X_means, self.X_means[strong_indices]),
+            "check strong_X_means",
+            method, logger,
+        )
+
+        # ================ strong_transforms / strong_vars check ====================
+        for ss_idx in range(len(self.strong_set)):
+            i = self.strong_set[ss_idx]
+            g, gs = self.groups[i], self.group_sizes[i]
+            Xi = Xc[:, g:g+gs]
+            V = self.strong_transforms[ss_idx]
+            XiV = Xi @ V
+            Dsq = XiV.T @ XiV
+            sb = self.strong_begins[ss_idx]
+            self._check(
+                np.allclose(self.strong_vars[sb:sb+gs], np.diag(Dsq)),
+                f"check strong_vars[{sb}:{sb}+{gs}]",
+                method, logger,
+            )
+            np.fill_diagonal(Dsq, 0)
+            self._check(
+                np.allclose(Dsq, 0),
+                "check VT Xi V is nearly 0 after zeroing the diagonal",
+                method, logger,
+            )
 
 
 class basil_naive_64(basil_naive_base, core.state.StateBasilNaive64):
@@ -1325,33 +1644,34 @@ def basil_naive(
     X_group_norms: np.ndarray,
     y_mean: float,
     y_var: float,
-    setup_edpp: bool,
     resid: np.ndarray,
-    edpp_safe_set: np.ndarray,
-    edpp_v1_0: np.ndarray,
-    edpp_resid_0: np.ndarray,
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
-    lmda_path: np.ndarray,
-    lmda_max: float,
     strong_set: np.ndarray,
     strong_beta: np.ndarray,
     strong_is_active: np.ndarray,
     rsq: float,
     lmda: float,
     grad: np.ndarray,
+    lmda_path: np.ndarray =None,
+    lmda_max: float =None,
+    edpp_safe_set: np.ndarray =None,
+    edpp_v1_0: np.ndarray =None,
+    edpp_resid_0: np.ndarray =None,
     max_iters: int =int(1e5),
-    tol: float =1e-12,
+    tol: float =1e-16,
     rsq_slope_tol: float =1e-2,
     rsq_curv_tol: float =1e-2,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
-    n_threads: int =os.cpu_count(),
+    n_threads: int =1,
     early_exit: bool =True,
     intercept: bool =True,
-    strong_rule: bool =True,
+    strong_rule: str ="default",
+    min_ratio: float =1e-2,
+    lmda_path_size: int =100,
     delta_lmda_path_size: int =5,
     delta_strong_size: int =5,
     max_strong_size: int =1000,
@@ -1367,25 +1687,17 @@ def basil_naive(
         Column means of ``X``.
     X_group_norms : (G,) np.ndarray
         Group Frobenius norm of ``X``.
-        ``X_group_norms[i]`` is :math:`\\|X[:, g:g+gs]\\|_F`` 
-        where ``g = groups[i]`` and ``gs = group_sizes[i]``.
+        ``X_group_norms[i]`` is :math:`\\|X_{c, g}\\|_F`` 
+        where :math:`g` corresponds to the group index ``i``.
     y_mean : float
         The mean of the response vector :math:`y`.
     y_var : float
-        The variance of the response vector :math:`y`, i.e. :math:`\\|y - \overline{y} 1\\|_2^2`.
-    setup_edpp : bool
-        ``True`` if EDPP setup is required,
-        in which case, the solver will always solve at :math:`\lambda_\max`.
-        See ``edpp_v1_0`` and ``edpp_resid_0``.
+        The variance of the response vector :math:`y`, i.e. 
+        :math:`\\|y - \\overline{y} 1\\|_2^2` if fitting with intercept and
+        :math:`\\|y\\|_2^2` otherwise.
     resid : (n,) np.ndarray
-        Residual :math:`y_c - X_c \\beta` where :math:`\\beta` is given by ``strong_beta``
+        Residual :math:`y_c - X \\beta` where :math:`\\beta` is given by ``strong_beta``
         *inverse-transformed*.
-    edpp_safe_set : (E,) np.ndarray
-        A list of EDPP safe groups.
-    edpp_v1_0: (n,) np.ndarray
-        The :math:`v_1` vector in EDPP rule at :math:`\\lambda_\\max`.
-    edpp_resid_0: (n,) np.ndarray
-        The residual at :math:`\\lambda_\\max`.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -1398,23 +1710,13 @@ def basil_naive(
     penalty : (G,) np.ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
-    lmda_path : (l,) np.ndarray
-        The regularization path to solve for.
-        The full path is not considered if ``early_exit`` is ``True``.
-        It is recommended that the path is sorted in decreasing order.
-    lmda_max : float
-        The smallest :math:`\\lambda` such that the true solution is zero
-        for all coefficients that have a non-vanishing group lasso penalty (:math:`\\ell_2`-norm).
     strong_set : (s,) np.ndarray
         List of indices into ``groups`` that correspond to the strong groups.
         ``strong_set[i]`` is ``i`` th strong group.
         ``strong_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
     strong_beta : (ws,) np.ndarray
-        Transformed coefficient vector on the strong set.
-        Note that the coefficient is in the transformed space of :math:`X_c`
-        where :math:`X_c` is column-mean centered version of :math:`X` if ``intercept`` is ``True``
-        and :math:`X` otherwise.
+        Coefficient vector on the strong set.
         ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
         where
         ``k = strong_set[i]``,
@@ -1426,19 +1728,42 @@ def basil_naive(
         ``strong_is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
     rsq : float
         The true unnormalized :math:`R^2` given by :math:`\\|y_c\\|_2^2 - \\|y_c-X_c\\beta\\|_2^2`
-        where :math:`\\beta` is given by ``strong_beta`` *inverse-transformed*.
+        where :math:`\\beta` is given by ``strong_beta``.
     lmda: float,
         The regularization parameter at which the true solution is given by ``strong_beta``
         (in the transformed space).
     grad: np.ndarray,
         The true full gradient :math:`X_c^\\top (y_c - X_c\\beta)` in the original space where
-        :math:`\\beta` is given by ``strong_beta`` *inverse-transformed*.
+        :math:`\\beta` is given by ``strong_beta``.
+    lmda_path : (l,) np.ndarray, optional
+        The regularization path to solve for.
+        The full path is not considered if ``early_exit`` is ``True``.
+        It is recommended that the path is sorted in decreasing order.
+        If ``None``, the path will be generated.
+        Default is ``None``.
+    lmda_max : float
+        The smallest :math:`\\lambda` such that the true solution is zero
+        for all coefficients that have a non-vanishing group lasso penalty (:math:`\\ell_2`-norm).
+        If ``None``, it will be computed.
+        Default is ``None``.
+    edpp_safe_set : (E,) np.ndarray, optional
+        A list of EDPP safe groups.
+        If ``None``,  it is set to be the same as ``strong_set``.
+        Default is ``None``.
+    edpp_v1_0: (n,) np.ndarray, optional
+        The :math:`v_1` vector in EDPP rule at :math:`\\lambda_\\max`.
+        If ``None``, it will be computed.
+        Default is ``None``.
+    edpp_resid_0: (n,) np.ndarray, optional
+        The residual :math:`y_c - X_c\\beta` where :math:`\\beta` is the solution at :math:`\\lambda_\\max`.
+        If ``None``, it will be computed.
+        Default is ``None``.
     max_iters : int, optional
         Maximum number of coordinate descents.
         Default is ``int(1e5)``.
     tol : float, optional
         Convergence tolerance.
-        Default is ``1e-12``.
+        Default is ``1e-16``.
     rsq_slope_tol : float, optional
         Early stopping rule check on slope of :math:`R^2`.
         Default is ``1e-2``.
@@ -1453,16 +1778,28 @@ def basil_naive(
         Default is ``1000``.
     n_threads : int, optional
         Number of threads.
-        Default is ``os.cpu_count()``.
+        Default is ``1``.
     early_exit : bool, optional
-        ``True`` if BASIL should early exit based on training :math:`R^2`.
+        ``True`` if the function should early exit based on training :math:`R^2`.
         Default is ``True``.
+    min_ratio : float, optional
+        The ratio between the largest and smallest :math:`\\lambda` in the regularization sequence
+        if it is to be generated.
+        Default is ``1e-2``.
+    lmda_path_size : int, optional
+        Number of regularizations in the path if it is to be generated.
+        Default is ``100``.
     intercept : bool, optional 
-        ``True`` if BASIL should fit with intercept.
+        ``True`` if the function should fit with intercept.
         Default is ``True``.
-    strong_rule : bool, optional
-        ``True`` if strong rule should be used (only a heuristic!).
-        Default is ``True``.
+    strong_rule : str, optional
+        The type of strong rule to use. It must be one of the following options:
+
+            - ``"default"``: discards variables from the safe set based on simple strong rule.
+            - ``"fixed_greedy"``: adds variables based on a fixed number of groups with the largest gradient norm.
+            - ``safe``: adds all safe variables to the strong set.
+
+        Default is ``default``.
     delta_lmda_path_size : int, optional 
         Number of regularizations to batch per BASIL iteration.
         Default is ``5``.
@@ -1504,6 +1841,21 @@ def basil_naive(
         np.float64: basil_naive_64,
         np.float32: basil_naive_32,
     }
+
+    setup_lmda_max = lmda_max is None
+    setup_lmda_path = lmda_path is None
+
+    if setup_lmda_max: lmda_max = -1
+    if setup_lmda_path: lmda_path = np.empty(0, dtype=dtype)
+
+    if edpp_safe_set is None:
+        edpp_safe_set = np.copy(strong_set)
+
+    setup_edpp = (edpp_resid_0 is None) or (edpp_v1_0 is None)
+    if setup_edpp: 
+        edpp_resid_0 = np.empty(0, dtype=dtype)
+        edpp_v1_0 = np.empty(0, dtype=dtype)
+
     return dispatcher[dtype](
         X=X,
         X_means=X_means,
@@ -1521,6 +1873,8 @@ def basil_naive(
         penalty=penalty,
         lmda_path=lmda_path,
         lmda_max=lmda_max,
+        setup_lmda_max=setup_lmda_max,
+        setup_lmda_path=setup_lmda_path,
         delta_lmda_path_size=delta_lmda_path_size,
         delta_strong_size=delta_strong_size,
         max_strong_size=max_strong_size,
@@ -1532,6 +1886,8 @@ def basil_naive(
         newton_tol=newton_tol,
         newton_max_iters=newton_max_iters,
         early_exit=early_exit,
+        min_ratio=min_ratio,
+        lmda_path_size=lmda_path_size,
         intercept=intercept,
         n_threads=n_threads,
         strong_set=strong_set,
