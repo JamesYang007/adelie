@@ -1,0 +1,154 @@
+﻿adelie.state.basil\_naive\_64
+=============================
+
+.. currentmodule:: adelie.state
+
+.. autoclass:: basil_naive_64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~basil_naive_64.__init__
+      ~basil_naive_64.check
+      ~basil_naive_64.create_from_core
+      ~basil_naive_64.default_init
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~basil_naive_64.X
+      ~basil_naive_64.X_group_norms
+      ~basil_naive_64.X_means
+      ~basil_naive_64.abs_grad
+      ~basil_naive_64.alpha
+      ~basil_naive_64.betas
+      ~basil_naive_64.delta_lmda_path_size
+      ~basil_naive_64.delta_strong_size
+      ~basil_naive_64.early_exit
+      ~basil_naive_64.edpp_resid_0
+      ~basil_naive_64.edpp_safe_hashset
+      ~basil_naive_64.edpp_safe_set
+      ~basil_naive_64.edpp_v1_0
+      ~basil_naive_64.grad
+      ~basil_naive_64.group_sizes
+      ~basil_naive_64.groups
+      ~basil_naive_64.intercept
+      ~basil_naive_64.intercepts
+      ~basil_naive_64.lmda
+      ~basil_naive_64.lmda_max
+      ~basil_naive_64.lmda_path
+      ~basil_naive_64.lmda_path_size
+      ~basil_naive_64.lmdas
+      ~basil_naive_64.max_iters
+      ~basil_naive_64.max_strong_size
+      ~basil_naive_64.min_ratio
+      ~basil_naive_64.n_threads
+      ~basil_naive_64.newton_max_iters
+      ~basil_naive_64.newton_tol
+      ~basil_naive_64.penalty
+      ~basil_naive_64.resid
+      ~basil_naive_64.resid_sum
+      ~basil_naive_64.rsq
+      ~basil_naive_64.rsq_curv_tol
+      ~basil_naive_64.rsq_slope_tol
+      ~basil_naive_64.rsqs
+      ~basil_naive_64.setup_edpp
+      ~basil_naive_64.setup_lmda_max
+      ~basil_naive_64.setup_lmda_path
+      ~basil_naive_64.strong_X_means
+      ~basil_naive_64.strong_begins
+      ~basil_naive_64.strong_beta
+      ~basil_naive_64.strong_g1
+      ~basil_naive_64.strong_g2
+      ~basil_naive_64.strong_hashset
+      ~basil_naive_64.strong_is_active
+      ~basil_naive_64.strong_order
+      ~basil_naive_64.strong_rule
+      ~basil_naive_64.strong_set
+      ~basil_naive_64.strong_transforms
+      ~basil_naive_64.strong_vars
+      ~basil_naive_64.tol
+      ~basil_naive_64.use_edpp
+      ~basil_naive_64.y_mean
+      ~basil_naive_64.y_var
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: check
+   .. automethod:: create_from_core
+   .. automethod:: default_init
+   
+   
+
+   
+   
+   
+   .. autoattribute:: X
+   .. autoattribute:: X_group_norms
+   .. autoattribute:: X_means
+   .. autoattribute:: abs_grad
+   .. autoattribute:: alpha
+   .. autoattribute:: betas
+   .. autoattribute:: delta_lmda_path_size
+   .. autoattribute:: delta_strong_size
+   .. autoattribute:: early_exit
+   .. autoattribute:: edpp_resid_0
+   .. autoattribute:: edpp_safe_hashset
+   .. autoattribute:: edpp_safe_set
+   .. autoattribute:: edpp_v1_0
+   .. autoattribute:: grad
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: intercept
+   .. autoattribute:: intercepts
+   .. autoattribute:: lmda
+   .. autoattribute:: lmda_max
+   .. autoattribute:: lmda_path
+   .. autoattribute:: lmda_path_size
+   .. autoattribute:: lmdas
+   .. autoattribute:: max_iters
+   .. autoattribute:: max_strong_size
+   .. autoattribute:: min_ratio
+   .. autoattribute:: n_threads
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: newton_tol
+   .. autoattribute:: penalty
+   .. autoattribute:: resid
+   .. autoattribute:: resid_sum
+   .. autoattribute:: rsq
+   .. autoattribute:: rsq_curv_tol
+   .. autoattribute:: rsq_slope_tol
+   .. autoattribute:: rsqs
+   .. autoattribute:: setup_edpp
+   .. autoattribute:: setup_lmda_max
+   .. autoattribute:: setup_lmda_path
+   .. autoattribute:: strong_X_means
+   .. autoattribute:: strong_begins
+   .. autoattribute:: strong_beta
+   .. autoattribute:: strong_g1
+   .. autoattribute:: strong_g2
+   .. autoattribute:: strong_hashset
+   .. autoattribute:: strong_is_active
+   .. autoattribute:: strong_order
+   .. autoattribute:: strong_rule
+   .. autoattribute:: strong_set
+   .. autoattribute:: strong_transforms
+   .. autoattribute:: strong_vars
+   .. autoattribute:: tol
+   .. autoattribute:: use_edpp
+   .. autoattribute:: y_mean
+   .. autoattribute:: y_var
+   
+   

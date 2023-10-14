@@ -35,9 +35,11 @@
       ~StateBasilBase64.lmda
       ~StateBasilBase64.lmda_max
       ~StateBasilBase64.lmda_path
+      ~StateBasilBase64.lmda_path_size
       ~StateBasilBase64.lmdas
       ~StateBasilBase64.max_iters
       ~StateBasilBase64.max_strong_size
+      ~StateBasilBase64.min_ratio
       ~StateBasilBase64.n_threads
       ~StateBasilBase64.newton_max_iters
       ~StateBasilBase64.newton_tol
@@ -46,6 +48,8 @@
       ~StateBasilBase64.rsq_curv_tol
       ~StateBasilBase64.rsq_slope_tol
       ~StateBasilBase64.rsqs
+      ~StateBasilBase64.setup_lmda_max
+      ~StateBasilBase64.setup_lmda_path
       ~StateBasilBase64.strong_begins
       ~StateBasilBase64.strong_beta
       ~StateBasilBase64.strong_g1
@@ -83,9 +87,11 @@
    .. autoattribute:: lmda
    .. autoattribute:: lmda_max
    .. autoattribute:: lmda_path
+   .. autoattribute:: lmda_path_size
    .. autoattribute:: lmdas
    .. autoattribute:: max_iters
    .. autoattribute:: max_strong_size
+   .. autoattribute:: min_ratio
    .. autoattribute:: n_threads
    .. autoattribute:: newton_max_iters
    .. autoattribute:: newton_tol
@@ -94,6 +100,8 @@
    .. autoattribute:: rsq_curv_tol
    .. autoattribute:: rsq_slope_tol
    .. autoattribute:: rsqs
+   .. autoattribute:: setup_lmda_max
+   .. autoattribute:: setup_lmda_path
    .. autoattribute:: strong_begins
    .. autoattribute:: strong_beta
    .. autoattribute:: strong_g1

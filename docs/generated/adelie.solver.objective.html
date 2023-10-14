@@ -44,7 +44,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="adelie.solver.solve_pin" href="adelie.solver.solve_pin.html" />
-    <link rel="prev" title="adelie.solver.lambda_max" href="adelie.solver.lambda_max.html" />
+    <link rel="prev" title="adelie.state.basil_naive" href="adelie.state.basil_naive.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -297,25 +297,34 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.naive_dense.html">adelie.matrix.naive_dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_dense.html">adelie.matrix.cov_dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov.html">adelie.state.pin_cov</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov_32.html">adelie.state.pin_cov_32</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov_64.html">adelie.state.pin_cov_64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive_32.html">adelie.state.pin_naive_32</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive_64.html">adelie.state.pin_naive_64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.basil_naive.html">adelie.state.basil_naive</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.create_lambdas.html">adelie.solver.create_lambdas</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.lambda_max.html">adelie.solver.lambda_max</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.solver.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_pin.html">adelie.solver.solve_pin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_basil.html">adelie.solver.solve_basil</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase32.html">adelie.matrix.MatrixCovBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase32.html">adelie.matrix.MatrixNaiveBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov_32.html">adelie.state.pin_cov_32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov_64.html">adelie.state.pin_cov_64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive_32.html">adelie.state.pin_naive_32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive_64.html">adelie.state.pin_naive_64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.basil_naive_32.html">adelie.state.basil_naive_32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.basil_naive_64.html">adelie.state.basil_naive_64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateBasilBase32.html">adelie.adelie_core.state.StateBasilBase32</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateBasilBase64.html">adelie.adelie_core.state.StateBasilBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StatePinBase32.html">adelie.adelie_core.state.StatePinBase32</a></li>
@@ -446,12 +455,12 @@ and <span class="math notranslate nohighlight">\(\beta_j\)</span> are the coeffi
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.solver.lambda_max.html"
+       href="adelie.state.basil_naive.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.solver.lambda_max</p>
+        <p class="prev-next-title">adelie.state.basil_naive</p>
       </div>
     </a>
     <a class="right-next"

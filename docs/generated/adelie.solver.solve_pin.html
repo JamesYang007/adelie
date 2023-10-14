@@ -43,7 +43,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.solver.solve_pin';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.adelie_core.state.StateBasilBase32" href="adelie.adelie_core.state.StateBasilBase32.html" />
+    <link rel="next" title="adelie.solver.solve_basil" href="adelie.solver.solve_basil.html" />
     <link rel="prev" title="adelie.solver.objective" href="adelie.solver.objective.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -297,25 +297,34 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.naive_dense.html">adelie.matrix.naive_dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_dense.html">adelie.matrix.cov_dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov.html">adelie.state.pin_cov</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov_32.html">adelie.state.pin_cov_32</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov_64.html">adelie.state.pin_cov_64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive_32.html">adelie.state.pin_naive_32</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive_64.html">adelie.state.pin_naive_64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.basil_naive.html">adelie.state.basil_naive</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.create_lambdas.html">adelie.solver.create_lambdas</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.lambda_max.html">adelie.solver.lambda_max</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.solver.solve_pin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_basil.html">adelie.solver.solve_basil</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase32.html">adelie.matrix.MatrixCovBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase32.html">adelie.matrix.MatrixNaiveBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov_32.html">adelie.state.pin_cov_32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov_64.html">adelie.state.pin_cov_64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive_32.html">adelie.state.pin_naive_32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive_64.html">adelie.state.pin_naive_64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.basil_naive_32.html">adelie.state.basil_naive_32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.basil_naive_64.html">adelie.state.basil_naive_64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateBasilBase32.html">adelie.adelie_core.state.StateBasilBase32</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateBasilBase64.html">adelie.adelie_core.state.StateBasilBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StatePinBase32.html">adelie.adelie_core.state.StatePinBase32</a></li>
@@ -388,9 +397,7 @@ minimizing the objective defined in <code class="docutils literal notranslate"><
 with the constraint that <span class="math notranslate nohighlight">\(\beta_{-S} = 0\)</span>
 where <span class="math notranslate nohighlight">\(S\)</span> denotes the strong set,
 that is, the coefficient vector is forced to be zero
-for groups outside the strong set.
-We also assume that <span class="math notranslate nohighlight">\(X\)</span> is such that the column blocks <span class="math notranslate nohighlight">\(X_k\)</span>
-defined by the groups have diagonal <span class="math notranslate nohighlight">\(X_k^\top X_k\)</span>.</p>
+for groups outside the strong set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -409,7 +416,7 @@ The type is the same as that of <code class="docutils literal notranslate"><span
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.state.state_pin_naive</span></code></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.state.pin_naive.html#adelie.state.pin_naive" title="adelie.state.pin_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.state.pin_naive</span></code></a></dt><dd></dd>
 <dt><a class="reference internal" href="adelie.solver.objective.html#adelie.solver.objective" title="adelie.solver.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.solver.objective</span></code></a></dt><dd></dd>
 </dl>
 </div>
@@ -437,11 +444,11 @@ The type is the same as that of <code class="docutils literal notranslate"><span
       </div>
     </a>
     <a class="right-next"
-       href="adelie.adelie_core.state.StateBasilBase32.html"
+       href="adelie.solver.solve_basil.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.adelie_core.state.StateBasilBase32</p>
+        <p class="prev-next-title">adelie.solver.solve_basil</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

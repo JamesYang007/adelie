@@ -46,6 +46,7 @@
       ~pin_naive_64.penalty
       ~pin_naive_64.resid
       ~pin_naive_64.resid_sum
+      ~pin_naive_64.resid_sums
       ~pin_naive_64.resids
       ~pin_naive_64.rsq
       ~pin_naive_64.rsq_curv_tol
@@ -104,6 +105,7 @@
    .. autoattribute:: penalty
    .. autoattribute:: resid
    .. autoattribute:: resid_sum
+   .. autoattribute:: resid_sums
    .. autoattribute:: resids
    .. autoattribute:: rsq
    .. autoattribute:: rsq_curv_tol

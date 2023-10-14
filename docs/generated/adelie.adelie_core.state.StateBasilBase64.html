@@ -297,25 +297,34 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.naive_dense.html">adelie.matrix.naive_dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_dense.html">adelie.matrix.cov_dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov.html">adelie.state.pin_cov</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov_32.html">adelie.state.pin_cov_32</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov_64.html">adelie.state.pin_cov_64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive_32.html">adelie.state.pin_naive_32</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive_64.html">adelie.state.pin_naive_64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.basil_naive.html">adelie.state.basil_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.create_lambdas.html">adelie.solver.create_lambdas</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.lambda_max.html">adelie.solver.lambda_max</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_pin.html">adelie.solver.solve_pin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_basil.html">adelie.solver.solve_basil</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase32.html">adelie.matrix.MatrixCovBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase32.html">adelie.matrix.MatrixNaiveBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov_32.html">adelie.state.pin_cov_32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov_64.html">adelie.state.pin_cov_64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive_32.html">adelie.state.pin_naive_32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive_64.html">adelie.state.pin_naive_64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.basil_naive_32.html">adelie.state.basil_naive_32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.basil_naive_64.html">adelie.state.basil_naive_64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateBasilBase32.html">adelie.adelie_core.state.StateBasilBase32</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.adelie_core.state.StateBasilBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StatePinBase32.html">adelie.adelie_core.state.StatePinBase32</a></li>
@@ -410,10 +419,10 @@ document.write(`
 <td><p>Number of strong groups to include per BASIL iteration  if strong rule does not include new groups but optimality is not reached.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.early_exit" title="adelie.adelie_core.state.StateBasilBase64.early_exit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">early_exit</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if BASIL should early exit based on training <span class="math notranslate nohighlight">\(R^2\)</span>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should early exit based on training <span class="math notranslate nohighlight">\(R^2\)</span>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.grad" title="adelie.adelie_core.state.StateBasilBase64.grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grad</span></code></a></p></td>
-<td><p>The true full gradient <span class="math notranslate nohighlight">\(X_c^\top (y_c - X_c\beta)\)</span> in the original space where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code> <em>inverse-transformed</em>.</p></td>
+<td><p>The true full gradient <span class="math notranslate nohighlight">\(X_c^\top (y_c - X_c\beta)\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.group_sizes" title="adelie.adelie_core.state.StateBasilBase64.group_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_sizes</span></code></a></p></td>
 <td><p>List of group sizes corresponding to each element in <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
@@ -422,13 +431,13 @@ document.write(`
 <td><p>List of starting indices to each group where <cite>G</cite> is the number of groups.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.intercept" title="adelie.adelie_core.state.StateBasilBase64.intercept"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercept</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if BASIL should fit with intercept.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should fit with intercept.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.intercepts" title="adelie.adelie_core.state.StateBasilBase64.intercepts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercepts</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">intercepts[i]</span></code> is the intercept solution corresponding to <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.lmda" title="adelie.adelie_core.state.StateBasilBase64.lmda"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda</span></code></a></p></td>
-<td><p>The regularization parameter at which the true solution is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code> (in the transformed space).</p></td>
+<td><p>The regularization parameter at which the true solution is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.lmda_max" title="adelie.adelie_core.state.StateBasilBase64.lmda_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_max</span></code></a></p></td>
 <td><p>The smallest <span class="math notranslate nohighlight">\(\lambda\)</span> such that the true solution is zero for all coefficients that have a non-vanishing group lasso penalty (<span class="math notranslate nohighlight">\(\ell_2\)</span>-norm).</p></td>
@@ -436,14 +445,20 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.lmda_path" title="adelie.adelie_core.state.StateBasilBase64.lmda_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_path</span></code></a></p></td>
 <td><p>The regularization path to solve for.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.lmdas" title="adelie.adelie_core.state.StateBasilBase64.lmdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.lmda_path_size" title="adelie.adelie_core.state.StateBasilBase64.lmda_path_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_path_size</span></code></a></p></td>
+<td><p>Number of regularizations in the path if it is to be generated.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.lmdas" title="adelie.adelie_core.state.StateBasilBase64.lmdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th <span class="math notranslate nohighlight">\(\lambda\)</span> regularization in the solution set.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.max_iters" title="adelie.adelie_core.state.StateBasilBase64.max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_iters</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.max_iters" title="adelie.adelie_core.state.StateBasilBase64.max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_iters</span></code></a></p></td>
 <td><p>Maximum number of coordinate descents.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.max_strong_size" title="adelie.adelie_core.state.StateBasilBase64.max_strong_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_strong_size</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.max_strong_size" title="adelie.adelie_core.state.StateBasilBase64.max_strong_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_strong_size</span></code></a></p></td>
 <td><p>Maximum number of strong groups allowed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.min_ratio" title="adelie.adelie_core.state.StateBasilBase64.min_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_ratio</span></code></a></p></td>
+<td><p>The ratio between the largest and smallest <span class="math notranslate nohighlight">\(\lambda\)</span> in the regularization sequence if it is to be generated.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.n_threads" title="adelie.adelie_core.state.StateBasilBase64.n_threads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_threads</span></code></a></p></td>
 <td><p>Number of threads.</p></td>
@@ -458,7 +473,7 @@ document.write(`
 <td><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.rsq" title="adelie.adelie_core.state.StateBasilBase64.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></p></td>
-<td><p>The true unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> given by <span class="math notranslate nohighlight">\(\|y_c\|_2^2 - \|y_c-X_c\beta\|_2^2\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code> <em>inverse-transformed</em>.</p></td>
+<td><p>The true unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> given by <span class="math notranslate nohighlight">\(\|y_c\|_2^2 - \|y_c-X_c\beta\|_2^2\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.rsq_curv_tol" title="adelie.adelie_core.state.StateBasilBase64.rsq_curv_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq_curv_tol</span></code></a></p></td>
 <td><p>Early stopping rule check on curvature of <span class="math notranslate nohighlight">\(R^2\)</span>.</p></td>
@@ -469,11 +484,17 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.rsqs" title="adelie.adelie_core.state.StateBasilBase64.rsqs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsqs</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">rsqs[i]</span></code> is the (normalized) <span class="math notranslate nohighlight">\(R^2\)</span> at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.setup_lmda_max" title="adelie.adelie_core.state.StateBasilBase64.setup_lmda_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup_lmda_max</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should setup <span class="math notranslate nohighlight">\(\lambda_\max\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.setup_lmda_path" title="adelie.adelie_core.state.StateBasilBase64.setup_lmda_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup_lmda_path</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should setup the regularization path.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.strong_begins" title="adelie.adelie_core.state.StateBasilBase64.strong_begins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_begins</span></code></a></p></td>
 <td><p>List of indices that index a corresponding list of values for each strong group.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.strong_beta" title="adelie.adelie_core.state.StateBasilBase64.strong_beta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_beta</span></code></a></p></td>
-<td><p>Transformed coefficient vector on the strong set.</p></td>
+<td><p>Coefficient vector on the strong set.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64.strong_g1" title="adelie.adelie_core.state.StateBasilBase64.strong_g1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_g1</span></code></a></p></td>
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">strong_set</span></code> that correspond to groups of size <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
@@ -503,7 +524,7 @@ document.write(`
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase64.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64" title="adelie.adelie_core.state.StateBasilBase64"><span class="pre">adelie.adelie_core.state.StateBasilBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_lmda_path_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_strong_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_strong_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_slope_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_curv_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_exit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intercept</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_is_active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase64.__init__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase64" title="adelie.adelie_core.state.StateBasilBase64"><span class="pre">adelie.adelie_core.state.StateBasilBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_lmda_path_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_strong_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_strong_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_slope_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_curv_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_exit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setup_lmda_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setup_lmda_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intercept</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strong_is_active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase64.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -543,14 +564,14 @@ if strong rule does not include new groups but optimality is not reached.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase64.early_exit">
 <span class="sig-name descname"><span class="pre">early_exit</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase64.early_exit" title="Link to this definition">#</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if BASIL should early exit based on training <span class="math notranslate nohighlight">\(R^2\)</span>.</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should early exit based on training <span class="math notranslate nohighlight">\(R^2\)</span>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase64.grad">
 <span class="sig-name descname"><span class="pre">grad</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase64.grad" title="Link to this definition">#</a></dt>
-<dd><p>The true full gradient <span class="math notranslate nohighlight">\(X_c^\top (y_c - X_c\beta)\)</span> in the original space where
-<span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code> <em>inverse-transformed</em>.</p>
+<dd><p>The true full gradient <span class="math notranslate nohighlight">\(X_c^\top (y_c - X_c\beta)\)</span> where
+<span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -570,7 +591,7 @@ if strong rule does not include new groups but optimality is not reached.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase64.intercept">
 <span class="sig-name descname"><span class="pre">intercept</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase64.intercept" title="Link to this definition">#</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if BASIL should fit with intercept.</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should fit with intercept.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -582,8 +603,7 @@ if strong rule does not include new groups but optimality is not reached.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase64.lmda">
 <span class="sig-name descname"><span class="pre">lmda</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase64.lmda" title="Link to this definition">#</a></dt>
-<dd><p>The regularization parameter at which the true solution is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>
-(in the transformed space).</p>
+<dd><p>The regularization parameter at which the true solution is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -599,6 +619,12 @@ for all coefficients that have a non-vanishing group lasso penalty (<span class=
 <dd><p>The regularization path to solve for.
 The full path is not considered if <code class="docutils literal notranslate"><span class="pre">early_exit</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.
 It is recommended that the path is sorted in decreasing order.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase64.lmda_path_size">
+<span class="sig-name descname"><span class="pre">lmda_path_size</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase64.lmda_path_size" title="Link to this definition">#</a></dt>
+<dd><p>Number of regularizations in the path if it is to be generated.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -619,6 +645,13 @@ It is recommended that the path is sorted in decreasing order.</p>
 <dd><p>Maximum number of strong groups allowed.
 The function will return a valid state and guaranteed to have strong set size
 less than or equal to <code class="docutils literal notranslate"><span class="pre">max_strong_size</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase64.min_ratio">
+<span class="sig-name descname"><span class="pre">min_ratio</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase64.min_ratio" title="Link to this definition">#</a></dt>
+<dd><p>The ratio between the largest and smallest <span class="math notranslate nohighlight">\(\lambda\)</span> in the regularization sequence
+if it is to be generated.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -650,7 +683,7 @@ It must be a non-negative vector.</p>
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase64.rsq">
 <span class="sig-name descname"><span class="pre">rsq</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase64.rsq" title="Link to this definition">#</a></dt>
 <dd><p>The true unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> given by <span class="math notranslate nohighlight">\(\|y_c\|_2^2 - \|y_c-X_c\beta\|_2^2\)</span>
-where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code> <em>inverse-transformed</em>.</p>
+where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -668,9 +701,19 @@ where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <c
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase64.rsqs">
 <span class="sig-name descname"><span class="pre">rsqs</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase64.rsqs" title="Link to this definition">#</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">rsqs[i]</span></code> is the (normalized) <span class="math notranslate nohighlight">\(R^2\)</span> at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.
-Note that these values always use the centered versions of <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>
-so that the values lie in the range <span class="math notranslate nohighlight">\([0,1]\)</span>.</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">rsqs[i]</span></code> is the (normalized) <span class="math notranslate nohighlight">\(R^2\)</span> at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase64.setup_lmda_max">
+<span class="sig-name descname"><span class="pre">setup_lmda_max</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase64.setup_lmda_max" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should setup <span class="math notranslate nohighlight">\(\lambda_\max\)</span>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase64.setup_lmda_path">
+<span class="sig-name descname"><span class="pre">setup_lmda_path</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase64.setup_lmda_path" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should setup the regularization path.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -685,10 +728,7 @@ will grab values corresponding to the full <code class="docutils literal notrans
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase64.strong_beta">
 <span class="sig-name descname"><span class="pre">strong_beta</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase64.strong_beta" title="Link to this definition">#</a></dt>
-<dd><p>Transformed coefficient vector on the strong set.
-Note that the coefficient is in the transformed space of <span class="math notranslate nohighlight">\(X_c\)</span>
-where <span class="math notranslate nohighlight">\(X_c\)</span> is column-mean centered version of <span class="math notranslate nohighlight">\(X\)</span> if <code class="docutils literal notranslate"><span class="pre">intercept</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>
-and <span class="math notranslate nohighlight">\(X\)</span> otherwise.
+<dd><p>Coefficient vector on the strong set.
 <code class="docutils literal notranslate"><span class="pre">strong_beta[b:b+p]</span></code> is the coefficient for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group 
 where
 <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">strong_set[i]</span></code>,
@@ -818,9 +858,11 @@ when the regularization is given by <code class="docutils literal notranslate"><
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.lmda"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.lmda</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.lmda_max"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.lmda_max</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.lmda_path"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.lmda_path</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.lmda_path_size"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.lmda_path_size</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.lmdas"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.lmdas</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.max_iters"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.max_iters</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.max_strong_size"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.max_strong_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.min_ratio"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.min_ratio</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.n_threads"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.n_threads</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.newton_max_iters"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.newton_max_iters</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.newton_tol"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.newton_tol</span></code></a></li>
@@ -829,6 +871,8 @@ when the regularization is given by <code class="docutils literal notranslate"><
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.rsq_curv_tol"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.rsq_curv_tol</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.rsq_slope_tol"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.rsq_slope_tol</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.rsqs"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.rsqs</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.setup_lmda_max"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.setup_lmda_max</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.setup_lmda_path"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.setup_lmda_path</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.strong_begins"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.strong_begins</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.strong_beta"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.strong_beta</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase64.strong_g1"><code class="docutils literal notranslate"><span class="pre">StateBasilBase64.strong_g1</span></code></a></li>
