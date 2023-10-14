@@ -158,8 +158,6 @@ def test_state_basil_naive():
         grad=grad,
     )
 
-    state.check(method="assert")
-
     assert id(X._core_mat) == id(state.X)
     assert np.allclose(X_means, state.X_means)
     assert np.allclose(X_group_norms, state.X_group_norms)

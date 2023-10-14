@@ -1687,17 +1687,15 @@ def basil_naive(
         Column means of ``X``.
     X_group_norms : (G,) np.ndarray
         Group Frobenius norm of ``X``.
-        ``X_group_norms[i]`` is :math:`\\|X_{c, g}\\|_F`` 
+        ``X_group_norms[i]`` is :math:`\\|X_{c, g}\\|_F`
         where :math:`g` corresponds to the group index ``i``.
     y_mean : float
         The mean of the response vector :math:`y`.
     y_var : float
         The variance of the response vector :math:`y`, i.e. 
-        :math:`\\|y - \\overline{y} 1\\|_2^2` if fitting with intercept and
-        :math:`\\|y\\|_2^2` otherwise.
+        :math:`\\|y_c\\|_2^2`.
     resid : (n,) np.ndarray
-        Residual :math:`y_c - X \\beta` where :math:`\\beta` is given by ``strong_beta``
-        *inverse-transformed*.
+        Residual :math:`y_c - X \\beta` where :math:`\\beta` is given by ``strong_beta``.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 

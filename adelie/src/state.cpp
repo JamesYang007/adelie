@@ -501,7 +501,9 @@ void state_basil_base(py::module_& m, const char* name)
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
-    py::class_<state_t>(m, name) 
+    py::class_<state_t>(m, name, R"delimiter(
+        Base core state class for all basil methods.
+        )delimiter") 
         .def(py::init<
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
@@ -878,7 +880,7 @@ void state_basil_naive(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("X_group_norms", &state_t::X_group_norms, R"delimiter(
         Group Frobenius norm of ``X``.
-        ``X_group_norms[i]`` is :math:`\|X_{c, g}\|_F`` 
+        ``X_group_norms[i]`` is :math:`\|X_{c, g}\|_F`
         where :math:`g` corresponds to the group index ``i``.
         )delimiter")
         .def_readonly("y_mean", &state_t::y_mean, R"delimiter(
@@ -886,8 +888,7 @@ void state_basil_naive(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("y_var", &state_t::y_var, R"delimiter(
         The variance of the response vector :math:`y`, i.e. 
-        :math:`\|y - \overline{y} 1\|_2^2` if fitting with intercept and
-        :math:`\|y\|_2^2` otherwise.
+        :math:`\|y_c\|_2^2`.
         )delimiter")
         .def_readonly("use_edpp", &state_t::use_edpp, R"delimiter(
         ``True`` if EDPP should be used.
@@ -901,8 +902,7 @@ void state_basil_naive(py::module_& m, const char* name)
         Feature matrix.
         )delimiter")
         .def_readonly("resid", &state_t::resid, R"delimiter(
-        Residual :math:`y_c - X \beta` where :math:`\beta` is given by ``strong_beta``
-        *inverse-transformed*.
+        Residual :math:`y_c - X \beta` where :math:`\beta` is given by ``strong_beta``.
         )delimiter")
         .def_readonly("resid_sum", &state_t::resid_sum, R"delimiter(
         Sum of ``resid``.

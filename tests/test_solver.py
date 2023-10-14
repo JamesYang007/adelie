@@ -1,6 +1,5 @@
 from adelie.solver import (
     objective,
-    create_lambdas,
     solve_pin,
     solve_basil,
 )
@@ -21,6 +20,8 @@ def create_test_data_pin(
     alpha=1,
     sparsity=0.95,
     seed=0,
+    min_ratio=1e-2,
+    n_lmdas=20,
 ):
     np.random.seed(seed)
 
@@ -45,10 +46,14 @@ def create_test_data_pin(
     strong_is_active = np.zeros(strong_set.shape[0], dtype=bool)
     penalty = np.random.uniform(0, 1, G)
     penalty /= np.sum(penalty)
-    lmda_path = create_lambdas(
-        X=X, y=y, groups=groups, group_sizes=group_sizes,
-        alpha=alpha, penalty=penalty, 
-    )
+    grad = X.T @ y
+    abs_grad = np.array([
+        np.linalg.norm(grad[g:g+gs])
+        for g, gs in zip(groups, group_sizes)
+    ])
+    lmda_candidates = abs_grad / (alpha * penalty)
+    lmda_max = np.max(lmda_candidates[~np.isinf(lmda_candidates)])
+    lmda_path = lmda_max * min_ratio ** (np.arange(n_lmdas) / (n_lmdas-1))
     rsq = 0
     strong_beta = np.zeros(np.sum(group_sizes[strong_set]))
 
