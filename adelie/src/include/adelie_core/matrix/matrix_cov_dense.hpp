@@ -12,8 +12,8 @@ public:
     using base_t = MatrixCovBase<typename DenseType::Scalar>;
     using dense_t = DenseType;
     using typename base_t::value_t;
-    using typename base_t::rowvec_t;
-    using typename base_t::colmat_t;
+    using typename base_t::vec_value_t;
+    using typename base_t::colmat_value_t;
     
 private:
     const Eigen::Map<const dense_t> _mat;   // underlying dense matrix
@@ -32,8 +32,8 @@ public:
     
     void bmul(
         int i, int j, int p, int q, 
-        const Eigen::Ref<const rowvec_t>& v, 
-        Eigen::Ref<rowvec_t> out
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
     ) override
     {
         auto outm = out.matrix();
@@ -48,7 +48,7 @@ public:
 
     void to_dense(
         int i, int j, int p, int q,
-        Eigen::Ref<colmat_t> out
+        Eigen::Ref<colmat_value_t> out
     ) const override
     {
         out = _mat.block(i, j, p, q);

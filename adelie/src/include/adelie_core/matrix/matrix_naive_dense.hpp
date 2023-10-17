@@ -12,8 +12,9 @@ public:
     using base_t = MatrixNaiveBase<typename DenseType::Scalar>;
     using dense_t = DenseType;
     using typename base_t::value_t;
-    using typename base_t::rowvec_t;
-    using typename base_t::colmat_t;
+    using typename base_t::vec_value_t;
+    using typename base_t::vec_index_t;
+    using typename base_t::colmat_value_t;
     
 private:
     const Eigen::Map<const dense_t> _mat;   // underlying dense matrix
@@ -32,7 +33,7 @@ public:
     
     value_t cmul(
         int j, 
-        const Eigen::Ref<const rowvec_t>& v
+        const Eigen::Ref<const vec_value_t>& v
     ) const override
     {
         return ddot(_mat.col(j).matrix(), v.matrix(), _n_threads);
@@ -41,7 +42,7 @@ public:
     void ctmul(
         int j, 
         value_t v, 
-        Eigen::Ref<rowvec_t> out
+        Eigen::Ref<vec_value_t> out
     ) const override
     {
         dax(v, _mat.col(j), _n_threads, out);
@@ -49,8 +50,8 @@ public:
 
     void bmul(
         int j, int q, 
-        const Eigen::Ref<const rowvec_t>& v, 
-        Eigen::Ref<rowvec_t> out
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
     ) override
     {
         auto outm = out.matrix();
@@ -65,8 +66,8 @@ public:
 
     void btmul(
         int j, int q, 
-        const Eigen::Ref<const rowvec_t>& v, 
-        Eigen::Ref<rowvec_t> out
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
     ) override
     {
         auto outm = out.matrix();
@@ -81,7 +82,7 @@ public:
 
     void to_dense(
         int j, int q,
-        Eigen::Ref<colmat_t> out
+        Eigen::Ref<colmat_value_t> out
     ) const override
     {
         dmmeq(
@@ -89,6 +90,46 @@ public:
             _mat.middleCols(j, q),
             _n_threads
         );
+    }
+
+    void means(
+        Eigen::Ref<vec_value_t> out
+    ) const override
+    {
+        const size_t p = _mat.cols();
+        const int n_blocks = std::min<int>(_n_threads, p);
+        const int block_size = p / n_blocks;
+        const int remainder = p % n_blocks;
+        #pragma omp parallel for schedule(static) num_threads(n_blocks)
+        for (int t = 0; t < n_blocks; ++t) {
+            const auto begin = (
+                std::min<int>(t, remainder) * (block_size + 1) 
+                + std::max<int>(t-remainder, 0) * block_size
+            );
+            const auto size = block_size + (t < remainder);
+            out.segment(begin, size) = _mat.middleCols(begin, size).colwise().mean();
+        }
+    }
+
+    void group_norms(
+        const Eigen::Ref<const vec_index_t>& groups,
+        const Eigen::Ref<const vec_index_t>& group_sizes,
+        const Eigen::Ref<const vec_value_t>& means,
+        bool center,
+        Eigen::Ref<vec_value_t> out
+    ) const override
+    {
+        const auto n = _mat.rows();
+        const auto G = groups.size();
+        const auto n_threads_capped = std::min<int>(_n_threads, G);
+        #pragma omp parallel for schedule(static) num_threads(n_threads_capped)
+        for (int i = 0; i < G; ++i) {
+            const auto g = groups[i];
+            const auto gs = group_sizes[i];
+            auto Xi_fro = _mat.middleCols(g, gs).squaredNorm();
+            if (center) Xi_fro -= n * means.segment(g, gs).matrix().squaredNorm();
+            out[i] = std::sqrt(Xi_fro);
+        }
     }
 
     int rows() const override

@@ -9,8 +9,8 @@ class MatrixCovBase
 {
 public:
     using value_t = ValueType;
-    using rowvec_t = util::rowvec_type<value_t>;
-    using colmat_t = util::colmat_type<value_t>;
+    using vec_value_t = util::rowvec_type<value_t>;
+    using colmat_value_t = util::colmat_type<value_t>;
     
     virtual ~MatrixCovBase() {}
 
@@ -26,8 +26,8 @@ public:
      */
     virtual void bmul(
         int i, int j, int p, int q, 
-        const Eigen::Ref<const rowvec_t>& v, 
-        Eigen::Ref<rowvec_t> out
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
     ) =0;
 
     /**
@@ -41,7 +41,7 @@ public:
      */
     virtual void to_dense(
         int i, int j, int p, int q,
-        Eigen::Ref<colmat_t> out
+        Eigen::Ref<colmat_value_t> out
     ) const =0;
 
     /**

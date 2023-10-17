@@ -1739,7 +1739,7 @@ def basil_naive(
     lmda_path_size: int =100,
     delta_lmda_path_size: int =5,
     delta_strong_size: int =5,
-    max_strong_size: int =1000,
+    max_strong_size: int =None,
 ):
     """Creates a basil, naive method state object.
 
@@ -1877,13 +1877,44 @@ def basil_naive(
         Maximum number of strong groups allowed.
         The function will return a valid state and guaranteed to have strong set size
         less than or equal to ``max_strong_size``.
-        Default is ``1000``.
+        If ``None``, it will be set to the total number of groups.
+        Default is ``None``.
 
     See Also
     --------
     adelie.state.basil_naive_64
     adelie.state.basil_naive_32
     """
+    if max_strong_size is None:
+        max_strong_size = len(groups)
+
+    if max_iters < 0:
+        raise ValueError("max_iters must be >= 0.")
+    if tol <= 0:
+        raise ValueError("tol must be > 0.")
+    if rsq_tol < 0 or rsq_tol > 1:
+        raise ValueError("rsq_tol must be in [0,1].")
+    if rsq_slope_tol < 0:
+        raise ValueError("rsq_slope_tol must be >= 0.")
+    if rsq_curv_tol < 0:
+        raise ValueError("rsq_curv_tol must be >= 0.")
+    if newton_tol < 0:
+        raise ValueError("newton_tol must be >= 0.")
+    if newton_max_iters < 0:
+        raise ValueError("newton_max_iters must be >= 0.")
+    if n_threads < 1:
+        raise ValueError("n_threads must be >= 1.")
+    if min_ratio <= 0:
+        raise ValueError("min_ratio must be > 0.")
+    if lmda_path_size < 0:
+        raise ValueError("lmda_path_size must be >= 0.")
+    if delta_lmda_path_size < 1:
+        raise ValueError("delta_lmda_path_size must be >= 1.")
+    if delta_strong_size < 1:
+        raise ValueError("delta_strong_size must be >= 1.")
+    if max_strong_size < 0:
+        raise ValueError("max_strong_size must be >= 0.")
+
     if isinstance(X, matrix.base):
         X_intr = X.internal()
     else:

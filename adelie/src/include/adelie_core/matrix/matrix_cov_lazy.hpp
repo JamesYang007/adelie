@@ -14,8 +14,8 @@ class MatrixCovLazy:
 public: 
     using base_t = MatrixCovBase<typename std::decay_t<DenseType>::Scalar>;
     using typename base_t::value_t;
-    using typename base_t::rowvec_t;
-    using typename base_t::colmat_t;
+    using typename base_t::vec_value_t;
+    using typename base_t::colmat_value_t;
     using dense_t = DenseType;
     using index_t = Eigen::Index;
     
@@ -72,8 +72,8 @@ public:
 
     void bmul(
         int i, int j, int p, int q, 
-        const Eigen::Ref<const rowvec_t>& v, 
-        Eigen::Ref<rowvec_t> out
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
     ) override
     {
         if (i < 0 || j < 0 || p <= 0 || q <= 0) {
@@ -96,7 +96,7 @@ public:
 
     void to_dense(
         int i, int j, int p, int q,
-        Eigen::Ref<colmat_t> out
+        Eigen::Ref<colmat_value_t> out
     ) const override
     {
         if (i < 0 || i > static_cast<int>(_index_map.size())) {

@@ -4,13 +4,15 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType> 
+template <class ValueType, class IndexType=int> 
 class MatrixNaiveBase
 {
 public:
     using value_t = ValueType;
-    using rowvec_t = util::rowvec_type<value_t>;
-    using colmat_t = util::colmat_type<value_t>;
+    using index_t = IndexType;
+    using vec_value_t = util::rowvec_type<value_t>;
+    using vec_index_t = util::rowvec_type<index_t>;
+    using colmat_value_t = util::colmat_type<value_t>;
     
     virtual ~MatrixNaiveBase() {}
     
@@ -23,7 +25,7 @@ public:
      */
     virtual value_t cmul(
         int j, 
-        const Eigen::Ref<const rowvec_t>& v
+        const Eigen::Ref<const vec_value_t>& v
     ) const =0;
 
     /**
@@ -36,7 +38,7 @@ public:
     virtual void ctmul(
         int j, 
         value_t v, 
-        Eigen::Ref<rowvec_t> out
+        Eigen::Ref<vec_value_t> out
     ) const =0;
 
     /**
@@ -49,8 +51,8 @@ public:
      */
     virtual void bmul(
         int j, int q, 
-        const Eigen::Ref<const rowvec_t>& v, 
-        Eigen::Ref<rowvec_t> out
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
     ) =0;
 
     /**
@@ -63,8 +65,8 @@ public:
      */
     virtual void btmul(
         int j, int q, 
-        const Eigen::Ref<const rowvec_t>& v, 
-        Eigen::Ref<rowvec_t> out
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
     ) =0;
 
     /**
@@ -76,7 +78,32 @@ public:
      */
     virtual void to_dense(
         int j, int q,
-        Eigen::Ref<colmat_t> out
+        Eigen::Ref<colmat_value_t> out
+    ) const =0;
+
+    /**
+     * @brief Computes column-wise mean.
+     * 
+     * @param out   resulting column means.
+     */
+    virtual void means(
+        Eigen::Ref<vec_value_t> out
+    ) const =0;
+
+    /**
+     * @brief Computes group-wise column norms.
+     * 
+     * @param groups    mapping group number to starting position.
+     * @param group_sizes   mapping group number to group size.
+     * @param center        true to compute centered column norms.
+     * @param out           resulting group-wise column norms.
+     */
+    virtual void group_norms(
+        const Eigen::Ref<const vec_index_t>& groups,
+        const Eigen::Ref<const vec_index_t>& group_sizes,
+        const Eigen::Ref<const vec_value_t>& means,
+        bool center,
+        Eigen::Ref<vec_value_t> out
     ) const =0;
 
     /**

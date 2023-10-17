@@ -3,3 +3,4 @@ from . import bcd
 from . import matrix
 from . import state
 from . import solver
+from .solver import grpnet
