@@ -16,13 +16,14 @@ public:
     /* Inherit the constructors */
     using base_t::base_t;
     using typename base_t::value_t;
-    using typename base_t::rowvec_t;
-    using typename base_t::colmat_t;
+    using typename base_t::vec_value_t;
+    using typename base_t::vec_index_t;
+    using typename base_t::colmat_value_t;
 
     /* Trampoline (need one for each virtual function) */
     value_t cmul(
         int j, 
-        const Eigen::Ref<const rowvec_t>& v
+        const Eigen::Ref<const vec_value_t>& v
     ) const override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -36,7 +37,7 @@ public:
     void ctmul(
         int j, 
         value_t v, 
-        Eigen::Ref<rowvec_t> out
+        Eigen::Ref<vec_value_t> out
     ) const override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -49,8 +50,8 @@ public:
 
     void bmul(
         int j, int q, 
-        const Eigen::Ref<const rowvec_t>& v, 
-        Eigen::Ref<rowvec_t> out
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
     ) override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -63,8 +64,8 @@ public:
 
     void btmul(
         int j, int q, 
-        const Eigen::Ref<const rowvec_t>& v, 
-        Eigen::Ref<rowvec_t> out
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
     ) override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -77,7 +78,7 @@ public:
 
     void to_dense(
         int j, int q,
-        Eigen::Ref<colmat_t> out
+        Eigen::Ref<colmat_value_t> out
     ) const override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -85,6 +86,34 @@ public:
             base_t,
             to_dense,
             j, q, out
+        );
+    }
+
+    void means(
+        Eigen::Ref<vec_value_t> out
+    ) const override
+    {
+        PYBIND11_OVERLOAD_PURE(
+            void,
+            base_t,
+            means,
+            out
+        );
+    }
+
+    void group_norms(
+        const Eigen::Ref<const vec_index_t>& groups,
+        const Eigen::Ref<const vec_index_t>& group_sizes,
+        const Eigen::Ref<const vec_value_t>& means,
+        bool center,
+        Eigen::Ref<vec_value_t> out
+    ) const override
+    {
+        PYBIND11_OVERLOAD_PURE(
+            void,
+            base_t,
+            group_norms,
+            groups, group_sizes, means, center, out
         );
     }
 
@@ -190,6 +219,37 @@ void matrix_naive_base(py::module_& m, const char* name)
         out : (n, q) np.ndarray
             Matrix to store the dense result.
         )delimiter")
+        .def("means", &internal_t::means, R"delimiter(
+        Computes column-wise means.
+
+        Equivalent to ``np.mean(X, axis=0)``.
+
+        Parameters
+        ----------
+        out : (p,) np.ndarray
+            Vector to store the column-wise means.
+        )delimiter")
+        .def("group_norms", &internal_t::group_norms, R"delimiter(
+        Computes group-wise column norms.
+
+        Equivalent to ``np.linalg.norm(Xc[:, g:g+gs])``
+        for every group ``g`` with group size ``gs``.
+        Note that if ``X`` is to be centered first,
+        ``Xc`` is the column-wise centered version of ``X``.
+
+        Parameters
+        ----------
+        groups : (G,) np.ndarray
+            Mapping group number to the starting column index.
+        group_sizes : (G,) np.ndarray
+            Mapping group number to the group size.
+        means : (p,) np.ndarray
+            Column-wise means.
+        center : bool
+            ``True`` if the function should compute centered group-wise column norms.
+        out : (G,) np.ndarray
+            Resulting group-wise column norms.
+        )delimiter")
         .def("rows", &internal_t::rows, R"delimiter(
         Number of rows.
         )delimiter")
@@ -207,13 +267,13 @@ public:
     /* Inherit the constructors */
     using base_t::base_t;
     using typename base_t::value_t;
-    using typename base_t::rowvec_t;
-    using typename base_t::colmat_t;
+    using typename base_t::vec_value_t;
+    using typename base_t::colmat_value_t;
 
     void bmul(
         int i, int j, int p, int q, 
-        const Eigen::Ref<const rowvec_t>& v, 
-        Eigen::Ref<rowvec_t> out
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
     ) override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -226,7 +286,7 @@ public:
 
     void to_dense(
         int i, int j, int p, int q,
-        Eigen::Ref<colmat_t> out
+        Eigen::Ref<colmat_value_t> out
     ) const override
     {
         PYBIND11_OVERRIDE_PURE(

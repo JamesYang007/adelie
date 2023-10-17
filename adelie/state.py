@@ -534,6 +534,7 @@ class pin_naive_base(pin_base):
         *,
         X: matrix.base | matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
         y_mean: float,
+        y_var: float,
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -547,6 +548,7 @@ class pin_naive_base(pin_base):
         intercept: bool,
         max_iters: int,
         tol: float,
+        rsq_tol: float,
         rsq_slope_tol: float,
         rsq_curv_tol: float,
         newton_tol: float,
@@ -619,6 +621,7 @@ class pin_naive_base(pin_base):
             self,
             X=X,
             y_mean=y_mean,
+            y_var=y_var,
             groups=self._groups,
             group_sizes=self._group_sizes,
             alpha=alpha,
@@ -634,6 +637,7 @@ class pin_naive_base(pin_base):
             intercept=intercept,
             max_iters=max_iters,
             tol=tol,
+            rsq_tol=rsq_tol,
             rsq_slope_tol=rsq_slope_tol,
             rsq_curv_tol=rsq_curv_tol,
             newton_tol=newton_tol,
@@ -715,6 +719,7 @@ def pin_naive(
     *,
     X: matrix.base | matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
     y_mean: float,
+    y_var: float,
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -727,9 +732,10 @@ def pin_naive(
     strong_is_active: np.ndarray,
     intercept: bool =True,
     max_iters: int =int(1e5),
-    tol: float =1e-16,
-    rsq_slope_tol: float =1e-2,
-    rsq_curv_tol: float =1e-2,
+    tol: float =1e-12,
+    rsq_tol: float =0.9,
+    rsq_slope_tol: float =1e-3,
+    rsq_curv_tol: float =1e-3,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -743,6 +749,8 @@ def pin_naive(
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
     y_mean : float
         Mean of :math:`y`.
+    y_var : float
+        :math:`\\ell_2` norm squared of :math:`y_c`.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -783,13 +791,16 @@ def pin_naive(
         Default is ``int(1e5)``.
     tol : float, optional
         Convergence tolerance.
-        Default is ``1e-16``.
+        Default is ``1e-12``.
+    rsq_tol : float, optional
+        Early stopping rule check on :math:`R^2`.
+        Default is ``0.9``.
     rsq_slope_tol : float, optional
         Early stopping rule check on slope of :math:`R^2`.
-        Default is ``1e-2``.
+        Default is ``1e-3``.
     rsq_curv_tol : float, optional
         Early stopping rule check on curvature of :math:`R^2`.
-        Default is ``1e-2``.
+        Default is ``1e-3``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
@@ -831,6 +842,7 @@ def pin_naive(
     return dispatcher[dtype](
         X=X,
         y_mean=y_mean,
+        y_var=y_var,
         groups=groups,
         group_sizes=group_sizes,
         alpha=alpha,
@@ -844,6 +856,7 @@ def pin_naive(
         intercept=intercept,
         max_iters=max_iters,
         tol=tol,
+        rsq_tol=rsq_tol,
         rsq_slope_tol=rsq_slope_tol,
         rsq_curv_tol=rsq_curv_tol,
         newton_tol=newton_tol,
@@ -1023,9 +1036,9 @@ def pin_cov(
     strong_grad: np.ndarray,
     strong_is_active: np.ndarray,
     max_iters: int =int(1e5),
-    tol: float =1e-16,
-    rsq_slope_tol: float =1e-2,
-    rsq_curv_tol: float =1e-2,
+    tol: float =1e-12,
+    rsq_slope_tol: float =1e-3,
+    rsq_curv_tol: float =1e-3,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -1081,13 +1094,13 @@ def pin_cov(
         Default is ``int(1e5)``.
     tol : float, optional
         Convergence tolerance.
-        Default is ``1e-16``.
+        Default is ``1e-12``.
     rsq_slope_tol : float, optional
         Early stopping rule check on slope of :math:`R^2`.
-        Default is ``1e-2``.
+        Default is ``1e-3``.
     rsq_curv_tol : float, optional
         Early stopping rule check on curvature of :math:`R^2`.
-        Default is ``1e-2``.
+        Default is ``1e-3``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
@@ -1182,6 +1195,7 @@ class basil_naive_base(basil_base):
         strong_rule: str,
         max_iters: int,
         tol: float,
+        rsq_tol: float,
         rsq_slope_tol: float,
         rsq_curv_tol: float,
         newton_tol: float,
@@ -1252,6 +1266,7 @@ class basil_naive_base(basil_base):
             strong_rule=strong_rule,
             max_iters=max_iters,
             tol=tol,
+            rsq_tol=rsq_tol,
             rsq_slope_tol=rsq_slope_tol,
             rsq_curv_tol=rsq_curv_tol,
             newton_tol=newton_tol,
@@ -1602,6 +1617,47 @@ class basil_naive_base(basil_base):
                 method, logger,
             )
 
+    def update_path(self, path):
+        return basil_naive(
+            X=self.X,
+            X_means=self.X_means,
+            X_group_norms=self.X_group_norms,
+            y_mean=self.y_mean,
+            y_var=self.y_var,
+            resid=self.resid,
+            groups=self.groups,
+            group_sizes=self.group_sizes,
+            alpha=self.alpha,
+            penalty=self.penalty,
+            strong_set=self.strong_set,
+            strong_beta=self.strong_beta,
+            strong_is_active=self.strong_is_active,
+            rsq=self.rsq,
+            lmda=self.lmda,
+            grad=self.grad,
+            lmda_path=path,
+            lmda_max=None if self.lmda_max == -1 else self.lmda_max,
+            edpp_safe_set=self.edpp_safe_set,
+            edpp_v1_0=None if len(self.edpp_v1_0) == 0 else self.edpp_v1_0,
+            edpp_resid_0=None if len(self.edpp_resid_0) == 0 else self.edpp_resid_0,
+            max_iters=self.max_iters,
+            tol=self.tol,
+            rsq_tol=self.rsq_tol,
+            rsq_slope_tol=self.rsq_slope_tol,
+            rsq_curv_tol=self.rsq_curv_tol,
+            newton_tol=self.newton_tol,
+            newton_max_iters=self.newton_max_iters,
+            n_threads=self.n_threads,
+            early_exit=self.early_exit,
+            intercept=self.intercept,
+            strong_rule=self.strong_rule,
+            min_ratio=self.min_ratio,
+            lmda_path_size=self.lmda_path_size,
+            delta_lmda_path_size=self.delta_lmda_path_size,
+            delta_strong_size=self.delta_strong_size,
+            max_strong_size=self.max_strong_size,
+        )
+
 
 class basil_naive_64(basil_naive_base, core.state.StateBasilNaive64):
     """State class for basil, naive method using 64-bit floating point."""
@@ -1669,9 +1725,10 @@ def basil_naive(
     edpp_v1_0: np.ndarray =None,
     edpp_resid_0: np.ndarray =None,
     max_iters: int =int(1e5),
-    tol: float =1e-16,
-    rsq_slope_tol: float =1e-2,
-    rsq_curv_tol: float =1e-2,
+    tol: float =1e-12,
+    rsq_tol: float =0.9,
+    rsq_slope_tol: float =1e-3,
+    rsq_curv_tol: float =1e-3,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -1682,7 +1739,7 @@ def basil_naive(
     lmda_path_size: int =100,
     delta_lmda_path_size: int =5,
     delta_strong_size: int =5,
-    max_strong_size: int =1000,
+    max_strong_size: int =None,
 ):
     """Creates a basil, naive method state object.
 
@@ -1769,13 +1826,16 @@ def basil_naive(
         Default is ``int(1e5)``.
     tol : float, optional
         Convergence tolerance.
-        Default is ``1e-16``.
+        Default is ``1e-12``.
+    rsq_tol : float, optional
+        Early stopping rule check on :math:`R^2`.
+        Default is ``0.9``.
     rsq_slope_tol : float, optional
         Early stopping rule check on slope of :math:`R^2`.
-        Default is ``1e-2``.
+        Default is ``1e-3``.
     rsq_curv_tol : float, optional
         Early stopping rule check on curvature of :math:`R^2`.
-        Default is ``1e-2``.
+        Default is ``1e-3``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
@@ -1817,13 +1877,44 @@ def basil_naive(
         Maximum number of strong groups allowed.
         The function will return a valid state and guaranteed to have strong set size
         less than or equal to ``max_strong_size``.
-        Default is ``1000``.
+        If ``None``, it will be set to the total number of groups.
+        Default is ``None``.
 
     See Also
     --------
     adelie.state.basil_naive_64
     adelie.state.basil_naive_32
     """
+    if max_strong_size is None:
+        max_strong_size = len(groups)
+
+    if max_iters < 0:
+        raise ValueError("max_iters must be >= 0.")
+    if tol <= 0:
+        raise ValueError("tol must be > 0.")
+    if rsq_tol < 0 or rsq_tol > 1:
+        raise ValueError("rsq_tol must be in [0,1].")
+    if rsq_slope_tol < 0:
+        raise ValueError("rsq_slope_tol must be >= 0.")
+    if rsq_curv_tol < 0:
+        raise ValueError("rsq_curv_tol must be >= 0.")
+    if newton_tol < 0:
+        raise ValueError("newton_tol must be >= 0.")
+    if newton_max_iters < 0:
+        raise ValueError("newton_max_iters must be >= 0.")
+    if n_threads < 1:
+        raise ValueError("n_threads must be >= 1.")
+    if min_ratio <= 0:
+        raise ValueError("min_ratio must be > 0.")
+    if lmda_path_size < 0:
+        raise ValueError("lmda_path_size must be >= 0.")
+    if delta_lmda_path_size < 1:
+        raise ValueError("delta_lmda_path_size must be >= 1.")
+    if delta_strong_size < 1:
+        raise ValueError("delta_strong_size must be >= 1.")
+    if max_strong_size < 0:
+        raise ValueError("max_strong_size must be >= 0.")
+
     if isinstance(X, matrix.base):
         X_intr = X.internal()
     else:
@@ -1887,6 +1978,7 @@ def basil_naive(
         strong_rule=strong_rule,
         max_iters=max_iters,
         tol=tol,
+        rsq_tol=rsq_tol,
         rsq_slope_tol=rsq_slope_tol,
         rsq_curv_tol=rsq_curv_tol,
         newton_tol=newton_tol,

@@ -22,12 +22,14 @@ def test_state_pin_naive():
     rsq = 0.0
     resid = np.random.normal(0, 1, n)
     y_mean = 0
+    y_var = 1
     strong_beta = np.zeros(p)
     strong_is_active = np.zeros(strong_set.shape[0], dtype=bool)
 
     state = mod.pin_naive(
         X=X,
         y_mean=y_mean,
+        y_var=y_var,
         groups=groups,
         group_sizes=group_sizes,
         alpha=alpha,

@@ -154,18 +154,7 @@ void screen_strong(
         return strong_hashset.find(i) != strong_hashset.end(); 
     };
 
-    /* update strong_set */
-    // Use either the fixed-increment rule or strong rule to increase strong set.
-    if (strong_rule == state::strong_rule_type::_default) {
-        const auto strong_rule_lmda = (2 * lmda_next - lmda) * alpha;
-        // TODO: PARALLELIZE!
-        for (int i = 0; i < abs_grad.size(); ++i) {
-            if (is_strong(i)) continue;
-            if (abs_grad[i] > strong_rule_lmda * penalty[i]) {
-                strong_set.push_back(i);
-            }
-        }
-    } else if (strong_rule == state::strong_rule_type::_fixed_greedy) {
+    const auto do_fixed_greedy = [&]() {
         size_t size_capped = std::min(delta_strong_size, new_safe_size);
 
         strong_set.insert(strong_set.end(), size_capped, -1);
@@ -182,10 +171,32 @@ void screen_strong(
             size_capped, 
             std::next(strong_set.begin(), old_strong_set_size)
         );
+    };
+
+    /* update strong_set */
+    // Use either the fixed-increment rule or strong rule to increase strong set.
+    if (strong_rule == state::strong_rule_type::_default) {
+        const auto strong_rule_lmda = (2 * lmda_next - lmda) * alpha;
+
+        // TODO: PARALLELIZE!
+        for (int i = 0; i < abs_grad.size(); ++i) {
+            if (is_strong(i)) continue;
+            if (abs_grad[i] > strong_rule_lmda * penalty[i]) {
+                strong_set.push_back(i);
+            }
+        }
+
+        // If no new strong variables were added, need a fall-back.
+        // Use fixed-greedy method.
+        if (strong_set.size() == old_strong_set_size) {
+            do_fixed_greedy();
+        }
+    } else if (strong_rule == state::strong_rule_type::_fixed_greedy) {
+        do_fixed_greedy();
     } else if (strong_rule == state::strong_rule_type::_safe) {
         for (int i = 0; i < edpp_safe_set.size(); ++i) {
             if (is_strong(edpp_safe_set[i])) continue;
-            strong_set.push_back(i);
+            strong_set.push_back(edpp_safe_set[i]);
         }
     }
 
@@ -243,6 +254,7 @@ auto fit(
 
     auto& X = *state.X;
     const auto y_mean = state.y_mean;
+    const auto y_var = state.y_var;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto alpha = state.alpha;
@@ -257,6 +269,9 @@ auto fit(
     const auto intercept = state.intercept;
     const auto max_iters = state.max_iters;
     const auto tol = state.tol;
+    const auto rsq_tol = state.rsq_tol;
+    const auto rsq_slope_tol = state.rsq_slope_tol;
+    const auto rsq_curv_tol = state.rsq_curv_tol;
     const auto newton_tol = state.newton_tol;
     const auto newton_max_iters = state.newton_max_iters;
     const auto n_threads = state.n_threads;
@@ -269,6 +284,7 @@ auto fit(
     state_pin_naive_t state_pin_naive(
         X,
         y_mean,
+        y_var,
         groups, 
         group_sizes,
         alpha, 
@@ -281,7 +297,8 @@ auto fit(
         Eigen::Map<const vec_value_t>(strong_X_means.data(), strong_X_means.size()), 
         strong_transforms,
         lmda_path,
-        intercept, max_iters, tol, 0, 0, newton_tol, newton_max_iters, n_threads,
+        intercept, max_iters, tol, rsq_tol, rsq_slope_tol, rsq_curv_tol, 
+        newton_tol, newton_max_iters, n_threads,
         rsq,
         Eigen::Map<vec_value_t>(resid.data(), resid.size()),
         resid_sum,
@@ -390,8 +407,8 @@ inline void solve_basil(
     using state_t = std::decay_t<StateType>;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
-    using vec_index_t = typename state_t::vec_index_t;
     using vec_safe_bool_t = typename state_t::vec_safe_bool_t;
+    using sw_t = util::Stopwatch;
 
     const auto& X_means = state.X_means;
     const auto alpha = state.alpha;
@@ -401,6 +418,7 @@ inline void solve_basil(
     const auto delta_lmda_path_size = state.delta_lmda_path_size;
     const auto early_exit = state.early_exit;
     const auto max_strong_size = state.max_strong_size;
+    const auto rsq_tol = state.rsq_tol;
     const auto rsq_slope_tol = state.rsq_slope_tol;
     const auto rsq_curv_tol = state.rsq_curv_tol;
     const auto setup_edpp = state.setup_edpp;
@@ -424,6 +442,10 @@ inline void solve_basil(
     auto& resid_prev_valid = state.resid_prev_valid;
     auto& strong_beta_prev_valid = state.strong_beta_prev_valid; 
     auto& strong_is_active_prev_valid = state.strong_is_active_prev_valid;
+    auto& benchmark_screen = state.benchmark_screen;
+    auto& benchmark_fit = state.benchmark_fit;
+    auto& benchmark_kkt = state.benchmark_kkt;
+    auto& benchmark_invariance = state.benchmark_invariance;
 
     const auto p = grad.size();
 
@@ -588,6 +610,7 @@ inline void solve_basil(
     // We must go through BASIL iterations to solve each lambda.
     vec_value_t lmda_batch;
     std::vector<vec_value_t> grads;
+    sw_t sw;
 
     while (1) 
     {
@@ -596,9 +619,8 @@ inline void solve_basil(
             const auto rsq_u = rsqs[rsqs.size()-1];
             const auto rsq_m = rsqs[rsqs.size()-2];
             const auto rsq_l = rsqs[rsqs.size()-3];
-            // TODO: generalize 0.99
             if (check_early_stop_rsq(rsq_l, rsq_m, rsq_u, rsq_slope_tol, rsq_curv_tol) || 
-                (rsqs.back() >= 0.99)) break;
+                (rsqs.back() >= rsq_tol)) break;
         }
 
         // check if any lambdas left to fit
@@ -613,10 +635,12 @@ inline void solve_basil(
         // ==================================================================================== 
         // Screening step
         // ==================================================================================== 
+        sw.start();
         naive::screen(
             state,
             lmda_batch[0]
         );
+        benchmark_screen.push_back(sw.elapsed());
 
         try {
             // ==================================================================================== 
@@ -625,27 +649,32 @@ inline void solve_basil(
             // Save all current valid quantities that will be modified in-place by fit.
             // This is needed for the invariance step in case no valid solutions are found.
             save_prev_valid();
+            sw.start();
             auto&& state_pin_naive = naive::fit(
                 state,
                 lmda_batch,
                 update_coefficients_f,
                 check_user_interrupt
             );
+            benchmark_fit.push_back(sw.elapsed());
 
             // ==================================================================================== 
             // KKT step
             // ==================================================================================== 
             grads.resize(lmda_batch.size());
             for (auto& g : grads) g.resize(p);
+            sw.start();
             const auto n_valid_solutions = naive::kkt(
                 state,
                 state_pin_naive,
                 grads
             );
+            benchmark_kkt.push_back(sw.elapsed());
 
             // ==================================================================================== 
             // Invariance step
             // ==================================================================================== 
+            sw.start();
             lmda_path_idx += n_valid_solutions;
             // If no valid solutions found, restore to the previous valid state,
             // so that we can start over after screening more variables.
@@ -675,6 +704,7 @@ inline void solve_basil(
                 state_pin_naive, 
                 n_valid_solutions
             );
+            benchmark_invariance.push_back(sw.elapsed());
         } catch (const std::exception& e) {
             load_prev_valid();
             throw util::propagator_error(e.what());

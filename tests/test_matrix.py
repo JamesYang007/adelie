@@ -42,6 +42,33 @@ def test_naive_dense():
             cX.to_dense(0, p // 2, out)
             assert np.allclose(X[:, :p//2], out)
 
+            # test means
+            X_means = np.empty(p, dtype=dtype)
+            cX.means(X_means)
+            assert np.allclose(np.mean(X, axis=0), X_means)
+
+            # test group_means
+            groups = np.concatenate([
+                [0],
+                np.random.choice(np.arange(1, p), size=p//2-1, replace=False)
+            ])
+            groups = np.sort(groups).astype(int)
+            group_sizes = np.concatenate([groups, [p]], dtype=int)
+            group_sizes = group_sizes[1:] - group_sizes[:-1]
+            out = np.empty(len(groups), dtype=dtype)
+            cX.group_norms(
+                groups,
+                group_sizes,
+                np.mean(X, axis=0),
+                True,
+                out,
+            )
+            expected = np.array([
+                np.linalg.norm(X[:, g:g+gs] - X_means[g:g+gs][None])
+                for g, gs in zip(groups, group_sizes)
+            ])
+            assert np.allclose(expected, out)
+
             assert cX.rows() == n
             assert cX.cols() == p
 

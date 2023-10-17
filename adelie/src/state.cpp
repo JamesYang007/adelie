@@ -309,6 +309,7 @@ void state_pin_naive(py::module_& m, const char* name)
         .def(py::init<
             matrix_t&,
             value_t,
+            value_t,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
@@ -327,6 +328,7 @@ void state_pin_naive(py::module_& m, const char* name)
             value_t,
             value_t,
             value_t,
+            value_t,
             size_t,
             size_t,
             value_t,
@@ -337,6 +339,7 @@ void state_pin_naive(py::module_& m, const char* name)
         >(),
             py::arg("X"),
             py::arg("y_mean"),
+            py::arg("y_var"),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
@@ -352,6 +355,7 @@ void state_pin_naive(py::module_& m, const char* name)
             py::arg("intercept"),
             py::arg("max_iters"),
             py::arg("tol"),
+            py::arg("rsq_tol"),
             py::arg("rsq_slope_tol"),
             py::arg("rsq_curv_tol"),
             py::arg("newton_tol"),
@@ -366,6 +370,12 @@ void state_pin_naive(py::module_& m, const char* name)
         .def(py::init([](const state_t& s) { return new state_t(s); }))
         .def_readonly("y_mean", &state_t::y_mean, R"delimiter(
         Mean of :math:`y`.
+        )delimiter")
+        .def_readonly("y_var", &state_t::y_var, R"delimiter(
+        :math:`\ell_2` norm squared of :math:`y_c`.
+        )delimiter")
+        .def_readonly("rsq_tol", &state_t::rsq_tol, R"delimiter(
+        Early stopping rule check on :math:`R^2`.
         )delimiter")
         .def_readonly("strong_X_means", &state_t::strong_X_means, R"delimiter(
         Column means of :math:`X` for strong groups.
@@ -522,6 +532,7 @@ void state_basil_base(py::module_& m, const char* name)
             value_t,
             value_t,
             value_t,
+            value_t,
             size_t,
             bool,
             bool,
@@ -549,6 +560,7 @@ void state_basil_base(py::module_& m, const char* name)
             py::arg("strong_rule"),
             py::arg("max_iters"),
             py::arg("tol"),
+            py::arg("rsq_tol"),
             py::arg("rsq_slope_tol"),
             py::arg("rsq_curv_tol"),
             py::arg("newton_tol"),
@@ -622,6 +634,9 @@ void state_basil_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("tol", &state_t::tol, R"delimiter(
         Convergence tolerance.
+        )delimiter")
+        .def_readonly("rsq_tol", &state_t::rsq_tol, R"delimiter(
+        Early stopping rule check on :math:`R^2`.
         )delimiter")
         .def_readonly("rsq_slope_tol", &state_t::rsq_slope_tol, R"delimiter(
         Early stopping rule check on slope of :math:`R^2`.
@@ -770,6 +785,38 @@ void state_basil_base(py::module_& m, const char* name)
         }, R"delimiter(
         ``intercepts[i]`` is the intercept solution corresponding to ``lmdas[i]``.
         )delimiter")
+        .def_property_readonly("benchmark_screen", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<double>>(
+                s.benchmark_screen.data(),
+                s.benchmark_screen.size()
+            );
+        }, R"delimiter(
+        Screen time for a given BASIL iteration.
+        )delimiter")
+        .def_property_readonly("benchmark_fit", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<double>>(
+                s.benchmark_fit.data(),
+                s.benchmark_fit.size()
+            );
+        }, R"delimiter(
+        Fit time for a given BASIL iteration.
+        )delimiter")
+        .def_property_readonly("benchmark_kkt", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<double>>(
+                s.benchmark_kkt.data(),
+                s.benchmark_kkt.size()
+            );
+        }, R"delimiter(
+        KKT time for a given BASIL iteration.
+        )delimiter")
+        .def_property_readonly("benchmark_invariance", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<double>>(
+                s.benchmark_invariance.data(),
+                s.benchmark_invariance.size()
+            );
+        }, R"delimiter(
+        Invariance time for a given BASIL iteration.
+        )delimiter")
         ;
 }
 
@@ -821,6 +868,7 @@ void state_basil_naive(py::module_& m, const char* name)
             value_t,
             value_t,
             value_t,
+            value_t,
             size_t,
             bool,
             bool,
@@ -858,6 +906,7 @@ void state_basil_naive(py::module_& m, const char* name)
             py::arg("strong_rule"),
             py::arg("max_iters"),
             py::arg("tol"),
+            py::arg("rsq_tol"),
             py::arg("rsq_slope_tol"),
             py::arg("rsq_curv_tol"),
             py::arg("newton_tol"),

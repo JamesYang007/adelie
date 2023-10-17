@@ -244,24 +244,23 @@ void solve_pin_active(
         ab_diff_view_curr = sb;
     }
     
-    time_active_cd.push_back(0);
-    {
-        sw_t stopwatch(time_active_cd.back());
-        while (1) {
-            check_user_interrupt(iters);
-            ++iters;
-            value_t convg_measure;
-            coordinate_descent(
-                state, 
-                active_g1.data(), active_g1.data() + active_g1.size(),
-                active_g2.data(), active_g2.data() + active_g2.size(),
-                lmda_idx, convg_measure, buffer1, buffer2, buffer3, buffer4,
-                update_coefficients_f
-            );
-            if (convg_measure < tol) break;
-            if (iters >= max_iters) throw util::max_cds_error(lmda_idx);
-        }
+    sw_t stopwatch;
+    stopwatch.start();
+    while (1) {
+        check_user_interrupt(iters);
+        ++iters;
+        value_t convg_measure;
+        coordinate_descent(
+            state, 
+            active_g1.data(), active_g1.data() + active_g1.size(),
+            active_g2.data(), active_g2.data() + active_g2.size(),
+            lmda_idx, convg_measure, buffer1, buffer2, buffer3, buffer4,
+            update_coefficients_f
+        );
+        if (convg_measure < tol) break;
+        if (iters >= max_iters) throw util::max_cds_error(lmda_idx);
     }
+    time_active_cd.push_back(stopwatch.elapsed());
     
     // compute new active beta - old active beta
     for (size_t i = 0; i < active_set.size(); ++i) {
@@ -422,22 +421,21 @@ inline void solve_pin(
             ++iters;
             value_t convg_measure;
             const auto old_active_size = active_set.size();
-            time_strong_cd.push_back(0);
-            {
-                sw_t stopwatch(time_strong_cd.back());
-                coordinate_descent(
-                    state,
-                    strong_g1.data(), strong_g1.data() + strong_g1.size(),
-                    strong_g2.data(), strong_g2.data() + strong_g2.size(),
-                    l, convg_measure,
-                    buffer_pack.buffer1,
-                    buffer_pack.buffer2,
-                    buffer_pack.buffer3,
-                    buffer_pack.buffer4,
-                    update_coefficients_f,
-                    add_active_set
-                );
-            }
+            sw_t stopwatch;
+            stopwatch.start();
+            coordinate_descent(
+                state,
+                strong_g1.data(), strong_g1.data() + strong_g1.size(),
+                strong_g2.data(), strong_g2.data() + strong_g2.size(),
+                l, convg_measure,
+                buffer_pack.buffer1,
+                buffer_pack.buffer2,
+                buffer_pack.buffer3,
+                buffer_pack.buffer4,
+                update_coefficients_f,
+                add_active_set
+            );
+            time_strong_cd.push_back(stopwatch.elapsed());
             const bool new_active_added = (old_active_size < active_set.size());
 
             if (new_active_added) {

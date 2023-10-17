@@ -1,4 +1,6 @@
 #include <benchmark/benchmark.h>
+#include <Eigen/SVD>
+#include <Eigen/Eigenvalues>
 #include <adelie_core/util/types.hpp>
 #include <omp.h>
 #include <iostream>
@@ -221,6 +223,40 @@ static void BM_btmul_par_c(benchmark::State& state) {
     }
 }
 
+static void BM_svd(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto p = state.range(1);
+    ad::util::colmat_type<double> X(n, p);
+    srand(0);
+    X.setRandom();
+
+    for (auto _ : state) {
+        Eigen::BDCSVD<ad::util::colmat_type<double>> solver(
+            X,
+            Eigen::ComputeFullV
+        );
+        benchmark::DoNotOptimize(solver);
+    }
+}
+
+static void BM_eigh(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto p = state.range(1);
+    ad::util::colmat_type<double> X(n, p);
+    ad::util::colmat_type<double> XTX(p, p);
+    srand(0);
+    X.setRandom();
+
+    Eigen::setNbThreads(8);
+    for (auto _ : state) {
+        XTX.noalias() = X.transpose() * X;
+        Eigen::SelfAdjointEigenSolver<ad::util::colmat_type<double>> solver(XTX);
+        benchmark::DoNotOptimize(solver);
+    }
+}
+
 BENCHMARK(BM_cmul_seq)
     -> Args({10000000})
     ;
@@ -266,4 +302,17 @@ BENCHMARK(BM_btmul_par_c)
     -> Args({1000000, 8, 2})
     -> Args({1000000, 8, 4})
     -> Args({1000000, 8, 8})
+    ;
+
+BENCHMARK(BM_svd)
+    -> Args({100, 8})
+    -> Args({1000, 8})
+    -> Args({10000, 8})
+    -> Args({100000, 8})
+    ;
+BENCHMARK(BM_eigh)
+    -> Args({100, 8})
+    -> Args({1000, 8})
+    -> Args({10000, 8})
+    -> Args({100000, 8})
     ;

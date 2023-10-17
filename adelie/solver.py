@@ -1,5 +1,6 @@
 from . import adelie_core as core
 from . import logger
+from . import matrix
 import adelie as ad
 import numpy as np
 
@@ -165,13 +166,138 @@ def solve_basil(
     return state
 
 
-def grpnet():
+def grpnet(
+    *,
+    X: np.ndarray | matrix.base,
+    y: np.ndarray,
+    groups: np.ndarray,
+    group_sizes: np.ndarray,
+    alpha: float,
+    penalty: np.ndarray,
+    lmda_path: np.ndarray =None,
+    max_iters: int =int(1e5),
+    tol: float =1e-12,
+    rsq_tol: float =0.9,
+    rsq_slope_tol: float =1e-3,
+    rsq_curv_tol: float =1e-3,
+    newton_tol: float =1e-12,
+    newton_max_iters: int =1000,
+    n_threads: int =1,
+    early_exit: bool =True,
+    intercept: bool =True,
+    strong_rule: str ="default",
+    min_ratio: float =1e-2,
+    lmda_path_size: int =100,
+    delta_lmda_path_size: int =5,
+    delta_strong_size: int =5,
+    max_strong_size: int =None,
+    check_state: bool =True,
+):
+    """TODO
     """
-    TODO:
-    - cap max_strong_size by number of features
-    - decreasing order of lmdas
-    - cap max number of lambdas per iter
-    - alpha <= 0: add all variables to strong_set
-    - alpha > 0: add all variables with penalty <= 0 to strong_set
-    """
-    pass
+
+    if isinstance(X, np.ndarray):
+        X_raw = X
+        X = ad.matrix.naive_dense(X_raw, n_threads=n_threads)
+        _X = X.internal()
+    else:
+        assert (
+            isinstance(X, matrix.MatrixNaiveBase64) or
+            isinstance(X, matrix.MatrixNaiveBase32)
+        )
+        _X = X
+
+    dtype = (
+        np.float64
+        if isinstance(_X, matrix.MatrixNaiveBase64) else
+        np.float32
+    )
+
+    p = _X.cols()
+    G = len(groups)
+
+    actual_lmda_path_size = (
+        lmda_path_size
+        if lmda_path is None else
+        len(lmda_path)
+    )
+    delta_lmda_path_size = np.minimum(delta_lmda_path_size, actual_lmda_path_size)
+
+    max_strong_size = np.minimum(max_strong_size, G)
+
+    X_means = np.empty(p, dtype=dtype)
+    _X.means(X_means)
+
+    X_group_norms = np.empty(G, dtype=dtype)
+    _X.group_norms(
+        groups,
+        group_sizes,
+        X_means,
+        intercept,
+        X_group_norms,
+    )
+
+    y_mean = np.mean(y)
+    yc = y
+    if intercept:
+        yc = yc - y_mean
+    y_var = np.sum(yc ** 2)
+    resid = yc
+
+    strong_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
+    strong_beta = np.zeros(np.sum(group_sizes[strong_set]), dtype=dtype)
+    strong_is_active = np.ones(strong_set.shape[0], dtype=bool)
+
+    rsq = 0
+    lmda = np.inf
+    grad = np.empty(p, dtype=dtype)
+    _X.bmul(0, p, resid, grad)
+
+    if not (lmda_path is None):
+        lmda_path = np.flip(np.sort(lmda_path))
+
+    state = ad.state.basil_naive(
+        X=X,
+        X_means=X_means,
+        X_group_norms=X_group_norms,
+        y_mean=y_mean,
+        y_var=y_var,
+        resid=resid,
+        groups=groups,
+        group_sizes=group_sizes,
+        alpha=alpha,
+        penalty=penalty,
+        strong_set=strong_set,
+        strong_beta=strong_beta,
+        strong_is_active=strong_is_active,
+        rsq=rsq,
+        lmda=lmda,
+        grad=grad,
+        lmda_path=lmda_path,
+        lmda_max=None,
+        edpp_safe_set=None,
+        edpp_v1_0=None,
+        edpp_resid_0=None,
+        max_iters=max_iters,
+        tol=tol,
+        rsq_tol=rsq_tol,
+        rsq_slope_tol=rsq_slope_tol,
+        rsq_curv_tol=rsq_curv_tol,
+        newton_tol=newton_tol,
+        newton_max_iters=newton_max_iters,
+        n_threads=n_threads,
+        early_exit=early_exit,
+        intercept=intercept,
+        strong_rule=strong_rule,
+        min_ratio=min_ratio,
+        lmda_path_size=lmda_path_size,
+        delta_lmda_path_size=delta_lmda_path_size,
+        delta_strong_size=delta_strong_size,
+        max_strong_size=max_strong_size,
+    )
+
+    if check_state:
+        assert isinstance(X_raw, np.ndarray)
+        state.check(X_raw, y, method="assert")
+
+    return solve_basil(state)

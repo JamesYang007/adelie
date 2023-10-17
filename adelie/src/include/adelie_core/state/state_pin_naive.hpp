@@ -40,7 +40,10 @@ struct StatePinNaive : StatePinBase<
 
     /* Static states */
     const value_t y_mean;
+    const value_t y_var;
     const map_cvec_value_t strong_X_means;
+
+    const value_t rsq_tol;
 
     /* Dynamic states */
     matrix_t* X;
@@ -55,6 +58,7 @@ struct StatePinNaive : StatePinBase<
     explicit StatePinNaive(
         matrix_t& X,
         value_t y_mean,
+        value_t y_var,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
@@ -70,6 +74,7 @@ struct StatePinNaive : StatePinBase<
         bool intercept,
         size_t max_iters,
         value_t tol,
+        value_t rsq_tol,
         value_t rsq_slope_tol,
         value_t rsq_curv_tol,
         value_t newton_tol,
@@ -88,7 +93,9 @@ struct StatePinNaive : StatePinBase<
             rsq, strong_beta, strong_is_active
         ),
         y_mean(y_mean),
+        y_var(y_var),
         strong_X_means(strong_X_means.data(), strong_X_means.size()),
+        rsq_tol(rsq_tol),
         X(&X),
         resid(resid.data(), resid.size()),
         resid_sum(resid_sum),
