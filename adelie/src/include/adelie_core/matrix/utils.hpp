@@ -32,6 +32,56 @@ void dvsubi(
 
 template <class X1Type, class X2Type>
 ADELIE_CORE_STRONG_INLINE
+void dmvsubi(
+    X1Type& x1,
+    const X2Type& x2,
+    size_t n_threads
+)
+{
+    assert(n_threads > 0);
+    const size_t n = x1.rows();
+    const int n_blocks = std::min(n_threads, n);
+    const int block_size = n / n_blocks;
+    const int remainder = n % n_blocks;
+
+    #pragma omp parallel for schedule(static) num_threads(n_blocks)
+    for (int t = 0; t < n_blocks; ++t) {
+        const auto begin = (
+            std::min<int>(t, remainder) * (block_size + 1) 
+            + std::max<int>(t-remainder, 0) * block_size
+        );
+        const auto size = block_size + (t < remainder);
+        x1.middleRows(begin, size).rowwise() -= x2;
+    }
+}
+
+template <class X1Type, class X2Type>
+ADELIE_CORE_STRONG_INLINE
+void dmmeq(
+    X1Type& x1,
+    const X2Type& x2,
+    size_t n_threads
+)
+{
+    assert(n_threads > 0);
+    const size_t n = x1.rows();
+    const int n_blocks = std::min(n_threads, n);
+    const int block_size = n / n_blocks;
+    const int remainder = n % n_blocks;
+
+    #pragma omp parallel for schedule(static) num_threads(n_blocks)
+    for (int t = 0; t < n_blocks; ++t) {
+        const auto begin = (
+            std::min<int>(t, remainder) * (block_size + 1) 
+            + std::max<int>(t-remainder, 0) * block_size
+        );
+        const auto size = block_size + (t < remainder);
+        x1.middleRows(begin, size) = x2.middleRows(begin, size);
+    }
+}
+
+template <class X1Type, class X2Type>
+ADELIE_CORE_STRONG_INLINE
 auto ddot(
     const X1Type& x1, 
     const X2Type& x2, 

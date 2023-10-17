@@ -1,7 +1,7 @@
 #pragma once
 #include <numeric>
 #include <unordered_map>
-#include <Eigen/SVD>
+#include <Eigen/Eigenvalues>
 #include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/state/state_basil_base.hpp>
 
@@ -50,7 +50,9 @@ void update_strong_derived_naive(
     strong_transforms.resize(new_strong_size);
     strong_vars.resize(new_strong_value_size, 0);
 
-    util::colmat_type<value_t> Xi; // buffer
+    // buffers
+    util::colmat_type<value_t> Xi;
+    util::colmat_type<value_t> XiTXi;
 
     for (size_t i = old_strong_size; i < new_strong_size; ++i) {
         const auto g = groups[strong_set[i]];
@@ -70,23 +72,24 @@ void update_strong_derived_naive(
 
         // if intercept, must center first
         if (intercept) {
-            // TODO: PARALLELIZE!!
-            Xi.rowwise() -= Xi_means.matrix();
+            auto Xia = Xi.array();
+            matrix::dmvsubi(Xia, Xi_means, n_threads);
         }
 
         // transform data
-        Eigen::BDCSVD<util::colmat_type<value_t>> solver(
-            Xi,
-            Eigen::ComputeFullV
-        );
-        const auto& D = solver.singularValues();
+        Eigen::setNbThreads(n_threads);
+        XiTXi.noalias() = Xi.transpose() * Xi;
+        Eigen::setNbThreads(0);
+
+        Eigen::SelfAdjointEigenSolver<util::colmat_type<value_t>> solver(XiTXi);
 
         /* update strong_transforms */
-        strong_transforms[i] = std::move(solver.matrixV());
+        strong_transforms[i] = std::move(solver.eigenvectors());
 
         /* update strong_vars */
+        const auto& D = solver.eigenvalues();
         Eigen::Map<vec_value_t> svars(strong_vars.data() + sb, gs);
-        svars.head(D.size()) = D.array().square();
+        svars.head(D.size()) = D.array();
     }
 }
 
@@ -234,6 +237,7 @@ struct StateBasilNaive : StateBasilBase<
         const std::string& strong_rule,
         size_t max_iters,
         value_t tol,
+        value_t rsq_tol,
         value_t rsq_slope_tol,
         value_t rsq_curv_tol,
         value_t newton_tol,
@@ -253,7 +257,7 @@ struct StateBasilNaive : StateBasilBase<
         base_t(
             groups, group_sizes, alpha, penalty, lmda_path, lmda_max, min_ratio, lmda_path_size,
             delta_lmda_path_size, delta_strong_size, max_strong_size, strong_rule,
-            max_iters, tol, rsq_slope_tol, rsq_curv_tol, 
+            max_iters, tol, rsq_tol, rsq_slope_tol, rsq_curv_tol, 
             newton_tol, newton_max_iters, early_exit, setup_lmda_max, setup_lmda_path, intercept, n_threads,
             strong_set, strong_beta, strong_is_active, rsq, lmda, grad
         ),

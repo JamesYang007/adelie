@@ -153,6 +153,7 @@ struct StateBasilBase
     // convergence configs
     const size_t max_iters;
     const value_t tol;
+    const value_t rsq_tol;
     const value_t rsq_slope_tol;
     const value_t rsq_curv_tol;
     const value_t newton_tol;
@@ -168,6 +169,8 @@ struct StateBasilBase
     /* dynamic states */
     value_t lmda_max;
     vec_value_t lmda_path;
+
+    // invariants
     uset_index_t strong_hashset;
     dyn_vec_index_t strong_set; 
     dyn_vec_index_t strong_g1;
@@ -180,13 +183,18 @@ struct StateBasilBase
     value_t lmda;
     vec_value_t grad;
     vec_value_t abs_grad;
+
+    // final results
     dyn_vec_sp_vec_t betas;
     dyn_vec_value_t intercepts;
     dyn_vec_value_t rsqs;
     dyn_vec_value_t lmdas;
 
-    /* diagnostics */
-    // TODO: fill
+    // diagnostics
+    std::vector<double> benchmark_screen;
+    std::vector<double> benchmark_fit;
+    std::vector<double> benchmark_kkt;
+    std::vector<double> benchmark_invariance;
 
     virtual ~StateBasilBase() =default;
 
@@ -205,6 +213,7 @@ struct StateBasilBase
         const std::string& strong_rule,
         size_t max_iters,
         value_t tol,
+        value_t rsq_tol,
         value_t rsq_slope_tol,
         value_t rsq_curv_tol,
         value_t newton_tol,
@@ -233,6 +242,7 @@ struct StateBasilBase
         strong_rule(convert_strong_rule(strong_rule)),
         max_iters(max_iters),
         tol(tol),
+        rsq_tol(rsq_tol),
         rsq_slope_tol(rsq_slope_tol),
         rsq_curv_tol(rsq_curv_tol),
         newton_tol(newton_tol),
@@ -284,6 +294,10 @@ struct StateBasilBase
         intercepts.reserve(n_lmdas);
         rsqs.reserve(n_lmdas);
         lmdas.reserve(n_lmdas);
+        benchmark_fit.reserve(n_lmdas);
+        benchmark_kkt.reserve(n_lmdas);
+        benchmark_screen.reserve(n_lmdas);
+        benchmark_invariance.reserve(n_lmdas);
     }
 };
 

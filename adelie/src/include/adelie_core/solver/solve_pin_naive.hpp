@@ -188,24 +188,23 @@ void solve_pin_active(
     auto& iters = state.iters;
     auto& time_active_cd = state.time_active_cd;
 
-    time_active_cd.push_back(0);
-    {
-        sw_t stopwatch(time_active_cd.back());
-        while (1) {
-            check_user_interrupt(iters);
-            ++iters;
-            value_t convg_measure;
-            coordinate_descent(
-                state, 
-                active_g1.data(), active_g1.data() + active_g1.size(),
-                active_g2.data(), active_g2.data() + active_g2.size(),
-                lmda_idx, convg_measure, buffer1, buffer2, buffer3, buffer4_n,
-                update_coefficients_f
-            );
-            if (convg_measure < tol) break;
-            if (iters >= max_iters) throw util::max_cds_error(lmda_idx);
-        }
+    sw_t stopwatch;
+    stopwatch.start();
+    while (1) {
+        check_user_interrupt(iters);
+        ++iters;
+        value_t convg_measure;
+        coordinate_descent(
+            state, 
+            active_g1.data(), active_g1.data() + active_g1.size(),
+            active_g2.data(), active_g2.data() + active_g2.size(),
+            lmda_idx, convg_measure, buffer1, buffer2, buffer3, buffer4_n,
+            update_coefficients_f
+        );
+        if (convg_measure < tol) break;
+        if (iters >= max_iters) throw util::max_cds_error(lmda_idx);
     }
+    time_active_cd.push_back(stopwatch.elapsed());
 }
 
 template <class StateType,
@@ -225,6 +224,7 @@ inline void solve_pin(
 
     auto& X = *state.X;
     const auto y_mean = state.y_mean;
+    const auto y_var = state.y_var;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto& strong_set = state.strong_set;
@@ -239,6 +239,7 @@ inline void solve_pin(
     const auto intercept = state.intercept;
     const auto tol = state.tol;
     const auto max_iters = state.max_iters;
+    const auto rsq_tol = state.rsq_tol;
     const auto rsq_slope_tol = state.rsq_slope_tol;
     const auto rsq_curv_tol = state.rsq_curv_tol;
     auto& strong_is_active = state.strong_is_active;
@@ -326,22 +327,21 @@ inline void solve_pin(
             ++iters;
             value_t convg_measure;
             const auto old_active_size = active_set.size();
-            time_strong_cd.push_back(0);
-            {
-                sw_t stopwatch(time_strong_cd.back());
-                coordinate_descent(
-                    state,
-                    strong_g1.data(), strong_g1.data() + strong_g1.size(),
-                    strong_g2.data(), strong_g2.data() + strong_g2.size(),
-                    l, convg_measure,
-                    buffer_pack.buffer1,
-                    buffer_pack.buffer2,
-                    buffer_pack.buffer3,
-                    buffer_pack.buffer4,
-                    update_coefficients_f,
-                    add_active_set
-                );
-            }
+            sw_t stopwatch;
+            stopwatch.start();
+            coordinate_descent(
+                state,
+                strong_g1.data(), strong_g1.data() + strong_g1.size(),
+                strong_g2.data(), strong_g2.data() + strong_g2.size(),
+                l, convg_measure,
+                buffer_pack.buffer1,
+                buffer_pack.buffer2,
+                buffer_pack.buffer3,
+                buffer_pack.buffer4,
+                update_coefficients_f,
+                add_active_set
+            );
+            time_strong_cd.push_back(stopwatch.elapsed());
             const bool new_active_added = (old_active_size < active_set.size());
 
             if (new_active_added) {
@@ -403,11 +403,17 @@ inline void solve_pin(
         strong_is_actives.emplace_back(strong_is_active);
         strong_betas.emplace_back(strong_beta);
 
-        // make sure to do at least 3 lambdas.
-        if (l < 2) continue;
+        if (rsq >= rsq_tol * y_var) break;
 
         // early stop if R^2 criterion is fulfilled.
-        if (check_early_stop_rsq(rsqs[l-2], rsqs[l-1], rsqs[l], rsq_slope_tol, rsq_curv_tol)) break;
+        if ((l >= 2) && 
+            check_early_stop_rsq(
+                rsqs[l-2], 
+                rsqs[l-1], 
+                rsqs[l], 
+                rsq_slope_tol, 
+                rsq_curv_tol
+            )) break;
     }
 }
 

@@ -84,7 +84,11 @@ public:
         Eigen::Ref<colmat_t> out
     ) const override
     {
-        out = _mat.middleCols(j, q);
+        dmmeq(
+            out,
+            _mat.middleCols(j, q),
+            _n_threads
+        );
     }
 
     int rows() const override

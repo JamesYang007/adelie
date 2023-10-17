@@ -8,10 +8,6 @@ import cvxpy as cp
 import numpy as np
 
 # ========================================================================
-# TEST helpers
-# ========================================================================
-
-# ========================================================================
 # TEST solve_pin
 # ========================================================================
 
@@ -190,6 +186,7 @@ def test_solve_pin_naive():
         )
         y_mean = np.mean(y)
         resid = y - intercept * y_mean
+        y_var = np.sum(resid ** 2)
         Xs = [
             ad.matrix.naive_dense(X, n_threads=2)
         ]
@@ -197,6 +194,7 @@ def test_solve_pin_naive():
             state = ad.state.pin_naive(
                 X=Xpy,
                 y_mean=y_mean,
+                y_var=y_var,
                 groups=groups,
                 group_sizes=group_sizes,
                 alpha=alpha,
@@ -213,6 +211,7 @@ def test_solve_pin_naive():
             state = ad.state.pin_naive(
                 X=Xpy,
                 y_mean=y_mean,
+                y_var=y_var,
                 groups=groups,
                 group_sizes=group_sizes,
                 alpha=alpha,
