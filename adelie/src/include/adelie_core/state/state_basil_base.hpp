@@ -119,7 +119,7 @@ struct StateBasilBase
     using value_t = ValueType;
     using index_t = IndexType;
     using bool_t = BoolType;
-    using safe_bool_t = unsigned char;
+    using safe_bool_t = int;
     using uset_index_t = std::unordered_set<index_t>;
     using vec_value_t = util::rowvec_type<value_t>;
     using vec_index_t = util::rowvec_type<index_t>;
@@ -195,6 +195,9 @@ struct StateBasilBase
     std::vector<double> benchmark_fit;
     std::vector<double> benchmark_kkt;
     std::vector<double> benchmark_invariance;
+    std::vector<int> active_sizes;
+    std::vector<int> strong_sizes;
+    std::vector<int> edpp_safe_sizes;
 
     virtual ~StateBasilBase() =default;
 
@@ -298,6 +301,9 @@ struct StateBasilBase
         benchmark_kkt.reserve(n_lmdas);
         benchmark_screen.reserve(n_lmdas);
         benchmark_invariance.reserve(n_lmdas);
+        active_sizes.reserve(n_lmdas);
+        strong_sizes.reserve(n_lmdas);
+        edpp_safe_sizes.reserve(n_lmdas);
     }
 };
 

@@ -480,7 +480,7 @@ void state_pin_cov(py::module_& m, const char* name)
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
         .def_readonly("A", &state_t::A, R"delimiter(
-        Covariance matrix :math:`X_c^\\top X_c` where `X_c` is column-centered to fit with intercept.
+        Covariance matrix :math:`X_c^\top X_c` where :math:`X_c` is column-centered to fit with intercept.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
         )delimiter")
         .def_readonly("strong_grad", &state_t::strong_grad, R"delimiter(
@@ -816,6 +816,30 @@ void state_basil_base(py::module_& m, const char* name)
             );
         }, R"delimiter(
         Invariance time for a given BASIL iteration.
+        )delimiter")
+        .def_property_readonly("active_sizes", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<int>>(
+                s.active_sizes.data(),
+                s.active_sizes.size()
+            );
+        }, R"delimiter(
+        Active set size for every saved solution.
+        )delimiter")
+        .def_property_readonly("strong_sizes", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<int>>(
+                s.strong_sizes.data(),
+                s.strong_sizes.size()
+            );
+        }, R"delimiter(
+        Strong set size for every saved solution.
+        )delimiter")
+        .def_property_readonly("edpp_safe_sizes", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<int>>(
+                s.edpp_safe_sizes.data(),
+                s.edpp_safe_sizes.size()
+            );
+        }, R"delimiter(
+        EDPP safe set size for every saved solution.
         )delimiter")
         ;
 }

@@ -172,8 +172,8 @@ def grpnet(
     y: np.ndarray,
     groups: np.ndarray,
     group_sizes: np.ndarray,
-    alpha: float,
-    penalty: np.ndarray,
+    alpha: float =1,
+    penalty: np.ndarray =None,
     lmda_path: np.ndarray =None,
     max_iters: int =int(1e5),
     tol: float =1e-12,
@@ -191,11 +191,11 @@ def grpnet(
     delta_lmda_path_size: int =5,
     delta_strong_size: int =5,
     max_strong_size: int =None,
-    check_state: bool =True,
+    use_edpp: bool =True,
+    check_state: bool =False,
 ):
     """TODO
     """
-
     if isinstance(X, np.ndarray):
         X_raw = X
         X = ad.matrix.naive_dense(X_raw, n_threads=n_threads)
@@ -213,17 +213,8 @@ def grpnet(
         np.float32
     )
 
-    p = _X.cols()
+    n, p = _X.rows(), _X.cols()
     G = len(groups)
-
-    actual_lmda_path_size = (
-        lmda_path_size
-        if lmda_path is None else
-        len(lmda_path)
-    )
-    delta_lmda_path_size = np.minimum(delta_lmda_path_size, actual_lmda_path_size)
-
-    max_strong_size = np.minimum(max_strong_size, G)
 
     X_means = np.empty(p, dtype=dtype)
     _X.means(X_means)
@@ -244,6 +235,9 @@ def grpnet(
     y_var = np.sum(yc ** 2)
     resid = yc
 
+    if penalty is None:
+        penalty = np.sqrt(group_sizes)
+
     strong_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
     strong_beta = np.zeros(np.sum(group_sizes[strong_set]), dtype=dtype)
     strong_is_active = np.ones(strong_set.shape[0], dtype=bool)
@@ -255,6 +249,14 @@ def grpnet(
 
     if not (lmda_path is None):
         lmda_path = np.flip(np.sort(lmda_path))
+
+    edpp_safe_set = None
+    edpp_v1_0 = None
+    edpp_resid_0 = None
+    if not use_edpp:
+        edpp_safe_set = np.arange(G)
+        edpp_v1_0 = np.empty(n, dtype=dtype)
+        edpp_resid_0 = np.empty(n, dtype=dtype)
 
     state = ad.state.basil_naive(
         X=X,
@@ -275,9 +277,9 @@ def grpnet(
         grad=grad,
         lmda_path=lmda_path,
         lmda_max=None,
-        edpp_safe_set=None,
-        edpp_v1_0=None,
-        edpp_resid_0=None,
+        edpp_safe_set=edpp_safe_set,
+        edpp_v1_0=edpp_v1_0,
+        edpp_resid_0=edpp_resid_0,
         max_iters=max_iters,
         tol=tol,
         rsq_tol=rsq_tol,

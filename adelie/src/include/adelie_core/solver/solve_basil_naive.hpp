@@ -140,6 +140,7 @@ void screen_strong(
     const auto& penalty = state.penalty;
     const auto& strong_hashset = state.strong_hashset;
     const auto& edpp_safe_set = state.edpp_safe_set;
+    const auto& edpp_safe_hashset = state.edpp_safe_hashset;
     const auto delta_strong_size = state.delta_strong_size;
     const auto max_strong_size = state.max_strong_size;
     const auto strong_rule = state.strong_rule;
@@ -153,6 +154,9 @@ void screen_strong(
     const auto is_strong = [&](auto i) { 
         return strong_hashset.find(i) != strong_hashset.end(); 
     };
+    const auto is_edpp = [&](auto i) { 
+        return edpp_safe_hashset.find(i) != edpp_safe_hashset.end(); 
+    };
 
     const auto do_fixed_greedy = [&]() {
         size_t size_capped = std::min(delta_strong_size, new_safe_size);
@@ -161,7 +165,7 @@ void screen_strong(
         const auto factor = (alpha <= 0) ? 1e-3 : alpha;
         const auto abs_grad_p = vec_value_t::NullaryExpr(
             abs_grad.size(), [&](auto i) {
-                return (penalty[i] <= 0) ? 0.0 : abs_grad[i] / penalty[i];
+                return ((penalty[i] <= 0) || !is_edpp(i)) ? 0.0 : abs_grad[i] / penalty[i];
             }
         ) / factor;
         // TODO: PARALLELIZE!
@@ -178,9 +182,8 @@ void screen_strong(
     if (strong_rule == state::strong_rule_type::_default) {
         const auto strong_rule_lmda = (2 * lmda_next - lmda) * alpha;
 
-        // TODO: PARALLELIZE!
         for (int i = 0; i < abs_grad.size(); ++i) {
-            if (is_strong(i)) continue;
+            if (is_strong(i) || !is_edpp(i)) continue;
             if (abs_grad[i] > strong_rule_lmda * penalty[i]) {
                 strong_set.push_back(i);
             }
@@ -446,6 +449,9 @@ inline void solve_basil(
     auto& benchmark_fit = state.benchmark_fit;
     auto& benchmark_kkt = state.benchmark_kkt;
     auto& benchmark_invariance = state.benchmark_invariance;
+    auto& active_sizes = state.active_sizes;
+    auto& strong_sizes = state.strong_sizes;
+    auto& edpp_safe_sizes = state.edpp_safe_sizes;
 
     const auto p = grad.size();
 
@@ -539,8 +545,9 @@ inline void solve_basil(
         [&](auto x) { return x <= lmda_max; }
     ) - lmda_path.data();
 
-    // if there is some large lambda or EDPP setup is needed, do initial fit.
-    if (large_lmda_path_size || setup_edpp) {
+    // if there is some large lambda or EDPP setup is needed or lmda_max setup is needed
+    // do the initial fit up to (and including) lmda_max.
+    if (large_lmda_path_size || setup_edpp || setup_lmda_max) {
         // create a lambda path containing only lmdas > lambda_max
         // and additionally lambda_max at the end.
         // If large_lmda_path_size > 0, mind as well fit for lambda_max as well to go down the path.
@@ -705,6 +712,17 @@ inline void solve_basil(
                 n_valid_solutions
             );
             benchmark_invariance.push_back(sw.elapsed());
+
+            // ==================================================================================== 
+            // Diagnostic step
+            // ==================================================================================== 
+            for (int i = 0; i < n_valid_solutions; ++i) {
+                active_sizes.push_back(
+                    state_pin_naive.strong_is_actives[i].sum()
+                );
+                strong_sizes.push_back(state.strong_set.size());
+                edpp_safe_sizes.push_back(state.edpp_safe_set.size());
+            }
         } catch (const std::exception& e) {
             load_prev_valid();
             throw util::propagator_error(e.what());

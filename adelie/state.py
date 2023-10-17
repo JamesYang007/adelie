@@ -1915,6 +1915,15 @@ def basil_naive(
     if max_strong_size < 0:
         raise ValueError("max_strong_size must be >= 0.")
 
+    actual_lmda_path_size = (
+        lmda_path_size
+        if lmda_path is None else
+        len(lmda_path)
+    )
+    delta_lmda_path_size = np.minimum(delta_lmda_path_size, actual_lmda_path_size)
+
+    max_strong_size = np.minimum(max_strong_size, len(groups))
+
     if isinstance(X, matrix.base):
         X_intr = X.internal()
     else:
