@@ -51,6 +51,7 @@
       ~pin_naive_32.rsq
       ~pin_naive_32.rsq_curv_tol
       ~pin_naive_32.rsq_slope_tol
+      ~pin_naive_32.rsq_tol
       ~pin_naive_32.rsqs
       ~pin_naive_32.strong_X_means
       ~pin_naive_32.strong_begins
@@ -67,6 +68,7 @@
       ~pin_naive_32.time_strong_cd
       ~pin_naive_32.tol
       ~pin_naive_32.y_mean
+      ~pin_naive_32.y_var
    
    
 
@@ -110,6 +112,7 @@
    .. autoattribute:: rsq
    .. autoattribute:: rsq_curv_tol
    .. autoattribute:: rsq_slope_tol
+   .. autoattribute:: rsq_tol
    .. autoattribute:: rsqs
    .. autoattribute:: strong_X_means
    .. autoattribute:: strong_begins
@@ -126,5 +129,6 @@
    .. autoattribute:: time_strong_cd
    .. autoattribute:: tol
    .. autoattribute:: y_mean
+   .. autoattribute:: y_var
    
    

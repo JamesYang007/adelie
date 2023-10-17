@@ -23,6 +23,10 @@
    
       ~StateBasilBase64.abs_grad
       ~StateBasilBase64.alpha
+      ~StateBasilBase64.benchmark_fit
+      ~StateBasilBase64.benchmark_invariance
+      ~StateBasilBase64.benchmark_kkt
+      ~StateBasilBase64.benchmark_screen
       ~StateBasilBase64.betas
       ~StateBasilBase64.delta_lmda_path_size
       ~StateBasilBase64.delta_strong_size
@@ -47,6 +51,7 @@
       ~StateBasilBase64.rsq
       ~StateBasilBase64.rsq_curv_tol
       ~StateBasilBase64.rsq_slope_tol
+      ~StateBasilBase64.rsq_tol
       ~StateBasilBase64.rsqs
       ~StateBasilBase64.setup_lmda_max
       ~StateBasilBase64.setup_lmda_path
@@ -75,6 +80,10 @@
    
    .. autoattribute:: abs_grad
    .. autoattribute:: alpha
+   .. autoattribute:: benchmark_fit
+   .. autoattribute:: benchmark_invariance
+   .. autoattribute:: benchmark_kkt
+   .. autoattribute:: benchmark_screen
    .. autoattribute:: betas
    .. autoattribute:: delta_lmda_path_size
    .. autoattribute:: delta_strong_size
@@ -99,6 +108,7 @@
    .. autoattribute:: rsq
    .. autoattribute:: rsq_curv_tol
    .. autoattribute:: rsq_slope_tol
+   .. autoattribute:: rsq_tol
    .. autoattribute:: rsqs
    .. autoattribute:: setup_lmda_max
    .. autoattribute:: setup_lmda_path

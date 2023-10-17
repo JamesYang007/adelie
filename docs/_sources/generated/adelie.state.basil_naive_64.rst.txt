@@ -15,6 +15,7 @@
       ~basil_naive_64.check
       ~basil_naive_64.create_from_core
       ~basil_naive_64.default_init
+      ~basil_naive_64.update_path
    
    
 
@@ -29,6 +30,10 @@
       ~basil_naive_64.X_means
       ~basil_naive_64.abs_grad
       ~basil_naive_64.alpha
+      ~basil_naive_64.benchmark_fit
+      ~basil_naive_64.benchmark_invariance
+      ~basil_naive_64.benchmark_kkt
+      ~basil_naive_64.benchmark_screen
       ~basil_naive_64.betas
       ~basil_naive_64.delta_lmda_path_size
       ~basil_naive_64.delta_strong_size
@@ -59,6 +64,7 @@
       ~basil_naive_64.rsq
       ~basil_naive_64.rsq_curv_tol
       ~basil_naive_64.rsq_slope_tol
+      ~basil_naive_64.rsq_tol
       ~basil_naive_64.rsqs
       ~basil_naive_64.setup_edpp
       ~basil_naive_64.setup_lmda_max
@@ -89,6 +95,7 @@
    .. automethod:: check
    .. automethod:: create_from_core
    .. automethod:: default_init
+   .. automethod:: update_path
    
    
 
@@ -100,6 +107,10 @@
    .. autoattribute:: X_means
    .. autoattribute:: abs_grad
    .. autoattribute:: alpha
+   .. autoattribute:: benchmark_fit
+   .. autoattribute:: benchmark_invariance
+   .. autoattribute:: benchmark_kkt
+   .. autoattribute:: benchmark_screen
    .. autoattribute:: betas
    .. autoattribute:: delta_lmda_path_size
    .. autoattribute:: delta_strong_size
@@ -130,6 +141,7 @@
    .. autoattribute:: rsq
    .. autoattribute:: rsq_curv_tol
    .. autoattribute:: rsq_slope_tol
+   .. autoattribute:: rsq_tol
    .. autoattribute:: rsqs
    .. autoattribute:: setup_edpp
    .. autoattribute:: setup_lmda_max
