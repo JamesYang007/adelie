@@ -9,6 +9,7 @@ def create_test_data_basil(
     rho: float =0,
     sparsity: float =0.95,
     zero_penalty: float =0,
+    snr: float = 1,
     seed: int =0,
 ):
     """Creates a test dataset for BASIL method.
@@ -41,6 +42,9 @@ def create_test_data_basil(
     zero_penalty : float, optional
         Proportion of ``penalty`` entries to be zeroed out.
         Default is ``0``.
+    snr : float, optional
+        Signal-to-noise ratio.
+        Default is ``1``.
     seed : int, optional
         Random seed.
         Default is ``0``.
@@ -86,7 +90,8 @@ def create_test_data_basil(
     X = np.asfortranarray(X)
     beta = np.random.normal(0, 1, p)
     beta[np.random.choice(p, int(sparsity * p), replace=False)] = 0
-    y = X @ beta + np.random.normal(0, 1, n)
+    noise_scale = np.maximum(np.sqrt((p - int(sparsity * p)) / snr), 1)
+    y = X @ beta + noise_scale * np.random.normal(0, 1, n)
     X /= np.sqrt(n)
     y /= np.sqrt(n)
 
