@@ -1,5 +1,7 @@
 from . import adelie_core
 from . import bcd
+from . import data
+from . import diagnostic
 from . import matrix
 from . import state
 from . import solver

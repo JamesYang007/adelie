@@ -21,6 +21,36 @@ adelie.bcd
     solve
 
 
+adelie.data
+-----------------
+
+
+.. currentmodule:: adelie.data
+
+
+.. autosummary::
+    :toctree: generated/
+
+
+    create_test_data_basil
+
+
+adelie.diagnostic
+-----------------
+
+
+.. currentmodule:: adelie.diagnostic
+
+
+.. autosummary::
+    :toctree: generated/
+
+
+    plot_coefficients
+    plot_rsqs
+    plot_set_sizes
+
+
 adelie.matrix
 -------------
 

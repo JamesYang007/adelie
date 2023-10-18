@@ -24,6 +24,7 @@ release = open("../../VERSION", "r").read()
 extensions = [
     "sphinx.ext.autodoc",
     "numpydoc",
+    "nbsphinx",
 ]
 
 templates_path = ['_templates']
