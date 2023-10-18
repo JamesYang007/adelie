@@ -76,11 +76,6 @@ void screen_edpp(
     auto& edpp_safe_set = state.edpp_safe_set;
     auto& edpp_safe_hashset = state.edpp_safe_hashset;
 
-    const auto resid_correction = (
-        Eigen::Map<const vec_value_t>(strong_X_means.data(), strong_X_means.size()) * 
-        Eigen::Map<const vec_value_t>(strong_beta.data(), strong_beta.size())
-    ).sum() / lmda;
-
     vec_value_t v1 = (
         (lmda == lmda_max) ?
         edpp_v1_0 :
@@ -88,6 +83,10 @@ void screen_edpp(
     );
     vec_value_t v2 = edpp_resid_0 / lmda_next - resid / lmda;
     if (intercept) {
+        const auto resid_correction = (
+            Eigen::Map<const vec_value_t>(strong_X_means.data(), strong_X_means.size()) * 
+            Eigen::Map<const vec_value_t>(strong_beta.data(), strong_beta.size())
+        ).sum() / lmda;
         if (lmda != lmda_max) v1 -= resid_correction;    
         v2 -= resid_correction;
     }
