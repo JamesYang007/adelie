@@ -421,8 +421,9 @@ such that <code class="docutils literal notranslate"><span class="pre">G</span><
 The data matrix <code class="docutils literal notranslate"><span class="pre">X</span></code> is generated from a normal distribution
 where each feature is equicorrelated with the other features by <code class="docutils literal notranslate"><span class="pre">rho</span></code>.
 The response <code class="docutils literal notranslate"><span class="pre">y</span></code> is generated from a linear model <span class="math notranslate nohighlight">\(y = X\beta + \epsilon\)</span>
-with <span class="math notranslate nohighlight">\(\epsilon \sim N(0, I_n)\)</span> and <span class="math notranslate nohighlight">\(\beta\)</span> such that <code class="docutils literal notranslate"><span class="pre">sparsity</span></code> proportion
+with <span class="math notranslate nohighlight">\(\epsilon \sim N(0, \sigma^2 I_n)\)</span> and <span class="math notranslate nohighlight">\(\beta\)</span> such that <code class="docutils literal notranslate"><span class="pre">sparsity</span></code> proportion
 of the entries are set to <span class="math notranslate nohighlight">\(0\)</span>.
+We compute <span class="math notranslate nohighlight">\(\sigma^2`\)</span> such that the signal-to-noise ratio is given by <code class="docutils literal notranslate"><span class="pre">snr</span></code>.
 The penalty factors are by default set to <code class="docutils literal notranslate"><span class="pre">np.sqrt(group_sizes)</span></code>,
 however if <code class="docutils literal notranslate"><span class="pre">zero_penalty</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>, a random set of penalties will be set to zero,
 in which case, <code class="docutils literal notranslate"><span class="pre">penalty</span></code> is rescaled such that the <span class="math notranslate nohighlight">\(\ell_2\)</span> norm squared is <code class="docutils literal notranslate"><span class="pre">p</span></code>.</p>

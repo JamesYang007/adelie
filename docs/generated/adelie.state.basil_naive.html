@@ -517,7 +517,7 @@ Default is <code class="docutils literal notranslate"><span class="pre">1e-12</s
 Default is <code class="docutils literal notranslate"><span class="pre">1000</span></code>.</p>
 </dd>
 <dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
-Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+Default is <code class="docutils literal notranslate"><span class="pre">max(os.cpu_count()</span> <span class="pre">//</span> <span class="pre">2,</span> <span class="pre">1)</span></code>.</p>
 </dd>
 <dt><strong>early_exit</strong><span class="classifier">bool, optional</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should early exit based on training <span class="math notranslate nohighlight">\(R^2\)</span>.
 Default is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
