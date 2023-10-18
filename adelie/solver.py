@@ -1,6 +1,7 @@
 from . import adelie_core as core
 from . import logger
 from . import matrix
+import os
 import adelie as ad
 import numpy as np
 
@@ -182,7 +183,7 @@ def grpnet(
     rsq_curv_tol: float =1e-3,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
-    n_threads: int =1,
+    n_threads: int =max(os.cpu_count() // 2, 1),
     early_exit: bool =True,
     intercept: bool =True,
     strong_rule: str ="default",
