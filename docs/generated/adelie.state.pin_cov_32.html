@@ -39,7 +39,9 @@
     <script src="../_static/documentation_options.js?v=e2e28a39"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.state.pin_cov_32';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -138,6 +140,13 @@
                     <li class="nav-item current active">
                       <a class="nav-link nav-internal" href="../api_reference.html">
                         API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide.html">
+                        User Guide
                       </a>
                     </li>
                 
@@ -244,6 +253,13 @@ document.write(`
                       </a>
                     </li>
                 
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide.html">
+                        User Guide
+                      </a>
+                    </li>
+                
   </ul>
 </nav></div>
         
@@ -295,6 +311,14 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.create_test_data_basil.html">adelie.data.create_test_data_basil</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_rsqs.html">adelie.diagnostic.plot_rsqs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.naive_dense.html">adelie.matrix.naive_dense</a></li>
@@ -413,7 +437,7 @@ document.write(`
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_cov_32.A" title="adelie.state.pin_cov_32.A"><code class="xref py py-obj docutils literal notranslate"><span class="pre">A</span></code></a></p></td>
-<td><p>Covariance matrix <span class="math notranslate nohighlight">\(X_c^\\top X_c\)</span> where <cite>X_c</cite> is column-centered to fit with intercept.</p></td>
+<td><p>Covariance matrix <span class="math notranslate nohighlight">\(X_c^\top X_c\)</span> where <span class="math notranslate nohighlight">\(X_c\)</span> is column-centered to fit with intercept.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_cov_32.active_begins" title="adelie.state.pin_cov_32.active_begins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_begins</span></code></a></p></td>
 <td><p>List of indices that index a corresponding list of values for each active group.</p></td>
@@ -594,7 +618,7 @@ Default is <code class="docutils literal notranslate"><span class="pre">logging.
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.state.pin_cov_32.A">
 <span class="sig-name descname"><span class="pre">A</span></span><a class="headerlink" href="#adelie.state.pin_cov_32.A" title="Link to this definition">#</a></dt>
-<dd><p>Covariance matrix <span class="math notranslate nohighlight">\(X_c^\\top X_c\)</span> where <cite>X_c</cite> is column-centered to fit with intercept.
+<dd><p>Covariance matrix <span class="math notranslate nohighlight">\(X_c^\top X_c\)</span> where <span class="math notranslate nohighlight">\(X_c\)</span> is column-centered to fit with intercept.
 It is typically one of the matrices defined in <code class="docutils literal notranslate"><span class="pre">adelie.matrix</span></code> sub-module.</p>
 </dd></dl>
 

@@ -39,7 +39,9 @@
     <script src="../_static/documentation_options.js?v=e2e28a39"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.state.basil_naive_64';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -138,6 +140,13 @@
                     <li class="nav-item current active">
                       <a class="nav-link nav-internal" href="../api_reference.html">
                         API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide.html">
+                        User Guide
                       </a>
                     </li>
                 
@@ -244,6 +253,13 @@ document.write(`
                       </a>
                     </li>
                 
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide.html">
+                        User Guide
+                      </a>
+                    </li>
+                
   </ul>
 </nav></div>
         
@@ -295,6 +311,14 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.create_test_data_basil.html">adelie.data.create_test_data_basil</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_rsqs.html">adelie.diagnostic.plot_rsqs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.naive_dense.html">adelie.matrix.naive_dense</a></li>
@@ -427,41 +451,47 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.abs_grad" title="adelie.state.basil_naive_64.abs_grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">abs_grad</span></code></a></p></td>
 <td><p>The <span class="math notranslate nohighlight">\(\ell_2\)</span> norms of <code class="docutils literal notranslate"><span class="pre">grad</span></code> across each group.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.alpha" title="adelie.state.basil_naive_64.alpha"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alpha</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.active_sizes" title="adelie.state.basil_naive_64.active_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_sizes</span></code></a></p></td>
+<td><p>Active set size for every saved solution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.alpha" title="adelie.state.basil_naive_64.alpha"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alpha</span></code></a></p></td>
 <td><p>Elastic net parameter.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.benchmark_fit" title="adelie.state.basil_naive_64.benchmark_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_fit</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.benchmark_fit" title="adelie.state.basil_naive_64.benchmark_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_fit</span></code></a></p></td>
 <td><p>Fit time for a given BASIL iteration.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.benchmark_invariance" title="adelie.state.basil_naive_64.benchmark_invariance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_invariance</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.benchmark_invariance" title="adelie.state.basil_naive_64.benchmark_invariance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_invariance</span></code></a></p></td>
 <td><p>Invariance time for a given BASIL iteration.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.benchmark_kkt" title="adelie.state.basil_naive_64.benchmark_kkt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_kkt</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.benchmark_kkt" title="adelie.state.basil_naive_64.benchmark_kkt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_kkt</span></code></a></p></td>
 <td><p>KKT time for a given BASIL iteration.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.benchmark_screen" title="adelie.state.basil_naive_64.benchmark_screen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_screen</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.benchmark_screen" title="adelie.state.basil_naive_64.benchmark_screen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_screen</span></code></a></p></td>
 <td><p>Screen time for a given BASIL iteration.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.betas" title="adelie.state.basil_naive_64.betas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">betas</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.betas" title="adelie.state.basil_naive_64.betas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">betas</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> is the (untransformed) solution corresponding to <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.delta_lmda_path_size" title="adelie.state.basil_naive_64.delta_lmda_path_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delta_lmda_path_size</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.delta_lmda_path_size" title="adelie.state.basil_naive_64.delta_lmda_path_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delta_lmda_path_size</span></code></a></p></td>
 <td><p>Number of regularizations to batch per BASIL iteration.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.delta_strong_size" title="adelie.state.basil_naive_64.delta_strong_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delta_strong_size</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.delta_strong_size" title="adelie.state.basil_naive_64.delta_strong_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delta_strong_size</span></code></a></p></td>
 <td><p>Number of strong groups to include per BASIL iteration  if strong rule does not include new groups but optimality is not reached.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.early_exit" title="adelie.state.basil_naive_64.early_exit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">early_exit</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.early_exit" title="adelie.state.basil_naive_64.early_exit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">early_exit</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should early exit based on training <span class="math notranslate nohighlight">\(R^2\)</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.edpp_resid_0" title="adelie.state.basil_naive_64.edpp_resid_0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edpp_resid_0</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.edpp_resid_0" title="adelie.state.basil_naive_64.edpp_resid_0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edpp_resid_0</span></code></a></p></td>
 <td><p>The residual <span class="math notranslate nohighlight">\(y_c - X_c\beta\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is the solution at <span class="math notranslate nohighlight">\(\lambda_\max\)</span>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.edpp_safe_hashset" title="adelie.state.basil_naive_64.edpp_safe_hashset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edpp_safe_hashset</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.edpp_safe_hashset" title="adelie.state.basil_naive_64.edpp_safe_hashset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edpp_safe_hashset</span></code></a></p></td>
 <td><p>Hashset containing all the safe groups.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.edpp_safe_set" title="adelie.state.basil_naive_64.edpp_safe_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edpp_safe_set</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.edpp_safe_set" title="adelie.state.basil_naive_64.edpp_safe_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edpp_safe_set</span></code></a></p></td>
 <td><p>A list of EDPP safe groups.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.edpp_safe_sizes" title="adelie.state.basil_naive_64.edpp_safe_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edpp_safe_sizes</span></code></a></p></td>
+<td><p>EDPP safe set size for every saved solution.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.edpp_v1_0" title="adelie.state.basil_naive_64.edpp_v1_0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edpp_v1_0</span></code></a></p></td>
 <td><p>The <span class="math notranslate nohighlight">\(v_1\)</span> vector in EDPP rule at <span class="math notranslate nohighlight">\(\lambda_\max\)</span>.</p></td>
@@ -577,22 +607,25 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.strong_set" title="adelie.state.basil_naive_64.strong_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_set</span></code></a></p></td>
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">groups</span></code> that correspond to the strong groups.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.strong_transforms" title="adelie.state.basil_naive_64.strong_transforms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_transforms</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.strong_sizes" title="adelie.state.basil_naive_64.strong_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_sizes</span></code></a></p></td>
+<td><p>Strong set size for every saved solution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.strong_transforms" title="adelie.state.basil_naive_64.strong_transforms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_transforms</span></code></a></p></td>
 <td><p>The <span class="math notranslate nohighlight">\(V\)</span> from the SVD of <span class="math notranslate nohighlight">\(X_{c,k}\)</span> where <span class="math notranslate nohighlight">\(X_c\)</span>  is the possibly centered feature matrix and <span class="math notranslate nohighlight">\(k\)</span> is an index to <code class="docutils literal notranslate"><span class="pre">strong_set</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.strong_vars" title="adelie.state.basil_naive_64.strong_vars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_vars</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.strong_vars" title="adelie.state.basil_naive_64.strong_vars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_vars</span></code></a></p></td>
 <td><p>The <span class="math notranslate nohighlight">\(D^2\)</span> from the SVD of <span class="math notranslate nohighlight">\(X_{c,k}\)</span> where <span class="math notranslate nohighlight">\(X_c\)</span>  is the possibly centered feature matrix and <span class="math notranslate nohighlight">\(k\)</span> is an index to <code class="docutils literal notranslate"><span class="pre">strong_set</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.tol" title="adelie.state.basil_naive_64.tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tol</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.tol" title="adelie.state.basil_naive_64.tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tol</span></code></a></p></td>
 <td><p>Convergence tolerance.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.use_edpp" title="adelie.state.basil_naive_64.use_edpp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">use_edpp</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.use_edpp" title="adelie.state.basil_naive_64.use_edpp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">use_edpp</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if EDPP should be used.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.y_mean" title="adelie.state.basil_naive_64.y_mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_mean</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.y_mean" title="adelie.state.basil_naive_64.y_mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_mean</span></code></a></p></td>
 <td><p>The mean of the response vector <span class="math notranslate nohighlight">\(y\)</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.y_var" title="adelie.state.basil_naive_64.y_var"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_var</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.basil_naive_64.y_var" title="adelie.state.basil_naive_64.y_var"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_var</span></code></a></p></td>
 <td><p>The variance of the response vector <span class="math notranslate nohighlight">\(y\)</span>, i.e. <span class="math notranslate nohighlight">\(\|y_c\|_2^2\)</span>.</p></td>
 </tr>
 </tbody>
@@ -691,6 +724,12 @@ where <code class="docutils literal notranslate"><span class="pre">g</span> <spa
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.basil_naive_64.active_sizes">
+<span class="sig-name descname"><span class="pre">active_sizes</span></span><a class="headerlink" href="#adelie.state.basil_naive_64.active_sizes" title="Link to this definition">#</a></dt>
+<dd><p>Active set size for every saved solution.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.state.basil_naive_64.alpha">
 <span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#adelie.state.basil_naive_64.alpha" title="Link to this definition">#</a></dt>
 <dd><p>Elastic net parameter.
@@ -763,6 +802,12 @@ If EDPP is not used, it contains all the variables.</p>
 <dt class="sig sig-object py" id="adelie.state.basil_naive_64.edpp_safe_set">
 <span class="sig-name descname"><span class="pre">edpp_safe_set</span></span><a class="headerlink" href="#adelie.state.basil_naive_64.edpp_safe_set" title="Link to this definition">#</a></dt>
 <dd><p>A list of EDPP safe groups.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.basil_naive_64.edpp_safe_sizes">
+<span class="sig-name descname"><span class="pre">edpp_safe_sizes</span></span><a class="headerlink" href="#adelie.state.basil_naive_64.edpp_safe_sizes" title="Link to this definition">#</a></dt>
+<dd><p>EDPP safe set size for every saved solution.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1026,6 +1071,12 @@ when the regularization is given by <code class="docutils literal notranslate"><
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.basil_naive_64.strong_sizes">
+<span class="sig-name descname"><span class="pre">strong_sizes</span></span><a class="headerlink" href="#adelie.state.basil_naive_64.strong_sizes" title="Link to this definition">#</a></dt>
+<dd><p>Strong set size for every saved solution.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.state.basil_naive_64.strong_transforms">
 <span class="sig-name descname"><span class="pre">strong_transforms</span></span><a class="headerlink" href="#adelie.state.basil_naive_64.strong_transforms" title="Link to this definition">#</a></dt>
 <dd><p>The <span class="math notranslate nohighlight">\(V\)</span> from the SVD of <span class="math notranslate nohighlight">\(X_{c,k}\)</span> where <span class="math notranslate nohighlight">\(X_c\)</span> 
@@ -1121,6 +1172,7 @@ is the possibly centered feature matrix and <span class="math notranslate nohigh
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.X_group_norms"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.X_group_norms</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.X_means"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.X_means</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.abs_grad"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.abs_grad</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.active_sizes"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.active_sizes</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.alpha"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.alpha</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.benchmark_fit"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.benchmark_fit</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.benchmark_invariance"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.benchmark_invariance</span></code></a></li>
@@ -1133,6 +1185,7 @@ is the possibly centered feature matrix and <span class="math notranslate nohigh
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.edpp_resid_0"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.edpp_resid_0</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.edpp_safe_hashset"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.edpp_safe_hashset</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.edpp_safe_set"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.edpp_safe_set</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.edpp_safe_sizes"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.edpp_safe_sizes</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.edpp_v1_0"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.edpp_v1_0</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.grad"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.grad</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.group_sizes"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.group_sizes</span></code></a></li>
@@ -1171,6 +1224,7 @@ is the possibly centered feature matrix and <span class="math notranslate nohigh
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.strong_order"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.strong_order</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.strong_rule"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.strong_rule</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.strong_set"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.strong_set</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.strong_sizes"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.strong_sizes</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.strong_transforms"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.strong_transforms</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.strong_vars"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.strong_vars</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.basil_naive_64.tol"><code class="docutils literal notranslate"><span class="pre">basil_naive_64.tol</span></code></a></li>

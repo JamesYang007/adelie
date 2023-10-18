@@ -29,6 +29,7 @@
       ~basil_naive_64.X_group_norms
       ~basil_naive_64.X_means
       ~basil_naive_64.abs_grad
+      ~basil_naive_64.active_sizes
       ~basil_naive_64.alpha
       ~basil_naive_64.benchmark_fit
       ~basil_naive_64.benchmark_invariance
@@ -41,6 +42,7 @@
       ~basil_naive_64.edpp_resid_0
       ~basil_naive_64.edpp_safe_hashset
       ~basil_naive_64.edpp_safe_set
+      ~basil_naive_64.edpp_safe_sizes
       ~basil_naive_64.edpp_v1_0
       ~basil_naive_64.grad
       ~basil_naive_64.group_sizes
@@ -79,6 +81,7 @@
       ~basil_naive_64.strong_order
       ~basil_naive_64.strong_rule
       ~basil_naive_64.strong_set
+      ~basil_naive_64.strong_sizes
       ~basil_naive_64.strong_transforms
       ~basil_naive_64.strong_vars
       ~basil_naive_64.tol
@@ -106,6 +109,7 @@
    .. autoattribute:: X_group_norms
    .. autoattribute:: X_means
    .. autoattribute:: abs_grad
+   .. autoattribute:: active_sizes
    .. autoattribute:: alpha
    .. autoattribute:: benchmark_fit
    .. autoattribute:: benchmark_invariance
@@ -118,6 +122,7 @@
    .. autoattribute:: edpp_resid_0
    .. autoattribute:: edpp_safe_hashset
    .. autoattribute:: edpp_safe_set
+   .. autoattribute:: edpp_safe_sizes
    .. autoattribute:: edpp_v1_0
    .. autoattribute:: grad
    .. autoattribute:: group_sizes
@@ -156,6 +161,7 @@
    .. autoattribute:: strong_order
    .. autoattribute:: strong_rule
    .. autoattribute:: strong_set
+   .. autoattribute:: strong_sizes
    .. autoattribute:: strong_transforms
    .. autoattribute:: strong_vars
    .. autoattribute:: tol

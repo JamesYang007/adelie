@@ -22,6 +22,7 @@
    .. autosummary::
    
       ~StateBasilBase64.abs_grad
+      ~StateBasilBase64.active_sizes
       ~StateBasilBase64.alpha
       ~StateBasilBase64.benchmark_fit
       ~StateBasilBase64.benchmark_invariance
@@ -31,6 +32,7 @@
       ~StateBasilBase64.delta_lmda_path_size
       ~StateBasilBase64.delta_strong_size
       ~StateBasilBase64.early_exit
+      ~StateBasilBase64.edpp_safe_sizes
       ~StateBasilBase64.grad
       ~StateBasilBase64.group_sizes
       ~StateBasilBase64.groups
@@ -64,6 +66,7 @@
       ~StateBasilBase64.strong_order
       ~StateBasilBase64.strong_rule
       ~StateBasilBase64.strong_set
+      ~StateBasilBase64.strong_sizes
       ~StateBasilBase64.tol
    
    
@@ -79,6 +82,7 @@
    
    
    .. autoattribute:: abs_grad
+   .. autoattribute:: active_sizes
    .. autoattribute:: alpha
    .. autoattribute:: benchmark_fit
    .. autoattribute:: benchmark_invariance
@@ -88,6 +92,7 @@
    .. autoattribute:: delta_lmda_path_size
    .. autoattribute:: delta_strong_size
    .. autoattribute:: early_exit
+   .. autoattribute:: edpp_safe_sizes
    .. autoattribute:: grad
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
@@ -121,6 +126,7 @@
    .. autoattribute:: strong_order
    .. autoattribute:: strong_rule
    .. autoattribute:: strong_set
+   .. autoattribute:: strong_sizes
    .. autoattribute:: tol
    
    

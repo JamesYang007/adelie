@@ -11,3 +11,4 @@ Adelie Documentation
    :hidden:
 
    api_reference
+   user_guide
