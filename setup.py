@@ -66,9 +66,7 @@ ext_modules = [
     Pybind11Extension(
         "adelie.adelie_core",
         sorted(glob("adelie/src/*.cpp")),  # Sort source files for reproducibility
-        defines=[
-            ("PYBIND11_DETAILED_ERROR_MESSAGES", None),
-        ],
+        defines=[],
         include_dirs=[
             "adelie/src",
             "adelie/src/include",
