@@ -90,7 +90,7 @@ def create_test_data_basil(
     X = np.asfortranarray(X)
     beta = np.random.normal(0, 1, p)
     beta[np.random.choice(p, int(sparsity * p), replace=False)] = 0
-    noise_scale = np.maximum(np.sqrt((p - int(sparsity * p)) / snr), 1)
+    noise_scale = np.sqrt(np.sum(beta ** 2) / snr)
     y = X @ beta + noise_scale * np.random.normal(0, 1, n)
     X /= np.sqrt(n)
     y /= np.sqrt(n)
