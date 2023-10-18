@@ -22,6 +22,8 @@ jobs:
     - uses: conda-incubator/setup-miniconda@v2
       with:
         mamba-version: "*"
+        channels: conda-forge,defaults
+        channel-priority: true
         activate-environment: adelie
         environment-file: environment.yml
         auto-activate-base: false
