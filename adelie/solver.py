@@ -183,7 +183,7 @@ def grpnet(
     rsq_curv_tol: float =1e-3,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
-    n_threads: int =max(os.cpu_count() // 2, 1),
+    n_threads: int =1,
     early_exit: bool =True,
     intercept: bool =True,
     strong_rule: str ="default",
@@ -195,7 +195,101 @@ def grpnet(
     use_edpp: bool =True,
     check_state: bool =False,
 ):
-    """TODO
+    """Group elastic net solver.
+
+    Parameters
+    ----------
+    X : Union[np.ndarray, adelie.matrix.base]
+        Feature matrix.
+        It is typically one of the matrices defined in ``adelie.matrix`` sub-module
+        or a ``numpy`` array.
+    y : (n,) np.ndarray
+        Response vector.
+    groups : (G,) np.ndarray
+        List of starting indices to each group where `G` is the number of groups.
+        ``groups[i]`` is the starting index of the ``i`` th group. 
+    group_sizes : (G,) np.ndarray
+        List of group sizes corresponding to each element in ``groups``.
+        ``group_sizes[i]`` is the group size of the ``i`` th group. 
+    alpha : float, optional
+        Elastic net parameter.
+        It must be in the range :math:`[0,1]`.
+        Default is ``1``.
+    penalty : (G,) np.ndarray
+        Penalty factor for each group in the same order as ``groups``.
+        It must be a non-negative vector.
+        Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
+    lmda_path : (l,) np.ndarray, optional
+        The regularization path to solve for.
+        The full path is not considered if ``early_exit`` is ``True``.
+        It is recommended that the path is sorted in decreasing order.
+        If ``None``, the path will be generated.
+        Default is ``None``.
+    max_iters : int, optional
+        Maximum number of coordinate descents.
+        Default is ``int(1e5)``.
+    tol : float, optional
+        Convergence tolerance.
+        Default is ``1e-12``.
+    rsq_tol : float, optional
+        Early stopping rule check on :math:`R^2`.
+        Default is ``0.9``.
+    rsq_slope_tol : float, optional
+        Early stopping rule check on slope of :math:`R^2`.
+        Default is ``1e-3``.
+    rsq_curv_tol : float, optional
+        Early stopping rule check on curvature of :math:`R^2`.
+        Default is ``1e-3``.
+    newton_tol : float, optional
+        Convergence tolerance for the BCD update.
+        Default is ``1e-12``.
+    newton_max_iters : int, optional
+        Maximum number of iterations for the BCD update.
+        Default is ``1000``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+    early_exit : bool, optional
+        ``True`` if the function should early exit based on training :math:`R^2`.
+        Default is ``True``.
+    min_ratio : float, optional
+        The ratio between the largest and smallest :math:`\\lambda` in the regularization sequence
+        if it is to be generated.
+        Default is ``1e-2``.
+    lmda_path_size : int, optional
+        Number of regularizations in the path if it is to be generated.
+        Default is ``100``.
+    intercept : bool, optional 
+        ``True`` if the function should fit with intercept.
+        Default is ``True``.
+    strong_rule : str, optional
+        The type of strong rule to use. It must be one of the following options:
+
+            - ``"default"``: discards variables from the safe set based on simple strong rule.
+            - ``"fixed_greedy"``: adds variables based on a fixed number of groups with the largest gradient norm.
+            - ``safe``: adds all safe variables to the strong set.
+
+        Default is ``default``.
+    delta_lmda_path_size : int, optional 
+        Number of regularizations to batch per BASIL iteration.
+        Default is ``5``.
+    delta_strong_size : int, optional
+        Number of strong groups to include per BASIL iteration 
+        if strong rule does not include new groups but optimality is not reached.
+        Default is ``5``.
+    max_strong_size: int, optional
+        Maximum number of strong groups allowed.
+        The function will return a valid state and guaranteed to have strong set size
+        less than or equal to ``max_strong_size``.
+        If ``None``, it will be set to the total number of groups.
+        Default is ``None``.
+    use_edpp : bool, optional
+        ``True`` is EDPP rule should be used.
+        If ``False``, all groups are considered EDPP safe.
+        Default is ``True``
+    check_state : bool, optional 
+        ``True`` is state should be checked for inconsistencies before calling solver.
+        Default is ``False``.
     """
     if isinstance(X, np.ndarray):
         X_raw = X

@@ -265,21 +265,21 @@ void state_pin_base(py::module_& m, const char* name)
         .def_readonly("iters", &state_t::iters, R"delimiter(
         Number of coordinate descents taken.
         )delimiter")
-        .def_property_readonly("time_strong_cd", [](const state_t& s) {
+        .def_property_readonly("benchmark_strong", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<double>>(
-                s.time_strong_cd.data(),
-                s.time_strong_cd.size()
+                s.benchmark_strong.data(),
+                s.benchmark_strong.size()
             );
         }, R"delimiter(
-        Benchmark time for performing coordinate-descent on the strong set at every iteration.
+        Benchmark time for performing coordinate-descent on the strong set for each :math:`\lambda`.
         )delimiter")
-        .def_property_readonly("time_active_cd", [](const state_t& s) {
+        .def_property_readonly("benchmark_active", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<double>>(
-                s.time_active_cd.data(),
-                s.time_active_cd.size()
+                s.benchmark_active.data(),
+                s.benchmark_active.size()
             );
         }, R"delimiter(
-        Benchmark time for performing coordinate-descent on the active set at every iteration.
+        Benchmark time for performing coordinate-descent on the active set for each :math:`\lambda`.
         )delimiter")
         ;
 }
@@ -793,13 +793,21 @@ void state_basil_base(py::module_& m, const char* name)
         }, R"delimiter(
         Screen time for a given BASIL iteration.
         )delimiter")
-        .def_property_readonly("benchmark_fit", [](const state_t& s) {
+        .def_property_readonly("benchmark_fit_strong", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<double>>(
-                s.benchmark_fit.data(),
-                s.benchmark_fit.size()
+                s.benchmark_fit_strong.data(),
+                s.benchmark_fit_strong.size()
             );
         }, R"delimiter(
-        Fit time for a given BASIL iteration.
+        Fit time on the strong set for a given BASIL iteration.
+        )delimiter")
+        .def_property_readonly("benchmark_fit_active", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<double>>(
+                s.benchmark_fit_active.data(),
+                s.benchmark_fit_active.size()
+            );
+        }, R"delimiter(
+        Fit time on the active set for a given BASIL iteration.
         )delimiter")
         .def_property_readonly("benchmark_kkt", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<double>>(
@@ -816,6 +824,14 @@ void state_basil_base(py::module_& m, const char* name)
             );
         }, R"delimiter(
         Invariance time for a given BASIL iteration.
+        )delimiter")
+        .def_property_readonly("n_valid_solutions", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<int>>(
+                s.n_valid_solutions.data(),
+                s.n_valid_solutions.size()
+            );
+        }, R"delimiter(
+        Number of valid solutions for a given BASIL iteration.
         )delimiter")
         .def_property_readonly("active_sizes", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<int>>(
