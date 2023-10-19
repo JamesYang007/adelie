@@ -71,8 +71,8 @@ struct StatePinBase
     size_t iters = 0;
 
     /* diagnostics */
-    std::vector<double> time_strong_cd;
-    std::vector<double> time_active_cd;
+    std::vector<double> benchmark_strong;
+    std::vector<double> benchmark_active;
 
     virtual ~StatePinBase() =default;
     
@@ -157,8 +157,8 @@ struct StatePinBase
         lmdas.reserve(lmda_path.size());
         strong_is_actives.reserve(lmda_path.size());
         strong_betas.reserve(lmda_path.size());
-        time_strong_cd.reserve(1000);
-        time_active_cd.reserve(1000);
+        benchmark_strong.reserve(1000);
+        benchmark_active.reserve(1000);
     }
 };
 

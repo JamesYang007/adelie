@@ -192,9 +192,11 @@ struct StateBasilBase
 
     // diagnostics
     std::vector<double> benchmark_screen;
-    std::vector<double> benchmark_fit;
+    std::vector<double> benchmark_fit_strong;
+    std::vector<double> benchmark_fit_active;
     std::vector<double> benchmark_kkt;
     std::vector<double> benchmark_invariance;
+    std::vector<int> n_valid_solutions;
     std::vector<int> active_sizes;
     std::vector<int> strong_sizes;
     std::vector<int> edpp_safe_sizes;
@@ -297,10 +299,12 @@ struct StateBasilBase
         intercepts.reserve(n_lmdas);
         rsqs.reserve(n_lmdas);
         lmdas.reserve(n_lmdas);
-        benchmark_fit.reserve(n_lmdas);
+        benchmark_fit_strong.reserve(n_lmdas);
+        benchmark_fit_active.reserve(n_lmdas);
         benchmark_kkt.reserve(n_lmdas);
         benchmark_screen.reserve(n_lmdas);
         benchmark_invariance.reserve(n_lmdas);
+        n_valid_solutions.reserve(n_lmdas);
         active_sizes.reserve(n_lmdas);
         strong_sizes.reserve(n_lmdas);
         edpp_safe_sizes.reserve(n_lmdas);

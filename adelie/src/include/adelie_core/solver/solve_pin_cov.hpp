@@ -208,7 +208,6 @@ void solve_pin_active(
     using state_t = std::decay_t<StateType>;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
-    using sw_t = util::Stopwatch;
 
     auto& A = *state.A;
     const auto& groups = state.groups;
@@ -225,7 +224,6 @@ void solve_pin_active(
     const auto max_iters = state.max_iters;
     auto& strong_grad = state.strong_grad;
     auto& iters = state.iters;
-    auto& time_active_cd = state.time_active_cd;
 
     Eigen::Map<vec_value_t> ab_diff_view(
         active_beta_diff.data(), 
@@ -244,8 +242,6 @@ void solve_pin_active(
         ab_diff_view_curr = sb;
     }
     
-    sw_t stopwatch;
-    stopwatch.start();
     while (1) {
         check_user_interrupt(iters);
         ++iters;
@@ -260,7 +256,6 @@ void solve_pin_active(
         if (convg_measure < tol) break;
         if (iters >= max_iters) throw util::max_cds_error(lmda_idx);
     }
-    time_active_cd.push_back(stopwatch.elapsed());
     
     // compute new active beta - old active beta
     for (size_t i = 0; i < active_set.size(); ++i) {
@@ -346,8 +341,10 @@ inline void solve_pin(
     auto& strong_grads = state.strong_grads;
     auto& rsq = state.rsq;
     auto& iters = state.iters;
-    auto& time_strong_cd = state.time_strong_cd;
+    auto& benchmark_strong = state.benchmark_strong;
+    auto& benchmark_active = state.benchmark_active;
 
+    sw_t stopwatch;
     const auto p = A.cols();
 
     // buffers for the routine
@@ -412,8 +409,13 @@ inline void solve_pin(
     };
 
     for (int l = 0; l < lmda_path.size(); ++l) {
+        double strong_time = 0;
+        double active_time = 0;
+
         if (lasso_active_called) {
+            stopwatch.start();
             lasso_active_and_update(l);
+            active_time += stopwatch.elapsed();
         }
 
         while (1) {
@@ -421,7 +423,6 @@ inline void solve_pin(
             ++iters;
             value_t convg_measure;
             const auto old_active_size = active_set.size();
-            sw_t stopwatch;
             stopwatch.start();
             coordinate_descent(
                 state,
@@ -435,7 +436,7 @@ inline void solve_pin(
                 update_coefficients_f,
                 add_active_set
             );
-            time_strong_cd.push_back(stopwatch.elapsed());
+            strong_time += stopwatch.elapsed();
             const bool new_active_added = (old_active_size < active_set.size());
 
             if (new_active_added) {
@@ -454,7 +455,9 @@ inline void solve_pin(
             if (convg_measure < tol) break;
             if (iters >= max_iters) throw util::max_cds_error(l);
 
+            stopwatch.start();
             lasso_active_and_update(l);
+            active_time += stopwatch.elapsed();
         }
 
         // update active_order
@@ -494,6 +497,8 @@ inline void solve_pin(
         strong_is_actives.emplace_back(strong_is_active);
         strong_betas.emplace_back(strong_beta);
         strong_grads.emplace_back(strong_grad);
+        benchmark_strong.emplace_back(strong_time);
+        benchmark_active.emplace_back(active_time);
 
         // make sure to do at least 3 lambdas.
         if (l < 2) continue;

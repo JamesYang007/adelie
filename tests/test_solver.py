@@ -206,6 +206,7 @@ def test_solve_pin_naive():
                 strong_beta=strong_beta,
                 strong_is_active=strong_is_active,
                 intercept=intercept,
+                tol=1e-12,
             )
             state = run_solve_pin(state, X, y)
             state = ad.state.pin_naive(
@@ -223,6 +224,7 @@ def test_solve_pin_naive():
                 strong_beta=state.strong_beta,
                 strong_is_active=state.strong_is_active,
                 intercept=intercept,
+                tol=1e-12,
             )
             run_solve_pin(state, X, y)
 
@@ -276,6 +278,7 @@ def test_solve_pin_cov():
                 strong_beta=strong_beta,
                 strong_grad=strong_grad,
                 strong_is_active=strong_is_active,
+                tol=1e-12,
             )
             state = run_solve_pin(state, X, y)
             state = ad.state.pin_cov(
@@ -289,7 +292,8 @@ def test_solve_pin_cov():
                 rsq=state.rsq,
                 strong_beta=state.strong_beta,
                 strong_grad=state.strong_grad,
-                strong_is_active=state.strong_is_active
+                strong_is_active=state.strong_is_active,
+                tol=1e-12,
             )
             run_solve_pin(state, X, y)
 
@@ -452,6 +456,7 @@ def test_solve_basil():
             test_data["X"] = Xpy
             state = ad.state.basil_naive(
                 **test_data,
+                tol=1e-12,
             )
             state = run_solve_basil(state, X, y)
             state = ad.state.basil_naive(
@@ -477,6 +482,7 @@ def test_solve_basil():
                 edpp_v1_0=state.edpp_v1_0,
                 edpp_resid_0=state.edpp_resid_0,
                 intercept=state.intercept,
+                tol=1e-12,
             )
             run_solve_basil(state, X, y)
 

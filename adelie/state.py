@@ -738,7 +738,7 @@ def pin_naive(
     rsq_curv_tol: float =1e-3,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
-    n_threads: int =max(os.cpu_count() // 2, 1),
+    n_threads: int =1,
 ):
     """Creates a pin, naive method state object.
 
@@ -809,7 +809,7 @@ def pin_naive(
         Default is ``1000``.
     n_threads : int, optional
         Number of threads.
-        Default is ``max(os.cpu_count() // 2, 1)``.
+        Default is ``1``.
 
     See Also
     --------
@@ -1041,7 +1041,7 @@ def pin_cov(
     rsq_curv_tol: float =1e-3,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
-    n_threads: int =max(os.cpu_count() // 2, 1),
+    n_threads: int =1,
 ):
     """Creates a pin, covariance method state object.
 
@@ -1109,7 +1109,7 @@ def pin_cov(
         Default is ``1000``.
     n_threads : int, optional
         Number of threads.
-        Default is ``max(os.cpu_count() // 2, 1)``.
+        Default is ``1``.
 
     See Also
     --------
@@ -1731,7 +1731,7 @@ def basil_naive(
     rsq_curv_tol: float =1e-3,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
-    n_threads: int =max(os.cpu_count() // 2, 1),
+    n_threads: int =1,
     early_exit: bool =True,
     intercept: bool =True,
     strong_rule: str ="default",
@@ -1844,7 +1844,7 @@ def basil_naive(
         Default is ``1000``.
     n_threads : int, optional
         Number of threads.
-        Default is ``max(os.cpu_count() // 2, 1)``.
+        Default is ``1``.
     early_exit : bool, optional
         ``True`` if the function should early exit based on training :math:`R^2`.
         Default is ``True``.

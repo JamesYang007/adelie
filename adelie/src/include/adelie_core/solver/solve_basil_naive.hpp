@@ -145,8 +145,8 @@ void screen_strong(
     const auto strong_rule = state.strong_rule;
     auto& strong_set = state.strong_set;
 
-    const auto old_strong_set_size = strong_set.size();
-    const auto new_safe_size = edpp_safe_set.size() - old_strong_set_size;
+    const int old_strong_set_size = strong_set.size();
+    const int new_safe_size = edpp_safe_set.size() - old_strong_set_size;
 
     assert(strong_set.size() <= abs_grad.size());
 
@@ -158,15 +158,18 @@ void screen_strong(
     };
 
     const auto do_fixed_greedy = [&]() {
-        size_t size_capped = std::min(delta_strong_size, new_safe_size);
+        size_t size_capped = std::min<int>(
+            delta_strong_size, 
+            //static_cast<int>(abs_grad.size()) - old_strong_set_size
+            new_safe_size
+        );
 
         strong_set.insert(strong_set.end(), size_capped, -1);
-        const auto factor = (alpha <= 0) ? 1e-3 : alpha;
         const auto abs_grad_p = vec_value_t::NullaryExpr(
             abs_grad.size(), [&](auto i) {
-                return ((penalty[i] <= 0) || !is_edpp(i)) ? 0.0 : abs_grad[i] / penalty[i];
+                return (penalty[i] <= 0 || !is_edpp(i)) ? 0.0 : abs_grad[i] / penalty[i];
             }
-        ) / factor;
+        );
         // TODO: PARALLELIZE!
         util::k_imax(
             abs_grad_p, 
@@ -445,9 +448,11 @@ inline void solve_basil(
     auto& strong_beta_prev_valid = state.strong_beta_prev_valid; 
     auto& strong_is_active_prev_valid = state.strong_is_active_prev_valid;
     auto& benchmark_screen = state.benchmark_screen;
-    auto& benchmark_fit = state.benchmark_fit;
+    auto& benchmark_fit_strong = state.benchmark_fit_strong;
+    auto& benchmark_fit_active = state.benchmark_fit_active;
     auto& benchmark_kkt = state.benchmark_kkt;
     auto& benchmark_invariance = state.benchmark_invariance;
+    auto& n_valid_solutions = state.n_valid_solutions;
     auto& active_sizes = state.active_sizes;
     auto& strong_sizes = state.strong_sizes;
     auto& edpp_safe_sizes = state.edpp_safe_sizes;
@@ -655,14 +660,24 @@ inline void solve_basil(
             // Save all current valid quantities that will be modified in-place by fit.
             // This is needed for the invariance step in case no valid solutions are found.
             save_prev_valid();
-            sw.start();
             auto&& state_pin_naive = naive::fit(
                 state,
                 lmda_batch,
                 update_coefficients_f,
                 check_user_interrupt
             );
-            benchmark_fit.push_back(sw.elapsed());
+            benchmark_fit_strong.push_back(
+                Eigen::Map<const util::rowvec_type<double>>(
+                    state_pin_naive.benchmark_strong.data(),
+                    state_pin_naive.benchmark_strong.size()
+                ).sum()
+            );
+            benchmark_fit_active.push_back(
+                Eigen::Map<const util::rowvec_type<double>>(
+                    state_pin_naive.benchmark_active.data(),
+                    state_pin_naive.benchmark_active.size()
+                ).sum()
+            );
 
             // ==================================================================================== 
             // KKT step
@@ -670,25 +685,26 @@ inline void solve_basil(
             grads.resize(lmda_batch.size());
             for (auto& g : grads) g.resize(p);
             sw.start();
-            const auto n_valid_solutions = naive::kkt(
+            const auto n_valid = naive::kkt(
                 state,
                 state_pin_naive,
                 grads
             );
             benchmark_kkt.push_back(sw.elapsed());
+            n_valid_solutions.push_back(n_valid);
 
             // ==================================================================================== 
             // Invariance step
             // ==================================================================================== 
             sw.start();
-            lmda_path_idx += n_valid_solutions;
+            lmda_path_idx += n_valid;
             // If no valid solutions found, restore to the previous valid state,
             // so that we can start over after screening more variables.
-            if (n_valid_solutions <= 0) {
+            if (n_valid <= 0) {
                 load_prev_valid();
             // Otherwise, use the last valid state found in kkt.
             } else {
-                const auto idx = n_valid_solutions - 1;
+                const auto idx = n_valid - 1;
                 resid.swap(state_pin_naive.resids[idx]);
                 resid_sum = state_pin_naive.resid_sums[idx];
                 // TODO: implement swap
@@ -708,14 +724,14 @@ inline void solve_basil(
             naive::update_solutions(
                 state, 
                 state_pin_naive, 
-                n_valid_solutions
+                n_valid
             );
             benchmark_invariance.push_back(sw.elapsed());
 
             // ==================================================================================== 
             // Diagnostic step
             // ==================================================================================== 
-            for (int i = 0; i < n_valid_solutions; ++i) {
+            for (int i = 0; i < n_valid; ++i) {
                 active_sizes.push_back(
                     state_pin_naive.strong_is_actives[i].sum()
                 );
