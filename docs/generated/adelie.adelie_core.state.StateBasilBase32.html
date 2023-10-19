@@ -316,9 +316,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.create_test_data_basil.html">adelie.data.create_test_data_basil</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_rsqs.html">adelie.diagnostic.plot_rsqs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficient.html">adelie.diagnostic.plot_coefficient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_rsq.html">adelie.diagnostic.plot_rsq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_size.html">adelie.diagnostic.plot_set_size</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_kkt.html">adelie.diagnostic.plot_kkt</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.naive_dense.html">adelie.matrix.naive_dense</a></li>
@@ -335,6 +337,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_pin.html">adelie.solver.solve_pin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_basil.html">adelie.solver.solve_basil</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
@@ -436,74 +439,80 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.alpha" title="adelie.adelie_core.state.StateBasilBase32.alpha"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alpha</span></code></a></p></td>
 <td><p>Elastic net parameter.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_fit" title="adelie.adelie_core.state.StateBasilBase32.benchmark_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_fit</span></code></a></p></td>
-<td><p>Fit time for a given BASIL iteration.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_fit_active" title="adelie.adelie_core.state.StateBasilBase32.benchmark_fit_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_fit_active</span></code></a></p></td>
+<td><p>Fit time on the active set for a given BASIL iteration.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_invariance" title="adelie.adelie_core.state.StateBasilBase32.benchmark_invariance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_invariance</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_fit_strong" title="adelie.adelie_core.state.StateBasilBase32.benchmark_fit_strong"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_fit_strong</span></code></a></p></td>
+<td><p>Fit time on the strong set for a given BASIL iteration.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_invariance" title="adelie.adelie_core.state.StateBasilBase32.benchmark_invariance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_invariance</span></code></a></p></td>
 <td><p>Invariance time for a given BASIL iteration.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_kkt" title="adelie.adelie_core.state.StateBasilBase32.benchmark_kkt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_kkt</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_kkt" title="adelie.adelie_core.state.StateBasilBase32.benchmark_kkt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_kkt</span></code></a></p></td>
 <td><p>KKT time for a given BASIL iteration.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_screen" title="adelie.adelie_core.state.StateBasilBase32.benchmark_screen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_screen</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_screen" title="adelie.adelie_core.state.StateBasilBase32.benchmark_screen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_screen</span></code></a></p></td>
 <td><p>Screen time for a given BASIL iteration.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.betas" title="adelie.adelie_core.state.StateBasilBase32.betas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">betas</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.betas" title="adelie.adelie_core.state.StateBasilBase32.betas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">betas</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> is the (untransformed) solution corresponding to <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.delta_lmda_path_size" title="adelie.adelie_core.state.StateBasilBase32.delta_lmda_path_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delta_lmda_path_size</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.delta_lmda_path_size" title="adelie.adelie_core.state.StateBasilBase32.delta_lmda_path_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delta_lmda_path_size</span></code></a></p></td>
 <td><p>Number of regularizations to batch per BASIL iteration.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.delta_strong_size" title="adelie.adelie_core.state.StateBasilBase32.delta_strong_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delta_strong_size</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.delta_strong_size" title="adelie.adelie_core.state.StateBasilBase32.delta_strong_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delta_strong_size</span></code></a></p></td>
 <td><p>Number of strong groups to include per BASIL iteration  if strong rule does not include new groups but optimality is not reached.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.early_exit" title="adelie.adelie_core.state.StateBasilBase32.early_exit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">early_exit</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.early_exit" title="adelie.adelie_core.state.StateBasilBase32.early_exit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">early_exit</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should early exit based on training <span class="math notranslate nohighlight">\(R^2\)</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.edpp_safe_sizes" title="adelie.adelie_core.state.StateBasilBase32.edpp_safe_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edpp_safe_sizes</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.edpp_safe_sizes" title="adelie.adelie_core.state.StateBasilBase32.edpp_safe_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edpp_safe_sizes</span></code></a></p></td>
 <td><p>EDPP safe set size for every saved solution.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.grad" title="adelie.adelie_core.state.StateBasilBase32.grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grad</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.grad" title="adelie.adelie_core.state.StateBasilBase32.grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grad</span></code></a></p></td>
 <td><p>The true full gradient <span class="math notranslate nohighlight">\(X_c^\top (y_c - X_c\beta)\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.group_sizes" title="adelie.adelie_core.state.StateBasilBase32.group_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_sizes</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.group_sizes" title="adelie.adelie_core.state.StateBasilBase32.group_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_sizes</span></code></a></p></td>
 <td><p>List of group sizes corresponding to each element in <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.groups" title="adelie.adelie_core.state.StateBasilBase32.groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">groups</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.groups" title="adelie.adelie_core.state.StateBasilBase32.groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">groups</span></code></a></p></td>
 <td><p>List of starting indices to each group where <cite>G</cite> is the number of groups.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.intercept" title="adelie.adelie_core.state.StateBasilBase32.intercept"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercept</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.intercept" title="adelie.adelie_core.state.StateBasilBase32.intercept"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercept</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should fit with intercept.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.intercepts" title="adelie.adelie_core.state.StateBasilBase32.intercepts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercepts</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.intercepts" title="adelie.adelie_core.state.StateBasilBase32.intercepts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercepts</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">intercepts[i]</span></code> is the intercept solution corresponding to <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.lmda" title="adelie.adelie_core.state.StateBasilBase32.lmda"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.lmda" title="adelie.adelie_core.state.StateBasilBase32.lmda"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda</span></code></a></p></td>
 <td><p>The regularization parameter at which the true solution is given by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.lmda_max" title="adelie.adelie_core.state.StateBasilBase32.lmda_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_max</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.lmda_max" title="adelie.adelie_core.state.StateBasilBase32.lmda_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_max</span></code></a></p></td>
 <td><p>The smallest <span class="math notranslate nohighlight">\(\lambda\)</span> such that the true solution is zero for all coefficients that have a non-vanishing group lasso penalty (<span class="math notranslate nohighlight">\(\ell_2\)</span>-norm).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.lmda_path" title="adelie.adelie_core.state.StateBasilBase32.lmda_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_path</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.lmda_path" title="adelie.adelie_core.state.StateBasilBase32.lmda_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_path</span></code></a></p></td>
 <td><p>The regularization path to solve for.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.lmda_path_size" title="adelie.adelie_core.state.StateBasilBase32.lmda_path_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_path_size</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.lmda_path_size" title="adelie.adelie_core.state.StateBasilBase32.lmda_path_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_path_size</span></code></a></p></td>
 <td><p>Number of regularizations in the path if it is to be generated.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.lmdas" title="adelie.adelie_core.state.StateBasilBase32.lmdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.lmdas" title="adelie.adelie_core.state.StateBasilBase32.lmdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th <span class="math notranslate nohighlight">\(\lambda\)</span> regularization in the solution set.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.max_iters" title="adelie.adelie_core.state.StateBasilBase32.max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_iters</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.max_iters" title="adelie.adelie_core.state.StateBasilBase32.max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_iters</span></code></a></p></td>
 <td><p>Maximum number of coordinate descents.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.max_strong_size" title="adelie.adelie_core.state.StateBasilBase32.max_strong_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_strong_size</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.max_strong_size" title="adelie.adelie_core.state.StateBasilBase32.max_strong_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_strong_size</span></code></a></p></td>
 <td><p>Maximum number of strong groups allowed.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.min_ratio" title="adelie.adelie_core.state.StateBasilBase32.min_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_ratio</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.min_ratio" title="adelie.adelie_core.state.StateBasilBase32.min_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_ratio</span></code></a></p></td>
 <td><p>The ratio between the largest and smallest <span class="math notranslate nohighlight">\(\lambda\)</span> in the regularization sequence if it is to be generated.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.n_threads" title="adelie.adelie_core.state.StateBasilBase32.n_threads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_threads</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.n_threads" title="adelie.adelie_core.state.StateBasilBase32.n_threads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_threads</span></code></a></p></td>
 <td><p>Number of threads.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.n_valid_solutions" title="adelie.adelie_core.state.StateBasilBase32.n_valid_solutions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_valid_solutions</span></code></a></p></td>
+<td><p>Number of valid solutions for a given BASIL iteration.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateBasilBase32.newton_max_iters" title="adelie.adelie_core.state.StateBasilBase32.newton_max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_max_iters</span></code></a></p></td>
 <td><p>Maximum number of iterations for the BCD update.</p></td>
@@ -597,9 +606,15 @@ It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</sp
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase32.benchmark_fit">
-<span class="sig-name descname"><span class="pre">benchmark_fit</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_fit" title="Link to this definition">#</a></dt>
-<dd><p>Fit time for a given BASIL iteration.</p>
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase32.benchmark_fit_active">
+<span class="sig-name descname"><span class="pre">benchmark_fit_active</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_fit_active" title="Link to this definition">#</a></dt>
+<dd><p>Fit time on the active set for a given BASIL iteration.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase32.benchmark_fit_strong">
+<span class="sig-name descname"><span class="pre">benchmark_fit_strong</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_fit_strong" title="Link to this definition">#</a></dt>
+<dd><p>Fit time on the strong set for a given BASIL iteration.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -742,6 +757,12 @@ if it is to be generated.</p>
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase32.n_threads">
 <span class="sig-name descname"><span class="pre">n_threads</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase32.n_threads" title="Link to this definition">#</a></dt>
 <dd><p>Number of threads.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase32.n_valid_solutions">
+<span class="sig-name descname"><span class="pre">n_valid_solutions</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase32.n_valid_solutions" title="Link to this definition">#</a></dt>
+<dd><p>Number of valid solutions for a given BASIL iteration.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -943,7 +964,8 @@ when the regularization is given by <code class="docutils literal notranslate"><
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.abs_grad"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.abs_grad</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.active_sizes"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.active_sizes</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.alpha"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.alpha</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_fit"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.benchmark_fit</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_fit_active"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.benchmark_fit_active</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_fit_strong"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.benchmark_fit_strong</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_invariance"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.benchmark_invariance</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_kkt"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.benchmark_kkt</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.benchmark_screen"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.benchmark_screen</span></code></a></li>
@@ -966,6 +988,7 @@ when the regularization is given by <code class="docutils literal notranslate"><
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.max_strong_size"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.max_strong_size</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.min_ratio"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.min_ratio</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.n_threads"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.n_threads</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.n_valid_solutions"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.n_valid_solutions</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.newton_max_iters"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.newton_max_iters</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.newton_tol"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.newton_tol</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateBasilBase32.penalty"><code class="docutils literal notranslate"><span class="pre">StateBasilBase32.penalty</span></code></a></li>

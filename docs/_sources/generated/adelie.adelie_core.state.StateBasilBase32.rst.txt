@@ -24,7 +24,8 @@
       ~StateBasilBase32.abs_grad
       ~StateBasilBase32.active_sizes
       ~StateBasilBase32.alpha
-      ~StateBasilBase32.benchmark_fit
+      ~StateBasilBase32.benchmark_fit_active
+      ~StateBasilBase32.benchmark_fit_strong
       ~StateBasilBase32.benchmark_invariance
       ~StateBasilBase32.benchmark_kkt
       ~StateBasilBase32.benchmark_screen
@@ -47,6 +48,7 @@
       ~StateBasilBase32.max_strong_size
       ~StateBasilBase32.min_ratio
       ~StateBasilBase32.n_threads
+      ~StateBasilBase32.n_valid_solutions
       ~StateBasilBase32.newton_max_iters
       ~StateBasilBase32.newton_tol
       ~StateBasilBase32.penalty
@@ -84,7 +86,8 @@
    .. autoattribute:: abs_grad
    .. autoattribute:: active_sizes
    .. autoattribute:: alpha
-   .. autoattribute:: benchmark_fit
+   .. autoattribute:: benchmark_fit_active
+   .. autoattribute:: benchmark_fit_strong
    .. autoattribute:: benchmark_invariance
    .. autoattribute:: benchmark_kkt
    .. autoattribute:: benchmark_screen
@@ -107,6 +110,7 @@
    .. autoattribute:: max_strong_size
    .. autoattribute:: min_ratio
    .. autoattribute:: n_threads
+   .. autoattribute:: n_valid_solutions
    .. autoattribute:: newton_max_iters
    .. autoattribute:: newton_tol
    .. autoattribute:: penalty

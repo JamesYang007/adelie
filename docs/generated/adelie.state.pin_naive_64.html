@@ -316,9 +316,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.create_test_data_basil.html">adelie.data.create_test_data_basil</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_rsqs.html">adelie.diagnostic.plot_rsqs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficient.html">adelie.diagnostic.plot_coefficient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_rsq.html">adelie.diagnostic.plot_rsq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_size.html">adelie.diagnostic.plot_set_size</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_kkt.html">adelie.diagnostic.plot_kkt</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.naive_dense.html">adelie.matrix.naive_dense</a></li>
@@ -335,6 +337,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_pin.html">adelie.solver.solve_pin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_basil.html">adelie.solver.solve_basil</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.base.html">adelie.matrix.base</a></li>
@@ -457,6 +460,12 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive_64.alpha" title="adelie.state.pin_naive_64.alpha"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alpha</span></code></a></p></td>
 <td><p>Elastic net parameter.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive_64.benchmark_active" title="adelie.state.pin_naive_64.benchmark_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_active</span></code></a></p></td>
+<td><p>Benchmark time for performing coordinate-descent on the active set for each <span class="math notranslate nohighlight">\(\lambda\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive_64.benchmark_strong" title="adelie.state.pin_naive_64.benchmark_strong"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_strong</span></code></a></p></td>
+<td><p>Benchmark time for performing coordinate-descent on the strong set for each <span class="math notranslate nohighlight">\(\lambda\)</span>.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive_64.betas" title="adelie.state.pin_naive_64.betas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">betas</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> corresponds to the solution corresponding to <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
 </tr>
@@ -555,12 +564,6 @@ document.write(`
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive_64.strong_vars" title="adelie.state.pin_naive_64.strong_vars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strong_vars</span></code></a></p></td>
 <td><p>List of <span class="math notranslate nohighlight">\(D_k^2\)</span> where <span class="math notranslate nohighlight">\(D_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(X_{c,k}\)</span>  along the strong groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered <span class="math notranslate nohighlight">\(X_k\)</span>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive_64.time_active_cd" title="adelie.state.pin_naive_64.time_active_cd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">time_active_cd</span></code></a></p></td>
-<td><p>Benchmark time for performing coordinate-descent on the active set at every iteration.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.pin_naive_64.time_strong_cd" title="adelie.state.pin_naive_64.time_strong_cd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">time_strong_cd</span></code></a></p></td>
-<td><p>Benchmark time for performing coordinate-descent on the strong set at every iteration.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.pin_naive_64.tol" title="adelie.state.pin_naive_64.tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tol</span></code></a></p></td>
 <td><p>Convergence tolerance.</p></td>
@@ -684,6 +687,18 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 <span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#adelie.state.pin_naive_64.alpha" title="Link to this definition">#</a></dt>
 <dd><p>Elastic net parameter.
 It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</span>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive_64.benchmark_active">
+<span class="sig-name descname"><span class="pre">benchmark_active</span></span><a class="headerlink" href="#adelie.state.pin_naive_64.benchmark_active" title="Link to this definition">#</a></dt>
+<dd><p>Benchmark time for performing coordinate-descent on the active set for each <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.state.pin_naive_64.benchmark_strong">
+<span class="sig-name descname"><span class="pre">benchmark_strong</span></span><a class="headerlink" href="#adelie.state.pin_naive_64.benchmark_strong" title="Link to this definition">#</a></dt>
+<dd><p>Benchmark time for performing coordinate-descent on the strong set for each <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -916,18 +931,6 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.state.pin_naive_64.time_active_cd">
-<span class="sig-name descname"><span class="pre">time_active_cd</span></span><a class="headerlink" href="#adelie.state.pin_naive_64.time_active_cd" title="Link to this definition">#</a></dt>
-<dd><p>Benchmark time for performing coordinate-descent on the active set at every iteration.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.state.pin_naive_64.time_strong_cd">
-<span class="sig-name descname"><span class="pre">time_strong_cd</span></span><a class="headerlink" href="#adelie.state.pin_naive_64.time_strong_cd" title="Link to this definition">#</a></dt>
-<dd><p>Benchmark time for performing coordinate-descent on the strong set at every iteration.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.state.pin_naive_64.tol">
 <span class="sig-name descname"><span class="pre">tol</span></span><a class="headerlink" href="#adelie.state.pin_naive_64.tol" title="Link to this definition">#</a></dt>
 <dd><p>Convergence tolerance.</p>
@@ -1004,6 +1007,8 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.active_order"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.active_order</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.active_set"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.active_set</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.alpha"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.alpha</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.benchmark_active"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.benchmark_active</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.benchmark_strong"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.benchmark_strong</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.betas"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.betas</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.group_sizes"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.group_sizes</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.groups"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.groups</span></code></a></li>
@@ -1037,8 +1042,6 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.strong_set"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.strong_set</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.strong_transforms"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.strong_transforms</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.strong_vars"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.strong_vars</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.time_active_cd"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.time_active_cd</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.time_strong_cd"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.time_strong_cd</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.tol"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.tol</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.y_mean"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.y_mean</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.pin_naive_64.y_var"><code class="docutils literal notranslate"><span class="pre">pin_naive_64.y_var</span></code></a></li>

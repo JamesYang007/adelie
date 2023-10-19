@@ -316,9 +316,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.data.create_test_data_basil.html">adelie.data.create_test_data_basil</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_rsqs.html">adelie.diagnostic.plot_rsqs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_coefficient.html">adelie.diagnostic.plot_coefficient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_rsq.html">adelie.diagnostic.plot_rsq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_set_size.html">adelie.diagnostic.plot_set_size</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_kkt.html">adelie.diagnostic.plot_kkt</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.naive_dense.html">adelie.matrix.naive_dense</a></li>
@@ -335,6 +337,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.objective.html">adelie.solver.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.solve_pin.html">adelie.solver.solve_pin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.solve_basil.html">adelie.solver.solve_basil</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.base.html">adelie.matrix.base</a></li>
@@ -448,14 +451,20 @@ document.write(`
 <h2>adelie.diagnostic<a class="headerlink" href="#adelie-diagnostic" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_coefficients.html#adelie.diagnostic.plot_coefficients" title="adelie.diagnostic.plot_coefficients"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_coefficients</span></code></a>(state)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_coefficient.html#adelie.diagnostic.plot_coefficient" title="adelie.diagnostic.plot_coefficient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_coefficient</span></code></a>(state)</p></td>
 <td><p>Plots the coefficient profile.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_rsqs.html#adelie.diagnostic.plot_rsqs" title="adelie.diagnostic.plot_rsqs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_rsqs</span></code></a>(state)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_rsq.html#adelie.diagnostic.plot_rsq" title="adelie.diagnostic.plot_rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_rsq</span></code></a>(state)</p></td>
 <td><p>Plots the <span class="math notranslate nohighlight">\(R^2\)</span> profile.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_set_sizes.html#adelie.diagnostic.plot_set_sizes" title="adelie.diagnostic.plot_set_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_set_sizes</span></code></a>(state[, ratio])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_set_size.html#adelie.diagnostic.plot_set_size" title="adelie.diagnostic.plot_set_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_set_size</span></code></a>(state[, ratio])</p></td>
 <td><p>Plots the active, strong, and EDPP set sizes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_benchmark.html#adelie.diagnostic.plot_benchmark" title="adelie.diagnostic.plot_benchmark"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_benchmark</span></code></a>(state)</p></td>
+<td><p>Plots benchmark times.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_kkt.html#adelie.diagnostic.plot_kkt" title="adelie.diagnostic.plot_kkt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_kkt</span></code></a>(y, state[, solution_idx])</p></td>
+<td><p>Plots KKT failures.</p></td>
 </tr>
 </tbody>
 </table>
@@ -507,6 +516,9 @@ document.write(`
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.solve_basil.html#adelie.solver.solve_basil" title="adelie.solver.solve_basil"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_basil</span></code></a>(state[, logger])</p></td>
 <td><p>Solves the group elastic net problem using BASIL.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.solver.grpnet.html#adelie.solver.grpnet" title="adelie.solver.grpnet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grpnet</span></code></a>(*, X, y, groups, group_sizes[, ...])</p></td>
+<td><p>Group elastic net solver.</p></td>
 </tr>
 </tbody>
 </table>

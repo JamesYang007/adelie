@@ -31,7 +31,8 @@
       ~basil_naive_64.abs_grad
       ~basil_naive_64.active_sizes
       ~basil_naive_64.alpha
-      ~basil_naive_64.benchmark_fit
+      ~basil_naive_64.benchmark_fit_active
+      ~basil_naive_64.benchmark_fit_strong
       ~basil_naive_64.benchmark_invariance
       ~basil_naive_64.benchmark_kkt
       ~basil_naive_64.benchmark_screen
@@ -58,6 +59,7 @@
       ~basil_naive_64.max_strong_size
       ~basil_naive_64.min_ratio
       ~basil_naive_64.n_threads
+      ~basil_naive_64.n_valid_solutions
       ~basil_naive_64.newton_max_iters
       ~basil_naive_64.newton_tol
       ~basil_naive_64.penalty
@@ -111,7 +113,8 @@
    .. autoattribute:: abs_grad
    .. autoattribute:: active_sizes
    .. autoattribute:: alpha
-   .. autoattribute:: benchmark_fit
+   .. autoattribute:: benchmark_fit_active
+   .. autoattribute:: benchmark_fit_strong
    .. autoattribute:: benchmark_invariance
    .. autoattribute:: benchmark_kkt
    .. autoattribute:: benchmark_screen
@@ -138,6 +141,7 @@
    .. autoattribute:: max_strong_size
    .. autoattribute:: min_ratio
    .. autoattribute:: n_threads
+   .. autoattribute:: n_valid_solutions
    .. autoattribute:: newton_max_iters
    .. autoattribute:: newton_tol
    .. autoattribute:: penalty

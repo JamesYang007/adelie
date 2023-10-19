@@ -27,6 +27,8 @@
       ~StatePinBase32.active_order
       ~StatePinBase32.active_set
       ~StatePinBase32.alpha
+      ~StatePinBase32.benchmark_active
+      ~StatePinBase32.benchmark_strong
       ~StatePinBase32.betas
       ~StatePinBase32.group_sizes
       ~StatePinBase32.groups
@@ -54,8 +56,6 @@
       ~StatePinBase32.strong_set
       ~StatePinBase32.strong_transforms
       ~StatePinBase32.strong_vars
-      ~StatePinBase32.time_active_cd
-      ~StatePinBase32.time_strong_cd
       ~StatePinBase32.tol
    
    
@@ -76,6 +76,8 @@
    .. autoattribute:: active_order
    .. autoattribute:: active_set
    .. autoattribute:: alpha
+   .. autoattribute:: benchmark_active
+   .. autoattribute:: benchmark_strong
    .. autoattribute:: betas
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
@@ -103,8 +105,6 @@
    .. autoattribute:: strong_set
    .. autoattribute:: strong_transforms
    .. autoattribute:: strong_vars
-   .. autoattribute:: time_active_cd
-   .. autoattribute:: time_strong_cd
    .. autoattribute:: tol
    
    

@@ -46,9 +46,11 @@ adelie.diagnostic
     :toctree: generated/
 
 
-    plot_coefficients
-    plot_rsqs
-    plot_set_sizes
+    plot_coefficient
+    plot_rsq
+    plot_set_size
+    plot_benchmark
+    plot_kkt
 
 
 adelie.matrix
@@ -98,6 +100,7 @@ adelie.solver
     objective
     solve_pin
     solve_basil
+    grpnet
 
 
 Internal

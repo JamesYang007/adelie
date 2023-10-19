@@ -31,6 +31,8 @@
       ~pin_cov_64.active_order
       ~pin_cov_64.active_set
       ~pin_cov_64.alpha
+      ~pin_cov_64.benchmark_active
+      ~pin_cov_64.benchmark_strong
       ~pin_cov_64.betas
       ~pin_cov_64.group_sizes
       ~pin_cov_64.groups
@@ -60,8 +62,6 @@
       ~pin_cov_64.strong_set
       ~pin_cov_64.strong_transforms
       ~pin_cov_64.strong_vars
-      ~pin_cov_64.time_active_cd
-      ~pin_cov_64.time_strong_cd
       ~pin_cov_64.tol
    
    
@@ -86,6 +86,8 @@
    .. autoattribute:: active_order
    .. autoattribute:: active_set
    .. autoattribute:: alpha
+   .. autoattribute:: benchmark_active
+   .. autoattribute:: benchmark_strong
    .. autoattribute:: betas
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
@@ -115,8 +117,6 @@
    .. autoattribute:: strong_set
    .. autoattribute:: strong_transforms
    .. autoattribute:: strong_vars
-   .. autoattribute:: time_active_cd
-   .. autoattribute:: time_strong_cd
    .. autoattribute:: tol
    
    

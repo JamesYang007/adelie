@@ -31,6 +31,8 @@
       ~pin_naive_64.active_order
       ~pin_naive_64.active_set
       ~pin_naive_64.alpha
+      ~pin_naive_64.benchmark_active
+      ~pin_naive_64.benchmark_strong
       ~pin_naive_64.betas
       ~pin_naive_64.group_sizes
       ~pin_naive_64.groups
@@ -64,8 +66,6 @@
       ~pin_naive_64.strong_set
       ~pin_naive_64.strong_transforms
       ~pin_naive_64.strong_vars
-      ~pin_naive_64.time_active_cd
-      ~pin_naive_64.time_strong_cd
       ~pin_naive_64.tol
       ~pin_naive_64.y_mean
       ~pin_naive_64.y_var
@@ -92,6 +92,8 @@
    .. autoattribute:: active_order
    .. autoattribute:: active_set
    .. autoattribute:: alpha
+   .. autoattribute:: benchmark_active
+   .. autoattribute:: benchmark_strong
    .. autoattribute:: betas
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
@@ -125,8 +127,6 @@
    .. autoattribute:: strong_set
    .. autoattribute:: strong_transforms
    .. autoattribute:: strong_vars
-   .. autoattribute:: time_active_cd
-   .. autoattribute:: time_strong_cd
    .. autoattribute:: tol
    .. autoattribute:: y_mean
    .. autoattribute:: y_var
