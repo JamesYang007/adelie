@@ -40,6 +40,8 @@
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.diagnostic.plot_kkt';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -314,9 +316,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.create_test_data_basil.html">adelie.data.create_test_data_basil</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficient.html">adelie.diagnostic.plot_coefficient</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_rsq.html">adelie.diagnostic.plot_rsq</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_size.html">adelie.diagnostic.plot_set_size</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.diagnostic.plot_kkt</a></li>
 </ul>
@@ -415,11 +414,15 @@ document.write(`
 <h1>adelie.diagnostic.plot_kkt<a class="headerlink" href="#adelie-diagnostic-plot-kkt" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.diagnostic.plot_kkt">
-<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">plot_kkt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.plot_kkt" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">plot_kkt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">abs_grad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.plot_kkt" title="Link to this definition">#</a></dt>
 <dd><p>Plots KKT failures.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
+<dt><strong>grad</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>Gradient vector.</p>
+</dd>
+<dt><strong>lmda</strong><span class="classifier">float</span></dt><dd><p><span class="math notranslate nohighlight">\(\lambda\)</span> at which <code class="docutils literal notranslate"><span class="pre">grad</span></code> is computed.</p>
+</dd>
 <dt><strong>state</strong></dt><dd><p>A state object from solving group elastic net.</p>
 </dd>
 </dl>
