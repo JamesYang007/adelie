@@ -4,7 +4,58 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot_coefficient(
+def active_sets(state):
+    p = state.X.cols()
+    feature_to_group = np.empty(p, dtype=int)
+    for i, (g, gs) in enumerate(zip(state.groups, state.group_sizes)):
+        feature_to_group[g:g+gs] = i
+    active_sets = [
+        set(feature_to_group[state.betas[i].indices])
+        for i in range(state.betas.shape[0])
+    ]
+    return active_sets
+
+
+
+def gradients(X, y, state):
+    """Computes the set of gradients for each saved solution.
+
+    Parameters
+    ----------
+    X : (n, p) np.ndarray
+        Feature matrix.
+    y : (n,) np.ndarray
+        Response vector.
+    state
+        A state object from solving group elastic net.
+    """
+    betas = state.betas
+    resids = y[None] - betas @ X.T
+    if state.intercept:
+        resids -= np.mean(y)
+    grads = resids @ X
+    if state.intercept:
+        grads -= state.X_means[None] * np.sum(resids, axis=-1)[:, None]
+    return grads
+
+
+def gradient_norms(grads, state):
+    """Computes the group-wise gradient norms.
+
+    Parameters
+    ----------
+    grads : (l, p) np.ndarray
+        Gradients for each :math:`\\lambda` value.
+    state
+        A state object from solving group elastic net.
+    """
+    return np.array([
+        np.linalg.norm(grads[:, g:g+gs], axis=-1)
+        for g, gs in zip(state.groups, state.group_sizes)
+    ]).T
+
+
+def plot_coefficients(
     state,
 ):
     """Plots the coefficient profile.
@@ -40,7 +91,7 @@ def plot_coefficient(
     return fig 
 
 
-def plot_rsq(
+def plot_rsqs(
     state,
 ):
     """Plots the :math:`R^2` profile.
@@ -64,7 +115,7 @@ def plot_rsq(
     return fig
 
 
-def plot_set_size(
+def plot_set_sizes(
     state,
     ratio: bool =True,
 ):
@@ -197,36 +248,37 @@ def plot_benchmark(
     return fig, axes
 
 
-def plot_kkt(y, state, solution_idx=0):
+def plot_kkt(
+    abs_grad, 
+    lmda, 
+    state,
+):
     """Plots KKT failures.
 
     Parameters
     ----------
+    grad : (p,) np.ndarray
+        Gradient vector.
+    lmda : float
+        :math:`\\lambda` at which ``grad`` is computed.
     state
         A state object from solving group elastic net.
     """
     fig = plt.figure(layout="constrained")
-
-    X = state.X
-    n, p = X.rows(), X.cols()
-    beta = state.betas[solution_idx].toarray().flatten()
-    resid = np.empty(n)
-    X.btmul(0, p, beta, resid)
-    resid = y - resid
-    if state.intercept:
-        resid -= np.mean(y)
-    grad = np.empty(p)
-    X.bmul(0, p, resid, grad)
-    if state.intercept:
-        grad -= state.X_means * np.sum(resid)
-    abs_grad = np.array([
-        np.linalg.norm(grad[g:g+gs])
-        for g, gs in zip(state.groups, state.group_sizes)
-    ])
-    weights = abs_grad / (state.alpha * state.penalty * state.lmdas[solution_idx])
-
-    plt.hist(weights[weights > 1], alpha=0.7, edgecolor="blue", bins=20)
-    plt.axvline(1, linestyle="--", linewidth=1, color="r")
+    weights = abs_grad / (state.alpha * state.penalty * lmda) - 1
+    colors = ["blue", "red"]
+    plt.scatter(
+        np.arange(len(weights)),
+        weights,
+        color=[colors[w > 0] for w in weights],
+        marker='.',
+        facecolor="None",
+    )
+    plt.axhline(0)
+    max_weight = np.max(weights)
+    plt.ylim(bottom=-max_weight * 1.05, top=max_weight * 1.05)
     plt.title("Group-wise Normalized Gradient Norms (KKT Failures)")
+    plt.ylabel(r"$\|g_k\|_2 / (\alpha p_k \lambda_k) - 1$")
+    plt.xlabel("Group Number")
 
     return fig
