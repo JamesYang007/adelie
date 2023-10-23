@@ -334,7 +334,7 @@ void newton_solver_base(
         return std::max<value_t>(h, 0.0);
     };
 
-    const auto root_find_state = newton_root_find(
+    const auto root_find_state = optimization::newton_root_find(
         initial_f,
         step_f,
         project_f,
@@ -404,7 +404,7 @@ void newton_brent_solver(
 
         value_t h = 0;
         size_t iters_brent;
-        brent(
+        optimization::brent(
             [&](auto x) { return root_function(x, vbuffer1, v, l1); },
             tol,
             brent_tol, 
@@ -669,7 +669,7 @@ void brent_solver(
     const auto phi = [&](auto h) {
         return root_function(h, buffer1, v, l1);
     };
-    brent(
+    optimization::brent(
         phi, tol, tol, max_iters, a, a, b, 
         [](auto, auto, auto, auto) { return std::make_pair(false, 0.0); },
         h, iters

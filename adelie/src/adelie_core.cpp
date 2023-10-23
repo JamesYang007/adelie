@@ -19,4 +19,7 @@ PYBIND11_MODULE(adelie_core, m) {
 
     auto m_solver = m.def_submodule("solver", "Grpnet submodule.");
     register_solver(m_solver);
+
+    auto m_optimization = m.def_submodule("optimization", "Optimization submodule.");
+    register_optimization(m_optimization);
 }

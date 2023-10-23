@@ -1,5 +1,6 @@
 #pragma once
 #include <adelie_core/matrix/matrix_naive_base.hpp>
+#include <adelie_core/optimization/search_pivot.hpp>
 #include <adelie_core/solver/solve_basil_base.hpp>
 #include <adelie_core/solver/solve_pin_naive.hpp>
 #include <adelie_core/state/state_basil_naive.hpp>
@@ -132,6 +133,7 @@ void screen_strong(
 {
     using state_t = std::decay_t<StateType>;
     using vec_value_t = typename state_t::vec_value_t;
+    using vec_index_t = typename state_t::vec_index_t;
 
     const auto& abs_grad = state.abs_grad;
     const auto lmda = state.lmda;
@@ -142,7 +144,11 @@ void screen_strong(
     const auto& edpp_safe_hashset = state.edpp_safe_hashset;
     const auto delta_strong_size = state.delta_strong_size;
     const auto max_strong_size = state.max_strong_size;
-    const auto strong_rule = state.strong_rule;
+    const auto screen_rule = state.screen_rule;
+    const auto pivot_subset_ratio = state.pivot_subset_ratio;
+    const auto pivot_subset_min = state.pivot_subset_min;
+    const auto pivot_slack_ratio = state.pivot_slack_ratio;
+
     auto& strong_set = state.strong_set;
 
     const int old_strong_set_size = strong_set.size();
@@ -160,7 +166,6 @@ void screen_strong(
     const auto do_fixed_greedy = [&]() {
         size_t size_capped = std::min<int>(
             delta_strong_size, 
-            //static_cast<int>(abs_grad.size()) - old_strong_set_size
             new_safe_size
         );
 
@@ -179,9 +184,56 @@ void screen_strong(
         );
     };
 
+    const auto do_pivot = [&]() {
+        const auto G = abs_grad.size();
+        vec_index_t order = vec_index_t::LinSpaced(G, 0, G-1);
+        vec_value_t weights = vec_value_t::NullaryExpr(
+            G, [&](auto i) { 
+                return (penalty[i] <= 0) ? alpha * lmda : abs_grad[i] / penalty[i]; 
+            }
+        );
+        std::sort(
+            order.data(), 
+            order.data() + order.size(), 
+            [&](auto i, auto j) { 
+                return weights[i] < weights[j]; 
+            }
+        );
+        const int subset_size = std::min<int>(std::max<int>(
+            old_strong_set_size * (1 + pivot_subset_ratio),
+            pivot_subset_min
+        ), G);
+        // top largest subset_size number of weights
+        vec_value_t weights_sorted_sub = vec_value_t::NullaryExpr(
+            subset_size,
+            [&](auto i) { return weights[order[G-subset_size+i]]; } 
+        );
+
+        vec_value_t mses(subset_size);
+        vec_value_t indices = vec_value_t::LinSpaced(subset_size, 0, subset_size-1);
+        const int pivot_idx = optimization::search_pivot(
+            indices, 
+            weights_sorted_sub, 
+            mses
+        );
+        const int cutoff_idx = static_cast<int>(pivot_idx * (1 - pivot_slack_ratio));
+
+        // add everything beyond the cutoff index that isn't strong yet
+        for (int ii = cutoff_idx; ii < subset_size; ++ii) {
+            const auto i = order[G-subset_size+ii];
+            if (is_strong(i) || !is_edpp(i)) continue;
+            strong_set.push_back(i); 
+        }
+
+        // this case should rarely happen
+        if (strong_set.size() == old_strong_set_size) {
+            do_fixed_greedy();
+        }
+    };
+
     /* update strong_set */
     // Use either the fixed-increment rule or strong rule to increase strong set.
-    if (strong_rule == state::strong_rule_type::_default) {
+    if (screen_rule == state::screen_rule_type::_strong) {
         const auto strong_rule_lmda = (2 * lmda_next - lmda) * alpha;
 
         for (int i = 0; i < abs_grad.size(); ++i) {
@@ -196,13 +248,17 @@ void screen_strong(
         if (strong_set.size() == old_strong_set_size) {
             do_fixed_greedy();
         }
-    } else if (strong_rule == state::strong_rule_type::_fixed_greedy) {
+    } else if (screen_rule == state::screen_rule_type::_fixed_greedy) {
         do_fixed_greedy();
-    } else if (strong_rule == state::strong_rule_type::_safe) {
+    } else if (screen_rule == state::screen_rule_type::_safe) {
         for (int i = 0; i < edpp_safe_set.size(); ++i) {
             if (is_strong(edpp_safe_set[i])) continue;
             strong_set.push_back(edpp_safe_set[i]);
         }
+    } else if (screen_rule == state::screen_rule_type::_pivot) {
+        do_pivot();
+    } else {
+        throw std::runtime_error("Unknown strong rule!");
     }
 
     // If adding new amount went over max strong size, 
@@ -622,6 +678,7 @@ inline void solve_basil(
     vec_value_t lmda_batch;
     std::vector<vec_value_t> grads;
     sw_t sw;
+    bool skip_screen = false;
 
     while (1) 
     {
@@ -647,10 +704,12 @@ inline void solve_basil(
         // Screening step
         // ==================================================================================== 
         sw.start();
-        naive::screen(
-            state,
-            lmda_batch[0]
-        );
+        if (!skip_screen) {
+            naive::screen(
+                state,
+                lmda_batch[0]
+            );
+        }
         benchmark_screen.push_back(sw.elapsed());
 
         try {
@@ -697,6 +756,8 @@ inline void solve_basil(
             // Invariance step
             // ==================================================================================== 
             sw.start();
+            // skip screening for the next iteration if all lambdas passed
+            skip_screen = n_valid == lmda_batch.size();
             lmda_path_idx += n_valid;
             // If no valid solutions found, restore to the previous valid state,
             // so that we can start over after screening more variables.

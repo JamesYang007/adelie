@@ -186,12 +186,15 @@ def grpnet(
     n_threads: int =1,
     early_exit: bool =True,
     intercept: bool =True,
-    strong_rule: str ="default",
+    screen_rule: str ="pivot",
     min_ratio: float =1e-2,
     lmda_path_size: int =100,
-    delta_lmda_path_size: int =5,
-    delta_strong_size: int =5,
+    delta_lmda_path_size: int =1,
+    delta_strong_size: int =10,
     max_strong_size: int =None,
+    pivot_subset_ratio: float =0.1,
+    pivot_subset_min: int =10,
+    pivot_slack_ratio: float =0.1,
     use_edpp: bool =True,
     check_state: bool =False,
 ):
@@ -262,17 +265,19 @@ def grpnet(
     intercept : bool, optional 
         ``True`` if the function should fit with intercept.
         Default is ``True``.
-    strong_rule : str, optional
+    screen_rule : str, optional
         The type of strong rule to use. It must be one of the following options:
 
-            - ``"default"``: discards variables from the safe set based on simple strong rule.
+            - ``"strong"``: discards variables from the safe set based on simple strong rule.
             - ``"fixed_greedy"``: adds variables based on a fixed number of groups with the largest gradient norm.
-            - ``safe``: adds all safe variables to the strong set.
+            - ``"safe"``: adds all safe variables to the strong set.
+            - ``"pivot"``: adds all variables whose gradient norms are largest, which is determined
+                by searching for a pivot point in the gradient norms.
 
-        Default is ``default``.
+        Default is ``"pivot"``.
     delta_lmda_path_size : int, optional 
         Number of regularizations to batch per BASIL iteration.
-        Default is ``5``.
+        Default is ``1``.
     delta_strong_size : int, optional
         Number of strong groups to include per BASIL iteration 
         if strong rule does not include new groups but optimality is not reached.
@@ -283,6 +288,22 @@ def grpnet(
         less than or equal to ``max_strong_size``.
         If ``None``, it will be set to the total number of groups.
         Default is ``None``.
+    pivot_subset_ratio : float, optional
+        If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
+        largest gradient norms are used to determine the pivot point
+        where ``s`` is the current strong set size.
+        It is only used if ``screen_rule == "pivot"``.
+        Default is ``0.1``.
+    pivot_subset_min : int, optional
+        If screening takes place, then at least ``pivot_subset_min``
+        number of gradient norms are used to determine the pivot point.
+        It is only used if ``screen_rule == "pivot"``.
+        Default is ``10``.
+    pivot_slack_ratio : float, optional
+        If screening takes place, then ``pivot_slack_ratio``
+        number of gradient norms below the pivot point are also added to the strong set as slack.
+        It is only used if ``screen_rule == "pivot"``.
+        Default is ``0.1``.
     use_edpp : bool, optional
         ``True`` is EDPP rule should be used.
         If ``False``, all groups are considered EDPP safe.
@@ -385,12 +406,15 @@ def grpnet(
         n_threads=n_threads,
         early_exit=early_exit,
         intercept=intercept,
-        strong_rule=strong_rule,
+        screen_rule=screen_rule,
         min_ratio=min_ratio,
         lmda_path_size=lmda_path_size,
         delta_lmda_path_size=delta_lmda_path_size,
         delta_strong_size=delta_strong_size,
         max_strong_size=max_strong_size,
+        pivot_subset_ratio=pivot_subset_ratio,
+        pivot_subset_min=pivot_subset_min,
+        pivot_slack_ratio=pivot_slack_ratio,
     )
 
     if check_state:

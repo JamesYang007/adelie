@@ -19,6 +19,8 @@ public:
     using typename base_t::vec_value_t;
     using typename base_t::vec_index_t;
     using typename base_t::colmat_value_t;
+    using typename base_t::rowmat_value_t;
+    using typename base_t::sp_mat_value_t;
 
     /* Trampoline (need one for each virtual function) */
     value_t cmul(
@@ -72,6 +74,20 @@ public:
             void,
             base_t,
             btmul,
+            j, q, v, out
+        );
+    }
+
+    void sp_btmul(
+        int j, int q,
+        const sp_mat_value_t& v,
+        Eigen::Ref<rowmat_value_t> out
+    ) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            sp_btmul,
             j, q, v, out
         );
     }
@@ -204,6 +220,23 @@ void matrix_naive_base(py::module_& m, const char* name)
             Vector to multiply with the block matrix.
         out : (n,) np.ndarray
             Vector to store in-place the result.
+        )delimiter")
+        .def("sp_btmul", &internal_t::sp_btmul, R"delimiter(
+        Block matrix transpose-sparse matrix multiplication.
+
+        Computes the matrix-sparse matrix multiplication
+        ``v @ X[:, j:j+q].T``.
+
+        Parameters
+        ----------
+        j : int
+            Column index.
+        q : int
+            Number of columns.
+        v : (l, p) scipy.sparse.csr_matrix
+            Sparse matrix to multiply with the block matrix.
+        out : (l, n) np.ndarray
+            Matrix to store in-place the result.
         )delimiter")
         .def("to_dense", &internal_t::to_dense, R"delimiter(
         Converts block to a dense matrix.

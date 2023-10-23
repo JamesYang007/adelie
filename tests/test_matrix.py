@@ -1,5 +1,6 @@
 import adelie.matrix as mod
 import numpy as np
+import scipy
 
 
 def test_naive_dense():
@@ -36,6 +37,15 @@ def test_naive_dense():
             out = np.empty(n, dtype=dtype)
             cX.btmul(0, p // 2, v, out)
             assert np.allclose(v.T @ X[:, :p//2].T, out, atol=atol)
+
+            # test sp_btmul
+            v = np.random.normal(0, 1, (2, p // 2)).astype(dtype)
+            v[:, :p//4] = 0
+            expected = v @ X[:, :p//2].T
+            v = scipy.sparse.csr_matrix(v)
+            out = np.empty((2, n), dtype=dtype)
+            cX.sp_btmul(0, p // 2, v, out)
+            assert np.allclose(expected, out, atol=atol)
 
             # test to_dense
             out = np.empty((n, p // 2), dtype=dtype, order="F")
