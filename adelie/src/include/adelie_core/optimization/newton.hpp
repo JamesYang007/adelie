@@ -2,7 +2,8 @@
 #include <cstddef>
 
 namespace adelie_core {
-    
+namespace optimization {
+
 /**
  * @brief General Newton root-finder for one-dimensional functions.
  * 
@@ -59,4 +60,5 @@ auto newton_root_find(
     return std::make_tuple(h, fh, dfh, iters); 
 }
     
+} // namespace optimization    
 } // namespace adelie_core

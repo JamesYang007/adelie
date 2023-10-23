@@ -234,7 +234,10 @@ struct StateBasilNaive : StateBasilBase<
         size_t delta_lmda_path_size,
         size_t delta_strong_size,
         size_t max_strong_size,
-        const std::string& strong_rule,
+        value_t pivot_subset_ratio,
+        size_t pivot_subset_min,
+        value_t pivot_slack_ratio,
+        const std::string& screen_rule,
         size_t max_iters,
         value_t tol,
         value_t rsq_tol,
@@ -256,7 +259,8 @@ struct StateBasilNaive : StateBasilBase<
     ):
         base_t(
             groups, group_sizes, alpha, penalty, lmda_path, lmda_max, min_ratio, lmda_path_size,
-            delta_lmda_path_size, delta_strong_size, max_strong_size, strong_rule,
+            delta_lmda_path_size, delta_strong_size, max_strong_size, 
+            pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule,
             max_iters, tol, rsq_tol, rsq_slope_tol, rsq_curv_tol, 
             newton_tol, newton_max_iters, early_exit, setup_lmda_max, setup_lmda_path, intercept, n_threads,
             strong_set, strong_beta, strong_is_active, rsq, lmda, grad

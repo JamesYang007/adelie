@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_set>
 #include <adelie_core/util/types.hpp>
+#include <adelie_core/util/macros.hpp>
 
 namespace adelie_core {
 namespace state {
@@ -103,11 +104,12 @@ void update_strong_derived_base(
     strong_is_active.resize(strong_set.size(), false);
 }
 
-enum class strong_rule_type
+enum class screen_rule_type
 {
-    _default,
+    _strong,
     _fixed_greedy,
-    _safe
+    _safe,
+    _pivot
 };
 
 template <class ValueType,
@@ -148,7 +150,10 @@ struct StateBasilBase
     const size_t delta_lmda_path_size;
     const size_t delta_strong_size;
     const size_t max_strong_size;
-    const strong_rule_type strong_rule;
+    const value_t pivot_subset_ratio;
+    const size_t pivot_subset_min;
+    const value_t pivot_slack_ratio;
+    const screen_rule_type screen_rule;
 
     // convergence configs
     const size_t max_iters;
@@ -215,7 +220,10 @@ struct StateBasilBase
         size_t delta_lmda_path_size,
         size_t delta_strong_size,
         size_t max_strong_size,
-        const std::string& strong_rule,
+        value_t pivot_subset_ratio,
+        size_t pivot_subset_min,
+        value_t pivot_slack_ratio,
+        const std::string& screen_rule,
         size_t max_iters,
         value_t tol,
         value_t rsq_tol,
@@ -244,7 +252,10 @@ struct StateBasilBase
         delta_lmda_path_size(delta_lmda_path_size),
         delta_strong_size(delta_strong_size),
         max_strong_size(max_strong_size),
-        strong_rule(convert_strong_rule(strong_rule)),
+        pivot_subset_ratio(pivot_subset_ratio),
+        pivot_subset_min(pivot_subset_min),
+        pivot_slack_ratio(pivot_slack_ratio),
+        screen_rule(convert_strong_rule(screen_rule)),
         max_iters(max_iters),
         tol(tol),
         rsq_tol(rsq_tol),
@@ -270,13 +281,14 @@ struct StateBasilBase
         initialize();
     }
 
-    strong_rule_type convert_strong_rule(
+    screen_rule_type convert_strong_rule(
         const std::string& rule
     )
     {
-        if (rule == "default") return strong_rule_type::_default;
-        if (rule == "fixed_greedy") return strong_rule_type::_fixed_greedy;
-        if (rule == "safe") return strong_rule_type::_safe;
+        if (rule == "strong") return screen_rule_type::_strong;
+        if (rule == "fixed_greedy") return screen_rule_type::_fixed_greedy;
+        if (rule == "safe") return screen_rule_type::_safe;
+        if (rule == "pivot") return screen_rule_type::_pivot;
         throw std::runtime_error("Invalid strong rule type: " + rule);
     }
 

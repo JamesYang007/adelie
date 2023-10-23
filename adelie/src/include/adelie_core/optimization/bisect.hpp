@@ -2,7 +2,8 @@
 #include <algorithm>
 
 namespace adelie_core {
-    
+namespace optimization {
+
 /*
  * Brent's Method: https://mmas.github.io/brent-julia
  */
@@ -98,4 +99,5 @@ void brent(
     }
 }
 
+} // namespace optimization 
 } // namespace adelie_core

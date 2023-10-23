@@ -13,6 +13,8 @@ public:
     using vec_value_t = util::rowvec_type<value_t>;
     using vec_index_t = util::rowvec_type<index_t>;
     using colmat_value_t = util::colmat_type<value_t>;
+    using rowmat_value_t = util::rowmat_type<value_t>;
+    using sp_mat_value_t = Eigen::SparseMatrix<value_t, Eigen::RowMajor>;
     
     virtual ~MatrixNaiveBase() {}
     
@@ -68,6 +70,20 @@ public:
         const Eigen::Ref<const vec_value_t>& v, 
         Eigen::Ref<vec_value_t> out
     ) =0;
+
+    /**
+     * @brief Computes v X[:, j:j+q]^T where X is the current matrix.
+     * 
+     * @param j     begin column index. 
+     * @param q     number of columns.
+     * @param v     (l, p) sparse matrix to multiply with.
+     * @param out   (l, n) resulting row vector.
+     */
+    virtual void sp_btmul(
+        int j, int q,
+        const sp_mat_value_t& v,
+        Eigen::Ref<rowmat_value_t> out
+    ) const =0;
 
     /**
      * @brief Computes the squared norm of a column of the matrix.

@@ -1192,7 +1192,10 @@ class basil_naive_base(basil_base):
         delta_lmda_path_size: int,
         delta_strong_size: int,
         max_strong_size: int,
-        strong_rule: str,
+        pivot_subset_ratio: float,
+        pivot_subset_min: int,
+        pivot_slack_ratio: float,
+        screen_rule: str,
         max_iters: int,
         tol: float,
         rsq_tol: float,
@@ -1263,7 +1266,10 @@ class basil_naive_base(basil_base):
             delta_lmda_path_size=delta_lmda_path_size,
             delta_strong_size=delta_strong_size,
             max_strong_size=max_strong_size,
-            strong_rule=strong_rule,
+            pivot_subset_ratio=pivot_subset_ratio,
+            pivot_subset_min=pivot_subset_min,
+            pivot_slack_ratio=pivot_slack_ratio,
+            screen_rule=screen_rule,
             max_iters=max_iters,
             tol=tol,
             rsq_tol=rsq_tol,
@@ -1375,7 +1381,7 @@ class basil_naive_base(basil_base):
             method, logger,
         )
         self._check(
-            (self.strong_rule != "fixed_greedy") | (self.delta_strong_size > 0),
+            (self.screen_rule != "fixed_greedy") | (self.delta_strong_size > 0),
             "check if strong rule is fixed_greedy, then delta_strong_size > 0",
             method, logger,
         )
@@ -1650,7 +1656,7 @@ class basil_naive_base(basil_base):
             n_threads=self.n_threads,
             early_exit=self.early_exit,
             intercept=self.intercept,
-            strong_rule=self.strong_rule,
+            screen_rule=self.screen_rule,
             min_ratio=self.min_ratio,
             lmda_path_size=self.lmda_path_size,
             delta_lmda_path_size=self.delta_lmda_path_size,
@@ -1734,12 +1740,15 @@ def basil_naive(
     n_threads: int =1,
     early_exit: bool =True,
     intercept: bool =True,
-    strong_rule: str ="default",
+    screen_rule: str ="pivot",
     min_ratio: float =1e-2,
     lmda_path_size: int =100,
-    delta_lmda_path_size: int =5,
-    delta_strong_size: int =5,
+    delta_lmda_path_size: int =1,
+    delta_strong_size: int =10,
     max_strong_size: int =None,
+    pivot_subset_ratio: float =0.1,
+    pivot_subset_min: int =10,
+    pivot_slack_ratio: float =0.1,
 ):
     """Creates a basil, naive method state object.
 
@@ -1858,17 +1867,19 @@ def basil_naive(
     intercept : bool, optional 
         ``True`` if the function should fit with intercept.
         Default is ``True``.
-    strong_rule : str, optional
+    screen_rule : str, optional
         The type of strong rule to use. It must be one of the following options:
 
-            - ``"default"``: discards variables from the safe set based on simple strong rule.
+            - ``"strong"``: discards variables from the safe set based on simple strong rule.
             - ``"fixed_greedy"``: adds variables based on a fixed number of groups with the largest gradient norm.
-            - ``safe``: adds all safe variables to the strong set.
+            - ``"safe"``: adds all safe variables to the strong set.
+            - ``"pivot"``: adds all variables whose gradient norms are largest, which is determined
+                by searching for a pivot point in the gradient norms.
 
-        Default is ``default``.
+        Default is ``"pivot"``.
     delta_lmda_path_size : int, optional 
         Number of regularizations to batch per BASIL iteration.
-        Default is ``5``.
+        Default is ``1``.
     delta_strong_size : int, optional
         Number of strong groups to include per BASIL iteration 
         if strong rule does not include new groups but optimality is not reached.
@@ -1879,6 +1890,22 @@ def basil_naive(
         less than or equal to ``max_strong_size``.
         If ``None``, it will be set to the total number of groups.
         Default is ``None``.
+    pivot_subset_ratio : float, optional
+        If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
+        largest gradient norms are used to determine the pivot point
+        where ``s`` is the current strong set size.
+        It is only used if ``screen_rule == "pivot"``.
+        Default is ``0.1``.
+    pivot_subset_min : int, optional
+        If screening takes place, then at least ``pivot_subset_min``
+        number of gradient norms are used to determine the pivot point.
+        It is only used if ``screen_rule == "pivot"``.
+        Default is ``10``.
+    pivot_slack_ratio : float, optional
+        If screening takes place, then ``pivot_slack_ratio``
+        number of gradient norms below the pivot point are also added to the strong set as slack.
+        It is only used if ``screen_rule == "pivot"``.
+        Default is ``0.1``.
 
     See Also
     --------
@@ -1914,6 +1941,12 @@ def basil_naive(
         raise ValueError("delta_strong_size must be >= 1.")
     if max_strong_size < 0:
         raise ValueError("max_strong_size must be >= 0.")
+    if pivot_subset_ratio <= 0 or pivot_subset_ratio > 1:
+        raise ValueError("pivot_subset_ratio must be in (0, 1].")
+    if pivot_subset_min < 1:
+        raise ValueError("pivot_subset_min must be >= 1.")
+    if pivot_slack_ratio < 0 or pivot_slack_ratio > 1:
+        raise ValueError("pivot_slack_ratio must be in [0,1].")
 
     actual_lmda_path_size = (
         lmda_path_size
@@ -1984,7 +2017,10 @@ def basil_naive(
         delta_lmda_path_size=delta_lmda_path_size,
         delta_strong_size=delta_strong_size,
         max_strong_size=max_strong_size,
-        strong_rule=strong_rule,
+        pivot_subset_ratio=pivot_subset_ratio,
+        pivot_subset_min=pivot_subset_min,
+        pivot_slack_ratio=pivot_slack_ratio,
+        screen_rule=screen_rule,
         max_iters=max_iters,
         tol=tol,
         rsq_tol=rsq_tol,

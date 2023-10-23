@@ -57,9 +57,15 @@ py::dict solve_pin_naive(StateType state)
         );
     };
 
+    const auto check_user_interrupt = [&](auto) {
+        if (PyErr_CheckSignals() != 0) {
+            throw py::error_already_set();
+        }
+    };
+
     std::string error;
     try {
-        ad::solver::naive::solve_pin(state, update_coefficients_f);
+        ad::solver::naive::solve_pin(state, update_coefficients_f, check_user_interrupt);
     } catch(const std::exception& e) {
         error = e.what(); 
     }
@@ -87,9 +93,15 @@ py::dict solve_pin_cov(StateType state)
         );
     };
 
+    const auto check_user_interrupt = [&](auto) {
+        if (PyErr_CheckSignals() != 0) {
+            throw py::error_already_set();
+        }
+    };
+
     std::string error;
     try {
-        ad::solver::cov::solve_pin(state, update_coefficients_f);
+        ad::solver::cov::solve_pin(state, update_coefficients_f, check_user_interrupt);
     } catch(const std::exception& e) {
         error = e.what(); 
     }
@@ -121,9 +133,15 @@ py::dict solve_basil_naive(StateType state)
         );
     };
 
+    const auto check_user_interrupt = [&](auto) {
+        if (PyErr_CheckSignals() != 0) {
+            throw py::error_already_set();
+        }
+    };
+
     std::string error;
     try {
-        ad::solver::naive::solve_basil(state, update_coefficients_f);
+        ad::solver::naive::solve_basil(state, update_coefficients_f, check_user_interrupt);
     } catch(const std::exception& e) {
         error = e.what(); 
     }

@@ -526,6 +526,9 @@ void state_basil_base(py::module_& m, const char* name)
             size_t,
             size_t,
             size_t,
+            value_t,
+            size_t,
+            value_t,
             const std::string&,
             size_t,
             value_t,
@@ -557,7 +560,10 @@ void state_basil_base(py::module_& m, const char* name)
             py::arg("delta_lmda_path_size"),
             py::arg("delta_strong_size"),
             py::arg("max_strong_size"),
-            py::arg("strong_rule"),
+            py::arg("pivot_subset_ratio"),
+            py::arg("pivot_subset_min"),
+            py::arg("pivot_slack_ratio"),
+            py::arg("screen_rule"),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("rsq_tol"),
@@ -616,18 +622,29 @@ void state_basil_base(py::module_& m, const char* name)
         The function will return a valid state and guaranteed to have strong set size
         less than or equal to ``max_strong_size``.
         )delimiter")
-        .def_property_readonly("strong_rule", [](const state_t& s) -> std::string {
-            switch (s.strong_rule) {
-                case ad::state::strong_rule_type::_default:
-                    return "default";
-                case ad::state::strong_rule_type::_fixed_greedy:
+        .def_readonly("pivot_subset_ratio", &state_t::pivot_subset_ratio, R"delimiter(
+            TODO
+        )delimiter")
+        .def_readonly("pivot_subset_min", &state_t::pivot_subset_min, R"delimiter(
+            TODO
+        )delimiter")
+        .def_readonly("pivot_slack_ratio", &state_t::pivot_slack_ratio, R"delimiter(
+            TODO
+        )delimiter")
+        .def_property_readonly("screen_rule", [](const state_t& s) -> std::string {
+            switch (s.screen_rule) {
+                case ad::state::screen_rule_type::_strong:
+                    return "strong";
+                case ad::state::screen_rule_type::_fixed_greedy:
                     return "fixed_greedy";
-                case ad::state::strong_rule_type::_safe:
+                case ad::state::screen_rule_type::_safe:
                     return "safe";
+                case ad::state::screen_rule_type::_pivot:
+                    return "pivot";
             }
             throw std::runtime_error("Invalid strong rule type!");
         }, R"delimiter(
-        ``True`` if strong rule should be used (only a heuristic!).
+        Strong rule type.
         )delimiter")
         .def_readonly("max_iters", &state_t::max_iters, R"delimiter(
         Maximum number of coordinate descents.
@@ -902,6 +919,9 @@ void state_basil_naive(py::module_& m, const char* name)
             size_t,
             size_t,
             size_t,
+            value_t,
+            size_t,
+            value_t,
             const std::string&,
             size_t,
             value_t,
@@ -943,7 +963,10 @@ void state_basil_naive(py::module_& m, const char* name)
             py::arg("delta_lmda_path_size"),
             py::arg("delta_strong_size"),
             py::arg("max_strong_size"),
-            py::arg("strong_rule"),
+            py::arg("pivot_subset_ratio"),
+            py::arg("pivot_subset_min"),
+            py::arg("pivot_slack_ratio"),
+            py::arg("screen_rule"),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("rsq_tol"),

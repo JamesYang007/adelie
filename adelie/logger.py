@@ -1,5 +1,7 @@
 import logging
 
+logging.getLogger("matplotlib").setLevel(logging.ERROR)
+
 class CustomFormatter(logging.Formatter):
 
     grey = "\x1b[38;20m"

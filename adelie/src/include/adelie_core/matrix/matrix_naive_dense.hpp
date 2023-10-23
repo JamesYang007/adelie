@@ -15,6 +15,8 @@ public:
     using typename base_t::vec_value_t;
     using typename base_t::vec_index_t;
     using typename base_t::colmat_value_t;
+    using typename base_t::rowmat_value_t;
+    using typename base_t::sp_mat_value_t;
     
 private:
     const Eigen::Map<const dense_t> _mat;   // underlying dense matrix
@@ -78,6 +80,15 @@ public:
             _buff,
             outm
         );
+    }
+
+    void sp_btmul(
+        int j, int q, 
+        const sp_mat_value_t& v, 
+        Eigen::Ref<rowmat_value_t> out
+    ) const override
+    {
+        out.noalias() = v * _mat.middleCols(j, q).transpose();
     }
 
     void to_dense(

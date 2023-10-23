@@ -163,8 +163,7 @@ void coordinate_descent(
  */
 template <class StateType, 
           class BufferType, 
-          class UpdateCoefficientsType,
-          class CUIType = util::no_op>
+          class UpdateCoefficientsType>
 ADELIE_CORE_STRONG_INLINE
 void solve_pin_active(
     StateType&& state,
@@ -173,8 +172,7 @@ void solve_pin_active(
     BufferType& buffer2,
     BufferType& buffer3,
     BufferType& buffer4_n,
-    UpdateCoefficientsType update_coefficients_f,
-    CUIType check_user_interrupt = CUIType()
+    UpdateCoefficientsType update_coefficients_f
 )
 {
     using state_t = std::decay_t<StateType>;
@@ -187,7 +185,6 @@ void solve_pin_active(
     auto& iters = state.iters;
 
     while (1) {
-        check_user_interrupt(iters);
         ++iters;
         value_t convg_measure;
         coordinate_descent(
@@ -308,8 +305,7 @@ inline void solve_pin(
             buffer_pack.buffer2,
             buffer_pack.buffer3,
             buffer_pack.buffer4,
-            update_coefficients_f,
-            check_user_interrupt
+            update_coefficients_f
         );
         lasso_active_called = true;
     };

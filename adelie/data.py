@@ -6,6 +6,7 @@ def create_test_data_basil(
     p: int, 
     G: int,
     *,
+    equal_groups=False,
     rho: float =0,
     sparsity: float =0.95,
     zero_penalty: float =0,
@@ -34,6 +35,9 @@ def create_test_data_basil(
         Number of features.
     G : int
         Number of groups.
+    equal_groups : bool, optional
+        If ``True``, group sizes are made as equal as possible.
+        Default is ``False``.
     rho : float, optional
         Feature (equi)-correlation.
         Default is ``0`` so that the features are independent.
@@ -72,11 +76,15 @@ def create_test_data_basil(
     np.random.seed(seed)
 
     # define groups
-    groups = np.concatenate([
-        [0],
-        np.random.choice(np.arange(1, p), size=G-1, replace=False)
-    ])
-    groups = np.sort(groups).astype(int)
+    if equal_groups:
+        equal_group_size = p // G
+        groups = equal_group_size * np.arange(G)
+    else:
+        groups = np.concatenate([
+            [0],
+            np.random.choice(np.arange(1, p), size=G-1, replace=False)
+        ])
+        groups = np.sort(groups).astype(int)
     group_sizes = np.concatenate([groups, [p]], dtype=int)
     group_sizes = group_sizes[1:] - group_sizes[:-1]
 
