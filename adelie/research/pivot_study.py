@@ -20,8 +20,8 @@ def active_sets(state):
     for i, (g, gs) in enumerate(zip(state.groups, state.group_sizes)):
         feature_to_group[g:g+gs] = i
     active_sets = [
-        set(feature_to_group[state.betas[i].indices])
-        for i in range(state.betas.shape[0])
+        set(feature_to_group[betas[i].indices])
+        for i in range(betas.shape[0])
     ]
     return active_sets
 
@@ -32,7 +32,7 @@ def _screen_sets_strong(
     scores: np.ndarray,
     active_sets: list,
     safe_sets: list =None,
-    method: str ="raw",
+    method: str ="",
 ):
     n_lmdas, G = scores.shape
     lmdas = state.lmdas
@@ -58,6 +58,9 @@ def _screen_sets_strong(
             if active_sets[i+1].issubset(previous_predict_set):
                 predict_set = previous_predict_set
 
+        if not active_sets[i+1].issubset(predict_set):
+            logger.warning("Strong rule failed!")
+
         predict_sets.append(predict_set)
 
     return predict_sets
@@ -67,6 +70,8 @@ def _screen_sets_safe(
     state,
     *,
     resids: np.ndarray,
+    active_sets: list,
+    method: str ="",
 ):
     if not (state.setup_edpp and state.use_edpp):
         raise RuntimeError("EDPP quantities are not properly set up! Run the solver with EDPP enabled.")
@@ -90,15 +95,27 @@ def _screen_sets_safe(
         X.bmul(0, p, (resids[i] / lmdas[i] + 0.5 * v2_perps[i]), edpps[i])
     abs_edpps = ad.diagnostic.gradient_norms(state, grads=edpps)
     is_edpp = (
-        abs_edpps >= penalty[None] - 0.5 * v2_perp_norms[:, None] * X_group_norms[None]
+        abs_edpps >= (penalty[None] - 0.5 * v2_perp_norms[:, None] * X_group_norms[None])
     )
 
     predict_sets = []
     gns = np.arange(G)
     for i in range(n_lmdas-1):
-        predict_sets.append(
-            set(gns[is_edpp[i]])
-        )
+        predict_set = set(gns[is_edpp[i]])
+
+        # always add current active set
+        predict_set = predict_set.union(active_sets[i])
+
+        if "ever" in method and i > 0:
+            predict_set.union(predict_sets[i-1])
+
+        if ("ever" in method) and (not active_sets[i+1].issubset(predict_set)):
+            logger.critical(
+                "EDPP ever safe set does not contain the next active set!"
+            )
+
+        predict_sets.append(predict_set)
+
     return predict_sets
 
 
@@ -108,7 +125,7 @@ def _screen_sets_pivot(
     scores: np.ndarray,
     active_sets: list,
     safe_sets: list =None,
-    method: str ="raw",
+    method: str ="",
 ):
     betas = state.betas
     n_lmdas, G = scores.shape
@@ -156,7 +173,9 @@ def _screen_sets_pivot(
                     slack_set = safe_sets[i]
                 else:
                     slack_set = set(np.arange(G))
-                slack_set = np.array(list(slack_set - predict_set))
+                slack_set = np.array(list(slack_set - predict_set), dtype=int)
+                if len(slack_set) == 0:
+                    break
                 slack_scores = scores[i, slack_set]
                 slack_scores_order = np.argsort(slack_scores)
                 delta_size = min(state.delta_strong_size, len(slack_scores_order))
@@ -164,8 +183,11 @@ def _screen_sets_pivot(
                     set(slack_set[slack_scores_order[-delta_size:]])
                 )
                 count += 1
-            if count > 1:
+            if count >= 1:
                 logger.warning(f"Greedy occured {count} times!")
+
+        if not active_sets[i+1].issubset(predict_set):
+            logger.warning("Pivot rule failed!")
 
         K = len(predict_set)
         predict_sets.append(predict_set)
@@ -197,7 +219,7 @@ def plot_scores(
     add_active_color: bool =True,
     add_cutoff: bool =True,
 ):
-    G = scores.shape[-1]
+    n_lmdas, G = scores.shape
 
     do_anim = idx is None
     idx = 0 if do_anim else idx
@@ -324,7 +346,7 @@ def plot_scores(
     anim = animation.FuncAnimation(
         fig=fig, 
         func=update, 
-        frames=state.betas.shape[0]-1, 
+        frames=n_lmdas-1, 
         interval=200, 
         repeat=False,
     )
@@ -336,19 +358,24 @@ def plot_set_sizes(
     state,
     *,
     mapping: dict,
+    ax=None,
 ):
     lmdas = state.lmdas
 
     dct = {
         "safe": 0,
         "strong": 1,
-        "pivot": 2,
-        "active": 3,
+        "pivot-S": 2,
+        "pivot-SL": 3,
+        "active": 4,
     } 
-    markers = ["o", "^", "v", "."]
-    colors = ["green", "orange", "green", "red"]
+    markers = ["o", "^", "v", "*", "."]
+    colors = ["tab:green", "tab:purple", "tab:orange", "tab:blue", "tab:red"]
 
-    fig, ax = plt.subplots(layout="constrained")
+    make_ax = ax is None
+    if make_ax:
+        fig, ax = plt.subplots(layout="constrained")
+
     tls = -np.log(lmdas[1:])
 
     for k, v in mapping.items():
@@ -367,4 +394,6 @@ def plot_set_sizes(
     ax.set_ylabel("Number of Groups")
     ax.set_xlabel(r"$-\log(\lambda)$")
 
-    return fig, ax
+    if make_ax: 
+        return fig, ax
+    return ax

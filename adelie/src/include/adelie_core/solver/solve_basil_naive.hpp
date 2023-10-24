@@ -128,7 +128,8 @@ template <class StateType, class ValueType>
 ADELIE_CORE_STRONG_INLINE 
 void screen_strong(
     StateType& state,
-    ValueType lmda_next
+    ValueType lmda_next,
+    int n_new_active
 )
 {
     using state_t = std::decay_t<StateType>;
@@ -142,13 +143,14 @@ void screen_strong(
     const auto& strong_hashset = state.strong_hashset;
     const auto& edpp_safe_set = state.edpp_safe_set;
     const auto& edpp_safe_hashset = state.edpp_safe_hashset;
-    const auto delta_strong_size = state.delta_strong_size;
     const auto max_strong_size = state.max_strong_size;
     const auto screen_rule = state.screen_rule;
     const auto pivot_subset_ratio = state.pivot_subset_ratio;
     const auto pivot_subset_min = state.pivot_subset_min;
     const auto pivot_slack_ratio = state.pivot_slack_ratio;
 
+    // may get modified
+    auto delta_strong_size = state.delta_strong_size;
     auto& strong_set = state.strong_set;
 
     const int old_strong_set_size = strong_set.size();
@@ -232,33 +234,40 @@ void screen_strong(
     };
 
     /* update strong_set */
-    // Use either the fixed-increment rule or strong rule to increase strong set.
-    if (screen_rule == state::screen_rule_type::_strong) {
-        const auto strong_rule_lmda = (2 * lmda_next - lmda) * alpha;
 
-        for (int i = 0; i < abs_grad.size(); ++i) {
-            if (is_strong(i) || !is_edpp(i)) continue;
-            if (abs_grad[i] > strong_rule_lmda * penalty[i]) {
-                strong_set.push_back(i);
-            }
-        }
-
-        // If no new strong variables were added, need a fall-back.
-        // Use fixed-greedy method.
-        if (strong_set.size() == old_strong_set_size) {
-            do_fixed_greedy();
-        }
-    } else if (screen_rule == state::screen_rule_type::_fixed_greedy) {
+    // KKT passed for some lambdas in the batch
+    if (n_new_active >= 0) {
+        // only add n_new_active number of groups
+        delta_strong_size = n_new_active;
         do_fixed_greedy();
-    } else if (screen_rule == state::screen_rule_type::_safe) {
-        for (int i = 0; i < edpp_safe_set.size(); ++i) {
-            if (is_strong(edpp_safe_set[i])) continue;
-            strong_set.push_back(edpp_safe_set[i]);
-        }
-    } else if (screen_rule == state::screen_rule_type::_pivot) {
-        do_pivot();
     } else {
-        throw std::runtime_error("Unknown strong rule!");
+        if (screen_rule == state::screen_rule_type::_strong) {
+            const auto strong_rule_lmda = (2 * lmda_next - lmda) * alpha;
+
+            for (int i = 0; i < abs_grad.size(); ++i) {
+                if (is_strong(i) || !is_edpp(i)) continue;
+                if (abs_grad[i] > strong_rule_lmda * penalty[i]) {
+                    strong_set.push_back(i);
+                }
+            }
+
+            // If no new strong variables were added, need a fall-back.
+            // Use fixed-greedy method.
+            if (strong_set.size() == old_strong_set_size) {
+                do_fixed_greedy();
+            }
+        } else if (screen_rule == state::screen_rule_type::_fixed_greedy) {
+            do_fixed_greedy();
+        } else if (screen_rule == state::screen_rule_type::_safe) {
+            for (int i = 0; i < edpp_safe_set.size(); ++i) {
+                if (is_strong(edpp_safe_set[i])) continue;
+                strong_set.push_back(edpp_safe_set[i]);
+            }
+        } else if (screen_rule == state::screen_rule_type::_pivot) {
+            do_pivot();
+        } else {
+            throw std::runtime_error("Unknown strong rule!");
+        }
     }
 
     // If adding new amount went over max strong size, 
@@ -280,11 +289,12 @@ template <class StateType, class ValueType>
 ADELIE_CORE_STRONG_INLINE
 void screen(
     StateType& state,
-    ValueType lmda_next
+    ValueType lmda_next,
+    int n_new_active
 )
 {
     screen_edpp(state, lmda_next);
-    screen_strong(state, lmda_next);
+    screen_strong(state, lmda_next, n_new_active);
 }
 
 template <class StateType,
@@ -678,7 +688,11 @@ inline void solve_basil(
     vec_value_t lmda_batch;
     std::vector<vec_value_t> grads;
     sw_t sw;
-    bool skip_screen = false;
+    int current_active_size = Eigen::Map<vec_safe_bool_t>(
+        strong_is_active.data(),
+        strong_is_active.size()
+    ).sum();
+    int n_new_active = 0;
 
     while (1) 
     {
@@ -704,12 +718,11 @@ inline void solve_basil(
         // Screening step
         // ==================================================================================== 
         sw.start();
-        if (!skip_screen) {
-            naive::screen(
-                state,
-                lmda_batch[0]
-            );
-        }
+        naive::screen(
+            state,
+            lmda_batch[0],
+            n_new_active
+        );
         benchmark_screen.push_back(sw.elapsed());
 
         try {
@@ -756,8 +769,6 @@ inline void solve_basil(
             // Invariance step
             // ==================================================================================== 
             sw.start();
-            // skip screening for the next iteration if all lambdas passed
-            skip_screen = n_valid == lmda_batch.size();
             lmda_path_idx += n_valid;
             // If no valid solutions found, restore to the previous valid state,
             // so that we can start over after screening more variables.
@@ -799,6 +810,15 @@ inline void solve_basil(
                 strong_sizes.push_back(state.strong_set.size());
                 edpp_safe_sizes.push_back(state.edpp_safe_set.size());
             }
+            // compute the number of new active groups 
+            n_new_active = (
+                (n_valid > 0) ?
+                (active_sizes.back() - current_active_size) : -1
+            );
+            current_active_size = (
+                (n_valid > 0) ?
+                active_sizes.back() : current_active_size
+            );
         } catch (const std::exception& e) {
             load_prev_valid();
             throw util::propagator_error(e.what());
