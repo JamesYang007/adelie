@@ -15,7 +15,6 @@ fig_path = os.path.join(tex_path, "figures")
 def active_sets(state):
     p = state.X.cols()
     betas = state.betas
-    betas.eliminate_zeros()
     feature_to_group = np.empty(p, dtype=int)
     for i, (g, gs) in enumerate(zip(state.groups, state.group_sizes)):
         feature_to_group[g:g+gs] = i
@@ -46,7 +45,7 @@ def _screen_sets_strong(
     gns = np.arange(G)
     for i in range(n_lmdas-1):
         predict_set = set(gns[is_strong[i]])
-
+        
         # always add current active set
         predict_set = predict_set.union(active_sets[i])
 
@@ -106,8 +105,8 @@ def _screen_sets_safe(
         # always add current active set
         predict_set = predict_set.union(active_sets[i])
 
-        if "ever" in method and i > 0:
-            predict_set.union(predict_sets[i-1])
+        if ("ever" in method) and i > 0:
+            predict_set = predict_set.union(predict_sets[i-1])
 
         if ("ever" in method) and (not active_sets[i+1].issubset(predict_set)):
             logger.critical(
@@ -132,6 +131,32 @@ def _screen_sets_pivot(
 
     orders = np.argsort(scores, axis=-1)
     K = betas[0].count_nonzero()
+
+    def _fixed_update(
+        predict_set,
+        safe_set,
+        delta,
+    ):
+        if "safe" in method:
+            slack_set = safe_set
+        else:
+            slack_set = set(np.arange(G))
+        slack_set = np.array(list(slack_set - predict_set), dtype=int)
+        slack_scores = scores[i, slack_set]
+        slack_scores_order = np.argsort(slack_scores)
+        delta_size = min(delta, len(slack_scores_order))
+        return predict_set.union(
+            set(slack_set[slack_scores_order[-delta_size:]])
+        )
+
+    ever_active_sets = []
+    for i, s in enumerate(active_sets):
+        if i == 0:
+            ever_active_sets.append(s)
+        else:
+            ever_active_sets.append(
+                ever_active_sets[-1].union(s)
+            )
 
     predict_sets = []
     for i in range(n_lmdas-1):
@@ -158,33 +183,49 @@ def _screen_sets_pivot(
             predict_set = predict_set.union(predict_sets[i-1])
 
         if "lazy" in method:
+            pivot_predict_set = predict_set
             previous_predict_set = predict_set if i == 0 else predict_sets[i-1]
-            # keep the same prediction set if current active set is already
-            # contained in the previous prediction set.
-            if active_sets[i+1].issubset(previous_predict_set):
-                predict_set = previous_predict_set
+
+            # if KKT passed from using previous predict set, 
+            # add however much active set increased.
+            # This small hedging is used for next lambda.
+            if active_sets[i].issubset(previous_predict_set):
+                delta_active = max(
+                    max(len(ever_active_sets[i]) - len(ever_active_sets[i-1]), 0) if i > 0 else 0,
+                    0,
+                )
+
+                if delta_active == 0:
+                    predict_set = previous_predict_set
+                else:
+                    predict_set = _fixed_update(
+                        previous_predict_set,
+                        safe_sets[i],
+                        delta_active,
+                    )
+
+                # if KKT failed after this small hedging,
+                # use pivot-rule instead.
+                if not active_sets[i+1].issubset(predict_set):
+                    predict_set = pivot_predict_set
+
+            # if KKT failed, use pivot-rule.
+            else:
+                predict_set = pivot_predict_set
 
         if "greedy" in method:
             # if current prediction does not contain the next active set,
             # fallback to greedy method
             count = 0
             while not active_sets[i+1].issubset(predict_set):
-                if "safe" in method:
-                    slack_set = safe_sets[i]
-                else:
-                    slack_set = set(np.arange(G))
-                slack_set = np.array(list(slack_set - predict_set), dtype=int)
-                if len(slack_set) == 0:
-                    break
-                slack_scores = scores[i, slack_set]
-                slack_scores_order = np.argsort(slack_scores)
-                delta_size = min(state.delta_strong_size, len(slack_scores_order))
-                predict_set = predict_set.union(
-                    set(slack_set[slack_scores_order[-delta_size:]])
+                predict_set = _fixed_update(
+                    predict_set,
+                    safe_sets[i],
+                    state.delta_strong_size,
                 )
                 count += 1
             if count >= 1:
-                logger.warning(f"Greedy occured {count} times!")
+                logger.warning(f"Index {i}: Greedy occured {count} times!")
 
         if not active_sets[i+1].issubset(predict_set):
             logger.warning("Pivot rule failed!")
