@@ -187,6 +187,7 @@ def grpnet(
     early_exit: bool =True,
     intercept: bool =True,
     screen_rule: str ="pivot",
+    lazify_screen: bool =True,
     min_ratio: float =1e-2,
     lmda_path_size: int =100,
     delta_lmda_path_size: int =1,
@@ -275,6 +276,9 @@ def grpnet(
                 by searching for a pivot point in the gradient norms.
 
         Default is ``"pivot"``.
+    lazify_screen : bool, optional
+        If ``True``, the function will lazify the screening step.
+        Default is ``True``.
     delta_lmda_path_size : int, optional 
         Number of regularizations to batch per BASIL iteration.
         Default is ``1``.
@@ -407,6 +411,7 @@ def grpnet(
         early_exit=early_exit,
         intercept=intercept,
         screen_rule=screen_rule,
+        lazify_screen=lazify_screen,
         min_ratio=min_ratio,
         lmda_path_size=lmda_path_size,
         delta_lmda_path_size=delta_lmda_path_size,
