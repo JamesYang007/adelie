@@ -1196,6 +1196,7 @@ class basil_naive_base(basil_base):
         pivot_subset_min: int,
         pivot_slack_ratio: float,
         screen_rule: str,
+        lazify_screen: bool,
         max_iters: int,
         tol: float,
         rsq_tol: float,
@@ -1270,6 +1271,7 @@ class basil_naive_base(basil_base):
             pivot_subset_min=pivot_subset_min,
             pivot_slack_ratio=pivot_slack_ratio,
             screen_rule=screen_rule,
+            lazify_screen=lazify_screen,
             max_iters=max_iters,
             tol=tol,
             rsq_tol=rsq_tol,
@@ -1657,11 +1659,15 @@ class basil_naive_base(basil_base):
             early_exit=self.early_exit,
             intercept=self.intercept,
             screen_rule=self.screen_rule,
+            lazify_screen=self.lazify_screen,
             min_ratio=self.min_ratio,
             lmda_path_size=self.lmda_path_size,
             delta_lmda_path_size=self.delta_lmda_path_size,
             delta_strong_size=self.delta_strong_size,
             max_strong_size=self.max_strong_size,
+            pivot_subset_ratio=self.pivot_subset_ratio,
+            pivot_subset_min=self.pivot_subset_min,
+            pivot_slack_ratio=self.pivot_slack_ratio,
         )
 
 
@@ -1741,6 +1747,7 @@ def basil_naive(
     early_exit: bool =True,
     intercept: bool =True,
     screen_rule: str ="pivot",
+    lazify_screen: bool =True,
     min_ratio: float =1e-2,
     lmda_path_size: int =100,
     delta_lmda_path_size: int =1,
@@ -1877,6 +1884,9 @@ def basil_naive(
                 by searching for a pivot point in the gradient norms.
 
         Default is ``"pivot"``.
+    lazify_screen : bool, optional
+        If ``True``, the function will lazify the screening step.
+        Default is ``True``.
     delta_lmda_path_size : int, optional 
         Number of regularizations to batch per BASIL iteration.
         Default is ``1``.
@@ -2021,6 +2031,7 @@ def basil_naive(
         pivot_subset_min=pivot_subset_min,
         pivot_slack_ratio=pivot_slack_ratio,
         screen_rule=screen_rule,
+        lazify_screen=lazify_screen,
         max_iters=max_iters,
         tol=tol,
         rsq_tol=rsq_tol,

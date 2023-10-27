@@ -496,6 +496,7 @@ inline void solve_basil(
     const auto setup_lmda_max = state.setup_lmda_max;
     const auto setup_lmda_path = state.setup_lmda_path;
     const auto lmda_path_size = state.lmda_path_size;
+    const auto lazify_screen = state.lazify_screen;
     const auto min_ratio = state.min_ratio;
     const auto intercept = state.intercept;
     const auto n_threads = state.n_threads;
@@ -692,7 +693,7 @@ inline void solve_basil(
         strong_is_active.data(),
         strong_is_active.size()
     ).sum();
-    int n_new_active = 0;
+    int n_new_active = lazify_screen ? 0 : -1;
 
     while (1) 
     {
@@ -814,6 +815,9 @@ inline void solve_basil(
             n_new_active = (
                 (n_valid > 0) ?
                 (active_sizes.back() - current_active_size) : -1
+            );
+            n_new_active = (
+                lazify_screen ? n_new_active : -1
             );
             current_active_size = (
                 (n_valid > 0) ?

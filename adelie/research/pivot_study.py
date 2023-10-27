@@ -207,10 +207,12 @@ def _screen_sets_pivot(
                 # if KKT failed after this small hedging,
                 # use pivot-rule instead.
                 if not active_sets[i+1].issubset(predict_set):
+                    logger.warning(f"Index {i}: small hedge failed! Using pivot.")
                     predict_set = pivot_predict_set
 
             # if KKT failed, use pivot-rule.
             else:
+                logger.warning(f"Index {i}: KKT failed! Using pivot.")
                 predict_set = pivot_predict_set
 
         if "greedy" in method:
@@ -404,7 +406,7 @@ def plot_set_sizes(
     lmdas = state.lmdas
 
     dct = {
-        "safe": 0,
+        "EDPP": 0,
         "strong": 1,
         "pivot-S": 2,
         "pivot-SL": 3,
