@@ -193,9 +193,9 @@ def grpnet(
     delta_lmda_path_size: int =1,
     delta_strong_size: int =10,
     max_strong_size: int =None,
-    pivot_subset_ratio: float =0.1,
+    pivot_subset_ratio: float =None,
     pivot_subset_min: int =10,
-    pivot_slack_ratio: float =0.1,
+    pivot_slack_ratio: float =None,
     use_edpp: bool =True,
     check_state: bool =False,
 ):
@@ -297,7 +297,8 @@ def grpnet(
         largest gradient norms are used to determine the pivot point
         where ``s`` is the current strong set size.
         It is only used if ``screen_rule == "pivot"``.
-        Default is ``0.1``.
+        If ``None``, then it is set to ``0.1`` when ``p > n`` otherwise ``0.5``.
+        Default is ``None``.
     pivot_subset_min : int, optional
         If screening takes place, then at least ``pivot_subset_min``
         number of gradient norms are used to determine the pivot point.
@@ -307,7 +308,8 @@ def grpnet(
         If screening takes place, then ``pivot_slack_ratio``
         number of gradient norms below the pivot point are also added to the strong set as slack.
         It is only used if ``screen_rule == "pivot"``.
-        Default is ``0.1``.
+        If ``None``, then it is set to ``0.1`` when ``p > n`` otherwise ``0.5``.
+        Default is ``None``.
     use_edpp : bool, optional
         ``True`` is EDPP rule should be used.
         If ``False``, all groups are considered EDPP safe.

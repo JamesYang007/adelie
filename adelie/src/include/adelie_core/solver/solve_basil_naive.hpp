@@ -55,12 +55,9 @@ void screen_edpp(
     using vec_value_t = typename state_t::vec_value_t;
 
     const auto use_edpp = state.use_edpp;
-
-    if (!use_edpp) return;
-
+    const auto& groups = state.groups;
     const auto& X_means = state.X_means;
     const auto& X_group_norms = state.X_group_norms;
-    const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto& penalty = state.penalty;
     const auto lmda = state.lmda;
@@ -76,6 +73,8 @@ void screen_edpp(
     auto& X = *state.X;
     auto& edpp_safe_set = state.edpp_safe_set;
     auto& edpp_safe_hashset = state.edpp_safe_hashset;
+
+    if (!use_edpp || (groups.size() == edpp_safe_hashset.size())) return;
 
     vec_value_t v1 = (
         (lmda == lmda_max) ?
@@ -124,11 +123,13 @@ void screen_edpp(
  * State MUST be a valid state satisfying its invariance.
  * The state after the function is finished is also a valid state.
  */
-template <class StateType, class ValueType>
+template <class StateType, class AbsGradNextType, class ValueType>
 ADELIE_CORE_STRONG_INLINE 
 void screen_strong(
     StateType& state,
+    AbsGradNextType& abs_grad_next,
     ValueType lmda_next,
+    bool all_kkt_passed,
     int n_new_active
 )
 {
@@ -191,7 +192,8 @@ void screen_strong(
         vec_index_t order = vec_index_t::LinSpaced(G, 0, G-1);
         vec_value_t weights = vec_value_t::NullaryExpr(
             G, [&](auto i) { 
-                return (penalty[i] <= 0) ? alpha * lmda : abs_grad[i] / penalty[i]; 
+                return (penalty[i] <= 0) ? 
+                    alpha * lmda : std::min(abs_grad[i] / penalty[i], alpha * lmda); 
             }
         );
         std::sort(
@@ -227,8 +229,10 @@ void screen_strong(
             strong_set.push_back(i); 
         }
 
-        // this case should rarely happen
-        if (strong_set.size() == old_strong_set_size) {
+        // this case should rarely happen, but we arrived here because
+        // previous iteration added all pivot-rule predictions and KKT still failed.
+        // In this case, do the most safe thing, which is to add all failed variables.
+        if ((strong_set.size() == old_strong_set_size) && !all_kkt_passed) {
             do_fixed_greedy();
         }
     };
@@ -253,8 +257,11 @@ void screen_strong(
 
             // If no new strong variables were added, need a fall-back.
             // Use fixed-greedy method.
-            if (strong_set.size() == old_strong_set_size) {
-                do_fixed_greedy();
+            if ((strong_set.size() == old_strong_set_size) && !all_kkt_passed) {
+                for (int i = 0; i < abs_grad_next.size(); ++i) {
+                    if (is_strong(i) || !is_edpp(i) || (abs_grad_next[i] <= lmda_next * alpha * penalty[i])) continue;
+                    strong_set.push_back(i);
+                }
             }
         } else if (screen_rule == state::screen_rule_type::_fixed_greedy) {
             do_fixed_greedy();
@@ -285,16 +292,18 @@ void screen_strong(
 
 }
 
-template <class StateType, class ValueType>
+template <class StateType, class AbsGradNextType, class ValueType>
 ADELIE_CORE_STRONG_INLINE
 void screen(
     StateType& state,
+    AbsGradNextType& abs_grad_next,
     ValueType lmda_next,
+    bool all_kkt_passed,
     int n_new_active
 )
 {
     screen_edpp(state, lmda_next);
-    screen_strong(state, lmda_next, n_new_active);
+    screen_strong(state, abs_grad_next, lmda_next, all_kkt_passed, n_new_active);
 }
 
 template <class StateType,
@@ -429,16 +438,20 @@ size_t kkt(
         const auto gk_size = group_sizes[k];
         const auto pk = penalty[k];
 
-        for (int l = 0; l < n_valid_solutions; ++l) {
+        for (int l = 0; l < std::max(n_valid_solutions, 1); ++l) {
             auto grad_lk = grads[l].segment(gk, gk_size);
 
-            X.bmul(gk, gk_size, state_pin_naive.resids[l], grad_lk);
+            if (gk_size == 1) {
+                grad_lk[0] = X.cmul(gk, state_pin_naive.resids[l]);
+            } else {
+                X.bmul(gk, gk_size, state_pin_naive.resids[l], grad_lk);
+            }
             if (intercept) {
                 grad_lk -= state_pin_naive.resid_sums[l] * X_means.segment(gk, gk_size);
             }
             const auto abs_grad_lk = grad_lk.matrix().norm();
             const auto lmda_l = state_pin_naive.lmdas[l];
-            if (abs_grad_lk > lmda_l * alpha * pk * (1 + 1e-6)) {
+            if (abs_grad_lk > lmda_l * alpha * pk) {
                 n_valid_solutions = l;
                 break;
             }
@@ -447,17 +460,22 @@ size_t kkt(
         if (n_valid_solutions <= 0) break;
     }
 
+    // If n_valid_solutions == 0, find all groups that failed KKT check.
     if (n_valid_solutions <= 0) return 0;
 
     // If n_valid_solutions > 0, 
     // compute gradient for strong variables only for the last solution.
     for (int k = 0; k < groups.size(); ++k) {
         if (!is_strong(k)) continue;
-        const auto l = n_valid_solutions-1;
+        const auto l = std::max(n_valid_solutions-1, 0);
         const auto gk = groups[k];
         const auto gk_size = group_sizes[k];
         auto grad_lk = grads[l].segment(gk, gk_size);
-        X.bmul(gk, gk_size, state_pin_naive.resids[l], grad_lk);
+        if (gk_size == 1) {
+            grad_lk[0] = X.cmul(gk, state_pin_naive.resids[l]);
+        } else {
+            X.bmul(gk, gk_size, state_pin_naive.resids[l], grad_lk);
+        }
         if (intercept) {
             grad_lk -= state_pin_naive.resid_sums[l] * X_means.segment(gk, gk_size);
         }
@@ -687,12 +705,14 @@ inline void solve_basil(
     // In this case, strong_set may not contain the true active set.
     // We must go through BASIL iterations to solve each lambda.
     vec_value_t lmda_batch;
+    vec_value_t abs_grad_next = abs_grad;
     std::vector<vec_value_t> grads;
     sw_t sw;
     int current_active_size = Eigen::Map<vec_safe_bool_t>(
         strong_is_active.data(),
         strong_is_active.size()
     ).sum();
+    bool all_kkt_passed = true;
     int n_new_active = lazify_screen ? 0 : -1;
 
     while (1) 
@@ -721,7 +741,9 @@ inline void solve_basil(
         sw.start();
         naive::screen(
             state,
+            abs_grad_next,
             lmda_batch[0],
+            all_kkt_passed,
             n_new_active
         );
         benchmark_screen.push_back(sw.elapsed());
@@ -771,10 +793,19 @@ inline void solve_basil(
             // ==================================================================================== 
             sw.start();
             lmda_path_idx += n_valid;
+            all_kkt_passed = n_valid == lmda_batch.size();
             // If no valid solutions found, restore to the previous valid state,
             // so that we can start over after screening more variables.
             if (n_valid <= 0) {
                 load_prev_valid();
+
+                state::update_abs_grad(
+                    state.groups,
+                    state.group_sizes,
+                    grads[0],
+                    abs_grad_next,
+                    state.n_threads
+                );
             // Otherwise, use the last valid state found in kkt.
             } else {
                 const auto idx = n_valid - 1;

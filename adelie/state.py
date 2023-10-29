@@ -1753,9 +1753,9 @@ def basil_naive(
     delta_lmda_path_size: int =1,
     delta_strong_size: int =10,
     max_strong_size: int =None,
-    pivot_subset_ratio: float =0.1,
+    pivot_subset_ratio: float =None,
     pivot_subset_min: int =10,
-    pivot_slack_ratio: float =0.1,
+    pivot_slack_ratio: float =None,
 ):
     """Creates a basil, naive method state object.
 
@@ -1910,20 +1910,41 @@ def basil_naive(
         If screening takes place, then at least ``pivot_subset_min``
         number of gradient norms are used to determine the pivot point.
         It is only used if ``screen_rule == "pivot"``.
-        Default is ``10``.
+        If ``None``, then it is set to ``0.1`` when ``p > n`` otherwise ``0.5``.
+        Default is ``None``.
     pivot_slack_ratio : float, optional
         If screening takes place, then ``pivot_slack_ratio``
         number of gradient norms below the pivot point are also added to the strong set as slack.
         It is only used if ``screen_rule == "pivot"``.
-        Default is ``0.1``.
+        If ``None``, then it is set to ``0.1`` when ``p > n`` otherwise ``0.5``.
+        Default is ``None``.
 
     See Also
     --------
     adelie.state.basil_naive_64
     adelie.state.basil_naive_32
     """
+    if isinstance(X, matrix.base):
+        X_intr = X.internal()
+    else:
+        X_intr = X
+
+    if not (
+        isinstance(X_intr, matrix.MatrixNaiveBase64) or 
+        isinstance(X_intr, matrix.MatrixNaiveBase32)
+    ):
+        raise ValueError(
+            "X must be an instance of matrix.MatrixNaiveBase32 or matrix.MatrixNaiveBase64."
+        )
+
+    n, p = X_intr.rows(), X_intr.cols()
+
     if max_strong_size is None:
         max_strong_size = len(groups)
+    if pivot_subset_ratio is None:
+        pivot_subset_ratio = 0.1 if p > n else 0.5
+    if pivot_slack_ratio is None:
+        pivot_slack_ratio = 0.1 if p > n else 0.5
 
     if max_iters < 0:
         raise ValueError("max_iters must be >= 0.")
@@ -1966,19 +1987,6 @@ def basil_naive(
     delta_lmda_path_size = np.minimum(delta_lmda_path_size, actual_lmda_path_size)
 
     max_strong_size = np.minimum(max_strong_size, len(groups))
-
-    if isinstance(X, matrix.base):
-        X_intr = X.internal()
-    else:
-        X_intr = X
-
-    if not (
-        isinstance(X_intr, matrix.MatrixNaiveBase64) or 
-        isinstance(X_intr, matrix.MatrixNaiveBase32)
-    ):
-        raise ValueError(
-            "X must be an instance of matrix.MatrixNaiveBase32 or matrix.MatrixNaiveBase64."
-        )
 
     dtype = (
         np.float64

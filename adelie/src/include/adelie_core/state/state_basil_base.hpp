@@ -8,6 +8,26 @@
 namespace adelie_core {
 namespace state {
 
+template <class GroupsType, class GroupSizesType,
+          class GradType, class AbsGradType>
+void update_abs_grad(
+    const GroupsType& groups,
+    const GroupSizesType& group_sizes,
+    const GradType& grad,
+    AbsGradType& abs_grad,
+    size_t n_threads
+)
+{
+    const auto n_threads_capped = std::min<size_t>(n_threads, groups.size());
+    #pragma omp parallel for schedule(static) num_threads(n_threads_capped)
+    for (int i = 0; i < groups.size(); ++i) 
+    {
+        const auto k = groups[i];
+        const auto size_k = group_sizes[i];
+        abs_grad[i] = grad.segment(k, size_k).matrix().norm();
+    }
+}
+
 /**
  * Updates absolute gradient in the base state.
  * The state DOES NOT have to be in its invariance. 
@@ -20,20 +40,13 @@ void update_abs_grad(
     StateType& state
 )
 {
-    const auto& grad = state.grad;
-    const auto& groups = state.groups;
-    const auto& group_sizes = state.group_sizes;
-    const auto n_threads = state.n_threads;
-    auto& abs_grad = state.abs_grad;
-
-    const auto n_threads_capped = std::min<size_t>(n_threads, groups.size());
-    #pragma omp parallel for schedule(static) num_threads(n_threads_capped)
-    for (int i = 0; i < groups.size(); ++i) 
-    {
-        const auto k = groups[i];
-        const auto size_k = group_sizes[i];
-        abs_grad[i] = grad.segment(k, size_k).matrix().norm();
-    }
+    update_abs_grad(
+        state.groups,
+        state.group_sizes,
+        state.grad,
+        state.abs_grad,
+        state.n_threads
+    );
 }
 
 /**

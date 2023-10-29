@@ -9,6 +9,7 @@ from IPython.display import HTML
 
 root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 tex_path = os.path.join(root_path, "docs/tex/pivot_rule")
+data_path = os.path.join(root_path, "data")
 fig_path = os.path.join(tex_path, "figures")
 
 
@@ -49,12 +50,15 @@ def _screen_sets_strong(
         # always add current active set
         predict_set = predict_set.union(active_sets[i])
 
+        if "ever" in method and i > 0:
+            predict_set = predict_set.union(predict_sets[i-1])
+
         if "safe" in method:
             predict_set = predict_set.intersection(safe_sets[i])
 
         if "lazy" in method:
             previous_predict_set = predict_set if i == 0 else predict_sets[i-1]
-            if active_sets[i+1].issubset(previous_predict_set):
+            if active_sets[i].issubset(previous_predict_set):
                 predict_set = previous_predict_set
 
         if not active_sets[i+1].issubset(predict_set):
@@ -134,13 +138,9 @@ def _screen_sets_pivot(
 
     def _fixed_update(
         predict_set,
-        safe_set,
+        slack_set,
         delta,
     ):
-        if "safe" in method:
-            slack_set = safe_set
-        else:
-            slack_set = set(np.arange(G))
         slack_set = np.array(list(slack_set - predict_set), dtype=int)
         slack_scores = scores[i, slack_set]
         slack_scores_order = np.argsort(slack_scores)
@@ -198,9 +198,13 @@ def _screen_sets_pivot(
                 if delta_active == 0:
                     predict_set = previous_predict_set
                 else:
+                    if "safe" in method:
+                        slack_set = safe_sets[i]
+                    else:
+                        slack_set = set(np.arange(G))
                     predict_set = _fixed_update(
                         previous_predict_set,
-                        safe_sets[i],
+                        slack_set,
                         delta_active,
                     )
 
@@ -220,9 +224,13 @@ def _screen_sets_pivot(
             # fallback to greedy method
             count = 0
             while not active_sets[i+1].issubset(predict_set):
+                if "safe" in method:
+                    slack_set = safe_sets[i]
+                else:
+                    slack_set = set(np.arange(G))
                 predict_set = _fixed_update(
                     predict_set,
-                    safe_sets[i],
+                    slack_set,
                     state.delta_strong_size,
                 )
                 count += 1
