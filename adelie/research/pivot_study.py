@@ -1,5 +1,6 @@
 import adelie as ad
 import numpy as np
+from time import time
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import os
@@ -448,3 +449,45 @@ def plot_set_sizes(
     if make_ax: 
         return fig, ax
     return ax
+
+
+def real_data_analysis(
+    data_fun,
+    configs,
+):
+    X, y = data_fun()
+
+    start = time()
+    strong_state = ad.grpnet(
+        X=X,
+        y=y,
+        **configs,
+        screen_rule="strong",
+        lazify_screen=False,
+    )
+    end = time()
+    strong_time = end - start
+
+    start = time()
+    pivot_state = ad.grpnet(
+        X=X,
+        y=y,
+        **configs,
+        screen_rule="pivot",
+        lazify_screen=True,
+    )
+    end = time()
+    pivot_time = end - start
+
+    active_ss = active_sets(pivot_state)
+    active_sizes = np.array([len(s) for s in active_ss])
+    strong_sizes = strong_state.strong_sizes
+    pivot_sizes = pivot_state.strong_sizes
+    
+
+    return (
+        strong_state,
+        pivot_state,
+        strong_time,
+        pivot_time,
+    )

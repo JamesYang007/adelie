@@ -1189,7 +1189,6 @@ class basil_naive_base(basil_base):
         lmda_max: float,
         min_ratio: float,
         lmda_path_size: int,
-        delta_lmda_path_size: int,
         delta_strong_size: int,
         max_strong_size: int,
         pivot_subset_ratio: float,
@@ -1264,7 +1263,6 @@ class basil_naive_base(basil_base):
             lmda_max=lmda_max,
             min_ratio=min_ratio,
             lmda_path_size=lmda_path_size,
-            delta_lmda_path_size=delta_lmda_path_size,
             delta_strong_size=delta_strong_size,
             max_strong_size=max_strong_size,
             pivot_subset_ratio=pivot_subset_ratio,
@@ -1375,11 +1373,6 @@ class basil_naive_base(basil_base):
         self._check(
             ~self.setup_lmda_path | (self.lmda_path_size > 0),
             "check either lmda_path is not setup or if it is, then path size is > 0",
-            method, logger,
-        )
-        self._check(
-            self.delta_lmda_path_size > 0,
-            "check delta_lmda_path_size > 0",
             method, logger,
         )
         self._check(
@@ -1662,7 +1655,6 @@ class basil_naive_base(basil_base):
             lazify_screen=self.lazify_screen,
             min_ratio=self.min_ratio,
             lmda_path_size=self.lmda_path_size,
-            delta_lmda_path_size=self.delta_lmda_path_size,
             delta_strong_size=self.delta_strong_size,
             max_strong_size=self.max_strong_size,
             pivot_subset_ratio=self.pivot_subset_ratio,
@@ -1750,12 +1742,11 @@ def basil_naive(
     lazify_screen: bool =True,
     min_ratio: float =1e-2,
     lmda_path_size: int =100,
-    delta_lmda_path_size: int =1,
     delta_strong_size: int =10,
     max_strong_size: int =None,
     pivot_subset_ratio: float =None,
-    pivot_subset_min: int =10,
-    pivot_slack_ratio: float =None,
+    pivot_subset_min: int =1,
+    pivot_slack_ratio: float =2,
 ):
     """Creates a basil, naive method state object.
 
@@ -1887,13 +1878,10 @@ def basil_naive(
     lazify_screen : bool, optional
         If ``True``, the function will lazify the screening step.
         Default is ``True``.
-    delta_lmda_path_size : int, optional 
-        Number of regularizations to batch per BASIL iteration.
-        Default is ``1``.
     delta_strong_size : int, optional
         Number of strong groups to include per BASIL iteration 
         if strong rule does not include new groups but optimality is not reached.
-        Default is ``5``.
+        Default is ``10``.
     max_strong_size: int, optional
         Maximum number of strong groups allowed.
         The function will return a valid state and guaranteed to have strong set size
@@ -1905,19 +1893,19 @@ def basil_naive(
         largest gradient norms are used to determine the pivot point
         where ``s`` is the current strong set size.
         It is only used if ``screen_rule == "pivot"``.
-        Default is ``0.1``.
+        If ``None``, then it is set to ``0.1`` when ``p > n`` otherwise ``0.5``.
+        Default is ``None``.
     pivot_subset_min : int, optional
         If screening takes place, then at least ``pivot_subset_min``
         number of gradient norms are used to determine the pivot point.
         It is only used if ``screen_rule == "pivot"``.
-        If ``None``, then it is set to ``0.1`` when ``p > n`` otherwise ``0.5``.
-        Default is ``None``.
+        Default is ``1``.
     pivot_slack_ratio : float, optional
         If screening takes place, then ``pivot_slack_ratio``
-        number of gradient norms below the pivot point are also added to the strong set as slack.
+        number of groups with next smallest (new) active scores 
+        below the pivot point are also added to the strong set as slack.
         It is only used if ``screen_rule == "pivot"``.
-        If ``None``, then it is set to ``0.1`` when ``p > n`` otherwise ``0.5``.
-        Default is ``None``.
+        Default is ``2``.
 
     See Also
     --------
@@ -1943,8 +1931,6 @@ def basil_naive(
         max_strong_size = len(groups)
     if pivot_subset_ratio is None:
         pivot_subset_ratio = 0.1 if p > n else 0.5
-    if pivot_slack_ratio is None:
-        pivot_slack_ratio = 0.1 if p > n else 0.5
 
     if max_iters < 0:
         raise ValueError("max_iters must be >= 0.")
@@ -1966,8 +1952,6 @@ def basil_naive(
         raise ValueError("min_ratio must be > 0.")
     if lmda_path_size < 0:
         raise ValueError("lmda_path_size must be >= 0.")
-    if delta_lmda_path_size < 1:
-        raise ValueError("delta_lmda_path_size must be >= 1.")
     if delta_strong_size < 1:
         raise ValueError("delta_strong_size must be >= 1.")
     if max_strong_size < 0:
@@ -1976,15 +1960,14 @@ def basil_naive(
         raise ValueError("pivot_subset_ratio must be in (0, 1].")
     if pivot_subset_min < 1:
         raise ValueError("pivot_subset_min must be >= 1.")
-    if pivot_slack_ratio < 0 or pivot_slack_ratio > 1:
-        raise ValueError("pivot_slack_ratio must be in [0,1].")
+    if pivot_slack_ratio < 0:
+        raise ValueError("pivot_slack_ratio must be >= 0.")
 
     actual_lmda_path_size = (
         lmda_path_size
         if lmda_path is None else
         len(lmda_path)
     )
-    delta_lmda_path_size = np.minimum(delta_lmda_path_size, actual_lmda_path_size)
 
     max_strong_size = np.minimum(max_strong_size, len(groups))
 
@@ -2032,7 +2015,6 @@ def basil_naive(
         lmda_max=lmda_max,
         setup_lmda_max=setup_lmda_max,
         setup_lmda_path=setup_lmda_path,
-        delta_lmda_path_size=delta_lmda_path_size,
         delta_strong_size=delta_strong_size,
         max_strong_size=max_strong_size,
         pivot_subset_ratio=pivot_subset_ratio,
@@ -2049,7 +2031,7 @@ def basil_naive(
         newton_max_iters=newton_max_iters,
         early_exit=early_exit,
         min_ratio=min_ratio,
-        lmda_path_size=lmda_path_size,
+        lmda_path_size=actual_lmda_path_size,
         intercept=intercept,
         n_threads=n_threads,
         strong_set=strong_set,

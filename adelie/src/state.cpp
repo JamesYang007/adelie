@@ -525,7 +525,6 @@ void state_basil_base(py::module_& m, const char* name)
             size_t,
             size_t,
             size_t,
-            size_t,
             value_t,
             size_t,
             value_t,
@@ -558,7 +557,6 @@ void state_basil_base(py::module_& m, const char* name)
             py::arg("lmda_max"),
             py::arg("min_ratio"),
             py::arg("lmda_path_size"),
-            py::arg("delta_lmda_path_size"),
             py::arg("delta_strong_size"),
             py::arg("max_strong_size"),
             py::arg("pivot_subset_ratio"),
@@ -611,9 +609,6 @@ void state_basil_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("lmda_path_size", &state_t::lmda_path_size, R"delimiter(
         Number of regularizations in the path if it is to be generated.
-        )delimiter")
-        .def_readonly("delta_lmda_path_size", &state_t::delta_lmda_path_size, R"delimiter(
-        Number of regularizations to batch per BASIL iteration.
         )delimiter")
         .def_readonly("delta_strong_size", &state_t::delta_strong_size, R"delimiter(
         Number of strong groups to include per BASIL iteration 
@@ -923,7 +918,6 @@ void state_basil_naive(py::module_& m, const char* name)
             size_t,
             size_t,
             size_t,
-            size_t,
             value_t,
             size_t,
             value_t,
@@ -966,7 +960,6 @@ void state_basil_naive(py::module_& m, const char* name)
             py::arg("lmda_max"),
             py::arg("min_ratio"),
             py::arg("lmda_path_size"),
-            py::arg("delta_lmda_path_size"),
             py::arg("delta_strong_size"),
             py::arg("max_strong_size"),
             py::arg("pivot_subset_ratio"),

@@ -160,7 +160,6 @@ struct StateBasilBase
     const size_t lmda_path_size;
 
     // basil iteration configs
-    const size_t delta_lmda_path_size;
     const size_t delta_strong_size;
     const size_t max_strong_size;
     const value_t pivot_subset_ratio;
@@ -231,7 +230,6 @@ struct StateBasilBase
         value_t lmda_max,
         value_t min_ratio,
         size_t lmda_path_size,
-        size_t delta_lmda_path_size,
         size_t delta_strong_size,
         size_t max_strong_size,
         value_t pivot_subset_ratio,
@@ -264,7 +262,6 @@ struct StateBasilBase
         penalty(penalty.data(), penalty.size()),
         min_ratio(min_ratio),
         lmda_path_size(lmda_path_size),
-        delta_lmda_path_size(delta_lmda_path_size),
         delta_strong_size(delta_strong_size),
         max_strong_size(max_strong_size),
         pivot_subset_ratio(pivot_subset_ratio),
