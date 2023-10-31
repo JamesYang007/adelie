@@ -1,5 +1,9 @@
 import adelie as ad
 import numpy as np
+import array
+import csv
+from sklearn.preprocessing import SplineTransformer
+from scipy.sparse import csr_matrix
 from time import time
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -18,8 +22,10 @@ def active_sets(state):
     p = state.X.cols()
     betas = state.betas
     feature_to_group = np.empty(p, dtype=int)
-    for i, (g, gs) in enumerate(zip(state.groups, state.group_sizes)):
-        feature_to_group[g:g+gs] = i
+    curr_idx = 0
+    for i, gs in enumerate(state.group_sizes):
+        feature_to_group[curr_idx:curr_idx+gs] = i
+        curr_idx += gs
     active_sets = [
         set(feature_to_group[betas[i].indices])
         for i in range(betas.shape[0])
@@ -451,12 +457,180 @@ def plot_set_sizes(
     return ax
 
 
-def real_data_analysis(
-    data_fun,
-    configs,
-):
-    X, y = data_fun()
+def arcene(path):
+    X_train = np.genfromtxt(
+        os.path.join(path, "arcene_train.data"),
+    )
+    y_train = np.genfromtxt(
+        os.path.join(path, "arcene_train.labels")
+    )
 
+    subset = np.std(X_train, axis=0) > 0
+    X_train = X_train[:, subset]
+
+    n, _ = X_train.shape
+    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train = np.asfortranarray(X_train)
+    y_train /= np.sqrt(n)
+
+    return X_train, y_train
+    
+
+def dorothea(path):
+    def csv_to_csr(f, p, delimiter=" "):
+        """Read content of CSV file f, return as CSR matrix."""
+        data = array.array("f")
+        indices = array.array("i")
+        indptr = array.array("i", [0])
+    
+        for i, row in enumerate(csv.reader(f, delimiter=delimiter), 1):
+            row = np.array([int(r) for r in row[:-1]])
+            data.extend(np.ones(len(row)))
+            indices.extend(row)
+            indptr.append(indptr[-1]+len(row))
+    
+        return csr_matrix(
+            (data, indices, indptr),
+            dtype=float, shape=(i, p)
+        )
+
+    X_train = csv_to_csr(
+        open(os.path.join(path, "dorothea_train.data")),
+        p=100000,
+    )
+    X_train = X_train.toarray()
+    y_train = np.genfromtxt(
+        os.path.join(path, "dorothea_train.labels")
+    )
+
+    subset = np.std(X_train, axis=0) > 0
+    X_train = X_train[:, subset]
+
+    n, _ = X_train.shape
+    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train = np.asfortranarray(X_train)
+    y_train /= np.sqrt(n)
+
+    return X_train, y_train
+
+
+def gisette(path):
+    X_train = np.genfromtxt(
+        os.path.join(path, "gisette_train.data"),
+    )
+    y_train = np.genfromtxt(
+        os.path.join(path, "gisette_train.labels")
+    )
+
+    subset = np.std(X_train, axis=0) > 0
+    X_train = X_train[:, subset]
+
+    n, _ = X_train.shape
+    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train = np.asfortranarray(X_train)
+    y_train /= np.sqrt(n)
+
+    return X_train, y_train
+
+
+def mnist(path):
+    data = np.genfromtxt(
+        os.path.join(path, "mnist_train.csv"),
+        delimiter=",",
+    )
+    X_train = data[1:-1, 1:].T
+    y_train = data[-1, 1:]
+
+    subset = np.std(X_train, axis=0) > 0
+    X_train = X_train[:, subset]
+
+    n, _ = X_train.shape
+    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train = np.asfortranarray(X_train)
+    y_train /= np.sqrt(n)
+
+    X_train.shape, y_train.shape
+
+    return X_train, y_train
+
+
+def electricity(path):
+    def conv(x):
+        return x.replace(",", ".").encode()
+
+    data = np.genfromtxt(
+        (conv(x) for x in open(os.path.join(path, "LD2011_2014.txt"))),
+        skip_header=1,
+        delimiter=";",
+    )
+    X_train = data[:-1, 1:].T
+    y_train = data[-1, 1:].flatten()
+
+    subset = np.std(X_train, axis=0) > 0
+    X_train = X_train[:, subset]
+
+    n, _ = X_train.shape
+    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train = np.asfortranarray(X_train)
+    y_train /= np.sqrt(n)
+
+    return X_train, y_train
+
+
+def gene(path):
+    X_train = np.genfromtxt(
+        os.path.join(path, "data.csv"),
+        skip_header=1,
+        delimiter=",",
+    )
+    y_dict = {
+        b"PRAD": 0,
+        b"LUAD": 1,
+        b"BRCA": 2,
+        b"KIRC": 3,
+        b"COAD": 4,
+    }
+    y_train = np.genfromtxt(
+        os.path.join(path, "labels.csv"),
+        skip_header=1,
+        delimiter=",",
+        converters={
+            1 : lambda x: y_dict[x],
+        },
+    )
+
+    X_train = X_train[:, 1:]
+    y_train = np.array([y[1] for y in y_train], dtype=float)
+
+    subset = np.std(X_train, axis=0) > 0
+    X_train = X_train[:, subset]
+
+    n, _ = X_train.shape
+    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train = np.asfortranarray(X_train)
+    y_train /= np.sqrt(n)
+
+    return X_train, y_train
+
+
+def spline_basis(X, **kwargs):
+    spl_tr = SplineTransformer(
+        include_bias=False,
+        order="F",
+        **kwargs,
+    )
+    n = X.shape[0]
+    X = X * np.sqrt(n)
+    X = spl_tr.fit_transform(X)
+    X /= np.sqrt(n)
+    return X
+
+
+def real_data_analysis(
+    X: np.ndarray,
+    y: np.ndarray,
+    configs: dict,
+):
     start = time()
     strong_state = ad.grpnet(
         X=X,
@@ -483,9 +657,71 @@ def real_data_analysis(
     active_sizes = np.array([len(s) for s in active_ss])
     strong_sizes = strong_state.strong_sizes
     pivot_sizes = pivot_state.strong_sizes
+
+    assert len(strong_sizes) == len(pivot_sizes)
+
+    labels = ["strong", "pivot-SL", "active"]
+    markers = ["v", "*", "."]
+    colors = ["tab:orange", "tab:blue", "tab:red"]
+    ys = [
+        strong_sizes,
+        pivot_sizes,
+        active_sizes,
+    ]
     
+    def _kkt_fails(ns):
+        count = 0
+        out = []
+        for n in ns:
+            if n == 1:
+                out.append(count)
+                count = 0
+                continue
+            count += 1
+        return np.array(out, dtype=int)
+
+    kkt_fails = [
+        _kkt_fails(strong_state.n_valid_solutions),
+        _kkt_fails(pivot_state.n_valid_solutions),
+        np.zeros(len(pivot_sizes), dtype=int),
+    ]
+
+    fig, ax = plt.subplots(layout="constrained")
+    tls = -np.log(pivot_state.lmdas)
+
+    for y, kkt, label, marker, color in zip(
+        ys, kkt_fails, labels, markers, colors
+    ):
+        # plot KKT successful ones
+        ax.plot(
+            tls[kkt == 0], 
+            y[kkt == 0], 
+            linestyle="None",
+            color=color,
+            marker=marker,
+            label=label,
+            markerfacecolor="None",
+        )
+        # plot KKT failure ones
+        ax.plot(
+            tls[kkt > 0],
+            y[kkt > 0],
+            linestyle="None",
+            color=color,
+            marker="x",
+            label=None,
+            markerfacecolor="None",
+        )
+    ax.legend()
+    ax.set_title("Set Size Comparison")
+    ax.set_ylabel("Number of Groups")
+    ax.set_xlabel(r"$-\log(\lambda)$")
 
     return (
+        fig, 
+        ax,
+        X.shape[0],
+        pivot_state.groups.shape[0],
         strong_state,
         pivot_state,
         strong_time,

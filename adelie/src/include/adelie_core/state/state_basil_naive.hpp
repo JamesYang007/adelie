@@ -238,6 +238,7 @@ struct StateBasilNaive : StateBasilBase<
         value_t pivot_slack_ratio,
         const std::string& screen_rule,
         bool lazify_screen,
+        value_t lazy_ratio,
         size_t max_iters,
         value_t tol,
         value_t rsq_tol,
@@ -260,7 +261,7 @@ struct StateBasilNaive : StateBasilBase<
         base_t(
             groups, group_sizes, alpha, penalty, lmda_path, lmda_max, min_ratio, lmda_path_size,
             delta_strong_size, max_strong_size, 
-            pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, lazify_screen,
+            pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, lazify_screen, lazy_ratio,
             max_iters, tol, rsq_tol, rsq_slope_tol, rsq_curv_tol, 
             newton_tol, newton_max_iters, early_exit, setup_lmda_max, setup_lmda_path, intercept, n_threads,
             strong_set, strong_beta, strong_is_active, rsq, lmda, grad

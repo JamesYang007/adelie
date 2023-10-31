@@ -188,6 +188,7 @@ def grpnet(
     intercept: bool =True,
     screen_rule: str ="pivot",
     lazify_screen: bool =True,
+    lazy_ratio: float =1,
     min_ratio: float =1e-2,
     lmda_path_size: int =100,
     delta_strong_size: int =10,
@@ -278,6 +279,9 @@ def grpnet(
     lazify_screen : bool, optional
         If ``True``, the function will lazify the screening step.
         Default is ``True``.
+    lazy_ratio : float, optional
+        Ratio of the number of new active groups to be added into the prediction set via lazy method.
+        Default is ``1``.
     delta_strong_size : int, optional
         Number of strong groups to include per BASIL iteration 
         if strong rule does not include new groups but optimality is not reached.
@@ -410,6 +414,7 @@ def grpnet(
         intercept=intercept,
         screen_rule=screen_rule,
         lazify_screen=lazify_screen,
+        lazy_ratio=lazy_ratio,
         min_ratio=min_ratio,
         lmda_path_size=lmda_path_size,
         delta_strong_size=delta_strong_size,

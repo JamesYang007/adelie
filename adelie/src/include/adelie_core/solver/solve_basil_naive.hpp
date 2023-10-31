@@ -145,6 +145,7 @@ void screen_strong(
     const auto max_strong_size = state.max_strong_size;
     const auto screen_rule = state.screen_rule;
     const auto lazify_screen = state.lazify_screen;
+    const auto lazy_ratio = state.lazy_ratio;
     const auto pivot_subset_ratio = state.pivot_subset_ratio;
     const auto pivot_subset_min = state.pivot_subset_min;
     const auto pivot_slack_ratio = state.pivot_slack_ratio;
@@ -254,7 +255,7 @@ void screen_strong(
     // KKT passed for some lambdas in the batch
     if (lazify_screen && all_kkt_passed) {
         // only add n_new_active number of groups
-        delta_strong_size = n_new_active;
+        delta_strong_size = lazy_ratio * std::max<int>(n_new_active, 1);
         do_fixed_greedy();
     } else {
         if (screen_rule == state::screen_rule_type::_strong) {

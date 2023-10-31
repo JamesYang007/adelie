@@ -530,6 +530,7 @@ void state_basil_base(py::module_& m, const char* name)
             value_t,
             const std::string&,
             bool,
+            value_t,
             size_t,
             value_t,
             value_t,
@@ -564,6 +565,7 @@ void state_basil_base(py::module_& m, const char* name)
             py::arg("pivot_slack_ratio"),
             py::arg("screen_rule"),
             py::arg("lazify_screen"),
+            py::arg("lazy_ratio"),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("rsq_tol"),
@@ -645,6 +647,9 @@ void state_basil_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("lazify_screen", &state_t::lazify_screen, R"delimiter(
         Flag that indicates whether to lazify the screening step.
+        )delimiter")
+        .def_readonly("lazy_ratio", &state_t::lazy_ratio, R"delimiter(
+        Ratio of the number of new active groups to be added into the prediction set via lazy method.
         )delimiter")
         .def_readonly("max_iters", &state_t::max_iters, R"delimiter(
         Maximum number of coordinate descents.
@@ -923,6 +928,7 @@ void state_basil_naive(py::module_& m, const char* name)
             value_t,
             const std::string&,
             bool,
+            value_t,
             size_t,
             value_t,
             value_t,
@@ -967,6 +973,7 @@ void state_basil_naive(py::module_& m, const char* name)
             py::arg("pivot_slack_ratio"),
             py::arg("screen_rule"),
             py::arg("lazify_screen"),
+            py::arg("lazy_ratio"),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("rsq_tol"),
