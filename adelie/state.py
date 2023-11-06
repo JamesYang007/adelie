@@ -1848,8 +1848,6 @@ def basil_naive(
         The type of strong rule to use. It must be one of the following options:
 
             - ``"strong"``: discards variables from the safe set based on simple strong rule.
-            - ``"fixed_greedy"``: adds variables based on a fixed number of groups with the largest gradient norm.
-            - ``"safe"``: adds all safe variables to the strong set.
             - ``"pivot"``: adds all variables whose gradient norms are largest, which is determined
                 by searching for a pivot point in the gradient norms.
 
