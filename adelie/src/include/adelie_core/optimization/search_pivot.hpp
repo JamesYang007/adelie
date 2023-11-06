@@ -40,21 +40,23 @@ int search_pivot(
         xsq_sum += x[i] * x[i];
         y_sum += y[i];
         yx_sum += y[i] * x[i];
-        const value_t x_bar = ((i+1) * x[i] - x_sum) / n;
-        const value_t var_x = (
+        const value_t t_bar = ((i+1) * x[i] - x_sum) / n;
+        const value_t var_t = (
             (i+1) * x[i] * x[i] 
             - 2 * x[i] * x_sum
             + xsq_sum
-            - n * x_bar * x_bar
+            - n * t_bar * t_bar
         );
-        const value_t cov_xy = (
-            x[i] * (y_sum - i * y_mean) 
+        const value_t cov_ty = (
+            x[i] * (y_sum - (i+1) * y_mean) 
             - (yx_sum - y_mean * x_sum)
         );
-        const value_t beta1_hat = cov_xy / var_x;
-        mses[i] = -beta1_hat * beta1_hat * var_x;
-        argmin_mse = (mses[i] < min_mse) ? i : argmin_mse;
-        min_mse = std::min(min_mse, mses[i]);
+        const value_t beta1_hat = cov_ty / var_t;
+        mses[i] = -beta1_hat * beta1_hat * var_t;
+        if (mses[i] < min_mse) {
+            argmin_mse = i;
+            min_mse = mses[i];
+        }
     }
 
     return argmin_mse;

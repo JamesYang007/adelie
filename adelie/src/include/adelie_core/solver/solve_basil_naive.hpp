@@ -144,8 +144,6 @@ void screen_strong(
     const auto& edpp_safe_hashset = state.edpp_safe_hashset;
     const auto max_strong_size = state.max_strong_size;
     const auto screen_rule = state.screen_rule;
-    const auto lazify_screen = state.lazify_screen;
-    const auto lazy_ratio = state.lazy_ratio;
     const auto pivot_subset_ratio = state.pivot_subset_ratio;
     const auto pivot_subset_min = state.pivot_subset_min;
     const auto pivot_slack_ratio = state.pivot_slack_ratio;
@@ -230,7 +228,7 @@ void screen_strong(
         // add some slack of new groups below the pivot
         int count = 0;
         for (int ii = full_pivot_idx - 1; ii >= 0; --ii) {
-            if (count >= pivot_slack_ratio * (n_new_active + 1)) break;
+            if (count >= pivot_slack_ratio * std::max<int>(n_new_active, 1)) break;
             const auto i = order[ii]; 
             if (is_strong(i) || !is_edpp(i)) continue;
             strong_set.push_back(i);
@@ -253,32 +251,26 @@ void screen_strong(
     /* update strong_set */
 
     // KKT passed for some lambdas in the batch
-    if (lazify_screen && all_kkt_passed) {
-        // only add n_new_active number of groups
-        delta_strong_size = lazy_ratio * std::max<int>(n_new_active, 1);
-        do_fixed_greedy();
-    } else {
-        if (screen_rule == state::screen_rule_type::_strong) {
-            const auto strong_rule_lmda = (2 * lmda_next - lmda) * alpha;
+    if (screen_rule == state::screen_rule_type::_strong) {
+        const auto strong_rule_lmda = (2 * lmda_next - lmda) * alpha;
 
-            for (int i = 0; i < abs_grad.size(); ++i) {
-                if (is_strong(i) || !is_edpp(i)) continue;
-                if (abs_grad[i] > strong_rule_lmda * penalty[i]) {
-                    strong_set.push_back(i);
-                }
+        for (int i = 0; i < abs_grad.size(); ++i) {
+            if (is_strong(i) || !is_edpp(i)) continue;
+            if (abs_grad[i] > strong_rule_lmda * penalty[i]) {
+                strong_set.push_back(i);
             }
-        } else if (screen_rule == state::screen_rule_type::_fixed_greedy) {
-            do_fixed_greedy();
-        } else if (screen_rule == state::screen_rule_type::_safe) {
-            for (int i = 0; i < edpp_safe_set.size(); ++i) {
-                if (is_strong(edpp_safe_set[i])) continue;
-                strong_set.push_back(edpp_safe_set[i]);
-            }
-        } else if (screen_rule == state::screen_rule_type::_pivot) {
-            do_pivot();
-        } else {
-            throw std::runtime_error("Unknown strong rule!");
         }
+    } else if (screen_rule == state::screen_rule_type::_fixed_greedy) {
+        do_fixed_greedy();
+    } else if (screen_rule == state::screen_rule_type::_safe) {
+        for (int i = 0; i < edpp_safe_set.size(); ++i) {
+            if (is_strong(edpp_safe_set[i])) continue;
+            strong_set.push_back(edpp_safe_set[i]);
+        }
+    } else if (screen_rule == state::screen_rule_type::_pivot) {
+        do_pivot();
+    } else {
+        throw std::runtime_error("Unknown strong rule!");
     }
 
     // If adding new amount went over max strong size, 

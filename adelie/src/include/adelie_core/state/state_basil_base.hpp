@@ -166,8 +166,6 @@ struct StateBasilBase
     const size_t pivot_subset_min;
     const value_t pivot_slack_ratio;
     const screen_rule_type screen_rule;
-    const bool lazify_screen;
-    const value_t lazy_ratio;
 
     // convergence configs
     const size_t max_iters;
@@ -237,8 +235,6 @@ struct StateBasilBase
         size_t pivot_subset_min,
         value_t pivot_slack_ratio,
         const std::string& screen_rule,
-        bool lazify_screen,
-        value_t lazy_ratio,
         size_t max_iters,
         value_t tol,
         value_t rsq_tol,
@@ -270,8 +266,6 @@ struct StateBasilBase
         pivot_subset_min(pivot_subset_min),
         pivot_slack_ratio(pivot_slack_ratio),
         screen_rule(convert_strong_rule(screen_rule)),
-        lazify_screen(lazify_screen),
-        lazy_ratio(lazy_ratio),
         max_iters(max_iters),
         tol(tol),
         rsq_tol(rsq_tol),

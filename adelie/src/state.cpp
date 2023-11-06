@@ -529,8 +529,6 @@ void state_basil_base(py::module_& m, const char* name)
             size_t,
             value_t,
             const std::string&,
-            bool,
-            value_t,
             size_t,
             value_t,
             value_t,
@@ -564,8 +562,6 @@ void state_basil_base(py::module_& m, const char* name)
             py::arg("pivot_subset_min"),
             py::arg("pivot_slack_ratio"),
             py::arg("screen_rule"),
-            py::arg("lazify_screen"),
-            py::arg("lazy_ratio"),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("rsq_tol"),
@@ -622,13 +618,21 @@ void state_basil_base(py::module_& m, const char* name)
         less than or equal to ``max_strong_size``.
         )delimiter")
         .def_readonly("pivot_subset_ratio", &state_t::pivot_subset_ratio, R"delimiter(
-            TODO
+        If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
+        largest gradient norms are used to determine the pivot point
+        where ``s`` is the current strong set size.
+        It is only used if ``screen_rule == "pivot"``.
         )delimiter")
         .def_readonly("pivot_subset_min", &state_t::pivot_subset_min, R"delimiter(
-            TODO
+        If screening takes place, then at least ``pivot_subset_min``
+        number of gradient norms are used to determine the pivot point.
+        It is only used if ``screen_rule == "pivot"``.
         )delimiter")
         .def_readonly("pivot_slack_ratio", &state_t::pivot_slack_ratio, R"delimiter(
-            TODO
+        If screening takes place, then ``pivot_slack_ratio``
+        number of groups with next smallest (new) active scores 
+        below the pivot point are also added to the strong set as slack.
+        It is only used if ``screen_rule == "pivot"``.
         )delimiter")
         .def_property_readonly("screen_rule", [](const state_t& s) -> std::string {
             switch (s.screen_rule) {
@@ -644,12 +648,6 @@ void state_basil_base(py::module_& m, const char* name)
             throw std::runtime_error("Invalid strong rule type!");
         }, R"delimiter(
         Strong rule type.
-        )delimiter")
-        .def_readonly("lazify_screen", &state_t::lazify_screen, R"delimiter(
-        Flag that indicates whether to lazify the screening step.
-        )delimiter")
-        .def_readonly("lazy_ratio", &state_t::lazy_ratio, R"delimiter(
-        Ratio of the number of new active groups to be added into the prediction set via lazy method.
         )delimiter")
         .def_readonly("max_iters", &state_t::max_iters, R"delimiter(
         Maximum number of coordinate descents.
@@ -927,8 +925,6 @@ void state_basil_naive(py::module_& m, const char* name)
             size_t,
             value_t,
             const std::string&,
-            bool,
-            value_t,
             size_t,
             value_t,
             value_t,
@@ -972,8 +968,6 @@ void state_basil_naive(py::module_& m, const char* name)
             py::arg("pivot_subset_min"),
             py::arg("pivot_slack_ratio"),
             py::arg("screen_rule"),
-            py::arg("lazify_screen"),
-            py::arg("lazy_ratio"),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("rsq_tol"),
