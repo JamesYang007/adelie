@@ -35,12 +35,12 @@ struct StatePinBase
     const map_cvec_index_t group_sizes;
     const value_t alpha;
     const map_cvec_value_t penalty;
-    const map_cvec_index_t strong_set;
-    const map_cvec_index_t strong_g1;
-    const map_cvec_index_t strong_g2;
-    const map_cvec_index_t strong_begins;
-    const map_cvec_value_t strong_vars;
-    const dyn_vec_mat_value_t* strong_transforms;
+    const map_cvec_index_t screen_set;
+    const map_cvec_index_t screen_g1;
+    const map_cvec_index_t screen_g2;
+    const map_cvec_index_t screen_begins;
+    const map_cvec_value_t screen_vars;
+    const dyn_vec_mat_value_t* screen_transforms;
     const map_cvec_value_t lmda_path;
 
     /* configurations */
@@ -55,8 +55,8 @@ struct StatePinBase
 
     /* dynamic states */
     value_t rsq;
-    map_vec_value_t strong_beta;
-    map_vec_bool_t strong_is_active;
+    map_vec_value_t screen_beta;
+    map_vec_bool_t screen_is_active;
     dyn_vec_index_t active_set;
     dyn_vec_index_t active_g1;
     dyn_vec_index_t active_g2;
@@ -66,12 +66,12 @@ struct StatePinBase
     dyn_vec_value_t intercepts;
     dyn_vec_value_t rsqs;
     dyn_vec_value_t lmdas;
-    dyn_vec_vec_bool_t strong_is_actives;
-    dyn_vec_vec_value_t strong_betas;
+    dyn_vec_vec_bool_t screen_is_actives;
+    dyn_vec_vec_value_t screen_betas;
     size_t iters = 0;
 
     /* diagnostics */
-    std::vector<double> benchmark_strong;
+    std::vector<double> benchmark_screen;
     std::vector<double> benchmark_active;
 
     virtual ~StatePinBase() =default;
@@ -81,12 +81,12 @@ struct StatePinBase
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
-        const Eigen::Ref<const vec_index_t>& strong_set, 
-        const Eigen::Ref<const vec_index_t>& strong_g1,
-        const Eigen::Ref<const vec_index_t>& strong_g2,
-        const Eigen::Ref<const vec_index_t>& strong_begins, 
-        const Eigen::Ref<const vec_value_t>& strong_vars,
-        const dyn_vec_mat_value_t& strong_transforms,
+        const Eigen::Ref<const vec_index_t>& screen_set, 
+        const Eigen::Ref<const vec_index_t>& screen_g1,
+        const Eigen::Ref<const vec_index_t>& screen_g2,
+        const Eigen::Ref<const vec_index_t>& screen_begins, 
+        const Eigen::Ref<const vec_value_t>& screen_vars,
+        const dyn_vec_mat_value_t& screen_transforms,
         const Eigen::Ref<const vec_value_t>& lmda_path, 
         bool intercept,
         size_t max_iters,
@@ -97,19 +97,19 @@ struct StatePinBase
         size_t newton_max_iters,
         size_t n_threads,
         value_t rsq,
-        Eigen::Ref<vec_value_t> strong_beta, 
-        Eigen::Ref<vec_bool_t> strong_is_active
+        Eigen::Ref<vec_value_t> screen_beta, 
+        Eigen::Ref<vec_bool_t> screen_is_active
     ): 
         groups(groups.data(), groups.size()),
         group_sizes(group_sizes.data(), group_sizes.size()),
         alpha(alpha),
         penalty(penalty.data(), penalty.size()),
-        strong_set(strong_set.data(), strong_set.size()),
-        strong_g1(strong_g1.data(), strong_g1.size()),
-        strong_g2(strong_g2.data(), strong_g2.size()),
-        strong_begins(strong_begins.data(), strong_begins.size()),
-        strong_vars(strong_vars.data(), strong_vars.size()),
-        strong_transforms(&strong_transforms),
+        screen_set(screen_set.data(), screen_set.size()),
+        screen_g1(screen_g1.data(), screen_g1.size()),
+        screen_g2(screen_g2.data(), screen_g2.size()),
+        screen_begins(screen_begins.data(), screen_begins.size()),
+        screen_vars(screen_vars.data(), screen_vars.size()),
+        screen_transforms(&screen_transforms),
         lmda_path(lmda_path.data(), lmda_path.size()),
         intercept(intercept),
         max_iters(max_iters),
@@ -120,18 +120,18 @@ struct StatePinBase
         newton_max_iters(newton_max_iters),
         n_threads(n_threads),
         rsq(rsq),
-        strong_beta(strong_beta.data(), strong_beta.size()),
-        strong_is_active(strong_is_active.data(), strong_is_active.size())
+        screen_beta(screen_beta.data(), screen_beta.size()),
+        screen_is_active(screen_is_active.data(), screen_is_active.size())
     {
-        active_set.reserve(strong_set.size());
-        active_g1.reserve(strong_set.size());
-        active_g2.reserve(strong_set.size());
-        active_begins.reserve(strong_beta.size());
+        active_set.reserve(screen_set.size());
+        active_g1.reserve(screen_set.size());
+        active_g2.reserve(screen_set.size());
+        active_begins.reserve(screen_beta.size());
         int active_begin = 0;
-        for (int i = 0; i < strong_is_active.size(); ++i) {
-            if (!strong_is_active[i]) continue;
+        for (int i = 0; i < screen_is_active.size(); ++i) {
+            if (!screen_is_active[i]) continue;
             active_set.push_back(i);
-            int curr_size = group_sizes[strong_set[i]];
+            int curr_size = group_sizes[screen_set[i]];
             if (curr_size == 1) {
                 active_g1.push_back(i);
             } else {
@@ -147,7 +147,7 @@ struct StatePinBase
             active_order.begin(),
             active_order.end(),
             [&](auto i, auto j) { 
-                return groups[strong_set[active_set[i]]] < groups[strong_set[active_set[j]]]; 
+                return groups[screen_set[active_set[i]]] < groups[screen_set[active_set[j]]]; 
             }
         );
 
@@ -155,9 +155,9 @@ struct StatePinBase
         intercepts.reserve(lmda_path.size());
         rsqs.reserve(lmda_path.size());
         lmdas.reserve(lmda_path.size());
-        strong_is_actives.reserve(lmda_path.size());
-        strong_betas.reserve(lmda_path.size());
-        benchmark_strong.reserve(1000);
+        screen_is_actives.reserve(lmda_path.size());
+        screen_betas.reserve(lmda_path.size());
+        benchmark_screen.reserve(1000);
         benchmark_active.reserve(1000);
     }
 };

@@ -38,6 +38,12 @@ def test_naive_dense():
             cX.btmul(0, p // 2, v, out)
             assert np.allclose(v.T @ X[:, :p//2].T, out, atol=atol)
 
+            # test mul
+            v = np.random.normal(0, 1, n).astype(dtype)
+            out = np.empty(p, dtype=dtype)
+            cX.mul(v, out)
+            assert np.allclose(v.T @ X, out, atol=atol)
+
             # test sp_btmul
             v = np.random.normal(0, 1, (2, p // 2)).astype(dtype)
             v[:, :p//4] = 0

@@ -50,78 +50,76 @@ void update_abs_grad(
 }
 
 /**
- * Updates all derived quantities from strong_set in the base class. 
- * The state must be such that only the strong_set is either unchanged from invariance,
+ * Updates all derived quantities from screen_set in the base class. 
+ * The state must be such that only the screen_set is either unchanged from invariance,
  * or appended with new groups.
  * After the function finishes, all strong quantities in the base class
- * will be consistent with strong_set, and the state is otherwise effectively
+ * will be consistent with screen_set, and the state is otherwise effectively
  * unchanged in the sense that other quantities dependent on strong states are unchanged.
  */
 template <class StateType>
 ADELIE_CORE_STRONG_INLINE
-void update_strong_derived_base(
+void update_screen_derived_base(
     StateType& state
 )
 {
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
-    const auto& strong_set = state.strong_set;
-    auto& strong_hashset = state.strong_hashset;
-    auto& strong_g1 = state.strong_g1;
-    auto& strong_g2 = state.strong_g2;
-    auto& strong_begins = state.strong_begins;
-    auto& strong_order = state.strong_order;
-    auto& strong_beta = state.strong_beta;
-    auto& strong_is_active = state.strong_is_active;
+    const auto& screen_set = state.screen_set;
+    auto& screen_hashset = state.screen_hashset;
+    auto& screen_g1 = state.screen_g1;
+    auto& screen_g2 = state.screen_g2;
+    auto& screen_begins = state.screen_begins;
+    auto& screen_order = state.screen_order;
+    auto& screen_beta = state.screen_beta;
+    auto& screen_is_active = state.screen_is_active;
 
-    /* update strong_hashset */
-    const auto old_strong_size = strong_begins.size();
-    const auto strong_set_new_begin = std::next(strong_set.begin(), old_strong_size);
-    strong_hashset.insert(strong_set_new_begin, strong_set.end());
+    /* update screen_hashset */
+    const auto old_screen_size = screen_begins.size();
+    const auto screen_set_new_begin = std::next(screen_set.begin(), old_screen_size);
+    screen_hashset.insert(screen_set_new_begin, screen_set.end());
 
-    /* update strong_g1, strong_g2, strong_begins */
-    size_t strong_value_size = (
-        (old_strong_size == 0) ? 
-        0 : (strong_begins.back() + group_sizes[strong_set[old_strong_size-1]])
+    /* update screen_g1, screen_g2, screen_begins */
+    size_t screen_value_size = (
+        (old_screen_size == 0) ? 
+        0 : (screen_begins.back() + group_sizes[screen_set[old_screen_size-1]])
     );
-    for (size_t i = old_strong_size; i < strong_set.size(); ++i) {
-        const auto curr_size = group_sizes[strong_set[i]];
+    for (size_t i = old_screen_size; i < screen_set.size(); ++i) {
+        const auto curr_size = group_sizes[screen_set[i]];
         if (curr_size == 1) {
-            strong_g1.push_back(i);
+            screen_g1.push_back(i);
         } else {
-            strong_g2.push_back(i);
+            screen_g2.push_back(i);
         }
-        strong_begins.push_back(strong_value_size);
-        strong_value_size += curr_size;
+        screen_begins.push_back(screen_value_size);
+        screen_value_size += curr_size;
     }
 
-    /* update strong_order */
-    strong_order.resize(strong_set.size());
+    /* update screen_order */
+    screen_order.resize(screen_set.size());
     std::iota(
-        std::next(strong_order.begin(), old_strong_size), 
-        strong_order.end(), 
-        old_strong_size
+        std::next(screen_order.begin(), old_screen_size), 
+        screen_order.end(), 
+        old_screen_size
     );
     std::sort(
-        strong_order.begin(),
-        strong_order.end(),
+        screen_order.begin(),
+        screen_order.end(),
         [&](auto i, auto j) {
-            return groups[strong_set[i]] < groups[strong_set[j]];
+            return groups[screen_set[i]] < groups[screen_set[j]];
         }
     );
 
-    /* update strong_beta */
-    strong_beta.resize(strong_value_size, 0);
+    /* update screen_beta */
+    screen_beta.resize(screen_value_size, 0);
 
-    /* update strong_is_active */
-    strong_is_active.resize(strong_set.size(), false);
+    /* update screen_is_active */
+    screen_is_active.resize(screen_set.size(), false);
 }
 
 enum class screen_rule_type
 {
     _strong,
-    _fixed_greedy,
-    _safe,
     _pivot
 };
 
@@ -160,8 +158,7 @@ struct StateBasilBase
     const size_t lmda_path_size;
 
     // basil iteration configs
-    const size_t delta_strong_size;
-    const size_t max_strong_size;
+    const size_t max_screen_size;
     const value_t pivot_subset_ratio;
     const size_t pivot_subset_min;
     const value_t pivot_slack_ratio;
@@ -188,14 +185,14 @@ struct StateBasilBase
     vec_value_t lmda_path;
 
     // invariants
-    uset_index_t strong_hashset;
-    dyn_vec_index_t strong_set; 
-    dyn_vec_index_t strong_g1;
-    dyn_vec_index_t strong_g2;
-    dyn_vec_index_t strong_begins;
-    dyn_vec_index_t strong_order;
-    dyn_vec_value_t strong_beta;
-    dyn_vec_bool_t strong_is_active;
+    uset_index_t screen_hashset;
+    dyn_vec_index_t screen_set; 
+    dyn_vec_index_t screen_g1;
+    dyn_vec_index_t screen_g2;
+    dyn_vec_index_t screen_begins;
+    dyn_vec_index_t screen_order;
+    dyn_vec_value_t screen_beta;
+    dyn_vec_bool_t screen_is_active;
     value_t rsq;
     value_t lmda;
     vec_value_t grad;
@@ -209,14 +206,13 @@ struct StateBasilBase
 
     // diagnostics
     std::vector<double> benchmark_screen;
-    std::vector<double> benchmark_fit_strong;
+    std::vector<double> benchmark_fit_screen;
     std::vector<double> benchmark_fit_active;
     std::vector<double> benchmark_kkt;
     std::vector<double> benchmark_invariance;
     std::vector<int> n_valid_solutions;
     std::vector<int> active_sizes;
-    std::vector<int> strong_sizes;
-    std::vector<int> edpp_safe_sizes;
+    std::vector<int> screen_sizes;
 
     virtual ~StateBasilBase() =default;
 
@@ -229,8 +225,7 @@ struct StateBasilBase
         value_t lmda_max,
         value_t min_ratio,
         size_t lmda_path_size,
-        size_t delta_strong_size,
-        size_t max_strong_size,
+        size_t max_screen_size,
         value_t pivot_subset_ratio,
         size_t pivot_subset_min,
         value_t pivot_slack_ratio,
@@ -247,9 +242,9 @@ struct StateBasilBase
         bool setup_lmda_path,
         bool intercept,
         size_t n_threads,
-        const Eigen::Ref<const vec_index_t>& strong_set,
-        const Eigen::Ref<const vec_value_t>& strong_beta,
-        const Eigen::Ref<const vec_bool_t>& strong_is_active,
+        const Eigen::Ref<const vec_index_t>& screen_set,
+        const Eigen::Ref<const vec_value_t>& screen_beta,
+        const Eigen::Ref<const vec_bool_t>& screen_is_active,
         value_t rsq,
         value_t lmda,
         const Eigen::Ref<const vec_value_t>& grad
@@ -260,12 +255,11 @@ struct StateBasilBase
         penalty(penalty.data(), penalty.size()),
         min_ratio(min_ratio),
         lmda_path_size(lmda_path_size),
-        delta_strong_size(delta_strong_size),
-        max_strong_size(max_strong_size),
+        max_screen_size(max_screen_size),
         pivot_subset_ratio(pivot_subset_ratio),
         pivot_subset_min(pivot_subset_min),
         pivot_slack_ratio(pivot_slack_ratio),
-        screen_rule(convert_strong_rule(screen_rule)),
+        screen_rule(convert_screen_rule(screen_rule)),
         max_iters(max_iters),
         tol(tol),
         rsq_tol(rsq_tol),
@@ -280,9 +274,9 @@ struct StateBasilBase
         n_threads(n_threads),
         lmda_max(lmda_max),
         lmda_path(lmda_path),
-        strong_set(strong_set.data(), strong_set.data() + strong_set.size()),
-        strong_beta(strong_beta.data(), strong_beta.data() + strong_beta.size()),
-        strong_is_active(strong_is_active.data(), strong_is_active.data() + strong_is_active.size()),
+        screen_set(screen_set.data(), screen_set.data() + screen_set.size()),
+        screen_beta(screen_beta.data(), screen_beta.data() + screen_beta.size()),
+        screen_is_active(screen_is_active.data(), screen_is_active.data() + screen_is_active.size()),
         rsq(rsq),
         lmda(lmda),
         grad(grad),
@@ -291,26 +285,24 @@ struct StateBasilBase
         initialize();
     }
 
-    screen_rule_type convert_strong_rule(
+    screen_rule_type convert_screen_rule(
         const std::string& rule
     )
     {
         if (rule == "strong") return screen_rule_type::_strong;
-        if (rule == "fixed_greedy") return screen_rule_type::_fixed_greedy;
-        if (rule == "safe") return screen_rule_type::_safe;
         if (rule == "pivot") return screen_rule_type::_pivot;
         throw std::runtime_error("Invalid strong rule type: " + rule);
     }
 
     void initialize()
     {
-        /* initialize strong_set derived quantities */
-        strong_begins.reserve(strong_set.size());
-        strong_g1.reserve(strong_set.size());
-        strong_g2.reserve(strong_set.size());
-        strong_begins.reserve(strong_set.size());
-        strong_order.reserve(strong_set.size());
-        update_strong_derived_base(*this);
+        /* initialize screen_set derived quantities */
+        screen_begins.reserve(screen_set.size());
+        screen_g1.reserve(screen_set.size());
+        screen_g2.reserve(screen_set.size());
+        screen_begins.reserve(screen_set.size());
+        screen_order.reserve(screen_set.size());
+        update_screen_derived_base(*this);
 
         /* initialize abs_grad */
         update_abs_grad(*this);
@@ -321,15 +313,14 @@ struct StateBasilBase
         intercepts.reserve(n_lmdas);
         rsqs.reserve(n_lmdas);
         lmdas.reserve(n_lmdas);
-        benchmark_fit_strong.reserve(n_lmdas);
+        benchmark_fit_screen.reserve(n_lmdas);
         benchmark_fit_active.reserve(n_lmdas);
         benchmark_kkt.reserve(n_lmdas);
         benchmark_screen.reserve(n_lmdas);
         benchmark_invariance.reserve(n_lmdas);
         n_valid_solutions.reserve(n_lmdas);
         active_sizes.reserve(n_lmdas);
-        strong_sizes.reserve(n_lmdas);
-        edpp_safe_sizes.reserve(n_lmdas);
+        screen_sizes.reserve(n_lmdas);
     }
 };
 

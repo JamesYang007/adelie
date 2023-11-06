@@ -78,20 +78,42 @@ def _screen_sets_strong(
 def _screen_sets_safe(
     state,
     *,
+    y: np.ndarray,
     resids: np.ndarray,
     active_sets: list,
     method: str ="",
 ):
-    if not (state.setup_edpp and state.use_edpp):
-        raise RuntimeError("EDPP quantities are not properly set up! Run the solver with EDPP enabled.")
     X = state.X
+    X_means = state.X_means
     X_group_norms = state.X_group_norms
     penalty = state.penalty
     betas = state.betas
-    edpp_v1_0 = state.edpp_v1_0
-    edpp_resid_0 = state.edpp_resid_0
     lmdas = state.lmdas
+    intercept = state.intercept
+
+    assert np.all(penalty > 0)
+
     G, n_lmdas, n, p = X_group_norms.shape[0], betas.shape[0], X.rows(), X.cols()
+
+    edpp_resid_0 = y
+    if intercept:
+        edpp_resid_0 = y - np.mean(y)
+    edpp_grad = np.empty(p)
+    X.mul(edpp_resid_0, edpp_grad)
+    edpp_abs_grad = np.array([
+        np.linalg.norm(edpp_grad[g:g+gs])
+        for g, gs in zip(state.groups, state.group_sizes)
+    ])
+    g_star = np.argmax(edpp_abs_grad / penalty)
+    tmp = np.empty(state.group_sizes[g_star])
+    X.bmul(state.groups[g_star], state.group_sizes[g_star], edpp_resid_0, tmp)
+    edpp_v1_0 = np.empty(n)
+    X.btmul(state.groups[g_star], state.group_sizes[g_star], tmp, edpp_v1_0)
+    if intercept:
+        edpp_v1_0 -= np.sum(tmp * X_means[
+            state.groups[g_star] :
+            state.groups[g_star] + state.group_sizes[g_star]
+        ])
 
     v1s = np.empty((n_lmdas-1, n))
     v1s[0] = edpp_v1_0
@@ -101,7 +123,7 @@ def _screen_sets_safe(
     v2_perp_norms = np.linalg.norm(v2_perps, axis=-1)
     edpps = np.empty((n_lmdas-1, p))
     for i in range(n_lmdas-1):
-        X.bmul(0, p, (resids[i] / lmdas[i] + 0.5 * v2_perps[i]), edpps[i])
+        X.mul((resids[i] / lmdas[i] + 0.5 * v2_perps[i]), edpps[i])
     abs_edpps = ad.diagnostic.gradient_norms(state, grads=edpps)
     is_edpp = (
         abs_edpps >= (penalty[None] - 0.5 * v2_perp_norms[:, None] * X_group_norms[None])
@@ -253,7 +275,7 @@ def _screen_sets_pivot(
                 predict_set = _fixed_update(
                     predict_set,
                     slack_set,
-                    state.delta_strong_size,
+                    state.delta_screen_size,
                 )
                 count += 1
             if count >= 1:
@@ -324,7 +346,7 @@ def plot_scores(
     fig, ax = plt.subplots(layout="constrained")
 
     order = np.argsort(scores[idx])
-    order_sub = order[-int((1 + state.pivot_subset_ratio) * state.strong_sizes[idx]):]
+    order_sub = order[-int((1 + state.pivot_subset_ratio) * state.screen_sizes[idx]):]
     argmin, _ = ad.optimization.search_pivot(
         np.arange(order_sub.shape[0]), 
         scores[idx, order_sub]
@@ -408,10 +430,10 @@ def plot_scores(
         s = scores[idx]
 
         order = np.argsort(s) 
-        order_sub = order[-int((1 + state.pivot_subset_ratio) * state.strong_sizes[idx]):]
+        order_sub = order[-int((1 + state.pivot_subset_ratio) * state.screen_sizes[idx]):]
         argmin, _ = ad.optimization.search_pivot(
             np.arange(order_sub.shape[0]), 
-            s[order_sub]
+            s[order_sub],
         )
         cutoff_idx = argmin + G - len(order_sub)
 
@@ -419,12 +441,12 @@ def plot_scores(
         is_active[np.array(list(active_ss[idx+1]))] = True
         if sorted:
             xs = [
-                gns[~is_active[order]][-k_largest:],
-                gns[is_active[order]][-k_largest:],
+                gns[~is_active[order]],
+                gns[is_active[order]],
             ]
             ys = [
-                scores[idx, order[xs[0]]][-k_largest:],
-                scores[idx, order[xs[1]]][-k_largest:],
+                scores[idx, order[xs[0]]],
+                scores[idx, order[xs[1]]],
             ]
         else:
             xs = [
@@ -717,8 +739,8 @@ def real_data_analysis(
 
     active_ss = active_sets(pivot_state)
     active_sizes = np.array([len(s) for s in active_ss])
-    strong_sizes = strong_state.strong_sizes
-    pivot_sizes = pivot_state.strong_sizes
+    strong_sizes = strong_state.screen_sizes
+    pivot_sizes = pivot_state.screen_sizes
 
     assert len(strong_sizes) == len(pivot_sizes)
 

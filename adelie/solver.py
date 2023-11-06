@@ -189,12 +189,10 @@ def grpnet(
     screen_rule: str ="pivot",
     min_ratio: float =1e-2,
     lmda_path_size: int =100,
-    delta_strong_size: int =10,
-    max_strong_size: int =None,
+    max_screen_size: int =None,
     pivot_subset_ratio: float =0.1,
     pivot_subset_min: int =1,
     pivot_slack_ratio: float =1.25,
-    use_edpp: bool =False,
     check_state: bool =False,
 ):
     """Group elastic net solver.
@@ -274,14 +272,10 @@ def grpnet(
                 by searching for a pivot point in the gradient norms.
 
         Default is ``"pivot"``.
-    delta_strong_size : int, optional
-        Number of strong groups to include per BASIL iteration 
-        if strong rule does not include new groups but optimality is not reached.
-        Default is ``10``.
-    max_strong_size: int, optional
+    max_screen_size: int, optional
         Maximum number of strong groups allowed.
         The function will return a valid state and guaranteed to have strong set size
-        less than or equal to ``max_strong_size``.
+        less than or equal to ``max_screen_size``.
         If ``None``, it will be set to the total number of groups.
         Default is ``None``.
     pivot_subset_ratio : float, optional
@@ -301,10 +295,6 @@ def grpnet(
         below the pivot point are also added to the strong set as slack.
         It is only used if ``screen_rule == "pivot"``.
         Default is ``1.25``.
-    use_edpp : bool, optional
-        ``True`` is EDPP rule should be used.
-        If ``False``, all groups are considered EDPP safe.
-        Default is ``False``
     check_state : bool, optional 
         ``True`` is state should be checked for inconsistencies before calling solver.
         Default is ``False``.
@@ -351,25 +341,17 @@ def grpnet(
     if penalty is None:
         penalty = np.sqrt(group_sizes)
 
-    strong_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
-    strong_beta = np.zeros(np.sum(group_sizes[strong_set]), dtype=dtype)
-    strong_is_active = np.ones(strong_set.shape[0], dtype=bool)
+    screen_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
+    screen_beta = np.zeros(np.sum(group_sizes[screen_set]), dtype=dtype)
+    screen_is_active = np.ones(screen_set.shape[0], dtype=bool)
 
     rsq = 0
     lmda = np.inf
     grad = np.empty(p, dtype=dtype)
-    _X.bmul(0, p, resid, grad)
+    _X.mul(resid, grad)
 
     if not (lmda_path is None):
         lmda_path = np.flip(np.sort(lmda_path))
-
-    edpp_safe_set = None
-    edpp_v1_0 = None
-    edpp_resid_0 = None
-    if not use_edpp:
-        edpp_safe_set = np.arange(G)
-        edpp_v1_0 = np.empty(n, dtype=dtype)
-        edpp_resid_0 = np.empty(n, dtype=dtype)
 
     state = ad.state.basil_naive(
         X=X,
@@ -382,17 +364,14 @@ def grpnet(
         group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
-        strong_set=strong_set,
-        strong_beta=strong_beta,
-        strong_is_active=strong_is_active,
+        screen_set=screen_set,
+        screen_beta=screen_beta,
+        screen_is_active=screen_is_active,
         rsq=rsq,
         lmda=lmda,
         grad=grad,
         lmda_path=lmda_path,
         lmda_max=None,
-        edpp_safe_set=edpp_safe_set,
-        edpp_v1_0=edpp_v1_0,
-        edpp_resid_0=edpp_resid_0,
         max_iters=max_iters,
         tol=tol,
         rsq_tol=rsq_tol,
@@ -406,15 +385,13 @@ def grpnet(
         screen_rule=screen_rule,
         min_ratio=min_ratio,
         lmda_path_size=lmda_path_size,
-        delta_strong_size=delta_strong_size,
-        max_strong_size=max_strong_size,
+        max_screen_size=max_screen_size,
         pivot_subset_ratio=pivot_subset_ratio,
         pivot_subset_min=pivot_subset_min,
         pivot_slack_ratio=pivot_slack_ratio,
     )
 
     if check_state:
-        assert isinstance(X_raw, np.ndarray)
-        state.check(X_raw, y, method="assert")
+        state.check(y, method="assert")
 
     return solve_basil(state)

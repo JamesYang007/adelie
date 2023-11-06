@@ -7,4 +7,4 @@ User Guide
 
 
     notebooks/edpp_study
-    notebooks/strong_rule_study
+    notebooks/pivot_rule

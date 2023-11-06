@@ -24,14 +24,4 @@ tar -xvf TCGA-PANCAN-HiSeq-801x20531.tar.gz
 rm -rf TCGA-PANCAN-HiSeq-801x20531.tar.gz
 cd ..
 
-wget https://archive.ics.uci.edu/static/public/216/amazon+access+samples.zip
-unzip amazon+access+samples.zip -d amazon
-rm -rf amazon+access+samples.zip
-cd amazon
-tar -xvf amzn-anon-access-samples.tgz
-rm -rf amzn-anon-access-samples.tgz
-cd ..
-
-wget https://archive.ics.uci.edu/static/public/328/greenhouse+gas+observing+network.zip
-unzip greenhouse+gas+observing+network.zip -d greenhouse
-rm -rf greenhouse+gas+observing+network.zip
+# manually download MNIST

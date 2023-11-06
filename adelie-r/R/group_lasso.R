@@ -12,11 +12,11 @@ group_basil <- function(
     user_lmdas=double(0),
     max_n_lambdas=100,
     n_lambdas_iter=5,
-    use_strong_rule=TRUE,
+    use_screen_rule=TRUE,
     do_early_exit=TRUE,
     verbose_diagnostic=FALSE,
-    delta_strong_size=5,
-    max_strong_size=ncol(X),
+    delta_screen_size=5,
+    max_screen_size=ncol(X),
     max_n_cds=as.integer(1e5),
     tol=1e-7,
     rsq_slope_tol=1e-3,
@@ -38,8 +38,8 @@ group_basil <- function(
     method_f__(
         X, y, as.integer(groups), as.integer(group_sizes), alpha, penalty,
         user_lmdas, max_n_lambdas, n_lambdas_iter,
-        use_strong_rule, do_early_exit, verbose_diagnostic,
-        delta_strong_size, max_strong_size,
+        use_screen_rule, do_early_exit, verbose_diagnostic,
+        delta_screen_size, max_screen_size,
         max_n_cds, tol, rsq_slope_tol, rsq_curv_tol,
         newton_tol, newton_max_iters, min_ratio, n_threads
     )

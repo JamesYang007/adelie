@@ -64,24 +64,24 @@ void sparsify_active_beta(
 
     const auto& active_set = state.active_set;
     const auto& active_order = state.active_order;
-    const auto& strong_set = state.strong_set;
+    const auto& screen_set = state.screen_set;
     const auto& group_sizes = state.group_sizes;
     const auto& groups = state.groups;
-    const auto& strong_beta = state.strong_beta;
-    const auto& strong_begins = state.strong_begins;
+    const auto& screen_beta = state.screen_beta;
+    const auto& screen_begins = state.screen_begins;
 
     auto idxs_begin = indices.data();
     auto vals_begin = values.data();
     for (size_t i = 0; i < active_order.size(); ++i) {
         const auto ss_idx = active_set[active_order[i]];
-        const auto group = strong_set[ss_idx];
+        const auto group = screen_set[ss_idx];
         const auto group_size = group_sizes[group];
         Eigen::Map<vec_index_t> idxs_seg(idxs_begin, group_size);
         Eigen::Map<vec_value_t> vals_seg(vals_begin, group_size);
         idxs_seg = vec_index_t::LinSpaced(
             group_size, groups[group], groups[group] + group_size - 1
         );
-        vals_seg = strong_beta.segment(strong_begins[ss_idx], group_size);
+        vals_seg = screen_beta.segment(screen_begins[ss_idx], group_size);
         idxs_begin += group_size;
         vals_begin += group_size;
     }        

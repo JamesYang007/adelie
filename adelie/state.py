@@ -9,7 +9,7 @@ import os
 def deduce_states(
     *,
     group_sizes: np.ndarray,
-    strong_set: np.ndarray,
+    screen_set: np.ndarray,
 ):
     """Deduce state variables.
 
@@ -17,33 +17,33 @@ def deduce_states(
     ----------
     group_sizes : (G,) np.ndarray
         See ``adelie.adelie_core.state.StatePinBase64``.
-    strong_set : (s,) np.ndarray
+    screen_set : (s,) np.ndarray
         See ``adelie.adelie_core.state.StatePinBase64``.
 
     Returns
     -------
-    strong_g1 : (s1,) np.ndarray
+    screen_g1 : (s1,) np.ndarray
         See ``adelie.adelie_core.state.StatePinBase64``.
-    strong_g2 : (s2,) np.ndarray
+    screen_g2 : (s2,) np.ndarray
         See ``adelie.adelie_core.state.StatePinBase64``.
-    strong_begins : (s,) np.ndarray
+    screen_begins : (s,) np.ndarray
         See ``adelie.adelie_core.state.StatePinBase64``.
 
     See Also
     --------
     adelie.adelie_core.state.StatePinBase64
     """
-    S = strong_set.shape[0]
-    strong_g1 = np.arange(S)[group_sizes[strong_set] == 1]
-    strong_g2 = np.arange(S)[group_sizes[strong_set] > 1]
-    strong_begins = np.cumsum(
-        np.concatenate([[0], group_sizes[strong_set]]),
+    S = screen_set.shape[0]
+    screen_g1 = np.arange(S)[group_sizes[screen_set] == 1]
+    screen_g2 = np.arange(S)[group_sizes[screen_set] > 1]
+    screen_begins = np.cumsum(
+        np.concatenate([[0], group_sizes[screen_set]]),
         dtype=int,
     )[:-1]
     return (
-        strong_g1,
-        strong_g2,
-        strong_begins,
+        screen_g1,
+        screen_g2,
+        screen_begins,
     )
 
 class base:
@@ -170,6 +170,11 @@ class pin_base(base):
             "check group_sizes dtype is int",
             method, logger,
         )
+        self._check(
+            np.allclose(self.groups, np.cumsum(np.concatenate([[0], self.group_sizes]))[:-1]),
+            "check groups and group_sizes consistency",
+            method, logger,
+        )
 
         # ================ alpha check ====================
         self._check(
@@ -190,106 +195,106 @@ class pin_base(base):
             method, logger,
         )
 
-        # ================ strong_set check ====================
+        # ================ screen_set check ====================
         self._check(
-            np.all((0 <= self.strong_set) & (self.strong_set < G)),
-            "check strong_set is a subset of [0, G)",
+            np.all((0 <= self.screen_set) & (self.screen_set < G)),
+            "check screen_set is a subset of [0, G)",
             method, logger,
         )
         self._check(
-            len(self.strong_set) == len(np.unique(self.strong_set)),
-            "check strong_set has unique values",
+            len(self.screen_set) == len(np.unique(self.screen_set)),
+            "check screen_set has unique values",
             method, logger,
         )
         self._check(
-            self.strong_set.dtype == np.dtype("int"),
-            "check strong_set dtype is int",
+            self.screen_set.dtype == np.dtype("int"),
+            "check screen_set dtype is int",
             method, logger,
         )
-        S = len(self.strong_set)
+        S = len(self.screen_set)
 
-        # ================ strong_g1 check ====================
+        # ================ screen_g1 check ====================
         self._check(
-            np.all((0 <= self.strong_g1) & (self.strong_g1 < S)),
-            "check strong_g1 is in [0, S)",
+            np.all((0 <= self.screen_g1) & (self.screen_g1 < S)),
+            "check screen_g1 is in [0, S)",
             method, logger,
         )
         self._check(
-            len(self.strong_g1) == len(np.unique(self.strong_g1)),
-            "check strong_g1 has unique values",
+            len(self.screen_g1) == len(np.unique(self.screen_g1)),
+            "check screen_g1 has unique values",
             method, logger,
         )
         self._check(
-            np.all(self.group_sizes[self.strong_set[self.strong_g1]] == 1),
-            "check strong_g1 has group sizes of 1",
+            np.all(self.group_sizes[self.screen_set[self.screen_g1]] == 1),
+            "check screen_g1 has group sizes of 1",
             method, logger,
         )
         self._check(
-            self.strong_g1.dtype == np.dtype("int"),
-            "check strong_g1 dtype is int",
-            method, logger,
-        )
-
-        # ================ strong_g2 check ====================
-        self._check(
-            np.all((0 <= self.strong_g2) & (self.strong_g2 < S)),
-            "check strong_g2 is in [0, S)",
-            method, logger,
-        )
-        self._check(
-            len(self.strong_g2) == len(np.unique(self.strong_g2)),
-            "check strong_g2 has unique values",
-            method, logger,
-        )
-        self._check(
-            np.all(self.group_sizes[self.strong_set[self.strong_g2]] > 1),
-            "check strong_g2 has group sizes more than 1",
-            method, logger,
-        )
-        self._check(
-            self.strong_g2.dtype == np.dtype("int"),
-            "check strong_g2 dtype is int",
-            method, logger,
-        )
-        self._check(
-            len(self.strong_g1) + len(self.strong_g2) == S,
-            "check strong_g1 and strong_g2 combined have length S",
+            self.screen_g1.dtype == np.dtype("int"),
+            "check screen_g1 dtype is int",
             method, logger,
         )
 
-        # ================ strong_begins check ====================
+        # ================ screen_g2 check ====================
+        self._check(
+            np.all((0 <= self.screen_g2) & (self.screen_g2 < S)),
+            "check screen_g2 is in [0, S)",
+            method, logger,
+        )
+        self._check(
+            len(self.screen_g2) == len(np.unique(self.screen_g2)),
+            "check screen_g2 has unique values",
+            method, logger,
+        )
+        self._check(
+            np.all(self.group_sizes[self.screen_set[self.screen_g2]] > 1),
+            "check screen_g2 has group sizes more than 1",
+            method, logger,
+        )
+        self._check(
+            self.screen_g2.dtype == np.dtype("int"),
+            "check screen_g2 dtype is int",
+            method, logger,
+        )
+        self._check(
+            len(self.screen_g1) + len(self.screen_g2) == S,
+            "check screen_g1 and screen_g2 combined have length S",
+            method, logger,
+        )
+
+        # ================ screen_begins check ====================
         expected = np.cumsum(
-            np.concatenate([[0], self.group_sizes[self.strong_set]], dtype=int)
+            np.concatenate([[0], self.group_sizes[self.screen_set]], dtype=int)
         )
         WS = expected[-1]
         expected = expected[:-1]
         self._check(
-            np.all(self.strong_begins == expected),
-            "check strong_begins is [0, g1, g2, ...] where gi is the group size of (i-1)th strong group.",
+            np.all(self.screen_begins == expected),
+            "check screen_begins is [0, g1, g2, ...] where gi is the group size of (i-1)th strong group.",
             method, logger,
         )
         self._check(
-            self.strong_begins.dtype == np.dtype("int"),
-            "check strong_begins dtype is int",
-            method, logger,
-        )
-
-        # ================ strong_vars check ====================
-        self._check(
-            len(self.strong_vars) == WS,
-            "check strong_vars size",
-            method, logger,
-        )
-        self._check(
-            np.all(0 <= self.strong_vars),
-            "check strong_vars is non-negative",
+            self.screen_begins.dtype == np.dtype("int"),
+            "check screen_begins dtype is int",
             method, logger,
         )
 
-        # ================ strong_transforms check ====================
+        # ================ screen_vars check ====================
         self._check(
-            len(self.strong_transforms) == S,
-            "check strong_transforms size",
+            len(self.screen_vars) == WS,
+            "check screen_vars size",
+            method, logger,
+        )
+        self._check(
+            np.all(0 <= self.screen_vars),
+            "check screen_vars is non-negative",
+            method, logger,
+        )
+
+        # ================ screen_transforms check ====================
+        self._check(
+            len(self.screen_transforms) == S,
+            "check screen_transforms size",
             method, logger,
         )
         
@@ -359,22 +364,22 @@ class pin_base(base):
             method, logger,
         )
 
-        # ================ strong_beta check ====================
+        # ================ screen_beta check ====================
         self._check(
-            len(self.strong_beta) == WS,
-            "check strong_beta size",
+            len(self.screen_beta) == WS,
+            "check screen_beta size",
             method, logger,
         )
 
-        # ================ strong_is_active check ====================
+        # ================ screen_is_active check ====================
         self._check(
-            np.all(np.arange(S)[self.strong_is_active] == np.sort(self.active_set)),
-            "check strong_is_active is consistent with active_set",
+            np.all(np.arange(S)[self.screen_is_active] == np.sort(self.active_set)),
+            "check screen_is_active is consistent with active_set",
             method, logger,
         )
         self._check(
-            self.strong_is_active.dtype == np.dtype("bool"),
-            "check strong_is_active dtype is bool",
+            self.screen_is_active.dtype == np.dtype("bool"),
+            "check screen_is_active dtype is bool",
             method, logger,
         )
 
@@ -408,7 +413,7 @@ class pin_base(base):
             method, logger,
         )
         self._check(
-            np.all(self.group_sizes[self.strong_set[self.active_g1]] == 1),
+            np.all(self.group_sizes[self.screen_set[self.active_g1]] == 1),
             "check active_g1 has group sizes of 1",
             method, logger,
         )
@@ -430,7 +435,7 @@ class pin_base(base):
             method, logger,
         )
         self._check(
-            np.all(self.group_sizes[self.strong_set[self.active_g2]] > 1),
+            np.all(self.group_sizes[self.screen_set[self.active_g2]] > 1),
             "check active_g2 has group sizes more than 1",
             method, logger,
         )
@@ -447,7 +452,7 @@ class pin_base(base):
 
         # ================ active_begins check ====================
         expected = np.cumsum(
-            np.concatenate([[0], self.group_sizes[self.strong_set[self.active_set]]], dtype=int)
+            np.concatenate([[0], self.group_sizes[self.screen_set[self.active_set]]], dtype=int)
         )
         WA = expected[-1]
         expected = expected[:-1]
@@ -463,7 +468,7 @@ class pin_base(base):
         )
 
         # ================ active_order check ====================
-        actual = self.groups[self.strong_set[self.active_set[self.active_order]]]
+        actual = self.groups[self.screen_set[self.active_set[self.active_order]]]
         self._check(
             np.all(actual == np.sort(actual)),
             "check active_order orders active_set such that groups is ordered",
@@ -511,17 +516,17 @@ class pin_base(base):
             method, logger,
         )
 
-        # ================ strong_is_actives check ====================
+        # ================ screen_is_actives check ====================
         self._check(
-            len(self.strong_is_actives) == self.betas.shape[0],
-            "check strong_is_actives shape",
+            len(self.screen_is_actives) == self.betas.shape[0],
+            "check screen_is_actives shape",
             method, logger,
         )
 
-        # ================ strong_betas check ====================
+        # ================ screen_betas check ====================
         self._check(
-            len(self.strong_betas) == self.betas.shape[0],
-            "check strong_betas shape",
+            len(self.screen_betas) == self.betas.shape[0],
+            "check screen_betas shape",
             method, logger,
         )
 
@@ -539,12 +544,12 @@ class pin_naive_base(pin_base):
         group_sizes: np.ndarray,
         alpha: float,
         penalty: np.ndarray,
-        strong_set: np.ndarray,
+        screen_set: np.ndarray,
         lmda_path: np.ndarray,
         rsq: float,
         resid: np.ndarray,
-        strong_beta: np.ndarray,
-        strong_is_active: np.ndarray,
+        screen_beta: np.ndarray,
+        screen_is_active: np.ndarray,
         intercept: bool,
         max_iters: int,
         tol: float,
@@ -571,27 +576,27 @@ class pin_naive_base(pin_base):
         self._groups = np.array(groups, copy=False, dtype=int)
         self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
         self._penalty = np.array(penalty, copy=False, dtype=dtype)
-        self._strong_set = np.array(strong_set, copy=False, dtype=int)
+        self._screen_set = np.array(screen_set, copy=False, dtype=int)
         self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
 
         # dynamic inputs require a copy to not modify user's inputs
         self._resid = np.copy(resid).astype(dtype)
-        self._strong_beta = np.copy(strong_beta).astype(dtype)
-        self._strong_is_active = np.copy(strong_is_active).astype(bool)
+        self._screen_beta = np.copy(screen_beta).astype(dtype)
+        self._screen_is_active = np.copy(screen_is_active).astype(bool)
 
         (
-            self._strong_g1,
-            self._strong_g2,
-            self._strong_begins,
+            self._screen_g1,
+            self._screen_g2,
+            self._screen_begins,
         ) = deduce_states(
             group_sizes=group_sizes,
-            strong_set=strong_set,
+            screen_set=screen_set,
         )
 
-        self._strong_vars = []
-        self._strong_X_means = []
-        self._strong_transforms = []
-        for i in self._strong_set:
+        self._screen_vars = []
+        self._screen_X_means = []
+        self._screen_transforms = []
+        for i in self._screen_set:
             g, gs = groups[i], group_sizes[i]
             Xi = np.empty((X.rows(), gs), dtype=dtype, order="F")
             X.to_dense(g, gs, Xi)
@@ -601,17 +606,17 @@ class pin_naive_base(pin_base):
             _, d, vh = np.linalg.svd(Xi, full_matrices=True, compute_uv=True)
             vars = np.zeros(gs)
             vars[:len(d)] = d ** 2
-            self._strong_vars.append(vars)
-            self._strong_X_means.append(Xi_means)
-            self._strong_transforms.append(np.array(vh.T, copy=False, dtype=dtype, order="F"))
-        self._strong_vars = np.concatenate(self._strong_vars, dtype=dtype)
-        self._strong_X_means = np.concatenate(self._strong_X_means, dtype=dtype)
+            self._screen_vars.append(vars)
+            self._screen_X_means.append(Xi_means)
+            self._screen_transforms.append(np.array(vh.T, copy=False, dtype=dtype, order="F"))
+        self._screen_vars = np.concatenate(self._screen_vars, dtype=dtype)
+        self._screen_X_means = np.concatenate(self._screen_X_means, dtype=dtype)
         vecmat_type = (
             core.VectorMatrix64
             if dtype == np.float64 else
             core.VectorMatrix32
         )
-        self._strong_transforms = vecmat_type(self._strong_transforms)
+        self._screen_transforms = vecmat_type(self._screen_transforms)
 
         resid_sum = np.sum(self._resid)
 
@@ -626,13 +631,13 @@ class pin_naive_base(pin_base):
             group_sizes=self._group_sizes,
             alpha=alpha,
             penalty=self._penalty,
-            strong_set=self._strong_set,
-            strong_g1=self._strong_g1,
-            strong_g2=self._strong_g2,
-            strong_begins=self._strong_begins,
-            strong_vars=self._strong_vars,
-            strong_X_means=self._strong_X_means,
-            strong_transforms=self._strong_transforms,
+            screen_set=self._screen_set,
+            screen_g1=self._screen_g1,
+            screen_g2=self._screen_g2,
+            screen_begins=self._screen_begins,
+            screen_vars=self._screen_vars,
+            screen_X_means=self._screen_X_means,
+            screen_transforms=self._screen_transforms,
             lmda_path=self._lmda_path,
             intercept=intercept,
             max_iters=max_iters,
@@ -646,8 +651,8 @@ class pin_naive_base(pin_base):
             rsq=rsq,
             resid=self._resid,
             resid_sum=resid_sum,
-            strong_beta=self._strong_beta,
-            strong_is_active=self._strong_is_active,
+            screen_beta=self._screen_beta,
+            screen_is_active=self._screen_is_active,
         )
 
     def check(
@@ -724,12 +729,12 @@ def pin_naive(
     group_sizes: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
-    strong_set: np.ndarray,
+    screen_set: np.ndarray,
     lmda_path: np.ndarray,
     rsq: float,
     resid: np.ndarray,
-    strong_beta: np.ndarray,
-    strong_is_active: np.ndarray,
+    screen_beta: np.ndarray,
+    screen_is_active: np.ndarray,
     intercept: bool =True,
     max_iters: int =int(1e5),
     tol: float =1e-12,
@@ -763,26 +768,26 @@ def pin_naive(
     penalty : (G,) np.ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
-    strong_set : (s,) np.ndarray
+    screen_set : (s,) np.ndarray
         List of indices into ``groups`` that correspond to the strong groups.
-        ``strong_set[i]`` is ``i`` th strong group.
+        ``screen_set[i]`` is ``i`` th strong group.
     lmda_path : (l,) np.ndarray
         Regularization sequence to fit on.
     rsq : float
-        Unnormalized :math:`R^2` value at ``strong_beta``.
+        Unnormalized :math:`R^2` value at ``screen_beta``.
         The unnormalized :math:`R^2` is given by :math:`\\|y_c\\|_2^2 - \\|y_c-X_c\\beta\\|_2^2`.
     resid : np.ndarray
-        Residual :math:`y_c-X\\beta` at ``strong_beta``.
-    strong_beta : (ws,) np.ndarray
+        Residual :math:`y_c-X\\beta` at ``screen_beta``.
+    screen_beta : (ws,) np.ndarray
         Coefficient vector on the strong set.
-        ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
         where
-        ``k = strong_set[i]``,
-        ``b = strong_begins[i]``,
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
-    strong_is_active : (a,) np.ndarray
+    screen_is_active : (a,) np.ndarray
         Boolean vector that indicates whether each strong group in ``groups`` is active or not.
-        ``strong_is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
+        ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
     intercept : bool, optional
         ``True`` to fit with intercept.
         Default is ``True``.
@@ -847,12 +852,12 @@ def pin_naive(
         group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
-        strong_set=strong_set,
+        screen_set=screen_set,
         lmda_path=lmda_path,
         rsq=rsq,
         resid=resid,
-        strong_beta=strong_beta,
-        strong_is_active=strong_is_active,
+        screen_beta=screen_beta,
+        screen_is_active=screen_is_active,
         intercept=intercept,
         max_iters=max_iters,
         tol=tol,
@@ -876,12 +881,12 @@ class pin_cov_base(pin_base):
         group_sizes: np.ndarray,
         alpha: float,
         penalty: np.ndarray,
-        strong_set: np.ndarray,
+        screen_set: np.ndarray,
         lmda_path: np.ndarray,
         rsq: float,
-        strong_beta: np.ndarray,
-        strong_grad: np.ndarray,
-        strong_is_active: np.ndarray,
+        screen_beta: np.ndarray,
+        screen_grad: np.ndarray,
+        screen_is_active: np.ndarray,
         max_iters: int,
         tol: float,
         rsq_slope_tol: float,
@@ -906,39 +911,39 @@ class pin_cov_base(pin_base):
         self._groups = np.array(groups, copy=False, dtype=int)
         self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
         self._penalty = np.array(penalty, copy=False, dtype=dtype)
-        self._strong_set = np.array(strong_set, copy=False, dtype=int)
+        self._screen_set = np.array(screen_set, copy=False, dtype=int)
         self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
 
         # dynamic inputs require a copy to not modify user's inputs
-        self._strong_beta = np.copy(strong_beta).astype(dtype)
-        self._strong_grad = np.copy(strong_grad).astype(dtype)
-        self._strong_is_active = np.copy(strong_is_active).astype(bool)
+        self._screen_beta = np.copy(screen_beta).astype(dtype)
+        self._screen_grad = np.copy(screen_grad).astype(dtype)
+        self._screen_is_active = np.copy(screen_is_active).astype(bool)
 
         (
-            self._strong_g1,
-            self._strong_g2,
-            self._strong_begins,
+            self._screen_g1,
+            self._screen_g2,
+            self._screen_begins,
         ) = deduce_states(
             group_sizes=group_sizes,
-            strong_set=strong_set,
+            screen_set=screen_set,
         )
 
-        self._strong_vars = []
-        self._strong_transforms = []
-        for i in self._strong_set:
+        self._screen_vars = []
+        self._screen_transforms = []
+        for i in self._screen_set:
             g, gs = groups[i], group_sizes[i]
             Aii = np.empty((gs, gs), dtype=dtype, order="F")
             A.to_dense(g, g, gs, gs, Aii)  
             dsq, v = np.linalg.eigh(Aii)
-            self._strong_vars.append(np.maximum(dsq, 0))
-            self._strong_transforms.append(v)
-        self._strong_vars = np.concatenate(self._strong_vars, dtype=dtype)
+            self._screen_vars.append(np.maximum(dsq, 0))
+            self._screen_transforms.append(v)
+        self._screen_vars = np.concatenate(self._screen_vars, dtype=dtype)
         vecmat_type = (
             core.VectorMatrix64
             if dtype == np.float64 else
             core.VectorMatrix32
         )
-        self._strong_transforms = vecmat_type(self._strong_transforms)
+        self._screen_transforms = vecmat_type(self._screen_transforms)
 
         base_type.__init__(
             self,
@@ -947,12 +952,12 @@ class pin_cov_base(pin_base):
             group_sizes=self._group_sizes,
             alpha=alpha,
             penalty=self._penalty,
-            strong_set=self._strong_set,
-            strong_g1=self._strong_g1,
-            strong_g2=self._strong_g2,
-            strong_begins=self._strong_begins,
-            strong_vars=self._strong_vars,
-            strong_transforms=self._strong_transforms,
+            screen_set=self._screen_set,
+            screen_g1=self._screen_g1,
+            screen_g2=self._screen_g2,
+            screen_begins=self._screen_begins,
+            screen_vars=self._screen_vars,
+            screen_transforms=self._screen_transforms,
             lmda_path=self._lmda_path,
             max_iters=max_iters,
             tol=tol,
@@ -962,9 +967,9 @@ class pin_cov_base(pin_base):
             newton_max_iters=newton_max_iters,
             n_threads=n_threads,
             rsq=rsq,
-            strong_beta=self._strong_beta,
-            strong_grad=self._strong_grad,
-            strong_is_active=self._strong_is_active,
+            screen_beta=self._screen_beta,
+            screen_grad=self._screen_grad,
+            screen_is_active=self._screen_is_active,
         )
 
     def check(
@@ -1029,12 +1034,12 @@ def pin_cov(
     group_sizes: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
-    strong_set: np.ndarray,
+    screen_set: np.ndarray,
     lmda_path: np.ndarray,
     rsq: float,
-    strong_beta: np.ndarray,
-    strong_grad: np.ndarray,
-    strong_is_active: np.ndarray,
+    screen_beta: np.ndarray,
+    screen_grad: np.ndarray,
+    screen_is_active: np.ndarray,
     max_iters: int =int(1e5),
     tol: float =1e-12,
     rsq_slope_tol: float =1e-3,
@@ -1062,33 +1067,33 @@ def pin_cov(
     penalty : (G,) np.ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
-    strong_set : (s,) np.ndarray
+    screen_set : (s,) np.ndarray
         List of indices into ``groups`` that correspond to the strong groups.
-        ``strong_set[i]`` is ``i`` th strong group.
+        ``screen_set[i]`` is ``i`` th strong group.
     lmda_path : (l,) np.ndarray
         Regularization sequence to fit on.
     rsq : float
-        Unnormalized :math:`R^2` value at ``strong_beta``.
+        Unnormalized :math:`R^2` value at ``screen_beta``.
         The unnormalized :math:`R^2` is given by :math:`\\|y_c\\|_2^2 - \\|y_c-X_c\\beta\\|_2^2`.
     resid : np.ndarray
-        Residual :math:`y_c-X\\beta` at ``strong_beta``.
-    strong_beta : (ws,) np.ndarray
+        Residual :math:`y_c-X\\beta` at ``screen_beta``.
+    screen_beta : (ws,) np.ndarray
         Coefficient vector on the strong set.
-        ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
         where
-        ``k = strong_set[i]``,
-        ``b = strong_begins[i]``,
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
-    strong_grad : (ws,) np.ndarray
-        Gradient :math:`X_{c,k}^\\top (y_c-X_c\\beta)` on the strong groups :math:`k` where :math:`beta` is given by ``strong_beta``.
-        ``strong_grad[b:b+p]`` is the gradient for the ``i`` th strong group
+    screen_grad : (ws,) np.ndarray
+        Gradient :math:`X_{c,k}^\\top (y_c-X_c\\beta)` on the strong groups :math:`k` where :math:`beta` is given by ``screen_beta``.
+        ``screen_grad[b:b+p]`` is the gradient for the ``i`` th strong group
         where 
-        ``k = strong_set[i]``,
-        ``b = strong_begins[i]``,
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
-    strong_is_active : (a,) np.ndarray
+    screen_is_active : (a,) np.ndarray
         Boolean vector that indicates whether each strong group in ``groups`` is active or not.
-        ``strong_is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
+        ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
     max_iters : int, optional
         Maximum number of coordinate descents.
         Default is ``int(1e5)``.
@@ -1145,12 +1150,12 @@ def pin_cov(
         group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
-        strong_set=strong_set,
+        screen_set=screen_set,
         lmda_path=lmda_path,
         rsq=rsq,
-        strong_beta=strong_beta,
-        strong_grad=strong_grad,
-        strong_is_active=strong_is_active,
+        screen_beta=screen_beta,
+        screen_grad=screen_grad,
+        screen_is_active=screen_is_active,
         max_iters=max_iters,
         tol=tol,
         rsq_slope_tol=rsq_slope_tol,
@@ -1176,11 +1181,7 @@ class basil_naive_base(basil_base):
         X_group_norms: np.ndarray,
         y_mean: float,
         y_var: float,
-        setup_edpp: bool,
         resid: np.ndarray,
-        edpp_safe_set: np.ndarray,
-        edpp_v1_0: np.ndarray,
-        edpp_resid_0: np.ndarray,
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -1189,8 +1190,7 @@ class basil_naive_base(basil_base):
         lmda_max: float,
         min_ratio: float,
         lmda_path_size: int,
-        delta_strong_size: int,
-        max_strong_size: int,
+        max_screen_size: int,
         pivot_subset_ratio: float,
         pivot_subset_min: int,
         pivot_slack_ratio: float,
@@ -1207,9 +1207,9 @@ class basil_naive_base(basil_base):
         setup_lmda_path: bool,
         intercept: bool,
         n_threads: int,
-        strong_set: np.ndarray,
-        strong_beta: np.ndarray,
-        strong_is_active: np.ndarray,
+        screen_set: np.ndarray,
+        screen_beta: np.ndarray,
+        screen_is_active: np.ndarray,
         rsq: float,
         lmda: float,
         grad: np.ndarray,
@@ -1231,12 +1231,9 @@ class basil_naive_base(basil_base):
         self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
         self._penalty = np.array(penalty, copy=False, dtype=dtype)
         self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
-        edpp_safe_set = np.array(edpp_safe_set, copy=False, dtype=int)
-        edpp_v1_0 = np.array(edpp_v1_0, copy=False, dtype=dtype)
-        edpp_resid_0 = np.array(edpp_resid_0, copy=False, dtype=dtype)
-        strong_set = np.array(strong_set, copy=False, dtype=int)
-        strong_beta = np.array(strong_beta, copy=False, dtype=dtype)
-        strong_is_active = np.array(strong_is_active, copy=False, dtype=bool)
+        screen_set = np.array(screen_set, copy=False, dtype=int)
+        screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
+        screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
         grad = np.array(grad, copy=False, dtype=dtype)
 
         # MUST call constructor directly and not use super()!
@@ -1249,11 +1246,7 @@ class basil_naive_base(basil_base):
             X_group_norms=self._X_group_norms,
             y_mean=y_mean,
             y_var=y_var,
-            setup_edpp=setup_edpp,
             resid=resid,
-            edpp_safe_set=edpp_safe_set,
-            edpp_v1_0=edpp_v1_0,
-            edpp_resid_0=edpp_resid_0,
             groups=self._groups,
             group_sizes=self._group_sizes,
             alpha=alpha,
@@ -1262,8 +1255,7 @@ class basil_naive_base(basil_base):
             lmda_max=lmda_max,
             min_ratio=min_ratio,
             lmda_path_size=lmda_path_size,
-            delta_strong_size=delta_strong_size,
-            max_strong_size=max_strong_size,
+            max_screen_size=max_screen_size,
             pivot_subset_ratio=pivot_subset_ratio,
             pivot_subset_min=pivot_subset_min,
             pivot_slack_ratio=pivot_slack_ratio,
@@ -1280,9 +1272,9 @@ class basil_naive_base(basil_base):
             setup_lmda_path=setup_lmda_path,
             intercept=intercept,
             n_threads=n_threads,
-            strong_set=strong_set,
-            strong_beta=strong_beta,
-            strong_is_active=strong_is_active,
+            screen_set=screen_set,
+            screen_beta=screen_beta,
+            screen_is_active=screen_is_active,
             rsq=rsq,
             lmda=lmda,
             grad=grad,
@@ -1290,17 +1282,14 @@ class basil_naive_base(basil_base):
 
     def check(
         self,
-        X,
         y, 
         method: str =None, 
         logger=logger.logger,
     ):
-        p = X.shape[1]
+        n, p = self.X.rows(), self.X.cols()
 
-        Xc = X 
         yc = y
         if self.intercept:
-            Xc = Xc - np.mean(X, axis=0)[None]
             yc = yc - np.mean(yc)
 
         # ================ groups check ====================
@@ -1342,6 +1331,11 @@ class basil_naive_base(basil_base):
             "check group_sizes dtype is int",
             method, logger,
         )
+        self._check(
+            np.allclose(self.groups, np.cumsum(np.concatenate([[0], self.group_sizes]))[:-1]),
+            "check groups and group_sizes consistency",
+            method, logger,
+        )
 
         # ================ alpha check ====================
         self._check(
@@ -1374,13 +1368,8 @@ class basil_naive_base(basil_base):
             method, logger,
         )
         self._check(
-            (self.screen_rule != "fixed_greedy") | (self.delta_strong_size > 0),
-            "check if strong rule is fixed_greedy, then delta_strong_size > 0",
-            method, logger,
-        )
-        self._check(
-            self.max_strong_size >= 0,
-            "check max_strong_size >= 0",
+            self.max_screen_size >= 0,
+            "check max_screen_size >= 0",
             method, logger,
         )
         self._check(
@@ -1419,136 +1408,147 @@ class basil_naive_base(basil_base):
             method, logger,
         )
 
-        # ================ strong_set check ====================
+        # ================ screen_set check ====================
         self._check(
-            np.all((0 <= self.strong_set) & (self.strong_set < G)),
-            "check strong_set is a subset of [0, G)",
+            np.all((0 <= self.screen_set) & (self.screen_set < G)),
+            "check screen_set is a subset of [0, G)",
             method, logger,
         )
         self._check(
-            len(self.strong_set) == len(np.unique(self.strong_set)),
-            "check strong_set has unique values",
+            len(self.screen_set) == len(np.unique(self.screen_set)),
+            "check screen_set has unique values",
             method, logger,
         )
         self._check(
-            self.strong_set.dtype == np.dtype("int"),
-            "check strong_set dtype is int",
+            self.screen_set.dtype == np.dtype("int"),
+            "check screen_set dtype is int",
             method, logger,
         )
-        S = len(self.strong_set)
+        S = len(self.screen_set)
 
-        # ================ strong_g1 check ====================
+        # ================ screen_g1 check ====================
         self._check(
-            np.all((0 <= self.strong_g1) & (self.strong_g1 < S)),
-            "check strong_g1 is in [0, S)",
+            np.all((0 <= self.screen_g1) & (self.screen_g1 < S)),
+            "check screen_g1 is in [0, S)",
             method, logger,
         )
         self._check(
-            len(self.strong_g1) == len(np.unique(self.strong_g1)),
-            "check strong_g1 has unique values",
+            len(self.screen_g1) == len(np.unique(self.screen_g1)),
+            "check screen_g1 has unique values",
             method, logger,
         )
         self._check(
-            np.all(self.group_sizes[self.strong_set[self.strong_g1]] == 1),
-            "check strong_g1 has group sizes of 1",
+            np.all(self.group_sizes[self.screen_set[self.screen_g1]] == 1),
+            "check screen_g1 has group sizes of 1",
             method, logger,
         )
         self._check(
-            self.strong_g1.dtype == np.dtype("int"),
-            "check strong_g1 dtype is int",
-            method, logger,
-        )
-
-        # ================ strong_g2 check ====================
-        self._check(
-            np.all((0 <= self.strong_g2) & (self.strong_g2 < S)),
-            "check strong_g2 is in [0, S)",
-            method, logger,
-        )
-        self._check(
-            len(self.strong_g2) == len(np.unique(self.strong_g2)),
-            "check strong_g2 has unique values",
-            method, logger,
-        )
-        self._check(
-            np.all(self.group_sizes[self.strong_set[self.strong_g2]] > 1),
-            "check strong_g2 has group sizes more than 1",
-            method, logger,
-        )
-        self._check(
-            self.strong_g2.dtype == np.dtype("int"),
-            "check strong_g2 dtype is int",
-            method, logger,
-        )
-        self._check(
-            len(self.strong_g1) + len(self.strong_g2) == S,
-            "check strong_g1 and strong_g2 combined have length S",
+            self.screen_g1.dtype == np.dtype("int"),
+            "check screen_g1 dtype is int",
             method, logger,
         )
 
-        # ================ strong_begins check ====================
+        # ================ screen_g2 check ====================
+        self._check(
+            np.all((0 <= self.screen_g2) & (self.screen_g2 < S)),
+            "check screen_g2 is in [0, S)",
+            method, logger,
+        )
+        self._check(
+            len(self.screen_g2) == len(np.unique(self.screen_g2)),
+            "check screen_g2 has unique values",
+            method, logger,
+        )
+        self._check(
+            np.all(self.group_sizes[self.screen_set[self.screen_g2]] > 1),
+            "check screen_g2 has group sizes more than 1",
+            method, logger,
+        )
+        self._check(
+            self.screen_g2.dtype == np.dtype("int"),
+            "check screen_g2 dtype is int",
+            method, logger,
+        )
+        self._check(
+            len(self.screen_g1) + len(self.screen_g2) == S,
+            "check screen_g1 and screen_g2 combined have length S",
+            method, logger,
+        )
+
+        # ================ screen_begins check ====================
         expected = np.cumsum(
-            np.concatenate([[0], self.group_sizes[self.strong_set]], dtype=int)
+            np.concatenate([[0], self.group_sizes[self.screen_set]], dtype=int)
         )
         WS = expected[-1]
         expected = expected[:-1]
         self._check(
-            np.all(self.strong_begins == expected),
-            "check strong_begins is [0, g1, g2, ...] where gi is the group size of (i-1)th strong group.",
+            np.all(self.screen_begins == expected),
+            "check screen_begins is [0, g1, g2, ...] where gi is the group size of (i-1)th strong group.",
             method, logger,
         )
         self._check(
-            self.strong_begins.dtype == np.dtype("int"),
-            "check strong_begins dtype is int",
+            self.screen_begins.dtype == np.dtype("int"),
+            "check screen_begins dtype is int",
             method, logger,
         )
 
-        # ================ strong_order check ====================
+        # ================ screen_order check ====================
         self._check(
-            np.all(self.strong_set[self.strong_order] == np.sort(self.strong_set)),
-            "check strong_order is correctly sorting strong_set",
+            np.all(self.screen_set[self.screen_order] == np.sort(self.screen_set)),
+            "check screen_order is correctly sorting screen_set",
             method, logger,
         )
 
-        # ================ strong_beta check ====================
+        # ================ screen_beta check ====================
         self._check(
-            len(self.strong_beta) == WS,
-            "check strong_beta size",
+            len(self.screen_beta) == WS,
+            "check screen_beta size",
             method, logger,
         )
 
-        # ================ strong_is_active check ====================
+        # ================ screen_is_active check ====================
         # This one is tricky! Since we keep track of ever-active set,
         # some coefficients may have once been active but now zero'ed out.
         # We can only check that if the non-zero coefficient blocks are active.
         nzn_idxs = np.array([
             i 
             for i, sb, gs in zip(
-                np.arange(len(self.strong_set)),
-                self.strong_begins, 
-                self.group_sizes[self.strong_set],
+                np.arange(len(self.screen_set)),
+                self.screen_begins, 
+                self.group_sizes[self.screen_set],
             )
-            if np.any(self.strong_beta[sb:sb+gs] != 0)
+            if np.any(self.screen_beta[sb:sb+gs] != 0)
         ], dtype=int)
         self._check(
-            np.all(self.strong_is_active[nzn_idxs]),
-            "check strong_is_active is only active on non-zeros of strong_beta",
+            np.all(self.screen_is_active[nzn_idxs]),
+            "check screen_is_active is only active on non-zeros of screen_beta",
             method, logger,
         )
 
         # ================ rsq check ====================
-        strong_indices = np.array([], dtype=int)
-        if len(self.strong_set) > 0:
-            strong_indices = np.concatenate([
-                np.arange(g, g + gs)
-                for g, gs in zip(self.groups[self.strong_set], self.group_sizes[self.strong_set])
-            ], dtype=int)
-        Xcbeta = Xc[:, strong_indices] @ self.strong_beta
-        Xbeta = Xcbeta
-        if self.intercept:
-            Xbeta = Xbeta + self.X_means[strong_indices] @ self.strong_beta
+        screen_indices = []
+        tmp = np.empty(n)
+        Xbeta = np.zeros(n)
+        for g, gs, b in zip(
+            self.groups[self.screen_set], 
+            self.group_sizes[self.screen_set],
+            self.screen_begins,
+        ):
+            screen_indices.append(np.arange(g, g + gs))
+            self.X.btmul(g, gs, self.screen_beta[b:b+gs], tmp)
+            Xbeta += tmp
+
+        if len(screen_indices) == 0:
+            screen_indices = np.array(screen_indices, dtype=int)
+        else:
+            screen_indices = np.concatenate(screen_indices, dtype=int)
+
         resid = yc - Xbeta
-        grad = Xc.T @ resid
+        grad = np.empty(p)
+        self.X.mul(resid, grad)
+        if self.intercept:
+            grad -= self.X_means * np.sum(resid)
+        Xcbeta = Xbeta - (self.screen_X_means @ self.screen_beta)
         expected = 2 * np.sum(yc * Xcbeta) - np.linalg.norm(Xcbeta) ** 2
         self._check(
             np.allclose(self.rsq, expected),
@@ -1588,25 +1588,28 @@ class basil_naive_base(basil_base):
             method, logger,
         )
 
-        # ================ strong_X_means check ====================
+        # ================ screen_X_means check ====================
         self._check(
-            np.allclose(self.strong_X_means, self.X_means[strong_indices]),
-            "check strong_X_means",
+            np.allclose(self.screen_X_means, self.X_means[screen_indices]),
+            "check screen_X_means",
             method, logger,
         )
 
-        # ================ strong_transforms / strong_vars check ====================
-        for ss_idx in range(len(self.strong_set)):
-            i = self.strong_set[ss_idx]
+        # ================ screen_transforms / screen_vars check ====================
+        for ss_idx in range(len(self.screen_set)):
+            i = self.screen_set[ss_idx]
             g, gs = self.groups[i], self.group_sizes[i]
-            Xi = Xc[:, g:g+gs]
-            V = self.strong_transforms[ss_idx]
+            Xi = np.empty((n, gs), order="F")
+            self.X.to_dense(g, gs, Xi)
+            if self.intercept:
+                Xi -= self.X_means[g:g+gs][None]
+            V = self.screen_transforms[ss_idx]
             XiV = Xi @ V
             Dsq = XiV.T @ XiV
-            sb = self.strong_begins[ss_idx]
+            sb = self.screen_begins[ss_idx]
             self._check(
-                np.allclose(self.strong_vars[sb:sb+gs], np.diag(Dsq)),
-                f"check strong_vars[{sb}:{sb}+{gs}]",
+                np.allclose(self.screen_vars[sb:sb+gs], np.diag(Dsq)),
+                f"check screen_vars[{sb}:{sb}+{gs}]",
                 method, logger,
             )
             np.fill_diagonal(Dsq, 0)
@@ -1628,17 +1631,14 @@ class basil_naive_base(basil_base):
             group_sizes=self.group_sizes,
             alpha=self.alpha,
             penalty=self.penalty,
-            strong_set=self.strong_set,
-            strong_beta=self.strong_beta,
-            strong_is_active=self.strong_is_active,
+            screen_set=self.screen_set,
+            screen_beta=self.screen_beta,
+            screen_is_active=self.screen_is_active,
             rsq=self.rsq,
             lmda=self.lmda,
             grad=self.grad,
             lmda_path=path,
             lmda_max=None if self.lmda_max == -1 else self.lmda_max,
-            edpp_safe_set=self.edpp_safe_set,
-            edpp_v1_0=None if len(self.edpp_v1_0) == 0 else self.edpp_v1_0,
-            edpp_resid_0=None if len(self.edpp_resid_0) == 0 else self.edpp_resid_0,
             max_iters=self.max_iters,
             tol=self.tol,
             rsq_tol=self.rsq_tol,
@@ -1652,8 +1652,7 @@ class basil_naive_base(basil_base):
             screen_rule=self.screen_rule,
             min_ratio=self.min_ratio,
             lmda_path_size=self.lmda_path_size,
-            delta_strong_size=self.delta_strong_size,
-            max_strong_size=self.max_strong_size,
+            max_screen_size=self.max_screen_size,
             pivot_subset_ratio=self.pivot_subset_ratio,
             pivot_subset_min=self.pivot_subset_min,
             pivot_slack_ratio=self.pivot_slack_ratio,
@@ -1714,17 +1713,14 @@ def basil_naive(
     group_sizes: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
-    strong_set: np.ndarray,
-    strong_beta: np.ndarray,
-    strong_is_active: np.ndarray,
+    screen_set: np.ndarray,
+    screen_beta: np.ndarray,
+    screen_is_active: np.ndarray,
     rsq: float,
     lmda: float,
     grad: np.ndarray,
     lmda_path: np.ndarray =None,
     lmda_max: float =None,
-    edpp_safe_set: np.ndarray =None,
-    edpp_v1_0: np.ndarray =None,
-    edpp_resid_0: np.ndarray =None,
     max_iters: int =int(1e5),
     tol: float =1e-12,
     rsq_tol: float =0.9,
@@ -1738,8 +1734,7 @@ def basil_naive(
     screen_rule: str ="pivot",
     min_ratio: float =1e-2,
     lmda_path_size: int =100,
-    delta_strong_size: int =10,
-    max_strong_size: int =None,
+    max_screen_size: int =None,
     pivot_subset_ratio: float =0.1,
     pivot_subset_min: int =1,
     pivot_slack_ratio: float =1.25,
@@ -1763,7 +1758,7 @@ def basil_naive(
         The variance of the response vector :math:`y`, i.e. 
         :math:`\\|y_c\\|_2^2`.
     resid : (n,) np.ndarray
-        Residual :math:`y_c - X \\beta` where :math:`\\beta` is given by ``strong_beta``.
+        Residual :math:`y_c - X \\beta` where :math:`\\beta` is given by ``screen_beta``.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -1776,31 +1771,31 @@ def basil_naive(
     penalty : (G,) np.ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
-    strong_set : (s,) np.ndarray
+    screen_set : (s,) np.ndarray
         List of indices into ``groups`` that correspond to the strong groups.
-        ``strong_set[i]`` is ``i`` th strong group.
-        ``strong_set`` must contain at least the true (optimal) active groups
+        ``screen_set[i]`` is ``i`` th strong group.
+        ``screen_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
-    strong_beta : (ws,) np.ndarray
+    screen_beta : (ws,) np.ndarray
         Coefficient vector on the strong set.
-        ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
         where
-        ``k = strong_set[i]``,
-        ``b = strong_begins[i]``,
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         This must contain the true solution values for the strong groups.
-    strong_is_active : (a,) np.ndarray
+    screen_is_active : (a,) np.ndarray
         Boolean vector that indicates whether each strong group in ``groups`` is active or not.
-        ``strong_is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
+        ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
     rsq : float
         The true unnormalized :math:`R^2` given by :math:`\\|y_c\\|_2^2 - \\|y_c-X_c\\beta\\|_2^2`
-        where :math:`\\beta` is given by ``strong_beta``.
+        where :math:`\\beta` is given by ``screen_beta``.
     lmda: float,
-        The regularization parameter at which the true solution is given by ``strong_beta``
+        The regularization parameter at which the true solution is given by ``screen_beta``
         (in the transformed space).
     grad: np.ndarray,
         The true full gradient :math:`X_c^\\top (y_c - X_c\\beta)` in the original space where
-        :math:`\\beta` is given by ``strong_beta``.
+        :math:`\\beta` is given by ``screen_beta``.
     lmda_path : (l,) np.ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
@@ -1810,18 +1805,6 @@ def basil_naive(
     lmda_max : float
         The smallest :math:`\\lambda` such that the true solution is zero
         for all coefficients that have a non-vanishing group lasso penalty (:math:`\\ell_2`-norm).
-        If ``None``, it will be computed.
-        Default is ``None``.
-    edpp_safe_set : (E,) np.ndarray, optional
-        A list of EDPP safe groups.
-        If ``None``,  it is set to be the same as ``strong_set``.
-        Default is ``None``.
-    edpp_v1_0: (n,) np.ndarray, optional
-        The :math:`v_1` vector in EDPP rule at :math:`\\lambda_\\max`.
-        If ``None``, it will be computed.
-        Default is ``None``.
-    edpp_resid_0: (n,) np.ndarray, optional
-        The residual :math:`y_c - X_c\\beta` where :math:`\\beta` is the solution at :math:`\\lambda_\\max`.
         If ``None``, it will be computed.
         Default is ``None``.
     max_iters : int, optional
@@ -1871,14 +1854,10 @@ def basil_naive(
                 by searching for a pivot point in the gradient norms.
 
         Default is ``"pivot"``.
-    delta_strong_size : int, optional
-        Number of strong groups to include per BASIL iteration 
-        if strong rule does not include new groups but optimality is not reached.
-        Default is ``10``.
-    max_strong_size: int, optional
+    max_screen_size: int, optional
         Maximum number of strong groups allowed.
         The function will return a valid state and guaranteed to have strong set size
-        less than or equal to ``max_strong_size``.
+        less than or equal to ``max_screen_size``.
         If ``None``, it will be set to the total number of groups.
         Default is ``None``.
     pivot_subset_ratio : float, optional
@@ -1917,10 +1896,8 @@ def basil_naive(
             "X must be an instance of matrix.MatrixNaiveBase32 or matrix.MatrixNaiveBase64."
         )
 
-    n, p = X_intr.rows(), X_intr.cols()
-
-    if max_strong_size is None:
-        max_strong_size = len(groups)
+    if max_screen_size is None:
+        max_screen_size = len(groups)
 
     if max_iters < 0:
         raise ValueError("max_iters must be >= 0.")
@@ -1942,10 +1919,8 @@ def basil_naive(
         raise ValueError("min_ratio must be > 0.")
     if lmda_path_size < 0:
         raise ValueError("lmda_path_size must be >= 0.")
-    if delta_strong_size < 1:
-        raise ValueError("delta_strong_size must be >= 1.")
-    if max_strong_size < 0:
-        raise ValueError("max_strong_size must be >= 0.")
+    if max_screen_size < 0:
+        raise ValueError("max_screen_size must be >= 0.")
     if pivot_subset_ratio <= 0 or pivot_subset_ratio > 1:
         raise ValueError("pivot_subset_ratio must be in (0, 1].")
     if pivot_subset_min < 1:
@@ -1959,7 +1934,7 @@ def basil_naive(
         len(lmda_path)
     )
 
-    max_strong_size = np.minimum(max_strong_size, len(groups))
+    max_screen_size = np.minimum(max_screen_size, len(groups))
 
     dtype = (
         np.float64
@@ -1978,25 +1953,13 @@ def basil_naive(
     if setup_lmda_max: lmda_max = -1
     if setup_lmda_path: lmda_path = np.empty(0, dtype=dtype)
 
-    if edpp_safe_set is None:
-        edpp_safe_set = np.copy(strong_set)
-
-    setup_edpp = (edpp_resid_0 is None) or (edpp_v1_0 is None)
-    if setup_edpp: 
-        edpp_resid_0 = np.empty(0, dtype=dtype)
-        edpp_v1_0 = np.empty(0, dtype=dtype)
-
     return dispatcher[dtype](
         X=X,
         X_means=X_means,
         X_group_norms=X_group_norms,
         y_mean=y_mean,
         y_var=y_var,
-        setup_edpp=setup_edpp,
         resid=resid,
-        edpp_safe_set=edpp_safe_set,
-        edpp_v1_0=edpp_v1_0,
-        edpp_resid_0=edpp_resid_0,
         groups=groups,
         group_sizes=group_sizes,
         alpha=alpha,
@@ -2005,8 +1968,7 @@ def basil_naive(
         lmda_max=lmda_max,
         setup_lmda_max=setup_lmda_max,
         setup_lmda_path=setup_lmda_path,
-        delta_strong_size=delta_strong_size,
-        max_strong_size=max_strong_size,
+        max_screen_size=max_screen_size,
         pivot_subset_ratio=pivot_subset_ratio,
         pivot_subset_min=pivot_subset_min,
         pivot_slack_ratio=pivot_slack_ratio,
@@ -2023,9 +1985,9 @@ def basil_naive(
         lmda_path_size=actual_lmda_path_size,
         intercept=intercept,
         n_threads=n_threads,
-        strong_set=strong_set,
-        strong_beta=strong_beta,
-        strong_is_active=strong_is_active,
+        screen_set=screen_set,
+        screen_beta=screen_beta,
+        screen_is_active=screen_is_active,
         rsq=rsq,
         lmda=lmda,
         grad=grad,

@@ -47,7 +47,7 @@ def gradients(
     p = X.cols()
     grads = np.empty((resids.shape[0], p))
     for i in range(resids.shape[0]):
-        X.bmul(0, p, resids[i], grads[i])
+        X.mul(resids[i], grads[i])
     return grads
 
 
@@ -188,7 +188,7 @@ def plot_set_sizes(
 
     ys = [
         state.active_sizes,
-        state.strong_sizes,
+        state.screen_sizes,
         state.edpp_safe_sizes,
     ]
     if ratio:
@@ -257,7 +257,7 @@ def plot_benchmark(state):
     """
     times = [
         state.benchmark_screen,
-        state.benchmark_fit_strong,
+        state.benchmark_fit_screen,
         state.benchmark_fit_active,
         state.benchmark_kkt,
         state.benchmark_invariance,

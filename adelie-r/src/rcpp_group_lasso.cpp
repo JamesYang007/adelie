@@ -20,11 +20,11 @@ Rcpp::List group_basil_cov__(
     const Eigen::Map<Eigen::VectorXd>& user_lmdas_, // to allow size 0
     size_t max_n_lambdas,
     size_t n_lambdas_iter,
-    bool use_strong_rule,
+    bool use_screen_rule,
     bool do_early_exit,
     bool verbose_diagnostic,
-    size_t delta_strong_size,
-    size_t max_strong_size,
+    size_t delta_screen_size,
+    size_t max_screen_size,
     size_t max_n_cds,
     double tol,
     double rsq_slope_tol,
@@ -61,7 +61,7 @@ Rcpp::List group_basil_cov__(
     try {
         gl_cov::group_basil(
             X, y, groups, group_sizes, alpha, penalty, user_lmdas, 
-            max_n_lambdas, n_lambdas_iter, use_strong_rule, do_early_exit, verbose_diagnostic, delta_strong_size, max_strong_size,
+            max_n_lambdas, n_lambdas_iter, use_screen_rule, do_early_exit, verbose_diagnostic, delta_screen_size, max_screen_size,
             max_n_cds, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, min_ratio, n_threads,
             betas_out, lmdas, rsqs_out, update_coefficients_f, checkpoint, diagnostic
         );
@@ -101,11 +101,11 @@ Rcpp::List group_basil_naive__(
     const Eigen::Map<Eigen::VectorXd>& user_lmdas_, // to allow size 0
     size_t max_n_lambdas,
     size_t n_lambdas_iter,
-    bool use_strong_rule,
+    bool use_screen_rule,
     bool do_early_exit,
     bool verbose_diagnostic,
-    size_t delta_strong_size,
-    size_t max_strong_size,
+    size_t delta_screen_size,
+    size_t max_screen_size,
     size_t max_n_cds,
     double tol,
     double rsq_slope_tol,
@@ -142,7 +142,7 @@ Rcpp::List group_basil_naive__(
     try {
         gl_naive::group_basil(
             X, y, groups, group_sizes, alpha, penalty, user_lmdas, 
-            max_n_lambdas, n_lambdas_iter, use_strong_rule, do_early_exit, verbose_diagnostic, delta_strong_size, max_strong_size,
+            max_n_lambdas, n_lambdas_iter, use_screen_rule, do_early_exit, verbose_diagnostic, delta_screen_size, max_screen_size,
             max_n_cds, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, min_ratio, n_threads,
             betas_out, lmdas, rsqs_out, update_coefficients_f, checkpoint, diagnostic
         );

@@ -38,8 +38,8 @@ def create_test_data_pin(
     X /= np.sqrt(n)
     y /= np.sqrt(n)
 
-    strong_set = np.random.choice(G, S, replace=False)
-    strong_is_active = np.zeros(strong_set.shape[0], dtype=bool)
+    screen_set = np.random.choice(G, S, replace=False)
+    screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
     penalty = np.random.uniform(0, 1, G)
     penalty /= np.sum(penalty)
     grad = X.T @ y
@@ -51,7 +51,7 @@ def create_test_data_pin(
     lmda_max = np.max(lmda_candidates[~np.isinf(lmda_candidates)])
     lmda_path = lmda_max * min_ratio ** (np.arange(n_lmdas) / (n_lmdas-1))
     rsq = 0
-    strong_beta = np.zeros(np.sum(group_sizes[strong_set]))
+    screen_beta = np.zeros(np.sum(group_sizes[screen_set]))
 
     return (
         X, 
@@ -60,10 +60,10 @@ def create_test_data_pin(
         group_sizes, 
         penalty,
         lmda_path,
-        strong_set, 
-        strong_is_active, 
+        screen_set, 
+        screen_is_active, 
         rsq,
-        strong_beta,
+        screen_beta,
     )
 
 
@@ -75,7 +75,7 @@ def solve_cvxpy(
     lmda: float,
     alpha: float,
     penalty: np.ndarray,
-    strong_set: np.ndarray,
+    screen_set: np.ndarray,
     intercept: bool,
     pin: bool,
 ):
@@ -95,7 +95,7 @@ def solve_cvxpy(
         constraints = [
             beta[groups[i] : groups[i] + group_sizes[i]] == 0
             for i in range(len(groups))
-            if not (i in strong_set)
+            if not (i in screen_set)
         ]
     if not intercept:
         constraints += [ beta0 == 0 ]
@@ -124,7 +124,7 @@ def run_solve_pin(state, X, y):
             lmda=lmda,
             alpha=state.alpha,
             penalty=state.penalty,
-            strong_set=state.strong_set,
+            screen_set=state.screen_set,
             intercept=state.intercept,
             pin=True,
         )
@@ -177,10 +177,10 @@ def test_solve_pin_naive():
             group_sizes, 
             penalty,
             lmda_path,
-            strong_set, 
-            strong_is_active, 
+            screen_set, 
+            screen_is_active, 
             rsq,
-            strong_beta,
+            screen_beta,
         ) = create_test_data_pin(
             n, p, G, S, alpha, sparsity, seed,
         )
@@ -199,12 +199,12 @@ def test_solve_pin_naive():
                 group_sizes=group_sizes,
                 alpha=alpha,
                 penalty=penalty,
-                strong_set=strong_set,
+                screen_set=screen_set,
                 lmda_path=lmda_path,
                 rsq=rsq,
                 resid=resid,
-                strong_beta=strong_beta,
-                strong_is_active=strong_is_active,
+                screen_beta=screen_beta,
+                screen_is_active=screen_is_active,
                 intercept=intercept,
                 tol=1e-12,
             )
@@ -217,12 +217,12 @@ def test_solve_pin_naive():
                 group_sizes=group_sizes,
                 alpha=alpha,
                 penalty=penalty,
-                strong_set=strong_set,
+                screen_set=screen_set,
                 lmda_path=[state.lmdas[-1] * 0.8],
                 rsq=state.rsq,
                 resid=state.resid,
-                strong_beta=state.strong_beta,
-                strong_is_active=state.strong_is_active,
+                screen_beta=state.screen_beta,
+                screen_is_active=state.screen_is_active,
                 intercept=intercept,
                 tol=1e-12,
             )
@@ -244,19 +244,19 @@ def test_solve_pin_cov():
             group_sizes, 
             penalty,
             lmda_path,
-            strong_set, 
-            strong_is_active, 
+            screen_set, 
+            screen_is_active, 
             rsq,
-            strong_beta,
+            screen_beta,
         ) = create_test_data_pin(
             n, p, G, S, alpha, sparsity, seed,
         )
 
         A = X.T @ X
         grad = X.T @ y
-        strong_grad = np.concatenate([
+        screen_grad = np.concatenate([
             grad[g:g+gs]
-            for g, gs in zip(groups[strong_set], group_sizes[strong_set])
+            for g, gs in zip(groups[screen_set], group_sizes[screen_set])
         ])
 
         # list of different types of cov matrices to test
@@ -272,12 +272,12 @@ def test_solve_pin_cov():
                 group_sizes=group_sizes,
                 alpha=alpha,
                 penalty=penalty,
-                strong_set=strong_set,
+                screen_set=screen_set,
                 lmda_path=lmda_path,
                 rsq=rsq,
-                strong_beta=strong_beta,
-                strong_grad=strong_grad,
-                strong_is_active=strong_is_active,
+                screen_beta=screen_beta,
+                screen_grad=screen_grad,
+                screen_is_active=screen_is_active,
                 tol=1e-12,
             )
             state = run_solve_pin(state, X, y)
@@ -287,12 +287,12 @@ def test_solve_pin_cov():
                 group_sizes=group_sizes,
                 alpha=alpha,
                 penalty=penalty,
-                strong_set=strong_set,
+                screen_set=screen_set,
                 lmda_path=[state.lmdas[-1] * 0.8],
                 rsq=state.rsq,
-                strong_beta=state.strong_beta,
-                strong_grad=state.strong_grad,
-                strong_is_active=state.strong_is_active,
+                screen_beta=state.screen_beta,
+                screen_grad=state.screen_grad,
+                screen_is_active=state.screen_is_active,
                 tol=1e-12,
             )
             run_solve_pin(state, X, y)
@@ -349,9 +349,9 @@ def create_test_data_basil(
     y_c = y - y_mean * intercept
     y_var = np.sum(y_c ** 2)
     resid = y_c
-    strong_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
-    strong_beta = np.zeros(np.sum(group_sizes[strong_set]))
-    strong_is_active = np.zeros(strong_set.shape[0], dtype=bool)
+    screen_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
+    screen_beta = np.zeros(np.sum(group_sizes[screen_set]))
+    screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
     grad = X_c.T @ y_c
 
     return {
@@ -366,9 +366,9 @@ def create_test_data_basil(
         "group_sizes": group_sizes,
         "alpha": alpha,
         "penalty": penalty,
-        "strong_set": strong_set,
-        "strong_beta": strong_beta,
-        "strong_is_active": strong_is_active,
+        "screen_set": screen_set,
+        "screen_beta": screen_beta,
+        "screen_is_active": screen_is_active,
         "rsq": 0,
         "lmda": np.inf,
         "grad": grad,
@@ -377,11 +377,11 @@ def create_test_data_basil(
 
 
 def run_solve_basil(state, X, y):
-    state.check(X, y, method="assert")
+    state.check(y, method="assert")
 
     state = solve_basil(state)    
 
-    state.check(X, y, method="assert")
+    state.check(y, method="assert")
 
     # get solved lmdas
     lmdas = state.lmdas
@@ -398,7 +398,7 @@ def run_solve_basil(state, X, y):
             lmda=lmda,
             alpha=state.alpha,
             penalty=state.penalty,
-            strong_set=state.strong_set,
+            screen_set=state.screen_set,
             intercept=state.intercept,
             pin=False,
         )
@@ -470,17 +470,14 @@ def test_solve_basil():
                 group_sizes=state.group_sizes,
                 alpha=state.alpha,
                 penalty=state.penalty,
-                strong_set=state.strong_set,
-                strong_beta=state.strong_beta,
-                strong_is_active=state.strong_is_active,
+                screen_set=state.screen_set,
+                screen_beta=state.screen_beta,
+                screen_is_active=state.screen_is_active,
                 rsq=state.rsq,
                 lmda=state.lmda,
                 grad=state.grad,
                 lmda_path=[state.lmdas[-1] * 0.8],
                 lmda_max=state.lmda_max,
-                edpp_safe_set=state.edpp_safe_set,
-                edpp_v1_0=state.edpp_v1_0,
-                edpp_resid_0=state.edpp_resid_0,
                 intercept=state.intercept,
                 tol=1e-12,
             )

@@ -36,11 +36,11 @@ public:
     }
 };
 
-class max_basil_strong_set : public adelie_core_error
+class max_basil_screen_set : public adelie_core_error
 {
     std::string msg_;
 public:
-    max_basil_strong_set(): 
+    max_basil_screen_set(): 
         msg_{"Basil maximum strong set size reached."}
     {}
 

@@ -78,6 +78,19 @@ public:
         );
     }
 
+    void mul(
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            mul,
+            v, out
+        );
+    }
+
     void sp_btmul(
         int j, int q,
         const sp_mat_value_t& v,
@@ -219,6 +232,19 @@ void matrix_naive_base(py::module_& m, const char* name)
         v : (q,) np.ndarray
             Vector to multiply with the block matrix.
         out : (n,) np.ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("mul", &internal_t::mul, R"delimiter(
+        Block matrix-vector multiplication.
+
+        Computes the matrix-vector multiplication
+        ``v.T @ X``.
+
+        Parameters
+        ----------
+        v : (n,) np.ndarray
+            Vector to multiply with the block matrix.
+        out : (q,) np.ndarray
             Vector to store in-place the result.
         )delimiter")
         .def("sp_btmul", &internal_t::sp_btmul, R"delimiter(
