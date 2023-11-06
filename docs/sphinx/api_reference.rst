@@ -46,11 +46,16 @@ adelie.diagnostic
     :toctree: generated/
 
 
-    plot_coefficient
-    plot_rsq
-    plot_set_size
+    residuals
+    gradients
+    gradient_norms
+    gradient_scores
+    plot_coefficients
+    plot_rsqs
+    plot_set_sizes
     plot_benchmark
     plot_kkt
+    Diagnostic
 
 
 adelie.matrix
