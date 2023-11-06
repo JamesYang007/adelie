@@ -12,7 +12,7 @@ void untransform_beta(
     BetasType& betas,
     RotationsType& rotations,
     const Eigen::Ref<const util::rowvec_type<IndexType>>& group_sizes,
-    const Eigen::Ref<const util::rowvec_type<IndexType>>& strong_set,
+    const Eigen::Ref<const util::rowvec_type<IndexType>>& screen_set,
     const Eigen::Ref<const util::rowvec_type<IndexType>>& active_set,
     const Eigen::Ref<const util::rowvec_type<IndexType>>& active_order
 )
@@ -26,7 +26,7 @@ void untransform_beta(
         int curr_idx = 0;
         for (const auto i : active_order) {
             const auto ss_idx = active_set[i];
-            const auto gs = group_sizes[strong_set[ss_idx]];
+            const auto gs = group_sizes[screen_set[ss_idx]];
             auto beta_i = beta_map.segment(curr_idx, gs); 
             beta_i.matrix() = beta_i.matrix() * rotations[ss_idx].transpose();
             curr_idx += gs;

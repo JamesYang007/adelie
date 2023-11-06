@@ -54,12 +54,12 @@ void state_pin_base(py::module_& m, const char* name)
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
-            py::arg("strong_set").noconvert(),
-            py::arg("strong_g1").noconvert(),
-            py::arg("strong_g2").noconvert(),
-            py::arg("strong_begins").noconvert(),
-            py::arg("strong_vars").noconvert(),
-            py::arg("strong_transforms").noconvert(),
+            py::arg("screen_set").noconvert(),
+            py::arg("screen_g1").noconvert(),
+            py::arg("screen_g2").noconvert(),
+            py::arg("screen_begins").noconvert(),
+            py::arg("screen_vars").noconvert(),
+            py::arg("screen_transforms").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("intercept"),
             py::arg("max_iters"),
@@ -70,8 +70,8 @@ void state_pin_base(py::module_& m, const char* name)
             py::arg("newton_max_iters"),
             py::arg("n_threads"),
             py::arg("rsq"),
-            py::arg("strong_beta").noconvert(),
-            py::arg("strong_is_active").noconvert()
+            py::arg("screen_beta").noconvert(),
+            py::arg("screen_is_active").noconvert()
         )
         .def_readonly("groups", &state_t::groups, R"delimiter(
         List of starting indices to each group where `G` is the number of groups.
@@ -89,40 +89,40 @@ void state_pin_base(py::module_& m, const char* name)
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
         )delimiter")
-        .def_readonly("strong_set", &state_t::strong_set, R"delimiter(
+        .def_readonly("screen_set", &state_t::screen_set, R"delimiter(
         List of indices into ``groups`` that correspond to the strong groups.
-        ``strong_set[i]`` is ``i`` th strong group.
+        ``screen_set[i]`` is ``i`` th strong group.
         )delimiter")
-        .def_readonly("strong_g1", &state_t::strong_g1, R"delimiter(
-        List of indices into ``strong_set`` that correspond to groups of size ``1``.
-        ``strong_set[strong_g1[i]]`` is the ``i`` th strong group of size ``1``
-        such that ``group_sizes[strong_set[strong_g1[i]]]`` is ``1``.
+        .def_readonly("screen_g1", &state_t::screen_g1, R"delimiter(
+        List of indices into ``screen_set`` that correspond to groups of size ``1``.
+        ``screen_set[screen_g1[i]]`` is the ``i`` th strong group of size ``1``
+        such that ``group_sizes[screen_set[screen_g1[i]]]`` is ``1``.
         )delimiter")
-        .def_readonly("strong_g2", &state_t::strong_g2, R"delimiter(
-        List of indices into ``strong_set`` that correspond to groups more than size ``1``.
-        ``strong_set[strong_g2[i]]`` is the ``i`` th strong group of size more than ``1``
-        such that ``group_sizes[strong_set[strong_g2[i]]]`` is more than ``1``.
+        .def_readonly("screen_g2", &state_t::screen_g2, R"delimiter(
+        List of indices into ``screen_set`` that correspond to groups more than size ``1``.
+        ``screen_set[screen_g2[i]]`` is the ``i`` th strong group of size more than ``1``
+        such that ``group_sizes[screen_set[screen_g2[i]]]`` is more than ``1``.
         )delimiter")
-        .def_readonly("strong_begins", &state_t::strong_begins, R"delimiter(
+        .def_readonly("screen_begins", &state_t::screen_begins, R"delimiter(
         List of indices that index a corresponding list of values for each strong group.
-        ``strong_begins[i]`` is the starting index corresponding to the ``i`` th strong group.
-        From this index, reading ``group_sizes[strong_set[i]]`` number of elements
+        ``screen_begins[i]`` is the starting index corresponding to the ``i`` th strong group.
+        From this index, reading ``group_sizes[screen_set[i]]`` number of elements
         will grab values corresponding to the full ``i`` th strong group block.
         )delimiter")
-        .def_readonly("strong_vars", &state_t::strong_vars, R"delimiter(
+        .def_readonly("screen_vars", &state_t::screen_vars, R"delimiter(
         List of :math:`D_k^2` where :math:`D_k` is from the SVD of :math:`X_{c,k}` 
         along the strong groups :math:`k` and for possibly column-centered :math:`X_k`.
-        ``strong_vars[b:b+p]`` is :math:`D_k` for the ``i`` th strong group where
-        ``k = strong_set[i]``,
-        ``b = strong_begins[i]``,
+        ``screen_vars[b:b+p]`` is :math:`D_k` for the ``i`` th strong group where
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         )delimiter")
-        .def_readonly("strong_transforms", &state_t::strong_transforms, R"delimiter(
+        .def_readonly("screen_transforms", &state_t::screen_transforms, R"delimiter(
         List of :math:`V_k` where :math:`V_k` is from the SVD of :math:`X_{c,k}`
         along the strong groups :math:`k` and for possibly column-centered :math:`X_k`.
         It *only* needs to be properly initialized for groups with size > 1.
-        ``strong_transforms[i]`` is :math:`V_k` for the ``i`` th strong group where
-        ``k = strong_set[i]``.
+        ``screen_transforms[i]`` is :math:`V_k` for the ``i`` th strong group where
+        ``k = screen_set[i]``.
         )delimiter")
         .def_readonly("lmda_path", &state_t::lmda_path, R"delimiter(
         Regularization sequence to fit on.
@@ -152,20 +152,20 @@ void state_pin_base(py::module_& m, const char* name)
         Number of threads.
         )delimiter")
         .def_readonly("rsq", &state_t::rsq, R"delimiter(
-        Unnormalized :math:`R^2` value at ``strong_beta``.
+        Unnormalized :math:`R^2` value at ``screen_beta``.
         The unnormalized :math:`R^2` is given by :math:`\|y_c\|_2^2 - \|y_c-X_c\beta\|_2^2`.
         )delimiter")
-        .def_readonly("strong_beta", &state_t::strong_beta, R"delimiter(
+        .def_readonly("screen_beta", &state_t::screen_beta, R"delimiter(
         Coefficient vector on the strong set.
-        ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
         where
-        ``k = strong_set[i]``,
-        ``b = strong_begins[i]``,
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         )delimiter")
-        .def_readonly("strong_is_active", &state_t::strong_is_active, R"delimiter(
+        .def_readonly("screen_is_active", &state_t::screen_is_active, R"delimiter(
         Boolean vector that indicates whether each strong group in ``groups`` is active or not.
-        ``strong_is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
+        ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
         )delimiter")
         .def_property_readonly("active_set", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<index_t>>(
@@ -173,14 +173,14 @@ void state_pin_base(py::module_& m, const char* name)
                 s.active_set.size()
             );
         }, R"delimiter(
-        List of indices into ``strong_set`` that correspond to active groups.
-        ``strong_set[active_set[i]]`` is the ``i`` th active group.
+        List of indices into ``screen_set`` that correspond to active groups.
+        ``screen_set[active_set[i]]`` is the ``i`` th active group.
         An active group is one with non-zero coefficient block,
         that is, for every ``i`` th active group, 
-        ``strong_beta[b:b+p] == 0`` where 
+        ``screen_beta[b:b+p] == 0`` where 
         ``j = active_set[i]``,
-        ``k = strong_set[j]``,
-        ``b = strong_begins[j]``,
+        ``k = screen_set[j]``,
+        ``b = screen_begins[j]``,
         and ``p = group_sizes[k]``.
         )delimiter")
         .def_property_readonly("active_g1", [](const state_t& s) {
@@ -215,7 +215,7 @@ void state_pin_base(py::module_& m, const char* name)
             );
         }, R"delimiter(
         Ordering such that ``groups`` is sorted in ascending order for the active groups.
-        ``groups[strong_set[active_order[i]]]`` is the ``i`` th active group in ascending order.
+        ``groups[screen_set[active_order[i]]]`` is the ``i`` th active group in ascending order.
         )delimiter")
         .def_property_readonly("betas", [](const state_t& s) {
             const auto p = s.group_sizes.sum();
@@ -254,21 +254,21 @@ void state_pin_base(py::module_& m, const char* name)
         ``lmdas[i]`` corresponds to the regularization :math:`\lambda`
         used for the ``i`` th outputted solution.
         )delimiter")
-        .def_readonly("strong_is_actives", &state_t::strong_is_actives, R"delimiter(
-        ``strong_is_actives[i]`` is the state of ``strong_is_active`` 
+        .def_readonly("screen_is_actives", &state_t::screen_is_actives, R"delimiter(
+        ``screen_is_actives[i]`` is the state of ``screen_is_active`` 
         when the ``i`` th solution is computed.
         )delimiter")
-        .def_readonly("strong_betas", &state_t::strong_betas, R"delimiter(
-        ``strong_betas[i]`` is the state of ``strong_beta`` 
+        .def_readonly("screen_betas", &state_t::screen_betas, R"delimiter(
+        ``screen_betas[i]`` is the state of ``screen_beta`` 
         when the ``i`` th solution is computed.
         )delimiter")
         .def_readonly("iters", &state_t::iters, R"delimiter(
         Number of coordinate descents taken.
         )delimiter")
-        .def_property_readonly("benchmark_strong", [](const state_t& s) {
+        .def_property_readonly("benchmark_screen", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<double>>(
-                s.benchmark_strong.data(),
-                s.benchmark_strong.size()
+                s.benchmark_screen.data(),
+                s.benchmark_screen.size()
             );
         }, R"delimiter(
         Benchmark time for performing coordinate-descent on the strong set for each :math:`\lambda`.
@@ -344,13 +344,13 @@ void state_pin_naive(py::module_& m, const char* name)
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
-            py::arg("strong_set").noconvert(),
-            py::arg("strong_g1").noconvert(),
-            py::arg("strong_g2").noconvert(),
-            py::arg("strong_begins").noconvert(),
-            py::arg("strong_vars").noconvert(),
-            py::arg("strong_X_means").noconvert(),
-            py::arg("strong_transforms").noconvert(),
+            py::arg("screen_set").noconvert(),
+            py::arg("screen_g1").noconvert(),
+            py::arg("screen_g2").noconvert(),
+            py::arg("screen_begins").noconvert(),
+            py::arg("screen_vars").noconvert(),
+            py::arg("screen_X_means").noconvert(),
+            py::arg("screen_transforms").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("intercept"),
             py::arg("max_iters"),
@@ -364,8 +364,8 @@ void state_pin_naive(py::module_& m, const char* name)
             py::arg("rsq"),
             py::arg("resid").noconvert(),
             py::arg("resid_sum"),
-            py::arg("strong_beta").noconvert(),
-            py::arg("strong_is_active").noconvert()
+            py::arg("screen_beta").noconvert(),
+            py::arg("screen_is_active").noconvert()
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
         .def_readonly("y_mean", &state_t::y_mean, R"delimiter(
@@ -377,14 +377,14 @@ void state_pin_naive(py::module_& m, const char* name)
         .def_readonly("rsq_tol", &state_t::rsq_tol, R"delimiter(
         Early stopping rule check on :math:`R^2`.
         )delimiter")
-        .def_readonly("strong_X_means", &state_t::strong_X_means, R"delimiter(
+        .def_readonly("screen_X_means", &state_t::screen_X_means, R"delimiter(
         Column means of :math:`X` for strong groups.
         )delimiter")
         .def_readonly("X", &state_t::X, R"delimiter(
         Feature matrix.
         )delimiter")
         .def_readonly("resid", &state_t::resid, R"delimiter(
-        Residual :math:`y_c-X\beta` at ``strong_beta`` 
+        Residual :math:`y_c-X\beta` at ``screen_beta`` 
         (note that it always uses uncentered :math:`X`!).
         )delimiter")
         .def_readonly("resid_sum", &state_t::resid_sum, R"delimiter(
@@ -459,12 +459,12 @@ void state_pin_cov(py::module_& m, const char* name)
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
-            py::arg("strong_set").noconvert(),
-            py::arg("strong_g1").noconvert(),
-            py::arg("strong_g2").noconvert(),
-            py::arg("strong_begins").noconvert(),
-            py::arg("strong_vars").noconvert(),
-            py::arg("strong_transforms").noconvert(),
+            py::arg("screen_set").noconvert(),
+            py::arg("screen_g1").noconvert(),
+            py::arg("screen_g2").noconvert(),
+            py::arg("screen_begins").noconvert(),
+            py::arg("screen_vars").noconvert(),
+            py::arg("screen_transforms").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
@@ -474,25 +474,25 @@ void state_pin_cov(py::module_& m, const char* name)
             py::arg("newton_max_iters"),
             py::arg("n_threads"),
             py::arg("rsq"),
-            py::arg("strong_beta").noconvert(),
-            py::arg("strong_grad").noconvert(),
-            py::arg("strong_is_active").noconvert()
+            py::arg("screen_beta").noconvert(),
+            py::arg("screen_grad").noconvert(),
+            py::arg("screen_is_active").noconvert()
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
         .def_readonly("A", &state_t::A, R"delimiter(
         Covariance matrix :math:`X_c^\top X_c` where :math:`X_c` is column-centered to fit with intercept.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
         )delimiter")
-        .def_readonly("strong_grad", &state_t::strong_grad, R"delimiter(
-        Gradient :math:`X_{c,k}^\top (y_c-X_c\beta)` on the strong groups :math:`k` where :math:`\beta` is given by ``strong_beta``.
-        ``strong_grad[b:b+p]`` is the gradient for the ``i`` th strong group
+        .def_readonly("screen_grad", &state_t::screen_grad, R"delimiter(
+        Gradient :math:`X_{c,k}^\top (y_c-X_c\beta)` on the strong groups :math:`k` where :math:`\beta` is given by ``screen_beta``.
+        ``screen_grad[b:b+p]`` is the gradient for the ``i`` th strong group
         where 
-        ``k = strong_set[i]``,
-        ``b = strong_begins[i]``,
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         )delimiter")
-        .def_readonly("strong_grads", &state_t::strong_grads, R"delimiter(
-        ``strong_grads[i]`` is the state of ``strong_grad`` 
+        .def_readonly("screen_grads", &state_t::screen_grads, R"delimiter(
+        ``screen_grads[i]`` is the state of ``screen_grad`` 
         when the ``i`` th solution is computed.
         )delimiter")
         ;
@@ -522,7 +522,6 @@ void state_basil_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             value_t,
             value_t,
-            size_t,
             size_t,
             size_t,
             value_t,
@@ -556,8 +555,7 @@ void state_basil_base(py::module_& m, const char* name)
             py::arg("lmda_max"),
             py::arg("min_ratio"),
             py::arg("lmda_path_size"),
-            py::arg("delta_strong_size"),
-            py::arg("max_strong_size"),
+            py::arg("max_screen_size"),
             py::arg("pivot_subset_ratio"),
             py::arg("pivot_subset_min"),
             py::arg("pivot_slack_ratio"),
@@ -574,9 +572,9 @@ void state_basil_base(py::module_& m, const char* name)
             py::arg("setup_lmda_path"),
             py::arg("intercept"),
             py::arg("n_threads"),
-            py::arg("strong_set").noconvert(),
-            py::arg("strong_beta").noconvert(),
-            py::arg("strong_is_active").noconvert(),
+            py::arg("screen_set").noconvert(),
+            py::arg("screen_beta").noconvert(),
+            py::arg("screen_is_active").noconvert(),
             py::arg("rsq"),
             py::arg("lmda"),
             py::arg("grad").noconvert()
@@ -608,14 +606,10 @@ void state_basil_base(py::module_& m, const char* name)
         .def_readonly("lmda_path_size", &state_t::lmda_path_size, R"delimiter(
         Number of regularizations in the path if it is to be generated.
         )delimiter")
-        .def_readonly("delta_strong_size", &state_t::delta_strong_size, R"delimiter(
-        Number of strong groups to include per BASIL iteration 
-        if strong rule does not include new groups but optimality is not reached.
-        )delimiter")
-        .def_readonly("max_strong_size", &state_t::max_strong_size, R"delimiter(
+        .def_readonly("max_screen_size", &state_t::max_screen_size, R"delimiter(
         Maximum number of strong groups allowed.
         The function will return a valid state and guaranteed to have strong set size
-        less than or equal to ``max_strong_size``.
+        less than or equal to ``max_screen_size``.
         )delimiter")
         .def_readonly("pivot_subset_ratio", &state_t::pivot_subset_ratio, R"delimiter(
         If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
@@ -638,10 +632,6 @@ void state_basil_base(py::module_& m, const char* name)
             switch (s.screen_rule) {
                 case ad::state::screen_rule_type::_strong:
                     return "strong";
-                case ad::state::screen_rule_type::_fixed_greedy:
-                    return "fixed_greedy";
-                case ad::state::screen_rule_type::_safe:
-                    return "safe";
                 case ad::state::screen_rule_type::_pivot:
                     return "pivot";
             }
@@ -690,76 +680,76 @@ void state_basil_base(py::module_& m, const char* name)
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
         )delimiter")
-        .def_readonly("strong_hashset", &state_t::strong_hashset, R"delimiter(
-        Hashmap containing the same values as ``strong_set``.
+        .def_readonly("screen_hashset", &state_t::screen_hashset, R"delimiter(
+        Hashmap containing the same values as ``screen_set``.
         It is used to check if a given group is strong or not.
         )delimiter")
-        .def_property_readonly("strong_set", [](const state_t& s) {
-            return Eigen::Map<const vec_index_t>(s.strong_set.data(), s.strong_set.size());
+        .def_property_readonly("screen_set", [](const state_t& s) {
+            return Eigen::Map<const vec_index_t>(s.screen_set.data(), s.screen_set.size());
         }, R"delimiter(
         List of indices into ``groups`` that correspond to the strong groups.
-        ``strong_set[i]`` is ``i`` th strong group.
-        ``strong_set`` must contain at least the true (optimal) active groups
+        ``screen_set[i]`` is ``i`` th strong group.
+        ``screen_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
         )delimiter")
-        .def_property_readonly("strong_g1", [](const state_t& s) {
-            return Eigen::Map<const vec_index_t>(s.strong_g1.data(), s.strong_g1.size());
+        .def_property_readonly("screen_g1", [](const state_t& s) {
+            return Eigen::Map<const vec_index_t>(s.screen_g1.data(), s.screen_g1.size());
         }, R"delimiter(
-        List of indices into ``strong_set`` that correspond to groups of size ``1``.
-        ``strong_set[strong_g1[i]]`` is the ``i`` th strong group of size ``1``
-        such that ``group_sizes[strong_set[strong_g1[i]]]`` is ``1``.
+        List of indices into ``screen_set`` that correspond to groups of size ``1``.
+        ``screen_set[screen_g1[i]]`` is the ``i`` th strong group of size ``1``
+        such that ``group_sizes[screen_set[screen_g1[i]]]`` is ``1``.
         )delimiter")
-        .def_property_readonly("strong_g2", [](const state_t& s) {
-            return Eigen::Map<const vec_index_t>(s.strong_g2.data(), s.strong_g2.size());
+        .def_property_readonly("screen_g2", [](const state_t& s) {
+            return Eigen::Map<const vec_index_t>(s.screen_g2.data(), s.screen_g2.size());
         }, R"delimiter(
-        List of indices into ``strong_set`` that correspond to groups more than size ``1``.
-        ``strong_set[strong_g2[i]]`` is the ``i`` th strong group of size more than ``1``
-        such that ``group_sizes[strong_set[strong_g2[i]]]`` is more than ``1``.
+        List of indices into ``screen_set`` that correspond to groups more than size ``1``.
+        ``screen_set[screen_g2[i]]`` is the ``i`` th strong group of size more than ``1``
+        such that ``group_sizes[screen_set[screen_g2[i]]]`` is more than ``1``.
         )delimiter")
-        .def_property_readonly("strong_begins", [](const state_t& s) {
-            return Eigen::Map<const vec_index_t>(s.strong_begins.data(), s.strong_begins.size());
+        .def_property_readonly("screen_begins", [](const state_t& s) {
+            return Eigen::Map<const vec_index_t>(s.screen_begins.data(), s.screen_begins.size());
         }, R"delimiter(
         List of indices that index a corresponding list of values for each strong group.
-        ``strong_begins[i]`` is the starting index corresponding to the ``i`` th strong group.
-        From this index, reading ``group_sizes[strong_set[i]]`` number of elements
+        ``screen_begins[i]`` is the starting index corresponding to the ``i`` th strong group.
+        From this index, reading ``group_sizes[screen_set[i]]`` number of elements
         will grab values corresponding to the full ``i`` th strong group block.
         )delimiter")
-        .def_property_readonly("strong_order", [](const state_t& s) {
-            return Eigen::Map<const vec_index_t>(s.strong_order.data(), s.strong_order.size());
+        .def_property_readonly("screen_order", [](const state_t& s) {
+            return Eigen::Map<const vec_index_t>(s.screen_order.data(), s.screen_order.size());
         }, R"delimiter(
         Ordering such that ``groups`` is sorted in ascending order for the strong groups.
-        ``groups[strong_set[i]]`` is the ``i`` th strong group in ascending order.
+        ``groups[screen_set[i]]`` is the ``i`` th strong group in ascending order.
         )delimiter")
-        .def_property_readonly("strong_beta", [](const state_t& s) {
-            return Eigen::Map<const vec_value_t>(s.strong_beta.data(), s.strong_beta.size());
+        .def_property_readonly("screen_beta", [](const state_t& s) {
+            return Eigen::Map<const vec_value_t>(s.screen_beta.data(), s.screen_beta.size());
         }, R"delimiter(
         Coefficient vector on the strong set.
-        ``strong_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
         where
-        ``k = strong_set[i]``,
-        ``b = strong_begins[i]``,
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         This must contain the true solution values for the strong groups.
         )delimiter")
-        .def_property_readonly("strong_is_active", [](const state_t& s) {
+        .def_property_readonly("screen_is_active", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<safe_bool_t>>(
-                s.strong_is_active.data(), 
-                s.strong_is_active.size()
+                s.screen_is_active.data(), 
+                s.screen_is_active.size()
             );
         }, R"delimiter(
         Boolean vector that indicates whether each strong group in ``groups`` is active or not.
-        ``strong_is_active[i]`` is ``True`` if and only if ``strong_set[i]`` is active.
+        ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
         )delimiter")
         .def_readonly("rsq", &state_t::rsq, R"delimiter(
         The true unnormalized :math:`R^2` given by :math:`\|y_c\|_2^2 - \|y_c-X_c\beta\|_2^2`
-        where :math:`\beta` is given by ``strong_beta``.
+        where :math:`\beta` is given by ``screen_beta``.
         )delimiter")
         .def_readonly("lmda", &state_t::lmda, R"delimiter(
-        The regularization parameter at which the true solution is given by ``strong_beta``.
+        The regularization parameter at which the true solution is given by ``screen_beta``.
         )delimiter")
         .def_readonly("grad", &state_t::grad, R"delimiter(
         The true full gradient :math:`X_c^\top (y_c - X_c\beta)` where
-        :math:`\beta` is given by ``strong_beta``.
+        :math:`\beta` is given by ``screen_beta``.
         )delimiter")
         .def_readonly("abs_grad", &state_t::abs_grad, R"delimiter(
         The :math:`\ell_2` norms of ``grad`` across each group.
@@ -813,10 +803,10 @@ void state_basil_base(py::module_& m, const char* name)
         }, R"delimiter(
         Screen time for a given BASIL iteration.
         )delimiter")
-        .def_property_readonly("benchmark_fit_strong", [](const state_t& s) {
+        .def_property_readonly("benchmark_fit_screen", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<double>>(
-                s.benchmark_fit_strong.data(),
-                s.benchmark_fit_strong.size()
+                s.benchmark_fit_screen.data(),
+                s.benchmark_fit_screen.size()
             );
         }, R"delimiter(
         Fit time on the strong set for a given BASIL iteration.
@@ -861,21 +851,13 @@ void state_basil_base(py::module_& m, const char* name)
         }, R"delimiter(
         Active set size for every saved solution.
         )delimiter")
-        .def_property_readonly("strong_sizes", [](const state_t& s) {
+        .def_property_readonly("screen_sizes", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<int>>(
-                s.strong_sizes.data(),
-                s.strong_sizes.size()
+                s.screen_sizes.data(),
+                s.screen_sizes.size()
             );
         }, R"delimiter(
         Strong set size for every saved solution.
-        )delimiter")
-        .def_property_readonly("edpp_safe_sizes", [](const state_t& s) {
-            return Eigen::Map<const ad::util::rowvec_type<int>>(
-                s.edpp_safe_sizes.data(),
-                s.edpp_safe_sizes.size()
-            );
-        }, R"delimiter(
-        EDPP safe set size for every saved solution.
         )delimiter")
         ;
 }
@@ -906,10 +888,6 @@ void state_basil_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             value_t,
             value_t,
-            bool,
-            const Eigen::Ref<const vec_value_t>&,
-            const Eigen::Ref<const vec_index_t>&, 
-            const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
@@ -918,7 +896,6 @@ void state_basil_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             value_t,
             value_t,
-            size_t,
             size_t,
             size_t,
             value_t,
@@ -949,11 +926,7 @@ void state_basil_naive(py::module_& m, const char* name)
             py::arg("X_group_norms").noconvert(),
             py::arg("y_mean"),
             py::arg("y_var"),
-            py::arg("setup_edpp"),
             py::arg("resid").noconvert(),
-            py::arg("edpp_safe_set").noconvert(),
-            py::arg("edpp_v1_0").noconvert(),
-            py::arg("edpp_resid_0").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
@@ -962,8 +935,7 @@ void state_basil_naive(py::module_& m, const char* name)
             py::arg("lmda_max"),
             py::arg("min_ratio"),
             py::arg("lmda_path_size"),
-            py::arg("delta_strong_size"),
-            py::arg("max_strong_size"),
+            py::arg("max_screen_size"),
             py::arg("pivot_subset_ratio"),
             py::arg("pivot_subset_min"),
             py::arg("pivot_slack_ratio"),
@@ -980,9 +952,9 @@ void state_basil_naive(py::module_& m, const char* name)
             py::arg("setup_lmda_path"),
             py::arg("intercept"),
             py::arg("n_threads"),
-            py::arg("strong_set").noconvert(),
-            py::arg("strong_beta").noconvert(),
-            py::arg("strong_is_active").noconvert(),
+            py::arg("screen_set").noconvert(),
+            py::arg("screen_beta").noconvert(),
+            py::arg("screen_is_active").noconvert(),
             py::arg("rsq"),
             py::arg("lmda"),
             py::arg("grad").noconvert()
@@ -1003,50 +975,27 @@ void state_basil_naive(py::module_& m, const char* name)
         The variance of the response vector :math:`y`, i.e. 
         :math:`\|y_c\|_2^2`.
         )delimiter")
-        .def_readonly("use_edpp", &state_t::use_edpp, R"delimiter(
-        ``True`` if EDPP should be used.
-        )delimiter")
-        .def_readonly("setup_edpp", &state_t::setup_edpp, R"delimiter(
-        ``True`` if EDPP setup is required,
-        in which case, the solver will always solve at :math:`\lambda_\max`.
-        See ``edpp_v1_0`` and ``edpp_resid_0``.
-        )delimiter")
         .def_readonly("X", &state_t::X, R"delimiter(
         Feature matrix.
         )delimiter")
         .def_readonly("resid", &state_t::resid, R"delimiter(
-        Residual :math:`y_c - X \beta` where :math:`\beta` is given by ``strong_beta``.
+        Residual :math:`y_c - X \beta` where :math:`\beta` is given by ``screen_beta``.
         )delimiter")
         .def_readonly("resid_sum", &state_t::resid_sum, R"delimiter(
         Sum of ``resid``.
         )delimiter")
-        .def_readonly("strong_X_means", &state_t::strong_X_means, R"delimiter(
+        .def_readonly("screen_X_means", &state_t::screen_X_means, R"delimiter(
         Column means of ``X`` on the strong set.
         )delimiter")
-        .def_readonly("strong_transforms", &state_t::strong_transforms, R"delimiter(
+        .def_readonly("screen_transforms", &state_t::screen_transforms, R"delimiter(
         The :math:`V` from the SVD of :math:`X_{c,k}` where :math:`X_c` 
-        is the possibly centered feature matrix and :math:`k` is an index to ``strong_set``.
+        is the possibly centered feature matrix and :math:`k` is an index to ``screen_set``.
         )delimiter")
-        .def_property_readonly("strong_vars", [](const state_t& s) {
-            return Eigen::Map<const vec_value_t>(s.strong_vars.data(), s.strong_vars.size());
+        .def_property_readonly("screen_vars", [](const state_t& s) {
+            return Eigen::Map<const vec_value_t>(s.screen_vars.data(), s.screen_vars.size());
         }, R"delimiter(
         The :math:`D^2` from the SVD of :math:`X_{c,k}` where :math:`X_c` 
-        is the possibly centered feature matrix and :math:`k` is an index to ``strong_set``.
-        )delimiter")
-        .def_readonly("edpp_safe_hashset", &state_t::edpp_safe_hashset, R"delimiter(
-        Hashset containing all the safe groups.
-        If EDPP is not used, it contains all the variables.
-        )delimiter")
-        .def_property_readonly("edpp_safe_set", [](const state_t& s) {
-            return Eigen::Map<const vec_index_t>(s.edpp_safe_set.data(), s.edpp_safe_set.size());
-        }, R"delimiter(
-        A list of EDPP safe groups.
-        )delimiter")
-        .def_readonly("edpp_v1_0", &state_t::edpp_v1_0, R"delimiter(
-        The :math:`v_1` vector in EDPP rule at :math:`\lambda_\max`.
-        )delimiter")
-        .def_readonly("edpp_resid_0", &state_t::edpp_resid_0, R"delimiter(
-        The residual :math:`y_c - X_c\beta` where :math:`\beta` is the solution at :math:`\lambda_\max`.
+        is the possibly centered feature matrix and :math:`k` is an index to ``screen_set``.
         )delimiter")
         ;
 }

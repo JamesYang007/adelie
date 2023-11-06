@@ -17,14 +17,14 @@ def test_state_pin_naive():
     group_sizes = np.array([1, p-1])
     alpha = 1.0
     penalty = np.random.uniform(0, 1, G)
-    strong_set = np.array([0, 1])
+    screen_set = np.array([0, 1])
     lmda_path = np.array([0.1, 1.0, 0.5])
     rsq = 0.0
     resid = np.random.normal(0, 1, n)
     y_mean = 0
     y_var = 1
-    strong_beta = np.zeros(p)
-    strong_is_active = np.zeros(strong_set.shape[0], dtype=bool)
+    screen_beta = np.zeros(p)
+    screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
 
     state = mod.pin_naive(
         X=X,
@@ -34,12 +34,12 @@ def test_state_pin_naive():
         group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
-        strong_set=strong_set,
+        screen_set=screen_set,
         lmda_path=lmda_path,
         rsq=rsq,
         resid=resid,
-        strong_beta=strong_beta,
-        strong_is_active=strong_is_active,
+        screen_beta=screen_beta,
+        screen_is_active=screen_is_active,
     )
 
     state.check(method="assert")
@@ -49,11 +49,11 @@ def test_state_pin_naive():
     assert np.allclose(group_sizes, state.group_sizes)
     assert np.allclose(alpha, state.alpha)
     assert np.allclose(penalty, state.penalty)
-    assert np.allclose(strong_set, state.strong_set)
+    assert np.allclose(screen_set, state.screen_set)
     assert np.allclose(lmda_path, state.lmda_path)
     assert np.allclose(rsq, state.rsq)
-    assert np.allclose(strong_beta, state.strong_beta)
-    assert np.allclose(strong_is_active, state.strong_is_active)
+    assert np.allclose(screen_beta, state.screen_beta)
+    assert np.allclose(screen_is_active, state.screen_is_active)
     assert state.iters == 0
 
 
@@ -68,12 +68,12 @@ def test_state_pin_cov():
     group_sizes = np.array([1, p-1])
     alpha = 1.0
     penalty = np.random.uniform(0, 1, G)
-    strong_set = np.array([0, 1])
+    screen_set = np.array([0, 1])
     lmda_path = np.array([0.1, 1.0, 0.5])
     rsq = 0.0
-    strong_beta = np.zeros(p)
-    strong_grad = X.T @ np.random.normal(0, 1, n)
-    strong_is_active = np.zeros(strong_set.shape[0], dtype=bool)
+    screen_beta = np.zeros(p)
+    screen_grad = X.T @ np.random.normal(0, 1, n)
+    screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
 
     state = mod.pin_cov(
         A=A,
@@ -81,12 +81,12 @@ def test_state_pin_cov():
         group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
-        strong_set=strong_set,
+        screen_set=screen_set,
         lmda_path=lmda_path,
         rsq=rsq,
-        strong_beta=strong_beta,
-        strong_grad=strong_grad,
-        strong_is_active=strong_is_active,
+        screen_beta=screen_beta,
+        screen_grad=screen_grad,
+        screen_is_active=screen_is_active,
     )
 
     state.check(method="assert")
@@ -96,12 +96,12 @@ def test_state_pin_cov():
     assert np.allclose(group_sizes, state.group_sizes)
     assert np.allclose(alpha, state.alpha)
     assert np.allclose(penalty, state.penalty)
-    assert np.allclose(strong_set, state.strong_set)
+    assert np.allclose(screen_set, state.screen_set)
     assert np.allclose(lmda_path, state.lmda_path)
     assert np.allclose(rsq, state.rsq)
-    assert np.allclose(strong_beta, state.strong_beta)
-    assert np.allclose(strong_grad, state.strong_grad)
-    assert np.allclose(strong_is_active, state.strong_is_active)
+    assert np.allclose(screen_beta, state.screen_beta)
+    assert np.allclose(screen_grad, state.screen_grad)
+    assert np.allclose(screen_is_active, state.screen_is_active)
     assert state.iters == 0
 
 
@@ -123,18 +123,15 @@ def test_state_basil_naive():
     y_var = 1.0
     alpha = 1.0
     penalty = np.random.uniform(0, 1, G)
-    strong_set = np.array([0, 1])
+    screen_set = np.array([0, 1])
     lmda_path = np.array([0.1, 1.0, 0.5])
     lmda_max = 0.9
     rsq = 0.0
     lmda = 2.0
     grad = np.random.normal(0, 1, p)
     resid = np.random.normal(0, 1, n)
-    edpp_safe_set = strong_set
-    edpp_v1_0 = np.zeros(n)
-    edpp_resid_0 = np.zeros(n)
-    strong_beta = np.zeros(p)
-    strong_is_active = np.zeros(strong_set.shape[0], dtype=bool)
+    screen_beta = np.zeros(p)
+    screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
 
     state = mod.basil_naive(
         X=X,
@@ -143,18 +140,15 @@ def test_state_basil_naive():
         y_mean=y_mean,
         y_var=y_var,
         resid=resid,
-        edpp_safe_set=edpp_safe_set,
-        edpp_v1_0=edpp_v1_0,
-        edpp_resid_0=edpp_resid_0,
         groups=groups,
         group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
         lmda_path=lmda_path,
         lmda_max=lmda_max,
-        strong_set=strong_set,
-        strong_beta=strong_beta,
-        strong_is_active=strong_is_active,
+        screen_set=screen_set,
+        screen_beta=screen_beta,
+        screen_is_active=screen_is_active,
         rsq=rsq,
         lmda=lmda,
         grad=grad,
@@ -165,20 +159,17 @@ def test_state_basil_naive():
     assert np.allclose(X_group_norms, state.X_group_norms)
     assert np.allclose(y_mean, state.y_mean)
     assert np.allclose(y_var, state.y_var)
-    assert np.allclose(edpp_safe_set, state.edpp_safe_set)
-    assert np.allclose(edpp_v1_0, state.edpp_v1_0)
-    assert np.allclose(edpp_resid_0, state.edpp_resid_0)
     assert np.allclose(groups, state.groups)
     assert np.allclose(group_sizes, state.group_sizes)
     assert np.allclose(alpha, state.alpha)
     assert np.allclose(penalty, state.penalty)
-    assert np.allclose(strong_set, state.strong_set)
+    assert np.allclose(screen_set, state.screen_set)
     assert np.allclose(lmda_path, state.lmda_path)
     assert np.allclose(lmda_max, state.lmda_max)
     assert np.allclose(rsq, state.rsq)
     assert np.allclose(lmda, state.lmda)
-    assert np.allclose(strong_set, state.strong_set)
-    assert np.allclose(strong_beta, state.strong_beta)
-    assert np.allclose(strong_is_active, state.strong_is_active)
+    assert np.allclose(screen_set, state.screen_set)
+    assert np.allclose(screen_beta, state.screen_beta)
+    assert np.allclose(screen_is_active, state.screen_is_active)
     assert np.allclose(grad, state.grad)
     assert np.allclose(resid, state.resid)

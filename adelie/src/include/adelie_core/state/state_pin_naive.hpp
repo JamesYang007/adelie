@@ -41,7 +41,7 @@ struct StatePinNaive : StatePinBase<
     /* Static states */
     const value_t y_mean;
     const value_t y_var;
-    const map_cvec_value_t strong_X_means;
+    const map_cvec_value_t screen_X_means;
 
     const value_t rsq_tol;
 
@@ -53,7 +53,7 @@ struct StatePinNaive : StatePinBase<
     dyn_vec_value_t resid_sums;
 
     /* buffer */
-    vec_value_t strong_grad;
+    vec_value_t screen_grad;
 
     explicit StatePinNaive(
         matrix_t& X,
@@ -63,13 +63,13 @@ struct StatePinNaive : StatePinBase<
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
-        const Eigen::Ref<const vec_index_t>& strong_set, 
-        const Eigen::Ref<const vec_index_t>& strong_g1,
-        const Eigen::Ref<const vec_index_t>& strong_g2,
-        const Eigen::Ref<const vec_index_t>& strong_begins, 
-        const Eigen::Ref<const vec_value_t>& strong_vars,
-        const Eigen::Ref<const vec_value_t>& strong_X_means,
-        const dyn_vec_mat_value_t& strong_transforms,
+        const Eigen::Ref<const vec_index_t>& screen_set, 
+        const Eigen::Ref<const vec_index_t>& screen_g1,
+        const Eigen::Ref<const vec_index_t>& screen_g2,
+        const Eigen::Ref<const vec_index_t>& screen_begins, 
+        const Eigen::Ref<const vec_value_t>& screen_vars,
+        const Eigen::Ref<const vec_value_t>& screen_X_means,
+        const dyn_vec_mat_value_t& screen_transforms,
         const Eigen::Ref<const vec_value_t>& lmda_path, 
         bool intercept,
         size_t max_iters,
@@ -83,23 +83,23 @@ struct StatePinNaive : StatePinBase<
         value_t rsq,
         Eigen::Ref<vec_value_t> resid,
         value_t resid_sum,
-        Eigen::Ref<vec_value_t> strong_beta, 
-        Eigen::Ref<vec_bool_t> strong_is_active
+        Eigen::Ref<vec_value_t> screen_beta, 
+        Eigen::Ref<vec_bool_t> screen_is_active
     ): 
         base_t(
             groups, group_sizes, alpha, penalty, 
-            strong_set, strong_g1, strong_g2, strong_begins, strong_vars, strong_transforms, lmda_path, 
+            screen_set, screen_g1, screen_g2, screen_begins, screen_vars, screen_transforms, lmda_path, 
             intercept, max_iters, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, n_threads,
-            rsq, strong_beta, strong_is_active
+            rsq, screen_beta, screen_is_active
         ),
         y_mean(y_mean),
         y_var(y_var),
-        strong_X_means(strong_X_means.data(), strong_X_means.size()),
+        screen_X_means(screen_X_means.data(), screen_X_means.size()),
         rsq_tol(rsq_tol),
         X(&X),
         resid(resid.data(), resid.size()),
         resid_sum(resid_sum),
-        strong_grad(strong_beta.size())
+        screen_grad(screen_beta.size())
     {
         resids.reserve(lmda_path.size());
         resid_sums.reserve(lmda_path.size());

@@ -34,11 +34,11 @@ void coordinate_descent(
 {
     auto& X = *state.X;
     const auto& penalty = state.penalty;
-    const auto& strong_set = state.strong_set;
-    const auto& strong_begins = state.strong_begins;
-    const auto& strong_X_means = state.strong_X_means;
-    const auto& strong_transforms = *state.strong_transforms;
-    const auto& strong_vars = state.strong_vars;
+    const auto& screen_set = state.screen_set;
+    const auto& screen_begins = state.screen_begins;
+    const auto& screen_X_means = state.screen_X_means;
+    const auto& screen_transforms = *state.screen_transforms;
+    const auto& screen_vars = state.screen_vars;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto intercept = state.intercept;
@@ -47,8 +47,8 @@ void coordinate_descent(
     const auto newton_tol = state.newton_tol;
     const auto newton_max_iters = state.newton_max_iters;
     const auto n_threads = state.n_threads;
-    auto& strong_beta = state.strong_beta;
-    auto& strong_grad = state.strong_grad;
+    auto& screen_beta = state.screen_beta;
+    auto& screen_grad = state.screen_grad;
     auto& resid = state.resid;
     auto& resid_sum = state.resid_sum;
     auto& rsq = state.rsq;
@@ -61,12 +61,12 @@ void coordinate_descent(
     // iterate over the groups of size 1
     for (auto it = g1_begin; it != g1_end; ++it) {
         const auto ss_idx = *it;              // index to strong set
-        const auto k = strong_set[ss_idx];    // actual group index
-        const auto ss_value_begin = strong_begins[ss_idx]; // value begin index at ss_idx
-        auto& ak = strong_beta[ss_value_begin]; // corresponding beta
-        auto& gk = strong_grad[ss_value_begin]; // corresponding gradient
-        const auto Xk_mean = strong_X_means[ss_value_begin]; // corresponding X[:,k] mean
-        const auto A_kk = strong_vars[ss_value_begin];  // corresponding A diagonal 
+        const auto k = screen_set[ss_idx];    // actual group index
+        const auto ss_value_begin = screen_begins[ss_idx]; // value begin index at ss_idx
+        auto& ak = screen_beta[ss_value_begin]; // corresponding beta
+        auto& gk = screen_grad[ss_value_begin]; // corresponding gradient
+        const auto Xk_mean = screen_X_means[ss_value_begin]; // corresponding X[:,k] mean
+        const auto A_kk = screen_vars[ss_value_begin];  // corresponding A diagonal 
         const auto pk = penalty[k]; // corresponding penalty
 
         const auto ak_old = ak;
@@ -97,14 +97,14 @@ void coordinate_descent(
     // iterate over the groups of dynamic size
     for (auto it = g2_begin; it != g2_end; ++it) {
         const auto ss_idx = *it;              // index to strong set
-        const auto k = strong_set[ss_idx];    // actual group index
-        const auto ss_value_begin = strong_begins[ss_idx]; // value begin index at ss_idx
+        const auto k = screen_set[ss_idx];    // actual group index
+        const auto ss_value_begin = screen_begins[ss_idx]; // value begin index at ss_idx
         const auto gsize = group_sizes[k]; // group size  
-        auto ak = strong_beta.segment(ss_value_begin, gsize); // corresponding beta
-        auto gk = strong_grad.segment(ss_value_begin, gsize); // corresponding gradient
-        const auto Xk_mean = strong_X_means.segment(ss_value_begin, gsize); // corresponding X[:, g:g+gs] means
-        const auto& Vk = strong_transforms[ss_idx]; // corresponding V in SVD of X_c
-        const auto A_kk = strong_vars.segment(ss_value_begin, gsize);  // corresponding A diagonal 
+        auto ak = screen_beta.segment(ss_value_begin, gsize); // corresponding beta
+        auto gk = screen_grad.segment(ss_value_begin, gsize); // corresponding gradient
+        const auto Xk_mean = screen_X_means.segment(ss_value_begin, gsize); // corresponding X[:, g:g+gs] means
+        const auto& Vk = screen_transforms[ss_idx]; // corresponding V in SVD of X_c
+        const auto A_kk = screen_vars.segment(ss_value_begin, gsize);  // corresponding A diagonal 
         const auto pk = penalty[k]; // corresponding penalty
 
         // compute current gradient
@@ -219,11 +219,11 @@ inline void solve_pin(
     const auto y_var = state.y_var;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
-    const auto& strong_set = state.strong_set;
-    const auto& strong_g1 = state.strong_g1;
-    const auto& strong_g2 = state.strong_g2;
-    const auto& strong_beta = state.strong_beta;
-    const auto& strong_X_means = state.strong_X_means;
+    const auto& screen_set = state.screen_set;
+    const auto& screen_g1 = state.screen_g1;
+    const auto& screen_g2 = state.screen_g2;
+    const auto& screen_beta = state.screen_beta;
+    const auto& screen_X_means = state.screen_X_means;
     const auto& lmda_path = state.lmda_path;
     const auto& resid = state.resid;
     const auto& resid_sum = state.resid_sum;
@@ -234,7 +234,7 @@ inline void solve_pin(
     const auto rsq_tol = state.rsq_tol;
     const auto rsq_slope_tol = state.rsq_slope_tol;
     const auto rsq_curv_tol = state.rsq_curv_tol;
-    auto& strong_is_active = state.strong_is_active;
+    auto& screen_is_active = state.screen_is_active;
     auto& active_set = state.active_set;
     auto& active_g1 = state.active_g1;
     auto& active_g2 = state.active_g2;
@@ -246,10 +246,10 @@ inline void solve_pin(
     auto& lmdas = state.lmdas;
     auto& resids = state.resids;
     auto& resid_sums = state.resid_sums;
-    auto& strong_is_actives = state.strong_is_actives;
-    auto& strong_betas = state.strong_betas;
+    auto& screen_is_actives = state.screen_is_actives;
+    auto& screen_betas = state.screen_betas;
     auto& iters = state.iters;
-    auto& benchmark_strong = state.benchmark_strong;
+    auto& benchmark_screen = state.benchmark_screen;
     auto& benchmark_active = state.benchmark_active;
     
     sw_t stopwatch;
@@ -268,14 +268,14 @@ inline void solve_pin(
     std::vector<value_t> active_beta_ordered;
 
     // allocate buffers for optimization
-    active_beta_indices.reserve(strong_beta.size());
-    active_beta_ordered.reserve(strong_beta.size());
+    active_beta_indices.reserve(screen_beta.size());
+    active_beta_ordered.reserve(screen_beta.size());
 
     // compute number of active coefficients
     size_t active_beta_size = 0;
     if (active_set.size()) {
         const auto last_idx = active_set.size()-1;
-        const auto last_group = strong_set[active_set[last_idx]];
+        const auto last_group = screen_set[active_set[last_idx]];
         const auto group_size = group_sizes[last_group];
         active_beta_size = active_begins[last_idx] + group_size;
     }
@@ -283,12 +283,12 @@ inline void solve_pin(
     bool lasso_active_called = false;
 
     const auto add_active_set = [&](auto ss_idx) {
-        if (!strong_is_active[ss_idx]) {
-            strong_is_active[ss_idx] = true;
+        if (!screen_is_active[ss_idx]) {
+            screen_is_active[ss_idx] = true;
 
             active_set.push_back(ss_idx);
 
-            const auto group = strong_set[ss_idx];
+            const auto group = screen_set[ss_idx];
             const auto group_size = group_sizes[group];
             if (group_size == 1) {
                 active_g1.push_back(ss_idx);
@@ -311,7 +311,7 @@ inline void solve_pin(
     };
 
     for (int l = 0; l < lmda_path.size(); ++l) {
-        double strong_time = 0;
+        double screen_time = 0;
         double active_time = 0;
 
         if (lasso_active_called) {
@@ -328,8 +328,8 @@ inline void solve_pin(
             stopwatch.start();
             coordinate_descent(
                 state,
-                strong_g1.data(), strong_g1.data() + strong_g1.size(),
-                strong_g2.data(), strong_g2.data() + strong_g2.size(),
+                screen_g1.data(), screen_g1.data() + screen_g1.size(),
+                screen_g2.data(), screen_g2.data() + screen_g2.size(),
                 l, convg_measure,
                 buffer_pack.buffer1,
                 buffer_pack.buffer2,
@@ -338,14 +338,14 @@ inline void solve_pin(
                 update_coefficients_f,
                 add_active_set
             );
-            strong_time += stopwatch.elapsed();
+            screen_time += stopwatch.elapsed();
             const bool new_active_added = (old_active_size < active_set.size());
 
             if (new_active_added) {
                 active_begins.resize(active_set.size());
                 for (size_t i = old_active_size; i < active_begins.size(); ++i) {
                     active_begins[i] = active_beta_size;
-                    const auto curr_group = strong_set[active_set[i]];
+                    const auto curr_group = screen_set[active_set[i]];
                     const auto curr_size = group_sizes[curr_group];
                     active_beta_size += curr_size;
                 }
@@ -370,7 +370,7 @@ inline void solve_pin(
         std::sort(
             active_order.begin(), active_order.end(),
             [&](auto i, auto j) { 
-                return groups[strong_set[active_set[i]]] < groups[strong_set[active_set[j]]];
+                return groups[screen_set[active_set[i]]] < groups[screen_set[active_set[j]]];
             }
         );
 
@@ -391,7 +391,7 @@ inline void solve_pin(
 
         betas.emplace_back(beta_map);
         if (intercept) {
-            intercepts.emplace_back(y_mean - (strong_X_means * strong_beta).sum());
+            intercepts.emplace_back(y_mean - (screen_X_means * screen_beta).sum());
         } else {
             intercepts.emplace_back(0);
         }
@@ -399,9 +399,9 @@ inline void solve_pin(
         lmdas.emplace_back(lmda_path[l]);
         resids.emplace_back(resid);
         resid_sums.emplace_back(resid_sum);
-        strong_is_actives.emplace_back(strong_is_active);
-        strong_betas.emplace_back(strong_beta);
-        benchmark_strong.emplace_back(strong_time);
+        screen_is_actives.emplace_back(screen_is_active);
+        screen_betas.emplace_back(screen_beta);
+        benchmark_screen.emplace_back(screen_time);
         benchmark_active.emplace_back(active_time);
 
         if (rsq >= rsq_tol * y_var) break;

@@ -72,6 +72,29 @@ public:
     ) =0;
 
     /**
+     * @brief Computes v^T X where X is the current matrix.
+     * 
+     * @param v     vector to multiply with.
+     * @param out   resulting row vector.
+     */
+    virtual void mul(
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
+    ) =0;
+
+    /**
+     * @brief Returns the number of rows of the represented matrix.
+     */
+    virtual int rows() const =0;
+    
+    /**
+     * @brief Returns the number of columns of the represented matrix.
+     */
+    virtual int cols() const =0;
+
+    /* Used outside of fitting procedures */
+
+    /**
      * @brief Computes v X[:, j:j+q]^T where X is the current matrix.
      * 
      * @param j     begin column index. 
@@ -121,16 +144,6 @@ public:
         bool center,
         Eigen::Ref<vec_value_t> out
     ) const =0;
-
-    /**
-     * @brief Returns the number of rows of the represented matrix.
-     */
-    virtual int rows() const =0;
-    
-    /**
-     * @brief Returns the number of columns of the represented matrix.
-     */
-    virtual int cols() const =0;
 };
 
 } // namespace matrix

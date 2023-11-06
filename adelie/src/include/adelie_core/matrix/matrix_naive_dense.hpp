@@ -82,6 +82,21 @@ public:
         );
     }
 
+    void mul(
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        auto outm = out.matrix();
+        dgemv(
+            _mat,
+            v.matrix(),
+            _n_threads,
+            _buff,
+            outm
+        );
+    }
+
     void sp_btmul(
         int j, int q, 
         const sp_mat_value_t& v, 
