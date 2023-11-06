@@ -187,16 +187,14 @@ def grpnet(
     early_exit: bool =True,
     intercept: bool =True,
     screen_rule: str ="pivot",
-    lazify_screen: bool =True,
     min_ratio: float =1e-2,
     lmda_path_size: int =100,
-    delta_lmda_path_size: int =1,
     delta_strong_size: int =10,
     max_strong_size: int =None,
     pivot_subset_ratio: float =0.1,
-    pivot_subset_min: int =10,
-    pivot_slack_ratio: float =0.1,
-    use_edpp: bool =True,
+    pivot_subset_min: int =1,
+    pivot_slack_ratio: float =1.25,
+    use_edpp: bool =False,
     check_state: bool =False,
 ):
     """Group elastic net solver.
@@ -276,16 +274,10 @@ def grpnet(
                 by searching for a pivot point in the gradient norms.
 
         Default is ``"pivot"``.
-    lazify_screen : bool, optional
-        If ``True``, the function will lazify the screening step.
-        Default is ``True``.
-    delta_lmda_path_size : int, optional 
-        Number of regularizations to batch per BASIL iteration.
-        Default is ``1``.
     delta_strong_size : int, optional
         Number of strong groups to include per BASIL iteration 
         if strong rule does not include new groups but optimality is not reached.
-        Default is ``5``.
+        Default is ``10``.
     max_strong_size: int, optional
         Maximum number of strong groups allowed.
         The function will return a valid state and guaranteed to have strong set size
@@ -300,18 +292,19 @@ def grpnet(
         Default is ``0.1``.
     pivot_subset_min : int, optional
         If screening takes place, then at least ``pivot_subset_min``
-        number of gradient norms are used to determine the pivot point.
+        number of active scores are used to determine the pivot point.
         It is only used if ``screen_rule == "pivot"``.
-        Default is ``10``.
+        Default is ``1``.
     pivot_slack_ratio : float, optional
         If screening takes place, then ``pivot_slack_ratio``
-        number of gradient norms below the pivot point are also added to the strong set as slack.
+        number of groups with next smallest (new) active scores 
+        below the pivot point are also added to the strong set as slack.
         It is only used if ``screen_rule == "pivot"``.
-        Default is ``0.1``.
+        Default is ``1.25``.
     use_edpp : bool, optional
         ``True`` is EDPP rule should be used.
         If ``False``, all groups are considered EDPP safe.
-        Default is ``True``
+        Default is ``False``
     check_state : bool, optional 
         ``True`` is state should be checked for inconsistencies before calling solver.
         Default is ``False``.
@@ -411,10 +404,8 @@ def grpnet(
         early_exit=early_exit,
         intercept=intercept,
         screen_rule=screen_rule,
-        lazify_screen=lazify_screen,
         min_ratio=min_ratio,
         lmda_path_size=lmda_path_size,
-        delta_lmda_path_size=delta_lmda_path_size,
         delta_strong_size=delta_strong_size,
         max_strong_size=max_strong_size,
         pivot_subset_ratio=pivot_subset_ratio,

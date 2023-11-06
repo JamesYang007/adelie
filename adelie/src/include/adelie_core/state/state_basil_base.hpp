@@ -8,6 +8,26 @@
 namespace adelie_core {
 namespace state {
 
+template <class GroupsType, class GroupSizesType,
+          class GradType, class AbsGradType>
+void update_abs_grad(
+    const GroupsType& groups,
+    const GroupSizesType& group_sizes,
+    const GradType& grad,
+    AbsGradType& abs_grad,
+    size_t n_threads
+)
+{
+    const auto n_threads_capped = std::min<size_t>(n_threads, groups.size());
+    #pragma omp parallel for schedule(static) num_threads(n_threads_capped)
+    for (int i = 0; i < groups.size(); ++i) 
+    {
+        const auto k = groups[i];
+        const auto size_k = group_sizes[i];
+        abs_grad[i] = grad.segment(k, size_k).matrix().norm();
+    }
+}
+
 /**
  * Updates absolute gradient in the base state.
  * The state DOES NOT have to be in its invariance. 
@@ -20,20 +40,13 @@ void update_abs_grad(
     StateType& state
 )
 {
-    const auto& grad = state.grad;
-    const auto& groups = state.groups;
-    const auto& group_sizes = state.group_sizes;
-    const auto n_threads = state.n_threads;
-    auto& abs_grad = state.abs_grad;
-
-    const auto n_threads_capped = std::min<size_t>(n_threads, groups.size());
-    #pragma omp parallel for schedule(static) num_threads(n_threads_capped)
-    for (int i = 0; i < groups.size(); ++i) 
-    {
-        const auto k = groups[i];
-        const auto size_k = group_sizes[i];
-        abs_grad[i] = grad.segment(k, size_k).matrix().norm();
-    }
+    update_abs_grad(
+        state.groups,
+        state.group_sizes,
+        state.grad,
+        state.abs_grad,
+        state.n_threads
+    );
 }
 
 /**
@@ -147,14 +160,12 @@ struct StateBasilBase
     const size_t lmda_path_size;
 
     // basil iteration configs
-    const size_t delta_lmda_path_size;
     const size_t delta_strong_size;
     const size_t max_strong_size;
     const value_t pivot_subset_ratio;
     const size_t pivot_subset_min;
     const value_t pivot_slack_ratio;
     const screen_rule_type screen_rule;
-    const bool lazify_screen;
 
     // convergence configs
     const size_t max_iters;
@@ -218,14 +229,12 @@ struct StateBasilBase
         value_t lmda_max,
         value_t min_ratio,
         size_t lmda_path_size,
-        size_t delta_lmda_path_size,
         size_t delta_strong_size,
         size_t max_strong_size,
         value_t pivot_subset_ratio,
         size_t pivot_subset_min,
         value_t pivot_slack_ratio,
         const std::string& screen_rule,
-        bool lazify_screen,
         size_t max_iters,
         value_t tol,
         value_t rsq_tol,
@@ -251,14 +260,12 @@ struct StateBasilBase
         penalty(penalty.data(), penalty.size()),
         min_ratio(min_ratio),
         lmda_path_size(lmda_path_size),
-        delta_lmda_path_size(delta_lmda_path_size),
         delta_strong_size(delta_strong_size),
         max_strong_size(max_strong_size),
         pivot_subset_ratio(pivot_subset_ratio),
         pivot_subset_min(pivot_subset_min),
         pivot_slack_ratio(pivot_slack_ratio),
         screen_rule(convert_strong_rule(screen_rule)),
-        lazify_screen(lazify_screen),
         max_iters(max_iters),
         tol(tol),
         rsq_tol(rsq_tol),

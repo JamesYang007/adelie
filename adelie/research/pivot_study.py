@@ -1,5 +1,10 @@
 import adelie as ad
 import numpy as np
+import array
+import csv
+from sklearn.preprocessing import SplineTransformer
+from scipy.sparse import csr_matrix
+from time import time
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import os
@@ -9,7 +14,9 @@ from IPython.display import HTML
 
 root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 tex_path = os.path.join(root_path, "docs/tex/pivot_rule")
+data_path = os.path.join(root_path, "data")
 fig_path = os.path.join(tex_path, "figures")
+tbl_path = os.path.join(tex_path, "tables")
 
 
 def active_sets(state):
@@ -49,12 +56,15 @@ def _screen_sets_strong(
         # always add current active set
         predict_set = predict_set.union(active_sets[i])
 
+        if "ever" in method and i > 0:
+            predict_set = predict_set.union(predict_sets[i-1])
+
         if "safe" in method:
             predict_set = predict_set.intersection(safe_sets[i])
 
         if "lazy" in method:
             previous_predict_set = predict_set if i == 0 else predict_sets[i-1]
-            if active_sets[i+1].issubset(previous_predict_set):
+            if active_sets[i].issubset(previous_predict_set):
                 predict_set = previous_predict_set
 
         if not active_sets[i+1].issubset(predict_set):
@@ -134,13 +144,9 @@ def _screen_sets_pivot(
 
     def _fixed_update(
         predict_set,
-        safe_set,
+        slack_set,
         delta,
     ):
-        if "safe" in method:
-            slack_set = safe_set
-        else:
-            slack_set = set(np.arange(G))
         slack_set = np.array(list(slack_set - predict_set), dtype=int)
         slack_scores = scores[i, slack_set]
         slack_scores_order = np.argsort(slack_scores)
@@ -169,18 +175,34 @@ def _screen_sets_pivot(
             np.arange(order_sub.shape[0]), 
             scores[i, order_sub],
         )
-        argmin = int(argmin * (1 - state.pivot_slack_ratio))
-        cutoff_idx = argmin + G - len(order_sub)
-        predict_set = set(orders[i, cutoff_idx:])
+        # add beyond pivot
+        predict_set = set(orders[i, G-subset_size+argmin:])
 
         # always add current active set
-        predict_set = predict_set.union(active_sets[i])
-
-        if "safe" in method:
-            predict_set = predict_set.intersection(safe_sets[i])
+        if "ever" in method:
+            predict_set = predict_set.union(ever_active_sets[i])
+        else:
+            predict_set = predict_set.union(active_sets[i])
 
         if "ever" in method and i > 0:
             predict_set = predict_set.union(predict_sets[i-1])
+
+        # add slack
+        n_new_active = (
+            len(ever_active_sets[i]) - len(ever_active_sets[i-1])
+            if i > 0 else
+            0
+        )
+        n_new_active = max(n_new_active, 1) * state.pivot_slack_ratio
+        count = 0
+        for j in range(G-subset_size+argmin-1, -1, -1):
+            if count >= n_new_active: break
+            if orders[i, j] in predict_set: continue
+            predict_set.add(orders[i, j])
+            count += 1
+
+        if "safe" in method:
+            predict_set = predict_set.intersection(safe_sets[i])
 
         if "lazy" in method:
             pivot_predict_set = predict_set
@@ -198,9 +220,13 @@ def _screen_sets_pivot(
                 if delta_active == 0:
                     predict_set = previous_predict_set
                 else:
+                    if "safe" in method:
+                        slack_set = safe_sets[i]
+                    else:
+                        slack_set = set(np.arange(G))
                     predict_set = _fixed_update(
                         previous_predict_set,
-                        safe_sets[i],
+                        slack_set,
                         delta_active,
                     )
 
@@ -220,9 +246,13 @@ def _screen_sets_pivot(
             # fallback to greedy method
             count = 0
             while not active_sets[i+1].issubset(predict_set):
+                if "safe" in method:
+                    slack_set = safe_sets[i]
+                else:
+                    slack_set = set(np.arange(G))
                 predict_set = _fixed_update(
                     predict_set,
-                    safe_sets[i],
+                    slack_set,
                     state.delta_strong_size,
                 )
                 count += 1
@@ -256,13 +286,26 @@ def plot_scores(
     state,
     *,
     scores: np.ndarray,
-    active_sets: list,
     sorted: bool =False,
     idx: int =None,
     add_active_color: bool =True,
-    add_cutoff: bool =True,
+    add_pivot_cutoff: bool =True,
+    add_strong_cutoff: bool =False,
 ):
     n_lmdas, G = scores.shape
+    
+    assert n_lmdas > 0
+
+    active_ss = active_sets(state)
+    ever_active_ss = []
+    for i, s in enumerate(active_ss):
+        if i == 0: 
+            ever_active_ss.append(s)
+            continue
+        ever_active_ss.append(s.union(ever_active_ss[i-1]))
+    ever_active_sizes = np.array([len(s) for s in active_ss], dtype=int)
+
+    scores = np.minimum(scores, state.lmdas[:, None])
 
     do_anim = idx is None
     idx = 0 if do_anim else idx
@@ -286,19 +329,18 @@ def plot_scores(
         np.arange(order_sub.shape[0]), 
         scores[idx, order_sub]
     )
-    argmin = int(argmin * (1 - state.pivot_slack_ratio))
     cutoff_idx = argmin + G - len(order_sub)
 
     is_active = np.zeros(G, dtype=bool)
-    is_active[np.array(list(active_sets[idx+1]))] = True
+    is_active[np.array(list(active_ss[idx+1]))] = True
     if sorted:
         xs = [
-            gns[:cutoff_idx],
-            gns[cutoff_idx:],
+            gns[~is_active[order]],
+            gns[is_active[order]],
         ]
         ys = [
-            scores[idx, order[:cutoff_idx]],
-            scores[idx, order[cutoff_idx:]],
+            scores[idx, order[xs[0]]],
+            scores[idx, order[xs[1]]],
         ]
     else:
         xs = [
@@ -320,14 +362,35 @@ def plot_scores(
             label=label,
         )
 
-    if add_cutoff:
-        line = ax.axhline(
+    if add_pivot_cutoff:
+        n_new_active = (
+            ever_active_sizes[idx] - ever_active_sizes[idx-1]
+            if idx > 0 else
+            0
+        )
+        count = 0
+        for i in range(cutoff_idx-1, -1, -1):
+            if count >= state.pivot_slack_ratio * max(n_new_active, 1):
+                cutoff_idx = i 
+                break
+            if order[i] in ever_active_ss[idx]: continue
+            count += 1
+        line_pivot = ax.axhline(
             scores[idx, order[cutoff_idx]], 
             linestyle='--', 
             linewidth=1, 
             color='green',
-            label=f"{state.screen_rule}-cutoff",
+            label="pivot-cutoff",
         )
+    if add_strong_cutoff:
+        line_strong = ax.axhline(
+            2 * state.lmdas[idx+1] - state.lmdas[idx],
+            linestyle='-.', 
+            linewidth=1, 
+            color='orange',
+            label="strong-cutoff",
+        )
+
     legend = ax.legend()
     # if there's nothing in the legend, just remove it
     if len(legend.get_texts()) == 0:
@@ -350,19 +413,18 @@ def plot_scores(
             np.arange(order_sub.shape[0]), 
             s[order_sub]
         )
-        argmin = int(argmin * (1 - state.pivot_slack_ratio))
         cutoff_idx = argmin + G - len(order_sub)
 
         is_active = np.zeros(G, dtype=bool)
-        is_active[np.array(list(active_sets[idx+1]))] = True
+        is_active[np.array(list(active_ss[idx+1]))] = True
         if sorted:
             xs = [
-                gns[:cutoff_idx],
-                gns[cutoff_idx:],
+                gns[~is_active[order]][-k_largest:],
+                gns[is_active[order]][-k_largest:],
             ]
             ys = [
-                s[order[:cutoff_idx]],
-                s[order[cutoff_idx:]],
+                scores[idx, order[xs[0]]][-k_largest:],
+                scores[idx, order[xs[1]]][-k_largest:],
             ]
         else:
             xs = [
@@ -383,7 +445,22 @@ def plot_scores(
                 label=label,
             )
         ax.set(ylim=[0, np.max(s) * 1.05])
-        line.set_ydata(s[order[cutoff_idx]])
+        if add_pivot_cutoff:
+            n_new_active = (
+                ever_active_sizes[idx] - ever_active_sizes[idx-1]
+                if idx > 0 else
+                0
+            )
+            count = 0
+            for i in range(cutoff_idx-1, -1, -1):
+                if count >= state.pivot_slack_ratio * max(n_new_active, 1):
+                    cutoff_idx = i 
+                    break
+                if order[i] in ever_active_ss[idx]: continue
+                count += 1
+            line_pivot.set_ydata(s[order[cutoff_idx]])
+        if add_strong_cutoff:
+            line_strong.set_ydata(2 * state.lmdas[idx+1] - state.lmdas[idx])
         return (scats[0], scats[1],)
 
     anim = animation.FuncAnimation(
@@ -408,12 +485,11 @@ def plot_set_sizes(
     dct = {
         "EDPP": 0,
         "strong": 1,
-        "pivot-S": 2,
-        "pivot-SL": 3,
-        "active": 4,
+        "pivot": 2,
+        "active": 3,
     } 
-    markers = ["o", "^", "v", "*", "."]
-    colors = ["tab:green", "tab:purple", "tab:orange", "tab:blue", "tab:red"]
+    markers = ["o", "v", "*", "."]
+    colors = ["tab:green", "tab:orange", "tab:blue", "tab:red"]
 
     make_ax = ax is None
     if make_ax:
@@ -440,3 +516,276 @@ def plot_set_sizes(
     if make_ax: 
         return fig, ax
     return ax
+
+
+def arcene(path):
+    X_train = np.genfromtxt(
+        os.path.join(path, "arcene_train.data"),
+    )
+    y_train = np.genfromtxt(
+        os.path.join(path, "arcene_train.labels")
+    )
+
+    subset = np.std(X_train, axis=0) > 0
+    X_train = X_train[:, subset]
+
+    n, _ = X_train.shape
+    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train = np.asfortranarray(X_train)
+    y_train /= np.std(y_train) * np.sqrt(n)
+
+    return X_train, y_train
+    
+
+def dorothea(path):
+    def csv_to_csr(f, p, delimiter=" "):
+        """Read content of CSV file f, return as CSR matrix."""
+        data = array.array("f")
+        indices = array.array("i")
+        indptr = array.array("i", [0])
+    
+        for i, row in enumerate(csv.reader(f, delimiter=delimiter), 1):
+            row = np.array([int(r) for r in row[:-1]])
+            data.extend(np.ones(len(row)))
+            indices.extend(row)
+            indptr.append(indptr[-1]+len(row))
+    
+        return csr_matrix(
+            (data, indices, indptr),
+            dtype=float, shape=(i, p)
+        )
+
+    X_train = csv_to_csr(
+        open(os.path.join(path, "dorothea_train.data")),
+        p=100000,
+    )
+    X_train = X_train.toarray()
+    y_train = np.genfromtxt(
+        os.path.join(path, "dorothea_train.labels")
+    )
+
+    subset = np.std(X_train, axis=0) > 0
+    X_train = X_train[:, subset]
+
+    n, _ = X_train.shape
+    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train = np.asfortranarray(X_train)
+    y_train /= np.std(y_train) * np.sqrt(n)
+
+    return X_train, y_train
+
+
+def gisette(path):
+    X_train = np.genfromtxt(
+        os.path.join(path, "gisette_train.data"),
+    )
+    y_train = np.genfromtxt(
+        os.path.join(path, "gisette_train.labels")
+    )
+
+    subset = np.std(X_train, axis=0) > 0
+    X_train = X_train[:, subset]
+
+    n, _ = X_train.shape
+    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train = np.asfortranarray(X_train)
+    y_train /= np.std(y_train) * np.sqrt(n)
+
+    return X_train, y_train
+
+
+def mnist(path):
+    data = np.genfromtxt(
+        os.path.join(path, "mnist_train.csv"),
+        delimiter=",",
+    )
+    X_train = data[1:-1, 1:].T
+    y_train = data[-1, 1:]
+
+    subset = np.std(X_train, axis=0) > 0
+    X_train = X_train[:, subset]
+
+    n, _ = X_train.shape
+    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train = np.asfortranarray(X_train)
+    y_train /= np.std(y_train) * np.sqrt(n)
+
+    X_train.shape, y_train.shape
+
+    return X_train, y_train
+
+
+def electricity(path):
+    def conv(x):
+        return x.replace(",", ".").encode()
+
+    data = np.genfromtxt(
+        (conv(x) for x in open(os.path.join(path, "LD2011_2014.txt"))),
+        skip_header=1,
+        delimiter=";",
+    )
+    X_train = data[:-1, 1:].T
+    y_train = data[-1, 1:].flatten()
+
+    subset = np.std(X_train, axis=0) > 0
+    X_train = X_train[:, subset]
+
+    n, _ = X_train.shape
+    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train = np.asfortranarray(X_train)
+    y_train /= np.std(y_train) * np.sqrt(n)
+
+    return X_train, y_train
+
+
+def gene(path):
+    X_train = np.genfromtxt(
+        os.path.join(path, "data.csv"),
+        skip_header=1,
+        delimiter=",",
+    )
+    y_dict = {
+        b"PRAD": 0,
+        b"LUAD": 1,
+        b"BRCA": 2,
+        b"KIRC": 3,
+        b"COAD": 4,
+    }
+    y_train = np.genfromtxt(
+        os.path.join(path, "labels.csv"),
+        skip_header=1,
+        delimiter=",",
+        converters={
+            1 : lambda x: y_dict[x],
+        },
+    )
+
+    X_train = X_train[:, 1:]
+    y_train = np.array([y[1] for y in y_train], dtype=float)
+
+    subset = np.std(X_train, axis=0) > 0
+    X_train = X_train[:, subset]
+
+    n, _ = X_train.shape
+    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train = np.asfortranarray(X_train)
+    y_train /= np.std(y_train) * np.sqrt(n)
+
+    return X_train, y_train
+
+
+def spline_basis(X, **kwargs):
+    spl_tr = SplineTransformer(
+        include_bias=False,
+        order="F",
+        **kwargs,
+    )
+    n = X.shape[0]
+    X = X * np.sqrt(n)
+    X = spl_tr.fit_transform(X)
+    X /= np.sqrt(n)
+    return X
+
+
+def real_data_analysis(
+    X: np.ndarray,
+    y: np.ndarray,
+    configs: dict,
+    lazify_screen: bool =True,
+):
+    start = time()
+    strong_state = ad.grpnet(
+        X=X,
+        y=y,
+        **configs,
+        screen_rule="strong",
+        lazify_screen=False,
+    )
+    end = time()
+    strong_time = end - start
+
+    start = time()
+    pivot_state = ad.grpnet(
+        X=X,
+        y=y,
+        **configs,
+        screen_rule="pivot",
+        lazify_screen=lazify_screen,
+    )
+    end = time()
+    pivot_time = end - start
+
+    active_ss = active_sets(pivot_state)
+    active_sizes = np.array([len(s) for s in active_ss])
+    strong_sizes = strong_state.strong_sizes
+    pivot_sizes = pivot_state.strong_sizes
+
+    assert len(strong_sizes) == len(pivot_sizes)
+
+    labels = ["strong", "pivot-L", "active"]
+    markers = ["v", "*", "."]
+    colors = ["tab:orange", "tab:blue", "tab:red"]
+    ys = [
+        strong_sizes,
+        pivot_sizes,
+        active_sizes,
+    ]
+    
+    def _kkt_fails(ns):
+        count = 0
+        out = []
+        for n in ns:
+            if n == 1:
+                out.append(count)
+                count = 0
+                continue
+            count += 1
+        return np.array(out, dtype=int)
+
+    kkt_fails = [
+        _kkt_fails(strong_state.n_valid_solutions),
+        _kkt_fails(pivot_state.n_valid_solutions),
+        np.zeros(len(pivot_sizes), dtype=int),
+    ]
+
+    fig, ax = plt.subplots(layout="constrained")
+    tls = -np.log(pivot_state.lmdas)
+
+    for y, kkt, label, marker, color in zip(
+        ys, kkt_fails, labels, markers, colors
+    ):
+        # plot KKT successful ones
+        ax.plot(
+            tls[kkt == 0], 
+            y[kkt == 0], 
+            linestyle="None",
+            color=color,
+            marker=marker,
+            label=label,
+            markerfacecolor="None",
+        )
+        # plot KKT failure ones
+        ax.plot(
+            tls[kkt > 0],
+            y[kkt > 0],
+            linestyle="None",
+            color=color,
+            marker="x",
+            label=None,
+            markerfacecolor="None",
+        )
+    ax.legend()
+    ax.set_title("Set Size Comparison")
+    ax.set_ylabel("Number of Groups")
+    ax.set_xlabel(r"$-\log(\lambda)$")
+
+    return (
+        fig, 
+        ax,
+        X.shape[0],
+        pivot_state.groups.shape[0],
+        strong_state,
+        pivot_state,
+        strong_time,
+        pivot_time,
+    )
