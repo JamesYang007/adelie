@@ -1,0 +1,717 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-theme="dark">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>API Reference &#8212; adelie 1.1.4 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "dark";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/numpy.css?v=92d1e6fe" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=ac02cc09edc035673794" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
+  <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
+
+    <script src="_static/documentation_options.js?v=e2e28a39"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api_reference';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="adelie.bcd.objective" href="generated/adelie.bcd.objective.html" />
+    <link rel="prev" title="Adelie Documentation" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="dark">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">adelie 1.1.4 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="user_guide.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/JamesYang007/adelie" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="user_guide.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/JamesYang007/adelie" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.bcd.objective.html">adelie.bcd.objective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.bcd.root.html">adelie.bcd.root</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.bcd.root_lower_bound.html">adelie.bcd.root_lower_bound</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.bcd.solve.html">adelie.bcd.solve</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.data.create_test_data_basil.html">adelie.data.create_test_data_basil</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_rsqs.html">adelie.diagnostic.plot_rsqs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_kkt.html">adelie.diagnostic.plot_kkt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.Diagnostic.html">adelie.diagnostic.Diagnostic</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.naive_dense.html">adelie.matrix.naive_dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.cov_dense.html">adelie.matrix.cov_dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_cov.html">adelie.state.pin_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.basil_naive.html">adelie.state.basil_naive</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.objective.html">adelie.solver.objective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.solve_pin.html">adelie.solver.solve_pin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.solve_basil.html">adelie.solver.solve_basil</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.base.html">adelie.matrix.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.MatrixCovBase32.html">adelie.matrix.MatrixCovBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.MatrixNaiveBase32.html">adelie.matrix.MatrixNaiveBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.base.html">adelie.state.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_cov_32.html">adelie.state.pin_cov_32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_cov_64.html">adelie.state.pin_cov_64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_naive_32.html">adelie.state.pin_naive_32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_naive_64.html">adelie.state.pin_naive_64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.basil_naive_32.html">adelie.state.basil_naive_32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.basil_naive_64.html">adelie.state.basil_naive_64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StateBasilBase32.html">adelie.adelie_core.state.StateBasilBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StateBasilBase64.html">adelie.adelie_core.state.StateBasilBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinBase32.html">adelie.adelie_core.state.StatePinBase32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinBase64.html">adelie.adelie_core.state.StatePinBase64</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">API Reference</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h1>
+<section id="adelie-bcd">
+<h2>adelie.bcd<a class="headerlink" href="#adelie-bcd" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.bcd.objective.html#adelie.bcd.objective" title="adelie.bcd.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">objective</span></code></a>(beta, *, quad, linear, l1, l2)</p></td>
+<td><p>Computes the BCD objective.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.bcd.root.html#adelie.bcd.root" title="adelie.bcd.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">root</span></code></a>(*, quad, linear, l1[, tol, max_iters, ...])</p></td>
+<td><p>Solves the non-negative root of the BCD root function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.bcd.root_lower_bound.html#adelie.bcd.root_lower_bound" title="adelie.bcd.root_lower_bound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">root_lower_bound</span></code></a>(*, quad, linear, l1)</p></td>
+<td><p>Computes a lower bound on the root of BCD root function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.bcd.root_upper_bound.html#adelie.bcd.root_upper_bound" title="adelie.bcd.root_upper_bound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">root_upper_bound</span></code></a>(*, quad, linear[, zero_tol])</p></td>
+<td><p>Computes an upper bound on the root of BCD root function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.bcd.root_function.html#adelie.bcd.root_function" title="adelie.bcd.root_function"><code class="xref py py-obj docutils literal notranslate"><span class="pre">root_function</span></code></a>(h, *, quad, linear, l1)</p></td>
+<td><p>Computes the BCD root function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.bcd.solve.html#adelie.bcd.solve" title="adelie.bcd.solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve</span></code></a>(*, quad, linear, l1, l2[, tol, ...])</p></td>
+<td><p>Solves the BCD update.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="adelie-data">
+<h2>adelie.data<a class="headerlink" href="#adelie-data" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.data.create_test_data_basil.html#adelie.data.create_test_data_basil" title="adelie.data.create_test_data_basil"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_test_data_basil</span></code></a>(n, p, G, *[, ...])</p></td>
+<td><p>Creates a test dataset for BASIL method.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="adelie-diagnostic">
+<h2>adelie.diagnostic<a class="headerlink" href="#adelie-diagnostic" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.residuals.html#adelie.diagnostic.residuals" title="adelie.diagnostic.residuals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">residuals</span></code></a>(state, *, y)</p></td>
+<td><p>Computes the residuals for each saved solution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.gradients.html#adelie.diagnostic.gradients" title="adelie.diagnostic.gradients"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradients</span></code></a>(state, *, resids)</p></td>
+<td><p>Computes the set of gradients for each saved solution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.gradient_norms.html#adelie.diagnostic.gradient_norms" title="adelie.diagnostic.gradient_norms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_norms</span></code></a>(state, *, grads)</p></td>
+<td><p>Computes the group-wise gradient norms for each saved solution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.gradient_scores.html#adelie.diagnostic.gradient_scores" title="adelie.diagnostic.gradient_scores"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_scores</span></code></a>(state, *, abs_grads)</p></td>
+<td><p>Computes the gradient scores for each saved solution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_coefficients.html#adelie.diagnostic.plot_coefficients" title="adelie.diagnostic.plot_coefficients"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_coefficients</span></code></a>(state)</p></td>
+<td><p>Plots the coefficient profile.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_rsqs.html#adelie.diagnostic.plot_rsqs" title="adelie.diagnostic.plot_rsqs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_rsqs</span></code></a>(state)</p></td>
+<td><p>Plots the <span class="math notranslate nohighlight">\(R^2\)</span> profile.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_set_sizes.html#adelie.diagnostic.plot_set_sizes" title="adelie.diagnostic.plot_set_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_set_sizes</span></code></a>(state, *[, ratio, exclude, axes])</p></td>
+<td><p>Plots the set sizes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_benchmark.html#adelie.diagnostic.plot_benchmark" title="adelie.diagnostic.plot_benchmark"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_benchmark</span></code></a>(state)</p></td>
+<td><p>Plots benchmark times.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_kkt.html#adelie.diagnostic.plot_kkt" title="adelie.diagnostic.plot_kkt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_kkt</span></code></a>(state, *, scores[, idx])</p></td>
+<td><p>Plots KKT failures.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.Diagnostic.html#adelie.diagnostic.Diagnostic" title="adelie.diagnostic.Diagnostic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Diagnostic</span></code></a>(*, y, state)</p></td>
+<td><p>Diagnostic class for user-friendly API.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="adelie-matrix">
+<h2>adelie.matrix<a class="headerlink" href="#adelie-matrix" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.naive_dense.html#adelie.matrix.naive_dense" title="adelie.matrix.naive_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">naive_dense</span></code></a>(mat[, n_threads])</p></td>
+<td><p>Creates a viewer of a dense matrix for naive method.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.cov_dense.html#adelie.matrix.cov_dense" title="adelie.matrix.cov_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cov_dense</span></code></a>(mat[, n_threads])</p></td>
+<td><p>Creates a viewer of a dense matrix for covariance method.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.cov_lazy.html#adelie.matrix.cov_lazy" title="adelie.matrix.cov_lazy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cov_lazy</span></code></a>(mat[, n_threads])</p></td>
+<td><p>Creates a viewer of a lazy matrix for covariance method.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="adelie-state">
+<h2>adelie.state<a class="headerlink" href="#adelie-state" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.deduce_states.html#adelie.state.deduce_states" title="adelie.state.deduce_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deduce_states</span></code></a>(*, group_sizes, screen_set)</p></td>
+<td><p>Deduce state variables.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.pin_cov.html#adelie.state.pin_cov" title="adelie.state.pin_cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pin_cov</span></code></a>(*, A, groups, group_sizes, alpha, ...)</p></td>
+<td><p>Creates a pin, covariance method state object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.pin_naive.html#adelie.state.pin_naive" title="adelie.state.pin_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pin_naive</span></code></a>(*, X, y_mean, y_var, groups, ...)</p></td>
+<td><p>Creates a pin, naive method state object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.basil_naive.html#adelie.state.basil_naive" title="adelie.state.basil_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">basil_naive</span></code></a>(*, X, X_means, X_group_norms, ...)</p></td>
+<td><p>Creates a basil, naive method state object.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="adelie-solver">
+<h2>adelie.solver<a class="headerlink" href="#adelie-solver" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.objective.html#adelie.solver.objective" title="adelie.solver.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">objective</span></code></a>(beta0, beta, *, X, y, groups, ...)</p></td>
+<td><p>Computes the group elastic net objective.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.solver.solve_pin.html#adelie.solver.solve_pin" title="adelie.solver.solve_pin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_pin</span></code></a>(state[, logger])</p></td>
+<td><p>Solves the pinned group elastic net problem.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.solve_basil.html#adelie.solver.solve_basil" title="adelie.solver.solve_basil"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_basil</span></code></a>(state[, logger])</p></td>
+<td><p>Solves the group elastic net problem using BASIL.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.solver.grpnet.html#adelie.solver.grpnet" title="adelie.solver.grpnet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grpnet</span></code></a>(*, X, y, groups, group_sizes[, ...])</p></td>
+<td><p>Group elastic net solver.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="internal">
+<h2>Internal<a class="headerlink" href="#internal" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.base.html#adelie.matrix.base" title="adelie.matrix.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.base</span></code></a>(core_mat)</p></td>
+<td><p>Base matrix wrapper class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixCovBase32.html#adelie.matrix.MatrixCovBase32" title="adelie.matrix.MatrixCovBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixCovBase32</span></code></a></p></td>
+<td><p>Base matrix class for covariance method.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixCovBase64.html#adelie.matrix.MatrixCovBase64" title="adelie.matrix.MatrixCovBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixCovBase64</span></code></a></p></td>
+<td><p>Base matrix class for covariance method.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixNaiveBase32.html#adelie.matrix.MatrixNaiveBase32" title="adelie.matrix.MatrixNaiveBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixNaiveBase32</span></code></a></p></td>
+<td><p>Base matrix class for naive method.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixNaiveBase64.html#adelie.matrix.MatrixNaiveBase64" title="adelie.matrix.MatrixNaiveBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixNaiveBase64</span></code></a></p></td>
+<td><p>Base matrix class for naive method.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.base.html#adelie.state.base" title="adelie.state.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.base</span></code></a>()</p></td>
+<td><p>Base wrapper state class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.pin_cov_32.html#adelie.state.pin_cov_32" title="adelie.state.pin_cov_32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.pin_cov_32</span></code></a>(*args, **kwargs)</p></td>
+<td><p>State class for pin, cov method using 32-bit floating point.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.pin_cov_64.html#adelie.state.pin_cov_64" title="adelie.state.pin_cov_64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.pin_cov_64</span></code></a>(*args, **kwargs)</p></td>
+<td><p>State class for pin, covariance method using 64-bit floating point.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.pin_naive_32.html#adelie.state.pin_naive_32" title="adelie.state.pin_naive_32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.pin_naive_32</span></code></a>(*args, **kwargs)</p></td>
+<td><p>State class for pin, naive method using 32-bit floating point.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.pin_naive_64.html#adelie.state.pin_naive_64" title="adelie.state.pin_naive_64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.pin_naive_64</span></code></a>(*args, **kwargs)</p></td>
+<td><p>State class for pin, naive method using 64-bit floating point.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.basil_naive_32.html#adelie.state.basil_naive_32" title="adelie.state.basil_naive_32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.basil_naive_32</span></code></a>(*args, **kwargs)</p></td>
+<td><p>State class for basil, naive method using 32-bit floating point.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.basil_naive_64.html#adelie.state.basil_naive_64" title="adelie.state.basil_naive_64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.basil_naive_64</span></code></a>(*args, **kwargs)</p></td>
+<td><p>State class for basil, naive method using 64-bit floating point.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateBasilBase32.html#adelie.adelie_core.state.StateBasilBase32" title="adelie.adelie_core.state.StateBasilBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateBasilBase32</span></code></a></p></td>
+<td><p>Base core state class for all basil methods.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateBasilBase64.html#adelie.adelie_core.state.StateBasilBase64" title="adelie.adelie_core.state.StateBasilBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateBasilBase64</span></code></a></p></td>
+<td><p>Base core state class for all basil methods.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinBase32.html#adelie.adelie_core.state.StatePinBase32" title="adelie.adelie_core.state.StatePinBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StatePinBase32</span></code></a></p></td>
+<td><p>Base core state class for all pin methods.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinBase64.html#adelie.adelie_core.state.StatePinBase64" title="adelie.adelie_core.state.StatePinBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StatePinBase64</span></code></a></p></td>
+<td><p>Base core state class for all pin methods.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Adelie Documentation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="generated/adelie.bcd.objective.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">adelie.bcd.objective</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-bcd">adelie.bcd</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-data">adelie.data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-diagnostic">adelie.diagnostic</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-matrix">adelie.matrix</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-state">adelie.state</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-solver">adelie.solver</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#internal">Internal</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="_sources/api_reference.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=ac02cc09edc035673794"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, James Yang.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
