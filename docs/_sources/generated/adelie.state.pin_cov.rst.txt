@@ -1,0 +1,6 @@
+﻿adelie.state.pin\_cov
+=====================
+
+.. currentmodule:: adelie.state
+
+.. autofunction:: pin_cov

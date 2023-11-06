@@ -1,0 +1,33 @@
+﻿adelie.matrix.base
+==================
+
+.. currentmodule:: adelie.matrix
+
+.. autoclass:: base
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~base.__init__
+      ~base.internal
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: internal
+   
+   
+
+   
+   
+   

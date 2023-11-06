@@ -1,0 +1,33 @@
+﻿adelie.matrix.cov\_lazy
+=======================
+
+.. currentmodule:: adelie.matrix
+
+.. autoclass:: cov_lazy
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~cov_lazy.__init__
+      ~cov_lazy.internal
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: internal
+   
+   
+
+   
+   
+   

@@ -1,0 +1,41 @@
+﻿adelie.diagnostic.Diagnostic
+============================
+
+.. currentmodule:: adelie.diagnostic
+
+.. autoclass:: Diagnostic
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Diagnostic.__init__
+      ~Diagnostic.plot_benchmark
+      ~Diagnostic.plot_coefficients
+      ~Diagnostic.plot_kkt
+      ~Diagnostic.plot_rsqs
+      ~Diagnostic.plot_set_sizes
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: plot_benchmark
+   .. automethod:: plot_coefficients
+   .. automethod:: plot_kkt
+   .. automethod:: plot_rsqs
+   .. automethod:: plot_set_sizes
+   
+   
+
+   
+   
+   

@@ -1,0 +1,136 @@
+﻿adelie.adelie\_core.state.StateBasilBase32
+==========================================
+
+.. currentmodule:: adelie.adelie_core.state
+
+.. autoclass:: StateBasilBase32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~StateBasilBase32.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StateBasilBase32.abs_grad
+      ~StateBasilBase32.active_sizes
+      ~StateBasilBase32.alpha
+      ~StateBasilBase32.benchmark_fit_active
+      ~StateBasilBase32.benchmark_fit_screen
+      ~StateBasilBase32.benchmark_invariance
+      ~StateBasilBase32.benchmark_kkt
+      ~StateBasilBase32.benchmark_screen
+      ~StateBasilBase32.betas
+      ~StateBasilBase32.early_exit
+      ~StateBasilBase32.grad
+      ~StateBasilBase32.group_sizes
+      ~StateBasilBase32.groups
+      ~StateBasilBase32.intercept
+      ~StateBasilBase32.intercepts
+      ~StateBasilBase32.lmda
+      ~StateBasilBase32.lmda_max
+      ~StateBasilBase32.lmda_path
+      ~StateBasilBase32.lmda_path_size
+      ~StateBasilBase32.lmdas
+      ~StateBasilBase32.max_iters
+      ~StateBasilBase32.max_screen_size
+      ~StateBasilBase32.min_ratio
+      ~StateBasilBase32.n_threads
+      ~StateBasilBase32.n_valid_solutions
+      ~StateBasilBase32.newton_max_iters
+      ~StateBasilBase32.newton_tol
+      ~StateBasilBase32.penalty
+      ~StateBasilBase32.pivot_slack_ratio
+      ~StateBasilBase32.pivot_subset_min
+      ~StateBasilBase32.pivot_subset_ratio
+      ~StateBasilBase32.rsq
+      ~StateBasilBase32.rsq_curv_tol
+      ~StateBasilBase32.rsq_slope_tol
+      ~StateBasilBase32.rsq_tol
+      ~StateBasilBase32.rsqs
+      ~StateBasilBase32.screen_begins
+      ~StateBasilBase32.screen_beta
+      ~StateBasilBase32.screen_g1
+      ~StateBasilBase32.screen_g2
+      ~StateBasilBase32.screen_hashset
+      ~StateBasilBase32.screen_is_active
+      ~StateBasilBase32.screen_order
+      ~StateBasilBase32.screen_rule
+      ~StateBasilBase32.screen_set
+      ~StateBasilBase32.screen_sizes
+      ~StateBasilBase32.setup_lmda_max
+      ~StateBasilBase32.setup_lmda_path
+      ~StateBasilBase32.tol
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   
+   
+
+   
+   
+   
+   .. autoattribute:: abs_grad
+   .. autoattribute:: active_sizes
+   .. autoattribute:: alpha
+   .. autoattribute:: benchmark_fit_active
+   .. autoattribute:: benchmark_fit_screen
+   .. autoattribute:: benchmark_invariance
+   .. autoattribute:: benchmark_kkt
+   .. autoattribute:: benchmark_screen
+   .. autoattribute:: betas
+   .. autoattribute:: early_exit
+   .. autoattribute:: grad
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: intercept
+   .. autoattribute:: intercepts
+   .. autoattribute:: lmda
+   .. autoattribute:: lmda_max
+   .. autoattribute:: lmda_path
+   .. autoattribute:: lmda_path_size
+   .. autoattribute:: lmdas
+   .. autoattribute:: max_iters
+   .. autoattribute:: max_screen_size
+   .. autoattribute:: min_ratio
+   .. autoattribute:: n_threads
+   .. autoattribute:: n_valid_solutions
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: newton_tol
+   .. autoattribute:: penalty
+   .. autoattribute:: pivot_slack_ratio
+   .. autoattribute:: pivot_subset_min
+   .. autoattribute:: pivot_subset_ratio
+   .. autoattribute:: rsq
+   .. autoattribute:: rsq_curv_tol
+   .. autoattribute:: rsq_slope_tol
+   .. autoattribute:: rsq_tol
+   .. autoattribute:: rsqs
+   .. autoattribute:: screen_begins
+   .. autoattribute:: screen_beta
+   .. autoattribute:: screen_g1
+   .. autoattribute:: screen_g2
+   .. autoattribute:: screen_hashset
+   .. autoattribute:: screen_is_active
+   .. autoattribute:: screen_order
+   .. autoattribute:: screen_rule
+   .. autoattribute:: screen_set
+   .. autoattribute:: screen_sizes
+   .. autoattribute:: setup_lmda_max
+   .. autoattribute:: setup_lmda_path
+   .. autoattribute:: tol
+   
+   
