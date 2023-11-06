@@ -151,7 +151,7 @@ def plot_set_sizes(
     exclude: list =[],
     axes = None,
 ):
-    """Plots the active, strong, and EDPP set sizes.
+    """Plots the set sizes.
 
     Parameters
     ----------
@@ -423,6 +423,15 @@ def plot_kkt(
 
 
 class Diagnostic:
+    """Diagnostic class for user-friendly API.
+
+    Parameters
+    ----------
+    y : (n,) np.ndarray
+        Response vector.
+    state
+        A state object from solving group elastic net.
+    """
     def __init__(self, *, y, state):
         self.state = state
         self.residuals = residuals(state, y=y)
@@ -431,16 +440,21 @@ class Diagnostic:
         self.gradient_scores = gradient_scores(state, abs_grads=self.gradient_norms)
 
     def plot_coefficients(self):
+        """Plots the coefficient profile."""
         return plot_coefficients(self.state)
 
     def plot_rsqs(self):
+        """Plots the :math:`R^2` profile."""
         return plot_rsqs(self.state)
 
     def plot_set_sizes(self, **kwargs):
+        """Plots the set sizes."""
         return plot_set_sizes(self.state, **kwargs)
 
     def plot_benchmark(self):
+        """Plots benchmark times."""
         return plot_benchmark(self.state)
 
     def plot_kkt(self, **kwargs):
+        """Plots KKT failures."""
         return plot_kkt(self.state, scores=self.gradient_scores, **kwargs)
