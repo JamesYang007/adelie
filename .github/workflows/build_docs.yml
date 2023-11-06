@@ -45,7 +45,7 @@ jobs:
         rm -rf _images _sources _static .doctrees generated notebooks *.html *.inv *.js .buildinfo
         cd sphinx
         make clean && make html
-        cp _build/html/* ..
+        cp -r _build/html/* ..
         touch .nojekyll
     # Publish built docs to gh-pages branch.
     # ===============================
