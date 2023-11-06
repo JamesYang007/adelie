@@ -1,6 +1,0 @@
-﻿adelie.solver.grpnet
-====================
-
-.. currentmodule:: adelie.solver
-
-.. autofunction:: grpnet

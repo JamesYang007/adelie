@@ -1,6 +1,0 @@
-﻿adelie.diagnostic.plot\_kkt
-===========================
-
-.. currentmodule:: adelie.diagnostic
-
-.. autofunction:: plot_kkt

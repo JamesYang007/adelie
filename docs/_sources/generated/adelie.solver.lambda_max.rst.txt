@@ -1,6 +1,0 @@
-﻿adelie.solver.lambda\_max
-=========================
-
-.. currentmodule:: adelie.solver
-
-.. autofunction:: lambda_max

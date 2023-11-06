@@ -1,6 +1,0 @@
-﻿adelie.bcd.root\_function
-=========================
-
-.. currentmodule:: adelie.bcd
-
-.. autofunction:: root_function

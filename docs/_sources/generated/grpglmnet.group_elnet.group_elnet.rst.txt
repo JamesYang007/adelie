@@ -1,6 +1,0 @@
-﻿grpglmnet.group\_elnet.group\_elnet
-===================================
-
-.. currentmodule:: grpglmnet.group_elnet
-
-.. autofunction:: group_elnet

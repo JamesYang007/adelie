@@ -1,6 +1,0 @@
-﻿grpglmnet.group\_elnet.bcd\_update
-==================================
-
-.. currentmodule:: grpglmnet.group_elnet
-
-.. autofunction:: bcd_update

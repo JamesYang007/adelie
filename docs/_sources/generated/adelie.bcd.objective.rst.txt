@@ -1,6 +1,0 @@
-﻿adelie.bcd.objective
-====================
-
-.. currentmodule:: adelie.bcd
-
-.. autofunction:: objective

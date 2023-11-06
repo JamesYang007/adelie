@@ -1,6 +1,0 @@
-﻿adelie.diagnostic.plot\_coefficient
-===================================
-
-.. currentmodule:: adelie.diagnostic
-
-.. autofunction:: plot_coefficient

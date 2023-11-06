@@ -1,6 +1,0 @@
-﻿adelie.bcd.root\_upper\_bound
-=============================
-
-.. currentmodule:: adelie.bcd
-
-.. autofunction:: root_upper_bound

@@ -1,6 +1,0 @@
-﻿adelie.solver.objective
-=======================
-
-.. currentmodule:: adelie.solver
-
-.. autofunction:: objective

@@ -1,6 +1,0 @@
-﻿adelie.diagnostic.plot\_set\_sizes
-==================================
-
-.. currentmodule:: adelie.diagnostic
-
-.. autofunction:: plot_set_sizes

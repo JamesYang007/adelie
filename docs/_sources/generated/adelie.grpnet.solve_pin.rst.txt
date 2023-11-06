@@ -1,6 +1,0 @@
-﻿adelie.grpnet.solve\_pin
-========================
-
-.. currentmodule:: adelie.grpnet
-
-.. autofunction:: solve_pin

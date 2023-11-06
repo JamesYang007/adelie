@@ -1,6 +1,0 @@
-﻿adelie.grpnet.objective
-=======================
-
-.. currentmodule:: adelie.grpnet
-
-.. autofunction:: objective

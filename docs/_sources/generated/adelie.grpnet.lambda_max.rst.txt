@@ -1,6 +1,0 @@
-﻿adelie.grpnet.lambda\_max
-=========================
-
-.. currentmodule:: adelie.grpnet
-
-.. autofunction:: lambda_max

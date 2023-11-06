@@ -1,6 +1,0 @@
-﻿adelie.solver.create\_lambdas
-=============================
-
-.. currentmodule:: adelie.solver
-
-.. autofunction:: create_lambdas

@@ -1,6 +1,0 @@
-﻿adelie.diagnostic.plot\_rsq
-===========================
-
-.. currentmodule:: adelie.diagnostic
-
-.. autofunction:: plot_rsq
