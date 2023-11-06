@@ -30,7 +30,7 @@ jobs:
         post-cleanup: 'all'
     - name: Set up dependencies
       run: |
-        conda activate adelie
+        mamba activate adelie
         poetry install --without test,dev --no-root
     - name: Install adelie
       run: |
