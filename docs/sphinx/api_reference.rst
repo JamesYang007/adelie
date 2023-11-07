@@ -50,6 +50,7 @@ adelie.diagnostic
     gradients
     gradient_norms
     gradient_scores
+    coefficient
     plot_coefficients
     plot_rsqs
     plot_set_sizes

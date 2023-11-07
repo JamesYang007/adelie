@@ -303,32 +303,36 @@ def grpnet(
     check_state : bool, optional 
         ``True`` is state should be checked for inconsistencies before calling solver.
         Default is ``False``.
+
+    Returns
+    -------
+    result
+        The resulting state after running the solver.
+        The type is the same as that of ``state``.
     """
     if isinstance(X, np.ndarray):
         X_raw = X
         X = ad.matrix.naive_dense(X_raw, n_threads=n_threads)
-        _X = X.internal()
-    else:
-        assert (
-            isinstance(X, matrix.MatrixNaiveBase64) or
-            isinstance(X, matrix.MatrixNaiveBase32)
-        )
-        _X = X
+
+    assert (
+        isinstance(X, matrix.MatrixNaiveBase64) or
+        isinstance(X, matrix.MatrixNaiveBase32)
+    )
 
     dtype = (
         np.float64
-        if isinstance(_X, matrix.MatrixNaiveBase64) else
+        if isinstance(X, matrix.MatrixNaiveBase64) else
         np.float32
     )
 
-    n, p = _X.rows(), _X.cols()
+    n, p = X.rows(), X.cols()
     G = len(groups)
 
     if weights is None:
         weights = np.full(n, 1/n)
 
     X_means = np.empty(p, dtype=dtype)
-    _X.means(weights, X_means)
+    X.means(weights, X_means)
 
     y_mean = np.sum(y * weights)
     yc = y
@@ -347,7 +351,7 @@ def grpnet(
     rsq = 0
     lmda = np.inf
     grad = np.empty(p, dtype=dtype)
-    _X.mul(resid, grad)
+    X.mul(resid, grad)
 
     if not (lmda_path is None):
         lmda_path = np.flip(np.sort(lmda_path))
