@@ -106,8 +106,6 @@ def create_test_data_basil(
         / snr
     )
     y = X @ beta + noise_scale * np.random.normal(0, 1, n)
-    X /= np.sqrt(n)
-    y /= np.sqrt(n)
 
     return {
         "X": X, 

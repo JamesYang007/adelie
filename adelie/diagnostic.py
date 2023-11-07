@@ -23,9 +23,9 @@ def residuals(
     n, p = X.rows(), X.cols()
     betas = state.betas
     intercepts = state.intercepts
-    Xbs = np.empty((betas.shape[0], n))
-    X.sp_btmul(0, p, betas, Xbs)
-    resids = y[None] - Xbs - intercepts[:, None]
+    WXbs = np.empty((betas.shape[0], n))
+    X.sp_btmul(0, p, betas, state.weights, WXbs)
+    resids = (state.weights * y)[None] - WXbs - (state.weights[None] * intercepts[:, None])
     return resids
 
 

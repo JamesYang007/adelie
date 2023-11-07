@@ -17,6 +17,7 @@ def objective(
     lmda: float, 
     alpha: float, 
     penalty: np.ndarray,
+    weights: np.ndarray,
 ):
     """Computes the group elastic net objective.
 
@@ -61,6 +62,8 @@ def objective(
         Elastic net parameter :math:`\\alpha`.
     penalty : (G,) np.ndarray
         List of penalty factors corresponding to each element of ``groups``.
+    weights : (G,) np.ndarray
+        Observation weights.
     
     Returns
     -------
@@ -68,7 +71,7 @@ def objective(
         Group elastic net objective.
     """
     return core.solver.objective(
-        beta0, beta, X, y, groups, group_sizes, lmda, alpha, penalty,
+        beta0, beta, X, y, groups, group_sizes, lmda, alpha, penalty, weights,
     )
 
 
@@ -175,6 +178,7 @@ def grpnet(
     group_sizes: np.ndarray,
     alpha: float =1,
     penalty: np.ndarray =None,
+    weights: np.ndarray =None,
     lmda_path: np.ndarray =None,
     max_iters: int =int(1e5),
     tol: float =1e-12,
@@ -219,6 +223,9 @@ def grpnet(
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
         Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
+    weights : (n,) np.ndarray
+        Observation weights.
+        Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
     lmda_path : (l,) np.ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
@@ -317,24 +324,18 @@ def grpnet(
     n, p = _X.rows(), _X.cols()
     G = len(groups)
 
+    if weights is None:
+        weights = np.full(n, 1/n)
+
     X_means = np.empty(p, dtype=dtype)
-    _X.means(X_means)
+    _X.means(weights, X_means)
 
-    X_group_norms = np.empty(G, dtype=dtype)
-    _X.group_norms(
-        groups,
-        group_sizes,
-        X_means,
-        intercept,
-        X_group_norms,
-    )
-
-    y_mean = np.mean(y)
+    y_mean = np.sum(y * weights)
     yc = y
     if intercept:
         yc = yc - y_mean
-    y_var = np.sum(yc ** 2)
-    resid = yc
+    y_var = np.sum(weights * yc ** 2)
+    resid = weights * yc
 
     if penalty is None:
         penalty = np.sqrt(group_sizes)
@@ -354,7 +355,6 @@ def grpnet(
     state = ad.state.basil_naive(
         X=X,
         X_means=X_means,
-        X_group_norms=X_group_norms,
         y_mean=y_mean,
         y_var=y_var,
         resid=resid,
@@ -362,6 +362,7 @@ def grpnet(
         group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
+        weights=weights,
         screen_set=screen_set,
         screen_beta=screen_beta,
         screen_is_active=screen_is_active,

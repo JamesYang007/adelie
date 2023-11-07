@@ -31,15 +31,17 @@ public:
     ) const =0;
 
     /**
-     * @brief Computes v X[:, j]^T where X is the current matrix.
+     * @brief Computes v X[:, j]^T W where X is the current matrix.
      * 
      * @param j         column index. 
      * @param v         scalar to multiply with. 
+     * @param   weights diagonal weights W.
      * @param out       resulting row vector.
      */
     virtual void ctmul(
         int j, 
         value_t v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) const =0;
 
@@ -58,16 +60,18 @@ public:
     ) =0;
 
     /**
-     * @brief Computes v^T X[:, j:j+q]^T where X is the current matrix.
+     * @brief Computes v^T X[:, j:j+q]^T W where X is the current matrix.
      * 
      * @param j     begin column index. 
      * @param q     number of columns.
      * @param v     vector to multiply with.
+     * @param   weights diagonal weights W.
      * @param out   resulting row vector.
      */
     virtual void btmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) =0;
 
@@ -95,16 +99,18 @@ public:
     /* Used outside of fitting procedures */
 
     /**
-     * @brief Computes v X[:, j:j+q]^T where X is the current matrix.
+     * @brief Computes v X[:, j:j+q]^T W where X is the current matrix.
      * 
      * @param j     begin column index. 
      * @param q     number of columns.
      * @param v     (l, p) sparse matrix to multiply with.
+     * @param   weights diagonal weights W.
      * @param out   (l, n) resulting row vector.
      */
     virtual void sp_btmul(
         int j, int q,
         const sp_mat_value_t& v,
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
     ) const =0;
 
@@ -121,27 +127,13 @@ public:
     ) const =0;
 
     /**
-     * @brief Computes column-wise mean.
+     * @brief Computes column-wise mean (weighted by W).
      * 
+     * @param   weights diagonal weights W.
      * @param out   resulting column means.
      */
     virtual void means(
-        Eigen::Ref<vec_value_t> out
-    ) const =0;
-
-    /**
-     * @brief Computes group-wise column norms.
-     * 
-     * @param groups    mapping group number to starting position.
-     * @param group_sizes   mapping group number to group size.
-     * @param center        true to compute centered column norms.
-     * @param out           resulting group-wise column norms.
-     */
-    virtual void group_norms(
-        const Eigen::Ref<const vec_index_t>& groups,
-        const Eigen::Ref<const vec_index_t>& group_sizes,
-        const Eigen::Ref<const vec_value_t>& means,
-        bool center,
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) const =0;
 };

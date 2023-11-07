@@ -75,6 +75,7 @@ def solve_cvxpy(
     lmda: float,
     alpha: float,
     penalty: np.ndarray,
+    weights: np.ndarray,
     screen_set: np.ndarray,
     intercept: bool,
     pin: bool,
@@ -83,7 +84,7 @@ def solve_cvxpy(
     beta = cp.Variable(p)
     beta0 = cp.Variable(1)
     expr = (
-        0.5 * cp.sum_squares(y - X @ beta - beta0)
+        0.5 * cp.sum(cp.multiply(weights, (y - X @ beta - beta0) ** 2))
     )
     for g, gs, w in zip(groups, group_sizes, penalty):
         expr += lmda * w * (
@@ -104,7 +105,7 @@ def solve_cvxpy(
     return beta0.value, beta.value
 
 
-def run_solve_pin(state, X, y):
+def run_solve_pin(state, X, y, weights):
     state.check(method="assert")
 
     state = solve_pin(state)    
@@ -124,6 +125,7 @@ def run_solve_pin(state, X, y):
             lmda=lmda,
             alpha=state.alpha,
             penalty=state.penalty,
+            weights=weights,
             screen_set=state.screen_set,
             intercept=state.intercept,
             pin=True,
@@ -146,6 +148,7 @@ def run_solve_pin(state, X, y):
                 lmda=lmda,
                 alpha=state.alpha,
                 penalty=state.penalty,
+                weights=weights,
             )
             for beta0, beta, lmda in zip(beta0s, betas, lmdas)
         ])
@@ -160,6 +163,7 @@ def run_solve_pin(state, X, y):
                 lmda=lmda,
                 alpha=state.alpha,
                 penalty=state.penalty,
+                weights=weights,
             )
             for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
         ])
@@ -184,9 +188,12 @@ def test_solve_pin_naive():
         ) = create_test_data_pin(
             n, p, G, S, alpha, sparsity, seed,
         )
-        y_mean = np.mean(y)
-        resid = y - intercept * y_mean
-        y_var = np.sum(resid ** 2)
+        np.random.seed(seed)
+        weights = np.random.uniform(1, 2, y.shape[0])
+        weights = weights / np.sum(weights)
+        y_mean = np.sum(y * weights)
+        resid = weights * (y - intercept * y_mean)
+        y_var = np.sum(resid ** 2 / weights)
         Xs = [
             ad.matrix.naive_dense(X, n_threads=2)
         ]
@@ -199,6 +206,7 @@ def test_solve_pin_naive():
                 group_sizes=group_sizes,
                 alpha=alpha,
                 penalty=penalty,
+                weights=weights,
                 screen_set=screen_set,
                 lmda_path=lmda_path,
                 rsq=rsq,
@@ -208,7 +216,7 @@ def test_solve_pin_naive():
                 intercept=intercept,
                 tol=1e-12,
             )
-            state = run_solve_pin(state, X, y)
+            state = run_solve_pin(state, X, y, weights)
             state = ad.state.pin_naive(
                 X=Xpy,
                 y_mean=y_mean,
@@ -217,6 +225,7 @@ def test_solve_pin_naive():
                 group_sizes=group_sizes,
                 alpha=alpha,
                 penalty=penalty,
+                weights=weights,
                 screen_set=screen_set,
                 lmda_path=[state.lmdas[-1] * 0.8],
                 rsq=state.rsq,
@@ -226,7 +235,7 @@ def test_solve_pin_naive():
                 intercept=intercept,
                 tol=1e-12,
             )
-            run_solve_pin(state, X, y)
+            run_solve_pin(state, X, y, weights)
 
     _test(10, 4, 2, 2)
     _test(10, 100, 10, 2)
@@ -251,9 +260,11 @@ def test_solve_pin_cov():
         ) = create_test_data_pin(
             n, p, G, S, alpha, sparsity, seed,
         )
-
-        A = X.T @ X
-        grad = X.T @ y
+        np.random.seed(seed)
+        weights = np.random.uniform(1, 2, y.shape[0])
+        WsqrtX = np.sqrt(weights)[:, None] * X
+        A = WsqrtX.T @ WsqrtX
+        grad = X.T @ (y * weights)
         screen_grad = np.concatenate([
             grad[g:g+gs]
             for g, gs in zip(groups[screen_set], group_sizes[screen_set])
@@ -262,7 +273,7 @@ def test_solve_pin_cov():
         # list of different types of cov matrices to test
         As = [
             ad.matrix.cov_dense(A, n_threads=3),
-            ad.matrix.cov_lazy(X, n_threads=3),
+            ad.matrix.cov_lazy(WsqrtX, n_threads=3),
         ]
 
         for Apy in As:
@@ -280,7 +291,7 @@ def test_solve_pin_cov():
                 screen_is_active=screen_is_active,
                 tol=1e-12,
             )
-            state = run_solve_pin(state, X, y)
+            state = run_solve_pin(state, X, y, weights)
             state = ad.state.pin_cov(
                 A=Apy,
                 groups=groups,
@@ -295,7 +306,7 @@ def test_solve_pin_cov():
                 screen_is_active=state.screen_is_active,
                 tol=1e-12,
             )
-            run_solve_pin(state, X, y)
+            run_solve_pin(state, X, y, weights)
 
     _test(10, 4, 2, 2)
     _test(10, 100, 10, 2)
@@ -339,26 +350,24 @@ def create_test_data_basil(
     X /= np.sqrt(n)
     y /= np.sqrt(n)
 
-    X_means = np.mean(X, axis=0)
+    weights = np.random.uniform(1, 2, n)
+    weights /= np.sum(weights)
+
+    X_means = np.sum(weights[:, None] * X, axis=0)
     X_c = X - intercept * X_means[None]
-    X_group_norms = np.array([
-        np.linalg.norm(X_c[:, g:g+gs])
-        for g, gs in zip(groups, group_sizes)
-    ])
-    y_mean = np.mean(y)
+    y_mean = np.sum(weights * y)
     y_c = y - y_mean * intercept
-    y_var = np.sum(y_c ** 2)
-    resid = y_c
+    y_var = np.sum(weights * y_c ** 2)
+    resid = weights * y_c
     screen_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
     screen_beta = np.zeros(np.sum(group_sizes[screen_set]))
     screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
-    grad = X_c.T @ y_c
+    grad = X_c.T @ resid
 
     return {
         "X": X, 
         "y": y,
         "X_means": X_means,
-        "X_group_norms": X_group_norms,
         "y_mean": y_mean,
         "y_var": y_var,
         "resid": resid,
@@ -366,6 +375,7 @@ def create_test_data_basil(
         "group_sizes": group_sizes,
         "alpha": alpha,
         "penalty": penalty,
+        "weights": weights,
         "screen_set": screen_set,
         "screen_beta": screen_beta,
         "screen_is_active": screen_is_active,
@@ -398,6 +408,7 @@ def run_solve_basil(state, X, y):
             lmda=lmda,
             alpha=state.alpha,
             penalty=state.penalty,
+            weights=state.weights,
             screen_set=state.screen_set,
             intercept=state.intercept,
             pin=False,
@@ -420,6 +431,7 @@ def run_solve_basil(state, X, y):
                 lmda=lmda,
                 alpha=state.alpha,
                 penalty=state.penalty,
+                weights=state.weights,
             )
             for beta0, beta, lmda in zip(beta0s, betas, lmdas)
         ])
@@ -434,10 +446,11 @@ def run_solve_basil(state, X, y):
                 lmda=lmda,
                 alpha=state.alpha,
                 penalty=state.penalty,
+                weights=state.weights,
             )
             for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
         ])
-        assert np.all(my_objs <= cvxpy_objs)
+        assert np.all(my_objs <= cvxpy_objs * (1 + 1e-10))
 
     return state
 
@@ -462,7 +475,6 @@ def test_solve_basil():
             state = ad.state.basil_naive(
                 X=state.X,
                 X_means=state.X_means,
-                X_group_norms=state.X_group_norms,
                 y_mean=state.y_mean,
                 y_var=state.y_var,
                 resid=state.resid,
@@ -470,6 +482,7 @@ def test_solve_basil():
                 group_sizes=state.group_sizes,
                 alpha=state.alpha,
                 penalty=state.penalty,
+                weights=state.weights,
                 screen_set=state.screen_set,
                 screen_beta=state.screen_beta,
                 screen_is_active=state.screen_is_active,

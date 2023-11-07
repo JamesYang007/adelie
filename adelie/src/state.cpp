@@ -110,16 +110,16 @@ void state_pin_base(py::module_& m, const char* name)
         will grab values corresponding to the full ``i`` th strong group block.
         )delimiter")
         .def_readonly("screen_vars", &state_t::screen_vars, R"delimiter(
-        List of :math:`D_k^2` where :math:`D_k` is from the SVD of :math:`X_{c,k}` 
-        along the strong groups :math:`k` and for possibly column-centered :math:`X_k`.
+        List of :math:`D_k^2` where :math:`D_k` is from the SVD of :math:`\sqrt{W} X_{c,k}` 
+        along the strong groups :math:`k` and for possibly column-centered (weighted by :math:`W`) :math:`X_k`.
         ``screen_vars[b:b+p]`` is :math:`D_k` for the ``i`` th strong group where
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         )delimiter")
         .def_readonly("screen_transforms", &state_t::screen_transforms, R"delimiter(
-        List of :math:`V_k` where :math:`V_k` is from the SVD of :math:`X_{c,k}`
-        along the strong groups :math:`k` and for possibly column-centered :math:`X_k`.
+        List of :math:`V_k` where :math:`V_k` is from the SVD of :math:`\sqrt{W} X_{c,k}`
+        along the strong groups :math:`k` and for possibly column-centered (weighted by :math:`W`) :math:`X_k`.
         It *only* needs to be properly initialized for groups with size > 1.
         ``screen_transforms[i]`` is :math:`V_k` for the ``i`` th strong group where
         ``k = screen_set[i]``.
@@ -153,7 +153,7 @@ void state_pin_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("rsq", &state_t::rsq, R"delimiter(
         Unnormalized :math:`R^2` value at ``screen_beta``.
-        The unnormalized :math:`R^2` is given by :math:`\|y_c\|_2^2 - \|y_c-X_c\beta\|_2^2`.
+        The unnormalized :math:`R^2` is given by :math:`\|y_c\|_{W}^2 - \|y_c-X_c\beta\|_{W}^2`.
         )delimiter")
         .def_readonly("screen_beta", &state_t::screen_beta, R"delimiter(
         Coefficient vector on the strong set.
@@ -314,6 +314,7 @@ void state_pin_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
@@ -344,6 +345,7 @@ void state_pin_naive(py::module_& m, const char* name)
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
+            py::arg("weights").noconvert(),
             py::arg("screen_set").noconvert(),
             py::arg("screen_g1").noconvert(),
             py::arg("screen_g2").noconvert(),
@@ -368,23 +370,26 @@ void state_pin_naive(py::module_& m, const char* name)
             py::arg("screen_is_active").noconvert()
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
+        .def_readonly("weights", &state_t::weights, R"delimiter(
+        Observation weights.
+        )delimiter")
         .def_readonly("y_mean", &state_t::y_mean, R"delimiter(
-        Mean of :math:`y`.
+        Mean (weighted by :math:`W`) of :math:`y`.
         )delimiter")
         .def_readonly("y_var", &state_t::y_var, R"delimiter(
-        :math:`\ell_2` norm squared of :math:`y_c`.
+        :math:`\ell_2` norm squared of :math:`y_c` (weighted by :math:`W`).
         )delimiter")
         .def_readonly("rsq_tol", &state_t::rsq_tol, R"delimiter(
         Early stopping rule check on :math:`R^2`.
         )delimiter")
         .def_readonly("screen_X_means", &state_t::screen_X_means, R"delimiter(
-        Column means of :math:`X` for strong groups.
+        Column means (weighted by :math:`W`) of :math:`X` for strong groups.
         )delimiter")
         .def_readonly("X", &state_t::X, R"delimiter(
         Feature matrix.
         )delimiter")
         .def_readonly("resid", &state_t::resid, R"delimiter(
-        Residual :math:`y_c-X\beta` at ``screen_beta`` 
+        Residual :math:`W(y_c-X\beta)` at ``screen_beta`` 
         (note that it always uses uncentered :math:`X`!).
         )delimiter")
         .def_readonly("resid_sum", &state_t::resid_sum, R"delimiter(
@@ -480,11 +485,12 @@ void state_pin_cov(py::module_& m, const char* name)
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
         .def_readonly("A", &state_t::A, R"delimiter(
-        Covariance matrix :math:`X_c^\top X_c` where :math:`X_c` is column-centered to fit with intercept.
+        Covariance matrix :math:`X_c^\top W X_c` where :math:`X_c` is column-centered 
+        (weighted by :math:`W`) to fit with intercept.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
         )delimiter")
         .def_readonly("screen_grad", &state_t::screen_grad, R"delimiter(
-        Gradient :math:`X_{c,k}^\top (y_c-X_c\beta)` on the strong groups :math:`k` where :math:`\beta` is given by ``screen_beta``.
+        Gradient :math:`X_{c,k}^\top W (y_c-X_c\beta)` on the strong groups :math:`k` where :math:`\beta` is given by ``screen_beta``.
         ``screen_grad[b:b+p]`` is the gradient for the ``i`` th strong group
         where 
         ``k = screen_set[i]``,
@@ -520,6 +526,7 @@ void state_basil_base(py::module_& m, const char* name)
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
             value_t,
             value_t,
             size_t,
@@ -551,6 +558,7 @@ void state_basil_base(py::module_& m, const char* name)
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
+            py::arg("weights").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("lmda_max"),
             py::arg("min_ratio"),
@@ -594,6 +602,9 @@ void state_basil_base(py::module_& m, const char* name)
         .def_readonly("penalty", &state_t::penalty, R"delimiter(
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
+        )delimiter")
+        .def_readonly("weights", &state_t::weights, R"delimiter(
+        Observation weights.
         )delimiter")
         .def_readonly("lmda_max", &state_t::lmda_max, R"delimiter(
         The smallest :math:`\lambda` such that the true solution is zero
@@ -741,14 +752,14 @@ void state_basil_base(py::module_& m, const char* name)
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
         )delimiter")
         .def_readonly("rsq", &state_t::rsq, R"delimiter(
-        The true unnormalized :math:`R^2` given by :math:`\|y_c\|_2^2 - \|y_c-X_c\beta\|_2^2`
+        The true unnormalized :math:`R^2` given by :math:`\|y_c\|_{W}^2 - \|y_c-X_c\beta\|_{W}^2`
         where :math:`\beta` is given by ``screen_beta``.
         )delimiter")
         .def_readonly("lmda", &state_t::lmda, R"delimiter(
         The regularization parameter at which the true solution is given by ``screen_beta``.
         )delimiter")
         .def_readonly("grad", &state_t::grad, R"delimiter(
-        The true full gradient :math:`X_c^\top (y_c - X_c\beta)` where
+        The true full gradient :math:`X_c^\top W (y_c - X_c\beta)` where
         :math:`\beta` is given by ``screen_beta``.
         )delimiter")
         .def_readonly("abs_grad", &state_t::abs_grad, R"delimiter(
@@ -885,13 +896,13 @@ void state_basil_naive(py::module_& m, const char* name)
         .def(py::init<
             matrix_t&,
             const Eigen::Ref<const vec_value_t>&,
-            const Eigen::Ref<const vec_value_t>&,
             value_t,
             value_t,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
+            const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             value_t,
@@ -923,7 +934,6 @@ void state_basil_naive(py::module_& m, const char* name)
         >(),
             py::arg("X"),
             py::arg("X_means").noconvert(),
-            py::arg("X_group_norms").noconvert(),
             py::arg("y_mean"),
             py::arg("y_var"),
             py::arg("resid").noconvert(),
@@ -931,6 +941,7 @@ void state_basil_naive(py::module_& m, const char* name)
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
+            py::arg("weights").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("lmda_max"),
             py::arg("min_ratio"),
@@ -961,41 +972,36 @@ void state_basil_naive(py::module_& m, const char* name)
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
         .def_readonly("X_means", &state_t::X_means, R"delimiter(
-        Column means of ``X``.
-        )delimiter")
-        .def_readonly("X_group_norms", &state_t::X_group_norms, R"delimiter(
-        Group Frobenius norm of ``X``.
-        ``X_group_norms[i]`` is :math:`\|X_{c, g}\|_F`
-        where :math:`g` corresponds to the group index ``i``.
+        Column means (weighted by :math:`W`) of ``X``.
         )delimiter")
         .def_readonly("y_mean", &state_t::y_mean, R"delimiter(
-        The mean of the response vector :math:`y`.
+        The mean (weighted by :math:`W`) of the response vector :math:`y`.
         )delimiter")
         .def_readonly("y_var", &state_t::y_var, R"delimiter(
-        The variance of the response vector :math:`y`, i.e. 
-        :math:`\|y_c\|_2^2`.
+        The variance (weighted by :math:`W`) of the response vector :math:`y`, i.e. 
+        :math:`\|y_c\|_{W}^2`.
         )delimiter")
         .def_readonly("X", &state_t::X, R"delimiter(
         Feature matrix.
         )delimiter")
         .def_readonly("resid", &state_t::resid, R"delimiter(
-        Residual :math:`y_c - X \beta` where :math:`\beta` is given by ``screen_beta``.
+        Residual :math:`W(y_c - X \beta)` where :math:`\beta` is given by ``screen_beta``.
         )delimiter")
         .def_readonly("resid_sum", &state_t::resid_sum, R"delimiter(
         Sum of ``resid``.
         )delimiter")
         .def_readonly("screen_X_means", &state_t::screen_X_means, R"delimiter(
-        Column means of ``X`` on the strong set.
+        Column means (weighted by :math:`W`) of ``X`` on the strong set.
         )delimiter")
         .def_readonly("screen_transforms", &state_t::screen_transforms, R"delimiter(
-        The :math:`V` from the SVD of :math:`X_{c,k}` where :math:`X_c` 
-        is the possibly centered feature matrix and :math:`k` is an index to ``screen_set``.
+        The :math:`V` from the SVD of :math:`\sqrt{W} X_{c,k}` where :math:`X_c` 
+        is the possibly centered (weighted by :math:`W`) feature matrix and :math:`k` is an index to ``screen_set``.
         )delimiter")
         .def_property_readonly("screen_vars", [](const state_t& s) {
             return Eigen::Map<const vec_value_t>(s.screen_vars.data(), s.screen_vars.size());
         }, R"delimiter(
-        The :math:`D^2` from the SVD of :math:`X_{c,k}` where :math:`X_c` 
-        is the possibly centered feature matrix and :math:`k` is an index to ``screen_set``.
+        The :math:`D^2` from the SVD of :math:`\sqrt{W} X_{c,k}` where :math:`X_c` 
+        is the possibly centered (weighted by :math:`W`) feature matrix and :math:`k` is an index to ``screen_set``.
         )delimiter")
         ;
 }

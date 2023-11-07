@@ -22,6 +22,7 @@ private:
     const Eigen::Map<const dense_t> _mat;   // underlying dense matrix
     const size_t _n_threads;                // number of threads
     util::rowmat_type<value_t> _buff;
+    util::rowvec_type<value_t> _vbuff;
     
 public:
     MatrixNaiveDense(
@@ -30,7 +31,8 @@ public:
     ): 
         _mat(mat.data(), mat.rows(), mat.cols()),
         _n_threads(n_threads),
-        _buff(_n_threads, std::min(mat.rows(), mat.cols()))
+        _buff(_n_threads, std::min(mat.rows(), mat.cols())),
+        _vbuff(mat.rows())
     {}
     
     value_t cmul(
@@ -38,16 +40,17 @@ public:
         const Eigen::Ref<const vec_value_t>& v
     ) const override
     {
-        return ddot(_mat.col(j).matrix(), v.matrix(), _n_threads);
+        return ddot(_mat.col(j), v.matrix(), _n_threads);
     }
 
     void ctmul(
         int j, 
         value_t v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) const override
     {
-        dax(v, _mat.col(j), _n_threads, out);
+        dax(v, _mat.transpose().row(j).array() * weights, _n_threads, out);
     }
 
     void bmul(
@@ -69,6 +72,7 @@ public:
     void btmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
@@ -80,6 +84,7 @@ public:
             _buff,
             outm
         );
+        out *= weights;
     }
 
     void mul(
@@ -100,10 +105,12 @@ public:
     void sp_btmul(
         int j, int q, 
         const sp_mat_value_t& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
     ) const override
     {
         out.noalias() = v * _mat.middleCols(j, q).transpose();
+        out.array().rowwise() *= weights;
     }
 
     void to_dense(
@@ -119,6 +126,7 @@ public:
     }
 
     void means(
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) const override
     {
@@ -133,28 +141,9 @@ public:
                 + std::max<int>(t-remainder, 0) * block_size
             );
             const auto size = block_size + (t < remainder);
-            out.segment(begin, size) = _mat.middleCols(begin, size).colwise().mean();
-        }
-    }
-
-    void group_norms(
-        const Eigen::Ref<const vec_index_t>& groups,
-        const Eigen::Ref<const vec_index_t>& group_sizes,
-        const Eigen::Ref<const vec_value_t>& means,
-        bool center,
-        Eigen::Ref<vec_value_t> out
-    ) const override
-    {
-        const auto n = _mat.rows();
-        const auto G = groups.size();
-        const auto n_threads_capped = std::min<int>(_n_threads, G);
-        #pragma omp parallel for schedule(static) num_threads(n_threads_capped)
-        for (int i = 0; i < G; ++i) {
-            const auto g = groups[i];
-            const auto gs = group_sizes[i];
-            auto Xi_fro = _mat.middleCols(g, gs).squaredNorm();
-            if (center) Xi_fro -= n * means.segment(g, gs).matrix().squaredNorm();
-            out[i] = std::sqrt(Xi_fro);
+            for (int j = 0; j < size; ++j) {
+                out[begin + j] = _mat.col(j).dot(weights.matrix());
+            }
         }
     }
 

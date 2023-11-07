@@ -219,7 +219,8 @@ auto objective(
     const Eigen::Ref<const util::rowvec_type<IndexType>>& group_sizes,
     ValueType lmda,
     ValueType alpha,
-    const Eigen::Ref<const util::rowvec_type<ValueType>>& penalty
+    const Eigen::Ref<const util::rowvec_type<ValueType>>& penalty,
+    const Eigen::Ref<const util::rowvec_type<ValueType>>& weights
 )
 {
     ValueType p_ = 0.0;
@@ -232,9 +233,8 @@ auto objective(
         );
     }
     p_ *= lmda;
-    return 0.5 * (
-        (y.matrix() - beta.matrix() * X.transpose()).array() - beta0
-    ).matrix().squaredNorm() + p_;
+    util::rowvec_type<ValueType> resid = (y.matrix() - beta.matrix() * X.transpose()).array() - beta0;
+    return 0.5 * (weights * resid.square()).sum() + p_;
 }
 
 } // namespace solver

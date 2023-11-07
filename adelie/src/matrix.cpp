@@ -39,6 +39,7 @@ public:
     void ctmul(
         int j, 
         value_t v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) const override
     {
@@ -46,7 +47,7 @@ public:
             void,
             base_t,
             ctmul,
-            j, v, out
+            j, v, weights, out
         );
     }
 
@@ -67,6 +68,7 @@ public:
     void btmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
@@ -74,7 +76,7 @@ public:
             void,
             base_t,
             btmul,
-            j, q, v, out
+            j, q, v, weights, out
         );
     }
 
@@ -94,6 +96,7 @@ public:
     void sp_btmul(
         int j, int q,
         const sp_mat_value_t& v,
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
     ) const override
     {
@@ -101,7 +104,7 @@ public:
             void,
             base_t,
             sp_btmul,
-            j, q, v, out
+            j, q, v, weights, out
         );
     }
 
@@ -119,6 +122,7 @@ public:
     }
 
     void means(
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) const override
     {
@@ -126,23 +130,7 @@ public:
             void,
             base_t,
             means,
-            out
-        );
-    }
-
-    void group_norms(
-        const Eigen::Ref<const vec_index_t>& groups,
-        const Eigen::Ref<const vec_index_t>& group_sizes,
-        const Eigen::Ref<const vec_value_t>& means,
-        bool center,
-        Eigen::Ref<vec_value_t> out
-    ) const override
-    {
-        PYBIND11_OVERLOAD_PURE(
-            void,
-            base_t,
-            group_norms,
-            groups, group_sizes, means, center, out
+            weights, out
         );
     }
 
@@ -151,7 +139,7 @@ public:
         PYBIND11_OVERRIDE_PURE(
             int,
             base_t,
-            rows
+            rows,
         );
     }
 
@@ -160,7 +148,7 @@ public:
         PYBIND11_OVERRIDE_PURE(
             int,
             base_t,
-            cols
+            cols,
         );
     }
 };
@@ -189,7 +177,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         .def("ctmul", &internal_t::ctmul, R"delimiter(
         Column scalar multiplication.
 
-        Computes the scalar-vector multiplication ``v * X[:,j]`` for a column ``j``.
+        Computes the scalar-vector multiplication ``v * (X[:,j].T @ W)`` for a column ``j``.
 
         Parameters
         ----------
@@ -197,6 +185,8 @@ void matrix_naive_base(py::module_& m, const char* name)
             Column index.
         v : float
             Scalar to multiply the ``j`` th column with.
+        w : (n,) np.ndarray
+            Vector of observation of weights.
         out : (n,) np.ndarray
             Vector to store in-place the result.
         )delimiter")
@@ -221,7 +211,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         Block matrix transpose-vector multiplication.
 
         Computes the matrix-vector multiplication
-        ``v.T @ X[:, j:j+q].T``.
+        ``v.T @ X[:, j:j+q].T @ W``.
 
         Parameters
         ----------
@@ -231,6 +221,8 @@ void matrix_naive_base(py::module_& m, const char* name)
             Number of columns.
         v : (q,) np.ndarray
             Vector to multiply with the block matrix.
+        w : (n,) np.ndarray
+            Vector of observation of weights.
         out : (n,) np.ndarray
             Vector to store in-place the result.
         )delimiter")
@@ -251,7 +243,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         Block matrix transpose-sparse matrix multiplication.
 
         Computes the matrix-sparse matrix multiplication
-        ``v @ X[:, j:j+q].T``.
+        ``v @ X[:, j:j+q].T @ W``.
 
         Parameters
         ----------
@@ -261,6 +253,8 @@ void matrix_naive_base(py::module_& m, const char* name)
             Number of columns.
         v : (l, p) scipy.sparse.csr_matrix
             Sparse matrix to multiply with the block matrix.
+        w : (n,) np.ndarray
+            Vector of observation of weights.
         out : (l, n) np.ndarray
             Matrix to store in-place the result.
         )delimiter")
@@ -281,33 +275,14 @@ void matrix_naive_base(py::module_& m, const char* name)
         .def("means", &internal_t::means, R"delimiter(
         Computes column-wise means.
 
-        Equivalent to ``np.mean(X, axis=0)``.
+        Equivalent to ``np.sum(W @ X, axis=0)``.
 
         Parameters
         ----------
+        w : (n,) np.ndarray
+            Vector of observation of weights.
         out : (p,) np.ndarray
             Vector to store the column-wise means.
-        )delimiter")
-        .def("group_norms", &internal_t::group_norms, R"delimiter(
-        Computes group-wise column norms.
-
-        Equivalent to ``np.linalg.norm(Xc[:, g:g+gs])``
-        for every group ``g`` with group size ``gs``.
-        Note that if ``X`` is to be centered first,
-        ``Xc`` is the column-wise centered version of ``X``.
-
-        Parameters
-        ----------
-        groups : (G,) np.ndarray
-            Mapping group number to the starting column index.
-        group_sizes : (G,) np.ndarray
-            Mapping group number to the group size.
-        means : (p,) np.ndarray
-            Column-wise means.
-        center : bool
-            ``True`` if the function should compute centered group-wise column norms.
-        out : (G,) np.ndarray
-            Resulting group-wise column norms.
         )delimiter")
         .def("rows", &internal_t::rows, R"delimiter(
         Number of rows.

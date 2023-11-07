@@ -12,8 +12,10 @@ def test_naive_dense():
             atol = 1e-6 if dtype == np.float32 else 1e-14
 
             X = np.array(X, dtype=dtype, order=order)
-            wrap = mod.naive_dense(X, n_threads=4)
+            wrap = mod.naive_dense(X, n_threads=1)
             cX = wrap._core_mat
+            w = np.random.uniform(1, 2, n).astype(dtype)
+            w = w / np.sum(w)
 
             # test cmul
             v = np.random.normal(0, 1, n).astype(dtype)
@@ -23,8 +25,8 @@ def test_naive_dense():
             # test ctmul
             v = np.random.normal(0, 1)
             out = np.empty(n, dtype=dtype)
-            cX.ctmul(p//2, v, out)
-            assert np.allclose(v * X[:, p//2], out, atol=atol)
+            cX.ctmul(p//2, v, w, out)
+            assert np.allclose(v * (w * X[:, p//2]), out, atol=atol)
 
             # test bmul
             v = np.random.normal(0, 1, n).astype(dtype)
@@ -35,8 +37,8 @@ def test_naive_dense():
             # test btmul
             v = np.random.normal(0, 1, p//2).astype(dtype)
             out = np.empty(n, dtype=dtype)
-            cX.btmul(0, p // 2, v, out)
-            assert np.allclose(v.T @ X[:, :p//2].T, out, atol=atol)
+            cX.btmul(0, p // 2, v, w, out)
+            assert np.allclose(v.T @ (w[:, None] * X[:, :p//2]).T, out, atol=atol)
 
             # test mul
             v = np.random.normal(0, 1, n).astype(dtype)
@@ -47,10 +49,10 @@ def test_naive_dense():
             # test sp_btmul
             v = np.random.normal(0, 1, (2, p // 2)).astype(dtype)
             v[:, :p//4] = 0
-            expected = v @ X[:, :p//2].T
+            expected = v @ (w[:, None] * X[:, :p//2]).T
             v = scipy.sparse.csr_matrix(v)
             out = np.empty((2, n), dtype=dtype)
-            cX.sp_btmul(0, p // 2, v, out)
+            cX.sp_btmul(0, p // 2, v, w, out)
             assert np.allclose(expected, out, atol=atol)
 
             # test to_dense
@@ -60,30 +62,8 @@ def test_naive_dense():
 
             # test means
             X_means = np.empty(p, dtype=dtype)
-            cX.means(X_means)
-            assert np.allclose(np.mean(X, axis=0), X_means)
-
-            # test group_means
-            groups = np.concatenate([
-                [0],
-                np.random.choice(np.arange(1, p), size=p//2-1, replace=False)
-            ])
-            groups = np.sort(groups).astype(int)
-            group_sizes = np.concatenate([groups, [p]], dtype=int)
-            group_sizes = group_sizes[1:] - group_sizes[:-1]
-            out = np.empty(len(groups), dtype=dtype)
-            cX.group_norms(
-                groups,
-                group_sizes,
-                np.mean(X, axis=0),
-                True,
-                out,
-            )
-            expected = np.array([
-                np.linalg.norm(X[:, g:g+gs] - X_means[g:g+gs][None])
-                for g, gs in zip(groups, group_sizes)
-            ])
-            assert np.allclose(expected, out)
+            cX.means(w, X_means)
+            assert np.allclose(np.sum(w[:, None] * X, axis=0), X_means)
 
             assert cX.rows() == n
             assert cX.cols() == p

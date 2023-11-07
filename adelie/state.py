@@ -3,7 +3,6 @@ from . import matrix
 from . import logger
 import numpy as np
 import scipy
-import os
 
 
 def deduce_states(
@@ -544,6 +543,7 @@ class pin_naive_base(pin_base):
         group_sizes: np.ndarray,
         alpha: float,
         penalty: np.ndarray,
+        weights: np.ndarray,
         screen_set: np.ndarray,
         lmda_path: np.ndarray,
         rsq: float,
@@ -576,6 +576,7 @@ class pin_naive_base(pin_base):
         self._groups = np.array(groups, copy=False, dtype=int)
         self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
         self._penalty = np.array(penalty, copy=False, dtype=dtype)
+        self._weights = np.array(weights, copy=False, dtype=dtype)
         self._screen_set = np.array(screen_set, copy=False, dtype=int)
         self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
 
@@ -600,7 +601,7 @@ class pin_naive_base(pin_base):
             g, gs = groups[i], group_sizes[i]
             Xi = np.empty((X.rows(), gs), dtype=dtype, order="F")
             X.to_dense(g, gs, Xi)
-            Xi_means = np.mean(Xi, axis=0)
+            Xi_means = np.sum(Xi * weights[:, None], axis=0)
             if intercept:
                 Xi -= Xi_means[None]
             _, d, vh = np.linalg.svd(Xi, full_matrices=True, compute_uv=True)
@@ -631,6 +632,7 @@ class pin_naive_base(pin_base):
             group_sizes=self._group_sizes,
             alpha=alpha,
             penalty=self._penalty,
+            weights=self._weights,
             screen_set=self._screen_set,
             screen_g1=self._screen_g1,
             screen_g2=self._screen_g2,
@@ -729,6 +731,7 @@ def pin_naive(
     group_sizes: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
+    weights: np.ndarray,
     screen_set: np.ndarray,
     lmda_path: np.ndarray,
     rsq: float,
@@ -768,6 +771,8 @@ def pin_naive(
     penalty : (G,) np.ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
+    weights : (n,) np.ndarray
+        Observation weights.
     screen_set : (s,) np.ndarray
         List of indices into ``groups`` that correspond to the strong groups.
         ``screen_set[i]`` is ``i`` th strong group.
@@ -852,6 +857,7 @@ def pin_naive(
         group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
+        weights=weights,
         screen_set=screen_set,
         lmda_path=lmda_path,
         rsq=rsq,
@@ -1178,7 +1184,6 @@ class basil_naive_base(basil_base):
         *,
         X: matrix.base | matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
         X_means: np.ndarray,
-        X_group_norms: np.ndarray,
         y_mean: float,
         y_var: float,
         resid: np.ndarray,
@@ -1186,6 +1191,7 @@ class basil_naive_base(basil_base):
         group_sizes: np.ndarray,
         alpha: float,
         penalty: np.ndarray,
+        weights: np.ndarray,
         lmda_path: np.ndarray,
         lmda_max: float,
         min_ratio: float,
@@ -1226,10 +1232,10 @@ class basil_naive_base(basil_base):
             X = X.internal()
 
         self._X_means = np.array(X_means, copy=False, dtype=dtype)
-        self._X_group_norms = np.array(X_group_norms, copy=False, dtype=dtype)
         self._groups = np.array(groups, copy=False, dtype=int)
         self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
         self._penalty = np.array(penalty, copy=False, dtype=dtype)
+        self._weights = np.array(weights, copy=False, dtype=dtype)
         self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
         screen_set = np.array(screen_set, copy=False, dtype=int)
         screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
@@ -1243,7 +1249,6 @@ class basil_naive_base(basil_base):
             self,
             X=X,
             X_means=self._X_means,
-            X_group_norms=self._X_group_norms,
             y_mean=y_mean,
             y_var=y_var,
             resid=resid,
@@ -1251,6 +1256,7 @@ class basil_naive_base(basil_base):
             group_sizes=self._group_sizes,
             alpha=alpha,
             penalty=self._penalty,
+            weights=self._weights,
             lmda_path=self._lmda_path,
             lmda_max=lmda_max,
             min_ratio=min_ratio,
@@ -1290,7 +1296,7 @@ class basil_naive_base(basil_base):
 
         yc = y
         if self.intercept:
-            yc = yc - np.mean(yc)
+            yc = yc - np.sum(yc * self.weights)
 
         # ================ groups check ====================
         self._check(
@@ -1353,6 +1359,18 @@ class basil_naive_base(basil_base):
         self._check(
             len(self.penalty) == G,
             "check penalty and groups have same length",
+            method, logger,
+        )
+
+        # ================ penalty check ====================
+        self._check(
+            np.all(self.weights >= 0),
+            "check weights is non-negative",
+            method, logger,
+        )
+        self._check(
+            np.allclose(np.sum(self.weights), 1),
+            "check weights sum to 1",
             method, logger,
         )
 
@@ -1528,28 +1546,28 @@ class basil_naive_base(basil_base):
         # ================ rsq check ====================
         screen_indices = []
         tmp = np.empty(n)
-        Xbeta = np.zeros(n)
+        WXbeta = np.zeros(n)
         for g, gs, b in zip(
             self.groups[self.screen_set], 
             self.group_sizes[self.screen_set],
             self.screen_begins,
         ):
             screen_indices.append(np.arange(g, g + gs))
-            self.X.btmul(g, gs, self.screen_beta[b:b+gs], tmp)
-            Xbeta += tmp
+            self.X.btmul(g, gs, self.screen_beta[b:b+gs], self.weights, tmp)
+            WXbeta += tmp
 
         if len(screen_indices) == 0:
             screen_indices = np.array(screen_indices, dtype=int)
         else:
             screen_indices = np.concatenate(screen_indices, dtype=int)
 
-        resid = yc - Xbeta
+        resid = self.weights * yc - WXbeta
         grad = np.empty(p)
         self.X.mul(resid, grad)
         if self.intercept:
             grad -= self.X_means * np.sum(resid)
-        Xcbeta = Xbeta - (self.screen_X_means @ self.screen_beta)
-        expected = 2 * np.sum(yc * Xcbeta) - np.linalg.norm(Xcbeta) ** 2
+        WXcbeta = WXbeta - self.weights * (self.screen_X_means @ self.screen_beta)
+        expected = 2 * np.sum(yc * WXcbeta) - np.linalg.norm(WXcbeta / np.sqrt(self.weights)) ** 2
         self._check(
             np.allclose(self.rsq, expected),
             "check rsq",
@@ -1605,7 +1623,7 @@ class basil_naive_base(basil_base):
                 Xi -= self.X_means[g:g+gs][None]
             V = self.screen_transforms[ss_idx]
             XiV = Xi @ V
-            Dsq = XiV.T @ XiV
+            Dsq = XiV.T @ (self.weights[:, None] * XiV)
             sb = self.screen_begins[ss_idx]
             self._check(
                 np.allclose(self.screen_vars[sb:sb+gs], np.diag(Dsq)),
@@ -1623,7 +1641,6 @@ class basil_naive_base(basil_base):
         return basil_naive(
             X=self.X,
             X_means=self.X_means,
-            X_group_norms=self.X_group_norms,
             y_mean=self.y_mean,
             y_var=self.y_var,
             resid=self.resid,
@@ -1631,6 +1648,7 @@ class basil_naive_base(basil_base):
             group_sizes=self.group_sizes,
             alpha=self.alpha,
             penalty=self.penalty,
+            weights=self.weights,
             screen_set=self.screen_set,
             screen_beta=self.screen_beta,
             screen_is_active=self.screen_is_active,
@@ -1705,7 +1723,6 @@ def basil_naive(
     *,
     X: matrix.base | matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
     X_means: np.ndarray,
-    X_group_norms: np.ndarray,
     y_mean: float,
     y_var: float,
     resid: np.ndarray,
@@ -1713,6 +1730,7 @@ def basil_naive(
     group_sizes: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
+    weights: np.ndarray,
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
@@ -1748,10 +1766,6 @@ def basil_naive(
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
     X_means : (p,) np.ndarray
         Column means of ``X``.
-    X_group_norms : (G,) np.ndarray
-        Group Frobenius norm of ``X``.
-        ``X_group_norms[i]`` is :math:`\\|X_{c, g}\\|_F`
-        where :math:`g` corresponds to the group index ``i``.
     y_mean : float
         The mean of the response vector :math:`y`.
     y_var : float
@@ -1771,6 +1785,8 @@ def basil_naive(
     penalty : (G,) np.ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
+    weights : (n,) np.ndarray
+        Observation weights.
     screen_set : (s,) np.ndarray
         List of indices into ``groups`` that correspond to the strong groups.
         ``screen_set[i]`` is ``i`` th strong group.
@@ -1954,7 +1970,6 @@ def basil_naive(
     return dispatcher[dtype](
         X=X,
         X_means=X_means,
-        X_group_norms=X_group_norms,
         y_mean=y_mean,
         y_var=y_var,
         resid=resid,
@@ -1962,6 +1977,7 @@ def basil_naive(
         group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
+        weights=weights,
         lmda_path=lmda_path,
         lmda_max=lmda_max,
         setup_lmda_max=setup_lmda_max,

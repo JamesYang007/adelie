@@ -39,6 +39,7 @@ struct StatePinNaive : StatePinBase<
     using dyn_vec_vec_value_t = std::vector<vec_value_t>;
 
     /* Static states */
+    const map_cvec_value_t weights;
     const value_t y_mean;
     const value_t y_var;
     const map_cvec_value_t screen_X_means;
@@ -63,6 +64,7 @@ struct StatePinNaive : StatePinBase<
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
+        const Eigen::Ref<const vec_value_t>& weights,
         const Eigen::Ref<const vec_index_t>& screen_set, 
         const Eigen::Ref<const vec_index_t>& screen_g1,
         const Eigen::Ref<const vec_index_t>& screen_g2,
@@ -87,11 +89,12 @@ struct StatePinNaive : StatePinBase<
         Eigen::Ref<vec_bool_t> screen_is_active
     ): 
         base_t(
-            groups, group_sizes, alpha, penalty, 
+            groups, group_sizes, alpha, penalty,
             screen_set, screen_g1, screen_g2, screen_begins, screen_vars, screen_transforms, lmda_path, 
             intercept, max_iters, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, n_threads,
             rsq, screen_beta, screen_is_active
         ),
+        weights(weights.data(), weights.size()),
         y_mean(y_mean),
         y_var(y_var),
         screen_X_means(screen_X_means.data(), screen_X_means.size()),

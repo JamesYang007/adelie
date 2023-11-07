@@ -26,6 +26,7 @@ void update_screen_derived_naive(
 
     update_screen_derived_base(state);
 
+    const auto& weights_sqrt = state.weights_sqrt;
     const auto& X_means = state.X_means;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
@@ -78,6 +79,7 @@ void update_screen_derived_naive(
 
         // transform data
         Eigen::setNbThreads(n_threads);
+        Xi.transpose().array().rowwise() *= weights_sqrt;
         XiTXi.noalias() = Xi.transpose() * Xi;
         Eigen::setNbThreads(0);
 
@@ -125,8 +127,8 @@ struct StateBasilNaive : StateBasilBase<
     using dyn_vec_mat_value_t = std::vector<util::rowmat_type<value_t>>;
 
     /* static states */
+    const vec_value_t weights_sqrt;
     const map_cvec_value_t X_means;
-    const map_cvec_value_t X_group_norms;
     const value_t y_mean;
     const value_t y_var;
 
@@ -148,7 +150,6 @@ struct StateBasilNaive : StateBasilBase<
     explicit StateBasilNaive(
         matrix_t& X,
         const Eigen::Ref<const vec_value_t>& X_means,
-        const Eigen::Ref<const vec_value_t>& X_group_norms,
         value_t y_mean,
         value_t y_var,
         const Eigen::Ref<const vec_value_t>& resid,
@@ -156,6 +157,7 @@ struct StateBasilNaive : StateBasilBase<
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
+        const Eigen::Ref<const vec_value_t>& weights,
         const Eigen::Ref<const vec_value_t>& lmda_path,
         value_t lmda_max,
         value_t min_ratio,
@@ -185,15 +187,15 @@ struct StateBasilNaive : StateBasilBase<
         const Eigen::Ref<const vec_value_t>& grad
     ):
         base_t(
-            groups, group_sizes, alpha, penalty, lmda_path, lmda_max, min_ratio, lmda_path_size,
+            groups, group_sizes, alpha, penalty, weights, lmda_path, lmda_max, min_ratio, lmda_path_size,
             max_screen_size, 
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             max_iters, tol, rsq_tol, rsq_slope_tol, rsq_curv_tol, 
             newton_tol, newton_max_iters, early_exit, setup_lmda_max, setup_lmda_path, intercept, n_threads,
             screen_set, screen_beta, screen_is_active, rsq, lmda, grad
         ),
+        weights_sqrt(weights.sqrt()),
         X_means(X_means.data(), X_means.size()),
-        X_group_norms(X_group_norms.data(), X_group_norms.size()),
         y_mean(y_mean),
         y_var(y_var),
         X(&X),
