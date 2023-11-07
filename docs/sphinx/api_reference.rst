@@ -119,18 +119,11 @@ Internal
     :toctree: generated/
     
 
-    matrix.base
     matrix.MatrixCovBase32
     matrix.MatrixCovBase64
     matrix.MatrixNaiveBase32
     matrix.MatrixNaiveBase64
     state.base
-    state.pin_cov_32
-    state.pin_cov_64
-    state.pin_naive_32
-    state.pin_naive_64
-    state.basil_naive_32
-    state.basil_naive_64
     adelie_core.state.StateBasilBase32
     adelie_core.state.StateBasilBase64
     adelie_core.state.StatePinBase32

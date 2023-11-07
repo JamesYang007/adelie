@@ -8,25 +8,11 @@ from .adelie_core.matrix import (
 import numpy as np
 
 
-class base:
-    """Base matrix wrapper class.
-
-    All Python matrix classes must inherit from this class.
-
-    Parameters
-    ----------
-    core_mat
-        Usually a C++ matrix object.
-    """
-    def __init__(self, core_mat):
-        self._core_mat = core_mat
-
-    def internal(self):
-        """Returns the core matrix object."""
-        return self._core_mat
-
-
-class naive_dense(base):
+def naive_dense(
+    mat: np.ndarray,
+    *,
+    n_threads: int =1,
+):
     """Creates a viewer of a dense matrix for naive method.
     
     Parameters
@@ -37,35 +23,44 @@ class naive_dense(base):
         Number of threads.
         Default is ``1``.
     """
-    def __init__(
-        self,
-        mat: np.ndarray,
-        n_threads: int =1,
-    ):
-        if n_threads < 1:
-            raise ValueError("Number of threads must be >= 1.")
-        self.mat = mat
-        dispatcher = {
-            np.dtype("float64"): {
-                "C": core.matrix.MatrixNaiveDense64C,
-                "F": core.matrix.MatrixNaiveDense64F,
-            },
-            np.dtype("float32"): {
-                "C": core.matrix.MatrixNaiveDense32C,
-                "F": core.matrix.MatrixNaiveDense32F,
-            },
-        }
+    if n_threads < 1:
+        raise ValueError("Number of threads must be >= 1.")
 
-        dtype = self.mat.dtype
-        order = (
-            "C"
-            if self.mat.flags.c_contiguous else
-            "F"
-        )
-        super().__init__(dispatcher[dtype][order](self.mat, n_threads))
+    dispatcher = {
+        np.dtype("float64"): {
+            "C": core.matrix.MatrixNaiveDense64C,
+            "F": core.matrix.MatrixNaiveDense64F,
+        },
+        np.dtype("float32"): {
+            "C": core.matrix.MatrixNaiveDense32C,
+            "F": core.matrix.MatrixNaiveDense32F,
+        },
+    }
+    dtype = mat.dtype
+    order = (
+        "C"
+        if mat.flags.c_contiguous else
+        "F"
+    )
+    core_base = dispatcher[dtype][order]
+
+    class _naive_dense(core_base):
+        def __init__(
+            self,
+            mat: np.ndarray,
+            n_threads: int =1,
+        ):
+            self.mat = mat
+            core_base.__init__(self, self.mat, n_threads)
+
+    return _naive_dense(mat, n_threads)
 
 
-class cov_dense(base):
+def cov_dense(
+    mat: np.ndarray,
+    *,
+    n_threads: int =1,
+):
     """Creates a viewer of a dense matrix for covariance method.
     
     Parameters
@@ -76,35 +71,45 @@ class cov_dense(base):
         Number of threads.
         Default is ``1``.
     """
-    def __init__(
-        self,
-        mat: np.ndarray,
-        n_threads: int =1,
-    ):
-        if n_threads < 1:
-            raise ValueError("Number of threads must be >= 1.")
-        self.mat = mat
-        dispatcher = {
-            np.dtype("float64"): {
-                "C": core.matrix.MatrixCovDense64C,
-                "F": core.matrix.MatrixCovDense64F,
-            },
-            np.dtype("float32"): {
-                "C": core.matrix.MatrixCovDense32C,
-                "F": core.matrix.MatrixCovDense32F,
-            },
-        }
+    if n_threads < 1:
+        raise ValueError("Number of threads must be >= 1.")
 
-        dtype = self.mat.dtype
-        order = (
-            "C"
-            if self.mat.flags.c_contiguous else
-            "F"
-        )
-        super().__init__(dispatcher[dtype][order](self.mat, n_threads))
+    dispatcher = {
+        np.dtype("float64"): {
+            "C": core.matrix.MatrixCovDense64C,
+            "F": core.matrix.MatrixCovDense64F,
+        },
+        np.dtype("float32"): {
+            "C": core.matrix.MatrixCovDense32C,
+            "F": core.matrix.MatrixCovDense32F,
+        },
+    }
+
+    dtype = mat.dtype
+    order = (
+        "C"
+        if mat.flags.c_contiguous else
+        "F"
+    )
+    core_base = dispatcher[dtype][order]
+
+    class _cov_dense(core_base):
+        def __init__(
+            self,
+            mat: np.ndarray,
+            n_threads: int =1,
+        ):
+            self.mat = mat
+            core_base.__init__(self, self.mat, n_threads)
+
+    return _cov_dense(mat, n_threads)
 
 
-class cov_lazy(base):
+def cov_lazy(
+    mat: np.ndarray,
+    *,
+    n_threads: int =1,
+):
     """Creates a viewer of a lazy matrix for covariance method.
     
     Parameters
@@ -115,68 +120,35 @@ class cov_lazy(base):
         Number of threads.
         Default is ``1``.
     """
-    def __init__(
-        self,
-        mat: np.ndarray,
-        n_threads: int =1,
-    ):
-        if n_threads < 1:
-            raise ValueError("Number of threads must be >= 1.")
-        self.mat = mat
-        dispatcher = {
-            np.dtype("float64"): {
-                "C": core.matrix.MatrixCovLazy64C,
-                "F": core.matrix.MatrixCovLazy64F,
-            },
-            np.dtype("float32"): {
-                "C": core.matrix.MatrixCovLazy32C,
-                "F": core.matrix.MatrixCovLazy32F,
-            },
-        }
+    if n_threads < 1:
+        raise ValueError("Number of threads must be >= 1.")
 
-        dtype = self.mat.dtype
-        order = (
-            "C"
-            if self.mat.flags.c_contiguous else
-            "F"
-        )
-        super().__init__(dispatcher[dtype][order](self.mat, n_threads))
+    dispatcher = {
+        np.dtype("float64"): {
+            "C": core.matrix.MatrixCovLazy64C,
+            "F": core.matrix.MatrixCovLazy64F,
+        },
+        np.dtype("float32"): {
+            "C": core.matrix.MatrixCovLazy32C,
+            "F": core.matrix.MatrixCovLazy32F,
+        },
+    }
 
+    dtype = mat.dtype
+    order = (
+        "C"
+        if mat.flags.c_contiguous else
+        "F"
+    )
+    core_base = dispatcher[dtype][order]
 
-class basil_naive_dense(base):
-    """Creates a viewer of a dense matrix for basil, naive method.
-    
-    Parameters
-    ----------
-    mat : np.ndarray
-        The matrix to view.
-    n_threads : int, optional
-        Number of threads.
-        Default is ``1``.
-    """
-    def __init__(
-        self,
-        mat: np.ndarray,
-        n_threads: int =1,
-    ):
-        if n_threads < 1:
-            raise ValueError("Number of threads must be >= 1.")
-        self.mat = mat
-        dispatcher = {
-            np.dtype("float64"): {
-                "C": core.matrix.MatrixBasilNaiveDense64C,
-                "F": core.matrix.MatrixBasilNaiveDense64F,
-            },
-            np.dtype("float32"): {
-                "C": core.matrix.MatrixBasilNaiveDense32C,
-                "F": core.matrix.MatrixBasilNaiveDense32F,
-            },
-        }
+    class _cov_lazy(core_base):
+        def __init__(
+            self,
+            mat: np.ndarray,
+            n_threads: int =1,
+        ):
+            self.mat = mat
+            core_base.__init__(self, self.mat, n_threads)
 
-        dtype = self.mat.dtype
-        order = (
-            "C"
-            if self.mat.flags.c_contiguous else
-            "F"
-        )
-        super().__init__(dispatcher[dtype][order](self.mat, n_threads))
+    return _cov_lazy(mat, n_threads)

@@ -47,7 +47,7 @@ def test_state_pin_naive():
 
     state.check(method="assert")
 
-    assert id(X._core_mat) == id(state.X)
+    assert id(X) == id(state.X)
     assert np.allclose(groups, state.groups)
     assert np.allclose(group_sizes, state.group_sizes)
     assert np.allclose(alpha, state.alpha)
@@ -94,7 +94,7 @@ def test_state_pin_cov():
 
     state.check(method="assert")
 
-    assert id(A._core_mat) == id(state.A)
+    assert id(A) == id(state.A)
     assert np.allclose(groups, state.groups)
     assert np.allclose(group_sizes, state.group_sizes)
     assert np.allclose(alpha, state.alpha)
@@ -155,7 +155,7 @@ def test_state_basil_naive():
         grad=grad,
     )
 
-    assert id(X._core_mat) == id(state.X)
+    assert id(X) == id(state.X)
     assert np.allclose(X_means, state.X_means)
     assert np.allclose(y_mean, state.y_mean)
     assert np.allclose(y_var, state.y_var)
