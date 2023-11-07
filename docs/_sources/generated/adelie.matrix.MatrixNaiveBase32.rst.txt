@@ -17,7 +17,6 @@
       ~MatrixNaiveBase32.cmul
       ~MatrixNaiveBase32.cols
       ~MatrixNaiveBase32.ctmul
-      ~MatrixNaiveBase32.group_norms
       ~MatrixNaiveBase32.means
       ~MatrixNaiveBase32.mul
       ~MatrixNaiveBase32.rows
@@ -39,7 +38,6 @@
    .. automethod:: cmul
    .. automethod:: cols
    .. automethod:: ctmul
-   .. automethod:: group_norms
    .. automethod:: means
    .. automethod:: mul
    .. automethod:: rows

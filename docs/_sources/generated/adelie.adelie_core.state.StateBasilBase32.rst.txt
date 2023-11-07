@@ -70,6 +70,7 @@
       ~StateBasilBase32.setup_lmda_max
       ~StateBasilBase32.setup_lmda_path
       ~StateBasilBase32.tol
+      ~StateBasilBase32.weights
    
    
 
@@ -132,5 +133,6 @@
    .. autoattribute:: setup_lmda_max
    .. autoattribute:: setup_lmda_path
    .. autoattribute:: tol
+   .. autoattribute:: weights
    
    

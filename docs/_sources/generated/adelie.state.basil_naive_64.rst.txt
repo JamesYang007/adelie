@@ -26,7 +26,6 @@
    .. autosummary::
    
       ~basil_naive_64.X
-      ~basil_naive_64.X_group_norms
       ~basil_naive_64.X_means
       ~basil_naive_64.abs_grad
       ~basil_naive_64.active_sizes
@@ -82,6 +81,7 @@
       ~basil_naive_64.setup_lmda_max
       ~basil_naive_64.setup_lmda_path
       ~basil_naive_64.tol
+      ~basil_naive_64.weights
       ~basil_naive_64.y_mean
       ~basil_naive_64.y_var
    
@@ -102,7 +102,6 @@
    
    
    .. autoattribute:: X
-   .. autoattribute:: X_group_norms
    .. autoattribute:: X_means
    .. autoattribute:: abs_grad
    .. autoattribute:: active_sizes
@@ -158,6 +157,7 @@
    .. autoattribute:: setup_lmda_max
    .. autoattribute:: setup_lmda_path
    .. autoattribute:: tol
+   .. autoattribute:: weights
    .. autoattribute:: y_mean
    .. autoattribute:: y_var
    

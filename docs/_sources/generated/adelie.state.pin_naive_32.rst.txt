@@ -67,6 +67,7 @@
       ~pin_naive_32.screen_transforms
       ~pin_naive_32.screen_vars
       ~pin_naive_32.tol
+      ~pin_naive_32.weights
       ~pin_naive_32.y_mean
       ~pin_naive_32.y_var
    
@@ -128,6 +129,7 @@
    .. autoattribute:: screen_transforms
    .. autoattribute:: screen_vars
    .. autoattribute:: tol
+   .. autoattribute:: weights
    .. autoattribute:: y_mean
    .. autoattribute:: y_var
    

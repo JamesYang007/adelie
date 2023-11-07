@@ -535,10 +535,10 @@ document.write(`
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">groups</span></code> that correspond to the strong groups.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StatePinBase32.screen_transforms" title="adelie.adelie_core.state.StatePinBase32.screen_transforms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_transforms</span></code></a></p></td>
-<td><p>List of <span class="math notranslate nohighlight">\(V_k\)</span> where <span class="math notranslate nohighlight">\(V_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(X_{c,k}\)</span> along the strong groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered <span class="math notranslate nohighlight">\(X_k\)</span>.</p></td>
+<td><p>List of <span class="math notranslate nohighlight">\(V_k\)</span> where <span class="math notranslate nohighlight">\(V_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span> along the strong groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StatePinBase32.screen_vars" title="adelie.adelie_core.state.StatePinBase32.screen_vars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_vars</span></code></a></p></td>
-<td><p>List of <span class="math notranslate nohighlight">\(D_k^2\)</span> where <span class="math notranslate nohighlight">\(D_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(X_{c,k}\)</span>  along the strong groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered <span class="math notranslate nohighlight">\(X_k\)</span>.</p></td>
+<td><p>List of <span class="math notranslate nohighlight">\(D_k^2\)</span> where <span class="math notranslate nohighlight">\(D_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span>  along the strong groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StatePinBase32.tol" title="adelie.adelie_core.state.StatePinBase32.tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tol</span></code></a></p></td>
 <td><p>Convergence tolerance.</p></td>
@@ -695,7 +695,7 @@ It must be a non-negative vector.</p>
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StatePinBase32.rsq">
 <span class="sig-name descname"><span class="pre">rsq</span></span><a class="headerlink" href="#adelie.adelie_core.state.StatePinBase32.rsq" title="Link to this definition">#</a></dt>
 <dd><p>Unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> value at <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.
-The unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> is given by <span class="math notranslate nohighlight">\(\|y_c\|_2^2 - \|y_c-X_c\beta\|_2^2\)</span>.</p>
+The unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> is given by <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2 - \|y_c-X_c\beta\|_{W}^2\)</span>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -783,8 +783,8 @@ when the <code class="docutils literal notranslate"><span class="pre">i</span></
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StatePinBase32.screen_transforms">
 <span class="sig-name descname"><span class="pre">screen_transforms</span></span><a class="headerlink" href="#adelie.adelie_core.state.StatePinBase32.screen_transforms" title="Link to this definition">#</a></dt>
-<dd><p>List of <span class="math notranslate nohighlight">\(V_k\)</span> where <span class="math notranslate nohighlight">\(V_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(X_{c,k}\)</span>
-along the strong groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered <span class="math notranslate nohighlight">\(X_k\)</span>.
+<dd><p>List of <span class="math notranslate nohighlight">\(V_k\)</span> where <span class="math notranslate nohighlight">\(V_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span>
+along the strong groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.
 It <em>only</em> needs to be properly initialized for groups with size &gt; 1.
 <code class="docutils literal notranslate"><span class="pre">screen_transforms[i]</span></code> is <span class="math notranslate nohighlight">\(V_k\)</span> for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group where
 <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">screen_set[i]</span></code>.</p>
@@ -793,8 +793,8 @@ It <em>only</em> needs to be properly initialized for groups with size &gt; 1.
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StatePinBase32.screen_vars">
 <span class="sig-name descname"><span class="pre">screen_vars</span></span><a class="headerlink" href="#adelie.adelie_core.state.StatePinBase32.screen_vars" title="Link to this definition">#</a></dt>
-<dd><p>List of <span class="math notranslate nohighlight">\(D_k^2\)</span> where <span class="math notranslate nohighlight">\(D_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(X_{c,k}\)</span> 
-along the strong groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered <span class="math notranslate nohighlight">\(X_k\)</span>.
+<dd><p>List of <span class="math notranslate nohighlight">\(D_k^2\)</span> where <span class="math notranslate nohighlight">\(D_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span> 
+along the strong groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.
 <code class="docutils literal notranslate"><span class="pre">screen_vars[b:b+p]</span></code> is <span class="math notranslate nohighlight">\(D_k\)</span> for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group where
 <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">screen_set[i]</span></code>,
 <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">screen_begins[i]</span></code>,
