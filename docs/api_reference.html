@@ -345,18 +345,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.base.html">adelie.matrix.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.MatrixCovBase32.html">adelie.matrix.MatrixCovBase32</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.MatrixNaiveBase32.html">adelie.matrix.MatrixNaiveBase32</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.base.html">adelie.state.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_cov_32.html">adelie.state.pin_cov_32</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_cov_64.html">adelie.state.pin_cov_64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_naive_32.html">adelie.state.pin_naive_32</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_naive_64.html">adelie.state.pin_naive_64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.basil_naive_32.html">adelie.state.basil_naive_32</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.basil_naive_64.html">adelie.state.basil_naive_64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StateBasilBase32.html">adelie.adelie_core.state.StateBasilBase32</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StateBasilBase64.html">adelie.adelie_core.state.StateBasilBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinBase32.html">adelie.adelie_core.state.StatePinBase32</a></li>
@@ -493,13 +486,13 @@ document.write(`
 <h2>adelie.matrix<a class="headerlink" href="#adelie-matrix" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.naive_dense.html#adelie.matrix.naive_dense" title="adelie.matrix.naive_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">naive_dense</span></code></a>(mat[, n_threads])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.naive_dense.html#adelie.matrix.naive_dense" title="adelie.matrix.naive_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">naive_dense</span></code></a>(mat, *[, n_threads])</p></td>
 <td><p>Creates a viewer of a dense matrix for naive method.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.cov_dense.html#adelie.matrix.cov_dense" title="adelie.matrix.cov_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cov_dense</span></code></a>(mat[, n_threads])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.cov_dense.html#adelie.matrix.cov_dense" title="adelie.matrix.cov_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cov_dense</span></code></a>(mat, *[, n_threads])</p></td>
 <td><p>Creates a viewer of a dense matrix for covariance method.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.cov_lazy.html#adelie.matrix.cov_lazy" title="adelie.matrix.cov_lazy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cov_lazy</span></code></a>(mat[, n_threads])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.cov_lazy.html#adelie.matrix.cov_lazy" title="adelie.matrix.cov_lazy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cov_lazy</span></code></a>(mat, *[, n_threads])</p></td>
 <td><p>Creates a viewer of a lazy matrix for covariance method.</p></td>
 </tr>
 </tbody>
@@ -547,52 +540,31 @@ document.write(`
 <h2>Internal<a class="headerlink" href="#internal" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.base.html#adelie.matrix.base" title="adelie.matrix.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.base</span></code></a>(core_mat)</p></td>
-<td><p>Base matrix wrapper class.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixCovBase32.html#adelie.matrix.MatrixCovBase32" title="adelie.matrix.MatrixCovBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixCovBase32</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixCovBase32.html#adelie.matrix.MatrixCovBase32" title="adelie.matrix.MatrixCovBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixCovBase32</span></code></a></p></td>
 <td><p>Base matrix class for covariance method.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixCovBase64.html#adelie.matrix.MatrixCovBase64" title="adelie.matrix.MatrixCovBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixCovBase64</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixCovBase64.html#adelie.matrix.MatrixCovBase64" title="adelie.matrix.MatrixCovBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixCovBase64</span></code></a></p></td>
 <td><p>Base matrix class for covariance method.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixNaiveBase32.html#adelie.matrix.MatrixNaiveBase32" title="adelie.matrix.MatrixNaiveBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixNaiveBase32</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixNaiveBase32.html#adelie.matrix.MatrixNaiveBase32" title="adelie.matrix.MatrixNaiveBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixNaiveBase32</span></code></a></p></td>
 <td><p>Base matrix class for naive method.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixNaiveBase64.html#adelie.matrix.MatrixNaiveBase64" title="adelie.matrix.MatrixNaiveBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixNaiveBase64</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixNaiveBase64.html#adelie.matrix.MatrixNaiveBase64" title="adelie.matrix.MatrixNaiveBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixNaiveBase64</span></code></a></p></td>
 <td><p>Base matrix class for naive method.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.base.html#adelie.state.base" title="adelie.state.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.base</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.base.html#adelie.state.base" title="adelie.state.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.base</span></code></a>()</p></td>
 <td><p>Base wrapper state class.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.pin_cov_32.html#adelie.state.pin_cov_32" title="adelie.state.pin_cov_32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.pin_cov_32</span></code></a>(*args, **kwargs)</p></td>
-<td><p>State class for pin, cov method using 32-bit floating point.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.pin_cov_64.html#adelie.state.pin_cov_64" title="adelie.state.pin_cov_64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.pin_cov_64</span></code></a>(*args, **kwargs)</p></td>
-<td><p>State class for pin, covariance method using 64-bit floating point.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.pin_naive_32.html#adelie.state.pin_naive_32" title="adelie.state.pin_naive_32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.pin_naive_32</span></code></a>(*args, **kwargs)</p></td>
-<td><p>State class for pin, naive method using 32-bit floating point.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.pin_naive_64.html#adelie.state.pin_naive_64" title="adelie.state.pin_naive_64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.pin_naive_64</span></code></a>(*args, **kwargs)</p></td>
-<td><p>State class for pin, naive method using 64-bit floating point.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.basil_naive_32.html#adelie.state.basil_naive_32" title="adelie.state.basil_naive_32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.basil_naive_32</span></code></a>(*args, **kwargs)</p></td>
-<td><p>State class for basil, naive method using 32-bit floating point.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.basil_naive_64.html#adelie.state.basil_naive_64" title="adelie.state.basil_naive_64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.basil_naive_64</span></code></a>(*args, **kwargs)</p></td>
-<td><p>State class for basil, naive method using 64-bit floating point.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateBasilBase32.html#adelie.adelie_core.state.StateBasilBase32" title="adelie.adelie_core.state.StateBasilBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateBasilBase32</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateBasilBase32.html#adelie.adelie_core.state.StateBasilBase32" title="adelie.adelie_core.state.StateBasilBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateBasilBase32</span></code></a></p></td>
 <td><p>Base core state class for all basil methods.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateBasilBase64.html#adelie.adelie_core.state.StateBasilBase64" title="adelie.adelie_core.state.StateBasilBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateBasilBase64</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateBasilBase64.html#adelie.adelie_core.state.StateBasilBase64" title="adelie.adelie_core.state.StateBasilBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateBasilBase64</span></code></a></p></td>
 <td><p>Base core state class for all basil methods.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinBase32.html#adelie.adelie_core.state.StatePinBase32" title="adelie.adelie_core.state.StatePinBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StatePinBase32</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinBase32.html#adelie.adelie_core.state.StatePinBase32" title="adelie.adelie_core.state.StatePinBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StatePinBase32</span></code></a></p></td>
 <td><p>Base core state class for all pin methods.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinBase64.html#adelie.adelie_core.state.StatePinBase64" title="adelie.adelie_core.state.StatePinBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StatePinBase64</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinBase64.html#adelie.adelie_core.state.StatePinBase64" title="adelie.adelie_core.state.StatePinBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StatePinBase64</span></code></a></p></td>
 <td><p>Base core state class for all pin methods.</p></td>
 </tr>
 </tbody>

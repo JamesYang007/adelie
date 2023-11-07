@@ -3,31 +3,4 @@
 
 .. currentmodule:: adelie.matrix
 
-.. autoclass:: cov_dense
-
-   
-   
-   .. rubric:: Methods
-
-   .. autosummary::
-   
-      ~cov_dense.__init__
-      ~cov_dense.internal
-   
-   
-
-   
-   
-   
-
-   
-   
-   
-   .. automethod:: __init__
-   .. automethod:: internal
-   
-   
-
-   
-   
-   
+.. autofunction:: cov_dense

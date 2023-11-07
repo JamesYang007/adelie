@@ -3,31 +3,4 @@
 
 .. currentmodule:: adelie.matrix
 
-.. autoclass:: naive_dense
-
-   
-   
-   .. rubric:: Methods
-
-   .. autosummary::
-   
-      ~naive_dense.__init__
-      ~naive_dense.internal
-   
-   
-
-   
-   
-   
-
-   
-   
-   
-   .. automethod:: __init__
-   .. automethod:: internal
-   
-   
-
-   
-   
-   
+.. autofunction:: naive_dense
