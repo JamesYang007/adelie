@@ -34,6 +34,7 @@ void coordinate_descent(
 {
     auto& X = *state.X;
     const auto& penalty = state.penalty;
+    const auto& weights = state.weights;
     const auto& screen_set = state.screen_set;
     const auto& screen_begins = state.screen_begins;
     const auto& screen_X_means = state.screen_X_means;
@@ -53,7 +54,6 @@ void coordinate_descent(
     auto& resid_sum = state.resid_sum;
     auto& rsq = state.rsq;
 
-    const auto n = X.rows();
     const auto l1 = lmda * alpha;
     const auto l2 = lmda * (1-alpha);
 
@@ -87,9 +87,9 @@ void coordinate_descent(
         update_rsq(rsq, del, A_kk, gk);
 
         // update residual 
-        X.ctmul(groups[k], del, buffer4_n);
+        X.ctmul(groups[k], del, weights, buffer4_n);
         matrix::dvsubi(resid, buffer4_n, n_threads);
-        resid_sum -= n * Xk_mean * del;
+        resid_sum -= Xk_mean * del;
 
         additional_step(ss_idx);
     }
@@ -150,9 +150,9 @@ void coordinate_descent(
         // update residual
         auto del = buffer1.head(ak.size());
         del = ak - ak_old;
-        X.btmul(groups[k], gsize, del, buffer4_n);
+        X.btmul(groups[k], gsize, del, weights, buffer4_n);
         matrix::dvsubi(resid, buffer4_n, n_threads);
-        resid_sum -= n * (Xk_mean * del).sum();
+        resid_sum -= (Xk_mean * del).sum();
 
         additional_step(ss_idx);
     }

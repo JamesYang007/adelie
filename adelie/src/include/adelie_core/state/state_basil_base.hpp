@@ -151,6 +151,7 @@ struct StateBasilBase
     const map_cvec_index_t group_sizes;
     const value_t alpha;
     const map_cvec_value_t penalty;
+    const map_cvec_value_t weights;
 
     /* configurations */
     // lambda path configs
@@ -221,6 +222,7 @@ struct StateBasilBase
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
+        const Eigen::Ref<const vec_value_t>& weights,
         const Eigen::Ref<const vec_value_t>& lmda_path,
         value_t lmda_max,
         value_t min_ratio,
@@ -253,6 +255,7 @@ struct StateBasilBase
         group_sizes(group_sizes.data(), group_sizes.size()),
         alpha(alpha),
         penalty(penalty.data(), penalty.size()),
+        weights(weights.data(), weights.size()),
         min_ratio(min_ratio),
         lmda_path_size(lmda_path_size),
         max_screen_size(max_screen_size),

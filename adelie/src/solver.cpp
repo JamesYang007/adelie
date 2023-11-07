@@ -25,11 +25,12 @@ double objective(
     const Eigen::Ref<const ad::util::rowvec_type<int>>& group_sizes,
     double lmda,
     double alpha,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& penalty
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& penalty,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& weights
 )
 {
     return ad::solver::objective(
-        beta0, beta, X, y, groups, group_sizes, lmda, alpha, penalty
+        beta0, beta, X, y, groups, group_sizes, lmda, alpha, penalty, weights
     );
 }
 

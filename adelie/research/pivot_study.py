@@ -85,32 +85,45 @@ def _screen_sets_safe(
 ):
     X = state.X
     X_means = state.X_means
-    X_group_norms = state.X_group_norms
     penalty = state.penalty
+    weights = state.weights
     betas = state.betas
     lmdas = state.lmdas
     intercept = state.intercept
 
     assert np.all(penalty > 0)
 
-    G, n_lmdas, n, p = X_group_norms.shape[0], betas.shape[0], X.rows(), X.cols()
+    resids = resids / np.sqrt(weights)
+
+    G, n_lmdas, n, p = penalty.shape[0], betas.shape[0], X.rows(), X.cols()
+
+    Xd = np.empty((n, p), order="F")
+    X.to_dense(0, p, Xd)
+    if intercept:
+        Xd -= X_means[None]
+    Xd *= np.sqrt(weights)[:, None]
+    X_group_norms = np.array([
+        np.linalg.norm(Xd[:, g:g+gs])
+        for g, gs in zip(state.groups, state.group_sizes)
+    ])
 
     edpp_resid_0 = y
     if intercept:
-        edpp_resid_0 = y - np.mean(y)
+        edpp_resid_0 = y - np.sum(y * weights)
+    edpp_resid_0 = edpp_resid_0 * np.sqrt(weights)
     edpp_grad = np.empty(p)
-    X.mul(edpp_resid_0, edpp_grad)
+    X.mul(np.sqrt(weights) * edpp_resid_0, edpp_grad)
     edpp_abs_grad = np.array([
         np.linalg.norm(edpp_grad[g:g+gs])
         for g, gs in zip(state.groups, state.group_sizes)
     ])
     g_star = np.argmax(edpp_abs_grad / penalty)
     tmp = np.empty(state.group_sizes[g_star])
-    X.bmul(state.groups[g_star], state.group_sizes[g_star], edpp_resid_0, tmp)
+    X.bmul(state.groups[g_star], state.group_sizes[g_star], np.sqrt(weights) * edpp_resid_0, tmp)
     edpp_v1_0 = np.empty(n)
-    X.btmul(state.groups[g_star], state.group_sizes[g_star], tmp, edpp_v1_0)
+    X.btmul(state.groups[g_star], state.group_sizes[g_star], tmp, np.sqrt(weights), edpp_v1_0)
     if intercept:
-        edpp_v1_0 -= np.sum(tmp * X_means[
+        edpp_v1_0 -= np.sqrt(weights) * np.sum(tmp * X_means[
             state.groups[g_star] :
             state.groups[g_star] + state.group_sizes[g_star]
         ])
@@ -123,7 +136,7 @@ def _screen_sets_safe(
     v2_perp_norms = np.linalg.norm(v2_perps, axis=-1)
     edpps = np.empty((n_lmdas-1, p))
     for i in range(n_lmdas-1):
-        X.mul((resids[i] / lmdas[i] + 0.5 * v2_perps[i]), edpps[i])
+        X.mul(np.sqrt(weights) * (resids[i] / lmdas[i] + 0.5 * v2_perps[i]), edpps[i])
     abs_edpps = ad.diagnostic.gradient_norms(state, grads=edpps)
     is_edpp = (
         abs_edpps >= (penalty[None] - 0.5 * v2_perp_norms[:, None] * X_group_norms[None])
@@ -551,10 +564,9 @@ def arcene(path):
     subset = np.std(X_train, axis=0) > 0
     X_train = X_train[:, subset]
 
-    n, _ = X_train.shape
-    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train /= np.std(X_train, axis=0)[None]
     X_train = np.asfortranarray(X_train)
-    y_train /= np.std(y_train) * np.sqrt(n)
+    y_train /= np.std(y_train)
 
     return X_train, y_train
     
@@ -589,10 +601,9 @@ def dorothea(path):
     subset = np.std(X_train, axis=0) > 0
     X_train = X_train[:, subset]
 
-    n, _ = X_train.shape
-    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train /= np.std(X_train, axis=0)[None]
     X_train = np.asfortranarray(X_train)
-    y_train /= np.std(y_train) * np.sqrt(n)
+    y_train /= np.std(y_train)
 
     return X_train, y_train
 
@@ -608,10 +619,9 @@ def gisette(path):
     subset = np.std(X_train, axis=0) > 0
     X_train = X_train[:, subset]
 
-    n, _ = X_train.shape
-    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train /= np.std(X_train, axis=0)[None]
     X_train = np.asfortranarray(X_train)
-    y_train /= np.std(y_train) * np.sqrt(n)
+    y_train /= np.std(y_train)
 
     return X_train, y_train
 
@@ -627,12 +637,9 @@ def mnist(path):
     subset = np.std(X_train, axis=0) > 0
     X_train = X_train[:, subset]
 
-    n, _ = X_train.shape
-    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train /= np.std(X_train, axis=0)[None]
     X_train = np.asfortranarray(X_train)
-    y_train /= np.std(y_train) * np.sqrt(n)
-
-    X_train.shape, y_train.shape
+    y_train /= np.std(y_train)
 
     return X_train, y_train
 
@@ -652,10 +659,9 @@ def electricity(path):
     subset = np.std(X_train, axis=0) > 0
     X_train = X_train[:, subset]
 
-    n, _ = X_train.shape
-    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train /= np.std(X_train, axis=0)[None]
     X_train = np.asfortranarray(X_train)
-    y_train /= np.std(y_train) * np.sqrt(n)
+    y_train /= np.std(y_train)
 
     return X_train, y_train
 
@@ -688,10 +694,9 @@ def gene(path):
     subset = np.std(X_train, axis=0) > 0
     X_train = X_train[:, subset]
 
-    n, _ = X_train.shape
-    X_train /= np.std(X_train, axis=0)[None] * np.sqrt(n)
+    X_train /= np.std(X_train, axis=0)[None]
     X_train = np.asfortranarray(X_train)
-    y_train /= np.std(y_train) * np.sqrt(n)
+    y_train /= np.std(y_train)
 
     return X_train, y_train
 
@@ -702,10 +707,7 @@ def spline_basis(X, **kwargs):
         order="F",
         **kwargs,
     )
-    n = X.shape[0]
-    X = X * np.sqrt(n)
     X = spl_tr.fit_transform(X)
-    X /= np.sqrt(n)
     return X
 
 
@@ -713,7 +715,6 @@ def real_data_analysis(
     X: np.ndarray,
     y: np.ndarray,
     configs: dict,
-    lazify_screen: bool =True,
 ):
     start = time()
     strong_state = ad.grpnet(
@@ -721,7 +722,6 @@ def real_data_analysis(
         y=y,
         **configs,
         screen_rule="strong",
-        lazify_screen=False,
     )
     end = time()
     strong_time = end - start
@@ -732,7 +732,6 @@ def real_data_analysis(
         y=y,
         **configs,
         screen_rule="pivot",
-        lazify_screen=lazify_screen,
     )
     end = time()
     pivot_time = end - start

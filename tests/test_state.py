@@ -23,6 +23,8 @@ def test_state_pin_naive():
     resid = np.random.normal(0, 1, n)
     y_mean = 0
     y_var = 1
+    weights = np.random.uniform(1, 2, n)
+    weights /= np.sum(weights)
     screen_beta = np.zeros(p)
     screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
 
@@ -34,6 +36,7 @@ def test_state_pin_naive():
         group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
+        weights=weights,
         screen_set=screen_set,
         lmda_path=lmda_path,
         rsq=rsq,
@@ -115,14 +118,12 @@ def test_state_basil_naive():
     X_means = np.mean(_X, axis=0)
     groups = np.array([0, 1])
     group_sizes = np.array([1, p-1])
-    X_group_norms = np.array([
-        np.linalg.norm(_X[:, g:g+gs], ord='fro') 
-        for g, gs in zip(groups, group_sizes)
-    ])
     y_mean = 0.0
     y_var = 1.0
     alpha = 1.0
     penalty = np.random.uniform(0, 1, G)
+    weights = np.random.uniform(1, 2, n)
+    weights /= np.sum(weights)
     screen_set = np.array([0, 1])
     lmda_path = np.array([0.1, 1.0, 0.5])
     lmda_max = 0.9
@@ -136,7 +137,6 @@ def test_state_basil_naive():
     state = mod.basil_naive(
         X=X,
         X_means=X_means,
-        X_group_norms=X_group_norms,
         y_mean=y_mean,
         y_var=y_var,
         resid=resid,
@@ -144,6 +144,7 @@ def test_state_basil_naive():
         group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
+        weights=weights,
         lmda_path=lmda_path,
         lmda_max=lmda_max,
         screen_set=screen_set,
@@ -156,7 +157,6 @@ def test_state_basil_naive():
 
     assert id(X._core_mat) == id(state.X)
     assert np.allclose(X_means, state.X_means)
-    assert np.allclose(X_group_norms, state.X_group_norms)
     assert np.allclose(y_mean, state.y_mean)
     assert np.allclose(y_var, state.y_var)
     assert np.allclose(groups, state.groups)

@@ -209,6 +209,7 @@ auto fit(
     const auto& group_sizes = state.group_sizes;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
+    const auto& weights = state.weights;
     const auto& screen_set = state.screen_set;
     const auto& screen_g1 = state.screen_g1;
     const auto& screen_g2 = state.screen_g2;
@@ -239,6 +240,7 @@ auto fit(
         group_sizes,
         alpha, 
         penalty,
+        weights,
         Eigen::Map<const vec_index_t>(screen_set.data(), screen_set.size()), 
         Eigen::Map<const vec_index_t>(screen_g1.data(), screen_g1.size()), 
         Eigen::Map<const vec_index_t>(screen_g2.data(), screen_g2.size()), 
@@ -279,6 +281,7 @@ size_t kkt(
     const auto& groups = state.groups;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
+    const auto& weights = state.weights;
     const auto intercept = state.intercept;
     const auto n_threads = state.n_threads;
     const auto& screen_hashset = state.screen_hashset;
@@ -327,6 +330,7 @@ inline void solve_basil(
     const auto& X_means = state.X_means;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
+    const auto& weights = state.weights;
     const auto& screen_set = state.screen_set;
     const auto& rsqs = state.rsqs;
     const auto early_exit = state.early_exit;
