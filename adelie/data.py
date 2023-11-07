@@ -22,7 +22,7 @@ def create_test_data_basil(
     The response ``y`` is generated from a linear model :math:`y = X\\beta + \\epsilon`
     with :math:`\\epsilon \\sim N(0, \\sigma^2 I_n)` and :math:`\\beta` such that ``sparsity`` proportion
     of the entries are set to :math:`0`.
-    We compute :math:`\\sigma^2`` such that the signal-to-noise ratio is given by ``snr``.
+    We compute :math:`\\sigma^2` such that the signal-to-noise ratio is given by ``snr``.
     The penalty factors are by default set to ``np.sqrt(group_sizes)``,
     however if ``zero_penalty > 0``, a random set of penalties will be set to zero,
     in which case, ``penalty`` is rescaled such that the :math:`\\ell_2` norm squared is ``p``.

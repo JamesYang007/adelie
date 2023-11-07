@@ -25,9 +25,9 @@ def objective(
 
     .. math::
         \\begin{align*}
-            \\frac{1}{2} \\|y - X\\beta - \\beta_0 \\textbf{1}\\|_2^2
-            + \\lambda \\sum\\limits_{j=1}^G w_j \\left(
-                \\alpha \\|\\beta_j\\|_2 + \\frac{1-\\alpha}{2} \\|\\beta_j\\|_2^2
+            \\frac{1}{2} \\|y - X\\beta - \\beta_0 \\textbf{1}\\|_{W}^2
+            + \\lambda \\sum\\limits_{g=1}^G w_g \\left(
+                \\alpha \\|\\beta_g\\|_2 + \\frac{1-\\alpha}{2} \\|\\beta_g\\|_2^2
             \\right)
         \\end{align*}
 
@@ -36,11 +36,12 @@ def objective(
     :math:`\\beta` is the coefficient vector,
     :math:`X` is the feature matrix,
     :math:`y` is the response vector,
+    :math:`W` is the observation weight diagonal matrix,
     :math:`\\lambda \\geq 0` is the regularization parameter,
     :math:`G` is the number of groups,
     :math:`w \\geq 0` is the penalty factor,
     :math:`\\alpha \\in [0,1]` is the elastic net parameter,
-    and :math:`\\beta_j` are the coefficients for the :math:`j` th group.
+    and :math:`\\beta_g` are the coefficients for the :math:`g` th group.
 
     Parameters
     ----------
@@ -61,9 +62,9 @@ def objective(
     alpha : float
         Elastic net parameter :math:`\\alpha`.
     penalty : (G,) np.ndarray
-        List of penalty factors corresponding to each element of ``groups``.
+        List of penalty factors :math:`w_g` corresponding to each element of ``groups``.
     weights : (G,) np.ndarray
-        Observation weights.
+        Observation weights :math:`W`.
     
     Returns
     -------
@@ -84,9 +85,9 @@ def solve_pin(
     The pinned group elastic net problem is given by
     minimizing the objective defined in ``objective()``
     with the constraint that :math:`\\beta_{-S} = 0`
-    where :math:`S` denotes the strong set,
+    where :math:`S` denotes the screen set,
     that is, the coefficient vector is forced to be zero
-    for groups outside the strong set.
+    for groups outside the screen set.
 
     Parameters
     ----------
@@ -270,11 +271,10 @@ def grpnet(
         ``True`` if the function should fit with intercept.
         Default is ``True``.
     screen_rule : str, optional
-        The type of strong rule to use. It must be one of the following options:
+        The type of screening rule to use. It must be one of the following options:
 
-            - ``"strong"``: discards variables from the safe set based on simple strong rule.
-            - ``"pivot"``: adds all variables whose gradient norms are largest, which is determined
-                by searching for a pivot point in the gradient norms.
+            - ``"strong"``: adds groups whose active scores are above the strong threshold.
+            - ``"pivot"``: adds groups whose active scores are above the pivot cutoff with slack.
 
         Default is ``"pivot"``.
     max_screen_size: int, optional

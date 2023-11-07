@@ -756,9 +756,9 @@ def pin_naive(
         Feature matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
     y_mean : float
-        Mean of :math:`y`.
+        Mean (weighted by :math:`W`) of :math:`y`.
     y_var : float
-        :math:`\\ell_2` norm squared of :math:`y_c`.
+        :math:`\\ell_2` norm squared (weighted by :math:`W`) of :math:`y_c`, i.e. :math:`\\|y_c\\|_{W}^2`.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -780,9 +780,9 @@ def pin_naive(
         Regularization sequence to fit on.
     rsq : float
         Unnormalized :math:`R^2` value at ``screen_beta``.
-        The unnormalized :math:`R^2` is given by :math:`\\|y_c\\|_2^2 - \\|y_c-X_c\\beta\\|_2^2`.
+        The unnormalized :math:`R^2` is given by :math:`\\|y_c\\|_{W}^2 - \\|y_c-X_c\\beta\\|_{W}^2`.
     resid : np.ndarray
-        Residual :math:`y_c-X\\beta` at ``screen_beta``.
+        Residual :math:`W(y_c-X\\beta)` at ``screen_beta``.
     screen_beta : (ws,) np.ndarray
         Coefficient vector on the strong set.
         ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
@@ -1059,7 +1059,9 @@ def pin_cov(
     Parameters
     ----------
     A : Union[adelie.matrix.base, adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]
-        Covariance matrix :math:`X_c^\\top X_c` where `X_c` is column-centered to fit with intercept.
+        Covariance matrix :math:`X_c^\\top W X_c` where :math:`X_c` 
+        is column-centered (weighted by :math:`W`) if fitting with intercept
+        and :math:`W` is the observation weights.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
@@ -1080,9 +1082,9 @@ def pin_cov(
         Regularization sequence to fit on.
     rsq : float
         Unnormalized :math:`R^2` value at ``screen_beta``.
-        The unnormalized :math:`R^2` is given by :math:`\\|y_c\\|_2^2 - \\|y_c-X_c\\beta\\|_2^2`.
+        The unnormalized :math:`R^2` is given by :math:`\\|y_c\\|_{W}^2 - \\|y_c-X_c\\beta\\|_{W}^2`.
     resid : np.ndarray
-        Residual :math:`y_c-X\\beta` at ``screen_beta``.
+        Residual :math:`W(y_c-X\\beta)` at ``screen_beta``.
     screen_beta : (ws,) np.ndarray
         Coefficient vector on the strong set.
         ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
@@ -1091,7 +1093,7 @@ def pin_cov(
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
     screen_grad : (ws,) np.ndarray
-        Gradient :math:`X_{c,k}^\\top (y_c-X_c\\beta)` on the strong groups :math:`k` where :math:`beta` is given by ``screen_beta``.
+        Gradient :math:`X_{c,k}^\\top W (y_c-X_c\\beta)` on the strong groups :math:`k` where :math:`\\beta` is given by ``screen_beta``.
         ``screen_grad[b:b+p]`` is the gradient for the ``i`` th strong group
         where 
         ``k = screen_set[i]``,
@@ -1765,14 +1767,14 @@ def basil_naive(
         Feature matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
     X_means : (p,) np.ndarray
-        Column means of ``X``.
+        Column means (weighted by :math:`W`) of ``X``.
     y_mean : float
-        The mean of the response vector :math:`y`.
+        Mean (weighted by :math:`W`) of the response vector :math:`y`.
     y_var : float
-        The variance of the response vector :math:`y`, i.e. 
-        :math:`\\|y_c\\|_2^2`.
+        :math:`\\ell_2` norm squared (weighted by :math:`W`) of :math:`y`, i.e. 
+        :math:`\\|y_c\\|_{W}^2`.
     resid : (n,) np.ndarray
-        Residual :math:`y_c - X \\beta` where :math:`\\beta` is given by ``screen_beta``.
+        Residual :math:`W(y_c - X \\beta)` where :math:`\\beta` is given by ``screen_beta``.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -1804,13 +1806,13 @@ def basil_naive(
         Boolean vector that indicates whether each strong group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
     rsq : float
-        The true unnormalized :math:`R^2` given by :math:`\\|y_c\\|_2^2 - \\|y_c-X_c\\beta\\|_2^2`
+        The true unnormalized :math:`R^2` given by :math:`\\|y_c\\|_{W}^2 - \\|y_c-X_c\\beta\\|_{W}^2`
         where :math:`\\beta` is given by ``screen_beta``.
     lmda: float,
         The regularization parameter at which the true solution is given by ``screen_beta``
         (in the transformed space).
     grad: np.ndarray,
-        The true full gradient :math:`X_c^\\top (y_c - X_c\\beta)` in the original space where
+        The true full gradient :math:`X_c^\\top W (y_c - X_c\\beta)` in the original space where
         :math:`\\beta` is given by ``screen_beta``.
     lmda_path : (l,) np.ndarray, optional
         The regularization path to solve for.
@@ -1861,11 +1863,10 @@ def basil_naive(
         ``True`` if the function should fit with intercept.
         Default is ``True``.
     screen_rule : str, optional
-        The type of strong rule to use. It must be one of the following options:
+        The type of screening rule to use. It must be one of the following options:
 
-            - ``"strong"``: discards variables from the safe set based on simple strong rule.
-            - ``"pivot"``: adds all variables whose gradient norms are largest, which is determined
-                by searching for a pivot point in the gradient norms.
+            - ``"strong"``: adds groups whose active scores are above the strong threshold.
+            - ``"pivot"``: adds groups whose active scores are above the pivot cutoff with slack.
 
         Default is ``"pivot"``.
     max_screen_size: int, optional
