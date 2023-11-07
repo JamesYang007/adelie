@@ -167,7 +167,6 @@ def plot_set_sizes(
 
             - ``"active"``: active set.
             - ``"screen"``: screen set.
-            - ``"safe"``: safe set.
 
         Default is ``[]``.
     axes
@@ -176,20 +175,18 @@ def plot_set_sizes(
     make_ax = axes is None
     ax = axes
 
-    include = ["active", "screen", "safe"]
+    include = ["active", "screen"]
     if len(exclude) > 0:
         include = list(set(include) - set(exclude))
     
     include_map = {
         "active": 0,
         "screen": 1,
-        "safe": 2,
     } 
 
     ys = [
         state.active_sizes,
         state.screen_sizes,
-        state.edpp_safe_sizes,
     ]
     if ratio:
         ys = [y / len(state.groups) for y in ys]
@@ -197,14 +194,12 @@ def plot_set_sizes(
     labels = [
         "active",
         state.screen_rule,
-        "safe",
     ]
     colors = [
+        "tab:red",
         "tab:blue",
-        "tab:orange",
-        "tab:green",
     ]
-    markers = ["o", "v", "^"]
+    markers = ["o", "v"]
 
     y_sizes = np.array([y.shape[0] for y in ys])
     iters = np.min(y_sizes)
@@ -440,21 +435,46 @@ class Diagnostic:
         self.gradient_scores = gradient_scores(state, abs_grads=self.gradient_norms)
 
     def plot_coefficients(self):
-        """Plots the coefficient profile."""
+        """Plots the coefficient profile.
+
+        See Also
+        --------
+        adelie.diagnostic.plot_coefficients
+        """
         return plot_coefficients(self.state)
 
     def plot_rsqs(self):
-        """Plots the :math:`R^2` profile."""
+        """Plots the :math:`R^2` profile.
+
+        See Also
+        --------
+        adelie.diagnostic.plot_rsqs
+        """
         return plot_rsqs(self.state)
 
     def plot_set_sizes(self, **kwargs):
-        """Plots the set sizes."""
+        """Plots the set sizes.
+
+        See Also
+        --------
+        adelie.diagnostic.plot_set_sizes
+        """
         return plot_set_sizes(self.state, **kwargs)
 
     def plot_benchmark(self):
-        """Plots benchmark times."""
+        """Plots benchmark times.
+
+        See Also
+        --------
+        adelie.diagnostic.plot_benchmark
+        """
         return plot_benchmark(self.state)
 
     def plot_kkt(self, **kwargs):
-        """Plots KKT failures."""
+        """Plots KKT failures.
+
+        See Also
+        --------
+        adelie.diagnostic.plot_kkt
+        """
         return plot_kkt(self.state, scores=self.gradient_scores, **kwargs)
