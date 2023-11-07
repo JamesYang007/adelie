@@ -430,14 +430,14 @@ document.write(`
 <dt><strong>X</strong><span class="classifier">Union[adelie.matrix.base, adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]</span></dt><dd><p>Feature matrix.
 It is typically one of the matrices defined in <code class="docutils literal notranslate"><span class="pre">adelie.matrix</span></code> sub-module.</p>
 </dd>
-<dt><strong>X_means</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>Column means of <code class="docutils literal notranslate"><span class="pre">X</span></code>.</p>
+<dt><strong>X_means</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>Column means (weighted by <span class="math notranslate nohighlight">\(W\)</span>) of <code class="docutils literal notranslate"><span class="pre">X</span></code>.</p>
 </dd>
-<dt><strong>y_mean</strong><span class="classifier">float</span></dt><dd><p>The mean of the response vector <span class="math notranslate nohighlight">\(y\)</span>.</p>
+<dt><strong>y_mean</strong><span class="classifier">float</span></dt><dd><p>Mean (weighted by <span class="math notranslate nohighlight">\(W\)</span>) of the response vector <span class="math notranslate nohighlight">\(y\)</span>.</p>
 </dd>
-<dt><strong>y_var</strong><span class="classifier">float</span></dt><dd><p>The variance of the response vector <span class="math notranslate nohighlight">\(y\)</span>, i.e. 
-<span class="math notranslate nohighlight">\(\|y_c\|_2^2\)</span>.</p>
+<dt><strong>y_var</strong><span class="classifier">float</span></dt><dd><p><span class="math notranslate nohighlight">\(\ell_2\)</span> norm squared (weighted by <span class="math notranslate nohighlight">\(W\)</span>) of <span class="math notranslate nohighlight">\(y\)</span>, i.e. 
+<span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span>.</p>
 </dd>
-<dt><strong>resid</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Residual <span class="math notranslate nohighlight">\(y_c - X \beta\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p>
+<dt><strong>resid</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Residual <span class="math notranslate nohighlight">\(W(y_c - X \beta)\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p>
 </dd>
 <dt><strong>groups</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>List of starting indices to each group where <cite>G</cite> is the number of groups.
 <code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group.</p>
@@ -469,13 +469,13 @@ This must contain the true solution values for the strong groups.</p>
 <dt><strong>screen_is_active</strong><span class="classifier">(a,) np.ndarray</span></dt><dd><p>Boolean vector that indicates whether each strong group in <code class="docutils literal notranslate"><span class="pre">groups</span></code> is active or not.
 <code class="docutils literal notranslate"><span class="pre">screen_is_active[i]</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> if and only if <code class="docutils literal notranslate"><span class="pre">screen_set[i]</span></code> is active.</p>
 </dd>
-<dt><strong>rsq</strong><span class="classifier">float</span></dt><dd><p>The true unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> given by <span class="math notranslate nohighlight">\(\|y_c\|_2^2 - \|y_c-X_c\beta\|_2^2\)</span>
+<dt><strong>rsq</strong><span class="classifier">float</span></dt><dd><p>The true unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> given by <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2 - \|y_c-X_c\beta\|_{W}^2\)</span>
 where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p>
 </dd>
 <dt><strong>lmda: float,</strong></dt><dd><p>The regularization parameter at which the true solution is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>
 (in the transformed space).</p>
 </dd>
-<dt><strong>grad: np.ndarray,</strong></dt><dd><p>The true full gradient <span class="math notranslate nohighlight">\(X_c^\top (y_c - X_c\beta)\)</span> in the original space where
+<dt><strong>grad: np.ndarray,</strong></dt><dd><p>The true full gradient <span class="math notranslate nohighlight">\(X_c^\top W (y_c - X_c\beta)\)</span> in the original space where
 <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p>
 </dd>
 <dt><strong>lmda_path</strong><span class="classifier">(l,) np.ndarray, optional</span></dt><dd><p>The regularization path to solve for.
@@ -526,15 +526,11 @@ Default is <code class="docutils literal notranslate"><span class="pre">100</spa
 <dt><strong>intercept</strong><span class="classifier">bool, optional</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should fit with intercept.
 Default is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
 </dd>
-<dt><strong>screen_rule</strong><span class="classifier">str, optional</span></dt><dd><p>The type of strong rule to use. It must be one of the following options:</p>
+<dt><strong>screen_rule</strong><span class="classifier">str, optional</span></dt><dd><p>The type of screening rule to use. It must be one of the following options:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;strong&quot;</span></code>: discards variables from the safe set based on simple strong rule.</p></li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">&quot;pivot&quot;</span></code>: adds all variables whose gradient norms are largest, which is determined</dt><dd><p>by searching for a pivot point in the gradient norms.</p>
-</dd>
-</dl>
-</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;strong&quot;</span></code>: adds groups whose active scores are above the strong threshold.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;pivot&quot;</span></code>: adds groups whose active scores are above the pivot cutoff with slack.</p></li>
 </ul>
 </div></blockquote>
 <p>Default is <code class="docutils literal notranslate"><span class="pre">&quot;pivot&quot;</span></code>.</p>

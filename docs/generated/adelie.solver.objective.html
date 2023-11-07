@@ -427,9 +427,9 @@ document.write(`
 <p>The group elastic net objective is given by:</p>
 <div class="math notranslate nohighlight">
 \[\begin{align*}
-    \frac{1}{2} \|y - X\beta - \beta_0 \textbf{1}\|_2^2
-    + \lambda \sum\limits_{j=1}^G w_j \left(
-        \alpha \|\beta_j\|_2 + \frac{1-\alpha}{2} \|\beta_j\|_2^2
+    \frac{1}{2} \|y - X\beta - \beta_0 \textbf{1}\|_{W}^2
+    + \lambda \sum\limits_{g=1}^G w_g \left(
+        \alpha \|\beta_g\|_2 + \frac{1-\alpha}{2} \|\beta_g\|_2^2
     \right)
 \end{align*}\]</div>
 <p>where 
@@ -437,11 +437,12 @@ document.write(`
 <span class="math notranslate nohighlight">\(\beta\)</span> is the coefficient vector,
 <span class="math notranslate nohighlight">\(X\)</span> is the feature matrix,
 <span class="math notranslate nohighlight">\(y\)</span> is the response vector,
+<span class="math notranslate nohighlight">\(W\)</span> is the observation weight diagonal matrix,
 <span class="math notranslate nohighlight">\(\lambda \geq 0\)</span> is the regularization parameter,
 <span class="math notranslate nohighlight">\(G\)</span> is the number of groups,
 <span class="math notranslate nohighlight">\(w \geq 0\)</span> is the penalty factor,
 <span class="math notranslate nohighlight">\(\alpha \in [0,1]\)</span> is the elastic net parameter,
-and <span class="math notranslate nohighlight">\(\beta_j\)</span> are the coefficients for the <span class="math notranslate nohighlight">\(j\)</span> th group.</p>
+and <span class="math notranslate nohighlight">\(\beta_g\)</span> are the coefficients for the <span class="math notranslate nohighlight">\(g\)</span> th group.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -461,9 +462,9 @@ and <span class="math notranslate nohighlight">\(\beta_j\)</span> are the coeffi
 </dd>
 <dt><strong>alpha</strong><span class="classifier">float</span></dt><dd><p>Elastic net parameter <span class="math notranslate nohighlight">\(\alpha\)</span>.</p>
 </dd>
-<dt><strong>penalty</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>List of penalty factors corresponding to each element of <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p>
+<dt><strong>penalty</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>List of penalty factors <span class="math notranslate nohighlight">\(w_g\)</span> corresponding to each element of <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p>
 </dd>
-<dt><strong>weights</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>Observation weights.</p>
+<dt><strong>weights</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>Observation weights <span class="math notranslate nohighlight">\(W\)</span>.</p>
 </dd>
 </dl>
 </dd>

@@ -430,9 +430,9 @@ document.write(`
 <dt><strong>X</strong><span class="classifier">Union[adelie.matrix.base, adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]</span></dt><dd><p>Feature matrix.
 It is typically one of the matrices defined in <code class="docutils literal notranslate"><span class="pre">adelie.matrix</span></code> sub-module.</p>
 </dd>
-<dt><strong>y_mean</strong><span class="classifier">float</span></dt><dd><p>Mean of <span class="math notranslate nohighlight">\(y\)</span>.</p>
+<dt><strong>y_mean</strong><span class="classifier">float</span></dt><dd><p>Mean (weighted by <span class="math notranslate nohighlight">\(W\)</span>) of <span class="math notranslate nohighlight">\(y\)</span>.</p>
 </dd>
-<dt><strong>y_var</strong><span class="classifier">float</span></dt><dd><p><span class="math notranslate nohighlight">\(\ell_2\)</span> norm squared of <span class="math notranslate nohighlight">\(y_c\)</span>.</p>
+<dt><strong>y_var</strong><span class="classifier">float</span></dt><dd><p><span class="math notranslate nohighlight">\(\ell_2\)</span> norm squared (weighted by <span class="math notranslate nohighlight">\(W\)</span>) of <span class="math notranslate nohighlight">\(y_c\)</span>, i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span>.</p>
 </dd>
 <dt><strong>groups</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>List of starting indices to each group where <cite>G</cite> is the number of groups.
 <code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group.</p>
@@ -454,9 +454,9 @@ It must be a non-negative vector.</p>
 <dt><strong>lmda_path</strong><span class="classifier">(l,) np.ndarray</span></dt><dd><p>Regularization sequence to fit on.</p>
 </dd>
 <dt><strong>rsq</strong><span class="classifier">float</span></dt><dd><p>Unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> value at <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.
-The unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> is given by <span class="math notranslate nohighlight">\(\|y_c\|_2^2 - \|y_c-X_c\beta\|_2^2\)</span>.</p>
+The unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> is given by <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2 - \|y_c-X_c\beta\|_{W}^2\)</span>.</p>
 </dd>
-<dt><strong>resid</strong><span class="classifier">np.ndarray</span></dt><dd><p>Residual <span class="math notranslate nohighlight">\(y_c-X\beta\)</span> at <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p>
+<dt><strong>resid</strong><span class="classifier">np.ndarray</span></dt><dd><p>Residual <span class="math notranslate nohighlight">\(W(y_c-X\beta)\)</span> at <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p>
 </dd>
 <dt><strong>screen_beta</strong><span class="classifier">(ws,) np.ndarray</span></dt><dd><p>Coefficient vector on the strong set.
 <code class="docutils literal notranslate"><span class="pre">screen_beta[b:b+p]</span></code> is the coefficient for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group 

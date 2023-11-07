@@ -493,15 +493,11 @@ Default is <code class="docutils literal notranslate"><span class="pre">100</spa
 <dt><strong>intercept</strong><span class="classifier">bool, optional</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should fit with intercept.
 Default is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
 </dd>
-<dt><strong>screen_rule</strong><span class="classifier">str, optional</span></dt><dd><p>The type of strong rule to use. It must be one of the following options:</p>
+<dt><strong>screen_rule</strong><span class="classifier">str, optional</span></dt><dd><p>The type of screening rule to use. It must be one of the following options:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;strong&quot;</span></code>: discards variables from the safe set based on simple strong rule.</p></li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">&quot;pivot&quot;</span></code>: adds all variables whose gradient norms are largest, which is determined</dt><dd><p>by searching for a pivot point in the gradient norms.</p>
-</dd>
-</dl>
-</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;strong&quot;</span></code>: adds groups whose active scores are above the strong threshold.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;pivot&quot;</span></code>: adds groups whose active scores are above the pivot cutoff with slack.</p></li>
 </ul>
 </div></blockquote>
 <p>Default is <code class="docutils literal notranslate"><span class="pre">&quot;pivot&quot;</span></code>.</p>

@@ -427,7 +427,9 @@ document.write(`
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>A</strong><span class="classifier">Union[adelie.matrix.base, adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]</span></dt><dd><p>Covariance matrix <span class="math notranslate nohighlight">\(X_c^\top X_c\)</span> where <cite>X_c</cite> is column-centered to fit with intercept.
+<dt><strong>A</strong><span class="classifier">Union[adelie.matrix.base, adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]</span></dt><dd><p>Covariance matrix <span class="math notranslate nohighlight">\(X_c^\top W X_c\)</span> where <span class="math notranslate nohighlight">\(X_c\)</span> 
+is column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) if fitting with intercept
+and <span class="math notranslate nohighlight">\(W\)</span> is the observation weights.
 It is typically one of the matrices defined in <code class="docutils literal notranslate"><span class="pre">adelie.matrix</span></code> sub-module.</p>
 </dd>
 <dt><strong>groups</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>List of starting indices to each group where <cite>G</cite> is the number of groups.
@@ -448,9 +450,9 @@ It must be a non-negative vector.</p>
 <dt><strong>lmda_path</strong><span class="classifier">(l,) np.ndarray</span></dt><dd><p>Regularization sequence to fit on.</p>
 </dd>
 <dt><strong>rsq</strong><span class="classifier">float</span></dt><dd><p>Unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> value at <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.
-The unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> is given by <span class="math notranslate nohighlight">\(\|y_c\|_2^2 - \|y_c-X_c\beta\|_2^2\)</span>.</p>
+The unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> is given by <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2 - \|y_c-X_c\beta\|_{W}^2\)</span>.</p>
 </dd>
-<dt><strong>resid</strong><span class="classifier">np.ndarray</span></dt><dd><p>Residual <span class="math notranslate nohighlight">\(y_c-X\beta\)</span> at <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p>
+<dt><strong>resid</strong><span class="classifier">np.ndarray</span></dt><dd><p>Residual <span class="math notranslate nohighlight">\(W(y_c-X\beta)\)</span> at <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p>
 </dd>
 <dt><strong>screen_beta</strong><span class="classifier">(ws,) np.ndarray</span></dt><dd><p>Coefficient vector on the strong set.
 <code class="docutils literal notranslate"><span class="pre">screen_beta[b:b+p]</span></code> is the coefficient for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group 
@@ -459,7 +461,7 @@ where
 <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">screen_begins[i]</span></code>,
 and <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">group_sizes[k]</span></code>.</p>
 </dd>
-<dt><strong>screen_grad</strong><span class="classifier">(ws,) np.ndarray</span></dt><dd><p>Gradient <span class="math notranslate nohighlight">\(X_{c,k}^\top (y_c-X_c\beta)\)</span> on the strong groups <span class="math notranslate nohighlight">\(k\)</span> where <span class="math notranslate nohighlight">\(beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.
+<dt><strong>screen_grad</strong><span class="classifier">(ws,) np.ndarray</span></dt><dd><p>Gradient <span class="math notranslate nohighlight">\(X_{c,k}^\top W (y_c-X_c\beta)\)</span> on the strong groups <span class="math notranslate nohighlight">\(k\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.
 <code class="docutils literal notranslate"><span class="pre">screen_grad[b:b+p]</span></code> is the gradient for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th strong group
 where 
 <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">screen_set[i]</span></code>,
