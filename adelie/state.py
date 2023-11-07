@@ -536,7 +536,7 @@ class pin_naive_base(pin_base):
         self, 
         base_type: core.state.StatePinNaive64 | core.state.StatePinNaive32,
         *,
-        X: matrix.base | matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
+        X: matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
         y_mean: float,
         y_var: float,
         groups: np.ndarray,
@@ -569,9 +569,6 @@ class pin_naive_base(pin_base):
         # static inputs require a reference to input
         # or copy if it must be made
         self._X = X
-
-        if isinstance(X, matrix.base):
-            X = X.internal()
 
         self._groups = np.array(groups, copy=False, dtype=int)
         self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
@@ -680,51 +677,9 @@ class pin_naive_base(pin_base):
         )
 
 
-class pin_naive_64(pin_naive_base, core.state.StatePinNaive64):
-    """State class for pin, naive method using 64-bit floating point."""
-
-    def __init__(self, *args, **kwargs):
-        pin_naive_base.default_init(
-            self,
-            core.state.StatePinNaive64,
-            *args,
-            dtype=np.float64,
-            **kwargs,
-        )
-
-    @classmethod
-    def create_from_core(cls, state, core_state):
-        obj = base.create_from_core(
-            cls, state, core_state, pin_naive_64, core.state.StatePinNaive64,
-        )
-        pin_naive_base.__init__(obj)
-        return obj
-
-
-class pin_naive_32(pin_naive_base, core.state.StatePinNaive32):
-    """State class for pin, naive method using 32-bit floating point."""
-
-    def __init__(self, *args, **kwargs):
-        pin_naive_base.default_init(
-            self,
-            core.state.StatePinNaive32,
-            *args,
-            dtype=np.float32,
-            **kwargs,
-        )
-
-    @classmethod
-    def create_from_core(cls, state, core_state):
-        obj = base.create_from_core(
-            cls, state, core_state, pin_naive_32, core.state.StatePinNaive32,
-        )
-        pin_naive_base.__init__(obj)
-        return obj
-
-
 def pin_naive(
     *,
-    X: matrix.base | matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
+    X: matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
     y_mean: float,
     y_var: float,
     groups: np.ndarray,
@@ -752,7 +707,7 @@ def pin_naive(
 
     Parameters
     ----------
-    X : Union[adelie.matrix.base, adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
+    X : Union[adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
         Feature matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
     y_mean : float
@@ -826,14 +781,9 @@ def pin_naive(
     adelie.state.pin_naive_64
     adelie.state.pin_naive_32
     """
-    if isinstance(X, matrix.base):
-        X_intr = X.internal()
-    else:
-        X_intr = X
-
     if not (
-        isinstance(X_intr, matrix.MatrixNaiveBase64) or
-        isinstance(X_intr, matrix.MatrixNaiveBase32)
+        isinstance(X, matrix.MatrixNaiveBase64) or
+        isinstance(X, matrix.MatrixNaiveBase32)
     ):
         raise ValueError(
             "X must be an instance of matrix.MatrixNaiveBase32 or matrix.MatrixNaiveBase64."
@@ -841,15 +791,38 @@ def pin_naive(
 
     dtype = (
         np.float64
-        if isinstance(X_intr, matrix.MatrixNaiveBase64) else
+        if isinstance(X, matrix.MatrixNaiveBase64) else
         np.float32
     )
         
     dispatcher = {
-        np.float64: pin_naive_64,
-        np.float32: pin_naive_32,
+        np.float64: core.state.StatePinNaive64,
+        np.float32: core.state.StatePinNaive32,
     }
-    return dispatcher[dtype](
+
+    core_base = dispatcher[dtype]
+
+    class _pin_naive(pin_naive_base, core_base):
+        def __init__(self, *args, **kwargs):
+            self._core_type = core_base
+            pin_naive_base.default_init(
+                self,
+                core_base,
+                *args,
+                dtype=dtype,
+                **kwargs,
+            )
+
+        @classmethod
+        def create_from_core(cls, state, core_state):
+            obj = base.create_from_core(
+                cls, state, core_state, _pin_naive, core_base,
+            )
+            pin_naive_base.__init__(obj)
+            return obj
+
+
+    return _pin_naive(
         X=X,
         y_mean=y_mean,
         y_var=y_var,
@@ -882,7 +855,7 @@ class pin_cov_base(pin_base):
         self, 
         base_type: core.state.StatePinCov64 | core.state.StatePinCov32,
         *,
-        A: matrix.base | matrix.MatrixCovBase64 | matrix.MatrixCovBase32,
+        A: matrix.MatrixCovBase64 | matrix.MatrixCovBase32,
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -910,9 +883,6 @@ class pin_cov_base(pin_base):
         # static inputs require a reference to input
         # or copy if it must be made
         self._A = A
-
-        if isinstance(A, matrix.base):
-            A = A.internal()
 
         self._groups = np.array(groups, copy=False, dtype=int)
         self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
@@ -991,51 +961,9 @@ class pin_cov_base(pin_base):
         )
 
 
-class pin_cov_64(pin_cov_base, core.state.StatePinCov64):
-    """State class for pin, covariance method using 64-bit floating point."""
-
-    def __init__(self, *args, **kwargs):
-        pin_cov_base.default_init(
-            self,
-            core.state.StatePinCov64,
-            *args,
-            dtype=np.float64,
-            **kwargs,
-        )
-
-    @classmethod
-    def create_from_core(cls, state, core_state):
-        obj = base.create_from_core(
-            cls, state, core_state, pin_cov_64, core.state.StatePinCov64,
-        )
-        pin_cov_base.__init__(obj)
-        return obj
-
-
-class pin_cov_32(pin_cov_base, core.state.StatePinCov32):
-    """State class for pin, cov method using 32-bit floating point."""
-
-    def __init__(self, *args, **kwargs):
-        pin_cov_base.default_init(
-            self,
-            core.state.StatePinCov32,
-            *args,
-            dtype=np.float32,
-            **kwargs,
-        )
-
-    @classmethod
-    def create_from_core(cls, state, core_state):
-        obj = base.create_from_core(
-            cls, state, core_state, pin_cov_32, core.state.StatePinCov32,
-        )
-        pin_cov_base.__init__(obj)
-        return obj
-
-
 def pin_cov(
     *,
-    A: matrix.base | matrix.MatrixCovBase64 | matrix.MatrixCovBase32,
+    A: matrix.MatrixCovBase64 | matrix.MatrixCovBase32,
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -1058,7 +986,7 @@ def pin_cov(
 
     Parameters
     ----------
-    A : Union[adelie.matrix.base, adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]
+    A : Union[adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]
         Covariance matrix :math:`X_c^\\top W X_c` where :math:`X_c` 
         is column-centered (weighted by :math:`W`) if fitting with intercept
         and :math:`W` is the observation weights.
@@ -1129,30 +1057,47 @@ def pin_cov(
     adelie.state.pin_cov_64
     adelie.state.pin_cov_32
     """
-    if isinstance(A, matrix.base):
-        A_intr = A.internal()
-    else:
-        A_intr = A
-
     if not (
-        isinstance(A_intr, matrix.MatrixCovBase64) or 
-        isinstance(A_intr, matrix.MatrixCovBase32)
+        isinstance(A, matrix.MatrixCovBase64) or 
+        isinstance(A, matrix.MatrixCovBase32)
     ):
         raise ValueError(
-            "X must be an instance of matrix.MatrixCovBase32 or matrix.MatrixCovBase64."
+            "A must be an instance of matrix.MatrixCovBase32 or matrix.MatrixCovBase64."
         )
 
     dtype = (
         np.float64
-        if isinstance(A_intr, matrix.MatrixCovBase64) else
+        if isinstance(A, matrix.MatrixCovBase64) else
         np.float32
     )
         
     dispatcher = {
-        np.float64: pin_cov_64,
-        np.float32: pin_cov_32,
+        np.float64: core.state.StatePinCov64,
+        np.float32: core.state.StatePinCov32,
     }
-    return dispatcher[dtype](
+
+    core_base = dispatcher[dtype]
+
+    class _pin_cov(pin_cov_base, core_base):
+        def __init__(self, *args, **kwargs):
+            self._core_type = core_base
+            pin_cov_base.default_init(
+                self,
+                core_base,
+                *args,
+                dtype=dtype,
+                **kwargs,
+            )
+
+        @classmethod
+        def create_from_core(cls, state, core_state):
+            obj = base.create_from_core(
+                cls, state, core_state, _pin_cov, core_base,
+            )
+            pin_cov_base.__init__(obj)
+            return obj
+
+    return _pin_cov(
         A=A,
         groups=groups,
         group_sizes=group_sizes,
@@ -1184,7 +1129,7 @@ class basil_naive_base(basil_base):
         self, 
         base_type: core.state.StateBasilNaive64 | core.state.StateBasilNaive32,
         *,
-        X: matrix.base | matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
+        X: matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
         X_means: np.ndarray,
         y_mean: float,
         y_var: float,
@@ -1229,9 +1174,6 @@ class basil_naive_base(basil_base):
         # static inputs require a reference to input
         # or copy if it must be made
         self._X = X
-
-        if isinstance(X, matrix.base):
-            X = X.internal()
 
         self._X_means = np.array(X_means, copy=False, dtype=dtype)
         self._groups = np.array(groups, copy=False, dtype=int)
@@ -1679,51 +1621,9 @@ class basil_naive_base(basil_base):
         )
 
 
-class basil_naive_64(basil_naive_base, core.state.StateBasilNaive64):
-    """State class for basil, naive method using 64-bit floating point."""
-
-    def __init__(self, *args, **kwargs):
-        basil_naive_base.default_init(
-            self,
-            core.state.StateBasilNaive64,
-            *args,
-            dtype=np.float64,
-            **kwargs,
-        )
-
-    @classmethod
-    def create_from_core(cls, state, core_state):
-        obj = base.create_from_core(
-            cls, state, core_state, basil_naive_64, core.state.StateBasilNaive64,
-        )
-        basil_naive_base.__init__(obj)
-        return obj
-
-
-class basil_naive_32(basil_naive_base, core.state.StateBasilNaive32):
-    """State class for basil, naive method using 32-bit floating point."""
-
-    def __init__(self, *args, **kwargs):
-        basil_naive_base.default_init(
-            self,
-            core.state.StateBasilNaive32,
-            *args,
-            dtype=np.float32,
-            **kwargs,
-        )
-
-    @classmethod
-    def create_from_core(cls, state, core_state):
-        obj = base.create_from_core(
-            cls, state, core_state, basil_naive_32, core.state.StateBasilNaive32,
-        )
-        basil_naive_base.__init__(obj)
-        return obj
-
-
 def basil_naive(
     *,
-    X: matrix.base | matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
+    X: matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
     X_means: np.ndarray,
     y_mean: float,
     y_var: float,
@@ -1763,7 +1663,7 @@ def basil_naive(
 
     Parameters
     ----------
-    X : Union[adelie.matrix.base, adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
+    X : Union[adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
         Feature matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
     X_means : (p,) np.ndarray
@@ -1898,14 +1798,9 @@ def basil_naive(
     adelie.state.basil_naive_64
     adelie.state.basil_naive_32
     """
-    if isinstance(X, matrix.base):
-        X_intr = X.internal()
-    else:
-        X_intr = X
-
     if not (
-        isinstance(X_intr, matrix.MatrixNaiveBase64) or 
-        isinstance(X_intr, matrix.MatrixNaiveBase32)
+        isinstance(X, matrix.MatrixNaiveBase64) or 
+        isinstance(X, matrix.MatrixNaiveBase32)
     ):
         raise ValueError(
             "X must be an instance of matrix.MatrixNaiveBase32 or matrix.MatrixNaiveBase64."
@@ -1953,14 +1848,16 @@ def basil_naive(
 
     dtype = (
         np.float64
-        if isinstance(X_intr, matrix.MatrixNaiveBase64) else
+        if isinstance(X, matrix.MatrixNaiveBase64) else
         np.float32
     )
         
     dispatcher = {
-        np.float64: basil_naive_64,
-        np.float32: basil_naive_32,
+        np.float64: core.state.StateBasilNaive64,
+        np.float32: core.state.StateBasilNaive32,
     }
+
+    core_base = dispatcher[dtype]
 
     setup_lmda_max = lmda_max is None
     setup_lmda_path = lmda_path is None
@@ -1968,7 +1865,28 @@ def basil_naive(
     if setup_lmda_max: lmda_max = -1
     if setup_lmda_path: lmda_path = np.empty(0, dtype=dtype)
 
-    return dispatcher[dtype](
+    class _basil_naive(basil_naive_base, core_base):
+        """State class for basil, naive method using 32-bit floating point."""
+
+        def __init__(self, *args, **kwargs):
+            self._core_type = core_base
+            basil_naive_base.default_init(
+                self,
+                core_base,
+                *args,
+                dtype=dtype,
+                **kwargs,
+            )
+
+        @classmethod
+        def create_from_core(cls, state, core_state):
+            obj = base.create_from_core(
+                cls, state, core_state, _basil_naive, core_base,
+            )
+            basil_naive_base.__init__(obj)
+            return obj
+
+    return _basil_naive(
         X=X,
         X_means=X_means,
         y_mean=y_mean,

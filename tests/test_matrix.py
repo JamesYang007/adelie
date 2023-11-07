@@ -12,8 +12,7 @@ def test_naive_dense():
             atol = 1e-6 if dtype == np.float32 else 1e-14
 
             X = np.array(X, dtype=dtype, order=order)
-            wrap = mod.naive_dense(X, n_threads=1)
-            cX = wrap._core_mat
+            cX = mod.naive_dense(X, n_threads=1)
             w = np.random.uniform(1, 2, n).astype(dtype)
             w = w / np.sum(w)
 
@@ -87,8 +86,7 @@ def test_cov_dense():
             atol = 1e-6 if dtype == np.float32 else 1e-14
 
             A = np.array(A, dtype=dtype, order=order)
-            wrap = mod.cov_dense(A, n_threads=4)
-            cA = wrap._core_mat
+            cA = mod.cov_dense(A, n_threads=4)
 
             # test bmul
             v = np.random.normal(0, 1, p // 2).astype(dtype)
@@ -125,8 +123,7 @@ def test_cov_lazy():
 
             X = np.array(X, dtype=dtype, order=order)
             A = np.array(A, dtype=dtype, order=order)
-            wrap = mod.cov_lazy(X, n_threads=4)
-            cA = wrap._core_mat
+            cA = mod.cov_lazy(X, n_threads=4)
 
             # test bmul
             v = np.random.normal(0, 1, p // 2).astype(dtype)

@@ -107,14 +107,14 @@ def solve_pin(
     """
     # mapping of each state type to the corresponding solver
     f_dict = {
-        ad.state.pin_naive_64: core.solver.solve_pin_naive_64,
-        ad.state.pin_naive_32: core.solver.solve_pin_naive_32,
-        ad.state.pin_cov_64: core.solver.solve_pin_cov_64,
-        ad.state.pin_cov_32: core.solver.solve_pin_cov_32,
+        core.state.StatePinNaive64: core.solver.solve_pin_naive_64,
+        core.state.StatePinNaive32: core.solver.solve_pin_naive_32,
+        core.state.StatePinCov64: core.solver.solve_pin_cov_64,
+        core.state.StatePinCov32: core.solver.solve_pin_cov_32,
     }
 
     # solve group elastic net
-    f = f_dict[type(state)]
+    f = f_dict[state._core_type]
     out = f(state)
 
     # raise any errors
@@ -152,12 +152,12 @@ def solve_basil(
     """
     # mapping of each state type to the corresponding solver
     f_dict = {
-        ad.state.basil_naive_64: core.solver.solve_basil_naive_64,
-        ad.state.basil_naive_32: core.solver.solve_basil_naive_32,
+        core.state.StateBasilNaive64: core.solver.solve_basil_naive_64,
+        core.state.StateBasilNaive32: core.solver.solve_basil_naive_32,
     }
 
     # solve group elastic net
-    f = f_dict[type(state)]
+    f = f_dict[state._core_type]
     out = f(state)
 
     # raise any errors
@@ -173,7 +173,7 @@ def solve_basil(
 
 def grpnet(
     *,
-    X: np.ndarray | matrix.base,
+    X: np.ndarray,
     y: np.ndarray,
     groups: np.ndarray,
     group_sizes: np.ndarray,
@@ -204,7 +204,7 @@ def grpnet(
 
     Parameters
     ----------
-    X : Union[np.ndarray, adelie.matrix.base]
+    X : np.ndarray
         Feature matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module
         or a ``numpy`` array.
