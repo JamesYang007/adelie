@@ -26,7 +26,6 @@ protected:
     const dyn_vec_string_t _filenames;  // (F,) array of file names
     const vec_index_t _file_begins;     // (F+1,) array of file begin indices.
                                         // _file_begins[i] == starting feature index for file i.
-     
     const size_t _n_threads;
 
     auto init_file_begins(
