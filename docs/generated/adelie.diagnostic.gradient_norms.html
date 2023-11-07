@@ -320,6 +320,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.diagnostic.gradient_norms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_rsqs.html">adelie.diagnostic.plot_rsqs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
@@ -423,6 +424,12 @@ document.write(`
 <dt><strong>state</strong></dt><dd><p>A state object from solving group elastic net.</p>
 </dd>
 <dt><strong>grads</strong><span class="classifier">(l, p) np.ndarray</span></dt><dd><p>Gradients for each <span class="math notranslate nohighlight">\(\lambda\)</span> value.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>norms</strong><span class="classifier">(l, G) np.ndarray</span></dt><dd><p>Gradient norms at each saved solution.</p>
 </dd>
 </dl>
 </dd>

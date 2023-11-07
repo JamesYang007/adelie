@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.bcd.root_upper_bound &#8212; adelie 1.1.5 documentation</title>
+    <title>adelie.diagnostic.coefficient &#8212; adelie 1.1.5 documentation</title>
   
   
   
@@ -42,11 +42,11 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.bcd.root_upper_bound';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.diagnostic.coefficient';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.bcd.root_function" href="adelie.bcd.root_function.html" />
-    <link rel="prev" title="adelie.bcd.root_lower_bound" href="adelie.bcd.root_lower_bound.html" />
+    <link rel="next" title="adelie.diagnostic.plot_coefficients" href="adelie.diagnostic.plot_coefficients.html" />
+    <link rel="prev" title="adelie.diagnostic.gradient_scores" href="adelie.diagnostic.gradient_scores.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -304,23 +304,23 @@ document.write(`
         <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.objective.html">adelie.bcd.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root.html">adelie.bcd.root</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_lower_bound.html">adelie.bcd.root_lower_bound</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.bcd.root_upper_bound</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.create_test_data_basil.html">adelie.data.create_test_data_basil</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.diagnostic.coefficient</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_rsqs.html">adelie.diagnostic.plot_rsqs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
@@ -395,7 +395,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.bcd.r...</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.diagn...</li>
   </ul>
 </nav>
 </div>
@@ -412,44 +412,28 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-bcd-root-upper-bound">
-<h1>adelie.bcd.root_upper_bound<a class="headerlink" href="#adelie-bcd-root-upper-bound" title="Link to this heading">#</a></h1>
+  <section id="adelie-diagnostic-coefficient">
+<h1>adelie.diagnostic.coefficient<a class="headerlink" href="#adelie-diagnostic-coefficient" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="adelie.bcd.root_upper_bound">
-<span class="sig-prename descclassname"><span class="pre">adelie.bcd.</span></span><span class="sig-name descname"><span class="pre">root_upper_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.bcd.root_upper_bound" title="Link to this definition">#</a></dt>
-<dd><p>Computes an upper bound on the root of BCD root function.</p>
-<p>The upper bound <span class="math notranslate nohighlight">\(h^\star\)</span> is guaranteed to be non-negative.
-However, it <em>may not satisfy</em> <span class="math notranslate nohighlight">\(\varphi(h^\star) \leq 0\)</span> where <span class="math notranslate nohighlight">\(\varphi\)</span>
-is given by <code class="docutils literal notranslate"><span class="pre">root_function()</span></code> if <code class="docutils literal notranslate"><span class="pre">zero_tol</span></code> is too large.
-Even when <code class="docutils literal notranslate"><span class="pre">zero_tol</span></code> is small enough, 
-we assume that <span class="math notranslate nohighlight">\(v_i=0\)</span> whenever <span class="math notranslate nohighlight">\(\Sigma_{ii} = 0\)</span>.
-It is undefined behavior if the condition is not satisfied.</p>
+<dt class="sig sig-object py" id="adelie.diagnostic.coefficient">
+<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.coefficient" title="Link to this definition">#</a></dt>
+<dd><p>Computes the coefficient at <span class="math notranslate nohighlight">\(\lambda\)</span> using linear interpolation of solutions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>quad</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">root_function()</span></code>.</p>
+<dt><strong>state</strong></dt><dd><p>A state object from solving group elastic net.</p>
 </dd>
-<dt><strong>linear</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">root_function()</span></code>.</p>
-</dd>
-<dt><strong>zero_tol</strong><span class="classifier">float, optional</span></dt><dd><p>A value is considered zero if its absolute value is less than or equal to <code class="docutils literal notranslate"><span class="pre">zero_tol</span></code>.
-Default is <code class="docutils literal notranslate"><span class="pre">1e-10</span></code>.</p>
+<dt><strong>lmda</strong><span class="classifier">float</span></dt><dd><p>New regularization parameter at which to find the solution.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>upper</strong><span class="classifier">float</span></dt><dd><p>Upper bound on the root.</p>
+<dt><strong>beta</strong><span class="classifier">scipy.sparse.csr_matrix</span></dt><dd><p>Coefficient vector at <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
 </dd>
 </dl>
 </dd>
 </dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="adelie.bcd.root_lower_bound.html#adelie.bcd.root_lower_bound" title="adelie.bcd.root_lower_bound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.bcd.root_lower_bound</span></code></a></dt><dd></dd>
-<dt><a class="reference internal" href="adelie.bcd.root_function.html#adelie.bcd.root_function" title="adelie.bcd.root_function"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.bcd.root_function</span></code></a></dt><dd></dd>
-</dl>
-</div>
 </dd></dl>
 
 </section>
@@ -465,20 +449,20 @@ Default is <code class="docutils literal notranslate"><span class="pre">1e-10</s
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.bcd.root_lower_bound.html"
+       href="adelie.diagnostic.gradient_scores.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.bcd.root_lower_bound</p>
+        <p class="prev-next-title">adelie.diagnostic.gradient_scores</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.bcd.root_function.html"
+       href="adelie.diagnostic.plot_coefficients.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.bcd.root_function</p>
+        <p class="prev-next-title">adelie.diagnostic.plot_coefficients</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -497,13 +481,13 @@ Default is <code class="docutils literal notranslate"><span class="pre">1e-10</s
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.bcd.root_upper_bound"><code class="docutils literal notranslate"><span class="pre">root_upper_bound()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.diagnostic.coefficient"><code class="docutils literal notranslate"><span class="pre">coefficient()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.bcd.root_upper_bound.rst.txt">
+    <a href="../_sources/generated/adelie.diagnostic.coefficient.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

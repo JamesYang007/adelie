@@ -1,0 +1,6 @@
+﻿adelie.diagnostic.coefficient
+=============================
+
+.. currentmodule:: adelie.diagnostic
+
+.. autofunction:: coefficient

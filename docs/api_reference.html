@@ -320,6 +320,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_rsqs.html">adelie.diagnostic.plot_rsqs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
@@ -461,22 +462,25 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.gradient_scores.html#adelie.diagnostic.gradient_scores" title="adelie.diagnostic.gradient_scores"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_scores</span></code></a>(state, *, abs_grads)</p></td>
 <td><p>Computes the gradient scores for each saved solution.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_coefficients.html#adelie.diagnostic.plot_coefficients" title="adelie.diagnostic.plot_coefficients"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_coefficients</span></code></a>(state)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.coefficient.html#adelie.diagnostic.coefficient" title="adelie.diagnostic.coefficient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coefficient</span></code></a>(state, *, lmda)</p></td>
+<td><p>Computes the coefficient at <span class="math notranslate nohighlight">\(\lambda\)</span> using linear interpolation of solutions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_coefficients.html#adelie.diagnostic.plot_coefficients" title="adelie.diagnostic.plot_coefficients"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_coefficients</span></code></a>(state)</p></td>
 <td><p>Plots the coefficient profile.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_rsqs.html#adelie.diagnostic.plot_rsqs" title="adelie.diagnostic.plot_rsqs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_rsqs</span></code></a>(state)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_rsqs.html#adelie.diagnostic.plot_rsqs" title="adelie.diagnostic.plot_rsqs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_rsqs</span></code></a>(state)</p></td>
 <td><p>Plots the <span class="math notranslate nohighlight">\(R^2\)</span> profile.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_set_sizes.html#adelie.diagnostic.plot_set_sizes" title="adelie.diagnostic.plot_set_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_set_sizes</span></code></a>(state, *[, ratio, exclude, axes])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_set_sizes.html#adelie.diagnostic.plot_set_sizes" title="adelie.diagnostic.plot_set_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_set_sizes</span></code></a>(state, *[, ratio, exclude, axes])</p></td>
 <td><p>Plots the set sizes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_benchmark.html#adelie.diagnostic.plot_benchmark" title="adelie.diagnostic.plot_benchmark"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_benchmark</span></code></a>(state)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_benchmark.html#adelie.diagnostic.plot_benchmark" title="adelie.diagnostic.plot_benchmark"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_benchmark</span></code></a>(state)</p></td>
 <td><p>Plots benchmark times.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_kkt.html#adelie.diagnostic.plot_kkt" title="adelie.diagnostic.plot_kkt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_kkt</span></code></a>(state, *, scores[, idx])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_kkt.html#adelie.diagnostic.plot_kkt" title="adelie.diagnostic.plot_kkt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_kkt</span></code></a>(state, *, scores[, idx])</p></td>
 <td><p>Plots KKT failures.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.Diagnostic.html#adelie.diagnostic.Diagnostic" title="adelie.diagnostic.Diagnostic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Diagnostic</span></code></a>(*, y, state)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.Diagnostic.html#adelie.diagnostic.Diagnostic" title="adelie.diagnostic.Diagnostic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Diagnostic</span></code></a>(*, y, state)</p></td>
 <td><p>Diagnostic class for user-friendly API.</p></td>
 </tr>
 </tbody>
