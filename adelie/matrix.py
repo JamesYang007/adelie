@@ -22,6 +22,11 @@ def naive_dense(
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
     """
     if n_threads < 1:
         raise ValueError("Number of threads must be >= 1.")
@@ -70,6 +75,11 @@ def cov_dense(
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
     """
     if n_threads < 1:
         raise ValueError("Number of threads must be >= 1.")
@@ -119,6 +129,11 @@ def cov_lazy(
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
     """
     if n_threads < 1:
         raise ValueError("Number of threads must be >= 1.")

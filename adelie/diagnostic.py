@@ -18,6 +18,11 @@ def residuals(
         A state object from solving group elastic net.
     y : (n,) np.ndarray
         Response vector.
+
+    Returns
+    -------
+    resids : (l, n) np.ndarray
+        Residual at each saved solution.
     """
     X = state.X
     n, p = X.rows(), X.cols()
@@ -42,6 +47,11 @@ def gradients(
         A state object from solving group elastic net.
     resids : (l, n) np.ndarray
         Residuals for each saved solution.
+
+    Returns
+    -------
+    grads : (l, p) np.ndarray
+        Gradient at each saved solution.
     """
     X = state.X
     p = X.cols()
@@ -64,6 +74,11 @@ def gradient_norms(
         A state object from solving group elastic net.
     grads : (l, p) np.ndarray
         Gradients for each :math:`\\lambda` value.
+
+    Returns
+    -------
+    norms : (l, G) np.ndarray
+        Gradient norms at each saved solution.
     """
     return np.array([
         np.linalg.norm(grads[:, g:g+gs], axis=-1)
@@ -84,11 +99,59 @@ def gradient_scores(
         A state object from solving group elastic net.
     abs_grads : (l, G) np.ndarray
         Gradient norms for each :math:`\\lambda` value.
+
+    Returns
+    -------
+    scores : (l, G) np.ndarray
+        Gradient scores at each saved solution.  
     """
     denom = state.alpha * state.penalty
     scores = np.divide(abs_grads, denom, where=denom[None] > 0)
     scores[:, denom <= 0] = state.lmdas[:, None]
     return scores
+
+
+def coefficient(
+    state,
+    *,
+    lmda: float,
+):
+    """Computes the coefficient at :math:`\\lambda` using linear interpolation of solutions.
+
+    Parameters
+    ----------
+    state
+        A state object from solving group elastic net.
+    lmda : float
+        New regularization parameter at which to find the solution.
+
+    Returns
+    -------
+    beta : scipy.sparse.csr_matrix
+        Coefficient vector at :math:`\\lambda`.
+    """
+    lmdas = state.lmdas
+    betas = state.betas 
+
+    order = np.argsort(lmdas)
+    idx = np.searchsorted(
+        lmdas,
+        lmda,
+        sorter=order,
+    )
+    idx = lmdas.shape[0] - idx
+    if idx == 0 or idx == lmdas.shape[0]:
+        logger.logger.warning(
+            "lmda is not within the range of the saved lambdas. " +
+            "Returning boundary solution."
+        )
+        idx = np.clip(idx, 0, lmdas.shape[0]-1)
+        return betas[idx]
+
+    left, right = betas[idx-1], betas[idx]
+    weight = (lmda - lmdas[idx]) / (lmdas[idx-1] - lmdas[idx])
+
+    return left.multiply(weight) + right.multiply(1-weight)
 
 
 def plot_coefficients(state):

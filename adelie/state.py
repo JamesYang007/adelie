@@ -106,6 +106,11 @@ class base:
             Python derived class type.
         corecls
             Core state class type.
+
+        Returns
+        -------
+        new_state : cls
+            New state object.
         """
         # allocate new object cls casted to pycls type
         obj = super(pycls, cls).__new__(cls)
@@ -776,6 +781,11 @@ def pin_naive(
         Number of threads.
         Default is ``1``.
 
+    Returns
+    -------
+    wrap
+        Wrapper state object.
+
     See Also
     --------
     adelie.state.pin_naive_64
@@ -1051,6 +1061,11 @@ def pin_cov(
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper state object.
 
     See Also
     --------
@@ -1792,6 +1807,11 @@ def basil_naive(
         below the pivot point are also added to the strong set as slack.
         It is only used if ``screen_rule == "pivot"``.
         Default is ``1.25``.
+
+    Returns
+    -------
+    wrap
+        Wrapper state object.
 
     See Also
     --------
