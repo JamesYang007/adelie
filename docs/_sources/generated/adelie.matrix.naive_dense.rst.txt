@@ -1,6 +1,0 @@
-﻿adelie.matrix.naive\_dense
-==========================
-
-.. currentmodule:: adelie.matrix
-
-.. autofunction:: naive_dense

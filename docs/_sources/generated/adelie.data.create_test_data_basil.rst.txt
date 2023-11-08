@@ -1,6 +1,0 @@
-﻿adelie.data.create\_test\_data\_basil
-=====================================
-
-.. currentmodule:: adelie.data
-
-.. autofunction:: create_test_data_basil

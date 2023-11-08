@@ -313,7 +313,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.data.create_test_data_basil.html">adelie.data.create_test_data_basil</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.data.create_dense.html">adelie.data.create_dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.data.create_snp_unphased.html">adelie.data.create_snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
@@ -329,9 +330,12 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.diagnostic.Diagnostic.html">adelie.diagnostic.Diagnostic</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.naive_dense.html">adelie.matrix.naive_dense</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.cov_dense.html">adelie.matrix.cov_dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.dense.html">adelie.matrix.dense</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
@@ -440,8 +444,11 @@ document.write(`
 <h2>adelie.data<a class="headerlink" href="#adelie-data" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.data.create_test_data_basil.html#adelie.data.create_test_data_basil" title="adelie.data.create_test_data_basil"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_test_data_basil</span></code></a>(n, p, G, *[, ...])</p></td>
-<td><p>Creates a test dataset for BASIL method.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.data.create_dense.html#adelie.data.create_dense" title="adelie.data.create_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_dense</span></code></a>(n, p, G, *[, equal_groups, ...])</p></td>
+<td><p>Creates a dense dataset.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.data.create_snp_unphased.html#adelie.data.create_snp_unphased" title="adelie.data.create_snp_unphased"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_snp_unphased</span></code></a>(n, p, *[, sparsity, ...])</p></td>
+<td><p>Creates a SNP Unphased dataset.</p></td>
 </tr>
 </tbody>
 </table>
@@ -486,18 +493,28 @@ document.write(`
 </tbody>
 </table>
 </section>
+<section id="adelie-io">
+<h2>adelie.io<a class="headerlink" href="#adelie-io" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.io.snp_unphased.html#adelie.io.snp_unphased" title="adelie.io.snp_unphased"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snp_unphased</span></code></a>(filename)</p></td>
+<td><p>IO handler for SNP Unphased data.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 <section id="adelie-matrix">
 <h2>adelie.matrix<a class="headerlink" href="#adelie-matrix" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.naive_dense.html#adelie.matrix.naive_dense" title="adelie.matrix.naive_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">naive_dense</span></code></a>(mat, *[, n_threads])</p></td>
-<td><p>Creates a viewer of a dense matrix for naive method.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.dense.html#adelie.matrix.dense" title="adelie.matrix.dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dense</span></code></a>(mat, *, method[, n_threads])</p></td>
+<td><p>Creates a viewer of a dense matrix.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.cov_dense.html#adelie.matrix.cov_dense" title="adelie.matrix.cov_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cov_dense</span></code></a>(mat, *[, n_threads])</p></td>
-<td><p>Creates a viewer of a dense matrix for covariance method.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.cov_lazy.html#adelie.matrix.cov_lazy" title="adelie.matrix.cov_lazy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cov_lazy</span></code></a>(mat, *[, n_threads])</p></td>
+<td><p>Creates a viewer of a lazy covariance matrix.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.cov_lazy.html#adelie.matrix.cov_lazy" title="adelie.matrix.cov_lazy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cov_lazy</span></code></a>(mat, *[, n_threads])</p></td>
-<td><p>Creates a viewer of a lazy matrix for covariance method.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.snp_unphased.html#adelie.matrix.snp_unphased" title="adelie.matrix.snp_unphased"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snp_unphased</span></code></a>(filenames, *[, n_threads, dtype])</p></td>
+<td><p>Creates a SNP unphased matrix.</p></td>
 </tr>
 </tbody>
 </table>
@@ -528,10 +545,10 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.objective.html#adelie.solver.objective" title="adelie.solver.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">objective</span></code></a>(beta0, beta, *, X, y, groups, ...)</p></td>
 <td><p>Computes the group elastic net objective.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.solver.solve_pin.html#adelie.solver.solve_pin" title="adelie.solver.solve_pin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_pin</span></code></a>(state[, logger])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.solver.solve_pin.html#adelie.solver.solve_pin" title="adelie.solver.solve_pin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_pin</span></code></a>(state)</p></td>
 <td><p>Solves the pinned group elastic net problem.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.solve_basil.html#adelie.solver.solve_basil" title="adelie.solver.solve_basil"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_basil</span></code></a>(state[, logger])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.solve_basil.html#adelie.solver.solve_basil" title="adelie.solver.solve_basil"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_basil</span></code></a>(state)</p></td>
 <td><p>Solves the group elastic net problem using BASIL.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.solver.grpnet.html#adelie.solver.grpnet" title="adelie.solver.grpnet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grpnet</span></code></a>(*, X, y, groups, group_sizes[, ...])</p></td>
@@ -622,6 +639,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-bcd">adelie.bcd</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-data">adelie.data</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-diagnostic">adelie.diagnostic</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-io">adelie.io</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-matrix">adelie.matrix</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-state">adelie.state</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-solver">adelie.solver</a></li>

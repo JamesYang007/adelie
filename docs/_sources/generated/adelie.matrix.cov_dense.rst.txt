@@ -1,6 +1,0 @@
-﻿adelie.matrix.cov\_dense
-========================
-
-.. currentmodule:: adelie.matrix
-
-.. autofunction:: cov_dense

@@ -1,0 +1,6 @@
+﻿adelie.matrix.snp\_unphased
+===========================
+
+.. currentmodule:: adelie.matrix
+
+.. autofunction:: snp_unphased

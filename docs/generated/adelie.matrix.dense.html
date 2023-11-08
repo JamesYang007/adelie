@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.solver.solve_basil &#8212; adelie 1.1.5 documentation</title>
+    <title>adelie.matrix.dense &#8212; adelie 1.1.5 documentation</title>
   
   
   
@@ -40,11 +40,11 @@
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.solver.solve_basil';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.matrix.dense';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.solver.grpnet" href="adelie.solver.grpnet.html" />
-    <link rel="prev" title="adelie.solver.solve_pin" href="adelie.solver.solve_pin.html" />
+    <link rel="next" title="adelie.matrix.cov_lazy" href="adelie.matrix.cov_lazy.html" />
+    <link rel="prev" title="adelie.io.snp_unphased" href="adelie.io.snp_unphased.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -330,8 +330,8 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
 </ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.matrix.dense</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 </ul>
@@ -341,10 +341,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.basil_naive.html">adelie.state.basil_naive</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_pin.html">adelie.solver.solve_pin</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.solver.solve_basil</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_basil.html">adelie.solver.solve_basil</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -397,7 +397,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.solve...</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.matrix.dense</li>
   </ul>
 </nav>
 </div>
@@ -414,34 +414,37 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-solver-solve-basil">
-<h1>adelie.solver.solve_basil<a class="headerlink" href="#adelie-solver-solve-basil" title="Link to this heading">#</a></h1>
+  <section id="adelie-matrix-dense">
+<h1>adelie.matrix.dense<a class="headerlink" href="#adelie-matrix-dense" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="adelie.solver.solve_basil">
-<span class="sig-prename descclassname"><span class="pre">adelie.solver.</span></span><span class="sig-name descname"><span class="pre">solve_basil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.solver.solve_basil" title="Link to this definition">#</a></dt>
-<dd><p>Solves the group elastic net problem using BASIL.</p>
-<dl class="field-list simple">
+<dt class="sig sig-object py" id="adelie.matrix.dense">
+<span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.matrix.dense" title="Link to this definition">#</a></dt>
+<dd><p>Creates a viewer of a dense matrix.</p>
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>state</strong></dt><dd><p>A basil state object.</p>
+<dd class="field-odd"><dl>
+<dt><strong>mat</strong><span class="classifier">np.ndarray</span></dt><dd><p>The matrix to view.</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">str</span></dt><dd><p>Method type. It must be one of the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;naive&quot;</span></code>: naive method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;cov&quot;</span></code>: covariance method.</p></li>
+</ul>
+</div></blockquote>
+</dd>
+<dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
+Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>result</dt><dd><p>The resulting state after running the solver.
-The type is the same as that of <code class="docutils literal notranslate"><span class="pre">state</span></code>.</p>
+<dt>wrap</dt><dd><p>Wrapper matrix object.</p>
 </dd>
 </dl>
 </dd>
 </dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="adelie.state.basil_naive.html#adelie.state.basil_naive" title="adelie.state.basil_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.state.basil_naive</span></code></a></dt><dd></dd>
-<dt><a class="reference internal" href="adelie.solver.objective.html#adelie.solver.objective" title="adelie.solver.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.solver.objective</span></code></a></dt><dd></dd>
-</dl>
-</div>
 </dd></dl>
 
 </section>
@@ -457,20 +460,20 @@ The type is the same as that of <code class="docutils literal notranslate"><span
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.solver.solve_pin.html"
+       href="adelie.io.snp_unphased.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.solver.solve_pin</p>
+        <p class="prev-next-title">adelie.io.snp_unphased</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.solver.grpnet.html"
+       href="adelie.matrix.cov_lazy.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.solver.grpnet</p>
+        <p class="prev-next-title">adelie.matrix.cov_lazy</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -489,13 +492,13 @@ The type is the same as that of <code class="docutils literal notranslate"><span
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.solver.solve_basil"><code class="docutils literal notranslate"><span class="pre">solve_basil()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.dense"><code class="docutils literal notranslate"><span class="pre">dense()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.solver.solve_basil.rst.txt">
+    <a href="../_sources/generated/adelie.matrix.dense.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

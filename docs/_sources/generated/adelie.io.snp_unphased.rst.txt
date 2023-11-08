@@ -1,0 +1,51 @@
+﻿adelie.io.snp\_unphased
+=======================
+
+.. currentmodule:: adelie.io
+
+.. autoclass:: snp_unphased
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~snp_unphased.__init__
+      ~snp_unphased.cols
+      ~snp_unphased.endian
+      ~snp_unphased.inner
+      ~snp_unphased.nnz
+      ~snp_unphased.outer
+      ~snp_unphased.read
+      ~snp_unphased.rows
+      ~snp_unphased.to_dense
+      ~snp_unphased.value
+      ~snp_unphased.write
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: cols
+   .. automethod:: endian
+   .. automethod:: inner
+   .. automethod:: nnz
+   .. automethod:: outer
+   .. automethod:: read
+   .. automethod:: rows
+   .. automethod:: to_dense
+   .. automethod:: value
+   .. automethod:: write
+   
+   
+
+   
+   
+   

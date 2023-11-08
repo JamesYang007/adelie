@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.solver.solve_basil &#8212; adelie 1.1.5 documentation</title>
+    <title>adelie.io.snp_unphased &#8212; adelie 1.1.5 documentation</title>
   
   
   
@@ -40,11 +40,11 @@
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.solver.solve_basil';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.io.snp_unphased';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.solver.grpnet" href="adelie.solver.grpnet.html" />
-    <link rel="prev" title="adelie.solver.solve_pin" href="adelie.solver.solve_pin.html" />
+    <link rel="next" title="adelie.matrix.dense" href="adelie.matrix.dense.html" />
+    <link rel="prev" title="adelie.diagnostic.Diagnostic" href="adelie.diagnostic.Diagnostic.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -327,8 +327,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_kkt.html">adelie.diagnostic.plot_kkt</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.Diagnostic.html">adelie.diagnostic.Diagnostic</a></li>
 </ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.io.snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
@@ -341,10 +341,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.basil_naive.html">adelie.state.basil_naive</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_pin.html">adelie.solver.solve_pin</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.solver.solve_basil</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_basil.html">adelie.solver.solve_basil</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -397,7 +397,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.solve...</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.io.sn...</li>
   </ul>
 </nav>
 </div>
@@ -414,34 +414,237 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-solver-solve-basil">
-<h1>adelie.solver.solve_basil<a class="headerlink" href="#adelie-solver-solve-basil" title="Link to this heading">#</a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="adelie.solver.solve_basil">
-<span class="sig-prename descclassname"><span class="pre">adelie.solver.</span></span><span class="sig-name descname"><span class="pre">solve_basil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.solver.solve_basil" title="Link to this definition">#</a></dt>
-<dd><p>Solves the group elastic net problem using BASIL.</p>
+  <section id="adelie-io-snp-unphased">
+<h1>adelie.io.snp_unphased<a class="headerlink" href="#adelie-io-snp-unphased" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="adelie.io.snp_unphased">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.io.</span></span><span class="sig-name descname"><span class="pre">snp_unphased</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased" title="Link to this definition">#</a></dt>
+<dd><p>IO handler for SNP Unphased data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>state</strong></dt><dd><p>A basil state object.</p>
+<dt><strong>filename</strong><span class="classifier">str</span></dt><dd><p>File name to either read from or write to related to the SNP data.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.__init__" title="adelie.io.snp_unphased.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(filename)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.cols" title="adelie.io.snp_unphased.cols"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cols</span></code></a>()</p></td>
+<td><p>Gets the number of columns of the matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.endian" title="adelie.io.snp_unphased.endian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">endian</span></code></a>()</p></td>
+<td><p>Gets the endianness used in the file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.inner" title="adelie.io.snp_unphased.inner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inner</span></code></a>(j)</p></td>
+<td><p>Gets the inner indexing vector at a column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.nnz" title="adelie.io.snp_unphased.nnz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nnz</span></code></a>(j)</p></td>
+<td><p>Gets the number of non-zero entries at a column.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.outer" title="adelie.io.snp_unphased.outer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">outer</span></code></a>()</p></td>
+<td><p>Gets the outer indexing vector.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.read" title="adelie.io.snp_unphased.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>()</p></td>
+<td><p>Read and load the matrix from file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.rows" title="adelie.io.snp_unphased.rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rows</span></code></a>()</p></td>
+<td><p>Gets the number of rows of the matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.to_dense" title="adelie.io.snp_unphased.to_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dense</span></code></a>([n_threads])</p></td>
+<td><p>Creates a dense matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.value" title="adelie.io.snp_unphased.value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">value</span></code></a>(j)</p></td>
+<td><p>Gets the value vector at a column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.write" title="adelie.io.snp_unphased.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(calldata[, n_threads])</p></td>
+<td><p>Write dense array to the file in special format.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.io.snp_unphased.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.io.snp_unphased.cols">
+<span class="sig-name descname"><span class="pre">cols</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.cols" title="Link to this definition">#</a></dt>
+<dd><p>Gets the number of columns of the matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>cols</strong><span class="classifier">int</span></dt><dd><p>Number of columns.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.io.snp_unphased.endian">
+<span class="sig-name descname"><span class="pre">endian</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.endian" title="Link to this definition">#</a></dt>
+<dd><p>Gets the endianness used in the file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>endian</strong><span class="classifier">str</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">&quot;big-endian&quot;</span></code> if big-endian and <code class="docutils literal notranslate"><span class="pre">&quot;little-endian&quot;</span></code> if little-endian.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.io.snp_unphased.inner">
+<span class="sig-name descname"><span class="pre">inner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.inner" title="Link to this definition">#</a></dt>
+<dd><p>Gets the inner indexing vector at a column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>j</strong><span class="classifier">int</span></dt><dd><p>Column index.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>result</dt><dd><p>The resulting state after running the solver.
-The type is the same as that of <code class="docutils literal notranslate"><span class="pre">state</span></code>.</p>
+<dt><strong>inner</strong><span class="classifier">np.ndarray</span></dt><dd><p>Inner indexing vector at column <code class="docutils literal notranslate"><span class="pre">j</span></code>.</p>
 </dd>
 </dl>
 </dd>
 </dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="adelie.state.basil_naive.html#adelie.state.basil_naive" title="adelie.state.basil_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.state.basil_naive</span></code></a></dt><dd></dd>
-<dt><a class="reference internal" href="adelie.solver.objective.html#adelie.solver.objective" title="adelie.solver.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.solver.objective</span></code></a></dt><dd></dd>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.io.snp_unphased.nnz">
+<span class="sig-name descname"><span class="pre">nnz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.nnz" title="Link to this definition">#</a></dt>
+<dd><p>Gets the number of non-zero entries at a column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>j</strong><span class="classifier">int</span></dt><dd><p>Column index.</p>
+</dd>
 </dl>
-</div>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>nnz</strong><span class="classifier">int</span></dt><dd><p>Number of non-zero entries column <code class="docutils literal notranslate"><span class="pre">j</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.io.snp_unphased.outer">
+<span class="sig-name descname"><span class="pre">outer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.outer" title="Link to this definition">#</a></dt>
+<dd><p>Gets the outer indexing vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>outer</strong><span class="classifier">(p+1,) np.ndarray</span></dt><dd><p>Outer indexing vector.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.io.snp_unphased.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.read" title="Link to this definition">#</a></dt>
+<dd><p>Read and load the matrix from file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>total_bytes</strong><span class="classifier">int</span></dt><dd><p>Number of bytes read.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.io.snp_unphased.rows">
+<span class="sig-name descname"><span class="pre">rows</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.rows" title="Link to this definition">#</a></dt>
+<dd><p>Gets the number of rows of the matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>rows</strong><span class="classifier">int</span></dt><dd><p>Number of rows.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.io.snp_unphased.to_dense">
+<span class="sig-name descname"><span class="pre">to_dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.to_dense" title="Link to this definition">#</a></dt>
+<dd><p>Creates a dense matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
+Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>dense</strong><span class="classifier">(n, p) np.ndarray</span></dt><dd><p>Dense matrix.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.io.snp_unphased.value">
+<span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.value" title="Link to this definition">#</a></dt>
+<dd><p>Gets the value vector at a column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>j</strong><span class="classifier">int</span></dt><dd><p>Column index.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>v</strong><span class="classifier">np.ndarray</span></dt><dd><p>Value vector at column <code class="docutils literal notranslate"><span class="pre">j</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.io.snp_unphased.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calldata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.write" title="Link to this definition">#</a></dt>
+<dd><p>Write dense array to the file in special format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>calldata</strong><span class="classifier">(n, p) np.ndarray</span></dt><dd><p>SNP unphased calldata in dense format.</p>
+</dd>
+<dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
+Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>total_bytes</strong><span class="classifier">int</span></dt><dd><p>Number of bytes written.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -457,20 +660,20 @@ The type is the same as that of <code class="docutils literal notranslate"><span
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.solver.solve_pin.html"
+       href="adelie.diagnostic.Diagnostic.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.solver.solve_pin</p>
+        <p class="prev-next-title">adelie.diagnostic.Diagnostic</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.solver.grpnet.html"
+       href="adelie.matrix.dense.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.solver.grpnet</p>
+        <p class="prev-next-title">adelie.matrix.dense</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -489,13 +692,26 @@ The type is the same as that of <code class="docutils literal notranslate"><span
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.solver.solve_basil"><code class="docutils literal notranslate"><span class="pre">solve_basil()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased"><code class="docutils literal notranslate"><span class="pre">snp_unphased</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.__init__"><code class="docutils literal notranslate"><span class="pre">snp_unphased.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.cols"><code class="docutils literal notranslate"><span class="pre">snp_unphased.cols()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.endian"><code class="docutils literal notranslate"><span class="pre">snp_unphased.endian()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.inner"><code class="docutils literal notranslate"><span class="pre">snp_unphased.inner()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.nnz"><code class="docutils literal notranslate"><span class="pre">snp_unphased.nnz()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.outer"><code class="docutils literal notranslate"><span class="pre">snp_unphased.outer()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.read"><code class="docutils literal notranslate"><span class="pre">snp_unphased.read()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.rows"><code class="docutils literal notranslate"><span class="pre">snp_unphased.rows()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.to_dense"><code class="docutils literal notranslate"><span class="pre">snp_unphased.to_dense()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.value"><code class="docutils literal notranslate"><span class="pre">snp_unphased.value()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.write"><code class="docutils literal notranslate"><span class="pre">snp_unphased.write()</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.solver.solve_basil.rst.txt">
+    <a href="../_sources/generated/adelie.io.snp_unphased.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

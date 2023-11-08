@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.solver.solve_basil &#8212; adelie 1.1.5 documentation</title>
+    <title>adelie.data.create_snp_unphased &#8212; adelie 1.1.5 documentation</title>
   
   
   
@@ -40,11 +40,13 @@
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.solver.solve_basil';</script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.data.create_snp_unphased';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.solver.grpnet" href="adelie.solver.grpnet.html" />
-    <link rel="prev" title="adelie.solver.solve_pin" href="adelie.solver.solve_pin.html" />
+    <link rel="next" title="adelie.diagnostic.residuals" href="adelie.diagnostic.residuals.html" />
+    <link rel="prev" title="adelie.data.create_dense" href="adelie.data.create_dense.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -310,9 +312,9 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.create_dense.html">adelie.data.create_dense</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.data.create_snp_unphased.html">adelie.data.create_snp_unphased</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.data.create_snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
@@ -341,10 +343,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.basil_naive.html">adelie.state.basil_naive</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_pin.html">adelie.solver.solve_pin</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.solver.solve_basil</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_basil.html">adelie.solver.solve_basil</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -397,7 +399,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.solve...</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.data....</li>
   </ul>
 </nav>
 </div>
@@ -414,34 +416,67 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-solver-solve-basil">
-<h1>adelie.solver.solve_basil<a class="headerlink" href="#adelie-solver-solve-basil" title="Link to this heading">#</a></h1>
+  <section id="adelie-data-create-snp-unphased">
+<h1>adelie.data.create_snp_unphased<a class="headerlink" href="#adelie-data-create-snp-unphased" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="adelie.solver.solve_basil">
-<span class="sig-prename descclassname"><span class="pre">adelie.solver.</span></span><span class="sig-name descname"><span class="pre">solve_basil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.solver.solve_basil" title="Link to this definition">#</a></dt>
-<dd><p>Solves the group elastic net problem using BASIL.</p>
-<dl class="field-list simple">
+<dt class="sig sig-object py" id="adelie.data.create_snp_unphased">
+<span class="sig-prename descclassname"><span class="pre">adelie.data.</span></span><span class="sig-name descname"><span class="pre">create_snp_unphased</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sparsity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">two_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.data.create_snp_unphased" title="Link to this definition">#</a></dt>
+<dd><p>Creates a SNP Unphased dataset.</p>
+<p>This dataset is only used for lasso, so <code class="docutils literal notranslate"><span class="pre">groups</span></code> is simply each individual feature
+and <code class="docutils literal notranslate"><span class="pre">group_sizes</span></code> is a vector of ones.
+The data matrix <code class="docutils literal notranslate"><span class="pre">X</span></code> has sparsity ratio <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">one_ratio</span> <span class="pre">-</span> <span class="pre">two_ratio</span></code>
+where <code class="docutils literal notranslate"><span class="pre">one_ratio</span></code> of the entries are randomly set to <code class="docutils literal notranslate"><span class="pre">1</span></code>
+and <code class="docutils literal notranslate"><span class="pre">two_ratio</span></code> are randomly set to <code class="docutils literal notranslate"><span class="pre">2</span></code>.
+The response <code class="docutils literal notranslate"><span class="pre">y</span></code> is generated from a linear model <span class="math notranslate nohighlight">\(y = X\beta + \epsilon\)</span>
+with <span class="math notranslate nohighlight">\(\epsilon \sim N(0, \sigma^2 I_n)\)</span> 
+and <span class="math notranslate nohighlight">\(\beta\)</span> such that <code class="docutils literal notranslate"><span class="pre">sparsity</span></code> proportion of the entries are set to <span class="math notranslate nohighlight">\(0\)</span>.
+We compute <span class="math notranslate nohighlight">\(\sigma^2\)</span> such that the signal-to-noise ratio is given by <code class="docutils literal notranslate"><span class="pre">snr</span></code>.
+The penalty factors are by default set to <code class="docutils literal notranslate"><span class="pre">np.sqrt(group_sizes)</span></code>,
+however if <code class="docutils literal notranslate"><span class="pre">zero_penalty</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>, a random set of penalties will be set to zero,
+in which case, <code class="docutils literal notranslate"><span class="pre">penalty</span></code> is rescaled such that the <span class="math notranslate nohighlight">\(\ell_2\)</span> norm squared is <code class="docutils literal notranslate"><span class="pre">p</span></code>.</p>
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>state</strong></dt><dd><p>A basil state object.</p>
+<dt><strong>n</strong><span class="classifier">int</span></dt><dd><p>Number of data points.</p>
+</dd>
+<dt><strong>p</strong><span class="classifier">int</span></dt><dd><p>Number of features.</p>
+</dd>
+<dt><strong>sparsity</strong><span class="classifier">float, optional</span></dt><dd><p>Proportion of <span class="math notranslate nohighlight">\(\beta\)</span> entries to be zeroed out.
+Default is <code class="docutils literal notranslate"><span class="pre">0.95</span></code>.</p>
+</dd>
+<dt><strong>one_ratio</strong><span class="classifier">float, optional</span></dt><dd><p>Proportion of the entries of <code class="docutils literal notranslate"><span class="pre">X</span></code> that is set to <code class="docutils literal notranslate"><span class="pre">1</span></code>.
+Default is <code class="docutils literal notranslate"><span class="pre">0.25</span></code>.</p>
+</dd>
+<dt><strong>two_ratio</strong><span class="classifier">float, optional</span></dt><dd><p>Proportion of the entries of <code class="docutils literal notranslate"><span class="pre">X</span></code> that is set to <code class="docutils literal notranslate"><span class="pre">2</span></code>.
+Default is <code class="docutils literal notranslate"><span class="pre">0.05</span></code>.</p>
+</dd>
+<dt><strong>zero_penalty</strong><span class="classifier">float, optional</span></dt><dd><p>Proportion of <code class="docutils literal notranslate"><span class="pre">penalty</span></code> entries to be zeroed out.
+Default is <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+</dd>
+<dt><strong>snr</strong><span class="classifier">float, optional</span></dt><dd><p>Signal-to-noise ratio.
+Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd>
+<dt><strong>seed</strong><span class="classifier">int, optional</span></dt><dd><p>Random seed.
+Default is <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>result</dt><dd><p>The resulting state after running the solver.
-The type is the same as that of <code class="docutils literal notranslate"><span class="pre">state</span></code>.</p>
+<dd class="field-even"><dl>
+<dt><strong>data</strong><span class="classifier">dict</span></dt><dd><p>A dictionary containing the generated data:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;X&quot;</span></code>: feature matrix.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code>: response vector.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;groups&quot;</span></code>: mapping of group index to the starting column index of <code class="docutils literal notranslate"><span class="pre">X</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;group_sizes&quot;</span></code>: mapping of group index to the group size.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;penalty&quot;</span></code>: penalty factor for each group index.</p></li>
+</ul>
+</div></blockquote>
 </dd>
 </dl>
 </dd>
 </dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="adelie.state.basil_naive.html#adelie.state.basil_naive" title="adelie.state.basil_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.state.basil_naive</span></code></a></dt><dd></dd>
-<dt><a class="reference internal" href="adelie.solver.objective.html#adelie.solver.objective" title="adelie.solver.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.solver.objective</span></code></a></dt><dd></dd>
-</dl>
-</div>
 </dd></dl>
 
 </section>
@@ -457,20 +492,20 @@ The type is the same as that of <code class="docutils literal notranslate"><span
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.solver.solve_pin.html"
+       href="adelie.data.create_dense.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.solver.solve_pin</p>
+        <p class="prev-next-title">adelie.data.create_dense</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.solver.grpnet.html"
+       href="adelie.diagnostic.residuals.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.solver.grpnet</p>
+        <p class="prev-next-title">adelie.diagnostic.residuals</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -489,13 +524,13 @@ The type is the same as that of <code class="docutils literal notranslate"><span
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.solver.solve_basil"><code class="docutils literal notranslate"><span class="pre">solve_basil()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.data.create_snp_unphased"><code class="docutils literal notranslate"><span class="pre">create_snp_unphased()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.solver.solve_basil.rst.txt">
+    <a href="../_sources/generated/adelie.data.create_snp_unphased.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>
