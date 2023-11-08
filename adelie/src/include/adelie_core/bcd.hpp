@@ -201,9 +201,9 @@ auto root_lower_bound(
  * @param vbuffer1      vector containing L + l2.
  * @param v             any vector of same length as vbuffer1.
  * @param zero_tol      if a float is <= zero_tol, it is considered to be 0.
- * @return (h_max, vbuffer1_min_nzn)
+ * @return (h_max, vbuffer1_min_nnz)
  *  h_max: the upper bound
- *  vbuffer1_min_nzn:   smallest value in vbuffer1 among non-zero values based on zero_tol.
+ *  vbuffer1_min_nnz:   smallest value in vbuffer1 among non-zero values based on zero_tol.
  */
 template <class DiagType, class VType, class ValueType>
 inline
@@ -217,7 +217,7 @@ auto root_upper_bound(
 
     const value_t vbuffer1_min = vbuffer1.minCoeff();
 
-    value_t vbuffer1_min_nzn = std::numeric_limits<value_t>::infinity();
+    value_t vbuffer1_min_nnz = std::numeric_limits<value_t>::infinity();
     value_t h_max = 0;
 
     // If L+l2 have entries <= threshold,
@@ -230,15 +230,15 @@ auto root_upper_bound(
             const bool is_nonzero = vbuffer1[i] > zero_tol;
             const auto vi2 = v[i] * v[i];
             h_max += is_nonzero ? vi2 / (vbuffer1[i] * vbuffer1[i]) : 0;
-            vbuffer1_min_nzn = is_nonzero ? std::min(vbuffer1_min_nzn, vbuffer1[i]) : vbuffer1_min_nzn;
+            vbuffer1_min_nnz = is_nonzero ? std::min(vbuffer1_min_nnz, vbuffer1[i]) : vbuffer1_min_nnz;
         }
         h_max = std::sqrt(h_max);
     } else {
-        vbuffer1_min_nzn = vbuffer1_min;
+        vbuffer1_min_nnz = vbuffer1_min;
         h_max = (v / vbuffer1).matrix().norm();
     }
 
-    return std::make_pair(h_max, vbuffer1_min_nzn);
+    return std::make_pair(h_max, vbuffer1_min_nnz);
 }
 
 template <class ValueType, class DiagType, class VType>
@@ -453,7 +453,7 @@ void newton_abs_solver(
         const value_t h_min = root_lower_bound(vbuffer1, v, l1);
         const auto h_max_out = root_upper_bound(vbuffer1, v, l1);
         const value_t h_max = std::get<0>(h_max_out);
-        const value_t vbuffer1_min_nzn = std::get<1>(h_max_out);
+        const value_t vbuffer1_min_nnz = std::get<1>(h_max_out);
 
         value_t h;
 
@@ -471,7 +471,7 @@ void newton_abs_solver(
 
             const auto ada_bisect = [&]() {
                 // enforce some movement towards h_min for safety.
-                w = std::max<value_t>(l1 / (vbuffer1_min_nzn * h_cand + l1), 0.05);
+                w = std::max<value_t>(l1 / (vbuffer1_min_nnz * h_cand + l1), 0.05);
                 h_cand = w * h_min + (1-w) * h_cand;
                 fh = root_function(h_cand, vbuffer1, v, l1);
             };
@@ -567,7 +567,7 @@ void newton_abs_debug_solver(
         
         // compute h_max
         const value_t vbuffer1_min = vbuffer1.minCoeff();
-        value_t vbuffer1_min_nzn = vbuffer1_min;
+        value_t vbuffer1_min_nnz = vbuffer1_min;
 
         // If L+l2 have entries <= threshold,
         // find h_max with more numerically-stable routine.
@@ -575,13 +575,13 @@ void newton_abs_debug_solver(
         // but we will use this to bisect and find an h where f(h) >= 0,
         // so we don't necessarily need h_max to be f(h_max) <= 0.
         if (vbuffer1_min <= 1e-10) {
-            vbuffer1_min_nzn = std::numeric_limits<value_t>::infinity();
+            vbuffer1_min_nnz = std::numeric_limits<value_t>::infinity();
             h_max = 0;
             for (int i = 0; i < vbuffer1.size(); ++i) {
                 const bool is_nonzero = vbuffer1[i] > 1e-10;
                 const auto vi2 = v[i] * v[i];
                 h_max += is_nonzero ? vi2 / (vbuffer1[i] * vbuffer1[i]) : 0;
-                vbuffer1_min_nzn = is_nonzero ? std::min<value_t>(vbuffer1_min_nzn, vbuffer1[i]) : vbuffer1_min_nzn;
+                vbuffer1_min_nnz = is_nonzero ? std::min<value_t>(vbuffer1_min_nnz, vbuffer1[i]) : vbuffer1_min_nnz;
             }
             h_max = std::sqrt(h_max);
         } else {
@@ -598,14 +598,14 @@ void newton_abs_debug_solver(
             //// NEW METHOD: bisection
             // Adaptive method enforces some movement towards h_min for safety.
 
-            value_t w = std::max<value_t>(l1 / (vbuffer1_min_nzn * h_max + l1), 0.05);
+            value_t w = std::max<value_t>(l1 / (vbuffer1_min_nnz * h_max + l1), 0.05);
             h = w * h_min + (1-w) * h_max;
             value_t fh = (v / (vbuffer1 * h + l1)).matrix().squaredNorm() - 1;
             
             smart_iters.push_back(h);
 
             while ((fh < 0) && std::abs(fh) > tol) {
-                w = std::max<value_t>(l1 / (vbuffer1_min_nzn * h + l1), 0.05);
+                w = std::max<value_t>(l1 / (vbuffer1_min_nnz * h + l1), 0.05);
                 h = w * h_min + (1-w) * h;
                 fh = (v / (vbuffer1 * h + l1)).matrix().squaredNorm() - 1;
                 smart_iters.push_back(h);

@@ -10,6 +10,9 @@ PYBIND11_MODULE(adelie_core, m) {
 
     auto m_bcd = m.def_submodule("bcd", "BCD submodule.");
     register_bcd(m_bcd);
+
+    auto m_io = m.def_submodule("io", "IO submodule.");
+    register_io(m_io);
     
     auto m_matrix = m.def_submodule("matrix", "Matrix submodule.");
     register_matrix(m_matrix);

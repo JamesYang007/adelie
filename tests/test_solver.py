@@ -195,7 +195,7 @@ def test_solve_pin_naive():
         resid = weights * (y - intercept * y_mean)
         y_var = np.sum(resid ** 2 / weights)
         Xs = [
-            ad.matrix.naive_dense(X, n_threads=2)
+            ad.matrix.dense(X, method="naive", n_threads=2)
         ]
         for Xpy in Xs:
             state = ad.state.pin_naive(
@@ -272,7 +272,7 @@ def test_solve_pin_cov():
 
         # list of different types of cov matrices to test
         As = [
-            ad.matrix.cov_dense(A, n_threads=3),
+            ad.matrix.dense(A, method="cov", n_threads=3),
             ad.matrix.cov_lazy(WsqrtX, n_threads=3),
         ]
 
@@ -320,7 +320,7 @@ def test_solve_pin_cov():
 # ========================================================================
 
 
-def create_test_data_basil(
+def create_dense(
     n, p, G,
     intercept=True,
     alpha=1,
@@ -457,13 +457,13 @@ def run_solve_basil(state, X, y):
 
 def test_solve_basil():
     def _test(n, p, G, intercept=True, alpha=1, sparsity=0.95, seed=0):
-        test_data = create_test_data_basil(
+        test_data = create_dense(
             n, p, G, intercept, alpha, sparsity, seed,
         )
         X, y = test_data["X"], test_data["y"]
         test_data.pop("y")
         Xs = [
-            ad.matrix.naive_dense(X, n_threads=2)
+            ad.matrix.dense(X, method="naive", n_threads=2)
         ]
         for Xpy in Xs:
             test_data["X"] = Xpy

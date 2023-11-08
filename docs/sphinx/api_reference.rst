@@ -32,7 +32,8 @@ adelie.data
     :toctree: generated/
 
 
-    create_test_data_basil
+    create_dense
+    create_snp_unphased
 
 
 adelie.diagnostic
@@ -59,6 +60,20 @@ adelie.diagnostic
     Diagnostic
 
 
+adelie.io
+---------
+
+
+.. currentmodule:: adelie.io
+
+
+.. autosummary::
+    :toctree: generated/
+
+
+    snp_unphased
+
+
 adelie.matrix
 -------------
 
@@ -70,9 +85,9 @@ adelie.matrix
     :toctree: generated/
 
 
-    naive_dense
-    cov_dense
+    dense
     cov_lazy
+    snp_unphased
 
 
 adelie.state

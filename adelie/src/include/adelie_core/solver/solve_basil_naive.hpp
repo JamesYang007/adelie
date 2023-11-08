@@ -281,7 +281,6 @@ size_t kkt(
     const auto& groups = state.groups;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
-    const auto& weights = state.weights;
     const auto intercept = state.intercept;
     const auto n_threads = state.n_threads;
     const auto& screen_hashset = state.screen_hashset;
@@ -330,7 +329,6 @@ inline void solve_basil(
     const auto& X_means = state.X_means;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
-    const auto& weights = state.weights;
     const auto& screen_set = state.screen_set;
     const auto& rsqs = state.rsqs;
     const auto early_exit = state.early_exit;

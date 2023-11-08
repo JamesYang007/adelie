@@ -12,7 +12,7 @@ def test_state_pin_naive():
     p = 100
     G = 2
 
-    X = matrix.naive_dense(np.random.normal(0, 1, (n, p)), n_threads=4)
+    X = matrix.dense(np.random.normal(0, 1, (n, p)), method="naive", n_threads=4)
     groups = np.array([0, 1])
     group_sizes = np.array([1, p-1])
     alpha = 1.0
@@ -66,7 +66,7 @@ def test_state_pin_cov():
     G = 2
 
     X = np.random.normal(0, 1, (n, p))
-    A = matrix.cov_dense(X.T @ X / n, n_threads=4)
+    A = matrix.dense(X.T @ X / n, method="cov", n_threads=4)
     groups = np.array([0, 1])
     group_sizes = np.array([1, p-1])
     alpha = 1.0
@@ -114,7 +114,7 @@ def test_state_basil_naive():
     G = 2
 
     _X = np.random.normal(0, 1, (n, p))
-    X = matrix.naive_dense(_X, n_threads=4)
+    X = matrix.dense(_X, method="naive", n_threads=4)
     X_means = np.mean(_X, axis=0)
     groups = np.array([0, 1])
     group_sizes = np.array([1, p-1])

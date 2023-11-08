@@ -125,9 +125,6 @@ class base:
 
 
 class pin_base(base):
-    def __init__(self):
-        self.solver = "pin"
-
     def check(
         self, 
         method: str =None, 
@@ -1487,7 +1484,7 @@ class basil_naive_base(basil_base):
         # This one is tricky! Since we keep track of ever-active set,
         # some coefficients may have once been active but now zero'ed out.
         # We can only check that if the non-zero coefficient blocks are active.
-        nzn_idxs = np.array([
+        nnz_idxs = np.array([
             i 
             for i, sb, gs in zip(
                 np.arange(len(self.screen_set)),
@@ -1497,7 +1494,7 @@ class basil_naive_base(basil_base):
             if np.any(self.screen_beta[sb:sb+gs] != 0)
         ], dtype=int)
         self._check(
-            np.all(self.screen_is_active[nzn_idxs]),
+            np.all(self.screen_is_active[nnz_idxs]),
             "check screen_is_active is only active on non-zeros of screen_beta",
             method, logger,
         )

@@ -76,10 +76,7 @@ def objective(
     )
 
 
-def solve_pin(
-    state,
-    logger=logger.logger,
-):
+def solve_pin(state):
     """Solves the pinned group elastic net problem.
 
     The pinned group elastic net problem is given by
@@ -119,7 +116,7 @@ def solve_pin(
 
     # raise any errors
     if out["error"] != "":
-        logger.warning(RuntimeError(out["error"]))
+        logger.logger.warning(RuntimeError(out["error"]))
 
     # return a subsetted Python result object
     core_state = out["state"]
@@ -128,10 +125,7 @@ def solve_pin(
     return state
 
 
-def solve_basil(
-    state,
-    logger=logger.logger,
-):
+def solve_basil(state):
     """Solves the group elastic net problem using BASIL.
 
     Parameters
@@ -162,7 +156,7 @@ def solve_basil(
 
     # raise any errors
     if out["error"] != "":
-        logger.error(RuntimeError(out["error"]))
+        logger.logger.warning(RuntimeError(out["error"]))
 
     # return a subsetted Python result object
     core_state = out["state"]
@@ -311,8 +305,7 @@ def grpnet(
         The type is the same as that of ``state``.
     """
     if isinstance(X, np.ndarray):
-        X_raw = X
-        X = ad.matrix.naive_dense(X_raw, n_threads=n_threads)
+        X = ad.matrix.dense(X, method="naive", n_threads=n_threads)
 
     assert (
         isinstance(X, matrix.MatrixNaiveBase64) or

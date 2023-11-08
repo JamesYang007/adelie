@@ -4,6 +4,7 @@
 #include <adelie_core/matrix/matrix_cov_lazy.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/matrix/matrix_naive_dense.hpp>
+#include <adelie_core/matrix/matrix_naive_snp_unphased.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -422,6 +423,24 @@ void matrix_naive_dense(py::module_& m, const char* name)
         ;
 }
 
+template <class ValueType>
+void matrix_naive_snp_unphased(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveSNPUnphased<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using dyn_vec_string_t = typename internal_t::dyn_vec_string_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(
+            py::init<
+                const dyn_vec_string_t&,
+                size_t
+            >(), 
+            py::arg("filenames").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
 template <class DenseType>
 void matrix_cov_dense(py::module_& m, const char* name)
 {
@@ -468,6 +487,9 @@ void register_matrix(py::module_& m)
     matrix_naive_dense<dense_type<double, Eigen::ColMajor>>(m, "MatrixNaiveDense64F");
     matrix_naive_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixNaiveDense32C");
     matrix_naive_dense<dense_type<float, Eigen::ColMajor>>(m, "MatrixNaiveDense32F");
+
+    matrix_naive_snp_unphased<double>(m, "MatrixNaiveSNPUnphased64");
+    matrix_naive_snp_unphased<float>(m, "MatrixNaiveSNPUnphased32");
 
     /* cov matrices */
     matrix_cov_dense<dense_type<double, Eigen::RowMajor>>(m, "MatrixCovDense64C");
