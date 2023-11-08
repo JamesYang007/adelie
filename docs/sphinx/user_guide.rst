@@ -6,5 +6,4 @@ User Guide
     :maxdepth: 1
 
 
-    notebooks/edpp_study
     notebooks/pivot_rule

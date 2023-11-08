@@ -15,3 +15,4 @@ void register_matrix(py::module_&);
 void register_optimization(py::module_&);
 void register_state(py::module_&);
 void register_solver(py::module_&);
+void register_io(py::module_&);
