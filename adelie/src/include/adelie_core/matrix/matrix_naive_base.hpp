@@ -87,6 +87,24 @@ public:
     ) =0;
 
     /**
+     * @brief Computes weighted covariance matrix.
+     * 
+     * @param   j       begin column index
+     * @param   q       number of columns.
+     * @param   sqrt_weights square-root of the weights.
+     * @param   means   corresponding column means for columns [j, j+q).
+     * @param   center  true if columns should be centered by means.
+     * @param   out     resulting covariance matrix.
+     * @param   buffer  (n, q) extra buffer space if needed.
+     */
+    virtual void cov(
+        int j, int q,
+        const Eigen::Ref<const vec_value_t>& sqrt_weights,
+        Eigen::Ref<colmat_value_t> out,
+        Eigen::Ref<colmat_value_t> buffer
+    ) const =0;
+
+    /**
      * @brief Returns the number of rows of the represented matrix.
      */
     virtual int rows() const =0;

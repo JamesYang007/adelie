@@ -102,6 +102,34 @@ public:
         );
     }
 
+    int rows() const override
+    {
+        return _mat.rows();
+    }
+    
+    int cols() const override
+    {
+        return _mat.cols();
+    }
+
+    void cov(
+        int j, int q,
+        const Eigen::Ref<const vec_value_t>& sqrt_weights,
+        Eigen::Ref<colmat_value_t> out,
+        Eigen::Ref<colmat_value_t> buffer
+    ) const override
+    {
+        auto& Xj = buffer;
+        
+        Xj.transpose().array() = (
+            _mat.middleCols(j, q).transpose().array().rowwise() * sqrt_weights
+        );
+
+        Eigen::setNbThreads(_n_threads);
+        out.noalias() = Xj.transpose() * Xj;
+        Eigen::setNbThreads(0);
+    }
+
     void sp_btmul(
         int j, int q, 
         const sp_mat_value_t& v, 
@@ -142,19 +170,9 @@ public:
             );
             const auto size = block_size + (t < remainder);
             for (int j = 0; j < size; ++j) {
-                out[begin + j] = _mat.col(j).dot(weights.matrix());
+                out[begin + j] = _mat.col(begin + j).dot(weights.matrix());
             }
         }
-    }
-
-    int rows() const override
-    {
-        return _mat.rows();
-    }
-    
-    int cols() const override
-    {
-        return _mat.cols();
     }
 };
 

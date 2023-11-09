@@ -14,7 +14,6 @@ def test_state_pin_naive():
 
     X = matrix.dense(np.random.normal(0, 1, (n, p)), method="naive", n_threads=4)
     groups = np.array([0, 1])
-    group_sizes = np.array([1, p-1])
     alpha = 1.0
     penalty = np.random.uniform(0, 1, G)
     screen_set = np.array([0, 1])
@@ -33,7 +32,6 @@ def test_state_pin_naive():
         y_mean=y_mean,
         y_var=y_var,
         groups=groups,
-        group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
         weights=weights,
@@ -49,7 +47,6 @@ def test_state_pin_naive():
 
     assert id(X) == id(state.X)
     assert np.allclose(groups, state.groups)
-    assert np.allclose(group_sizes, state.group_sizes)
     assert np.allclose(alpha, state.alpha)
     assert np.allclose(penalty, state.penalty)
     assert np.allclose(screen_set, state.screen_set)
@@ -68,7 +65,6 @@ def test_state_pin_cov():
     X = np.random.normal(0, 1, (n, p))
     A = matrix.dense(X.T @ X / n, method="cov", n_threads=4)
     groups = np.array([0, 1])
-    group_sizes = np.array([1, p-1])
     alpha = 1.0
     penalty = np.random.uniform(0, 1, G)
     screen_set = np.array([0, 1])
@@ -81,7 +77,6 @@ def test_state_pin_cov():
     state = mod.pin_cov(
         A=A,
         groups=groups,
-        group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
         screen_set=screen_set,
@@ -96,7 +91,6 @@ def test_state_pin_cov():
 
     assert id(A) == id(state.A)
     assert np.allclose(groups, state.groups)
-    assert np.allclose(group_sizes, state.group_sizes)
     assert np.allclose(alpha, state.alpha)
     assert np.allclose(penalty, state.penalty)
     assert np.allclose(screen_set, state.screen_set)
@@ -117,7 +111,6 @@ def test_state_basil_naive():
     X = matrix.dense(_X, method="naive", n_threads=4)
     X_means = np.mean(_X, axis=0)
     groups = np.array([0, 1])
-    group_sizes = np.array([1, p-1])
     y_mean = 0.0
     y_var = 1.0
     alpha = 1.0
@@ -141,7 +134,6 @@ def test_state_basil_naive():
         y_var=y_var,
         resid=resid,
         groups=groups,
-        group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
         weights=weights,
@@ -160,7 +152,6 @@ def test_state_basil_naive():
     assert np.allclose(y_mean, state.y_mean)
     assert np.allclose(y_var, state.y_var)
     assert np.allclose(groups, state.groups)
-    assert np.allclose(group_sizes, state.group_sizes)
     assert np.allclose(alpha, state.alpha)
     assert np.allclose(penalty, state.penalty)
     assert np.allclose(screen_set, state.screen_set)

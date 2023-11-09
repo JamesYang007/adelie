@@ -197,7 +197,7 @@ void dvzero(
     const int block_size = n / n_blocks;
     const int remainder = n % n_blocks;
 
-    #pragma omp parallel for schedule(static) num_threads(n_blocks)
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
     for (int t = 0; t < n_blocks; ++t) 
     {
         const auto begin = (
@@ -207,6 +207,42 @@ void dvzero(
         const auto size = block_size + (t < remainder);
         out.segment(begin, size).setZero();
     }
+}
+
+template <class InnerType, class ValueType, class WeightsType>
+ADELIE_CORE_STRONG_INLINE
+auto svsvwdot(
+    const InnerType& inner_1,
+    const ValueType& value_1,
+    const InnerType& inner_2,
+    const ValueType& value_2,
+    const WeightsType& weights
+)
+{
+    using value_t = typename std::decay_t<WeightsType>::Scalar;
+
+    int i1 = 0;
+    int i2 = 0;
+    value_t sum = 0;
+    while (
+        (i1 < inner_1.size()) &&
+        (i2 < inner_2.size())
+    ) {
+        while ((i1 < inner_1.size()) && (inner_1[i1] < inner_2[i2])) ++i1;
+        if (i1 == inner_1.size()) break;
+        while ((i2 < inner_2.size()) && (inner_2[i2] < inner_1[i1])) ++i2;
+        if (i2 == inner_2.size()) break;
+        while (
+            (i1 < inner_1.size()) &&
+            (i2 < inner_2.size()) &&
+            (inner_1[i1] == inner_2[i2])
+        ) {
+            sum += value_1[i1] * value_2[i2] * weights[inner_1[i1]];
+            ++i1;
+            ++i2;
+        }
+    }
+    return sum;
 }
 
 } // namespace matrix
