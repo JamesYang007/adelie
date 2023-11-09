@@ -169,8 +169,7 @@ def grpnet(
     *,
     X: np.ndarray,
     y: np.ndarray,
-    groups: np.ndarray,
-    group_sizes: np.ndarray,
+    groups: np.ndarray =None,
     alpha: float =1,
     penalty: np.ndarray =None,
     weights: np.ndarray =None,
@@ -204,12 +203,10 @@ def grpnet(
         or a ``numpy`` array.
     y : (n,) np.ndarray
         Response vector.
-    groups : (G,) np.ndarray
+    groups : (G,) np.ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-    group_sizes : (G,) np.ndarray
-        List of group sizes corresponding to each element in ``groups``.
-        ``group_sizes[i]`` is the group size of the ``i`` th group. 
+        Default is ``np.arange(p)``.
     alpha : float, optional
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
@@ -319,6 +316,12 @@ def grpnet(
     )
 
     n, p = X.rows(), X.cols()
+
+    if groups is None:
+        groups = np.arange(p, dtype=int)
+    group_sizes = np.concatenate([groups, [p]], dtype=int)
+    group_sizes = group_sizes[1:] - group_sizes[:-1]
+
     G = len(groups)
 
     if weights is None:
@@ -356,7 +359,6 @@ def grpnet(
         y_var=y_var,
         resid=resid,
         groups=groups,
-        group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
         weights=weights,

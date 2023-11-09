@@ -33,7 +33,6 @@ void update_screen_derived_naive(
     const auto& screen_set = state.screen_set;
     const auto& screen_begins = state.screen_begins;
     const auto intercept = state.intercept;
-    const auto n_threads = state.n_threads;
     auto& X = *state.X;
     auto& screen_X_means = state.screen_X_means;
     auto& screen_transforms = state.screen_transforms;
@@ -52,18 +51,19 @@ void update_screen_derived_naive(
     screen_vars.resize(new_screen_value_size, 0);
 
     // buffers
-    util::colmat_type<value_t> Xi;
+    const auto n = X.rows();
+    const auto max_gs = group_sizes.maxCoeff();
+    util::colmat_type<value_t> buffer(n, max_gs);
     util::colmat_type<value_t> XiTXi;
 
     for (size_t i = old_screen_size; i < new_screen_size; ++i) {
         const auto g = groups[screen_set[i]];
         const auto gs = group_sizes[screen_set[i]];
         const auto sb = screen_begins[i];
-        const auto n = X.rows();
 
-        // get dense version of the group matrix block
-        Xi.resize(n, gs);
-        X.to_dense(g, gs, Xi);
+        // resize output and buffer 
+        auto Xi = buffer.leftCols(gs);
+        XiTXi.resize(gs, gs);
 
         // compute column-means
         Eigen::Map<vec_value_t> Xi_means(
@@ -71,17 +71,12 @@ void update_screen_derived_naive(
         );
         Xi_means = X_means.segment(g, gs);
 
-        // if intercept, must center first
-        if (intercept) {
-            auto Xia = Xi.array();
-            matrix::dmvsubi(Xia, Xi_means, n_threads);
-        }
+        // compute weighted covariance matrix
+        X.cov(g, gs, weights_sqrt, XiTXi, Xi);
 
-        // transform data
-        Eigen::setNbThreads(n_threads);
-        Xi.transpose().array().rowwise() *= weights_sqrt;
-        XiTXi.noalias() = Xi.transpose() * Xi;
-        Eigen::setNbThreads(0);
+        if (intercept) {
+            XiTXi.noalias() -= Xi_means.matrix().transpose() * Xi_means.matrix();
+        }
 
         Eigen::SelfAdjointEigenSolver<util::colmat_type<value_t>> solver(XiTXi);
 

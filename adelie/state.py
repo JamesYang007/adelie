@@ -565,8 +565,6 @@ class pin_naive_base(pin_base):
     ):
         """Default initialization method.
         """
-        self.method = "naive"
-
         ## save inputs due to lifetime issues
         # static inputs require a reference to input
         # or copy if it must be made
@@ -593,6 +591,7 @@ class pin_naive_base(pin_base):
             screen_set=screen_set,
         )
 
+        sqrt_weights = np.sqrt(self._weights)
         self._screen_vars = []
         self._screen_X_means = []
         self._screen_transforms = []
@@ -600,15 +599,15 @@ class pin_naive_base(pin_base):
             g, gs = groups[i], group_sizes[i]
             Xi = np.empty((X.rows(), gs), dtype=dtype, order="F")
             X.to_dense(g, gs, Xi)
-            Xi_means = np.sum(Xi * weights[:, None], axis=0)
+            Xi *= sqrt_weights[:, None]
+            XiTXi = Xi.T @ Xi
+            Xi_means = np.sum(Xi * sqrt_weights[:, None], axis=0)
             if intercept:
-                Xi -= Xi_means[None]
-            _, d, vh = np.linalg.svd(Xi, full_matrices=True, compute_uv=True)
-            vars = np.zeros(gs)
-            vars[:len(d)] = d ** 2
-            self._screen_vars.append(vars)
+                XiTXi -= Xi_means[:, None] @ Xi_means[None]
+            vars, v = np.linalg.eigh(XiTXi)
+            self._screen_vars.append(np.maximum(vars, 0))
             self._screen_X_means.append(Xi_means)
-            self._screen_transforms.append(np.array(vh.T, copy=False, dtype=dtype, order="F"))
+            self._screen_transforms.append(np.array(v, copy=False, dtype=dtype, order="F"))
         self._screen_vars = np.concatenate(self._screen_vars, dtype=dtype)
         self._screen_X_means = np.concatenate(self._screen_X_means, dtype=dtype)
         vecmat_type = (
@@ -685,7 +684,6 @@ def pin_naive(
     y_mean: float,
     y_var: float,
     groups: np.ndarray,
-    group_sizes: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
     weights: np.ndarray,
@@ -719,9 +717,6 @@ def pin_naive(
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-    group_sizes : (G,) np.ndarray
-        List of group sizes corresponding to each element in ``groups``.
-        ``group_sizes[i]`` is the group size of the ``i`` th group. 
     alpha : float
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
@@ -730,6 +725,7 @@ def pin_naive(
         It must be a non-negative vector.
     weights : (n,) np.ndarray
         Observation weights.
+        Internally, it is normalized to sum to one.
     screen_set : (s,) np.ndarray
         List of indices into ``groups`` that correspond to the strong groups.
         ``screen_set[i]`` is ``i`` th strong group.
@@ -795,6 +791,12 @@ def pin_naive(
         raise ValueError(
             "X must be an instance of matrix.MatrixNaiveBase32 or matrix.MatrixNaiveBase64."
         )
+
+    p = X.cols()
+    group_sizes = np.concatenate([groups, [p]], dtype=int)
+    group_sizes = group_sizes[1:] - group_sizes[:-1]
+
+    weights = weights / np.sum(weights)
 
     dtype = (
         np.float64
@@ -884,8 +886,6 @@ class pin_cov_base(pin_base):
     ):
         """Default initialization method.
         """
-        self.method = "cov"
-
         ## save inputs due to lifetime issues
         # static inputs require a reference to input
         # or copy if it must be made
@@ -972,7 +972,6 @@ def pin_cov(
     *,
     A: matrix.MatrixCovBase64 | matrix.MatrixCovBase32,
     groups: np.ndarray,
-    group_sizes: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
     screen_set: np.ndarray,
@@ -1001,9 +1000,6 @@ def pin_cov(
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-    group_sizes : (G,) np.ndarray
-        List of group sizes corresponding to each element in ``groups``.
-        ``group_sizes[i]`` is the group size of the ``i`` th group. 
     alpha : float
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
@@ -1076,6 +1072,10 @@ def pin_cov(
         raise ValueError(
             "A must be an instance of matrix.MatrixCovBase32 or matrix.MatrixCovBase64."
         )
+
+    p = A.cols()
+    group_sizes = np.concatenate([groups, [p]], dtype=int)
+    group_sizes = group_sizes[1:] - group_sizes[:-1]
 
     dtype = (
         np.float64
@@ -1570,16 +1570,18 @@ class basil_naive_base(basil_base):
         )
 
         # ================ screen_transforms / screen_vars check ====================
+        sqrt_weights = np.sqrt(self.weights)
         for ss_idx in range(len(self.screen_set)):
             i = self.screen_set[ss_idx]
             g, gs = self.groups[i], self.group_sizes[i]
             Xi = np.empty((n, gs), order="F")
-            self.X.to_dense(g, gs, Xi)
+            XiTXi = np.empty((gs, gs), order="F")
+            self.X.cov(g, gs, sqrt_weights, XiTXi, Xi)
             if self.intercept:
-                Xi -= self.X_means[g:g+gs][None]
+                Xi_means = self.X_means[g:g+gs]
+                XiTXi -= Xi_means[:, None] @ Xi_means[None]
             V = self.screen_transforms[ss_idx]
-            XiV = Xi @ V
-            Dsq = XiV.T @ (self.weights[:, None] * XiV)
+            Dsq = V.T @ XiTXi @ V
             sb = self.screen_begins[ss_idx]
             self._check(
                 np.allclose(self.screen_vars[sb:sb+gs], np.diag(Dsq)),
@@ -1601,7 +1603,6 @@ class basil_naive_base(basil_base):
             y_var=self.y_var,
             resid=self.resid,
             groups=self.groups,
-            group_sizes=self.group_sizes,
             alpha=self.alpha,
             penalty=self.penalty,
             weights=self.weights,
@@ -1641,7 +1642,6 @@ def basil_naive(
     y_var: float,
     resid: np.ndarray,
     groups: np.ndarray,
-    group_sizes: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
     weights: np.ndarray,
@@ -1690,9 +1690,6 @@ def basil_naive(
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-    group_sizes : (G,) np.ndarray
-        List of group sizes corresponding to each element in ``groups``.
-        ``group_sizes[i]`` is the group size of the ``i`` th group. 
     alpha : float
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
@@ -1701,6 +1698,7 @@ def basil_naive(
         It must be a non-negative vector.
     weights : (n,) np.ndarray
         Observation weights.
+        Internally, it is normalized to sum to one.
     screen_set : (s,) np.ndarray
         List of indices into ``groups`` that correspond to the strong groups.
         ``screen_set[i]`` is ``i`` th strong group.
@@ -1854,6 +1852,13 @@ def basil_naive(
         raise ValueError("pivot_subset_min must be >= 1.")
     if pivot_slack_ratio < 0:
         raise ValueError("pivot_slack_ratio must be >= 0.")
+
+    p = X.cols()
+
+    weights = weights / np.sum(weights)
+
+    group_sizes = np.concatenate([groups, [p]], dtype=int)
+    group_sizes = group_sizes[1:] - group_sizes[:-1]
 
     actual_lmda_path_size = (
         lmda_path_size

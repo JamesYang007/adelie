@@ -22,7 +22,6 @@ public:
     using typename base_t::sp_mat_value_t;
     using io_t = io::IOSNPUnphased;
     using string_t = std::string;
-    using vec_vec_index_t = util::rowvec_type<vec_index_t>;
     using dyn_vec_string_t = std::vector<string_t>;
     using dyn_vec_io_t = std::vector<io_t>;
     
@@ -135,7 +134,6 @@ public:
         const auto value = io.value(index);
 
         value_t sum = 0;
-        #pragma omp simd reduction(+:sum)
         for (int i = 0; i < inner.size(); ++i) {
             sum += v[inner[i]] * value[i];
         }
@@ -169,8 +167,7 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        const auto n_threads = std::min<size_t>(_n_threads, q);
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int t = 0; t < q; ++t) 
         {
             const auto slice = _io_slice_map[j+t];
@@ -180,7 +177,6 @@ public:
             const auto value = io.value(index);
 
             value_t sum = 0;
-            #pragma omp simd reduction(+:sum)
             for (int i = 0; i < inner.size(); ++i) {
                 sum += v[inner[i]] * value[i];
             }
@@ -217,6 +213,41 @@ public:
         bmul(0, cols(), v, out);
     }
 
+    void cov(
+        int j, int q,
+        const Eigen::Ref<const vec_value_t>& sqrt_weights,
+        Eigen::Ref<colmat_value_t> out,
+        Eigen::Ref<colmat_value_t> 
+    ) const override
+    {
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
+        for (int i1 = 0; i1 < q; ++i1) {
+            for (int i2 = 0; i2 <= i1; ++i2) {
+                const auto slice_1 = _io_slice_map[j+i1];
+                const auto slice_2 = _io_slice_map[j+i2];
+                const auto& io_1 = _ios[slice_1];
+                const auto& io_2 = _ios[slice_2];
+                const auto index_1 = _io_index_map[j+i1];
+                const auto index_2 = _io_index_map[j+i2];
+                const auto inner_1 = io_1.inner(index_1);
+                const auto inner_2 = io_2.inner(index_2);
+                const auto value_1 = io_1.value(index_1);
+                const auto value_2 = io_2.value(index_2);
+
+                out(i1, i2) = svsvwdot(
+                    inner_1, value_1,
+                    inner_2, value_2,
+                    sqrt_weights.square()
+                );
+            }
+        }
+        for (int i1 = 0; i1 < q; ++i1) {
+            for (int i2 = i1+1; i2 < q; ++i2) {
+                out(i1, i2) = out(i2, i1);
+            }
+        }
+    }
+
     int rows() const override { return _ios[0].rows(); }
     int cols() const override { return _p; }
 
@@ -227,8 +258,7 @@ public:
         Eigen::Ref<rowmat_value_t> out
     ) const override
     {
-        const auto n_threads = std::min<size_t>(_n_threads, v.outerSize());
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int k = 0; k < v.outerSize(); ++k) {
             typename sp_mat_value_t::InnerIterator it(v, k);
             auto out_k = out.row(k);
@@ -253,14 +283,19 @@ public:
         Eigen::Ref<colmat_value_t> out
     ) const override
     {
-        auto begin = 0;
-        while (begin < q) {
-            const auto slice = _io_slice_map[j+begin];
+        #pragma omp parallel for schedule(auto) num_threads(_n_threads)
+        for (int k = 0; k < q; ++k) {
+            const auto slice = _io_slice_map[j+k];
             const auto& io = _ios[slice];
-            const auto index = _io_index_map[j+begin];
-            const auto size = std::min<size_t>(q - begin, io.cols() - index);
-            out.middleCols(begin, size) = io.to_dense(1).middleCols(index, size).template cast<value_t>();
-            begin += size;
+            const auto index = _io_index_map[j+k];
+            const auto inner = io.inner(index);
+            const auto value = io.value(index);
+            auto out_k = out.col(k);
+
+            out_k.setZero();
+            for (int i = 0; i < inner.size(); ++i) {
+                out_k[inner[i]] = value[i];
+            }
         }
     }
 
@@ -270,8 +305,7 @@ public:
     ) const override
     {
         const auto p = cols();
-        const auto n_threads = std::min<size_t>(_n_threads, p);
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int j = 0; j < p; ++j) 
         {
             const auto slice = _io_slice_map[j];
@@ -280,7 +314,6 @@ public:
             const auto inner = io.inner(index);
             const auto value = io.value(index);
             value_t sum = 0;
-            #pragma omp simd reduction(+:sum)
             for (int i = 0; i < inner.size(); ++i) {
                 sum += weights[inner[i]] * value[i];
             }

@@ -109,6 +109,21 @@ public:
         );
     }
 
+    void cov(
+        int j, int q,
+        const Eigen::Ref<const vec_value_t>& sqrt_weights,
+        Eigen::Ref<colmat_value_t> out,
+        Eigen::Ref<colmat_value_t> buffer
+    ) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            cov,
+            j, q, sqrt_weights, out, buffer
+        );
+    }
+
     void to_dense(
         int j, int q,
         Eigen::Ref<colmat_value_t> out
@@ -258,6 +273,25 @@ void matrix_naive_base(py::module_& m, const char* name)
             Vector of observation of weights.
         out : (l, n) np.ndarray
             Matrix to store in-place the result.
+        )delimiter")
+        .def("cov", &internal_t::cov, R"delimiter(
+        Weighted covariance matrix.
+
+        Computes the weighted covariance matrix
+        ``X[:, j:j+q].T @ W @ X[:, j:j+q]``.
+
+        Parameters
+        ----------
+        j : int
+            Column index.
+        q : int
+            Number of columns.
+        sqrt_weights : (n,) np.ndarray
+            Square-root of the weights.
+        out : (q, q) np.ndarray
+            Matrix to store in-place the result.
+        buffer : (n, q) np.ndarray
+            Extra buffer space if needed.
         )delimiter")
         .def("to_dense", &internal_t::to_dense, R"delimiter(
         Converts block to a dense matrix.
