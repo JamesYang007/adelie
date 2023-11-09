@@ -438,22 +438,25 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32.cols" title="adelie.matrix.MatrixNaiveBase32.cols"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cols</span></code></a>(self)</p></td>
 <td><p>Number of columns.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32.ctmul" title="adelie.matrix.MatrixNaiveBase32.ctmul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ctmul</span></code></a>(self, arg0, arg1, arg2, arg3)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32.cov" title="adelie.matrix.MatrixNaiveBase32.cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cov</span></code></a>(self, arg0, arg1, arg2, arg3, arg4)</p></td>
+<td><p>Weighted covariance matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32.ctmul" title="adelie.matrix.MatrixNaiveBase32.ctmul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ctmul</span></code></a>(self, arg0, arg1, arg2, arg3)</p></td>
 <td><p>Column scalar multiplication.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32.means" title="adelie.matrix.MatrixNaiveBase32.means"><code class="xref py py-obj docutils literal notranslate"><span class="pre">means</span></code></a>(self, arg0, arg1)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32.means" title="adelie.matrix.MatrixNaiveBase32.means"><code class="xref py py-obj docutils literal notranslate"><span class="pre">means</span></code></a>(self, arg0, arg1)</p></td>
 <td><p>Computes column-wise means.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32.mul" title="adelie.matrix.MatrixNaiveBase32.mul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mul</span></code></a>(self, arg0, arg1)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32.mul" title="adelie.matrix.MatrixNaiveBase32.mul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mul</span></code></a>(self, arg0, arg1)</p></td>
 <td><p>Block matrix-vector multiplication.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32.rows" title="adelie.matrix.MatrixNaiveBase32.rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rows</span></code></a>(self)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32.rows" title="adelie.matrix.MatrixNaiveBase32.rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rows</span></code></a>(self)</p></td>
 <td><p>Number of rows.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32.sp_btmul" title="adelie.matrix.MatrixNaiveBase32.sp_btmul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sp_btmul</span></code></a>(self, arg0, arg1, arg2, arg3, arg4)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32.sp_btmul" title="adelie.matrix.MatrixNaiveBase32.sp_btmul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sp_btmul</span></code></a>(self, arg0, arg1, arg2, arg3, arg4)</p></td>
 <td><p>Block matrix transpose-sparse matrix multiplication.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32.to_dense" title="adelie.matrix.MatrixNaiveBase32.to_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dense</span></code></a>(self, arg0, arg1, arg2)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32.to_dense" title="adelie.matrix.MatrixNaiveBase32.to_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dense</span></code></a>(self, arg0, arg1, arg2)</p></td>
 <td><p>Converts block to a dense matrix.</p></td>
 </tr>
 </tbody>
@@ -530,6 +533,30 @@ document.write(`
 <dt class="sig sig-object py" id="adelie.matrix.MatrixNaiveBase32.cols">
 <span class="sig-name descname"><span class="pre">cols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32" title="adelie.adelie_core.matrix.MatrixNaiveBase32"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveBase32</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#adelie.matrix.MatrixNaiveBase32.cols" title="Link to this definition">#</a></dt>
 <dd><p>Number of columns.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.matrix.MatrixNaiveBase32.cov">
+<span class="sig-name descname"><span class="pre">cov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase32" title="adelie.adelie_core.matrix.MatrixNaiveBase32"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveBase32</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg3</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.f_contiguous</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg4</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.f_contiguous</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.matrix.MatrixNaiveBase32.cov" title="Link to this definition">#</a></dt>
+<dd><p>Weighted covariance matrix.</p>
+<p>Computes the weighted covariance matrix
+<code class="docutils literal notranslate"><span class="pre">X[:,</span> <span class="pre">j:j+q].T</span> <span class="pre">&#64;</span> <span class="pre">W</span> <span class="pre">&#64;</span> <span class="pre">X[:,</span> <span class="pre">j:j+q]</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>j</strong><span class="classifier">int</span></dt><dd><p>Column index.</p>
+</dd>
+<dt><strong>q</strong><span class="classifier">int</span></dt><dd><p>Number of columns.</p>
+</dd>
+<dt><strong>sqrt_weights</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Square-root of the weights.</p>
+</dd>
+<dt><strong>out</strong><span class="classifier">(q, q) np.ndarray</span></dt><dd><p>Matrix to store in-place the result.</p>
+</dd>
+<dt><strong>buffer</strong><span class="classifier">(n, q) np.ndarray</span></dt><dd><p>Extra buffer space if needed.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -690,6 +717,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixNaiveBase32.btmul"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveBase32.btmul()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixNaiveBase32.cmul"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveBase32.cmul()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixNaiveBase32.cols"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveBase32.cols()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixNaiveBase32.cov"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveBase32.cov()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixNaiveBase32.ctmul"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveBase32.ctmul()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixNaiveBase32.means"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveBase32.means()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixNaiveBase32.mul"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveBase32.mul()</span></code></a></li>

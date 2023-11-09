@@ -16,6 +16,7 @@
       ~MatrixNaiveBase32.btmul
       ~MatrixNaiveBase32.cmul
       ~MatrixNaiveBase32.cols
+      ~MatrixNaiveBase32.cov
       ~MatrixNaiveBase32.ctmul
       ~MatrixNaiveBase32.means
       ~MatrixNaiveBase32.mul
@@ -37,6 +38,7 @@
    .. automethod:: btmul
    .. automethod:: cmul
    .. automethod:: cols
+   .. automethod:: cov
    .. automethod:: ctmul
    .. automethod:: means
    .. automethod:: mul
