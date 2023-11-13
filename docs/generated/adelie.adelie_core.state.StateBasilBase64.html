@@ -594,8 +594,10 @@ document.write(`
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateBasilBase64.abs_grad">
 <span class="sig-name descname"><span class="pre">abs_grad</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateBasilBase64.abs_grad" title="Link to this definition">#</a></dt>
 <dd><p>The <span class="math notranslate nohighlight">\(\ell_2\)</span> norms of <code class="docutils literal notranslate"><span class="pre">grad</span></code> across each group.
-<code class="docutils literal notranslate"><span class="pre">abs_grad[i]</span></code> is given by <code class="docutils literal notranslate"><span class="pre">np.linalg.norm(grad[g:g+gs])</span></code>
-where <code class="docutils literal notranslate"><span class="pre">g</span> <span class="pre">=</span> <span class="pre">groups[i]</span></code> and <code class="docutils literal notranslate"><span class="pre">gs</span> <span class="pre">=</span> <span class="pre">group_sizes[i]</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">abs_grad[i]</span></code> is given by <code class="docutils literal notranslate"><span class="pre">np.linalg.norm(grad[g:g+gs]</span> <span class="pre">-</span> <span class="pre">lmda</span> <span class="pre">*</span> <span class="pre">penalty[i]</span> <span class="pre">*</span> <span class="pre">(1-alpha)</span> <span class="pre">*</span> <span class="pre">beta[g:g+gs])</span></code>
+where <code class="docutils literal notranslate"><span class="pre">g</span> <span class="pre">=</span> <span class="pre">groups[i]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">gs</span> <span class="pre">=</span> <span class="pre">group_sizes[i]</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">beta</span></code> is the full solution vector represented by <code class="docutils literal notranslate"><span class="pre">strong_beta</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
