@@ -8,6 +8,59 @@
 namespace py = pybind11;
 namespace ad = adelie_core;
 
+template <class BetasType>
+static auto convert_betas(
+    size_t p,
+    const BetasType& betas
+)
+{
+    using value_t = typename std::decay_t<BetasType>::value_type::Scalar;
+    using vec_value_t = ad::util::rowvec_type<value_t>;
+    using vec_index_t = ad::util::rowvec_type<Eigen::Index>;
+    using sp_mat_t = Eigen::SparseMatrix<value_t, Eigen::RowMajor, Eigen::Index>;
+
+    const size_t l = betas.size();
+    size_t nnz = 0;
+    for (const auto& beta : betas) {
+        nnz += beta.nonZeros();
+    }
+    vec_value_t values(nnz);
+    vec_index_t inners(nnz); 
+    vec_index_t outers(l+1);
+    outers[0] = 0;
+    int inner_idx = 0;
+    for (size_t i = 0; i < l; ++i) {
+        const auto& curr = betas[i];
+        const auto nnz_curr = curr.nonZeros();
+        Eigen::Map<vec_value_t>(
+            values.data() + inner_idx,
+            nnz_curr
+        ) = Eigen::Map<const vec_value_t>(
+            curr.valuePtr(),
+            nnz_curr
+        );
+        Eigen::Map<vec_index_t>(
+            inners.data() + inner_idx,
+            nnz_curr
+        ) = Eigen::Map<const vec_index_t>(
+            curr.innerIndexPtr(),
+            nnz_curr
+        );
+        outers[i+1] = outers[i] + nnz_curr;
+        inner_idx += nnz_curr;
+    }
+    sp_mat_t out;
+    out = Eigen::Map<const sp_mat_t>(
+        l, 
+        p,
+        nnz,
+        outers.data(),
+        inners.data(),
+        values.data()
+    );
+    return out;
+}
+
 // ========================================================================
 // Pin State 
 // ========================================================================
@@ -218,17 +271,10 @@ void state_pin_base(py::module_& m, const char* name)
         ``groups[screen_set[active_order[i]]]`` is the ``i`` th active group in ascending order.
         )delimiter")
         .def_property_readonly("betas", [](const state_t& s) {
-            const auto p = s.group_sizes.sum();
-            Eigen::SparseMatrix<value_t, Eigen::RowMajor> betas(s.betas.size(), p);
-            for (size_t i = 0; i < s.betas.size(); ++i) {
-                const auto& curr = s.betas[i];
-                for (int j = 0; j < curr.nonZeros(); ++j) {
-                    const auto jj = curr.innerIndexPtr()[j];
-                    betas.coeffRef(i, jj) = curr.valuePtr()[j];
-                }
-            }
-            betas.makeCompressed();
-            return betas;
+            return convert_betas(
+                s.group_sizes.sum(),
+                s.betas
+            );
         }, R"delimiter(
         ``betas[i]`` corresponds to the solution corresponding to ``lmdas[i]``.
         )delimiter")
@@ -764,21 +810,16 @@ void state_basil_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("abs_grad", &state_t::abs_grad, R"delimiter(
         The :math:`\ell_2` norms of ``grad`` across each group.
-        ``abs_grad[i]`` is given by ``np.linalg.norm(grad[g:g+gs])``
-        where ``g = groups[i]`` and ``gs = group_sizes[i]``.
+        ``abs_grad[i]`` is given by ``np.linalg.norm(grad[g:g+gs] - lmda * penalty[i] * (1-alpha) * beta[g:g+gs])``
+        where ``g = groups[i]``,
+        ``gs = group_sizes[i]``,
+        and ``beta`` is the full solution vector represented by ``strong_beta``.
         )delimiter")
         .def_property_readonly("betas", [](const state_t& s) {
-            const auto p = s.group_sizes.sum();
-            Eigen::SparseMatrix<value_t, Eigen::RowMajor> betas(s.betas.size(), p);
-            for (size_t i = 0; i < s.betas.size(); ++i) {
-                const auto& curr = s.betas[i];
-                for (int j = 0; j < curr.nonZeros(); ++j) {
-                    const auto jj = curr.innerIndexPtr()[j];
-                    betas.coeffRef(i, jj) = curr.valuePtr()[j];
-                }
-            }
-            betas.makeCompressed();
-            return betas;
+            return convert_betas(
+                s.group_sizes.sum(),
+                s.betas
+            );
         }, R"delimiter(
         ``betas[i]`` is the (untransformed) solution corresponding to ``lmdas[i]``.
         )delimiter")

@@ -1538,12 +1538,21 @@ class basil_naive_base(basil_base):
         )
 
         # ================ abs_grad check ====================
+        grad_corr = np.copy(grad)
+        for i, b, g, gs in zip(
+            self.screen_set,
+            self.screen_begins,
+            self.groups[self.screen_set],
+            self.group_sizes[self.screen_set],
+        ):
+            lmda = 1e35 if np.isinf(self.lmda) else self.lmda
+            grad_corr[g:g+gs] -= lmda * (1-self.alpha) * self.penalty[i] * self.screen_beta[b:b+gs]
         abs_grad = np.array([
-            np.linalg.norm(grad[g:g+gs])
+            np.linalg.norm(grad_corr[g:g+gs])
             for g, gs in zip(self.groups, self.group_sizes)
         ])
         self._check(
-            np.allclose(self.abs_grad, abs_grad),
+            (self.lmda_max == -1) or np.allclose(self.abs_grad, abs_grad),
             "check abs_grad",
             method, logger,
         )

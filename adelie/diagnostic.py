@@ -1,6 +1,7 @@
 from . import logger
 import adelie as ad
 import numpy as np
+import scipy
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
@@ -9,6 +10,7 @@ def residuals(
     state,
     *,
     y: np.ndarray,
+    betas: scipy.sparse.csr_matrix,
 ):
     """Computes the residuals for each saved solution.
 
@@ -26,7 +28,6 @@ def residuals(
     """
     X = state.X
     n, p = X.rows(), X.cols()
-    betas = state.betas
     intercepts = state.intercepts
     WXbs = np.empty((betas.shape[0], n))
     X.sp_btmul(0, p, betas, state.weights, WXbs)
@@ -65,6 +66,7 @@ def gradient_norms(
     state, 
     *, 
     grads: np.ndarray,
+    betas: scipy.sparse.csr_matrix,
 ):
     """Computes the group-wise gradient norms for each saved solution.
 
@@ -80,6 +82,8 @@ def gradient_norms(
     norms : (l, G) np.ndarray
         Gradient norms at each saved solution.
     """
+    penalty = np.repeat(state.penalty, state.group_sizes)
+    grads = grads - betas.multiply(state.lmdas[:, None] * (1 - state.alpha) * penalty[None])
     return np.array([
         np.linalg.norm(grads[:, g:g+gs], axis=-1)
         for g, gs in zip(state.groups, state.group_sizes)
@@ -492,9 +496,10 @@ class Diagnostic:
     """
     def __init__(self, *, y, state):
         self.state = state
-        self.residuals = residuals(state, y=y)
+        self.betas = state.betas
+        self.residuals = residuals(state, y=y, betas=self.betas)
         self.gradients = gradients(state, resids=self.residuals)
-        self.gradient_norms = gradient_norms(state, grads=self.gradients)
+        self.gradient_norms = gradient_norms(state, grads=self.gradients, betas=self.betas)
         self.gradient_scores = gradient_scores(state, abs_grads=self.gradient_norms)
 
     def plot_coefficients(self):

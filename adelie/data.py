@@ -198,8 +198,9 @@ def create_snp_unphased(
     two_ratio = two_ratio / nnz_ratio
     nnz = int(nnz_ratio * n * p)
     nnz_indices = np.random.choice(n * p, nnz, replace=False)
-    one_indices = np.random.choice(nnz_indices, int(one_ratio * nnz), replace=False)
-    two_indices = np.array(list(set(nnz_indices) - set(one_indices)))
+    nnz_indices = np.random.permutation(nnz_indices)
+    one_indices = nnz_indices[:int(one_ratio * nnz)]
+    two_indices = nnz_indices[int(one_ratio * nnz):]
     X = np.zeros((n, p), dtype=np.int8)
     X.ravel()[one_indices] = 1
     X.ravel()[two_indices] = 2

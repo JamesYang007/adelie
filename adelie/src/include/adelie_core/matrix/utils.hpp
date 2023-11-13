@@ -19,7 +19,7 @@ void dvsubi(
     const int block_size = n / n_blocks;
     const int remainder = n % n_blocks;
 
-    #pragma omp parallel for schedule(static) num_threads(n_blocks)
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
     for (int t = 0; t < n_blocks; ++t) {
         const auto begin = (
             std::min<int>(t, remainder) * (block_size + 1) 
@@ -44,7 +44,7 @@ void dmvsubi(
     const int block_size = n / n_blocks;
     const int remainder = n % n_blocks;
 
-    #pragma omp parallel for schedule(static) num_threads(n_blocks)
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
     for (int t = 0; t < n_blocks; ++t) {
         const auto begin = (
             std::min<int>(t, remainder) * (block_size + 1) 
@@ -69,7 +69,7 @@ void dmmeq(
     const int block_size = n / n_blocks;
     const int remainder = n % n_blocks;
 
-    #pragma omp parallel for schedule(static) num_threads(n_blocks)
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
     for (int t = 0; t < n_blocks; ++t) {
         const auto begin = (
             std::min<int>(t, remainder) * (block_size + 1) 
@@ -97,7 +97,7 @@ auto ddot(
     const int remainder = n % n_blocks;
 
     value_t out = 0;
-    #pragma omp parallel for schedule(static) num_threads(n_blocks) reduction(+:out)
+    #pragma omp parallel for schedule(static) num_threads(n_threads) reduction(+:out)
     for (int t = 0; t < n_blocks; ++t)
     {
         const auto begin = (
@@ -124,7 +124,7 @@ void dax(
     const int n_blocks = std::min(n_threads, n);
     const int block_size = n / n_blocks;
     const int remainder = n % n_blocks;
-    #pragma omp parallel for schedule(static) num_threads(n_blocks)
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
     for (int t = 0; t < n_blocks; ++t)
     {
         const auto begin = (
@@ -155,7 +155,7 @@ void dgemv(
     const int remainder = max_np % n_blocks;
 
     if (n <= p) {
-        #pragma omp parallel for schedule(static) num_threads(n_blocks)
+        #pragma omp parallel for schedule(static) num_threads(n_threads)
         for (int t = 0; t < n_blocks; ++t)
         {
             const auto begin = (
@@ -168,7 +168,7 @@ void dgemv(
     } else {
         assert(buff.rows() >= n_blocks);
         assert(buff.cols() >= p);
-        #pragma omp parallel for schedule(static) num_threads(n_blocks)
+        #pragma omp parallel for schedule(static) num_threads(n_threads)
         for (int t = 0; t < n_blocks; ++t)
         {
             const auto begin = (
