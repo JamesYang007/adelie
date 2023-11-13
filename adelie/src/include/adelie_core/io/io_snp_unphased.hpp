@@ -141,7 +141,6 @@ public:
         const auto p = cols();
         rowarr_value_t dense(n, p);
 
-        n_threads = std::min<size_t>(n_threads, p);
         #pragma omp parallel for schedule(auto) num_threads(n_threads)
         for (inner_t j = 0; j < p; ++j) {
             const auto _inner = inner(j);
@@ -222,7 +221,6 @@ public:
             outer.size()
         ) = outer;
 
-        n_threads = std::min<size_t>(n_threads, p);
         #pragma omp parallel for schedule(auto) num_threads(n_threads)
         for (inner_t j = 0; j < p; ++j) {
             const auto col_j = calldata.col(j);

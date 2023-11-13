@@ -9,19 +9,50 @@ namespace adelie_core {
 namespace state {
 
 template <class GroupsType, class GroupSizesType,
-          class GradType, class AbsGradType>
+          class PenaltyType, class GradType, 
+          class ScreenSetType, class ScreenHashsetType,
+          class ScreenBeginsType, class ScreenBetaType,
+          class ValueType, class AbsGradType>
 void update_abs_grad(
     const GroupsType& groups,
     const GroupSizesType& group_sizes,
+    const PenaltyType& penalty,
     const GradType& grad,
+    const ScreenSetType& screen_set,
+    const ScreenHashsetType& screen_hashset,
+    const ScreenBeginsType& screen_begins,
+    const ScreenBetaType& screen_beta,
+    ValueType lmda,
+    ValueType alpha,
     AbsGradType& abs_grad,
     size_t n_threads
 )
 {
-    const auto n_threads_capped = std::min<size_t>(n_threads, groups.size());
-    #pragma omp parallel for schedule(static) num_threads(n_threads_capped)
+    const auto is_screen = [&](auto i) {
+        return screen_hashset.find(i) != screen_hashset.end();
+    };
+
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
+    for (int ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) 
+    {
+        const auto i = screen_set[ss_idx];
+        const auto b = screen_begins[ss_idx]; 
+        const auto k = groups[i];
+        const auto size_k = group_sizes[i];
+        const auto pk = penalty[i];
+        abs_grad[i] = (
+            grad.segment(k, size_k) - 
+            ((1-alpha) * pk) * (lmda * Eigen::Map<const util::rowvec_type<ValueType>>(
+                screen_beta.data() + b,
+                size_k
+            ))
+        ).matrix().norm();
+    }
+
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
     for (int i = 0; i < groups.size(); ++i) 
     {
+        if (is_screen(i)) continue;
         const auto k = groups[i];
         const auto size_k = group_sizes[i];
         abs_grad[i] = grad.segment(k, size_k).matrix().norm();
@@ -34,16 +65,24 @@ void update_abs_grad(
  * After the function finishes, abs_grad will reflect the correct value
  * respective to grad.
  */
-template <class StateType>
+template <class StateType, class ValueType>
 ADELIE_CORE_STRONG_INLINE
 void update_abs_grad(
-    StateType& state
+    StateType& state,
+    ValueType lmda
 )
 {
     update_abs_grad(
         state.groups,
         state.group_sizes,
+        state.penalty,
         state.grad,
+        state.screen_set,
+        state.screen_hashset,
+        state.screen_begins,
+        state.screen_beta,
+        lmda,
+        state.alpha,
         state.abs_grad,
         state.n_threads
     );
@@ -308,7 +347,7 @@ struct StateBasilBase
         update_screen_derived_base(*this);
 
         /* initialize abs_grad */
-        update_abs_grad(*this);
+        update_abs_grad(*this, lmda);
 
         /* optimize for output storage size */
         const auto n_lmdas = std::max<size_t>(lmda_path.size(), lmda_path_size);

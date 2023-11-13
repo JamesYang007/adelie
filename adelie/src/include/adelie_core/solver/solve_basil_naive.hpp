@@ -285,6 +285,7 @@ size_t kkt(
     const auto n_threads = state.n_threads;
     const auto& screen_hashset = state.screen_hashset;
     const auto& abs_grad = state.abs_grad;
+    const auto lmda = state_pin_naive.lmdas[0];
     auto& X = *state.X;
     auto& grad = state.grad;
 
@@ -297,14 +298,13 @@ size_t kkt(
     if (intercept) {
         matrix::dvsubi(grad, state_pin_naive.resid_sums[0] * X_means, n_threads);
     }
-    state::update_abs_grad(state);
+    state::update_abs_grad(state, lmda);
 
     // First, loop over non-strong set, compute gradients, and update n_valid_solutions.
     for (int k = 0; k < groups.size(); ++k) {
         if (is_screen(k)) continue;
         const auto pk = penalty[k];
         const auto abs_grad_k = abs_grad[k];
-        const auto lmda = state_pin_naive.lmdas[0];
         if (abs_grad_k > lmda * alpha * pk) return false;
     }
 
@@ -405,7 +405,7 @@ inline void solve_basil(
             if (intercept) {
                 matrix::dvsubi(grad, resid_sum * X_means, n_threads);
             }
-            state::update_abs_grad(state);
+            state::update_abs_grad(state, lmda);
 
             /* Compute lmda_max */
             const auto factor = (alpha <= 0) ? 1e-3 : alpha;
@@ -495,7 +495,7 @@ inline void solve_basil(
             if (intercept) {
                 matrix::dvsubi(grad, resid_sum * X_means, n_threads);
             }
-            state::update_abs_grad(state);
+            state::update_abs_grad(state, lmda);
             naive::update_solutions(
                 state, 
                 state_pin_naive, 

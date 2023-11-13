@@ -257,6 +257,44 @@ static void BM_eigh(benchmark::State& state)
     }
 }
 
+static void BM_keep_pool(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    int x = 0;
+    for (auto _ : state) {
+        for (int i = 0; i < 100; ++i) {
+            #pragma omp parallel for schedule(static) num_threads(4)
+            for (int i = 0; i < n; ++i) {
+                x += i;
+            }
+            #pragma omp parallel for schedule(static) num_threads(4)
+            for (int i = 0; i < n; ++i) {
+                x += i;
+            }
+        }
+        benchmark::DoNotOptimize(x);
+    }
+}
+
+static void BM_change_pool(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    int x = 0;
+    for (auto _ : state) {
+        for (int i = 0; i < 100; ++i) {
+            #pragma omp parallel for schedule(static) num_threads(4)
+            for (int i = 0; i < n; ++i) {
+                x += i;
+            }
+            #pragma omp parallel for schedule(static) num_threads(5)
+            for (int i = 0; i < n; ++i) {
+                x += i;
+            }
+        }
+        benchmark::DoNotOptimize(x);
+    }
+}
+
 BENCHMARK(BM_cmul_seq)
     -> Args({10000000})
     ;
@@ -315,4 +353,10 @@ BENCHMARK(BM_eigh)
     -> Args({1000, 8})
     -> Args({10000, 8})
     -> Args({100000, 8})
+    ;
+BENCHMARK(BM_keep_pool)
+    -> Args({1000})
+    ;
+BENCHMARK(BM_change_pool)
+    -> Args({1000})
     ;

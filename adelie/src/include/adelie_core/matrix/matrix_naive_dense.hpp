@@ -162,7 +162,7 @@ public:
         const int n_blocks = std::min<int>(_n_threads, p);
         const int block_size = p / n_blocks;
         const int remainder = p % n_blocks;
-        #pragma omp parallel for schedule(static) num_threads(n_blocks)
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int t = 0; t < n_blocks; ++t) {
             const auto begin = (
                 std::min<int>(t, remainder) * (block_size + 1) 
