@@ -72,6 +72,7 @@ adelie.io
 
 
     snp_unphased
+    snp_phased_ancestry
 
 
 adelie.matrix
@@ -135,12 +136,10 @@ Internal
     :toctree: generated/
     
 
-    matrix.MatrixCovBase32
+    adelie_core.state.StateBasilNaive64
+    adelie_core.state.StatePinBase64
+    adelie_core.state.StatePinCov64
+    adelie_core.state.StatePinNaive64
     matrix.MatrixCovBase64
-    matrix.MatrixNaiveBase32
     matrix.MatrixNaiveBase64
     state.base
-    adelie_core.state.StateBasilBase32
-    adelie_core.state.StateBasilBase64
-    adelie_core.state.StatePinBase32
-    adelie_core.state.StatePinBase64

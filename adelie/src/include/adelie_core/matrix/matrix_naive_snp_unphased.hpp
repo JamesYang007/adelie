@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <string>
 #include <vector>
-#include <adelie_core/matrix/matrix_naive_base.hpp>
+#include <adelie_core/matrix/matrix_naive_snp_base.hpp>
 #include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/io/io_snp_unphased.hpp>
 
@@ -10,107 +10,46 @@ namespace adelie_core {
 namespace matrix {
 
 template <class ValueType>
-class MatrixNaiveSNPUnphased : public MatrixNaiveBase<ValueType>
+class MatrixNaiveSNPUnphased : 
+    public MatrixNaiveBase<ValueType>,
+    public MatrixNaiveSNPBase
 {
 public:
     using base_t = MatrixNaiveBase<ValueType>;
+    using snp_base_t = MatrixNaiveSNPBase;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_index_t;
     using typename base_t::colmat_value_t;
     using typename base_t::rowmat_value_t;
     using typename base_t::sp_mat_value_t;
+    using typename snp_base_t::string_t;
+    using typename snp_base_t::dyn_vec_string_t;
     using io_t = io::IOSNPUnphased;
-    using string_t = std::string;
-    using dyn_vec_string_t = std::vector<string_t>;
     using dyn_vec_io_t = std::vector<io_t>;
     
 protected:
-    const dyn_vec_string_t _filenames;  // (F,) array of file names
+    using snp_base_t::init_ios;
+    using snp_base_t::init_snps;
+    using snp_base_t::init_io_slice_map;
+    using snp_base_t::init_io_index_map;
+
     const dyn_vec_io_t _ios;            // (F,) array of IO handlers
-    const size_t _p;                    // total number of feature across all slices
-    const vec_index_t _io_slice_map;    // (p,) array mapping to matrix slice
-    const vec_index_t _io_index_map;    // (p,) array mapping to (relative) index of the slice
-    const size_t _n_threads;            // number of threads
-
-    static auto init_ios(
-        const dyn_vec_string_t& filenames
-    )
-    {
-        dyn_vec_io_t ios;
-        ios.reserve(filenames.size());
-        for (int i = 0; i < filenames.size(); ++i) {
-            ios.emplace_back(filenames[i]);
-            ios.back().read();
-        }
-        return ios;
-    }
-
-    static auto init_p(
-        const dyn_vec_io_t& ios
-    )
-    {
-        size_t p = 0;
-        for (const auto& io : ios) {
-            p += io.cols();
-        }
-        return p;
-    }
-
-    static auto init_io_slice_map(
-        const dyn_vec_io_t& ios,
-        size_t p
-    )
-    {
-        vec_index_t io_slice_map(p);
-        size_t begin = 0;
-        for (int i = 0; i < ios.size(); ++i) {
-            const auto& io = ios[i];
-            const auto pi = io.cols();
-            for (int j = 0; j < pi; ++j) {
-                io_slice_map[begin + j] = i;
-            }
-            begin += pi;
-        } 
-        return io_slice_map;
-    }
-
-    static auto init_io_index_map(
-        const dyn_vec_io_t& ios,
-        size_t p
-    )
-    {
-        vec_index_t io_index_map(p);
-        size_t begin = 0;
-        for (int i = 0; i < ios.size(); ++i) {
-            const auto& io = ios[i];
-            const auto pi = io.cols();
-            for (int j = 0; j < pi; ++j) {
-                io_index_map[begin + j] = j;
-            }
-            begin += pi;
-        } 
-        return io_index_map;
-    }
+    const size_t _snps;                 // total number of SNPs across all slices
+    const vec_index_t _io_slice_map;    // (s,) array mapping to matrix slice
+    const vec_index_t _io_index_map;    // (s,) array mapping to (relative) index of the slice
 
 public:
     MatrixNaiveSNPUnphased(
         const dyn_vec_string_t& filenames,
         size_t n_threads
     ): 
-        _filenames(filenames),
-        _ios(init_ios(filenames)),
-        _p(init_p(_ios)),
-        _io_slice_map(init_io_slice_map(_ios, _p)),
-        _io_index_map(init_io_index_map(_ios, _p)),
-        _n_threads(n_threads)
+        snp_base_t(filenames, n_threads),
+        _ios(init_ios<dyn_vec_io_t>(filenames)),
+        _snps(init_snps(_ios)),
+        _io_slice_map(init_io_slice_map(_ios, _snps)),
+        _io_index_map(init_io_index_map(_ios, _snps))
     {
-        if (filenames.size() == 0) {
-            throw std::runtime_error(
-                "filenames must be non-empty!"
-            );
-        }
-
         // make sure every file has the same number of rows.
         const size_t rows = _ios[0].rows();
         for (const auto& io : _ios) {
@@ -249,7 +188,7 @@ public:
     }
 
     int rows() const override { return _ios[0].rows(); }
-    int cols() const override { return _p; }
+    int cols() const override { return _snps; }
 
     void sp_btmul(
         int j, int q,

@@ -781,8 +781,7 @@ def pin_naive(
 
     See Also
     --------
-    adelie.state.pin_naive_64
-    adelie.state.pin_naive_32
+    adelie.adelie_core.state.StatePinNaive64
     """
     if not (
         isinstance(X, matrix.MatrixNaiveBase64) or
@@ -1062,8 +1061,7 @@ def pin_cov(
 
     See Also
     --------
-    adelie.state.pin_cov_64
-    adelie.state.pin_cov_32
+    adelie.adelie_core.state.StatePinCov64
     """
     if not (
         isinstance(A, matrix.MatrixCovBase64) or 
@@ -1819,8 +1817,7 @@ def basil_naive(
 
     See Also
     --------
-    adelie.state.basil_naive_64
-    adelie.state.basil_naive_32
+    adelie.adelie_core.state.StateBasilNaive64
     """
     if not (
         isinstance(X, matrix.MatrixNaiveBase64) or 
