@@ -132,6 +132,53 @@ def snp_unphased(
     return _snp_unphased(filenames, n_threads)
 
 
+def snp_phased_ancestry(
+    filenames: list,
+    *,
+    n_threads: int =1,
+    dtype: np.float32 | np.float64 =np.float64,
+):
+    """Creates a SNP phased ancestry matrix.
+
+    .. note::
+        This matrix only works for naive method!
+    
+    Parameters
+    ----------
+    filenames : list
+        List of file names that contain column-block slices of the matrix.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+    dtype : Union[np.float32, np.float64], optional
+        Underlying value type.
+        Default is ``np.float64``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
+    """
+    if n_threads < 1:
+        raise ValueError("Number of threads must be >= 1.")
+
+    dispatcher = {
+        np.float64: core.matrix.MatrixNaiveSNPPhasedAncestry64,
+        np.float32: core.matrix.MatrixNaiveSNPPhasedAncestry32,
+    }
+    core_base = dispatcher[dtype]
+
+    class _snp_phased_ancestry(core_base):
+        def __init__(
+            self,
+            filenames: list,
+            n_threads: int,
+        ):
+            core_base.__init__(self, filenames, n_threads)
+
+    return _snp_phased_ancestry(filenames, n_threads)
+
+
 def cov_lazy(
     mat: np.ndarray,
     *,

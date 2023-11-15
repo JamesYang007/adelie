@@ -5,6 +5,7 @@
 #include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/matrix/matrix_naive_dense.hpp>
 #include <adelie_core/matrix/matrix_naive_snp_unphased.hpp>
+#include <adelie_core/matrix/matrix_naive_snp_phased_ancestry.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -95,7 +96,6 @@ public:
     }
 
     void sp_btmul(
-        int j, int q,
         const sp_mat_value_t& v,
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
@@ -105,7 +105,7 @@ public:
             void,
             base_t,
             sp_btmul,
-            j, q, v, weights, out
+            v, weights, out
         );
     }
 
@@ -124,18 +124,18 @@ public:
         );
     }
 
-    void to_dense(
-        int j, int q,
-        Eigen::Ref<colmat_value_t> out
-    ) const override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            void,
-            base_t,
-            to_dense,
-            j, q, out
-        );
-    }
+    //void to_dense(
+    //    int j, int q,
+    //    Eigen::Ref<colmat_value_t> out
+    //) const override
+    //{
+    //    PYBIND11_OVERRIDE_PURE(
+    //        void,
+    //        base_t,
+    //        to_dense,
+    //        j, q, out
+    //    );
+    //}
 
     void means(
         const Eigen::Ref<const vec_value_t>& weights,
@@ -259,14 +259,10 @@ void matrix_naive_base(py::module_& m, const char* name)
         Block matrix transpose-sparse matrix multiplication.
 
         Computes the matrix-sparse matrix multiplication
-        ``v @ X[:, j:j+q].T @ W``.
+        ``v @ X.T @ W``.
 
         Parameters
         ----------
-        j : int
-            Column index.
-        q : int
-            Number of columns.
         v : (l, p) scipy.sparse.csr_matrix
             Sparse matrix to multiply with the block matrix.
         w : (n,) np.ndarray
@@ -293,20 +289,20 @@ void matrix_naive_base(py::module_& m, const char* name)
         buffer : (n, q) np.ndarray
             Extra buffer space if needed.
         )delimiter")
-        .def("to_dense", &internal_t::to_dense, R"delimiter(
-        Converts block to a dense matrix.
+        //.def("to_dense", &internal_t::to_dense, R"delimiter(
+        //Converts block to a dense matrix.
 
-        Converts the block ``X[:, j:j+q]`` into a dense matrix.
+        //Converts the block ``X[:, j:j+q]`` into a dense matrix.
 
-        Parameters
-        ----------
-        j : int
-            Column index.
-        q : int
-            Number of columns.
-        out : (n, q) np.ndarray
-            Matrix to store the dense result.
-        )delimiter")
+        //Parameters
+        //----------
+        //j : int
+        //    Column index.
+        //q : int
+        //    Number of columns.
+        //out : (n, q) np.ndarray
+        //    Matrix to store the dense result.
+        //)delimiter")
         .def("means", &internal_t::means, R"delimiter(
         Computes column-wise means.
 
@@ -475,6 +471,24 @@ void matrix_naive_snp_unphased(py::module_& m, const char* name)
         ;
 }
 
+template <class ValueType>
+void matrix_naive_snp_phased_ancestry(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveSNPPhasedAncestry<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using dyn_vec_string_t = typename internal_t::dyn_vec_string_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(
+            py::init<
+                const dyn_vec_string_t&,
+                size_t
+            >(), 
+            py::arg("filenames").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
 template <class DenseType>
 void matrix_cov_dense(py::module_& m, const char* name)
 {
@@ -524,6 +538,8 @@ void register_matrix(py::module_& m)
 
     matrix_naive_snp_unphased<double>(m, "MatrixNaiveSNPUnphased64");
     matrix_naive_snp_unphased<float>(m, "MatrixNaiveSNPUnphased32");
+    matrix_naive_snp_phased_ancestry<double>(m, "MatrixNaiveSNPPhasedAncestry64");
+    matrix_naive_snp_phased_ancestry<float>(m, "MatrixNaiveSNPPhasedAncestry32");
 
     /* cov matrices */
     matrix_cov_dense<dense_type<double, Eigen::RowMajor>>(m, "MatrixCovDense64C");

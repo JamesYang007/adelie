@@ -30,7 +30,7 @@ def residuals(
     n, p = X.rows(), X.cols()
     intercepts = state.intercepts
     WXbs = np.empty((betas.shape[0], n))
-    X.sp_btmul(0, p, betas, state.weights, WXbs)
+    X.sp_btmul(betas, state.weights, WXbs)
     resids = (state.weights * y)[None] - WXbs - (state.weights[None] * intercepts[:, None])
     return resids
 

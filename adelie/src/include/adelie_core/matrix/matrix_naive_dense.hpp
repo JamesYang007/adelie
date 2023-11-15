@@ -131,26 +131,13 @@ public:
     }
 
     void sp_btmul(
-        int j, int q, 
         const sp_mat_value_t& v, 
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
     ) const override
     {
-        out.noalias() = v * _mat.middleCols(j, q).transpose();
+        out.noalias() = v * _mat.transpose();
         out.array().rowwise() *= weights;
-    }
-
-    void to_dense(
-        int j, int q,
-        Eigen::Ref<colmat_value_t> out
-    ) const override
-    {
-        dmmeq(
-            out,
-            _mat.middleCols(j, q),
-            _n_threads
-        );
     }
 
     void means(

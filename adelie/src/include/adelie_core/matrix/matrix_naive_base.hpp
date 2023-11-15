@@ -117,31 +117,16 @@ public:
     /* Used outside of fitting procedures */
 
     /**
-     * @brief Computes v X[:, j:j+q]^T W where X is the current matrix.
+     * @brief Computes v X^T W where X is the current matrix.
      * 
-     * @param j     begin column index. 
-     * @param q     number of columns.
      * @param v     (l, p) sparse matrix to multiply with.
      * @param   weights diagonal weights W.
      * @param out   (l, n) resulting row vector.
      */
     virtual void sp_btmul(
-        int j, int q,
         const sp_mat_value_t& v,
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
-    ) const =0;
-
-    /**
-     * @brief Computes the squared norm of a column of the matrix.
-     * 
-     * @param j     column index.
-     * @param q     number of columns.
-     * @param out   resulting dense matrix (n, q).
-     */
-    virtual void to_dense(
-        int j, int q,
-        Eigen::Ref<colmat_value_t> out
     ) const =0;
 
     /**

@@ -39,6 +39,12 @@ def run_naive(
         cX.bmul(0, i, v, out)
         expected = v.T @ X[:, :i]
         assert np.allclose(expected, out, atol=atol)
+    q = min(10, p)
+    out = np.empty(q, dtype=dtype)
+    for i in range(p-q+1):
+        cX.bmul(i, q, v, out)
+        expected = v.T @ X[:, i:i+q]
+        assert np.allclose(expected, out, atol=atol)
 
     # test btmul
     out = np.empty(n, dtype=dtype)
@@ -46,6 +52,12 @@ def run_naive(
         v = np.random.normal(0, 1, i).astype(dtype)
         cX.btmul(0, i, v, w, out)
         expected = v.T @ (w[:, None] * X[:, :i]).T
+        assert np.allclose(expected, out, atol=atol)
+    q = min(10, p)
+    v = np.random.normal(0, 1, q).astype(dtype)
+    for i in range(p-q+1):
+        cX.btmul(i, q, v, w, out)
+        expected = v.T @ (w[:, None] * X[:, i:i+q]).T
         assert np.allclose(expected, out, atol=atol)
 
     # test mul
@@ -55,18 +67,8 @@ def run_naive(
     expected = v.T @ X
     assert np.allclose(expected, out, atol=atol)
 
-    # test sp_btmul
-    out = np.empty((2, n), dtype=dtype)
-    for i in range(1, p+1):
-        v = np.random.normal(0, 1, (2, i)).astype(dtype)
-        v[:, :i//2] = 0
-        expected = v @ (w[:, None] * X[:, :i]).T
-        v = scipy.sparse.csr_matrix(v)
-        cX.sp_btmul(0, i, v, w, out)
-        assert np.allclose(expected, out, atol=atol)
-
     # test cov
-    q = min(1, p)
+    q = min(5, p)
     sqrt_weights = np.sqrt(w)
     buffer = np.empty((n, q), dtype=dtype, order="F")
     out = np.empty((q, q), dtype=dtype, order="F")
@@ -75,20 +77,23 @@ def run_naive(
         expected = X[:, i:i+q].T @ (w[:, None] * X[:, i:i+q])
         assert np.allclose(expected, out, atol=atol)
 
-    # test to_dense
-    for i in range(1, p+1):
-        out = np.empty((n, i), dtype=dtype, order="F")
-        cX.to_dense(0, i, out)
-        assert np.allclose(X[:, :i], out)
+    assert cX.rows() == n
+    assert cX.cols() == p
+
+    # test sp_btmul
+    out = np.empty((2, n), dtype=dtype)
+    v = np.random.normal(0, 1, (2, p)).astype(dtype)
+    v[:, :p//2] = 0
+    expected = v @ (w[:, None] * X).T
+    v = scipy.sparse.csr_matrix(v)
+    cX.sp_btmul(v, w, out)
+    assert np.allclose(expected, out, atol=atol)
 
     # test means
     X_means = np.empty(p, dtype=dtype)
     cX.means(w, X_means)
     expected = np.sum(w[:, None] * X, axis=0)
     assert np.allclose(expected, X_means)
-
-    assert cX.rows() == n
-    assert cX.cols() == p
 
 
 def run_cov(
@@ -201,3 +206,54 @@ def test_snp_unphased():
         _test(10, 20, 3, dtype)
         _test(1, 13, 3, dtype)
         _test(144, 1, 3, dtype)
+
+
+def test_snp_phased_ancestry():
+    # TODO: this was copied from test_io.py
+    def create_dense(calldata, ancestries, A):
+        n, s = calldata.shape[0], calldata.shape[1] // 2
+        dense = np.zeros((n, s * A), dtype=np.int8)
+        base_indices = A * np.arange(n * s, dtype=int)[None]
+        dense.ravel()[
+            base_indices +
+            ancestries.reshape(n, s, 2)[:,:,0].ravel()
+        ] += calldata.reshape(n, s, 2)[:,:,0].ravel()
+        dense.ravel()[
+            base_indices +
+            ancestries.reshape(n, s, 2)[:,:,1].ravel()
+        ] += calldata.reshape(n, s, 2)[:,:,1].ravel()
+        return dense
+
+    def _test(n, s, A, n_files, dtype, seed=0):
+        np.random.seed(seed)
+        datas = [
+            ad.data.create_snp_phased_ancestry(n, s, A, seed=seed+i)
+            for i in range(n_files)
+        ]
+        filenames = [
+            f"/tmp/test_snp_phased_ancestry_{i}.snpdat"
+            for i in range(n_files)
+        ]
+        for i in range(n_files):
+            handler = ad.io.snp_phased_ancestry(filenames[i])
+            handler.write(datas[i]["X"], datas[i]["ancestries"], A)
+        cX = mod.snp_phased_ancestry(
+            filenames=filenames,
+            dtype=dtype,
+            n_threads=15,
+        )
+        for f in filenames:
+            os.remove(f)
+
+        X = np.concatenate([
+            create_dense(data["X"], data["ancestries"], A) 
+            for data in datas
+        ], axis=-1, dtype=np.int8)
+        run_naive(X, cX, dtype)
+
+
+    dtypes = [np.float64, np.float32]
+    for dtype in dtypes:
+        _test(10, 20, 4, 3, dtype)
+        _test(1, 13, 3, 3, dtype)
+        _test(144, 1, 2, 3, dtype)
