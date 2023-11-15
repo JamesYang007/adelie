@@ -29,6 +29,8 @@ public:
         _n_threads(n_threads),
         _buff(_n_threads, std::min(mat.rows(), mat.cols()))
     {}
+
+    using base_t::rows;
     
     void bmul(
         int i, int j, int p, int q, 
@@ -36,6 +38,7 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
+        base_t::check_bmul(i, j, p, q, v.size(), out.size(), rows(), cols());
         auto outm = out.matrix();
         dgemv(
             _mat.block(i, j, p, q),
@@ -51,6 +54,7 @@ public:
         Eigen::Ref<colmat_value_t> out
     ) const override
     {
+        base_t::check_to_dense(i, j, p, q, out.rows(), out.cols(), rows(), cols());
         out = _mat.block(i, j, p, q);
     }
 

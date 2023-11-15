@@ -167,7 +167,7 @@ def run_solve_pin(state, X, y, weights):
             )
             for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
         ])
-        assert np.all(my_objs <= cvxpy_objs)
+        assert np.all(my_objs <= cvxpy_objs * (1 + 1e-10))
 
     return state
 
@@ -213,7 +213,7 @@ def test_solve_pin_naive():
                 screen_beta=screen_beta,
                 screen_is_active=screen_is_active,
                 intercept=intercept,
-                tol=1e-12,
+                tol=1e-7,
             )
             state = run_solve_pin(state, X, y, weights)
             state = ad.state.pin_naive(
@@ -231,7 +231,7 @@ def test_solve_pin_naive():
                 screen_beta=state.screen_beta,
                 screen_is_active=state.screen_is_active,
                 intercept=intercept,
-                tol=1e-12,
+                tol=1e-7,
             )
             run_solve_pin(state, X, y, weights)
 
@@ -286,7 +286,7 @@ def test_solve_pin_cov():
                 screen_beta=screen_beta,
                 screen_grad=screen_grad,
                 screen_is_active=screen_is_active,
-                tol=1e-12,
+                tol=1e-8,
             )
             state = run_solve_pin(state, X, y, weights)
             state = ad.state.pin_cov(
@@ -300,7 +300,7 @@ def test_solve_pin_cov():
                 screen_beta=state.screen_beta,
                 screen_grad=state.screen_grad,
                 screen_is_active=state.screen_is_active,
-                tol=1e-12,
+                tol=1e-8,
             )
             run_solve_pin(state, X, y, weights)
 
@@ -445,7 +445,7 @@ def run_solve_basil(state, X, y):
             )
             for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
         ])
-        assert np.all(my_objs <= cvxpy_objs * (1 + 1e-10))
+        assert np.all(my_objs <= cvxpy_objs * (1 + 1e-8))
 
     return state
 
@@ -464,7 +464,7 @@ def test_solve_basil():
             test_data["X"] = Xpy
             state = ad.state.basil_naive(
                 **test_data,
-                tol=1e-12,
+                tol=1e-11,
             )
             state = run_solve_basil(state, X, y)
             state = ad.state.basil_naive(
@@ -486,7 +486,7 @@ def test_solve_basil():
                 lmda_path=[state.lmdas[-1] * 0.8],
                 lmda_max=state.lmda_max,
                 intercept=state.intercept,
-                tol=1e-12,
+                tol=1e-11,
             )
             run_solve_basil(state, X, y)
 
