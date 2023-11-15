@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.io.snp_unphased &#8212; adelie 1.1.6
+    <title>adelie.io.snp_phased_ancestry &#8212; adelie 1.1.6
  documentation</title>
   
   
@@ -41,11 +41,11 @@
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.io.snp_unphased';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.io.snp_phased_ancestry';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.io.snp_phased_ancestry" href="adelie.io.snp_phased_ancestry.html" />
-    <link rel="prev" title="adelie.diagnostic.Diagnostic" href="adelie.diagnostic.Diagnostic.html" />
+    <link rel="next" title="adelie.matrix.dense" href="adelie.matrix.dense.html" />
+    <link rel="prev" title="adelie.io.snp_unphased" href="adelie.io.snp_unphased.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -330,8 +330,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.Diagnostic.html">adelie.diagnostic.Diagnostic</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.io.snp_unphased</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.io.snp_phased_ancestry</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
@@ -415,12 +415,12 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-io-snp-unphased">
-<h1>adelie.io.snp_unphased<a class="headerlink" href="#adelie-io-snp-unphased" title="Link to this heading">#</a></h1>
+  <section id="adelie-io-snp-phased-ancestry">
+<h1>adelie.io.snp_phased_ancestry<a class="headerlink" href="#adelie-io-snp-phased-ancestry" title="Link to this heading">#</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="adelie.io.snp_unphased">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.io.</span></span><span class="sig-name descname"><span class="pre">snp_unphased</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased" title="Link to this definition">#</a></dt>
-<dd><p>IO handler for SNP Unphased data.</p>
+<dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.io.</span></span><span class="sig-name descname"><span class="pre">snp_phased_ancestry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry" title="Link to this definition">#</a></dt>
+<dd><p>IO handler for SNP Phased Ancestry data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -432,49 +432,71 @@ document.write(`
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.__init__" title="adelie.io.snp_unphased.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(filename)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_phased_ancestry.__init__" title="adelie.io.snp_phased_ancestry.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(filename)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.cols" title="adelie.io.snp_unphased.cols"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cols</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_phased_ancestry.ancestry" title="adelie.io.snp_phased_ancestry.ancestry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ancestry</span></code></a>(j, hap)</p></td>
+<td><p>Gets the value vector at a SNP and haplotype.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_phased_ancestry.cols" title="adelie.io.snp_phased_ancestry.cols"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cols</span></code></a>()</p></td>
 <td><p>Gets the number of columns of the matrix.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.endian" title="adelie.io.snp_unphased.endian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">endian</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_phased_ancestry.endian" title="adelie.io.snp_phased_ancestry.endian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">endian</span></code></a>()</p></td>
 <td><p>Gets the endianness used in the file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.inner" title="adelie.io.snp_unphased.inner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inner</span></code></a>(j)</p></td>
-<td><p>Gets the inner indexing vector at a column.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_phased_ancestry.inner" title="adelie.io.snp_phased_ancestry.inner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inner</span></code></a>(j, hap)</p></td>
+<td><p>Gets the inner indexing vector at SNP and haplotype.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.nnz" title="adelie.io.snp_unphased.nnz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nnz</span></code></a>(j)</p></td>
-<td><p>Gets the number of non-zero entries at a column.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_phased_ancestry.nnz" title="adelie.io.snp_phased_ancestry.nnz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nnz</span></code></a>(j, hap)</p></td>
+<td><p>Gets the number of non-zero entries at SNP and haplotype.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.outer" title="adelie.io.snp_unphased.outer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">outer</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_phased_ancestry.outer" title="adelie.io.snp_phased_ancestry.outer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">outer</span></code></a>()</p></td>
 <td><p>Gets the outer indexing vector.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.read" title="adelie.io.snp_unphased.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_phased_ancestry.read" title="adelie.io.snp_phased_ancestry.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>()</p></td>
 <td><p>Read and load the matrix from file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.rows" title="adelie.io.snp_unphased.rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rows</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_phased_ancestry.rows" title="adelie.io.snp_phased_ancestry.rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rows</span></code></a>()</p></td>
 <td><p>Gets the number of rows of the matrix.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.to_dense" title="adelie.io.snp_unphased.to_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dense</span></code></a>([n_threads])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_phased_ancestry.to_dense" title="adelie.io.snp_phased_ancestry.to_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dense</span></code></a>([n_threads])</p></td>
 <td><p>Creates a dense matrix.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.value" title="adelie.io.snp_unphased.value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">value</span></code></a>(j)</p></td>
-<td><p>Gets the value vector at a column.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.write" title="adelie.io.snp_unphased.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(calldata[, n_threads])</p></td>
-<td><p>Write dense array to the file in special format.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_phased_ancestry.write" title="adelie.io.snp_phased_ancestry.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(calldata, ancestries, A[, n_threads])</p></td>
+<td><p>Write dense arrays to the file in special format.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.io.snp_unphased.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.__init__" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.io.snp_unphased.cols">
-<span class="sig-name descname"><span class="pre">cols</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.cols" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry.ancestry">
+<span class="sig-name descname"><span class="pre">ancestry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry.ancestry" title="Link to this definition">#</a></dt>
+<dd><p>Gets the value vector at a SNP and haplotype.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>j</strong><span class="classifier">int</span></dt><dd><p>SNP index.</p>
+</dd>
+<dt><strong>hap</strong><span class="classifier">int</span></dt><dd><p>Haplotype for the corresponding SNP.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>v</strong><span class="classifier">np.ndarray</span></dt><dd><p>Ancestry vector at SNP <code class="docutils literal notranslate"><span class="pre">j</span></code> and haplotype <code class="docutils literal notranslate"><span class="pre">hap</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry.cols">
+<span class="sig-name descname"><span class="pre">cols</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry.cols" title="Link to this definition">#</a></dt>
 <dd><p>Gets the number of columns of the matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -487,8 +509,8 @@ document.write(`
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.io.snp_unphased.endian">
-<span class="sig-name descname"><span class="pre">endian</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.endian" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry.endian">
+<span class="sig-name descname"><span class="pre">endian</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry.endian" title="Link to this definition">#</a></dt>
 <dd><p>Gets the endianness used in the file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -501,19 +523,21 @@ document.write(`
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.io.snp_unphased.inner">
-<span class="sig-name descname"><span class="pre">inner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.inner" title="Link to this definition">#</a></dt>
-<dd><p>Gets the inner indexing vector at a column.</p>
+<dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry.inner">
+<span class="sig-name descname"><span class="pre">inner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry.inner" title="Link to this definition">#</a></dt>
+<dd><p>Gets the inner indexing vector at SNP and haplotype.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>j</strong><span class="classifier">int</span></dt><dd><p>Column index.</p>
+<dt><strong>j</strong><span class="classifier">int</span></dt><dd><p>SNP index.</p>
+</dd>
+<dt><strong>hap</strong><span class="classifier">int</span></dt><dd><p>Haplotype for the corresponding SNP.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>inner</strong><span class="classifier">np.ndarray</span></dt><dd><p>Inner indexing vector at column <code class="docutils literal notranslate"><span class="pre">j</span></code>.</p>
+<dt><strong>inner</strong><span class="classifier">np.ndarray</span></dt><dd><p>Inner indexing vector at SNP <code class="docutils literal notranslate"><span class="pre">j</span></code> and haplotype <code class="docutils literal notranslate"><span class="pre">hap</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -521,19 +545,21 @@ document.write(`
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.io.snp_unphased.nnz">
-<span class="sig-name descname"><span class="pre">nnz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.nnz" title="Link to this definition">#</a></dt>
-<dd><p>Gets the number of non-zero entries at a column.</p>
+<dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry.nnz">
+<span class="sig-name descname"><span class="pre">nnz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry.nnz" title="Link to this definition">#</a></dt>
+<dd><p>Gets the number of non-zero entries at SNP and haplotype.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>j</strong><span class="classifier">int</span></dt><dd><p>Column index.</p>
+<dt><strong>j</strong><span class="classifier">int</span></dt><dd><p>SNP index.</p>
+</dd>
+<dt><strong>hap</strong><span class="classifier">int</span></dt><dd><p>Haplotype for the corresponding SNP.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>nnz</strong><span class="classifier">int</span></dt><dd><p>Number of non-zero entries column <code class="docutils literal notranslate"><span class="pre">j</span></code>.</p>
+<dt><strong>nnz</strong><span class="classifier">int</span></dt><dd><p>Number of non-zero entries at SNP <code class="docutils literal notranslate"><span class="pre">j</span></code> and haplotype <code class="docutils literal notranslate"><span class="pre">hap</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -541,13 +567,13 @@ document.write(`
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.io.snp_unphased.outer">
-<span class="sig-name descname"><span class="pre">outer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.outer" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry.outer">
+<span class="sig-name descname"><span class="pre">outer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry.outer" title="Link to this definition">#</a></dt>
 <dd><p>Gets the outer indexing vector.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>outer</strong><span class="classifier">(p+1,) np.ndarray</span></dt><dd><p>Outer indexing vector.</p>
+<dt><strong>outer</strong><span class="classifier">(2*s+1,) np.ndarray</span></dt><dd><p>Outer indexing vector.</p>
 </dd>
 </dl>
 </dd>
@@ -555,8 +581,8 @@ document.write(`
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.io.snp_unphased.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.read" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry.read" title="Link to this definition">#</a></dt>
 <dd><p>Read and load the matrix from file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -569,8 +595,8 @@ document.write(`
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.io.snp_unphased.rows">
-<span class="sig-name descname"><span class="pre">rows</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.rows" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry.rows">
+<span class="sig-name descname"><span class="pre">rows</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry.rows" title="Link to this definition">#</a></dt>
 <dd><p>Gets the number of rows of the matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -583,8 +609,8 @@ document.write(`
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.io.snp_unphased.to_dense">
-<span class="sig-name descname"><span class="pre">to_dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.to_dense" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry.to_dense">
+<span class="sig-name descname"><span class="pre">to_dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry.to_dense" title="Link to this definition">#</a></dt>
 <dd><p>Creates a dense matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -604,33 +630,17 @@ Default is <code class="docutils literal notranslate"><span class="pre">1</span>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.io.snp_unphased.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.value" title="Link to this definition">#</a></dt>
-<dd><p>Gets the value vector at a column.</p>
+<dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calldata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ancestries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry.write" title="Link to this definition">#</a></dt>
+<dd><p>Write dense arrays to the file in special format.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>j</strong><span class="classifier">int</span></dt><dd><p>Column index.</p>
+<dt><strong>calldata</strong><span class="classifier">(n, 2*s) np.ndarray</span></dt><dd><p>SNP phased calldata in dense format.</p>
 </dd>
-</dl>
+<dt><strong>ancestries</strong><span class="classifier">(n, 2*s) np.ndarray</span></dt><dd><p>Ancestry in dense format.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>v</strong><span class="classifier">np.ndarray</span></dt><dd><p>Value vector at column <code class="docutils literal notranslate"><span class="pre">j</span></code>.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="adelie.io.snp_unphased.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calldata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_unphased.write" title="Link to this definition">#</a></dt>
-<dd><p>Write dense array to the file in special format.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>calldata</strong><span class="classifier">(n, p) np.ndarray</span></dt><dd><p>SNP unphased calldata in dense format.</p>
+<dt><strong>A</strong><span class="classifier">int</span></dt><dd><p>Number of ancestries.</p>
 </dd>
 <dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
 Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
@@ -661,20 +671,20 @@ Default is <code class="docutils literal notranslate"><span class="pre">1</span>
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.diagnostic.Diagnostic.html"
+       href="adelie.io.snp_unphased.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.diagnostic.Diagnostic</p>
+        <p class="prev-next-title">adelie.io.snp_unphased</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.io.snp_phased_ancestry.html"
+       href="adelie.matrix.dense.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.io.snp_phased_ancestry</p>
+        <p class="prev-next-title">adelie.matrix.dense</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -693,18 +703,18 @@ Default is <code class="docutils literal notranslate"><span class="pre">1</span>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased"><code class="docutils literal notranslate"><span class="pre">snp_unphased</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.__init__"><code class="docutils literal notranslate"><span class="pre">snp_unphased.__init__()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.cols"><code class="docutils literal notranslate"><span class="pre">snp_unphased.cols()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.endian"><code class="docutils literal notranslate"><span class="pre">snp_unphased.endian()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.inner"><code class="docutils literal notranslate"><span class="pre">snp_unphased.inner()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.nnz"><code class="docutils literal notranslate"><span class="pre">snp_unphased.nnz()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.outer"><code class="docutils literal notranslate"><span class="pre">snp_unphased.outer()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.read"><code class="docutils literal notranslate"><span class="pre">snp_unphased.read()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.rows"><code class="docutils literal notranslate"><span class="pre">snp_unphased.rows()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.to_dense"><code class="docutils literal notranslate"><span class="pre">snp_unphased.to_dense()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.value"><code class="docutils literal notranslate"><span class="pre">snp_unphased.value()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.write"><code class="docutils literal notranslate"><span class="pre">snp_unphased.write()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_phased_ancestry"><code class="docutils literal notranslate"><span class="pre">snp_phased_ancestry</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_phased_ancestry.__init__"><code class="docutils literal notranslate"><span class="pre">snp_phased_ancestry.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_phased_ancestry.ancestry"><code class="docutils literal notranslate"><span class="pre">snp_phased_ancestry.ancestry()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_phased_ancestry.cols"><code class="docutils literal notranslate"><span class="pre">snp_phased_ancestry.cols()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_phased_ancestry.endian"><code class="docutils literal notranslate"><span class="pre">snp_phased_ancestry.endian()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_phased_ancestry.inner"><code class="docutils literal notranslate"><span class="pre">snp_phased_ancestry.inner()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_phased_ancestry.nnz"><code class="docutils literal notranslate"><span class="pre">snp_phased_ancestry.nnz()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_phased_ancestry.outer"><code class="docutils literal notranslate"><span class="pre">snp_phased_ancestry.outer()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_phased_ancestry.read"><code class="docutils literal notranslate"><span class="pre">snp_phased_ancestry.read()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_phased_ancestry.rows"><code class="docutils literal notranslate"><span class="pre">snp_phased_ancestry.rows()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_phased_ancestry.to_dense"><code class="docutils literal notranslate"><span class="pre">snp_phased_ancestry.to_dense()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_phased_ancestry.write"><code class="docutils literal notranslate"><span class="pre">snp_phased_ancestry.write()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -712,7 +722,7 @@ Default is <code class="docutils literal notranslate"><span class="pre">1</span>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.io.snp_unphased.rst.txt">
+    <a href="../_sources/generated/adelie.io.snp_phased_ancestry.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

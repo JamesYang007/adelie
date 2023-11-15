@@ -1,0 +1,156 @@
+﻿adelie.adelie\_core.state.StateBasilNaive64
+===========================================
+
+.. currentmodule:: adelie.adelie_core.state
+
+.. autoclass:: StateBasilNaive64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~StateBasilNaive64.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StateBasilNaive64.X
+      ~StateBasilNaive64.X_means
+      ~StateBasilNaive64.abs_grad
+      ~StateBasilNaive64.active_sizes
+      ~StateBasilNaive64.alpha
+      ~StateBasilNaive64.benchmark_fit_active
+      ~StateBasilNaive64.benchmark_fit_screen
+      ~StateBasilNaive64.benchmark_invariance
+      ~StateBasilNaive64.benchmark_kkt
+      ~StateBasilNaive64.benchmark_screen
+      ~StateBasilNaive64.betas
+      ~StateBasilNaive64.early_exit
+      ~StateBasilNaive64.grad
+      ~StateBasilNaive64.group_sizes
+      ~StateBasilNaive64.groups
+      ~StateBasilNaive64.intercept
+      ~StateBasilNaive64.intercepts
+      ~StateBasilNaive64.lmda
+      ~StateBasilNaive64.lmda_max
+      ~StateBasilNaive64.lmda_path
+      ~StateBasilNaive64.lmda_path_size
+      ~StateBasilNaive64.lmdas
+      ~StateBasilNaive64.max_iters
+      ~StateBasilNaive64.max_screen_size
+      ~StateBasilNaive64.min_ratio
+      ~StateBasilNaive64.n_threads
+      ~StateBasilNaive64.n_valid_solutions
+      ~StateBasilNaive64.newton_max_iters
+      ~StateBasilNaive64.newton_tol
+      ~StateBasilNaive64.penalty
+      ~StateBasilNaive64.pivot_slack_ratio
+      ~StateBasilNaive64.pivot_subset_min
+      ~StateBasilNaive64.pivot_subset_ratio
+      ~StateBasilNaive64.resid
+      ~StateBasilNaive64.resid_sum
+      ~StateBasilNaive64.rsq
+      ~StateBasilNaive64.rsq_curv_tol
+      ~StateBasilNaive64.rsq_slope_tol
+      ~StateBasilNaive64.rsq_tol
+      ~StateBasilNaive64.rsqs
+      ~StateBasilNaive64.screen_X_means
+      ~StateBasilNaive64.screen_begins
+      ~StateBasilNaive64.screen_beta
+      ~StateBasilNaive64.screen_g1
+      ~StateBasilNaive64.screen_g2
+      ~StateBasilNaive64.screen_hashset
+      ~StateBasilNaive64.screen_is_active
+      ~StateBasilNaive64.screen_order
+      ~StateBasilNaive64.screen_rule
+      ~StateBasilNaive64.screen_set
+      ~StateBasilNaive64.screen_sizes
+      ~StateBasilNaive64.screen_transforms
+      ~StateBasilNaive64.screen_vars
+      ~StateBasilNaive64.setup_lmda_max
+      ~StateBasilNaive64.setup_lmda_path
+      ~StateBasilNaive64.tol
+      ~StateBasilNaive64.weights
+      ~StateBasilNaive64.y_mean
+      ~StateBasilNaive64.y_var
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   
+   
+
+   
+   
+   
+   .. autoattribute:: X
+   .. autoattribute:: X_means
+   .. autoattribute:: abs_grad
+   .. autoattribute:: active_sizes
+   .. autoattribute:: alpha
+   .. autoattribute:: benchmark_fit_active
+   .. autoattribute:: benchmark_fit_screen
+   .. autoattribute:: benchmark_invariance
+   .. autoattribute:: benchmark_kkt
+   .. autoattribute:: benchmark_screen
+   .. autoattribute:: betas
+   .. autoattribute:: early_exit
+   .. autoattribute:: grad
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: intercept
+   .. autoattribute:: intercepts
+   .. autoattribute:: lmda
+   .. autoattribute:: lmda_max
+   .. autoattribute:: lmda_path
+   .. autoattribute:: lmda_path_size
+   .. autoattribute:: lmdas
+   .. autoattribute:: max_iters
+   .. autoattribute:: max_screen_size
+   .. autoattribute:: min_ratio
+   .. autoattribute:: n_threads
+   .. autoattribute:: n_valid_solutions
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: newton_tol
+   .. autoattribute:: penalty
+   .. autoattribute:: pivot_slack_ratio
+   .. autoattribute:: pivot_subset_min
+   .. autoattribute:: pivot_subset_ratio
+   .. autoattribute:: resid
+   .. autoattribute:: resid_sum
+   .. autoattribute:: rsq
+   .. autoattribute:: rsq_curv_tol
+   .. autoattribute:: rsq_slope_tol
+   .. autoattribute:: rsq_tol
+   .. autoattribute:: rsqs
+   .. autoattribute:: screen_X_means
+   .. autoattribute:: screen_begins
+   .. autoattribute:: screen_beta
+   .. autoattribute:: screen_g1
+   .. autoattribute:: screen_g2
+   .. autoattribute:: screen_hashset
+   .. autoattribute:: screen_is_active
+   .. autoattribute:: screen_order
+   .. autoattribute:: screen_rule
+   .. autoattribute:: screen_set
+   .. autoattribute:: screen_sizes
+   .. autoattribute:: screen_transforms
+   .. autoattribute:: screen_vars
+   .. autoattribute:: setup_lmda_max
+   .. autoattribute:: setup_lmda_path
+   .. autoattribute:: tol
+   .. autoattribute:: weights
+   .. autoattribute:: y_mean
+   .. autoattribute:: y_var
+   
+   

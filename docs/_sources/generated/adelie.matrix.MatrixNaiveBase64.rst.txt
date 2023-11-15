@@ -22,7 +22,6 @@
       ~MatrixNaiveBase64.mul
       ~MatrixNaiveBase64.rows
       ~MatrixNaiveBase64.sp_btmul
-      ~MatrixNaiveBase64.to_dense
    
    
 
@@ -44,7 +43,6 @@
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_btmul
-   .. automethod:: to_dense
    
    
 
