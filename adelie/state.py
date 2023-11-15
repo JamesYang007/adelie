@@ -591,17 +591,20 @@ class pin_naive_base(pin_base):
             screen_set=screen_set,
         )
 
+        n, p = X.rows(), X.cols()
         sqrt_weights = np.sqrt(self._weights)
+        X_means = np.empty(p, dtype=dtype)
+        X.means(self._weights, X_means)
+
         self._screen_vars = []
         self._screen_X_means = []
         self._screen_transforms = []
         for i in self._screen_set:
             g, gs = groups[i], group_sizes[i]
-            Xi = np.empty((X.rows(), gs), dtype=dtype, order="F")
-            X.to_dense(g, gs, Xi)
-            Xi *= sqrt_weights[:, None]
-            XiTXi = Xi.T @ Xi
-            Xi_means = np.sum(Xi * sqrt_weights[:, None], axis=0)
+            XiTXi = np.empty((gs, gs), dtype=dtype, order="F")
+            buffer = np.empty((n, gs), dtype=dtype, order="F")
+            X.cov(g, gs, sqrt_weights, XiTXi, buffer)
+            Xi_means = X_means[g:g+gs]
             if intercept:
                 XiTXi -= Xi_means[:, None] @ Xi_means[None]
             vars, v = np.linalg.eigh(XiTXi)

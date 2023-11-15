@@ -191,7 +191,6 @@ public:
     int cols() const override { return _snps; }
 
     void sp_btmul(
-        int j, int q,
         const sp_mat_value_t& v,
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
@@ -205,35 +204,14 @@ public:
             for (; it; ++it) 
             {
                 const auto t = it.index();
-                const auto slice = _io_slice_map[j+t];
+                const auto slice = _io_slice_map[t];
                 const auto& io = _ios[slice];
-                const auto index = _io_index_map[j+t];
+                const auto index = _io_index_map[t];
                 const auto inner = io.inner(index);
                 const auto value = io.value(index);
                 for (int i = 0; i < inner.size(); ++i) {
                     out_k[inner[i]] += value[i] * weights[inner[i]] * it.value();
                 } 
-            }
-        }
-    }
-
-    void to_dense(
-        int j, int q,
-        Eigen::Ref<colmat_value_t> out
-    ) const override
-    {
-        #pragma omp parallel for schedule(auto) num_threads(_n_threads)
-        for (int k = 0; k < q; ++k) {
-            const auto slice = _io_slice_map[j+k];
-            const auto& io = _ios[slice];
-            const auto index = _io_index_map[j+k];
-            const auto inner = io.inner(index);
-            const auto value = io.value(index);
-            auto out_k = out.col(k);
-
-            out_k.setZero();
-            for (int i = 0; i < inner.size(); ++i) {
-                out_k[inner[i]] = value[i];
             }
         }
     }

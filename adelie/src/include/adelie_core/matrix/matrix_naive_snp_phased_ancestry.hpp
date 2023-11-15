@@ -142,25 +142,26 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        const auto A = ancestries();
+        const int A = ancestries();
         out.setZero();
 
-        int begin = 0;
-        while (begin < q)
+        int n_solved = 0;
+        while (n_solved < q)
         {
-            const auto snp = (j + begin) / A;
+            const auto begin = j + n_solved;
+            const auto snp = begin / A;
             const auto slice = _io_slice_map[snp];
             const auto& io = _ios[slice];
             const auto index = _io_index_map[snp];
-            const auto ancestry_lower = (j + begin) % A;
-            const auto ancestry_upper = std::min(ancestry_lower + q, A);
+            const auto ancestry_lower = begin % A;
+            const auto ancestry_upper = std::min<int>(ancestry_lower + q - n_solved, A);
 
             if (ancestry_lower == 0 && ancestry_upper == A) {
                 for (int hap = 0; hap < 2; ++hap) {
                     const auto inner = io.inner(index, hap);
                     const auto ancestry = io.ancestry(index, hap);
                     for (int i = 0; i < inner.size(); ++i) {
-                        out[begin+ancestry[i]] += v[inner[i]];
+                        out[n_solved+ancestry[i]] += v[inner[i]];
                     }
                 }
             } else {
@@ -169,12 +170,12 @@ public:
                     const auto ancestry = io.ancestry(index, hap);
                     for (int i = 0; i < inner.size(); ++i) {
                         if (ancestry[i] < ancestry_lower || ancestry[i] >= ancestry_upper) continue;
-                        out[begin+ancestry[i]-ancestry_lower] += v[inner[i]];
+                        out[n_solved+ancestry[i]-ancestry_lower] += v[inner[i]];
                     }
                 }
             }
 
-            begin += ancestry_upper - ancestry_lower;
+            n_solved += ancestry_upper - ancestry_lower;
         }     
     }
 
@@ -185,7 +186,41 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        // TODO
+        const int A = ancestries();
+        dvzero(out, _n_threads);
+
+        int n_solved = 0;
+        while (n_solved < q) 
+        {
+            const auto begin = j + n_solved;
+            const auto snp = begin / A;
+            const auto slice = _io_slice_map[snp];
+            const auto& io = _ios[slice];
+            const auto index = _io_index_map[snp];
+            const auto ancestry_lower = begin % A;
+            const auto ancestry_upper = std::min<int>(ancestry_lower + q - n_solved, A);
+
+            if (ancestry_lower == 0 && ancestry_upper == A) {
+                for (int hap = 0; hap < 2; ++hap) {
+                    const auto inner = io.inner(index, hap);
+                    const auto ancestry = io.ancestry(index, hap);
+                    for (int i = 0; i < inner.size(); ++i) {
+                        out[inner[i]] += weights[inner[i]] * v[n_solved + ancestry[i]];
+                    }
+                }
+            } else {
+                for (int hap = 0; hap < 2; ++hap) {
+                    const auto inner = io.inner(index, hap);
+                    const auto ancestry = io.ancestry(index, hap);
+                    for (int i = 0; i < inner.size(); ++i) {
+                        if (ancestry[i] < ancestry_lower || ancestry[i] >= ancestry_upper) continue;
+                        out[inner[i]] += weights[inner[i]] * v[n_solved + ancestry[i] - ancestry_lower];
+                    }
+                }
+            }
+
+            n_solved += ancestry_upper - ancestry_lower;
+        }
     }
 
     void mul(
@@ -193,38 +228,130 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        // TODO
+        bmul(0, out.size(), v, out);
     }
 
     void cov(
         int j, int q,
         const Eigen::Ref<const vec_value_t>& sqrt_weights,
         Eigen::Ref<colmat_value_t> out,
-        Eigen::Ref<colmat_value_t> buffer
+        Eigen::Ref<colmat_value_t> 
     ) const override
     {
-        // TODO
+        const auto A = ancestries();
+
+        out.setZero();
+
+        int n_solved0 = 0;
+        while (n_solved0 < q) {
+            const auto begin0 = j + n_solved0;
+            const auto snp0 = begin0 / A;
+            const auto slice0 = _io_slice_map[snp0];
+            const auto& io0 = _ios[slice0];
+            const auto index0 = _io_index_map[snp0];
+            const auto ancestry_lower0 = begin0 % A;
+            const auto ancestry_upper0 = std::min<int>(ancestry_lower0 + q - n_solved0, A);
+
+            int n_solved1 = 0;
+            while (n_solved1 <= n_solved0) {
+                const auto begin1 = j + n_solved1;
+                const auto snp1 = begin1 / A;
+                const auto slice1 = _io_slice_map[snp1];
+                const auto& io1 = _ios[slice1];
+                const auto index1 = _io_index_map[snp1];
+                const auto ancestry_lower1 = begin1 % A;
+                const auto ancestry_upper1 = std::min<int>(ancestry_lower1 + q - n_solved1, A);
+
+                for (int hap0 = 0; hap0 < 2; ++hap0) {
+                    for (int hap1 = 0; hap1 < 2; ++hap1) {
+                        const auto inner0 = io0.inner(index0, hap0);
+                        const auto ancestry0 = io0.ancestry(index0, hap0);
+                        const auto inner1 = io1.inner(index1, hap1);
+                        const auto ancestry1 = io1.ancestry(index1, hap1);
+
+                        int i0 = 0;
+                        int i1 = 0;
+                        while (
+                            (i0 < inner0.size()) &&
+                            (i1 < inner1.size())
+                        ) {
+                            while ((i0 < inner0.size()) && (inner0[i0] < inner1[i1])) ++i0;
+                            if (i0 == inner0.size()) break;
+                            while ((i1 < inner1.size()) && (inner1[i1] < inner0[i0])) ++i1;
+                            if (i1 == inner1.size()) break;
+                            while (
+                                (i0 < inner0.size()) &&
+                                (i1 < inner1.size()) &&
+                                (inner0[i0] == inner1[i1])
+                            ) {
+                                if (
+                                    ((n_solved0 == n_solved1) && (ancestry0[i0] < ancestry1[i1])) ||
+                                    (ancestry0[i0] < ancestry_lower0) ||
+                                    (ancestry0[i0] >= ancestry_upper0) ||
+                                    (ancestry1[i1] < ancestry_lower1) ||
+                                    (ancestry1[i1] >= ancestry_upper1)
+                                ) {
+                                    ++i0;
+                                    ++i1;
+                                    continue;
+                                }
+                                const auto k0 = n_solved0 + ancestry0[i0] - ancestry_lower0;
+                                const auto k1 = n_solved1 + ancestry1[i1] - ancestry_lower1;
+                                const auto sw = sqrt_weights[inner1[i1]];
+                                out(k0, k1) += sw * sw;
+                                ++i0;
+                                ++i1;
+                            }
+                        }
+                    }
+                }
+
+                n_solved1 += ancestry_upper1 - ancestry_lower1;
+            }
+            n_solved0 += ancestry_upper0 - ancestry_lower0;
+        }     
+
+        for (int i1 = 0; i1 < q; ++i1) {
+            for (int i2 = i1+1; i2 < q; ++i2) {
+                out(i1, i2) = out(i2, i1);
+            }
+        }
     }
 
     int rows() const override { return _ios[0].rows(); }
     int cols() const override { return _snps * ancestries(); }
 
     void sp_btmul(
-        int j, int q,
         const sp_mat_value_t& v,
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
     ) const override
     {
-        // TODO
-    }
+        const auto A = ancestries();
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
+        for (int k = 0; k < v.outerSize(); ++k) {
+            typename sp_mat_value_t::InnerIterator it(v, k);
+            auto out_k = out.row(k);
+            out_k.setZero();
+            for (; it; ++it) 
+            {
+                const auto t = it.index();
+                const auto snp = t / A;
+                const auto slice = _io_slice_map[snp];
+                const auto& io = _ios[slice];
+                const auto index = _io_index_map[snp];
+                const auto anc = t % A;
 
-    void to_dense(
-        int j, int q,
-        Eigen::Ref<colmat_value_t> out
-    ) const override
-    {
-        // TODO
+                for (int hap = 0; hap < 2; ++hap) {
+                    const auto inner = io.inner(index, hap);
+                    const auto ancestry = io.ancestry(index, hap);
+                    for (int i = 0; i < inner.size(); ++i) {
+                        if (ancestry[i] != anc) continue;
+                        out_k[inner[i]] += weights[inner[i]] * it.value();
+                    }
+                }
+            }
+        }
     }
 
     void means(
@@ -232,7 +359,23 @@ public:
         Eigen::Ref<vec_value_t> out
     ) const override
     {
-        // TODO
+        dvzero(out, _n_threads);
+
+        const auto A = ancestries();
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
+        for (int snp = 0; snp < _snps; ++snp) {
+            const auto slice = _io_slice_map[snp];
+            const auto& io = _ios[slice];
+            const auto index = _io_index_map[snp];
+
+            for (int hap = 0; hap < 2; ++hap) {
+                const auto inner = io.inner(index, hap);
+                const auto ancestry = io.ancestry(index, hap);
+                for (int i = 0; i < inner.size(); ++i) {
+                    out[A * snp + ancestry[i]] += weights[inner[i]];
+                }
+            }
+        }
     }
 };
 
