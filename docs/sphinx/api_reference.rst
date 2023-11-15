@@ -34,6 +34,7 @@ adelie.data
 
     create_dense
     create_snp_unphased
+    create_snp_phased_ancestry
 
 
 adelie.diagnostic
@@ -89,6 +90,7 @@ adelie.matrix
     dense
     cov_lazy
     snp_unphased
+    snp_phased_ancestry
 
 
 adelie.state
