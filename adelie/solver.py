@@ -175,7 +175,7 @@ def grpnet(
     weights: np.ndarray =None,
     lmda_path: np.ndarray =None,
     max_iters: int =int(1e5),
-    tol: float =1e-12,
+    tol: float =1e-7,
     rsq_tol: float =0.9,
     rsq_slope_tol: float =1e-3,
     rsq_curv_tol: float =1e-3,
@@ -229,7 +229,7 @@ def grpnet(
         Default is ``int(1e5)``.
     tol : float, optional
         Convergence tolerance.
-        Default is ``1e-12``.
+        Default is ``1e-7``.
     rsq_tol : float, optional
         Early stopping rule check on :math:`R^2`.
         Default is ``0.9``.

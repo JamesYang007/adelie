@@ -91,6 +91,8 @@ public:
         const Eigen::Ref<const vec_value_t>& v
     ) const override
     {
+        base_t::check_cmul(j, v.size(), rows(), cols());
+
         const auto A = ancestries();
         const auto snp = j / A;
         const auto anc = j % A;
@@ -118,6 +120,8 @@ public:
         Eigen::Ref<vec_value_t> out
     ) const override
     {
+        base_t::check_ctmul(j, weights.size(), out.size(), rows(), cols());
+
         const auto A = ancestries();
         const auto snp = j / A;
         const auto anc = j % A;
@@ -142,12 +146,19 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
+        base_t::check_bmul(j, q, v.size(), out.size(), rows(), cols());
+
         const int A = ancestries();
         out.setZero();
 
-        int n_solved = 0;
-        while (n_solved < q)
+        int n_batches = (
+            (j + q - A * (j / A) + A - 1) / A
+        );
+
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
+        for (int b = 0; b < n_batches; ++b)
         {
+            const auto n_solved =  (b > 0) * (A * ((j / A) + 1) - j + (b-1) * A);
             const auto begin = j + n_solved;
             const auto snp = begin / A;
             const auto slice = _io_slice_map[snp];
@@ -174,8 +185,6 @@ public:
                     }
                 }
             }
-
-            n_solved += ancestry_upper - ancestry_lower;
         }     
     }
 
@@ -186,6 +195,8 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
+        base_t::check_btmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+
         const int A = ancestries();
         dvzero(out, _n_threads);
 
@@ -235,9 +246,15 @@ public:
         int j, int q,
         const Eigen::Ref<const vec_value_t>& sqrt_weights,
         Eigen::Ref<colmat_value_t> out,
-        Eigen::Ref<colmat_value_t> 
+        Eigen::Ref<colmat_value_t> buffer
     ) const override
     {
+        base_t::check_cov(
+            j, q, sqrt_weights.size(), 
+            out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
+            rows(), cols()
+        );
+
         const auto A = ancestries();
 
         out.setZero();
@@ -327,6 +344,9 @@ public:
         Eigen::Ref<rowmat_value_t> out
     ) const override
     {
+        base_t::check_sp_btmul(
+            v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
+        );
         const auto A = ancestries();
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int k = 0; k < v.outerSize(); ++k) {
@@ -359,6 +379,7 @@ public:
         Eigen::Ref<vec_value_t> out
     ) const override
     {
+        base_t::check_means(weights.size(), out.size(), rows(), cols());
         dvzero(out, _n_threads);
 
         const auto A = ancestries();

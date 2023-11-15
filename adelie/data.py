@@ -288,6 +288,7 @@ def create_snp_phased_ancestry(
         A dictionary containing the generated data:
         
             - ``"X"``: feature matrix.
+            - ``"ancestries"``: ancestry label of the same shape as ``X``.
             - ``"y"``: response vector.
             - ``"groups"``: mapping of group index to the starting column index of ``X``.
             - ``"group_sizes"``: mapping of group index to the group size.

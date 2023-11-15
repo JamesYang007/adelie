@@ -150,8 +150,9 @@ void coordinate_descent(
         // update residual
         auto del = buffer1.head(ak.size());
         del = ak - ak_old;
-        X.btmul(groups[k], gsize, del, weights, buffer4_n);
-        matrix::dvsubi(resid, buffer4_n, n_threads);
+        auto dresid = buffer4_n.head(resid.size());
+        X.btmul(groups[k], gsize, del, weights, dresid);
+        matrix::dvsubi(resid, dresid, n_threads);
         resid_sum -= (Xk_mean * del).sum();
 
         additional_step(ss_idx);

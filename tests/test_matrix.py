@@ -240,7 +240,7 @@ def test_snp_phased_ancestry():
         cX = mod.snp_phased_ancestry(
             filenames=filenames,
             dtype=dtype,
-            n_threads=15,
+            n_threads=8,
         )
         for f in filenames:
             os.remove(f)

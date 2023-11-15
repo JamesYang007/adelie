@@ -66,6 +66,7 @@ public:
         const Eigen::Ref<const vec_value_t>& v
     ) const override
     {
+        base_t::check_cmul(j, v.size(), rows(), cols());
         const auto slice = _io_slice_map[j];
         const auto& io = _ios[slice];
         const auto index = _io_index_map[j];
@@ -87,6 +88,7 @@ public:
         Eigen::Ref<vec_value_t> out
     ) const override
     {
+        base_t::check_ctmul(j, weights.size(), out.size(), rows(), cols());
         const auto slice = _io_slice_map[j];
         const auto& io = _ios[slice];
         const auto index = _io_index_map[j];
@@ -106,6 +108,7 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
+        base_t::check_bmul(j, q, v.size(), out.size(), rows(), cols());
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int t = 0; t < q; ++t) 
         {
@@ -130,6 +133,7 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
+        base_t::check_btmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
         dvzero(out, _n_threads);
         for (int t = 0; t < q; ++t) 
         {
@@ -156,9 +160,14 @@ public:
         int j, int q,
         const Eigen::Ref<const vec_value_t>& sqrt_weights,
         Eigen::Ref<colmat_value_t> out,
-        Eigen::Ref<colmat_value_t> 
+        Eigen::Ref<colmat_value_t> buffer
     ) const override
     {
+        base_t::check_cov(
+            j, q, sqrt_weights.size(), 
+            out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
+            rows(), cols()
+        );
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int i1 = 0; i1 < q; ++i1) {
             for (int i2 = 0; i2 <= i1; ++i2) {
@@ -196,6 +205,9 @@ public:
         Eigen::Ref<rowmat_value_t> out
     ) const override
     {
+        base_t::check_sp_btmul(
+            v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
+        );
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int k = 0; k < v.outerSize(); ++k) {
             typename sp_mat_value_t::InnerIterator it(v, k);
@@ -221,6 +233,7 @@ public:
         Eigen::Ref<vec_value_t> out
     ) const override
     {
+        base_t::check_means(weights.size(), out.size(), rows(), cols());
         const auto p = cols();
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int j = 0; j < p; ++j) 

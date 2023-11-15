@@ -40,6 +40,7 @@ public:
         const Eigen::Ref<const vec_value_t>& v
     ) const override
     {
+        base_t::check_cmul(j, v.size(), rows(), cols());
         return ddot(_mat.col(j), v.matrix(), _n_threads);
     }
 
@@ -50,6 +51,7 @@ public:
         Eigen::Ref<vec_value_t> out
     ) const override
     {
+        base_t::check_ctmul(j, weights.size(), out.size(), rows(), cols());
         dax(v, _mat.transpose().row(j).array() * weights, _n_threads, out);
     }
 
@@ -59,6 +61,7 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
+        base_t::check_bmul(j, q, v.size(), out.size(), rows(), cols());
         auto outm = out.matrix();
         dgemv(
             _mat.middleCols(j, q),
@@ -76,6 +79,7 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
+        base_t::check_btmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
         auto outm = out.matrix();
         dgemv(
             _mat.middleCols(j, q).transpose(),
@@ -119,6 +123,11 @@ public:
         Eigen::Ref<colmat_value_t> buffer
     ) const override
     {
+        base_t::check_cov(
+            j, q, sqrt_weights.size(), 
+            out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
+            rows(), cols()
+        );
         auto& Xj = buffer;
         
         Xj.transpose().array() = (
@@ -136,6 +145,9 @@ public:
         Eigen::Ref<rowmat_value_t> out
     ) const override
     {
+        base_t::check_sp_btmul(
+            v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
+        );
         out.noalias() = v * _mat.transpose();
         out.array().rowwise() *= weights;
     }
@@ -145,6 +157,7 @@ public:
         Eigen::Ref<vec_value_t> out
     ) const override
     {
+        base_t::check_means(weights.size(), out.size(), rows(), cols());
         const size_t p = _mat.cols();
         const int n_blocks = std::min<int>(_n_threads, p);
         const int block_size = p / n_blocks;

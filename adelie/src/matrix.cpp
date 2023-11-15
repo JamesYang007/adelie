@@ -124,19 +124,6 @@ public:
         );
     }
 
-    //void to_dense(
-    //    int j, int q,
-    //    Eigen::Ref<colmat_value_t> out
-    //) const override
-    //{
-    //    PYBIND11_OVERRIDE_PURE(
-    //        void,
-    //        base_t,
-    //        to_dense,
-    //        j, q, out
-    //    );
-    //}
-
     void means(
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
@@ -289,20 +276,6 @@ void matrix_naive_base(py::module_& m, const char* name)
         buffer : (n, q) np.ndarray
             Extra buffer space if needed.
         )delimiter")
-        //.def("to_dense", &internal_t::to_dense, R"delimiter(
-        //Converts block to a dense matrix.
-
-        //Converts the block ``X[:, j:j+q]`` into a dense matrix.
-
-        //Parameters
-        //----------
-        //j : int
-        //    Column index.
-        //q : int
-        //    Number of columns.
-        //out : (n, q) np.ndarray
-        //    Matrix to store the dense result.
-        //)delimiter")
         .def("means", &internal_t::means, R"delimiter(
         Computes column-wise means.
 

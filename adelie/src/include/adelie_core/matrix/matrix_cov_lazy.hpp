@@ -70,17 +70,15 @@ public:
         _cache.reserve(X.cols());
     }
 
+    using base_t::rows;
+
     void bmul(
         int i, int j, int p, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        if (i < 0 || j < 0 || p <= 0 || q <= 0) {
-            throw std::runtime_error(
-                "Indices must be all non-negative and sizes must be all positive."
-            );
-        }
+        base_t::check_bmul(i, j, p, q, v.size(), out.size(), rows(), cols());
         const index_t ci = _index_map[i];
         if (ci < 0) {
             cache(i, p);
@@ -99,11 +97,7 @@ public:
         Eigen::Ref<colmat_value_t> out
     ) const override
     {
-        if (i < 0 || i > static_cast<int>(_index_map.size())) {
-            throw std::runtime_error(
-                "Index is out of range."
-            );
-        }
+        base_t::check_to_dense(i, j, p, q, out.rows(), out.cols(), rows(), cols());
         const index_t ci = _index_map[i];
         if (ci < 0) {
             const auto Xi = _X.middleCols(i, p);
