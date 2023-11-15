@@ -7,3 +7,4 @@ User Guide
 
 
     notebooks/pivot_rule
+    notebooks/snp_analysis
