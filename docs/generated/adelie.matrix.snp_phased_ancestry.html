@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.diagnostic.plot_set_sizes &#8212; adelie 1.1.6
+    <title>adelie.matrix.snp_phased_ancestry &#8212; adelie 1.1.6
  documentation</title>
   
   
@@ -41,11 +41,11 @@
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.diagnostic.plot_set_sizes';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.matrix.snp_phased_ancestry';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.diagnostic.plot_benchmark" href="adelie.diagnostic.plot_benchmark.html" />
-    <link rel="prev" title="adelie.diagnostic.plot_rsqs" href="adelie.diagnostic.plot_rsqs.html" />
+    <link rel="next" title="adelie.state.deduce_states" href="adelie.state.deduce_states.html" />
+    <link rel="prev" title="adelie.matrix.snp_unphased" href="adelie.matrix.snp_unphased.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -317,7 +317,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.create_snp_unphased.html">adelie.data.create_snp_unphased</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.create_snp_phased_ancestry.html">adelie.data.create_snp_phased_ancestry</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
@@ -325,7 +325,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_rsqs.html">adelie.diagnostic.plot_rsqs</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.diagnostic.plot_set_sizes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_kkt.html">adelie.diagnostic.plot_kkt</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.Diagnostic.html">adelie.diagnostic.Diagnostic</a></li>
@@ -334,11 +334,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.matrix.snp_phased_ancestry</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
@@ -400,7 +400,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.diagn...</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.matri...</li>
   </ul>
 </nav>
 </div>
@@ -417,32 +417,32 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-diagnostic-plot-set-sizes">
-<h1>adelie.diagnostic.plot_set_sizes<a class="headerlink" href="#adelie-diagnostic-plot-set-sizes" title="Link to this heading">#</a></h1>
+  <section id="adelie-matrix-snp-phased-ancestry">
+<h1>adelie.matrix.snp_phased_ancestry<a class="headerlink" href="#adelie-matrix-snp-phased-ancestry" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="adelie.diagnostic.plot_set_sizes">
-<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">plot_set_sizes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.plot_set_sizes" title="Link to this definition">#</a></dt>
-<dd><p>Plots the set sizes.</p>
-<dl class="field-list">
+<dt class="sig sig-object py" id="adelie.matrix.snp_phased_ancestry">
+<span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">snp_phased_ancestry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filenames:</span> <span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">~numpy.float32</span> <span class="pre">|</span> <span class="pre">~numpy.float64</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.matrix.snp_phased_ancestry" title="Link to this definition">#</a></dt>
+<dd><p>Creates a SNP phased ancestry matrix.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This matrix only works for naive method!</p>
+</div>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>state</strong></dt><dd><p>A state object from solving group elastic net.</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>filenames</strong><span class="classifier">list</span></dt><dd><p>List of file names that contain column-block slices of the matrix.</p>
 </dd>
-<dt><strong>ratio</strong><span class="classifier">bool, optional</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if plot should normalize the set sizes
-by the total number of groups.
-Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
+Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </dd>
-<dt><strong>exclude</strong><span class="classifier">list, optional</span></dt><dd><p>The sets to exclude from plotting.
-It must be a subset of the following:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;active&quot;</span></code>: active set.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;screen&quot;</span></code>: screen set.</p></li>
-</ul>
-</div></blockquote>
-<p>Default is <code class="docutils literal notranslate"><span class="pre">[]</span></code>.</p>
+<dt><strong>dtype</strong><span class="classifier">Union[np.float32, np.float64], optional</span></dt><dd><p>Underlying value type.
+Default is <code class="docutils literal notranslate"><span class="pre">np.float64</span></code>.</p>
 </dd>
-<dt><strong>axes</strong></dt><dd><p>Matplotlib axes object.</p>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>wrap</dt><dd><p>Wrapper matrix object.</p>
 </dd>
 </dl>
 </dd>
@@ -462,20 +462,20 @@ It must be a subset of the following:</p>
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.diagnostic.plot_rsqs.html"
+       href="adelie.matrix.snp_unphased.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.diagnostic.plot_rsqs</p>
+        <p class="prev-next-title">adelie.matrix.snp_unphased</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.diagnostic.plot_benchmark.html"
+       href="adelie.state.deduce_states.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.diagnostic.plot_benchmark</p>
+        <p class="prev-next-title">adelie.state.deduce_states</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -494,13 +494,13 @@ It must be a subset of the following:</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.diagnostic.plot_set_sizes"><code class="docutils literal notranslate"><span class="pre">plot_set_sizes()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.snp_phased_ancestry"><code class="docutils literal notranslate"><span class="pre">snp_phased_ancestry()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.diagnostic.plot_set_sizes.rst.txt">
+    <a href="../_sources/generated/adelie.matrix.snp_phased_ancestry.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>
