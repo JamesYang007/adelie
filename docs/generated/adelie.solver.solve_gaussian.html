@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.solver.solve_basil &#8212; adelie 1.1.7
+    <title>adelie.solver.solve_gaussian &#8212; adelie 1.1.7
  documentation</title>
   
   
@@ -41,7 +41,7 @@
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.solver.solve_basil';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.solver.solve_gaussian';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="adelie.solver.grpnet" href="adelie.solver.grpnet.html" />
@@ -344,16 +344,16 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov.html">adelie.state.pin_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.basil_naive.html">adelie.state.basil_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_pin.html">adelie.solver.solve_pin</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.solver.solve_basil</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.solver.solve_gaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateBasilNaive64.html">adelie.adelie_core.state.StateBasilNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StatePinBase64.html">adelie.adelie_core.state.StatePinBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StatePinCov64.html">adelie.adelie_core.state.StatePinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StatePinNaive64.html">adelie.adelie_core.state.StatePinNaive64</a></li>
@@ -417,16 +417,16 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-solver-solve-basil">
-<h1>adelie.solver.solve_basil<a class="headerlink" href="#adelie-solver-solve-basil" title="Link to this heading">#</a></h1>
+  <section id="adelie-solver-solve-gaussian">
+<h1>adelie.solver.solve_gaussian<a class="headerlink" href="#adelie-solver-solve-gaussian" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="adelie.solver.solve_basil">
-<span class="sig-prename descclassname"><span class="pre">adelie.solver.</span></span><span class="sig-name descname"><span class="pre">solve_basil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.solver.solve_basil" title="Link to this definition">#</a></dt>
-<dd><p>Solves the group elastic net problem using BASIL.</p>
+<dt class="sig sig-object py" id="adelie.solver.solve_gaussian">
+<span class="sig-prename descclassname"><span class="pre">adelie.solver.</span></span><span class="sig-name descname"><span class="pre">solve_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.solver.solve_gaussian" title="Link to this definition">#</a></dt>
+<dd><p>Solves the group elastic net problem with Gaussian loss.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>state</strong></dt><dd><p>A basil state object.</p>
+<dt><strong>state</strong></dt><dd><p>A state object.</p>
 </dd>
 </dl>
 </dd>
@@ -441,7 +441,7 @@ The type is the same as that of <code class="docutils literal notranslate"><span
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="adelie.state.basil_naive.html#adelie.state.basil_naive" title="adelie.state.basil_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.state.basil_naive</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.state.gaussian_naive.html#adelie.state.gaussian_naive" title="adelie.state.gaussian_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.state.gaussian_naive</span></code></a></dt><dd></dd>
 <dt><a class="reference internal" href="adelie.solver.objective.html#adelie.solver.objective" title="adelie.solver.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.solver.objective</span></code></a></dt><dd></dd>
 </dl>
 </div>
@@ -492,13 +492,13 @@ The type is the same as that of <code class="docutils literal notranslate"><span
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.solver.solve_basil"><code class="docutils literal notranslate"><span class="pre">solve_basil()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.solver.solve_gaussian"><code class="docutils literal notranslate"><span class="pre">solve_gaussian()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.solver.solve_basil.rst.txt">
+    <a href="../_sources/generated/adelie.solver.solve_gaussian.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

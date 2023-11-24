@@ -1,6 +1,0 @@
-﻿adelie.state.basil\_naive
-=========================
-
-.. currentmodule:: adelie.state
-
-.. autofunction:: basil_naive
