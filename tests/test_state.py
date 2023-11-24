@@ -102,7 +102,7 @@ def test_state_pin_cov():
     assert state.iters == 0
 
 
-def test_state_basil_naive():
+def test_state_gaussian_naive():
     n = 3
     p = 100
     G = 2
@@ -127,7 +127,7 @@ def test_state_basil_naive():
     screen_beta = np.zeros(p)
     screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
 
-    state = mod.basil_naive(
+    state = mod.gaussian_naive(
         X=X,
         X_means=X_means,
         y_mean=y_mean,

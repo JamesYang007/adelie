@@ -125,13 +125,13 @@ def solve_pin(state):
     return state
 
 
-def solve_basil(state):
-    """Solves the group elastic net problem using BASIL.
+def solve_gaussian(state):
+    """Solves the group elastic net problem with Gaussian loss.
 
     Parameters
     ----------
     state
-        A basil state object.
+        A state object.
 
     Returns
     -------
@@ -141,13 +141,13 @@ def solve_basil(state):
 
     See Also
     --------
-    adelie.state.basil_naive
+    adelie.state.gaussian_naive
     adelie.solver.objective
     """
     # mapping of each state type to the corresponding solver
     f_dict = {
-        core.state.StateBasilNaive64: core.solver.solve_basil_naive_64,
-        core.state.StateBasilNaive32: core.solver.solve_basil_naive_32,
+        core.state.StateGaussianNaive64: core.solver.solve_gaussian_naive_64,
+        core.state.StateGaussianNaive32: core.solver.solve_gaussian_naive_32,
     }
 
     # solve group elastic net
@@ -352,7 +352,7 @@ def grpnet(
     if not (lmda_path is None):
         lmda_path = np.flip(np.sort(lmda_path))
 
-    state = ad.state.basil_naive(
+    state = ad.state.gaussian_naive(
         X=X,
         X_means=X_means,
         y_mean=y_mean,
@@ -392,4 +392,4 @@ def grpnet(
     if check_state:
         state.check(y, method="assert")
 
-    return solve_basil(state)
+    return solve_gaussian(state)

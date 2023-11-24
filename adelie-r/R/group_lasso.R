@@ -1,7 +1,7 @@
 
-#' Group basil function
+#' Group gaussian function
 #' @export
-group_basil <- function(
+group_gaussian <- function(
     X,
     y,
     groups,
@@ -28,9 +28,9 @@ group_basil <- function(
 )
 {
     if (method == 'cov') {
-        method_f__ = group_basil_cov__
+        method_f__ = group_gaussian_cov__
     } else if (method == 'naive') {
-        method_f__ = group_basil_naive__
+        method_f__ = group_gaussian_naive__
     } else {
         stop("Unknown method type.")
     }

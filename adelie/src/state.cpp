@@ -3,7 +3,7 @@
 #include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/state/state_pin_cov.hpp>
 #include <adelie_core/state/state_pin_naive.hpp>
-#include <adelie_core/state/state_basil_naive.hpp>
+#include <adelie_core/state/state_gaussian_naive.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -551,20 +551,20 @@ void state_pin_cov(py::module_& m, const char* name)
 }
 
 // ========================================================================
-// Basil State 
+// Gaussian State 
 // ========================================================================
 
 template <class ValueType>
-void state_basil_base(py::module_& m, const char* name)
+void state_gaussian_base(py::module_& m, const char* name)
 {
-    using state_t = ad::state::StateBasilBase<ValueType>;
+    using state_t = ad::state::StateGaussianBase<ValueType>;
     using value_t = typename state_t::value_t;
     using safe_bool_t = typename state_t::safe_bool_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
     py::class_<state_t>(m, name, R"delimiter(
-        Base core state class for all basil methods.
+        Base core state class for all gaussian methods.
         )delimiter") 
         .def(py::init<
             const Eigen::Ref<const vec_index_t>&, 
@@ -915,25 +915,25 @@ void state_basil_base(py::module_& m, const char* name)
 }
 
 template <class MatrixType>
-class PyStateBasilNaive : public ad::state::StateBasilNaive<MatrixType>
+class PyStateGaussianNaive : public ad::state::StateGaussianNaive<MatrixType>
 {
-    using base_t = ad::state::StateBasilNaive<MatrixType>;
+    using base_t = ad::state::StateGaussianNaive<MatrixType>;
 public:
     using base_t::base_t;
-    PyStateBasilNaive(base_t&& base) : base_t(std::move(base)) {}
+    PyStateGaussianNaive(base_t&& base) : base_t(std::move(base)) {}
 };
 
 template <class MatrixType>
-void state_basil_naive(py::module_& m, const char* name)
+void state_gaussian_naive(py::module_& m, const char* name)
 {
     using matrix_t = MatrixType;
-    using state_t = ad::state::StateBasilNaive<matrix_t>;
+    using state_t = ad::state::StateGaussianNaive<matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
-    py::class_<state_t, base_t, PyStateBasilNaive<matrix_t>>(m, name)
+    py::class_<state_t, base_t, PyStateGaussianNaive<matrix_t>>(m, name)
         .def(py::init<
             matrix_t&,
             const Eigen::Ref<const vec_value_t>&,
@@ -1056,8 +1056,8 @@ void register_state(py::module_& m)
     state_pin_cov<ad::matrix::MatrixCovBase<double>>(m, "StatePinCov64");
     state_pin_cov<ad::matrix::MatrixCovBase<float>>(m, "StatePinCov32");
 
-    state_basil_base<double>(m, "StateBasilBase64");
-    state_basil_base<float>(m, "StateBasilBase32");
-    state_basil_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateBasilNaive64");
-    state_basil_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateBasilNaive32");
+    state_gaussian_base<double>(m, "StateGaussianBase64");
+    state_gaussian_base<float>(m, "StateGaussianBase32");
+    state_gaussian_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateGaussianNaive64");
+    state_gaussian_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateGaussianNaive32");
 }

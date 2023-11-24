@@ -59,9 +59,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// group_basil_cov__
-Rcpp::List group_basil_cov__(const Eigen::Map<Eigen::MatrixXd>& X, const Eigen::Map<Eigen::VectorXd>& y, const Eigen::Map<Eigen::VectorXi>& groups, const Eigen::Map<Eigen::VectorXi>& group_sizes, double alpha, const Eigen::Map<Eigen::VectorXd>& penalty, const Eigen::Map<Eigen::VectorXd>& user_lmdas_, size_t max_n_lambdas, size_t n_lambdas_iter, bool use_screen_rule, bool do_early_exit, bool verbose_diagnostic, size_t delta_screen_size, size_t max_screen_size, size_t max_n_cds, double tol, double rsq_slope_tol, double rsq_curv_tol, double newton_tol, size_t newton_max_iters, double min_ratio, size_t n_threads);
-RcppExport SEXP _adelie_group_basil_cov__(SEXP XSEXP, SEXP ySEXP, SEXP groupsSEXP, SEXP group_sizesSEXP, SEXP alphaSEXP, SEXP penaltySEXP, SEXP user_lmdas_SEXP, SEXP max_n_lambdasSEXP, SEXP n_lambdas_iterSEXP, SEXP use_screen_ruleSEXP, SEXP do_early_exitSEXP, SEXP verbose_diagnosticSEXP, SEXP delta_screen_sizeSEXP, SEXP max_screen_sizeSEXP, SEXP max_n_cdsSEXP, SEXP thrSEXP, SEXP cond_0_threshSEXP, SEXP cond_1_threshSEXP, SEXP newton_tolSEXP, SEXP newton_max_itersSEXP, SEXP min_ratioSEXP, SEXP n_threadsSEXP) {
+// group_gaussian_cov__
+Rcpp::List group_gaussian_cov__(const Eigen::Map<Eigen::MatrixXd>& X, const Eigen::Map<Eigen::VectorXd>& y, const Eigen::Map<Eigen::VectorXi>& groups, const Eigen::Map<Eigen::VectorXi>& group_sizes, double alpha, const Eigen::Map<Eigen::VectorXd>& penalty, const Eigen::Map<Eigen::VectorXd>& user_lmdas_, size_t max_n_lambdas, size_t n_lambdas_iter, bool use_screen_rule, bool do_early_exit, bool verbose_diagnostic, size_t delta_screen_size, size_t max_screen_size, size_t max_n_cds, double tol, double rsq_slope_tol, double rsq_curv_tol, double newton_tol, size_t newton_max_iters, double min_ratio, size_t n_threads);
+RcppExport SEXP _adelie_group_gaussian_cov__(SEXP XSEXP, SEXP ySEXP, SEXP groupsSEXP, SEXP group_sizesSEXP, SEXP alphaSEXP, SEXP penaltySEXP, SEXP user_lmdas_SEXP, SEXP max_n_lambdasSEXP, SEXP n_lambdas_iterSEXP, SEXP use_screen_ruleSEXP, SEXP do_early_exitSEXP, SEXP verbose_diagnosticSEXP, SEXP delta_screen_sizeSEXP, SEXP max_screen_sizeSEXP, SEXP max_n_cdsSEXP, SEXP thrSEXP, SEXP cond_0_threshSEXP, SEXP cond_1_threshSEXP, SEXP newton_tolSEXP, SEXP newton_max_itersSEXP, SEXP min_ratioSEXP, SEXP n_threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -87,13 +87,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< size_t >::type newton_max_iters(newton_max_itersSEXP);
     Rcpp::traits::input_parameter< double >::type min_ratio(min_ratioSEXP);
     Rcpp::traits::input_parameter< size_t >::type n_threads(n_threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(group_basil_cov__(X, y, groups, group_sizes, alpha, penalty, user_lmdas_, max_n_lambdas, n_lambdas_iter, use_screen_rule, do_early_exit, verbose_diagnostic, delta_screen_size, max_screen_size, max_n_cds, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, min_ratio, n_threads));
+    rcpp_result_gen = Rcpp::wrap(group_gaussian_cov__(X, y, groups, group_sizes, alpha, penalty, user_lmdas_, max_n_lambdas, n_lambdas_iter, use_screen_rule, do_early_exit, verbose_diagnostic, delta_screen_size, max_screen_size, max_n_cds, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, min_ratio, n_threads));
     return rcpp_result_gen;
 END_RCPP
 }
-// group_basil_naive__
-Rcpp::List group_basil_naive__(const Eigen::Map<Eigen::MatrixXd>& X, const Eigen::Map<Eigen::VectorXd>& y, const Eigen::Map<Eigen::VectorXi>& groups, const Eigen::Map<Eigen::VectorXi>& group_sizes, double alpha, const Eigen::Map<Eigen::VectorXd>& penalty, const Eigen::Map<Eigen::VectorXd>& user_lmdas_, size_t max_n_lambdas, size_t n_lambdas_iter, bool use_screen_rule, bool do_early_exit, bool verbose_diagnostic, size_t delta_screen_size, size_t max_screen_size, size_t max_n_cds, double tol, double rsq_slope_tol, double rsq_curv_tol, double newton_tol, size_t newton_max_iters, double min_ratio, size_t n_threads);
-RcppExport SEXP _adelie_group_basil_naive__(SEXP XSEXP, SEXP ySEXP, SEXP groupsSEXP, SEXP group_sizesSEXP, SEXP alphaSEXP, SEXP penaltySEXP, SEXP user_lmdas_SEXP, SEXP max_n_lambdasSEXP, SEXP n_lambdas_iterSEXP, SEXP use_screen_ruleSEXP, SEXP do_early_exitSEXP, SEXP verbose_diagnosticSEXP, SEXP delta_screen_sizeSEXP, SEXP max_screen_sizeSEXP, SEXP max_n_cdsSEXP, SEXP thrSEXP, SEXP cond_0_threshSEXP, SEXP cond_1_threshSEXP, SEXP newton_tolSEXP, SEXP newton_max_itersSEXP, SEXP min_ratioSEXP, SEXP n_threadsSEXP) {
+// group_gaussian_naive__
+Rcpp::List group_gaussian_naive__(const Eigen::Map<Eigen::MatrixXd>& X, const Eigen::Map<Eigen::VectorXd>& y, const Eigen::Map<Eigen::VectorXi>& groups, const Eigen::Map<Eigen::VectorXi>& group_sizes, double alpha, const Eigen::Map<Eigen::VectorXd>& penalty, const Eigen::Map<Eigen::VectorXd>& user_lmdas_, size_t max_n_lambdas, size_t n_lambdas_iter, bool use_screen_rule, bool do_early_exit, bool verbose_diagnostic, size_t delta_screen_size, size_t max_screen_size, size_t max_n_cds, double tol, double rsq_slope_tol, double rsq_curv_tol, double newton_tol, size_t newton_max_iters, double min_ratio, size_t n_threads);
+RcppExport SEXP _adelie_group_gaussian_naive__(SEXP XSEXP, SEXP ySEXP, SEXP groupsSEXP, SEXP group_sizesSEXP, SEXP alphaSEXP, SEXP penaltySEXP, SEXP user_lmdas_SEXP, SEXP max_n_lambdasSEXP, SEXP n_lambdas_iterSEXP, SEXP use_screen_ruleSEXP, SEXP do_early_exitSEXP, SEXP verbose_diagnosticSEXP, SEXP delta_screen_sizeSEXP, SEXP max_screen_sizeSEXP, SEXP max_n_cdsSEXP, SEXP thrSEXP, SEXP cond_0_threshSEXP, SEXP cond_1_threshSEXP, SEXP newton_tolSEXP, SEXP newton_max_itersSEXP, SEXP min_ratioSEXP, SEXP n_threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -119,7 +119,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< size_t >::type newton_max_iters(newton_max_itersSEXP);
     Rcpp::traits::input_parameter< double >::type min_ratio(min_ratioSEXP);
     Rcpp::traits::input_parameter< size_t >::type n_threads(n_threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(group_basil_naive__(X, y, groups, group_sizes, alpha, penalty, user_lmdas_, max_n_lambdas, n_lambdas_iter, use_screen_rule, do_early_exit, verbose_diagnostic, delta_screen_size, max_screen_size, max_n_cds, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, min_ratio, n_threads));
+    rcpp_result_gen = Rcpp::wrap(group_gaussian_naive__(X, y, groups, group_sizes, alpha, penalty, user_lmdas_, max_n_lambdas, n_lambdas_iter, use_screen_rule, do_early_exit, verbose_diagnostic, delta_screen_size, max_screen_size, max_n_cds, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, min_ratio, n_threads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -195,8 +195,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_adelie_ista_solver", (DL_FUNC) &_adelie_ista_solver, 6},
     {"_adelie_fista_solver", (DL_FUNC) &_adelie_fista_solver, 6},
     {"_adelie_fista_adares_solver", (DL_FUNC) &_adelie_fista_adares_solver, 6},
-    {"_adelie_group_basil_cov__", (DL_FUNC) &_adelie_group_basil_cov__, 22},
-    {"_adelie_group_basil_naive__", (DL_FUNC) &_adelie_group_basil_naive__, 22},
+    {"_adelie_group_gaussian_cov__", (DL_FUNC) &_adelie_group_gaussian_cov__, 22},
+    {"_adelie_group_gaussian_naive__", (DL_FUNC) &_adelie_group_gaussian_naive__, 22},
     {"_adelie_newton_solver", (DL_FUNC) &_adelie_newton_solver, 6},
     {"_adelie_newton_abs_solver", (DL_FUNC) &_adelie_newton_abs_solver, 6},
     {"_adelie_newton_abs_debug_solver", (DL_FUNC) &_adelie_newton_abs_debug_solver, 7},

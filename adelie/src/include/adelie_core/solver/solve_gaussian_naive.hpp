@@ -1,9 +1,9 @@
 #pragma once
 #include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/optimization/search_pivot.hpp>
-#include <adelie_core/solver/solve_basil_base.hpp>
+#include <adelie_core/solver/solve_gaussian_base.hpp>
 #include <adelie_core/solver/solve_pin_naive.hpp>
-#include <adelie_core/state/state_basil_naive.hpp>
+#include <adelie_core/state/state_gaussian_naive.hpp>
 #include <adelie_core/state/state_pin_naive.hpp>
 #include <adelie_core/util/algorithm.hpp>
 #include <adelie_core/util/stopwatch.hpp>
@@ -314,7 +314,7 @@ size_t kkt(
 template <class StateType,
           class UpdateCoefficientsType,
           class CUIType=util::no_op>
-inline void solve_basil(
+inline void solve_gaussian(
     StateType&& state,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()

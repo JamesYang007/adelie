@@ -1132,15 +1132,15 @@ def pin_cov(
     )
 
 
-class basil_base(base):
+class gaussian_base(base):
     pass
 
 
-class basil_naive_base(basil_base):
-    """State wrapper base class for all basil, naive method."""
+class gaussian_naive_base(gaussian_base):
+    """State wrapper base class for all gaussian, naive method."""
     def default_init(
         self, 
-        base_type: core.state.StateBasilNaive64 | core.state.StateBasilNaive32,
+        base_type: core.state.StateGaussianNaive64 | core.state.StateGaussianNaive32,
         *,
         X: matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
         X_means: np.ndarray,
@@ -1606,7 +1606,7 @@ class basil_naive_base(basil_base):
             )
 
     def update_path(self, path):
-        return basil_naive(
+        return gaussian_naive(
             X=self.X,
             X_means=self.X_means,
             y_mean=self.y_mean,
@@ -1644,7 +1644,7 @@ class basil_naive_base(basil_base):
         )
 
 
-def basil_naive(
+def gaussian_naive(
     *,
     X: matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
     X_means: np.ndarray,
@@ -1681,7 +1681,7 @@ def basil_naive(
     pivot_subset_min: int =1,
     pivot_slack_ratio: float =1.25,
 ):
-    """Creates a basil, naive method state object.
+    """Creates a gaussian, naive method state object.
 
     Parameters
     ----------
@@ -1820,7 +1820,7 @@ def basil_naive(
 
     See Also
     --------
-    adelie.adelie_core.state.StateBasilNaive64
+    adelie.adelie_core.state.StateGaussianNaive64
     """
     if not (
         isinstance(X, matrix.MatrixNaiveBase64) or 
@@ -1884,8 +1884,8 @@ def basil_naive(
     )
         
     dispatcher = {
-        np.float64: core.state.StateBasilNaive64,
-        np.float32: core.state.StateBasilNaive32,
+        np.float64: core.state.StateGaussianNaive64,
+        np.float32: core.state.StateGaussianNaive32,
     }
 
     core_base = dispatcher[dtype]
@@ -1896,12 +1896,12 @@ def basil_naive(
     if setup_lmda_max: lmda_max = -1
     if setup_lmda_path: lmda_path = np.empty(0, dtype=dtype)
 
-    class _basil_naive(basil_naive_base, core_base):
-        """State class for basil, naive method using 32-bit floating point."""
+    class _gaussian_naive(gaussian_naive_base, core_base):
+        """State class for gaussian, naive method using 32-bit floating point."""
 
         def __init__(self, *args, **kwargs):
             self._core_type = core_base
-            basil_naive_base.default_init(
+            gaussian_naive_base.default_init(
                 self,
                 core_base,
                 *args,
@@ -1912,12 +1912,12 @@ def basil_naive(
         @classmethod
         def create_from_core(cls, state, core_state):
             obj = base.create_from_core(
-                cls, state, core_state, _basil_naive, core_base,
+                cls, state, core_state, _gaussian_naive, core_base,
             )
-            basil_naive_base.__init__(obj)
+            gaussian_naive_base.__init__(obj)
             return obj
 
-    return _basil_naive(
+    return _gaussian_naive(
         X=X,
         X_means=X_means,
         y_mean=y_mean,

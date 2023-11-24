@@ -1,8 +1,8 @@
 #include <Rcpp.h>
 #include <RcppEigen.h>
-#include <adelie_core/optimization/group_basil_cov.hpp>
+#include <adelie_core/optimization/group_gaussian_cov.hpp>
 #include <adelie_core/optimization/group_elnet_cov.hpp>
-#include <adelie_core/optimization/group_basil_naive.hpp>
+#include <adelie_core/optimization/group_gaussian_naive.hpp>
 #include <adelie_core/optimization/group_elnet_naive.hpp>
 
 namespace gl_naive = adelie_core::naive;
@@ -10,7 +10,7 @@ namespace gl_cov = adelie_core::cov;
 
 //' @export
 // [[Rcpp::export]]
-Rcpp::List group_basil_cov__(
+Rcpp::List group_gaussian_cov__(
     const Eigen::Map<Eigen::MatrixXd>& X,
     const Eigen::Map<Eigen::VectorXd>& y,
     const Eigen::Map<Eigen::VectorXi>& groups,
@@ -39,8 +39,8 @@ Rcpp::List group_basil_cov__(
     std::vector<Eigen::SparseVector<double>> betas_out;
     std::vector<double> lmdas;
     std::vector<double> rsqs_out;
-    gl_cov::GroupBasilCheckpoint<double, int, int> checkpoint;
-    gl_cov::GroupBasilDiagnostic diagnostic;
+    gl_cov::GroupGaussianCheckpoint<double, int, int> checkpoint;
+    gl_cov::GroupGaussianDiagnostic diagnostic;
 
     const auto update_coefficients_f = [](
         const auto& L,
@@ -59,7 +59,7 @@ Rcpp::List group_basil_cov__(
     
     std::string error;
     try {
-        gl_cov::group_basil(
+        gl_cov::group_gaussian(
             X, y, groups, group_sizes, alpha, penalty, user_lmdas, 
             max_n_lambdas, n_lambdas_iter, use_screen_rule, do_early_exit, verbose_diagnostic, delta_screen_size, max_screen_size,
             max_n_cds, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, min_ratio, n_threads,
@@ -91,7 +91,7 @@ Rcpp::List group_basil_cov__(
 
 //' @export
 // [[Rcpp::export]]
-Rcpp::List group_basil_naive__(
+Rcpp::List group_gaussian_naive__(
     const Eigen::Map<Eigen::MatrixXd>& X,
     const Eigen::Map<Eigen::VectorXd>& y,
     const Eigen::Map<Eigen::VectorXi>& groups,
@@ -120,8 +120,8 @@ Rcpp::List group_basil_naive__(
     std::vector<Eigen::SparseVector<double>> betas_out;
     std::vector<double> lmdas;
     std::vector<double> rsqs_out;
-    gl_naive::GroupBasilCheckpoint<double, int, int> checkpoint;
-    gl_naive::GroupBasilDiagnostic diagnostic;
+    gl_naive::GroupGaussianCheckpoint<double, int, int> checkpoint;
+    gl_naive::GroupGaussianDiagnostic diagnostic;
 
     const auto update_coefficients_f = [](
         const auto& L,
@@ -140,7 +140,7 @@ Rcpp::List group_basil_naive__(
     
     std::string error;
     try {
-        gl_naive::group_basil(
+        gl_naive::group_gaussian(
             X, y, groups, group_sizes, alpha, penalty, user_lmdas, 
             max_n_lambdas, n_lambdas_iter, use_screen_rule, do_early_exit, verbose_diagnostic, delta_screen_size, max_screen_size,
             max_n_cds, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, min_ratio, n_threads,
