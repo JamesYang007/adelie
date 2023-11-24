@@ -107,7 +107,7 @@ adelie.state
     deduce_states
     pin_cov
     pin_naive
-    basil_naive
+    gaussian_naive
 
 
 adelie.solver
@@ -123,7 +123,7 @@ adelie.solver
 
     objective
     solve_pin
-    solve_basil
+    solve_gaussian
     grpnet
 
 
@@ -138,7 +138,7 @@ Internal
     :toctree: generated/
     
 
-    adelie_core.state.StateBasilNaive64
+    adelie_core.state.StateGaussianNaive64
     adelie_core.state.StatePinBase64
     adelie_core.state.StatePinCov64
     adelie_core.state.StatePinNaive64

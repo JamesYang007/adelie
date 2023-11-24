@@ -1,7 +1,7 @@
 from adelie.solver import (
     objective,
     solve_pin,
-    solve_basil,
+    solve_gaussian,
 )
 import adelie as ad
 import cvxpy as cp
@@ -312,7 +312,7 @@ def test_solve_pin_cov():
 
 
 # ========================================================================
-# TEST solve_basil
+# TEST solve_gaussian
 # ========================================================================
 
 
@@ -381,10 +381,10 @@ def create_dense(
     }
 
 
-def run_solve_basil(state, X, y):
+def run_solve_gaussian(state, X, y):
     state.check(y, method="assert")
 
-    state = solve_basil(state)    
+    state = solve_gaussian(state)    
 
     state.check(y, method="assert")
 
@@ -450,7 +450,7 @@ def run_solve_basil(state, X, y):
     return state
 
 
-def test_solve_basil():
+def test_solve_gaussian():
     def _test(n, p, G, intercept=True, alpha=1, sparsity=0.95, seed=0):
         test_data = create_dense(
             n, p, G, intercept, alpha, sparsity, seed,
@@ -462,12 +462,12 @@ def test_solve_basil():
         ]
         for Xpy in Xs:
             test_data["X"] = Xpy
-            state = ad.state.basil_naive(
+            state = ad.state.gaussian_naive(
                 **test_data,
                 tol=1e-11,
             )
-            state = run_solve_basil(state, X, y)
-            state = ad.state.basil_naive(
+            state = run_solve_gaussian(state, X, y)
+            state = ad.state.gaussian_naive(
                 X=state.X,
                 X_means=state.X_means,
                 y_mean=state.y_mean,
@@ -488,7 +488,7 @@ def test_solve_basil():
                 intercept=state.intercept,
                 tol=1e-11,
             )
-            run_solve_basil(state, X, y)
+            run_solve_gaussian(state, X, y)
 
     _test(10, 4, 2)
     _test(10, 100, 10)

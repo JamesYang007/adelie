@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <Eigen/Eigenvalues>
 #include <adelie_core/matrix/utils.hpp>
-#include <adelie_core/state/state_basil_base.hpp>
+#include <adelie_core/state/state_gaussian_base.hpp>
 
 namespace adelie_core {
 namespace state {
@@ -96,13 +96,13 @@ template <class MatrixType,
           class IndexType=Eigen::Index,
           class BoolType=bool
         >
-struct StateBasilNaive : StateBasilBase<
+struct StateGaussianNaive : StateGaussianBase<
         ValueType,
         IndexType,
         BoolType
     >
 {
-    using base_t = StateBasilBase<
+    using base_t = StateGaussianBase<
         ValueType,
         IndexType,
         BoolType
@@ -142,7 +142,7 @@ struct StateBasilNaive : StateBasilBase<
     dyn_vec_value_t screen_beta_prev_valid; 
     dyn_vec_bool_t screen_is_active_prev_valid;
 
-    explicit StateBasilNaive(
+    explicit StateGaussianNaive(
         matrix_t& X,
         const Eigen::Ref<const vec_value_t>& X_means,
         value_t y_mean,

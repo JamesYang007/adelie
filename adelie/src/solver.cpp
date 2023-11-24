@@ -1,11 +1,11 @@
 #include "decl.hpp"
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
-#include <adelie_core/state/state_basil_naive.hpp>
+#include <adelie_core/state/state_gaussian_naive.hpp>
 #include <adelie_core/state/state_pin_cov.hpp>
 #include <adelie_core/state/state_pin_naive.hpp>
-#include <adelie_core/solver/solve_basil_base.hpp>
-#include <adelie_core/solver/solve_basil_naive.hpp>
+#include <adelie_core/solver/solve_gaussian_base.hpp>
+#include <adelie_core/solver/solve_gaussian_naive.hpp>
 #include <adelie_core/solver/solve_pin_cov.hpp>
 #include <adelie_core/solver/solve_pin_naive.hpp>
 
@@ -111,11 +111,11 @@ py::dict solve_pin_cov(StateType state)
 } 
 
 // =================================================================
-// Solve Basil Method
+// Solve Gaussian Method
 // =================================================================
 
 template <class StateType>
-py::dict solve_basil_naive(StateType state)
+py::dict solve_gaussian_naive(StateType state)
 {
     const auto update_coefficients_f = [](
         const auto& L,
@@ -142,7 +142,7 @@ py::dict solve_basil_naive(StateType state)
 
     std::string error;
     try {
-        ad::solver::naive::solve_basil(state, update_coefficients_f, check_user_interrupt);
+        ad::solver::naive::solve_gaussian(state, update_coefficients_f, check_user_interrupt);
     } catch(const std::exception& e) {
         error = e.what(); 
     }
@@ -155,7 +155,7 @@ using state_pin_naive_t = ad::state::StatePinNaive<ad::matrix::MatrixNaiveBase<T
 template <class T> 
 using state_pin_cov_t = ad::state::StatePinCov<ad::matrix::MatrixCovBase<T>>;
 template <class T> 
-using state_basil_naive_t = ad::state::StateBasilNaive<ad::matrix::MatrixNaiveBase<T>>;
+using state_gaussian_naive_t = ad::state::StateGaussianNaive<ad::matrix::MatrixNaiveBase<T>>;
 
 void register_solver(py::module_& m)
 {
@@ -168,7 +168,7 @@ void register_solver(py::module_& m)
     m.def("solve_pin_cov_64", &solve_pin_cov<state_pin_cov_t<double>>);
     m.def("solve_pin_cov_32", &solve_pin_cov<state_pin_cov_t<float>>);
 
-    /* solve basil method */
-    m.def("solve_basil_naive_64", &solve_basil_naive<state_basil_naive_t<double>>);
-    m.def("solve_basil_naive_32", &solve_basil_naive<state_basil_naive_t<float>>);
+    /* solve gaussian method */
+    m.def("solve_gaussian_naive_64", &solve_gaussian_naive<state_gaussian_naive_t<double>>);
+    m.def("solve_gaussian_naive_32", &solve_gaussian_naive<state_gaussian_naive_t<float>>);
 }

@@ -166,7 +166,7 @@ template <class ValueType,
           class IndexType=Eigen::Index,
           class BoolType=bool
         >
-struct StateBasilBase
+struct StateGaussianBase
 {
     using value_t = ValueType;
     using index_t = IndexType;
@@ -197,7 +197,7 @@ struct StateBasilBase
     const value_t min_ratio;
     const size_t lmda_path_size;
 
-    // basil iteration configs
+    // iteration configs
     const size_t max_screen_size;
     const value_t pivot_subset_ratio;
     const size_t pivot_subset_min;
@@ -254,9 +254,9 @@ struct StateBasilBase
     std::vector<int> active_sizes;
     std::vector<int> screen_sizes;
 
-    virtual ~StateBasilBase() =default;
+    virtual ~StateGaussianBase() =default;
 
-    explicit StateBasilBase(
+    explicit StateGaussianBase(
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
