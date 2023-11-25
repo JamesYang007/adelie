@@ -1,7 +1,5 @@
 #pragma once
-#include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/optimization/search_pivot.hpp>
-#include <adelie_core/solver/solve_gaussian_base.hpp>
 #include <adelie_core/solver/solve_pin_naive.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
 #include <adelie_core/state/state_pin_naive.hpp>
