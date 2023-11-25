@@ -4,7 +4,6 @@
 #include <adelie_core/state/state_gaussian_naive.hpp>
 #include <adelie_core/state/state_pin_cov.hpp>
 #include <adelie_core/state/state_pin_naive.hpp>
-#include <adelie_core/solver/solve_gaussian_base.hpp>
 #include <adelie_core/solver/solve_gaussian_naive.hpp>
 #include <adelie_core/solver/solve_pin_cov.hpp>
 #include <adelie_core/solver/solve_pin_naive.hpp>

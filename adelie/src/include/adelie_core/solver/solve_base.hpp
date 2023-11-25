@@ -6,6 +6,9 @@
 namespace adelie_core {
 namespace solver {
 
+/**
+ * TODO: not currently used
+ */
 template <class BetasType, class RotationsType, class IndexType>
 ADELIE_CORE_STRONG_INLINE
 void untransform_beta(
