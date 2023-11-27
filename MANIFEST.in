@@ -9,4 +9,5 @@ prune dist
 prune docs
 prune r-adelie
 prune research
+prune adelie/research
 prune tests

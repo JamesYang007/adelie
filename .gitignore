@@ -21,4 +21,3 @@ bazel-out
 bazel-testlogs
 .bazelrc
 .vscode
-data/*
