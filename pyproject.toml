@@ -68,8 +68,8 @@ numpydoc = "^1.6.0"
 nbsphinx = "^0.9.3"
 
 [tool.poetry.group.dev.dependencies]
-pybind11 = "^2.11.1"
 pandas = "^1.5.3"
+pybind11 = "^2.11.1"
 pre-commit = "^3.1.1"
 ipython = "^8.11.0"
 nbformat = "^5.7.3"
