@@ -9,7 +9,9 @@ def phe_to_csv(
     phenotype: str,
     dest: str,
 ):
+    logger.logger.info("Reading master CSV.")
     master_df = pd.read_csv(src, sep='\t', usecols=['IID', phenotype])
+    logger.logger.info(f"Saving IID/{phenotype} CSV.")
     master_df.to_csv(dest, sep=",", index=False)
     return master_df
 
