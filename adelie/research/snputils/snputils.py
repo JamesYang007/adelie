@@ -1,7 +1,9 @@
+import logging
+import adelie as ad
 import adelie.logger as logger
 import pandas as pd
 import numpy as np
-from tqdm import tqdm
+import os
 
 
 def phe_to_csv(
@@ -16,8 +18,11 @@ def phe_to_csv(
     return master_df
 
 
-def pgen_to_csv(
-    src: str,    
+def gen_to_snpdat(
+    pgen: str,    
+    pvar: str,
+    psam: str,
+    msp: str,
     dest: str,
 ):
     """Converts a PGEN file to CSV file.
@@ -33,11 +38,12 @@ def pgen_to_csv(
     # We do not perform a global import since this module cannot be loaded on Mac M1 then.
     import pgenlib as pg
 
-    encoded_pgen_path = str.encode(src)
+    # instantiate PGEN reader
     pgen_reader = pg.PgenReader(
-        encoded_pgen_path,
+        str.encode(pgen),
     )
 
+    # create calldata array
     calldata_shape = (pgen_reader.get_variant_ct(), 2 * pgen_reader.get_raw_sample_ct())
     logger.logger.info(f"calldata shape: {calldata.shape}")
     calldata = np.empty(
@@ -45,39 +51,76 @@ def pgen_to_csv(
         dtype=np.int8,
     )
 
+    # store calldata
     logger.logger.info(f"Reading PGEN file.")
     pgen_reader.read_alleles_range(0, pgen_reader.get_variant_ct(), calldata)
     pgen_reader.close() 
 
-    logger.logger.info(f"Saving calldata as CSV.")
-    np.savetxt(dest, calldata, delimiter=",")
+    # load PGEN metadata
+    logger.logger.info(f"Loading PGEN metadata.")
+    pvar_df = pd.read_csv(
+        pvar, 
+        sep='\t', 
+        comment='#',
+        header=None, 
+        names=['CHROM', 'POS', 'ID', 'REF', 'ALT'],
+        dtype={'CHROM': str},
+    )
+    psam_df = pd.read_csv(psam, sep='\t')
 
-    return calldata
-
-
-def msp_to_csv(
-    src: str,
-    dest: str,
-):
-    """Converts MSP file to CSV.
-
-    Parameters
-    ----------
-    src : str
-        MSP filename.
-    dest : str
-        CSV filename.
-    """
+    # instantiate MSP reader
     import msp_reader
-    reader = msp_reader.MSPReader(src)
+    reader = msp_reader.MSPReader(msp)
 
     logger.logger.info(f"Reading MSP file.")
     snpobj = reader.read()
 
-    logger.logger.info(f"Saving LAI as CSV.")
-    np.savetxt(dest, snpobj.lai, delimiter=",")
+    # check that IIDs match up.
+    logger.logger.info(f"Checking that IIDs are exactly the same in MSP and PSAM.")
+    psam_iids = psam_df["IID"].to_numpy()
+    psam_iids_order = np.argsort(psam_iids)
+    msp_iids = np.array([int(i) for i in snpobj.sample_IDs], dtype=np.uint32)
+    msp_iids_order = np.argsort(msp_iids)
 
-    return snpobj.lai
+    assert np.equal(psam_iids[psam_iids_order], msp_iids[msp_iids_order])
+
+    # check that LAI SNPs contain all PVAR SNPs
+    assert np.equal(np.sort(pvar_df["POS"]), pvar_df["POS"])
+    assert snpobj.physical_pos[0, 0] <= pvar_df["POS"][0]
+    assert snpobj.physical_pos[-1, 1] > pvar_df["POS"][-1]
+    # TODO: check that physical_pos is always increasing windows?
+
+    calldata = np.transpose(
+        calldata.reshape((calldata.shape[0], calldata.shape[1], 2)),
+        (1, 0, 2),
+    )[psam_iids_order]
+    calldata = calldata.reshape((calldata.shape[0], -1))
+    calldata = np.array(calldata, copy=False, order="C", dtype=np.int8)
+
+    lai = np.repeat(
+        snpobj.lai,
+        snpobj.physical_pos[:, 1] - snpobj.physical_pos[:, 0],
+        axis=0,
+    )
+    lai = np.transpose(
+        lai.reshape((lai.shape[0], lai.shape[1], 2)),
+        (1, 0, 2),
+    )[msp_iids_order]
+    lai = lai.reshape((lai.shape[0], -1))
+    lai = np.array(lai, copy=False, order="C", dtype=np.int8)
+
+    assert calldata.shape == lai.shape
+
+    # convert to snpdat
+    handler = ad.io.snp_phased_ancestry(dest)
+    handler.write(
+        calldata=calldata,
+        ancestries=lai,
+        A=8,
+        n_threads=os.cpu_count() // 2,
+    )
+
+    return calldata, lai
 
 
 def common_iids(
