@@ -1,3 +1,4 @@
+from typing import Union
 from . import adelie_core as core
 from . import matrix
 from . import logger
@@ -536,9 +537,9 @@ class pin_naive_base(pin_base):
     """State wrapper base class for all pin, naive method."""
     def default_init(
         self, 
-        base_type: core.state.StatePinNaive64 | core.state.StatePinNaive32,
+        base_type: Union[core.state.StatePinNaive64, core.state.StatePinNaive32],
         *,
-        X: matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
+        X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
         y_mean: float,
         y_var: float,
         groups: np.ndarray,
@@ -561,7 +562,7 @@ class pin_naive_base(pin_base):
         newton_tol: float,
         newton_max_iters: int,
         n_threads: int,
-        dtype: np.float32 | np.float64,
+        dtype: Union[np.float32, np.float64],
     ):
         """Default initialization method.
         """
@@ -683,7 +684,7 @@ class pin_naive_base(pin_base):
 
 def pin_naive(
     *,
-    X: matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
+    X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
     y_mean: float,
     y_var: float,
     groups: np.ndarray,
@@ -864,9 +865,9 @@ class pin_cov_base(pin_base):
     """State wrapper base class for all pin, covariance method."""
     def default_init(
         self, 
-        base_type: core.state.StatePinCov64 | core.state.StatePinCov32,
+        base_type: Union[core.state.StatePinCov64, core.state.StatePinCov32],
         *,
-        A: matrix.MatrixCovBase64 | matrix.MatrixCovBase32,
+        A: Union[matrix.MatrixCovBase64, matrix.MatrixCovBase32],
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -884,7 +885,7 @@ class pin_cov_base(pin_base):
         newton_tol: float,
         newton_max_iters: int,
         n_threads: int,
-        dtype: np.float32 | np.float64,
+        dtype: Union[np.float32, np.float64],
     ):
         """Default initialization method.
         """
@@ -972,7 +973,7 @@ class pin_cov_base(pin_base):
 
 def pin_cov(
     *,
-    A: matrix.MatrixCovBase64 | matrix.MatrixCovBase32,
+    A: Union[matrix.MatrixCovBase64, matrix.MatrixCovBase32],
     groups: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
@@ -1140,9 +1141,9 @@ class gaussian_naive_base(gaussian_base):
     """State wrapper base class for all gaussian, naive method."""
     def default_init(
         self, 
-        base_type: core.state.StateGaussianNaive64 | core.state.StateGaussianNaive32,
+        base_type: Union[core.state.StateGaussianNaive64, core.state.StateGaussianNaive32],
         *,
-        X: matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
+        X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
         X_means: np.ndarray,
         y_mean: float,
         y_var: float,
@@ -1179,7 +1180,7 @@ class gaussian_naive_base(gaussian_base):
         rsq: float,
         lmda: float,
         grad: np.ndarray,
-        dtype: np.float32 | np.float64,
+        dtype: Union[np.float32, np.float64],
     ):
         """Default initialization method.
         """
@@ -1646,7 +1647,7 @@ class gaussian_naive_base(gaussian_base):
 
 def gaussian_naive(
     *,
-    X: matrix.MatrixNaiveBase64 | matrix.MatrixNaiveBase32,
+    X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
     X_means: np.ndarray,
     y_mean: float,
     y_var: float,
