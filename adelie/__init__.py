@@ -5,6 +5,7 @@ from . import diagnostic
 from . import io
 from . import matrix
 from . import optimization
+from . import research
 from . import state
 from . import solver
 from .solver import grpnet
