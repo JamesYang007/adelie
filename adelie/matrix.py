@@ -1,3 +1,4 @@
+from typing import Union
 from . import adelie_core as core
 from .adelie_core.matrix import (
     MatrixNaiveBase64,
@@ -89,7 +90,7 @@ def snp_unphased(
     filenames: list,
     *,
     n_threads: int =1,
-    dtype: np.float32 | np.float64 =np.float64,
+    dtype: Union[np.float32, np.float64] =np.float64,
 ):
     """Creates a SNP unphased matrix.
 
@@ -136,7 +137,7 @@ def snp_phased_ancestry(
     filenames: list,
     *,
     n_threads: int =1,
-    dtype: np.float32 | np.float64 =np.float64,
+    dtype: Union[np.float32, np.float64] =np.float64,
 ):
     """Creates a SNP phased ancestry matrix.
 
