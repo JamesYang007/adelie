@@ -26,19 +26,18 @@ ParallelCompile("NPY_NUM_BUILD_JOBS").install()
 __version__ = open("VERSION", "r").read()
 
 ENVPATH = os.getenv("CONDA_PREFIX")
-ROOTPATH = os.path.abspath(os.getcwd())
 
 # copy Eigen header files to src/third_party if Eigen exists in conda
-EIGENPATH = os.path.join(ENVPATH, "include/eigen3")
-if os.path.exists(EIGENPATH):
-    if not os.path.exists("adelie/src/third_party"):
-        os.mkdir("adelie/src/third_party")
-    if not os.path.exists("adelie/src/third_party/eigen3"):
-        os.mkdir("adelie/src/third_party/eigen3")
-    copy_tree(
-        EIGENPATH,
-        os.path.abspath("adelie/src/third_party/eigen3"),
-    )
+#EIGENPATH = os.path.join(ENVPATH, "include/eigen3")
+#if os.path.exists(EIGENPATH):
+#    if not os.path.exists("adelie/src/third_party"):
+#        os.mkdir("adelie/src/third_party")
+#    if not os.path.exists("adelie/src/third_party/eigen3"):
+#        os.mkdir("adelie/src/third_party/eigen3")
+#    copy_tree(
+#        EIGENPATH,
+#        os.path.abspath("adelie/src/third_party/eigen3"),
+#    )
 
 extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
 extra_compile_args += ["-Wall", "-Wextra", "-DNDEBUG", "-O3"]
