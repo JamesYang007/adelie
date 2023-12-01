@@ -3,6 +3,7 @@ import adelie as ad
 import adelie.logger as logger
 import pandas as pd
 import numpy as np
+import pickle
 import os
 
 
@@ -11,6 +12,22 @@ def phe_to_csv(
     phenotype: str,
     dest: str,
 ):
+    """Converts master phenotype file to a smaller CSV file with one phenotype.
+
+    Parameters
+    ----------
+    src : str
+        Master phenotype filename.
+    phenotype : str
+        Phenotype ID in master phenotype file.
+    dest : str
+        Smaller CSV filename.
+
+    Returns
+    -------
+    df : pandas.DataFrame
+        Dataframe with IID and given phenotype.
+    """
     logger.logger.info("Reading master CSV.")
     master_df = pd.read_csv(src, sep='\t', usecols=['IID', phenotype])
     logger.logger.info(f"Saving IID/{phenotype} CSV.")
@@ -18,12 +35,46 @@ def phe_to_csv(
     return master_df
 
 
+def pickle_msp(
+    src: str, 
+    dest: str,
+    iids: np.ndarray,
+):
+    """Reads and pickles MSP object.
+
+    Parameters
+    ----------
+    src : str
+        MSP filename.
+    dest : str
+        Pickle filename.
+    iids : np.ndarray
+        Subset of IIDs.
+    
+    Returns
+    -------
+    snpobj
+        The resulting object from reading the MSP file using ``msp_reader.MSPReader``.
+    """
+    from . import msp_reader
+    reader = msp_reader.MSPReader(src)
+    logger.logger.info(f"Reading MSP file.")
+    snpobj = reader.read(
+        usecols=reader.iid_to_msp_cols(iids),
+    )
+    logger.logger.info("Pickling MSP object.")
+    with open(dest, 'wb') as handle:
+        pickle.dump(snpobj, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    return snpobj
+
+
 def gen_to_snpdat(
     pgen: str,    
     pvar: str,
-    psam: str,
-    msp: str,
+    msp_pkl: str,
     dest: str,
+    pgen_indices: np.ndarray,
+    iids: np.ndarray,
 ):
     """Converts a PGEN file to CSV file.
 
@@ -41,20 +92,27 @@ def gen_to_snpdat(
     # instantiate PGEN reader
     pgen_reader = pg.PgenReader(
         str.encode(pgen),
+	    sample_subset=pgen_indices,
     )
 
     # create calldata array
-    calldata_shape = (pgen_reader.get_variant_ct(), 2 * pgen_reader.get_raw_sample_ct())
-    logger.logger.info(f"calldata shape: {calldata.shape}")
+    calldata_shape = (pgen_reader.get_variant_ct(), 2 * len(pgen_indices))
+    logger.logger.info(f"calldata shape: {calldata_shape}")
     calldata = np.empty(
         calldata_shape,
-        dtype=np.int8,
+        dtype=np.int32,
     )
 
     # store calldata
     logger.logger.info(f"Reading PGEN file.")
     pgen_reader.read_alleles_range(0, pgen_reader.get_variant_ct(), calldata)
-    pgen_reader.close() 
+    pgen_reader.close()
+    calldata = np.transpose(
+        calldata.astype(np.int8).reshape((calldata.shape[0], calldata.shape[1] // 2, 2)),
+        (1, 0, 2),
+    )
+    calldata = calldata.reshape((calldata.shape[0], -1))
+    calldata = np.array(calldata, copy=False, order="C", dtype=np.int8)
 
     # load PGEN metadata
     logger.logger.info(f"Loading PGEN metadata.")
@@ -66,61 +124,43 @@ def gen_to_snpdat(
         names=['CHROM', 'POS', 'ID', 'REF', 'ALT'],
         dtype={'CHROM': str},
     )
-    psam_df = pd.read_csv(psam, sep='\t')
 
-    # instantiate MSP reader
-    import msp_reader
-    reader = msp_reader.MSPReader(msp)
-
-    logger.logger.info(f"Reading MSP file.")
-    snpobj = reader.read()
-
-    # check that IIDs match up.
-    logger.logger.info(f"Checking that IIDs are exactly the same in MSP and PSAM.")
-    psam_iids = psam_df["IID"].to_numpy()
-    psam_iids_order = np.argsort(psam_iids)
-    msp_iids = np.array([int(i) for i in snpobj.sample_IDs], dtype=np.uint32)
-    msp_iids_order = np.argsort(msp_iids)
-
-    assert np.equal(psam_iids[psam_iids_order], msp_iids[msp_iids_order])
-
-    # check that LAI SNPs contain all PVAR SNPs
-    assert np.equal(np.sort(pvar_df["POS"]), pvar_df["POS"])
-    assert snpobj.physical_pos[0, 0] <= pvar_df["POS"][0]
-    assert snpobj.physical_pos[-1, 1] > pvar_df["POS"][-1]
-    # TODO: check that physical_pos is always increasing windows?
-
-    calldata = np.transpose(
-        calldata.reshape((calldata.shape[0], calldata.shape[1], 2)),
-        (1, 0, 2),
-    )[psam_iids_order]
-    calldata = calldata.reshape((calldata.shape[0], -1))
-    calldata = np.array(calldata, copy=False, order="C", dtype=np.int8)
-
-    lai = np.repeat(
-        snpobj.lai,
-        snpobj.physical_pos[:, 1] - snpobj.physical_pos[:, 0],
-        axis=0,
+    # instantiate MSP object
+    logger.logger.info(f"Loading MSP object.")
+    with open(msp_pkl, "rb") as f:
+        snpobj = pickle.load(f)
+    assert np.allclose(
+        [int(x) for x in snpobj.sample_IDs], 
+        iids,
     )
+
+    lai_indices = np.searchsorted(
+        snpobj.physical_pos[:, 0], 
+        pvar_df['POS'], 
+        side='right',
+    ) - 1
+    assert np.all(lai_indices >= 0)
+    lai = snpobj.lai.astype(np.int8)[lai_indices]
     lai = np.transpose(
-        lai.reshape((lai.shape[0], lai.shape[1], 2)),
+        lai.reshape((lai.shape[0], lai.shape[1] // 2, 2)),
         (1, 0, 2),
-    )[msp_iids_order]
+    )
     lai = lai.reshape((lai.shape[0], -1))
     lai = np.array(lai, copy=False, order="C", dtype=np.int8)
 
     assert calldata.shape == lai.shape
 
     # convert to snpdat
+    logger.logger.info("Saving as snpdat.")
     handler = ad.io.snp_phased_ancestry(dest)
-    handler.write(
+    bytes_written = handler.write(
         calldata=calldata,
         ancestries=lai,
         A=8,
         n_threads=os.cpu_count() // 2,
     )
 
-    return calldata, lai
+    return calldata, lai, bytes_written
 
 
 def common_iids(
@@ -134,7 +174,7 @@ def common_iids(
     phe_iids = master_df.iloc[phe_iids, 0]
 
     # get MSP IIDs and intersect with previous
-    import msp_reader
+    from . import msp_reader
     reader = msp_reader.MSPReader(msp)
     header = reader.read_header()
     msp_iids = reader.get_iids(header)
