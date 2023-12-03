@@ -222,7 +222,7 @@ def create_snp_unphased(
     y = X_sub @ beta_sub + noise_scale * np.random.normal(0, 1, n)
 
     return {
-        "X": X, 
+        "X": np.asfortranarray(X), 
         "y": y,
         "groups": groups,
         "group_sizes": group_sizes,
@@ -342,8 +342,8 @@ def create_snp_phased_ancestry(
     y = X_sub @ beta_sub + noise_scale * np.random.normal(0, 1, n)
 
     return {
-        "X": X, 
-        "ancestries": ancestries,
+        "X": np.asfortranarray(X), 
+        "ancestries": np.asfortranarray(ancestries),
         "y": y,
         "groups": groups,
         "group_sizes": group_sizes,
