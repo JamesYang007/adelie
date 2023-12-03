@@ -35,3 +35,10 @@ pip3 install -e .
 where `<partition>` is your favorite partition on the cluster and `<adelie path>` is the local path to the cloned repository.
 __Note: if RAM is too small (e.g. default setting), then the installation fails!__
 This will install `adelie` in editable mode, which is the preferred mode for development.
+
+## Multi-Threaded Run
+
+It is useful to run `adelie` using multiple cores. 
+Note that `os.cpu_count()` will return all available cores on the host machine,
+which may not be the same number of CPUs that the user is bound to by Sherlock.
+If the user allocates for `n` CPUs using Sherlock, then manually set `n_threads` to be `n`.
