@@ -14,6 +14,7 @@ def create_calldata(
     calldata.ravel()[
         np.random.choice(np.arange(n * p), int(0.05 * n * p), replace=False)
     ] = 2
+    calldata = np.asfortranarray(calldata)
     return calldata
 
 

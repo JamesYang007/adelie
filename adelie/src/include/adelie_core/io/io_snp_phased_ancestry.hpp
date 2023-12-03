@@ -15,6 +15,7 @@ public:
     using vec_inner_t = util::rowvec_type<inner_t>;
     using vec_value_t = util::rowvec_type<value_t>;
     using rowarr_value_t = util::rowarr_type<value_t>;
+    using colarr_value_t = util::colarr_type<value_t>;
 
 protected:
     static constexpr size_t _multiplier = (
@@ -122,8 +123,8 @@ public:
     }
 
     size_t write(
-        const Eigen::Ref<const rowarr_value_t>& calldata,
-        const Eigen::Ref<const rowarr_value_t>& ancestries,
+        const Eigen::Ref<const colarr_value_t>& calldata,
+        const Eigen::Ref<const colarr_value_t>& ancestries,
         size_t A,
         size_t n_threads
     )
