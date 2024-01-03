@@ -1,8 +1,8 @@
 #include "decl.hpp"
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
-#include <adelie_core/state/state_pin_cov.hpp>
-#include <adelie_core/state/state_pin_naive.hpp>
+#include <adelie_core/state/state_gaussian_pin_cov.hpp>
+#include <adelie_core/state/state_gaussian_pin_naive.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
 
 namespace py = pybind11;
@@ -68,7 +68,7 @@ static auto convert_betas(
 template <class ValueType>
 void state_pin_base(py::module_& m, const char* name)
 {
-    using state_t = ad::state::StatePinBase<ValueType>;
+    using state_t = ad::state::gaussian::StatePinBase<ValueType>;
     using index_t = typename state_t::index_t;
     using value_t = typename state_t::value_t;
     using vec_index_t = typename state_t::vec_index_t;
@@ -331,9 +331,9 @@ void state_pin_base(py::module_& m, const char* name)
 }
 
 template <class MatrixType>
-class PyStatePinNaive : public ad::state::StatePinNaive<MatrixType>
+class PyStatePinNaive : public ad::state::gaussian::StatePinNaive<MatrixType>
 {
-    using base_t = ad::state::StatePinNaive<MatrixType>;
+    using base_t = ad::state::gaussian::StatePinNaive<MatrixType>;
 public:
     using base_t::base_t;
     PyStatePinNaive(base_t&& base) : base_t(std::move(base)) {}
@@ -343,7 +343,7 @@ template <class MatrixType>
 void state_pin_naive(py::module_& m, const char* name)
 {
     using matrix_t = MatrixType;
-    using state_t = ad::state::StatePinNaive<matrix_t>;
+    using state_t = ad::state::gaussian::StatePinNaive<matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_index_t = typename state_t::vec_index_t;
@@ -459,9 +459,9 @@ void state_pin_naive(py::module_& m, const char* name)
 }
 
 template <class MatrixType>
-class PyStatePinCov : public ad::state::StatePinCov<MatrixType>
+class PyStatePinCov : public ad::state::gaussian::StatePinCov<MatrixType>
 {
-    using base_t = ad::state::StatePinCov<MatrixType>;
+    using base_t = ad::state::gaussian::StatePinCov<MatrixType>;
 public:
     using base_t::base_t;
     PyStatePinCov(base_t&& base) : base_t(std::move(base)) {}
@@ -471,7 +471,7 @@ template <class MatrixType>
 void state_pin_cov(py::module_& m, const char* name)
 {
     using matrix_t = MatrixType;
-    using state_t = ad::state::StatePinCov<matrix_t>;
+    using state_t = ad::state::gaussian::StatePinCov<matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_index_t = typename state_t::vec_index_t;
@@ -557,7 +557,7 @@ void state_pin_cov(py::module_& m, const char* name)
 template <class ValueType>
 void state_gaussian_base(py::module_& m, const char* name)
 {
-    using state_t = ad::state::StateGaussianBase<ValueType>;
+    using state_t = ad::state::gaussian::StateGaussianBase<ValueType>;
     using value_t = typename state_t::value_t;
     using safe_bool_t = typename state_t::safe_bool_t;
     using vec_value_t = typename state_t::vec_value_t;
@@ -687,9 +687,9 @@ void state_gaussian_base(py::module_& m, const char* name)
         )delimiter")
         .def_property_readonly("screen_rule", [](const state_t& s) -> std::string {
             switch (s.screen_rule) {
-                case ad::state::screen_rule_type::_strong:
+                case ad::util::screen_rule_type::_strong:
                     return "strong";
-                case ad::state::screen_rule_type::_pivot:
+                case ad::util::screen_rule_type::_pivot:
                     return "pivot";
             }
             throw std::runtime_error("Invalid strong rule type!");
@@ -915,9 +915,9 @@ void state_gaussian_base(py::module_& m, const char* name)
 }
 
 template <class MatrixType>
-class PyStateGaussianNaive : public ad::state::StateGaussianNaive<MatrixType>
+class PyStateGaussianNaive : public ad::state::gaussian::StateGaussianNaive<MatrixType>
 {
-    using base_t = ad::state::StateGaussianNaive<MatrixType>;
+    using base_t = ad::state::gaussian::StateGaussianNaive<MatrixType>;
 public:
     using base_t::base_t;
     PyStateGaussianNaive(base_t&& base) : base_t(std::move(base)) {}
@@ -927,7 +927,7 @@ template <class MatrixType>
 void state_gaussian_naive(py::module_& m, const char* name)
 {
     using matrix_t = MatrixType;
-    using state_t = ad::state::StateGaussianNaive<matrix_t>;
+    using state_t = ad::state::gaussian::StateGaussianNaive<matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;

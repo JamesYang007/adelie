@@ -7,6 +7,7 @@
 
 namespace adelie_core {
 namespace state {
+namespace gaussian {
 
 template <class GroupsType, class GroupSizesType,
           class PenaltyType, class GradType, 
@@ -360,5 +361,6 @@ struct StateGaussianBase
     }
 };
 
+} // namespace gaussian
 } // namespace state
 } // namespace adelie_core

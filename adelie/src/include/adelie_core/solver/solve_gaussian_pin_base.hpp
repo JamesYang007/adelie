@@ -5,6 +5,7 @@
 
 namespace adelie_core {
 namespace solver {
+namespace gaussian {
 
 /**
  * Pack of buffers used in solvers.
@@ -237,5 +238,6 @@ auto objective(
     return 0.5 * (weights * resid.square()).sum() + p_;
 }
 
+} // namespace gaussian
 } // namespace solver
 } // namespace adelie_core
