@@ -1,8 +1,8 @@
 #pragma once
 #include <adelie_core/optimization/search_pivot.hpp>
-#include <adelie_core/solver/solve_pin_naive.hpp>
+#include <adelie_core/solver/solve_gaussian_pin_naive.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
-#include <adelie_core/state/state_pin_naive.hpp>
+#include <adelie_core/state/state_gaussian_pin_naive.hpp>
 #include <adelie_core/util/algorithm.hpp>
 #include <adelie_core/util/stopwatch.hpp>
 
@@ -171,7 +171,7 @@ void screen(
     }
 
     /* update derived strong quantities */
-    state::update_screen_derived_naive(state);
+    state::gaussian::update_screen_derived_naive(state);
 
 }
 
@@ -194,7 +194,7 @@ auto fit(
     using vec_index_t = typename state_t::vec_index_t;
     using vec_safe_bool_t = util::rowvec_type<safe_bool_t>;
     using matrix_pin_naive_t = typename state_t::matrix_t;
-    using state_pin_naive_t = state::StatePinNaive<
+    using state_pin_naive_t = state::gaussian::StatePinNaive<
         matrix_pin_naive_t,
         typename std::decay_t<matrix_pin_naive_t>::value_t,
         index_t,
@@ -297,7 +297,7 @@ size_t kkt(
     if (intercept) {
         matrix::dvsubi(grad, state_pin_naive.resid_sums[0] * X_means, n_threads);
     }
-    state::update_abs_grad(state, lmda);
+    state::gaussian::update_abs_grad(state, lmda);
 
     // First, loop over non-strong set, compute gradients, and update n_valid_solutions.
     for (int k = 0; k < groups.size(); ++k) {
@@ -404,7 +404,7 @@ inline void solve(
             if (intercept) {
                 matrix::dvsubi(grad, resid_sum * X_means, n_threads);
             }
-            state::update_abs_grad(state, lmda);
+            state::gaussian::update_abs_grad(state, lmda);
 
             /* Compute lmda_max */
             const auto factor = (alpha <= 0) ? 1e-3 : alpha;
@@ -493,7 +493,7 @@ inline void solve(
             if (intercept) {
                 matrix::dvsubi(grad, resid_sum * X_means, n_threads);
             }
-            state::update_abs_grad(state, lmda);
+            state::gaussian::update_abs_grad(state, lmda);
             update_solutions(
                 state, 
                 state_pin_naive, 

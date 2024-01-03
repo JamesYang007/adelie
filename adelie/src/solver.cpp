@@ -2,11 +2,11 @@
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
-#include <adelie_core/state/state_pin_cov.hpp>
-#include <adelie_core/state/state_pin_naive.hpp>
+#include <adelie_core/state/state_gaussian_pin_cov.hpp>
+#include <adelie_core/state/state_gaussian_pin_naive.hpp>
 #include <adelie_core/solver/solve_gaussian_naive.hpp>
-#include <adelie_core/solver/solve_pin_cov.hpp>
-#include <adelie_core/solver/solve_pin_naive.hpp>
+#include <adelie_core/solver/solve_gaussian_pin_cov.hpp>
+#include <adelie_core/solver/solve_gaussian_pin_naive.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -28,7 +28,7 @@ double objective(
     const Eigen::Ref<const ad::util::rowvec_type<double>>& weights
 )
 {
-    return ad::solver::objective(
+    return ad::solver::gaussian::objective(
         beta0, beta, X, y, groups, group_sizes, lmda, alpha, penalty, weights
     );
 }
@@ -52,7 +52,7 @@ py::dict solve_pin_naive(StateType state)
         auto& buffer1,
         auto& buffer2
     ){
-        ad::solver::update_coefficients(
+        ad::solver::gaussian::update_coefficients(
             L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
         );
     };
@@ -65,7 +65,9 @@ py::dict solve_pin_naive(StateType state)
 
     std::string error;
     try {
-        ad::solver::naive::solve_pin(state, update_coefficients_f, check_user_interrupt);
+        ad::solver::gaussian::naive::solve_pin(
+            state, update_coefficients_f, check_user_interrupt
+        );
     } catch(const std::exception& e) {
         error = e.what(); 
     }
@@ -88,7 +90,7 @@ py::dict solve_pin_cov(StateType state)
         auto& buffer1,
         auto& buffer2
     ){
-        ad::solver::update_coefficients(
+        ad::solver::gaussian::update_coefficients(
             L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
         );
     };
@@ -101,7 +103,9 @@ py::dict solve_pin_cov(StateType state)
 
     std::string error;
     try {
-        ad::solver::cov::solve_pin(state, update_coefficients_f, check_user_interrupt);
+        ad::solver::gaussian::cov::solve_pin(
+            state, update_coefficients_f, check_user_interrupt
+        );
     } catch(const std::exception& e) {
         error = e.what(); 
     }
@@ -128,7 +132,7 @@ py::dict solve_gaussian_naive(StateType state)
         auto& buffer1,
         auto& buffer2
     ){
-        ad::solver::update_coefficients(
+        ad::solver::gaussian::update_coefficients(
             L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
         );
     };
@@ -141,7 +145,9 @@ py::dict solve_gaussian_naive(StateType state)
 
     std::string error;
     try {
-        ad::solver::gaussian::naive::solve(state, update_coefficients_f, check_user_interrupt);
+        ad::solver::gaussian::naive::solve(
+            state, update_coefficients_f, check_user_interrupt
+        );
     } catch(const std::exception& e) {
         error = e.what(); 
     }
@@ -150,11 +156,11 @@ py::dict solve_gaussian_naive(StateType state)
 } 
 
 template <class T> 
-using state_pin_naive_t = ad::state::StatePinNaive<ad::matrix::MatrixNaiveBase<T>>;
+using state_pin_naive_t = ad::state::gaussian::StatePinNaive<ad::matrix::MatrixNaiveBase<T>>;
 template <class T> 
-using state_pin_cov_t = ad::state::StatePinCov<ad::matrix::MatrixCovBase<T>>;
+using state_pin_cov_t = ad::state::gaussian::StatePinCov<ad::matrix::MatrixCovBase<T>>;
 template <class T> 
-using state_gaussian_naive_t = ad::state::StateGaussianNaive<ad::matrix::MatrixNaiveBase<T>>;
+using state_gaussian_naive_t = ad::state::gaussian::StateGaussianNaive<ad::matrix::MatrixNaiveBase<T>>;
 
 void register_solver(py::module_& m)
 {

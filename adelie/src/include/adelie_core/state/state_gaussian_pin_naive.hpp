@@ -1,8 +1,9 @@
 #pragma once
-#include <adelie_core/state/state_pin_base.hpp>
+#include <adelie_core/state/state_gaussian_pin_base.hpp>
 
 namespace adelie_core {
 namespace state {
+namespace gaussian {
 
 template <class MatrixType, 
           class ValueType=typename std::decay_t<MatrixType>::value_t,
@@ -109,5 +110,6 @@ struct StatePinNaive : StatePinBase<
     }
 };
 
+} // namespace gaussian
 } // namespace state
 } // namespace adelie_core
