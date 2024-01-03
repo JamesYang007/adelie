@@ -141,7 +141,7 @@ py::dict solve_gaussian_naive(StateType state)
 
     std::string error;
     try {
-        ad::solver::naive::solve_gaussian(state, update_coefficients_f, check_user_interrupt);
+        ad::solver::gaussian::naive::solve(state, update_coefficients_f, check_user_interrupt);
     } catch(const std::exception& e) {
         error = e.what(); 
     }
