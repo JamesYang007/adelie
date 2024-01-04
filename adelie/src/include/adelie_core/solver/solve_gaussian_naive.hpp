@@ -1,13 +1,14 @@
 #pragma once
 #include <adelie_core/optimization/search_pivot.hpp>
-#include <adelie_core/solver/solve_pin_naive.hpp>
+#include <adelie_core/solver/solve_gaussian_pin_naive.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
-#include <adelie_core/state/state_pin_naive.hpp>
+#include <adelie_core/state/state_gaussian_pin_naive.hpp>
 #include <adelie_core/util/algorithm.hpp>
 #include <adelie_core/util/stopwatch.hpp>
 
 namespace adelie_core {
 namespace solver {
+namespace gaussian {
 namespace naive {
 
 template <class StateType, class StatePinType>
@@ -144,7 +145,7 @@ void screen(
     /* update screen_set */
 
     // KKT passed for some lambdas in the batch
-    if (screen_rule == state::screen_rule_type::_strong) {
+    if (screen_rule == util::screen_rule_type::_strong) {
         const auto strong_rule_lmda = (2 * lmda_next - lmda) * alpha;
 
         for (int i = 0; i < abs_grad.size(); ++i) {
@@ -153,7 +154,7 @@ void screen(
                 screen_set.push_back(i);
             }
         }
-    } else if (screen_rule == state::screen_rule_type::_pivot) {
+    } else if (screen_rule == util::screen_rule_type::_pivot) {
         do_pivot();
     } else {
         throw std::runtime_error("Unknown strong rule!");
@@ -170,7 +171,7 @@ void screen(
     }
 
     /* update derived strong quantities */
-    state::update_screen_derived_naive(state);
+    state::gaussian::update_screen_derived_naive(state);
 
 }
 
@@ -193,7 +194,7 @@ auto fit(
     using vec_index_t = typename state_t::vec_index_t;
     using vec_safe_bool_t = util::rowvec_type<safe_bool_t>;
     using matrix_pin_naive_t = typename state_t::matrix_t;
-    using state_pin_naive_t = state::StatePinNaive<
+    using state_pin_naive_t = state::gaussian::StatePinNaive<
         matrix_pin_naive_t,
         typename std::decay_t<matrix_pin_naive_t>::value_t,
         index_t,
@@ -296,7 +297,7 @@ size_t kkt(
     if (intercept) {
         matrix::dvsubi(grad, state_pin_naive.resid_sums[0] * X_means, n_threads);
     }
-    state::update_abs_grad(state, lmda);
+    state::gaussian::update_abs_grad(state, lmda);
 
     // First, loop over non-strong set, compute gradients, and update n_valid_solutions.
     for (int k = 0; k < groups.size(); ++k) {
@@ -312,7 +313,7 @@ size_t kkt(
 template <class StateType,
           class UpdateCoefficientsType,
           class CUIType=util::no_op>
-inline void solve_gaussian(
+inline void solve(
     StateType&& state,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
@@ -388,7 +389,7 @@ inline void solve_gaussian(
         large_lmda_path[0] = std::numeric_limits<value_t>::max();
         try {
             save_prev_valid();
-            auto&& state_pin_naive = naive::fit(
+            auto&& state_pin_naive = fit(
                 state,
                 large_lmda_path,
                 update_coefficients_f,
@@ -403,7 +404,7 @@ inline void solve_gaussian(
             if (intercept) {
                 matrix::dvsubi(grad, resid_sum * X_means, n_threads);
             }
-            state::update_abs_grad(state, lmda);
+            state::gaussian::update_abs_grad(state, lmda);
 
             /* Compute lmda_max */
             const auto factor = (alpha <= 0) ? 1e-3 : alpha;
@@ -442,7 +443,7 @@ inline void solve_gaussian(
     // Only unpenalized (l1) groups are active in this case by definition of lmda_max.
     // Since state is in its invariance (solution at state.lmda) and unpenalized groups
     // are ALWAYS active, state includes all unpenalized groups.
-    // If no lambda in lmda_path is > lmda_max and EDPP setup not needed, state is left unchanged.
+    // If no lambda in lmda_path is > lmda_max, state is left unchanged.
     // Otherwise, it is in its invariance at lmda = lmda_max.
     // All solutions to lambda > lambda_max are saved.
 
@@ -459,14 +460,13 @@ inline void solve_gaussian(
         // create a lambda path containing only lmdas > lambda_max
         // and additionally lambda_max at the end.
         // If large_lmda_path_size > 0, mind as well fit for lambda_max as well to go down the path.
-        // Else, setup_edpp is true, in which case, we must fit lambda_max.
         vec_value_t large_lmda_path(large_lmda_path_size + 1);
         large_lmda_path.head(large_lmda_path_size) = lmda_path.head(large_lmda_path_size);
         large_lmda_path[large_lmda_path_size] = lmda_max;
 
         try {
             save_prev_valid();
-            auto&& state_pin_naive = naive::fit(
+            auto&& state_pin_naive = fit(
                 state, 
                 large_lmda_path, 
                 update_coefficients_f, 
@@ -493,8 +493,8 @@ inline void solve_gaussian(
             if (intercept) {
                 matrix::dvsubi(grad, resid_sum * X_means, n_threads);
             }
-            state::update_abs_grad(state, lmda);
-            naive::update_solutions(
+            state::gaussian::update_abs_grad(state, lmda);
+            update_solutions(
                 state, 
                 state_pin_naive, 
                 state_pin_naive.lmdas.size()-1
@@ -544,7 +544,7 @@ inline void solve_gaussian(
         // Screening step
         // ==================================================================================== 
         sw.start();
-        naive::screen(
+        screen(
             state,
             lmda_batch[0],
             kkt_passed,
@@ -559,7 +559,7 @@ inline void solve_gaussian(
             // Save all current valid quantities that will be modified in-place by fit.
             // This is needed in case we exit with exception and need to restore invariance.
             save_prev_valid();
-            auto&& state_pin_naive = naive::fit(
+            auto&& state_pin_naive = fit(
                 state,
                 lmda_batch,
                 update_coefficients_f,
@@ -582,7 +582,7 @@ inline void solve_gaussian(
             // KKT step
             // ==================================================================================== 
             sw.start();
-            kkt_passed = naive::kkt(
+            kkt_passed = kkt(
                 state,
                 state_pin_naive
             );
@@ -597,7 +597,7 @@ inline void solve_gaussian(
             resid_sum = state_pin_naive.resid_sums[0];
             rsq = state_pin_naive.rsqs[0];
             lmda = lmda_batch[0];
-            naive::update_solutions(
+            update_solutions(
                 state, 
                 state_pin_naive, 
                 kkt_passed
@@ -628,5 +628,6 @@ inline void solve_gaussian(
 }
 
 } // namespace naive
+} // namespace gaussian
 } // namespace solver
 } // namespace adelie_core

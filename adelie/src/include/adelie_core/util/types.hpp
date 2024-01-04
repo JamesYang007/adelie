@@ -26,5 +26,11 @@ using rowvec_type = rowarr_type<Scalar_, 1, Cols_>;
 template <class Scalar_, int Options_=Eigen::ColMajor, class StorageIndex_=int>
 using sp_vec_type = Eigen::SparseVector<Scalar_, Options_, StorageIndex_>;
 
+enum class screen_rule_type
+{
+    _strong,
+    _pivot
+};
+
 } // namespace util
 } // namespace adelie_core

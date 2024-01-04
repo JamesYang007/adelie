@@ -7,6 +7,7 @@
 
 namespace adelie_core {
 namespace state {
+namespace gaussian {
 
 template <class GroupsType, class GroupSizesType,
           class PenaltyType, class GradType, 
@@ -156,12 +157,6 @@ void update_screen_derived_base(
     screen_is_active.resize(screen_set.size(), false);
 }
 
-enum class screen_rule_type
-{
-    _strong,
-    _pivot
-};
-
 template <class ValueType,
           class IndexType=Eigen::Index,
           class BoolType=bool
@@ -202,7 +197,7 @@ struct StateGaussianBase
     const value_t pivot_subset_ratio;
     const size_t pivot_subset_min;
     const value_t pivot_slack_ratio;
-    const screen_rule_type screen_rule;
+    const util::screen_rule_type screen_rule;
 
     // convergence configs
     const size_t max_iters;
@@ -327,12 +322,12 @@ struct StateGaussianBase
         initialize();
     }
 
-    screen_rule_type convert_screen_rule(
+    util::screen_rule_type convert_screen_rule(
         const std::string& rule
     )
     {
-        if (rule == "strong") return screen_rule_type::_strong;
-        if (rule == "pivot") return screen_rule_type::_pivot;
+        if (rule == "strong") return util::screen_rule_type::_strong;
+        if (rule == "pivot") return util::screen_rule_type::_pivot;
         throw std::runtime_error("Invalid strong rule type: " + rule);
     }
 
@@ -366,5 +361,6 @@ struct StateGaussianBase
     }
 };
 
+} // namespace gaussian
 } // namespace state
 } // namespace adelie_core

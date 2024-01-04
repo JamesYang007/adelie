@@ -5,6 +5,7 @@
 
 namespace adelie_core {
 namespace state {
+namespace gaussian {
 
 template <class ValueType,
           class IndexType=Eigen::Index,
@@ -162,5 +163,6 @@ struct StatePinBase
     }
 };
 
+} // namespace gaussian
 } // namespace state
 } // namespace adelie_core

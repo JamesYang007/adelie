@@ -28,7 +28,7 @@ public:
     value_t cmul(
         int j, 
         const Eigen::Ref<const vec_value_t>& v
-    ) const override
+    ) override
     {
         PYBIND11_OVERRIDE_PURE(
             value_t,

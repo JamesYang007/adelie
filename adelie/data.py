@@ -206,7 +206,7 @@ def create_snp_unphased(
     X.ravel()[two_indices] = 2
 
     groups = np.arange(p)
-    group_sizes = np.ones(p)
+    group_sizes = np.ones(p, dtype=int)
 
     penalty = np.sqrt(group_sizes)
     penalty[np.random.choice(p, int(zero_penalty * p), replace=False)] = 0
@@ -325,8 +325,8 @@ def create_snp_phased_ancestry(
     ancestries.ravel()[two_indices] = np.random.choice(A, len(two_indices), replace=True)
     ancestries.ravel()[two_indices + 1] = np.random.choice(A, len(two_indices), replace=True)
 
-    groups = np.arange(s)
-    group_sizes = np.full(s, A)
+    groups = A * np.arange(s)
+    group_sizes = np.full(s, A, dtype=int)
 
     penalty = np.sqrt(group_sizes)
     penalty[np.random.choice(s, int(zero_penalty * s), replace=False)] = 0

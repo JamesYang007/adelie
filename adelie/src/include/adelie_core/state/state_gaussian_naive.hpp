@@ -7,6 +7,7 @@
 
 namespace adelie_core {
 namespace state {
+namespace gaussian {
 
 /**
  * Updates all derived strong quantities for naive state.
@@ -210,5 +211,6 @@ struct StateGaussianNaive : StateGaussianBase<
     }
 };
 
+} // namespace gaussian
 } // namespace state
 } // namespace adelie_core
