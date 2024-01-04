@@ -1,6 +1,6 @@
 from adelie.solver import (
     objective,
-    solve_pin,
+    solve_gaussian_pin,
     solve_gaussian,
 )
 import adelie as ad
@@ -9,10 +9,10 @@ import numpy as np
 import os
 
 # ========================================================================
-# TEST solve_pin
+# TEST solve_gaussian_pin
 # ========================================================================
 
-def create_test_data_pin(
+def create_test_data_gaussian_pin(
     n, p, G, S, 
     alpha=1,
     sparsity=0.95,
@@ -106,10 +106,10 @@ def solve_cvxpy(
     return beta0.value, beta.value
 
 
-def run_solve_pin(state, X, y, weights):
+def run_solve_gaussian_pin(state, X, y, weights):
     state.check(method="assert")
 
-    state = solve_pin(state)    
+    state = solve_gaussian_pin(state)    
 
     # get solved lmdas
     lmdas = state.lmdas
@@ -173,7 +173,7 @@ def run_solve_pin(state, X, y, weights):
     return state
 
 
-def test_solve_pin_naive():
+def test_solve_gaussian_pin_naive():
     def _test(n, p, G, S, intercept=True, alpha=1, sparsity=0.95, seed=0):
         (
             X, 
@@ -186,7 +186,7 @@ def test_solve_pin_naive():
             screen_is_active, 
             rsq,
             screen_beta,
-        ) = create_test_data_pin(
+        ) = create_test_data_gaussian_pin(
             n, p, G, S, alpha, sparsity, seed,
         )
         np.random.seed(seed)
@@ -199,7 +199,7 @@ def test_solve_pin_naive():
             ad.matrix.dense(X, method="naive", n_threads=2)
         ]
         for Xpy in Xs:
-            state = ad.state.pin_naive(
+            state = ad.state.gaussian_pin_naive(
                 X=Xpy,
                 y_mean=y_mean,
                 y_var=y_var,
@@ -216,8 +216,8 @@ def test_solve_pin_naive():
                 intercept=intercept,
                 tol=1e-7,
             )
-            state = run_solve_pin(state, X, y, weights)
-            state = ad.state.pin_naive(
+            state = run_solve_gaussian_pin(state, X, y, weights)
+            state = ad.state.gaussian_pin_naive(
                 X=Xpy,
                 y_mean=y_mean,
                 y_var=y_var,
@@ -234,7 +234,7 @@ def test_solve_pin_naive():
                 intercept=intercept,
                 tol=1e-7,
             )
-            run_solve_pin(state, X, y, weights)
+            run_solve_gaussian_pin(state, X, y, weights)
 
     _test(10, 4, 2, 2)
     _test(10, 100, 10, 2)
@@ -243,7 +243,7 @@ def test_solve_pin_naive():
     _test(100, 100, 50, 20)
 
 
-def test_solve_pin_cov():
+def test_solve_gaussian_pin_cov():
     def _test(n, p, G, S, alpha=1, sparsity=0.95, seed=0):
         (
             X, 
@@ -256,7 +256,7 @@ def test_solve_pin_cov():
             screen_is_active, 
             rsq,
             screen_beta,
-        ) = create_test_data_pin(
+        ) = create_test_data_gaussian_pin(
             n, p, G, S, alpha, sparsity, seed,
         )
         np.random.seed(seed)
@@ -276,7 +276,7 @@ def test_solve_pin_cov():
         ]
 
         for Apy in As:
-            state = ad.state.pin_cov(
+            state = ad.state.gaussian_pin_cov(
                 A=Apy,
                 groups=groups,
                 alpha=alpha,
@@ -289,8 +289,8 @@ def test_solve_pin_cov():
                 screen_is_active=screen_is_active,
                 tol=1e-8,
             )
-            state = run_solve_pin(state, X, y, weights)
-            state = ad.state.pin_cov(
+            state = run_solve_gaussian_pin(state, X, y, weights)
+            state = ad.state.gaussian_pin_cov(
                 A=Apy,
                 groups=groups,
                 alpha=alpha,
@@ -303,7 +303,7 @@ def test_solve_pin_cov():
                 screen_is_active=state.screen_is_active,
                 tol=1e-8,
             )
-            run_solve_pin(state, X, y, weights)
+            run_solve_gaussian_pin(state, X, y, weights)
 
     _test(10, 4, 2, 2)
     _test(10, 100, 10, 2)

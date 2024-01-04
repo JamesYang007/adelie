@@ -16,22 +16,22 @@ def deduce_states(
     Parameters
     ----------
     group_sizes : (G,) np.ndarray
-        See ``adelie.adelie_core.state.StatePinBase64``.
+        See ``adelie.adelie_core.state.StateGaussianPinBase64``.
     screen_set : (s,) np.ndarray
-        See ``adelie.adelie_core.state.StatePinBase64``.
+        See ``adelie.adelie_core.state.StateGaussianPinBase64``.
 
     Returns
     -------
     screen_g1 : (s1,) np.ndarray
-        See ``adelie.adelie_core.state.StatePinBase64``.
+        See ``adelie.adelie_core.state.StateGaussianPinBase64``.
     screen_g2 : (s2,) np.ndarray
-        See ``adelie.adelie_core.state.StatePinBase64``.
+        See ``adelie.adelie_core.state.StateGaussianPinBase64``.
     screen_begins : (s,) np.ndarray
-        See ``adelie.adelie_core.state.StatePinBase64``.
+        See ``adelie.adelie_core.state.StateGaussianPinBase64``.
 
     See Also
     --------
-    adelie.adelie_core.state.StatePinBase64
+    adelie.adelie_core.state.StateGaussianPinBase64
     """
     S = screen_set.shape[0]
     screen_g1 = np.arange(S)[group_sizes[screen_set] == 1]
@@ -125,7 +125,7 @@ class base:
         return obj
 
 
-class pin_base(base):
+class gaussian_pin_base(base):
     def check(
         self, 
         method: str =None, 
@@ -533,11 +533,11 @@ class pin_base(base):
         )
 
 
-class pin_naive_base(pin_base):
+class gaussian_pin_naive_base(gaussian_pin_base):
     """State wrapper base class for all pin, naive method."""
     def default_init(
         self, 
-        base_type: Union[core.state.StatePinNaive64, core.state.StatePinNaive32],
+        base_type: Union[core.state.StateGaussianPinNaive64, core.state.StateGaussianPinNaive32],
         *,
         X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
         y_mean: float,
@@ -682,7 +682,7 @@ class pin_naive_base(pin_base):
         )
 
 
-def pin_naive(
+def gaussian_pin_naive(
     *,
     X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
     y_mean: float,
@@ -785,7 +785,7 @@ def pin_naive(
 
     See Also
     --------
-    adelie.adelie_core.state.StatePinNaive64
+    adelie.adelie_core.state.StateGaussianPinNaive64
     """
     if not (
         isinstance(X, matrix.MatrixNaiveBase64) or
@@ -808,16 +808,16 @@ def pin_naive(
     )
         
     dispatcher = {
-        np.float64: core.state.StatePinNaive64,
-        np.float32: core.state.StatePinNaive32,
+        np.float64: core.state.StateGaussianPinNaive64,
+        np.float32: core.state.StateGaussianPinNaive32,
     }
 
     core_base = dispatcher[dtype]
 
-    class _pin_naive(pin_naive_base, core_base):
+    class _gaussian_pin_naive(gaussian_pin_naive_base, core_base):
         def __init__(self, *args, **kwargs):
             self._core_type = core_base
-            pin_naive_base.default_init(
+            gaussian_pin_naive_base.default_init(
                 self,
                 core_base,
                 *args,
@@ -828,13 +828,13 @@ def pin_naive(
         @classmethod
         def create_from_core(cls, state, core_state):
             obj = base.create_from_core(
-                cls, state, core_state, _pin_naive, core_base,
+                cls, state, core_state, _gaussian_pin_naive, core_base,
             )
-            pin_naive_base.__init__(obj)
+            gaussian_pin_naive_base.__init__(obj)
             return obj
 
 
-    return _pin_naive(
+    return _gaussian_pin_naive(
         X=X,
         y_mean=y_mean,
         y_var=y_var,
@@ -861,11 +861,11 @@ def pin_naive(
     )
 
 
-class pin_cov_base(pin_base):
+class gaussian_pin_cov_base(gaussian_pin_base):
     """State wrapper base class for all pin, covariance method."""
     def default_init(
         self, 
-        base_type: Union[core.state.StatePinCov64, core.state.StatePinCov32],
+        base_type: Union[core.state.StateGaussianPinCov64, core.state.StateGaussianPinCov32],
         *,
         A: Union[matrix.MatrixCovBase64, matrix.MatrixCovBase32],
         groups: np.ndarray,
@@ -971,7 +971,7 @@ class pin_cov_base(pin_base):
         )
 
 
-def pin_cov(
+def gaussian_pin_cov(
     *,
     A: Union[matrix.MatrixCovBase64, matrix.MatrixCovBase32],
     groups: np.ndarray,
@@ -1065,7 +1065,7 @@ def pin_cov(
 
     See Also
     --------
-    adelie.adelie_core.state.StatePinCov64
+    adelie.adelie_core.state.StateGaussianPinCov64
     """
     if not (
         isinstance(A, matrix.MatrixCovBase64) or 
@@ -1086,16 +1086,16 @@ def pin_cov(
     )
         
     dispatcher = {
-        np.float64: core.state.StatePinCov64,
-        np.float32: core.state.StatePinCov32,
+        np.float64: core.state.StateGaussianPinCov64,
+        np.float32: core.state.StateGaussianPinCov32,
     }
 
     core_base = dispatcher[dtype]
 
-    class _pin_cov(pin_cov_base, core_base):
+    class _gaussian_pin_cov(gaussian_pin_cov_base, core_base):
         def __init__(self, *args, **kwargs):
             self._core_type = core_base
-            pin_cov_base.default_init(
+            gaussian_pin_cov_base.default_init(
                 self,
                 core_base,
                 *args,
@@ -1106,12 +1106,12 @@ def pin_cov(
         @classmethod
         def create_from_core(cls, state, core_state):
             obj = base.create_from_core(
-                cls, state, core_state, _pin_cov, core_base,
+                cls, state, core_state, _gaussian_pin_cov, core_base,
             )
-            pin_cov_base.__init__(obj)
+            gaussian_pin_cov_base.__init__(obj)
             return obj
 
-    return _pin_cov(
+    return _gaussian_pin_cov(
         A=A,
         groups=groups,
         group_sizes=group_sizes,

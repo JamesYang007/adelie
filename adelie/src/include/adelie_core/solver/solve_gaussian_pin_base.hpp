@@ -6,13 +6,14 @@
 namespace adelie_core {
 namespace solver {
 namespace gaussian {
+namespace pin {
 
 /**
  * Pack of buffers used in solvers.
  * This class is purely for convenience purposes.
  */
 template <class ValueType>
-struct SolvePinBufferPack 
+struct SolveGaussianPinBufferPack 
 {
     using value_t = ValueType;
     
@@ -21,16 +22,16 @@ struct SolvePinBufferPack
     util::rowvec_type<value_t> buffer3;
     util::rowvec_type<value_t> buffer4;
 
-    explicit SolvePinBufferPack(
+    explicit SolveGaussianPinBufferPack(
         size_t buffer_size,
         size_t n
     ): 
-        SolvePinBufferPack(
+        SolveGaussianPinBufferPack(
             buffer_size, buffer_size, buffer_size, n
         ) 
     {}
 
-    explicit SolvePinBufferPack(
+    explicit SolveGaussianPinBufferPack(
             size_t buffer1_size, 
             size_t buffer2_size,
             size_t buffer3_size,
@@ -46,7 +47,7 @@ struct SolvePinBufferPack
 /**
  * Constructs a sparse vector containing all active values.
  * 
- * @param   state    see StatePinNaive.
+ * @param   state    see StateGaussianPinNaive.
  * @param   indices     increasing order of indices with active values.
  * @param   values      corresponding active values to indices.
  */
@@ -209,35 +210,7 @@ bool check_early_stop_rsq(
             ((delta_m*rsq_u-delta_u*rsq_m) <= rsq_curv_tol*rsq_m*rsq_u));
 }
 
-template <class ValueType, class IndexType> 
-inline
-auto objective(
-    ValueType beta0, 
-    const Eigen::Ref<const util::rowvec_type<ValueType>>& beta,
-    const Eigen::Ref<const util::rowmat_type<ValueType>>& X,
-    const Eigen::Ref<const util::rowvec_type<ValueType>>& y,
-    const Eigen::Ref<const util::rowvec_type<IndexType>>& groups,
-    const Eigen::Ref<const util::rowvec_type<IndexType>>& group_sizes,
-    ValueType lmda,
-    ValueType alpha,
-    const Eigen::Ref<const util::rowvec_type<ValueType>>& penalty,
-    const Eigen::Ref<const util::rowvec_type<ValueType>>& weights
-)
-{
-    ValueType p_ = 0.0;
-    for (int j = 0; j < groups.size(); ++j) {
-        const auto begin = groups[j];
-        const auto size = group_sizes[j];
-        const auto b_norm2 = beta.segment(begin, size).matrix().norm();
-        p_ += penalty[j] * b_norm2 * (
-            alpha + 0.5 * (1-alpha) * b_norm2
-        );
-    }
-    p_ *= lmda;
-    util::rowvec_type<ValueType> resid = (y.matrix() - beta.matrix() * X.transpose()).array() - beta0;
-    return 0.5 * (weights * resid.square()).sum() + p_;
-}
-
+} // namespace pin
 } // namespace gaussian
 } // namespace solver
 } // namespace adelie_core

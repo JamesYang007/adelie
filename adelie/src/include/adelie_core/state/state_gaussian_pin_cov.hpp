@@ -4,19 +4,21 @@
 namespace adelie_core {
 namespace state {
 namespace gaussian {
+namespace pin {
+namespace cov {
 
 template <class MatrixType, 
           class ValueType=typename std::decay_t<MatrixType>::value_t,
           class IndexType=Eigen::Index,
           class BoolType=bool
         >
-struct StatePinCov : StatePinBase<
+struct StateGaussianPinCov : StateGaussianPinBase<
         ValueType,
         IndexType,
         BoolType
     >
 {
-    using base_t = StatePinBase<
+    using base_t = StateGaussianPinBase<
         ValueType,
         IndexType,
         BoolType
@@ -46,7 +48,7 @@ struct StatePinCov : StatePinBase<
     map_vec_value_t screen_grad;
     dyn_vec_vec_value_t screen_grads;
 
-    explicit StatePinCov(
+    explicit StateGaussianPinCov(
         matrix_t& A,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
@@ -84,6 +86,8 @@ struct StatePinCov : StatePinBase<
     }
 };
 
+} // namespace cov
+} // namespace pin
 } // namespace gaussian
 } // namespace state
 } // namespace adelie_core

@@ -10,6 +10,7 @@
 namespace adelie_core {
 namespace solver {
 namespace gaussian {
+namespace pin {
 namespace naive {
 
 template <class StateType, class G1Iter, class G2Iter,
@@ -167,7 +168,7 @@ template <class StateType,
           class BufferType, 
           class UpdateCoefficientsType>
 ADELIE_CORE_STRONG_INLINE
-void solve_pin_active(
+void solve_active(
     StateType&& state,
     size_t lmda_idx,
     BufferType& buffer1,
@@ -204,7 +205,7 @@ void solve_pin_active(
 template <class StateType,
           class UpdateCoefficientsType,
           class CUIType = util::no_op>
-inline void solve_pin(
+inline void solve(
     StateType&& state,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
@@ -260,7 +261,7 @@ inline void solve_pin(
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
-    SolvePinBufferPack<value_t> buffer_pack(
+    SolveGaussianPinBufferPack<value_t> buffer_pack(
         max_group_size, 
         std::max<size_t>(3 * max_group_size, n)
     );
@@ -301,7 +302,7 @@ inline void solve_pin(
     };
 
     const auto lasso_active_and_update = [&](size_t l) {
-        solve_pin_active(
+        solve_active(
             state, l, 
             buffer_pack.buffer1,
             buffer_pack.buffer2,
@@ -421,6 +422,7 @@ inline void solve_pin(
 }
 
 } // namespace naive    
+} // namespace pin
 } // namespace gaussian
 } // namespace solver
 } // namespace adelie_core
