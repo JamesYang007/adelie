@@ -6,12 +6,13 @@
 namespace adelie_core {
 namespace state {
 namespace gaussian {
+namespace pin {
 
 template <class ValueType,
           class IndexType=Eigen::Index,
           class BoolType=bool
         >
-struct StatePinBase
+struct StateGaussianPinBase
 {
     using value_t = ValueType;
     using index_t = IndexType;
@@ -75,9 +76,9 @@ struct StatePinBase
     std::vector<double> benchmark_screen;
     std::vector<double> benchmark_active;
 
-    virtual ~StatePinBase() =default;
+    virtual ~StateGaussianPinBase() =default;
     
-    explicit StatePinBase(
+    explicit StateGaussianPinBase(
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
@@ -163,6 +164,7 @@ struct StatePinBase
     }
 };
 
+} // namespace pin
 } // namespace gaussian
 } // namespace state
 } // namespace adelie_core

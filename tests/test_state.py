@@ -7,7 +7,7 @@ import adelie.matrix as matrix
 import numpy as np
 
 
-def test_state_pin_naive():
+def test_state_gaussian_pin_naive():
     n = 1000
     p = 100
     G = 2
@@ -27,7 +27,7 @@ def test_state_pin_naive():
     screen_beta = np.zeros(p)
     screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
 
-    state = mod.pin_naive(
+    state = mod.gaussian_pin_naive(
         X=X,
         y_mean=y_mean,
         y_var=y_var,
@@ -57,7 +57,7 @@ def test_state_pin_naive():
     assert state.iters == 0
 
 
-def test_state_pin_cov():
+def test_state_gaussian_pin_cov():
     n = 1000
     p = 100
     G = 2
@@ -74,7 +74,7 @@ def test_state_pin_cov():
     screen_grad = X.T @ np.random.normal(0, 1, n)
     screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
 
-    state = mod.pin_cov(
+    state = mod.gaussian_pin_cov(
         A=A,
         groups=groups,
         alpha=alpha,

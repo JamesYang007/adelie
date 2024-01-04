@@ -28,7 +28,7 @@ double objective(
     const Eigen::Ref<const ad::util::rowvec_type<double>>& weights
 )
 {
-    return ad::solver::gaussian::objective(
+    return ad::solver::gaussian::naive::objective(
         beta0, beta, X, y, groups, group_sizes, lmda, alpha, penalty, weights
     );
 }
@@ -38,7 +38,7 @@ double objective(
 // =================================================================
 
 template <class StateType>
-py::dict solve_pin_naive(StateType state)
+py::dict solve_gaussian_pin_naive(StateType state)
 {
     const auto update_coefficients_f = [](
         const auto& L,
@@ -52,7 +52,7 @@ py::dict solve_pin_naive(StateType state)
         auto& buffer1,
         auto& buffer2
     ){
-        ad::solver::gaussian::update_coefficients(
+        ad::solver::gaussian::pin::update_coefficients(
             L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
         );
     };
@@ -65,7 +65,7 @@ py::dict solve_pin_naive(StateType state)
 
     std::string error;
     try {
-        ad::solver::gaussian::naive::solve_pin(
+        ad::solver::gaussian::pin::naive::solve(
             state, update_coefficients_f, check_user_interrupt
         );
     } catch(const std::exception& e) {
@@ -76,7 +76,7 @@ py::dict solve_pin_naive(StateType state)
 } 
 
 template <class StateType>
-py::dict solve_pin_cov(StateType state)
+py::dict solve_gaussian_pin_cov(StateType state)
 {
     const auto update_coefficients_f = [](
         const auto& L,
@@ -90,7 +90,7 @@ py::dict solve_pin_cov(StateType state)
         auto& buffer1,
         auto& buffer2
     ){
-        ad::solver::gaussian::update_coefficients(
+        ad::solver::gaussian::pin::update_coefficients(
             L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
         );
     };
@@ -103,7 +103,7 @@ py::dict solve_pin_cov(StateType state)
 
     std::string error;
     try {
-        ad::solver::gaussian::cov::solve_pin(
+        ad::solver::gaussian::pin::cov::solve(
             state, update_coefficients_f, check_user_interrupt
         );
     } catch(const std::exception& e) {
@@ -132,7 +132,7 @@ py::dict solve_gaussian_naive(StateType state)
         auto& buffer1,
         auto& buffer2
     ){
-        ad::solver::gaussian::update_coefficients(
+        ad::solver::gaussian::pin::update_coefficients(
             L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
         );
     };
@@ -156,11 +156,11 @@ py::dict solve_gaussian_naive(StateType state)
 } 
 
 template <class T> 
-using state_pin_naive_t = ad::state::gaussian::StatePinNaive<ad::matrix::MatrixNaiveBase<T>>;
+using state_gaussian_pin_naive_t = ad::state::gaussian::pin::naive::StateGaussianPinNaive<ad::matrix::MatrixNaiveBase<T>>;
 template <class T> 
-using state_pin_cov_t = ad::state::gaussian::StatePinCov<ad::matrix::MatrixCovBase<T>>;
+using state_gaussian_pin_cov_t = ad::state::gaussian::pin::cov::StateGaussianPinCov<ad::matrix::MatrixCovBase<T>>;
 template <class T> 
-using state_gaussian_naive_t = ad::state::gaussian::StateGaussianNaive<ad::matrix::MatrixNaiveBase<T>>;
+using state_gaussian_naive_t = ad::state::gaussian::naive::StateGaussianNaive<ad::matrix::MatrixNaiveBase<T>>;
 
 void register_solver(py::module_& m)
 {
@@ -168,10 +168,10 @@ void register_solver(py::module_& m)
     m.def("objective", &objective);
 
     /* solve pinned method */
-    m.def("solve_pin_naive_64", &solve_pin_naive<state_pin_naive_t<double>>);
-    m.def("solve_pin_naive_32", &solve_pin_naive<state_pin_naive_t<float>>);
-    m.def("solve_pin_cov_64", &solve_pin_cov<state_pin_cov_t<double>>);
-    m.def("solve_pin_cov_32", &solve_pin_cov<state_pin_cov_t<float>>);
+    m.def("solve_gaussian_pin_naive_64", &solve_gaussian_pin_naive<state_gaussian_pin_naive_t<double>>);
+    m.def("solve_gaussian_pin_naive_32", &solve_gaussian_pin_naive<state_gaussian_pin_naive_t<float>>);
+    m.def("solve_gaussian_pin_cov_64", &solve_gaussian_pin_cov<state_gaussian_pin_cov_t<double>>);
+    m.def("solve_gaussian_pin_cov_32", &solve_gaussian_pin_cov<state_gaussian_pin_cov_t<float>>);
 
     /* solve gaussian method */
     m.def("solve_gaussian_naive_64", &solve_gaussian_naive<state_gaussian_naive_t<double>>);
