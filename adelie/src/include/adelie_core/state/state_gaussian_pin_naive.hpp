@@ -4,19 +4,21 @@
 namespace adelie_core {
 namespace state {
 namespace gaussian {
+namespace pin {
+namespace naive {
 
 template <class MatrixType, 
           class ValueType=typename std::decay_t<MatrixType>::value_t,
           class IndexType=Eigen::Index,
           class BoolType=bool
         >
-struct StatePinNaive : StatePinBase<
+struct StateGaussianPinNaive : StateGaussianPinBase<
         ValueType,
         IndexType,
         BoolType
     >
 {
-    using base_t = StatePinBase<
+    using base_t = StateGaussianPinBase<
         ValueType,
         IndexType,
         BoolType
@@ -57,7 +59,7 @@ struct StatePinNaive : StatePinBase<
     /* buffer */
     vec_value_t screen_grad;
 
-    explicit StatePinNaive(
+    explicit StateGaussianPinNaive(
         matrix_t& X,
         value_t y_mean,
         value_t y_var,
@@ -110,6 +112,8 @@ struct StatePinNaive : StatePinBase<
     }
 };
 
+} // namespace naive
+} // namespace pin
 } // namespace gaussian
 } // namespace state
 } // namespace adelie_core

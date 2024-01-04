@@ -105,8 +105,8 @@ adelie.state
 
 
     deduce_states
-    pin_cov
-    pin_naive
+    gaussian_pin_cov
+    gaussian_pin_naive
     gaussian_naive
 
 
@@ -122,7 +122,7 @@ adelie.solver
 
 
     objective
-    solve_pin
+    solve_gaussian_pin
     solve_gaussian
     grpnet
 
@@ -139,9 +139,9 @@ Internal
     
 
     adelie_core.state.StateGaussianNaive64
-    adelie_core.state.StatePinBase64
-    adelie_core.state.StatePinCov64
-    adelie_core.state.StatePinNaive64
+    adelie_core.state.StateGaussianPinBase64
+    adelie_core.state.StateGaussianPinCov64
+    adelie_core.state.StateGaussianPinNaive64
     matrix.MatrixCovBase64
     matrix.MatrixNaiveBase64
     state.base

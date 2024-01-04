@@ -76,7 +76,7 @@ def objective(
     )
 
 
-def solve_pin(state):
+def solve_gaussian_pin(state):
     """Solves the pinned group elastic net problem.
 
     The pinned group elastic net problem is given by
@@ -99,15 +99,15 @@ def solve_pin(state):
 
     See Also
     --------
-    adelie.state.pin_naive
+    adelie.state.gaussian_pin_naive
     adelie.solver.objective
     """
     # mapping of each state type to the corresponding solver
     f_dict = {
-        core.state.StatePinNaive64: core.solver.solve_pin_naive_64,
-        core.state.StatePinNaive32: core.solver.solve_pin_naive_32,
-        core.state.StatePinCov64: core.solver.solve_pin_cov_64,
-        core.state.StatePinCov32: core.solver.solve_pin_cov_32,
+        core.state.StateGaussianPinNaive64: core.solver.solve_gaussian_pin_naive_64,
+        core.state.StateGaussianPinNaive32: core.solver.solve_gaussian_pin_naive_32,
+        core.state.StateGaussianPinCov64: core.solver.solve_gaussian_pin_cov_64,
+        core.state.StateGaussianPinCov32: core.solver.solve_gaussian_pin_cov_32,
     }
 
     # solve group elastic net

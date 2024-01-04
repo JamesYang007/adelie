@@ -8,6 +8,7 @@
 namespace adelie_core {
 namespace state {
 namespace gaussian {
+namespace naive {
 
 /**
  * Updates all derived strong quantities for naive state.
@@ -17,7 +18,7 @@ namespace gaussian {
  * unchanged in the sense that other quantities dependent on strong states are unchanged.
  */
 template <class StateType>
-void update_screen_derived_naive(
+void update_screen_derived(
     StateType& state
 )
 {
@@ -207,10 +208,11 @@ struct StateGaussianNaive : StateGaussianBase<
     void initialize() 
     {
         /* initialize the rest of the strong quantities */
-        update_screen_derived_naive(*this); 
+        update_screen_derived(*this); 
     }
 };
 
+} // namespace naive
 } // namespace gaussian
 } // namespace state
 } // namespace adelie_core
