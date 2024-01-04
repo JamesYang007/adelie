@@ -32,7 +32,7 @@ public:
         _n_threads(n_threads),
         _buff(_n_threads, std::min(mat.rows(), mat.cols()))
     {}
-    
+
     value_t cmul(
         int j, 
         const Eigen::Ref<const vec_value_t>& v

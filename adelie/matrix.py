@@ -9,6 +9,73 @@ from .adelie_core.matrix import (
 import numpy as np
 
 
+def _to_dtype(mat):
+    if isinstance(mat, MatrixNaiveBase32): return np.float32
+    elif isinstance(mat, MatrixNaiveBase64): return np.float64
+    else: return None
+
+
+def concatenate(
+    mats: list,
+    *,
+    method: str,
+    n_threads: int =1,
+):
+    """Creates a column-wise concatenation of the matrices.
+
+    Parameters
+    ----------
+    mats : list
+        List of matrices to concatenate along the columns.
+    method : str
+        Method type. It must be one of the following:
+
+            - ``"naive"``: naive method.
+
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
+    """
+    if n_threads < 1:
+        raise ValueError("Number of threads must be >= 1.")
+    if len(mats) == 0:
+        raise ValueError("mats must be non-empty.")
+    
+    
+    dtype = _to_dtype(mats[0])
+
+    for mat in mats:
+        if dtype == _to_dtype(mat): continue
+        raise ValueError("All matrices must have the same underlying data type.")
+
+    naive_dispatcher = {
+        np.float64: core.matrix.MatrixNaiveConcatenate64,
+        np.float32: core.matrix.MatrixNaiveConcatenate32,
+    }
+
+    dispatcher = {
+        "naive" : naive_dispatcher,
+    }
+
+    core_base = dispatcher[method][dtype]
+
+    class _concatenate(core_base):
+        def __init__(
+            self,
+            mats: list,
+            n_threads: int =1,
+        ):
+            self.mats = mats
+            core_base.__init__(self, self.mats, n_threads)
+
+    return _concatenate(mats, n_threads)
+
+
 def dense(
     mat: np.ndarray,
     *,
