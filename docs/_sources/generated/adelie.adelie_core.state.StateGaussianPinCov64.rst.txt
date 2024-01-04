@@ -1,0 +1,116 @@
+﻿adelie.adelie\_core.state.StateGaussianPinCov64
+===============================================
+
+.. currentmodule:: adelie.adelie_core.state
+
+.. autoclass:: StateGaussianPinCov64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~StateGaussianPinCov64.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StateGaussianPinCov64.A
+      ~StateGaussianPinCov64.active_begins
+      ~StateGaussianPinCov64.active_g1
+      ~StateGaussianPinCov64.active_g2
+      ~StateGaussianPinCov64.active_order
+      ~StateGaussianPinCov64.active_set
+      ~StateGaussianPinCov64.alpha
+      ~StateGaussianPinCov64.benchmark_active
+      ~StateGaussianPinCov64.benchmark_screen
+      ~StateGaussianPinCov64.betas
+      ~StateGaussianPinCov64.group_sizes
+      ~StateGaussianPinCov64.groups
+      ~StateGaussianPinCov64.intercept
+      ~StateGaussianPinCov64.intercepts
+      ~StateGaussianPinCov64.iters
+      ~StateGaussianPinCov64.lmda_path
+      ~StateGaussianPinCov64.lmdas
+      ~StateGaussianPinCov64.max_iters
+      ~StateGaussianPinCov64.n_threads
+      ~StateGaussianPinCov64.newton_max_iters
+      ~StateGaussianPinCov64.newton_tol
+      ~StateGaussianPinCov64.penalty
+      ~StateGaussianPinCov64.rsq
+      ~StateGaussianPinCov64.rsq_curv_tol
+      ~StateGaussianPinCov64.rsq_slope_tol
+      ~StateGaussianPinCov64.rsqs
+      ~StateGaussianPinCov64.screen_begins
+      ~StateGaussianPinCov64.screen_beta
+      ~StateGaussianPinCov64.screen_betas
+      ~StateGaussianPinCov64.screen_g1
+      ~StateGaussianPinCov64.screen_g2
+      ~StateGaussianPinCov64.screen_grad
+      ~StateGaussianPinCov64.screen_grads
+      ~StateGaussianPinCov64.screen_is_active
+      ~StateGaussianPinCov64.screen_is_actives
+      ~StateGaussianPinCov64.screen_set
+      ~StateGaussianPinCov64.screen_transforms
+      ~StateGaussianPinCov64.screen_vars
+      ~StateGaussianPinCov64.tol
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   
+   
+
+   
+   
+   
+   .. autoattribute:: A
+   .. autoattribute:: active_begins
+   .. autoattribute:: active_g1
+   .. autoattribute:: active_g2
+   .. autoattribute:: active_order
+   .. autoattribute:: active_set
+   .. autoattribute:: alpha
+   .. autoattribute:: benchmark_active
+   .. autoattribute:: benchmark_screen
+   .. autoattribute:: betas
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: intercept
+   .. autoattribute:: intercepts
+   .. autoattribute:: iters
+   .. autoattribute:: lmda_path
+   .. autoattribute:: lmdas
+   .. autoattribute:: max_iters
+   .. autoattribute:: n_threads
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: newton_tol
+   .. autoattribute:: penalty
+   .. autoattribute:: rsq
+   .. autoattribute:: rsq_curv_tol
+   .. autoattribute:: rsq_slope_tol
+   .. autoattribute:: rsqs
+   .. autoattribute:: screen_begins
+   .. autoattribute:: screen_beta
+   .. autoattribute:: screen_betas
+   .. autoattribute:: screen_g1
+   .. autoattribute:: screen_g2
+   .. autoattribute:: screen_grad
+   .. autoattribute:: screen_grads
+   .. autoattribute:: screen_is_active
+   .. autoattribute:: screen_is_actives
+   .. autoattribute:: screen_set
+   .. autoattribute:: screen_transforms
+   .. autoattribute:: screen_vars
+   .. autoattribute:: tol
+   
+   

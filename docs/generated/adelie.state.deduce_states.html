@@ -44,7 +44,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.state.deduce_states';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.state.pin_cov" href="adelie.state.pin_cov.html" />
+    <link rel="next" title="adelie.state.gaussian_pin_cov" href="adelie.state.gaussian_pin_cov.html" />
     <link rel="prev" title="adelie.matrix.snp_phased_ancestry" href="adelie.matrix.snp_phased_ancestry.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -351,21 +351,21 @@ document.write(`
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.state.deduce_states</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_cov.html">adelie.state.pin_cov</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_pin.html">adelie.solver.solve_pin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian_pin.html">adelie.solver.solve_gaussian_pin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian.html">adelie.solver.solve_gaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StatePinBase64.html">adelie.adelie_core.state.StatePinBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StatePinCov64.html">adelie.adelie_core.state.StatePinCov64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StatePinNaive64.html">adelie.adelie_core.state.StatePinNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
@@ -435,19 +435,19 @@ document.write(`
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>group_sizes</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
+<dt><strong>group_sizes</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StateGaussianPinBase64</span></code>.</p>
 </dd>
-<dt><strong>screen_set</strong><span class="classifier">(s,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
+<dt><strong>screen_set</strong><span class="classifier">(s,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StateGaussianPinBase64</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>screen_g1</strong><span class="classifier">(s1,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
+<dt><strong>screen_g1</strong><span class="classifier">(s1,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StateGaussianPinBase64</span></code>.</p>
 </dd>
-<dt><strong>screen_g2</strong><span class="classifier">(s2,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
+<dt><strong>screen_g2</strong><span class="classifier">(s2,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StateGaussianPinBase64</span></code>.</p>
 </dd>
-<dt><strong>screen_begins</strong><span class="classifier">(s,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code>.</p>
+<dt><strong>screen_begins</strong><span class="classifier">(s,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StateGaussianPinBase64</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -455,7 +455,7 @@ document.write(`
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="adelie.adelie_core.state.StatePinBase64.html#adelie.adelie_core.state.StatePinBase64" title="adelie.adelie_core.state.StatePinBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StatePinBase64</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html#adelie.adelie_core.state.StateGaussianPinBase64" title="adelie.adelie_core.state.StateGaussianPinBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StateGaussianPinBase64</span></code></a></dt><dd></dd>
 </dl>
 </div>
 </dd></dl>
@@ -482,11 +482,11 @@ document.write(`
       </div>
     </a>
     <a class="right-next"
-       href="adelie.state.pin_cov.html"
+       href="adelie.state.gaussian_pin_cov.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.state.pin_cov</p>
+        <p class="prev-next-title">adelie.state.gaussian_pin_cov</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

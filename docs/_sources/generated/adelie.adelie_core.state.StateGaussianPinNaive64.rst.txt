@@ -1,0 +1,130 @@
+﻿adelie.adelie\_core.state.StateGaussianPinNaive64
+=================================================
+
+.. currentmodule:: adelie.adelie_core.state
+
+.. autoclass:: StateGaussianPinNaive64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~StateGaussianPinNaive64.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StateGaussianPinNaive64.X
+      ~StateGaussianPinNaive64.active_begins
+      ~StateGaussianPinNaive64.active_g1
+      ~StateGaussianPinNaive64.active_g2
+      ~StateGaussianPinNaive64.active_order
+      ~StateGaussianPinNaive64.active_set
+      ~StateGaussianPinNaive64.alpha
+      ~StateGaussianPinNaive64.benchmark_active
+      ~StateGaussianPinNaive64.benchmark_screen
+      ~StateGaussianPinNaive64.betas
+      ~StateGaussianPinNaive64.group_sizes
+      ~StateGaussianPinNaive64.groups
+      ~StateGaussianPinNaive64.intercept
+      ~StateGaussianPinNaive64.intercepts
+      ~StateGaussianPinNaive64.iters
+      ~StateGaussianPinNaive64.lmda_path
+      ~StateGaussianPinNaive64.lmdas
+      ~StateGaussianPinNaive64.max_iters
+      ~StateGaussianPinNaive64.n_threads
+      ~StateGaussianPinNaive64.newton_max_iters
+      ~StateGaussianPinNaive64.newton_tol
+      ~StateGaussianPinNaive64.penalty
+      ~StateGaussianPinNaive64.resid
+      ~StateGaussianPinNaive64.resid_sum
+      ~StateGaussianPinNaive64.resid_sums
+      ~StateGaussianPinNaive64.resids
+      ~StateGaussianPinNaive64.rsq
+      ~StateGaussianPinNaive64.rsq_curv_tol
+      ~StateGaussianPinNaive64.rsq_slope_tol
+      ~StateGaussianPinNaive64.rsq_tol
+      ~StateGaussianPinNaive64.rsqs
+      ~StateGaussianPinNaive64.screen_X_means
+      ~StateGaussianPinNaive64.screen_begins
+      ~StateGaussianPinNaive64.screen_beta
+      ~StateGaussianPinNaive64.screen_betas
+      ~StateGaussianPinNaive64.screen_g1
+      ~StateGaussianPinNaive64.screen_g2
+      ~StateGaussianPinNaive64.screen_is_active
+      ~StateGaussianPinNaive64.screen_is_actives
+      ~StateGaussianPinNaive64.screen_set
+      ~StateGaussianPinNaive64.screen_transforms
+      ~StateGaussianPinNaive64.screen_vars
+      ~StateGaussianPinNaive64.tol
+      ~StateGaussianPinNaive64.weights
+      ~StateGaussianPinNaive64.y_mean
+      ~StateGaussianPinNaive64.y_var
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   
+   
+
+   
+   
+   
+   .. autoattribute:: X
+   .. autoattribute:: active_begins
+   .. autoattribute:: active_g1
+   .. autoattribute:: active_g2
+   .. autoattribute:: active_order
+   .. autoattribute:: active_set
+   .. autoattribute:: alpha
+   .. autoattribute:: benchmark_active
+   .. autoattribute:: benchmark_screen
+   .. autoattribute:: betas
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: intercept
+   .. autoattribute:: intercepts
+   .. autoattribute:: iters
+   .. autoattribute:: lmda_path
+   .. autoattribute:: lmdas
+   .. autoattribute:: max_iters
+   .. autoattribute:: n_threads
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: newton_tol
+   .. autoattribute:: penalty
+   .. autoattribute:: resid
+   .. autoattribute:: resid_sum
+   .. autoattribute:: resid_sums
+   .. autoattribute:: resids
+   .. autoattribute:: rsq
+   .. autoattribute:: rsq_curv_tol
+   .. autoattribute:: rsq_slope_tol
+   .. autoattribute:: rsq_tol
+   .. autoattribute:: rsqs
+   .. autoattribute:: screen_X_means
+   .. autoattribute:: screen_begins
+   .. autoattribute:: screen_beta
+   .. autoattribute:: screen_betas
+   .. autoattribute:: screen_g1
+   .. autoattribute:: screen_g2
+   .. autoattribute:: screen_is_active
+   .. autoattribute:: screen_is_actives
+   .. autoattribute:: screen_set
+   .. autoattribute:: screen_transforms
+   .. autoattribute:: screen_vars
+   .. autoattribute:: tol
+   .. autoattribute:: weights
+   .. autoattribute:: y_mean
+   .. autoattribute:: y_var
+   
+   

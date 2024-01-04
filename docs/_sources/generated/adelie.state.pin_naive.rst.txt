@@ -1,6 +1,0 @@
-﻿adelie.state.pin\_naive
-=======================
-
-.. currentmodule:: adelie.state
-
-.. autofunction:: pin_naive

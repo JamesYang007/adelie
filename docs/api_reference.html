@@ -353,21 +353,21 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_cov.html">adelie.state.pin_cov</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pin_naive.html">adelie.state.pin_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.objective.html">adelie.solver.objective</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.solve_pin.html">adelie.solver.solve_pin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.solve_gaussian_pin.html">adelie.solver.solve_gaussian_pin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.solve_gaussian.html">adelie.solver.solve_gaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinBase64.html">adelie.adelie_core.state.StatePinBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinCov64.html">adelie.adelie_core.state.StatePinCov64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinNaive64.html">adelie.adelie_core.state.StatePinNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.base.html">adelie.state.base</a></li>
@@ -547,10 +547,10 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.deduce_states.html#adelie.state.deduce_states" title="adelie.state.deduce_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deduce_states</span></code></a>(*, group_sizes, screen_set)</p></td>
 <td><p>Deduce state variables.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.pin_cov.html#adelie.state.pin_cov" title="adelie.state.pin_cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pin_cov</span></code></a>(*, A, groups, alpha, penalty, ...[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.gaussian_pin_cov.html#adelie.state.gaussian_pin_cov" title="adelie.state.gaussian_pin_cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_pin_cov</span></code></a>(*, A, groups, alpha, ...[, ...])</p></td>
 <td><p>Creates a pin, covariance method state object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.pin_naive.html#adelie.state.pin_naive" title="adelie.state.pin_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pin_naive</span></code></a>(*, X, y_mean, y_var, groups, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.gaussian_pin_naive.html#adelie.state.gaussian_pin_naive" title="adelie.state.gaussian_pin_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_pin_naive</span></code></a>(*, X, y_mean, y_var, ...)</p></td>
 <td><p>Creates a pin, naive method state object.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.gaussian_naive.html#adelie.state.gaussian_naive" title="adelie.state.gaussian_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_naive</span></code></a>(*, X, X_means, y_mean, y_var, ...)</p></td>
@@ -566,7 +566,7 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.objective.html#adelie.solver.objective" title="adelie.solver.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">objective</span></code></a>(beta0, beta, *, X, y, groups, ...)</p></td>
 <td><p>Computes the group elastic net objective.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.solver.solve_pin.html#adelie.solver.solve_pin" title="adelie.solver.solve_pin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_pin</span></code></a>(state)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.solver.solve_gaussian_pin.html#adelie.solver.solve_gaussian_pin" title="adelie.solver.solve_gaussian_pin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_gaussian_pin</span></code></a>(state)</p></td>
 <td><p>Solves the pinned group elastic net problem.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.solve_gaussian.html#adelie.solver.solve_gaussian" title="adelie.solver.solve_gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_gaussian</span></code></a>(state)</p></td>
@@ -585,13 +585,13 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianNaive64.html#adelie.adelie_core.state.StateGaussianNaive64" title="adelie.adelie_core.state.StateGaussianNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateGaussianNaive64</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinBase64.html#adelie.adelie_core.state.StatePinBase64" title="adelie.adelie_core.state.StatePinBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StatePinBase64</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinBase64.html#adelie.adelie_core.state.StateGaussianPinBase64" title="adelie.adelie_core.state.StateGaussianPinBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateGaussianPinBase64</span></code></a></p></td>
 <td><p>Base core state class for all pin methods.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinCov64.html#adelie.adelie_core.state.StatePinCov64" title="adelie.adelie_core.state.StatePinCov64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StatePinCov64</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinCov64.html#adelie.adelie_core.state.StateGaussianPinCov64" title="adelie.adelie_core.state.StateGaussianPinCov64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateGaussianPinCov64</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinNaive64.html#adelie.adelie_core.state.StatePinNaive64" title="adelie.adelie_core.state.StatePinNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StatePinNaive64</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinNaive64.html#adelie.adelie_core.state.StateGaussianPinNaive64" title="adelie.adelie_core.state.StateGaussianPinNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateGaussianPinNaive64</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixCovBase64.html#adelie.matrix.MatrixCovBase64" title="adelie.matrix.MatrixCovBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixCovBase64</span></code></a></p></td>
