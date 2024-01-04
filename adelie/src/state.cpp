@@ -68,7 +68,7 @@ static auto convert_betas(
 template <class ValueType>
 void state_gaussian_pin_base(py::module_& m, const char* name)
 {
-    using state_t = ad::state::gaussian::pin::StateGaussianPinBase<ValueType>;
+    using state_t = ad::state::StateGaussianPinBase<ValueType>;
     using index_t = typename state_t::index_t;
     using value_t = typename state_t::value_t;
     using vec_index_t = typename state_t::vec_index_t;
@@ -331,9 +331,9 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
 }
 
 template <class MatrixType>
-class PyStateGaussianPinNaive : public ad::state::gaussian::pin::naive::StateGaussianPinNaive<MatrixType>
+class PyStateGaussianPinNaive : public ad::state::StateGaussianPinNaive<MatrixType>
 {
-    using base_t = ad::state::gaussian::pin::naive::StateGaussianPinNaive<MatrixType>;
+    using base_t = ad::state::StateGaussianPinNaive<MatrixType>;
 public:
     using base_t::base_t;
     PyStateGaussianPinNaive(base_t&& base) : base_t(std::move(base)) {}
@@ -343,7 +343,7 @@ template <class MatrixType>
 void state_gaussian_pin_naive(py::module_& m, const char* name)
 {
     using matrix_t = MatrixType;
-    using state_t = ad::state::gaussian::pin::naive::StateGaussianPinNaive<matrix_t>;
+    using state_t = ad::state::StateGaussianPinNaive<matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_index_t = typename state_t::vec_index_t;
@@ -459,9 +459,9 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
 }
 
 template <class MatrixType>
-class PyStateGaussianPinCov : public ad::state::gaussian::pin::cov::StateGaussianPinCov<MatrixType>
+class PyStateGaussianPinCov : public ad::state::StateGaussianPinCov<MatrixType>
 {
-    using base_t = ad::state::gaussian::pin::cov::StateGaussianPinCov<MatrixType>;
+    using base_t = ad::state::StateGaussianPinCov<MatrixType>;
 public:
     using base_t::base_t;
     PyStateGaussianPinCov(base_t&& base) : base_t(std::move(base)) {}
@@ -471,7 +471,7 @@ template <class MatrixType>
 void state_gaussian_pin_cov(py::module_& m, const char* name)
 {
     using matrix_t = MatrixType;
-    using state_t = ad::state::gaussian::pin::cov::StateGaussianPinCov<matrix_t>;
+    using state_t = ad::state::StateGaussianPinCov<matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_index_t = typename state_t::vec_index_t;
@@ -557,7 +557,7 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
 template <class ValueType>
 void state_gaussian_base(py::module_& m, const char* name)
 {
-    using state_t = ad::state::gaussian::StateGaussianBase<ValueType>;
+    using state_t = ad::state::StateGaussianBase<ValueType>;
     using value_t = typename state_t::value_t;
     using safe_bool_t = typename state_t::safe_bool_t;
     using vec_value_t = typename state_t::vec_value_t;
@@ -915,9 +915,9 @@ void state_gaussian_base(py::module_& m, const char* name)
 }
 
 template <class MatrixType>
-class PyStateGaussianNaive : public ad::state::gaussian::naive::StateGaussianNaive<MatrixType>
+class PyStateGaussianNaive : public ad::state::StateGaussianNaive<MatrixType>
 {
-    using base_t = ad::state::gaussian::naive::StateGaussianNaive<MatrixType>;
+    using base_t = ad::state::StateGaussianNaive<MatrixType>;
 public:
     using base_t::base_t;
     PyStateGaussianNaive(base_t&& base) : base_t(std::move(base)) {}
@@ -927,7 +927,7 @@ template <class MatrixType>
 void state_gaussian_naive(py::module_& m, const char* name)
 {
     using matrix_t = MatrixType;
-    using state_t = ad::state::gaussian::naive::StateGaussianNaive<matrix_t>;
+    using state_t = ad::state::StateGaussianNaive<matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
