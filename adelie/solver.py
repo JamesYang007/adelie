@@ -6,7 +6,7 @@ import adelie as ad
 import numpy as np
 
 
-def objective(
+def gaussian_naive_objective(
     beta0: float,
     beta: np.ndarray, 
     *,
@@ -71,7 +71,7 @@ def objective(
     obj : float
         Group elastic net objective.
     """
-    return core.solver.objective(
+    return core.solver.gaussian_naive_objective(
         beta0, beta, X, y, groups, group_sizes, lmda, alpha, penalty, weights,
     )
 

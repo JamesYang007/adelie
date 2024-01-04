@@ -157,6 +157,8 @@ void update_screen_derived_base(
     screen_is_active.resize(screen_set.size(), false);
 }
 
+} // namespace gaussian
+
 template <class ValueType,
           class IndexType=Eigen::Index,
           class BoolType=bool
@@ -339,10 +341,10 @@ struct StateGaussianBase
         screen_g2.reserve(screen_set.size());
         screen_begins.reserve(screen_set.size());
         screen_order.reserve(screen_set.size());
-        update_screen_derived_base(*this);
+        gaussian::update_screen_derived_base(*this);
 
         /* initialize abs_grad */
-        update_abs_grad(*this, lmda);
+        gaussian::update_abs_grad(*this, lmda);
 
         /* optimize for output storage size */
         const auto n_lmdas = std::max<size_t>(lmda_path.size(), lmda_path_size);
@@ -361,6 +363,5 @@ struct StateGaussianBase
     }
 };
 
-} // namespace gaussian
 } // namespace state
 } // namespace adelie_core
