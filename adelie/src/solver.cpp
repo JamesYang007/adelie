@@ -15,7 +15,7 @@ using namespace pybind11::literals; // to bring in the `_a` literal
 // =================================================================
 // Helper functions
 // =================================================================
-double objective(
+double gaussian_naive_objective(
     double beta0,
     const Eigen::Ref<const ad::util::rowvec_type<double>>& beta,
     const Eigen::Ref<const ad::util::rowmat_type<double>>& X,
@@ -156,16 +156,16 @@ py::dict solve_gaussian_naive(StateType state)
 } 
 
 template <class T> 
-using state_gaussian_pin_naive_t = ad::state::gaussian::pin::naive::StateGaussianPinNaive<ad::matrix::MatrixNaiveBase<T>>;
+using state_gaussian_pin_naive_t = ad::state::StateGaussianPinNaive<ad::matrix::MatrixNaiveBase<T>>;
 template <class T> 
-using state_gaussian_pin_cov_t = ad::state::gaussian::pin::cov::StateGaussianPinCov<ad::matrix::MatrixCovBase<T>>;
+using state_gaussian_pin_cov_t = ad::state::StateGaussianPinCov<ad::matrix::MatrixCovBase<T>>;
 template <class T> 
-using state_gaussian_naive_t = ad::state::gaussian::naive::StateGaussianNaive<ad::matrix::MatrixNaiveBase<T>>;
+using state_gaussian_naive_t = ad::state::StateGaussianNaive<ad::matrix::MatrixNaiveBase<T>>;
 
 void register_solver(py::module_& m)
 {
     /* helpers */
-    m.def("objective", &objective);
+    m.def("gaussian_naive_objective", &gaussian_naive_objective);
 
     /* solve pinned method */
     m.def("solve_gaussian_pin_naive_64", &solve_gaussian_pin_naive<state_gaussian_pin_naive_t<double>>);

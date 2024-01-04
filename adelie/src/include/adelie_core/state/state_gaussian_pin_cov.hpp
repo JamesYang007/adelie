@@ -3,9 +3,6 @@
 
 namespace adelie_core {
 namespace state {
-namespace gaussian {
-namespace pin {
-namespace cov {
 
 template <class MatrixType, 
           class ValueType=typename std::decay_t<MatrixType>::value_t,
@@ -86,8 +83,5 @@ struct StateGaussianPinCov : StateGaussianPinBase<
     }
 };
 
-} // namespace cov
-} // namespace pin
-} // namespace gaussian
 } // namespace state
 } // namespace adelie_core

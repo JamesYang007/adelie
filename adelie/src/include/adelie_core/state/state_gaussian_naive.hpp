@@ -92,6 +92,8 @@ void update_screen_derived(
     }
 }
 
+} // namespace naive
+} // namespace gaussian
 
 template <class MatrixType, 
           class ValueType=typename std::decay_t<MatrixType>::value_t,
@@ -208,11 +210,9 @@ struct StateGaussianNaive : StateGaussianBase<
     void initialize() 
     {
         /* initialize the rest of the strong quantities */
-        update_screen_derived(*this); 
+        gaussian::naive::update_screen_derived(*this); 
     }
 };
 
-} // namespace naive
-} // namespace gaussian
 } // namespace state
 } // namespace adelie_core

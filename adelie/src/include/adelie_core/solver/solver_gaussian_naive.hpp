@@ -223,7 +223,7 @@ auto fit(
     using vec_index_t = typename state_t::vec_index_t;
     using vec_safe_bool_t = util::rowvec_type<safe_bool_t>;
     using matrix_naive_t = typename state_t::matrix_t;
-    using state_gaussian_pin_naive_t = state::gaussian::pin::naive::StateGaussianPinNaive<
+    using state_gaussian_pin_naive_t = state::StateGaussianPinNaive<
         matrix_naive_t,
         typename std::decay_t<matrix_naive_t>::value_t,
         index_t,
