@@ -4,9 +4,9 @@
 #include <adelie_core/state/state_gaussian_naive.hpp>
 #include <adelie_core/state/state_gaussian_pin_cov.hpp>
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
-#include <adelie_core/solver/solve_gaussian_naive.hpp>
-#include <adelie_core/solver/solve_gaussian_pin_cov.hpp>
-#include <adelie_core/solver/solve_gaussian_pin_naive.hpp>
+#include <adelie_core/solver/solver_gaussian_naive.hpp>
+#include <adelie_core/solver/solver_gaussian_pin_cov.hpp>
+#include <adelie_core/solver/solver_gaussian_pin_naive.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
