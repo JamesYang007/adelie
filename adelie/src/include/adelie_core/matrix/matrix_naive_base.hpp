@@ -166,7 +166,7 @@ public:
     virtual value_t cmul(
         int j, 
         const Eigen::Ref<const vec_value_t>& v
-    ) const =0;
+    ) =0;
 
     /**
      * @brief Computes v X[:, j]^T W where X is the current matrix.

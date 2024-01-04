@@ -125,7 +125,7 @@ def test_naive_dense():
         np.random.seed(seed)
         X = np.random.normal(0, 1, (n, p))
         X = np.array(X, dtype=dtype, order=order)
-        cX = mod.dense(X, method="naive", n_threads=4)
+        cX = mod.dense(X, method="naive", n_threads=15)
         run_naive(X, cX, dtype)
 
     dtypes = [np.float32, np.float64]
