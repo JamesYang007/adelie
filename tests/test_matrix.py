@@ -73,9 +73,16 @@ def run_naive(
     buffer = np.empty((n, q), dtype=dtype, order="F")
     out = np.empty((q, q), dtype=dtype, order="F")
     for i in range(p-q+1):
-        cX.cov(i, q, sqrt_weights, out, buffer)
-        expected = X[:, i:i+q].T @ (w[:, None] * X[:, i:i+q])
-        assert np.allclose(expected, out, atol=atol)
+        try:
+            cX.cov(i, q, sqrt_weights, out, buffer)
+            expected = X[:, i:i+q].T @ (w[:, None] * X[:, i:i+q])
+            assert np.allclose(expected, out, atol=atol)
+        except RuntimeError as err:
+            err_msg = str(err)
+            if "MatrixNaiveConcatenate::cov() only allows the block to be fully contained in one of the matrices in the list." in err_msg:
+                pass
+            else:
+                raise err
 
     assert cX.rows() == n
     assert cX.cols() == p
@@ -118,6 +125,27 @@ def run_cov(
 
     assert cA.rows() == p
     assert cA.cols() == p
+
+
+def test_naive_concat():
+    def _test(n, ps, dtype, n_threads=7, seed=0):
+        np.random.seed(seed)
+        Xs = [
+            np.random.normal(0, 1, (n, p))
+            for p in ps
+        ]
+        X = np.concatenate(Xs, axis=1, dtype=dtype)
+        cX = mod.concatenate(
+            [mod.dense(_X.astype(dtype), method="naive", n_threads=n_threads) for _X in Xs], 
+            method="naive", 
+            n_threads=n_threads, 
+        )
+        run_naive(X, cX, dtype)
+
+    dtypes = [np.float32, np.float64]
+    ps = [1, 7, 41, 13, 113]
+    for dtype in dtypes:
+        _test(2, ps, dtype)
 
 
 def test_naive_dense():
