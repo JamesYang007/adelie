@@ -1,5 +1,5 @@
 from adelie.solver import (
-    objective,
+    gaussian_naive_objective,
     solve_gaussian_pin,
     solve_gaussian,
 )
@@ -139,7 +139,7 @@ def run_solve_gaussian_pin(state, X, y, weights):
     is_beta_close = np.allclose(betas, cvxpy_betas, atol=1e-6)
     if not is_beta_close:
         my_objs = np.array([
-            objective(
+            gaussian_naive_objective(
                 beta0,
                 beta,
                 X=X,
@@ -154,7 +154,7 @@ def run_solve_gaussian_pin(state, X, y, weights):
             for beta0, beta, lmda in zip(beta0s, betas, lmdas)
         ])
         cvxpy_objs = np.array([
-            objective(
+            gaussian_naive_objective(
                 beta0,
                 beta,
                 X=X,
@@ -411,13 +411,14 @@ def run_solve_gaussian(state, X, y):
         )
         for lmda in lmdas
     ]
+
     cvxpy_beta0s = [out[0] for out in cvxpy_res]
     cvxpy_betas = [out[1] for out in cvxpy_res]
 
     is_beta_close = np.allclose(betas, cvxpy_betas, atol=1e-6)
     if not is_beta_close:
         my_objs = np.array([
-            objective(
+            gaussian_naive_objective(
                 beta0,
                 beta,
                 X=X,
@@ -432,7 +433,7 @@ def run_solve_gaussian(state, X, y):
             for beta0, beta, lmda in zip(beta0s, betas, lmdas)
         ])
         cvxpy_objs = np.array([
-            objective(
+            gaussian_naive_objective(
                 beta0,
                 beta,
                 X=X,
