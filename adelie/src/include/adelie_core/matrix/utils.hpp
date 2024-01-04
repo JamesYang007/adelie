@@ -80,12 +80,13 @@ void dmmeq(
     }
 }
 
-template <class X1Type, class X2Type>
+template <class X1Type, class X2Type, class BuffType>
 ADELIE_CORE_STRONG_INLINE
 auto ddot(
     const X1Type& x1, 
     const X2Type& x2, 
-    size_t n_threads
+    size_t n_threads,
+    BuffType& buff
 )
 {
     using value_t = typename std::decay_t<X1Type>::Scalar;
@@ -96,8 +97,7 @@ auto ddot(
     const int block_size = n / n_blocks;
     const int remainder = n % n_blocks;
 
-    value_t out = 0;
-    #pragma omp parallel for schedule(static) num_threads(n_threads) reduction(+:out)
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
     for (int t = 0; t < n_blocks; ++t)
     {
         const auto begin = (
@@ -105,9 +105,10 @@ auto ddot(
             + std::max<int>(t-remainder, 0) * block_size
         );
         const auto size = block_size + (t < remainder);
-        out += x1.segment(begin, size).dot(x2.segment(begin, size));
+        buff[t] = x1.segment(begin, size).dot(x2.segment(begin, size));
     }
-    return out;
+
+    return buff.head(n_blocks).sum();
 }
 
 template <class ValueType, class XType, class OutType>

@@ -22,7 +22,6 @@ private:
     const Eigen::Map<const dense_t> _mat;   // underlying dense matrix
     const size_t _n_threads;                // number of threads
     util::rowmat_type<value_t> _buff;
-    util::rowvec_type<value_t> _vbuff;
     
 public:
     MatrixNaiveDense(
@@ -31,17 +30,17 @@ public:
     ): 
         _mat(mat.data(), mat.rows(), mat.cols()),
         _n_threads(n_threads),
-        _buff(_n_threads, std::min(mat.rows(), mat.cols())),
-        _vbuff(mat.rows())
+        _buff(_n_threads, std::min(mat.rows(), mat.cols()))
     {}
     
     value_t cmul(
         int j, 
         const Eigen::Ref<const vec_value_t>& v
-    ) const override
+    ) override
     {
         base_t::check_cmul(j, v.size(), rows(), cols());
-        return ddot(_mat.col(j), v.matrix(), _n_threads);
+        Eigen::Map<vec_value_t> _vbuff(_buff.data(), _n_threads);
+        return ddot(_mat.col(j), v.matrix(), _n_threads, _vbuff);
     }
 
     void ctmul(
