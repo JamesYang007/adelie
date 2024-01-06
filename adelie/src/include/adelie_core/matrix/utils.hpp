@@ -114,8 +114,6 @@ auto ddot(
     BuffType& buff
 )
 {
-    using value_t = typename std::decay_t<X1Type>::Scalar;
-
     assert(n_threads > 0);
     const size_t n = x1.size();
     const int n_blocks = std::min(n_threads, n);
@@ -135,6 +133,44 @@ auto ddot(
 
     return buff.head(n_blocks).sum();
 }
+
+
+template <class InnerType, class ValueType, class DenseType, class BuffType>
+ADELIE_CORE_STRONG_INLINE
+auto spddot(
+    const InnerType& inner, 
+    const ValueType& value,
+    const DenseType& x, 
+    size_t n_threads,
+    BuffType& buff
+)
+{
+    using value_t = typename std::decay_t<DenseType>::Scalar;
+
+    assert(n_threads > 0);
+    const size_t n_sp = inner.size();
+    const int n_blocks = std::min(n_threads, n_sp);
+    const int block_size = n_sp / n_blocks;
+    const int remainder = n_sp % n_blocks;
+
+    buff.head(n_blocks).setZero();
+
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
+    for (int t = 0; t < n_blocks; ++t)
+    {
+        const auto begin = (
+            std::min<int>(t, remainder) * (block_size + 1) 
+            + std::max<int>(t-remainder, 0) * block_size
+        );
+        const auto size = block_size + (t < remainder);
+        for (int i = begin; i < begin+size; ++i) {
+            buff[t] += x[inner[i]] * value[i];
+        }
+    }
+
+    return buff.head(n_blocks).sum();
+}
+
 
 template <class ValueType, class XType, class OutType>
 ADELIE_CORE_STRONG_INLINE

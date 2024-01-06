@@ -89,8 +89,9 @@ void coordinate_descent(
         update_rsq(rsq, del, A_kk, gk);
 
         // update residual 
-        X.ctmul(groups[k], del, weights, buffer4_n);
-        matrix::dvsubi(resid, buffer4_n, n_threads);
+        auto dresid = buffer4_n.head(resid.size());
+        X.ctmul(groups[k], del, weights, dresid);
+        matrix::dvsubi(resid, dresid, n_threads);
         resid_sum -= Xk_mean * del;
 
         additional_step(ss_idx);
