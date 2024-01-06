@@ -5,9 +5,6 @@
 namespace adelie_core {
 namespace matrix {
 
-/**
- * NOTE: only used for benchmark. 
- */
 template <class X1Type, class X2Type>
 ADELIE_CORE_STRONG_INLINE
 void dvaddi(
