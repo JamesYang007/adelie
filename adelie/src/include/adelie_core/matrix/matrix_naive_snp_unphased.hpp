@@ -70,7 +70,7 @@ public:
         const auto inner = _io.inner(j);
         const auto value = _io.value(j);
 
-        out.setZero();
+        dvzero(out, _n_threads);
 
         for (int i = 0; i < inner.size(); ++i) {
             out[inner[i]] = v * value[i] * weights[inner[i]];
@@ -101,7 +101,7 @@ public:
     ) override
     {
         base_t::check_btmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-        out.setZero();
+        dvzero(out, _n_threads);
         for (int t = 0; t < q; ++t) 
         {
             const auto inner = _io.inner(j+t);
