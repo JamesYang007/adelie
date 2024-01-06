@@ -132,7 +132,7 @@ void dmmeq(
 
 template <class X1Type, class X2Type, class BuffType>
 ADELIE_CORE_STRONG_INLINE
-auto ddot(
+typename std::decay_t<X1Type>::Scalar ddot(
     const X1Type& x1, 
     const X2Type& x2, 
     size_t n_threads,
