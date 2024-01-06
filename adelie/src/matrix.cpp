@@ -11,6 +11,27 @@
 namespace py = pybind11;
 namespace ad = adelie_core;
 
+template <class ValueType = double>
+void utils(py::module_& m)
+{
+    using value_t = ValueType;
+    using ref_rowarr_value_t = Eigen::Ref<ad::util::rowarr_type<value_t>>;
+    using ref_rowmat_value_t = Eigen::Ref<ad::util::rowmat_type<value_t>>;
+    using ref_vec_value_t = Eigen::Ref<ad::util::rowvec_type<value_t>>;
+    using ref_mvec_value_t = Eigen::Ref<Eigen::Matrix<value_t, 1, Eigen::Dynamic, Eigen::RowMajor>>;
+    using cref_vec_value_t = Eigen::Ref<const ad::util::rowvec_type<value_t>>;
+    using cref_rowarr_value_t = Eigen::Ref<const ad::util::rowarr_type<value_t>>;
+    using cref_colmat_value_t = Eigen::Ref<const ad::util::colmat_type<value_t>>;
+    using cref_mvec_value_t = Eigen::Ref<const Eigen::Matrix<value_t, 1, Eigen::Dynamic, Eigen::RowMajor>>;
+
+    m.def("dvaddi", ad::matrix::dvaddi<ref_vec_value_t, cref_vec_value_t>);
+    m.def("dmmeq", ad::matrix::dmmeq<ref_rowarr_value_t, cref_rowarr_value_t>);
+    m.def("dvzero", ad::matrix::dvzero<ref_vec_value_t>);
+    m.def("ddot", ad::matrix::ddot<ref_mvec_value_t, cref_mvec_value_t, ref_vec_value_t>);
+    m.def("dax", ad::matrix::dax<value_t, cref_vec_value_t, ref_vec_value_t>);
+    m.def("dgemv", ad::matrix::dgemv<cref_colmat_value_t, cref_mvec_value_t, ref_rowmat_value_t, ref_mvec_value_t>);
+}
+
 template <class T>
 class PyMatrixNaiveBase : public ad::matrix::MatrixNaiveBase<T>
 {
@@ -520,12 +541,7 @@ using dense_type = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Storage>;
 void register_matrix(py::module_& m)
 {
     /* utils */
-    using ref_arr_value_t = Eigen::Ref<ad::util::rowarr_type<double>>;
-    using ref_vec_value_t = Eigen::Ref<ad::util::rowvec_type<double>>;
-    using cref_vec_value_t = Eigen::Ref<const ad::util::rowvec_type<double>>;
-    using cref_arr_value_t = Eigen::Ref<const ad::util::rowarr_type<double>>;
-    m.def("dvaddi", ad::matrix::dvaddi<ref_vec_value_t, cref_vec_value_t>);
-    m.def("dmmeq", ad::matrix::dvaddi<ref_arr_value_t, cref_arr_value_t>);
+    utils(m);
 
     /* base matrices */
     matrix_naive_base<double>(m, "MatrixNaiveBase64");

@@ -159,25 +159,6 @@ auto ddot(
     return buff.head(n_blocks).sum();
 }
 
-
-template <class InnerType, class ValueType, class DenseType>
-ADELIE_CORE_STRONG_INLINE
-auto spddot(
-    const InnerType& inner, 
-    const ValueType& value,
-    const DenseType& x
-)
-{
-    using value_t = typename std::decay_t<DenseType>::Scalar;
-
-    value_t sum = 0;
-    for (int i = 0; i < inner.size(); ++i) {
-        sum += x[inner[i]] * value[i];
-    }
-    return sum;
-}
-
-
 template <class ValueType, class XType, class OutType>
 ADELIE_CORE_STRONG_INLINE
 void dax(
@@ -201,6 +182,31 @@ void dax(
         );
         const auto size = block_size + (t < remainder);
         out.segment(begin, size) = a * x.segment(begin, size);
+    }
+}
+
+template <class OutType>
+ADELIE_CORE_STRONG_INLINE
+void dvzero(
+    OutType& out,
+    size_t n_threads
+)
+{
+    assert(n_threads > 0);
+    const size_t n = out.size();
+    const int n_blocks = std::min(n_threads, n);
+    const int block_size = n / n_blocks;
+    const int remainder = n % n_blocks;
+
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
+    for (int t = 0; t < n_blocks; ++t) 
+    {
+        const auto begin = (
+            std::min<int>(t, remainder) * (block_size + 1) 
+            + std::max<int>(t-remainder, 0) * block_size
+        );
+        const auto size = block_size + (t < remainder);
+        out.segment(begin, size).setZero();
     }
 }
 
@@ -284,6 +290,23 @@ auto svsvwdot(
             ++i1;
             ++i2;
         }
+    }
+    return sum;
+}
+
+template <class InnerType, class ValueType, class DenseType>
+ADELIE_CORE_STRONG_INLINE
+auto spddot(
+    const InnerType& inner, 
+    const ValueType& value,
+    const DenseType& x
+)
+{
+    using value_t = typename std::decay_t<DenseType>::Scalar;
+
+    value_t sum = 0;
+    for (int i = 0; i < inner.size(); ++i) {
+        sum += x[inner[i]] * value[i];
     }
     return sum;
 }
