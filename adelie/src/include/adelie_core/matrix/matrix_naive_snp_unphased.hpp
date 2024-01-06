@@ -28,7 +28,6 @@ protected:
     const string_t _filename;   // filename because why not? :)
     const io_t _io;             // IO handler
     const size_t _n_threads;    // number of threads
-    vec_value_t _buff;          // buffer
 
     static auto init_io(
         const string_t& filename
@@ -46,8 +45,7 @@ public:
     ): 
         _filename(filename),
         _io(init_io(filename)),
-        _n_threads(n_threads),
-        _buff(n_threads)
+        _n_threads(n_threads)
     {}
 
     value_t cmul(
@@ -58,7 +56,7 @@ public:
         base_t::check_cmul(j, v.size(), rows(), cols());
         const auto inner = _io.inner(j);
         const auto value = _io.value(j);
-        return spddot(inner, value, v, _n_threads, _buff);
+        return spddot(inner, value, v);
     }
 
     void ctmul(
@@ -72,11 +70,8 @@ public:
         const auto inner = _io.inner(j);
         const auto value = _io.value(j);
 
-        dvzero(out, _n_threads);
+        out.setZero();
 
-        // parallelization should be fine since 
-        // inner indices are always strictly increasing (no duplicate values).
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int i = 0; i < inner.size(); ++i) {
             out[inner[i]] = v * value[i] * weights[inner[i]];
         }
@@ -89,12 +84,12 @@ public:
     ) override
     {
         base_t::check_bmul(j, q, v.size(), out.size(), rows(), cols());
-
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int t = 0; t < q; ++t) 
         {
             const auto inner = _io.inner(j+t);
             const auto value = _io.value(j+t);
-            out[t] = spddot(inner, value, v, _n_threads, _buff);
+            out[t] = spddot(inner, value, v);
         }
     }
 
@@ -106,14 +101,11 @@ public:
     ) override
     {
         base_t::check_btmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-        dvzero(out, _n_threads);
+        out.setZero();
         for (int t = 0; t < q; ++t) 
         {
             const auto inner = _io.inner(j+t);
             const auto value = _io.value(j+t);
-            // parallelization should be fine since 
-            // inner indices are always strictly increasing (no duplicate values).
-            #pragma omp parallel for schedule(static) num_threads(_n_threads)
             for (int i = 0; i < inner.size(); ++i) {
                 out[inner[i]] += value[i] * weights[inner[i]] * v[t];
             } 
@@ -177,6 +169,7 @@ public:
         base_t::check_sp_btmul(
             v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
         );
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int k = 0; k < v.outerSize(); ++k) {
             typename sp_mat_value_t::InnerIterator it(v, k);
             auto out_k = out.row(k);
@@ -186,7 +179,6 @@ public:
                 const auto t = it.index();
                 const auto inner = _io.inner(t);
                 const auto value = _io.value(t);
-                #pragma omp parallel for schedule(static) num_threads(_n_threads)
                 for (int i = 0; i < inner.size(); ++i) {
                     out_k[inner[i]] += value[i] * weights[inner[i]] * it.value();
                 } 
