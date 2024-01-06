@@ -520,9 +520,12 @@ using dense_type = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Storage>;
 void register_matrix(py::module_& m)
 {
     /* utils */
+    using ref_arr_value_t = Eigen::Ref<ad::util::rowarr_type<double>>;
     using ref_vec_value_t = Eigen::Ref<ad::util::rowvec_type<double>>;
     using cref_vec_value_t = Eigen::Ref<const ad::util::rowvec_type<double>>;
+    using cref_arr_value_t = Eigen::Ref<const ad::util::rowarr_type<double>>;
     m.def("dvaddi", ad::matrix::dvaddi<ref_vec_value_t, cref_vec_value_t>);
+    m.def("dmmeq", ad::matrix::dvaddi<ref_arr_value_t, cref_arr_value_t>);
 
     /* base matrices */
     matrix_naive_base<double>(m, "MatrixNaiveBase64");
