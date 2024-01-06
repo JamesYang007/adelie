@@ -87,7 +87,7 @@ public:
             _buff,
             outm
         );
-        out *= weights;
+        dvmuli(out, weights, _n_threads);
     }
 
     void mul(
