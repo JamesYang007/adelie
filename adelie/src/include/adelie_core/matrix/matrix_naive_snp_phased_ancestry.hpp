@@ -85,25 +85,11 @@ public:
         for (int hap = 0; hap < 2; ++hap) {
             const auto inner = _io.inner(snp, hap);
             const auto ancestry = _io.ancestry(snp, hap);
-            const auto n_sp = inner.size();
-            const int n_blocks = std::min<int>(_n_threads, n_sp);
-            const int block_size = n_sp / n_blocks;
-            const int remainder = n_sp % n_blocks;
 
-            _vbuff.head(n_blocks).setZero();
-            #pragma omp parallel for schedule(static) num_threads(_n_threads)
-            for (int t = 0; t < n_blocks; ++t) {
-                const auto begin = (
-                    std::min<int>(t, remainder) * (block_size + 1) 
-                    + std::max<int>(t-remainder, 0) * block_size
-                );
-                const auto size = block_size + (t < remainder);
-                for (int i = 0; i < size; ++i) {
-                    if (ancestry[begin+i] != anc) continue;
-                    _vbuff[t] += v[inner[begin+i]];
-                }
+            for (int i = 0; i < inner.size(); ++i) {
+                if (ancestry[i] != anc) continue;
+                sum += v[inner[i]];
             }
-            sum += _vbuff.head(n_blocks).sum();
         }
 
         return sum;
@@ -122,11 +108,10 @@ public:
         const auto snp = j / A;
         const auto anc = j % A;
 
-        dvzero(out, _n_threads);
+        out.setZero();
         for (int hap = 0; hap < 2; ++hap) {
             const auto inner = _io.inner(snp, hap);
             const auto ancestry = _io.ancestry(snp, hap);
-            #pragma omp parallel for schedule(static) num_threads(_n_threads)
             for (int i = 0; i < inner.size(); ++i) {
                 if (ancestry[i] != anc) continue;
                 out[inner[i]] += v * weights[inner[i]];
@@ -149,6 +134,7 @@ public:
             (j + q - A * (j / A) + A - 1) / A
         );
 
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int b = 0; b < n_batches; ++b)
         {
             const auto n_solved =  (b > 0) * (A * ((j / A) + 1) - j + (b-1) * A);
@@ -156,46 +142,27 @@ public:
             const auto snp = begin / A;
             const auto ancestry_lower = begin % A;
             const auto ancestry_upper = std::min<int>(ancestry_lower + q - n_solved, A);
-            const auto ancestry_window = ancestry_upper - ancestry_lower;
 
             const auto _common_routine = [&](const auto func) {
                 for (int hap = 0; hap < 2; ++hap) {
                     const auto inner = _io.inner(snp, hap);
                     const auto ancestry = _io.ancestry(snp, hap);
-                    const int n_sp = inner.size();
-                    const int n_blocks = std::min<int>(_n_threads, n_sp);
-                    const int block_size = n_sp / n_blocks;
-                    const int remainder = n_sp % n_blocks;
-                    _buff.topRows(n_blocks).setZero();
-                    #pragma omp parallel for schedule(static) num_threads(_n_threads)
-                    for (int t = 0; t < n_blocks; ++t) {
-                        const auto begin = (
-                            std::min<int>(t, remainder) * (block_size + 1) 
-                            + std::max<int>(t-remainder, 0) * block_size
-                        );
-                        const auto size = block_size + (t < remainder);
-                        func(t, begin, size, inner, ancestry);
-                    }
-                    out.segment(n_solved, ancestry_window) += (
-                        _buff.topRows(n_blocks).middleCols(ancestry_lower, ancestry_window).colwise().sum()
-                    );
+                    func(inner, ancestry);
                 }
             };
 
             // optimized routine when additional check is not required
             if (ancestry_lower == 0 && ancestry_upper == A) {
-                _common_routine([&](int t, int begin, int size, const auto& inner, const auto& ancestry) {
-                    for (int i = 0; i < size; ++i) {
-                        const auto idx = begin + i;
-                        _buff(t, ancestry[idx]) += v[inner[idx]];
+                _common_routine([&](const auto& inner, const auto& ancestry) {
+                    for (int i = 0; i < inner.size(); ++i) {
+                        out[n_solved+ancestry[i]] += v[inner[i]];
                     }
                 });
             } else {
-                _common_routine([&](int t, int begin, int size, const auto& inner, const auto& ancestry) {
-                    for (int i = 0; i < size; ++i) {
-                        const auto idx = begin + i;
-                        if (ancestry[idx] < ancestry_lower || ancestry[idx] >= ancestry_upper) continue;
-                        _buff(t, ancestry[idx]) += v[inner[idx]];
+                _common_routine([&](const auto& inner, const auto& ancestry) {
+                    for (int i = 0; i < inner.size(); ++i) {
+                        if (ancestry[i] < ancestry_lower || ancestry[i] >= ancestry_upper) continue;
+                        out[n_solved+ancestry[i]-ancestry_lower] += v[inner[i]];
                     }
                 });
             }
@@ -212,7 +179,7 @@ public:
         base_t::check_btmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
 
         const int A = ancestries();
-        dvzero(out, _n_threads);
+        out.setZero();
 
         int n_solved = 0;
         while (n_solved < q) 
@@ -232,14 +199,12 @@ public:
 
             if (ancestry_lower == 0 && ancestry_upper == A) {
                 _common_routine([&](const auto& inner, const auto& ancestry) {
-                    #pragma omp parallel for schedule(static) num_threads(_n_threads)
                     for (int i = 0; i < inner.size(); ++i) {
                         out[inner[i]] += weights[inner[i]] * v[n_solved + ancestry[i]];
                     }
                 });
             } else {
                 _common_routine([&](const auto& inner, const auto& ancestry) {
-                    #pragma omp parallel for schedule(static) num_threads(_n_threads)
                     for (int i = 0; i < inner.size(); ++i) {
                         if (ancestry[i] < ancestry_lower || ancestry[i] >= ancestry_upper) continue;
                         out[inner[i]] += weights[inner[i]] * v[n_solved + ancestry[i] - ancestry_lower];
@@ -359,6 +324,7 @@ public:
             v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
         );
         const auto A = ancestries();
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int k = 0; k < v.outerSize(); ++k) {
             typename sp_mat_value_t::InnerIterator it(v, k);
             auto out_k = out.row(k);
@@ -372,7 +338,6 @@ public:
                 for (int hap = 0; hap < 2; ++hap) {
                     const auto inner = _io.inner(snp, hap);
                     const auto ancestry = _io.ancestry(snp, hap);
-                    #pragma omp parallel for schedule(static) num_threads(_n_threads)
                     for (int i = 0; i < inner.size(); ++i) {
                         if (ancestry[i] != anc) continue;
                         out_k[inner[i]] += weights[inner[i]] * it.value();
@@ -388,7 +353,7 @@ public:
     ) const override
     {
         base_t::check_means(weights.size(), out.size(), rows(), cols());
-        dvzero(out, _n_threads);
+        out.setZero();
 
         const auto A = ancestries();
         #pragma omp parallel for schedule(static) num_threads(_n_threads)

@@ -5,6 +5,9 @@
 namespace adelie_core {
 namespace matrix {
 
+/**
+ * NOTE: only used for benchmark. 
+ */
 template <class X1Type, class X2Type>
 ADELIE_CORE_STRONG_INLINE
 void dvaddi(
@@ -160,40 +163,21 @@ auto ddot(
 }
 
 
-template <class InnerType, class ValueType, class DenseType, class BuffType>
+template <class InnerType, class ValueType, class DenseType>
 ADELIE_CORE_STRONG_INLINE
 auto spddot(
     const InnerType& inner, 
     const ValueType& value,
-    const DenseType& x, 
-    size_t n_threads,
-    BuffType& buff
+    const DenseType& x
 )
 {
     using value_t = typename std::decay_t<DenseType>::Scalar;
 
-    assert(n_threads > 0);
-    const size_t n_sp = inner.size();
-    const int n_blocks = std::min(n_threads, n_sp);
-    const int block_size = n_sp / n_blocks;
-    const int remainder = n_sp % n_blocks;
-
-    buff.head(n_blocks).setZero();
-
-    #pragma omp parallel for schedule(static) num_threads(n_threads)
-    for (int t = 0; t < n_blocks; ++t)
-    {
-        const auto begin = (
-            std::min<int>(t, remainder) * (block_size + 1) 
-            + std::max<int>(t-remainder, 0) * block_size
-        );
-        const auto size = block_size + (t < remainder);
-        for (int i = begin; i < begin+size; ++i) {
-            buff[t] += x[inner[i]] * value[i];
-        }
+    value_t sum = 0;
+    for (int i = 0; i < inner.size(); ++i) {
+        sum += x[inner[i]] * value[i];
     }
-
-    return buff.head(n_blocks).sum();
+    return sum;
 }
 
 
@@ -268,31 +252,6 @@ void dgemv(
             );
         }
         out = buff.block(0, 0, n_blocks, p).colwise().sum();
-    }
-}
-
-template <class OutType>
-ADELIE_CORE_STRONG_INLINE
-void dvzero(
-    OutType& out,
-    size_t n_threads
-)
-{
-    assert(n_threads > 0);
-    const size_t n = out.size();
-    const int n_blocks = std::min(n_threads, n);
-    const int block_size = n / n_blocks;
-    const int remainder = n % n_blocks;
-
-    #pragma omp parallel for schedule(static) num_threads(n_threads)
-    for (int t = 0; t < n_blocks; ++t) 
-    {
-        const auto begin = (
-            std::min<int>(t, remainder) * (block_size + 1) 
-            + std::max<int>(t-remainder, 0) * block_size
-        );
-        const auto size = block_size + (t < remainder);
-        out.segment(begin, size).setZero();
     }
 }
 
