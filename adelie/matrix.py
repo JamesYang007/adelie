@@ -154,7 +154,7 @@ def dense(
 
 
 def snp_unphased(
-    filenames: list,
+    filename: str,
     *,
     n_threads: int =1,
     dtype: Union[np.float32, np.float64] =np.float64,
@@ -166,8 +166,8 @@ def snp_unphased(
     
     Parameters
     ----------
-    filenames : list
-        List of file names that contain column-block slices of the matrix.
+    filename : str
+        File name that contains unphased calldata in ``.snpdat`` format.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -179,6 +179,10 @@ def snp_unphased(
     -------
     wrap
         Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.io.snp_unphased
     """
     if n_threads < 1:
         raise ValueError("Number of threads must be >= 1.")
@@ -192,16 +196,16 @@ def snp_unphased(
     class _snp_unphased(core_base):
         def __init__(
             self,
-            filenames: list,
+            filename: str,
             n_threads: int,
         ):
-            core_base.__init__(self, filenames, n_threads)
+            core_base.__init__(self, filename, n_threads)
 
-    return _snp_unphased(filenames, n_threads)
+    return _snp_unphased(filename, n_threads)
 
 
 def snp_phased_ancestry(
-    filenames: list,
+    filename: str,
     *,
     n_threads: int =1,
     dtype: Union[np.float32, np.float64] =np.float64,
@@ -213,8 +217,8 @@ def snp_phased_ancestry(
     
     Parameters
     ----------
-    filenames : list
-        List of file names that contain column-block slices of the matrix.
+    filename : str
+        File name that contains phased calldata with ancestry information in ``.snpdat`` format.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -226,6 +230,10 @@ def snp_phased_ancestry(
     -------
     wrap
         Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.io.snp_phased_ancestry
     """
     if n_threads < 1:
         raise ValueError("Number of threads must be >= 1.")
@@ -239,12 +247,12 @@ def snp_phased_ancestry(
     class _snp_phased_ancestry(core_base):
         def __init__(
             self,
-            filenames: list,
+            filename: str,
             n_threads: int,
         ):
-            core_base.__init__(self, filenames, n_threads)
+            core_base.__init__(self, filename, n_threads)
 
-    return _snp_phased_ancestry(filenames, n_threads)
+    return _snp_phased_ancestry(filename, n_threads)
 
 
 def cov_lazy(

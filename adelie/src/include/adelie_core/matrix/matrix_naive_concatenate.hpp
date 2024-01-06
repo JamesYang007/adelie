@@ -156,7 +156,7 @@ public:
     ) override
     {
         base_t::check_btmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-        dvzero(out, _n_threads);
+        out.setZero();
         int n_processed = 0;
         while (n_processed < q) {
             const auto j_curr = j + n_processed;

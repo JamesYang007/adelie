@@ -11,4 +11,5 @@
     }),
 ) for type_ in [
     "bench_omp",
+    "bench_matrix_utils",
 ]]
