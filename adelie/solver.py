@@ -211,11 +211,11 @@ def grpnet(
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
         Default is ``1``.
-    penalty : (G,) np.ndarray
+    penalty : (G,) np.ndarray, optional
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
         Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
-    weights : (n,) np.ndarray
+    weights : (n,) np.ndarray, optional
         Observation weights.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
     lmda_path : (l,) np.ndarray, optional
