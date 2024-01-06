@@ -295,6 +295,29 @@ static void BM_change_pool(benchmark::State& state)
     }
 }
 
+static void BM_change_n_iters(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    int x = 0;
+    srand(0);
+    int m1 = rand() % n;
+    int m2 = rand() % n;
+    int m = (m1 + m2) / 2;
+    for (auto _ : state) {
+        for (int i = 0; i < 100; ++i) {
+            #pragma omp parallel for schedule(static) num_threads(4)
+            for (int j = 0; j < m1; ++j) {
+                x += j;
+            }
+            #pragma omp parallel for schedule(static) num_threads(4)
+            for (int j = 0; j < m2; ++j) {
+                x += j;
+            }
+        }
+        benchmark::DoNotOptimize(x);
+    }
+}
+
 BENCHMARK(BM_cmul_seq)
     -> Args({10000000})
     ;
@@ -358,5 +381,8 @@ BENCHMARK(BM_keep_pool)
     -> Args({1000})
     ;
 BENCHMARK(BM_change_pool)
+    -> Args({1000})
+    ;
+BENCHMARK(BM_change_n_iters)
     -> Args({1000})
     ;

@@ -1,6 +1,7 @@
 #pragma once
+#include <string>
+#include <vector>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
-#include <adelie_core/matrix/matrix_naive_snp_base.hpp>
 #include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/io/io_snp_phased_ancestry.hpp>
 
@@ -9,33 +10,35 @@ namespace matrix {
 
 template <class ValueType>
 class MatrixNaiveSNPPhasedAncestry : 
-    public MatrixNaiveBase<ValueType>,
-    public MatrixNaiveSNPBase
+    public MatrixNaiveBase<ValueType>
 {
 public:
     using base_t = MatrixNaiveBase<ValueType>;
-    using snp_base_t = MatrixNaiveSNPBase;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_index_t;
     using typename base_t::colmat_value_t;
     using typename base_t::rowmat_value_t;
     using typename base_t::sp_mat_value_t;
-    using typename snp_base_t::string_t;
-    using typename snp_base_t::dyn_vec_string_t;
+    using string_t = std::string;
     using io_t = io::IOSNPPhasedAncestry;
     using dyn_vec_io_t = std::vector<io_t>;
     
 protected:
-    using snp_base_t::init_ios;
-    using snp_base_t::init_snps;
-    using snp_base_t::init_io_slice_map;
-    using snp_base_t::init_io_index_map;
+    const string_t _filename;   // filename because why not? :)
+    const io_t _io;             // IO handler
+    const size_t _n_threads;    // number of threads
+    vec_value_t _vbuff;         // vector buffer
+    util::rowarr_type<value_t> _buff;           // buffer
 
-    const dyn_vec_io_t _ios;            // (F,) array of IO handlers
-    const size_t _snps;                 // total number of SNPs across all slices
-    const vec_index_t _io_slice_map;    // (s,) array mapping to matrix slice
-    const vec_index_t _io_index_map;    // (s,) array mapping to (relative) index of the slice
+    static auto init_io(
+        const string_t& filename
+    )
+    {
+        io_t io(filename);
+        io.read();
+        return io;
+    }
 
     static void throw_bad_start_index(int j, int A)
     {
@@ -55,36 +58,17 @@ protected:
 
 public:
     MatrixNaiveSNPPhasedAncestry(
-        const dyn_vec_string_t& filenames,
+        const string_t& filename,
         size_t n_threads
     ): 
-        snp_base_t(filenames, n_threads),
-        _ios(init_ios<dyn_vec_io_t>(filenames)),
-        _snps(init_snps(_ios)),
-        _io_slice_map(init_io_slice_map(_ios, _snps)),
-        _io_index_map(init_io_index_map(_ios, _snps))
-    {
-        // make sure every file has the same number of rows.
-        const size_t rows = _ios[0].rows();
-        for (const auto& io : _ios) {
-            if (io.rows() != rows) {
-                throw std::runtime_error(
-                    "Every slice must have same number of rows."
-                );
-            }
-        }
+        _filename(filename),
+        _io(init_io(filename)),
+        _n_threads(n_threads),
+        _vbuff(n_threads),
+        _buff(n_threads, _io.ancestries())
+    {}
 
-        const size_t A = _ios[0].ancestries();
-        for (const auto& io : _ios) {
-            if (io.ancestries() != A) {
-                throw std::runtime_error(
-                    "Every slice must have same number of ancestries."
-                );
-            }
-        }
-    }
-
-    auto ancestries() const { return _ios[0].ancestries(); }
+    auto ancestries() const { return _io.ancestries(); }
 
     value_t cmul(
         int j, 
@@ -96,18 +80,30 @@ public:
         const auto A = ancestries();
         const auto snp = j / A;
         const auto anc = j % A;
-        const auto slice = _io_slice_map[snp];
-        const auto& io = _ios[slice];
-        const auto index = _io_index_map[snp];
 
         value_t sum = 0;
         for (int hap = 0; hap < 2; ++hap) {
-            const auto inner = io.inner(index, hap);
-            const auto ancestry = io.ancestry(index, hap);
-            for (int i = 0; i < inner.size(); ++i) {
-                if (ancestry[i] != anc) continue;
-                sum += v[inner[i]];
+            const auto inner = _io.inner(snp, hap);
+            const auto ancestry = _io.ancestry(snp, hap);
+            const auto n_sp = inner.size();
+            const int n_blocks = std::min<int>(_n_threads, n_sp);
+            const int block_size = n_sp / n_blocks;
+            const int remainder = n_sp % n_blocks;
+
+            _vbuff.head(n_blocks).setZero();
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int t = 0; t < n_blocks; ++t) {
+                const auto begin = (
+                    std::min<int>(t, remainder) * (block_size + 1) 
+                    + std::max<int>(t-remainder, 0) * block_size
+                );
+                const auto size = block_size + (t < remainder);
+                for (int i = 0; i < size; ++i) {
+                    if (ancestry[begin+i] != anc) continue;
+                    _vbuff[t] += v[inner[begin+i]];
+                }
             }
+            sum += _vbuff.head(n_blocks).sum();
         }
 
         return sum;
@@ -125,14 +121,12 @@ public:
         const auto A = ancestries();
         const auto snp = j / A;
         const auto anc = j % A;
-        const auto slice = _io_slice_map[snp];
-        const auto& io = _ios[slice];
-        const auto index = _io_index_map[snp];
 
         dvzero(out, _n_threads);
         for (int hap = 0; hap < 2; ++hap) {
-            const auto inner = io.inner(index, hap);
-            const auto ancestry = io.ancestry(index, hap);
+            const auto inner = _io.inner(snp, hap);
+            const auto ancestry = _io.ancestry(snp, hap);
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
             for (int i = 0; i < inner.size(); ++i) {
                 if (ancestry[i] != anc) continue;
                 out[inner[i]] += v * weights[inner[i]];
@@ -155,35 +149,55 @@ public:
             (j + q - A * (j / A) + A - 1) / A
         );
 
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int b = 0; b < n_batches; ++b)
         {
             const auto n_solved =  (b > 0) * (A * ((j / A) + 1) - j + (b-1) * A);
             const auto begin = j + n_solved;
             const auto snp = begin / A;
-            const auto slice = _io_slice_map[snp];
-            const auto& io = _ios[slice];
-            const auto index = _io_index_map[snp];
             const auto ancestry_lower = begin % A;
             const auto ancestry_upper = std::min<int>(ancestry_lower + q - n_solved, A);
+            const auto ancestry_window = ancestry_upper - ancestry_lower;
 
+            const auto _common_routine = [&](const auto func) {
+                for (int hap = 0; hap < 2; ++hap) {
+                    const auto inner = _io.inner(snp, hap);
+                    const auto ancestry = _io.ancestry(snp, hap);
+                    const int n_sp = inner.size();
+                    const int n_blocks = std::min<int>(_n_threads, n_sp);
+                    const int block_size = n_sp / n_blocks;
+                    const int remainder = n_sp % n_blocks;
+                    _buff.topRows(n_blocks).setZero();
+                    #pragma omp parallel for schedule(static) num_threads(_n_threads)
+                    for (int t = 0; t < n_blocks; ++t) {
+                        const auto begin = (
+                            std::min<int>(t, remainder) * (block_size + 1) 
+                            + std::max<int>(t-remainder, 0) * block_size
+                        );
+                        const auto size = block_size + (t < remainder);
+                        func(t, begin, size, inner, ancestry);
+                    }
+                    out.segment(n_solved, ancestry_window) += (
+                        _buff.topRows(n_blocks).middleCols(ancestry_lower, ancestry_window).colwise().sum()
+                    );
+                }
+            };
+
+            // optimized routine when additional check is not required
             if (ancestry_lower == 0 && ancestry_upper == A) {
-                for (int hap = 0; hap < 2; ++hap) {
-                    const auto inner = io.inner(index, hap);
-                    const auto ancestry = io.ancestry(index, hap);
-                    for (int i = 0; i < inner.size(); ++i) {
-                        out[n_solved+ancestry[i]] += v[inner[i]];
+                _common_routine([&](int t, int begin, int size, const auto& inner, const auto& ancestry) {
+                    for (int i = 0; i < size; ++i) {
+                        const auto idx = begin + i;
+                        _buff(t, ancestry[idx]) += v[inner[idx]];
                     }
-                }
+                });
             } else {
-                for (int hap = 0; hap < 2; ++hap) {
-                    const auto inner = io.inner(index, hap);
-                    const auto ancestry = io.ancestry(index, hap);
-                    for (int i = 0; i < inner.size(); ++i) {
-                        if (ancestry[i] < ancestry_lower || ancestry[i] >= ancestry_upper) continue;
-                        out[n_solved+ancestry[i]-ancestry_lower] += v[inner[i]];
+                _common_routine([&](int t, int begin, int size, const auto& inner, const auto& ancestry) {
+                    for (int i = 0; i < size; ++i) {
+                        const auto idx = begin + i;
+                        if (ancestry[idx] < ancestry_lower || ancestry[idx] >= ancestry_upper) continue;
+                        _buff(t, ancestry[idx]) += v[inner[idx]];
                     }
-                }
+                });
             }
         }     
     }
@@ -205,29 +219,32 @@ public:
         {
             const auto begin = j + n_solved;
             const auto snp = begin / A;
-            const auto slice = _io_slice_map[snp];
-            const auto& io = _ios[slice];
-            const auto index = _io_index_map[snp];
             const auto ancestry_lower = begin % A;
             const auto ancestry_upper = std::min<int>(ancestry_lower + q - n_solved, A);
 
-            if (ancestry_lower == 0 && ancestry_upper == A) {
+            const auto _common_routine = [&](const auto func) {
                 for (int hap = 0; hap < 2; ++hap) {
-                    const auto inner = io.inner(index, hap);
-                    const auto ancestry = io.ancestry(index, hap);
+                    const auto inner = _io.inner(snp, hap);
+                    const auto ancestry = _io.ancestry(snp, hap);
+                    func(inner, ancestry);
+                }
+            };
+
+            if (ancestry_lower == 0 && ancestry_upper == A) {
+                _common_routine([&](const auto& inner, const auto& ancestry) {
+                    #pragma omp parallel for schedule(static) num_threads(_n_threads)
                     for (int i = 0; i < inner.size(); ++i) {
                         out[inner[i]] += weights[inner[i]] * v[n_solved + ancestry[i]];
                     }
-                }
+                });
             } else {
-                for (int hap = 0; hap < 2; ++hap) {
-                    const auto inner = io.inner(index, hap);
-                    const auto ancestry = io.ancestry(index, hap);
+                _common_routine([&](const auto& inner, const auto& ancestry) {
+                    #pragma omp parallel for schedule(static) num_threads(_n_threads)
                     for (int i = 0; i < inner.size(); ++i) {
                         if (ancestry[i] < ancestry_lower || ancestry[i] >= ancestry_upper) continue;
                         out[inner[i]] += weights[inner[i]] * v[n_solved + ancestry[i] - ancestry_lower];
                     }
-                }
+                });
             }
 
             n_solved += ancestry_upper - ancestry_lower;
@@ -263,9 +280,6 @@ public:
         while (n_solved0 < q) {
             const auto begin0 = j + n_solved0;
             const auto snp0 = begin0 / A;
-            const auto slice0 = _io_slice_map[snp0];
-            const auto& io0 = _ios[slice0];
-            const auto index0 = _io_index_map[snp0];
             const auto ancestry_lower0 = begin0 % A;
             const auto ancestry_upper0 = std::min<int>(ancestry_lower0 + q - n_solved0, A);
 
@@ -273,18 +287,15 @@ public:
             while (n_solved1 <= n_solved0) {
                 const auto begin1 = j + n_solved1;
                 const auto snp1 = begin1 / A;
-                const auto slice1 = _io_slice_map[snp1];
-                const auto& io1 = _ios[slice1];
-                const auto index1 = _io_index_map[snp1];
                 const auto ancestry_lower1 = begin1 % A;
                 const auto ancestry_upper1 = std::min<int>(ancestry_lower1 + q - n_solved1, A);
 
                 for (int hap0 = 0; hap0 < 2; ++hap0) {
                     for (int hap1 = 0; hap1 < 2; ++hap1) {
-                        const auto inner0 = io0.inner(index0, hap0);
-                        const auto ancestry0 = io0.ancestry(index0, hap0);
-                        const auto inner1 = io1.inner(index1, hap1);
-                        const auto ancestry1 = io1.ancestry(index1, hap1);
+                        const auto inner0 = _io.inner(snp0, hap0);
+                        const auto ancestry0 = _io.ancestry(snp0, hap0);
+                        const auto inner1 = _io.inner(snp1, hap1);
+                        const auto ancestry1 = _io.ancestry(snp1, hap1);
 
                         int i0 = 0;
                         int i1 = 0;
@@ -335,8 +346,8 @@ public:
         }
     }
 
-    int rows() const override { return _ios[0].rows(); }
-    int cols() const override { return _snps * ancestries(); }
+    int rows() const override { return _io.rows(); }
+    int cols() const override { return _io.snps() * ancestries(); }
 
     void sp_btmul(
         const sp_mat_value_t& v,
@@ -348,7 +359,6 @@ public:
             v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
         );
         const auto A = ancestries();
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int k = 0; k < v.outerSize(); ++k) {
             typename sp_mat_value_t::InnerIterator it(v, k);
             auto out_k = out.row(k);
@@ -357,14 +367,12 @@ public:
             {
                 const auto t = it.index();
                 const auto snp = t / A;
-                const auto slice = _io_slice_map[snp];
-                const auto& io = _ios[slice];
-                const auto index = _io_index_map[snp];
                 const auto anc = t % A;
 
                 for (int hap = 0; hap < 2; ++hap) {
-                    const auto inner = io.inner(index, hap);
-                    const auto ancestry = io.ancestry(index, hap);
+                    const auto inner = _io.inner(snp, hap);
+                    const auto ancestry = _io.ancestry(snp, hap);
+                    #pragma omp parallel for schedule(static) num_threads(_n_threads)
                     for (int i = 0; i < inner.size(); ++i) {
                         if (ancestry[i] != anc) continue;
                         out_k[inner[i]] += weights[inner[i]] * it.value();
@@ -384,14 +392,10 @@ public:
 
         const auto A = ancestries();
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int snp = 0; snp < _snps; ++snp) {
-            const auto slice = _io_slice_map[snp];
-            const auto& io = _ios[slice];
-            const auto index = _io_index_map[snp];
-
+        for (int snp = 0; snp < _io.snps(); ++snp) {
             for (int hap = 0; hap < 2; ++hap) {
-                const auto inner = io.inner(index, hap);
-                const auto ancestry = io.ancestry(index, hap);
+                const auto inner = _io.inner(snp, hap);
+                const auto ancestry = _io.ancestry(snp, hap);
                 for (int i = 0; i < inner.size(); ++i) {
                     out[A * snp + ancestry[i]] += weights[inner[i]];
                 }

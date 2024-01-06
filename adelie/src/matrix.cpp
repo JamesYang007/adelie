@@ -453,14 +453,14 @@ void matrix_naive_snp_unphased(py::module_& m, const char* name)
 {
     using internal_t = ad::matrix::MatrixNaiveSNPUnphased<ValueType>;
     using base_t = typename internal_t::base_t;
-    using dyn_vec_string_t = typename internal_t::dyn_vec_string_t;
+    using string_t = typename internal_t::string_t;
     py::class_<internal_t, base_t>(m, name)
         .def(
             py::init<
-                const dyn_vec_string_t&,
+                const string_t&,
                 size_t
             >(), 
-            py::arg("filenames").noconvert(),
+            py::arg("filename"),
             py::arg("n_threads")
         )
         ;
@@ -471,14 +471,14 @@ void matrix_naive_snp_phased_ancestry(py::module_& m, const char* name)
 {
     using internal_t = ad::matrix::MatrixNaiveSNPPhasedAncestry<ValueType>;
     using base_t = typename internal_t::base_t;
-    using dyn_vec_string_t = typename internal_t::dyn_vec_string_t;
+    using string_t = typename internal_t::string_t;
     py::class_<internal_t, base_t>(m, name)
         .def(
             py::init<
-                const dyn_vec_string_t&,
+                const string_t&,
                 size_t
             >(), 
-            py::arg("filenames").noconvert(),
+            py::arg("filename"),
             py::arg("n_threads")
         )
         ;

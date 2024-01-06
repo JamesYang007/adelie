@@ -204,36 +204,28 @@ def test_cov_lazy():
 
 
 def test_snp_unphased():
-    def _test(n, p, n_files, dtype, seed=0):
+    def _test(n, p, dtype, seed=0):
         np.random.seed(seed)
-        datas = [
-            ad.data.create_snp_unphased(n, p, seed=seed+i)
-            for i in range(n_files)
-        ]
-        filenames = [
-            f"/tmp/test_snp_unphased_{i}.snpdat"
-            for i in range(n_files)
-        ]
-        for i in range(n_files):
-            handler = ad.io.snp_unphased(filenames[i])
-            handler.write(datas[i]["X"])
+        data = ad.data.create_snp_unphased(n, p, seed=seed)
+        filename = "/tmp/test_snp_unphased.snpdat"
+        handler = ad.io.snp_unphased(filename)
+        handler.write(data["X"])
         cX = mod.snp_unphased(
-            filenames=filenames,
+            filename=filename,
             dtype=dtype,
-            n_threads=15,
+            n_threads=7,
         )
-        for f in filenames:
-            os.remove(f)
+        os.remove(filename)
 
-        X = np.concatenate([data["X"] for data in datas], axis=-1, dtype=np.int8)
+        X = data["X"].astype(np.int8)
         run_naive(X, cX, dtype)
 
 
     dtypes = [np.float64, np.float32]
     for dtype in dtypes:
-        _test(10, 20, 3, dtype)
-        _test(1, 13, 3, dtype)
-        _test(144, 1, 3, dtype)
+        _test(10, 20, dtype)
+        _test(1, 13, dtype)
+        _test(144, 1, dtype)
 
 
 def test_snp_phased_ancestry():
@@ -252,36 +244,25 @@ def test_snp_phased_ancestry():
         ] += calldata.reshape(n, s, 2)[:,:,1].ravel()
         return dense
 
-    def _test(n, s, A, n_files, dtype, seed=0):
+    def _test(n, s, A, dtype, seed=0):
         np.random.seed(seed)
-        datas = [
-            ad.data.create_snp_phased_ancestry(n, s, A, seed=seed+i)
-            for i in range(n_files)
-        ]
-        filenames = [
-            f"/tmp/test_snp_phased_ancestry_{i}.snpdat"
-            for i in range(n_files)
-        ]
-        for i in range(n_files):
-            handler = ad.io.snp_phased_ancestry(filenames[i])
-            handler.write(datas[i]["X"], datas[i]["ancestries"], A)
+        data = ad.data.create_snp_phased_ancestry(n, s, A, seed=seed)
+        filename = "/tmp/test_snp_phased_ancestry.snpdat"
+        handler = ad.io.snp_phased_ancestry(filename)
+        handler.write(data["X"], data["ancestries"], A)
         cX = mod.snp_phased_ancestry(
-            filenames=filenames,
+            filename=filename,
             dtype=dtype,
-            n_threads=8,
+            n_threads=7,
         )
-        for f in filenames:
-            os.remove(f)
+        os.remove(filename)
 
-        X = np.concatenate([
-            create_dense(data["X"], data["ancestries"], A) 
-            for data in datas
-        ], axis=-1, dtype=np.int8)
+        X = create_dense(data["X"], data["ancestries"], A) 
         run_naive(X, cX, dtype)
 
 
     dtypes = [np.float64, np.float32]
     for dtype in dtypes:
-        _test(10, 20, 4, 3, dtype)
-        _test(1, 13, 3, 3, dtype)
-        _test(144, 1, 2, 3, dtype)
+        _test(10, 20, 4, dtype)
+        _test(1, 13, 3, dtype)
+        _test(144, 1, 2, dtype)

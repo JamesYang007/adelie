@@ -499,6 +499,107 @@ def test_solve_gaussian():
     _test(100, 100, 50)
 
 
+def test_solve_gaussian_concatenate():
+    def _test(n, ps, G, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=7):
+        test_datas = [
+            ad.data.create_dense(n, p, G, sparsity=sparsity, seed=seed)
+            for p in ps
+        ]
+        Xs = [
+            ad.matrix.concatenate(
+                [ad.matrix.dense(data["X"], method="naive", n_threads=n_threads) for data in test_datas],
+                method="naive",
+                n_threads=n_threads,
+            )
+        ]
+        X = np.concatenate([
+            data["X"] for data in test_datas
+        ], axis=-1)
+        y = np.mean([data["y"] for data in test_datas], axis=0)
+
+        groups = np.concatenate([
+            begin + data["groups"]
+            for begin, data in zip(
+                np.cumsum(np.concatenate([[0], ps[:-1]])),
+                test_datas,
+            )
+        ])
+        group_sizes = np.concatenate([groups, [X.shape[-1]]], dtype=int)
+        group_sizes = group_sizes[1:] - group_sizes[:-1]
+        penalty = np.concatenate([data["penalty"] for data in test_datas])
+        weights = np.random.uniform(1, 2, n)
+        weights /= np.sum(weights)
+        X_means = np.sum(weights[:, None] * X, axis=0)
+        y_mean = np.sum(weights * y)
+        X_c = X - intercept * X_means[None]
+        y_c = y - y_mean * intercept
+        y_var = np.sum(weights * y_c ** 2)
+        resid = weights * y_c
+        screen_set = np.arange(len(groups))[(penalty <= 0) | (alpha <= 0)]
+        screen_beta = np.zeros(np.sum(group_sizes[screen_set]))
+        screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
+        grad = X_c.T @ resid
+
+        for Xpy in Xs:
+            state_special = ad.solver.solve_gaussian(
+                ad.state.gaussian_naive(
+                    X=Xpy,
+                    X_means=X_means,
+                    y_mean=y_mean,
+                    y_var=y_var,
+                    resid=resid,
+                    groups=groups,
+                    alpha=alpha,
+                    penalty=penalty,
+                    weights=weights,
+                    screen_set=screen_set,
+                    screen_beta=screen_beta,
+                    screen_is_active=screen_is_active,
+                    rsq=0,
+                    lmda=np.inf,
+                    grad=grad,
+                    n_threads=n_threads,
+                ),
+            )
+            X_dense = ad.matrix.dense(
+                X, 
+                method="naive", 
+                n_threads=n_threads,
+            )
+            state_dense = ad.solver.solve_gaussian(
+                ad.state.gaussian_naive(
+                    X=X_dense,
+                    X_means=X_means,
+                    y_mean=y_mean,
+                    y_var=y_var,
+                    resid=resid,
+                    groups=groups,
+                    alpha=alpha,
+                    penalty=penalty,
+                    weights=weights,
+                    screen_set=screen_set,
+                    screen_beta=screen_beta,
+                    screen_is_active=screen_is_active,
+                    rsq=0,
+                    lmda=np.inf,
+                    grad=grad,
+                    n_threads=n_threads,
+                )
+            )
+
+            assert np.allclose(state_special.lmdas, state_dense.lmdas)
+            assert np.allclose(state_special.rsqs, state_dense.rsqs)
+            assert np.allclose(state_special.intercepts, state_dense.intercepts)
+            assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray())
+
+    ps = np.array([4, 3, 20, 10, 252, 71, 1000])
+    _test(10, ps[ps >= 2], 2)
+    _test(10, ps[ps >= 17], 17)
+    _test(100, ps[ps >= 23], 23)
+    _test(100, ps[ps >= 2], 2)
+    _test(100, ps[ps >= 6], 6)
+
+
 def test_solve_gaussian_snp_unphased():
     def _test(n, p, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=7):
         test_data = ad.data.create_snp_unphased(
@@ -507,18 +608,17 @@ def test_solve_gaussian_snp_unphased():
             sparsity=sparsity, 
             seed=seed,
         )
-        filenames = [f"/tmp/test_snp_unphased.snpdat"]
-        handler = ad.io.snp_unphased(filenames[0])
+        filename = f"/tmp/test_snp_unphased.snpdat"
+        handler = ad.io.snp_unphased(filename)
         handler.write(test_data["X"], n_threads)
         Xs = [
             ad.matrix.snp_unphased(
-                filenames=filenames,
+                filename=filename,
                 dtype=np.float64,
                 n_threads=n_threads,
             )
         ]
-        for f in filenames:
-            os.remove(f)
+        os.remove(filename)
 
         X, y = test_data["X"], test_data["y"]
 
@@ -566,7 +666,6 @@ def test_solve_gaussian_snp_unphased():
 
     _test(10, 4)
     _test(10, 100)
-    _test(10, 100)
     _test(100, 23)
     _test(100, 100)
     _test(100, 10000)
@@ -581,19 +680,18 @@ def test_solve_gaussian_snp_phased_ancestry():
             sparsity=sparsity, 
             seed=seed,
         )
-        filenames = [f"/tmp/test_snp_phased_ancestry.snpdat"]
-        handler = ad.io.snp_phased_ancestry(filenames[0])
+        filename = "/tmp/test_snp_phased_ancestry.snpdat"
+        handler = ad.io.snp_phased_ancestry(filename)
         handler.write(test_data["X"], test_data["ancestries"], A, n_threads)
         Xs = [
             ad.matrix.snp_phased_ancestry(
-                filenames=filenames,
+                filename=filename,
                 dtype=np.float64,
                 n_threads=n_threads,
             )
         ]
         handler.read() 
-        for f in filenames:
-            os.remove(f)
+        os.remove(filename)
 
         X, y = handler.to_dense(n_threads), test_data["y"]
 
@@ -641,7 +739,6 @@ def test_solve_gaussian_snp_phased_ancestry():
             assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray())
 
     _test(10, 4)
-    _test(10, 100)
     _test(10, 100)
     _test(100, 23)
     _test(100, 100)
