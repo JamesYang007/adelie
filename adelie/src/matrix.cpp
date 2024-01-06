@@ -27,7 +27,7 @@ void utils(py::module_& m)
     m.def("dvaddi", ad::matrix::dvaddi<ref_vec_value_t, cref_vec_value_t>);
     m.def("dmmeq", ad::matrix::dmmeq<ref_rowarr_value_t, cref_rowarr_value_t>);
     m.def("dvzero", ad::matrix::dvzero<ref_vec_value_t>);
-    m.def("ddot", ad::matrix::ddot<ref_mvec_value_t, cref_mvec_value_t, ref_vec_value_t>);
+    m.def("ddot", ad::matrix::ddot<cref_mvec_value_t, cref_mvec_value_t, ref_vec_value_t>);
     m.def("dax", ad::matrix::dax<value_t, cref_vec_value_t, ref_vec_value_t>);
     m.def("dgemv", ad::matrix::dgemv<cref_colmat_value_t, cref_mvec_value_t, ref_rowmat_value_t, ref_mvec_value_t>);
 }
