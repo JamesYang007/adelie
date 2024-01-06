@@ -450,11 +450,11 @@ Default is <code class="docutils literal notranslate"><span class="pre">np.arang
 It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</span>.
 Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </dd>
-<dt><strong>penalty</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.
+<dt><strong>penalty</strong><span class="classifier">(G,) np.ndarray, optional</span></dt><dd><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.
 It must be a non-negative vector.
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to <code class="docutils literal notranslate"><span class="pre">np.sqrt(group_sizes)</span></code>.</p>
 </dd>
-<dt><strong>weights</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Observation weights.
+<dt><strong>weights</strong><span class="classifier">(n,) np.ndarray, optional</span></dt><dd><p>Observation weights.
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to <code class="docutils literal notranslate"><span class="pre">np.full(n,</span> <span class="pre">1/n)</span></code>.</p>
 </dd>
 <dt><strong>lmda_path</strong><span class="classifier">(l,) np.ndarray, optional</span></dt><dd><p>The regularization path to solve for.
