@@ -167,7 +167,8 @@ void coordinate_descent(
  */
 template <class StateType, 
           class BufferType, 
-          class UpdateCoefficientsType>
+          class UpdateCoefficientsType,
+          class CUIType>
 ADELIE_CORE_STRONG_INLINE
 void solve_active(
     StateType&& state,
@@ -176,7 +177,8 @@ void solve_active(
     BufferType& buffer2,
     BufferType& buffer3,
     BufferType& buffer4_n,
-    UpdateCoefficientsType update_coefficients_f
+    UpdateCoefficientsType update_coefficients_f,
+    CUIType check_user_interrupt
 )
 {
     using state_t = std::decay_t<StateType>;
@@ -189,6 +191,7 @@ void solve_active(
     auto& iters = state.iters;
 
     while (1) {
+        check_user_interrupt();
         ++iters;
         value_t convg_measure;
         coordinate_descent(
@@ -309,7 +312,8 @@ inline void solve(
             buffer_pack.buffer2,
             buffer_pack.buffer3,
             buffer_pack.buffer4,
-            update_coefficients_f
+            update_coefficients_f,
+            check_user_interrupt
         );
         lasso_active_called = true;
     };
@@ -325,7 +329,7 @@ inline void solve(
         }
 
         while (1) {
-            check_user_interrupt(iters);
+            check_user_interrupt();
             ++iters;
             value_t convg_measure;
             const auto old_active_size = active_set.size();
