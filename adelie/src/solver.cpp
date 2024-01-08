@@ -57,7 +57,7 @@ py::dict solve_gaussian_pin_naive(StateType state)
         );
     };
 
-    const auto check_user_interrupt = [&](auto) {
+    const auto check_user_interrupt = [&]() {
         if (PyErr_CheckSignals() != 0) {
             throw py::error_already_set();
         }
@@ -95,7 +95,7 @@ py::dict solve_gaussian_pin_cov(StateType state)
         );
     };
 
-    const auto check_user_interrupt = [&](auto) {
+    const auto check_user_interrupt = [&]() {
         if (PyErr_CheckSignals() != 0) {
             throw py::error_already_set();
         }
@@ -137,7 +137,7 @@ py::dict solve_gaussian_naive(StateType state)
         );
     };
 
-    const auto check_user_interrupt = [&](auto) {
+    const auto check_user_interrupt = [&]() {
         if (PyErr_CheckSignals() != 0) {
             throw py::error_already_set();
         }
