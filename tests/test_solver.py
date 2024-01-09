@@ -369,6 +369,7 @@ def create_dense(
         "y_var": y_var,
         "resid": resid,
         "groups": groups,
+        "group_sizes": group_sizes,
         "alpha": alpha,
         "penalty": penalty,
         "weights": weights,
@@ -383,11 +384,11 @@ def create_dense(
 
 
 def run_solve_gaussian(state, X, y):
-    state.check(y, method="assert")
+    state.check(method="assert")
 
     state = solve_gaussian(state)    
 
-    state.check(y, method="assert")
+    state.check(method="assert")
 
     # get solved lmdas
     lmdas = state.lmdas
@@ -458,7 +459,6 @@ def test_solve_gaussian():
             n, p, G, intercept, alpha, sparsity, seed,
         )
         X, y = test_data["X"], test_data["y"]
-        test_data.pop("y")
         Xs = [
             ad.matrix.dense(X, method="naive", n_threads=2)
         ]
@@ -471,11 +471,13 @@ def test_solve_gaussian():
             state = run_solve_gaussian(state, X, y)
             state = ad.state.gaussian_naive(
                 X=state.X,
+                y=y,
                 X_means=state.X_means,
                 y_mean=state.y_mean,
                 y_var=state.y_var,
                 resid=state.resid,
                 groups=state.groups,
+                group_sizes=state.group_sizes,
                 alpha=state.alpha,
                 penalty=state.penalty,
                 weights=state.weights,
@@ -544,11 +546,13 @@ def test_solve_gaussian_concatenate():
             state_special = ad.solver.solve_gaussian(
                 ad.state.gaussian_naive(
                     X=Xpy,
+                    y=y,
                     X_means=X_means,
                     y_mean=y_mean,
                     y_var=y_var,
                     resid=resid,
                     groups=groups,
+                    group_sizes=group_sizes,
                     alpha=alpha,
                     penalty=penalty,
                     weights=weights,
@@ -569,11 +573,13 @@ def test_solve_gaussian_concatenate():
             state_dense = ad.solver.solve_gaussian(
                 ad.state.gaussian_naive(
                     X=X_dense,
+                    y=y,
                     X_means=X_means,
                     y_mean=y_mean,
                     y_var=y_var,
                     resid=resid,
                     groups=groups,
+                    group_sizes=group_sizes,
                     alpha=alpha,
                     penalty=penalty,
                     weights=weights,
@@ -641,9 +647,6 @@ def test_solve_gaussian_snp_unphased():
         test_data["lmda"] = np.inf
         test_data["tol"] = 1e-7
         test_data["n_threads"] = n_threads
-
-        test_data.pop("y")
-        test_data.pop("group_sizes")
 
         for Xpy in Xs:
             test_data["X"] = Xpy
@@ -715,8 +718,6 @@ def test_solve_gaussian_snp_phased_ancestry():
         test_data["tol"] = 1e-7
         test_data["n_threads"] = n_threads
 
-        test_data.pop("y")
-        test_data.pop("group_sizes")
         test_data.pop("ancestries")
 
         for Xpy in Xs:

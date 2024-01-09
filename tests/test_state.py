@@ -109,8 +109,10 @@ def test_state_gaussian_naive():
 
     _X = np.random.normal(0, 1, (n, p))
     X = matrix.dense(_X, method="naive", n_threads=4)
+    y = np.random.normal(0, 1, n)
     X_means = np.mean(_X, axis=0)
     groups = np.array([0, 1])
+    group_sizes = np.array([1, 99])
     y_mean = 0.0
     y_var = 1.0
     alpha = 1.0
@@ -123,17 +125,19 @@ def test_state_gaussian_naive():
     rsq = 0.0
     lmda = 2.0
     grad = np.random.normal(0, 1, p)
-    resid = np.random.normal(0, 1, n)
+    resid = y
     screen_beta = np.zeros(p)
     screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
 
     state = mod.gaussian_naive(
         X=X,
+        y=y,
         X_means=X_means,
         y_mean=y_mean,
         y_var=y_var,
         resid=resid,
         groups=groups,
+        group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
         weights=weights,

@@ -1144,6 +1144,7 @@ class gaussian_naive_base(gaussian_base):
         base_type: Union[core.state.StateGaussianNaive64, core.state.StateGaussianNaive32],
         *,
         X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
+        y: np.ndarray,
         X_means: np.ndarray,
         y_mean: float,
         y_var: float,
@@ -1188,6 +1189,8 @@ class gaussian_naive_base(gaussian_base):
         # static inputs require a reference to input
         # or copy if it must be made
         self._X = X
+        # this is only needed for check()
+        self._y = y
 
         self._X_means = np.array(X_means, copy=False, dtype=dtype)
         self._groups = np.array(groups, copy=False, dtype=int)
@@ -1246,13 +1249,12 @@ class gaussian_naive_base(gaussian_base):
 
     def check(
         self,
-        y, 
         method: str =None, 
         logger=logger.logger,
     ):
         n, p = self.X.rows(), self.X.cols()
 
-        yc = y
+        yc = self._y
         if self.intercept:
             yc = yc - np.sum(yc * self.weights)
 
@@ -1609,11 +1611,13 @@ class gaussian_naive_base(gaussian_base):
     def update_path(self, path):
         return gaussian_naive(
             X=self.X,
+            y=self._y,
             X_means=self.X_means,
             y_mean=self.y_mean,
             y_var=self.y_var,
             resid=self.resid,
             groups=self.groups,
+            group_sizes=self.group_sizes,
             alpha=self.alpha,
             penalty=self.penalty,
             weights=self.weights,
@@ -1648,11 +1652,13 @@ class gaussian_naive_base(gaussian_base):
 def gaussian_naive(
     *,
     X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
+    y: np.ndarray,
     X_means: np.ndarray,
     y_mean: float,
     y_var: float,
     resid: np.ndarray,
     groups: np.ndarray,
+    group_sizes: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
     weights: np.ndarray,
@@ -1689,6 +1695,8 @@ def gaussian_naive(
     X : Union[adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
         Feature matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
+    y : (n,) np.ndarray
+        Response vector.
     X_means : (p,) np.ndarray
         Column means (weighted by :math:`W`) of ``X``.
     y_mean : float
@@ -1701,6 +1709,9 @@ def gaussian_naive(
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
+    group_sizes : (G,) np.ndarray
+        List of group sizes corresponding to each element of ``groups``.
+        ``group_sizes[i]`` is the size of the ``i`` th group.
     alpha : float
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
@@ -1863,14 +1874,7 @@ def gaussian_naive(
     if pivot_slack_ratio < 0:
         raise ValueError("pivot_slack_ratio must be >= 0.")
 
-    p = X.cols()
-
-    weights = weights / np.sum(weights)
-
-    group_sizes = np.concatenate([groups, [p]], dtype=int)
-    group_sizes = group_sizes[1:] - group_sizes[:-1]
-
-    actual_lmda_path_size = (
+    lmda_path_size = (
         lmda_path_size
         if lmda_path is None else
         len(lmda_path)
@@ -1920,6 +1924,7 @@ def gaussian_naive(
 
     return _gaussian_naive(
         X=X,
+        y=y,
         X_means=X_means,
         y_mean=y_mean,
         y_var=y_var,
@@ -1947,7 +1952,7 @@ def gaussian_naive(
         newton_max_iters=newton_max_iters,
         early_exit=early_exit,
         min_ratio=min_ratio,
-        lmda_path_size=actual_lmda_path_size,
+        lmda_path_size=lmda_path_size,
         intercept=intercept,
         n_threads=n_threads,
         screen_set=screen_set,

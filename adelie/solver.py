@@ -333,6 +333,8 @@ def grpnet(
 
     if weights is None:
         weights = np.full(n, 1/n)
+    else:
+        weights = weights / np.sum(weights)
 
     X_means = np.empty(p, dtype=dtype)
     X.means(weights, X_means)
@@ -366,6 +368,7 @@ def grpnet(
         y_var=y_var,
         resid=resid,
         groups=groups,
+        group_sizes=group_sizes,
         alpha=alpha,
         penalty=penalty,
         weights=weights,
@@ -397,7 +400,7 @@ def grpnet(
     )
 
     if check_state:
-        state.check(y, method="assert")
+        state.check(method="assert")
 
     return solve_gaussian(
         state=state, 
