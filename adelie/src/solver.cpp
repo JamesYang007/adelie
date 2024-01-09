@@ -147,10 +147,11 @@ py::dict solve_gaussian_naive(
     };
 
     std::string error;
+
+    // this is to redirect std::cerr to sys.stderr in Python.
+    // https://pybind11.readthedocs.io/en/stable/advanced/pycpp/utilities.html?highlight=cout#capturing-standard-output-from-ostream
+    py::scoped_estream_redirect _estream;
     try {
-        // this is to redirect std::cerr to sys.stderr in Python.
-        // https://pybind11.readthedocs.io/en/stable/advanced/pycpp/utilities.html?highlight=cout#capturing-standard-output-from-ostream
-        py::scoped_estream_redirect _estream;
         ad::solver::gaussian::naive::solve(
             state, display_progress_bar, 
             update_coefficients_f, check_user_interrupt
