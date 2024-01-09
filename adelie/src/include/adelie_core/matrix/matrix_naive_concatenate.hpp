@@ -60,7 +60,7 @@ private:
     {
         vec_index_t slice_map(p);
         size_t begin = 0;
-        for (int i = 0; i < mat_list.size(); ++i) {
+        for (size_t i = 0; i < mat_list.size(); ++i) {
             const auto& mat = *mat_list[i];
             const auto pi = mat.cols();
             for (int j = 0; j < pi; ++j) {
@@ -78,7 +78,7 @@ private:
     {
         vec_index_t index_map(p);
         size_t begin = 0;
-        for (int i = 0; i < mat_list.size(); ++i) {
+        for (size_t i = 0; i < mat_list.size(); ++i) {
             const auto& mat = *mat_list[i];
             const auto pi = mat.cols();
             for (int j = 0; j < pi; ++j) {

@@ -179,7 +179,7 @@ public:
             );
 
             size_t count = 0;
-            for (int i = 0; i < n; ++i) {
+            for (inner_t i = 0; i < n; ++i) {
                 if (col_j[i] == 0) continue;
                 inner[count] = i;
                 ancestry[count] = ancestry_j(i);
@@ -190,7 +190,7 @@ public:
         auto file_ptr = fopen_safe(_filename.c_str(), "wb");
         auto fp = file_ptr.get();
         auto total_bytes = std::fwrite(buffer.data(), sizeof(char), buffer.size(), fp);
-        if (total_bytes != buffer.size()) {
+        if (total_bytes != static_cast<size_t>(buffer.size())) {
             throw std::runtime_error(
                 "Could not write the full buffer."
             );
