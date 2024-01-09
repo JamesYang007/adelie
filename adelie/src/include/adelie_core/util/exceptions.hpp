@@ -7,21 +7,6 @@ namespace util {
 
 class adelie_core_error: public std::exception {};
 
-class propagator_error: public adelie_core_error 
-{
-    std::string msg_;
-
-public:
-    propagator_error() =default;
-    propagator_error(const char* msg)
-        : msg_(msg)
-    {}
-     
-    const char* what() const noexcept override {
-        return msg_.data();
-    }
-};
-
 class max_cds_error : public adelie_core_error
 {
     std::string msg_;

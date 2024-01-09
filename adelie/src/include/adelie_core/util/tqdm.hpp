@@ -31,6 +31,7 @@
 #include <iomanip>
 #include <iostream>
 #include <iterator>
+#include <string>
 #include <sstream>
 #include <type_traits>
 
@@ -203,7 +204,7 @@ private:
         auto num_filled = static_cast<index>(std::round(filled*bar_size_));
         ss << '|';
         for (int i = 0; i < num_filled; ++i) {
-            ss << "\u2588";
+            ss << "\033[1;32m\u2588\033[0m";
         }
         ss << std::string(bar_size_ - num_filled, ' ') << '|';
     }
@@ -340,11 +341,11 @@ public:
         return *this;
     }
 
-    void manually_set_progress(double to)
+    void manually_set_progress(int to)
     {
-        if (to > 1.) to = 1.;
-        if (to < 0.) to = 0.;
-        iters_done_ = std::round(to*num_iters_);
+        if (to > num_iters_) to = num_iters_;
+        if (to < 0) to = 0;
+        iters_done_ = to;
     }
 
 private:
