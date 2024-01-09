@@ -34,7 +34,7 @@ void update_abs_grad(
     };
 
     #pragma omp parallel for schedule(static) num_threads(n_threads)
-    for (int ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) 
+    for (size_t ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) 
     {
         const auto i = screen_set[ss_idx];
         const auto b = screen_begins[ss_idx]; 

@@ -28,7 +28,14 @@ __version__ = open("VERSION", "r").read()
 ENVPATH = os.getenv("CONDA_PREFIX")
 
 extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
-extra_compile_args += ["-Wall", "-Wextra", "-DNDEBUG", "-O3"]
+extra_compile_args += [
+    "-Wall", 
+    "-Wextra", 
+    "-Werror", 
+    "-Wno-error=deprecated-copy-with-user-provided-copy",
+    "-DNDEBUG", 
+    "-O3",
+]
 libraries = []
 extra_link_args = []
 

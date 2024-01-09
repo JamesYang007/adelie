@@ -162,7 +162,7 @@ void screen(
         // this case should rarely happen, but we arrived here because
         // previous iteration added all pivot-rule predictions and KKT still failed.
         // In this case, do the most safe thing, which is to add all failed variables.
-        if ((screen_set.size() == old_screen_set_size) && !all_kkt_passed) {
+        if ((screen_set.size() == static_cast<size_t>(old_screen_set_size)) && !all_kkt_passed) {
             for (int i = 0; i < abs_grad.size(); ++i) {
                 if (is_screen(i)) continue;
                 if (abs_grad[i] > lmda_next * penalty[i] * alpha) {
@@ -568,6 +568,8 @@ inline void solve(
 
     for (int _ : pb)
     {
+        static_cast<void>(_);
+
         // check early exit
         if (early_exit && (rsqs.size() >= 3)) {
             const auto rsq_u = rsqs[rsqs.size()-1];

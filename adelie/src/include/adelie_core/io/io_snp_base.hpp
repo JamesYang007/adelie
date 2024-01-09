@@ -83,7 +83,7 @@ public:
         _buffer.resize(total_bytes);
         std::fseek(fp, 0, SEEK_SET);
         const size_t read = std::fread(_buffer.data(), sizeof(char), _buffer.size(), fp);
-        if (read != _buffer.size()) {
+        if (read != static_cast<size_t>(_buffer.size())) {
             throw std::runtime_error(
                 "Could not read the whole file into buffer."
             );
