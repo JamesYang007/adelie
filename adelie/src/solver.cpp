@@ -118,7 +118,10 @@ py::dict solve_gaussian_pin_cov(StateType state)
 // =================================================================
 
 template <class StateType>
-py::dict solve_gaussian_naive(StateType state)
+py::dict solve_gaussian_naive(
+    StateType state,
+    bool display_progress_bar
+)
 {
     const auto update_coefficients_f = [](
         const auto& L,
@@ -145,8 +148,12 @@ py::dict solve_gaussian_naive(StateType state)
 
     std::string error;
     try {
+        // this is to redirect std::cerr to sys.stderr in Python.
+        // https://pybind11.readthedocs.io/en/stable/advanced/pycpp/utilities.html?highlight=cout#capturing-standard-output-from-ostream
+        py::scoped_estream_redirect _estream;
         ad::solver::gaussian::naive::solve(
-            state, update_coefficients_f, check_user_interrupt
+            state, display_progress_bar, 
+            update_coefficients_f, check_user_interrupt
         );
     } catch(const std::exception& e) {
         error = e.what(); 

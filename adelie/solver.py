@@ -125,13 +125,16 @@ def solve_gaussian_pin(state):
     return state
 
 
-def solve_gaussian(state):
+def solve_gaussian(state, progress_bar: bool =False):
     """Solves the group elastic net problem with Gaussian loss.
 
     Parameters
     ----------
     state
         A state object.
+    progress_bar : bool, optional
+        ``True`` to enable progress bar.
+        Default is ``False``.
 
     Returns
     -------
@@ -152,7 +155,7 @@ def solve_gaussian(state):
 
     # solve group elastic net
     f = f_dict[state._core_type]
-    out = f(state)
+    out = f(state, progress_bar)
 
     # raise any errors
     if out["error"] != "":
@@ -192,6 +195,7 @@ def grpnet(
     pivot_subset_min: int =1,
     pivot_slack_ratio: float =1.25,
     check_state: bool =False,
+    progress_bar: bool =False,
 ):
     """Group elastic net solver.
 
@@ -294,6 +298,9 @@ def grpnet(
     check_state : bool, optional 
         ``True`` is state should be checked for inconsistencies before calling solver.
         Default is ``False``.
+    progress_bar : bool, optional
+        ``True`` to enable progress bar.
+        Default is ``False``.
 
     Returns
     -------
@@ -392,4 +399,7 @@ def grpnet(
     if check_state:
         state.check(y, method="assert")
 
-    return solve_gaussian(state)
+    return solve_gaussian(
+        state=state, 
+        progress_bar=progress_bar,
+    )
