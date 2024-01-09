@@ -445,9 +445,9 @@ inline void solve(
                     return (penalty[i] <= 0.0) ? 0.0 : abs_grad[i] / penalty[i];
                 }
             ).maxCoeff() / factor;
-        } catch (const std::exception& e) {
+        } catch (...) {
             load_prev_valid();
-            throw util::propagator_error(e.what());
+            throw;
         }
     }
 
@@ -530,9 +530,9 @@ inline void solve(
                 state_gaussian_pin_naive, 
                 state_gaussian_pin_naive.lmdas.size()-1
             );
-        } catch (const std::exception& e) {
+        } catch (...) {
             load_prev_valid();
-            throw util::propagator_error(e.what());
+            throw;
         }
     }
 
@@ -554,9 +554,7 @@ inline void solve(
 
     auto pb = util::tq::trange(lmda_path.size() - lmda_path_idx);
     pb.set_display(display);
-
-    for (int _ : pb)
-    {
+    const auto pb_add_suffix = [&]() {
         // print extra information with the progress bar
         if (display) {
             // current training R^2
@@ -566,108 +564,121 @@ inline void solve(
                 << "%]"
                 ; 
         }
+    };
 
+    for (int _ : pb)
+    {
         // check early exit
         if (early_exit && (rsqs.size() >= 3)) {
             const auto rsq_u = rsqs[rsqs.size()-1];
             const auto rsq_m = rsqs[rsqs.size()-2];
             const auto rsq_l = rsqs[rsqs.size()-3];
             if (pin::check_early_stop_rsq(rsq_l, rsq_m, rsq_u, rsq_slope_tol, rsq_curv_tol) || 
-                (rsq_u >= rsq_tol)) break;
+                (rsq_u >= rsq_tol)) 
+            {
+                pb_add_suffix();
+                break;
+            }
         }
-
-        // check if any lambdas left to fit
-        if (lmda_path_idx >= lmda_path.size()) break;
 
         // batch the next set of lambdas
         lmda_batch = lmda_path.segment(
             lmda_path_idx, 1
         );
 
-        // ==================================================================================== 
-        // Screening step
-        // ==================================================================================== 
-        sw.start();
-        screen(
-            state,
-            lmda_batch[0],
-            kkt_passed,
-            n_new_active
-        );
-        benchmark_screen.push_back(sw.elapsed());
+        // keep doing screen-fit-kkt until KKT passes
+        while (1) {
+            try {
+                // ==================================================================================== 
+                // Screening step
+                // ==================================================================================== 
+                sw.start();
+                screen(
+                    state,
+                    lmda_batch[0],
+                    kkt_passed,
+                    n_new_active
+                );
+                benchmark_screen.push_back(sw.elapsed());
 
-        try {
-            // ==================================================================================== 
-            // Fit step
-            // ==================================================================================== 
-            // Save all current valid quantities that will be modified in-place by fit.
-            // This is needed in case we exit with exception and need to restore invariance.
-            save_prev_valid();
-            auto&& state_gaussian_pin_naive = fit(
-                state,
-                lmda_batch,
-                update_coefficients_f,
-                check_user_interrupt
-            );
-            benchmark_fit_screen.push_back(
-                Eigen::Map<const util::rowvec_type<double>>(
-                    state_gaussian_pin_naive.benchmark_screen.data(),
-                    state_gaussian_pin_naive.benchmark_screen.size()
-                ).sum()
-            );
-            benchmark_fit_active.push_back(
-                Eigen::Map<const util::rowvec_type<double>>(
-                    state_gaussian_pin_naive.benchmark_active.data(),
-                    state_gaussian_pin_naive.benchmark_active.size()
-                ).sum()
-            );
+                // ==================================================================================== 
+                // Fit step
+                // ==================================================================================== 
+                // Save all current valid quantities that will be modified in-place by fit.
+                // This is needed in case we exit with exception and need to restore invariance.
+                save_prev_valid();
+                auto&& state_gaussian_pin_naive = fit(
+                    state,
+                    lmda_batch,
+                    update_coefficients_f,
+                    check_user_interrupt
+                );
+                benchmark_fit_screen.push_back(
+                    Eigen::Map<const util::rowvec_type<double>>(
+                        state_gaussian_pin_naive.benchmark_screen.data(),
+                        state_gaussian_pin_naive.benchmark_screen.size()
+                    ).sum()
+                );
+                benchmark_fit_active.push_back(
+                    Eigen::Map<const util::rowvec_type<double>>(
+                        state_gaussian_pin_naive.benchmark_active.data(),
+                        state_gaussian_pin_naive.benchmark_active.size()
+                    ).sum()
+                );
 
-            // ==================================================================================== 
-            // KKT step
-            // ==================================================================================== 
-            sw.start();
-            kkt_passed = kkt(
-                state,
-                state_gaussian_pin_naive
-            );
-            benchmark_kkt.push_back(sw.elapsed());
-            n_valid_solutions.push_back(kkt_passed);
+                // ==================================================================================== 
+                // KKT step
+                // ==================================================================================== 
+                sw.start();
+                kkt_passed = kkt(
+                    state,
+                    state_gaussian_pin_naive
+                );
+                benchmark_kkt.push_back(sw.elapsed());
+                n_valid_solutions.push_back(kkt_passed);
 
-            // ==================================================================================== 
-            // Invariance step
-            // ==================================================================================== 
-            sw.start();
-            lmda_path_idx += kkt_passed;
-            resid_sum = state_gaussian_pin_naive.resid_sums[0];
-            rsq = state_gaussian_pin_naive.rsqs[0];
-            lmda = lmda_batch[0];
-            update_solutions(
-                state, 
-                state_gaussian_pin_naive, 
-                kkt_passed
-            );
-            benchmark_invariance.push_back(sw.elapsed());
+                // ==================================================================================== 
+                // Invariance step
+                // ==================================================================================== 
+                sw.start();
+                lmda_path_idx += kkt_passed;
+                resid_sum = state_gaussian_pin_naive.resid_sums[0];
+                rsq = state_gaussian_pin_naive.rsqs[0];
+                lmda = lmda_batch[0];
+                update_solutions(
+                    state, 
+                    state_gaussian_pin_naive, 
+                    kkt_passed
+                );
+                benchmark_invariance.push_back(sw.elapsed());
 
-            // ==================================================================================== 
-            // Diagnostic step
-            // ==================================================================================== 
-            if (kkt_passed) {
-                active_sizes.push_back(state_gaussian_pin_naive.active_set.size());
-                screen_sizes.push_back(state.screen_set.size());
+                // ==================================================================================== 
+                // Diagnostic step
+                // ==================================================================================== 
+                if (kkt_passed) {
+                    active_sizes.push_back(state_gaussian_pin_naive.active_set.size());
+                    screen_sizes.push_back(state.screen_set.size());
+                }
+                // compute the number of new active groups 
+                n_new_active = (
+                    kkt_passed ?
+                    active_sizes.back() - current_active_size : n_new_active
+                );
+                current_active_size = (
+                    kkt_passed ?
+                    active_sizes.back() : current_active_size
+                );
+
+            } catch (...) {
+                load_prev_valid();
+                pb_add_suffix();
+                throw;
             }
-            // compute the number of new active groups 
-            n_new_active = (
-                kkt_passed ?
-                active_sizes.back() - current_active_size : n_new_active
-            );
-            current_active_size = (
-                kkt_passed ?
-                active_sizes.back() : current_active_size
-            );
-        } catch (const std::exception& e) {
-            load_prev_valid();
-            throw util::propagator_error(e.what());
-        }
+
+            if (kkt_passed) break;
+        } // end while(1)
+
+        pb_add_suffix();
     }
 }
 
