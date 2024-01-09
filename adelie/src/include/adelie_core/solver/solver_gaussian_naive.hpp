@@ -5,6 +5,7 @@
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
 #include <adelie_core/util/algorithm.hpp>
 #include <adelie_core/util/stopwatch.hpp>
+#include <adelie_core/util/tqdm.hpp>
 
 namespace adelie_core {
 namespace solver {
@@ -344,6 +345,7 @@ template <class StateType,
           class CUIType=util::no_op>
 inline void solve(
     StateType&& state,
+    bool display,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
@@ -550,8 +552,21 @@ inline void solve(
     bool kkt_passed = true;
     int n_new_active = 0;
 
-    while (1) 
+    auto pb = util::tq::trange(lmda_path.size() - lmda_path_idx);
+    pb.set_display(display);
+
+    for (int _ : pb)
     {
+        // print extra information with the progress bar
+        if (display) {
+            // current training R^2
+            pb << " [dev:" 
+                << std::fixed << std::setprecision(1) 
+                << ((rsqs.size() == 0) ? 0.0 : rsqs.back()) * 100
+                << "%]"
+                ; 
+        }
+
         // check early exit
         if (early_exit && (rsqs.size() >= 3)) {
             const auto rsq_u = rsqs[rsqs.size()-1];
