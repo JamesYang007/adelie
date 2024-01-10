@@ -363,6 +363,7 @@ def grpnet(
 
     state = ad.state.gaussian_naive(
         X=X,
+        y=y,
         X_means=X_means,
         y_mean=y_mean,
         y_var=y_var,
