@@ -1,6 +1,7 @@
 from typing import Union
 from . import adelie_core as core
 from . import matrix
+from . import glm
 from . import logger
 import numpy as np
 import scipy
@@ -1205,7 +1206,6 @@ class gaussian_naive_base(gaussian_base):
 
         # MUST call constructor directly and not use super()!
         # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
-        # TODO:
         base_type.__init__(
             self,
             X=X,
@@ -1470,13 +1470,6 @@ class gaussian_naive_base(gaussian_base):
             method, logger,
         )
 
-        # ================ screen_order check ====================
-        self._check(
-            np.all(self.screen_set[self.screen_order] == np.sort(self.screen_set)),
-            "check screen_order is correctly sorting screen_set",
-            method, logger,
-        )
-
         # ================ screen_beta check ====================
         self._check(
             len(self.screen_beta) == WS,
@@ -1733,18 +1726,18 @@ def gaussian_naive(
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
-        This must contain the true solution values for the strong groups.
+        The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
     screen_is_active : (a,) np.ndarray
         Boolean vector that indicates whether each strong group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
     rsq : float
-        The true unnormalized :math:`R^2` given by :math:`\\|y_c\\|_{W}^2 - \\|y_c-X_c\\beta\\|_{W}^2`
+        The unnormalized :math:`R^2` given by :math:`\\|y_c\\|_{W}^2 - \\|y_c-X_c\\beta\\|_{W}^2`
         where :math:`\\beta` is given by ``screen_beta``.
-    lmda: float,
-        The regularization parameter at which the true solution is given by ``screen_beta``
+    lmda : float
+        The regularization parameter at which the solution is given by ``screen_beta``
         (in the transformed space).
-    grad: np.ndarray,
-        The true full gradient :math:`X_c^\\top W (y_c - X_c\\beta)` in the original space where
+    grad : np.ndarray
+        The full gradient :math:`X_c^\\top W (y_c - X_c\\beta)` in the original space where
         :math:`\\beta` is given by ``screen_beta``.
     lmda_path : (l,) np.ndarray, optional
         The regularization path to solve for.
@@ -1902,8 +1895,6 @@ def gaussian_naive(
     if setup_lmda_path: lmda_path = np.empty(0, dtype=dtype)
 
     class _gaussian_naive(gaussian_naive_base, core_base):
-        """State class for gaussian, naive method using 32-bit floating point."""
-
         def __init__(self, *args, **kwargs):
             self._core_type = core_base
             gaussian_naive_base.default_init(
@@ -1959,6 +1950,416 @@ def gaussian_naive(
         screen_beta=screen_beta,
         screen_is_active=screen_is_active,
         rsq=rsq,
+        lmda=lmda,
+        grad=grad,
+    )
+
+
+class glm_naive_base:
+    """State wrapper base class for all glm, naive method."""
+    def default_init(
+        self, 
+        base_type: Union[core.state.StateGlmNaive64, core.state.StateGlmNaive32],
+        *,
+        glm: Union[glm.GlmBase64, glm.GlmBase32],
+        X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
+        y: np.ndarray,
+        groups: np.ndarray,
+        group_sizes: np.ndarray,
+        alpha: float,
+        penalty: np.ndarray,
+        weights: np.ndarray,
+        lmda_path: np.ndarray,
+        dev0: float,
+        lmda_max: float,
+        min_ratio: float,
+        lmda_path_size: int,
+        max_screen_size: int,
+        pivot_subset_ratio: float,
+        pivot_subset_min: int,
+        pivot_slack_ratio: float,
+        screen_rule: str,
+        irls_max_iters: int,
+        irls_tol: float,
+        max_iters: int,
+        tol: float,
+        newton_tol: float,
+        newton_max_iters: int,
+        early_exit: bool,
+        setup_dev0: bool,
+        setup_lmda_max: bool,
+        setup_lmda_path: bool,
+        intercept: bool,
+        n_threads: int,
+        screen_set: np.ndarray,
+        screen_beta: np.ndarray,
+        screen_is_active: np.ndarray,
+        beta0: float,
+        lmda: float,
+        grad: np.ndarray,
+        dtype: Union[np.float32, np.float64],
+    ):
+        """Default initialization method.
+        """
+        ## save inputs due to lifetime issues
+        # static inputs require a reference to input
+        # or copy if it must be made
+        self._X = X
+        # this is only needed for check()
+        self._y = y
+
+        self._groups = np.array(groups, copy=False, dtype=int)
+        self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
+        self._penalty = np.array(penalty, copy=False, dtype=dtype)
+        self._weights = np.array(weights, copy=False, dtype=dtype)
+        self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
+        screen_set = np.array(screen_set, copy=False, dtype=int)
+        screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
+        screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
+        grad = np.array(grad, copy=False, dtype=dtype)
+
+        # MUST call constructor directly and not use super()!
+        # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
+        base_type.__init__(
+            self,
+            glm=glm,
+            X=X,
+            y=y,
+            groups=self._groups,
+            group_sizes=self._group_sizes,
+            alpha=alpha,
+            penalty=self._penalty,
+            weights=self._weights,
+            lmda_path=self._lmda_path,
+            dev0=dev0,
+            lmda_max=lmda_max,
+            min_ratio=min_ratio,
+            lmda_path_size=lmda_path_size,
+            max_screen_size=max_screen_size,
+            pivot_subset_ratio=pivot_subset_ratio,
+            pivot_subset_min=pivot_subset_min,
+            pivot_slack_ratio=pivot_slack_ratio,
+            screen_rule=screen_rule,
+            irls_max_iters=irls_max_iters,
+            irls_tol=irls_tol,
+            max_iters=max_iters,
+            tol=tol,
+            newton_tol=newton_tol,
+            newton_max_iters=newton_max_iters,
+            early_exit=early_exit,
+            setup_dev0=setup_dev0,
+            setup_lmda_max=setup_lmda_max,
+            setup_lmda_path=setup_lmda_path,
+            intercept=intercept,
+            n_threads=n_threads,
+            screen_set=screen_set,
+            screen_beta=screen_beta,
+            screen_is_active=screen_is_active,
+            beta0=beta0,
+            lmda=lmda,
+            grad=grad,
+        )
+
+
+def glm_naive(
+    *,
+    glm: Union[glm.GlmBase64, glm.GlmBase32],
+    X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
+    y: np.ndarray,
+    groups: np.ndarray,
+    group_sizes: np.ndarray,
+    alpha: float,
+    penalty: np.ndarray,
+    weights: np.ndarray,
+    screen_set: np.ndarray,
+    screen_beta: np.ndarray,
+    screen_is_active: np.ndarray,
+    beta0: float,
+    lmda: float,
+    grad: np.ndarray,
+    lmda_path: np.ndarray =None,
+    dev0: float =None,
+    lmda_max: float =None,
+    irls_max_iters: int =int(1e2),
+    irls_tol: float =1e-7,
+    max_iters: int =int(1e5),
+    tol: float =1e-7,
+    newton_tol: float =1e-12,
+    newton_max_iters: int =1000,
+    n_threads: int =1,
+    early_exit: bool =True,
+    intercept: bool =True,
+    screen_rule: str ="pivot",
+    min_ratio: float =1e-2,
+    lmda_path_size: int =100,
+    max_screen_size: int =None,
+    pivot_subset_ratio: float =0.1,
+    pivot_subset_min: int =1,
+    pivot_slack_ratio: float =1.25,
+):
+    """Creates a gaussian, naive method state object.
+
+    Parameters
+    ----------
+    glm : Union[adelie.glm.GlmBase64, adelie.glm.GlmBase32]
+        GLM object.
+    X : Union[adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
+        Feature matrix.
+        It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
+    y : (n,) np.ndarray
+        Response vector.
+    groups : (G,) np.ndarray
+        List of starting indices to each group where `G` is the number of groups.
+        ``groups[i]`` is the starting index of the ``i`` th group. 
+    group_sizes : (G,) np.ndarray
+        List of group sizes corresponding to each element of ``groups``.
+        ``group_sizes[i]`` is the size of the ``i`` th group.
+    alpha : float
+        Elastic net parameter.
+        It must be in the range :math:`[0,1]`.
+    penalty : (G,) np.ndarray
+        Penalty factor for each group in the same order as ``groups``.
+        It must be a non-negative vector.
+    weights : (n,) np.ndarray
+        Observation weights.
+        Internally, it is normalized to sum to one.
+    screen_set : (s,) np.ndarray
+        List of indices into ``groups`` that correspond to the strong groups.
+        ``screen_set[i]`` is ``i`` th strong group.
+        ``screen_set`` must contain at least the true (optimal) active groups
+        when the regularization is given by ``lmda``.
+    screen_beta : (ws,) np.ndarray
+        Coefficient vector on the strong set.
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        where
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
+        and ``p = group_sizes[k]``.
+        The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
+    screen_is_active : (a,) np.ndarray
+        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
+        ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    beta0 : float
+        The current intercept value.
+        The value can be arbitrary but it is recommended to be close to the solution at ``lmda``.
+    lmda : float
+        The last regularization parameter that was attempted to be solved.
+    grad : np.ndarray
+        The full gradient :math:`X^\\top W (y - \\underline{\\mu}(X\\beta + \\beta_0 \\mathbf{1}))` where
+        :math:`\\beta` is given by ``screen_beta``
+        and :math:`\\beta_0` is given by ``beta0``.
+    lmda_path : (l,) np.ndarray, optional
+        The regularization path to solve for.
+        The full path is not considered if ``early_exit`` is ``True``.
+        It is recommended that the path is sorted in decreasing order.
+        If ``None``, the path will be generated.
+        Default is ``None``.
+    dev0 : float, optional
+        Null deviance :math:`D(\\eta_0) - D(\\eta^\\star)`
+        where :math:`\\eta_0 = \\beta_0 1` is the intercept-only model fit
+        and :math:`\\eta^\star = \\underline{\\mu}^{-1}(y)` is the saturated model fit.
+        If ``None``, then it is computed.
+        Default is ``None``.
+    lmda_max : float
+        The smallest :math:`\\lambda` such that the true solution is zero
+        for all coefficients that have a non-vanishing group lasso penalty (:math:`\\ell_2`-norm).
+        If ``None``, it will be computed.
+        Default is ``None``.
+    irls_max_iters : int, optional
+        Maximum number of IRLS iterations.
+        Default is ``100``.
+    irls_tol : float, optional
+        IRLS convergence tolerance.
+        Default is ``1e-7``.
+    max_iters : int, optional
+        Maximum number of coordinate descents.
+        Default is ``int(1e5)``.
+    tol : float, optional
+        Convergence tolerance.
+        Default is ``1e-7``.
+    newton_tol : float, optional
+        Convergence tolerance for the BCD update.
+        Default is ``1e-12``.
+    newton_max_iters : int, optional
+        Maximum number of iterations for the BCD update.
+        Default is ``1000``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+    early_exit : bool, optional
+        ``True`` if the function should early exit based on training :math:`R^2`.
+        Default is ``True``.
+    min_ratio : float, optional
+        The ratio between the largest and smallest :math:`\\lambda` in the regularization sequence
+        if it is to be generated.
+        Default is ``1e-2``.
+    lmda_path_size : int, optional
+        Number of regularizations in the path if it is to be generated.
+        Default is ``100``.
+    intercept : bool, optional 
+        ``True`` if the function should fit with intercept.
+        Default is ``True``.
+    screen_rule : str, optional
+        The type of screening rule to use. It must be one of the following options:
+
+            - ``"strong"``: adds groups whose active scores are above the strong threshold.
+            - ``"pivot"``: adds groups whose active scores are above the pivot cutoff with slack.
+
+        Default is ``"pivot"``.
+    max_screen_size: int, optional
+        Maximum number of strong groups allowed.
+        The function will return a valid state and guaranteed to have strong set size
+        less than or equal to ``max_screen_size``.
+        If ``None``, it will be set to the total number of groups.
+        Default is ``None``.
+    pivot_subset_ratio : float, optional
+        If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
+        largest gradient norms are used to determine the pivot point
+        where ``s`` is the current strong set size.
+        It is only used if ``screen_rule == "pivot"``.
+        Default is ``0.1``.
+    pivot_subset_min : int, optional
+        If screening takes place, then at least ``pivot_subset_min``
+        number of gradient norms are used to determine the pivot point.
+        It is only used if ``screen_rule == "pivot"``.
+        Default is ``1``.
+    pivot_slack_ratio : float, optional
+        If screening takes place, then ``pivot_slack_ratio``
+        number of groups with next smallest (new) active scores 
+        below the pivot point are also added to the strong set as slack.
+        It is only used if ``screen_rule == "pivot"``.
+        Default is ``1.25``.
+
+    Returns
+    -------
+    wrap
+        Wrapper state object.
+
+    See Also
+    --------
+    adelie.adelie_core.state.StateGlmNaive64
+    """
+    if not (
+        isinstance(X, matrix.MatrixNaiveBase64) or 
+        isinstance(X, matrix.MatrixNaiveBase32)
+    ):
+        raise ValueError(
+            "X must be an instance of matrix.MatrixNaiveBase32 or matrix.MatrixNaiveBase64."
+        )
+
+    if max_screen_size is None:
+        max_screen_size = len(groups)
+
+    if irls_max_iters < 0:
+        raise ValueError("irls_max_iters must be >= 0.")
+    if irls_tol <= 0:
+        raise ValueError("irls_tol must be > 0.")
+    if max_iters < 0:
+        raise ValueError("max_iters must be >= 0.")
+    if tol <= 0:
+        raise ValueError("tol must be > 0.")
+    if newton_tol < 0:
+        raise ValueError("newton_tol must be >= 0.")
+    if newton_max_iters < 0:
+        raise ValueError("newton_max_iters must be >= 0.")
+    if n_threads < 1:
+        raise ValueError("n_threads must be >= 1.")
+    if min_ratio <= 0:
+        raise ValueError("min_ratio must be > 0.")
+    if lmda_path_size < 0:
+        raise ValueError("lmda_path_size must be >= 0.")
+    if max_screen_size < 0:
+        raise ValueError("max_screen_size must be >= 0.")
+    if pivot_subset_ratio <= 0 or pivot_subset_ratio > 1:
+        raise ValueError("pivot_subset_ratio must be in (0, 1].")
+    if pivot_subset_min < 1:
+        raise ValueError("pivot_subset_min must be >= 1.")
+    if pivot_slack_ratio < 0:
+        raise ValueError("pivot_slack_ratio must be >= 0.")
+
+    lmda_path_size = (
+        lmda_path_size
+        if lmda_path is None else
+        len(lmda_path)
+    )
+
+    max_screen_size = np.minimum(max_screen_size, len(groups))
+
+    dtype = (
+        np.float64
+        if isinstance(X, matrix.MatrixNaiveBase64) else
+        np.float32
+    )
+        
+    dispatcher = {
+        np.float64: core.state.StateGlmNaive64,
+        np.float32: core.state.StateGlmNaive32,
+    }
+
+    core_base = dispatcher[dtype]
+
+    setup_dev0 = dev0 is None
+    setup_lmda_max = lmda_max is None
+    setup_lmda_path = lmda_path is None
+
+    if setup_dev0: dev0 = -1
+    if setup_lmda_max: lmda_max = -1
+    if setup_lmda_path: lmda_path = np.empty(0, dtype=dtype)
+
+    class _glm_naive(glm_naive_base, core_base):
+        def __init__(self, *args, **kwargs):
+            self._core_type = core_base
+            glm_naive_base.default_init(
+                self,
+                core_base,
+                *args,
+                dtype=dtype,
+                **kwargs,
+            )
+
+        @classmethod
+        def create_from_core(cls, state, core_state):
+            obj = base.create_from_core(
+                cls, state, core_state, _glm_naive, core_base,
+            )
+            glm_naive_base.__init__(obj)
+            return obj
+
+    return _glm_naive(
+        glm=glm,
+        X=X,
+        y=y,
+        groups=groups,
+        group_sizes=group_sizes,
+        alpha=alpha,
+        penalty=penalty,
+        weights=weights,
+        lmda_path=lmda_path,
+        dev0=dev0,
+        lmda_max=lmda_max,
+        setup_dev0=setup_dev0,
+        setup_lmda_max=setup_lmda_max,
+        setup_lmda_path=setup_lmda_path,
+        max_screen_size=max_screen_size,
+        pivot_subset_ratio=pivot_subset_ratio,
+        pivot_subset_min=pivot_subset_min,
+        pivot_slack_ratio=pivot_slack_ratio,
+        screen_rule=screen_rule,
+        irls_max_iters=irls_max_iters,
+        irls_tol=irls_tol,
+        max_iters=max_iters,
+        tol=tol,
+        newton_tol=newton_tol,
+        newton_max_iters=newton_max_iters,
+        early_exit=early_exit,
+        min_ratio=min_ratio,
+        lmda_path_size=lmda_path_size,
+        intercept=intercept,
+        n_threads=n_threads,
+        screen_set=screen_set,
+        screen_beta=screen_beta,
+        screen_is_active=screen_is_active,
+        beta0=beta0,
         lmda=lmda,
         grad=grad,
     )

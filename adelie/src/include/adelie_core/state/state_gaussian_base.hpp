@@ -33,30 +33,33 @@ void update_abs_grad(
         return screen_hashset.find(i) != screen_hashset.end();
     };
 
-    #pragma omp parallel for schedule(static) num_threads(n_threads)
-    for (size_t ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) 
+    #pragma omp parallel num_threads(n_threads)
     {
-        const auto i = screen_set[ss_idx];
-        const auto b = screen_begins[ss_idx]; 
-        const auto k = groups[i];
-        const auto size_k = group_sizes[i];
-        const auto pk = penalty[i];
-        abs_grad[i] = (
-            grad.segment(k, size_k) - 
-            ((1-alpha) * pk) * (lmda * Eigen::Map<const util::rowvec_type<ValueType>>(
-                screen_beta.data() + b,
-                size_k
-            ))
-        ).matrix().norm();
-    }
+        #pragma omp for schedule(static) nowait
+        for (size_t ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) 
+        {
+            const auto i = screen_set[ss_idx];
+            const auto b = screen_begins[ss_idx]; 
+            const auto k = groups[i];
+            const auto size_k = group_sizes[i];
+            const auto pk = penalty[i];
+            abs_grad[i] = (
+                grad.segment(k, size_k) - 
+                ((1-alpha) * pk) * (lmda * Eigen::Map<const util::rowvec_type<ValueType>>(
+                    screen_beta.data() + b,
+                    size_k
+                ))
+            ).matrix().norm();
+        }
 
-    #pragma omp parallel for schedule(static) num_threads(n_threads)
-    for (int i = 0; i < groups.size(); ++i) 
-    {
-        if (is_screen(i)) continue;
-        const auto k = groups[i];
-        const auto size_k = group_sizes[i];
-        abs_grad[i] = grad.segment(k, size_k).matrix().norm();
+        #pragma omp for schedule(static) nowait
+        for (int i = 0; i < groups.size(); ++i) 
+        {
+            if (is_screen(i)) continue;
+            const auto k = groups[i];
+            const auto size_k = group_sizes[i];
+            abs_grad[i] = grad.segment(k, size_k).matrix().norm();
+        }
     }
 }
 
@@ -103,14 +106,12 @@ void update_screen_derived_base(
     StateType& state
 )
 {
-    const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto& screen_set = state.screen_set;
     auto& screen_hashset = state.screen_hashset;
     auto& screen_g1 = state.screen_g1;
     auto& screen_g2 = state.screen_g2;
     auto& screen_begins = state.screen_begins;
-    auto& screen_order = state.screen_order;
     auto& screen_beta = state.screen_beta;
     auto& screen_is_active = state.screen_is_active;
 
@@ -134,21 +135,6 @@ void update_screen_derived_base(
         screen_begins.push_back(screen_value_size);
         screen_value_size += curr_size;
     }
-
-    /* update screen_order */
-    screen_order.resize(screen_set.size());
-    std::iota(
-        std::next(screen_order.begin(), old_screen_size), 
-        screen_order.end(), 
-        old_screen_size
-    );
-    std::sort(
-        screen_order.begin(),
-        screen_order.end(),
-        [&](auto i, auto j) {
-            return groups[screen_set[i]] < groups[screen_set[j]];
-        }
-    );
 
     /* update screen_beta */
     screen_beta.resize(screen_value_size, 0);
@@ -227,7 +213,6 @@ struct StateGaussianBase
     dyn_vec_index_t screen_g1;
     dyn_vec_index_t screen_g2;
     dyn_vec_index_t screen_begins;
-    dyn_vec_index_t screen_order;
     dyn_vec_value_t screen_beta;
     dyn_vec_bool_t screen_is_active;
     value_t rsq;
@@ -298,7 +283,7 @@ struct StateGaussianBase
         pivot_subset_ratio(pivot_subset_ratio),
         pivot_subset_min(pivot_subset_min),
         pivot_slack_ratio(pivot_slack_ratio),
-        screen_rule(convert_screen_rule(screen_rule)),
+        screen_rule(util::convert_screen_rule(screen_rule)),
         max_iters(max_iters),
         tol(tol),
         rsq_tol(rsq_tol),
@@ -324,23 +309,12 @@ struct StateGaussianBase
         initialize();
     }
 
-    util::screen_rule_type convert_screen_rule(
-        const std::string& rule
-    )
-    {
-        if (rule == "strong") return util::screen_rule_type::_strong;
-        if (rule == "pivot") return util::screen_rule_type::_pivot;
-        throw std::runtime_error("Invalid strong rule type: " + rule);
-    }
-
     void initialize()
     {
         /* initialize screen_set derived quantities */
         screen_begins.reserve(screen_set.size());
         screen_g1.reserve(screen_set.size());
         screen_g2.reserve(screen_set.size());
-        screen_begins.reserve(screen_set.size());
-        screen_order.reserve(screen_set.size());
         gaussian::update_screen_derived_base(*this);
 
         /* initialize abs_grad */
