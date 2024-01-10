@@ -46,7 +46,6 @@ def concatenate(
     if len(mats) == 0:
         raise ValueError("mats must be non-empty.")
     
-    
     dtype = _to_dtype(mats[0])
 
     for mat in mats:

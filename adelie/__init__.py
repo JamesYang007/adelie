@@ -2,6 +2,7 @@ from . import adelie_core
 from . import bcd
 from . import data
 from . import diagnostic
+from . import glm
 from . import io
 from . import matrix
 from . import optimization

@@ -88,6 +88,7 @@ adelie.matrix
 
 
     dense
+    concatenate
     cov_lazy
     snp_unphased
     snp_phased_ancestry
@@ -108,6 +109,7 @@ adelie.state
     gaussian_pin_cov
     gaussian_pin_naive
     gaussian_naive
+    glm_naive
 
 
 adelie.solver

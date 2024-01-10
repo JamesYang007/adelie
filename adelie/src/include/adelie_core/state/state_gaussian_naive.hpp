@@ -11,61 +11,50 @@ namespace gaussian {
 namespace naive {
 
 /**
- * Updates all derived strong quantities for naive state.
- * See the incoming state requirements in update_screen_derived_base.
- * After the function finishes, all strong quantities in the base + naive class
- * will be consistent with screen_set, and the state is otherwise effectively
- * unchanged in the sense that other quantities dependent on strong states are unchanged.
+ * Updates in-place the screen quantities 
+ * in the range [begin, begin+size) of the groups in screen_set. 
+ * NOTE: X_means only needs to be well-defined on the groups in that range,
+ * that is, weighted mean according to weights_sqrt ** 2.
  */
-template <class StateType>
+template <class XType, class XMType, class WType,
+          class GroupsType, class GroupSizesType, 
+          class SSType, class SBType,
+          class SXMType, class STType, class SVType>
 void update_screen_derived(
-    StateType& state
+    const XType& X,
+    const XMType& X_means,
+    const WType& weights_sqrt,
+    const GroupsType& groups,
+    const GroupSizesType& group_sizes,
+    const SSType& screen_set,
+    const SBType& screen_begins,
+    size_t begin,
+    size_t size,
+    bool intercept,
+    SXMType& screen_X_means,
+    STType& screen_transforms,
+    SVType& screen_vars
 )
 {
-    using state_t = std::decay_t<StateType>;
-    using value_t = typename state_t::value_t;
-    using vec_value_t = typename state_t::vec_value_t;
-
-    update_screen_derived_base(state);
-
-    const auto& weights_sqrt = state.weights_sqrt;
-    const auto& X_means = state.X_means;
-    const auto& groups = state.groups;
-    const auto& group_sizes = state.group_sizes;
-    const auto& screen_set = state.screen_set;
-    const auto& screen_begins = state.screen_begins;
-    const auto intercept = state.intercept;
-    auto& X = *state.X;
-    auto& screen_X_means = state.screen_X_means;
-    auto& screen_transforms = state.screen_transforms;
-    auto& screen_vars = state.screen_vars;
-
-    const auto old_screen_size = screen_transforms.size();
-    const auto new_screen_size = screen_set.size();
-    const int new_screen_value_size = (
-        (screen_begins.size() == 0) ? 0 : (
-            screen_begins.back() + group_sizes[screen_set.back()]
-        )
-    );
-
-    screen_X_means.resize(new_screen_value_size);    
-    screen_transforms.resize(new_screen_size);
-    screen_vars.resize(new_screen_value_size, 0);
+    using value_t = typename std::decay_t<XType>::value_t;
+    using vec_value_t = util::rowvec_type<value_t>;
 
     // buffers
     const auto n = X.rows();
     const auto max_gs = group_sizes.maxCoeff();
-    util::colmat_type<value_t> buffer(n, max_gs);
-    util::colmat_type<value_t> XiTXi;
+    util::colmat_type<value_t> buffer1(n, max_gs);
+    util::rowvec_type<value_t> buffer2(max_gs * max_gs);
 
-    for (size_t i = old_screen_size; i < new_screen_size; ++i) {
+    for (size_t i = begin; i < size; ++i) {
         const auto g = groups[screen_set[i]];
         const auto gs = group_sizes[screen_set[i]];
         const auto sb = screen_begins[i];
 
         // resize output and buffer 
-        auto Xi = buffer.leftCols(gs);
-        XiTXi.resize(gs, gs);
+        auto Xi = buffer1.leftCols(gs);
+        Eigen::Map<util::colmat_type<value_t>> XiTXi(
+            buffer2.data(), gs, gs
+        );
 
         // compute column-means
         Eigen::Map<vec_value_t> Xi_means(
@@ -90,6 +79,56 @@ void update_screen_derived(
         Eigen::Map<vec_value_t> svars(screen_vars.data() + sb, gs);
         svars.head(D.size()) = D.array();
     }
+}
+
+/**
+ * Updates all derived strong quantities for naive state.
+ * See the incoming state requirements in update_screen_derived_base.
+ * After the function finishes, all strong quantities in the base + naive class
+ * will be consistent with screen_set, and the state is otherwise effectively
+ * unchanged in the sense that other quantities dependent on strong states are unchanged.
+ */
+template <class StateType>
+void update_screen_derived(
+    StateType& state
+)
+{
+    update_screen_derived_base(state);
+
+    const auto& group_sizes = state.group_sizes;
+    const auto& screen_set = state.screen_set;
+    auto& screen_transforms = state.screen_transforms;
+    const auto& screen_begins = state.screen_begins;
+    auto& screen_X_means = state.screen_X_means;
+    auto& screen_vars = state.screen_vars;
+
+    const auto old_screen_size = screen_transforms.size();
+    const auto new_screen_size = screen_set.size();
+    const int new_screen_value_size = (
+        (screen_begins.size() == 0) ? 0 : (
+            screen_begins.back() + group_sizes[screen_set.back()]
+        )
+    );
+
+    screen_X_means.resize(new_screen_value_size);    
+    screen_transforms.resize(new_screen_size);
+    screen_vars.resize(new_screen_value_size, 0);
+
+    update_screen_derived(
+        *state.X, 
+        state.X_means, 
+        state.weights_sqrt,
+        state.groups, 
+        state.group_sizes, 
+        state.screen_set, 
+        state.screen_begins, 
+        old_screen_size, 
+        new_screen_size, 
+        state.intercept, 
+        state.screen_X_means, 
+        state.screen_transforms, 
+        state.screen_vars
+    );
 }
 
 } // namespace naive
@@ -140,11 +179,6 @@ struct StateGaussianNaive : StateGaussianBase<
     dyn_vec_value_t screen_X_means;
     dyn_vec_mat_value_t screen_transforms;
     dyn_vec_value_t screen_vars;
-
-    /* buffers */
-    vec_value_t resid_prev_valid;
-    dyn_vec_value_t screen_beta_prev_valid; 
-    dyn_vec_bool_t screen_is_active_prev_valid;
 
     explicit StateGaussianNaive(
         matrix_t& X,
