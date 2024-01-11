@@ -1,6 +1,7 @@
 #include "decl.hpp"
 #include <adelie_core/glm/glm_base.hpp>
 #include <adelie_core/glm/glm_gaussian.hpp>
+#include <adelie_core/glm/glm_binomial.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -93,10 +94,22 @@ void glm_gaussian(py::module_& m, const char* name)
         ;
 }
 
+template <class T>
+void glm_binomial(py::module_& m, const char* name)
+{
+    using internal_t = ad::glm::GlmBinomial<T>;
+    using base_t = typename internal_t::base_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(py::init<>())
+        ;
+}
+
 void register_glm(py::module_& m)
 {
     glm_base<double>(m, "GlmBase64");
     glm_base<float>(m, "GlmBase32");
     glm_gaussian<double>(m, "GlmGaussian64");
     glm_gaussian<float>(m, "GlmGaussian32");
+    glm_binomial<double>(m, "GlmBinomial64");
+    glm_binomial<float>(m, "GlmBinomial32");
 }

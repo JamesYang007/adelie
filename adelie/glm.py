@@ -25,3 +25,23 @@ def gaussian(
             core_base.__init__(self)
 
     return _gaussian()
+
+
+def binomial(
+    *,
+    dtype: Union[np.float32, np.float64] =np.float64,
+):
+    dispatcher = {
+        np.float64: core.glm.GlmBinomial64,
+        np.float32: core.glm.GlmBinomial32,
+    }
+
+    core_base = dispatcher[dtype]
+
+    class _binomial(core_base):
+        def __init__(
+            self,
+        ):
+            core_base.__init__(self)
+
+    return _binomial()
