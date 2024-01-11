@@ -645,7 +645,7 @@ def test_solve_gaussian_snp_unphased():
         test_data["grad"] = X_c.T @ test_data["resid"]
         test_data["rsq"] = 0 
         test_data["lmda"] = np.inf
-        test_data["tol"] = 1e-7
+        test_data["tol"] = 1e-10
         test_data["n_threads"] = n_threads
 
         for Xpy in Xs:
