@@ -237,7 +237,7 @@ def create_snp_unphased(
     X_sub = X[:, beta_nnz_indices]
     beta_sub = beta[beta_nnz_indices]
 
-    signal_var = np.dot(beta_sub, np.dot(np.cov(X_sub.T), beta_sub))
+    signal_var = np.dot(beta_sub, np.dot(np.cov(X_sub.T, ddof=0), beta_sub))
     noise_scale = np.sqrt(signal_var / snr)
     y = X_sub @ beta_sub + noise_scale * np.random.normal(0, 1, n)
 
@@ -357,7 +357,7 @@ def create_snp_phased_ancestry(
     X_sub = X[:, beta_nnz_indices]
     beta_sub = beta[beta_nnz_indices]
 
-    signal_var = np.dot(beta_sub, np.dot(np.cov(X_sub.T), beta_sub))
+    signal_var = np.dot(beta_sub, np.dot(np.cov(X_sub.T, ddof=0), beta_sub))
     noise_scale = np.sqrt(signal_var / snr)
     y = X_sub @ beta_sub + noise_scale * np.random.normal(0, 1, n)
 
