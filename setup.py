@@ -32,7 +32,7 @@ extra_compile_args += [
     "-Wall", 
     "-Wextra", 
     "-Werror", 
-    "-Wno-error=deprecated-copy-with-user-provided-copy",
+    "-Wno-error=deprecated-copy",
     "-DNDEBUG", 
     "-O3",
 ]

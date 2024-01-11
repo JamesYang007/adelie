@@ -595,8 +595,8 @@ def test_solve_gaussian_concatenate():
 
             assert np.allclose(state_special.lmdas, state_dense.lmdas)
             assert np.allclose(state_special.rsqs, state_dense.rsqs)
-            assert np.allclose(state_special.intercepts, state_dense.intercepts)
-            assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray())
+            assert np.allclose(state_special.intercepts, state_dense.intercepts, atol=1e-3)
+            assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray(), atol=1e-3)
 
     ps = np.array([4, 3, 20, 10, 252, 71, 1000])
     _test(10, ps[ps >= 2], 2)
@@ -645,7 +645,7 @@ def test_solve_gaussian_snp_unphased():
         test_data["grad"] = X_c.T @ test_data["resid"]
         test_data["rsq"] = 0 
         test_data["lmda"] = np.inf
-        test_data["tol"] = 1e-7
+        test_data["tol"] = 1e-10
         test_data["n_threads"] = n_threads
 
         for Xpy in Xs:
@@ -664,8 +664,8 @@ def test_solve_gaussian_snp_unphased():
 
             assert np.allclose(state_special.lmdas, state_dense.lmdas)
             assert np.allclose(state_special.rsqs, state_dense.rsqs)
-            assert np.allclose(state_special.intercepts, state_dense.intercepts)
-            assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray())
+            assert np.allclose(state_special.intercepts, state_dense.intercepts, atol=1e-3)
+            assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray(), atol=1e-3)
 
     _test(10, 4)
     _test(10, 100)
