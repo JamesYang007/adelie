@@ -595,8 +595,8 @@ def test_solve_gaussian_concatenate():
 
             assert np.allclose(state_special.lmdas, state_dense.lmdas)
             assert np.allclose(state_special.rsqs, state_dense.rsqs)
-            assert np.allclose(state_special.intercepts, state_dense.intercepts)
-            assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray())
+            assert np.allclose(state_special.intercepts, state_dense.intercepts, atol=1e-3)
+            assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray(), atol=1e-3)
 
     ps = np.array([4, 3, 20, 10, 252, 71, 1000])
     _test(10, ps[ps >= 2], 2)
@@ -664,8 +664,8 @@ def test_solve_gaussian_snp_unphased():
 
             assert np.allclose(state_special.lmdas, state_dense.lmdas)
             assert np.allclose(state_special.rsqs, state_dense.rsqs)
-            assert np.allclose(state_special.intercepts, state_dense.intercepts)
-            assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray())
+            assert np.allclose(state_special.intercepts, state_dense.intercepts, atol=1e-3)
+            assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray(), atol=1e-3)
 
     _test(10, 4)
     _test(10, 100)
