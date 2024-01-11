@@ -1997,6 +1997,8 @@ class glm_naive_base:
         beta0: float,
         lmda: float,
         grad: np.ndarray,
+        eta: np.ndarray,
+        mu: np.ndarray,
         dtype: Union[np.float32, np.float64],
     ):
         """Default initialization method.
@@ -2058,6 +2060,8 @@ class glm_naive_base:
             beta0=beta0,
             lmda=lmda,
             grad=grad,
+            eta=eta,
+            mu=mu,
         )
 
 
@@ -2077,6 +2081,8 @@ def glm_naive(
     beta0: float,
     lmda: float,
     grad: np.ndarray,
+    eta: np.ndarray,
+    mu: np.ndarray,
     lmda_path: np.ndarray =None,
     dev0: float =None,
     lmda_max: float =None,
@@ -2144,10 +2150,17 @@ def glm_naive(
         The value can be arbitrary but it is recommended to be close to the solution at ``lmda``.
     lmda : float
         The last regularization parameter that was attempted to be solved.
-    grad : np.ndarray
+    grad : (p,) np.ndarray
         The full gradient :math:`X^\\top W (y - \\underline{\\mu}(X\\beta + \\beta_0 \\mathbf{1}))` where
         :math:`\\beta` is given by ``screen_beta``
         and :math:`\\beta_0` is given by ``beta0``.
+    eta : (n,) np.ndarray
+        The natural parameter :math:`\eta = X\\beta + \\beta_0 \\mathbf{1}`
+        where :math:`\\beta` and :math:`\\beta_0` are given by
+        ``screen_beta`` and ``beta0``.
+    mu : (n,) np.ndarray
+        The mean parameter :math:`\\mu \\equiv \\mu(\\eta)`
+        where :math:`\\eta` is given by ``eta``.
     lmda_path : (l,) np.ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
@@ -2362,4 +2375,6 @@ def glm_naive(
         beta0=beta0,
         lmda=lmda,
         grad=grad,
+        eta=eta,
+        mu=mu,
     )

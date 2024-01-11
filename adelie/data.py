@@ -1,4 +1,7 @@
 import numpy as np
+from .glm import (
+    binomial,
+)
 
 
 def create_dense(
@@ -6,6 +9,7 @@ def create_dense(
     p: int, 
     G: int,
     *,
+    glm="gaussian",
     equal_groups=False,
     rho: float =0,
     sparsity: float =0.95,
@@ -35,6 +39,14 @@ def create_dense(
         Number of features.
     G : int
         Number of groups.
+    glm : str, optional
+        Must be one of the following options, 
+        which specifies how the response vector is generated:
+
+            - ``"gaussian"``
+            - ``"binomial"``
+
+        Default is ``"gaussian"``.
     equal_groups : bool, optional
         If ``True``, group sizes are made as equal as possible.
         Default is ``False``.
@@ -105,11 +117,19 @@ def create_dense(
     X_sub = X[:, beta_nnz_indices]
     beta_sub = beta[beta_nnz_indices]
 
-    noise_scale = np.sqrt(
-        (rho * np.sum(beta_sub) ** 2 + (1-rho) * np.sum(beta_sub ** 2))
-        / snr
-    )
-    y = X_sub @ beta_sub + noise_scale * np.random.normal(0, 1, n)
+    eta = X_sub @ beta_sub
+    if glm == "gaussian":
+        noise_scale = np.sqrt(
+            (rho * np.sum(beta_sub) ** 2 + (1-rho) * np.sum(beta_sub ** 2))
+            / snr
+        )
+        y = eta + noise_scale * np.random.normal(0, 1, n)
+    elif glm == "binomial":
+        mu = np.empty(eta.shape[0], dtype=eta.dtype)
+        binomial().gradient(eta, mu)
+        y = np.random.binomial(1, mu).astype(eta.dtype)
+    else:
+        raise RuntimeError(f"Unexpected glm type: {glm}")
 
     return {
         "X": X, 

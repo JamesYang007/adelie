@@ -24,7 +24,7 @@ struct GlmNaiveBufferPack
         size_t n,
         size_t p
     ):
-        ones(vec_value_t::ones(n)),
+        ones(vec_value_t::Ones(n)),
         X_means(p),
         weights(n),
         weights_sqrt(n),
@@ -69,6 +69,7 @@ auto fit(
 )
 {
     using state_t = std::decay_t<StateType>;
+    using value_t = typename state_t::value_t;
     using index_t = typename state_t::index_t;
     using safe_bool_t = typename state_t::safe_bool_t;
     using vec_value_t = typename state_t::vec_value_t;
@@ -144,7 +145,7 @@ auto fit(
 
         /* compute rest of quadratic approximation quantities */
         // TODO: parallelize?
-        glm.variance(eta, var);
+        glm.hessian(eta, var);
         weights = weights0 * var;
         const auto weights_sum = weights.sum();
         weights /= weights_sum;
@@ -158,7 +159,7 @@ auto fit(
         for (size_t ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) {
             const auto i = screen_set[ss_idx];
             const auto g = groups[i];
-            const auto gs = group_sizes[i];
+            const size_t gs = group_sizes[i];
             for (size_t j = 0; j < gs; ++j) {
                 X_means[g+j] = X.cmul(g+j, weights);
             }
@@ -170,7 +171,7 @@ auto fit(
             X_means,
             weights_sqrt,
             0,
-            screen_sets.size(),
+            screen_set.size(),
             screen_X_means,
             screen_transforms,
             screen_vars
@@ -204,7 +205,7 @@ auto fit(
             Eigen::Map<vec_safe_bool_t>(screen_is_active.data(), screen_is_active.size())
         );
         try { 
-            pin::naive::solve(
+            gaussian::pin::naive::solve(
                 state_gaussian_pin_naive, 
                 update_coefficients_f, 
                 check_user_interrupt
@@ -224,8 +225,11 @@ auto fit(
             const auto g = groups[i];
             const auto gs = group_sizes[i];
             const auto sb = screen_begins[ss_idx];
-            const auto beta_g = screen_beta.segment(sb, gs);
-            if (gs == 1) X.ctmul(g, beta_g[0], buffer_n);
+            const auto beta_g = Eigen::Map<const vec_value_t>(
+                screen_beta.data() + sb,
+                gs
+            );
+            if (gs == 1) X.ctmul(g, beta_g[0], ones, buffer_n);
             else X.btmul(g, gs, beta_g, ones, buffer_n);
             matrix::dvaddi(eta, buffer_n, n_threads);
         }
@@ -233,10 +237,12 @@ auto fit(
 
         // update mu
         mu_prev.swap(mu);
-        glm.mean(eta, mu); 
+        glm.gradient(eta, mu); 
 
         /* check convergence */
-        if ((weights * (mu - mu_prev).square()).sum() <= irls_tol) break;
+        if ((weights * (mu - mu_prev).square()).sum() <= irls_tol) {
+            return state_gaussian_pin_naive;
+        }
 
         ++irls_it;
     }
@@ -245,9 +251,9 @@ auto fit(
 template <class StateType,
           class UpdateCoefficientsType,
           class CUIType=util::no_op>
-inline void solve_glm(
+inline void solve(
     StateType&& state,
-    bool display,
+    bool /*display*/,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
@@ -255,13 +261,14 @@ inline void solve_glm(
     using state_t = std::decay_t<StateType>;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
-    using vec_safe_bool_t = typename state_t::vec_safe_bool_t;
-    using sw_t = util::Stopwatch;
+    //using vec_safe_bool_t = typename state_t::vec_safe_bool_t;
+    //using sw_t = util::Stopwatch;
 
+    const auto& y0 = state.y;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
+    const auto& weights0 = state.weights;
     const auto& screen_set = state.screen_set;
-    //const auto& rsqs = state.rsqs;
     //const auto early_exit = state.early_exit;
     const auto max_screen_size = state.max_screen_size;
     const auto setup_lmda_max = state.setup_lmda_max;
@@ -271,12 +278,13 @@ inline void solve_glm(
     //const auto intercept = state.intercept;
     //const auto n_threads = state.n_threads;
     const auto& abs_grad = state.abs_grad;
+    const auto& mu = state.mu;
     auto& X = *state.X;
     auto& lmda_max = state.lmda_max;
     //auto& lmda_path = state.lmda_path;
     //auto& screen_is_active = state.screen_is_active;
     //auto& screen_beta = state.screen_beta;
-    //auto& grad = state.grad;
+    auto& grad = state.grad;
     auto& lmda = state.lmda;
     //auto& resid_prev_valid = state.resid_prev_valid;
     //auto& screen_beta_prev_valid = state.screen_beta_prev_valid; 
@@ -296,6 +304,8 @@ inline void solve_glm(
     const auto p = X.cols();
     GlmNaiveBufferPack<value_t> buffer_pack(n, p);
 
+    auto& buffer_n = buffer_pack.buffer_n;
+
     // ==================================================================================== 
     // Initial fit for lambda ~ infinity to setup lmda_max
     // ==================================================================================== 
@@ -305,38 +315,35 @@ inline void solve_glm(
     // that leads to that solution where all penalized variables have 0 coefficient.
     if (setup_lmda_max) {
         vec_value_t large_lmda_path(1);
-        large_lmda_path[0] = std::numeric_limits<value_t>::max();
-        try {
-            save_prev_valid();
-            auto&& state_gaussian_pin_naive = fit(
-                state,
-                large_lmda_path,
-                update_coefficients_f,
-                check_user_interrupt
-            );
+        // NOTE: std::numeric_limits<value_t>::max() does not work here
+        // because when we call fit, we have to scale lmda, 
+        // which may make it exceed the initial value.
+        // Instead, we just set it to some very large number O_O (similar to glmnet).
+        large_lmda_path[0] = 9.9e35; 
 
-            /* Invariance */
-            lmda = large_lmda_path[0];
-            X.mul(resid, grad);
-            //if (intercept) {
-            //    matrix::dvsubi(grad, resid_sum * X_means, n_threads);
-            //}
-            //state::gaussian::update_abs_grad(state, lmda);
+        fit(
+            state,
+            buffer_pack,
+            large_lmda_path,
+            update_coefficients_f,
+            check_user_interrupt
+        );
 
-            /* Compute lmda_max */
-            //const auto factor = (alpha <= 0) ? 1e-3 : alpha;
-            //lmda_max = vec_value_t::NullaryExpr(
-            //    abs_grad.size(),
-            //    [&](auto i) { 
-            //        return (penalty[i] <= 0.0) ? 0.0 : abs_grad[i] / penalty[i];
-            //    }
-            //).maxCoeff() / factor;
-        } catch (...) {
-            load_prev_valid();
-            throw;
-        }
+        /* Invariance */
+        lmda = large_lmda_path[0];
+        buffer_n = weights0 * (y0 - mu);
+        X.mul(buffer_n, grad);
+        state::gaussian::update_abs_grad(state, lmda);
+
+        /* Compute lmda_max */
+        const auto factor = (alpha <= 0) ? 1e-3 : alpha;
+        lmda_max = vec_value_t::NullaryExpr(
+            abs_grad.size(),
+            [&](auto i) { 
+                return (penalty[i] <= 0.0) ? 0.0 : abs_grad[i] / penalty[i];
+            }
+        ).maxCoeff() / factor;
     }
-
 }
 
 } // namespace naive 

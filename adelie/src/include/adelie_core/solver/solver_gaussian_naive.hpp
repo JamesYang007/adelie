@@ -438,7 +438,7 @@ inline void solve(
     auto& screen_sizes = state.screen_sizes;
 
     const auto n = X.rows();
-    gaussian::naive::GaussianNaiveBufferPack<value_t> buffer_pack(n);
+    GaussianNaiveBufferPack<value_t> buffer_pack(n);
 
     if (screen_set.size() > max_screen_size) throw util::max_basil_screen_set();
 

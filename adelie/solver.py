@@ -100,7 +100,6 @@ def solve_gaussian_pin(state):
     See Also
     --------
     adelie.state.gaussian_pin_naive
-    adelie.solver.objective
     """
     # mapping of each state type to the corresponding solver
     f_dict = {
@@ -145,12 +144,53 @@ def solve_gaussian(state, progress_bar: bool =False):
     See Also
     --------
     adelie.state.gaussian_naive
-    adelie.solver.objective
     """
     # mapping of each state type to the corresponding solver
     f_dict = {
         core.state.StateGaussianNaive64: core.solver.solve_gaussian_naive_64,
         core.state.StateGaussianNaive32: core.solver.solve_gaussian_naive_32,
+    }
+
+    # solve group elastic net
+    f = f_dict[state._core_type]
+    out = f(state, progress_bar)
+
+    # raise any errors
+    if out["error"] != "":
+        logger.logger.warning(RuntimeError(out["error"]))
+
+    # return a subsetted Python result object
+    core_state = out["state"]
+    state = type(state).create_from_core(state, core_state)
+
+    return state
+
+
+def solve_glm(state, progress_bar: bool =False):
+    """Solves the group elastic net problem with any GLM loss.
+
+    Parameters
+    ----------
+    state
+        A state object.
+    progress_bar : bool, optional
+        ``True`` to enable progress bar.
+        Default is ``False``.
+
+    Returns
+    -------
+    result
+        The resulting state after running the solver.
+        The type is the same as that of ``state``.
+
+    See Also
+    --------
+    adelie.state.glm_naive
+    """
+    # mapping of each state type to the corresponding solver
+    f_dict = {
+        core.state.StateGlmNaive64: core.solver.solve_glm_naive_64,
+        core.state.StateGlmNaive32: core.solver.solve_glm_naive_32,
     }
 
     # solve group elastic net
