@@ -325,20 +325,6 @@ class gaussian_pin_base(base):
             method, logger,
         )
 
-        # ================ rsq_slope_tol check ====================
-        self._check(
-            self.rsq_slope_tol >= 0,
-            "check rsq_slope_tol >= 0",
-            method, logger,
-        )
-
-        # ================ rsq_curve_tol check ====================
-        self._check(
-            self.rsq_curv_tol >= 0,
-            "check rsq_curv_tol >= 0",
-            method, logger,
-        )
-
         # ================ newton_tol check ====================
         self._check(
             self.newton_tol >= 0,
@@ -512,7 +498,7 @@ class gaussian_pin_base(base):
             method, logger,
         )
 
-        # ================ rsqs check ====================
+        # ================ lmdas check ====================
         self._check(
             self.lmdas.shape == (self.betas.shape[0],),
             "check lmdas shape",
@@ -557,9 +543,8 @@ class gaussian_pin_naive_base(gaussian_pin_base):
         intercept: bool,
         max_iters: int,
         tol: float,
-        rsq_tol: float,
-        rsq_slope_tol: float,
-        rsq_curv_tol: float,
+        adev_tol: float,
+        ddev_tol: float,
         newton_tol: float,
         newton_max_iters: int,
         n_threads: int,
@@ -647,9 +632,8 @@ class gaussian_pin_naive_base(gaussian_pin_base):
             intercept=intercept,
             max_iters=max_iters,
             tol=tol,
-            rsq_tol=rsq_tol,
-            rsq_slope_tol=rsq_slope_tol,
-            rsq_curv_tol=rsq_curv_tol,
+            adev_tol=adev_tol,
+            ddev_tol=ddev_tol,
             newton_tol=newton_tol,
             newton_max_iters=newton_max_iters,
             n_threads=n_threads,
@@ -701,9 +685,8 @@ def gaussian_pin_naive(
     intercept: bool =True,
     max_iters: int =int(1e5),
     tol: float =1e-7,
-    rsq_tol: float =0.9,
-    rsq_slope_tol: float =1e-3,
-    rsq_curv_tol: float =1e-3,
+    adev_tol: float =0.9,
+    ddev_tol: float =1e-3,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -760,14 +743,11 @@ def gaussian_pin_naive(
     tol : float, optional
         Convergence tolerance.
         Default is ``1e-7``.
-    rsq_tol : float, optional
-        Early stopping rule check on :math:`R^2`.
+    adev_tol : float, optional
+        Percent deviance explained tolerance.
         Default is ``0.9``.
-    rsq_slope_tol : float, optional
-        Early stopping rule check on slope of :math:`R^2`.
-        Default is ``1e-3``.
-    rsq_curv_tol : float, optional
-        Early stopping rule check on curvature of :math:`R^2`.
+    ddev_tol : float, optional
+        Difference in percent deviance explained tolerance.
         Default is ``1e-3``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
@@ -853,9 +833,8 @@ def gaussian_pin_naive(
         intercept=intercept,
         max_iters=max_iters,
         tol=tol,
-        rsq_tol=rsq_tol,
-        rsq_slope_tol=rsq_slope_tol,
-        rsq_curv_tol=rsq_curv_tol,
+        adev_tol=adev_tol,
+        ddev_tol=ddev_tol,
         newton_tol=newton_tol,
         newton_max_iters=newton_max_iters,
         n_threads=n_threads,
@@ -881,8 +860,6 @@ class gaussian_pin_cov_base(gaussian_pin_base):
         screen_is_active: np.ndarray,
         max_iters: int,
         tol: float,
-        rsq_slope_tol: float,
-        rsq_curv_tol: float,
         newton_tol: float,
         newton_max_iters: int,
         n_threads: int,
@@ -948,8 +925,6 @@ class gaussian_pin_cov_base(gaussian_pin_base):
             lmda_path=self._lmda_path,
             max_iters=max_iters,
             tol=tol,
-            rsq_slope_tol=rsq_slope_tol,
-            rsq_curv_tol=rsq_curv_tol,
             newton_tol=newton_tol,
             newton_max_iters=newton_max_iters,
             n_threads=n_threads,
@@ -986,8 +961,6 @@ def gaussian_pin_cov(
     screen_is_active: np.ndarray,
     max_iters: int =int(1e5),
     tol: float =1e-7,
-    rsq_slope_tol: float =1e-3,
-    rsq_curv_tol: float =1e-3,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -1043,12 +1016,6 @@ def gaussian_pin_cov(
     tol : float, optional
         Convergence tolerance.
         Default is ``1e-7``.
-    rsq_slope_tol : float, optional
-        Early stopping rule check on slope of :math:`R^2`.
-        Default is ``1e-3``.
-    rsq_curv_tol : float, optional
-        Early stopping rule check on curvature of :math:`R^2`.
-        Default is ``1e-3``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
@@ -1126,8 +1093,6 @@ def gaussian_pin_cov(
         screen_is_active=screen_is_active,
         max_iters=max_iters,
         tol=tol,
-        rsq_slope_tol=rsq_slope_tol,
-        rsq_curv_tol=rsq_curv_tol,
         newton_tol=newton_tol,
         newton_max_iters=newton_max_iters,
         n_threads=n_threads,
@@ -1166,9 +1131,8 @@ class gaussian_naive_base(gaussian_base):
         screen_rule: str,
         max_iters: int,
         tol: float,
-        rsq_tol: float,
-        rsq_slope_tol: float,
-        rsq_curv_tol: float,
+        adev_tol: float,
+        ddev_tol: float,
         newton_tol: float,
         newton_max_iters: int,
         early_exit: bool,
@@ -1229,9 +1193,8 @@ class gaussian_naive_base(gaussian_base):
             screen_rule=screen_rule,
             max_iters=max_iters,
             tol=tol,
-            rsq_tol=rsq_tol,
-            rsq_slope_tol=rsq_slope_tol,
-            rsq_curv_tol=rsq_curv_tol,
+            adev_tol=adev_tol,
+            ddev_tol=ddev_tol,
             newton_tol=newton_tol,
             newton_max_iters=newton_max_iters,
             early_exit=early_exit,
@@ -1358,16 +1321,6 @@ class gaussian_naive_base(gaussian_base):
         self._check(
             self.tol >= 0,
             "check tol >= 0",
-            method, logger,
-        )
-        self._check(
-            self.rsq_slope_tol >= 0,
-            "check rsq_slope_tol >= 0",
-            method, logger,
-        )
-        self._check(
-            self.rsq_curv_tol >= 0,
-            "check rsq_curv_tol >= 0",
             method, logger,
         )
         self._check(
@@ -1624,9 +1577,8 @@ class gaussian_naive_base(gaussian_base):
             lmda_max=None if self.lmda_max == -1 else self.lmda_max,
             max_iters=self.max_iters,
             tol=self.tol,
-            rsq_tol=self.rsq_tol,
-            rsq_slope_tol=self.rsq_slope_tol,
-            rsq_curv_tol=self.rsq_curv_tol,
+            adev_tol=self.adev_tol,
+            ddev_tol=self.ddev_tol,
             newton_tol=self.newton_tol,
             newton_max_iters=self.newton_max_iters,
             n_threads=self.n_threads,
@@ -1665,9 +1617,8 @@ def gaussian_naive(
     lmda_max: float =None,
     max_iters: int =int(1e5),
     tol: float =1e-7,
-    rsq_tol: float =0.9,
-    rsq_slope_tol: float =1e-3,
-    rsq_curv_tol: float =1e-3,
+    adev_tol: float =0.9,
+    ddev_tol: float =1e-3,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -1756,14 +1707,11 @@ def gaussian_naive(
     tol : float, optional
         Convergence tolerance.
         Default is ``1e-7``.
-    rsq_tol : float, optional
-        Early stopping rule check on :math:`R^2`.
+    adev_tol : float, optional
+        Percent deviance explained tolerance.
         Default is ``0.9``.
-    rsq_slope_tol : float, optional
-        Early stopping rule check on slope of :math:`R^2`.
-        Default is ``1e-3``.
-    rsq_curv_tol : float, optional
-        Early stopping rule check on curvature of :math:`R^2`.
+    ddev_tol : float, optional
+        Difference in percent deviance explained tolerance.
         Default is ``1e-3``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
@@ -1842,12 +1790,10 @@ def gaussian_naive(
         raise ValueError("max_iters must be >= 0.")
     if tol <= 0:
         raise ValueError("tol must be > 0.")
-    if rsq_tol < 0 or rsq_tol > 1:
-        raise ValueError("rsq_tol must be in [0,1].")
-    if rsq_slope_tol < 0:
-        raise ValueError("rsq_slope_tol must be >= 0.")
-    if rsq_curv_tol < 0:
-        raise ValueError("rsq_curv_tol must be >= 0.")
+    if adev_tol < 0 or adev_tol > 1:
+        raise ValueError("adev_tol must be in [0,1].")
+    if ddev_tol < 0 or ddev_tol > 1:
+        raise ValueError("ddev_tol must be in [0,1].")
     if newton_tol < 0:
         raise ValueError("newton_tol must be >= 0.")
     if newton_max_iters < 0:
@@ -1936,9 +1882,8 @@ def gaussian_naive(
         screen_rule=screen_rule,
         max_iters=max_iters,
         tol=tol,
-        rsq_tol=rsq_tol,
-        rsq_slope_tol=rsq_slope_tol,
-        rsq_curv_tol=rsq_curv_tol,
+        adev_tol=adev_tol,
+        ddev_tol=ddev_tol,
         newton_tol=newton_tol,
         newton_max_iters=newton_max_iters,
         early_exit=early_exit,
@@ -1970,7 +1915,8 @@ class glm_naive_base:
         penalty: np.ndarray,
         weights: np.ndarray,
         lmda_path: np.ndarray,
-        dev0: float,
+        dev_null: float,
+        dev_full: float,
         lmda_max: float,
         min_ratio: float,
         lmda_path_size: int,
@@ -1983,10 +1929,11 @@ class glm_naive_base:
         irls_tol: float,
         max_iters: int,
         tol: float,
+        adev_tol: float,
+        ddev_tol: float,
         newton_tol: float,
         newton_max_iters: int,
         early_exit: bool,
-        setup_dev0: bool,
         setup_lmda_max: bool,
         setup_lmda_path: bool,
         intercept: bool,
@@ -2033,7 +1980,8 @@ class glm_naive_base:
             penalty=self._penalty,
             weights=self._weights,
             lmda_path=self._lmda_path,
-            dev0=dev0,
+            dev_null=dev_null,
+            dev_full=dev_full,
             lmda_max=lmda_max,
             min_ratio=min_ratio,
             lmda_path_size=lmda_path_size,
@@ -2046,10 +1994,11 @@ class glm_naive_base:
             irls_tol=irls_tol,
             max_iters=max_iters,
             tol=tol,
+            adev_tol=adev_tol,
+            ddev_tol=ddev_tol,
             newton_tol=newton_tol,
             newton_max_iters=newton_max_iters,
             early_exit=early_exit,
-            setup_dev0=setup_dev0,
             setup_lmda_max=setup_lmda_max,
             setup_lmda_path=setup_lmda_path,
             intercept=intercept,
@@ -2083,13 +2032,16 @@ def glm_naive(
     grad: np.ndarray,
     eta: np.ndarray,
     mu: np.ndarray,
+    dev_null: float,
+    dev_full: float,
     lmda_path: np.ndarray =None,
-    dev0: float =None,
     lmda_max: float =None,
     irls_max_iters: int =int(1e2),
     irls_tol: float =1e-7,
     max_iters: int =int(1e5),
     tol: float =1e-7,
+    adev_tol: float =0.9,
+    ddev_tol: float =1e-3,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -2155,23 +2107,23 @@ def glm_naive(
         :math:`\\beta` is given by ``screen_beta``
         and :math:`\\beta_0` is given by ``beta0``.
     eta : (n,) np.ndarray
-        The natural parameter :math:`\eta = X\\beta + \\beta_0 \\mathbf{1}`
+        The natural parameter :math:`\\eta = X\\beta + \\beta_0 \\mathbf{1}`
         where :math:`\\beta` and :math:`\\beta_0` are given by
         ``screen_beta`` and ``beta0``.
     mu : (n,) np.ndarray
         The mean parameter :math:`\\mu \\equiv \\mu(\\eta)`
         where :math:`\\eta` is given by ``eta``.
+    dev_null : float 
+        Null deviance :math:`D(\\eta_0)`
+        where :math:`\\eta_0 = \\beta_0 1` is the intercept-only model fit.
+    dev_full : float
+        Full deviance :math:`D(\\eta^\\star)`
+        where :math:`\\eta^\\star = \\underline{\\mu}^{-1}(y)` is the saturated model fit.
     lmda_path : (l,) np.ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
         If ``None``, the path will be generated.
-        Default is ``None``.
-    dev0 : float, optional
-        Null deviance :math:`D(\\eta_0) - D(\\eta^\\star)`
-        where :math:`\\eta_0 = \\beta_0 1` is the intercept-only model fit
-        and :math:`\\eta^\star = \\underline{\\mu}^{-1}(y)` is the saturated model fit.
-        If ``None``, then it is computed.
         Default is ``None``.
     lmda_max : float
         The smallest :math:`\\lambda` such that the true solution is zero
@@ -2190,6 +2142,12 @@ def glm_naive(
     tol : float, optional
         Convergence tolerance.
         Default is ``1e-7``.
+    adev_tol : float, optional
+        Percent deviance explained tolerance.
+        Default is ``0.9``.
+    ddev_tol : float, optional
+        Difference in percent deviance explained tolerance.
+        Default is ``1e-3``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
@@ -2271,6 +2229,10 @@ def glm_naive(
         raise ValueError("max_iters must be >= 0.")
     if tol <= 0:
         raise ValueError("tol must be > 0.")
+    if adev_tol < 0 or adev_tol > 1:
+        raise ValueError("adev_tol must be in [0,1]")
+    if ddev_tol < 0 or ddev_tol > 1:
+        raise ValueError("ddev_tol must be in [0,1]")
     if newton_tol < 0:
         raise ValueError("newton_tol must be >= 0.")
     if newton_max_iters < 0:
@@ -2311,11 +2273,9 @@ def glm_naive(
 
     core_base = dispatcher[dtype]
 
-    setup_dev0 = dev0 is None
     setup_lmda_max = lmda_max is None
     setup_lmda_path = lmda_path is None
 
-    if setup_dev0: dev0 = -1
     if setup_lmda_max: lmda_max = -1
     if setup_lmda_path: lmda_path = np.empty(0, dtype=dtype)
 
@@ -2348,9 +2308,9 @@ def glm_naive(
         penalty=penalty,
         weights=weights,
         lmda_path=lmda_path,
-        dev0=dev0,
+        dev_null=dev_null,
+        dev_full=dev_full,
         lmda_max=lmda_max,
-        setup_dev0=setup_dev0,
         setup_lmda_max=setup_lmda_max,
         setup_lmda_path=setup_lmda_path,
         max_screen_size=max_screen_size,
@@ -2362,6 +2322,8 @@ def glm_naive(
         irls_tol=irls_tol,
         max_iters=max_iters,
         tol=tol,
+        adev_tol=adev_tol,
+        ddev_tol=ddev_tol,
         newton_tol=newton_tol,
         newton_max_iters=newton_max_iters,
         early_exit=early_exit,

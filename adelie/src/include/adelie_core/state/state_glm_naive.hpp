@@ -20,8 +20,6 @@ void update_screen_derived(
     SVType& screen_vars
 )
 {
-    gaussian::update_screen_derived_base(state);
-
     const auto& group_sizes = state.group_sizes;
     const auto& screen_set = state.screen_set;
     const auto& screen_begins = state.screen_begins;
@@ -111,7 +109,8 @@ struct StateGlmNaive: StateGlmBase<
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_value_t>& weights,
         const Eigen::Ref<const vec_value_t>& lmda_path,
-        value_t dev0,
+        value_t dev_null,
+        value_t dev_full,
         value_t lmda_max,
         value_t min_ratio,
         size_t lmda_path_size,
@@ -124,10 +123,11 @@ struct StateGlmNaive: StateGlmBase<
         value_t irls_tol,
         size_t max_iters,
         value_t tol,
+        value_t adev_tol,
+        value_t ddev_tol,
         value_t newton_tol,
         size_t newton_max_iters,
         bool early_exit,
-        bool setup_dev0,
         bool setup_lmda_max,
         bool setup_lmda_path,
         bool intercept,
@@ -141,10 +141,10 @@ struct StateGlmNaive: StateGlmBase<
     ):
         base_t(
             glm, groups, group_sizes, alpha, penalty, weights, lmda_path, 
-            dev0, lmda_max, min_ratio, lmda_path_size, max_screen_size, 
+            dev_null, dev_full, lmda_max, min_ratio, lmda_path_size, max_screen_size, 
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
-            irls_max_iters, irls_tol, max_iters, tol, 
-            newton_tol, newton_max_iters, early_exit, setup_dev0, setup_lmda_max, setup_lmda_path, intercept, n_threads,
+            irls_max_iters, irls_tol, max_iters, tol, adev_tol, ddev_tol,
+            newton_tol, newton_max_iters, early_exit, setup_lmda_max, setup_lmda_path, intercept, n_threads,
             screen_set, screen_beta, screen_is_active, beta0, lmda, grad
         ),
         y(y.data(), y.size()),

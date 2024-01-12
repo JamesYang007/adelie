@@ -189,23 +189,23 @@ def plot_coefficients(state):
     return fig, ax
 
 
-def plot_rsqs(state):
-    """Plots the :math:`R^2` profile.
+def plot_devs(state):
+    """Plots the deviance profile.
 
     Parameters
     ----------
     state
         A state object from solving group elastic net.
     """
-    rsqs = state.rsqs
+    devs = state.devs
     lmdas = state.lmdas
 
     tls = -np.log(lmdas)
 
     fig, ax = plt.subplots(layout="constrained")
-    ax.plot(tls, rsqs, linestyle='-', color='r', marker='.')
-    ax.set_title(r"$R^2$ Profile")
-    ax.set_ylabel(r"$R^2$")
+    ax.plot(tls, devs, linestyle='-', color='r', marker='.')
+    ax.set_title(r"Deviance Profile")
+    ax.set_ylabel(r"Deviance Explained (%)")
     ax.set_xlabel(r"$-\log(\lambda)$")
 
     return fig, ax
@@ -511,14 +511,14 @@ class Diagnostic:
         """
         return plot_coefficients(self.state)
 
-    def plot_rsqs(self):
-        """Plots the :math:`R^2` profile.
+    def plot_devs(self):
+        """Plots the deviance profile.
 
         See Also
         --------
-        adelie.diagnostic.plot_rsqs
+        adelie.diagnostic.plot_devs
         """
-        return plot_rsqs(self.state)
+        return plot_devs(self.state)
 
     def plot_set_sizes(self, **kwargs):
         """Plots the set sizes.

@@ -328,8 +328,6 @@ inline void solve(
     const auto& lmda_path = state.lmda_path;
     const auto tol = state.tol;
     const auto max_iters = state.max_iters;
-    const auto rsq_slope_tol = state.rsq_slope_tol;
-    const auto rsq_curv_tol = state.rsq_curv_tol;
     auto& active_set = state.active_set;
     auto& active_g1 = state.active_g1;
     auto& active_g2 = state.active_g2;
@@ -507,8 +505,7 @@ inline void solve(
         // make sure to do at least 3 lambdas.
         if (l < 2) continue;
 
-        // early stop if R^2 criterion is fulfilled.
-        if (check_early_stop_rsq(rsqs[l-2], rsqs[l-1], rsqs[l], rsq_slope_tol, rsq_curv_tol)) break;
+        // TODO: early stop if R^2 criterion is fulfilled.
     }
 }
 

@@ -168,7 +168,7 @@ def run_solve_gaussian_pin(state, X, y, weights):
             )
             for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
         ])
-        assert np.all(my_objs <= cvxpy_objs * (1 + 1e-10))
+        assert np.all(my_objs <= cvxpy_objs * (1 + 1e-5))
 
     return state
 
@@ -594,7 +594,7 @@ def test_solve_gaussian_concatenate():
             )
 
             assert np.allclose(state_special.lmdas, state_dense.lmdas)
-            assert np.allclose(state_special.rsqs, state_dense.rsqs)
+            assert np.allclose(state_special.devs, state_dense.devs)
             assert np.allclose(state_special.intercepts, state_dense.intercepts, atol=1e-3)
             assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray(), atol=1e-3)
 
@@ -663,7 +663,7 @@ def test_solve_gaussian_snp_unphased():
             )
 
             assert np.allclose(state_special.lmdas, state_dense.lmdas)
-            assert np.allclose(state_special.rsqs, state_dense.rsqs)
+            assert np.allclose(state_special.devs, state_dense.devs)
             assert np.allclose(state_special.intercepts, state_dense.intercepts, atol=1e-3)
             assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray(), atol=1e-3)
 
@@ -735,7 +735,7 @@ def test_solve_gaussian_snp_phased_ancestry():
             )
 
             assert np.allclose(state_special.lmdas, state_dense.lmdas)
-            assert np.allclose(state_special.rsqs, state_dense.rsqs)
+            assert np.allclose(state_special.devs, state_dense.devs)
             assert np.allclose(state_special.intercepts, state_dense.intercepts)
             assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray())
 

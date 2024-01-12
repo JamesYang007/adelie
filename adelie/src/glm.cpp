@@ -28,6 +28,19 @@ public:
         );
     }
 
+    void gradient_inverse(
+        const Eigen::Ref<const vec_value_t>& mu,
+        Eigen::Ref<vec_value_t> eta
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            gradient_inverse,
+            mu, eta
+        );
+    }
+
     void hessian(
         const Eigen::Ref<const vec_value_t>& eta,
         Eigen::Ref<vec_value_t> var
@@ -38,6 +51,20 @@ public:
             base_t,
             hessian,
             eta, var
+        );
+    }
+
+    void deviance(
+        const Eigen::Ref<const vec_value_t>& y,
+        const Eigen::Ref<const vec_value_t>& eta,
+        Eigen::Ref<vec_value_t> dev
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            deviance,
+            y, eta, dev
         );
     }
 };
@@ -65,6 +92,20 @@ void glm_base(py::module_& m, const char* name)
         mu : (n,) np.ndarray
             The gradient, or mean parameter, to store.
         )delimiter")
+        .def("gradient_inverse", &internal_t::gradient_inverse, R"delimiter(
+        Inverse gradient of the log-partition function.
+
+        Computes :math:`(\nabla \underline{A})^{-1}(\mu)`
+        where :math:`\underline{A}(\eta)_k = A(\eta_k)`
+        and :math:`A` is the log-partition function.
+
+        Parameters
+        ----------
+        mu : (n,) np.ndarray
+            The mean parameter.
+        eta : (n,) np.ndarray
+            The natural parameter to store.
+        )delimiter")
         .def("hessian", &internal_t::hessian, R"delimiter(
         Hessian of the log-partition function.
 
@@ -80,6 +121,21 @@ void glm_base(py::module_& m, const char* name)
             Natural parameter.
         var : (n,) np.ndarray
             The hessian, or variance parameter, to store.
+        )delimiter")
+        .def("deviance", &internal_t::deviance, R"delimiter(
+        Element-wise deviance function.
+
+        Computes :math:`-y_i \eta_i + A(\eta_i)` for each entry :math:`i`
+        where :math:`A` is the log-partition function.
+
+        Parameters
+        ----------
+        y : (n,) np.ndarray
+            Sufficient statistic.
+        eta : (n,) np.ndarray
+            Natural parameter.
+        dev : (n,) np.ndarray
+            The deviance to store.
         )delimiter")
         ;
 }
