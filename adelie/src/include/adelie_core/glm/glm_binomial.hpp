@@ -18,7 +18,15 @@ public:
     ) override
     {
         mu = 1 / (1 + (-eta).exp());
-    };
+    }
+
+    void gradient_inverse(
+        const Eigen::Ref<const vec_value_t>& mu,
+        Eigen::Ref<vec_value_t> eta
+    ) override
+    {
+        eta = (mu / (1-mu)).log();
+    }
 
     void hessian(
         const Eigen::Ref<const vec_value_t>& eta,
@@ -27,6 +35,15 @@ public:
     {
         var = 1 / (1 + (-eta).exp());
         var *= (1-var);
+    }
+
+    void deviance(
+        const Eigen::Ref<const vec_value_t>& y,
+        const Eigen::Ref<const vec_value_t>& eta,
+        Eigen::Ref<vec_value_t> dev
+    ) override
+    {
+        dev = (1 + ((1-2*y) * eta).exp()).log();
     }
 };
 

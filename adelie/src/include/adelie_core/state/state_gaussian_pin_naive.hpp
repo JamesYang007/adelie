@@ -44,7 +44,8 @@ struct StateGaussianPinNaive : StateGaussianPinBase<
     const value_t y_var;
     const map_cvec_value_t screen_X_means;
 
-    const value_t rsq_tol;
+    const value_t adev_tol;
+    const value_t ddev_tol;
 
     /* Dynamic states */
     matrix_t* X;
@@ -76,9 +77,8 @@ struct StateGaussianPinNaive : StateGaussianPinBase<
         bool intercept,
         size_t max_iters,
         value_t tol,
-        value_t rsq_tol,
-        value_t rsq_slope_tol,
-        value_t rsq_curv_tol,
+        value_t adev_tol,
+        value_t ddev_tol,
         value_t newton_tol,
         size_t newton_max_iters,
         size_t n_threads,
@@ -91,14 +91,15 @@ struct StateGaussianPinNaive : StateGaussianPinBase<
         base_t(
             groups, group_sizes, alpha, penalty,
             screen_set, screen_g1, screen_g2, screen_begins, screen_vars, screen_transforms, lmda_path, 
-            intercept, max_iters, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, n_threads,
+            intercept, max_iters, tol, newton_tol, newton_max_iters, n_threads,
             rsq, screen_beta, screen_is_active
         ),
         weights(weights.data(), weights.size()),
         y_mean(y_mean),
         y_var(y_var),
         screen_X_means(screen_X_means.data(), screen_X_means.size()),
-        rsq_tol(rsq_tol),
+        adev_tol(adev_tol),
+        ddev_tol(ddev_tol),
         X(&X),
         resid(resid.data(), resid.size()),
         resid_sum(resid_sum),

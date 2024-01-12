@@ -238,9 +238,8 @@ inline void solve(
     const auto intercept = state.intercept;
     const auto tol = state.tol;
     const auto max_iters = state.max_iters;
-    const auto rsq_tol = state.rsq_tol;
-    const auto rsq_slope_tol = state.rsq_slope_tol;
-    const auto rsq_curv_tol = state.rsq_curv_tol;
+    const auto adev_tol = state.adev_tol;
+    const auto ddev_tol = state.ddev_tol;
     auto& screen_is_active = state.screen_is_active;
     auto& active_set = state.active_set;
     auto& active_g1 = state.active_g1;
@@ -412,17 +411,8 @@ inline void solve(
         benchmark_screen.emplace_back(screen_time);
         benchmark_active.emplace_back(active_time);
 
-        if (rsq >= rsq_tol * y_var) break;
-
-        // early stop if R^2 criterion is fulfilled.
-        if ((l >= 2) && 
-            check_early_stop_rsq(
-                rsqs[l-2], 
-                rsqs[l-1], 
-                rsqs[l], 
-                rsq_slope_tol, 
-                rsq_curv_tol
-            )) break;
+        if (rsq >= adev_tol * y_var) break;
+        if ((l >= 1) && (rsqs[l]-rsqs[l-1] <= ddev_tol * y_var)) break;
     }
 }
 

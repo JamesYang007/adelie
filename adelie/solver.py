@@ -219,9 +219,8 @@ def grpnet(
     lmda_path: np.ndarray =None,
     max_iters: int =int(1e5),
     tol: float =1e-7,
-    rsq_tol: float =0.9,
-    rsq_slope_tol: float =1e-3,
-    rsq_curv_tol: float =1e-3,
+    adev_tol: float =0.9,
+    ddev_tol: float =1e-3,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -274,14 +273,11 @@ def grpnet(
     tol : float, optional
         Convergence tolerance.
         Default is ``1e-7``.
-    rsq_tol : float, optional
-        Early stopping rule check on :math:`R^2`.
+    adev_tol : float, optional
+        Percent deviance explained tolerance.
         Default is ``0.9``.
-    rsq_slope_tol : float, optional
-        Early stopping rule check on slope of :math:`R^2`.
-        Default is ``1e-3``.
-    rsq_curv_tol : float, optional
-        Early stopping rule check on curvature of :math:`R^2`.
+    ddev_tol : float, optional
+        Difference in percent deviance explained tolerance.
         Default is ``1e-3``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
@@ -423,9 +419,8 @@ def grpnet(
         lmda_max=None,
         max_iters=max_iters,
         tol=tol,
-        rsq_tol=rsq_tol,
-        rsq_slope_tol=rsq_slope_tol,
-        rsq_curv_tol=rsq_curv_tol,
+        adev_tol=adev_tol,
+        ddev_tol=ddev_tol,
         newton_tol=newton_tol,
         newton_max_iters=newton_max_iters,
         n_threads=n_threads,

@@ -30,6 +30,8 @@ struct StateGlmBase
     using dyn_vec_sp_vec_t = std::vector<sp_vec_value_t>;
 
     /* static states */
+    const value_t dev_null;
+    const value_t dev_full;
     const map_cvec_index_t groups;
     const map_cvec_index_t group_sizes;
     const value_t alpha;
@@ -53,12 +55,14 @@ struct StateGlmBase
     const value_t irls_tol;
     const size_t max_iters;
     const value_t tol;
+    const value_t adev_tol;
+    const value_t ddev_tol;
     const value_t newton_tol;
     const size_t newton_max_iters;
+
     const bool early_exit;
 
     // other configs
-    const bool setup_dev0;
     const bool setup_lmda_max;
     const bool setup_lmda_path;
     const bool intercept;
@@ -66,7 +70,6 @@ struct StateGlmBase
 
     /* dynamic states */
     glm_t* glm;
-    value_t dev0;
     value_t lmda_max;
     vec_value_t lmda_path;
 
@@ -89,6 +92,15 @@ struct StateGlmBase
     dyn_vec_value_t devs;
     dyn_vec_value_t lmdas;
 
+    // diagnostics
+    std::vector<double> benchmark_screen;
+    std::vector<double> benchmark_fit;
+    std::vector<double> benchmark_kkt;
+    std::vector<double> benchmark_invariance;
+    std::vector<int> n_valid_solutions;
+    std::vector<int> active_sizes;
+    std::vector<int> screen_sizes;
+
     virtual ~StateGlmBase() =default;
 
     explicit StateGlmBase(
@@ -99,7 +111,8 @@ struct StateGlmBase
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_value_t>& weights,
         const Eigen::Ref<const vec_value_t>& lmda_path,
-        value_t dev0,
+        value_t dev_null,
+        value_t dev_full,
         value_t lmda_max,
         value_t min_ratio,
         size_t lmda_path_size,
@@ -112,10 +125,11 @@ struct StateGlmBase
         value_t irls_tol,
         size_t max_iters,
         value_t tol,
+        value_t adev_tol,
+        value_t ddev_tol,
         value_t newton_tol,
         size_t newton_max_iters,
         bool early_exit,
-        bool setup_dev0,
         bool setup_lmda_max,
         bool setup_lmda_path,
         bool intercept,
@@ -127,6 +141,8 @@ struct StateGlmBase
         value_t lmda,
         const Eigen::Ref<const vec_value_t>& grad
     ): 
+        dev_null(dev_null),
+        dev_full(dev_full),
         groups(groups.data(), groups.size()),
         group_sizes(group_sizes.data(), group_sizes.size()),
         alpha(alpha),
@@ -143,16 +159,16 @@ struct StateGlmBase
         irls_tol(irls_tol),
         max_iters(max_iters),
         tol(tol),
+        adev_tol(adev_tol),
+        ddev_tol(ddev_tol),
         newton_tol(newton_tol),
         newton_max_iters(newton_max_iters),
         early_exit(early_exit),
-        setup_dev0(setup_dev0),
         setup_lmda_max(setup_lmda_max),
         setup_lmda_path(setup_lmda_path),
         intercept(intercept),
         n_threads(n_threads),
         glm(&glm),
-        dev0(dev0),
         lmda_max(lmda_max),
         lmda_path(lmda_path),
         screen_set(screen_set.data(), screen_set.data() + screen_set.size()),
@@ -183,14 +199,13 @@ struct StateGlmBase
         intercepts.reserve(n_lmdas);
         devs.reserve(n_lmdas);
         lmdas.reserve(n_lmdas);
-        //benchmark_fit_screen.reserve(n_lmdas);
-        //benchmark_fit_active.reserve(n_lmdas);
-        //benchmark_kkt.reserve(n_lmdas);
-        //benchmark_screen.reserve(n_lmdas);
-        //benchmark_invariance.reserve(n_lmdas);
-        //n_valid_solutions.reserve(n_lmdas);
-        //active_sizes.reserve(n_lmdas);
-        //screen_sizes.reserve(n_lmdas);
+        benchmark_fit.reserve(n_lmdas);
+        benchmark_kkt.reserve(n_lmdas);
+        benchmark_screen.reserve(n_lmdas);
+        benchmark_invariance.reserve(n_lmdas);
+        n_valid_solutions.reserve(n_lmdas);
+        active_sizes.reserve(n_lmdas);
+        screen_sizes.reserve(n_lmdas);
     }
 };
 

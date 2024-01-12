@@ -1,6 +1,8 @@
 #pragma once
 #include <adelie_core/optimization/search_pivot.hpp>
+#include <adelie_core/solver/solver_gaussian_naive.hpp>
 #include <adelie_core/solver/solver_gaussian_pin_naive.hpp>
+#include <adelie_core/solver/utils.hpp>
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
 #include <adelie_core/util/algorithm.hpp>
 #include <adelie_core/util/stopwatch.hpp>
@@ -53,6 +55,42 @@ struct GlmNaiveBufferPack
 
     vec_value_t buffer_n;   // (n,) extra buffer
 };
+
+template <class StateType, 
+          class ValueType,
+          class StateGaussianPinType, 
+          class BufferPackType>
+ADELIE_CORE_STRONG_INLINE
+void update_solutions(
+    StateType& state,
+    StateGaussianPinType& state_gaussian_pin_naive,
+    BufferPackType& buffer_pack,
+    ValueType lmda
+)
+{
+    const auto dev_null = state.dev_null;
+    const auto dev_full = state.dev_full;
+    const auto& y0 = state.y;
+    const auto& weights0 = state.weights;
+    const auto& eta = state.eta;
+    auto& glm = *state.glm;
+    auto& betas = state.betas;
+    auto& devs = state.devs;
+    auto& lmdas = state.lmdas;
+    auto& intercepts = state.intercepts;
+
+    auto& buffer_n = buffer_pack.buffer_n;
+
+    betas.emplace_back(std::move(state_gaussian_pin_naive.betas.back()));
+    intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
+    lmdas.emplace_back(lmda);
+
+    glm.deviance(y0, eta, buffer_n);
+    devs.emplace_back(
+        (dev_null - (weights0 * buffer_n).sum()) /
+        (dev_null - dev_full)
+    );
+}
 
 template <class StateType,
           class BufferPackType,
@@ -156,6 +194,17 @@ auto fit(
         resid = weights * (y - eta + intercept * (beta0 - y_mean));
         const auto resid_sum = resid.sum();
         lmda_path_adjusted = lmda / weights_sum;
+        if (std::isinf(lmda_path_adjusted[0])) {
+            if (lmda == std::numeric_limits<value_t>::max()) {
+                lmda_path_adjusted = lmda;
+            }
+            else {
+                throw std::runtime_error(
+                    "IRLS lambda is unexpectedly inf. "
+                    "This likely indicates a bug in the code. Please report this!"
+                );
+            }
+        }
         for (size_t ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) {
             const auto i = screen_set[ss_idx];
             const auto g = groups[i];
@@ -196,7 +245,7 @@ auto fit(
             Eigen::Map<const vec_value_t>(screen_X_means.data(), screen_X_means.size()), 
             screen_transforms,
             lmda_path_adjusted,
-            intercept, max_iters, tol, 0 /* rsq_tol */, 0 /* rsq_slope_tol */, 0 /* rsq_curv_tol */, 
+            intercept, max_iters, tol, 0 /* adev_tol */, 0 /* ddev_tol */,
             newton_tol, newton_max_iters, n_threads,
             0 /* rsq (no need to track) */,
             Eigen::Map<vec_value_t>(resid.data(), resid.size()),
@@ -248,12 +297,56 @@ auto fit(
     }
 }
 
+/**
+ * Checks the KKT condition on the proposed solutions in state_gaussian_pin_naive.
+ */
+template <class StateType, 
+          class ValueType,
+          class BufferPackType>
+ADELIE_CORE_STRONG_INLINE
+size_t kkt(
+    StateType& state,
+    BufferPackType& buffer_pack,
+    ValueType lmda
+)
+{
+    const auto& y0 = state.y;
+    const auto& weights0 = state.weights;
+    const auto& groups = state.groups;
+    const auto alpha = state.alpha;
+    const auto& penalty = state.penalty;
+    const auto& screen_hashset = state.screen_hashset;
+    const auto& abs_grad = state.abs_grad;
+    const auto& mu = state.mu;
+    auto& X = *state.X;
+    auto& grad = state.grad;
+    auto& buffer_n = buffer_pack.buffer_n;
+
+    const auto is_screen = [&](auto i) {
+        return screen_hashset.find(i) != screen_hashset.end();
+    };
+
+    // NOTE: no matter what, every gradient must be computed for pivot method.
+    buffer_n = weights0 * (y0 - mu);
+    X.mul(buffer_n, grad);
+    state::gaussian::update_abs_grad(state, lmda);
+
+    for (int k = 0; k < groups.size(); ++k) {
+        if (is_screen(k)) continue;
+        const auto pk = penalty[k];
+        const auto abs_grad_k = abs_grad[k];
+        if (abs_grad_k > lmda * alpha * pk) return false;
+    }
+
+    return true;
+}
+
 template <class StateType,
           class UpdateCoefficientsType,
           class CUIType=util::no_op>
 inline void solve(
     StateType&& state,
-    bool /*display*/,
+    bool display,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
@@ -261,42 +354,38 @@ inline void solve(
     using state_t = std::decay_t<StateType>;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
-    //using vec_safe_bool_t = typename state_t::vec_safe_bool_t;
-    //using sw_t = util::Stopwatch;
+    using vec_safe_bool_t = typename state_t::vec_safe_bool_t;
+    using sw_t = util::Stopwatch;
 
     const auto& y0 = state.y;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
     const auto& weights0 = state.weights;
     const auto& screen_set = state.screen_set;
-    //const auto early_exit = state.early_exit;
+    const auto early_exit = state.early_exit;
     const auto max_screen_size = state.max_screen_size;
     const auto setup_lmda_max = state.setup_lmda_max;
-    //const auto setup_lmda_path = state.setup_lmda_path;
-    //const auto lmda_path_size = state.lmda_path_size;
-    //const auto min_ratio = state.min_ratio;
-    //const auto intercept = state.intercept;
-    //const auto n_threads = state.n_threads;
+    const auto setup_lmda_path = state.setup_lmda_path;
+    const auto lmda_path_size = state.lmda_path_size;
+    const auto min_ratio = state.min_ratio;
+    const auto adev_tol = state.adev_tol;
+    const auto ddev_tol = state.ddev_tol;
+    const auto& screen_is_active = state.screen_is_active;
     const auto& abs_grad = state.abs_grad;
     const auto& mu = state.mu;
+    const auto& devs = state.devs;
     auto& X = *state.X;
     auto& lmda_max = state.lmda_max;
-    //auto& lmda_path = state.lmda_path;
-    //auto& screen_is_active = state.screen_is_active;
-    //auto& screen_beta = state.screen_beta;
+    auto& lmda_path = state.lmda_path;
     auto& grad = state.grad;
     auto& lmda = state.lmda;
-    //auto& resid_prev_valid = state.resid_prev_valid;
-    //auto& screen_beta_prev_valid = state.screen_beta_prev_valid; 
-    //auto& screen_is_active_prev_valid = state.screen_is_active_prev_valid;
     //auto& benchmark_screen = state.benchmark_screen;
-    //auto& benchmark_fit_screen = state.benchmark_fit_screen;
-    //auto& benchmark_fit_active = state.benchmark_fit_active;
+    //auto& benchmark_fit = state.benchmark_fit;
     //auto& benchmark_kkt = state.benchmark_kkt;
     //auto& benchmark_invariance = state.benchmark_invariance;
-    //auto& n_valid_solutions = state.n_valid_solutions;
-    //auto& active_sizes = state.active_sizes;
-    //auto& screen_sizes = state.screen_sizes;
+    auto& n_valid_solutions = state.n_valid_solutions;
+    auto& active_sizes = state.active_sizes;
+    auto& screen_sizes = state.screen_sizes;
 
     if (screen_set.size() > max_screen_size) throw util::max_basil_screen_set();
 
@@ -314,23 +403,18 @@ inline void solve(
     // We solve for large lambda, then back-track the KKT condition to find the lambda
     // that leads to that solution where all penalized variables have 0 coefficient.
     if (setup_lmda_max) {
-        vec_value_t large_lmda_path(1);
-        // NOTE: std::numeric_limits<value_t>::max() does not work here
-        // because when we call fit, we have to scale lmda, 
-        // which may make it exceed the initial value.
-        // Instead, we just set it to some very large number O_O (similar to glmnet).
-        large_lmda_path[0] = 9.9e35; 
+        const auto large_lmda = std::numeric_limits<value_t>::max(); 
 
         fit(
             state,
             buffer_pack,
-            large_lmda_path,
+            large_lmda,
             update_coefficients_f,
             check_user_interrupt
         );
 
         /* Invariance */
-        lmda = large_lmda_path[0];
+        lmda = large_lmda;
         buffer_n = weights0 * (y0 - mu);
         X.mul(buffer_n, grad);
         state::gaussian::update_abs_grad(state, lmda);
@@ -343,6 +427,204 @@ inline void solve(
                 return (penalty[i] <= 0.0) ? 0.0 : abs_grad[i] / penalty[i];
             }
         ).maxCoeff() / factor;
+    }
+
+    // ==================================================================================== 
+    // Generate lambda path if needed
+    // ==================================================================================== 
+    if (setup_lmda_path) {
+        if (lmda_path_size <= 0) throw std::runtime_error("lmda_path_size must be > 0.");
+
+        lmda_path.resize(lmda_path_size);
+
+        generate_lmda_path(lmda_path, min_ratio, lmda_max);
+    }
+
+    // ==================================================================================== 
+    // Initial fit for lambda > lambda_max
+    // ==================================================================================== 
+    // Only unpenalized (l1) groups are active in this case by definition of lmda_max.
+    // Since state is in its invariance (solution at state.lmda) and unpenalized groups
+    // are ALWAYS active, state includes all unpenalized groups.
+    // If no lambda in lmda_path is > lmda_max and setup at lmda_max is not required, 
+    // state is left unchanged.
+    // Otherwise, it is in its invariance at lmda = lmda_max.
+    // All solutions to lambda > lambda_max are saved.
+
+    // slice lambda_path up to lmda_max
+    const auto large_lmda_path_size = std::find_if(
+        lmda_path.data(), 
+        lmda_path.data() + lmda_path.size(),
+        [&](auto x) { return x <= lmda_max; }
+    ) - lmda_path.data();
+
+    if (large_lmda_path_size || setup_lmda_max) {
+        // create a lambda path containing only lmdas > lambda_max
+        // and additionally lambda_max at the end.
+        // If large_lmda_path_size > 0, mind as well fit for lambda_max as well to go down the path.
+        vec_value_t large_lmda_path(large_lmda_path_size + 1);
+        large_lmda_path.head(large_lmda_path_size) = lmda_path.head(large_lmda_path_size);
+        large_lmda_path[large_lmda_path_size] = lmda_max;
+
+        for (int i = 0; i < large_lmda_path.size(); ++i) {
+            auto&& state_gaussian_pin_naive = fit(
+                state, 
+                buffer_pack,
+                large_lmda_path[i], 
+                update_coefficients_f, 
+                check_user_interrupt
+            );
+
+            /* Invariance */
+            // save only the solutions that the user asked for (up to and not including lmda_max)
+            if (i < large_lmda_path.size()-1) {
+                update_solutions(
+                    state, 
+                    state_gaussian_pin_naive,
+                    buffer_pack,
+                    large_lmda_path[i]
+                );
+            // otherwise, put the state at the last fitted lambda (lmda_max)
+            } else {
+                lmda = large_lmda_path[large_lmda_path.size()-1];
+                buffer_n = weights0 * (y0 - mu);
+                X.mul(buffer_n, grad);
+                state::gaussian::update_abs_grad(state, lmda);
+            }
+        }
+    }
+
+    size_t lmda_path_idx = devs.size(); // next index into lmda_path to fit
+
+    // ==================================================================================== 
+    // BASIL iterations for lambda <= lambda_max
+    // ==================================================================================== 
+    // In this case, screen_set may not contain the true active set.
+    // We must go through BASIL iterations to solve each lambda.
+    sw_t sw;
+    int current_active_size = Eigen::Map<const vec_safe_bool_t>(
+        screen_is_active.data(),
+        screen_is_active.size()
+    ).sum();
+    bool kkt_passed = true;
+    int n_new_active = 0;
+
+    auto pb = util::tq::trange(lmda_path.size() - lmda_path_idx);
+    pb.set_display(display);
+    const auto pb_add_suffix = [&]() {
+        // print extra information with the progress bar
+        if (display) {
+            // current training R^2
+            pb << " [dev:" 
+                << std::fixed << std::setprecision(1) 
+                << ((devs.size() == 0) ? 0.0 : devs.back()) * 100
+                << "%]"
+                ; 
+        }
+    };
+
+    for (int _ : pb)
+    {
+        static_cast<void>(_);
+
+        // check early exit
+        if (early_exit && (devs.size() >= 2)) {
+            const auto dev_u = devs[devs.size()-1];
+            const auto dev_m = devs[devs.size()-2];
+            if ((dev_u >= adev_tol) || (dev_u-dev_m <= ddev_tol)) 
+            {
+                pb_add_suffix();
+                break;
+            }
+        }
+
+        // batch the next set of lambdas
+        const auto lmda_curr = lmda_path[lmda_path_idx];
+
+        // keep doing screen-fit-kkt until KKT passes
+        while (1) {
+            try {
+                // ==================================================================================== 
+                // Screening step
+                // ==================================================================================== 
+                //sw.start();
+                gaussian::naive::screen(
+                    state,
+                    lmda_curr,
+                    kkt_passed,
+                    n_new_active
+                );
+                state::gaussian::update_screen_derived_base(state);
+                //benchmark_screen.push_back(sw.elapsed());
+
+                // ==================================================================================== 
+                // Fit step
+                // ==================================================================================== 
+                // Save all current valid quantities that will be modified in-place by fit.
+                // This is needed in case we exit with exception and need to restore invariance.
+                //sw.start();
+                auto&& state_gaussian_pin_naive = fit(
+                    state,
+                    buffer_pack,
+                    lmda_curr,
+                    update_coefficients_f,
+                    check_user_interrupt
+                );
+                //benchmark_fit.push_back(sw.elapsed());
+
+                // ==================================================================================== 
+                // KKT step
+                // ==================================================================================== 
+                //sw.start();
+                kkt_passed = kkt(
+                    state,
+                    buffer_pack,
+                    lmda_curr
+                );
+                //benchmark_kkt.push_back(sw.elapsed());
+                n_valid_solutions.push_back(kkt_passed);
+
+                // ==================================================================================== 
+                // Invariance step
+                // ==================================================================================== 
+                //sw.start();
+                lmda_path_idx += kkt_passed;
+                lmda = lmda_curr;
+                if (kkt_passed) {
+                    update_solutions(
+                        state, 
+                        state_gaussian_pin_naive,
+                        buffer_pack,
+                        lmda_curr
+                    );
+                }
+                //benchmark_invariance.push_back(sw.elapsed());
+
+                // ==================================================================================== 
+                // Diagnostic step
+                // ==================================================================================== 
+                if (kkt_passed) {
+                    active_sizes.push_back(state_gaussian_pin_naive.active_set.size());
+                    screen_sizes.push_back(state.screen_set.size());
+                }
+                // compute the number of new active groups 
+                n_new_active = (
+                    kkt_passed ?
+                    active_sizes.back() - current_active_size : n_new_active
+                );
+                current_active_size = (
+                    kkt_passed ?
+                    active_sizes.back() : current_active_size
+                );
+            } catch (...) {
+                pb_add_suffix();
+                throw;
+            }
+
+            if (kkt_passed) break;
+        } // end while(1)
+
+        pb_add_suffix();
     }
 }
 

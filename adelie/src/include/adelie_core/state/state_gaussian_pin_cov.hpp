@@ -60,8 +60,6 @@ struct StateGaussianPinCov : StateGaussianPinBase<
         const Eigen::Ref<const vec_value_t>& lmda_path, 
         size_t max_iters,
         value_t tol,
-        value_t rsq_slope_tol,
-        value_t rsq_curv_tol,
         value_t newton_tol,
         size_t newton_max_iters,
         size_t n_threads,
@@ -73,7 +71,7 @@ struct StateGaussianPinCov : StateGaussianPinBase<
         base_t(
             groups, group_sizes, alpha, penalty, 
             screen_set, screen_g1, screen_g2, screen_begins, screen_vars, screen_transforms, lmda_path, 
-            false, max_iters, tol, rsq_slope_tol, rsq_curv_tol, newton_tol, newton_max_iters, n_threads,
+            false, max_iters, tol, newton_tol, newton_max_iters, n_threads,
             rsq, screen_beta, screen_is_active
         ),
         A(&A),

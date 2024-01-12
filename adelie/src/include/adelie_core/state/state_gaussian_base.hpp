@@ -190,9 +190,8 @@ struct StateGaussianBase
     // convergence configs
     const size_t max_iters;
     const value_t tol;
-    const value_t rsq_tol;
-    const value_t rsq_slope_tol;
-    const value_t rsq_curv_tol;
+    const value_t adev_tol;
+    const value_t ddev_tol;
     const value_t newton_tol;
     const size_t newton_max_iters;
     const bool early_exit;
@@ -223,7 +222,7 @@ struct StateGaussianBase
     // final results
     dyn_vec_sp_vec_t betas;
     dyn_vec_value_t intercepts;
-    dyn_vec_value_t rsqs;
+    dyn_vec_value_t devs;
     dyn_vec_value_t lmdas;
 
     // diagnostics
@@ -255,9 +254,8 @@ struct StateGaussianBase
         const std::string& screen_rule,
         size_t max_iters,
         value_t tol,
-        value_t rsq_tol,
-        value_t rsq_slope_tol,
-        value_t rsq_curv_tol,
+        value_t adev_tol,
+        value_t ddev_tol,
         value_t newton_tol,
         size_t newton_max_iters,
         bool early_exit,
@@ -286,9 +284,8 @@ struct StateGaussianBase
         screen_rule(util::convert_screen_rule(screen_rule)),
         max_iters(max_iters),
         tol(tol),
-        rsq_tol(rsq_tol),
-        rsq_slope_tol(rsq_slope_tol),
-        rsq_curv_tol(rsq_curv_tol),
+        adev_tol(adev_tol),
+        ddev_tol(ddev_tol),
         newton_tol(newton_tol),
         newton_max_iters(newton_max_iters),
         early_exit(early_exit),
@@ -324,7 +321,7 @@ struct StateGaussianBase
         const auto n_lmdas = std::max<size_t>(lmda_path.size(), lmda_path_size);
         betas.reserve(n_lmdas);
         intercepts.reserve(n_lmdas);
-        rsqs.reserve(n_lmdas);
+        devs.reserve(n_lmdas);
         lmdas.reserve(n_lmdas);
         benchmark_fit_screen.reserve(n_lmdas);
         benchmark_fit_active.reserve(n_lmdas);

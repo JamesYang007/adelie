@@ -54,7 +54,7 @@ adelie.diagnostic
     gradient_scores
     coefficient
     plot_coefficients
-    plot_rsqs
+    plot_devs
     plot_set_sizes
     plot_benchmark
     plot_kkt

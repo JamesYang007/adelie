@@ -47,8 +47,6 @@ struct StateGaussianPinBase
     const bool intercept;
     const size_t max_iters;
     const value_t tol;
-    const value_t rsq_slope_tol;
-    const value_t rsq_curv_tol;
     const value_t newton_tol;
     const size_t newton_max_iters;
     const size_t n_threads;
@@ -91,8 +89,6 @@ struct StateGaussianPinBase
         bool intercept,
         size_t max_iters,
         value_t tol,
-        value_t rsq_slope_tol,
-        value_t rsq_curv_tol,
         value_t newton_tol,
         size_t newton_max_iters,
         size_t n_threads,
@@ -114,8 +110,6 @@ struct StateGaussianPinBase
         intercept(intercept),
         max_iters(max_iters),
         tol(tol),
-        rsq_slope_tol(rsq_slope_tol),
-        rsq_curv_tol(rsq_curv_tol),
         newton_tol(newton_tol),
         newton_max_iters(newton_max_iters),
         n_threads(n_threads),

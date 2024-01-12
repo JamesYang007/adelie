@@ -97,8 +97,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             size_t,
             value_t,
             value_t,
-            value_t,
-            value_t,
             size_t,
             size_t,
             value_t,
@@ -119,8 +117,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             py::arg("intercept"),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("rsq_slope_tol"),
-            py::arg("rsq_curv_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("n_threads"),
@@ -190,12 +186,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("tol", &state_t::tol, R"delimiter(
         Convergence tolerance.
-        )delimiter")
-        .def_readonly("rsq_slope_tol", &state_t::rsq_slope_tol, R"delimiter(
-        Early stopping rule check on slope of :math:`R^2`.
-        )delimiter")
-        .def_readonly("rsq_curv_tol", &state_t::rsq_curv_tol, R"delimiter(
-        Early stopping rule check on curvature of :math:`R^2`.
         )delimiter")
         .def_readonly("newton_tol", &state_t::newton_tol, R"delimiter(
         Convergence tolerance for the BCD update.
@@ -377,7 +367,6 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             value_t,
             value_t,
             value_t,
-            value_t,
             size_t,
             size_t,
             value_t,
@@ -405,9 +394,8 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             py::arg("intercept"),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("rsq_tol"),
-            py::arg("rsq_slope_tol"),
-            py::arg("rsq_curv_tol"),
+            py::arg("adev_tol"),
+            py::arg("ddev_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("n_threads"),
@@ -427,8 +415,11 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
         .def_readonly("y_var", &state_t::y_var, R"delimiter(
         :math:`\ell_2` norm squared of :math:`y_c` (weighted by :math:`W`).
         )delimiter")
-        .def_readonly("rsq_tol", &state_t::rsq_tol, R"delimiter(
-        Early stopping rule check on :math:`R^2`.
+        .def_readonly("adev_tol", &state_t::adev_tol, R"delimiter(
+        Percent deviance explained tolerance.
+        )delimiter")
+        .def_readonly("ddev_tol", &state_t::ddev_tol, R"delimiter(
+        Difference in percent deviance explained tolerance.
         )delimiter")
         .def_readonly("screen_X_means", &state_t::screen_X_means, R"delimiter(
         Column means (weighted by :math:`W`) of :math:`X` for strong groups.
@@ -498,8 +489,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             size_t,
             value_t,
             value_t,
-            value_t,
-            value_t,
             size_t,
             size_t,
             value_t,
@@ -521,8 +510,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("lmda_path").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("rsq_slope_tol"),
-            py::arg("rsq_curv_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("n_threads"),
@@ -588,7 +575,6 @@ void state_gaussian_base(py::module_& m, const char* name)
             value_t,
             value_t,
             value_t,
-            value_t,
             size_t,
             bool,
             bool,
@@ -618,9 +604,8 @@ void state_gaussian_base(py::module_& m, const char* name)
             py::arg("screen_rule"),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("rsq_tol"),
-            py::arg("rsq_slope_tol"),
-            py::arg("rsq_curv_tol"),
+            py::arg("adev_tol"),
+            py::arg("ddev_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("early_exit"),
@@ -704,14 +689,11 @@ void state_gaussian_base(py::module_& m, const char* name)
         .def_readonly("tol", &state_t::tol, R"delimiter(
         Convergence tolerance.
         )delimiter")
-        .def_readonly("rsq_tol", &state_t::rsq_tol, R"delimiter(
-        Early stopping rule check on :math:`R^2`.
+        .def_readonly("adev_tol", &state_t::adev_tol, R"delimiter(
+        Percent deviance explained tolerance.
         )delimiter")
-        .def_readonly("rsq_slope_tol", &state_t::rsq_slope_tol, R"delimiter(
-        Early stopping rule check on slope of :math:`R^2`.
-        )delimiter")
-        .def_readonly("rsq_curv_tol", &state_t::rsq_curv_tol, R"delimiter(
-        Early stopping rule check on curvature of :math:`R^2`.
+        .def_readonly("ddev_tol", &state_t::ddev_tol, R"delimiter(
+        Difference in percent deviance explained tolerance.
         )delimiter")
         .def_readonly("newton_tol", &state_t::newton_tol, R"delimiter(
         Convergence tolerance for the BCD update.
@@ -819,13 +801,13 @@ void state_gaussian_base(py::module_& m, const char* name)
         }, R"delimiter(
         ``betas[i]`` is the (untransformed) solution corresponding to ``lmdas[i]``.
         )delimiter")
-        .def_property_readonly("rsqs", [](const state_t& s) {
+        .def_property_readonly("devs", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<value_t>>(
-                s.rsqs.data(),
-                s.rsqs.size()
+                s.devs.data(),
+                s.devs.size()
             );
         }, R"delimiter(
-        ``rsqs[i]`` is the (normalized) :math:`R^2` at ``betas[i]``.
+        ``devs[i]`` is the (normalized) :math:`R^2` at ``betas[i]``.
         )delimiter")
         .def_property_readonly("lmdas", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<value_t>>(
@@ -955,7 +937,6 @@ void state_gaussian_naive(py::module_& m, const char* name)
             value_t,
             value_t,
             value_t,
-            value_t,
             size_t,
             bool,
             bool,
@@ -990,9 +971,8 @@ void state_gaussian_naive(py::module_& m, const char* name)
             py::arg("screen_rule"),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("rsq_tol"),
-            py::arg("rsq_slope_tol"),
-            py::arg("rsq_curv_tol"),
+            py::arg("adev_tol"),
+            py::arg("ddev_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("early_exit"),
@@ -1071,6 +1051,7 @@ void state_glm_base(py::module_& m, const char* name)
             value_t,
             value_t,
             value_t,
+            value_t,
             size_t,
             size_t,
             value_t,
@@ -1082,8 +1063,9 @@ void state_glm_base(py::module_& m, const char* name)
             size_t,
             value_t,
             value_t,
+            value_t,
+            value_t,
             size_t,
-            bool,
             bool,
             bool,
             bool,
@@ -1103,7 +1085,8 @@ void state_glm_base(py::module_& m, const char* name)
             py::arg("penalty").noconvert(),
             py::arg("weights").noconvert(),
             py::arg("lmda_path").noconvert(),
-            py::arg("dev0"),
+            py::arg("dev_null"),
+            py::arg("dev_full"),
             py::arg("lmda_max"),
             py::arg("min_ratio"),
             py::arg("lmda_path_size"),
@@ -1116,10 +1099,11 @@ void state_glm_base(py::module_& m, const char* name)
             py::arg("irls_tol"),
             py::arg("max_iters"),
             py::arg("tol"),
+            py::arg("adev_tol"),
+            py::arg("ddev_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("early_exit"),
-            py::arg("setup_dev0"),
             py::arg("setup_lmda_max"),
             py::arg("setup_lmda_path"),
             py::arg("intercept"),
@@ -1202,6 +1186,12 @@ void state_glm_base(py::module_& m, const char* name)
         .def_readonly("tol", &state_t::tol, R"delimiter(
         Convergence tolerance.
         )delimiter")
+        .def_readonly("adev_tol", &state_t::adev_tol, R"delimiter(
+        Percent deviance explained tolerance.
+        )delimiter")
+        .def_readonly("ddev_tol", &state_t::ddev_tol, R"delimiter(
+        Difference in percent deviance explained tolerance.
+        )delimiter")
         .def_readonly("newton_tol", &state_t::newton_tol, R"delimiter(
         Convergence tolerance for the BCD update.
         )delimiter")
@@ -1210,9 +1200,6 @@ void state_glm_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("early_exit", &state_t::early_exit, R"delimiter(
         ``True`` if the function should early exit based on training :math:`R^2`.
-        )delimiter")
-        .def_readonly("setup_dev0", &state_t::setup_dev0, R"delimiter(
-        ``True`` if the function should setup the null deviance :math:`D(\eta_0)-D(\eta^\star)`.
         )delimiter")
         .def_readonly("setup_lmda_max", &state_t::setup_lmda_max, R"delimiter(
         ``True`` if the function should setup :math:`\lambda_\max`.
@@ -1229,10 +1216,13 @@ void state_glm_base(py::module_& m, const char* name)
         .def_readonly("glm", &state_t::glm, R"delimiter(
         GLM object.
         )delimiter")
-        .def_readonly("dev0", &state_t::dev0, R"delimiter(
-        Null deviance :math:`D(\eta_0) - D(\eta^\star)`
-        where :math:`\eta_0 = \beta_0 1` is the intercept-only model fit
-        and :math:`\eta^\star = \underline{\mu}^{-1}(y)` is the saturated model fit.
+        .def_readonly("dev_null", &state_t::dev_null, R"delimiter(
+        Null deviance :math:`D(\\eta_0)`
+        where :math:`\\eta_0 = \\beta_0 1` is the intercept-only model fit.
+        )delimiter")
+        .def_readonly("dev_full", &state_t::dev_full, R"delimiter(
+        Full deviance :math:`D(\\eta^\\star)`
+        where :math:`\\eta^\\star = \\underline{\\mu}^{-1}(y)` is the saturated model fit.
         )delimiter")
         .def_readonly("lmda_max", &state_t::lmda_max, R"delimiter(
         The smallest :math:`\lambda` such that the true solution is zero
@@ -1451,6 +1441,7 @@ void state_glm_naive(py::module_& m, const char* name)
             value_t,
             value_t,
             value_t,
+            value_t,
             size_t,
             size_t,
             value_t,
@@ -1462,8 +1453,9 @@ void state_glm_naive(py::module_& m, const char* name)
             size_t,
             value_t,
             value_t,
+            value_t,
+            value_t,
             size_t,
-            bool,
             bool,
             bool,
             bool,
@@ -1487,7 +1479,8 @@ void state_glm_naive(py::module_& m, const char* name)
             py::arg("penalty").noconvert(),
             py::arg("weights").noconvert(),
             py::arg("lmda_path").noconvert(),
-            py::arg("dev0"),
+            py::arg("dev_null"),
+            py::arg("dev_full"),
             py::arg("lmda_max"),
             py::arg("min_ratio"),
             py::arg("lmda_path_size"),
@@ -1500,10 +1493,11 @@ void state_glm_naive(py::module_& m, const char* name)
             py::arg("irls_tol"),
             py::arg("max_iters"),
             py::arg("tol"),
+            py::arg("adev_tol"),
+            py::arg("ddev_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("early_exit"),
-            py::arg("setup_dev0"),
             py::arg("setup_lmda_max"),
             py::arg("setup_lmda_path"),
             py::arg("intercept"),
