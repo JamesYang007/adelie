@@ -769,7 +769,7 @@ class diagnostic:
         self.residuals = residuals(
             glm=self.state.glm,
             X=self.state.X,
-            y=self.state._y, 
+            y=self.state.y, 
             betas=self.betas,
             intercepts=self.state.intercepts,
         )

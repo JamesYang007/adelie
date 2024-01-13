@@ -78,12 +78,12 @@ def _screen_sets_strong(
 def _screen_sets_safe(
     state,
     *,
-    y: np.ndarray,
     resids: np.ndarray,
     active_sets: list,
     method: str ="",
 ):
     X = state.X
+    y = state.y
     X_means = state.X_means
     penalty = state.penalty
     weights = state.weights
@@ -93,12 +93,16 @@ def _screen_sets_safe(
 
     assert np.all(penalty > 0)
 
-    resids = resids / np.sqrt(weights)
+    resids = resids * np.sqrt(weights)
 
     G, n_lmdas, n, p = penalty.shape[0], betas.shape[0], X.rows(), X.cols()
 
-    Xd = np.empty((n, p), order="F")
-    X.to_dense(0, p, Xd)
+    assert (
+        isinstance(state, ad.adelie_core.state.StateGaussianNaive32) or
+        isinstance(state, ad.adelie_core.state.StateGaussianNaive64)
+    )
+    Xd = np.array(state._X.mat, order="F")
+
     if intercept:
         Xd -= X_means[None]
     Xd *= np.sqrt(weights)[:, None]
@@ -137,7 +141,15 @@ def _screen_sets_safe(
     edpps = np.empty((n_lmdas-1, p))
     for i in range(n_lmdas-1):
         X.mul(np.sqrt(weights) * (resids[i] / lmdas[i] + 0.5 * v2_perps[i]), edpps[i])
-    abs_edpps = ad.diagnostic.gradient_norms(state, grads=edpps)
+    abs_edpps = ad.diagnostic.gradient_norms(
+        groups=state.groups,
+        group_sizes=state.group_sizes,
+        alpha=state.alpha,
+        penalty=state.penalty,
+        lmdas=lmdas[:-1],
+        betas=betas[:-1],
+        grads=edpps,
+    )
     is_edpp = (
         abs_edpps >= (penalty[None] - 0.5 * v2_perp_norms[:, None] * X_group_norms[None])
     )
