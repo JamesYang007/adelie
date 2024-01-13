@@ -88,6 +88,11 @@ void glm_base(py::module_& m, const char* name)
             \end{align*}
 
         We define :math:`D(\eta)` as the *deviance*.
+        For multidimensional data :math:`y \in \mathbb{R}^n`,
+        we assume each :math:`y_i` is a sample from the same exponential family.
+        It is useful to define :math:`\underline{A}(\eta) \in \mathbb{R}^n`
+        where :math:`\eta \in \mathbb{R}^n` and :math:`\underline{A}(\eta)_i = A(\eta_i)`.
+
         The purpose of a GLM class is to define methods that evaluate key quantities regarding this model
         that are required for solving the group lasso problem.
 

@@ -27,7 +27,7 @@ def _sample_y(
     return y
 
 
-def create_dense(
+def dense(
     n: int, 
     p: int, 
     G: int,
@@ -166,7 +166,7 @@ def create_dense(
     }
 
 
-def create_snp_unphased(
+def snp_unphased(
     n: int, 
     p: int, 
     *,
@@ -297,7 +297,7 @@ def create_snp_unphased(
     }
 
 
-def create_snp_phased_ancestry(
+def snp_phased_ancestry(
     n: int, 
     s: int, 
     A: int,

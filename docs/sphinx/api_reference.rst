@@ -32,9 +32,9 @@ adelie.data
     :toctree: generated/
 
 
-    create_dense
-    create_snp_phased_ancestry
-    create_snp_unphased
+    dense
+    snp_phased_ancestry
+    snp_unphased
 
 
 adelie.diagnostic
@@ -48,8 +48,8 @@ adelie.diagnostic
     :toctree: generated/
 
 
-    Diagnostic
     coefficient
+    diagnostic
     gradients
     gradient_norms
     gradient_scores
@@ -58,6 +58,7 @@ adelie.diagnostic
     plot_devs
     plot_kkt
     plot_set_sizes
+    predict
     residuals
 
 
@@ -120,7 +121,6 @@ adelie.state
     :toctree: generated/
 
 
-    deduce_states
     gaussian_naive
     gaussian_pin_cov
     gaussian_pin_naive

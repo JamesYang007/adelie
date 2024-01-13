@@ -507,7 +507,7 @@ def test_solve_gaussian():
 def test_solve_gaussian_concatenate():
     def _test(n, ps, G, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=7):
         test_datas = [
-            ad.data.create_dense(n, p, G, sparsity=sparsity, seed=seed)
+            ad.data.dense(n, p, G, sparsity=sparsity, seed=seed)
             for p in ps
         ]
         Xs = [
@@ -611,7 +611,7 @@ def test_solve_gaussian_concatenate():
 
 def test_solve_gaussian_snp_unphased():
     def _test(n, p, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=7):
-        test_data = ad.data.create_snp_unphased(
+        test_data = ad.data.snp_unphased(
             n, 
             p, 
             sparsity=sparsity, 
@@ -679,7 +679,7 @@ def test_solve_gaussian_snp_unphased():
 
 def test_solve_gaussian_snp_phased_ancestry():
     def _test(n, p, A=8, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=7):
-        test_data = ad.data.create_snp_phased_ancestry(
+        test_data = ad.data.snp_phased_ancestry(
             n, 
             p, 
             A,

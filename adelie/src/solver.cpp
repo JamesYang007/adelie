@@ -106,6 +106,8 @@ py::dict solve_gaussian_naive(
     bool display_progress_bar
 )
 {
+    using sw_t = ad::util::Stopwatch;
+
     const auto update_coefficients_f = [](
         const auto& L,
         const auto& v,
@@ -134,6 +136,8 @@ py::dict solve_gaussian_naive(
     // this is to redirect std::cerr to sys.stderr in Python.
     // https://pybind11.readthedocs.io/en/stable/advanced/pycpp/utilities.html?highlight=cout#capturing-standard-output-from-ostream
     py::scoped_estream_redirect _estream;
+    sw_t sw;
+    sw.start();
     try {
         ad::solver::gaussian::naive::solve(
             state, display_progress_bar, 
@@ -142,8 +146,9 @@ py::dict solve_gaussian_naive(
     } catch(const std::exception& e) {
         error = e.what(); 
     }
+    double total_time = sw.elapsed();
 
-    return py::dict("state"_a=state, "error"_a=error);
+    return py::dict("state"_a=state, "error"_a=error, "total_time"_a=total_time);
 } 
 
 // =================================================================
@@ -156,6 +161,8 @@ py::dict solve_glm_naive(
     bool display_progress_bar
 )
 {
+    using sw_t = ad::util::Stopwatch;
+
     const auto update_coefficients_f = [](
         const auto& L,
         const auto& v,
@@ -184,6 +191,8 @@ py::dict solve_glm_naive(
     // this is to redirect std::cerr to sys.stderr in Python.
     // https://pybind11.readthedocs.io/en/stable/advanced/pycpp/utilities.html?highlight=cout#capturing-standard-output-from-ostream
     py::scoped_estream_redirect _estream;
+    sw_t sw;
+    sw.start();
     try {
         ad::solver::glm::naive::solve(
             state, display_progress_bar, 
@@ -193,7 +202,8 @@ py::dict solve_glm_naive(
         error = e.what(); 
     }
 
-    return py::dict("state"_a=state, "error"_a=error);
+    double total_time = sw.elapsed();
+    return py::dict("state"_a=state, "error"_a=error, "total_time"_a=total_time);
 } 
 
 template <class T> 
