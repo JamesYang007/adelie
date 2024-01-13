@@ -15,7 +15,7 @@ struct StateGlmBase
     using value_t = typename glm_t::value_t;
     using index_t = IndexType;
     using bool_t = BoolType;
-    using safe_bool_t = int;
+    using safe_bool_t = int8_t;
     using uset_index_t = std::unordered_set<index_t>;
     using vec_value_t = util::rowvec_type<value_t>;
     using vec_index_t = util::rowvec_type<index_t>;
@@ -94,7 +94,8 @@ struct StateGlmBase
 
     // diagnostics
     std::vector<double> benchmark_screen;
-    std::vector<double> benchmark_fit;
+    std::vector<double> benchmark_fit_screen;
+    std::vector<double> benchmark_fit_active;
     std::vector<double> benchmark_kkt;
     std::vector<double> benchmark_invariance;
     std::vector<int> n_valid_solutions;
@@ -199,7 +200,8 @@ struct StateGlmBase
         intercepts.reserve(n_lmdas);
         devs.reserve(n_lmdas);
         lmdas.reserve(n_lmdas);
-        benchmark_fit.reserve(n_lmdas);
+        benchmark_fit_screen.reserve(n_lmdas);
+        benchmark_fit_active.reserve(n_lmdas);
         benchmark_kkt.reserve(n_lmdas);
         benchmark_screen.reserve(n_lmdas);
         benchmark_invariance.reserve(n_lmdas);

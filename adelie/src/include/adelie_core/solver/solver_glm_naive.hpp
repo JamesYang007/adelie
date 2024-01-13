@@ -16,7 +16,7 @@ template <class ValueType>
 struct GlmNaiveBufferPack
 {
     using value_t = ValueType;
-    using safe_bool_t = int;
+    using safe_bool_t = int8_t;
     using vec_value_t = util::rowvec_type<value_t>;
     using dyn_vec_value_t = std::vector<value_t>;
     using dyn_vec_bool_t = std::vector<safe_bool_t>;
@@ -173,7 +173,10 @@ auto fit(
         screen_is_active.swap(screen_is_active_prev);
     };
 
+    value_t screen_time = 0;
+    value_t active_time = 0;
     size_t irls_it = 0;
+
     while (1) {
         if (irls_it >= irls_max_iters) {
             throw std::runtime_error("Maximum IRLS iterations reached.");
@@ -183,7 +186,7 @@ auto fit(
 
         /* compute rest of quadratic approximation quantities */
         // TODO: parallelize?
-        glm.hessian(eta, var);
+        glm.hessian(mu, var);
         weights = weights0 * var;
         const auto weights_sum = weights.sum();
         weights /= weights_sum;
@@ -213,7 +216,7 @@ auto fit(
                 X_means[g+j] = X.cmul(g+j, weights);
             }
         }
-        // this call should effectively only adjust the size of screen_* quantities
+        // this call should only adjust the size of screen_* quantities
         // and repopulate every entry using the new weights.
         state::glm::naive::update_screen_derived(
             state,
@@ -264,6 +267,16 @@ auto fit(
             throw;
         }
 
+        // update benchmark times
+        screen_time += Eigen::Map<const util::rowvec_type<double>>(
+            state_gaussian_pin_naive.benchmark_screen.data(),
+            state_gaussian_pin_naive.benchmark_screen.size()
+        ).sum();
+        active_time += Eigen::Map<const util::rowvec_type<double>>(
+            state_gaussian_pin_naive.benchmark_active.data(),
+            state_gaussian_pin_naive.benchmark_active.size()
+        ).sum();
+
         // update beta0
         beta0 = state_gaussian_pin_naive.intercepts[0];
 
@@ -290,7 +303,11 @@ auto fit(
 
         /* check convergence */
         if ((weights * (mu - mu_prev).square()).sum() <= irls_tol) {
-            return state_gaussian_pin_naive;
+            return std::make_tuple(
+                std::move(state_gaussian_pin_naive),
+                screen_time,
+                active_time
+            );
         }
 
         ++irls_it;
@@ -379,10 +396,11 @@ inline void solve(
     auto& lmda_path = state.lmda_path;
     auto& grad = state.grad;
     auto& lmda = state.lmda;
-    //auto& benchmark_screen = state.benchmark_screen;
-    //auto& benchmark_fit = state.benchmark_fit;
-    //auto& benchmark_kkt = state.benchmark_kkt;
-    //auto& benchmark_invariance = state.benchmark_invariance;
+    auto& benchmark_screen = state.benchmark_screen;
+    auto& benchmark_fit_screen = state.benchmark_fit_screen;
+    auto& benchmark_fit_active = state.benchmark_fit_active;
+    auto& benchmark_kkt = state.benchmark_kkt;
+    auto& benchmark_invariance = state.benchmark_invariance;
     auto& n_valid_solutions = state.n_valid_solutions;
     auto& active_sizes = state.active_sizes;
     auto& screen_sizes = state.screen_sizes;
@@ -467,13 +485,14 @@ inline void solve(
         large_lmda_path[large_lmda_path_size] = lmda_max;
 
         for (int i = 0; i < large_lmda_path.size(); ++i) {
-            auto&& state_gaussian_pin_naive = fit(
+            auto tup = fit(
                 state, 
                 buffer_pack,
                 large_lmda_path[i], 
                 update_coefficients_f, 
                 check_user_interrupt
             );
+            auto&& state_gaussian_pin_naive = std::get<0>(tup);
 
             /* Invariance */
             // save only the solutions that the user asked for (up to and not including lmda_max)
@@ -486,7 +505,7 @@ inline void solve(
                 );
             // otherwise, put the state at the last fitted lambda (lmda_max)
             } else {
-                lmda = large_lmda_path[large_lmda_path.size()-1];
+                lmda = large_lmda_path[i];
                 buffer_n = weights0 * (y0 - mu);
                 X.mul(buffer_n, grad);
                 state::gaussian::update_abs_grad(state, lmda);
@@ -547,7 +566,7 @@ inline void solve(
                 // ==================================================================================== 
                 // Screening step
                 // ==================================================================================== 
-                //sw.start();
+                sw.start();
                 gaussian::naive::screen(
                     state,
                     lmda_curr,
@@ -555,39 +574,40 @@ inline void solve(
                     n_new_active
                 );
                 state::gaussian::update_screen_derived_base(state);
-                //benchmark_screen.push_back(sw.elapsed());
+                benchmark_screen.push_back(sw.elapsed());
 
                 // ==================================================================================== 
                 // Fit step
                 // ==================================================================================== 
                 // Save all current valid quantities that will be modified in-place by fit.
                 // This is needed in case we exit with exception and need to restore invariance.
-                //sw.start();
-                auto&& state_gaussian_pin_naive = fit(
+                auto tup = fit(
                     state,
                     buffer_pack,
                     lmda_curr,
                     update_coefficients_f,
                     check_user_interrupt
                 );
-                //benchmark_fit.push_back(sw.elapsed());
+                auto&& state_gaussian_pin_naive = std::get<0>(tup);
+                benchmark_fit_screen.push_back(std::get<1>(tup));
+                benchmark_fit_active.push_back(std::get<2>(tup));
 
                 // ==================================================================================== 
                 // KKT step
                 // ==================================================================================== 
-                //sw.start();
+                sw.start();
                 kkt_passed = kkt(
                     state,
                     buffer_pack,
                     lmda_curr
                 );
-                //benchmark_kkt.push_back(sw.elapsed());
+                benchmark_kkt.push_back(sw.elapsed());
                 n_valid_solutions.push_back(kkt_passed);
 
                 // ==================================================================================== 
                 // Invariance step
                 // ==================================================================================== 
-                //sw.start();
+                sw.start();
                 lmda_path_idx += kkt_passed;
                 lmda = lmda_curr;
                 if (kkt_passed) {
@@ -598,7 +618,7 @@ inline void solve(
                         lmda_curr
                     );
                 }
-                //benchmark_invariance.push_back(sw.elapsed());
+                benchmark_invariance.push_back(sw.elapsed());
 
                 // ==================================================================================== 
                 // Diagnostic step

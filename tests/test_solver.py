@@ -1,5 +1,5 @@
 from adelie.solver import (
-    gaussian_naive_objective,
+    objective,
     solve_gaussian_pin,
     solve_gaussian,
 )
@@ -139,10 +139,10 @@ def run_solve_gaussian_pin(state, X, y, weights):
     is_beta_close = np.allclose(betas, cvxpy_betas, atol=1e-6)
     if not is_beta_close:
         my_objs = np.array([
-            gaussian_naive_objective(
-                beta0,
-                beta,
-                X=X,
+            objective(
+                beta0=beta0,
+                beta=beta,
+                X=ad.matrix.dense(X),
                 y=y,
                 groups=state.groups,
                 group_sizes=state.group_sizes,
@@ -154,10 +154,10 @@ def run_solve_gaussian_pin(state, X, y, weights):
             for beta0, beta, lmda in zip(beta0s, betas, lmdas)
         ])
         cvxpy_objs = np.array([
-            gaussian_naive_objective(
-                beta0,
-                beta,
-                X=X,
+            objective(
+                beta0=beta0,
+                beta=beta,
+                X=ad.matrix.dense(X),
                 y=y,
                 groups=state.groups,
                 group_sizes=state.group_sizes,
@@ -268,6 +268,7 @@ def test_solve_gaussian_pin_cov():
             grad[g:g+gs]
             for g, gs in zip(groups[screen_set], group_sizes[screen_set])
         ])
+        y_var = np.sum(y ** 2)
 
         # list of different types of cov matrices to test
         As = [
@@ -278,6 +279,7 @@ def test_solve_gaussian_pin_cov():
         for Apy in As:
             state = ad.state.gaussian_pin_cov(
                 A=Apy,
+                y_var=y_var,
                 groups=groups,
                 alpha=alpha,
                 penalty=penalty,
@@ -292,6 +294,7 @@ def test_solve_gaussian_pin_cov():
             state = run_solve_gaussian_pin(state, X, y, weights)
             state = ad.state.gaussian_pin_cov(
                 A=Apy,
+                y_var=y_var,
                 groups=groups,
                 alpha=alpha,
                 penalty=penalty,
@@ -419,10 +422,10 @@ def run_solve_gaussian(state, X, y):
     is_beta_close = np.allclose(betas, cvxpy_betas, atol=1e-6)
     if not is_beta_close:
         my_objs = np.array([
-            gaussian_naive_objective(
-                beta0,
-                beta,
-                X=X,
+            objective(
+                beta0=beta0,
+                beta=beta,
+                X=ad.matrix.dense(X),
                 y=y,
                 groups=state.groups,
                 group_sizes=state.group_sizes,
@@ -434,10 +437,10 @@ def run_solve_gaussian(state, X, y):
             for beta0, beta, lmda in zip(beta0s, betas, lmdas)
         ])
         cvxpy_objs = np.array([
-            gaussian_naive_objective(
-                beta0,
-                beta,
-                X=X,
+            objective(
+                beta0=beta0,
+                beta=beta,
+                X=ad.matrix.dense(X),
                 y=y,
                 groups=state.groups,
                 group_sizes=state.group_sizes,

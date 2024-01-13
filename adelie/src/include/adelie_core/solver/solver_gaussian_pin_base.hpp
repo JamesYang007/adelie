@@ -13,7 +13,7 @@ namespace pin {
  * This class is purely for convenience purposes.
  */
 template <class ValueType>
-struct SolveGaussianPinBufferPack 
+struct GaussianPinBufferPack 
 {
     using value_t = ValueType;
     
@@ -22,16 +22,16 @@ struct SolveGaussianPinBufferPack
     util::rowvec_type<value_t> buffer3;
     util::rowvec_type<value_t> buffer4;
 
-    explicit SolveGaussianPinBufferPack(
+    explicit GaussianPinBufferPack(
         size_t buffer_size,
         size_t n
     ): 
-        SolveGaussianPinBufferPack(
+        GaussianPinBufferPack(
             buffer_size, buffer_size, buffer_size, n
         ) 
     {}
 
-    explicit SolveGaussianPinBufferPack(
+    explicit GaussianPinBufferPack(
             size_t buffer1_size, 
             size_t buffer2_size,
             size_t buffer3_size,

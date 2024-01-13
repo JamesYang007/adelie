@@ -8,8 +8,7 @@ namespace adelie_core {
 namespace matrix {
 
 template <class DenseType>
-class MatrixCovLazy: 
-    public MatrixCovBase<typename std::decay_t<DenseType>::Scalar>
+class MatrixCovLazy: public MatrixCovBase<typename std::decay_t<DenseType>::Scalar>
 {
 public: 
     using base_t = MatrixCovBase<typename std::decay_t<DenseType>::Scalar>;

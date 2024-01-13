@@ -144,6 +144,7 @@ void coordinate_descent(
         );
         gk_transformed -= A_kk * ak_old_transformed; 
 
+        // TODO: just change to == 0?
         if ((ak_old_transformed - ak_transformed).matrix().norm() <= 1e-12 * std::sqrt(gsize)) continue;
         
         auto del_transformed = buffer1.head(ak.size());
@@ -318,15 +319,17 @@ inline void solve(
     using sw_t = util::Stopwatch;
 
     auto& A = *state.A;
+    const auto y_var = state.y_var;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto& screen_set = state.screen_set;
     const auto& screen_g1 = state.screen_g1;
     const auto& screen_g2 = state.screen_g2;
     const auto& screen_beta = state.screen_beta;
-    const auto& screen_grad = state.screen_grad;
     const auto& lmda_path = state.lmda_path;
     const auto tol = state.tol;
+    const auto adev_tol = state.adev_tol;
+    const auto ddev_tol = state.ddev_tol;
     const auto max_iters = state.max_iters;
     auto& active_set = state.active_set;
     auto& active_g1 = state.active_g1;
@@ -338,9 +341,6 @@ inline void solve(
     auto& intercepts = state.intercepts;
     auto& rsqs = state.rsqs;
     auto& lmdas = state.lmdas;
-    auto& screen_is_actives = state.screen_is_actives;
-    auto& screen_betas = state.screen_betas;
-    auto& screen_grads = state.screen_grads;
     auto& rsq = state.rsq;
     auto& iters = state.iters;
     auto& benchmark_screen = state.benchmark_screen;
@@ -351,7 +351,7 @@ inline void solve(
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
-    SolveGaussianPinBufferPack<value_t> buffer_pack(
+    GaussianPinBufferPack<value_t> buffer_pack(
         max_group_size, 
         3 * max_group_size
     );
@@ -496,16 +496,14 @@ inline void solve(
         intercepts.emplace_back(0);
         rsqs.emplace_back(rsq);
         lmdas.emplace_back(lmda_path[l]);
-        screen_is_actives.emplace_back(screen_is_active);
-        screen_betas.emplace_back(screen_beta);
-        screen_grads.emplace_back(screen_grad);
         benchmark_screen.emplace_back(screen_time);
         benchmark_active.emplace_back(active_time);
 
-        // make sure to do at least 3 lambdas.
-        if (l < 2) continue;
-
-        // TODO: early stop if R^2 criterion is fulfilled.
+        // if y variance is provided, do early stopping rule
+        if (y_var != -1) {
+            if (rsq >= adev_tol * y_var) break;
+            if ((l >= 1) && (rsqs[l]-rsqs[l-1] <= ddev_tol * y_var)) break;
+        }
     }
 }
 

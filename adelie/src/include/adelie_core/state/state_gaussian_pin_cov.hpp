@@ -9,7 +9,7 @@ template <class MatrixType,
           class IndexType=Eigen::Index,
           class BoolType=bool
         >
-struct StateGaussianPinCov : StateGaussianPinBase<
+struct StateGaussianPinCov: StateGaussianPinBase<
         ValueType,
         IndexType,
         BoolType
@@ -39,14 +39,15 @@ struct StateGaussianPinCov : StateGaussianPinBase<
     using matrix_t = MatrixType;
 
     /* Static states */
+    const value_t y_var;
 
     /* Dynamic states */
     matrix_t* A;    // covariance matrix-like
     map_vec_value_t screen_grad;
-    dyn_vec_vec_value_t screen_grads;
 
     explicit StateGaussianPinCov(
         matrix_t& A,
+        value_t y_var,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
@@ -60,6 +61,8 @@ struct StateGaussianPinCov : StateGaussianPinBase<
         const Eigen::Ref<const vec_value_t>& lmda_path, 
         size_t max_iters,
         value_t tol,
+        value_t adev_tol,
+        value_t ddev_tol,
         value_t newton_tol,
         size_t newton_max_iters,
         size_t n_threads,
@@ -71,14 +74,13 @@ struct StateGaussianPinCov : StateGaussianPinBase<
         base_t(
             groups, group_sizes, alpha, penalty, 
             screen_set, screen_g1, screen_g2, screen_begins, screen_vars, screen_transforms, lmda_path, 
-            false, max_iters, tol, newton_tol, newton_max_iters, n_threads,
+            false, max_iters, tol, adev_tol, ddev_tol, newton_tol, newton_max_iters, n_threads,
             rsq, screen_beta, screen_is_active
         ),
+        y_var(y_var),
         A(&A),
         screen_grad(screen_grad.data(), screen_grad.size())
-    {
-        screen_grads.reserve(lmda_path.size());
-    }
+    {}
 };
 
 } // namespace state

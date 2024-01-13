@@ -17,27 +17,6 @@ namespace ad = adelie_core;
 using namespace pybind11::literals; // to bring in the `_a` literal
 
 // =================================================================
-// Helper functions
-// =================================================================
-double gaussian_naive_objective(
-    double beta0,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& beta,
-    const Eigen::Ref<const ad::util::rowmat_type<double>>& X,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& y,
-    const Eigen::Ref<const ad::util::rowvec_type<int>>& groups,
-    const Eigen::Ref<const ad::util::rowvec_type<int>>& group_sizes,
-    double lmda,
-    double alpha,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& penalty,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& weights
-)
-{
-    return ad::solver::gaussian::naive::objective(
-        beta0, beta, X, y, groups, group_sizes, lmda, alpha, penalty, weights
-    );
-}
-
-// =================================================================
 // Solve Pinned Method
 // =================================================================
 
@@ -231,9 +210,6 @@ using state_glm_naive_t = ad::state::StateGlmNaive<
 
 void register_solver(py::module_& m)
 {
-    /* helpers */
-    m.def("gaussian_naive_objective", &gaussian_naive_objective);
-
     /* solve pinned method */
     m.def("solve_gaussian_pin_naive_64", &solve_gaussian_pin_naive<state_gaussian_pin_naive_t<double>>);
     m.def("solve_gaussian_pin_naive_32", &solve_gaussian_pin_naive<state_gaussian_pin_naive_t<float>>);
