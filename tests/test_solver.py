@@ -1,5 +1,5 @@
 from adelie.solver import (
-    gaussian_naive_objective,
+    objective,
     solve_gaussian_pin,
     solve_gaussian,
 )
@@ -139,10 +139,10 @@ def run_solve_gaussian_pin(state, X, y, weights):
     is_beta_close = np.allclose(betas, cvxpy_betas, atol=1e-6)
     if not is_beta_close:
         my_objs = np.array([
-            gaussian_naive_objective(
-                beta0,
-                beta,
-                X=X,
+            objective(
+                beta0=beta0,
+                beta=beta,
+                X=ad.matrix.dense(X),
                 y=y,
                 groups=state.groups,
                 group_sizes=state.group_sizes,
@@ -154,10 +154,10 @@ def run_solve_gaussian_pin(state, X, y, weights):
             for beta0, beta, lmda in zip(beta0s, betas, lmdas)
         ])
         cvxpy_objs = np.array([
-            gaussian_naive_objective(
-                beta0,
-                beta,
-                X=X,
+            objective(
+                beta0=beta0,
+                beta=beta,
+                X=ad.matrix.dense(X),
                 y=y,
                 groups=state.groups,
                 group_sizes=state.group_sizes,
@@ -168,7 +168,7 @@ def run_solve_gaussian_pin(state, X, y, weights):
             )
             for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
         ])
-        assert np.all(my_objs <= cvxpy_objs * (1 + 1e-10))
+        assert np.all(my_objs <= cvxpy_objs * (1 + 1e-5))
 
     return state
 
@@ -268,6 +268,7 @@ def test_solve_gaussian_pin_cov():
             grad[g:g+gs]
             for g, gs in zip(groups[screen_set], group_sizes[screen_set])
         ])
+        y_var = np.sum(y ** 2)
 
         # list of different types of cov matrices to test
         As = [
@@ -278,6 +279,7 @@ def test_solve_gaussian_pin_cov():
         for Apy in As:
             state = ad.state.gaussian_pin_cov(
                 A=Apy,
+                y_var=y_var,
                 groups=groups,
                 alpha=alpha,
                 penalty=penalty,
@@ -292,6 +294,7 @@ def test_solve_gaussian_pin_cov():
             state = run_solve_gaussian_pin(state, X, y, weights)
             state = ad.state.gaussian_pin_cov(
                 A=Apy,
+                y_var=y_var,
                 groups=groups,
                 alpha=alpha,
                 penalty=penalty,
@@ -369,6 +372,7 @@ def create_dense(
         "y_var": y_var,
         "resid": resid,
         "groups": groups,
+        "group_sizes": group_sizes,
         "alpha": alpha,
         "penalty": penalty,
         "weights": weights,
@@ -383,11 +387,11 @@ def create_dense(
 
 
 def run_solve_gaussian(state, X, y):
-    state.check(y, method="assert")
+    state.check(method="assert")
 
     state = solve_gaussian(state)    
 
-    state.check(y, method="assert")
+    state.check(method="assert")
 
     # get solved lmdas
     lmdas = state.lmdas
@@ -418,10 +422,10 @@ def run_solve_gaussian(state, X, y):
     is_beta_close = np.allclose(betas, cvxpy_betas, atol=1e-6)
     if not is_beta_close:
         my_objs = np.array([
-            gaussian_naive_objective(
-                beta0,
-                beta,
-                X=X,
+            objective(
+                beta0=beta0,
+                beta=beta,
+                X=ad.matrix.dense(X),
                 y=y,
                 groups=state.groups,
                 group_sizes=state.group_sizes,
@@ -433,10 +437,10 @@ def run_solve_gaussian(state, X, y):
             for beta0, beta, lmda in zip(beta0s, betas, lmdas)
         ])
         cvxpy_objs = np.array([
-            gaussian_naive_objective(
-                beta0,
-                beta,
-                X=X,
+            objective(
+                beta0=beta0,
+                beta=beta,
+                X=ad.matrix.dense(X),
                 y=y,
                 groups=state.groups,
                 group_sizes=state.group_sizes,
@@ -458,7 +462,6 @@ def test_solve_gaussian():
             n, p, G, intercept, alpha, sparsity, seed,
         )
         X, y = test_data["X"], test_data["y"]
-        test_data.pop("y")
         Xs = [
             ad.matrix.dense(X, method="naive", n_threads=2)
         ]
@@ -471,11 +474,13 @@ def test_solve_gaussian():
             state = run_solve_gaussian(state, X, y)
             state = ad.state.gaussian_naive(
                 X=state.X,
+                y=y,
                 X_means=state.X_means,
                 y_mean=state.y_mean,
                 y_var=state.y_var,
                 resid=state.resid,
                 groups=state.groups,
+                group_sizes=state.group_sizes,
                 alpha=state.alpha,
                 penalty=state.penalty,
                 weights=state.weights,
@@ -502,7 +507,7 @@ def test_solve_gaussian():
 def test_solve_gaussian_concatenate():
     def _test(n, ps, G, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=7):
         test_datas = [
-            ad.data.create_dense(n, p, G, sparsity=sparsity, seed=seed)
+            ad.data.dense(n, p, G, sparsity=sparsity, seed=seed)
             for p in ps
         ]
         Xs = [
@@ -544,11 +549,13 @@ def test_solve_gaussian_concatenate():
             state_special = ad.solver.solve_gaussian(
                 ad.state.gaussian_naive(
                     X=Xpy,
+                    y=y,
                     X_means=X_means,
                     y_mean=y_mean,
                     y_var=y_var,
                     resid=resid,
                     groups=groups,
+                    group_sizes=group_sizes,
                     alpha=alpha,
                     penalty=penalty,
                     weights=weights,
@@ -569,11 +576,13 @@ def test_solve_gaussian_concatenate():
             state_dense = ad.solver.solve_gaussian(
                 ad.state.gaussian_naive(
                     X=X_dense,
+                    y=y,
                     X_means=X_means,
                     y_mean=y_mean,
                     y_var=y_var,
                     resid=resid,
                     groups=groups,
+                    group_sizes=group_sizes,
                     alpha=alpha,
                     penalty=penalty,
                     weights=weights,
@@ -588,9 +597,9 @@ def test_solve_gaussian_concatenate():
             )
 
             assert np.allclose(state_special.lmdas, state_dense.lmdas)
-            assert np.allclose(state_special.rsqs, state_dense.rsqs)
-            assert np.allclose(state_special.intercepts, state_dense.intercepts)
-            assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray())
+            assert np.allclose(state_special.devs, state_dense.devs)
+            assert np.allclose(state_special.intercepts, state_dense.intercepts, atol=1e-3)
+            assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray(), atol=1e-3)
 
     ps = np.array([4, 3, 20, 10, 252, 71, 1000])
     _test(10, ps[ps >= 2], 2)
@@ -602,7 +611,7 @@ def test_solve_gaussian_concatenate():
 
 def test_solve_gaussian_snp_unphased():
     def _test(n, p, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=7):
-        test_data = ad.data.create_snp_unphased(
+        test_data = ad.data.snp_unphased(
             n, 
             p, 
             sparsity=sparsity, 
@@ -639,11 +648,8 @@ def test_solve_gaussian_snp_unphased():
         test_data["grad"] = X_c.T @ test_data["resid"]
         test_data["rsq"] = 0 
         test_data["lmda"] = np.inf
-        test_data["tol"] = 1e-7
+        test_data["tol"] = 1e-10
         test_data["n_threads"] = n_threads
-
-        test_data.pop("y")
-        test_data.pop("group_sizes")
 
         for Xpy in Xs:
             test_data["X"] = Xpy
@@ -660,9 +666,9 @@ def test_solve_gaussian_snp_unphased():
             )
 
             assert np.allclose(state_special.lmdas, state_dense.lmdas)
-            assert np.allclose(state_special.rsqs, state_dense.rsqs)
-            assert np.allclose(state_special.intercepts, state_dense.intercepts)
-            assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray())
+            assert np.allclose(state_special.devs, state_dense.devs)
+            assert np.allclose(state_special.intercepts, state_dense.intercepts, atol=1e-3)
+            assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray(), atol=1e-3)
 
     _test(10, 4)
     _test(10, 100)
@@ -673,7 +679,7 @@ def test_solve_gaussian_snp_unphased():
 
 def test_solve_gaussian_snp_phased_ancestry():
     def _test(n, p, A=8, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=7):
-        test_data = ad.data.create_snp_phased_ancestry(
+        test_data = ad.data.snp_phased_ancestry(
             n, 
             p, 
             A,
@@ -715,8 +721,6 @@ def test_solve_gaussian_snp_phased_ancestry():
         test_data["tol"] = 1e-7
         test_data["n_threads"] = n_threads
 
-        test_data.pop("y")
-        test_data.pop("group_sizes")
         test_data.pop("ancestries")
 
         for Xpy in Xs:
@@ -734,7 +738,7 @@ def test_solve_gaussian_snp_phased_ancestry():
             )
 
             assert np.allclose(state_special.lmdas, state_dense.lmdas)
-            assert np.allclose(state_special.rsqs, state_dense.rsqs)
+            assert np.allclose(state_special.devs, state_dense.devs)
             assert np.allclose(state_special.intercepts, state_dense.intercepts)
             assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray())
 

@@ -18,7 +18,7 @@ def _to_dtype(mat):
 def concatenate(
     mats: list,
     *,
-    method: str,
+    method: str ="naive",
     n_threads: int =1,
 ):
     """Creates a column-wise concatenation of the matrices.
@@ -27,11 +27,12 @@ def concatenate(
     ----------
     mats : list
         List of matrices to concatenate along the columns.
-    method : str
+    method : str, optional
         Method type. It must be one of the following:
 
             - ``"naive"``: naive method.
 
+        Default is ``"naive"``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -40,12 +41,15 @@ def concatenate(
     -------
     wrap
         Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.matrix.MatrixNaiveBase64
     """
     if n_threads < 1:
         raise ValueError("Number of threads must be >= 1.")
     if len(mats) == 0:
         raise ValueError("mats must be non-empty.")
-    
     
     dtype = _to_dtype(mats[0])
 
@@ -60,6 +64,7 @@ def concatenate(
 
     dispatcher = {
         "naive" : naive_dispatcher,
+        # TODO: add more?
     }
 
     core_base = dispatcher[method][dtype]
@@ -68,7 +73,7 @@ def concatenate(
         def __init__(
             self,
             mats: list,
-            n_threads: int =1,
+            n_threads: int,
         ):
             self.mats = mats
             core_base.__init__(self, self.mats, n_threads)
@@ -79,7 +84,7 @@ def concatenate(
 def dense(
     mat: np.ndarray,
     *,
-    method: str,
+    method: str ="naive",
     n_threads: int =1,
 ):
     """Creates a viewer of a dense matrix.
@@ -88,12 +93,13 @@ def dense(
     ----------
     mat : np.ndarray
         The matrix to view.
-    method : str
+    method : str, optional
         Method type. It must be one of the following:
 
             - ``"naive"``: naive method.
             - ``"cov"``: covariance method.
 
+        Default is ``"naive"``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -102,6 +108,11 @@ def dense(
     -------
     wrap
         Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.matrix.MatrixCovBase64
+    adelie.matrix.MatrixNaiveBase64
     """
     if n_threads < 1:
         raise ValueError("Number of threads must be >= 1.")
@@ -145,7 +156,7 @@ def dense(
         def __init__(
             self,
             mat: np.ndarray,
-            n_threads: int =1,
+            n_threads: int,
         ):
             self.mat = mat
             core_base.__init__(self, self.mat, n_threads)
@@ -183,6 +194,7 @@ def snp_unphased(
     See Also
     --------
     adelie.io.snp_unphased
+    adelie.matrix.MatrixNaiveBase64
     """
     if n_threads < 1:
         raise ValueError("Number of threads must be >= 1.")
@@ -234,6 +246,7 @@ def snp_phased_ancestry(
     See Also
     --------
     adelie.io.snp_phased_ancestry
+    adelie.matrix.MatrixNaiveBase64
     """
     if n_threads < 1:
         raise ValueError("Number of threads must be >= 1.")
@@ -277,6 +290,10 @@ def cov_lazy(
     -------
     wrap
         Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.matrix.MatrixCovBase64
     """
     if n_threads < 1:
         raise ValueError("Number of threads must be >= 1.")
@@ -304,7 +321,7 @@ def cov_lazy(
         def __init__(
             self,
             mat: np.ndarray,
-            n_threads: int =1,
+            n_threads: int,
         ):
             self.mat = mat
             core_base.__init__(self, self.mat, n_threads)

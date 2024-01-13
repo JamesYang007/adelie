@@ -9,8 +9,7 @@ namespace adelie_core {
 namespace matrix {
 
 template <class ValueType>
-class MatrixNaiveSNPPhasedAncestry : 
-    public MatrixNaiveBase<ValueType>
+class MatrixNaiveSNPPhasedAncestry: public MatrixNaiveBase<ValueType>
 {
 public:
     using base_t = MatrixNaiveBase<ValueType>;
@@ -360,7 +359,7 @@ public:
 
         const auto A = ancestries();
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int snp = 0; snp < _io.snps(); ++snp) {
+        for (uint32_t snp = 0; snp < _io.snps(); ++snp) {
             for (int hap = 0; hap < 2; ++hap) {
                 const auto inner = _io.inner(snp, hap);
                 const auto ancestry = _io.ancestry(snp, hap);

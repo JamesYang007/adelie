@@ -232,15 +232,12 @@ inline void solve(
     const auto& screen_beta = state.screen_beta;
     const auto& screen_X_means = state.screen_X_means;
     const auto& lmda_path = state.lmda_path;
-    const auto& resid = state.resid;
-    const auto& resid_sum = state.resid_sum;
     const auto& rsq = state.rsq;
     const auto intercept = state.intercept;
     const auto tol = state.tol;
     const auto max_iters = state.max_iters;
-    const auto rsq_tol = state.rsq_tol;
-    const auto rsq_slope_tol = state.rsq_slope_tol;
-    const auto rsq_curv_tol = state.rsq_curv_tol;
+    const auto adev_tol = state.adev_tol;
+    const auto ddev_tol = state.ddev_tol;
     auto& screen_is_active = state.screen_is_active;
     auto& active_set = state.active_set;
     auto& active_g1 = state.active_g1;
@@ -251,10 +248,6 @@ inline void solve(
     auto& intercepts = state.intercepts;
     auto& rsqs = state.rsqs;
     auto& lmdas = state.lmdas;
-    auto& resids = state.resids;
-    auto& resid_sums = state.resid_sums;
-    auto& screen_is_actives = state.screen_is_actives;
-    auto& screen_betas = state.screen_betas;
     auto& iters = state.iters;
     auto& benchmark_screen = state.benchmark_screen;
     auto& benchmark_active = state.benchmark_active;
@@ -265,7 +258,7 @@ inline void solve(
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
-    SolveGaussianPinBufferPack<value_t> buffer_pack(
+    GaussianPinBufferPack<value_t> buffer_pack(
         max_group_size, 
         std::max<size_t>(3 * max_group_size, n)
     );
@@ -405,24 +398,11 @@ inline void solve(
         }
         rsqs.emplace_back(rsq);
         lmdas.emplace_back(lmda_path[l]);
-        resids.emplace_back(resid);
-        resid_sums.emplace_back(resid_sum);
-        screen_is_actives.emplace_back(screen_is_active);
-        screen_betas.emplace_back(screen_beta);
         benchmark_screen.emplace_back(screen_time);
         benchmark_active.emplace_back(active_time);
 
-        if (rsq >= rsq_tol * y_var) break;
-
-        // early stop if R^2 criterion is fulfilled.
-        if ((l >= 2) && 
-            check_early_stop_rsq(
-                rsqs[l-2], 
-                rsqs[l-1], 
-                rsqs[l], 
-                rsq_slope_tol, 
-                rsq_curv_tol
-            )) break;
+        if (rsq >= adev_tol * y_var) break;
+        if ((l >= 1) && (rsqs[l]-rsqs[l-1] <= ddev_tol * y_var)) break;
     }
 }
 

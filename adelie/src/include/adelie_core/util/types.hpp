@@ -1,6 +1,7 @@
 #pragma once
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
+#include <string>
 
 namespace adelie_core {
 namespace util {
@@ -31,6 +32,15 @@ enum class screen_rule_type
     _strong,
     _pivot
 };
+
+inline util::screen_rule_type convert_screen_rule(
+    const std::string& rule
+)
+{
+    if (rule == "strong") return screen_rule_type::_strong;
+    if (rule == "pivot") return screen_rule_type::_pivot;
+    throw std::runtime_error("Invalid strong rule type: " + rule);
+}
 
 } // namespace util
 } // namespace adelie_core

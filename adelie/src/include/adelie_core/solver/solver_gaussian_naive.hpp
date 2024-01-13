@@ -1,6 +1,7 @@
 #pragma once
 #include <adelie_core/optimization/search_pivot.hpp>
 #include <adelie_core/solver/solver_gaussian_pin_naive.hpp>
+#include <adelie_core/solver/utils.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
 #include <adelie_core/util/algorithm.hpp>
@@ -12,66 +13,55 @@ namespace solver {
 namespace gaussian {
 namespace naive {
 
-template <class ValueType, class IndexType> 
-inline
-auto objective(
-    ValueType beta0, 
-    const Eigen::Ref<const util::rowvec_type<ValueType>>& beta,
-    const Eigen::Ref<const util::rowmat_type<ValueType>>& X,
-    const Eigen::Ref<const util::rowvec_type<ValueType>>& y,
-    const Eigen::Ref<const util::rowvec_type<IndexType>>& groups,
-    const Eigen::Ref<const util::rowvec_type<IndexType>>& group_sizes,
-    ValueType lmda,
-    ValueType alpha,
-    const Eigen::Ref<const util::rowvec_type<ValueType>>& penalty,
-    const Eigen::Ref<const util::rowvec_type<ValueType>>& weights
-)
+template <class ValueType>
+struct GaussianNaiveBufferPack
 {
-    ValueType p_ = 0.0;
-    for (int j = 0; j < groups.size(); ++j) {
-        const auto begin = groups[j];
-        const auto size = group_sizes[j];
-        const auto b_norm2 = beta.segment(begin, size).matrix().norm();
-        p_ += penalty[j] * b_norm2 * (
-            alpha + 0.5 * (1-alpha) * b_norm2
-        );
-    }
-    p_ *= lmda;
-    util::rowvec_type<ValueType> resid = (y.matrix() - beta.matrix() * X.transpose()).array() - beta0;
-    return 0.5 * (weights * resid.square()).sum() + p_;
-}
+    using value_t = ValueType;
+    using safe_bool_t = int8_t;
+    using vec_value_t = util::rowvec_type<value_t>;
+    using dyn_vec_value_t = std::vector<value_t>;
+    using dyn_vec_bool_t = std::vector<safe_bool_t>;
+
+    GaussianNaiveBufferPack(
+        size_t n
+    ):
+        resid_prev(n)
+    {}
+
+    vec_value_t resid_prev;
+    dyn_vec_value_t screen_beta_prev; 
+    dyn_vec_bool_t screen_is_active_prev;
+};
 
 template <class StateType, class StateGaussianPinType>
 ADELIE_CORE_STRONG_INLINE
 void update_solutions(
     StateType& state,
-    StateGaussianPinType& state_gaussian_pin_naive,
-    size_t n_sols
+    StateGaussianPinType& state_gaussian_pin_naive
 )
 {
     const auto y_var = state.y_var;
     auto& betas = state.betas;
-    auto& rsqs = state.rsqs;
+    auto& rsqs = state.devs;
     auto& lmdas = state.lmdas;
     auto& intercepts = state.intercepts;
 
-    for (size_t i = 0; i < n_sols; ++i) {
-        betas.emplace_back(std::move(state_gaussian_pin_naive.betas[i]));
-        intercepts.emplace_back(state_gaussian_pin_naive.intercepts[i]);
-        rsqs.emplace_back(state_gaussian_pin_naive.rsqs[i]);
-        lmdas.emplace_back(state_gaussian_pin_naive.lmdas[i]);
+    betas.emplace_back(std::move(state_gaussian_pin_naive.betas.back()));
+    intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
+    rsqs.emplace_back(state_gaussian_pin_naive.rsqs.back());
+    lmdas.emplace_back(state_gaussian_pin_naive.lmdas.back());
 
-        // normalize R^2 by null model
-        rsqs.back() /= y_var;
-    }
+    // normalize R^2 by null model
+    rsqs.back() /= y_var;
 }
 
 /**
- * Screens for new variables to include in the strong set
+ * Screens for new variables to include in the screen set
  * for fitting with lmda = lmda_next.
  * 
  * State MUST be a valid state satisfying its invariance.
- * The state after the function is finished is also a valid state.
+ * Note that only the screen set is modified!
+ * All derived strong quantities must be updated afterwards. 
  */
 template <class StateType, class ValueType>
 ADELIE_CORE_STRONG_INLINE 
@@ -162,7 +152,7 @@ void screen(
         // this case should rarely happen, but we arrived here because
         // previous iteration added all pivot-rule predictions and KKT still failed.
         // In this case, do the most safe thing, which is to add all failed variables.
-        if ((screen_set.size() == old_screen_set_size) && !all_kkt_passed) {
+        if ((screen_set.size() == static_cast<size_t>(old_screen_set_size)) && !all_kkt_passed) {
             for (int i = 0; i < abs_grad.size(); ++i) {
                 if (is_screen(i)) continue;
                 if (abs_grad[i] > lmda_next * penalty[i] * alpha) {
@@ -199,25 +189,24 @@ void screen(
         );
         throw util::max_basil_screen_set();
     }
-
-    /* update derived strong quantities */
-    state::gaussian::naive::update_screen_derived(state);
-
 }
 
 template <class StateType,
-          class LmdaPathType,
+          class BufferPackType,
+          class ValueType,
           class UpdateCoefficientsType,
           class CUIType=util::no_op>
 ADELIE_CORE_STRONG_INLINE
 auto fit(
     StateType& state,
-    const LmdaPathType& lmda_path,
+    BufferPackType& buffer_pack,
+    ValueType lmda,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
 {
     using state_t = std::decay_t<StateType>;
+    using value_t = typename state_t::value_t;
     using index_t = typename state_t::index_t;
     using safe_bool_t = typename state_t::safe_bool_t;
     using vec_value_t = typename state_t::vec_value_t;
@@ -249,17 +238,36 @@ auto fit(
     const auto intercept = state.intercept;
     const auto max_iters = state.max_iters;
     const auto tol = state.tol;
-    const auto rsq_tol = state.rsq_tol;
-    const auto rsq_slope_tol = state.rsq_slope_tol;
-    const auto rsq_curv_tol = state.rsq_curv_tol;
+    const auto adev_tol = state.adev_tol;
+    const auto ddev_tol = state.ddev_tol;
     const auto newton_tol = state.newton_tol;
     const auto newton_max_iters = state.newton_max_iters;
     const auto n_threads = state.n_threads;
-    const auto rsq = state.rsq;
-    const auto resid_sum = state.resid_sum;
+    auto& rsq = state.rsq;
+    auto& resid_sum = state.resid_sum;
     auto& resid = state.resid;
     auto& screen_beta = state.screen_beta;
     auto& screen_is_active = state.screen_is_active;
+
+    auto& resid_prev = buffer_pack.resid_prev;
+    auto& screen_beta_prev = buffer_pack.screen_beta_prev;
+    auto& screen_is_active_prev = buffer_pack.screen_is_active_prev;
+
+    util::rowvec_type<value_t, 1> lmda_path;
+    lmda_path = lmda;
+
+    const auto save_prev_valid = [&]() {
+        resid_prev = resid;
+        screen_beta_prev = screen_beta;
+        screen_is_active_prev = screen_is_active;
+    };
+    const auto load_prev_valid = [&]() {
+        resid.swap(resid_prev);
+        screen_beta.swap(screen_beta_prev);
+        screen_is_active.swap(screen_is_active_prev);
+    };
+
+    save_prev_valid();
 
     state_gaussian_pin_naive_t state_gaussian_pin_naive(
         X,
@@ -278,7 +286,7 @@ auto fit(
         Eigen::Map<const vec_value_t>(screen_X_means.data(), screen_X_means.size()), 
         screen_transforms,
         lmda_path,
-        intercept, max_iters, tol, rsq_tol, rsq_slope_tol, rsq_curv_tol, 
+        intercept, max_iters, tol, adev_tol, ddev_tol, 
         newton_tol, newton_max_iters, n_threads,
         rsq,
         Eigen::Map<vec_value_t>(resid.data(), resid.size()),
@@ -287,23 +295,44 @@ auto fit(
         Eigen::Map<vec_safe_bool_t>(screen_is_active.data(), screen_is_active.size())
     );
 
-    pin::naive::solve(
-        state_gaussian_pin_naive, 
-        update_coefficients_f, 
-        check_user_interrupt
-    );
+    try {
+        pin::naive::solve(
+            state_gaussian_pin_naive, 
+            update_coefficients_f, 
+            check_user_interrupt
+        );
+    } catch(...) {
+        load_prev_valid();
+        throw;
+    }
 
-    return state_gaussian_pin_naive;
+    resid_sum = state_gaussian_pin_naive.resid_sum;
+    rsq = state_gaussian_pin_naive.rsq;
+
+    const auto screen_time = Eigen::Map<const util::rowvec_type<double>>(
+        state_gaussian_pin_naive.benchmark_screen.data(),
+        state_gaussian_pin_naive.benchmark_screen.size()
+    ).sum();
+    const auto active_time = Eigen::Map<const util::rowvec_type<double>>(
+        state_gaussian_pin_naive.benchmark_active.data(),
+        state_gaussian_pin_naive.benchmark_active.size()
+    ).sum();
+
+    return std::make_tuple(
+        std::move(state_gaussian_pin_naive), 
+        screen_time, 
+        active_time
+    );
 }
 
 /**
- * Checks the KKT condition on the proposed solutions in state_gaussian_pin_naive.
+ * Checks the KKT condition on the proposed solution.
  */
-template <class StateType, class StateGaussianPinNaiveType>
+template <class StateType, class ValueType>
 ADELIE_CORE_STRONG_INLINE
 size_t kkt(
     StateType& state,
-    const StateGaussianPinNaiveType& state_gaussian_pin_naive
+    ValueType lmda
 )
 {
     const auto& X_means = state.X_means;
@@ -314,7 +343,8 @@ size_t kkt(
     const auto n_threads = state.n_threads;
     const auto& screen_hashset = state.screen_hashset;
     const auto& abs_grad = state.abs_grad;
-    const auto lmda = state_gaussian_pin_naive.lmdas[0];
+    const auto& resid = state.resid;
+    const auto resid_sum = state.resid_sum;
     auto& X = *state.X;
     auto& grad = state.grad;
 
@@ -323,13 +353,12 @@ size_t kkt(
     };
 
     // NOTE: no matter what, every gradient must be computed for pivot method.
-    X.mul(state_gaussian_pin_naive.resids[0], grad);
+    X.mul(resid, grad);
     if (intercept) {
-        matrix::dvsubi(grad, state_gaussian_pin_naive.resid_sums[0] * X_means, n_threads);
+        matrix::dvsubi(grad, resid_sum * X_means, n_threads);
     }
     state::gaussian::update_abs_grad(state, lmda);
 
-    // First, loop over non-strong set, compute gradients, and update n_valid_solutions.
     for (int k = 0; k < groups.size(); ++k) {
         if (is_screen(k)) continue;
         const auto pk = penalty[k];
@@ -360,32 +389,26 @@ inline void solve(
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
     const auto& screen_set = state.screen_set;
-    const auto& rsqs = state.rsqs;
+    const auto& rsqs = state.devs;
     const auto early_exit = state.early_exit;
     const auto max_screen_size = state.max_screen_size;
-    const auto rsq_tol = state.rsq_tol;
-    const auto rsq_slope_tol = state.rsq_slope_tol;
-    const auto rsq_curv_tol = state.rsq_curv_tol;
+    const auto adev_tol = state.adev_tol;
+    const auto ddev_tol = state.ddev_tol;
     const auto setup_lmda_max = state.setup_lmda_max;
     const auto setup_lmda_path = state.setup_lmda_path;
     const auto lmda_path_size = state.lmda_path_size;
     const auto min_ratio = state.min_ratio;
     const auto intercept = state.intercept;
     const auto n_threads = state.n_threads;
+    const auto& screen_is_active = state.screen_is_active;
     const auto& abs_grad = state.abs_grad;
+    const auto& resid = state.resid;
+    const auto resid_sum = state.resid_sum;
     auto& X = *state.X;
     auto& lmda_max = state.lmda_max;
     auto& lmda_path = state.lmda_path;
-    auto& screen_is_active = state.screen_is_active;
-    auto& screen_beta = state.screen_beta;
-    auto& resid = state.resid;
-    auto& resid_sum = state.resid_sum;
     auto& grad = state.grad;
-    auto& rsq = state.rsq;
     auto& lmda = state.lmda;
-    auto& resid_prev_valid = state.resid_prev_valid;
-    auto& screen_beta_prev_valid = state.screen_beta_prev_valid; 
-    auto& screen_is_active_prev_valid = state.screen_is_active_prev_valid;
     auto& benchmark_screen = state.benchmark_screen;
     auto& benchmark_fit_screen = state.benchmark_fit_screen;
     auto& benchmark_fit_active = state.benchmark_fit_active;
@@ -395,18 +418,10 @@ inline void solve(
     auto& active_sizes = state.active_sizes;
     auto& screen_sizes = state.screen_sizes;
 
-    if (screen_set.size() > max_screen_size) throw util::max_basil_screen_set();
+    const auto n = X.rows();
+    GaussianNaiveBufferPack<value_t> buffer_pack(n);
 
-    const auto save_prev_valid = [&]() {
-        resid_prev_valid = resid;
-        screen_beta_prev_valid = screen_beta;
-        screen_is_active_prev_valid = screen_is_active;
-    };
-    const auto load_prev_valid = [&]() {
-        resid.swap(resid_prev_valid);
-        screen_beta.swap(screen_beta_prev_valid);
-        screen_is_active.swap(screen_is_active_prev_valid);
-    };
+    if (screen_set.size() > max_screen_size) throw util::max_basil_screen_set();
 
     // ==================================================================================== 
     // Initial fit for lambda ~ infinity to setup lmda_max
@@ -416,39 +431,32 @@ inline void solve(
     // We solve for large lambda, then back-track the KKT condition to find the lambda
     // that leads to that solution where all penalized variables have 0 coefficient.
     if (setup_lmda_max) {
-        vec_value_t large_lmda_path(1);
-        large_lmda_path[0] = std::numeric_limits<value_t>::max();
-        try {
-            save_prev_valid();
-            auto&& state_gaussian_pin_naive = fit(
-                state,
-                large_lmda_path,
-                update_coefficients_f,
-                check_user_interrupt
-            );
+        const auto large_lmda = std::numeric_limits<value_t>::max();
 
-            /* Invariance */
-            resid_sum = state_gaussian_pin_naive.resid_sums.back();
-            rsq = state_gaussian_pin_naive.rsqs.back();
-            lmda = state_gaussian_pin_naive.lmdas.back();
-            X.mul(resid, grad);
-            if (intercept) {
-                matrix::dvsubi(grad, resid_sum * X_means, n_threads);
-            }
-            state::gaussian::update_abs_grad(state, lmda);
+        fit(
+            state,
+            buffer_pack,
+            large_lmda,
+            update_coefficients_f,
+            check_user_interrupt
+        );
 
-            /* Compute lmda_max */
-            const auto factor = (alpha <= 0) ? 1e-3 : alpha;
-            lmda_max = vec_value_t::NullaryExpr(
-                abs_grad.size(),
-                [&](auto i) { 
-                    return (penalty[i] <= 0.0) ? 0.0 : abs_grad[i] / penalty[i];
-                }
-            ).maxCoeff() / factor;
-        } catch (...) {
-            load_prev_valid();
-            throw;
+        /* Invariance */
+        lmda = large_lmda;
+        X.mul(resid, grad);
+        if (intercept) {
+            matrix::dvsubi(grad, resid_sum * X_means, n_threads);
         }
+        state::gaussian::update_abs_grad(state, lmda);
+
+        /* Compute lmda_max */
+        const auto factor = (alpha <= 0) ? 1e-3 : alpha;
+        lmda_max = vec_value_t::NullaryExpr(
+            abs_grad.size(),
+            [&](auto i) { 
+                return (penalty[i] <= 0.0) ? 0.0 : abs_grad[i] / penalty[i];
+            }
+        ).maxCoeff() / factor;
     }
 
     // ==================================================================================== 
@@ -459,13 +467,7 @@ inline void solve(
 
         lmda_path.resize(lmda_path_size);
 
-        if (lmda_path_size == 1) lmda_path[0] = lmda_max;
-
-        const auto log_factor = std::log(min_ratio) / (lmda_path_size - 1);
-        lmda_path = lmda_max * (log_factor * vec_value_t::LinSpaced(
-            lmda_path_size, 0, lmda_path_size-1
-        )).exp();
-        lmda_path[0] = lmda_max; // for numerical stability
+        generate_lmda_path(lmda_path, min_ratio, lmda_max);
     }
 
     // ==================================================================================== 
@@ -474,7 +476,8 @@ inline void solve(
     // Only unpenalized (l1) groups are active in this case by definition of lmda_max.
     // Since state is in its invariance (solution at state.lmda) and unpenalized groups
     // are ALWAYS active, state includes all unpenalized groups.
-    // If no lambda in lmda_path is > lmda_max, state is left unchanged.
+    // If no lambda in lmda_path is > lmda_max and setup at lmda_max is not required, 
+    // state is left unchanged.
     // Otherwise, it is in its invariance at lmda = lmda_max.
     // All solutions to lambda > lambda_max are saved.
 
@@ -485,8 +488,6 @@ inline void solve(
         [&](auto x) { return x <= lmda_max; }
     ) - lmda_path.data();
 
-    // if there is some large lambda or lmda_max setup is needed
-    // do the initial fit up to (and including) lmda_max.
     if (large_lmda_path_size || setup_lmda_max) {
         // create a lambda path containing only lmdas > lambda_max
         // and additionally lambda_max at the end.
@@ -495,44 +496,32 @@ inline void solve(
         large_lmda_path.head(large_lmda_path_size) = lmda_path.head(large_lmda_path_size);
         large_lmda_path[large_lmda_path_size] = lmda_max;
 
-        try {
-            save_prev_valid();
-            auto&& state_gaussian_pin_naive = fit(
+        for (int i = 0; i < large_lmda_path.size(); ++i) {
+            auto tup = fit(
                 state, 
-                large_lmda_path, 
+                buffer_pack,
+                large_lmda_path[i], 
                 update_coefficients_f, 
                 check_user_interrupt
             );
+            auto&& state_gaussian_pin_naive = std::get<0>(tup);
 
             /* Invariance */
-            // put the state at the last fitted lambda (should be lmda_max)
-            // but save only the solutions that the user asked for (up to and not including lmda_max).
-            resid.swap(state_gaussian_pin_naive.resids.back());
-            resid_sum = state_gaussian_pin_naive.resid_sums.back();
-            // TODO: implement swap
-            Eigen::Map<vec_value_t>(
-                screen_beta.data(),
-                screen_beta.size()
-            ) = state_gaussian_pin_naive.screen_betas.back();
-            Eigen::Map<vec_safe_bool_t>(
-                screen_is_active.data(), 
-                screen_is_active.size()
-            ) = state_gaussian_pin_naive.screen_is_actives.back();
-            rsq = state_gaussian_pin_naive.rsqs.back();
-            lmda = state_gaussian_pin_naive.lmdas.back();
-            X.mul(resid, grad);
-            if (intercept) {
-                matrix::dvsubi(grad, resid_sum * X_means, n_threads);
+            // save only the solutions that the user asked for (up to and not including lmda_max)
+            if (i < large_lmda_path.size()-1) {
+                update_solutions(
+                    state, 
+                    state_gaussian_pin_naive
+                );
+            // otherwise, put the state at the last fitted lambda (lmda_max)
+            } else {
+                lmda = large_lmda_path[i];
+                X.mul(resid, grad);
+                if (intercept) {
+                    matrix::dvsubi(grad, resid_sum * X_means, n_threads);
+                }
+                state::gaussian::update_abs_grad(state, lmda);
             }
-            state::gaussian::update_abs_grad(state, lmda);
-            update_solutions(
-                state, 
-                state_gaussian_pin_naive, 
-                state_gaussian_pin_naive.lmdas.size()-1
-            );
-        } catch (...) {
-            load_prev_valid();
-            throw;
         }
     }
 
@@ -543,9 +532,8 @@ inline void solve(
     // ==================================================================================== 
     // In this case, screen_set may not contain the true active set.
     // We must go through BASIL iterations to solve each lambda.
-    vec_value_t lmda_batch;
     sw_t sw;
-    int current_active_size = Eigen::Map<vec_safe_bool_t>(
+    int current_active_size = Eigen::Map<const vec_safe_bool_t>(
         screen_is_active.data(),
         screen_is_active.size()
     ).sum();
@@ -568,13 +556,13 @@ inline void solve(
 
     for (int _ : pb)
     {
+        static_cast<void>(_);
+
         // check early exit
-        if (early_exit && (rsqs.size() >= 3)) {
+        if (early_exit && (rsqs.size() >= 2)) {
             const auto rsq_u = rsqs[rsqs.size()-1];
             const auto rsq_m = rsqs[rsqs.size()-2];
-            const auto rsq_l = rsqs[rsqs.size()-3];
-            if (pin::check_early_stop_rsq(rsq_l, rsq_m, rsq_u, rsq_slope_tol, rsq_curv_tol) || 
-                (rsq_u >= rsq_tol)) 
+            if ((rsq_u >= adev_tol) || (rsq_u-rsq_m <= ddev_tol)) 
             {
                 pb_add_suffix();
                 break;
@@ -582,9 +570,7 @@ inline void solve(
         }
 
         // batch the next set of lambdas
-        lmda_batch = lmda_path.segment(
-            lmda_path_idx, 1
-        );
+        const auto lmda_curr = lmda_path[lmda_path_idx];
 
         // keep doing screen-fit-kkt until KKT passes
         while (1) {
@@ -595,10 +581,11 @@ inline void solve(
                 sw.start();
                 screen(
                     state,
-                    lmda_batch[0],
+                    lmda_curr,
                     kkt_passed,
                     n_new_active
                 );
+                state::gaussian::naive::update_screen_derived(state);
                 benchmark_screen.push_back(sw.elapsed());
 
                 // ==================================================================================== 
@@ -606,25 +593,16 @@ inline void solve(
                 // ==================================================================================== 
                 // Save all current valid quantities that will be modified in-place by fit.
                 // This is needed in case we exit with exception and need to restore invariance.
-                save_prev_valid();
-                auto&& state_gaussian_pin_naive = fit(
+                auto tup = fit(
                     state,
-                    lmda_batch,
+                    buffer_pack,
+                    lmda_curr,
                     update_coefficients_f,
                     check_user_interrupt
                 );
-                benchmark_fit_screen.push_back(
-                    Eigen::Map<const util::rowvec_type<double>>(
-                        state_gaussian_pin_naive.benchmark_screen.data(),
-                        state_gaussian_pin_naive.benchmark_screen.size()
-                    ).sum()
-                );
-                benchmark_fit_active.push_back(
-                    Eigen::Map<const util::rowvec_type<double>>(
-                        state_gaussian_pin_naive.benchmark_active.data(),
-                        state_gaussian_pin_naive.benchmark_active.size()
-                    ).sum()
-                );
+                auto&& state_gaussian_pin_naive = std::get<0>(tup);
+                benchmark_fit_screen.push_back(std::get<1>(tup));
+                benchmark_fit_active.push_back(std::get<2>(tup));
 
                 // ==================================================================================== 
                 // KKT step
@@ -632,7 +610,7 @@ inline void solve(
                 sw.start();
                 kkt_passed = kkt(
                     state,
-                    state_gaussian_pin_naive
+                    lmda_curr
                 );
                 benchmark_kkt.push_back(sw.elapsed());
                 n_valid_solutions.push_back(kkt_passed);
@@ -642,14 +620,13 @@ inline void solve(
                 // ==================================================================================== 
                 sw.start();
                 lmda_path_idx += kkt_passed;
-                resid_sum = state_gaussian_pin_naive.resid_sums[0];
-                rsq = state_gaussian_pin_naive.rsqs[0];
-                lmda = lmda_batch[0];
-                update_solutions(
-                    state, 
-                    state_gaussian_pin_naive, 
-                    kkt_passed
-                );
+                lmda = lmda_curr;
+                if (kkt_passed) {
+                    update_solutions(
+                        state, 
+                        state_gaussian_pin_naive
+                    );
+                }
                 benchmark_invariance.push_back(sw.elapsed());
 
                 // ==================================================================================== 
@@ -668,9 +645,7 @@ inline void solve(
                     kkt_passed ?
                     active_sizes.back() : current_active_size
                 );
-
             } catch (...) {
-                load_prev_valid();
                 pb_add_suffix();
                 throw;
             }

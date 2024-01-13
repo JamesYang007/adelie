@@ -1,9 +1,11 @@
 #include "decl.hpp"
+#include <adelie_core/glm/glm_base.hpp>
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/state/state_gaussian_pin_cov.hpp>
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
+#include <adelie_core/state/state_glm_naive.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -77,7 +79,7 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
     using dyn_vec_mat_value_t = typename state_t::dyn_vec_mat_value_t;
 
     py::class_<state_t>(m, name, R"delimiter(
-        Base core state class for all pin methods.
+        Base core state class for all gaussian pin methods.
         )delimiter")
         .def(py::init<
             const Eigen::Ref<const vec_index_t>&, 
@@ -117,8 +119,8 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             py::arg("intercept"),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("rsq_slope_tol"),
-            py::arg("rsq_curv_tol"),
+            py::arg("adev_tol"),
+            py::arg("ddev_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("n_threads"),
@@ -189,11 +191,11 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         .def_readonly("tol", &state_t::tol, R"delimiter(
         Convergence tolerance.
         )delimiter")
-        .def_readonly("rsq_slope_tol", &state_t::rsq_slope_tol, R"delimiter(
-        Early stopping rule check on slope of :math:`R^2`.
+        .def_readonly("adev_tol", &state_t::adev_tol, R"delimiter(
+        Percent deviance explained tolerance.
         )delimiter")
-        .def_readonly("rsq_curv_tol", &state_t::rsq_curv_tol, R"delimiter(
-        Early stopping rule check on curvature of :math:`R^2`.
+        .def_readonly("ddev_tol", &state_t::ddev_tol, R"delimiter(
+        Difference in percent deviance explained tolerance.
         )delimiter")
         .def_readonly("newton_tol", &state_t::newton_tol, R"delimiter(
         Convergence tolerance for the BCD update.
@@ -300,14 +302,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         ``lmdas[i]`` corresponds to the regularization :math:`\lambda`
         used for the ``i`` th outputted solution.
         )delimiter")
-        .def_readonly("screen_is_actives", &state_t::screen_is_actives, R"delimiter(
-        ``screen_is_actives[i]`` is the state of ``screen_is_active`` 
-        when the ``i`` th solution is computed.
-        )delimiter")
-        .def_readonly("screen_betas", &state_t::screen_betas, R"delimiter(
-        ``screen_betas[i]`` is the state of ``screen_beta`` 
-        when the ``i`` th solution is computed.
-        )delimiter")
         .def_readonly("iters", &state_t::iters, R"delimiter(
         Number of coordinate descents taken.
         )delimiter")
@@ -331,7 +325,7 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
 }
 
 template <class MatrixType>
-class PyStateGaussianPinNaive : public ad::state::StateGaussianPinNaive<MatrixType>
+class PyStateGaussianPinNaive: public ad::state::StateGaussianPinNaive<MatrixType>
 {
     using base_t = ad::state::StateGaussianPinNaive<MatrixType>;
 public:
@@ -375,7 +369,6 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             value_t,
             value_t,
             value_t,
-            value_t,
             size_t,
             size_t,
             value_t,
@@ -403,9 +396,8 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             py::arg("intercept"),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("rsq_tol"),
-            py::arg("rsq_slope_tol"),
-            py::arg("rsq_curv_tol"),
+            py::arg("adev_tol"),
+            py::arg("ddev_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("n_threads"),
@@ -425,9 +417,6 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
         .def_readonly("y_var", &state_t::y_var, R"delimiter(
         :math:`\ell_2` norm squared of :math:`y_c` (weighted by :math:`W`).
         )delimiter")
-        .def_readonly("rsq_tol", &state_t::rsq_tol, R"delimiter(
-        Early stopping rule check on :math:`R^2`.
-        )delimiter")
         .def_readonly("screen_X_means", &state_t::screen_X_means, R"delimiter(
         Column means (weighted by :math:`W`) of :math:`X` for strong groups.
         )delimiter")
@@ -437,23 +426,16 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
         .def_readonly("resid", &state_t::resid, R"delimiter(
         Residual :math:`W(y_c-X\beta)` at ``screen_beta`` 
         (note that it always uses uncentered :math:`X`!).
+
+        .. note:: 
+            This definition is unconventional.
+            This was done deliberately as the algorithm is most efficient 
+            when it updates this quantity compared to 
+            the conventional quantity :math:`y_c-X_c \beta`.
+
         )delimiter")
         .def_readonly("resid_sum", &state_t::resid_sum, R"delimiter(
         Sum of ``resid``.
-        )delimiter")
-        .def_property_readonly("resids", [](const state_t& s) {
-            ad::util::rowarr_type<value_t> resids(s.resids.size(), s.resid.size());
-            for (size_t i = 0; i < s.resids.size(); ++i) {
-                resids.row(i) = s.resids[i];
-            }
-            return resids;
-        }, R"delimiter(
-        ``resids[i]`` is the residual at ``betas[i]``.
-        )delimiter")
-        .def_property_readonly("resid_sums", [](const state_t& s) {
-            return Eigen::Map<const vec_value_t>(s.resid_sums.data(), s.resid_sums.size());
-        }, R"delimiter(
-        ``resid_sums[i]`` is the sum of ``resids[i]``.
         )delimiter")
         ;
 }
@@ -482,6 +464,7 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
     py::class_<state_t, base_t, PyStateGaussianPinCov<matrix_t>>(m, name)
         .def(py::init<
             matrix_t&,
+            value_t,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
@@ -506,6 +489,7 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             Eigen::Ref<vec_bool_t>
         >(),
             py::arg("A"),
+            py::arg("y_var"),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
@@ -519,8 +503,8 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("lmda_path").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("rsq_slope_tol"),
-            py::arg("rsq_curv_tol"),
+            py::arg("adev_tol"),
+            py::arg("ddev_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("n_threads"),
@@ -530,6 +514,13 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("screen_is_active").noconvert()
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
+        .def_readonly("y_var", &state_t::y_var, R"delimiter(
+        :math:`\ell_2` norm squared of :math:`y_c` (weighted by :math:`W`).
+        If the user does not have access to this quantity, 
+        they may be set it to ``-1``.
+        The only effect this variable has on the algorithm is early stopping rule.
+        Hence, with ``-1``, the early stopping rule is effectively disabled.
+        )delimiter")
         .def_readonly("A", &state_t::A, R"delimiter(
         Covariance matrix :math:`X_c^\top W X_c` where :math:`X_c` is column-centered 
         (weighted by :math:`W`) to fit with intercept.
@@ -542,10 +533,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
-        )delimiter")
-        .def_readonly("screen_grads", &state_t::screen_grads, R"delimiter(
-        ``screen_grads[i]`` is the state of ``screen_grad`` 
-        when the ``i`` th solution is computed.
         )delimiter")
         ;
 }
@@ -586,7 +573,6 @@ void state_gaussian_base(py::module_& m, const char* name)
             value_t,
             value_t,
             value_t,
-            value_t,
             size_t,
             bool,
             bool,
@@ -616,9 +602,8 @@ void state_gaussian_base(py::module_& m, const char* name)
             py::arg("screen_rule"),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("rsq_tol"),
-            py::arg("rsq_slope_tol"),
-            py::arg("rsq_curv_tol"),
+            py::arg("adev_tol"),
+            py::arg("ddev_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("early_exit"),
@@ -702,14 +687,11 @@ void state_gaussian_base(py::module_& m, const char* name)
         .def_readonly("tol", &state_t::tol, R"delimiter(
         Convergence tolerance.
         )delimiter")
-        .def_readonly("rsq_tol", &state_t::rsq_tol, R"delimiter(
-        Early stopping rule check on :math:`R^2`.
+        .def_readonly("adev_tol", &state_t::adev_tol, R"delimiter(
+        Percent deviance explained tolerance.
         )delimiter")
-        .def_readonly("rsq_slope_tol", &state_t::rsq_slope_tol, R"delimiter(
-        Early stopping rule check on slope of :math:`R^2`.
-        )delimiter")
-        .def_readonly("rsq_curv_tol", &state_t::rsq_curv_tol, R"delimiter(
-        Early stopping rule check on curvature of :math:`R^2`.
+        .def_readonly("ddev_tol", &state_t::ddev_tol, R"delimiter(
+        Difference in percent deviance explained tolerance.
         )delimiter")
         .def_readonly("newton_tol", &state_t::newton_tol, R"delimiter(
         Convergence tolerance for the BCD update.
@@ -771,12 +753,6 @@ void state_gaussian_base(py::module_& m, const char* name)
         From this index, reading ``group_sizes[screen_set[i]]`` number of elements
         will grab values corresponding to the full ``i`` th strong group block.
         )delimiter")
-        .def_property_readonly("screen_order", [](const state_t& s) {
-            return Eigen::Map<const vec_index_t>(s.screen_order.data(), s.screen_order.size());
-        }, R"delimiter(
-        Ordering such that ``groups`` is sorted in ascending order for the strong groups.
-        ``groups[screen_set[i]]`` is the ``i`` th strong group in ascending order.
-        )delimiter")
         .def_property_readonly("screen_beta", [](const state_t& s) {
             return Eigen::Map<const vec_value_t>(s.screen_beta.data(), s.screen_beta.size());
         }, R"delimiter(
@@ -786,7 +762,7 @@ void state_gaussian_base(py::module_& m, const char* name)
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
-        This must contain the true solution values for the strong groups.
+        The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
         )delimiter")
         .def_property_readonly("screen_is_active", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<safe_bool_t>>(
@@ -798,14 +774,14 @@ void state_gaussian_base(py::module_& m, const char* name)
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
         )delimiter")
         .def_readonly("rsq", &state_t::rsq, R"delimiter(
-        The true unnormalized :math:`R^2` given by :math:`\|y_c\|_{W}^2 - \|y_c-X_c\beta\|_{W}^2`
+        The unnormalized :math:`R^2` given by :math:`\|y_c\|_{W}^2 - \|y_c-X_c\beta\|_{W}^2`
         where :math:`\beta` is given by ``screen_beta``.
         )delimiter")
         .def_readonly("lmda", &state_t::lmda, R"delimiter(
-        The regularization parameter at which the true solution is given by ``screen_beta``.
+        The last regularization parameter that was attempted to be solved.
         )delimiter")
         .def_readonly("grad", &state_t::grad, R"delimiter(
-        The true full gradient :math:`X_c^\top W (y_c - X_c\beta)` where
+        The full gradient :math:`X_c^\top W (y_c - X_c\beta)` where
         :math:`\beta` is given by ``screen_beta``.
         )delimiter")
         .def_readonly("abs_grad", &state_t::abs_grad, R"delimiter(
@@ -823,13 +799,13 @@ void state_gaussian_base(py::module_& m, const char* name)
         }, R"delimiter(
         ``betas[i]`` is the (untransformed) solution corresponding to ``lmdas[i]``.
         )delimiter")
-        .def_property_readonly("rsqs", [](const state_t& s) {
+        .def_property_readonly("devs", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<value_t>>(
-                s.rsqs.data(),
-                s.rsqs.size()
+                s.devs.data(),
+                s.devs.size()
             );
         }, R"delimiter(
-        ``rsqs[i]`` is the (normalized) :math:`R^2` at ``betas[i]``.
+        ``devs[i]`` is the (normalized) :math:`R^2` at ``betas[i]``.
         )delimiter")
         .def_property_readonly("lmdas", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<value_t>>(
@@ -959,7 +935,6 @@ void state_gaussian_naive(py::module_& m, const char* name)
             value_t,
             value_t,
             value_t,
-            value_t,
             size_t,
             bool,
             bool,
@@ -994,9 +969,8 @@ void state_gaussian_naive(py::module_& m, const char* name)
             py::arg("screen_rule"),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("rsq_tol"),
-            py::arg("rsq_slope_tol"),
-            py::arg("rsq_curv_tol"),
+            py::arg("adev_tol"),
+            py::arg("ddev_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("early_exit"),
@@ -1047,6 +1021,511 @@ void state_gaussian_naive(py::module_& m, const char* name)
         ;
 }
 
+// ========================================================================
+// GLM State 
+// ========================================================================
+
+template <class GlmType>
+void state_glm_base(py::module_& m, const char* name)
+{
+    using glm_t = GlmType;
+    using state_t = ad::state::StateGlmBase<glm_t>;
+    using value_t = typename state_t::value_t;
+    using safe_bool_t = typename state_t::safe_bool_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_bool_t = typename state_t::vec_bool_t;
+    py::class_<state_t>(m, name, R"delimiter(
+        Base core state class for all GLM methods.
+        )delimiter") 
+        .def(py::init<
+            glm_t&,
+            const Eigen::Ref<const vec_index_t>&, 
+            const Eigen::Ref<const vec_index_t>&,
+            value_t, 
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            value_t,
+            value_t,
+            value_t,
+            value_t,
+            size_t,
+            size_t,
+            value_t,
+            size_t,
+            value_t,
+            const std::string&,
+            size_t,
+            value_t,
+            size_t,
+            value_t,
+            value_t,
+            value_t,
+            value_t,
+            size_t,
+            bool,
+            bool,
+            bool,
+            bool,
+            size_t,
+            const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_value_t>&, 
+            const Eigen::Ref<const vec_bool_t>&,
+            value_t,
+            value_t,
+            const Eigen::Ref<const vec_value_t>& 
+        >(),
+            py::arg("glm"),
+            py::arg("groups").noconvert(),
+            py::arg("group_sizes").noconvert(),
+            py::arg("alpha"),
+            py::arg("penalty").noconvert(),
+            py::arg("weights").noconvert(),
+            py::arg("lmda_path").noconvert(),
+            py::arg("dev_null"),
+            py::arg("dev_full"),
+            py::arg("lmda_max"),
+            py::arg("min_ratio"),
+            py::arg("lmda_path_size"),
+            py::arg("max_screen_size"),
+            py::arg("pivot_subset_ratio"),
+            py::arg("pivot_subset_min"),
+            py::arg("pivot_slack_ratio"),
+            py::arg("screen_rule"),
+            py::arg("irls_max_iters"),
+            py::arg("irls_tol"),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("adev_tol"),
+            py::arg("ddev_tol"),
+            py::arg("newton_tol"),
+            py::arg("newton_max_iters"),
+            py::arg("early_exit"),
+            py::arg("setup_lmda_max"),
+            py::arg("setup_lmda_path"),
+            py::arg("intercept"),
+            py::arg("n_threads"),
+            py::arg("screen_set").noconvert(),
+            py::arg("screen_beta").noconvert(),
+            py::arg("screen_is_active").noconvert(),
+            py::arg("beta0"),
+            py::arg("lmda"),
+            py::arg("grad").noconvert()
+        )
+        .def_readonly("groups", &state_t::groups, R"delimiter(
+        List of starting indices to each group where `G` is the number of groups.
+        ``groups[i]`` is the starting index of the ``i`` th group. 
+        )delimiter")
+        .def_readonly("group_sizes", &state_t::group_sizes, R"delimiter(
+        List of group sizes corresponding to each element in ``groups``.
+        ``group_sizes[i]`` is the group size of the ``i`` th group. 
+        )delimiter")
+        .def_readonly("alpha", &state_t::alpha, R"delimiter(
+        Elastic net parameter.
+        It must be in the range :math:`[0,1]`.
+        )delimiter")
+        .def_readonly("penalty", &state_t::penalty, R"delimiter(
+        Penalty factor for each group in the same order as ``groups``.
+        It must be a non-negative vector.
+        )delimiter")
+        .def_readonly("weights", &state_t::weights, R"delimiter(
+        Observation weights.
+        )delimiter")
+        .def_readonly("min_ratio", &state_t::min_ratio, R"delimiter(
+        The ratio between the largest and smallest :math:`\lambda` in the regularization sequence
+        if it is to be generated.
+        )delimiter")
+        .def_readonly("lmda_path_size", &state_t::lmda_path_size, R"delimiter(
+        Number of regularizations in the path if it is to be generated.
+        )delimiter")
+        .def_readonly("max_screen_size", &state_t::max_screen_size, R"delimiter(
+        Maximum number of strong groups allowed.
+        The function will return a valid state and guaranteed to have strong set size
+        less than or equal to ``max_screen_size``.
+        )delimiter")
+        .def_readonly("pivot_subset_ratio", &state_t::pivot_subset_ratio, R"delimiter(
+        If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
+        largest gradient norms are used to determine the pivot point
+        where ``s`` is the current strong set size.
+        It is only used if ``screen_rule == "pivot"``.
+        )delimiter")
+        .def_readonly("pivot_subset_min", &state_t::pivot_subset_min, R"delimiter(
+        If screening takes place, then at least ``pivot_subset_min``
+        number of gradient norms are used to determine the pivot point.
+        It is only used if ``screen_rule == "pivot"``.
+        )delimiter")
+        .def_readonly("pivot_slack_ratio", &state_t::pivot_slack_ratio, R"delimiter(
+        If screening takes place, then ``pivot_slack_ratio``
+        number of groups with next smallest (new) active scores 
+        below the pivot point are also added to the strong set as slack.
+        It is only used if ``screen_rule == "pivot"``.
+        )delimiter")
+        .def_property_readonly("screen_rule", [](const state_t& s) -> std::string {
+            switch (s.screen_rule) {
+                case ad::util::screen_rule_type::_strong:
+                    return "strong";
+                case ad::util::screen_rule_type::_pivot:
+                    return "pivot";
+            }
+            throw std::runtime_error("Invalid strong rule type!");
+        }, R"delimiter(
+        Strong rule type.
+        )delimiter")
+        .def_readonly("irls_max_iters", &state_t::irls_max_iters, R"delimiter(
+        Maximum number of IRLS iterations.
+        )delimiter")
+        .def_readonly("irls_tol", &state_t::irls_tol, R"delimiter(
+        IRLS convergence tolerance.
+        )delimiter")
+        .def_readonly("max_iters", &state_t::max_iters, R"delimiter(
+        Maximum number of coordinate descents.
+        )delimiter")
+        .def_readonly("tol", &state_t::tol, R"delimiter(
+        Convergence tolerance.
+        )delimiter")
+        .def_readonly("adev_tol", &state_t::adev_tol, R"delimiter(
+        Percent deviance explained tolerance.
+        )delimiter")
+        .def_readonly("ddev_tol", &state_t::ddev_tol, R"delimiter(
+        Difference in percent deviance explained tolerance.
+        )delimiter")
+        .def_readonly("newton_tol", &state_t::newton_tol, R"delimiter(
+        Convergence tolerance for the BCD update.
+        )delimiter")
+        .def_readonly("newton_max_iters", &state_t::newton_max_iters, R"delimiter(
+        Maximum number of iterations for the BCD update.
+        )delimiter")
+        .def_readonly("early_exit", &state_t::early_exit, R"delimiter(
+        ``True`` if the function should early exit based on training percent deviance explained.
+        )delimiter")
+        .def_readonly("setup_lmda_max", &state_t::setup_lmda_max, R"delimiter(
+        ``True`` if the function should setup :math:`\lambda_\max`.
+        )delimiter")
+        .def_readonly("setup_lmda_path", &state_t::setup_lmda_path, R"delimiter(
+        ``True`` if the function should setup the regularization path.
+        )delimiter")
+        .def_readonly("intercept", &state_t::intercept, R"delimiter(
+        ``True`` if the function should fit with intercept.
+        )delimiter")
+        .def_readonly("n_threads", &state_t::n_threads, R"delimiter(
+        Number of threads.
+        )delimiter")
+        .def_readonly("glm", &state_t::glm, R"delimiter(
+        GLM object.
+        )delimiter")
+        .def_readonly("dev_null", &state_t::dev_null, R"delimiter(
+        Null deviance :math:`D(\eta_0)`
+        where :math:`\eta_0 = \beta_0 \mathbf{1}` is the intercept-only model fit.
+        )delimiter")
+        .def_readonly("dev_full", &state_t::dev_full, R"delimiter(
+        Full deviance :math:`D(\eta^\star)`
+        where :math:`\eta^\star = (\nabla \underline{A})^{-1}(y)` is the saturated model fit.
+        )delimiter")
+        .def_readonly("lmda_max", &state_t::lmda_max, R"delimiter(
+        The smallest :math:`\lambda` such that the true solution is zero
+        for all coefficients that have a non-vanishing group lasso penalty (:math:`\ell_2`-norm).
+        )delimiter")
+        .def_readonly("lmda_path", &state_t::lmda_path, R"delimiter(
+        The regularization path to solve for.
+        The full path is not considered if ``early_exit`` is ``True``.
+        It is recommended that the path is sorted in decreasing order.
+        )delimiter")
+        .def_readonly("screen_hashset", &state_t::screen_hashset, R"delimiter(
+        Hashmap containing the same values as ``screen_set``.
+        It is used to check if a given group is strong or not.
+        )delimiter")
+        .def_property_readonly("screen_set", [](const state_t& s) {
+            return Eigen::Map<const vec_index_t>(s.screen_set.data(), s.screen_set.size());
+        }, R"delimiter(
+        List of indices into ``groups`` that correspond to the strong groups.
+        ``screen_set[i]`` is ``i`` th strong group.
+        ``screen_set`` must contain at least the true (optimal) active groups
+        when the regularization is given by ``lmda``.
+        )delimiter")
+        .def_property_readonly("screen_g1", [](const state_t& s) {
+            return Eigen::Map<const vec_index_t>(s.screen_g1.data(), s.screen_g1.size());
+        }, R"delimiter(
+        List of indices into ``screen_set`` that correspond to groups of size ``1``.
+        ``screen_set[screen_g1[i]]`` is the ``i`` th strong group of size ``1``
+        such that ``group_sizes[screen_set[screen_g1[i]]]`` is ``1``.
+        )delimiter")
+        .def_property_readonly("screen_g2", [](const state_t& s) {
+            return Eigen::Map<const vec_index_t>(s.screen_g2.data(), s.screen_g2.size());
+        }, R"delimiter(
+        List of indices into ``screen_set`` that correspond to groups more than size ``1``.
+        ``screen_set[screen_g2[i]]`` is the ``i`` th strong group of size more than ``1``
+        such that ``group_sizes[screen_set[screen_g2[i]]]`` is more than ``1``.
+        )delimiter")
+        .def_property_readonly("screen_begins", [](const state_t& s) {
+            return Eigen::Map<const vec_index_t>(s.screen_begins.data(), s.screen_begins.size());
+        }, R"delimiter(
+        List of indices that index a corresponding list of values for each strong group.
+        ``screen_begins[i]`` is the starting index corresponding to the ``i`` th strong group.
+        From this index, reading ``group_sizes[screen_set[i]]`` number of elements
+        will grab values corresponding to the full ``i`` th strong group block.
+        )delimiter")
+        .def_property_readonly("screen_beta", [](const state_t& s) {
+            return Eigen::Map<const vec_value_t>(s.screen_beta.data(), s.screen_beta.size());
+        }, R"delimiter(
+        Coefficient vector on the strong set.
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        where
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
+        and ``p = group_sizes[k]``.
+        The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
+        )delimiter")
+        .def_property_readonly("screen_is_active", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<safe_bool_t>>(
+                s.screen_is_active.data(), 
+                s.screen_is_active.size()
+            );
+        }, R"delimiter(
+        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
+        ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+        )delimiter")
+        .def_readonly("beta0", &state_t::beta0, R"delimiter(
+        The current intercept value.
+        The value can be arbitrary but it is recommended to be close to the solution at ``lmda``.
+        )delimiter")
+        .def_readonly("lmda", &state_t::lmda, R"delimiter(
+        The last regularization parameter that was attempted to be solved.
+        )delimiter")
+        .def_readonly("grad", &state_t::grad, R"delimiter(
+        The full gradient :math:`X^\top W (y - \nabla \underline{A}(X\beta + \beta_0 \mathbf{1}))` where
+        :math:`\beta` is given by ``screen_beta``
+        and :math:`\beta_0` is given by ``beta0``.
+        )delimiter")
+        .def_readonly("abs_grad", &state_t::abs_grad, R"delimiter(
+        The :math:`\ell_2` norms of ``grad`` across each group.
+        ``abs_grad[i]`` is given by ``np.linalg.norm(grad[g:g+gs] - lmda * penalty[i] * (1-alpha) * beta[g:g+gs])``
+        where ``g = groups[i]``,
+        ``gs = group_sizes[i]``,
+        and ``beta`` is the full solution vector represented by ``strong_beta``.
+        )delimiter")
+        .def_property_readonly("betas", [](const state_t& s) {
+            return convert_betas(
+                s.group_sizes.sum(),
+                s.betas
+            );
+        }, R"delimiter(
+        ``betas[i]`` is the solution corresponding to ``lmdas[i]``.
+        )delimiter")
+        .def_property_readonly("devs", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<value_t>>(
+                s.devs.data(),
+                s.devs.size()
+            );
+        }, R"delimiter(
+        ``devs[i]`` is the (normalized) deviance at ``betas[i]``.
+        )delimiter")
+        .def_property_readonly("lmdas", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<value_t>>(
+                s.lmdas.data(),
+                s.lmdas.size()
+            );
+        }, R"delimiter(
+        ``lmdas[i]`` is the ``i`` th :math:`\lambda` regularization in the solution set.
+        )delimiter")
+        .def_property_readonly("intercepts", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<value_t>>(
+                s.intercepts.data(),
+                s.intercepts.size()
+            );
+        }, R"delimiter(
+        ``intercepts[i]`` is the intercept solution corresponding to ``lmdas[i]``.
+        )delimiter")
+        .def_property_readonly("benchmark_screen", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<double>>(
+                s.benchmark_screen.data(),
+                s.benchmark_screen.size()
+            );
+        }, R"delimiter(
+        Screen time for a given BASIL iteration.
+        )delimiter")
+        .def_property_readonly("benchmark_fit_screen", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<double>>(
+                s.benchmark_fit_screen.data(),
+                s.benchmark_fit_screen.size()
+            );
+        }, R"delimiter(
+        Fit time on the strong set for a given BASIL iteration.
+        )delimiter")
+        .def_property_readonly("benchmark_fit_active", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<double>>(
+                s.benchmark_fit_active.data(),
+                s.benchmark_fit_active.size()
+            );
+        }, R"delimiter(
+        Fit time on the active set for a given BASIL iteration.
+        )delimiter")
+        .def_property_readonly("benchmark_kkt", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<double>>(
+                s.benchmark_kkt.data(),
+                s.benchmark_kkt.size()
+            );
+        }, R"delimiter(
+        KKT time for a given BASIL iteration.
+        )delimiter")
+        .def_property_readonly("benchmark_invariance", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<double>>(
+                s.benchmark_invariance.data(),
+                s.benchmark_invariance.size()
+            );
+        }, R"delimiter(
+        Invariance time for a given BASIL iteration.
+        )delimiter")
+        .def_property_readonly("n_valid_solutions", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<int>>(
+                s.n_valid_solutions.data(),
+                s.n_valid_solutions.size()
+            );
+        }, R"delimiter(
+        Number of valid solutions for a given BASIL iteration.
+        )delimiter")
+        .def_property_readonly("active_sizes", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<int>>(
+                s.active_sizes.data(),
+                s.active_sizes.size()
+            );
+        }, R"delimiter(
+        Active set size for every saved solution.
+        )delimiter")
+        .def_property_readonly("screen_sizes", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<int>>(
+                s.screen_sizes.data(),
+                s.screen_sizes.size()
+            );
+        }, R"delimiter(
+        Strong set size for every saved solution.
+        )delimiter")
+        ;
+}
+
+template <class GlmType, class MatrixType>
+class PyStateGlmNaive : public ad::state::StateGlmNaive<GlmType, MatrixType>
+{
+    using base_t = ad::state::StateGlmNaive<GlmType, MatrixType>;
+public:
+    using base_t::base_t;
+    PyStateGlmNaive(base_t&& base) : base_t(std::move(base)) {}
+};
+
+template <class GlmType, class MatrixType>
+void state_glm_naive(py::module_& m, const char* name)
+{
+    using glm_t = GlmType;
+    using matrix_t = MatrixType;
+    using state_t = ad::state::StateGlmNaive<glm_t, matrix_t>;
+    using base_t = typename state_t::base_t;
+    using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_bool_t = typename state_t::vec_bool_t;
+    py::class_<state_t, base_t, PyStateGlmNaive<glm_t, matrix_t>>(m, name)
+        .def(py::init<
+            glm_t&,
+            matrix_t&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_index_t>&,
+            value_t, 
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            value_t,
+            value_t,
+            value_t,
+            value_t,
+            size_t,
+            size_t,
+            value_t,
+            size_t,
+            value_t,
+            const std::string&,
+            size_t,
+            value_t,
+            size_t,
+            value_t,
+            value_t,
+            value_t,
+            value_t,
+            size_t,
+            bool,
+            bool,
+            bool,
+            bool,
+            size_t,
+            const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_value_t>&, 
+            const Eigen::Ref<const vec_bool_t>&,
+            value_t,
+            value_t,
+            const Eigen::Ref<const vec_value_t>& 
+        >(),
+            py::arg("glm"),
+            py::arg("X"),
+            py::arg("y").noconvert(),
+            py::arg("eta").noconvert(),
+            py::arg("mu").noconvert(),
+            py::arg("groups").noconvert(),
+            py::arg("group_sizes").noconvert(),
+            py::arg("alpha"),
+            py::arg("penalty").noconvert(),
+            py::arg("weights").noconvert(),
+            py::arg("lmda_path").noconvert(),
+            py::arg("dev_null"),
+            py::arg("dev_full"),
+            py::arg("lmda_max"),
+            py::arg("min_ratio"),
+            py::arg("lmda_path_size"),
+            py::arg("max_screen_size"),
+            py::arg("pivot_subset_ratio"),
+            py::arg("pivot_subset_min"),
+            py::arg("pivot_slack_ratio"),
+            py::arg("screen_rule"),
+            py::arg("irls_max_iters"),
+            py::arg("irls_tol"),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("adev_tol"),
+            py::arg("ddev_tol"),
+            py::arg("newton_tol"),
+            py::arg("newton_max_iters"),
+            py::arg("early_exit"),
+            py::arg("setup_lmda_max"),
+            py::arg("setup_lmda_path"),
+            py::arg("intercept"),
+            py::arg("n_threads"),
+            py::arg("screen_set").noconvert(),
+            py::arg("screen_beta").noconvert(),
+            py::arg("screen_is_active").noconvert(),
+            py::arg("beta0"),
+            py::arg("lmda"),
+            py::arg("grad").noconvert()
+        )
+        .def(py::init([](const state_t& s) { return new state_t(s); }))
+        .def_readonly("y", &state_t::y, R"delimiter(
+        Response vector.
+        )delimiter")
+        .def_readonly("X", &state_t::X, R"delimiter(
+        Feature matrix.
+        )delimiter")
+        .def_readonly("eta", &state_t::eta, R"delimiter(
+        The natural parameter :math:`\eta = X\beta + \beta_0 \mathbf{1}`
+        where :math:`\beta` and :math:`\beta_0` are given by
+        ``screen_beta`` and ``beta0``.
+        )delimiter")
+        .def_readonly("mu", &state_t::mu, R"delimiter(
+        The mean parameter :math:`\mu = \nabla \underline{A}(\eta)`
+        where :math:`\eta` is given by ``eta``.
+        )delimiter")
+        ;
+}
+
 void register_state(py::module_& m)
 {
     state_gaussian_pin_base<double>(m, "StateGaussianPinBase64");
@@ -1060,4 +1539,14 @@ void register_state(py::module_& m)
     state_gaussian_base<float>(m, "StateGaussianBase32");
     state_gaussian_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateGaussianNaive64");
     state_gaussian_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateGaussianNaive32");
+    state_glm_base<ad::glm::GlmBase<double>>(m, "StateGlmBase64");
+    state_glm_base<ad::glm::GlmBase<float>>(m, "StateGlmBase32");
+    state_glm_naive<
+        ad::glm::GlmBase<double>,
+        ad::matrix::MatrixNaiveBase<double>
+    >(m, "StateGlmNaive64");
+    state_glm_naive<
+        ad::glm::GlmBase<float>,
+        ad::matrix::MatrixNaiveBase<float>
+    >(m, "StateGlmNaive32");
 }

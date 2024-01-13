@@ -77,7 +77,7 @@ def test_io_snp_phased_ancestry():
         return dense
 
     def _test(n, s, A, seed=0):
-        data = ad.data.create_snp_phased_ancestry(n, s, A, seed=seed)
+        data = ad.data.snp_phased_ancestry(n, s, A, seed=seed)
         calldata = data["X"]
         ancestries = data["ancestries"]
         dense = create_dense(calldata, ancestries, A)

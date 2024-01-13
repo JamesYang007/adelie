@@ -1,11 +1,38 @@
 import numpy as np
+from .glm import (
+    binomial,
+)
 
 
-def create_dense(
+def _sample_y(
+    glm: str,
+    eta: np.ndarray,
+    beta: np.ndarray,
+    rho: float =0,
+    snr: float =1,
+):
+    n = eta.shape[0]
+    if glm == "gaussian":
+        noise_scale = np.sqrt(
+            (rho * np.sum(beta) ** 2 + (1-rho) * np.sum(beta ** 2))
+            / snr
+        )
+        y = eta + noise_scale * np.random.normal(0, 1, n)
+    elif glm == "binomial":
+        mu = np.empty(eta.shape[0], dtype=eta.dtype)
+        binomial().gradient(eta, mu)
+        y = np.random.binomial(1, mu).astype(eta.dtype)
+    else:
+        raise RuntimeError(f"Unexpected glm type: {glm}")
+    return y
+
+
+def dense(
     n: int, 
     p: int, 
     G: int,
     *,
+    glm="gaussian",
     equal_groups=False,
     rho: float =0,
     sparsity: float =0.95,
@@ -15,17 +42,25 @@ def create_dense(
 ):
     """Creates a dense dataset.
 
-    The groups and group sizes are generated randomly
-    such that ``G`` groups are created and the sum of the group sizes is ``p``.
-    The data matrix ``X`` is generated from a normal distribution
-    where each feature is equicorrelated with the other features by ``rho``.
-    The response ``y`` is generated from a linear model :math:`y = X\\beta + \\epsilon`
-    with :math:`\\epsilon \\sim N(0, \\sigma^2 I_n)` and :math:`\\beta` such that ``sparsity`` proportion
-    of the entries are set to :math:`0`.
-    We compute :math:`\\sigma^2` such that the signal-to-noise ratio is given by ``snr``.
-    The penalty factors are by default set to ``np.sqrt(group_sizes)``,
-    however if ``zero_penalty > 0``, a random set of penalties will be set to zero,
-    in which case, ``penalty`` is rescaled such that the :math:`\\ell_2` norm squared is ``p``.
+    - The groups and group sizes are generated randomly
+      such that ``G`` groups are created and the sum of the group sizes is ``p``.
+    - The data matrix ``X`` is generated from a normal distribution
+      where each feature is equicorrelated with the other features by ``rho``.
+    - The true coefficients :math:`\\beta` are such that ``sparsity`` proportion
+      of the entries are set to :math:`0`.
+    - The response ``y`` is generated from the GLM specified by ``glm``:
+
+        - ``"gaussian"``: :math:`y \\sim \mathcal{N}(\\eta, \\sigma^2 I_n)` 
+          where
+          :math:`\\eta \\equiv X\\beta + \\beta_0 \\mathbf{1}`
+          and :math:`\\sigma^2` is such that the signal-to-noise ratio (SNR) is given by ``snr``.
+        - ``"binomial"``: :math:`y \\sim \mathrm{Bern}(p)`
+          where
+          :math:`p \\equiv \\mathrm{expit}(X\\beta + \\beta_0 \\mathbf{1})`.
+
+    - The penalty factors are by default set to ``np.sqrt(group_sizes)``,
+      however if ``zero_penalty > 0``, a random set of penalties will be set to zero,
+      in which case, ``penalty`` is rescaled such that the :math:`\\ell_2` norm squared equals ``p``.
 
     Parameters
     ----------
@@ -35,6 +70,14 @@ def create_dense(
         Number of features.
     G : int
         Number of groups.
+    glm : str, optional
+        Must be one of the following options, 
+        which specifies how the response vector is generated:
+
+            - ``"gaussian"``
+            - ``"binomial"``
+
+        Default is ``"gaussian"``.
     equal_groups : bool, optional
         If ``True``, group sizes are made as equal as possible.
         Default is ``False``.
@@ -105,11 +148,14 @@ def create_dense(
     X_sub = X[:, beta_nnz_indices]
     beta_sub = beta[beta_nnz_indices]
 
-    noise_scale = np.sqrt(
-        (rho * np.sum(beta_sub) ** 2 + (1-rho) * np.sum(beta_sub ** 2))
-        / snr
+    eta = X_sub @ beta_sub
+    y = _sample_y(
+        glm=glm,
+        eta=eta,
+        beta=beta_sub,
+        rho=rho,
+        snr=snr,
     )
-    y = X_sub @ beta_sub + noise_scale * np.random.normal(0, 1, n)
 
     return {
         "X": X, 
@@ -120,10 +166,11 @@ def create_dense(
     }
 
 
-def create_snp_unphased(
+def snp_unphased(
     n: int, 
     p: int, 
     *,
+    glm="gaussian",
     sparsity: float =0.95,
     one_ratio: float =0.25,
     two_ratio: float =0.05,
@@ -133,18 +180,26 @@ def create_snp_unphased(
 ):
     """Creates a SNP Unphased dataset.
 
-    This dataset is only used for lasso, so ``groups`` is simply each individual feature
-    and ``group_sizes`` is a vector of ones.
-    The data matrix ``X`` has sparsity ratio ``1 - one_ratio - two_ratio``
-    where ``one_ratio`` of the entries are randomly set to ``1``
-    and ``two_ratio`` are randomly set to ``2``.
-    The response ``y`` is generated from a linear model :math:`y = X\\beta + \\epsilon`
-    with :math:`\\epsilon \\sim N(0, \\sigma^2 I_n)` 
-    and :math:`\\beta` such that ``sparsity`` proportion of the entries are set to :math:`0`.
-    We compute :math:`\\sigma^2` such that the signal-to-noise ratio is given by ``snr``.
-    The penalty factors are by default set to ``np.sqrt(group_sizes)``,
-    however if ``zero_penalty > 0``, a random set of penalties will be set to zero,
-    in which case, ``penalty`` is rescaled such that the :math:`\\ell_2` norm squared is ``p``.
+    - This dataset is only used for lasso, so ``groups`` is simply each individual feature
+      and ``group_sizes`` is a vector of ones.
+    - The calldata matrix ``X`` has sparsity ratio ``1 - one_ratio - two_ratio``
+      where ``one_ratio`` of the entries are randomly set to ``1``
+      and ``two_ratio`` are randomly set to ``2``.
+    - The true coefficients :math:`\\beta` are such that ``sparsity`` proportion
+      of the entries are set to :math:`0`.
+    - The response ``y`` is generated from the GLM specified by ``glm``:
+
+        - ``"gaussian"``: :math:`y \\sim \mathcal{N}(\\eta, \\sigma^2 I_n)` 
+          where
+          :math:`\\eta \\equiv X\\beta + \\beta_0 \\mathbf{1}`
+          and :math:`\\sigma^2` is such that the signal-to-noise ratio (SNR) is given by ``snr``.
+        - ``"binomial"``: :math:`y \\sim \mathrm{Bern}(p)`
+          where
+          :math:`p \\equiv \\mathrm{expit}(X\\beta + \\beta_0 \\mathbf{1})`.
+
+    - The penalty factors are by default set to ``np.sqrt(group_sizes)``,
+      however if ``zero_penalty > 0``, a random set of penalties will be set to zero,
+      in which case, ``penalty`` is rescaled such that the :math:`\\ell_2` norm squared is ``p``.
 
     Parameters
     ----------
@@ -152,6 +207,14 @@ def create_snp_unphased(
         Number of data points.
     p : int
         Number of SNPs.
+    glm : str, optional
+        Must be one of the following options, 
+        which specifies how the response vector is generated:
+
+            - ``"gaussian"``
+            - ``"binomial"``
+
+        Default is ``"gaussian"``.
     sparsity : float, optional
         Proportion of :math:`\\beta` entries to be zeroed out.
         Default is ``0.95``.
@@ -217,9 +280,13 @@ def create_snp_unphased(
     X_sub = X[:, beta_nnz_indices]
     beta_sub = beta[beta_nnz_indices]
 
-    signal_var = np.dot(beta_sub, np.dot(np.cov(X_sub.T), beta_sub))
-    noise_scale = np.sqrt(signal_var / snr)
-    y = X_sub @ beta_sub + noise_scale * np.random.normal(0, 1, n)
+    eta = X_sub @ beta_sub 
+    y = _sample_y(
+        glm=glm,
+        eta=eta,
+        beta=beta_sub,
+        snr=snr,
+    )
 
     return {
         "X": np.asfortranarray(X), 
@@ -230,11 +297,12 @@ def create_snp_unphased(
     }
 
 
-def create_snp_phased_ancestry(
+def snp_phased_ancestry(
     n: int, 
     s: int, 
     A: int,
     *,
+    glm="gaussian",
     sparsity: float =0.95,
     one_ratio: float =0.25,
     two_ratio: float =0.05,
@@ -244,16 +312,27 @@ def create_snp_phased_ancestry(
 ):
     """Creates a SNP Unphased dataset.
 
-    The data matrix ``X`` is a phased version of a matrix with sparsity ratio ``1 - one_ratio - two_ratio``
-    where ``one_ratio`` of the entries are randomly set to ``1``
-    and ``two_ratio`` are randomly set to ``2``.
-    The response ``y`` is generated from a linear model :math:`y = X\\beta + \\epsilon`
-    with :math:`\\epsilon \\sim N(0, \\sigma^2 I_n)` 
-    and :math:`\\beta` such that ``sparsity`` proportion of the entries are set to :math:`0`.
-    We compute :math:`\\sigma^2` such that the signal-to-noise ratio is given by ``snr``.
-    The penalty factors are by default set to ``np.sqrt(group_sizes)``,
-    however if ``zero_penalty > 0``, a random set of penalties will be set to zero,
-    in which case, ``penalty`` is rescaled such that the :math:`\\ell_2` norm squared is ``p``.
+    - The groups and group sizes are generated randomly
+      such that ``G`` groups are created and the sum of the group sizes is ``p``.
+    - The calldata matrix ``X`` is a phased version of a matrix with sparsity ratio 
+      ``1 - one_ratio - two_ratio``
+      where ``one_ratio`` of the entries are randomly set to ``1``
+      and ``two_ratio`` are randomly set to ``2``.
+    - The ancestry matrix randomly generates integers in the range ``[0, A)``.
+    - The true coefficients :math:`\\beta` is such that ``sparsity`` proportion of the entries are set to :math:`0`.
+    - The response ``y`` is generated from the GLM specified by ``glm``:
+
+        - ``"gaussian"``: :math:`y \\sim \mathcal{N}(\\eta, \\sigma^2 I_n)` 
+          where
+          :math:`\\eta \\equiv X\\beta + \\beta_0 \\mathbf{1}`
+          and :math:`\\sigma^2` is such that the signal-to-noise ratio (SNR) is given by ``snr``.
+        - ``"binomial"``: :math:`y \\sim \mathrm{Bern}(p)`
+          where
+          :math:`p \\equiv \\mathrm{expit}(X\\beta + \\beta_0 \\mathbf{1})`.
+
+    - The penalty factors are by default set to ``np.sqrt(group_sizes)``,
+      however if ``zero_penalty > 0``, a random set of penalties will be set to zero,
+      in which case, ``penalty`` is rescaled such that the :math:`\\ell_2` norm squared is ``p``.
 
     Parameters
     ----------
@@ -263,6 +342,14 @@ def create_snp_phased_ancestry(
         Number of SNPs.
     A : int
         Number of ancestries.
+    glm : str, optional
+        Must be one of the following options, 
+        which specifies how the response vector is generated:
+
+            - ``"gaussian"``
+            - ``"binomial"``
+
+        Default is ``"gaussian"``.
     sparsity : float, optional
         Proportion of :math:`\\beta` entries to be zeroed out.
         Default is ``0.95``.
@@ -337,9 +424,13 @@ def create_snp_phased_ancestry(
     X_sub = X[:, beta_nnz_indices]
     beta_sub = beta[beta_nnz_indices]
 
-    signal_var = np.dot(beta_sub, np.dot(np.cov(X_sub.T), beta_sub))
-    noise_scale = np.sqrt(signal_var / snr)
-    y = X_sub @ beta_sub + noise_scale * np.random.normal(0, 1, n)
+    eta = X_sub @ beta_sub 
+    y = _sample_y(
+        glm=glm,
+        eta=eta,
+        beta=beta_sub,
+        snr=snr,
+    )
 
     return {
         "X": np.asfortranarray(X), 

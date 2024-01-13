@@ -47,8 +47,8 @@ struct StateGaussianPinBase
     const bool intercept;
     const size_t max_iters;
     const value_t tol;
-    const value_t rsq_slope_tol;
-    const value_t rsq_curv_tol;
+    const value_t adev_tol;
+    const value_t ddev_tol;
     const value_t newton_tol;
     const size_t newton_max_iters;
     const size_t n_threads;
@@ -66,8 +66,6 @@ struct StateGaussianPinBase
     dyn_vec_value_t intercepts;
     dyn_vec_value_t rsqs;
     dyn_vec_value_t lmdas;
-    dyn_vec_vec_bool_t screen_is_actives;
-    dyn_vec_vec_value_t screen_betas;
     size_t iters = 0;
 
     /* diagnostics */
@@ -91,8 +89,8 @@ struct StateGaussianPinBase
         bool intercept,
         size_t max_iters,
         value_t tol,
-        value_t rsq_slope_tol,
-        value_t rsq_curv_tol,
+        value_t adev_tol,
+        value_t ddev_tol,
         value_t newton_tol,
         size_t newton_max_iters,
         size_t n_threads,
@@ -114,8 +112,8 @@ struct StateGaussianPinBase
         intercept(intercept),
         max_iters(max_iters),
         tol(tol),
-        rsq_slope_tol(rsq_slope_tol),
-        rsq_curv_tol(rsq_curv_tol),
+        adev_tol(adev_tol),
+        ddev_tol(ddev_tol),
         newton_tol(newton_tol),
         newton_max_iters(newton_max_iters),
         n_threads(n_threads),
@@ -155,8 +153,6 @@ struct StateGaussianPinBase
         intercepts.reserve(lmda_path.size());
         rsqs.reserve(lmda_path.size());
         lmdas.reserve(lmda_path.size());
-        screen_is_actives.reserve(lmda_path.size());
-        screen_betas.reserve(lmda_path.size());
         benchmark_screen.reserve(1000);
         benchmark_active.reserve(1000);
     }

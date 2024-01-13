@@ -33,8 +33,9 @@ void update_abs_grad(
         return screen_hashset.find(i) != screen_hashset.end();
     };
 
-    #pragma omp parallel for schedule(static) num_threads(n_threads)
-    for (int ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) 
+    // do not parallelize since it may result in large false sharing 
+    // (access to abs_grad[i] is random order)
+    for (size_t ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) 
     {
         const auto i = screen_set[ss_idx];
         const auto b = screen_begins[ss_idx]; 
@@ -50,6 +51,8 @@ void update_abs_grad(
         ).matrix().norm();
     }
 
+    // can be parallelized since access is in linear order.
+    // any false sharing is happening near the beginning/ends of the block of indices.
     #pragma omp parallel for schedule(static) num_threads(n_threads)
     for (int i = 0; i < groups.size(); ++i) 
     {
@@ -103,14 +106,12 @@ void update_screen_derived_base(
     StateType& state
 )
 {
-    const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto& screen_set = state.screen_set;
     auto& screen_hashset = state.screen_hashset;
     auto& screen_g1 = state.screen_g1;
     auto& screen_g2 = state.screen_g2;
     auto& screen_begins = state.screen_begins;
-    auto& screen_order = state.screen_order;
     auto& screen_beta = state.screen_beta;
     auto& screen_is_active = state.screen_is_active;
 
@@ -135,21 +136,6 @@ void update_screen_derived_base(
         screen_value_size += curr_size;
     }
 
-    /* update screen_order */
-    screen_order.resize(screen_set.size());
-    std::iota(
-        std::next(screen_order.begin(), old_screen_size), 
-        screen_order.end(), 
-        old_screen_size
-    );
-    std::sort(
-        screen_order.begin(),
-        screen_order.end(),
-        [&](auto i, auto j) {
-            return groups[screen_set[i]] < groups[screen_set[j]];
-        }
-    );
-
     /* update screen_beta */
     screen_beta.resize(screen_value_size, 0);
 
@@ -168,7 +154,7 @@ struct StateGaussianBase
     using value_t = ValueType;
     using index_t = IndexType;
     using bool_t = BoolType;
-    using safe_bool_t = int;
+    using safe_bool_t = int8_t;
     using uset_index_t = std::unordered_set<index_t>;
     using vec_value_t = util::rowvec_type<value_t>;
     using vec_index_t = util::rowvec_type<index_t>;
@@ -204,9 +190,8 @@ struct StateGaussianBase
     // convergence configs
     const size_t max_iters;
     const value_t tol;
-    const value_t rsq_tol;
-    const value_t rsq_slope_tol;
-    const value_t rsq_curv_tol;
+    const value_t adev_tol;
+    const value_t ddev_tol;
     const value_t newton_tol;
     const size_t newton_max_iters;
     const bool early_exit;
@@ -227,7 +212,6 @@ struct StateGaussianBase
     dyn_vec_index_t screen_g1;
     dyn_vec_index_t screen_g2;
     dyn_vec_index_t screen_begins;
-    dyn_vec_index_t screen_order;
     dyn_vec_value_t screen_beta;
     dyn_vec_bool_t screen_is_active;
     value_t rsq;
@@ -238,7 +222,7 @@ struct StateGaussianBase
     // final results
     dyn_vec_sp_vec_t betas;
     dyn_vec_value_t intercepts;
-    dyn_vec_value_t rsqs;
+    dyn_vec_value_t devs;
     dyn_vec_value_t lmdas;
 
     // diagnostics
@@ -270,9 +254,8 @@ struct StateGaussianBase
         const std::string& screen_rule,
         size_t max_iters,
         value_t tol,
-        value_t rsq_tol,
-        value_t rsq_slope_tol,
-        value_t rsq_curv_tol,
+        value_t adev_tol,
+        value_t ddev_tol,
         value_t newton_tol,
         size_t newton_max_iters,
         bool early_exit,
@@ -298,12 +281,11 @@ struct StateGaussianBase
         pivot_subset_ratio(pivot_subset_ratio),
         pivot_subset_min(pivot_subset_min),
         pivot_slack_ratio(pivot_slack_ratio),
-        screen_rule(convert_screen_rule(screen_rule)),
+        screen_rule(util::convert_screen_rule(screen_rule)),
         max_iters(max_iters),
         tol(tol),
-        rsq_tol(rsq_tol),
-        rsq_slope_tol(rsq_slope_tol),
-        rsq_curv_tol(rsq_curv_tol),
+        adev_tol(adev_tol),
+        ddev_tol(ddev_tol),
         newton_tol(newton_tol),
         newton_max_iters(newton_max_iters),
         early_exit(early_exit),
@@ -324,23 +306,12 @@ struct StateGaussianBase
         initialize();
     }
 
-    util::screen_rule_type convert_screen_rule(
-        const std::string& rule
-    )
-    {
-        if (rule == "strong") return util::screen_rule_type::_strong;
-        if (rule == "pivot") return util::screen_rule_type::_pivot;
-        throw std::runtime_error("Invalid strong rule type: " + rule);
-    }
-
     void initialize()
     {
         /* initialize screen_set derived quantities */
         screen_begins.reserve(screen_set.size());
         screen_g1.reserve(screen_set.size());
         screen_g2.reserve(screen_set.size());
-        screen_begins.reserve(screen_set.size());
-        screen_order.reserve(screen_set.size());
         gaussian::update_screen_derived_base(*this);
 
         /* initialize abs_grad */
@@ -350,7 +321,7 @@ struct StateGaussianBase
         const auto n_lmdas = std::max<size_t>(lmda_path.size(), lmda_path_size);
         betas.reserve(n_lmdas);
         intercepts.reserve(n_lmdas);
-        rsqs.reserve(n_lmdas);
+        devs.reserve(n_lmdas);
         lmdas.reserve(n_lmdas);
         benchmark_fit_screen.reserve(n_lmdas);
         benchmark_fit_active.reserve(n_lmdas);

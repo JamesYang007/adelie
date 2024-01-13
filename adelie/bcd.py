@@ -211,13 +211,27 @@ def solve(
     max_iters : int, optional
         Max number of iterations. Default is ``1000``.
     solver : str, optional
-        Solver type must be one of 
-        ``["brent", "newton", "newton_brent", "newton_abs", "newton_abs_debug", "ista", "fista", "fista_adares"]``.
+        Solver type must be one of the following: 
+
+            - ``"brent"``: Brent method.
+            - ``"ista"``: ISTA method.
+            - ``"fista"``: FISTA method.
+            - ``"fista_adares"``: FISTA with Adaptive Restarts method.
+            - ``"newton"``: Newton method.
+            - ``"newton_abs"``: Newton method combined with Adaptive Bisection Starts for initialization.
+            - ``"newton_abs_debug"``: same as ``"newton_abs"`` but with more debug information.
+            - ``"newton_brent"``: Newton method combined with Brent method for initialization.
+
         Default is ``"newton_abs"``.
 
         .. warning::
             The following methods are known to have poor convergence:
-            ``["brent", "ista", "fista", "fista_adares"]``.
+
+                - ``"brent"``
+                - ``"ista"``
+                - ``"fista"``
+                - ``"fista_adares"``
+
     smart_init : bool
         If ``True``, the ABS method is invoked to find a smart initial point before starting Newton's method.
         It is only used when ``solver`` is ``"newton_abs_debug"``.
@@ -266,18 +280,30 @@ def root(
     max_iters : int, optional
         Max number of iterations. Default is ``1000``.
     solver : str, optional
-        Solver type must be one of 
-        ``["brent", "newton", "newton_brent", "newton_abs", "ista", "fista", "fista_adares"]``.
+        Solver type must be one of the following: 
+
+            - ``"brent"``: Brent method.
+            - ``"newton"``: Newton method.
+            - ``"newton_brent"``: Newton method combined with Brent method for initialization.
+            - ``"newton_abs"``: Newton method combined with Adaptive Bisection Starts for initialization.
+            - ``"ista"``: ISTA method.
+            - ``"fista"``: FISTA method.
+            - ``"fista_adares"``: FISTA with Adaptive Restarts method.
+
         Default is ``"newton_abs"``.
 
         .. warning::
             The following methods are known to have poor convergence:
-            ``["brent", "ista", "fista", "fista_adares"]``.
+
+                - ``"brent"``
+                - ``"ista"``
+                - ``"fista"``
+                - ``"fista_adares"``
 
     Returns
     -------
     result : Dict[str, Any]
-        - ``result["root"]``: root.
+        - ``result["root"]``: the non-negative root.
         - ``result["iters"]``: number of iterations taken.
 
     See Also

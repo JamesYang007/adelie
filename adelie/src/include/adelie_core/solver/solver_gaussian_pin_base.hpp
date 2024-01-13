@@ -13,7 +13,7 @@ namespace pin {
  * This class is purely for convenience purposes.
  */
 template <class ValueType>
-struct SolveGaussianPinBufferPack 
+struct GaussianPinBufferPack 
 {
     using value_t = ValueType;
     
@@ -22,16 +22,16 @@ struct SolveGaussianPinBufferPack
     util::rowvec_type<value_t> buffer3;
     util::rowvec_type<value_t> buffer4;
 
-    explicit SolveGaussianPinBufferPack(
+    explicit GaussianPinBufferPack(
         size_t buffer_size,
         size_t n
     ): 
-        SolveGaussianPinBufferPack(
+        GaussianPinBufferPack(
             buffer_size, buffer_size, buffer_size, n
         ) 
     {}
 
-    explicit SolveGaussianPinBufferPack(
+    explicit GaussianPinBufferPack(
             size_t buffer1_size, 
             size_t buffer2_size,
             size_t buffer3_size,
@@ -176,38 +176,6 @@ void update_coefficient(
     const auto u = grad + coeff * x_var;
     const auto v = std::abs(u) - l1 * penalty;
     coeff = (v > 0.0) ? std::copysign(v,u)/denom : 0;
-}
-
-/**
- * Checks early stopping based on R^2 values.
- * Returns true (early stopping should occur) if both are true:
- *
- *      delta_u := (R^2_u - R^2_m)/R^2_u
- *      delta_m := (R^2_m - R^2_l)/R^2_m 
- *      delta_u < rsq_slope_tol 
- *      AND
- *      (delta_u - delta_m) < rsq_curv_tol
- *
- * @param   rsq_l   third to last R^2 value.
- * @param   rsq_m   second to last R^2 value.
- * @param   rsq_u   last R^2 value.
- * @param   rsq_slope_tol   threshold for derivative condition.
- * @param   rsq_curv_tol   threshold for second derivative condition.
- */
-template <class ValueType>
-ADELIE_CORE_STRONG_INLINE
-bool check_early_stop_rsq(
-    ValueType rsq_l,
-    ValueType rsq_m,
-    ValueType rsq_u,
-    ValueType rsq_slope_tol = 1e-5,
-    ValueType rsq_curv_tol = 1e-5
-)
-{
-    const auto delta_u = (rsq_u-rsq_m);
-    const auto delta_m = (rsq_m-rsq_l);
-    return ((delta_u <= rsq_slope_tol*rsq_u) &&
-            ((delta_m*rsq_u-delta_u*rsq_m) <= rsq_curv_tol*rsq_m*rsq_u));
 }
 
 } // namespace pin
