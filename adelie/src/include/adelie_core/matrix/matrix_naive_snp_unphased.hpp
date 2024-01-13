@@ -9,8 +9,7 @@ namespace adelie_core {
 namespace matrix {
 
 template <class ValueType>
-class MatrixNaiveSNPUnphased: 
-    public MatrixNaiveBase<ValueType>
+class MatrixNaiveSNPUnphased: public MatrixNaiveBase<ValueType>
 {
 public:
     using base_t = MatrixNaiveBase<ValueType>;

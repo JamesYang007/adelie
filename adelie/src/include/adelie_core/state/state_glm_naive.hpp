@@ -7,6 +7,14 @@ namespace state {
 namespace glm {
 namespace naive {
 
+/**
+ * Unlike the similar function in gaussian::naive,
+ * this does not call the base version to update the base classes's screen derived quantities.
+ * This is because in GLM fitting, the three screen_* inputs are modified at every IRLS loop,
+ * while the base quantities remain the same. 
+ * It is only when IRLS finishes and we must screen for variables where we have to update the base quantities.
+ * In gaussian naive setting, the IRLS has loop size of 1 essentially, so the two versions are synonymous.
+ */
 template <class StateType, class XMType, class WType,
           class SXMType, class STType, class SVType>
 void update_screen_derived(

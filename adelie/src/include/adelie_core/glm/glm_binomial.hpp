@@ -29,12 +29,11 @@ public:
     }
 
     void hessian(
-        const Eigen::Ref<const vec_value_t>& eta,
+        const Eigen::Ref<const vec_value_t>& mu,
         Eigen::Ref<vec_value_t> var
     ) override
     {
-        var = 1 / (1 + (-eta).exp());
-        var *= (1-var);
+        var = mu * (1-mu);
     }
 
     void deviance(

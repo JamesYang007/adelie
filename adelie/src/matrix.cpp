@@ -33,7 +33,7 @@ void utils(py::module_& m)
 }
 
 template <class T>
-class PyMatrixNaiveBase : public ad::matrix::MatrixNaiveBase<T>
+class PyMatrixNaiveBase: public ad::matrix::MatrixNaiveBase<T>
 {
     using base_t = ad::matrix::MatrixNaiveBase<T>;
 public:
@@ -188,7 +188,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         )delimiter")
         .def(py::init<>())
         .def("cmul", &internal_t::cmul, R"delimiter(
-        Column vector multiplication.
+        Column vector-vector multiplication.
 
         Computes the dot-product ``v.T @ X[:,j]`` for a column ``j``.
 
@@ -197,29 +197,28 @@ void matrix_naive_base(py::module_& m, const char* name)
         j : int
             Column index.
         v : (n,) np.ndarray
-            Vector to multiply the ``j`` th column with.
+            Vector to dot product with the ``j`` th column with.
         )delimiter")
         .def("ctmul", &internal_t::ctmul, R"delimiter(
-        Column scalar multiplication.
+        Column vector-scalar multiplication.
 
-        Computes the scalar-vector multiplication ``v * (X[:,j].T @ W)`` for a column ``j``.
+        Computes the vector-scalar multiplication ``v * X[:,j] * w`` for a column ``j``.
 
         Parameters
         ----------
         j : int
             Column index.
         v : float
-            Scalar to multiply the ``j`` th column with.
+            Scalar to multiply with the ``j`` th column.
         w : (n,) np.ndarray
-            Vector of observation of weights.
+            Vector of weights.
         out : (n,) np.ndarray
             Vector to store in-place the result.
         )delimiter")
         .def("bmul", &internal_t::bmul, R"delimiter(
-        Block matrix-vector multiplication.
+        Column block matrix-vector multiplication.
 
-        Computes the matrix-vector multiplication
-        ``v.T @ X[:, j:j+q]``.
+        Computes the matrix-vector multiplication ``v.T @ X[:, j:j+q]``.
 
         Parameters
         ----------
@@ -233,10 +232,10 @@ void matrix_naive_base(py::module_& m, const char* name)
             Vector to store in-place the result.
         )delimiter")
         .def("btmul", &internal_t::btmul, R"delimiter(
-        Block matrix transpose-vector multiplication.
+        Column block matrix transpose-vector multiplication.
 
         Computes the matrix-vector multiplication
-        ``v.T @ X[:, j:j+q].T @ W``.
+        ``(v.T @ X[:, j:j+q].T) * w``.
 
         Parameters
         ----------
@@ -247,12 +246,12 @@ void matrix_naive_base(py::module_& m, const char* name)
         v : (q,) np.ndarray
             Vector to multiply with the block matrix.
         w : (n,) np.ndarray
-            Vector of observation of weights.
+            Vector of weights.
         out : (n,) np.ndarray
             Vector to store in-place the result.
         )delimiter")
         .def("mul", &internal_t::mul, R"delimiter(
-        Block matrix-vector multiplication.
+        Matrix-vector multiplication.
 
         Computes the matrix-vector multiplication
         ``v.T @ X``.
@@ -265,17 +264,17 @@ void matrix_naive_base(py::module_& m, const char* name)
             Vector to store in-place the result.
         )delimiter")
         .def("sp_btmul", &internal_t::sp_btmul, R"delimiter(
-        Block matrix transpose-sparse matrix multiplication.
+        Matrix transpose-sparse matrix multiplication.
 
-        Computes the matrix-sparse matrix multiplication
-        ``v @ X.T @ W``.
+        Computes the matrix transpose-sparse matrix multiplication
+        ``v @ X.T @ w[None]``.
 
         Parameters
         ----------
         v : (l, p) scipy.sparse.csr_matrix
-            Sparse matrix to multiply with the block matrix.
+            Sparse matrix to multiply with the matrix.
         w : (n,) np.ndarray
-            Vector of observation of weights.
+            Vector of weights.
         out : (l, n) np.ndarray
             Matrix to store in-place the result.
         )delimiter")
@@ -284,6 +283,9 @@ void matrix_naive_base(py::module_& m, const char* name)
 
         Computes the weighted covariance matrix
         ``X[:, j:j+q].T @ W @ X[:, j:j+q]``.
+        
+        .. note::
+            Although the name is "covariance", we do not center the columns of ``X``!
 
         Parameters
         ----------
@@ -299,16 +301,16 @@ void matrix_naive_base(py::module_& m, const char* name)
             Extra buffer space if needed.
         )delimiter")
         .def("means", &internal_t::means, R"delimiter(
-        Computes column-wise means.
+        Column means.
 
-        Equivalent to ``np.sum(W @ X, axis=0)``.
+        Equivalent to ``np.sum(w[:, None] * X, axis=0)``.
 
         Parameters
         ----------
         w : (n,) np.ndarray
-            Vector of observation of weights.
+            Vector of weights.
         out : (p,) np.ndarray
-            Vector to store the column-wise means.
+            Vector to store the column means.
         )delimiter")
         .def("rows", &internal_t::rows, R"delimiter(
         Number of rows.
@@ -320,7 +322,7 @@ void matrix_naive_base(py::module_& m, const char* name)
 }
 
 template <class T>
-class PyMatrixCovBase : public ad::matrix::MatrixCovBase<T>
+class PyMatrixCovBase: public ad::matrix::MatrixCovBase<T>
 {
     using base_t = ad::matrix::MatrixCovBase<T>;
 public:
@@ -407,7 +409,7 @@ void matrix_cov_base(py::module_& m, const char* name)
             Vector to store in-place the result.
         )delimiter")
         .def("to_dense", &internal_t::to_dense, R"delimiter(
-        Converts block to a dense matrix.
+        Converts a block to a dense matrix.
 
         Converts the block ``X[i:i+p, j:j+q]`` into a dense matrix.
 

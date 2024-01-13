@@ -94,7 +94,7 @@ class base:
         pycls, 
         corecls,
     ):
-        """Create a new instance of a pin naive state using given state and new core state.
+        """Create a new instance of a state using an existing state and new (C++) core state.
 
         Parameters
         ---------- 
@@ -505,23 +505,9 @@ class gaussian_pin_base(base):
             method, logger,
         )
 
-        # ================ screen_is_actives check ====================
-        self._check(
-            len(self.screen_is_actives) == self.betas.shape[0],
-            "check screen_is_actives shape",
-            method, logger,
-        )
-
-        # ================ screen_betas check ====================
-        self._check(
-            len(self.screen_betas) == self.betas.shape[0],
-            "check screen_betas shape",
-            method, logger,
-        )
-
 
 class gaussian_pin_naive_base(gaussian_pin_base):
-    """State wrapper base class for all pin, naive method."""
+    """State wrapper base class for all gaussian pin naive method."""
     def default_init(
         self, 
         base_type: Union[core.state.StateGaussianPinNaive64, core.state.StateGaussianPinNaive32],
@@ -660,11 +646,6 @@ class gaussian_pin_naive_base(gaussian_pin_base):
             "check resid shape",
             method, logger,
         )
-        self._check(
-            self.resids.shape == (self.betas.shape[0], self.X.rows()),
-            "check resids shape",
-            method, logger,
-        )
 
 
 def gaussian_pin_naive(
@@ -686,12 +667,12 @@ def gaussian_pin_naive(
     max_iters: int =int(1e5),
     tol: float =1e-7,
     adev_tol: float =0.9,
-    ddev_tol: float =1e-3,
+    ddev_tol: float =1e-4,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
 ):
-    """Creates a pin, naive method state object.
+    """Creates a gaussian pin naive method state object.
 
     Parameters
     ----------
@@ -722,7 +703,7 @@ def gaussian_pin_naive(
     rsq : float
         Unnormalized :math:`R^2` value at ``screen_beta``.
         The unnormalized :math:`R^2` is given by :math:`\\|y_c\\|_{W}^2 - \\|y_c-X_c\\beta\\|_{W}^2`.
-    resid : np.ndarray
+    resid : (n,) np.ndarray
         Residual :math:`W(y_c-X\\beta)` at ``screen_beta``.
     screen_beta : (ws,) np.ndarray
         Coefficient vector on the strong set.
@@ -748,7 +729,7 @@ def gaussian_pin_naive(
         Default is ``0.9``.
     ddev_tol : float, optional
         Difference in percent deviance explained tolerance.
-        Default is ``1e-3``.
+        Default is ``1e-4``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
@@ -848,6 +829,7 @@ class gaussian_pin_cov_base(gaussian_pin_base):
         base_type: Union[core.state.StateGaussianPinCov64, core.state.StateGaussianPinCov32],
         *,
         A: Union[matrix.MatrixCovBase64, matrix.MatrixCovBase32],
+        y_var: float,
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -860,6 +842,8 @@ class gaussian_pin_cov_base(gaussian_pin_base):
         screen_is_active: np.ndarray,
         max_iters: int,
         tol: float,
+        adev_tol: float,
+        ddev_tol: float,
         newton_tol: float,
         newton_max_iters: int,
         n_threads: int,
@@ -912,6 +896,7 @@ class gaussian_pin_cov_base(gaussian_pin_base):
         base_type.__init__(
             self,
             A=A,
+            y_var=y_var,
             groups=self._groups,
             group_sizes=self._group_sizes,
             alpha=alpha,
@@ -925,6 +910,8 @@ class gaussian_pin_cov_base(gaussian_pin_base):
             lmda_path=self._lmda_path,
             max_iters=max_iters,
             tol=tol,
+            adev_tol=adev_tol,
+            ddev_tol=ddev_tol,
             newton_tol=newton_tol,
             newton_max_iters=newton_max_iters,
             n_threads=n_threads,
@@ -959,13 +946,16 @@ def gaussian_pin_cov(
     screen_beta: np.ndarray,
     screen_grad: np.ndarray,
     screen_is_active: np.ndarray,
+    y_var: float =-1,
     max_iters: int =int(1e5),
     tol: float =1e-7,
+    adev_tol: float =0.9,
+    ddev_tol: float =1e-4,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
 ):
-    """Creates a pin, covariance method state object.
+    """Creates a gaussian pin covariance method state object.
 
     Parameters
     ----------
@@ -991,7 +981,7 @@ def gaussian_pin_cov(
     rsq : float
         Unnormalized :math:`R^2` value at ``screen_beta``.
         The unnormalized :math:`R^2` is given by :math:`\\|y_c\\|_{W}^2 - \\|y_c-X_c\\beta\\|_{W}^2`.
-    resid : np.ndarray
+    resid : (n,) np.ndarray
         Residual :math:`W(y_c-X\\beta)` at ``screen_beta``.
     screen_beta : (ws,) np.ndarray
         Coefficient vector on the strong set.
@@ -1010,12 +1000,25 @@ def gaussian_pin_cov(
     screen_is_active : (a,) np.ndarray
         Boolean vector that indicates whether each strong group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    y_var : float, optional
+        :math:`\ell_2` norm squared of :math:`y_c` (weighted by :math:`W`).
+        If the user does not have access to this quantity, 
+        they may be set it to ``-1``.
+        The only effect this variable has on the algorithm is early stopping rule.
+        Hence, with ``-1``, the early stopping rule is effectively disabled.
+        Default is ``-1``.
     max_iters : int, optional
         Maximum number of coordinate descents.
         Default is ``int(1e5)``.
     tol : float, optional
         Convergence tolerance.
         Default is ``1e-7``.
+    adev_tol : float, optional
+        Percent deviance explained tolerance.
+        Default is ``0.9``.
+    ddev_tol : float, optional
+        Difference in percent deviance explained tolerance.
+        Default is ``1e-4``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
@@ -1081,6 +1084,7 @@ def gaussian_pin_cov(
 
     return _gaussian_pin_cov(
         A=A,
+        y_var=y_var,
         groups=groups,
         group_sizes=group_sizes,
         alpha=alpha,
@@ -1093,6 +1097,8 @@ def gaussian_pin_cov(
         screen_is_active=screen_is_active,
         max_iters=max_iters,
         tol=tol,
+        adev_tol=adev_tol,
+        ddev_tol=ddev_tol,
         newton_tol=newton_tol,
         newton_max_iters=newton_max_iters,
         n_threads=n_threads,
@@ -1104,7 +1110,7 @@ class gaussian_base(base):
 
 
 class gaussian_naive_base(gaussian_base):
-    """State wrapper base class for all gaussian, naive method."""
+    """State wrapper base class for all gaussian naive method."""
     def default_init(
         self, 
         base_type: Union[core.state.StateGaussianNaive64, core.state.StateGaussianNaive32],
@@ -1618,7 +1624,7 @@ def gaussian_naive(
     max_iters: int =int(1e5),
     tol: float =1e-7,
     adev_tol: float =0.9,
-    ddev_tol: float =1e-3,
+    ddev_tol: float =1e-4,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -1712,7 +1718,7 @@ def gaussian_naive(
         Default is ``0.9``.
     ddev_tol : float, optional
         Difference in percent deviance explained tolerance.
-        Default is ``1e-3``.
+        Default is ``1e-4``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
@@ -1901,7 +1907,7 @@ def gaussian_naive(
 
 
 class glm_naive_base:
-    """State wrapper base class for all glm, naive method."""
+    """State wrapper base class for all glm naive method."""
     def default_init(
         self, 
         base_type: Union[core.state.StateGlmNaive64, core.state.StateGlmNaive32],
@@ -2041,7 +2047,7 @@ def glm_naive(
     max_iters: int =int(1e5),
     tol: float =1e-7,
     adev_tol: float =0.9,
-    ddev_tol: float =1e-3,
+    ddev_tol: float =1e-4,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -2103,7 +2109,7 @@ def glm_naive(
     lmda : float
         The last regularization parameter that was attempted to be solved.
     grad : (p,) np.ndarray
-        The full gradient :math:`X^\\top W (y - \\underline{\\mu}(X\\beta + \\beta_0 \\mathbf{1}))` where
+        The full gradient :math:`X^\\top W (y - \\nabla \\underline{A}(X\\beta + \\beta_0 \\mathbf{1}))` where
         :math:`\\beta` is given by ``screen_beta``
         and :math:`\\beta_0` is given by ``beta0``.
     eta : (n,) np.ndarray
@@ -2111,14 +2117,14 @@ def glm_naive(
         where :math:`\\beta` and :math:`\\beta_0` are given by
         ``screen_beta`` and ``beta0``.
     mu : (n,) np.ndarray
-        The mean parameter :math:`\\mu \\equiv \\mu(\\eta)`
+        The mean parameter :math:`\\mu \\equiv \\nabla \\underline{A}(\\eta)`
         where :math:`\\eta` is given by ``eta``.
     dev_null : float 
         Null deviance :math:`D(\\eta_0)`
         where :math:`\\eta_0 = \\beta_0 1` is the intercept-only model fit.
     dev_full : float
         Full deviance :math:`D(\\eta^\\star)`
-        where :math:`\\eta^\\star = \\underline{\\mu}^{-1}(y)` is the saturated model fit.
+        where :math:`\\eta^\\star = (\\nabla \\underline{A})^{-1}(y)` is the saturated model fit.
     lmda_path : (l,) np.ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
@@ -2147,7 +2153,7 @@ def glm_naive(
         Default is ``0.9``.
     ddev_tol : float, optional
         Difference in percent deviance explained tolerance.
-        Default is ``1e-3``.
+        Default is ``1e-4``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
@@ -2158,7 +2164,7 @@ def glm_naive(
         Number of threads.
         Default is ``1``.
     early_exit : bool, optional
-        ``True`` if the function should early exit based on training :math:`R^2`.
+        ``True`` if the function should early exit based on training percent deviance explained.
         Default is ``True``.
     min_ratio : float, optional
         The ratio between the largest and smallest :math:`\\lambda` in the regularization sequence

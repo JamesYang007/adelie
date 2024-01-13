@@ -42,7 +42,7 @@ public:
     }
 
     void hessian(
-        const Eigen::Ref<const vec_value_t>& eta,
+        const Eigen::Ref<const vec_value_t>& mu,
         Eigen::Ref<vec_value_t> var
     ) override
     {
@@ -50,7 +50,7 @@ public:
             void,
             base_t,
             hessian,
-            eta, var
+            mu, var
         );
     }
 
@@ -76,14 +76,34 @@ void glm_base(py::module_& m, const char* name)
     using internal_t = ad::glm::GlmBase<T>;
     py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
         Base GLM class.
+
+        Suppose :math:`y \in \mathbb{R}` is a single observation
+        that is statistically modeled with an exponential family.
+        Recall that an exponential family is defined by the log-partition function :math:`A`
+        so that the (negative) log-likelihood (up to a constant) is given by
+        
+        .. math::
+            \begin{align*}
+                D(\eta) = -y \eta + A(\eta)
+            \end{align*}
+
+        We define :math:`D(\eta)` as the *deviance*.
+        The purpose of a GLM class is to define methods that evaluate key quantities regarding this model
+        that are required for solving the group lasso problem.
+
+        .. note::
+            Our definition of deviance is the negative of the standard definition.
+            Moreover, it is off by a factor of 2.
+            This was more of a design choice to be consistent with the group lasso problem.
+
+        Every GLM-like class must inherit from this class and override the methods
+        before passing into the solver.
         )delimiter")
         .def(py::init<>())
         .def("gradient", &internal_t::gradient, R"delimiter(
-        Gradient of the log-partition function.
+        Element-wise gradient of the log-partition function.
 
-        Computes :math:`\nabla \underline{A}(\eta)`
-        where :math:`\underline{A}(\eta)_k = A(\eta_k)`
-        and :math:`A` is the log-partition function.
+        Computes :math:`A'(\eta_i)` for every element ``i``.
 
         Parameters
         ----------
@@ -93,11 +113,9 @@ void glm_base(py::module_& m, const char* name)
             The gradient, or mean parameter, to store.
         )delimiter")
         .def("gradient_inverse", &internal_t::gradient_inverse, R"delimiter(
-        Inverse gradient of the log-partition function.
+        Element-wise inverse gradient of the log-partition function.
 
-        Computes :math:`(\nabla \underline{A})^{-1}(\mu)`
-        where :math:`\underline{A}(\eta)_k = A(\eta_k)`
-        and :math:`A` is the log-partition function.
+        Computes :math:`(A')^{-1}(\mu_i)` for every element ``i``.
 
         Parameters
         ----------
@@ -107,31 +125,32 @@ void glm_base(py::module_& m, const char* name)
             The natural parameter to store.
         )delimiter")
         .def("hessian", &internal_t::hessian, R"delimiter(
-        Hessian of the log-partition function.
+        Element-wise hessian of the log-partition function.
 
-        Computes :math:`\nabla^2 \underline{A}(\eta)`
-        where :math:`\underline{A}(\eta)_k = A(\eta_k)`
-        and :math:`A` is the log-partition function.
-        Note that since the hessian is a diagonal matrix, 
-        we only output the diagonal.
+        Computes :math:`A''(\eta_i)` for every element ``i``.
+
+        .. note::
+            Since the hessian is a diagonal matrix, we only output the diagonal.
+            Interestingly, most hessian computations become greatly simplified
+            when evaluated using the mean parameter instead of the natural parameter.
+            Hence, the hessian computation assumes the mean parameter is provided.
 
         Parameters
         ----------
-        eta : (n,) np.ndarray
-            Natural parameter.
+        mu : (n,) np.ndarray
+            The mean parameter.
         var : (n,) np.ndarray
             The hessian, or variance parameter, to store.
         )delimiter")
         .def("deviance", &internal_t::deviance, R"delimiter(
         Element-wise deviance function.
 
-        Computes :math:`-y_i \eta_i + A(\eta_i)` for each entry :math:`i`
-        where :math:`A` is the log-partition function.
+        Computes :math:`D(\eta_i)` for every element ``i``.
 
         Parameters
         ----------
         y : (n,) np.ndarray
-            Sufficient statistic.
+            Observations (sufficient statistics).
         eta : (n,) np.ndarray
             Natural parameter.
         dev : (n,) np.ndarray

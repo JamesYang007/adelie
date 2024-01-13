@@ -9,7 +9,7 @@ template <class MatrixType,
           class IndexType=Eigen::Index,
           class BoolType=bool
         >
-struct StateGaussianPinNaive : StateGaussianPinBase<
+struct StateGaussianPinNaive: StateGaussianPinBase<
         ValueType,
         IndexType,
         BoolType
@@ -35,8 +35,8 @@ struct StateGaussianPinNaive : StateGaussianPinBase<
     using typename base_t::dyn_vec_value_t;
     using typename base_t::dyn_vec_sp_vec_t;
     using typename base_t::dyn_vec_mat_value_t;
-    using matrix_t = MatrixType;
     using dyn_vec_vec_value_t = std::vector<vec_value_t>;
+    using matrix_t = MatrixType;
 
     /* Static states */
     const map_cvec_value_t weights;
@@ -44,15 +44,10 @@ struct StateGaussianPinNaive : StateGaussianPinBase<
     const value_t y_var;
     const map_cvec_value_t screen_X_means;
 
-    const value_t adev_tol;
-    const value_t ddev_tol;
-
     /* Dynamic states */
     matrix_t* X;
     map_vec_value_t resid;
     value_t resid_sum;
-    dyn_vec_vec_value_t resids;
-    dyn_vec_value_t resid_sums;
 
     /* buffer */
     vec_value_t screen_grad;
@@ -91,23 +86,18 @@ struct StateGaussianPinNaive : StateGaussianPinBase<
         base_t(
             groups, group_sizes, alpha, penalty,
             screen_set, screen_g1, screen_g2, screen_begins, screen_vars, screen_transforms, lmda_path, 
-            intercept, max_iters, tol, newton_tol, newton_max_iters, n_threads,
+            intercept, max_iters, tol, adev_tol, ddev_tol, newton_tol, newton_max_iters, n_threads,
             rsq, screen_beta, screen_is_active
         ),
         weights(weights.data(), weights.size()),
         y_mean(y_mean),
         y_var(y_var),
         screen_X_means(screen_X_means.data(), screen_X_means.size()),
-        adev_tol(adev_tol),
-        ddev_tol(ddev_tol),
         X(&X),
         resid(resid.data(), resid.size()),
         resid_sum(resid_sum),
         screen_grad(screen_beta.size())
-    {
-        resids.reserve(lmda_path.size());
-        resid_sums.reserve(lmda_path.size());
-    }
+    {}
 };
 
 } // namespace state

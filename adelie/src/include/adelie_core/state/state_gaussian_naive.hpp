@@ -77,7 +77,8 @@ void update_screen_derived(
         /* update screen_vars */
         const auto& D = solver.eigenvalues();
         Eigen::Map<vec_value_t> svars(screen_vars.data() + sb, gs);
-        svars.head(D.size()) = D.array();
+        // numerical stability to remove small negative eigenvalues
+        svars.head(D.size()) = D.array() * (D.array() >= 0).template cast<value_t>(); 
     }
 }
 

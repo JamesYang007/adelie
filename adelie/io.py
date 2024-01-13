@@ -7,7 +7,13 @@ class snp_base:
         self._core = core
     
     def endian(self):
-        """Gets the endianness used in the file.
+        """Endianness used in the file.
+
+        .. note::
+            We recommend that users read/write from the file on the *same* machine.
+            The ``.snpdat`` format may depend on the endianness of the machine.
+            So, unless the endianness is the same across two different machines,
+            it is undefined behavior reading a file that was generated on a different machine.
 
         Returns
         -------
@@ -21,7 +27,7 @@ class snp_base:
         )
 
     def rows(self):
-        """Gets the number of rows of the matrix.
+        """Number of rows of the matrix.
 
         Returns
         -------
@@ -31,7 +37,7 @@ class snp_base:
         return self._core.rows()
 
     def cols(self):
-        """Gets the number of columns of the matrix.
+        """Number of columns of the matrix.
 
         Returns
         -------
@@ -68,12 +74,12 @@ class snp_base:
 
 
 class snp_unphased(snp_base):
-    """IO handler for SNP Unphased data.
+    """IO handler for SNP unphased data.
 
     Parameters
     ----------
     filename : str
-        File name to either read from or write to related to the SNP data.
+        File name containing the SNP data in ``.snpdat`` format.
     """
     def __init__(
         self,
@@ -82,7 +88,7 @@ class snp_unphased(snp_base):
         super().__init__(core_io.IOSNPUnphased(filename))
 
     def outer(self):
-        """Gets the outer indexing vector.
+        """Outer indexing vector.
 
         Returns
         -------
@@ -92,7 +98,7 @@ class snp_unphased(snp_base):
         return self._core.outer()
 
     def nnz(self, j: int):
-        """Gets the number of non-zero entries at a column.
+        """Number of non-zero entries at a column.
 
         Parameters
         ----------
@@ -102,12 +108,12 @@ class snp_unphased(snp_base):
         Returns
         -------
         nnz : int
-            Number of non-zero entries column ``j``.
+            Number of non-zero entries in column ``j``.
         """
         return self._core.nnz(j)
 
     def inner(self, j: int):
-        """Gets the inner indexing vector at a column.
+        """Inner indexing vector at a column.
 
         Parameters
         ----------
@@ -122,7 +128,7 @@ class snp_unphased(snp_base):
         return self._core.inner(j)
 
     def value(self, j: int):
-        """Gets the value vector at a column.
+        """Value vector at a column.
 
         Parameters
         ----------
@@ -141,7 +147,7 @@ class snp_unphased(snp_base):
         calldata: np.ndarray,
         n_threads: int =1,
     ):
-        """Write dense array to the file in special format.
+        """Write a dense array to the file in ``.snpdat`` format.
 
         Parameters
         ----------
@@ -160,12 +166,12 @@ class snp_unphased(snp_base):
 
 
 class snp_phased_ancestry(snp_base):
-    """IO handler for SNP Phased Ancestry data.
+    """IO handler for SNP phased ancestry data.
 
     Parameters
     ----------
     filename : str
-        File name to either read from or write to related to the SNP data.
+        File name containing the SNP data in ``.snpdat`` format.
     """
     def __init__(
         self,
@@ -174,7 +180,7 @@ class snp_phased_ancestry(snp_base):
         super().__init__(core_io.IOSNPPhasedAncestry(filename))
 
     def outer(self):
-        """Gets the outer indexing vector.
+        """Outer indexing vector.
 
         Returns
         -------
@@ -184,14 +190,14 @@ class snp_phased_ancestry(snp_base):
         return self._core.outer()
 
     def nnz(self, j: int, hap: int):
-        """Gets the number of non-zero entries at SNP and haplotype.
+        """Number of non-zero entries at a SNP/haplotype.
 
         Parameters
         ----------
         j : int
             SNP index.
         hap : int
-            Haplotype for the corresponding SNP.
+            Haplotype for SNP ``j``.
 
         Returns
         -------
@@ -201,14 +207,14 @@ class snp_phased_ancestry(snp_base):
         return self._core.nnz(j, hap)
 
     def inner(self, j: int, hap: int):
-        """Gets the inner indexing vector at SNP and haplotype.
+        """Inner indexing vector at a SNP/haplotype.
 
         Parameters
         ----------
         j : int
             SNP index.
         hap : int
-            Haplotype for the corresponding SNP.
+            Haplotype for SNP ``j``.
 
         Returns
         -------
@@ -218,14 +224,14 @@ class snp_phased_ancestry(snp_base):
         return self._core.inner(j, hap)
 
     def ancestry(self, j: int, hap: int):
-        """Gets the value vector at a SNP and haplotype.
+        """Ancestry vector at a SNP/haplotype.
 
         Parameters
         ----------
         j : int
             SNP index.
         hap : int
-            Haplotype for the corresponding SNP.
+            Haplotype for SNP ``j``.
 
         Returns
         -------
@@ -241,14 +247,16 @@ class snp_phased_ancestry(snp_base):
         A: int,
         n_threads: int =1,
     ):
-        """Write dense arrays to the file in special format.
+        """Write a dense array of calldata and ancestry information to the file in ``.snpdat`` format.
 
         Parameters
         ----------
         calldata : (n, 2*s) np.ndarray
             SNP phased calldata in dense format.
+            ``calldata[i, 2*j+k]`` is the data for individual ``i``, SNP ``j``, and haplotype ``k``.
         ancestries : (n, 2*s) np.ndarray
-            Ancestry in dense format.
+            Ancestry information in dense format.
+            ``ancestries[i, 2*j+k]`` is the ancestry for individual ``i``, SNP ``j``, and haplotype ``k``.
         A : int
             Number of ancestries.
         n_threads : int, optional

@@ -33,33 +33,33 @@ void update_abs_grad(
         return screen_hashset.find(i) != screen_hashset.end();
     };
 
-    #pragma omp parallel num_threads(n_threads)
+    // do not parallelize since it may result in large false sharing 
+    // (access to abs_grad[i] is random order)
+    for (size_t ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) 
     {
-        #pragma omp for schedule(static) nowait
-        for (size_t ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) 
-        {
-            const auto i = screen_set[ss_idx];
-            const auto b = screen_begins[ss_idx]; 
-            const auto k = groups[i];
-            const auto size_k = group_sizes[i];
-            const auto pk = penalty[i];
-            abs_grad[i] = (
-                grad.segment(k, size_k) - 
-                ((1-alpha) * pk) * (lmda * Eigen::Map<const util::rowvec_type<ValueType>>(
-                    screen_beta.data() + b,
-                    size_k
-                ))
-            ).matrix().norm();
-        }
+        const auto i = screen_set[ss_idx];
+        const auto b = screen_begins[ss_idx]; 
+        const auto k = groups[i];
+        const auto size_k = group_sizes[i];
+        const auto pk = penalty[i];
+        abs_grad[i] = (
+            grad.segment(k, size_k) - 
+            ((1-alpha) * pk) * (lmda * Eigen::Map<const util::rowvec_type<ValueType>>(
+                screen_beta.data() + b,
+                size_k
+            ))
+        ).matrix().norm();
+    }
 
-        #pragma omp for schedule(static) nowait
-        for (int i = 0; i < groups.size(); ++i) 
-        {
-            if (is_screen(i)) continue;
-            const auto k = groups[i];
-            const auto size_k = group_sizes[i];
-            abs_grad[i] = grad.segment(k, size_k).matrix().norm();
-        }
+    // can be parallelized since access is in linear order.
+    // any false sharing is happening near the beginning/ends of the block of indices.
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
+    for (int i = 0; i < groups.size(); ++i) 
+    {
+        if (is_screen(i)) continue;
+        const auto k = groups[i];
+        const auto size_k = group_sizes[i];
+        abs_grad[i] = grad.segment(k, size_k).matrix().norm();
     }
 }
 
@@ -154,7 +154,7 @@ struct StateGaussianBase
     using value_t = ValueType;
     using index_t = IndexType;
     using bool_t = BoolType;
-    using safe_bool_t = int;
+    using safe_bool_t = int8_t;
     using uset_index_t = std::unordered_set<index_t>;
     using vec_value_t = util::rowvec_type<value_t>;
     using vec_index_t = util::rowvec_type<index_t>;

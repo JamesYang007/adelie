@@ -24,7 +24,7 @@ public:
     ) =0;
 
     virtual void hessian(
-        const Eigen::Ref<const vec_value_t>& eta,
+        const Eigen::Ref<const vec_value_t>& mu,
         Eigen::Ref<vec_value_t> var
     ) =0;
 
