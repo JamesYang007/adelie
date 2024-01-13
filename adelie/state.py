@@ -1162,8 +1162,6 @@ class gaussian_naive_base(gaussian_base):
         # static inputs require a reference to input
         # or copy if it must be made
         self._X = X
-        # this is only needed for check()
-        self._y = y
 
         self._X_means = np.array(X_means, copy=False, dtype=dtype)
         self._groups = np.array(groups, copy=False, dtype=int)
@@ -1225,7 +1223,7 @@ class gaussian_naive_base(gaussian_base):
     ):
         n, p = self.X.rows(), self.X.cols()
 
-        yc = self._y
+        yc = self.y
         if self.intercept:
             yc = yc - np.sum(yc * self.weights)
 
@@ -1813,6 +1811,7 @@ def gaussian_naive(
         def __init__(self, *args, **kwargs):
             self._core_type = core_base
             # this is to keep the API consistent with grpnet with non-trivial GLM object
+            self.y = y
             self.glm = None
             gaussian_naive_base.default_init(
                 self,
@@ -1828,6 +1827,7 @@ def gaussian_naive(
                 cls, state, core_state, _gaussian_naive, core_base,
             )
             obj._core_type = core_base
+            obj.y = y
             obj.glm = None
             gaussian_naive_base.__init__(obj)
             return obj
