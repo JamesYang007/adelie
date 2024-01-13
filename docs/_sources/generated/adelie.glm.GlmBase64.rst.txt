@@ -1,0 +1,39 @@
+﻿adelie.glm.GlmBase64
+====================
+
+.. currentmodule:: adelie.glm
+
+.. autoclass:: GlmBase64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GlmBase64.__init__
+      ~GlmBase64.deviance
+      ~GlmBase64.gradient
+      ~GlmBase64.gradient_inverse
+      ~GlmBase64.hessian
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: deviance
+   .. automethod:: gradient
+   .. automethod:: gradient_inverse
+   .. automethod:: hessian
+   
+   
+
+   
+   
+   

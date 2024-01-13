@@ -15,9 +15,9 @@ adelie.bcd
 
     objective
     root
+    root_function
     root_lower_bound
     root_upper_bound
-    root_function
     solve
 
 
@@ -32,9 +32,9 @@ adelie.data
     :toctree: generated/
 
 
-    create_dense
-    create_snp_unphased
-    create_snp_phased_ancestry
+    dense
+    snp_phased_ancestry
+    snp_unphased
 
 
 adelie.diagnostic
@@ -48,17 +48,33 @@ adelie.diagnostic
     :toctree: generated/
 
 
-    residuals
+    coefficient
+    diagnostic
     gradients
     gradient_norms
     gradient_scores
-    coefficient
-    plot_coefficients
-    plot_rsqs
-    plot_set_sizes
     plot_benchmark
+    plot_coefficients
+    plot_devs
     plot_kkt
-    Diagnostic
+    plot_set_sizes
+    predict
+    residuals
+
+
+adelie.glm
+----------
+
+
+.. currentmodule:: adelie.glm
+
+
+.. autosummary::
+    :toctree: generated/
+
+
+    binomial
+    gaussian
 
 
 adelie.io
@@ -72,8 +88,8 @@ adelie.io
     :toctree: generated/
 
 
-    snp_unphased
     snp_phased_ancestry
+    snp_unphased
 
 
 adelie.matrix
@@ -87,10 +103,11 @@ adelie.matrix
     :toctree: generated/
 
 
-    dense
+    concatenate
     cov_lazy
-    snp_unphased
+    dense
     snp_phased_ancestry
+    snp_unphased
 
 
 adelie.state
@@ -104,10 +121,10 @@ adelie.state
     :toctree: generated/
 
 
-    deduce_states
+    gaussian_naive
     gaussian_pin_cov
     gaussian_pin_naive
-    gaussian_naive
+    glm_naive
 
 
 adelie.solver
@@ -121,10 +138,11 @@ adelie.solver
     :toctree: generated/
 
 
+    grpnet
     objective
     solve_gaussian_pin
     solve_gaussian
-    grpnet
+    solve_glm
 
 
 Internal
@@ -138,10 +156,12 @@ Internal
     :toctree: generated/
     
 
-    adelie_core.state.StateGaussianNaive64
     adelie_core.state.StateGaussianPinBase64
     adelie_core.state.StateGaussianPinCov64
     adelie_core.state.StateGaussianPinNaive64
+    adelie_core.state.StateGaussianNaive64
+    adelie_core.state.StateGlmNaive64
+    glm.GlmBase64
     matrix.MatrixCovBase64
     matrix.MatrixNaiveBase64
     state.base

@@ -44,8 +44,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.matrix.snp_unphased';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.matrix.snp_phased_ancestry" href="adelie.matrix.snp_phased_ancestry.html" />
-    <link rel="prev" title="adelie.matrix.cov_lazy" href="adelie.matrix.cov_lazy.html" />
+    <link rel="next" title="adelie.state.gaussian_naive" href="adelie.state.gaussian_naive.html" />
+    <link rel="prev" title="adelie.matrix.snp_phased_ancestry" href="adelie.matrix.snp_phased_ancestry.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -316,55 +316,65 @@ document.write(`
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.objective.html">adelie.bcd.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root.html">adelie.bcd.root</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_lower_bound.html">adelie.bcd.root_lower_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.data.create_dense.html">adelie.data.create_dense</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.data.create_snp_unphased.html">adelie.data.create_snp_unphased</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.data.create_snp_phased_ancestry.html">adelie.data.create_snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.dense.html">adelie.data.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_phased_ancestry.html">adelie.data.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_unphased.html">adelie.data.snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.diagnostic.html">adelie.diagnostic.diagnostic</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_rsqs.html">adelie.diagnostic.plot_rsqs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_devs.html">adelie.diagnostic.plot_devs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_kkt.html">adelie.diagnostic.plot_kkt</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.Diagnostic.html">adelie.diagnostic.Diagnostic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.predict.html">adelie.diagnostic.predict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.concatenate.html">adelie.matrix.concatenate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.matrix.snp_unphased</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.matrix.snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.glm_naive.html">adelie.state.glm_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian_pin.html">adelie.solver.solve_gaussian_pin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian.html">adelie.solver.solve_gaussian</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_glm.html">adelie.solver.solve_glm</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmBase64.html">adelie.glm.GlmBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
@@ -459,6 +469,7 @@ Default is <code class="docutils literal notranslate"><span class="pre">np.float
 <p class="admonition-title">See also</p>
 <dl class="simple">
 <dt><a class="reference internal" href="adelie.io.snp_unphased.html#adelie.io.snp_unphased" title="adelie.io.snp_unphased"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.io.snp_unphased</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html#adelie.matrix.MatrixNaiveBase64" title="adelie.matrix.MatrixNaiveBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.matrix.MatrixNaiveBase64</span></code></a></dt><dd></dd>
 </dl>
 </div>
 </dd></dl>
@@ -476,20 +487,20 @@ Default is <code class="docutils literal notranslate"><span class="pre">np.float
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.matrix.cov_lazy.html"
+       href="adelie.matrix.snp_phased_ancestry.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.matrix.cov_lazy</p>
+        <p class="prev-next-title">adelie.matrix.snp_phased_ancestry</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.matrix.snp_phased_ancestry.html"
+       href="adelie.state.gaussian_naive.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.matrix.snp_phased_ancestry</p>
+        <p class="prev-next-title">adelie.state.gaussian_naive</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

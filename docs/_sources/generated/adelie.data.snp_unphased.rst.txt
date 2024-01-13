@@ -1,6 +1,6 @@
-﻿adelie.data.create\_dense
+﻿adelie.data.snp\_unphased
 =========================
 
 .. currentmodule:: adelie.data
 
-.. autofunction:: create_dense
+.. autofunction:: snp_unphased

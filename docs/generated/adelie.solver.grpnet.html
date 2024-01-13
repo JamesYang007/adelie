@@ -46,8 +46,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.solver.grpnet';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.adelie_core.state.StateGaussianNaive64" href="adelie.adelie_core.state.StateGaussianNaive64.html" />
-    <link rel="prev" title="adelie.solver.solve_gaussian" href="adelie.solver.solve_gaussian.html" />
+    <link rel="next" title="adelie.solver.objective" href="adelie.solver.objective.html" />
+    <link rel="prev" title="adelie.state.glm_naive" href="adelie.state.glm_naive.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -318,55 +318,65 @@ document.write(`
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.objective.html">adelie.bcd.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root.html">adelie.bcd.root</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_lower_bound.html">adelie.bcd.root_lower_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.data.create_dense.html">adelie.data.create_dense</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.data.create_snp_unphased.html">adelie.data.create_snp_unphased</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.data.create_snp_phased_ancestry.html">adelie.data.create_snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.dense.html">adelie.data.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_phased_ancestry.html">adelie.data.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_unphased.html">adelie.data.snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.diagnostic.html">adelie.diagnostic.diagnostic</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_rsqs.html">adelie.diagnostic.plot_rsqs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_devs.html">adelie.diagnostic.plot_devs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_kkt.html">adelie.diagnostic.plot_kkt</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.Diagnostic.html">adelie.diagnostic.Diagnostic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.predict.html">adelie.diagnostic.predict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.concatenate.html">adelie.matrix.concatenate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.glm_naive.html">adelie.state.glm_naive</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.solver.grpnet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian_pin.html">adelie.solver.solve_gaussian_pin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian.html">adelie.solver.solve_gaussian</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.solver.grpnet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_glm.html">adelie.solver.solve_glm</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmBase64.html">adelie.glm.GlmBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
@@ -431,8 +441,31 @@ document.write(`
 <h1>adelie.solver.grpnet<a class="headerlink" href="#adelie-solver-grpnet" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.solver.grpnet">
-<span class="sig-prename descclassname"><span class="pre">adelie.solver.</span></span><span class="sig-name descname"><span class="pre">grpnet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-07</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_slope_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_curv_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_exit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intercept</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pivot'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_screen_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pivot_subset_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pivot_subset_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pivot_slack_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress_bar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.solver.grpnet" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.solver.</span></span><span class="sig-name descname"><span class="pre">grpnet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GlmBase32</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.glm.GlmBase64.html#adelie.glm.GlmBase64" title="adelie.adelie_core.glm.GlmBase64"><span class="pre">GlmBase64</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">irls_max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">irls_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-07</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-07</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adev_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddev_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_exit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intercept</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pivot'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_screen_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pivot_subset_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pivot_subset_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pivot_slack_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress_bar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warm_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.solver.grpnet" title="Link to this definition">#</a></dt>
 <dd><p>Group elastic net solver.</p>
+<p>The group elastic net problem minimizes 
+the objective given by <span class="math notranslate nohighlight">\(\mathcal{L}(\beta_0, \beta)\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{align*}
+    \sum_{i=1}^n w_i \left(
+        -y_i (x_i^\top \beta + \beta_0) + A(x_i^\top \beta + \beta_0)
+    \right)
+    + \lambda \sum\limits_{g=1}^G p_g \left(
+        \alpha \|\beta_g\|_2 + \frac{1-\alpha}{2} \|\beta_g\|_2^2
+    \right)
+\end{align*}\]</div>
+<p>where 
+<span class="math notranslate nohighlight">\(\beta_0\)</span> is the intercept,
+<span class="math notranslate nohighlight">\(\beta\)</span> is the coefficient vector,
+<span class="math notranslate nohighlight">\(X\)</span> is the feature matrix,
+<span class="math notranslate nohighlight">\(y\)</span> is the response vector,
+<span class="math notranslate nohighlight">\(w \geq 0\)</span> is the observation weight vector (that sum to 1),
+<span class="math notranslate nohighlight">\(\lambda \geq 0\)</span> is the regularization parameter,
+<span class="math notranslate nohighlight">\(G\)</span> is the number of groups,
+<span class="math notranslate nohighlight">\(p \geq 0\)</span> is the penalty factor,
+<span class="math notranslate nohighlight">\(\alpha \in [0,1]\)</span> is the elastic net parameter,
+<span class="math notranslate nohighlight">\(\beta_g\)</span> are the coefficients for the <span class="math notranslate nohighlight">\(g\)</span> th group,
+and <span class="math notranslate nohighlight">\(A\)</span> is the log-partition function defining the GLM family.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
@@ -441,6 +474,14 @@ It is typically one of the matrices defined in <code class="docutils literal not
 or a <code class="docutils literal notranslate"><span class="pre">numpy</span></code> array.</p>
 </dd>
 <dt><strong>y</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Response vector.</p>
+</dd>
+<dt><strong>glm</strong><span class="classifier">Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64], optional</span></dt><dd><p>GLM object.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then it is assumed that the Gaussian GLM is used
+and an optimized routine is used to fit the group lasso problem.
+Otherwise, a more general-purpose solver is used.
+We recommend users to use <code class="docutils literal notranslate"><span class="pre">None</span></code> instead of supplying the Gaussian GLM object
+for best performance.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </dd>
 <dt><strong>groups</strong><span class="classifier">(G,) np.ndarray, optional</span></dt><dd><p>List of starting indices to each group where <cite>G</cite> is the number of groups.
 <code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group. 
@@ -463,20 +504,25 @@ It is recommended that the path is sorted in decreasing order.
 If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the path will be generated.
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </dd>
+<dt><strong>irls_max_iters</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum number of IRLS iterations.
+This parameter is only used if <code class="docutils literal notranslate"><span class="pre">glm</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>.
+Default is <code class="docutils literal notranslate"><span class="pre">100</span></code>.</p>
+</dd>
+<dt><strong>irls_tol</strong><span class="classifier">float, optional</span></dt><dd><p>IRLS convergence tolerance.
+This parameter is only used if <code class="docutils literal notranslate"><span class="pre">glm</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>.
+Default is <code class="docutils literal notranslate"><span class="pre">1e-7</span></code>.</p>
+</dd>
 <dt><strong>max_iters</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum number of coordinate descents.
 Default is <code class="docutils literal notranslate"><span class="pre">int(1e5)</span></code>.</p>
 </dd>
 <dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Convergence tolerance.
 Default is <code class="docutils literal notranslate"><span class="pre">1e-7</span></code>.</p>
 </dd>
-<dt><strong>rsq_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Early stopping rule check on <span class="math notranslate nohighlight">\(R^2\)</span>.
+<dt><strong>adev_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Percent deviance explained tolerance.
 Default is <code class="docutils literal notranslate"><span class="pre">0.9</span></code>.</p>
 </dd>
-<dt><strong>rsq_slope_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Early stopping rule check on slope of <span class="math notranslate nohighlight">\(R^2\)</span>.
-Default is <code class="docutils literal notranslate"><span class="pre">1e-3</span></code>.</p>
-</dd>
-<dt><strong>rsq_curv_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Early stopping rule check on curvature of <span class="math notranslate nohighlight">\(R^2\)</span>.
-Default is <code class="docutils literal notranslate"><span class="pre">1e-3</span></code>.</p>
+<dt><strong>ddev_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Difference in percent deviance explained tolerance.
+Default is <code class="docutils literal notranslate"><span class="pre">1e-4</span></code>.</p>
 </dd>
 <dt><strong>newton_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Convergence tolerance for the BCD update.
 Default is <code class="docutils literal notranslate"><span class="pre">1e-12</span></code>.</p>
@@ -538,16 +584,45 @@ Default is <code class="docutils literal notranslate"><span class="pre">False</s
 <dt><strong>progress_bar</strong><span class="classifier">bool, optional</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> to enable progress bar.
 Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
 </dd>
+<dt><strong>warm_start</strong><span class="classifier">optional</span></dt><dd><p>If no warm-start is provided, the initial solution is set to 0
+and other invariance quantities are set accordingly.
+Otherwise, the warm-start is used to extract all necessary state variables.
+If warm-start is used, the user <em>must</em> still provide consistent inputs,
+that is, warm-start will not overwrite the arguments passed into this function.
+For example, if <code class="docutils literal notranslate"><span class="pre">X</span></code> were a different matrix object from <code class="docutils literal notranslate"><span class="pre">warm_start.X</span></code>,
+it is undefined behavior.
+However, changing configuration settings such as tolerance levels is well-defined.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The primary use-case is when a user already called <code class="docutils literal notranslate"><span class="pre">grpnet</span></code> with <code class="docutils literal notranslate"><span class="pre">warm_start=False</span></code>
+but would like to continue fitting down a longer path of regularizations.
+This way, the user does not have to restart the fit at the beginning,
+but can simply continue from the last state <code class="docutils literal notranslate"><span class="pre">grpnet</span></code> returned.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>We have only tested warm-starts in the setting described in the note above,
+that is, when <code class="docutils literal notranslate"><span class="pre">lmda_path</span></code> is changed and no other arguments are changed.
+Use with caution in other settings!</p>
+</div>
+</dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>result</dt><dd><p>The resulting state after running the solver.
-The type is the same as that of <code class="docutils literal notranslate"><span class="pre">state</span></code>.</p>
+<dt>state</dt><dd><p>The resulting state after running the solver.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="adelie.solver.solve_gaussian.html#adelie.solver.solve_gaussian" title="adelie.solver.solve_gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.solver.solve_gaussian</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.solver.solve_glm.html#adelie.solver.solve_glm" title="adelie.solver.solve_glm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.solver.solve_glm</span></code></a></dt><dd></dd>
+</dl>
+</div>
 </dd></dl>
 
 </section>
@@ -563,20 +638,20 @@ The type is the same as that of <code class="docutils literal notranslate"><span
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.solver.solve_gaussian.html"
+       href="adelie.state.glm_naive.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.solver.solve_gaussian</p>
+        <p class="prev-next-title">adelie.state.glm_naive</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.adelie_core.state.StateGaussianNaive64.html"
+       href="adelie.solver.objective.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.adelie_core.state.StateGaussianNaive64</p>
+        <p class="prev-next-title">adelie.solver.objective</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

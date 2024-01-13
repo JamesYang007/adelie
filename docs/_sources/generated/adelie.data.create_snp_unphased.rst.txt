@@ -1,6 +1,0 @@
-﻿adelie.data.create\_snp\_unphased
-=================================
-
-.. currentmodule:: adelie.data
-
-.. autofunction:: create_snp_unphased

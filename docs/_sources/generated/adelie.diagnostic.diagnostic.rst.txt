@@ -1,9 +1,9 @@
-﻿adelie.diagnostic.Diagnostic
+﻿adelie.diagnostic.diagnostic
 ============================
 
 .. currentmodule:: adelie.diagnostic
 
-.. autoclass:: Diagnostic
+.. autoclass:: diagnostic
 
    
    
@@ -11,12 +11,12 @@
 
    .. autosummary::
    
-      ~Diagnostic.__init__
-      ~Diagnostic.plot_benchmark
-      ~Diagnostic.plot_coefficients
-      ~Diagnostic.plot_kkt
-      ~Diagnostic.plot_rsqs
-      ~Diagnostic.plot_set_sizes
+      ~diagnostic.__init__
+      ~diagnostic.plot_benchmark
+      ~diagnostic.plot_coefficients
+      ~diagnostic.plot_devs
+      ~diagnostic.plot_kkt
+      ~diagnostic.plot_set_sizes
    
    
 
@@ -30,8 +30,8 @@
    .. automethod:: __init__
    .. automethod:: plot_benchmark
    .. automethod:: plot_coefficients
+   .. automethod:: plot_devs
    .. automethod:: plot_kkt
-   .. automethod:: plot_rsqs
    .. automethod:: plot_set_sizes
    
    

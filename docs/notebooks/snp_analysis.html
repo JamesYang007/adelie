@@ -403,7 +403,7 @@ document.write(`
 <h2><strong>SNP Unphased</strong><a class="headerlink" href="#SNP-Unphased" title="Link to this heading">#</a></h2>
 <p>The usual unphased calldata is a <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">s)</span></code> matrix of type <code class="docutils literal notranslate"><span class="pre">np.int8</span></code> since the entries are one of <code class="docutils literal notranslate"><span class="pre">{0,1,2}</span></code> (assuming no missing values), where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the number of observations and <code class="docutils literal notranslate"><span class="pre">s</span></code> is the number of SNPs. We assume that the user has access to a dense matrix of the unphased calldata prior to using <code class="docutils literal notranslate"><span class="pre">adelie</span></code>. For the purposes of demonstration, we will generate our dataset. In practice, there are other third-party libraries such as <code class="docutils literal notranslate"><span class="pre">scikit-allel</span></code> that load the calldata (phased /
 unphased) and other information from files.</p>
-<p>To fully mimic the real application, we assume that the calldata is split into chromosomes so that we load column-blocks of the calldata, one chromosome at a time. We will generate <code class="docutils literal notranslate"><span class="pre">n</span></code> observations and <code class="docutils literal notranslate"><span class="pre">s[i]</span></code> SNPs per chromosome for each chromosome <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
+<p>To fully mimic the real application, we assume that the calldata is split into chromosomes so that we load column-blocks of the calldata, one chromosome at a time. We will generate <code class="docutils literal notranslate"><span class="pre">n</span></code> observations and <code class="docutils literal notranslate"><span class="pre">ss[i]</span></code> SNPs per chromosome for each chromosome <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -422,7 +422,7 @@ unphased) and other information from files.</p>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
 <span class="n">calldatas</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">ad</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">create_snp_unphased</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">i</span><span class="p">)[</span><span class="s2">&quot;X&quot;</span><span class="p">]</span>
+    <span class="n">ad</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">snp_unphased</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">i</span><span class="p">)[</span><span class="s2">&quot;X&quot;</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
 <span class="p">]</span>
 <span class="n">calldata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">calldatas</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
@@ -455,18 +455,24 @@ unphased) and other information from files.</p>
 </pre></div>
 </div>
 </div>
-<p>The following code instantiates the special matrix representing the unphased calldata. It takes in a list of file names, which contains the converted representation from before. At construction, the object will load the saved information.</p>
+<p>The following code instantiates the special matrix representing the unphased calldata. We first create a list of SNP matrices by calling <code class="docutils literal notranslate"><span class="pre">ad.matrix.snp_unphased</span></code> for each file name. Then, we “concatenate” them by calling <code class="docutils literal notranslate"><span class="pre">ad.matrix.concatenate</span></code>. Note that these matrices are specially written so that they have the same abstract representation as <code class="docutils literal notranslate"><span class="pre">calldata</span></code>, but have different internal structures.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">snp_unphased</span><span class="p">(</span><span class="n">filenames</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">snp_unphased</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span>
+    <span class="p">],</span>
+    <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>For demonstration purposes, we generate our response vector <code class="docutils literal notranslate"><span class="pre">y</span></code> from a linear model with only the last three SNPs active in the model.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">314</span><span class="p">)</span>
@@ -480,7 +486,7 @@ unphased) and other information from files.</p>
 </div>
 <p>Finally, we use <code class="docutils literal notranslate"><span class="pre">adelie</span></code> to fit lasso!</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
@@ -493,10 +499,10 @@ unphased) and other information from files.</p>
 </div>
 <p>Now, we can use our diagnostic object to inspect our solutions. For example, we can plot the coefficients.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dg</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">diagnostic</span><span class="o">.</span><span class="n">Diagnostic</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dg</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">diagnostic</span><span class="o">.</span><span class="n">diagnostic</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 <span class="n">dg</span><span class="o">.</span><span class="n">plot_coefficients</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -510,7 +516,7 @@ unphased) and other information from files.</p>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># clean-up generated files!</span>
@@ -525,9 +531,9 @@ unphased) and other information from files.</p>
 corresponds to the individual, haplotype, and SNP as in the calldata. We assume that the user has access to a dense matrix of the phased calldata and the corresponding ancestry information prior to using <code class="docutils literal notranslate"><span class="pre">adelie</span></code>.</p>
 <p>The data matrix we ultimately want to use is the sum of the ancestry-expanded calldata for each haplotype, described next. Fix a haplotype, and consider the corresponding calldata and ancestry matrix. For each <code class="docutils literal notranslate"><span class="pre">(i,j)</span></code> entry of the calldata, suppose it is exanded into a length <code class="docutils literal notranslate"><span class="pre">A</span></code> vector where a mutation is recorded in entry <code class="docutils literal notranslate"><span class="pre">k</span></code> if the ancestry at <code class="docutils literal notranslate"><span class="pre">(i,j)</span></code> is <code class="docutils literal notranslate"><span class="pre">k</span></code> (and zero otherwise). The concatenation of all these expanded vectors results in <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">As)</span></code> matrix. Then, we wish to run
 group lasso by grouping every <code class="docutils literal notranslate"><span class="pre">A</span></code> columns as a group (i.e. SNP).</p>
-<p>To fully mimic the real application, we assume that the calldata is split into chromosomes so that we load column-blocks of the calldata, one chromosome at a time. We will generate <code class="docutils literal notranslate"><span class="pre">n</span></code> observations and <code class="docutils literal notranslate"><span class="pre">s[i]</span></code> SNPs per chromosome for each chromosome <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
+<p>To fully mimic the real application, we assume that the calldata is split into chromosomes so that we load column-blocks of the calldata, one chromosome at a time. We will generate <code class="docutils literal notranslate"><span class="pre">n</span></code> observations and <code class="docutils literal notranslate"><span class="pre">ss[i]</span></code> SNPs per chromosome for each chromosome <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">1000</span>                        <span class="c1"># number of observations</span>
@@ -539,7 +545,7 @@ group lasso by grouping every <code class="docutils literal notranslate"><span c
 </div>
 <p>Similar to the unphased calldata example, we generate our data for each chromosome using a helper function and store a sparse representation in <code class="docutils literal notranslate"><span class="pre">/tmp/spa_chr_i.snpdat</span></code> for each chromosome <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span>
@@ -547,7 +553,7 @@ group lasso by grouping every <code class="docutils literal notranslate"><span c
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ss</span><span class="p">))</span>
 <span class="p">]</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ss</span><span class="p">):</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">create_snp_phased_ancestry</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">snp_phased_ancestry</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
     <span class="n">handler</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">snp_phased_ancestry</span><span class="p">(</span><span class="n">filenames</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
     <span class="n">handler</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ancestries&quot;</span><span class="p">],</span> <span class="n">A</span><span class="p">,</span> <span class="n">n_threads</span><span class="p">)</span>
 </pre></div>
@@ -555,16 +561,22 @@ group lasso by grouping every <code class="docutils literal notranslate"><span c
 </div>
 <p>We then instantiate our special matrix object for phased ancestry SNP data.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">snp_phased_ancestry</span><span class="p">(</span><span class="n">filenames</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">snp_phased_ancestry</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span>
+    <span class="p">],</span>
+    <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>For demonstration purposes, we generate our response vector <code class="docutils literal notranslate"><span class="pre">y</span></code> from a linear model with only the last three SNPs active in the model.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ss</span><span class="p">))</span>
@@ -580,7 +592,7 @@ group lasso by grouping every <code class="docutils literal notranslate"><span c
 </div>
 <p>Finally, we use <code class="docutils literal notranslate"><span class="pre">adelie</span></code> to fit group lasso!</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
@@ -588,17 +600,16 @@ group lasso by grouping every <code class="docutils literal notranslate"><span c
     <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
     <span class="n">groups</span><span class="o">=</span><span class="n">A</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">s</span><span class="p">),</span>
     <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">,</span>
-    <span class="n">screen_rule</span><span class="o">=</span><span class="s2">&quot;pivot&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Now, we can use our diagnostic object to inspect our solutions. For example, we can plot the coefficients.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dg</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">diagnostic</span><span class="o">.</span><span class="n">Diagnostic</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dg</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">diagnostic</span><span class="o">.</span><span class="n">diagnostic</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 <span class="n">dg</span><span class="o">.</span><span class="n">plot_coefficients</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -612,7 +623,7 @@ group lasso by grouping every <code class="docutils literal notranslate"><span c
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># clean-up generated files!</span>

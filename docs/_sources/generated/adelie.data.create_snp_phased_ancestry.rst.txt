@@ -1,6 +1,0 @@
-﻿adelie.data.create\_snp\_phased\_ancestry
-=========================================
-
-.. currentmodule:: adelie.data
-
-.. autofunction:: create_snp_phased_ancestry

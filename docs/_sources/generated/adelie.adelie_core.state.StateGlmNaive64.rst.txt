@@ -1,0 +1,152 @@
+﻿adelie.adelie\_core.state.StateGlmNaive64
+=========================================
+
+.. currentmodule:: adelie.adelie_core.state
+
+.. autoclass:: StateGlmNaive64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~StateGlmNaive64.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StateGlmNaive64.X
+      ~StateGlmNaive64.abs_grad
+      ~StateGlmNaive64.active_sizes
+      ~StateGlmNaive64.adev_tol
+      ~StateGlmNaive64.alpha
+      ~StateGlmNaive64.benchmark_fit_active
+      ~StateGlmNaive64.benchmark_fit_screen
+      ~StateGlmNaive64.benchmark_invariance
+      ~StateGlmNaive64.benchmark_kkt
+      ~StateGlmNaive64.benchmark_screen
+      ~StateGlmNaive64.beta0
+      ~StateGlmNaive64.betas
+      ~StateGlmNaive64.ddev_tol
+      ~StateGlmNaive64.dev_full
+      ~StateGlmNaive64.dev_null
+      ~StateGlmNaive64.devs
+      ~StateGlmNaive64.early_exit
+      ~StateGlmNaive64.eta
+      ~StateGlmNaive64.glm
+      ~StateGlmNaive64.grad
+      ~StateGlmNaive64.group_sizes
+      ~StateGlmNaive64.groups
+      ~StateGlmNaive64.intercept
+      ~StateGlmNaive64.intercepts
+      ~StateGlmNaive64.irls_max_iters
+      ~StateGlmNaive64.irls_tol
+      ~StateGlmNaive64.lmda
+      ~StateGlmNaive64.lmda_max
+      ~StateGlmNaive64.lmda_path
+      ~StateGlmNaive64.lmda_path_size
+      ~StateGlmNaive64.lmdas
+      ~StateGlmNaive64.max_iters
+      ~StateGlmNaive64.max_screen_size
+      ~StateGlmNaive64.min_ratio
+      ~StateGlmNaive64.mu
+      ~StateGlmNaive64.n_threads
+      ~StateGlmNaive64.n_valid_solutions
+      ~StateGlmNaive64.newton_max_iters
+      ~StateGlmNaive64.newton_tol
+      ~StateGlmNaive64.penalty
+      ~StateGlmNaive64.pivot_slack_ratio
+      ~StateGlmNaive64.pivot_subset_min
+      ~StateGlmNaive64.pivot_subset_ratio
+      ~StateGlmNaive64.screen_begins
+      ~StateGlmNaive64.screen_beta
+      ~StateGlmNaive64.screen_g1
+      ~StateGlmNaive64.screen_g2
+      ~StateGlmNaive64.screen_hashset
+      ~StateGlmNaive64.screen_is_active
+      ~StateGlmNaive64.screen_rule
+      ~StateGlmNaive64.screen_set
+      ~StateGlmNaive64.screen_sizes
+      ~StateGlmNaive64.setup_lmda_max
+      ~StateGlmNaive64.setup_lmda_path
+      ~StateGlmNaive64.tol
+      ~StateGlmNaive64.weights
+      ~StateGlmNaive64.y
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   
+   
+
+   
+   
+   
+   .. autoattribute:: X
+   .. autoattribute:: abs_grad
+   .. autoattribute:: active_sizes
+   .. autoattribute:: adev_tol
+   .. autoattribute:: alpha
+   .. autoattribute:: benchmark_fit_active
+   .. autoattribute:: benchmark_fit_screen
+   .. autoattribute:: benchmark_invariance
+   .. autoattribute:: benchmark_kkt
+   .. autoattribute:: benchmark_screen
+   .. autoattribute:: beta0
+   .. autoattribute:: betas
+   .. autoattribute:: ddev_tol
+   .. autoattribute:: dev_full
+   .. autoattribute:: dev_null
+   .. autoattribute:: devs
+   .. autoattribute:: early_exit
+   .. autoattribute:: eta
+   .. autoattribute:: glm
+   .. autoattribute:: grad
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: intercept
+   .. autoattribute:: intercepts
+   .. autoattribute:: irls_max_iters
+   .. autoattribute:: irls_tol
+   .. autoattribute:: lmda
+   .. autoattribute:: lmda_max
+   .. autoattribute:: lmda_path
+   .. autoattribute:: lmda_path_size
+   .. autoattribute:: lmdas
+   .. autoattribute:: max_iters
+   .. autoattribute:: max_screen_size
+   .. autoattribute:: min_ratio
+   .. autoattribute:: mu
+   .. autoattribute:: n_threads
+   .. autoattribute:: n_valid_solutions
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: newton_tol
+   .. autoattribute:: penalty
+   .. autoattribute:: pivot_slack_ratio
+   .. autoattribute:: pivot_subset_min
+   .. autoattribute:: pivot_subset_ratio
+   .. autoattribute:: screen_begins
+   .. autoattribute:: screen_beta
+   .. autoattribute:: screen_g1
+   .. autoattribute:: screen_g2
+   .. autoattribute:: screen_hashset
+   .. autoattribute:: screen_is_active
+   .. autoattribute:: screen_rule
+   .. autoattribute:: screen_set
+   .. autoattribute:: screen_sizes
+   .. autoattribute:: setup_lmda_max
+   .. autoattribute:: setup_lmda_path
+   .. autoattribute:: tol
+   .. autoattribute:: weights
+   .. autoattribute:: y
+   
+   

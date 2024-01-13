@@ -27,10 +27,12 @@
       ~StateGaussianPinCov64.active_g2
       ~StateGaussianPinCov64.active_order
       ~StateGaussianPinCov64.active_set
+      ~StateGaussianPinCov64.adev_tol
       ~StateGaussianPinCov64.alpha
       ~StateGaussianPinCov64.benchmark_active
       ~StateGaussianPinCov64.benchmark_screen
       ~StateGaussianPinCov64.betas
+      ~StateGaussianPinCov64.ddev_tol
       ~StateGaussianPinCov64.group_sizes
       ~StateGaussianPinCov64.groups
       ~StateGaussianPinCov64.intercept
@@ -44,22 +46,18 @@
       ~StateGaussianPinCov64.newton_tol
       ~StateGaussianPinCov64.penalty
       ~StateGaussianPinCov64.rsq
-      ~StateGaussianPinCov64.rsq_curv_tol
-      ~StateGaussianPinCov64.rsq_slope_tol
       ~StateGaussianPinCov64.rsqs
       ~StateGaussianPinCov64.screen_begins
       ~StateGaussianPinCov64.screen_beta
-      ~StateGaussianPinCov64.screen_betas
       ~StateGaussianPinCov64.screen_g1
       ~StateGaussianPinCov64.screen_g2
       ~StateGaussianPinCov64.screen_grad
-      ~StateGaussianPinCov64.screen_grads
       ~StateGaussianPinCov64.screen_is_active
-      ~StateGaussianPinCov64.screen_is_actives
       ~StateGaussianPinCov64.screen_set
       ~StateGaussianPinCov64.screen_transforms
       ~StateGaussianPinCov64.screen_vars
       ~StateGaussianPinCov64.tol
+      ~StateGaussianPinCov64.y_var
    
    
 
@@ -79,10 +77,12 @@
    .. autoattribute:: active_g2
    .. autoattribute:: active_order
    .. autoattribute:: active_set
+   .. autoattribute:: adev_tol
    .. autoattribute:: alpha
    .. autoattribute:: benchmark_active
    .. autoattribute:: benchmark_screen
    .. autoattribute:: betas
+   .. autoattribute:: ddev_tol
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
    .. autoattribute:: intercept
@@ -96,21 +96,17 @@
    .. autoattribute:: newton_tol
    .. autoattribute:: penalty
    .. autoattribute:: rsq
-   .. autoattribute:: rsq_curv_tol
-   .. autoattribute:: rsq_slope_tol
    .. autoattribute:: rsqs
    .. autoattribute:: screen_begins
    .. autoattribute:: screen_beta
-   .. autoattribute:: screen_betas
    .. autoattribute:: screen_g1
    .. autoattribute:: screen_g2
    .. autoattribute:: screen_grad
-   .. autoattribute:: screen_grads
    .. autoattribute:: screen_is_active
-   .. autoattribute:: screen_is_actives
    .. autoattribute:: screen_set
    .. autoattribute:: screen_transforms
    .. autoattribute:: screen_vars
    .. autoattribute:: tol
+   .. autoattribute:: y_var
    
    

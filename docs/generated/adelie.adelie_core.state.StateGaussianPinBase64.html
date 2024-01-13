@@ -47,7 +47,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="adelie.adelie_core.state.StateGaussianPinCov64" href="adelie.adelie_core.state.StateGaussianPinCov64.html" />
-    <link rel="prev" title="adelie.adelie_core.state.StateGaussianNaive64" href="adelie.adelie_core.state.StateGaussianNaive64.html" />
+    <link rel="prev" title="adelie.solver.solve_glm" href="adelie.solver.solve_glm.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -318,55 +318,65 @@ document.write(`
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.objective.html">adelie.bcd.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root.html">adelie.bcd.root</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_lower_bound.html">adelie.bcd.root_lower_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.data.create_dense.html">adelie.data.create_dense</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.data.create_snp_unphased.html">adelie.data.create_snp_unphased</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.data.create_snp_phased_ancestry.html">adelie.data.create_snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.dense.html">adelie.data.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_phased_ancestry.html">adelie.data.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_unphased.html">adelie.data.snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.diagnostic.html">adelie.diagnostic.diagnostic</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_rsqs.html">adelie.diagnostic.plot_rsqs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_devs.html">adelie.diagnostic.plot_devs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_kkt.html">adelie.diagnostic.plot_kkt</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.Diagnostic.html">adelie.diagnostic.Diagnostic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.predict.html">adelie.diagnostic.predict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.concatenate.html">adelie.matrix.concatenate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.glm_naive.html">adelie.state.glm_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian_pin.html">adelie.solver.solve_gaussian_pin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian.html">adelie.solver.solve_gaussian</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_glm.html">adelie.solver.solve_glm</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmBase64.html">adelie.glm.GlmBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
@@ -432,7 +442,7 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.adelie_core.state.</span></span><span class="sig-name descname"><span class="pre">StateGaussianPinBase64</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64" title="Link to this definition">#</a></dt>
-<dd><p>Base core state class for all pin methods.</p>
+<dd><p>Base core state class for all gaussian pin methods.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
@@ -459,17 +469,23 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.active_set" title="adelie.adelie_core.state.StateGaussianPinBase64.active_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_set</span></code></a></p></td>
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">screen_set</span></code> that correspond to active groups.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.alpha" title="adelie.adelie_core.state.StateGaussianPinBase64.alpha"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alpha</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.adev_tol" title="adelie.adelie_core.state.StateGaussianPinBase64.adev_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adev_tol</span></code></a></p></td>
+<td><p>Percent deviance explained tolerance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.alpha" title="adelie.adelie_core.state.StateGaussianPinBase64.alpha"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alpha</span></code></a></p></td>
 <td><p>Elastic net parameter.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.benchmark_active" title="adelie.adelie_core.state.StateGaussianPinBase64.benchmark_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_active</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.benchmark_active" title="adelie.adelie_core.state.StateGaussianPinBase64.benchmark_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_active</span></code></a></p></td>
 <td><p>Benchmark time for performing coordinate-descent on the active set for each <span class="math notranslate nohighlight">\(\lambda\)</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.benchmark_screen" title="adelie.adelie_core.state.StateGaussianPinBase64.benchmark_screen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_screen</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.benchmark_screen" title="adelie.adelie_core.state.StateGaussianPinBase64.benchmark_screen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_screen</span></code></a></p></td>
 <td><p>Benchmark time for performing coordinate-descent on the strong set for each <span class="math notranslate nohighlight">\(\lambda\)</span>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.betas" title="adelie.adelie_core.state.StateGaussianPinBase64.betas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">betas</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.betas" title="adelie.adelie_core.state.StateGaussianPinBase64.betas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">betas</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> corresponds to the solution corresponding to <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.ddev_tol" title="adelie.adelie_core.state.StateGaussianPinBase64.ddev_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ddev_tol</span></code></a></p></td>
+<td><p>Difference in percent deviance explained tolerance.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.group_sizes" title="adelie.adelie_core.state.StateGaussianPinBase64.group_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_sizes</span></code></a></p></td>
 <td><p>List of group sizes corresponding to each element in <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
@@ -510,12 +526,6 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.rsq" title="adelie.adelie_core.state.StateGaussianPinBase64.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></p></td>
 <td><p>Unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> value at <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.rsq_curv_tol" title="adelie.adelie_core.state.StateGaussianPinBase64.rsq_curv_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq_curv_tol</span></code></a></p></td>
-<td><p>Early stopping rule check on curvature of <span class="math notranslate nohighlight">\(R^2\)</span>.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.rsq_slope_tol" title="adelie.adelie_core.state.StateGaussianPinBase64.rsq_slope_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq_slope_tol</span></code></a></p></td>
-<td><p>Early stopping rule check on slope of <span class="math notranslate nohighlight">\(R^2\)</span>.</p></td>
-</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.rsqs" title="adelie.adelie_core.state.StateGaussianPinBase64.rsqs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsqs</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">rsqs[i]</span></code> corresponds to the unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p></td>
 </tr>
@@ -525,20 +535,14 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_beta" title="adelie.adelie_core.state.StateGaussianPinBase64.screen_beta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_beta</span></code></a></p></td>
 <td><p>Coefficient vector on the strong set.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_betas" title="adelie.adelie_core.state.StateGaussianPinBase64.screen_betas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_betas</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">screen_betas[i]</span></code> is the state of <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>  when the <code class="docutils literal notranslate"><span class="pre">i</span></code> th solution is computed.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_g1" title="adelie.adelie_core.state.StateGaussianPinBase64.screen_g1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_g1</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_g1" title="adelie.adelie_core.state.StateGaussianPinBase64.screen_g1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_g1</span></code></a></p></td>
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">screen_set</span></code> that correspond to groups of size <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_g2" title="adelie.adelie_core.state.StateGaussianPinBase64.screen_g2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_g2</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_g2" title="adelie.adelie_core.state.StateGaussianPinBase64.screen_g2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_g2</span></code></a></p></td>
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">screen_set</span></code> that correspond to groups more than size <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_is_active" title="adelie.adelie_core.state.StateGaussianPinBase64.screen_is_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_is_active</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_is_active" title="adelie.adelie_core.state.StateGaussianPinBase64.screen_is_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_is_active</span></code></a></p></td>
 <td><p>Boolean vector that indicates whether each strong group in <code class="docutils literal notranslate"><span class="pre">groups</span></code> is active or not.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_is_actives" title="adelie.adelie_core.state.StateGaussianPinBase64.screen_is_actives"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_is_actives</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">screen_is_actives[i]</span></code> is the state of <code class="docutils literal notranslate"><span class="pre">screen_is_active</span></code>  when the <code class="docutils literal notranslate"><span class="pre">i</span></code> th solution is computed.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_set" title="adelie.adelie_core.state.StateGaussianPinBase64.screen_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_set</span></code></a></p></td>
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">groups</span></code> that correspond to the strong groups.</p></td>
@@ -556,7 +560,7 @@ document.write(`
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64" title="adelie.adelie_core.state.StateGaussianPinBase64"><span class="pre">adelie.adelie_core.state.StateGaussianPinBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_g1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_g2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_begins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_vars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_transforms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">adelie.adelie_core.VectorMatrix64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intercept</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_slope_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq_curv_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_is_active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.__init__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64" title="adelie.adelie_core.state.StateGaussianPinBase64"><span class="pre">adelie.adelie_core.state.StateGaussianPinBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_g1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_g2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_begins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_vars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_transforms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">adelie.adelie_core.VectorMatrix64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intercept</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adev_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddev_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_is_active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -600,6 +604,12 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.adev_tol">
+<span class="sig-name descname"><span class="pre">adev_tol</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.adev_tol" title="Link to this definition">#</a></dt>
+<dd><p>Percent deviance explained tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.alpha">
 <span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.alpha" title="Link to this definition">#</a></dt>
 <dd><p>Elastic net parameter.
@@ -622,6 +632,12 @@ It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</sp
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.betas">
 <span class="sig-name descname"><span class="pre">betas</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.betas" title="Link to this definition">#</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> corresponds to the solution corresponding to <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.ddev_tol">
+<span class="sig-name descname"><span class="pre">ddev_tol</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.ddev_tol" title="Link to this definition">#</a></dt>
+<dd><p>Difference in percent deviance explained tolerance.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -708,18 +724,6 @@ The unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> is gi
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.rsq_curv_tol">
-<span class="sig-name descname"><span class="pre">rsq_curv_tol</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.rsq_curv_tol" title="Link to this definition">#</a></dt>
-<dd><p>Early stopping rule check on curvature of <span class="math notranslate nohighlight">\(R^2\)</span>.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.rsq_slope_tol">
-<span class="sig-name descname"><span class="pre">rsq_slope_tol</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.rsq_slope_tol" title="Link to this definition">#</a></dt>
-<dd><p>Early stopping rule check on slope of <span class="math notranslate nohighlight">\(R^2\)</span>.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.rsqs">
 <span class="sig-name descname"><span class="pre">rsqs</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.rsqs" title="Link to this definition">#</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">rsqs[i]</span></code> corresponds to the unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p>
@@ -746,13 +750,6 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.screen_betas">
-<span class="sig-name descname"><span class="pre">screen_betas</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_betas" title="Link to this definition">#</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">screen_betas[i]</span></code> is the state of <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code> 
-when the <code class="docutils literal notranslate"><span class="pre">i</span></code> th solution is computed.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.screen_g1">
 <span class="sig-name descname"><span class="pre">screen_g1</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_g1" title="Link to this definition">#</a></dt>
 <dd><p>List of indices into <code class="docutils literal notranslate"><span class="pre">screen_set</span></code> that correspond to groups of size <code class="docutils literal notranslate"><span class="pre">1</span></code>.
@@ -773,13 +770,6 @@ such that <code class="docutils literal notranslate"><span class="pre">group_siz
 <span class="sig-name descname"><span class="pre">screen_is_active</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_is_active" title="Link to this definition">#</a></dt>
 <dd><p>Boolean vector that indicates whether each strong group in <code class="docutils literal notranslate"><span class="pre">groups</span></code> is active or not.
 <code class="docutils literal notranslate"><span class="pre">screen_is_active[i]</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> if and only if <code class="docutils literal notranslate"><span class="pre">screen_set[i]</span></code> is active.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.screen_is_actives">
-<span class="sig-name descname"><span class="pre">screen_is_actives</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_is_actives" title="Link to this definition">#</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">screen_is_actives[i]</span></code> is the state of <code class="docutils literal notranslate"><span class="pre">screen_is_active</span></code> 
-when the <code class="docutils literal notranslate"><span class="pre">i</span></code> th solution is computed.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -831,12 +821,12 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.adelie_core.state.StateGaussianNaive64.html"
+       href="adelie.solver.solve_glm.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.adelie_core.state.StateGaussianNaive64</p>
+        <p class="prev-next-title">adelie.solver.solve_glm</p>
       </div>
     </a>
     <a class="right-next"
@@ -871,10 +861,12 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.active_g2"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.active_g2</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.active_order"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.active_order</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.active_set"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.active_set</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.adev_tol"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.adev_tol</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.alpha"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.alpha</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.benchmark_active"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.benchmark_active</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.benchmark_screen"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.benchmark_screen</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.betas"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.betas</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.ddev_tol"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.ddev_tol</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.group_sizes"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.group_sizes</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.groups"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.groups</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.intercept"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.intercept</span></code></a></li>
@@ -888,16 +880,12 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.newton_tol"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.newton_tol</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.penalty"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.penalty</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.rsq"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.rsq</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.rsq_curv_tol"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.rsq_curv_tol</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.rsq_slope_tol"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.rsq_slope_tol</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.rsqs"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.rsqs</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_begins"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.screen_begins</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_beta"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.screen_beta</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_betas"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.screen_betas</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_g1"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.screen_g1</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_g2"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.screen_g2</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_is_active"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.screen_is_active</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_is_actives"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.screen_is_actives</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_set"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.screen_set</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_transforms"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.screen_transforms</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_vars"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinBase64.screen_vars</span></code></a></li>

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.data.create_dense &#8212; adelie 1.1.7
+    <title>adelie.matrix.concatenate &#8212; adelie 1.1.7
  documentation</title>
   
   
@@ -41,13 +41,11 @@
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.data.create_dense';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.matrix.concatenate';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.data.create_snp_unphased" href="adelie.data.create_snp_unphased.html" />
-    <link rel="prev" title="adelie.bcd.solve" href="adelie.bcd.solve.html" />
+    <link rel="next" title="adelie.matrix.cov_lazy" href="adelie.matrix.cov_lazy.html" />
+    <link rel="prev" title="adelie.io.snp_unphased" href="adelie.io.snp_unphased.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -318,55 +316,65 @@ document.write(`
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.objective.html">adelie.bcd.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root.html">adelie.bcd.root</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_lower_bound.html">adelie.bcd.root_lower_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.data.create_dense</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.data.create_snp_unphased.html">adelie.data.create_snp_unphased</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.data.create_snp_phased_ancestry.html">adelie.data.create_snp_phased_ancestry</a></li>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.dense.html">adelie.data.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_phased_ancestry.html">adelie.data.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_unphased.html">adelie.data.snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.diagnostic.html">adelie.diagnostic.diagnostic</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_rsqs.html">adelie.diagnostic.plot_rsqs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_devs.html">adelie.diagnostic.plot_devs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_kkt.html">adelie.diagnostic.plot_kkt</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.Diagnostic.html">adelie.diagnostic.Diagnostic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.predict.html">adelie.diagnostic.predict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
 </ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.matrix.concatenate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.deduce_states.html">adelie.state.deduce_states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.glm_naive.html">adelie.state.glm_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian_pin.html">adelie.solver.solve_gaussian_pin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian.html">adelie.solver.solve_gaussian</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_glm.html">adelie.solver.solve_glm</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmBase64.html">adelie.glm.GlmBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
@@ -410,7 +418,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.data....</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.matri...</li>
   </ul>
 </nav>
 </div>
@@ -427,68 +435,43 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-data-create-dense">
-<h1>adelie.data.create_dense<a class="headerlink" href="#adelie-data-create-dense" title="Link to this heading">#</a></h1>
+  <section id="adelie-matrix-concatenate">
+<h1>adelie.matrix.concatenate<a class="headerlink" href="#adelie-matrix-concatenate" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="adelie.data.create_dense">
-<span class="sig-prename descclassname"><span class="pre">adelie.data.</span></span><span class="sig-name descname"><span class="pre">create_dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">G</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equal_groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sparsity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.data.create_dense" title="Link to this definition">#</a></dt>
-<dd><p>Creates a dense dataset.</p>
-<p>The groups and group sizes are generated randomly
-such that <code class="docutils literal notranslate"><span class="pre">G</span></code> groups are created and the sum of the group sizes is <code class="docutils literal notranslate"><span class="pre">p</span></code>.
-The data matrix <code class="docutils literal notranslate"><span class="pre">X</span></code> is generated from a normal distribution
-where each feature is equicorrelated with the other features by <code class="docutils literal notranslate"><span class="pre">rho</span></code>.
-The response <code class="docutils literal notranslate"><span class="pre">y</span></code> is generated from a linear model <span class="math notranslate nohighlight">\(y = X\beta + \epsilon\)</span>
-with <span class="math notranslate nohighlight">\(\epsilon \sim N(0, \sigma^2 I_n)\)</span> and <span class="math notranslate nohighlight">\(\beta\)</span> such that <code class="docutils literal notranslate"><span class="pre">sparsity</span></code> proportion
-of the entries are set to <span class="math notranslate nohighlight">\(0\)</span>.
-We compute <span class="math notranslate nohighlight">\(\sigma^2\)</span> such that the signal-to-noise ratio is given by <code class="docutils literal notranslate"><span class="pre">snr</span></code>.
-The penalty factors are by default set to <code class="docutils literal notranslate"><span class="pre">np.sqrt(group_sizes)</span></code>,
-however if <code class="docutils literal notranslate"><span class="pre">zero_penalty</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>, a random set of penalties will be set to zero,
-in which case, <code class="docutils literal notranslate"><span class="pre">penalty</span></code> is rescaled such that the <span class="math notranslate nohighlight">\(\ell_2\)</span> norm squared is <code class="docutils literal notranslate"><span class="pre">p</span></code>.</p>
+<dt class="sig sig-object py" id="adelie.matrix.concatenate">
+<span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">concatenate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mats</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'naive'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.matrix.concatenate" title="Link to this definition">#</a></dt>
+<dd><p>Creates a column-wise concatenation of the matrices.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>n</strong><span class="classifier">int</span></dt><dd><p>Number of data points.</p>
+<dd class="field-odd"><dl>
+<dt><strong>mats</strong><span class="classifier">list</span></dt><dd><p>List of matrices to concatenate along the columns.</p>
 </dd>
-<dt><strong>p</strong><span class="classifier">int</span></dt><dd><p>Number of features.</p>
+<dt><strong>method</strong><span class="classifier">str, optional</span></dt><dd><p>Method type. It must be one of the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;naive&quot;</span></code>: naive method.</p></li>
+</ul>
+</div></blockquote>
+<p>Default is <code class="docutils literal notranslate"><span class="pre">&quot;naive&quot;</span></code>.</p>
 </dd>
-<dt><strong>G</strong><span class="classifier">int</span></dt><dd><p>Number of groups.</p>
-</dd>
-<dt><strong>equal_groups</strong><span class="classifier">bool, optional</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, group sizes are made as equal as possible.
-Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
-</dd>
-<dt><strong>rho</strong><span class="classifier">float, optional</span></dt><dd><p>Feature (equi)-correlation.
-Default is <code class="docutils literal notranslate"><span class="pre">0</span></code> so that the features are independent.</p>
-</dd>
-<dt><strong>sparsity</strong><span class="classifier">float, optional</span></dt><dd><p>Proportion of <span class="math notranslate nohighlight">\(\beta\)</span> entries to be zeroed out.
-Default is <code class="docutils literal notranslate"><span class="pre">0.95</span></code>.</p>
-</dd>
-<dt><strong>zero_penalty</strong><span class="classifier">float, optional</span></dt><dd><p>Proportion of <code class="docutils literal notranslate"><span class="pre">penalty</span></code> entries to be zeroed out.
-Default is <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
-</dd>
-<dt><strong>snr</strong><span class="classifier">float, optional</span></dt><dd><p>Signal-to-noise ratio.
+<dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
 Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
-</dd>
-<dt><strong>seed</strong><span class="classifier">int, optional</span></dt><dd><p>Random seed.
-Default is <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>data</strong><span class="classifier">dict</span></dt><dd><p>A dictionary containing the generated data:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;X&quot;</span></code>: feature matrix.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code>: response vector.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;groups&quot;</span></code>: mapping of group index to the starting column index of <code class="docutils literal notranslate"><span class="pre">X</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;group_sizes&quot;</span></code>: mapping of group index to the group size.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;penalty&quot;</span></code>: penalty factor for each group index.</p></li>
-</ul>
-</div></blockquote>
+<dd class="field-even"><dl class="simple">
+<dt>wrap</dt><dd><p>Wrapper matrix object.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html#adelie.matrix.MatrixNaiveBase64" title="adelie.matrix.MatrixNaiveBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.matrix.MatrixNaiveBase64</span></code></a></dt><dd></dd>
+</dl>
+</div>
 </dd></dl>
 
 </section>
@@ -504,20 +487,20 @@ Default is <code class="docutils literal notranslate"><span class="pre">0</span>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.bcd.solve.html"
+       href="adelie.io.snp_unphased.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.bcd.solve</p>
+        <p class="prev-next-title">adelie.io.snp_unphased</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.data.create_snp_unphased.html"
+       href="adelie.matrix.cov_lazy.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.data.create_snp_unphased</p>
+        <p class="prev-next-title">adelie.matrix.cov_lazy</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -537,14 +520,14 @@ Default is <code class="docutils literal notranslate"><span class="pre">0</span>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.data.create_dense"><code class="docutils literal notranslate"><span class="pre">create_dense()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.concatenate"><code class="docutils literal notranslate"><span class="pre">concatenate()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.data.create_dense.rst.txt">
+    <a href="../_sources/generated/adelie.matrix.concatenate.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

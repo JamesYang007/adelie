@@ -25,6 +25,7 @@
       ~StateGaussianNaive64.X_means
       ~StateGaussianNaive64.abs_grad
       ~StateGaussianNaive64.active_sizes
+      ~StateGaussianNaive64.adev_tol
       ~StateGaussianNaive64.alpha
       ~StateGaussianNaive64.benchmark_fit_active
       ~StateGaussianNaive64.benchmark_fit_screen
@@ -32,6 +33,8 @@
       ~StateGaussianNaive64.benchmark_kkt
       ~StateGaussianNaive64.benchmark_screen
       ~StateGaussianNaive64.betas
+      ~StateGaussianNaive64.ddev_tol
+      ~StateGaussianNaive64.devs
       ~StateGaussianNaive64.early_exit
       ~StateGaussianNaive64.grad
       ~StateGaussianNaive64.group_sizes
@@ -57,10 +60,6 @@
       ~StateGaussianNaive64.resid
       ~StateGaussianNaive64.resid_sum
       ~StateGaussianNaive64.rsq
-      ~StateGaussianNaive64.rsq_curv_tol
-      ~StateGaussianNaive64.rsq_slope_tol
-      ~StateGaussianNaive64.rsq_tol
-      ~StateGaussianNaive64.rsqs
       ~StateGaussianNaive64.screen_X_means
       ~StateGaussianNaive64.screen_begins
       ~StateGaussianNaive64.screen_beta
@@ -68,7 +67,6 @@
       ~StateGaussianNaive64.screen_g2
       ~StateGaussianNaive64.screen_hashset
       ~StateGaussianNaive64.screen_is_active
-      ~StateGaussianNaive64.screen_order
       ~StateGaussianNaive64.screen_rule
       ~StateGaussianNaive64.screen_set
       ~StateGaussianNaive64.screen_sizes
@@ -97,6 +95,7 @@
    .. autoattribute:: X_means
    .. autoattribute:: abs_grad
    .. autoattribute:: active_sizes
+   .. autoattribute:: adev_tol
    .. autoattribute:: alpha
    .. autoattribute:: benchmark_fit_active
    .. autoattribute:: benchmark_fit_screen
@@ -104,6 +103,8 @@
    .. autoattribute:: benchmark_kkt
    .. autoattribute:: benchmark_screen
    .. autoattribute:: betas
+   .. autoattribute:: ddev_tol
+   .. autoattribute:: devs
    .. autoattribute:: early_exit
    .. autoattribute:: grad
    .. autoattribute:: group_sizes
@@ -129,10 +130,6 @@
    .. autoattribute:: resid
    .. autoattribute:: resid_sum
    .. autoattribute:: rsq
-   .. autoattribute:: rsq_curv_tol
-   .. autoattribute:: rsq_slope_tol
-   .. autoattribute:: rsq_tol
-   .. autoattribute:: rsqs
    .. autoattribute:: screen_X_means
    .. autoattribute:: screen_begins
    .. autoattribute:: screen_beta
@@ -140,7 +137,6 @@
    .. autoattribute:: screen_g2
    .. autoattribute:: screen_hashset
    .. autoattribute:: screen_is_active
-   .. autoattribute:: screen_order
    .. autoattribute:: screen_rule
    .. autoattribute:: screen_set
    .. autoattribute:: screen_sizes

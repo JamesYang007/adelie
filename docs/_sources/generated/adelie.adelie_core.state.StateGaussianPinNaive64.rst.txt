@@ -27,10 +27,12 @@
       ~StateGaussianPinNaive64.active_g2
       ~StateGaussianPinNaive64.active_order
       ~StateGaussianPinNaive64.active_set
+      ~StateGaussianPinNaive64.adev_tol
       ~StateGaussianPinNaive64.alpha
       ~StateGaussianPinNaive64.benchmark_active
       ~StateGaussianPinNaive64.benchmark_screen
       ~StateGaussianPinNaive64.betas
+      ~StateGaussianPinNaive64.ddev_tol
       ~StateGaussianPinNaive64.group_sizes
       ~StateGaussianPinNaive64.groups
       ~StateGaussianPinNaive64.intercept
@@ -45,21 +47,14 @@
       ~StateGaussianPinNaive64.penalty
       ~StateGaussianPinNaive64.resid
       ~StateGaussianPinNaive64.resid_sum
-      ~StateGaussianPinNaive64.resid_sums
-      ~StateGaussianPinNaive64.resids
       ~StateGaussianPinNaive64.rsq
-      ~StateGaussianPinNaive64.rsq_curv_tol
-      ~StateGaussianPinNaive64.rsq_slope_tol
-      ~StateGaussianPinNaive64.rsq_tol
       ~StateGaussianPinNaive64.rsqs
       ~StateGaussianPinNaive64.screen_X_means
       ~StateGaussianPinNaive64.screen_begins
       ~StateGaussianPinNaive64.screen_beta
-      ~StateGaussianPinNaive64.screen_betas
       ~StateGaussianPinNaive64.screen_g1
       ~StateGaussianPinNaive64.screen_g2
       ~StateGaussianPinNaive64.screen_is_active
-      ~StateGaussianPinNaive64.screen_is_actives
       ~StateGaussianPinNaive64.screen_set
       ~StateGaussianPinNaive64.screen_transforms
       ~StateGaussianPinNaive64.screen_vars
@@ -86,10 +81,12 @@
    .. autoattribute:: active_g2
    .. autoattribute:: active_order
    .. autoattribute:: active_set
+   .. autoattribute:: adev_tol
    .. autoattribute:: alpha
    .. autoattribute:: benchmark_active
    .. autoattribute:: benchmark_screen
    .. autoattribute:: betas
+   .. autoattribute:: ddev_tol
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
    .. autoattribute:: intercept
@@ -104,21 +101,14 @@
    .. autoattribute:: penalty
    .. autoattribute:: resid
    .. autoattribute:: resid_sum
-   .. autoattribute:: resid_sums
-   .. autoattribute:: resids
    .. autoattribute:: rsq
-   .. autoattribute:: rsq_curv_tol
-   .. autoattribute:: rsq_slope_tol
-   .. autoattribute:: rsq_tol
    .. autoattribute:: rsqs
    .. autoattribute:: screen_X_means
    .. autoattribute:: screen_begins
    .. autoattribute:: screen_beta
-   .. autoattribute:: screen_betas
    .. autoattribute:: screen_g1
    .. autoattribute:: screen_g2
    .. autoattribute:: screen_is_active
-   .. autoattribute:: screen_is_actives
    .. autoattribute:: screen_set
    .. autoattribute:: screen_transforms
    .. autoattribute:: screen_vars
