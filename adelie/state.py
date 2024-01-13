@@ -792,6 +792,7 @@ def gaussian_pin_naive(
             obj = base.create_from_core(
                 cls, state, core_state, _gaussian_pin_naive, core_base,
             )
+            obj._core_type = core_base
             gaussian_pin_naive_base.__init__(obj)
             return obj
 
@@ -1079,6 +1080,7 @@ def gaussian_pin_cov(
             obj = base.create_from_core(
                 cls, state, core_state, _gaussian_pin_cov, core_base,
             )
+            obj._core_type = core_base
             gaussian_pin_cov_base.__init__(obj)
             return obj
 
@@ -1560,45 +1562,6 @@ class gaussian_naive_base(gaussian_base):
                 method, logger,
             )
 
-    def update_path(self, path):
-        return gaussian_naive(
-            X=self.X,
-            y=self._y,
-            X_means=self.X_means,
-            y_mean=self.y_mean,
-            y_var=self.y_var,
-            resid=self.resid,
-            groups=self.groups,
-            group_sizes=self.group_sizes,
-            alpha=self.alpha,
-            penalty=self.penalty,
-            weights=self.weights,
-            screen_set=self.screen_set,
-            screen_beta=self.screen_beta,
-            screen_is_active=self.screen_is_active,
-            rsq=self.rsq,
-            lmda=self.lmda,
-            grad=self.grad,
-            lmda_path=path,
-            lmda_max=None if self.lmda_max == -1 else self.lmda_max,
-            max_iters=self.max_iters,
-            tol=self.tol,
-            adev_tol=self.adev_tol,
-            ddev_tol=self.ddev_tol,
-            newton_tol=self.newton_tol,
-            newton_max_iters=self.newton_max_iters,
-            n_threads=self.n_threads,
-            early_exit=self.early_exit,
-            intercept=self.intercept,
-            screen_rule=self.screen_rule,
-            min_ratio=self.min_ratio,
-            lmda_path_size=self.lmda_path_size,
-            max_screen_size=self.max_screen_size,
-            pivot_subset_ratio=self.pivot_subset_ratio,
-            pivot_subset_min=self.pivot_subset_min,
-            pivot_slack_ratio=self.pivot_slack_ratio,
-        )
-
 
 def gaussian_naive(
     *,
@@ -1849,6 +1812,8 @@ def gaussian_naive(
     class _gaussian_naive(gaussian_naive_base, core_base):
         def __init__(self, *args, **kwargs):
             self._core_type = core_base
+            # this is to keep the API consistent with grpnet with non-trivial GLM object
+            self.glm = None
             gaussian_naive_base.default_init(
                 self,
                 core_base,
@@ -1862,6 +1827,8 @@ def gaussian_naive(
             obj = base.create_from_core(
                 cls, state, core_state, _gaussian_naive, core_base,
             )
+            obj._core_type = core_base
+            obj.glm = None
             gaussian_naive_base.__init__(obj)
             return obj
 
@@ -2018,6 +1985,8 @@ class glm_naive_base:
             eta=eta,
             mu=mu,
         )
+
+    # TODO: implement check()?
 
 
 def glm_naive(
@@ -2301,6 +2270,7 @@ def glm_naive(
             obj = base.create_from_core(
                 cls, state, core_state, _glm_naive, core_base,
             )
+            obj._core_type = core_base
             glm_naive_base.__init__(obj)
             return obj
 

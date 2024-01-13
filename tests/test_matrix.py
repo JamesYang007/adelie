@@ -206,7 +206,7 @@ def test_cov_lazy():
 def test_snp_unphased():
     def _test(n, p, dtype, seed=0):
         np.random.seed(seed)
-        data = ad.data.create_snp_unphased(n, p, seed=seed)
+        data = ad.data.snp_unphased(n, p, seed=seed)
         filename = "/tmp/test_snp_unphased.snpdat"
         handler = ad.io.snp_unphased(filename)
         handler.write(data["X"])
@@ -246,7 +246,7 @@ def test_snp_phased_ancestry():
 
     def _test(n, s, A, dtype, seed=0):
         np.random.seed(seed)
-        data = ad.data.create_snp_phased_ancestry(n, s, A, seed=seed)
+        data = ad.data.snp_phased_ancestry(n, s, A, seed=seed)
         filename = "/tmp/test_snp_phased_ancestry.snpdat"
         handler = ad.io.snp_phased_ancestry(filename)
         handler.write(data["X"], data["ancestries"], A)

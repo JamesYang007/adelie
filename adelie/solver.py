@@ -205,6 +205,9 @@ def solve_gaussian(state, progress_bar: bool =False):
     core_state = out["state"]
     state = type(state).create_from_core(state, core_state)
 
+    # add extra total time information
+    state.total_time = out["total_time"]
+
     return state
 
 
@@ -247,6 +250,9 @@ def solve_glm(state, progress_bar: bool =False):
     # return a subsetted Python result object
     core_state = out["state"]
     state = type(state).create_from_core(state, core_state)
+
+    # add extra total time information
+    state.total_time = out["total_time"]
 
     return state
 
