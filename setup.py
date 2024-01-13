@@ -33,6 +33,7 @@ extra_compile_args += [
     "-Wextra", 
     "-Werror", 
     "-Wno-error=deprecated-copy",
+    "-Wno-error=maybe-uninitialized",
     "-DNDEBUG", 
     "-O3",
 ]
