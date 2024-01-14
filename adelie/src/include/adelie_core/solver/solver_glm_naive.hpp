@@ -26,7 +26,6 @@ struct GlmNaiveBufferPack
         size_t n,
         size_t p
     ):
-        ones(vec_value_t::Ones(n)),
         X_means(p),
         weights(n),
         weights_sqrt(n),
@@ -36,8 +35,6 @@ struct GlmNaiveBufferPack
         var(n),
         buffer_n(n)
     {}
-
-    const vec_value_t ones;       // (n,) vector of ones
 
     vec_value_t X_means;    // (p,) buffer for X column means (only screen groups need to be well-defined)
     dyn_vec_value_t screen_X_means; // (ss,) buffer for X column means on screen groups
@@ -148,7 +145,6 @@ auto fit(
     auto& eta = state.eta;
     auto& mu = state.mu;
 
-    const auto& ones = buffer_pack.ones;
     auto& X_means = buffer_pack.X_means;
     auto& screen_X_means = buffer_pack.screen_X_means;
     auto& screen_transforms = buffer_pack.screen_transforms;
@@ -161,7 +157,6 @@ auto fit(
     auto& var = buffer_pack.var;
     auto& screen_beta_prev = buffer_pack.screen_beta_prev;
     auto& screen_is_active_prev = buffer_pack.screen_is_active_prev;
-    auto& buffer_n = buffer_pack.buffer_n;
 
     util::rowvec_type<value_t, 1> lmda_path_adjusted;
 
@@ -213,8 +208,11 @@ auto fit(
             const auto i = screen_set[ss_idx];
             const auto g = groups[i];
             const size_t gs = group_sizes[i];
-            for (size_t j = 0; j < gs; ++j) {
-                X_means[g+j] = X.cmul(g+j, weights);
+            if (gs == 1) {
+                X_means[g] = X.cmul(g, weights);
+            } else {
+                Eigen::Map<vec_value_t> Xi_means(X_means.data() + g, gs);
+                X.bmul(g, gs, weights, Xi_means);
             }
         }
         // this call should only adjust the size of screen_* quantities
@@ -282,21 +280,7 @@ auto fit(
         beta0 = state_gaussian_pin_naive.intercepts[0];
 
         // update eta
-        matrix::dvzero(eta, n_threads);
-        for (size_t ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) {
-            const auto i = screen_set[ss_idx];
-            const auto g = groups[i];
-            const auto gs = group_sizes[i];
-            const auto sb = screen_begins[ss_idx];
-            const auto beta_g = Eigen::Map<const vec_value_t>(
-                screen_beta.data() + sb,
-                gs
-            );
-            if (gs == 1) X.ctmul(g, beta_g[0], ones, buffer_n);
-            else X.btmul(g, gs, beta_g, ones, buffer_n);
-            matrix::dvaddi(eta, buffer_n, n_threads);
-        }
-        if (intercept) eta += beta0;
+        eta = y - resid / weights + intercept * (beta0 - y_mean);
 
         // update mu
         mu_prev.swap(mu);

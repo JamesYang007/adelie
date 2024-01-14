@@ -50,23 +50,31 @@ void update_screen_derived(
         const auto gs = group_sizes[screen_set[i]];
         const auto sb = screen_begins[i];
 
-        // resize output and buffer 
-        auto Xi = buffer1.leftCols(gs);
-        Eigen::Map<util::colmat_type<value_t>> XiTXi(
-            buffer2.data(), gs, gs
-        );
-
         // compute column-means
         Eigen::Map<vec_value_t> Xi_means(
             screen_X_means.data() + sb, gs
         );
         Xi_means = X_means.segment(g, gs);
 
+        // resize output and buffer 
+        auto Xi = buffer1.leftCols(gs);
+        Eigen::Map<util::colmat_type<value_t>> XiTXi(
+            buffer2.data(), gs, gs
+        );
+
         // compute weighted covariance matrix
         X.cov(g, gs, weights_sqrt, XiTXi, Xi);
 
         if (intercept) {
             XiTXi.noalias() -= Xi_means.matrix().transpose() * Xi_means.matrix();
+        }
+
+        if (gs == 1) {
+            util::colmat_type<value_t, 1, 1> Q;
+            Q(0, 0) = 1;
+            screen_transforms[i] = Q;
+            screen_vars[sb] = XiTXi(0, 0);
+            continue;
         }
 
         Eigen::SelfAdjointEigenSolver<util::colmat_type<value_t>> solver(XiTXi);
