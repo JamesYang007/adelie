@@ -127,6 +127,12 @@ public:
             out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
             rows(), cols()
         );
+        
+        if (q == 1) {
+            out(0, 0) = (_mat.col(j).transpose().array() * sqrt_weights).square().sum();
+            return;
+        }
+
         auto& Xj = buffer;
         
         Xj.transpose().array() = (
