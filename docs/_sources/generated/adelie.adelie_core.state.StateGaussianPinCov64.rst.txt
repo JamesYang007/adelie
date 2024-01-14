@@ -40,6 +40,7 @@
       ~StateGaussianPinCov64.iters
       ~StateGaussianPinCov64.lmda_path
       ~StateGaussianPinCov64.lmdas
+      ~StateGaussianPinCov64.max_active_size
       ~StateGaussianPinCov64.max_iters
       ~StateGaussianPinCov64.n_threads
       ~StateGaussianPinCov64.newton_max_iters
@@ -90,6 +91,7 @@
    .. autoattribute:: iters
    .. autoattribute:: lmda_path
    .. autoattribute:: lmdas
+   .. autoattribute:: max_active_size
    .. autoattribute:: max_iters
    .. autoattribute:: n_threads
    .. autoattribute:: newton_max_iters

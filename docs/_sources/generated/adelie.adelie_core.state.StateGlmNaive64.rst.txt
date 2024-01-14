@@ -52,6 +52,7 @@
       ~StateGlmNaive64.lmda_path
       ~StateGlmNaive64.lmda_path_size
       ~StateGlmNaive64.lmdas
+      ~StateGlmNaive64.max_active_size
       ~StateGlmNaive64.max_iters
       ~StateGlmNaive64.max_screen_size
       ~StateGlmNaive64.min_ratio
@@ -122,6 +123,7 @@
    .. autoattribute:: lmda_path
    .. autoattribute:: lmda_path_size
    .. autoattribute:: lmdas
+   .. autoattribute:: max_active_size
    .. autoattribute:: max_iters
    .. autoattribute:: max_screen_size
    .. autoattribute:: min_ratio

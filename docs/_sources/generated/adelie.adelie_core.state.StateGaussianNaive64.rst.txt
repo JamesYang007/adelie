@@ -46,6 +46,7 @@
       ~StateGaussianNaive64.lmda_path
       ~StateGaussianNaive64.lmda_path_size
       ~StateGaussianNaive64.lmdas
+      ~StateGaussianNaive64.max_active_size
       ~StateGaussianNaive64.max_iters
       ~StateGaussianNaive64.max_screen_size
       ~StateGaussianNaive64.min_ratio
@@ -116,6 +117,7 @@
    .. autoattribute:: lmda_path
    .. autoattribute:: lmda_path_size
    .. autoattribute:: lmdas
+   .. autoattribute:: max_active_size
    .. autoattribute:: max_iters
    .. autoattribute:: max_screen_size
    .. autoattribute:: min_ratio
