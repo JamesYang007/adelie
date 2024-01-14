@@ -2,6 +2,7 @@
 #include <adelie_core/glm/glm_base.hpp>
 #include <adelie_core/glm/glm_gaussian.hpp>
 #include <adelie_core/glm/glm_binomial.hpp>
+#include <adelie_core/glm/glm_poisson.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -156,6 +157,7 @@ void glm_base(py::module_& m, const char* name)
         ----------
         y : (n,) np.ndarray
             Observations (sufficient statistics).
+            It is assumed that ``y`` only takes on values assumed by the GLM.
         eta : (n,) np.ndarray
             Natural parameter.
         dev : (n,) np.ndarray
@@ -184,6 +186,16 @@ void glm_binomial(py::module_& m, const char* name)
         ;
 }
 
+template <class T>
+void glm_poisson(py::module_& m, const char* name)
+{
+    using internal_t = ad::glm::GlmPoisson<T>;
+    using base_t = typename internal_t::base_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(py::init<>())
+        ;
+}
+
 void register_glm(py::module_& m)
 {
     glm_base<double>(m, "GlmBase64");
@@ -192,4 +204,6 @@ void register_glm(py::module_& m)
     glm_gaussian<float>(m, "GlmGaussian32");
     glm_binomial<double>(m, "GlmBinomial64");
     glm_binomial<float>(m, "GlmBinomial32");
+    glm_poisson<double>(m, "GlmPoisson64");
+    glm_poisson<float>(m, "GlmPoisson32");
 }

@@ -1,29 +1,26 @@
 import numpy as np
 from .glm import (
     binomial,
+    poisson
 )
 
 
 def _sample_y(
-    glm: str,
+    glm,
     eta: np.ndarray,
     beta: np.ndarray,
     rho: float =0,
     snr: float =1,
 ):
     n = eta.shape[0]
-    if glm == "gaussian":
-        noise_scale = np.sqrt(
-            (rho * np.sum(beta) ** 2 + (1-rho) * np.sum(beta ** 2))
-            / snr
-        )
+    signal_scale = np.sqrt(rho * np.sum(beta) ** 2 + (1-rho) * np.sum(beta ** 2))
+    if glm is None:
+        noise_scale = signal_scale / np.sqrt(snr)
         y = eta + noise_scale * np.random.normal(0, 1, n)
-    elif glm == "binomial":
-        mu = np.empty(eta.shape[0], dtype=eta.dtype)
-        binomial().gradient(eta, mu)
-        y = np.random.binomial(1, mu).astype(eta.dtype)
     else:
-        raise RuntimeError(f"Unexpected glm type: {glm}")
+        mu = np.empty(eta.shape[0], dtype=eta.dtype)
+        glm.gradient(snr * eta / np.sqrt(np.sum(beta**2)), mu)
+        y = glm.sample(mu).astype(eta.dtype)
     return y
 
 
@@ -32,7 +29,7 @@ def dense(
     p: int, 
     G: int,
     *,
-    glm="gaussian",
+    glm=None,
     equal_groups=False,
     rho: float =0,
     sparsity: float =0.95,
@@ -48,16 +45,7 @@ def dense(
       where each feature is equicorrelated with the other features by ``rho``.
     - The true coefficients :math:`\\beta` are such that ``sparsity`` proportion
       of the entries are set to :math:`0`.
-    - The response ``y`` is generated from the GLM specified by ``glm``:
-
-        - ``"gaussian"``: :math:`y \\sim \mathcal{N}(\\eta, \\sigma^2 I_n)` 
-          where
-          :math:`\\eta \\equiv X\\beta + \\beta_0 \\mathbf{1}`
-          and :math:`\\sigma^2` is such that the signal-to-noise ratio (SNR) is given by ``snr``.
-        - ``"binomial"``: :math:`y \\sim \mathrm{Bern}(p)`
-          where
-          :math:`p \\equiv \\mathrm{expit}(X\\beta + \\beta_0 \\mathbf{1})`.
-
+    - The response ``y`` is generated from the GLM specified by ``glm``.
     - The penalty factors are by default set to ``np.sqrt(group_sizes)``,
       however if ``zero_penalty > 0``, a random set of penalties will be set to zero,
       in which case, ``penalty`` is rescaled such that the :math:`\\ell_2` norm squared equals ``p``.
@@ -70,14 +58,9 @@ def dense(
         Number of features.
     G : int
         Number of groups.
-    glm : str, optional
-        Must be one of the following options, 
-        which specifies how the response vector is generated:
-
-            - ``"gaussian"``
-            - ``"binomial"``
-
-        Default is ``"gaussian"``.
+    glm : adelie.glm.glm_base, optional
+        GLM object.
+        Default is ``None``.
     equal_groups : bool, optional
         If ``True``, group sizes are made as equal as possible.
         Default is ``False``.
@@ -170,7 +153,7 @@ def snp_unphased(
     n: int, 
     p: int, 
     *,
-    glm="gaussian",
+    glm=None,
     sparsity: float =0.95,
     one_ratio: float =0.25,
     two_ratio: float =0.05,
@@ -187,16 +170,7 @@ def snp_unphased(
       and ``two_ratio`` are randomly set to ``2``.
     - The true coefficients :math:`\\beta` are such that ``sparsity`` proportion
       of the entries are set to :math:`0`.
-    - The response ``y`` is generated from the GLM specified by ``glm``:
-
-        - ``"gaussian"``: :math:`y \\sim \mathcal{N}(\\eta, \\sigma^2 I_n)` 
-          where
-          :math:`\\eta \\equiv X\\beta + \\beta_0 \\mathbf{1}`
-          and :math:`\\sigma^2` is such that the signal-to-noise ratio (SNR) is given by ``snr``.
-        - ``"binomial"``: :math:`y \\sim \mathrm{Bern}(p)`
-          where
-          :math:`p \\equiv \\mathrm{expit}(X\\beta + \\beta_0 \\mathbf{1})`.
-
+    - The response ``y`` is generated from the GLM specified by ``glm``.
     - The penalty factors are by default set to ``np.sqrt(group_sizes)``,
       however if ``zero_penalty > 0``, a random set of penalties will be set to zero,
       in which case, ``penalty`` is rescaled such that the :math:`\\ell_2` norm squared is ``p``.
@@ -207,14 +181,9 @@ def snp_unphased(
         Number of data points.
     p : int
         Number of SNPs.
-    glm : str, optional
-        Must be one of the following options, 
-        which specifies how the response vector is generated:
-
-            - ``"gaussian"``
-            - ``"binomial"``
-
-        Default is ``"gaussian"``.
+    glm : adelie.glm.glm_base, optional
+        GLM object.
+        Default is ``None``.
     sparsity : float, optional
         Proportion of :math:`\\beta` entries to be zeroed out.
         Default is ``0.95``.
@@ -302,7 +271,7 @@ def snp_phased_ancestry(
     s: int, 
     A: int,
     *,
-    glm="gaussian",
+    glm=None,
     sparsity: float =0.95,
     one_ratio: float =0.25,
     two_ratio: float =0.05,
@@ -320,16 +289,7 @@ def snp_phased_ancestry(
       and ``two_ratio`` are randomly set to ``2``.
     - The ancestry matrix randomly generates integers in the range ``[0, A)``.
     - The true coefficients :math:`\\beta` is such that ``sparsity`` proportion of the entries are set to :math:`0`.
-    - The response ``y`` is generated from the GLM specified by ``glm``:
-
-        - ``"gaussian"``: :math:`y \\sim \mathcal{N}(\\eta, \\sigma^2 I_n)` 
-          where
-          :math:`\\eta \\equiv X\\beta + \\beta_0 \\mathbf{1}`
-          and :math:`\\sigma^2` is such that the signal-to-noise ratio (SNR) is given by ``snr``.
-        - ``"binomial"``: :math:`y \\sim \mathrm{Bern}(p)`
-          where
-          :math:`p \\equiv \\mathrm{expit}(X\\beta + \\beta_0 \\mathbf{1})`.
-
+    - The response ``y`` is generated from the GLM specified by ``glm``.
     - The penalty factors are by default set to ``np.sqrt(group_sizes)``,
       however if ``zero_penalty > 0``, a random set of penalties will be set to zero,
       in which case, ``penalty`` is rescaled such that the :math:`\\ell_2` norm squared is ``p``.
@@ -342,14 +302,9 @@ def snp_phased_ancestry(
         Number of SNPs.
     A : int
         Number of ancestries.
-    glm : str, optional
-        Must be one of the following options, 
-        which specifies how the response vector is generated:
-
-            - ``"gaussian"``
-            - ``"binomial"``
-
-        Default is ``"gaussian"``.
+    glm : adelie.glm.glm_base, optional
+        GLM object.
+        Default is ``None``.
     sparsity : float, optional
         Proportion of :math:`\\beta` entries to be zeroed out.
         Default is ``0.95``.

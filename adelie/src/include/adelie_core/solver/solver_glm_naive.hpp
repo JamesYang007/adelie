@@ -287,7 +287,7 @@ auto fit(
         glm.gradient(eta, mu); 
 
         /* check convergence */
-        if ((weights * (mu - mu_prev).square()).sum() <= irls_tol) {
+        if ((weights0 * (mu - mu_prev).square()).sum() <= irls_tol) {
             return std::make_tuple(
                 std::move(state_gaussian_pin_naive),
                 screen_time,
