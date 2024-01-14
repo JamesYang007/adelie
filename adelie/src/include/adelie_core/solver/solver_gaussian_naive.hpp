@@ -61,7 +61,7 @@ void update_solutions(
  * 
  * State MUST be a valid state satisfying its invariance.
  * Note that only the screen set is modified!
- * All derived strong quantities must be updated afterwards. 
+ * All derived screen quantities must be updated afterwards. 
  */
 template <class StateType, class ValueType>
 ADELIE_CORE_STRONG_INLINE 
@@ -133,7 +133,7 @@ void screen(
         );
         const int full_pivot_idx = G - subset_size + pivot_idx;
 
-        // add everything beyond the cutoff index that isn't strong yet
+        // add everything beyond the cutoff index that isn't screen yet
         for (int ii = G-1; ii >= full_pivot_idx; --ii) {
             const auto i = order[ii];
             if (is_screen(i)) continue;
@@ -177,10 +177,10 @@ void screen(
     } else if (screen_rule == util::screen_rule_type::_pivot) {
         do_pivot();
     } else {
-        throw std::runtime_error("Unknown strong rule!");
+        throw std::runtime_error("Unknown screen rule!");
     }
 
-    // If adding new amount went over max strong size, 
+    // If adding new amount went over max screen size, 
     // undo the change to keep invariance from before, then throw exception.
     if (screen_set.size() > max_screen_size) {
         screen_set.erase(
@@ -236,6 +236,7 @@ auto fit(
     const auto& screen_X_means = state.screen_X_means;
     const auto& screen_transforms = state.screen_transforms;
     const auto intercept = state.intercept;
+    const auto max_active_size = state.max_active_size;
     const auto max_iters = state.max_iters;
     const auto tol = state.tol;
     const auto adev_tol = state.adev_tol;
@@ -286,7 +287,7 @@ auto fit(
         Eigen::Map<const vec_value_t>(screen_X_means.data(), screen_X_means.size()), 
         screen_transforms,
         lmda_path,
-        intercept, max_iters, tol, adev_tol, ddev_tol, 
+        intercept, max_active_size, max_iters, tol, adev_tol, ddev_tol, 
         newton_tol, newton_max_iters, n_threads,
         rsq,
         Eigen::Map<vec_value_t>(resid.data(), resid.size()),

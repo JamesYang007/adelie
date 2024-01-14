@@ -45,6 +45,7 @@ struct StateGaussianPinBase
 
     /* configurations */
     const bool intercept;
+    const size_t max_active_size;
     const size_t max_iters;
     const value_t tol;
     const value_t adev_tol;
@@ -87,6 +88,7 @@ struct StateGaussianPinBase
         const dyn_vec_mat_value_t& screen_transforms,
         const Eigen::Ref<const vec_value_t>& lmda_path, 
         bool intercept,
+        size_t max_active_size,
         size_t max_iters,
         value_t tol,
         value_t adev_tol,
@@ -110,6 +112,7 @@ struct StateGaussianPinBase
         screen_transforms(&screen_transforms),
         lmda_path(lmda_path.data(), lmda_path.size()),
         intercept(intercept),
+        max_active_size(max_active_size),
         max_iters(max_iters),
         tol(tol),
         adev_tol(adev_tol),

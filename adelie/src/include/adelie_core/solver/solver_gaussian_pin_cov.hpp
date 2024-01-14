@@ -57,7 +57,7 @@ void coordinate_descent(
     convg_measure = 0;
     // iterate over the groups of size 1
     for (auto it = g1_begin; it != g1_end; ++it) {
-        const auto ss_idx = *it;              // index to strong set
+        const auto ss_idx = *it;              // index to screen set
         const auto k = screen_set[ss_idx];    // actual group index
         const auto ss_value_begin = screen_begins[ss_idx]; // value begin index at ss_idx
         auto& ak = screen_beta[ss_value_begin]; // corresponding beta
@@ -112,7 +112,7 @@ void coordinate_descent(
     
     // iterate over the groups of dynamic size
     for (auto it = g2_begin; it != g2_end; ++it) {
-        const auto ss_idx = *it;              // index to strong set
+        const auto ss_idx = *it;              // index to screen set
         const auto k = screen_set[ss_idx];    // actual group index
         const auto ss_value_begin = screen_begins[ss_idx]; // value begin index at ss_idx
         const auto gsize = group_sizes[k]; // group size  
@@ -273,9 +273,9 @@ void solve_active(
         ab_diff_view_curr = sb - ab_diff_view_curr;
     }
 
-    /* update strong gradient for non-active strong variables */
+    /* update screen gradient for non-active screen variables */
 
-    // optimization: if active set is empty or active set is the same as strong set.
+    // optimization: if active set is empty or active set is the same as screen set.
     if ((ab_diff_view.size() == 0) ||
         (static_cast<size_t>(active_set.size()) 
             == static_cast<size_t>(screen_set.size()))) return;
@@ -327,6 +327,7 @@ inline void solve(
     const auto& screen_g2 = state.screen_g2;
     const auto& screen_beta = state.screen_beta;
     const auto& lmda_path = state.lmda_path;
+    const auto max_active_size = state.max_active_size;
     const auto tol = state.tol;
     const auto adev_tol = state.adev_tol;
     const auto ddev_tol = state.ddev_tol;
@@ -382,6 +383,10 @@ inline void solve(
 
     const auto add_active_set = [&](auto ss_idx) {
         if (!screen_is_active[ss_idx]) {
+            if (active_set.size() >= max_active_size) {
+                throw std::runtime_error("Maximum number of active groups reached.");
+            }
+
             screen_is_active[ss_idx] = true;
 
             active_set.push_back(ss_idx);
