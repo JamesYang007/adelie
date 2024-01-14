@@ -26,7 +26,7 @@ class max_basil_screen_set : public adelie_core_error
     std::string msg_;
 public:
     max_basil_screen_set(): 
-        msg_{"Basil maximum strong set size reached."}
+        msg_{"Basil maximum screen set size reached."}
     {}
 
     const char* what() const noexcept override {

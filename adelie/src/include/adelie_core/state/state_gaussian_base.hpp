@@ -96,9 +96,9 @@ void update_abs_grad(
  * Updates all derived quantities from screen_set in the base class. 
  * The state must be such that only the screen_set is either unchanged from invariance,
  * or appended with new groups.
- * After the function finishes, all strong quantities in the base class
+ * After the function finishes, all screen quantities in the base class
  * will be consistent with screen_set, and the state is otherwise effectively
- * unchanged in the sense that other quantities dependent on strong states are unchanged.
+ * unchanged in the sense that other quantities dependent on screen states are unchanged.
  */
 template <class StateType>
 ADELIE_CORE_STRONG_INLINE
@@ -182,6 +182,7 @@ struct StateGaussianBase
 
     // iteration configs
     const size_t max_screen_size;
+    const size_t max_active_size;
     const value_t pivot_subset_ratio;
     const size_t pivot_subset_min;
     const value_t pivot_slack_ratio;
@@ -248,6 +249,7 @@ struct StateGaussianBase
         value_t min_ratio,
         size_t lmda_path_size,
         size_t max_screen_size,
+        size_t max_active_size,
         value_t pivot_subset_ratio,
         size_t pivot_subset_min,
         value_t pivot_slack_ratio,
@@ -278,6 +280,7 @@ struct StateGaussianBase
         min_ratio(min_ratio),
         lmda_path_size(lmda_path_size),
         max_screen_size(max_screen_size),
+        max_active_size(max_active_size),
         pivot_subset_ratio(pivot_subset_ratio),
         pivot_subset_min(pivot_subset_min),
         pivot_slack_ratio(pivot_slack_ratio),

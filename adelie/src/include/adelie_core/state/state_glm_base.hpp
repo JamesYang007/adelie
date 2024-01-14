@@ -45,6 +45,7 @@ struct StateGlmBase
 
     // iteration configs
     const size_t max_screen_size;
+    const size_t max_active_size;
     const value_t pivot_subset_ratio;
     const size_t pivot_subset_min;
     const value_t pivot_slack_ratio;
@@ -118,6 +119,7 @@ struct StateGlmBase
         value_t min_ratio,
         size_t lmda_path_size,
         size_t max_screen_size,
+        size_t max_active_size,
         value_t pivot_subset_ratio,
         size_t pivot_subset_min,
         value_t pivot_slack_ratio,
@@ -152,6 +154,7 @@ struct StateGlmBase
         min_ratio(min_ratio),
         lmda_path_size(lmda_path_size),
         max_screen_size(max_screen_size),
+        max_active_size(max_active_size),
         pivot_subset_ratio(pivot_subset_ratio),
         pivot_subset_min(pivot_subset_min),
         pivot_slack_ratio(pivot_slack_ratio),

@@ -70,6 +70,7 @@ struct StateGaussianPinNaive: StateGaussianPinBase<
         const dyn_vec_mat_value_t& screen_transforms,
         const Eigen::Ref<const vec_value_t>& lmda_path, 
         bool intercept,
+        size_t max_active_size,
         size_t max_iters,
         value_t tol,
         value_t adev_tol,
@@ -86,7 +87,7 @@ struct StateGaussianPinNaive: StateGaussianPinBase<
         base_t(
             groups, group_sizes, alpha, penalty,
             screen_set, screen_g1, screen_g2, screen_begins, screen_vars, screen_transforms, lmda_path, 
-            intercept, max_iters, tol, adev_tol, ddev_tol, newton_tol, newton_max_iters, n_threads,
+            intercept, max_active_size, max_iters, tol, adev_tol, ddev_tol, newton_tol, newton_max_iters, n_threads,
             rsq, screen_beta, screen_is_active
         ),
         weights(weights.data(), weights.size()),

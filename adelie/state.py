@@ -273,7 +273,7 @@ class gaussian_pin_base(base):
         expected = expected[:-1]
         self._check(
             np.all(self.screen_begins == expected),
-            "check screen_begins is [0, g1, g2, ...] where gi is the group size of (i-1)th strong group.",
+            "check screen_begins is [0, g1, g2, ...] where gi is the group size of (i-1)th screen group.",
             method, logger,
         )
         self._check(
@@ -527,6 +527,7 @@ class gaussian_pin_naive_base(gaussian_pin_base):
         screen_beta: np.ndarray,
         screen_is_active: np.ndarray,
         intercept: bool,
+        max_active_size: int,
         max_iters: int,
         tol: float,
         adev_tol: float,
@@ -562,6 +563,12 @@ class gaussian_pin_naive_base(gaussian_pin_base):
         ) = deduce_states(
             group_sizes=group_sizes,
             screen_set=screen_set,
+        )
+
+        max_active_size = (
+            len(self._groups)
+            if max_active_size is None else
+            np.minimum(max_active_size, len(self._groups))
         )
 
         n, p = X.rows(), X.cols()
@@ -616,6 +623,7 @@ class gaussian_pin_naive_base(gaussian_pin_base):
             screen_transforms=self._screen_transforms,
             lmda_path=self._lmda_path,
             intercept=intercept,
+            max_active_size=max_active_size,
             max_iters=max_iters,
             tol=tol,
             adev_tol=adev_tol,
@@ -664,6 +672,7 @@ def gaussian_pin_naive(
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
     intercept: bool =True,
+    max_active_size: int =None,
     max_iters: int =int(1e5),
     tol: float =1e-7,
     adev_tol: float =0.9,
@@ -696,8 +705,8 @@ def gaussian_pin_naive(
         Observation weights.
         Internally, it is normalized to sum to one.
     screen_set : (s,) np.ndarray
-        List of indices into ``groups`` that correspond to the strong groups.
-        ``screen_set[i]`` is ``i`` th strong group.
+        List of indices into ``groups`` that correspond to the screen groups.
+        ``screen_set[i]`` is ``i`` th screen group.
     lmda_path : (l,) np.ndarray
         Regularization sequence to fit on.
     rsq : float
@@ -706,18 +715,24 @@ def gaussian_pin_naive(
     resid : (n,) np.ndarray
         Residual :math:`W(y_c-X\\beta)` at ``screen_beta``.
     screen_beta : (ws,) np.ndarray
-        Coefficient vector on the strong set.
-        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        Coefficient vector on the screen set.
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
         where
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
     screen_is_active : (a,) np.ndarray
-        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
+        Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
     intercept : bool, optional
         ``True`` to fit with intercept.
         Default is ``True``.
+    max_active_size : int, optional
+        Maximum number of active groups allowed.
+        The function will return a valid state and guarantees to have active set size
+        less than or equal to ``max_active_size``.
+        If ``None``, it will be set to the total number of groups.
+        Default is ``None``.
     max_iters : int, optional
         Maximum number of coordinate descents.
         Default is ``int(1e5)``.
@@ -813,6 +828,7 @@ def gaussian_pin_naive(
         screen_beta=screen_beta,
         screen_is_active=screen_is_active,
         intercept=intercept,
+        max_active_size=max_active_size,
         max_iters=max_iters,
         tol=tol,
         adev_tol=adev_tol,
@@ -841,6 +857,7 @@ class gaussian_pin_cov_base(gaussian_pin_base):
         screen_beta: np.ndarray,
         screen_grad: np.ndarray,
         screen_is_active: np.ndarray,
+        max_active_size: int,
         max_iters: int,
         tol: float,
         adev_tol: float,
@@ -877,6 +894,12 @@ class gaussian_pin_cov_base(gaussian_pin_base):
             screen_set=screen_set,
         )
 
+        max_active_size = (
+            len(self._groups)
+            if max_active_size is None else
+            np.minimum(max_active_size, len(self._groups))
+        )
+
         self._screen_vars = []
         self._screen_transforms = []
         for i in self._screen_set:
@@ -909,6 +932,7 @@ class gaussian_pin_cov_base(gaussian_pin_base):
             screen_vars=self._screen_vars,
             screen_transforms=self._screen_transforms,
             lmda_path=self._lmda_path,
+            max_active_size=max_active_size,
             max_iters=max_iters,
             tol=tol,
             adev_tol=adev_tol,
@@ -948,6 +972,7 @@ def gaussian_pin_cov(
     screen_grad: np.ndarray,
     screen_is_active: np.ndarray,
     y_var: float =-1,
+    max_active_size: int =None,
     max_iters: int =int(1e5),
     tol: float =1e-7,
     adev_tol: float =0.9,
@@ -975,8 +1000,8 @@ def gaussian_pin_cov(
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
     screen_set : (s,) np.ndarray
-        List of indices into ``groups`` that correspond to the strong groups.
-        ``screen_set[i]`` is ``i`` th strong group.
+        List of indices into ``groups`` that correspond to the screen groups.
+        ``screen_set[i]`` is ``i`` th screen group.
     lmda_path : (l,) np.ndarray
         Regularization sequence to fit on.
     rsq : float
@@ -985,29 +1010,35 @@ def gaussian_pin_cov(
     resid : (n,) np.ndarray
         Residual :math:`W(y_c-X\\beta)` at ``screen_beta``.
     screen_beta : (ws,) np.ndarray
-        Coefficient vector on the strong set.
-        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        Coefficient vector on the screen set.
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
         where
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
     screen_grad : (ws,) np.ndarray
-        Gradient :math:`X_{c,k}^\\top W (y_c-X_c\\beta)` on the strong groups :math:`k` where :math:`\\beta` is given by ``screen_beta``.
-        ``screen_grad[b:b+p]`` is the gradient for the ``i`` th strong group
+        Gradient :math:`X_{c,k}^\\top W (y_c-X_c\\beta)` on the screen groups :math:`k` where :math:`\\beta` is given by ``screen_beta``.
+        ``screen_grad[b:b+p]`` is the gradient for the ``i`` th screen group
         where 
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
     screen_is_active : (a,) np.ndarray
-        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
+        Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
     y_var : float, optional
-        :math:`\ell_2` norm squared of :math:`y_c` (weighted by :math:`W`).
+        :math:`\\ell_2` norm squared of :math:`y_c` (weighted by :math:`W`).
         If the user does not have access to this quantity, 
         they may be set it to ``-1``.
         The only effect this variable has on the algorithm is early stopping rule.
         Hence, with ``-1``, the early stopping rule is effectively disabled.
         Default is ``-1``.
+    max_active_size : int, optional
+        Maximum number of active groups allowed.
+        The function will return a valid state and guarantees to have active set size
+        less than or equal to ``max_active_size``.
+        If ``None``, it will be set to the total number of groups.
+        Default is ``None``.
     max_iters : int, optional
         Maximum number of coordinate descents.
         Default is ``int(1e5)``.
@@ -1097,6 +1128,7 @@ def gaussian_pin_cov(
         screen_beta=screen_beta,
         screen_grad=screen_grad,
         screen_is_active=screen_is_active,
+        max_active_size=max_active_size,
         max_iters=max_iters,
         tol=tol,
         adev_tol=adev_tol,
@@ -1118,7 +1150,6 @@ class gaussian_naive_base(gaussian_base):
         base_type: Union[core.state.StateGaussianNaive64, core.state.StateGaussianNaive32],
         *,
         X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
-        y: np.ndarray,
         X_means: np.ndarray,
         y_mean: float,
         y_var: float,
@@ -1133,6 +1164,7 @@ class gaussian_naive_base(gaussian_base):
         min_ratio: float,
         lmda_path_size: int,
         max_screen_size: int,
+        max_active_size: int,
         pivot_subset_ratio: float,
         pivot_subset_min: int,
         pivot_slack_ratio: float,
@@ -1193,6 +1225,7 @@ class gaussian_naive_base(gaussian_base):
             min_ratio=min_ratio,
             lmda_path_size=lmda_path_size,
             max_screen_size=max_screen_size,
+            max_active_size=max_active_size,
             pivot_subset_ratio=pivot_subset_ratio,
             pivot_subset_min=pivot_subset_min,
             pivot_slack_ratio=pivot_slack_ratio,
@@ -1420,7 +1453,7 @@ class gaussian_naive_base(gaussian_base):
         expected = expected[:-1]
         self._check(
             np.all(self.screen_begins == expected),
-            "check screen_begins is [0, g1, g2, ...] where gi is the group size of (i-1)th strong group.",
+            "check screen_begins is [0, g1, g2, ...] where gi is the group size of (i-1)th screen group.",
             method, logger,
         )
         self._check(
@@ -1595,6 +1628,7 @@ def gaussian_naive(
     min_ratio: float =1e-2,
     lmda_path_size: int =100,
     max_screen_size: int =None,
+    max_active_size: int =None,
     pivot_subset_ratio: float =0.1,
     pivot_subset_min: int =1,
     pivot_slack_ratio: float =1.25,
@@ -1633,20 +1667,20 @@ def gaussian_naive(
         Observation weights.
         Internally, it is normalized to sum to one.
     screen_set : (s,) np.ndarray
-        List of indices into ``groups`` that correspond to the strong groups.
-        ``screen_set[i]`` is ``i`` th strong group.
+        List of indices into ``groups`` that correspond to the screen groups.
+        ``screen_set[i]`` is ``i`` th screen group.
         ``screen_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
     screen_beta : (ws,) np.ndarray
-        Coefficient vector on the strong set.
-        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        Coefficient vector on the screen set.
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
         where
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
     screen_is_active : (a,) np.ndarray
-        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
+        Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
     rsq : float
         The unnormalized :math:`R^2` given by :math:`\\|y_c\\|_{W}^2 - \\|y_c-X_c\\beta\\|_{W}^2`
@@ -1709,16 +1743,22 @@ def gaussian_naive(
             - ``"pivot"``: adds groups whose active scores are above the pivot cutoff with slack.
 
         Default is ``"pivot"``.
-    max_screen_size: int, optional
-        Maximum number of strong groups allowed.
-        The function will return a valid state and guaranteed to have strong set size
+    max_screen_size : int, optional
+        Maximum number of screen groups allowed.
+        The function will return a valid state and guarantees to have screen set size
         less than or equal to ``max_screen_size``.
+        If ``None``, it will be set to the total number of groups.
+        Default is ``None``.
+    max_active_size : int, optional
+        Maximum number of active groups allowed.
+        The function will return a valid state and guarantees to have active set size
+        less than or equal to ``max_active_size``.
         If ``None``, it will be set to the total number of groups.
         Default is ``None``.
     pivot_subset_ratio : float, optional
         If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
         largest gradient norms are used to determine the pivot point
-        where ``s`` is the current strong set size.
+        where ``s`` is the current screen set size.
         It is only used if ``screen_rule == "pivot"``.
         Default is ``0.1``.
     pivot_subset_min : int, optional
@@ -1729,7 +1769,7 @@ def gaussian_naive(
     pivot_slack_ratio : float, optional
         If screening takes place, then ``pivot_slack_ratio``
         number of groups with next smallest (new) active scores 
-        below the pivot point are also added to the strong set as slack.
+        below the pivot point are also added to the screen set as slack.
         It is only used if ``screen_rule == "pivot"``.
         Default is ``1.25``.
 
@@ -1752,6 +1792,8 @@ def gaussian_naive(
 
     if max_screen_size is None:
         max_screen_size = len(groups)
+    if max_active_size is None:
+        max_active_size = len(groups)
 
     if max_iters < 0:
         raise ValueError("max_iters must be >= 0.")
@@ -1773,6 +1815,8 @@ def gaussian_naive(
         raise ValueError("lmda_path_size must be >= 0.")
     if max_screen_size < 0:
         raise ValueError("max_screen_size must be >= 0.")
+    if max_active_size < 0:
+        raise ValueError("max_active_size must be >= 0.")
     if pivot_subset_ratio <= 0 or pivot_subset_ratio > 1:
         raise ValueError("pivot_subset_ratio must be in (0, 1].")
     if pivot_subset_min < 1:
@@ -1787,6 +1831,7 @@ def gaussian_naive(
     )
 
     max_screen_size = np.minimum(max_screen_size, len(groups))
+    max_active_size = np.minimum(max_active_size, len(groups))
 
     dtype = (
         np.float64
@@ -1834,7 +1879,6 @@ def gaussian_naive(
 
     return _gaussian_naive(
         X=X,
-        y=y,
         X_means=X_means,
         y_mean=y_mean,
         y_var=y_var,
@@ -1849,6 +1893,7 @@ def gaussian_naive(
         setup_lmda_max=setup_lmda_max,
         setup_lmda_path=setup_lmda_path,
         max_screen_size=max_screen_size,
+        max_active_size=max_active_size,
         pivot_subset_ratio=pivot_subset_ratio,
         pivot_subset_min=pivot_subset_min,
         pivot_slack_ratio=pivot_slack_ratio,
@@ -1894,6 +1939,7 @@ class glm_naive_base:
         min_ratio: float,
         lmda_path_size: int,
         max_screen_size: int,
+        max_active_size: int,
         pivot_subset_ratio: float,
         pivot_subset_min: int,
         pivot_slack_ratio: float,
@@ -1959,6 +2005,7 @@ class glm_naive_base:
             min_ratio=min_ratio,
             lmda_path_size=lmda_path_size,
             max_screen_size=max_screen_size,
+            max_active_size=max_active_size,
             pivot_subset_ratio=pivot_subset_ratio,
             pivot_subset_min=pivot_subset_min,
             pivot_slack_ratio=pivot_slack_ratio,
@@ -2026,6 +2073,7 @@ def glm_naive(
     min_ratio: float =1e-2,
     lmda_path_size: int =100,
     max_screen_size: int =None,
+    max_active_size: int =None,
     pivot_subset_ratio: float =0.1,
     pivot_subset_min: int =1,
     pivot_slack_ratio: float =1.25,
@@ -2057,20 +2105,20 @@ def glm_naive(
         Observation weights.
         Internally, it is normalized to sum to one.
     screen_set : (s,) np.ndarray
-        List of indices into ``groups`` that correspond to the strong groups.
-        ``screen_set[i]`` is ``i`` th strong group.
+        List of indices into ``groups`` that correspond to the screen groups.
+        ``screen_set[i]`` is ``i`` th screen group.
         ``screen_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
     screen_beta : (ws,) np.ndarray
-        Coefficient vector on the strong set.
-        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        Coefficient vector on the screen set.
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
         where
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
     screen_is_active : (a,) np.ndarray
-        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
+        Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
     beta0 : float
         The current intercept value.
@@ -2152,16 +2200,22 @@ def glm_naive(
             - ``"pivot"``: adds groups whose active scores are above the pivot cutoff with slack.
 
         Default is ``"pivot"``.
-    max_screen_size: int, optional
-        Maximum number of strong groups allowed.
-        The function will return a valid state and guaranteed to have strong set size
+    max_screen_size : int, optional
+        Maximum number of screen groups allowed.
+        The function will return a valid state and guarantees to have screen set size
         less than or equal to ``max_screen_size``.
+        If ``None``, it will be set to the total number of groups.
+        Default is ``None``.
+    max_active_size : int, optional
+        Maximum number of active groups allowed.
+        The function will return a valid state and guarantees to have active set size
+        less than or equal to ``max_active_size``.
         If ``None``, it will be set to the total number of groups.
         Default is ``None``.
     pivot_subset_ratio : float, optional
         If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
         largest gradient norms are used to determine the pivot point
-        where ``s`` is the current strong set size.
+        where ``s`` is the current screen set size.
         It is only used if ``screen_rule == "pivot"``.
         Default is ``0.1``.
     pivot_subset_min : int, optional
@@ -2172,7 +2226,7 @@ def glm_naive(
     pivot_slack_ratio : float, optional
         If screening takes place, then ``pivot_slack_ratio``
         number of groups with next smallest (new) active scores 
-        below the pivot point are also added to the strong set as slack.
+        below the pivot point are also added to the screen set as slack.
         It is only used if ``screen_rule == "pivot"``.
         Default is ``1.25``.
 
@@ -2195,6 +2249,8 @@ def glm_naive(
 
     if max_screen_size is None:
         max_screen_size = len(groups)
+    if max_active_size is None:
+        max_active_size = len(groups)
 
     if irls_max_iters < 0:
         raise ValueError("irls_max_iters must be >= 0.")
@@ -2220,6 +2276,8 @@ def glm_naive(
         raise ValueError("lmda_path_size must be >= 0.")
     if max_screen_size < 0:
         raise ValueError("max_screen_size must be >= 0.")
+    if max_active_size < 0:
+        raise ValueError("max_screen_size must be >= 0.")
     if pivot_subset_ratio <= 0 or pivot_subset_ratio > 1:
         raise ValueError("pivot_subset_ratio must be in (0, 1].")
     if pivot_subset_min < 1:
@@ -2234,6 +2292,7 @@ def glm_naive(
     )
 
     max_screen_size = np.minimum(max_screen_size, len(groups))
+    max_active_size = np.minimum(max_active_size, len(groups))
 
     dtype = (
         np.float64
@@ -2290,6 +2349,7 @@ def glm_naive(
         setup_lmda_max=setup_lmda_max,
         setup_lmda_path=setup_lmda_path,
         max_screen_size=max_screen_size,
+        max_active_size=max_active_size,
         pivot_subset_ratio=pivot_subset_ratio,
         pivot_subset_min=pivot_subset_min,
         pivot_slack_ratio=pivot_slack_ratio,
