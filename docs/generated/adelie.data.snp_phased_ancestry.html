@@ -345,6 +345,7 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.poisson.html">adelie.glm.poisson</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
@@ -441,9 +442,9 @@ document.write(`
 <h1>adelie.data.snp_phased_ancestry<a class="headerlink" href="#adelie-data-snp-phased-ancestry" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.data.snp_phased_ancestry">
-<span class="sig-prename descclassname"><span class="pre">adelie.data.</span></span><span class="sig-name descname"><span class="pre">snp_phased_ancestry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sparsity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">two_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.data.snp_phased_ancestry" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.data.</span></span><span class="sig-name descname"><span class="pre">snp_phased_ancestry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sparsity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">two_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.data.snp_phased_ancestry" title="Link to this definition">#</a></dt>
 <dd><p>Creates a SNP Unphased dataset.</p>
-<ul>
+<ul class="simple">
 <li><p>The groups and group sizes are generated randomly
 such that <code class="docutils literal notranslate"><span class="pre">G</span></code> groups are created and the sum of the group sizes is <code class="docutils literal notranslate"><span class="pre">p</span></code>.</p></li>
 <li><p>The calldata matrix <code class="docutils literal notranslate"><span class="pre">X</span></code> is a phased version of a matrix with sparsity ratio 
@@ -452,41 +453,22 @@ where <code class="docutils literal notranslate"><span class="pre">one_ratio</sp
 and <code class="docutils literal notranslate"><span class="pre">two_ratio</span></code> are randomly set to <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p></li>
 <li><p>The ancestry matrix randomly generates integers in the range <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">A)</span></code>.</p></li>
 <li><p>The true coefficients <span class="math notranslate nohighlight">\(\beta\)</span> is such that <code class="docutils literal notranslate"><span class="pre">sparsity</span></code> proportion of the entries are set to <span class="math notranslate nohighlight">\(0\)</span>.</p></li>
-<li><p>The response <code class="docutils literal notranslate"><span class="pre">y</span></code> is generated from the GLM specified by <code class="docutils literal notranslate"><span class="pre">glm</span></code>:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;gaussian&quot;</span></code>: <span class="math notranslate nohighlight">\(y \sim \mathcal{N}(\eta, \sigma^2 I_n)\)</span> 
-where
-<span class="math notranslate nohighlight">\(\eta \equiv X\beta + \beta_0 \mathbf{1}\)</span>
-and <span class="math notranslate nohighlight">\(\sigma^2\)</span> is such that the signal-to-noise ratio (SNR) is given by <code class="docutils literal notranslate"><span class="pre">snr</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;binomial&quot;</span></code>: <span class="math notranslate nohighlight">\(y \sim \mathrm{Bern}(p)\)</span>
-where
-<span class="math notranslate nohighlight">\(p \equiv \mathrm{expit}(X\beta + \beta_0 \mathbf{1})\)</span>.</p></li>
-</ul>
-</div></blockquote>
-</li>
+<li><p>The response <code class="docutils literal notranslate"><span class="pre">y</span></code> is generated from the GLM specified by <code class="docutils literal notranslate"><span class="pre">glm</span></code>.</p></li>
 <li><p>The penalty factors are by default set to <code class="docutils literal notranslate"><span class="pre">np.sqrt(group_sizes)</span></code>,
 however if <code class="docutils literal notranslate"><span class="pre">zero_penalty</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>, a random set of penalties will be set to zero,
 in which case, <code class="docutils literal notranslate"><span class="pre">penalty</span></code> is rescaled such that the <span class="math notranslate nohighlight">\(\ell_2\)</span> norm squared is <code class="docutils literal notranslate"><span class="pre">p</span></code>.</p></li>
 </ul>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
+<dd class="field-odd"><dl class="simple">
 <dt><strong>n</strong><span class="classifier">int</span></dt><dd><p>Number of data points.</p>
 </dd>
 <dt><strong>s</strong><span class="classifier">int</span></dt><dd><p>Number of SNPs.</p>
 </dd>
 <dt><strong>A</strong><span class="classifier">int</span></dt><dd><p>Number of ancestries.</p>
 </dd>
-<dt><strong>glm</strong><span class="classifier">str, optional</span></dt><dd><p>Must be one of the following options, 
-which specifies how the response vector is generated:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;gaussian&quot;</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;binomial&quot;</span></code></p></li>
-</ul>
-</div></blockquote>
-<p>Default is <code class="docutils literal notranslate"><span class="pre">&quot;gaussian&quot;</span></code>.</p>
+<dt><strong>glm</strong><span class="classifier">adelie.glm.glm_base, optional</span></dt><dd><p>GLM object.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </dd>
 <dt><strong>sparsity</strong><span class="classifier">float, optional</span></dt><dd><p>Proportion of <span class="math notranslate nohighlight">\(\beta\)</span> entries to be zeroed out.
 Default is <code class="docutils literal notranslate"><span class="pre">0.95</span></code>.</p>

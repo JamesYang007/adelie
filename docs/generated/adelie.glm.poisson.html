@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.diagnostic.coefficient &#8212; adelie 1.1.8
+    <title>adelie.glm.poisson &#8212; adelie 1.1.8
  documentation</title>
   
   
@@ -43,11 +43,11 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.diagnostic.coefficient';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.glm.poisson';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.diagnostic.diagnostic" href="adelie.diagnostic.diagnostic.html" />
-    <link rel="prev" title="adelie.data.snp_unphased" href="adelie.data.snp_unphased.html" />
+    <link rel="next" title="adelie.io.snp_phased_ancestry" href="adelie.io.snp_phased_ancestry.html" />
+    <link rel="prev" title="adelie.glm.gaussian" href="adelie.glm.gaussian.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -328,8 +328,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_phased_ancestry.html">adelie.data.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_unphased.html">adelie.data.snp_unphased</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.diagnostic.coefficient</a></li>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.diagnostic.html">adelie.diagnostic.diagnostic</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
@@ -342,10 +342,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.predict.html">adelie.diagnostic.predict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.glm.poisson.html">adelie.glm.poisson</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.glm.poisson</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
@@ -421,7 +421,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.diagn...</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.glm.poisson</li>
   </ul>
 </nav>
 </div>
@@ -438,44 +438,38 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-diagnostic-coefficient">
-<h1>adelie.diagnostic.coefficient<a class="headerlink" href="#adelie-diagnostic-coefficient" title="Link to this heading">#</a></h1>
+  <section id="adelie-glm-poisson">
+<h1>adelie.glm.poisson<a class="headerlink" href="#adelie-glm-poisson" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="adelie.diagnostic.coefficient">
-<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csr_matrix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.coefficient" title="Link to this definition">#</a></dt>
-<dd><p>Computes the coefficient at <span class="math notranslate nohighlight">\(\lambda\)</span> using linear interpolation of solutions.</p>
-<p>The linearly interpolated coefficient is given by</p>
+<dt class="sig sig-object py" id="adelie.glm.poisson">
+<span class="sig-prename descclassname"><span class="pre">adelie.glm.</span></span><span class="sig-name descname"><span class="pre">poisson</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">~numpy.float32</span> <span class="pre">|</span> <span class="pre">~numpy.float64</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.glm.poisson" title="Link to this definition">#</a></dt>
+<dd><p>Creates a Poisson GLM family object.</p>
+<p>The Poisson GLM family specifies the log-partition function as:</p>
 <div class="math notranslate nohighlight">
 \[\begin{align*}
-    \hat{\beta}(\lambda)
-    =
-    \frac{\lambda - \lambda_{k+1}}{\lambda_{k} - \lambda_{k+1}}
-    \hat{\beta}(\lambda_k)
-    +
-    \frac{\lambda_{k} - \lambda}{\lambda_{k} - \lambda_{k+1}}
-    \hat{\beta}(\lambda_{k+1})
+    A(\eta) = e^{\eta}
 \end{align*}\]</div>
-<p>if <span class="math notranslate nohighlight">\(\lambda \in [\lambda_{k+1}, \lambda_k]\)</span>.
-If <span class="math notranslate nohighlight">\(\lambda\)</span> lies above the largest value in <code class="docutils literal notranslate"><span class="pre">lmdas</span></code> or below the smallest value,
-then we simply take the solution at the respective ends.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>lmda</strong><span class="classifier">float</span></dt><dd><p>New regularization parameter at which to find the solution.</p>
-</dd>
-<dt><strong>lmdas</strong><span class="classifier">(l,) np.ndarray</span></dt><dd><p>Regularizations.</p>
-</dd>
-<dt><strong>betas</strong><span class="classifier">(l, p) np.ndarray</span></dt><dd><p>Solution coefficient vectors for each <span class="math notranslate nohighlight">\(\lambda\)</span> in <code class="docutils literal notranslate"><span class="pre">lmdas</span></code>.</p>
+<dt><strong>dtype</strong><span class="classifier">Union[np.float32, np.float64], optional</span></dt><dd><p>The underlying data type.
+Default is <code class="docutils literal notranslate"><span class="pre">np.float64</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>beta</strong><span class="classifier">(1, p) scipy.sparse.csr_matrix</span></dt><dd><p>Linearly interpolated coefficient vector at <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
+<dt>glm</dt><dd><p>Binomial GLM object.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="adelie.glm.GlmBase64.html#adelie.glm.GlmBase64" title="adelie.glm.GlmBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.glm.GlmBase64</span></code></a></dt><dd></dd>
+</dl>
+</div>
 </dd></dl>
 
 </section>
@@ -491,20 +485,20 @@ then we simply take the solution at the respective ends.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.data.snp_unphased.html"
+       href="adelie.glm.gaussian.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.data.snp_unphased</p>
+        <p class="prev-next-title">adelie.glm.gaussian</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.diagnostic.diagnostic.html"
+       href="adelie.io.snp_phased_ancestry.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.diagnostic.diagnostic</p>
+        <p class="prev-next-title">adelie.io.snp_phased_ancestry</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -524,14 +518,14 @@ then we simply take the solution at the respective ends.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.diagnostic.coefficient"><code class="docutils literal notranslate"><span class="pre">coefficient()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.poisson"><code class="docutils literal notranslate"><span class="pre">poisson()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.diagnostic.coefficient.rst.txt">
+    <a href="../_sources/generated/adelie.glm.poisson.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

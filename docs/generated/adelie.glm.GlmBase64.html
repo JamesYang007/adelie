@@ -345,6 +345,7 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.poisson.html">adelie.glm.poisson</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
@@ -499,7 +500,8 @@ before passing into the solver.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>y</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Observations (sufficient statistics).</p>
+<dt><strong>y</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Observations (sufficient statistics).
+It is assumed that <code class="docutils literal notranslate"><span class="pre">y</span></code> only takes on values assumed by the GLM.</p>
 </dd>
 <dt><strong>eta</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Natural parameter.</p>
 </dd>

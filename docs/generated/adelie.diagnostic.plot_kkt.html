@@ -343,6 +343,7 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.poisson.html">adelie.glm.poisson</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
@@ -439,7 +440,7 @@ document.write(`
 <h1>adelie.diagnostic.plot_kkt<a class="headerlink" href="#adelie-diagnostic-plot-kkt" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.diagnostic.plot_kkt">
-<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">plot_kkt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.plot_kkt" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">plot_kkt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.plot_kkt" title="Link to this definition">#</a></dt>
 <dd><p>Plots KKT failures.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -451,6 +452,18 @@ document.write(`
 <dt><strong>idx</strong><span class="classifier">int, optional</span></dt><dd><p>Index of <code class="docutils literal notranslate"><span class="pre">lmdas</span></code> and <code class="docutils literal notranslate"><span class="pre">scores</span></code> at which to plot the KKT failures.
 If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then an animation of the plots at every index is shown.
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+<dt><strong>relative</strong><span class="classifier">bool, optional</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, then plots the relative error <code class="docutils literal notranslate"><span class="pre">score</span> <span class="pre">/</span> <span class="pre">lmda</span> <span class="pre">-</span> <span class="pre">1</span></code>.
+Otherwise, the absolute values are used.
+Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>fig, ax</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">idx</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>, then a figure and axes is returned.</p>
+</dd>
+<dt>anim</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">Idx</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, then an animation of the plots is returned.</p>
 </dd>
 </dl>
 </dd>
