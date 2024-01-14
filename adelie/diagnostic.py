@@ -652,6 +652,7 @@ def plot_kkt(
     lmdas: np.ndarray,
     scores: np.ndarray, 
     idx: int =None,
+    relative: bool =False,
 ):
     """Plots KKT failures.
 
@@ -665,10 +666,25 @@ def plot_kkt(
         Index of ``lmdas`` and ``scores`` at which to plot the KKT failures.
         If ``None``, then an animation of the plots at every index is shown.
         Default is ``None``.
+    relative : bool, optional
+        If ``True``, then plots the relative error ``score / lmda - 1``.
+        Otherwise, the absolute values are used.
+        Default is ``False``.
+
+    Returns
+    -------
+    fig, ax
+        If ``idx`` is not ``None``, then a figure and axes is returned.
+    anim 
+        If ``Idx`` is ``None``, then an animation of the plots is returned.
     """
     G = scores.shape[-1]
 
-    scores = scores - lmdas[:, None]
+    if relative:
+        scores = scores / lmdas[:, None] - 1
+        baseline = np.zeros(scores.shape[0])
+    else:
+        baseline = lmdas
 
     do_anim = idx is None
     idx = 0 if do_anim else idx
@@ -681,7 +697,7 @@ def plot_kkt(
 
     fig, ax = plt.subplots(figsize=(9, 6), layout="constrained")
 
-    is_failure = scores[idx] > 0
+    is_failure = scores[idx] > baseline[idx]
     xs = [
         gns[~is_failure],
         gns[is_failure],
@@ -701,14 +717,17 @@ def plot_kkt(
             alpha=alpha,
         )
     ax.legend()
-    bound = np.max(scores[idx]) * 1.05
+    bound = (np.max(scores[idx]) - baseline[idx]) * 1.05
     ax.set_ylim(
-        bottom=-bound,
-        top=bound,
+        bottom=baseline[idx]-bound,
+        top=baseline[idx]+bound,
     )
-    ax.axhline(0, linestyle='--', linewidth=1, color="green")
+    ax.axhline(baseline[idx], linestyle='--', linewidth=1, color="green")
     ax.set_title("Active Score Error (Largest)")
-    ax.set_ylabel(r"$s_g - \lambda$")
+    if relative:
+        ax.set_ylabel(r"$s_g / \lambda - 1")
+    else:
+        ax.set_ylabel(r"$s_g$")
     ax.set_xlabel("Group Number")
 
     if do_anim:
@@ -719,7 +738,7 @@ def plot_kkt(
     def update(idx):
         s = scores[idx]
 
-        is_failure = s > 0
+        is_failure = s > baseline[idx]
         xs = [
             gns[~is_failure],
             gns[is_failure],
@@ -737,10 +756,10 @@ def plot_kkt(
                 alpha=alpha,
                 label=label,
             )
-        bound = np.maximum(np.max(s) * 1.05, 1e-5)
+        bound = np.maximum((np.max(s) - baseline[idx]) * 1.05, 1e-5)
         ax.set_ylim(
-            bottom=-bound,
-            top=bound,
+            bottom=baseline[idx]-bound,
+            top=baseline[idx]+bound,
         )
         return (scats[0], scats[1],)
 

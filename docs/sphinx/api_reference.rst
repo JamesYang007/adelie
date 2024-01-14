@@ -75,6 +75,7 @@ adelie.glm
 
     binomial
     gaussian
+    poisson
 
 
 adelie.io
