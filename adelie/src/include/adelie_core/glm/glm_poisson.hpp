@@ -5,7 +5,7 @@ namespace adelie_core {
 namespace glm {
 
 template <class ValueType>
-class GlmBinomial: public GlmBase<ValueType>
+class GlmPoisson: public GlmBase<ValueType>
 {
 public:
     using base_t = GlmBase<ValueType>;
@@ -17,7 +17,7 @@ public:
         Eigen::Ref<vec_value_t> mu
     ) override
     {
-        mu = 1 / (1 + (-eta).exp());
+        mu = eta.exp();
     }
 
     void gradient_inverse(
@@ -25,7 +25,7 @@ public:
         Eigen::Ref<vec_value_t> eta
     ) override
     {
-        eta = (mu / (1-mu)).log();
+        eta = mu.log();
     }
 
     void hessian(
@@ -33,7 +33,7 @@ public:
         Eigen::Ref<vec_value_t> var
     ) override
     {
-        var = mu * (1-mu);
+        var = mu;
     }
 
     void deviance(
@@ -42,8 +42,8 @@ public:
         Eigen::Ref<vec_value_t> dev
     ) override
     {
-        // numerically stable so that exp == 0 when y = 1 and eta = inf or y = 0 and eta = -inf.
-        dev = (1 + ((1-2*y) * eta).exp()).log();
+        // numerically stable when y == 0 and eta could be -inf
+        dev = (-eta).min(std::numeric_limits<value_t>::max()) * y + eta.exp();
     }
 };
 

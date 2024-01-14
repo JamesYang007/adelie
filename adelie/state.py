@@ -2058,7 +2058,7 @@ def glm_naive(
     dev_full: float,
     lmda_path: np.ndarray =None,
     lmda_max: float =None,
-    irls_max_iters: int =int(1e2),
+    irls_max_iters: int =int(1e4),
     irls_tol: float =1e-7,
     max_iters: int =int(1e5),
     tol: float =1e-7,
@@ -2155,7 +2155,7 @@ def glm_naive(
         Default is ``None``.
     irls_max_iters : int, optional
         Maximum number of IRLS iterations.
-        Default is ``100``.
+        Default is ``int(1e4)``.
     irls_tol : float, optional
         IRLS convergence tolerance.
         Default is ``1e-7``.
