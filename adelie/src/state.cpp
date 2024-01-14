@@ -95,6 +95,7 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&, 
             bool,
             size_t,
+            size_t,
             value_t,
             value_t,
             value_t,
@@ -117,6 +118,7 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             py::arg("screen_transforms").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("intercept"),
+            py::arg("max_active_size"),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("adev_tol"),
@@ -145,38 +147,38 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         It must be a non-negative vector.
         )delimiter")
         .def_readonly("screen_set", &state_t::screen_set, R"delimiter(
-        List of indices into ``groups`` that correspond to the strong groups.
-        ``screen_set[i]`` is ``i`` th strong group.
+        List of indices into ``groups`` that correspond to the screen groups.
+        ``screen_set[i]`` is ``i`` th screen group.
         )delimiter")
         .def_readonly("screen_g1", &state_t::screen_g1, R"delimiter(
         List of indices into ``screen_set`` that correspond to groups of size ``1``.
-        ``screen_set[screen_g1[i]]`` is the ``i`` th strong group of size ``1``
+        ``screen_set[screen_g1[i]]`` is the ``i`` th screen group of size ``1``
         such that ``group_sizes[screen_set[screen_g1[i]]]`` is ``1``.
         )delimiter")
         .def_readonly("screen_g2", &state_t::screen_g2, R"delimiter(
         List of indices into ``screen_set`` that correspond to groups more than size ``1``.
-        ``screen_set[screen_g2[i]]`` is the ``i`` th strong group of size more than ``1``
+        ``screen_set[screen_g2[i]]`` is the ``i`` th screen group of size more than ``1``
         such that ``group_sizes[screen_set[screen_g2[i]]]`` is more than ``1``.
         )delimiter")
         .def_readonly("screen_begins", &state_t::screen_begins, R"delimiter(
-        List of indices that index a corresponding list of values for each strong group.
-        ``screen_begins[i]`` is the starting index corresponding to the ``i`` th strong group.
+        List of indices that index a corresponding list of values for each screen group.
+        ``screen_begins[i]`` is the starting index corresponding to the ``i`` th screen group.
         From this index, reading ``group_sizes[screen_set[i]]`` number of elements
-        will grab values corresponding to the full ``i`` th strong group block.
+        will grab values corresponding to the full ``i`` th screen group block.
         )delimiter")
         .def_readonly("screen_vars", &state_t::screen_vars, R"delimiter(
         List of :math:`D_k^2` where :math:`D_k` is from the SVD of :math:`\sqrt{W} X_{c,k}` 
-        along the strong groups :math:`k` and for possibly column-centered (weighted by :math:`W`) :math:`X_k`.
-        ``screen_vars[b:b+p]`` is :math:`D_k` for the ``i`` th strong group where
+        along the screen groups :math:`k` and for possibly column-centered (weighted by :math:`W`) :math:`X_k`.
+        ``screen_vars[b:b+p]`` is :math:`D_k` for the ``i`` th screen group where
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         )delimiter")
         .def_readonly("screen_transforms", &state_t::screen_transforms, R"delimiter(
         List of :math:`V_k` where :math:`V_k` is from the SVD of :math:`\sqrt{W} X_{c,k}`
-        along the strong groups :math:`k` and for possibly column-centered (weighted by :math:`W`) :math:`X_k`.
+        along the screen groups :math:`k` and for possibly column-centered (weighted by :math:`W`) :math:`X_k`.
         It *only* needs to be properly initialized for groups with size > 1.
-        ``screen_transforms[i]`` is :math:`V_k` for the ``i`` th strong group where
+        ``screen_transforms[i]`` is :math:`V_k` for the ``i`` th screen group where
         ``k = screen_set[i]``.
         )delimiter")
         .def_readonly("lmda_path", &state_t::lmda_path, R"delimiter(
@@ -184,6 +186,9 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("intercept", &state_t::intercept, R"delimiter(
         ``True`` to fit with intercept.
+        )delimiter")
+        .def_readonly("max_active_size", &state_t::max_active_size, R"delimiter(
+        Maximum number of active groups allowed.
         )delimiter")
         .def_readonly("max_iters", &state_t::max_iters, R"delimiter(
         Maximum number of coordinate descents.
@@ -211,15 +216,15 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         The unnormalized :math:`R^2` is given by :math:`\|y_c\|_{W}^2 - \|y_c-X_c\beta\|_{W}^2`.
         )delimiter")
         .def_readonly("screen_beta", &state_t::screen_beta, R"delimiter(
-        Coefficient vector on the strong set.
-        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        Coefficient vector on the screen set.
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
         where
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         )delimiter")
         .def_readonly("screen_is_active", &state_t::screen_is_active, R"delimiter(
-        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
+        Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
         )delimiter")
         .def_property_readonly("active_set", [](const state_t& s) {
@@ -311,7 +316,7 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
                 s.benchmark_screen.size()
             );
         }, R"delimiter(
-        Benchmark time for performing coordinate-descent on the strong set for each :math:`\lambda`.
+        Benchmark time for performing coordinate-descent on the screen set for each :math:`\lambda`.
         )delimiter")
         .def_property_readonly("benchmark_active", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<double>>(
@@ -365,6 +370,7 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&, 
             bool,
             size_t,
+            size_t,
             value_t,
             value_t,
             value_t,
@@ -394,6 +400,7 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             py::arg("screen_transforms").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("intercept"),
+            py::arg("max_active_size"),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("adev_tol"),
@@ -418,7 +425,7 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
         :math:`\ell_2` norm squared of :math:`y_c` (weighted by :math:`W`).
         )delimiter")
         .def_readonly("screen_X_means", &state_t::screen_X_means, R"delimiter(
-        Column means (weighted by :math:`W`) of :math:`X` for strong groups.
+        Column means (weighted by :math:`W`) of :math:`X` for screen groups.
         )delimiter")
         .def_readonly("X", &state_t::X, R"delimiter(
         Feature matrix.
@@ -477,6 +484,7 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             const dyn_vec_mat_value_t&,
             const Eigen::Ref<const vec_value_t>&, 
             size_t,
+            size_t,
             value_t,
             value_t,
             value_t,
@@ -501,6 +509,7 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("screen_vars").noconvert(),
             py::arg("screen_transforms").noconvert(),
             py::arg("lmda_path").noconvert(),
+            py::arg("max_active_size"),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("adev_tol"),
@@ -527,8 +536,8 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
         )delimiter")
         .def_readonly("screen_grad", &state_t::screen_grad, R"delimiter(
-        Gradient :math:`X_{c,k}^\top W (y_c-X_c\beta)` on the strong groups :math:`k` where :math:`\beta` is given by ``screen_beta``.
-        ``screen_grad[b:b+p]`` is the gradient for the ``i`` th strong group
+        Gradient :math:`X_{c,k}^\top W (y_c-X_c\beta)` on the screen groups :math:`k` where :math:`\beta` is given by ``screen_beta``.
+        ``screen_grad[b:b+p]`` is the gradient for the ``i`` th screen group
         where 
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
@@ -564,6 +573,7 @@ void state_gaussian_base(py::module_& m, const char* name)
             value_t,
             size_t,
             size_t,
+            size_t,
             value_t,
             size_t,
             value_t,
@@ -596,6 +606,7 @@ void state_gaussian_base(py::module_& m, const char* name)
             py::arg("min_ratio"),
             py::arg("lmda_path_size"),
             py::arg("max_screen_size"),
+            py::arg("max_active_size"),
             py::arg("pivot_subset_ratio"),
             py::arg("pivot_subset_min"),
             py::arg("pivot_slack_ratio"),
@@ -649,14 +660,19 @@ void state_gaussian_base(py::module_& m, const char* name)
         Number of regularizations in the path if it is to be generated.
         )delimiter")
         .def_readonly("max_screen_size", &state_t::max_screen_size, R"delimiter(
-        Maximum number of strong groups allowed.
-        The function will return a valid state and guaranteed to have strong set size
+        Maximum number of screen groups allowed.
+        The function will return a valid state and guarantees to have screen set size
         less than or equal to ``max_screen_size``.
+        )delimiter")
+        .def_readonly("max_active_size", &state_t::max_active_size, R"delimiter(
+        Maximum number of active groups allowed.
+        The function will return a valid state and guarantees to have active set size
+        less than or equal to ``max_active_size``.
         )delimiter")
         .def_readonly("pivot_subset_ratio", &state_t::pivot_subset_ratio, R"delimiter(
         If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
         largest gradient norms are used to determine the pivot point
-        where ``s`` is the current strong set size.
+        where ``s`` is the current screen set size.
         It is only used if ``screen_rule == "pivot"``.
         )delimiter")
         .def_readonly("pivot_subset_min", &state_t::pivot_subset_min, R"delimiter(
@@ -667,7 +683,7 @@ void state_gaussian_base(py::module_& m, const char* name)
         .def_readonly("pivot_slack_ratio", &state_t::pivot_slack_ratio, R"delimiter(
         If screening takes place, then ``pivot_slack_ratio``
         number of groups with next smallest (new) active scores 
-        below the pivot point are also added to the strong set as slack.
+        below the pivot point are also added to the screen set as slack.
         It is only used if ``screen_rule == "pivot"``.
         )delimiter")
         .def_property_readonly("screen_rule", [](const state_t& s) -> std::string {
@@ -677,7 +693,7 @@ void state_gaussian_base(py::module_& m, const char* name)
                 case ad::util::screen_rule_type::_pivot:
                     return "pivot";
             }
-            throw std::runtime_error("Invalid strong rule type!");
+            throw std::runtime_error("Invalid screen rule type!");
         }, R"delimiter(
         Strong rule type.
         )delimiter")
@@ -721,13 +737,13 @@ void state_gaussian_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("screen_hashset", &state_t::screen_hashset, R"delimiter(
         Hashmap containing the same values as ``screen_set``.
-        It is used to check if a given group is strong or not.
+        It is used to check if a given group is screen or not.
         )delimiter")
         .def_property_readonly("screen_set", [](const state_t& s) {
             return Eigen::Map<const vec_index_t>(s.screen_set.data(), s.screen_set.size());
         }, R"delimiter(
-        List of indices into ``groups`` that correspond to the strong groups.
-        ``screen_set[i]`` is ``i`` th strong group.
+        List of indices into ``groups`` that correspond to the screen groups.
+        ``screen_set[i]`` is ``i`` th screen group.
         ``screen_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
         )delimiter")
@@ -735,29 +751,29 @@ void state_gaussian_base(py::module_& m, const char* name)
             return Eigen::Map<const vec_index_t>(s.screen_g1.data(), s.screen_g1.size());
         }, R"delimiter(
         List of indices into ``screen_set`` that correspond to groups of size ``1``.
-        ``screen_set[screen_g1[i]]`` is the ``i`` th strong group of size ``1``
+        ``screen_set[screen_g1[i]]`` is the ``i`` th screen group of size ``1``
         such that ``group_sizes[screen_set[screen_g1[i]]]`` is ``1``.
         )delimiter")
         .def_property_readonly("screen_g2", [](const state_t& s) {
             return Eigen::Map<const vec_index_t>(s.screen_g2.data(), s.screen_g2.size());
         }, R"delimiter(
         List of indices into ``screen_set`` that correspond to groups more than size ``1``.
-        ``screen_set[screen_g2[i]]`` is the ``i`` th strong group of size more than ``1``
+        ``screen_set[screen_g2[i]]`` is the ``i`` th screen group of size more than ``1``
         such that ``group_sizes[screen_set[screen_g2[i]]]`` is more than ``1``.
         )delimiter")
         .def_property_readonly("screen_begins", [](const state_t& s) {
             return Eigen::Map<const vec_index_t>(s.screen_begins.data(), s.screen_begins.size());
         }, R"delimiter(
-        List of indices that index a corresponding list of values for each strong group.
-        ``screen_begins[i]`` is the starting index corresponding to the ``i`` th strong group.
+        List of indices that index a corresponding list of values for each screen group.
+        ``screen_begins[i]`` is the starting index corresponding to the ``i`` th screen group.
         From this index, reading ``group_sizes[screen_set[i]]`` number of elements
-        will grab values corresponding to the full ``i`` th strong group block.
+        will grab values corresponding to the full ``i`` th screen group block.
         )delimiter")
         .def_property_readonly("screen_beta", [](const state_t& s) {
             return Eigen::Map<const vec_value_t>(s.screen_beta.data(), s.screen_beta.size());
         }, R"delimiter(
-        Coefficient vector on the strong set.
-        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        Coefficient vector on the screen set.
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
         where
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
@@ -770,7 +786,7 @@ void state_gaussian_base(py::module_& m, const char* name)
                 s.screen_is_active.size()
             );
         }, R"delimiter(
-        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
+        Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
         )delimiter")
         .def_readonly("rsq", &state_t::rsq, R"delimiter(
@@ -789,7 +805,7 @@ void state_gaussian_base(py::module_& m, const char* name)
         ``abs_grad[i]`` is given by ``np.linalg.norm(grad[g:g+gs] - lmda * penalty[i] * (1-alpha) * beta[g:g+gs])``
         where ``g = groups[i]``,
         ``gs = group_sizes[i]``,
-        and ``beta`` is the full solution vector represented by ``strong_beta``.
+        and ``beta`` is the full solution vector represented by ``screen_beta``.
         )delimiter")
         .def_property_readonly("betas", [](const state_t& s) {
             return convert_betas(
@@ -837,7 +853,7 @@ void state_gaussian_base(py::module_& m, const char* name)
                 s.benchmark_fit_screen.size()
             );
         }, R"delimiter(
-        Fit time on the strong set for a given BASIL iteration.
+        Fit time on the screen set for a given BASIL iteration.
         )delimiter")
         .def_property_readonly("benchmark_fit_active", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<double>>(
@@ -926,6 +942,7 @@ void state_gaussian_naive(py::module_& m, const char* name)
             value_t,
             size_t,
             size_t,
+            size_t,
             value_t,
             size_t,
             value_t,
@@ -963,6 +980,7 @@ void state_gaussian_naive(py::module_& m, const char* name)
             py::arg("min_ratio"),
             py::arg("lmda_path_size"),
             py::arg("max_screen_size"),
+            py::arg("max_active_size"),
             py::arg("pivot_subset_ratio"),
             py::arg("pivot_subset_min"),
             py::arg("pivot_slack_ratio"),
@@ -1006,7 +1024,7 @@ void state_gaussian_naive(py::module_& m, const char* name)
         Sum of ``resid``.
         )delimiter")
         .def_readonly("screen_X_means", &state_t::screen_X_means, R"delimiter(
-        Column means (weighted by :math:`W`) of ``X`` on the strong set.
+        Column means (weighted by :math:`W`) of ``X`` on the screen set.
         )delimiter")
         .def_readonly("screen_transforms", &state_t::screen_transforms, R"delimiter(
         The :math:`V` from the SVD of :math:`\sqrt{W} X_{c,k}` where :math:`X_c` 
@@ -1052,6 +1070,7 @@ void state_glm_base(py::module_& m, const char* name)
             value_t,
             size_t,
             size_t,
+            size_t,
             value_t,
             size_t,
             value_t,
@@ -1089,6 +1108,7 @@ void state_glm_base(py::module_& m, const char* name)
             py::arg("min_ratio"),
             py::arg("lmda_path_size"),
             py::arg("max_screen_size"),
+            py::arg("max_active_size"),
             py::arg("pivot_subset_ratio"),
             py::arg("pivot_subset_min"),
             py::arg("pivot_slack_ratio"),
@@ -1140,14 +1160,19 @@ void state_glm_base(py::module_& m, const char* name)
         Number of regularizations in the path if it is to be generated.
         )delimiter")
         .def_readonly("max_screen_size", &state_t::max_screen_size, R"delimiter(
-        Maximum number of strong groups allowed.
-        The function will return a valid state and guaranteed to have strong set size
+        Maximum number of screen groups allowed.
+        The function will return a valid state and guarantees to have screen size
         less than or equal to ``max_screen_size``.
+        )delimiter")
+        .def_readonly("max_active_size", &state_t::max_active_size, R"delimiter(
+        Maximum number of active groups allowed.
+        The function will return a valid state and guarantees to have active set size
+        less than or equal to ``max_active_size``.
         )delimiter")
         .def_readonly("pivot_subset_ratio", &state_t::pivot_subset_ratio, R"delimiter(
         If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
         largest gradient norms are used to determine the pivot point
-        where ``s`` is the current strong set size.
+        where ``s`` is the current screen set size.
         It is only used if ``screen_rule == "pivot"``.
         )delimiter")
         .def_readonly("pivot_subset_min", &state_t::pivot_subset_min, R"delimiter(
@@ -1158,7 +1183,7 @@ void state_glm_base(py::module_& m, const char* name)
         .def_readonly("pivot_slack_ratio", &state_t::pivot_slack_ratio, R"delimiter(
         If screening takes place, then ``pivot_slack_ratio``
         number of groups with next smallest (new) active scores 
-        below the pivot point are also added to the strong set as slack.
+        below the pivot point are also added to the screen set as slack.
         It is only used if ``screen_rule == "pivot"``.
         )delimiter")
         .def_property_readonly("screen_rule", [](const state_t& s) -> std::string {
@@ -1168,7 +1193,7 @@ void state_glm_base(py::module_& m, const char* name)
                 case ad::util::screen_rule_type::_pivot:
                     return "pivot";
             }
-            throw std::runtime_error("Invalid strong rule type!");
+            throw std::runtime_error("Invalid screen rule type!");
         }, R"delimiter(
         Strong rule type.
         )delimiter")
@@ -1233,13 +1258,13 @@ void state_glm_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("screen_hashset", &state_t::screen_hashset, R"delimiter(
         Hashmap containing the same values as ``screen_set``.
-        It is used to check if a given group is strong or not.
+        It is used to check if a given group is screen or not.
         )delimiter")
         .def_property_readonly("screen_set", [](const state_t& s) {
             return Eigen::Map<const vec_index_t>(s.screen_set.data(), s.screen_set.size());
         }, R"delimiter(
-        List of indices into ``groups`` that correspond to the strong groups.
-        ``screen_set[i]`` is ``i`` th strong group.
+        List of indices into ``groups`` that correspond to the screen groups.
+        ``screen_set[i]`` is ``i`` th screen group.
         ``screen_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
         )delimiter")
@@ -1247,29 +1272,29 @@ void state_glm_base(py::module_& m, const char* name)
             return Eigen::Map<const vec_index_t>(s.screen_g1.data(), s.screen_g1.size());
         }, R"delimiter(
         List of indices into ``screen_set`` that correspond to groups of size ``1``.
-        ``screen_set[screen_g1[i]]`` is the ``i`` th strong group of size ``1``
+        ``screen_set[screen_g1[i]]`` is the ``i`` th screen group of size ``1``
         such that ``group_sizes[screen_set[screen_g1[i]]]`` is ``1``.
         )delimiter")
         .def_property_readonly("screen_g2", [](const state_t& s) {
             return Eigen::Map<const vec_index_t>(s.screen_g2.data(), s.screen_g2.size());
         }, R"delimiter(
         List of indices into ``screen_set`` that correspond to groups more than size ``1``.
-        ``screen_set[screen_g2[i]]`` is the ``i`` th strong group of size more than ``1``
+        ``screen_set[screen_g2[i]]`` is the ``i`` th screen group of size more than ``1``
         such that ``group_sizes[screen_set[screen_g2[i]]]`` is more than ``1``.
         )delimiter")
         .def_property_readonly("screen_begins", [](const state_t& s) {
             return Eigen::Map<const vec_index_t>(s.screen_begins.data(), s.screen_begins.size());
         }, R"delimiter(
-        List of indices that index a corresponding list of values for each strong group.
-        ``screen_begins[i]`` is the starting index corresponding to the ``i`` th strong group.
+        List of indices that index a corresponding list of values for each screen group.
+        ``screen_begins[i]`` is the starting index corresponding to the ``i`` th screen group.
         From this index, reading ``group_sizes[screen_set[i]]`` number of elements
-        will grab values corresponding to the full ``i`` th strong group block.
+        will grab values corresponding to the full ``i`` th screen group block.
         )delimiter")
         .def_property_readonly("screen_beta", [](const state_t& s) {
             return Eigen::Map<const vec_value_t>(s.screen_beta.data(), s.screen_beta.size());
         }, R"delimiter(
-        Coefficient vector on the strong set.
-        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th strong group 
+        Coefficient vector on the screen set.
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
         where
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
@@ -1282,7 +1307,7 @@ void state_glm_base(py::module_& m, const char* name)
                 s.screen_is_active.size()
             );
         }, R"delimiter(
-        Boolean vector that indicates whether each strong group in ``groups`` is active or not.
+        Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
         )delimiter")
         .def_readonly("beta0", &state_t::beta0, R"delimiter(
@@ -1302,7 +1327,7 @@ void state_glm_base(py::module_& m, const char* name)
         ``abs_grad[i]`` is given by ``np.linalg.norm(grad[g:g+gs] - lmda * penalty[i] * (1-alpha) * beta[g:g+gs])``
         where ``g = groups[i]``,
         ``gs = group_sizes[i]``,
-        and ``beta`` is the full solution vector represented by ``strong_beta``.
+        and ``beta`` is the full solution vector represented by ``screen_beta``.
         )delimiter")
         .def_property_readonly("betas", [](const state_t& s) {
             return convert_betas(
@@ -1350,7 +1375,7 @@ void state_glm_base(py::module_& m, const char* name)
                 s.benchmark_fit_screen.size()
             );
         }, R"delimiter(
-        Fit time on the strong set for a given BASIL iteration.
+        Fit time on the screen set for a given BASIL iteration.
         )delimiter")
         .def_property_readonly("benchmark_fit_active", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<double>>(
@@ -1442,6 +1467,7 @@ void state_glm_naive(py::module_& m, const char* name)
             value_t,
             size_t,
             size_t,
+            size_t,
             value_t,
             size_t,
             value_t,
@@ -1483,6 +1509,7 @@ void state_glm_naive(py::module_& m, const char* name)
             py::arg("min_ratio"),
             py::arg("lmda_path_size"),
             py::arg("max_screen_size"),
+            py::arg("max_active_size"),
             py::arg("pivot_subset_ratio"),
             py::arg("pivot_subset_min"),
             py::arg("pivot_slack_ratio"),

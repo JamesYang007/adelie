@@ -282,6 +282,7 @@ def grpnet(
     min_ratio: float =1e-2,
     lmda_path_size: int =100,
     max_screen_size: int =None,
+    max_active_size: int =None,
     pivot_subset_ratio: float =0.1,
     pivot_subset_min: int =1,
     pivot_slack_ratio: float =1.25,
@@ -403,16 +404,22 @@ def grpnet(
             - ``"pivot"``: adds groups whose active scores are above the pivot cutoff with slack.
 
         Default is ``"pivot"``.
-    max_screen_size: int, optional
-        Maximum number of strong groups allowed.
-        The function will return a valid state and guaranteed to have strong set size
+    max_screen_size : int, optional
+        Maximum number of screen groups allowed.
+        The function will return a valid state and guarantees to have screen set size
         less than or equal to ``max_screen_size``.
+        If ``None``, it will be set to the total number of groups.
+        Default is ``None``.
+    max_active_size : int, optional
+        Maximum number of active groups allowed.
+        The function will return a valid state and guarantees to have active set size
+        less than or equal to ``max_active_size``.
         If ``None``, it will be set to the total number of groups.
         Default is ``None``.
     pivot_subset_ratio : float, optional
         If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
         largest gradient norms are used to determine the pivot point
-        where ``s`` is the current strong set size.
+        where ``s`` is the current screen set size.
         It is only used if ``screen_rule == "pivot"``.
         Default is ``0.1``.
     pivot_subset_min : int, optional
@@ -423,7 +430,7 @@ def grpnet(
     pivot_slack_ratio : float, optional
         If screening takes place, then ``pivot_slack_ratio``
         number of groups with next smallest (new) active scores 
-        below the pivot point are also added to the strong set as slack.
+        below the pivot point are also added to the screen set as slack.
         It is only used if ``screen_rule == "pivot"``.
         Default is ``1.25``.
     check_state : bool, optional 
@@ -541,6 +548,7 @@ def grpnet(
         "min_ratio": min_ratio,
         "lmda_path_size": lmda_path_size,
         "max_screen_size": max_screen_size,
+        "max_active_size": max_active_size,
         "pivot_subset_ratio": pivot_subset_ratio,
         "pivot_subset_min": pivot_subset_min,
         "pivot_slack_ratio": pivot_slack_ratio,

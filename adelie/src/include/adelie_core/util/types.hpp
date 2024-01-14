@@ -39,7 +39,7 @@ inline util::screen_rule_type convert_screen_rule(
 {
     if (rule == "strong") return screen_rule_type::_strong;
     if (rule == "pivot") return screen_rule_type::_pivot;
-    throw std::runtime_error("Invalid strong rule type: " + rule);
+    throw std::runtime_error("Invalid screen rule type: " + rule);
 }
 
 } // namespace util

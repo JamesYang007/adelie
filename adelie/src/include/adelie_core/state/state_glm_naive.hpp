@@ -123,6 +123,7 @@ struct StateGlmNaive: StateGlmBase<
         value_t min_ratio,
         size_t lmda_path_size,
         size_t max_screen_size,
+        size_t max_active_size,
         value_t pivot_subset_ratio,
         size_t pivot_subset_min,
         value_t pivot_slack_ratio,
@@ -149,7 +150,7 @@ struct StateGlmNaive: StateGlmBase<
     ):
         base_t(
             glm, groups, group_sizes, alpha, penalty, weights, lmda_path, 
-            dev_null, dev_full, lmda_max, min_ratio, lmda_path_size, max_screen_size, 
+            dev_null, dev_full, lmda_max, min_ratio, lmda_path_size, max_screen_size, max_active_size,
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             irls_max_iters, irls_tol, max_iters, tol, adev_tol, ddev_tol,
             newton_tol, newton_max_iters, early_exit, setup_lmda_max, setup_lmda_path, intercept, n_threads,

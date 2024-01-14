@@ -83,11 +83,11 @@ void update_screen_derived(
 }
 
 /**
- * Updates all derived strong quantities for naive state.
+ * Updates all derived screen quantities for naive state.
  * See the incoming state requirements in update_screen_derived_base.
- * After the function finishes, all strong quantities in the base + naive class
+ * After the function finishes, all screen quantities in the base + naive class
  * will be consistent with screen_set, and the state is otherwise effectively
- * unchanged in the sense that other quantities dependent on strong states are unchanged.
+ * unchanged in the sense that other quantities dependent on screen states are unchanged.
  */
 template <class StateType>
 void update_screen_derived(
@@ -197,6 +197,7 @@ struct StateGaussianNaive : StateGaussianBase<
         value_t min_ratio,
         size_t lmda_path_size,
         size_t max_screen_size,
+        size_t max_active_size,
         value_t pivot_subset_ratio,
         size_t pivot_subset_min,
         value_t pivot_slack_ratio,
@@ -221,7 +222,7 @@ struct StateGaussianNaive : StateGaussianBase<
     ):
         base_t(
             groups, group_sizes, alpha, penalty, weights, lmda_path, lmda_max, min_ratio, lmda_path_size,
-            max_screen_size, 
+            max_screen_size, max_active_size,
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             max_iters, tol, adev_tol, ddev_tol, 
             newton_tol, newton_max_iters, early_exit, setup_lmda_max, setup_lmda_path, intercept, n_threads,
@@ -243,7 +244,7 @@ struct StateGaussianNaive : StateGaussianBase<
      */
     void initialize() 
     {
-        /* initialize the rest of the strong quantities */
+        /* initialize the rest of the screen quantities */
         gaussian::naive::update_screen_derived(*this); 
     }
 };
