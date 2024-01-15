@@ -19,7 +19,7 @@ def objective(
     penalty: np.ndarray,
     weights: np.ndarray,
     beta0: float,
-    beta: np.ndarray | csr_matrix, 
+    beta: Union[np.ndarray, csr_matrix], 
     glm: Union[glm.GlmBase32, glm.GlmBase64] =glm.gaussian(),
     relative: bool =True,
     add_penalty: bool =True,
@@ -267,7 +267,7 @@ def grpnet(
     penalty: np.ndarray =None,
     weights: np.ndarray =None,
     lmda_path: np.ndarray =None,
-    irls_max_iters: int =int(1e2),
+    irls_max_iters: int =int(1e4),
     irls_tol: float =1e-7,
     max_iters: int =int(1e5),
     tol: float =1e-7,
@@ -358,7 +358,7 @@ def grpnet(
     irls_max_iters : int, optional
         Maximum number of IRLS iterations.
         This parameter is only used if ``glm`` is not ``None``.
-        Default is ``100``.
+        Default is ``int(1e4)``.
     irls_tol : float, optional
         IRLS convergence tolerance.
         This parameter is only used if ``glm`` is not ``None``.
