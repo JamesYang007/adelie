@@ -404,7 +404,7 @@ inline void solve(
     const auto& screen_is_active = state.screen_is_active;
     const auto& abs_grad = state.abs_grad;
     const auto& resid = state.resid;
-    const auto resid_sum = state.resid_sum;
+    const auto& resid_sum = state.resid_sum; // MUST be a reference since the most updated value is needed
     auto& X = *state.X;
     auto& lmda_max = state.lmda_max;
     auto& lmda_path = state.lmda_path;
