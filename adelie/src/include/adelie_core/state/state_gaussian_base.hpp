@@ -42,12 +42,13 @@ void update_abs_grad(
         const auto k = groups[i];
         const auto size_k = group_sizes[i];
         const auto pk = penalty[i];
+        const auto regul = ((1-alpha) * lmda) * pk;
         abs_grad[i] = (
             grad.segment(k, size_k) - 
-            ((1-alpha) * pk) * (lmda * Eigen::Map<const util::rowvec_type<ValueType>>(
+            regul * Eigen::Map<const util::rowvec_type<ValueType>>(
                 screen_beta.data() + b,
                 size_k
-            ))
+            )
         ).matrix().norm();
     }
 

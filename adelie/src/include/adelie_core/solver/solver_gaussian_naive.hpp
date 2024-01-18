@@ -455,7 +455,7 @@ inline void solve(
         lmda_max = vec_value_t::NullaryExpr(
             abs_grad.size(),
             [&](auto i) { 
-                return (penalty[i] <= 0.0) ? 0.0 : abs_grad[i] / penalty[i];
+                return (penalty[i] <= 0.0) ? 0.0 : (abs_grad[i] / penalty[i]);
             }
         ).maxCoeff() / factor;
     }
