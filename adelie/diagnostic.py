@@ -17,10 +17,10 @@ import matplotlib.animation as animation
 
 def predict(
     *,
-    glm: Union[GlmBase32, GlmBase64],
     X: Union[MatrixNaiveBase32, MatrixNaiveBase64],
     betas: Union[np.ndarray, scipy.sparse.csr_matrix],
     intercepts: np.ndarray,
+    glm: Union[GlmBase32, GlmBase64] =None,
 ):
     """Computes the predictions.
 
@@ -33,14 +33,15 @@ def predict(
 
     Parameters
     ----------
-    glm : Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64]
-        GLM object.
     X : (n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64]
         Feature matrix.
     betas : (l, p) Union[np.ndarray, scipy.sparse.csr_matrix]
         Matrix with each row being a coefficient vector.
     intercepts : (l,) np.ndarray
         Intercept corresponding to ``betas``.
+    glm : Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64], optional
+        GLM object.
+        Default is ``None``.
 
     Returns
     -------
@@ -73,11 +74,11 @@ def predict(
 
 def residuals(
     *,
-    glm: Union[GlmBase32, GlmBase64],
     X: Union[MatrixNaiveBase32, MatrixNaiveBase64],
     y: np.ndarray,
     betas: Union[np.ndarray, scipy.sparse.csr_matrix],
     intercepts: np.ndarray,
+    glm: Union[GlmBase32, GlmBase64] =None,
 ):
     """Computes the residuals.
 
@@ -90,8 +91,6 @@ def residuals(
 
     Parameters
     ----------
-    glm : Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64]
-        GLM object.
     X : (n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64]
         Feature matrix.
     y : (n,) np.ndarray
@@ -100,6 +99,9 @@ def residuals(
         Matrix with each row being a coefficient vector.
     intercepts : (l,) np.ndarray
         Intercept corresponding to ``betas``.
+    glm : Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64], optional
+        GLM object.
+        Default is ``None``.
 
     Returns
     -------
