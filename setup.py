@@ -31,9 +31,6 @@ extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
 extra_compile_args += [
     "-Wall", 
     "-Wextra", 
-    "-Werror", 
-    "-Wno-error=deprecated-copy",
-    "-Wno-error=maybe-uninitialized",
     "-DNDEBUG", 
     "-O3",
 ]
