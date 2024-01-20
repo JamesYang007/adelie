@@ -1154,6 +1154,7 @@ class gaussian_naive_base(gaussian_base):
         y_mean: float,
         y_var: float,
         resid: np.ndarray,
+        resid_sum: float,
         groups: np.ndarray,
         group_sizes: np.ndarray,
         alpha: float,
@@ -1215,6 +1216,7 @@ class gaussian_naive_base(gaussian_base):
             y_mean=y_mean,
             y_var=y_var,
             resid=resid,
+            resid_sum=resid_sum,
             groups=self._groups,
             group_sizes=self._group_sizes,
             alpha=alpha,
@@ -1602,6 +1604,7 @@ def gaussian_naive(
     y_mean: float,
     y_var: float,
     resid: np.ndarray,
+    resid_sum: float,
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -1651,6 +1654,8 @@ def gaussian_naive(
         :math:`\\|y_c\\|_{W}^2`.
     resid : (n,) np.ndarray
         Residual :math:`W(y_c - X \\beta)` where :math:`\\beta` is given by ``screen_beta``.
+    resid_sum : float
+        Sum of ``resid``.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -1883,6 +1888,7 @@ def gaussian_naive(
         y_mean=y_mean,
         y_var=y_var,
         resid=resid,
+        resid_sum=resid_sum,
         groups=groups,
         group_sizes=group_sizes,
         alpha=alpha,
