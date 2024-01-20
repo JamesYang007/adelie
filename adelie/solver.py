@@ -567,6 +567,7 @@ def grpnet(
             y_var = np.sum(weights * yc ** 2)
             rsq = 0
             resid = weights * yc
+            resid_sum = np.sum(resid)
             grad = np.empty(p, dtype=dtype)
             X.mul(resid, grad)
         else:
@@ -575,6 +576,7 @@ def grpnet(
             y_var = warm_start.y_var
             rsq = warm_start.rsq
             resid = warm_start.resid
+            resid_sum = warm_start.resid_sum
             grad = warm_start.grad
 
         solver_args["X_means"] = X_means
@@ -582,6 +584,7 @@ def grpnet(
         solver_args["y_var"] = y_var
         solver_args["rsq"] = rsq
         solver_args["resid"] = resid
+        solver_args["resid_sum"] = resid_sum
         solver_args["grad"] = grad
 
         state = ad.state.gaussian_naive(**solver_args)
