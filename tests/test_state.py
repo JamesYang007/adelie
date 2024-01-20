@@ -126,6 +126,7 @@ def test_state_gaussian_naive():
     lmda = 2.0
     grad = np.random.normal(0, 1, p)
     resid = y
+    resid_sum = np.sum(resid)
     screen_beta = np.zeros(p)
     screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
 
@@ -136,6 +137,7 @@ def test_state_gaussian_naive():
         y_mean=y_mean,
         y_var=y_var,
         resid=resid,
+        resid_sum=resid_sum,
         groups=groups,
         group_sizes=group_sizes,
         alpha=alpha,

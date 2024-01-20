@@ -195,6 +195,7 @@ struct StateGaussianNaive : StateGaussianBase<
         value_t y_mean,
         value_t y_var,
         const Eigen::Ref<const vec_value_t>& resid,
+        value_t resid_sum,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
@@ -242,7 +243,7 @@ struct StateGaussianNaive : StateGaussianBase<
         y_var(y_var),
         X(&X),
         resid(resid),
-        resid_sum(resid.sum())
+        resid_sum(resid_sum)
     { 
         initialize();
     }

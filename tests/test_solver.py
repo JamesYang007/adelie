@@ -359,6 +359,7 @@ def create_dense(
     y_c = y - y_mean * intercept
     y_var = np.sum(weights * y_c ** 2)
     resid = weights * y_c
+    resid_sum = np.sum(resid)
     screen_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
     screen_beta = np.zeros(np.sum(group_sizes[screen_set]))
     screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
@@ -371,6 +372,7 @@ def create_dense(
         "y_mean": y_mean,
         "y_var": y_var,
         "resid": resid,
+        "resid_sum": resid_sum,
         "groups": groups,
         "group_sizes": group_sizes,
         "alpha": alpha,
@@ -479,6 +481,7 @@ def test_solve_gaussian():
                 y_mean=state.y_mean,
                 y_var=state.y_var,
                 resid=state.resid,
+                resid_sum=state.resid_sum,
                 groups=state.groups,
                 group_sizes=state.group_sizes,
                 alpha=state.alpha,
@@ -540,32 +543,38 @@ def test_solve_gaussian_concatenate():
         y_c = y - y_mean * intercept
         y_var = np.sum(weights * y_c ** 2)
         resid = weights * y_c
+        resid_sum = np.sum(resid)
         screen_set = np.arange(len(groups))[(penalty <= 0) | (alpha <= 0)]
         screen_beta = np.zeros(np.sum(group_sizes[screen_set]))
         screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
         grad = X_c.T @ resid
 
+        test_data = {
+            "y": y,
+            "X_means": X_means,
+            "y_mean": y_mean,
+            "y_var": y_var,
+            "resid": resid,
+            "resid_sum": resid_sum,
+            "groups": groups,
+            "group_sizes": group_sizes,
+            "alpha": alpha,
+            "penalty": penalty,
+            "weights": weights,
+            "screen_set": screen_set,
+            "screen_beta": screen_beta,
+            "screen_is_active": screen_is_active,
+            "rsq": 0,
+            "lmda": np.inf,
+            "grad": grad,
+            "n_threads": n_threads,
+        }
+
         for Xpy in Xs:
             state_special = ad.solver.solve_gaussian(
                 ad.state.gaussian_naive(
                     X=Xpy,
-                    y=y,
-                    X_means=X_means,
-                    y_mean=y_mean,
-                    y_var=y_var,
-                    resid=resid,
-                    groups=groups,
-                    group_sizes=group_sizes,
-                    alpha=alpha,
-                    penalty=penalty,
-                    weights=weights,
-                    screen_set=screen_set,
-                    screen_beta=screen_beta,
-                    screen_is_active=screen_is_active,
-                    rsq=0,
-                    lmda=np.inf,
-                    grad=grad,
-                    n_threads=n_threads,
+                    **test_data,
                 ),
             )
             X_dense = ad.matrix.dense(
@@ -576,23 +585,7 @@ def test_solve_gaussian_concatenate():
             state_dense = ad.solver.solve_gaussian(
                 ad.state.gaussian_naive(
                     X=X_dense,
-                    y=y,
-                    X_means=X_means,
-                    y_mean=y_mean,
-                    y_var=y_var,
-                    resid=resid,
-                    groups=groups,
-                    group_sizes=group_sizes,
-                    alpha=alpha,
-                    penalty=penalty,
-                    weights=weights,
-                    screen_set=screen_set,
-                    screen_beta=screen_beta,
-                    screen_is_active=screen_is_active,
-                    rsq=0,
-                    lmda=np.inf,
-                    grad=grad,
-                    n_threads=n_threads,
+                    **test_data,
                 )
             )
 
@@ -642,6 +635,7 @@ def test_solve_gaussian_snp_unphased():
         y_c = y - test_data["y_mean"] * intercept
         test_data["y_var"] = np.sum(weights * y_c ** 2)
         test_data["resid"] = weights * y_c
+        test_data["resid_sum"] = np.sum(test_data["resid"])
         test_data["screen_set"] = np.arange(p)[(test_data["penalty"] <= 0) | (alpha <= 0)]
         test_data["screen_beta"] = np.zeros(np.sum(test_data["group_sizes"][test_data["screen_set"]]))
         test_data["screen_is_active"] = np.zeros(test_data["screen_set"].shape[0], dtype=bool)
@@ -712,6 +706,7 @@ def test_solve_gaussian_snp_phased_ancestry():
         y_c = y - test_data["y_mean"] * intercept
         test_data["y_var"] = np.sum(weights * y_c ** 2)
         test_data["resid"] = weights * y_c
+        test_data["resid_sum"] = np.sum(test_data["resid"])
         test_data["screen_set"] = np.arange(p)[(test_data["penalty"] <= 0) | (alpha <= 0)]
         test_data["screen_beta"] = np.zeros(np.sum(test_data["group_sizes"][test_data["screen_set"]]))
         test_data["screen_is_active"] = np.zeros(test_data["screen_set"].shape[0], dtype=bool)
