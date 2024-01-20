@@ -456,7 +456,7 @@ document.write(`
 </div>
 <p>For example, we can plot the coefficients and the percent deviance explained.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dg</span><span class="o">.</span><span class="n">plot_coefficients</span><span class="p">()</span>
@@ -481,7 +481,7 @@ document.write(`
 </div>
 <p>Serious developers may be interested in the performance of the solver. We also provide a function to inspect the benchmark timings at each iteration of the solver.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dg</span><span class="o">.</span><span class="n">plot_benchmark</span><span class="p">()</span>
@@ -501,7 +501,7 @@ document.write(`
 <h4><strong>Group Lasso</strong><a class="headerlink" href="#Group-Lasso" title="Link to this heading">#</a></h4>
 <p>To fit group lasso, the user simply needs to supply a <code class="docutils literal notranslate"><span class="pre">groups</span></code> argument that defines the starting column index for each group. For example, if there are <code class="docutils literal notranslate"><span class="pre">4</span></code> features grouped every two features, then <code class="docutils literal notranslate"><span class="pre">groups</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">2]</span></code>. For demonstration, we take the same data as before and group every <code class="docutils literal notranslate"><span class="pre">10</span></code> features. We then fit group lasso using the same function.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
@@ -514,7 +514,7 @@ document.write(`
 </div>
 <p>As before, we may inspect the same elements of <code class="docutils literal notranslate"><span class="pre">state</span></code> and diagnostics.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dg</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">diagnostic</span><span class="o">.</span><span class="n">diagnostic</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">)</span>
@@ -522,7 +522,7 @@ document.write(`
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dg</span><span class="o">.</span><span class="n">plot_coefficients</span><span class="p">()</span>
@@ -546,7 +546,7 @@ document.write(`
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dg</span><span class="o">.</span><span class="n">plot_benchmark</span><span class="p">()</span>

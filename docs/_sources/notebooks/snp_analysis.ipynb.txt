@@ -23,16 +23,6 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "%load_ext autoreload\n",
-    "%autoreload 2"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 2,
-   "metadata": {},
-   "outputs": [],
-   "source": [
     "import adelie as ad\n",
     "import numpy as np\n",
     "import matplotlib.pyplot as plt\n",
@@ -63,7 +53,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
+   "execution_count": 2,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -84,7 +74,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 4,
+   "execution_count": 3,
    "metadata": {},
    "outputs": [
     {
@@ -93,7 +83,7 @@
        "(1000, 6000)"
       ]
      },
-     "execution_count": 4,
+     "execution_count": 3,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -122,7 +112,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
+   "execution_count": 4,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -148,7 +138,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 7,
+   "execution_count": 5,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -171,7 +161,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 8,
+   "execution_count": 6,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -192,7 +182,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 10,
+   "execution_count": 7,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -213,7 +203,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 12,
+   "execution_count": 8,
    "metadata": {},
    "outputs": [
     {
@@ -235,7 +225,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 13,
+   "execution_count": 9,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -276,7 +266,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 14,
+   "execution_count": 10,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -297,7 +287,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 15,
+   "execution_count": 11,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -320,7 +310,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 16,
+   "execution_count": 12,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -343,7 +333,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 17,
+   "execution_count": 13,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -366,7 +356,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 18,
+   "execution_count": 14,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -388,7 +378,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 19,
+   "execution_count": 15,
    "metadata": {},
    "outputs": [
     {
@@ -410,7 +400,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 20,
+   "execution_count": 16,
    "metadata": {},
    "outputs": [],
    "source": [
