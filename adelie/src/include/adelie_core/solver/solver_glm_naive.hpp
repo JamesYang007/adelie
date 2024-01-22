@@ -82,9 +82,9 @@ void update_solutions(
     intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
     lmdas.emplace_back(lmda);
 
-    glm.deviance(y0, eta, buffer_n);
+    const auto dev = glm.deviance(y0, eta, weights0);
     devs.emplace_back(
-        (dev_null - (weights0 * buffer_n).sum()) /
+        (dev_null - dev) /
         (dev_null - dev_full)
     );
 }
@@ -181,18 +181,16 @@ auto fit(
         save_prev_valid();
 
         /* compute rest of quadratic approximation quantities */
-        // TODO: parallelize?
-        glm.hessian(mu, var);
-        weights = weights0 * var;
-        const auto weights_sum = weights.sum();
-        weights /= weights_sum;
+        glm.hessian(mu, weights0, var);
+        const auto var_sum = var.sum();
+        weights = var / var_sum;
         weights_sqrt = weights.sqrt();
-        y = (y0 - mu) / var + eta;
+        y = (weights0 * y0 - mu) / var + eta;
         const auto y_mean = (weights * y).sum();
-        const auto y_var = (weights * y.square()).sum() - y_mean * y_mean;
+        const auto y_var = (weights * y.square()).sum() - intercept * y_mean * y_mean;
         resid = weights * (y - eta + intercept * (beta0 - y_mean));
         const auto resid_sum = resid.sum();
-        lmda_path_adjusted = lmda / weights_sum;
+        lmda_path_adjusted = lmda / var_sum;
         if (std::isinf(lmda_path_adjusted[0])) {
             if (lmda == std::numeric_limits<value_t>::max()) {
                 lmda_path_adjusted = lmda;
@@ -280,14 +278,18 @@ auto fit(
         beta0 = state_gaussian_pin_naive.intercepts[0];
 
         // update eta
-        eta = y - resid / weights + intercept * (beta0 - y_mean);
+        eta = (
+            y - 
+            resid / (weights + (weights <= 0).template cast<value_t>()) + 
+            intercept * (beta0 - y_mean)
+        );
 
         // update mu
         mu_prev.swap(mu);
-        glm.gradient(eta, mu); 
+        glm.gradient(eta, weights0, mu); 
 
         /* check convergence */
-        if ((weights0 * (mu - mu_prev).square()).sum() <= irls_tol) {
+        if ((mu - mu_prev).square().sum() <= irls_tol) {
             return std::make_tuple(
                 std::move(state_gaussian_pin_naive),
                 screen_time,
@@ -329,7 +331,7 @@ size_t kkt(
     };
 
     // NOTE: no matter what, every gradient must be computed for pivot method.
-    buffer_n = weights0 * (y0 - mu);
+    buffer_n = (weights0 * y0 - mu);
     X.mul(buffer_n, grad);
     state::gaussian::update_abs_grad(state, lmda);
 
@@ -418,7 +420,7 @@ inline void solve(
 
         /* Invariance */
         lmda = large_lmda;
-        buffer_n = weights0 * (y0 - mu);
+        buffer_n = (weights0 * y0 - mu);
         X.mul(buffer_n, grad);
         state::gaussian::update_abs_grad(state, lmda);
 
@@ -491,7 +493,7 @@ inline void solve(
             // otherwise, put the state at the last fitted lambda (lmda_max)
             } else {
                 lmda = large_lmda_path[i];
-                buffer_n = weights0 * (y0 - mu);
+                buffer_n = (weights0 * y0 - mu);
                 X.mul(buffer_n, grad);
                 state::gaussian::update_abs_grad(state, lmda);
             }

@@ -15,23 +15,25 @@ public:
 
     virtual void gradient(
         const Eigen::Ref<const vec_value_t>& eta,
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> mu
-    ) =0;
-
-    virtual void gradient_inverse(
-        const Eigen::Ref<const vec_value_t>& mu,
-        Eigen::Ref<vec_value_t> eta
     ) =0;
 
     virtual void hessian(
         const Eigen::Ref<const vec_value_t>& mu,
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> var
     ) =0;
 
-    virtual void deviance(
+    virtual value_t deviance(
         const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& eta,
-        Eigen::Ref<vec_value_t> dev
+        const Eigen::Ref<const vec_value_t>& weights
+    ) =0;
+
+    virtual value_t deviance_full(
+        const Eigen::Ref<const vec_value_t>& y,
+        const Eigen::Ref<const vec_value_t>& weights
     ) =0;
 };
 
