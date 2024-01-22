@@ -19,7 +19,7 @@ def _sample_y(
         y = eta + noise_scale * np.random.normal(0, 1, n)
     else:
         mu = np.empty(eta.shape[0], dtype=eta.dtype)
-        glm.gradient(snr * eta / np.sqrt(np.sum(beta**2)), mu)
+        glm.gradient(snr * eta / np.sqrt(np.sum(beta**2)), np.ones(n), mu)
         y = glm.sample(mu).astype(eta.dtype)
     return y
 

@@ -2132,7 +2132,7 @@ def glm_naive(
     lmda : float
         The last regularization parameter that was attempted to be solved.
     grad : (p,) np.ndarray
-        The full gradient :math:`X^\\top W (y - \\nabla \\underline{A}(X\\beta + \\beta_0 \\mathbf{1}))` where
+        The full gradient :math:`X^\\top (Wy - \\nabla A(X\\beta + \\beta_0 \\mathbf{1}))` where
         :math:`\\beta` is given by ``screen_beta``
         and :math:`\\beta_0` is given by ``beta0``.
     eta : (n,) np.ndarray
@@ -2140,14 +2140,13 @@ def glm_naive(
         where :math:`\\beta` and :math:`\\beta_0` are given by
         ``screen_beta`` and ``beta0``.
     mu : (n,) np.ndarray
-        The mean parameter :math:`\\mu \\equiv \\nabla \\underline{A}(\\eta)`
+        The mean parameter :math:`\\mu \\equiv \\nabla A(\\eta)`
         where :math:`\\eta` is given by ``eta``.
     dev_null : float 
-        Null deviance :math:`D(\\eta_0)`
-        where :math:`\\eta_0 = \\beta_0 1` is the intercept-only model fit.
+        Null deviance :math:`D(0)`.
     dev_full : float
         Full deviance :math:`D(\\eta^\\star)`
-        where :math:`\\eta^\\star = (\\nabla \\underline{A})^{-1}(y)` is the saturated model fit.
+        where :math:`\\eta^\\star` is the minimizer.
     lmda_path : (l,) np.ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.

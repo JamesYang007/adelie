@@ -14,36 +14,39 @@ public:
 
     void gradient(
         const Eigen::Ref<const vec_value_t>& eta,
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> mu
     ) override
     {
-        mu = 1 / (1 + (-eta).exp());
-    }
-
-    void gradient_inverse(
-        const Eigen::Ref<const vec_value_t>& mu,
-        Eigen::Ref<vec_value_t> eta
-    ) override
-    {
-        eta = (mu / (1-mu)).log();
+        mu = weights / (1 + (-eta).exp());
     }
 
     void hessian(
         const Eigen::Ref<const vec_value_t>& mu,
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> var
     ) override
     {
-        var = mu * (1-mu);
+        // denominator is given a dummy positive value when weights == 0.
+        var = (mu * (weights-mu)) / (weights + (weights <= 0).template cast<value_t>());
     }
 
-    void deviance(
+    value_t deviance(
         const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& eta,
-        Eigen::Ref<vec_value_t> dev
+        const Eigen::Ref<const vec_value_t>& weights
     ) override
     {
         // numerically stable so that exp == 0 when y = 1 and eta = inf or y = 0 and eta = -inf.
-        dev = (1 + ((1-2*y) * eta).exp()).log();
+        return (weights * (1 + ((1-2*y) * eta).exp()).log()).sum();
+    }
+
+    value_t deviance_full(
+        const Eigen::Ref<const vec_value_t>&,
+        const Eigen::Ref<const vec_value_t>& 
+    ) override
+    {
+        return 0;
     }
 };
 

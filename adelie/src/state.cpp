@@ -1242,12 +1242,10 @@ void state_glm_base(py::module_& m, const char* name)
         GLM object.
         )delimiter")
         .def_readonly("dev_null", &state_t::dev_null, R"delimiter(
-        Null deviance :math:`D(\eta_0)`
-        where :math:`\eta_0 = \beta_0 \mathbf{1}` is the intercept-only model fit.
+        Null deviance :math:`D(0)`.
         )delimiter")
         .def_readonly("dev_full", &state_t::dev_full, R"delimiter(
-        Full deviance :math:`D(\eta^\star)`
-        where :math:`\eta^\star = (\nabla \underline{A})^{-1}(y)` is the saturated model fit.
+        Full deviance :math:`D(\eta^\star)` where :math:`\eta^\star` is the minimizer.
         )delimiter")
         .def_readonly("lmda_max", &state_t::lmda_max, R"delimiter(
         The smallest :math:`\lambda` such that the true solution is zero
@@ -1320,7 +1318,7 @@ void state_glm_base(py::module_& m, const char* name)
         The last regularization parameter that was attempted to be solved.
         )delimiter")
         .def_readonly("grad", &state_t::grad, R"delimiter(
-        The full gradient :math:`X^\top W (y - \nabla \underline{A}(X\beta + \beta_0 \mathbf{1}))` where
+        The full gradient :math:`X^\top (W y - \nabla A(X\beta + \beta_0 \mathbf{1}))` where
         :math:`\beta` is given by ``screen_beta``
         and :math:`\beta_0` is given by ``beta0``.
         )delimiter")
@@ -1549,7 +1547,7 @@ void state_glm_naive(py::module_& m, const char* name)
         ``screen_beta`` and ``beta0``.
         )delimiter")
         .def_readonly("mu", &state_t::mu, R"delimiter(
-        The mean parameter :math:`\mu = \nabla \underline{A}(\eta)`
+        The mean parameter :math:`\mu = \nabla A(\eta)`
         where :math:`\eta` is given by ``eta``.
         )delimiter")
         ;

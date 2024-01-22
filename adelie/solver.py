@@ -54,8 +54,8 @@ def objective(
         GLM object.
         Default is ``adelie.glm.gaussian()``.
     relative : bool, optional
-        If ``True``, then the deviance, :math:`D^\\star`, is computed at the saturated model
-        and the difference :math:`\\mathcal{L}-D^\\star` is provided,
+        If ``True``, then the full deviance, :math:`D^\\star`, is computed at the saturated model
+        and the difference :math:`D-D^\\star` is provided,
         which will always be non-negative.
         This effectively computes deviance *relative* to the saturated model.
         Default is ``True``.
@@ -87,17 +87,11 @@ def objective(
     eta += beta0
 
     # compute deviance part
-    deviance = np.empty(n)
-    glm.deviance(y, eta, deviance)
-    obj = np.sum(weights * deviance)
+    obj = glm.deviance(y, eta, weights)
 
     # relative to saturated model
     if relative:
-        eta_sat = np.empty(n)
-        glm.gradient_inverse(y, eta_sat)
-        deviance_sat = np.empty(n)
-        glm.deviance(y, eta_sat, deviance_sat)
-        obj -= np.sum(weights * deviance_sat)
+        obj -= glm.deviance_full(y, weights)
 
     # compute regularization part
     if add_penalty:
@@ -297,12 +291,16 @@ def grpnet(
 
     .. math::
         \\begin{align*}
+            \\mathrm{minimize}_{\\beta, \\beta_0} \\quad&
             \\sum_{i=1}^n w_i \\left(
-                -y_i (x_i^\\top \\beta + \\beta_0) + A(x_i^\\top \\beta + \\beta_0)
+                -y_i \\eta_i + A_i(\\eta)
             \\right)
             + \\lambda \\sum\\limits_{g=1}^G p_g \\left(
                 \\alpha \\|\\beta_g\\|_2 + \\frac{1-\\alpha}{2} \\|\\beta_g\\|_2^2
             \\right)
+            \\\\
+            \\text{subject to} \\quad&
+            \\eta = X\\beta + \\beta_0 \\mathbf{1}
         \\end{align*}
 
     where 
@@ -316,7 +314,7 @@ def grpnet(
     :math:`p \\geq 0` is the penalty factor,
     :math:`\\alpha \\in [0,1]` is the elastic net parameter,
     :math:`\\beta_g` are the coefficients for the :math:`g` th group,
-    and :math:`A` is the log-partition function defining the GLM family.
+    and :math:`A_i` define the log-partition function in the GLM family.
 
     Parameters
     ----------
@@ -593,14 +591,11 @@ def grpnet(
         if warm_start is None:
             beta0 = 0
             eta = np.zeros(n)
-            mu = np.empty(n); glm.gradient(eta, mu)
-            resid = weights * (y - mu)
+            mu = np.empty(n); glm.gradient(eta, weights, mu)
+            resid = (weights * y - mu)
             grad = np.empty(p); X.mul(resid, grad)
-            dev = np.empty(n); glm.deviance(y, eta, dev)
-            dev_null = np.sum(weights * dev)
-            eta_full = np.empty(n); glm.gradient_inverse(y, eta_full)
-            glm.deviance(y, eta_full, dev)
-            dev_full = np.sum(weights * dev)
+            dev_null = glm.deviance(y, eta, weights)
+            dev_full = glm.deviance_full(y, weights)
         else:
             beta0 = warm_start.beta0
             eta = warm_start.eta
