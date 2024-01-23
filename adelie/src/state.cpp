@@ -1090,6 +1090,7 @@ void state_glm_base(py::module_& m, const char* name)
             bool,
             bool,
             bool,
+            bool,
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
@@ -1126,6 +1127,7 @@ void state_glm_base(py::module_& m, const char* name)
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("early_exit"),
+            py::arg("setup_dev_null"),
             py::arg("setup_lmda_max"),
             py::arg("setup_lmda_path"),
             py::arg("intercept"),
@@ -1231,6 +1233,9 @@ void state_glm_base(py::module_& m, const char* name)
         .def_readonly("early_exit", &state_t::early_exit, R"delimiter(
         ``True`` if the function should early exit based on training percent deviance explained.
         )delimiter")
+        .def_readonly("setup_dev_null", &state_t::setup_dev_null, R"delimiter(
+        ``True`` if the function should setup ``dev_null``.
+        )delimiter")
         .def_readonly("setup_lmda_max", &state_t::setup_lmda_max, R"delimiter(
         ``True`` if the function should setup :math:`\lambda_\max`.
         )delimiter")
@@ -1247,7 +1252,8 @@ void state_glm_base(py::module_& m, const char* name)
         GLM object.
         )delimiter")
         .def_readonly("dev_null", &state_t::dev_null, R"delimiter(
-        Null deviance :math:`D(0)`.
+        Null deviance :math:`D(\beta_0^\star \mathbf{1} + \eta^0)`
+        from fitting an intercept-only model (if ``intercept`` is ``True``).
         )delimiter")
         .def_readonly("dev_full", &state_t::dev_full, R"delimiter(
         Full deviance :math:`D(\eta^\star)` where :math:`\eta^\star` is the minimizer.
@@ -1490,6 +1496,7 @@ void state_glm_naive(py::module_& m, const char* name)
             bool,
             bool,
             bool,
+            bool,
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
@@ -1530,6 +1537,7 @@ void state_glm_naive(py::module_& m, const char* name)
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("early_exit"),
+            py::arg("setup_dev_null"),
             py::arg("setup_lmda_max"),
             py::arg("setup_lmda_path"),
             py::arg("intercept"),
