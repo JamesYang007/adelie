@@ -532,11 +532,13 @@ def grpnet(
 
     solver_args = {
         "X": X,
+        "y": y,
         "groups": groups,
         "group_sizes": group_sizes,
         "alpha": alpha,
         "penalty": penalty,
         "weights": weights,
+        "offsets": offsets,
         "screen_set": screen_set,
         "screen_beta": screen_beta,
         "screen_is_active": screen_is_active,
@@ -565,10 +567,10 @@ def grpnet(
     # compute quantities specific to each method 
 
     if glm is None:
-        y_off = y - offsets
         if warm_start is None:
             X_means = np.empty(p, dtype=dtype)
             X.means(weights, X_means)
+            y_off = y - offsets
             y_mean = np.sum(y_off * weights)
             yc = y_off
             if intercept:
@@ -588,7 +590,6 @@ def grpnet(
             resid_sum = warm_start.resid_sum
             grad = warm_start.grad
 
-        solver_args["y"] = y_off
         solver_args["X_means"] = X_means
         solver_args["y_mean"] = y_mean
         solver_args["y_var"] = y_var
@@ -606,7 +607,7 @@ def grpnet(
             mu = np.empty(n); glm.gradient(eta, weights, mu)
             resid = (weights * y - mu)
             grad = np.empty(p); X.mul(resid, grad)
-            dev_null = glm.deviance(y, eta, weights)
+            dev_null = None
             dev_full = glm.deviance_full(y, weights)
         else:
             beta0 = warm_start.beta0
@@ -617,14 +618,12 @@ def grpnet(
             dev_full = warm_start.dev_full
 
         solver_args["glm"] = glm
-        solver_args["y"] = y
         solver_args["beta0"] = beta0
         solver_args["grad"] = grad
         solver_args["eta"] = eta
         solver_args["mu"] = mu
         solver_args["dev_null"] = dev_null
         solver_args["dev_full"] = dev_full
-        solver_args["offsets"] = offsets
         solver_args["irls_max_iters"] = irls_max_iters
         solver_args["irls_tol"] = irls_tol
         state = ad.state.glm_naive(**solver_args)
