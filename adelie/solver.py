@@ -353,7 +353,7 @@ def grpnet(
         Observation weights.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
     offsets : (n,) np.ndarray, optional
-        Observation offsets.
+        Observation offsets :math:`\\eta^0`.
         Default is ``None``, in which case, it is set to ``np.zeros(n)``.
     lmda_path : (l,) np.ndarray, optional
         The regularization path to solve for.
