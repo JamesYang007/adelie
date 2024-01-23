@@ -82,11 +82,82 @@ void update_solutions(
     intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
     lmdas.emplace_back(lmda);
 
-    glm.deviance(y0, eta, buffer_n);
+    const auto dev = glm.deviance(y0, eta, weights0);
     devs.emplace_back(
-        (dev_null - (weights0 * buffer_n).sum()) /
+        (dev_null - dev) /
         (dev_null - dev_full)
     );
+}
+
+template <class StateType,
+          class BufferPackType>
+ADELIE_CORE_STRONG_INLINE
+void update_dev_null(
+    StateType& state,
+    BufferPackType& buffer_pack
+)
+{
+    using state_t = std::decay_t<StateType>;
+    using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
+
+    const auto& y0 = state.y;
+    const auto& weights0 = state.weights;
+    const auto& offsets = state.offsets;
+    const auto intercept = state.intercept;
+    auto& glm = *state.glm;
+    auto& dev_null = state.dev_null;
+
+    if (!intercept) {
+        dev_null = glm.deviance(y0, offsets, weights0);
+        return;
+    }
+
+    const auto irls_max_iters = state.irls_max_iters;
+    const auto irls_tol = state.irls_tol;
+
+    // make copies since we do not want to mess with the warm-start.
+    // this function is only needed to fit intercept-only model and get dev_null.
+    value_t beta0 = state.beta0;
+    vec_value_t eta = state.eta;
+    vec_value_t mu = state.mu;
+
+    auto& weights = buffer_pack.weights;
+    auto& y = buffer_pack.y;
+    auto& mu_prev = buffer_pack.mu_prev;
+    auto& var = buffer_pack.var;
+
+    size_t irls_it = 0;
+
+    while (1) {
+        if (irls_it >= irls_max_iters) {
+            throw std::runtime_error("Maximum IRLS iterations reached.");
+        }
+
+        /* compute rest of quadratic approximation quantities */
+        glm.hessian(mu, weights0, var);
+        const auto var_sum = var.sum();
+        weights = var / var_sum;
+        y = (weights0 * y0 - mu) / var + eta - offsets; // TODO: division well-defined?
+
+        /* fit beta0 */
+        beta0 = (weights * y).sum();
+
+        // update eta
+        eta = beta0 + offsets;
+
+        // update mu
+        mu_prev.swap(mu);
+        glm.gradient(eta, weights0, mu); 
+
+        /* check convergence */
+        if ((mu - mu_prev).square().sum() <= irls_tol) {
+            dev_null = glm.deviance(y0, eta, weights0);
+            return;
+        }
+
+        ++irls_it;
+    }
 }
 
 template <class StateType,
@@ -126,6 +197,7 @@ auto fit(
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
     const auto& weights0 = state.weights;
+    const auto& offsets = state.offsets;
     const auto& screen_set = state.screen_set;
     const auto& screen_g1 = state.screen_g1;
     const auto& screen_g2 = state.screen_g2;
@@ -181,18 +253,16 @@ auto fit(
         save_prev_valid();
 
         /* compute rest of quadratic approximation quantities */
-        // TODO: parallelize?
-        glm.hessian(mu, var);
-        weights = weights0 * var;
-        const auto weights_sum = weights.sum();
-        weights /= weights_sum;
+        glm.hessian(mu, weights0, var);
+        const auto var_sum = var.sum();
+        weights = var / var_sum;
         weights_sqrt = weights.sqrt();
-        y = (y0 - mu) / var + eta;
+        y = (weights0 * y0 - mu) / var + eta - offsets; // TODO: division well-defined?
         const auto y_mean = (weights * y).sum();
-        const auto y_var = (weights * y.square()).sum() - y_mean * y_mean;
-        resid = weights * (y - eta + intercept * (beta0 - y_mean));
+        const auto y_var = (weights * y.square()).sum() - intercept * y_mean * y_mean;
+        resid = weights * (y + offsets - eta + intercept * (beta0 - y_mean));
         const auto resid_sum = resid.sum();
-        lmda_path_adjusted = lmda / weights_sum;
+        lmda_path_adjusted = lmda / var_sum;
         if (std::isinf(lmda_path_adjusted[0])) {
             if (lmda == std::numeric_limits<value_t>::max()) {
                 lmda_path_adjusted = lmda;
@@ -280,14 +350,18 @@ auto fit(
         beta0 = state_gaussian_pin_naive.intercepts[0];
 
         // update eta
-        eta = y - resid / weights + intercept * (beta0 - y_mean);
+        eta = (
+            y + offsets - 
+            resid / (weights + (weights <= 0).template cast<value_t>()) + 
+            intercept * (beta0 - y_mean)
+        );
 
         // update mu
         mu_prev.swap(mu);
-        glm.gradient(eta, mu); 
+        glm.gradient(eta, weights0, mu); 
 
         /* check convergence */
-        if ((weights0 * (mu - mu_prev).square()).sum() <= irls_tol) {
+        if ((mu - mu_prev).square().sum() <= irls_tol) {
             return std::make_tuple(
                 std::move(state_gaussian_pin_naive),
                 screen_time,
@@ -329,7 +403,7 @@ size_t kkt(
     };
 
     // NOTE: no matter what, every gradient must be computed for pivot method.
-    buffer_n = weights0 * (y0 - mu);
+    buffer_n = (weights0 * y0 - mu);
     X.mul(buffer_n, grad);
     state::gaussian::update_abs_grad(state, lmda);
 
@@ -366,6 +440,7 @@ inline void solve(
     const auto& screen_set = state.screen_set;
     const auto early_exit = state.early_exit;
     const auto max_screen_size = state.max_screen_size;
+    const auto setup_dev_null = state.setup_dev_null;
     const auto setup_lmda_max = state.setup_lmda_max;
     const auto setup_lmda_path = state.setup_lmda_path;
     const auto lmda_path_size = state.lmda_path_size;
@@ -399,6 +474,13 @@ inline void solve(
     auto& buffer_n = buffer_pack.buffer_n;
 
     // ==================================================================================== 
+    // Initial fit with beta = 0 to get dev_null.
+    // ==================================================================================== 
+    if (setup_dev_null) {
+        update_dev_null(state, buffer_pack);
+    }
+
+    // ==================================================================================== 
     // Initial fit for lambda ~ infinity to setup lmda_max
     // ==================================================================================== 
     // Only unpenalized (l1) groups are active in this case.
@@ -418,7 +500,7 @@ inline void solve(
 
         /* Invariance */
         lmda = large_lmda;
-        buffer_n = weights0 * (y0 - mu);
+        buffer_n = (weights0 * y0 - mu);
         X.mul(buffer_n, grad);
         state::gaussian::update_abs_grad(state, lmda);
 
@@ -491,7 +573,7 @@ inline void solve(
             // otherwise, put the state at the last fitted lambda (lmda_max)
             } else {
                 lmda = large_lmda_path[i];
-                buffer_n = weights0 * (y0 - mu);
+                buffer_n = (weights0 * y0 - mu);
                 X.mul(buffer_n, grad);
                 state::gaussian::update_abs_grad(state, lmda);
             }

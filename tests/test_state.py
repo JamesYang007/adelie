@@ -119,6 +119,7 @@ def test_state_gaussian_naive():
     penalty = np.random.uniform(0, 1, G)
     weights = np.random.uniform(1, 2, n)
     weights /= np.sum(weights)
+    offsets = np.zeros(n)
     screen_set = np.array([0, 1])
     lmda_path = np.array([0.1, 1.0, 0.5])
     lmda_max = 0.9
@@ -143,6 +144,7 @@ def test_state_gaussian_naive():
         alpha=alpha,
         penalty=penalty,
         weights=weights,
+        offsets=offsets,
         lmda_path=lmda_path,
         lmda_max=lmda_max,
         screen_set=screen_set,

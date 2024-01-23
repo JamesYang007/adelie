@@ -1010,10 +1010,10 @@ void state_gaussian_naive(py::module_& m, const char* name)
         Column means (weighted by :math:`W`) of ``X``.
         )delimiter")
         .def_readonly("y_mean", &state_t::y_mean, R"delimiter(
-        The mean (weighted by :math:`W`) of the response vector :math:`y`.
+        The mean (weighted by :math:`W`) of the offsetted response vector :math:`y-\eta^0`.
         )delimiter")
         .def_readonly("y_var", &state_t::y_var, R"delimiter(
-        The variance (weighted by :math:`W`) of the response vector :math:`y`, i.e. 
+        The variance (weighted by :math:`W`) of the offsetted response vector :math:`y-\eta^0`, i.e. 
         :math:`\|y_c\|_{W}^2`.
         )delimiter")
         .def_readonly("X", &state_t::X, R"delimiter(
@@ -1066,6 +1066,7 @@ void state_glm_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
             value_t,
             value_t,
             value_t,
@@ -1089,6 +1090,7 @@ void state_glm_base(py::module_& m, const char* name)
             bool,
             bool,
             bool,
+            bool,
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
@@ -1103,6 +1105,7 @@ void state_glm_base(py::module_& m, const char* name)
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("weights").noconvert(),
+            py::arg("offsets").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("dev_null"),
             py::arg("dev_full"),
@@ -1124,6 +1127,7 @@ void state_glm_base(py::module_& m, const char* name)
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("early_exit"),
+            py::arg("setup_dev_null"),
             py::arg("setup_lmda_max"),
             py::arg("setup_lmda_path"),
             py::arg("intercept"),
@@ -1153,6 +1157,9 @@ void state_glm_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("weights", &state_t::weights, R"delimiter(
         Observation weights.
+        )delimiter")
+        .def_readonly("offsets", &state_t::offsets, R"delimiter(
+        Observation offsets :math:`\eta^0`.
         )delimiter")
         .def_readonly("min_ratio", &state_t::min_ratio, R"delimiter(
         The ratio between the largest and smallest :math:`\lambda` in the regularization sequence
@@ -1226,6 +1233,9 @@ void state_glm_base(py::module_& m, const char* name)
         .def_readonly("early_exit", &state_t::early_exit, R"delimiter(
         ``True`` if the function should early exit based on training percent deviance explained.
         )delimiter")
+        .def_readonly("setup_dev_null", &state_t::setup_dev_null, R"delimiter(
+        ``True`` if the function should setup ``dev_null``.
+        )delimiter")
         .def_readonly("setup_lmda_max", &state_t::setup_lmda_max, R"delimiter(
         ``True`` if the function should setup :math:`\lambda_\max`.
         )delimiter")
@@ -1242,12 +1252,11 @@ void state_glm_base(py::module_& m, const char* name)
         GLM object.
         )delimiter")
         .def_readonly("dev_null", &state_t::dev_null, R"delimiter(
-        Null deviance :math:`D(\eta_0)`
-        where :math:`\eta_0 = \beta_0 \mathbf{1}` is the intercept-only model fit.
+        Null deviance :math:`D(\beta_0^\star \mathbf{1} + \eta^0)`
+        from fitting an intercept-only model (if ``intercept`` is ``True``).
         )delimiter")
         .def_readonly("dev_full", &state_t::dev_full, R"delimiter(
-        Full deviance :math:`D(\eta^\star)`
-        where :math:`\eta^\star = (\nabla \underline{A})^{-1}(y)` is the saturated model fit.
+        Full deviance :math:`D(\eta^\star)` where :math:`\eta^\star` is the minimizer.
         )delimiter")
         .def_readonly("lmda_max", &state_t::lmda_max, R"delimiter(
         The smallest :math:`\lambda` such that the true solution is zero
@@ -1320,9 +1329,8 @@ void state_glm_base(py::module_& m, const char* name)
         The last regularization parameter that was attempted to be solved.
         )delimiter")
         .def_readonly("grad", &state_t::grad, R"delimiter(
-        The full gradient :math:`X^\top W (y - \nabla \underline{A}(X\beta + \beta_0 \mathbf{1}))` where
-        :math:`\beta` is given by ``screen_beta``
-        and :math:`\beta_0` is given by ``beta0``.
+        The full gradient :math:`X^\top (W y - \nabla A(\eta))` where
+        :math:`\eta` is given by ``eta``.
         )delimiter")
         .def_readonly("abs_grad", &state_t::abs_grad, R"delimiter(
         The :math:`\ell_2` norms of ``grad`` across each group.
@@ -1463,6 +1471,7 @@ void state_glm_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
             value_t,
             value_t,
             value_t,
@@ -1486,6 +1495,7 @@ void state_glm_naive(py::module_& m, const char* name)
             bool,
             bool,
             bool,
+            bool,
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
@@ -1504,6 +1514,7 @@ void state_glm_naive(py::module_& m, const char* name)
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("weights").noconvert(),
+            py::arg("offsets").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("dev_null"),
             py::arg("dev_full"),
@@ -1525,6 +1536,7 @@ void state_glm_naive(py::module_& m, const char* name)
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("early_exit"),
+            py::arg("setup_dev_null"),
             py::arg("setup_lmda_max"),
             py::arg("setup_lmda_path"),
             py::arg("intercept"),
@@ -1544,12 +1556,12 @@ void state_glm_naive(py::module_& m, const char* name)
         Feature matrix.
         )delimiter")
         .def_readonly("eta", &state_t::eta, R"delimiter(
-        The natural parameter :math:`\eta = X\beta + \beta_0 \mathbf{1}`
-        where :math:`\beta` and :math:`\beta_0` are given by
-        ``screen_beta`` and ``beta0``.
+        The natural parameter :math:`\eta = X\beta + \beta_0 \mathbf{1} + \eta^0`
+        where :math:`\beta`, :math:`\beta_0`, and :math:`\eta^0` are given by
+        ``screen_beta``, ``beta0``, and ``offsets``.
         )delimiter")
         .def_readonly("mu", &state_t::mu, R"delimiter(
-        The mean parameter :math:`\mu = \nabla \underline{A}(\eta)`
+        The mean parameter :math:`\mu = \nabla A(\eta)`
         where :math:`\eta` is given by ``eta``.
         )delimiter")
         ;

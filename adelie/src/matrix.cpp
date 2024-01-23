@@ -5,6 +5,7 @@
 #include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/matrix/matrix_naive_concatenate.hpp>
 #include <adelie_core/matrix/matrix_naive_dense.hpp>
+#include <adelie_core/matrix/matrix_naive_kronecker_eye.hpp>
 #include <adelie_core/matrix/matrix_naive_snp_unphased.hpp>
 #include <adelie_core/matrix/matrix_naive_snp_phased_ancestry.hpp>
 
@@ -471,6 +472,22 @@ void matrix_naive_dense(py::module_& m, const char* name)
         ;
 }
 
+template <class DenseType>
+void matrix_naive_kronecker_eye(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveKroneckerEye<DenseType>;
+    using base_t = typename internal_t::base_t;
+    using dense_t = typename internal_t::dense_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(
+            py::init<const Eigen::Ref<const dense_t>&, size_t, size_t>(), 
+            py::arg("mat").noconvert(),
+            py::arg("K"),
+            py::arg("n_threads")
+        )
+        ;
+}
+
 template <class ValueType>
 void matrix_naive_snp_unphased(py::module_& m, const char* name)
 {
@@ -559,6 +576,11 @@ void register_matrix(py::module_& m)
     matrix_naive_dense<dense_type<double, Eigen::ColMajor>>(m, "MatrixNaiveDense64F");
     matrix_naive_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixNaiveDense32C");
     matrix_naive_dense<dense_type<float, Eigen::ColMajor>>(m, "MatrixNaiveDense32F");
+
+    matrix_naive_kronecker_eye<dense_type<double, Eigen::RowMajor>>(m, "MatrixNaiveKroneckerEye64C");
+    matrix_naive_kronecker_eye<dense_type<double, Eigen::ColMajor>>(m, "MatrixNaiveKroneckerEye64F");
+    matrix_naive_kronecker_eye<dense_type<float, Eigen::RowMajor>>(m, "MatrixNaiveKroneckerEye32C");
+    matrix_naive_kronecker_eye<dense_type<float, Eigen::ColMajor>>(m, "MatrixNaiveKroneckerEye32F");
 
     matrix_naive_snp_unphased<double>(m, "MatrixNaiveSNPUnphased64");
     matrix_naive_snp_unphased<float>(m, "MatrixNaiveSNPUnphased32");

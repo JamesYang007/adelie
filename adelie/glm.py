@@ -43,7 +43,7 @@ def gaussian(
 
     .. math::
         \\begin{align*}
-            A(\\eta) = \\frac{\\eta^2}{2}
+            A(\\eta) = \sum\limits_{i=1}^n W_{ii} \\frac{\\eta_i^2}{2}
         \\end{align*}
 
     Parameters
@@ -90,7 +90,7 @@ def binomial(
 
     .. math::
         \\begin{align*}
-            A(\\eta) = \\log(1 + e^{\\eta})
+            A(\\eta) = \\sum\\limits_{i=1}^n W_{ii} \\log(1 + e^{\\eta_i})
         \\end{align*}
 
 
@@ -138,7 +138,7 @@ def poisson(
 
     .. math::
         \\begin{align*}
-            A(\\eta) = e^{\eta}
+            A(\\eta) = \\sum\\limits_{i=1}^n W_{ii} e^{\\eta_i}
         \\end{align*}
 
 

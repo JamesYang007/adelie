@@ -150,6 +150,7 @@ def run_solve_gaussian_pin(state, X, y, weights):
                 alpha=state.alpha,
                 penalty=state.penalty,
                 weights=weights,
+                offsets=np.zeros_like(weights),
             )
             for beta0, beta, lmda in zip(beta0s, betas, lmdas)
         ])
@@ -165,6 +166,7 @@ def run_solve_gaussian_pin(state, X, y, weights):
                 alpha=state.alpha,
                 penalty=state.penalty,
                 weights=weights,
+                offsets=np.zeros_like(weights),
             )
             for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
         ])
@@ -353,6 +355,8 @@ def create_dense(
     weights = np.random.uniform(1, 2, n)
     weights /= np.sum(weights)
 
+    offsets = np.zeros(n)
+
     X_means = np.sum(weights[:, None] * X, axis=0)
     X_c = X - intercept * X_means[None]
     y_mean = np.sum(weights * y)
@@ -378,6 +382,7 @@ def create_dense(
         "alpha": alpha,
         "penalty": penalty,
         "weights": weights,
+        "offsets": offsets,
         "screen_set": screen_set,
         "screen_beta": screen_beta,
         "screen_is_active": screen_is_active,
@@ -435,6 +440,7 @@ def run_solve_gaussian(state, X, y):
                 alpha=state.alpha,
                 penalty=state.penalty,
                 weights=state.weights,
+                offsets=state.offsets,
             )
             for beta0, beta, lmda in zip(beta0s, betas, lmdas)
         ])
@@ -450,6 +456,7 @@ def run_solve_gaussian(state, X, y):
                 alpha=state.alpha,
                 penalty=state.penalty,
                 weights=state.weights,
+                offsets=state.offsets,
             )
             for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
         ])
@@ -487,6 +494,7 @@ def test_solve_gaussian():
                 alpha=state.alpha,
                 penalty=state.penalty,
                 weights=state.weights,
+                offsets=state.offsets,
                 screen_set=state.screen_set,
                 screen_beta=state.screen_beta,
                 screen_is_active=state.screen_is_active,
@@ -537,6 +545,7 @@ def test_solve_gaussian_concatenate():
         penalty = np.concatenate([data["penalty"] for data in test_datas])
         weights = np.random.uniform(1, 2, n)
         weights /= np.sum(weights)
+        offsets = np.zeros(n)
         X_means = np.sum(weights[:, None] * X, axis=0)
         y_mean = np.sum(weights * y)
         X_c = X - intercept * X_means[None]
@@ -561,6 +570,7 @@ def test_solve_gaussian_concatenate():
             "alpha": alpha,
             "penalty": penalty,
             "weights": weights,
+            "offsets": offsets,
             "screen_set": screen_set,
             "screen_beta": screen_beta,
             "screen_is_active": screen_is_active,
@@ -628,6 +638,7 @@ def test_solve_gaussian_snp_unphased():
         weights /= np.sum(weights)
 
         test_data["weights"] = weights
+        test_data["offsets"] = np.zeros(n)
         test_data["alpha"] = alpha
         test_data["X_means"] = np.sum(weights[:, None] * X, axis=0)
         test_data["y_mean"] = np.sum(weights * y)
@@ -699,6 +710,7 @@ def test_solve_gaussian_snp_phased_ancestry():
         weights /= np.sum(weights)
 
         test_data["weights"] = weights
+        test_data["offsets"] = np.zeros(n)
         test_data["alpha"] = alpha
         test_data["X_means"] = np.sum(weights[:, None] * X, axis=0)
         test_data["y_mean"] = np.sum(weights * y)

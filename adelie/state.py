@@ -1610,6 +1610,7 @@ def gaussian_naive(
     alpha: float,
     penalty: np.ndarray,
     weights: np.ndarray,
+    offsets: np.ndarray,
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
@@ -1645,12 +1646,17 @@ def gaussian_naive(
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
     y : (n,) np.ndarray
         Response vector.
+        
+        .. note::
+            This is the original response vector not offsetted!
+            All other arguments related to :math:`y` are offsetted by ``offset``.
+
     X_means : (p,) np.ndarray
         Column means (weighted by :math:`W`) of ``X``.
     y_mean : float
-        Mean (weighted by :math:`W`) of the response vector :math:`y`.
+        Mean (weighted by :math:`W`) of the offsetted response vector :math:`y-\\eta^0`.
     y_var : float
-        :math:`\\ell_2` norm squared (weighted by :math:`W`) of :math:`y`, i.e. 
+        :math:`\\ell_2` norm squared (weighted by :math:`W`) of :math:`y-\\eta^0`, i.e. 
         :math:`\\|y_c\\|_{W}^2`.
     resid : (n,) np.ndarray
         Residual :math:`W(y_c - X \\beta)` where :math:`\\beta` is given by ``screen_beta``.
@@ -1671,6 +1677,8 @@ def gaussian_naive(
     weights : (n,) np.ndarray
         Observation weights.
         Internally, it is normalized to sum to one.
+    offsets : (n,) np.ndarray
+        Observation offsets :math:`\\eta^0`.
     screen_set : (s,) np.ndarray
         List of indices into ``groups`` that correspond to the screen groups.
         ``screen_set[i]`` is ``i`` th screen group.
@@ -1862,6 +1870,7 @@ def gaussian_naive(
             self._core_type = core_base
             # this is to keep the API consistent with grpnet with non-trivial GLM object
             self.y = y
+            self.offsets = offsets
             self.glm = None
             gaussian_naive_base.default_init(
                 self,
@@ -1878,6 +1887,7 @@ def gaussian_naive(
             )
             obj._core_type = core_base
             obj.y = y
+            obj.offsets = offsets
             obj.glm = None
             gaussian_naive_base.__init__(obj)
             return obj
@@ -1938,6 +1948,7 @@ class glm_naive_base:
         alpha: float,
         penalty: np.ndarray,
         weights: np.ndarray,
+        offsets: np.ndarray,
         lmda_path: np.ndarray,
         dev_null: float,
         dev_full: float,
@@ -1959,6 +1970,7 @@ class glm_naive_base:
         newton_tol: float,
         newton_max_iters: int,
         early_exit: bool,
+        setup_dev_null: bool,
         setup_lmda_max: bool,
         setup_lmda_path: bool,
         intercept: bool,
@@ -1986,6 +1998,7 @@ class glm_naive_base:
         self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
         self._penalty = np.array(penalty, copy=False, dtype=dtype)
         self._weights = np.array(weights, copy=False, dtype=dtype)
+        self._offsets = np.array(offsets, copy=False, dtype=dtype)
         self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
         screen_set = np.array(screen_set, copy=False, dtype=int)
         screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
@@ -2004,6 +2017,7 @@ class glm_naive_base:
             alpha=alpha,
             penalty=self._penalty,
             weights=self._weights,
+            offsets=self._offsets,
             lmda_path=self._lmda_path,
             dev_null=dev_null,
             dev_full=dev_full,
@@ -2025,6 +2039,7 @@ class glm_naive_base:
             newton_tol=newton_tol,
             newton_max_iters=newton_max_iters,
             early_exit=early_exit,
+            setup_dev_null=setup_dev_null,
             setup_lmda_max=setup_lmda_max,
             setup_lmda_path=setup_lmda_path,
             intercept=intercept,
@@ -2052,6 +2067,7 @@ def glm_naive(
     alpha: float,
     penalty: np.ndarray,
     weights: np.ndarray,
+    offsets: np.ndarray,
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
@@ -2060,8 +2076,8 @@ def glm_naive(
     grad: np.ndarray,
     eta: np.ndarray,
     mu: np.ndarray,
-    dev_null: float,
     dev_full: float,
+    dev_null: float =None,
     lmda_path: np.ndarray =None,
     lmda_max: float =None,
     irls_max_iters: int =int(1e4),
@@ -2110,6 +2126,8 @@ def glm_naive(
     weights : (n,) np.ndarray
         Observation weights.
         Internally, it is normalized to sum to one.
+    offsets : (n,) np.ndarray
+        Observation offsets :math:`\\eta^0`.
     screen_set : (s,) np.ndarray
         List of indices into ``groups`` that correspond to the screen groups.
         ``screen_set[i]`` is ``i`` th screen group.
@@ -2132,29 +2150,33 @@ def glm_naive(
     lmda : float
         The last regularization parameter that was attempted to be solved.
     grad : (p,) np.ndarray
-        The full gradient :math:`X^\\top W (y - \\nabla \\underline{A}(X\\beta + \\beta_0 \\mathbf{1}))` where
-        :math:`\\beta` is given by ``screen_beta``
-        and :math:`\\beta_0` is given by ``beta0``.
+        The full gradient :math:`X^\\top (Wy - \\nabla A(\\eta))` where
+        and :math:`\\eta` is given by ``eta``.
     eta : (n,) np.ndarray
-        The natural parameter :math:`\\eta = X\\beta + \\beta_0 \\mathbf{1}`
-        where :math:`\\beta` and :math:`\\beta_0` are given by
-        ``screen_beta`` and ``beta0``.
+        The natural parameter :math:`\\eta = X\\beta + \\beta_0 \\mathbf{1} + \\eta^0`
+        where 
+        :math:`\\beta`,
+        :math:`\\beta_0`,
+        :math:`\\eta^0` are given by
+        ``screen_beta``, ``beta0``, and ``offsets``.
     mu : (n,) np.ndarray
-        The mean parameter :math:`\\mu \\equiv \\nabla \\underline{A}(\\eta)`
+        The mean parameter :math:`\\mu \\equiv \\nabla A(\\eta)`
         where :math:`\\eta` is given by ``eta``.
-    dev_null : float 
-        Null deviance :math:`D(\\eta_0)`
-        where :math:`\\eta_0 = \\beta_0 1` is the intercept-only model fit.
     dev_full : float
         Full deviance :math:`D(\\eta^\\star)`
-        where :math:`\\eta^\\star = (\\nabla \\underline{A})^{-1}(y)` is the saturated model fit.
+        where :math:`\\eta^\\star` is the minimizer.
+    dev_null : float, optional
+        Null deviance :math:`D(\\beta_0^\\star \\mathbf{1} + \\eta^0)`
+        from fitting an intercept-only model (if ``intercept`` is ``True``).
+        If ``None``, it will be computed.
+        Default is ``None``. 
     lmda_path : (l,) np.ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
         If ``None``, the path will be generated.
         Default is ``None``.
-    lmda_max : float
+    lmda_max : float, optional
         The smallest :math:`\\lambda` such that the true solution is zero
         for all coefficients that have a non-vanishing group lasso penalty (:math:`\\ell_2`-norm).
         If ``None``, it will be computed.
@@ -2313,9 +2335,11 @@ def glm_naive(
 
     core_base = dispatcher[dtype]
 
+    setup_dev_null = dev_null is None
     setup_lmda_max = lmda_max is None
     setup_lmda_path = lmda_path is None
 
+    if setup_dev_null: dev_null = np.inf
     if setup_lmda_max: lmda_max = -1
     if setup_lmda_path: lmda_path = np.empty(0, dtype=dtype)
 
@@ -2348,10 +2372,12 @@ def glm_naive(
         alpha=alpha,
         penalty=penalty,
         weights=weights,
+        offsets=offsets,
         lmda_path=lmda_path,
         dev_null=dev_null,
         dev_full=dev_full,
         lmda_max=lmda_max,
+        setup_dev_null=setup_dev_null,
         setup_lmda_max=setup_lmda_max,
         setup_lmda_path=setup_lmda_path,
         max_screen_size=max_screen_size,

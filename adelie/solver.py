@@ -18,6 +18,7 @@ def objective(
     alpha: float, 
     penalty: np.ndarray,
     weights: np.ndarray,
+    offsets: np.ndarray,
     beta0: float,
     beta: Union[np.ndarray, csr_matrix], 
     glm: Union[glm.GlmBase32, glm.GlmBase64] =glm.gaussian(),
@@ -44,8 +45,10 @@ def objective(
         Elastic net parameter :math:`\\alpha`.
     penalty : (G,) np.ndarray
         List of penalty factors :math:`p_g` corresponding to each element of ``groups``.
-    weights : (G,) np.ndarray
+    weights : (n,) np.ndarray
         Observation weights :math:`w`.
+    offsets : (n,) np.ndarray
+        Observation offsets :math:`\\eta^0`.
     beta0 : float
         Intercept.
     beta : (p,) np.ndarray, (1, p) scipy.sparse.csr_matrix
@@ -54,8 +57,8 @@ def objective(
         GLM object.
         Default is ``adelie.glm.gaussian()``.
     relative : bool, optional
-        If ``True``, then the deviance, :math:`D^\\star`, is computed at the saturated model
-        and the difference :math:`\\mathcal{L}-D^\\star` is provided,
+        If ``True``, then the full deviance, :math:`D^\\star`, is computed at the saturated model
+        and the difference :math:`D-D^\\star` is provided,
         which will always be non-negative.
         This effectively computes deviance *relative* to the saturated model.
         Default is ``True``.
@@ -84,20 +87,14 @@ def objective(
         beta = beta.toarray()
     else:
         raise RuntimeError("beta is not one of np.ndarray or scipy.sparse.csr_matrix.")
-    eta += beta0
+    eta += beta0 + offsets
 
     # compute deviance part
-    deviance = np.empty(n)
-    glm.deviance(y, eta, deviance)
-    obj = np.sum(weights * deviance)
+    obj = glm.deviance(y, eta, weights)
 
     # relative to saturated model
     if relative:
-        eta_sat = np.empty(n)
-        glm.gradient_inverse(y, eta_sat)
-        deviance_sat = np.empty(n)
-        glm.deviance(y, eta_sat, deviance_sat)
-        obj -= np.sum(weights * deviance_sat)
+        obj -= glm.deviance_full(y, weights)
 
     # compute regularization part
     if add_penalty:
@@ -266,6 +263,7 @@ def grpnet(
     alpha: float =1,
     penalty: np.ndarray =None,
     weights: np.ndarray =None,
+    offsets: np.ndarray =None,
     lmda_path: np.ndarray =None,
     irls_max_iters: int =int(1e4),
     irls_tol: float =1e-7,
@@ -297,12 +295,16 @@ def grpnet(
 
     .. math::
         \\begin{align*}
+            \\mathrm{minimize}_{\\beta, \\beta_0} \\quad&
             \\sum_{i=1}^n w_i \\left(
-                -y_i (x_i^\\top \\beta + \\beta_0) + A(x_i^\\top \\beta + \\beta_0)
+                -y_i \\eta_i + A_i(\\eta)
             \\right)
             + \\lambda \\sum\\limits_{g=1}^G p_g \\left(
                 \\alpha \\|\\beta_g\\|_2 + \\frac{1-\\alpha}{2} \\|\\beta_g\\|_2^2
             \\right)
+            \\\\
+            \\text{subject to} \\quad&
+            \\eta = X\\beta + \\beta_0 \\mathbf{1} + \\eta^0
         \\end{align*}
 
     where 
@@ -311,12 +313,13 @@ def grpnet(
     :math:`X` is the feature matrix,
     :math:`y` is the response vector,
     :math:`w \\geq 0` is the observation weight vector (that sum to 1),
+    :math:`\\eta^0` is a fixed offset vector,
     :math:`\\lambda \\geq 0` is the regularization parameter,
     :math:`G` is the number of groups,
     :math:`p \\geq 0` is the penalty factor,
     :math:`\\alpha \\in [0,1]` is the elastic net parameter,
     :math:`\\beta_g` are the coefficients for the :math:`g` th group,
-    and :math:`A` is the log-partition function defining the GLM family.
+    and :math:`A_i` define the log-partition function in the GLM family.
 
     Parameters
     ----------
@@ -349,6 +352,9 @@ def grpnet(
     weights : (n,) np.ndarray, optional
         Observation weights.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
+    offsets : (n,) np.ndarray, optional
+        Observation offsets :math:`\\eta^0`.
+        Default is ``None``, in which case, it is set to ``np.zeros(n)``.
     lmda_path : (l,) np.ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
@@ -501,6 +507,9 @@ def grpnet(
     else:
         weights = weights / np.sum(weights)
 
+    if offsets is None:
+        offsets = np.zeros(n)
+
     if penalty is None:
         penalty = np.sqrt(group_sizes)
 
@@ -529,6 +538,7 @@ def grpnet(
         "alpha": alpha,
         "penalty": penalty,
         "weights": weights,
+        "offsets": offsets,
         "screen_set": screen_set,
         "screen_beta": screen_beta,
         "screen_is_active": screen_is_active,
@@ -560,8 +570,9 @@ def grpnet(
         if warm_start is None:
             X_means = np.empty(p, dtype=dtype)
             X.means(weights, X_means)
-            y_mean = np.sum(y * weights)
-            yc = y
+            y_off = y - offsets
+            y_mean = np.sum(y_off * weights)
+            yc = y_off
             if intercept:
                 yc = yc - y_mean
             y_var = np.sum(weights * yc ** 2)
@@ -592,15 +603,12 @@ def grpnet(
     else:
         if warm_start is None:
             beta0 = 0
-            eta = np.zeros(n)
-            mu = np.empty(n); glm.gradient(eta, mu)
-            resid = weights * (y - mu)
+            eta = offsets
+            mu = np.empty(n); glm.gradient(eta, weights, mu)
+            resid = (weights * y - mu)
             grad = np.empty(p); X.mul(resid, grad)
-            dev = np.empty(n); glm.deviance(y, eta, dev)
-            dev_null = np.sum(weights * dev)
-            eta_full = np.empty(n); glm.gradient_inverse(y, eta_full)
-            glm.deviance(y, eta_full, dev)
-            dev_full = np.sum(weights * dev)
+            dev_null = None
+            dev_full = glm.deviance_full(y, weights)
         else:
             beta0 = warm_start.beta0
             eta = warm_start.eta

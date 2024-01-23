@@ -30,13 +30,13 @@ struct StateGlmBase
     using dyn_vec_sp_vec_t = std::vector<sp_vec_value_t>;
 
     /* static states */
-    const value_t dev_null;
     const value_t dev_full;
     const map_cvec_index_t groups;
     const map_cvec_index_t group_sizes;
     const value_t alpha;
     const map_cvec_value_t penalty;
     const map_cvec_value_t weights;
+    const map_cvec_value_t offsets;
 
     /* configurations */
     // lambda path configs
@@ -64,6 +64,7 @@ struct StateGlmBase
     const bool early_exit;
 
     // other configs
+    const bool setup_dev_null;
     const bool setup_lmda_max;
     const bool setup_lmda_path;
     const bool intercept;
@@ -71,6 +72,7 @@ struct StateGlmBase
 
     /* dynamic states */
     glm_t* glm;
+    value_t dev_null;
     value_t lmda_max;
     vec_value_t lmda_path;
 
@@ -112,6 +114,7 @@ struct StateGlmBase
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_value_t>& weights,
+        const Eigen::Ref<const vec_value_t>& offsets,
         const Eigen::Ref<const vec_value_t>& lmda_path,
         value_t dev_null,
         value_t dev_full,
@@ -133,6 +136,7 @@ struct StateGlmBase
         value_t newton_tol,
         size_t newton_max_iters,
         bool early_exit,
+        bool setup_dev_null,
         bool setup_lmda_max,
         bool setup_lmda_path,
         bool intercept,
@@ -144,13 +148,13 @@ struct StateGlmBase
         value_t lmda,
         const Eigen::Ref<const vec_value_t>& grad
     ): 
-        dev_null(dev_null),
         dev_full(dev_full),
         groups(groups.data(), groups.size()),
         group_sizes(group_sizes.data(), group_sizes.size()),
         alpha(alpha),
         penalty(penalty.data(), penalty.size()),
         weights(weights.data(), weights.size()),
+        offsets(offsets.data(), offsets.size()),
         min_ratio(min_ratio),
         lmda_path_size(lmda_path_size),
         max_screen_size(max_screen_size),
@@ -168,11 +172,13 @@ struct StateGlmBase
         newton_tol(newton_tol),
         newton_max_iters(newton_max_iters),
         early_exit(early_exit),
+        setup_dev_null(setup_dev_null),
         setup_lmda_max(setup_lmda_max),
         setup_lmda_path(setup_lmda_path),
         intercept(intercept),
         n_threads(n_threads),
         glm(&glm),
+        dev_null(dev_null),
         lmda_max(lmda_max),
         lmda_path(lmda_path),
         screen_set(screen_set.data(), screen_set.data() + screen_set.size()),
