@@ -138,7 +138,11 @@ void update_dev_null(
         glm.hessian(mu, weights0, var);
         const auto var_sum = var.sum();
         weights = var / var_sum;
-        y = (weights0 * y0 - mu) / var + eta - offsets; // TODO: division well-defined?
+        y = weights0 * y0 - mu;
+        y = y.NullaryExpr(y.size(), [&](auto i) {
+            const auto ratio = y[i] / var[i]; 
+            return std::isnan(ratio) ? y[i] : ratio;
+        }) + eta - offsets;
 
         /* fit beta0 */
         beta0 = (weights * y).sum();
@@ -257,7 +261,11 @@ auto fit(
         const auto var_sum = var.sum();
         weights = var / var_sum;
         weights_sqrt = weights.sqrt();
-        y = (weights0 * y0 - mu) / var + eta - offsets; // TODO: division well-defined?
+        y = weights0 * y0 - mu;
+        y = y.NullaryExpr(y.size(), [&](auto i) {
+            const auto ratio = y[i] / var[i]; 
+            return std::isnan(ratio) ? y[i] : ratio;
+        }) + eta - offsets;
         const auto y_mean = (weights * y).sum();
         const auto y_var = (weights * y.square()).sum() - intercept * y_mean * y_mean;
         resid = weights * (y + offsets - eta + intercept * (beta0 - y_mean));
