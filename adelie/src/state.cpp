@@ -1066,6 +1066,7 @@ void state_glm_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
             value_t,
             value_t,
             value_t,
@@ -1103,6 +1104,7 @@ void state_glm_base(py::module_& m, const char* name)
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("weights").noconvert(),
+            py::arg("offsets").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("dev_null"),
             py::arg("dev_full"),
@@ -1153,6 +1155,9 @@ void state_glm_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("weights", &state_t::weights, R"delimiter(
         Observation weights.
+        )delimiter")
+        .def_readonly("offsets", &state_t::offsets, R"delimiter(
+        Observation offsets.
         )delimiter")
         .def_readonly("min_ratio", &state_t::min_ratio, R"delimiter(
         The ratio between the largest and smallest :math:`\lambda` in the regularization sequence
@@ -1461,6 +1466,7 @@ void state_glm_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
             value_t,
             value_t,
             value_t,
@@ -1502,6 +1508,7 @@ void state_glm_naive(py::module_& m, const char* name)
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("weights").noconvert(),
+            py::arg("offsets").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("dev_null"),
             py::arg("dev_full"),

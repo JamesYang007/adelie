@@ -37,6 +37,7 @@ struct StateGlmBase
     const value_t alpha;
     const map_cvec_value_t penalty;
     const map_cvec_value_t weights;
+    const map_cvec_value_t offsets;
 
     /* configurations */
     // lambda path configs
@@ -112,6 +113,7 @@ struct StateGlmBase
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_value_t>& weights,
+        const Eigen::Ref<const vec_value_t>& offsets,
         const Eigen::Ref<const vec_value_t>& lmda_path,
         value_t dev_null,
         value_t dev_full,
@@ -151,6 +153,7 @@ struct StateGlmBase
         alpha(alpha),
         penalty(penalty.data(), penalty.size()),
         weights(weights.data(), weights.size()),
+        offsets(offsets.data(), offsets.size()),
         min_ratio(min_ratio),
         lmda_path_size(lmda_path_size),
         max_screen_size(max_screen_size),

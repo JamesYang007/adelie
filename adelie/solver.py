@@ -18,6 +18,7 @@ def objective(
     alpha: float, 
     penalty: np.ndarray,
     weights: np.ndarray,
+    offsets: np.ndarray,
     beta0: float,
     beta: Union[np.ndarray, csr_matrix], 
     glm: Union[glm.GlmBase32, glm.GlmBase64] =glm.gaussian(),
@@ -44,8 +45,10 @@ def objective(
         Elastic net parameter :math:`\\alpha`.
     penalty : (G,) np.ndarray
         List of penalty factors :math:`p_g` corresponding to each element of ``groups``.
-    weights : (G,) np.ndarray
+    weights : (n,) np.ndarray
         Observation weights :math:`w`.
+    offsets : (n,) np.ndarray
+        Observation offsets :math:`\\eta^0`.
     beta0 : float
         Intercept.
     beta : (p,) np.ndarray, (1, p) scipy.sparse.csr_matrix
@@ -84,7 +87,7 @@ def objective(
         beta = beta.toarray()
     else:
         raise RuntimeError("beta is not one of np.ndarray or scipy.sparse.csr_matrix.")
-    eta += beta0
+    eta += beta0 + offsets
 
     # compute deviance part
     obj = glm.deviance(y, eta, weights)
@@ -260,6 +263,7 @@ def grpnet(
     alpha: float =1,
     penalty: np.ndarray =None,
     weights: np.ndarray =None,
+    offsets: np.ndarray =None,
     lmda_path: np.ndarray =None,
     irls_max_iters: int =int(1e4),
     irls_tol: float =1e-7,
@@ -300,7 +304,7 @@ def grpnet(
             \\right)
             \\\\
             \\text{subject to} \\quad&
-            \\eta = X\\beta + \\beta_0 \\mathbf{1}
+            \\eta = X\\beta + \\beta_0 \\mathbf{1} + \\eta^0
         \\end{align*}
 
     where 
@@ -309,6 +313,7 @@ def grpnet(
     :math:`X` is the feature matrix,
     :math:`y` is the response vector,
     :math:`w \\geq 0` is the observation weight vector (that sum to 1),
+    :math:`\\eta^0` is a fixed offset vector,
     :math:`\\lambda \\geq 0` is the regularization parameter,
     :math:`G` is the number of groups,
     :math:`p \\geq 0` is the penalty factor,
@@ -347,6 +352,9 @@ def grpnet(
     weights : (n,) np.ndarray, optional
         Observation weights.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
+    offsets : (n,) np.ndarray, optional
+        Observation offsets.
+        Default is ``None``, in which case, it is set to ``np.zeros(n)``.
     lmda_path : (l,) np.ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
@@ -499,6 +507,9 @@ def grpnet(
     else:
         weights = weights / np.sum(weights)
 
+    if offsets is None:
+        offsets = np.zeros(n)
+
     if penalty is None:
         penalty = np.sqrt(group_sizes)
 
@@ -521,7 +532,6 @@ def grpnet(
 
     solver_args = {
         "X": X,
-        "y": y,
         "groups": groups,
         "group_sizes": group_sizes,
         "alpha": alpha,
@@ -555,11 +565,12 @@ def grpnet(
     # compute quantities specific to each method 
 
     if glm is None:
+        y_off = y - offsets
         if warm_start is None:
             X_means = np.empty(p, dtype=dtype)
             X.means(weights, X_means)
-            y_mean = np.sum(y * weights)
-            yc = y
+            y_mean = np.sum(y_off * weights)
+            yc = y_off
             if intercept:
                 yc = yc - y_mean
             y_var = np.sum(weights * yc ** 2)
@@ -577,6 +588,7 @@ def grpnet(
             resid_sum = warm_start.resid_sum
             grad = warm_start.grad
 
+        solver_args["y"] = y_off
         solver_args["X_means"] = X_means
         solver_args["y_mean"] = y_mean
         solver_args["y_var"] = y_var
@@ -590,7 +602,7 @@ def grpnet(
     else:
         if warm_start is None:
             beta0 = 0
-            eta = np.zeros(n)
+            eta = offsets
             mu = np.empty(n); glm.gradient(eta, weights, mu)
             resid = (weights * y - mu)
             grad = np.empty(p); X.mul(resid, grad)
@@ -605,12 +617,14 @@ def grpnet(
             dev_full = warm_start.dev_full
 
         solver_args["glm"] = glm
+        solver_args["y"] = y
         solver_args["beta0"] = beta0
         solver_args["grad"] = grad
         solver_args["eta"] = eta
         solver_args["mu"] = mu
         solver_args["dev_null"] = dev_null
         solver_args["dev_full"] = dev_full
+        solver_args["offsets"] = offsets
         solver_args["irls_max_iters"] = irls_max_iters
         solver_args["irls_tol"] = irls_tol
         state = ad.state.glm_naive(**solver_args)

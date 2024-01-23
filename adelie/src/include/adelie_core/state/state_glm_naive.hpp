@@ -116,6 +116,7 @@ struct StateGlmNaive: StateGlmBase<
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_value_t>& weights,
+        const Eigen::Ref<const vec_value_t>& offsets,
         const Eigen::Ref<const vec_value_t>& lmda_path,
         value_t dev_null,
         value_t dev_full,
@@ -149,7 +150,7 @@ struct StateGlmNaive: StateGlmBase<
         const Eigen::Ref<const vec_value_t>& grad
     ):
         base_t(
-            glm, groups, group_sizes, alpha, penalty, weights, lmda_path, 
+            glm, groups, group_sizes, alpha, penalty, weights, offsets, lmda_path, 
             dev_null, dev_full, lmda_max, min_ratio, lmda_path_size, max_screen_size, max_active_size,
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             irls_max_iters, irls_tol, max_iters, tol, adev_tol, ddev_tol,
