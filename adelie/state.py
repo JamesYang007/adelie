@@ -1648,13 +1648,13 @@ def gaussian_naive(
         Response vector.
         
         .. note::
-            This is the original response vector!
+            This is the original response vector not offsetted!
             All other arguments related to :math:`y` are offsetted by ``offset``.
 
     X_means : (p,) np.ndarray
         Column means (weighted by :math:`W`) of ``X``.
     y_mean : float
-        Mean (weighted by :math:`W`) of the response vector :math:`y-\\eta^0`.
+        Mean (weighted by :math:`W`) of the offsetted response vector :math:`y-\\eta^0`.
     y_var : float
         :math:`\\ell_2` norm squared (weighted by :math:`W`) of :math:`y-\\eta^0`, i.e. 
         :math:`\\|y_c\\|_{W}^2`.
@@ -1678,7 +1678,7 @@ def gaussian_naive(
         Observation weights.
         Internally, it is normalized to sum to one.
     offsets : (n,) np.ndarray
-        Observation offsets.
+        Observation offsets :math:`\\eta^0`.
     screen_set : (s,) np.ndarray
         List of indices into ``groups`` that correspond to the screen groups.
         ``screen_set[i]`` is ``i`` th screen group.
@@ -2127,7 +2127,7 @@ def glm_naive(
         Observation weights.
         Internally, it is normalized to sum to one.
     offsets : (n,) np.ndarray
-        Observation offsets.
+        Observation offsets :math:`\\eta^0`.
     screen_set : (s,) np.ndarray
         List of indices into ``groups`` that correspond to the screen groups.
         ``screen_set[i]`` is ``i`` th screen group.
@@ -2150,13 +2150,15 @@ def glm_naive(
     lmda : float
         The last regularization parameter that was attempted to be solved.
     grad : (p,) np.ndarray
-        The full gradient :math:`X^\\top (Wy - \\nabla A(X\\beta + \\beta_0 \\mathbf{1}))` where
-        :math:`\\beta` is given by ``screen_beta``
-        and :math:`\\beta_0` is given by ``beta0``.
+        The full gradient :math:`X^\\top (Wy - \\nabla A(\\eta))` where
+        and :math:`\\eta` is given by ``eta``.
     eta : (n,) np.ndarray
-        The natural parameter :math:`\\eta = X\\beta + \\beta_0 \\mathbf{1}`
-        where :math:`\\beta` and :math:`\\beta_0` are given by
-        ``screen_beta`` and ``beta0``.
+        The natural parameter :math:`\\eta = X\\beta + \\beta_0 \\mathbf{1} + \\eta^0`
+        where 
+        :math:`\\beta`,
+        :math:`\\beta_0`,
+        :math:`\\eta^0` are given by
+        ``screen_beta``, ``beta0``, and ``offsets``.
     mu : (n,) np.ndarray
         The mean parameter :math:`\\mu \\equiv \\nabla A(\\eta)`
         where :math:`\\eta` is given by ``eta``.
