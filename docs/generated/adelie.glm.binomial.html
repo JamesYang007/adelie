@@ -447,7 +447,7 @@ document.write(`
 <p>The Binomial GLM family specifies the log-partition function as:</p>
 <div class="math notranslate nohighlight">
 \[\begin{align*}
-    A(\eta) = \log(1 + e^{\eta})
+    A(\eta) = \sum\limits_{i=1}^n W_{ii} \log(1 + e^{\eta_i})
 \end{align*}\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

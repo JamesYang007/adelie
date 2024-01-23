@@ -444,19 +444,14 @@ document.write(`
 <dt class="sig sig-object py" id="adelie.glm.GlmBase64">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.glm.</span></span><span class="sig-name descname"><span class="pre">GlmBase64</span></span><a class="headerlink" href="#adelie.glm.GlmBase64" title="Link to this definition">#</a></dt>
 <dd><p>Base GLM class.</p>
-<p>Suppose <span class="math notranslate nohighlight">\(y \in \mathbb{R}\)</span> is a single observation
-that is statistically modeled with an exponential family.
-Recall that an exponential family is defined by the log-partition function <span class="math notranslate nohighlight">\(A\)</span>
-so that the (negative) log-likelihood (up to a constant) is given by</p>
+<p>The generalized linear model is given by the (weighted) negative likelihood</p>
 <div class="math notranslate nohighlight">
 \[\begin{align*}
-    D(\eta) = -y \eta + A(\eta)
+    D(\eta) = -y^\top W \eta + \sum\limits_{i=1}^n W_{ii} A_i(\eta)
 \end{align*}\]</div>
-<p>We define <span class="math notranslate nohighlight">\(D(\eta)\)</span> as the <em>deviance</em>.
-For multidimensional data <span class="math notranslate nohighlight">\(y \in \mathbb{R}^n\)</span>,
-we assume each <span class="math notranslate nohighlight">\(y_i\)</span> is a sample from the same exponential family.
-It is useful to define <span class="math notranslate nohighlight">\(\underline{A}(\eta) \in \mathbb{R}^n\)</span>
-where <span class="math notranslate nohighlight">\(\eta \in \mathbb{R}^n\)</span> and <span class="math notranslate nohighlight">\(\underline{A}(\eta)_i = A(\eta_i)\)</span>.</p>
+<p>We define <span class="math notranslate nohighlight">\(D(\eta)\)</span> as the <em>deviance</em> and <span class="math notranslate nohighlight">\(A(\eta) := \sum_{i=1}^n W_{ii} A_i(\eta)\)</span>
+as the <em>log-partition function</em>.
+Here, <span class="math notranslate nohighlight">\(W \geq 0\)</span> is a diagonal matrix and <span class="math notranslate nohighlight">\(A_i\)</span> are any convex functions.</p>
 <p>The purpose of a GLM class is to define methods that evaluate key quantities regarding this model
 that are required for solving the group lasso problem.</p>
 <div class="admonition note">
@@ -474,16 +469,16 @@ before passing into the solver.</p>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.glm.GlmBase64.deviance" title="adelie.glm.GlmBase64.deviance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deviance</span></code></a>(self, arg0, arg1, arg2)</p></td>
-<td><p>Element-wise deviance function.</p></td>
+<td><p>Deviance function.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.glm.GlmBase64.gradient" title="adelie.glm.GlmBase64.gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient</span></code></a>(self, arg0, arg1)</p></td>
-<td><p>Element-wise gradient of the log-partition function.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.glm.GlmBase64.deviance_full" title="adelie.glm.GlmBase64.deviance_full"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deviance_full</span></code></a>(self, arg0, arg1)</p></td>
+<td><p>Deviance function at the full-model.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.glm.GlmBase64.gradient_inverse" title="adelie.glm.GlmBase64.gradient_inverse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_inverse</span></code></a>(self, arg0, arg1)</p></td>
-<td><p>Element-wise inverse gradient of the log-partition function.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.glm.GlmBase64.gradient" title="adelie.glm.GlmBase64.gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient</span></code></a>(self, arg0, arg1, arg2)</p></td>
+<td><p>Gradient of the log-partition function.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.glm.GlmBase64.hessian" title="adelie.glm.GlmBase64.hessian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hessian</span></code></a>(self, arg0, arg1)</p></td>
-<td><p>Element-wise hessian of the log-partition function.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.glm.GlmBase64.hessian" title="adelie.glm.GlmBase64.hessian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hessian</span></code></a>(self, arg0, arg1, arg2)</p></td>
+<td><p>Hessian of the log-partition function.</p></td>
 </tr>
 </tbody>
 </table>
@@ -494,9 +489,9 @@ before passing into the solver.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.glm.GlmBase64.deviance">
-<span class="sig-name descname"><span class="pre">deviance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.glm.GlmBase64" title="adelie.adelie_core.glm.GlmBase64"><span class="pre">adelie.adelie_core.glm.GlmBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.glm.GlmBase64.deviance" title="Link to this definition">#</a></dt>
-<dd><p>Element-wise deviance function.</p>
-<p>Computes <span class="math notranslate nohighlight">\(D(\eta_i)\)</span> for every element <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
+<span class="sig-name descname"><span class="pre">deviance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.glm.GlmBase64" title="adelie.adelie_core.glm.GlmBase64"><span class="pre">adelie.adelie_core.glm.GlmBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#adelie.glm.GlmBase64.deviance" title="Link to this definition">#</a></dt>
+<dd><p>Deviance function.</p>
+<p>Computes <span class="math notranslate nohighlight">\(D(\eta)\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -505,7 +500,37 @@ It is assumed that <code class="docutils literal notranslate"><span class="pre">
 </dd>
 <dt><strong>eta</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Natural parameter.</p>
 </dd>
-<dt><strong>dev</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>The deviance to store.</p>
+<dt><strong>weights</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Observation weights.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>dev</strong><span class="classifier">float</span></dt><dd><p>Deviance.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.glm.GlmBase64.deviance_full">
+<span class="sig-name descname"><span class="pre">deviance_full</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.glm.GlmBase64" title="adelie.adelie_core.glm.GlmBase64"><span class="pre">adelie.adelie_core.glm.GlmBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#adelie.glm.GlmBase64.deviance_full" title="Link to this definition">#</a></dt>
+<dd><p>Deviance function at the full-model.</p>
+<p>Computes <span class="math notranslate nohighlight">\(D(\eta^\star)\)</span> where <span class="math notranslate nohighlight">\(\eta^\star\)</span> is the minimizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>y</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Observations (sufficient statistics).
+It is assumed that <code class="docutils literal notranslate"><span class="pre">y</span></code> only takes on values assumed by the GLM.</p>
+</dd>
+<dt><strong>weights</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Observation weights.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>dev</strong><span class="classifier">float</span></dt><dd><p>Deviance at the full model.</p>
 </dd>
 </dl>
 </dd>
@@ -514,13 +539,15 @@ It is assumed that <code class="docutils literal notranslate"><span class="pre">
 
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.glm.GlmBase64.gradient">
-<span class="sig-name descname"><span class="pre">gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.glm.GlmBase64" title="adelie.adelie_core.glm.GlmBase64"><span class="pre">adelie.adelie_core.glm.GlmBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.glm.GlmBase64.gradient" title="Link to this definition">#</a></dt>
-<dd><p>Element-wise gradient of the log-partition function.</p>
-<p>Computes <span class="math notranslate nohighlight">\(A'(\eta_i)\)</span> for every element <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
+<span class="sig-name descname"><span class="pre">gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.glm.GlmBase64" title="adelie.adelie_core.glm.GlmBase64"><span class="pre">adelie.adelie_core.glm.GlmBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.glm.GlmBase64.gradient" title="Link to this definition">#</a></dt>
+<dd><p>Gradient of the log-partition function.</p>
+<p>Computes <span class="math notranslate nohighlight">\(\nabla A(\eta)\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>eta</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Natural parameter.</p>
+</dd>
+<dt><strong>weights</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Observation weights.</p>
 </dd>
 <dt><strong>mu</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>The gradient, or mean parameter, to store.</p>
 </dd>
@@ -530,30 +557,16 @@ It is assumed that <code class="docutils literal notranslate"><span class="pre">
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.glm.GlmBase64.gradient_inverse">
-<span class="sig-name descname"><span class="pre">gradient_inverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.glm.GlmBase64" title="adelie.adelie_core.glm.GlmBase64"><span class="pre">adelie.adelie_core.glm.GlmBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.glm.GlmBase64.gradient_inverse" title="Link to this definition">#</a></dt>
-<dd><p>Element-wise inverse gradient of the log-partition function.</p>
-<p>Computes <span class="math notranslate nohighlight">\((A')^{-1}(\mu_i)\)</span> for every element <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>mu</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>The mean parameter.</p>
-</dd>
-<dt><strong>eta</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>The natural parameter to store.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="adelie.glm.GlmBase64.hessian">
-<span class="sig-name descname"><span class="pre">hessian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.glm.GlmBase64" title="adelie.adelie_core.glm.GlmBase64"><span class="pre">adelie.adelie_core.glm.GlmBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.glm.GlmBase64.hessian" title="Link to this definition">#</a></dt>
-<dd><p>Element-wise hessian of the log-partition function.</p>
-<p>Computes <span class="math notranslate nohighlight">\(A''(\eta_i)\)</span> for every element <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
+<span class="sig-name descname"><span class="pre">hessian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.glm.GlmBase64" title="adelie.adelie_core.glm.GlmBase64"><span class="pre">adelie.adelie_core.glm.GlmBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.glm.GlmBase64.hessian" title="Link to this definition">#</a></dt>
+<dd><p>Hessian of the log-partition function.</p>
+<p>Computes <span class="math notranslate nohighlight">\(\nabla^2 A(\eta)\)</span>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Since the hessian is a diagonal matrix, we only output the diagonal.
+<p>Although the hessian is in general a fully dense matrix,
+we only require the user to output a diagonal matrix.
+It is recommended that the diagonal matrix dominate the true hessian.
+However, in some cases, the diagonal of the hessian suffices.
 Interestingly, most hessian computations become greatly simplified
 when evaluated using the mean parameter instead of the natural parameter.
 Hence, the hessian computation assumes the mean parameter is provided.</p>
@@ -561,7 +574,9 @@ Hence, the hessian computation assumes the mean parameter is provided.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>mu</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>The mean parameter.</p>
+<dt><strong>mu</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Mean parameter.</p>
+</dd>
+<dt><strong>weights</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Observation weights.</p>
 </dd>
 <dt><strong>var</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>The hessian, or variance parameter, to store.</p>
 </dd>
@@ -621,8 +636,8 @@ Hence, the hessian computation assumes the mean parameter is provided.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmBase64"><code class="docutils literal notranslate"><span class="pre">GlmBase64</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmBase64.__init__"><code class="docutils literal notranslate"><span class="pre">GlmBase64.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmBase64.deviance"><code class="docutils literal notranslate"><span class="pre">GlmBase64.deviance()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmBase64.deviance_full"><code class="docutils literal notranslate"><span class="pre">GlmBase64.deviance_full()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmBase64.gradient"><code class="docutils literal notranslate"><span class="pre">GlmBase64.gradient()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmBase64.gradient_inverse"><code class="docutils literal notranslate"><span class="pre">GlmBase64.gradient_inverse()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmBase64.hessian"><code class="docutils literal notranslate"><span class="pre">GlmBase64.hessian()</span></code></a></li>
 </ul>
 </li>

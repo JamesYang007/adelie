@@ -13,8 +13,8 @@
    
       ~GlmBase64.__init__
       ~GlmBase64.deviance
+      ~GlmBase64.deviance_full
       ~GlmBase64.gradient
-      ~GlmBase64.gradient_inverse
       ~GlmBase64.hessian
    
    
@@ -28,8 +28,8 @@
    
    .. automethod:: __init__
    .. automethod:: deviance
+   .. automethod:: deviance_full
    .. automethod:: gradient
-   .. automethod:: gradient_inverse
    .. automethod:: hessian
    
    

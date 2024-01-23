@@ -61,6 +61,7 @@
       ~StateGlmNaive64.n_valid_solutions
       ~StateGlmNaive64.newton_max_iters
       ~StateGlmNaive64.newton_tol
+      ~StateGlmNaive64.offsets
       ~StateGlmNaive64.penalty
       ~StateGlmNaive64.pivot_slack_ratio
       ~StateGlmNaive64.pivot_subset_min
@@ -74,6 +75,7 @@
       ~StateGlmNaive64.screen_rule
       ~StateGlmNaive64.screen_set
       ~StateGlmNaive64.screen_sizes
+      ~StateGlmNaive64.setup_dev_null
       ~StateGlmNaive64.setup_lmda_max
       ~StateGlmNaive64.setup_lmda_path
       ~StateGlmNaive64.tol
@@ -132,6 +134,7 @@
    .. autoattribute:: n_valid_solutions
    .. autoattribute:: newton_max_iters
    .. autoattribute:: newton_tol
+   .. autoattribute:: offsets
    .. autoattribute:: penalty
    .. autoattribute:: pivot_slack_ratio
    .. autoattribute:: pivot_subset_min
@@ -145,6 +148,7 @@
    .. autoattribute:: screen_rule
    .. autoattribute:: screen_set
    .. autoattribute:: screen_sizes
+   .. autoattribute:: setup_dev_null
    .. autoattribute:: setup_lmda_max
    .. autoattribute:: setup_lmda_path
    .. autoattribute:: tol

@@ -623,10 +623,10 @@ document.write(`
 <td><p>Observation weights.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianNaive64.y_mean" title="adelie.adelie_core.state.StateGaussianNaive64.y_mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_mean</span></code></a></p></td>
-<td><p>The mean (weighted by <span class="math notranslate nohighlight">\(W\)</span>) of the response vector <span class="math notranslate nohighlight">\(y\)</span>.</p></td>
+<td><p>The mean (weighted by <span class="math notranslate nohighlight">\(W\)</span>) of the offsetted response vector <span class="math notranslate nohighlight">\(y-\eta^0\)</span>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianNaive64.y_var" title="adelie.adelie_core.state.StateGaussianNaive64.y_var"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_var</span></code></a></p></td>
-<td><p>The variance (weighted by <span class="math notranslate nohighlight">\(W\)</span>) of the response vector <span class="math notranslate nohighlight">\(y\)</span>, i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span>.</p></td>
+<td><p>The variance (weighted by <span class="math notranslate nohighlight">\(W\)</span>) of the offsetted response vector <span class="math notranslate nohighlight">\(y-\eta^0\)</span>, i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span>.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1025,13 +1025,13 @@ is the possibly centered (weighted by <span class="math notranslate nohighlight"
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianNaive64.y_mean">
 <span class="sig-name descname"><span class="pre">y_mean</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianNaive64.y_mean" title="Link to this definition">#</a></dt>
-<dd><p>The mean (weighted by <span class="math notranslate nohighlight">\(W\)</span>) of the response vector <span class="math notranslate nohighlight">\(y\)</span>.</p>
+<dd><p>The mean (weighted by <span class="math notranslate nohighlight">\(W\)</span>) of the offsetted response vector <span class="math notranslate nohighlight">\(y-\eta^0\)</span>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianNaive64.y_var">
 <span class="sig-name descname"><span class="pre">y_var</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianNaive64.y_var" title="Link to this definition">#</a></dt>
-<dd><p>The variance (weighted by <span class="math notranslate nohighlight">\(W\)</span>) of the response vector <span class="math notranslate nohighlight">\(y\)</span>, i.e. 
+<dd><p>The variance (weighted by <span class="math notranslate nohighlight">\(W\)</span>) of the offsetted response vector <span class="math notranslate nohighlight">\(y-\eta^0\)</span>, i.e. 
 <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span>.</p>
 </dd></dl>
 

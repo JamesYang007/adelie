@@ -447,7 +447,7 @@ document.write(`
 <p>The Poisson GLM family specifies the log-partition function as:</p>
 <div class="math notranslate nohighlight">
 \[\begin{align*}
-    A(\eta) = e^{\eta}
+    A(\eta) = \sum\limits_{i=1}^n W_{ii} e^{\eta_i}
 \end{align*}\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
