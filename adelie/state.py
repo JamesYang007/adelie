@@ -1862,6 +1862,7 @@ def gaussian_naive(
             self._core_type = core_base
             # this is to keep the API consistent with grpnet with non-trivial GLM object
             self.y = y
+            self.offsets = np.zeros_like(y)
             self.glm = None
             gaussian_naive_base.default_init(
                 self,
@@ -1878,6 +1879,7 @@ def gaussian_naive(
             )
             obj._core_type = core_base
             obj.y = y
+            obj.offsets = np.zeros_like(y)
             obj.glm = None
             gaussian_naive_base.__init__(obj)
             return obj
@@ -1938,6 +1940,7 @@ class glm_naive_base:
         alpha: float,
         penalty: np.ndarray,
         weights: np.ndarray,
+        offsets: np.ndarray,
         lmda_path: np.ndarray,
         dev_null: float,
         dev_full: float,
@@ -1986,6 +1989,7 @@ class glm_naive_base:
         self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
         self._penalty = np.array(penalty, copy=False, dtype=dtype)
         self._weights = np.array(weights, copy=False, dtype=dtype)
+        self._offsets = np.array(offsets, copy=False, dtype=dtype)
         self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
         screen_set = np.array(screen_set, copy=False, dtype=int)
         screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
@@ -2004,6 +2008,7 @@ class glm_naive_base:
             alpha=alpha,
             penalty=self._penalty,
             weights=self._weights,
+            offsets=self._offsets,
             lmda_path=self._lmda_path,
             dev_null=dev_null,
             dev_full=dev_full,
@@ -2052,6 +2057,7 @@ def glm_naive(
     alpha: float,
     penalty: np.ndarray,
     weights: np.ndarray,
+    offsets: np.ndarray,
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
@@ -2110,6 +2116,8 @@ def glm_naive(
     weights : (n,) np.ndarray
         Observation weights.
         Internally, it is normalized to sum to one.
+    offsets : (n,) np.ndarray
+        Observation offsets.
     screen_set : (s,) np.ndarray
         List of indices into ``groups`` that correspond to the screen groups.
         ``screen_set[i]`` is ``i`` th screen group.
@@ -2347,6 +2355,7 @@ def glm_naive(
         alpha=alpha,
         penalty=penalty,
         weights=weights,
+        offsets=offsets,
         lmda_path=lmda_path,
         dev_null=dev_null,
         dev_full=dev_full,

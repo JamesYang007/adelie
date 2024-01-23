@@ -126,6 +126,7 @@ auto fit(
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
     const auto& weights0 = state.weights;
+    const auto& offsets = state.offsets;
     const auto& screen_set = state.screen_set;
     const auto& screen_g1 = state.screen_g1;
     const auto& screen_g2 = state.screen_g2;
@@ -185,10 +186,10 @@ auto fit(
         const auto var_sum = var.sum();
         weights = var / var_sum;
         weights_sqrt = weights.sqrt();
-        y = (weights0 * y0 - mu) / var + eta;
+        y = (weights0 * y0 - mu) / var + eta - offsets; // TODO: division well-defined?
         const auto y_mean = (weights * y).sum();
         const auto y_var = (weights * y.square()).sum() - intercept * y_mean * y_mean;
-        resid = weights * (y - eta + intercept * (beta0 - y_mean));
+        resid = weights * (y + offsets - eta + intercept * (beta0 - y_mean));
         const auto resid_sum = resid.sum();
         lmda_path_adjusted = lmda / var_sum;
         if (std::isinf(lmda_path_adjusted[0])) {
@@ -279,7 +280,7 @@ auto fit(
 
         // update eta
         eta = (
-            y - 
+            y + offsets - 
             resid / (weights + (weights <= 0).template cast<value_t>()) + 
             intercept * (beta0 - y_mean)
         );

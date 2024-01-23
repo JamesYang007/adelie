@@ -150,6 +150,7 @@ def run_solve_gaussian_pin(state, X, y, weights):
                 alpha=state.alpha,
                 penalty=state.penalty,
                 weights=weights,
+                offsets=np.zeros_like(weights),
             )
             for beta0, beta, lmda in zip(beta0s, betas, lmdas)
         ])
@@ -165,6 +166,7 @@ def run_solve_gaussian_pin(state, X, y, weights):
                 alpha=state.alpha,
                 penalty=state.penalty,
                 weights=weights,
+                offsets=np.zeros_like(weights),
             )
             for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
         ])
@@ -435,6 +437,7 @@ def run_solve_gaussian(state, X, y):
                 alpha=state.alpha,
                 penalty=state.penalty,
                 weights=state.weights,
+                offsets=state.offsets,
             )
             for beta0, beta, lmda in zip(beta0s, betas, lmdas)
         ])
@@ -450,6 +453,7 @@ def run_solve_gaussian(state, X, y):
                 alpha=state.alpha,
                 penalty=state.penalty,
                 weights=state.weights,
+                offsets=state.offsets,
             )
             for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
         ])

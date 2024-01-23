@@ -19,6 +19,7 @@ def predict(
     *,
     X: Union[MatrixNaiveBase32, MatrixNaiveBase64],
     weights: np.ndarray,
+    offsets: np.ndarray,
     betas: Union[np.ndarray, scipy.sparse.csr_matrix],
     intercepts: np.ndarray,
     glm: Union[GlmBase32, GlmBase64] =None,
@@ -29,7 +30,7 @@ def predict(
     
     .. math::
         \\begin{align*}
-            \\hat{y} = W^{-1} \\nabla A(X\\beta + \\beta_0 \\mathbf{1})
+            \\hat{y} = W^{-1} \\nabla A(X\\beta + \\beta_0 \\mathbf{1} + \\eta^0)
         \\end{align*}
 
     Parameters
@@ -42,6 +43,8 @@ def predict(
         .. warning::
             Currently, the return value is only well-defined if weights are positive!
 
+    offsets : (n,) np.ndarray
+        Observation offsets.
     betas : (l, p) Union[np.ndarray, scipy.sparse.csr_matrix]
         Matrix with each row being a coefficient vector.
     intercepts : (l,) np.ndarray
@@ -74,7 +77,7 @@ def predict(
             X.btmul(0, p, betas[i], _ones, etas[i])
     else:
         raise RuntimeError("Unrecognized betas type.")
-    etas += intercepts[:, None]
+    etas += intercepts[:, None] + offsets[None]
     mus = np.empty((betas.shape[0], n))
     for i in range(betas.shape[0]):
         glm.gradient(etas[i], weights, mus[i])
@@ -87,6 +90,7 @@ def residuals(
     X: Union[MatrixNaiveBase32, MatrixNaiveBase64],
     y: np.ndarray,
     weights: np.ndarray,
+    offsets: np.ndarray,
     betas: Union[np.ndarray, scipy.sparse.csr_matrix],
     intercepts: np.ndarray,
     glm: Union[GlmBase32, GlmBase64] =None,
@@ -112,6 +116,8 @@ def residuals(
         .. warning::
             Currently, the return value is only well-defined if weights are positive!
 
+    offsets : (n,) np.ndarray
+        Observation offsets.
     betas : (l, p) Union[np.ndarray, scipy.sparse.csr_matrix]
         Matrix with each row being a coefficient vector.
     intercepts : (l,) np.ndarray
@@ -132,6 +138,7 @@ def residuals(
     preds = predict(
         X=X, 
         weights=weights,
+        offsets=offsets,
         betas=betas, 
         intercepts=intercepts,
         glm=glm,
@@ -809,6 +816,7 @@ class diagnostic:
             X=self.state.X,
             y=self.state.y, 
             weights=self.state.weights,
+            offsets=self.state.offsets,
             betas=self.betas,
             intercepts=self.state.intercepts,
             glm=self.state.glm,
