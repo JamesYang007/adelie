@@ -10,6 +10,7 @@
         "//conditions:default": [],
     }),
 ) for type_ in [
+    "bench_eigen",
     "bench_omp",
     "bench_matrix_utils",
 ]]

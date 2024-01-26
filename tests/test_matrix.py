@@ -96,12 +96,6 @@ def run_naive(
     cX.sp_btmul(v, w, out)
     assert np.allclose(expected, out, atol=atol)
 
-    # test means
-    X_means = np.empty(p, dtype=dtype)
-    cX.means(w, X_means)
-    expected = np.sum(w[:, None] * X, axis=0)
-    assert np.allclose(expected, X_means)
-
 
 def run_cov(
     A,
@@ -169,7 +163,9 @@ def test_naive_kronecker_eye():
         np.random.seed(seed)
         X = np.random.normal(0, 1, (n, p))
         X = np.array(X, dtype=dtype, order=order)
-        cX = mod.kronecker_eye(X, K, n_threads=7)
+        cX = mod.kronecker_eye(
+            mod.dense(X, method="naive"), K, n_threads=7
+        )
         X = np.kron(X, np.eye(K))
         run_naive(X, cX, dtype)
 

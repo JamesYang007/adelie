@@ -66,7 +66,7 @@ public:
         value_t v, 
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) const override
+    ) override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -122,7 +122,7 @@ public:
         const sp_mat_value_t& v,
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
-    ) const override
+    ) override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -137,26 +137,13 @@ public:
         const Eigen::Ref<const vec_value_t>& sqrt_weights,
         Eigen::Ref<colmat_value_t> out,
         Eigen::Ref<colmat_value_t> buffer
-    ) const override
+    ) override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
             base_t,
             cov,
             j, q, sqrt_weights, out, buffer
-        );
-    }
-
-    void means(
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) const override
-    {
-        PYBIND11_OVERLOAD_PURE(
-            void,
-            base_t,
-            means,
-            weights, out
         );
     }
 
@@ -300,18 +287,6 @@ void matrix_naive_base(py::module_& m, const char* name)
             Matrix to store in-place the result.
         buffer : (n, q) np.ndarray
             Extra buffer space if needed.
-        )delimiter")
-        .def("means", &internal_t::means, R"delimiter(
-        Column means.
-
-        Equivalent to ``np.sum(w[:, None] * X, axis=0)``.
-
-        Parameters
-        ----------
-        w : (n,) np.ndarray
-            Vector of weights.
-        out : (p,) np.ndarray
-            Vector to store the column means.
         )delimiter")
         .def("rows", &internal_t::rows, R"delimiter(
         Number of rows.
@@ -472,16 +447,15 @@ void matrix_naive_dense(py::module_& m, const char* name)
         ;
 }
 
-template <class DenseType>
+template <class ValueType>
 void matrix_naive_kronecker_eye(py::module_& m, const char* name)
 {
-    using internal_t = ad::matrix::MatrixNaiveKroneckerEye<DenseType>;
+    using internal_t = ad::matrix::MatrixNaiveKroneckerEye<ValueType>;
     using base_t = typename internal_t::base_t;
-    using dense_t = typename internal_t::dense_t;
     py::class_<internal_t, base_t>(m, name)
         .def(
-            py::init<const Eigen::Ref<const dense_t>&, size_t, size_t>(), 
-            py::arg("mat").noconvert(),
+            py::init<base_t&, size_t, size_t>(), 
+            py::arg("mat"),
             py::arg("K"),
             py::arg("n_threads")
         )
@@ -577,10 +551,8 @@ void register_matrix(py::module_& m)
     matrix_naive_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixNaiveDense32C");
     matrix_naive_dense<dense_type<float, Eigen::ColMajor>>(m, "MatrixNaiveDense32F");
 
-    matrix_naive_kronecker_eye<dense_type<double, Eigen::RowMajor>>(m, "MatrixNaiveKroneckerEye64C");
-    matrix_naive_kronecker_eye<dense_type<double, Eigen::ColMajor>>(m, "MatrixNaiveKroneckerEye64F");
-    matrix_naive_kronecker_eye<dense_type<float, Eigen::RowMajor>>(m, "MatrixNaiveKroneckerEye32C");
-    matrix_naive_kronecker_eye<dense_type<float, Eigen::ColMajor>>(m, "MatrixNaiveKroneckerEye32F");
+    matrix_naive_kronecker_eye<double>(m, "MatrixNaiveKroneckerEye64");
+    matrix_naive_kronecker_eye<float>(m, "MatrixNaiveKroneckerEye32");
 
     matrix_naive_snp_unphased<double>(m, "MatrixNaiveSNPUnphased64");
     matrix_naive_snp_unphased<float>(m, "MatrixNaiveSNPUnphased32");

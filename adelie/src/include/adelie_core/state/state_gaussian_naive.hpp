@@ -21,7 +21,7 @@ template <class XType, class XMType, class WType,
           class SSType, class SBType,
           class SXMType, class STType, class SVType>
 void update_screen_derived(
-    const XType& X,
+    XType& X,
     const XMType& X_means,
     const WType& weights_sqrt,
     const GroupsType& groups,

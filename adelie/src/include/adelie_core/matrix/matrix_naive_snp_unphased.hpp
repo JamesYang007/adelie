@@ -63,7 +63,7 @@ public:
         value_t v, 
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) const override
+    ) override
     {
         base_t::check_ctmul(j, weights.size(), out.size(), rows(), cols());
         const auto inner = _io.inner(j);
@@ -124,7 +124,7 @@ public:
         const Eigen::Ref<const vec_value_t>& sqrt_weights,
         Eigen::Ref<colmat_value_t> out,
         Eigen::Ref<colmat_value_t> buffer
-    ) const override
+    ) override
     {
         base_t::check_cov(
             j, q, sqrt_weights.size(), 
@@ -163,7 +163,7 @@ public:
         const sp_mat_value_t& v,
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
-    ) const override
+    ) override
     {
         base_t::check_sp_btmul(
             v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
@@ -182,26 +182,6 @@ public:
                     out_k[inner[i]] += value[i] * weights[inner[i]] * it.value();
                 } 
             }
-        }
-    }
-
-    void means(
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) const override
-    {
-        base_t::check_means(weights.size(), out.size(), rows(), cols());
-        const auto p = cols();
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int j = 0; j < p; ++j) 
-        {
-            const auto inner = _io.inner(j);
-            const auto value = _io.value(j);
-            value_t sum = 0;
-            for (int i = 0; i < inner.size(); ++i) {
-                sum += weights[inner[i]] * value[i];
-            }
-            out[j] = sum;
         }
     }
 };
