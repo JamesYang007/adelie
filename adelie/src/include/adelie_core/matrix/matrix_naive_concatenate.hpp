@@ -120,11 +120,11 @@ public:
         value_t v, 
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) const override
+    ) override
     {
         base_t::check_ctmul(j, weights.size(), out.size(), rows(), cols());
         const auto slice = _slice_map[j];
-        const auto& mat = *_mat_list[slice];
+        auto& mat = *_mat_list[slice];
         const auto index = _index_map[j];
         mat.ctmul(index, v, weights, out);
     }
@@ -156,7 +156,7 @@ public:
     ) override
     {
         base_t::check_btmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-        out.setZero();
+        dvzero(out, _n_threads);
         int n_processed = 0;
         while (n_processed < q) {
             const auto j_curr = j + n_processed;
@@ -193,7 +193,7 @@ public:
         const Eigen::Ref<const vec_value_t>& sqrt_weights,
         Eigen::Ref<colmat_value_t> out,
         Eigen::Ref<colmat_value_t> buffer
-    ) const override
+    ) override
     {
         base_t::check_cov(
             j, q, sqrt_weights.size(), 
@@ -202,7 +202,7 @@ public:
         );
 
         const auto slice = _slice_map[j]; 
-        const auto& mat = *_mat_list[slice];
+        auto& mat = *_mat_list[slice];
         const auto index = _index_map[j];
 
         // check that the block is fully contained in one matrix
@@ -219,7 +219,7 @@ public:
         const sp_mat_value_t& v, 
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
-    ) const override
+    ) override
     {
         base_t::check_sp_btmul(
             v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
@@ -228,25 +228,10 @@ public:
         rowmat_value_t buff(out.rows(), out.cols());
         int n_processed = 0;
         for (size_t i = 0; i < _mat_list.size(); ++i) {
-            const auto& mat = *_mat_list[i];
+            auto& mat = *_mat_list[i];
             const auto q_curr = mat.cols();
             mat.sp_btmul(v.middleCols(n_processed, q_curr), weights, buff);
             out += buff;
-            n_processed += q_curr;
-        }
-    }
-
-    void means(
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) const override
-    {
-        base_t::check_means(weights.size(), out.size(), rows(), cols());
-        int n_processed = 0;
-        for (size_t i = 0; i < _mat_list.size(); ++i) {
-            const auto& mat = *_mat_list[i];
-            const auto q_curr = mat.cols();
-            mat.means(weights, out.segment(n_processed, q_curr));
             n_processed += q_curr;
         }
     }

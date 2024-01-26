@@ -165,7 +165,7 @@ def dense(
 
 
 def kronecker_eye(
-    mat: np.ndarray,
+    mat: Union[MatrixNaiveBase32, MatrixNaiveBase64],
     K: int,
     *,
     n_threads: int =1,
@@ -178,8 +178,8 @@ def kronecker_eye(
     
     Parameters
     ----------
-    mat : np.ndarray
-        The matrix to view.
+    mat : Union[MatrixNaiveBase32, MatrixNaiveBase64]
+        The matrix to view as a Kronecker product with identity matrix.
     K : int
         Dimension of the identity matrix.
     n_threads : int, optional
@@ -193,35 +193,23 @@ def kronecker_eye(
 
     See Also
     --------
-    adelie.matrix.MatrixCovBase64
     adelie.matrix.MatrixNaiveBase64
     """
     if n_threads < 1:
         raise ValueError("Number of threads must be >= 1.")
 
     dispatcher = {
-        np.dtype("float64"): {
-            "C": core.matrix.MatrixNaiveKroneckerEye64C,
-            "F": core.matrix.MatrixNaiveKroneckerEye64F,
-        },
-        np.dtype("float32"): {
-            "C": core.matrix.MatrixNaiveKroneckerEye32C,
-            "F": core.matrix.MatrixNaiveKroneckerEye32F,
-        },
+        np.float64: core.matrix.MatrixNaiveKroneckerEye64,
+        np.float32: core.matrix.MatrixNaiveKroneckerEye32,
     }
 
-    dtype = mat.dtype
-    order = (
-        "C"
-        if mat.flags.c_contiguous else
-        "F"
-    )
-    core_base = dispatcher[dtype][order]
+    dtype = _to_dtype(mat)
+    core_base = dispatcher[dtype]
 
     class _kronecker_eye(core_base):
         def __init__(
             self,
-            mat: np.ndarray,
+            mat,
             K: int,
             n_threads: int,
         ):

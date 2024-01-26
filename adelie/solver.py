@@ -569,7 +569,7 @@ def grpnet(
     if glm is None:
         if warm_start is None:
             X_means = np.empty(p, dtype=dtype)
-            X.means(weights, X_means)
+            X.mul(weights, X_means)
             y_off = y - offsets
             y_mean = np.sum(y_off * weights)
             yc = y_off

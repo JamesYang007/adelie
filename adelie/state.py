@@ -574,7 +574,7 @@ class gaussian_pin_naive_base(gaussian_pin_base):
         n, p = X.rows(), X.cols()
         sqrt_weights = np.sqrt(self._weights)
         X_means = np.empty(p, dtype=dtype)
-        X.means(self._weights, X_means)
+        X.mul(self._weights, X_means)
 
         self._screen_vars = []
         self._screen_X_means = []
