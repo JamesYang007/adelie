@@ -91,7 +91,8 @@ public:
         for (int l = 0; l < _K; ++l) {
             const auto j_l = std::max(j-l, 0);
             const auto i_begin = j_l / static_cast<int>(_K) + ((j_l % _K) != 0);
-            const auto i_end = std::max(j-l+q-1, 0) / static_cast<int>(_K) + 1;
+            if (j-l+q <= 0) continue;
+            const auto i_end = (j-l+q-1) / static_cast<int>(_K) + 1;
             const auto i_q = i_end - i_begin;
             if (i_q <= 0) continue;
             _v = V.col(l);
@@ -101,7 +102,7 @@ public:
             );
             _mat->bmul(i_begin, i_q, _v, _out);
             for (int i = i_begin; i < i_end; ++i){
-                out[i*_K+l] = _out[i-i_begin];
+                out[i*_K+l-j] = _out[i-i_begin];
             }
         }
     }
@@ -120,7 +121,11 @@ public:
         for (int l = 0; l < _K; ++l) {
             const auto j_l = std::max(j-l, 0);
             const auto i_begin = j_l / static_cast<int>(_K) + ((j_l % _K) != 0);
-            const auto i_end = std::max(j-l+q-1, 0) / static_cast<int>(_K) + 1;
+            if (j-l+q <= 0) {
+                Out.col(l).setZero();
+                continue;
+            }
+            const auto i_end = (j-l+q-1) / static_cast<int>(_K) + 1;
             const auto i_q = i_end - i_begin;
             if (i_q <= 0) {
                 Out.col(l).setZero();
@@ -132,7 +137,7 @@ public:
                 i_q
             );
             for (int i = i_begin; i < i_end; ++i) {
-                _v[i-i_begin] = v[i*_K+l];
+                _v[i-i_begin] = v[i*_K+l-j];
             }
             Eigen::Map<vec_value_t> _out(
                 _buff.data() + _weights.size() + i_q,
@@ -168,7 +173,8 @@ public:
         for (int l = 0; l < _K; ++l) {
             const auto j_l = std::max(j-l, 0);
             const auto i_begin = j_l / static_cast<int>(_K) + ((j_l % _K) != 0);
-            const auto i_end = std::max(j-l+q-1, 0) / static_cast<int>(_K) + 1;
+            if (j-l+q <= 0) continue;
+            const auto i_end = (j-l+q-1) / static_cast<int>(_K) + 1;
             const auto i_q = i_end - i_begin;
             if (i_q <= 0) continue;
             if (_buff.size() < sqrt_W.rows() + i_q * i_q) {
@@ -205,7 +211,62 @@ public:
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
+        base_t::check_sp_btmul(
+            v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
+        );
 
+        Eigen::Map<const rowmat_value_t> W(weights.data(), rows() / _K, _K);
+
+        std::vector<int> outers(v.outerSize()+1); 
+        outers[0] = 0;
+        std::vector<int> inners;
+        std::vector<value_t> values;
+        inners.reserve(v.nonZeros());
+        values.reserve(v.nonZeros());
+
+        rowmat_value_t _out(out.rows(), W.rows());
+
+        for (int l = 0; l < _K; ++l) {
+            Eigen::Map<vec_value_t> _weights(
+                _buff.data(),
+                W.rows()
+            );
+            _weights = W.col(l);
+
+            inners.clear();
+            values.clear();
+
+            // populate current v
+            for (int k = 0; k < v.outerSize(); ++k) {
+                typename sp_mat_value_t::InnerIterator it(v, k);
+                int n_read = 0;
+                for (; it; ++it) {
+                    if (it.index() % _K != l) continue;
+                    inners.push_back(it.index() / _K);
+                    values.push_back(it.value());
+                    ++n_read;
+                }
+                outers[k+1] = outers[k] + n_read;
+            }
+            Eigen::Map<sp_mat_value_t> _v(
+                v.rows(),
+                v.cols() / _K,
+                inners.size(),
+                outers.data(),
+                inners.data(),
+                values.data()
+            );
+
+            _mat->sp_btmul(_v, _weights, _out);
+
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int k = 0; k < out.rows(); ++k) {
+                Eigen::Map<rowmat_value_t> out_k(
+                    out.row(k).data(), W.rows(), W.cols()
+                );
+                out_k.col(l) = _out.row(k);
+            }
+        }
     }
 };
 
