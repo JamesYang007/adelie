@@ -135,13 +135,16 @@ public:
 
         auto& Xj = buffer;
         
-        Xj.transpose().array() = (
-            _mat.middleCols(j, q).transpose().array().rowwise() * sqrt_weights
+        auto Xj_array = Xj.array();
+        dmmeq(
+            Xj_array,
+            _mat.middleCols(j, q).array().colwise() * sqrt_weights.matrix().transpose().array(),
+            _n_threads
         );
 
         Eigen::setNbThreads(_n_threads);
         out.noalias() = Xj.transpose() * Xj;
-        Eigen::setNbThreads(0);
+        Eigen::setNbThreads(1);
     }
 
     void sp_btmul(
