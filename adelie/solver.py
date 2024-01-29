@@ -575,8 +575,7 @@ def grpnet(
         if intercept:
             X = ad.matrix.concatenate([
                 ad.matrix.kronecker_eye(
-                    # TODO: optimize for dense input
-                    ad.matrix.dense(np.ones((n, 1))),
+                    np.ones((n, 1)),
                     K,
                     n_threads=n_threads,
                 ),

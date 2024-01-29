@@ -76,8 +76,6 @@ void update_solutions(
     auto& lmdas = state.lmdas;
     auto& intercepts = state.intercepts;
 
-    auto& buffer_n = buffer_pack.buffer_n;
-
     betas.emplace_back(std::move(state_gaussian_pin_naive.betas.back()));
     intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
     lmdas.emplace_back(lmda);

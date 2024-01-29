@@ -14,7 +14,7 @@ def _sample_y(
 ):
     n, K = eta.shape
 
-    if not ("multi" in glm._type) and K > 1:
+    if not glm._is_multi and K > 1:
         warnings.warn("Ignoring K and taking only first class response.")
         eta = eta[:, 0][:, None]
         K = 1
@@ -23,9 +23,9 @@ def _sample_y(
         signal_scale = np.sqrt(rho * np.sum(beta) ** 2 + (1-rho) * np.sum(beta ** 2))
         noise_scale = signal_scale / np.sqrt(snr)
         y = eta + noise_scale * np.random.normal(0, 1, eta.shape)
-        if not ("multi" in glm._type):
+        if not glm._is_multi:
             y = y.ravel()
-    elif "multinomial" in glm._type:
+    elif glm._type == "multinomial":
         mu = np.empty((n, K-1), dtype=eta.dtype)
         glm.gradient(
             snr * (eta[:,:-1] / np.sqrt(np.sum(beta**2, axis=0)[:-1])[None]).ravel(), 
