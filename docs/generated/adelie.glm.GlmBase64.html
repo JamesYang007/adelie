@@ -473,7 +473,7 @@ before passing into the solver.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.glm.GlmBase64.__init__" title="adelie.glm.GlmBase64.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(self)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.glm.GlmBase64.__init__" title="adelie.glm.GlmBase64.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(self, name, is_multi)</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.glm.GlmBase64.deviance" title="adelie.glm.GlmBase64.deviance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deviance</span></code></a>(self, arg0, arg1, arg2)</p></td>
@@ -490,9 +490,20 @@ before passing into the solver.</p>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.glm.GlmBase64.is_multi" title="adelie.glm.GlmBase64.is_multi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_multi</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if it defines a multi-response GLM family.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.glm.GlmBase64.name" title="adelie.glm.GlmBase64.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></a></p></td>
+<td><p>Name of the GLM family.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.glm.GlmBase64.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.glm.GlmBase64" title="adelie.adelie_core.glm.GlmBase64"><span class="pre">adelie.adelie_core.glm.GlmBase64</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.glm.GlmBase64.__init__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.glm.GlmBase64" title="adelie.adelie_core.glm.GlmBase64"><span class="pre">adelie.adelie_core.glm.GlmBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_multi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.glm.GlmBase64.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -593,6 +604,18 @@ Hence, the hessian computation assumes the mean parameter is provided.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.glm.GlmBase64.is_multi">
+<span class="sig-name descname"><span class="pre">is_multi</span></span><a class="headerlink" href="#adelie.glm.GlmBase64.is_multi" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if it defines a multi-response GLM family.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.glm.GlmBase64.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#adelie.glm.GlmBase64.name" title="Link to this definition">#</a></dt>
+<dd><p>Name of the GLM family.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -647,6 +670,8 @@ Hence, the hessian computation assumes the mean parameter is provided.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmBase64.deviance_full"><code class="docutils literal notranslate"><span class="pre">GlmBase64.deviance_full()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmBase64.gradient"><code class="docutils literal notranslate"><span class="pre">GlmBase64.gradient()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmBase64.hessian"><code class="docutils literal notranslate"><span class="pre">GlmBase64.hessian()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmBase64.is_multi"><code class="docutils literal notranslate"><span class="pre">GlmBase64.is_multi</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmBase64.name"><code class="docutils literal notranslate"><span class="pre">GlmBase64.name</span></code></a></li>
 </ul>
 </li>
 </ul>

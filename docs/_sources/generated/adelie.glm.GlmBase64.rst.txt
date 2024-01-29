@@ -21,6 +21,13 @@
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GlmBase64.is_multi
+      ~GlmBase64.name
+   
    
 
    
@@ -35,5 +42,9 @@
    
 
    
+   
+   
+   .. autoattribute:: is_multi
+   .. autoattribute:: name
    
    
