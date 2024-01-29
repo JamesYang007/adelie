@@ -1,7 +1,8 @@
 #include "decl.hpp"
 #include <adelie_core/glm/glm_base.hpp>
-#include <adelie_core/glm/glm_gaussian.hpp>
 #include <adelie_core/glm/glm_binomial.hpp>
+#include <adelie_core/glm/glm_gaussian.hpp>
+#include <adelie_core/glm/glm_multigaussian.hpp>
 #include <adelie_core/glm/glm_multinomial.hpp>
 #include <adelie_core/glm/glm_poisson.hpp>
 
@@ -78,6 +79,7 @@ void glm_base(py::module_& m, const char* name)
 {
     using trampoline_t = PyGlmBase<T>;
     using internal_t = ad::glm::GlmBase<T>;
+    using string_t = typename internal_t::string_t;
     py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
         Base GLM class.
 
@@ -108,7 +110,16 @@ void glm_base(py::module_& m, const char* name)
         Every GLM-like class must inherit from this class and override the methods
         before passing into the solver.
         )delimiter")
-        .def(py::init<>())
+        .def(py::init<const string_t&, bool>(),
+            py::arg("name"),
+            py::arg("is_multi")
+        )
+        .def_readonly("name", &internal_t::name, R"delimiter(
+            Name of the GLM family.
+        )delimiter")
+        .def_readonly("is_multi", &internal_t::is_multi, R"delimiter(
+            ``True`` if it defines a multi-response GLM family.
+        )delimiter")
         .def("gradient", &internal_t::gradient, R"delimiter(
         Gradient of the log-partition function.
 
@@ -188,6 +199,16 @@ void glm_base(py::module_& m, const char* name)
 }
 
 template <class T>
+void glm_binomial(py::module_& m, const char* name)
+{
+    using internal_t = ad::glm::GlmBinomial<T>;
+    using base_t = typename internal_t::base_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(py::init<>())
+        ;
+}
+
+template <class T>
 void glm_gaussian(py::module_& m, const char* name)
 {
     using internal_t = ad::glm::GlmGaussian<T>;
@@ -198,9 +219,9 @@ void glm_gaussian(py::module_& m, const char* name)
 }
 
 template <class T>
-void glm_binomial(py::module_& m, const char* name)
+void glm_multigaussian(py::module_& m, const char* name)
 {
-    using internal_t = ad::glm::GlmBinomial<T>;
+    using internal_t = ad::glm::GlmMultiGaussian<T>;
     using base_t = typename internal_t::base_t;
     py::class_<internal_t, base_t>(m, name)
         .def(py::init<>())
@@ -233,10 +254,12 @@ void register_glm(py::module_& m)
 {
     glm_base<double>(m, "GlmBase64");
     glm_base<float>(m, "GlmBase32");
-    glm_gaussian<double>(m, "GlmGaussian64");
-    glm_gaussian<float>(m, "GlmGaussian32");
     glm_binomial<double>(m, "GlmBinomial64");
     glm_binomial<float>(m, "GlmBinomial32");
+    glm_gaussian<double>(m, "GlmGaussian64");
+    glm_gaussian<float>(m, "GlmGaussian32");
+    glm_multigaussian<double>(m, "GlmMultiGaussian64");
+    glm_multigaussian<float>(m, "GlmMultiGaussian32");
     glm_multinomial<double>(m, "GlmMultinomial64");
     glm_multinomial<float>(m, "GlmMultinomial32");
     glm_poisson<double>(m, "GlmPoisson64");

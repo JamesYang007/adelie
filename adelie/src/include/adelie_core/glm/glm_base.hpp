@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
@@ -9,7 +10,19 @@ class GlmBase
 {
 public:
     using value_t = ValueType;
+    using string_t = std::string;
     using vec_value_t = util::rowvec_type<value_t>;
+
+    const string_t name;
+    const bool is_multi;
+
+    explicit GlmBase(
+        const string_t& name,
+        bool is_multi
+    ):
+        name(name),
+        is_multi(is_multi)
+    {}
 
     virtual ~GlmBase() =default;
 
