@@ -22,7 +22,7 @@ def predict(
     offsets: np.ndarray,
     betas: Union[np.ndarray, scipy.sparse.csr_matrix],
     intercepts: np.ndarray,
-    glm: Union[GlmBase32, GlmBase64] =None,
+    glm: Union[GlmBase32, GlmBase64] =gaussian(),
 ):
     """Computes the predictions.
 
@@ -62,8 +62,6 @@ def predict(
     --------
     adelie.glm.GlmBase64
     """
-    if glm is None:
-        glm = gaussian()
     n = X.rows()
     etas = np.empty((betas.shape[0], n))
     if isinstance(betas, scipy.sparse.csr_matrix):

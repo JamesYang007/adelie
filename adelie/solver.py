@@ -3,9 +3,10 @@ from . import adelie_core as core
 from . import logger
 from . import matrix
 from . import glm
+from scipy.sparse import csr_matrix
 import adelie as ad
 import numpy as np
-from scipy.sparse import csr_matrix
+import warnings
 
 
 def objective(
@@ -81,10 +82,12 @@ def objective(
     # for code consistency with sparse case.
     eta = np.empty(n)
     if isinstance(beta, np.ndarray):
+        assert beta.shape == (p,), "beta must be (p,) array."
         X.btmul(0, p, beta, np.ones(n), eta)
     elif isinstance(beta, csr_matrix):
+        assert beta.shape == (1, p), "beta must be (1, p) scipy.sparse.csr_matrix."
         X.sp_btmul(beta, np.ones(n), eta[None]) 
-        beta = beta.toarray()
+        beta = beta.toarray()[0]
     else:
         raise RuntimeError("beta is not one of np.ndarray or scipy.sparse.csr_matrix.")
     eta += beta0 + offsets
@@ -258,7 +261,7 @@ def grpnet(
     *,
     X: np.ndarray,
     y: np.ndarray,
-    glm: Union[glm.GlmBase32, glm.GlmBase64] =None,
+    glm: Union[glm.GlmBase32, glm.GlmBase64] =glm.gaussian(),
     groups: np.ndarray =None,
     alpha: float =1,
     penalty: np.ndarray =None,
@@ -321,26 +324,55 @@ def grpnet(
     :math:`\\beta_g` are the coefficients for the :math:`g` th group,
     and :math:`A_i` define the log-partition function in the GLM family.
 
+    For multi-response problems (i.e. when :math:`y` is 2-dimensional)
+    such as in multigaussian or multinomial GLM,
+    the group elastic net problem can still be formulated as above after flattening the inputs
+    and modifying the :math:`X` matrix.
+    Concretely, we solve
+
+    .. math::
+        \\begin{align*}
+            \\mathrm{minimize}_{\\beta, \\beta_0} \\quad&
+            \\sum_{i=1}^{nK}
+            w_{i} \\left(
+                -y_{i} \\eta_{i} + A_{i}(\\eta)
+            \\right)
+            + \\lambda \\sum\\limits_{g=1}^G p_g \\left(
+                \\alpha \\|\\beta_g\\|_2 + \\frac{1-\\alpha}{2} \\|\\beta_g\\|_2^2
+            \\right)
+            \\\\
+            \\text{subject to} \\quad&
+            \\eta = (X\\otimes I_K) \\beta + (\\mathbf{1}\\otimes I_K) \\beta_0 + \\eta^0
+        \\end{align*}
+
+    where
+    :math:`y`, :math:`w`, :math:`\\beta`, and :math:`\\eta^0`
+    are flattened row-major matrices.
+    Note that if ``intercept`` is ``True``, then an intercept for each class is provided
+    as additional unpenalized features in the data matrix and the global intercept is turned off.
+
+    .. note::
+        Some multi-response GLM families require further restrictions
+        on the structure of the objective (e.g. see ``adelie.glm.multinomial``).
+
     Parameters
     ----------
-    X : np.ndarray
+    X : (n, p) matrix-like
         Feature matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` sub-module
         or a ``numpy`` array.
-    y : (n,) np.ndarray
-        Response vector.
+    y : (n,) or (n, K) np.ndarray
+        Response vector or multi-response matrix.
     glm : Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64], optional
         GLM object.
-        If ``None``, then it is assumed that the Gaussian GLM is used
-        and an optimized routine is used to fit the group lasso problem.
-        Otherwise, a more general-purpose solver is used.
-        We recommend users to use ``None`` instead of supplying the Gaussian GLM object
-        for best performance.
-        Default is ``None``.
+        Default is ``adelie.glm.gaussian()``.
     groups : (G,) np.ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-        Default is ``np.arange(p)``.
+        If ``y`` is multi-response, then the groups must correspond 
+        to the flattened :math:`\\beta` (row-major) matrix.
+        Default is ``np.arange(p)`` if ``y`` is single-response
+        and ``K * np.arange(p)`` if multi-response.
     alpha : float, optional
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
@@ -349,12 +381,15 @@ def grpnet(
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
         Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
-    weights : (n,) np.ndarray, optional
+    weights : (n,) or (n, K) np.ndarray, optional
         Observation weights.
-        Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-    offsets : (n,) np.ndarray, optional
+        Weights are normalized such that they sum to ``1``.
+        Default is ``None``, in which case, it is set to ``np.full(n, 1/n)`` if ``y`` is single-response
+        and ``np.full((n, K), 1/(n*K))`` if multi-response.
+    offsets : (n,) or (n, K) np.ndarray, optional
         Observation offsets :math:`\\eta^0`.
-        Default is ``None``, in which case, it is set to ``np.zeros(n)``.
+        Default is ``None``, in which case, it is set to ``np.zeros(n)`` if ``y`` is single-response
+        and ``np.zeros((n, K))`` if multi-response.
     lmda_path : (l,) np.ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
@@ -402,6 +437,8 @@ def grpnet(
         Default is ``100``.
     intercept : bool, optional 
         ``True`` if the function should fit with intercept.
+        If ``y`` is multi-response, then an intercept for each class is added as an unpenalized feature 
+        to the data matrix and the global intercept is turned off.
         Default is ``True``.
     screen_rule : str, optional
         The type of screening rule to use. It must be one of the following options:
@@ -477,6 +514,8 @@ def grpnet(
     adelie.solver.solve_gaussian
     adelie.solver.solve_glm
     """
+    X_raw = X
+
     if isinstance(X, np.ndarray):
         X = ad.matrix.dense(X, method="naive", n_threads=n_threads)
 
@@ -491,10 +530,71 @@ def grpnet(
         np.float32
     )
 
-    # compute common quantities
-
     n, p = X.rows(), X.cols()
 
+    # special handling if multi-response GLMs
+    if glm._is_multi:
+        if len(y.shape) != 2:
+            raise RuntimeError("y must be 2-dimensional.")
+
+        y = np.array(y, order="C", copy=False)
+        K = y.shape[-1]
+        y = y.ravel()
+
+        if not (offsets is None): 
+            if offsets.shape != (n, K):
+                raise RuntimeError("offsets must be (n, K) if not None.")
+            offsets = np.array(offsets, order="C", copy=False).ravel()
+
+        if not (weights is None):
+            if len(weights.shape) == 1:
+                if weights.shape != (n,):
+                    raise RuntimeError("weights must be (n,) array if 1-dimensional.")
+                weights = np.repeat(weights, K)
+            elif weights.shape != (n, K):
+                raise RuntimeError("weights must be (n, K) array if 2-dimensional.")
+            else:
+                if glm._type == "multinomial":
+                    raise RuntimeError(
+                        "multinomial cannot accept general (n, K) weights. " +
+                        "See adelie.glm.multinomial for more detail."
+                    )
+                weights = np.array(weights, order="C", copy=False).ravel()
+
+        # kronecker_eye is optimized for np.ndarray input
+        X = ad.matrix.kronecker_eye(X_raw, K, n_threads=n_threads)
+
+        if groups is None:
+            groups = K * np.arange(p)
+
+        if penalty is None:
+            group_sizes = np.concatenate([groups, [K*p]], dtype=int)
+            group_sizes = group_sizes[1:] - group_sizes[:-1]
+            penalty = np.sqrt(group_sizes)
+
+        if intercept:
+            X = ad.matrix.concatenate([
+                ad.matrix.kronecker_eye(
+                    # TODO: optimize for dense input
+                    ad.matrix.dense(np.ones((n, 1))),
+                    K,
+                    n_threads=n_threads,
+                ),
+                X,
+            ])
+            groups = np.concatenate([
+                np.arange(K),
+                K + groups,
+            ], dtype=int)
+            penalty = np.concatenate([
+                np.zeros(K),
+                penalty,
+            ])
+            intercept = False
+
+        n, p = X.rows(), X.cols()
+
+    # compute common quantities
     if groups is None:
         groups = np.arange(p, dtype=int)
     group_sizes = np.concatenate([groups, [p]], dtype=int)
@@ -566,7 +666,9 @@ def grpnet(
 
     # compute quantities specific to each method 
 
-    if glm is None:
+    # do special routine for optimized gaussian
+    is_gaussian_opt = glm._type in ["gaussian", "multigaussian"]
+    if is_gaussian_opt:
         if warm_start is None:
             X_means = np.empty(p, dtype=dtype)
             X.mul(weights, X_means)
@@ -633,7 +735,7 @@ def grpnet(
 
     solve_fun = (
         solve_gaussian
-        if glm is None else
+        if is_gaussian_opt else
         solve_glm
     )
     return solve_fun(
