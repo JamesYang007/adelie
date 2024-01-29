@@ -533,7 +533,7 @@ def grpnet(
     n, p = X.rows(), X.cols()
 
     # special handling if multi-response GLMs
-    if glm._is_multi:
+    if glm.is_multi:
         if len(y.shape) != 2:
             raise RuntimeError("y must be 2-dimensional.")
 
@@ -554,7 +554,7 @@ def grpnet(
             elif weights.shape != (n, K):
                 raise RuntimeError("weights must be (n, K) array if 2-dimensional.")
             else:
-                if glm._type == "multinomial":
+                if glm.name == "multinomial":
                     raise RuntimeError(
                         "multinomial cannot accept general (n, K) weights. " +
                         "See adelie.glm.multinomial for more detail."
@@ -666,7 +666,10 @@ def grpnet(
     # compute quantities specific to each method 
 
     # do special routine for optimized gaussian
-    is_gaussian_opt = glm._type in ["gaussian", "multigaussian"]
+    is_gaussian_opt = (
+        (glm.name in ["gaussian", "multigaussian"]) and
+        glm.opt
+    )
     if is_gaussian_opt:
         if warm_start is None:
             X_means = np.empty(p, dtype=dtype)

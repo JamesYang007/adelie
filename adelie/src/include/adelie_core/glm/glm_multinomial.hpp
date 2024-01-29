@@ -17,9 +17,10 @@ private:
     vec_value_t _buff;
 
 public:
-    GlmMultinomial(
+    explicit GlmMultinomial(
         size_t K
     ):
+        base_t("multinomial", true),
         _K(K)
     {}
 

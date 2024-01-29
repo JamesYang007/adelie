@@ -12,6 +12,10 @@ public:
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
 
+    explicit GlmBinomial():
+        base_t("binomial", false)
+    {}
+
     void gradient(
         const Eigen::Ref<const vec_value_t>& eta,
         const Eigen::Ref<const vec_value_t>& weights,

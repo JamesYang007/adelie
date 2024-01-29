@@ -81,11 +81,7 @@ def gaussian(
         def __init__(
             self,
         ):
-            if opt:
-                self._type = "gaussian"
-            else:
-                self._type = "gaussian-irls"
-            self._is_multi = False
+            self.opt = opt
             core_base.__init__(self)
 
         def sample(self, mu):
@@ -137,9 +133,24 @@ def multigaussian(
     --------
     adelie.glm.GlmBase64
     """
-    out = gaussian(dtype=dtype, opt=opt)
-    out._is_multi = True
-    return out
+    dispatcher = {
+        np.float64: core.glm.GlmMultiGaussian64,
+        np.float32: core.glm.GlmMultiGaussian32,
+    }
+
+    core_base = dispatcher[dtype]
+
+    class _multigaussian(core_base, glm_base):
+        def __init__(
+            self,
+        ):
+            self.opt = opt
+            core_base.__init__(self)
+
+        def sample(self, mu):
+            return np.random.normal(mu)
+
+    return _multigaussian()
 
 
 def binomial(
@@ -185,8 +196,6 @@ def binomial(
         def __init__(
             self,
         ):
-            self._type = "binomial"
-            self._is_multi = False
             core_base.__init__(self)
 
         def sample(self, mu):
@@ -273,8 +282,6 @@ def multinomial(
             self,
             K,
         ):
-            self._type = "multinomial"
-            self._is_multi = True
             core_base.__init__(self, K)
 
         def sample(self, mu):
@@ -326,8 +333,6 @@ def poisson(
         def __init__(
             self,
         ):
-            self._type = "poisson"
-            self._is_multi = False
             core_base.__init__(self)
 
         def sample(self, mu):

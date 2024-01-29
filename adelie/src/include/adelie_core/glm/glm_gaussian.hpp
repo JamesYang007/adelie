@@ -12,6 +12,10 @@ public:
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
 
+    explicit GlmGaussian():
+        base_t("gaussian", false)
+    {}
+
     void gradient(
         const Eigen::Ref<const vec_value_t>& eta,
         const Eigen::Ref<const vec_value_t>& weights,
