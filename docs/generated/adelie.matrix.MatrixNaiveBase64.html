@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.matrix.MatrixNaiveBase64 &#8212; adelie 1.1.8
+    <title>adelie.matrix.MatrixNaiveBase64 &#8212; adelie 1.1.9
  documentation</title>
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=df104e6e"></script>
+    <script src="../_static/documentation_options.js?v=7b68ca77"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -119,7 +119,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.8
+    <p class="title logo__title">adelie 1.1.9
  documentation</p>
   
 </a></div>
@@ -343,6 +343,8 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.multigaussian.html">adelie.glm.multigaussian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.multinomial.html">adelie.glm.multinomial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.poisson.html">adelie.glm.poisson</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -353,6 +355,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.concatenate.html">adelie.matrix.concatenate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.kronecker_eye.html">adelie.matrix.kronecker_eye</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 </ul>
@@ -466,16 +469,13 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase64.ctmul" title="adelie.matrix.MatrixNaiveBase64.ctmul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ctmul</span></code></a>(self, arg0, arg1, arg2, arg3)</p></td>
 <td><p>Column vector-scalar multiplication.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase64.means" title="adelie.matrix.MatrixNaiveBase64.means"><code class="xref py py-obj docutils literal notranslate"><span class="pre">means</span></code></a>(self, arg0, arg1)</p></td>
-<td><p>Column means.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase64.mul" title="adelie.matrix.MatrixNaiveBase64.mul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mul</span></code></a>(self, arg0, arg1)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase64.mul" title="adelie.matrix.MatrixNaiveBase64.mul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mul</span></code></a>(self, arg0, arg1)</p></td>
 <td><p>Matrix-vector multiplication.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase64.rows" title="adelie.matrix.MatrixNaiveBase64.rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rows</span></code></a>(self)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase64.rows" title="adelie.matrix.MatrixNaiveBase64.rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rows</span></code></a>(self)</p></td>
 <td><p>Number of rows.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase64.sp_btmul" title="adelie.matrix.MatrixNaiveBase64.sp_btmul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sp_btmul</span></code></a>(self, arg0, arg1, arg2)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase64.sp_btmul" title="adelie.matrix.MatrixNaiveBase64.sp_btmul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sp_btmul</span></code></a>(self, arg0, arg1, arg2)</p></td>
 <td><p>Matrix transpose-sparse matrix multiplication.</p></td>
 </tr>
 </tbody>
@@ -603,23 +603,6 @@ document.write(`
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.matrix.MatrixNaiveBase64.means">
-<span class="sig-name descname"><span class="pre">means</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.matrix.MatrixNaiveBase64.means" title="Link to this definition">#</a></dt>
-<dd><p>Column means.</p>
-<p>Equivalent to <code class="docutils literal notranslate"><span class="pre">np.sum(w[:,</span> <span class="pre">None]</span> <span class="pre">*</span> <span class="pre">X,</span> <span class="pre">axis=0)</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>w</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Vector of weights.</p>
-</dd>
-<dt><strong>out</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>Vector to store the column means.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="adelie.matrix.MatrixNaiveBase64.mul">
 <span class="sig-name descname"><span class="pre">mul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.matrix.MatrixNaiveBase64.mul" title="Link to this definition">#</a></dt>
 <dd><p>Matrix-vector multiplication.</p>
@@ -719,7 +702,6 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixNaiveBase64.cols"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveBase64.cols()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixNaiveBase64.cov"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveBase64.cov()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixNaiveBase64.ctmul"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveBase64.ctmul()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixNaiveBase64.means"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveBase64.means()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixNaiveBase64.mul"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveBase64.mul()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixNaiveBase64.rows"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveBase64.rows()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixNaiveBase64.sp_btmul"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveBase64.sp_btmul()</span></code></a></li>

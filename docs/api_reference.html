@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>API Reference &#8212; adelie 1.1.8
+    <title>API Reference &#8212; adelie 1.1.9
  documentation</title>
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="_static/documentation_options.js?v=df104e6e"></script>
+    <script src="_static/documentation_options.js?v=7b68ca77"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.8
+    <p class="title logo__title">adelie 1.1.9
  documentation</p>
   
 </a></div>
@@ -345,6 +345,8 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.glm.binomial.html">adelie.glm.binomial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.glm.multigaussian.html">adelie.glm.multigaussian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.glm.multinomial.html">adelie.glm.multinomial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.glm.poisson.html">adelie.glm.poisson</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -355,6 +357,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.concatenate.html">adelie.matrix.concatenate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.dense.html">adelie.matrix.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.kronecker_eye.html">adelie.matrix.kronecker_eye</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 </ul>
@@ -466,13 +469,13 @@ document.write(`
 <h2>adelie.data<a class="headerlink" href="#adelie-data" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.data.dense.html#adelie.data.dense" title="adelie.data.dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dense</span></code></a>(n, p, G, *[, glm, equal_groups, rho, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.data.dense.html#adelie.data.dense" title="adelie.data.dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dense</span></code></a>(n, p, G, *[, K, glm, equal_groups, ...])</p></td>
 <td><p>Creates a dense dataset.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.data.snp_phased_ancestry.html#adelie.data.snp_phased_ancestry" title="adelie.data.snp_phased_ancestry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snp_phased_ancestry</span></code></a>(n, s, A, *[, glm, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.data.snp_phased_ancestry.html#adelie.data.snp_phased_ancestry" title="adelie.data.snp_phased_ancestry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snp_phased_ancestry</span></code></a>(n, s, A, *[, K, glm, ...])</p></td>
 <td><p>Creates a SNP Unphased dataset.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.data.snp_unphased.html#adelie.data.snp_unphased" title="adelie.data.snp_unphased"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snp_unphased</span></code></a>(n, p, *[, glm, sparsity, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.data.snp_unphased.html#adelie.data.snp_unphased" title="adelie.data.snp_unphased"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snp_unphased</span></code></a>(n, p, *[, K, glm, sparsity, ...])</p></td>
 <td><p>Creates a SNP Unphased dataset.</p></td>
 </tr>
 </tbody>
@@ -528,8 +531,14 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.binomial.html#adelie.glm.binomial" title="adelie.glm.binomial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">binomial</span></code></a>(*[, dtype])</p></td>
 <td><p>Creates a Binomial GLM family object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.gaussian.html#adelie.glm.gaussian" title="adelie.glm.gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian</span></code></a>(*[, dtype])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.gaussian.html#adelie.glm.gaussian" title="adelie.glm.gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian</span></code></a>(*[, dtype, opt])</p></td>
 <td><p>Creates a Gaussian GLM family object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.multigaussian.html#adelie.glm.multigaussian" title="adelie.glm.multigaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multigaussian</span></code></a>(*[, dtype, opt])</p></td>
+<td><p>Creates a Multi-Response Gaussian GLM family object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.multinomial.html#adelie.glm.multinomial" title="adelie.glm.multinomial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multinomial</span></code></a>(K, *[, dtype])</p></td>
+<td><p>Creates a Multinomial GLM family object.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.poisson.html#adelie.glm.poisson" title="adelie.glm.poisson"><code class="xref py py-obj docutils literal notranslate"><span class="pre">poisson</span></code></a>(*[, dtype])</p></td>
 <td><p>Creates a Poisson GLM family object.</p></td>
@@ -563,10 +572,13 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.dense.html#adelie.matrix.dense" title="adelie.matrix.dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dense</span></code></a>(mat, *[, method, n_threads])</p></td>
 <td><p>Creates a viewer of a dense matrix.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.snp_phased_ancestry.html#adelie.matrix.snp_phased_ancestry" title="adelie.matrix.snp_phased_ancestry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snp_phased_ancestry</span></code></a>(filename, *[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.kronecker_eye.html#adelie.matrix.kronecker_eye" title="adelie.matrix.kronecker_eye"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kronecker_eye</span></code></a>(mat, K, *[, n_threads])</p></td>
+<td><p>Creates a viewer of a matrix Kronecker product identity matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.snp_phased_ancestry.html#adelie.matrix.snp_phased_ancestry" title="adelie.matrix.snp_phased_ancestry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snp_phased_ancestry</span></code></a>(filename, *[, ...])</p></td>
 <td><p>Creates a SNP phased ancestry matrix.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.snp_unphased.html#adelie.matrix.snp_unphased" title="adelie.matrix.snp_unphased"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snp_unphased</span></code></a>(filename, *[, n_threads, dtype])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.snp_unphased.html#adelie.matrix.snp_unphased" title="adelie.matrix.snp_unphased"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snp_unphased</span></code></a>(filename, *[, n_threads, dtype])</p></td>
 <td><p>Creates a SNP unphased matrix.</p></td>
 </tr>
 </tbody>

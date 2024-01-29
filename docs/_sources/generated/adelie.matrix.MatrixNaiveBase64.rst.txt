@@ -18,7 +18,6 @@
       ~MatrixNaiveBase64.cols
       ~MatrixNaiveBase64.cov
       ~MatrixNaiveBase64.ctmul
-      ~MatrixNaiveBase64.means
       ~MatrixNaiveBase64.mul
       ~MatrixNaiveBase64.rows
       ~MatrixNaiveBase64.sp_btmul
@@ -39,7 +38,6 @@
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul
-   .. automethod:: means
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_btmul

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.glm.poisson &#8212; adelie 1.1.8
+    <title>adelie.glm.poisson &#8212; adelie 1.1.9
  documentation</title>
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=df104e6e"></script>
+    <script src="../_static/documentation_options.js?v=7b68ca77"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -47,7 +47,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="adelie.io.snp_phased_ancestry" href="adelie.io.snp_phased_ancestry.html" />
-    <link rel="prev" title="adelie.glm.gaussian" href="adelie.glm.gaussian.html" />
+    <link rel="prev" title="adelie.glm.multinomial" href="adelie.glm.multinomial.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.8
+    <p class="title logo__title">adelie 1.1.9
  documentation</p>
   
 </a></div>
@@ -345,6 +345,8 @@ document.write(`
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.multigaussian.html">adelie.glm.multigaussian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.multinomial.html">adelie.glm.multinomial</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.glm.poisson</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -355,6 +357,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.concatenate.html">adelie.matrix.concatenate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.kronecker_eye.html">adelie.matrix.kronecker_eye</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 </ul>
@@ -444,11 +447,14 @@ document.write(`
 <dt class="sig sig-object py" id="adelie.glm.poisson">
 <span class="sig-prename descclassname"><span class="pre">adelie.glm.</span></span><span class="sig-name descname"><span class="pre">poisson</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">~numpy.float32</span> <span class="pre">|</span> <span class="pre">~numpy.float64</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.glm.poisson" title="Link to this definition">#</a></dt>
 <dd><p>Creates a Poisson GLM family object.</p>
-<p>The Poisson GLM family specifies the log-partition function as:</p>
+<p>The Poisson GLM family specifies the loss function as:</p>
 <div class="math notranslate nohighlight">
 \[\begin{align*}
-    A(\eta) = \sum\limits_{i=1}^n W_{ii} e^{\eta_i}
+    \sum\limits_{i=1}^n w_i \left(
+        -y_i \eta_i + e^{\eta_i}
+    \right) 
 \end{align*}\]</div>
+<p>We assume that <span class="math notranslate nohighlight">\(y_i \in \mathbb{N}_0\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -459,7 +465,7 @@ Default is <code class="docutils literal notranslate"><span class="pre">np.float
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>glm</dt><dd><p>Binomial GLM object.</p>
+<dt>glm</dt><dd><p>Poisson GLM object.</p>
 </dd>
 </dl>
 </dd>
@@ -485,12 +491,12 @@ Default is <code class="docutils literal notranslate"><span class="pre">np.float
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.glm.gaussian.html"
+       href="adelie.glm.multinomial.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.glm.gaussian</p>
+        <p class="prev-next-title">adelie.glm.multinomial</p>
       </div>
     </a>
     <a class="right-next"

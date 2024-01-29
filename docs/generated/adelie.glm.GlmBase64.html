@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.glm.GlmBase64 &#8212; adelie 1.1.8
+    <title>adelie.glm.GlmBase64 &#8212; adelie 1.1.9
  documentation</title>
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=df104e6e"></script>
+    <script src="../_static/documentation_options.js?v=7b68ca77"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.8
+    <p class="title logo__title">adelie 1.1.9
  documentation</p>
   
 </a></div>
@@ -345,6 +345,8 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.multigaussian.html">adelie.glm.multigaussian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.multinomial.html">adelie.glm.multinomial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.poisson.html">adelie.glm.poisson</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -355,6 +357,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.concatenate.html">adelie.matrix.concatenate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.kronecker_eye.html">adelie.matrix.kronecker_eye</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 </ul>
@@ -447,17 +450,22 @@ document.write(`
 <p>The generalized linear model is given by the (weighted) negative likelihood</p>
 <div class="math notranslate nohighlight">
 \[\begin{align*}
-    D(\eta) = -y^\top W \eta + \sum\limits_{i=1}^n W_{ii} A_i(\eta)
+    D(\eta) = \sum\limits_{i=1}^n w_{i} \left(
+        -y_i \eta_i + A_i(\eta)
+    \right)
 \end{align*}\]</div>
-<p>We define <span class="math notranslate nohighlight">\(D(\eta)\)</span> as the <em>deviance</em> and <span class="math notranslate nohighlight">\(A(\eta) := \sum_{i=1}^n W_{ii} A_i(\eta)\)</span>
+<p>We define <span class="math notranslate nohighlight">\(D(\eta)\)</span> as the <em>deviance</em> and <span class="math notranslate nohighlight">\(A(\eta) := \sum_{i=1}^n w_{i} A_i(\eta)\)</span>
 as the <em>log-partition function</em>.
-Here, <span class="math notranslate nohighlight">\(W \geq 0\)</span> is a diagonal matrix and <span class="math notranslate nohighlight">\(A_i\)</span> are any convex functions.</p>
+Here, <span class="math notranslate nohighlight">\(w \geq 0\)</span> and <span class="math notranslate nohighlight">\(A_i\)</span> are any convex functions.</p>
 <p>The purpose of a GLM class is to define methods that evaluate key quantities regarding this model
 that are required for solving the group lasso problem.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Our definition of deviance is the negative of the standard definition.
-Moreover, it is off by a factor of 2.
+<p>Our definition of deviance is non-standard.
+However, the differences are unimportant since deviance 
+is only relevant in terms of percent deviance explained.
+Both our definition and the standard one result in the same quantity
+for percent deviance explained.
 This was more of a design choice to be consistent with the group lasso problem.</p>
 </div>
 <p>Every GLM-like class must inherit from this class and override the methods
