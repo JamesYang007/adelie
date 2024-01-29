@@ -48,7 +48,7 @@ public:
         value_t v, 
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) const override
+    ) override
     {
         base_t::check_ctmul(j, weights.size(), out.size(), rows(), cols());
         dax(v, _mat.transpose().row(j).array() * weights, _n_threads, out);
@@ -120,7 +120,7 @@ public:
         const Eigen::Ref<const vec_value_t>& sqrt_weights,
         Eigen::Ref<colmat_value_t> out,
         Eigen::Ref<colmat_value_t> buffer
-    ) const override
+    ) override
     {
         base_t::check_cov(
             j, q, sqrt_weights.size(), 
@@ -135,49 +135,29 @@ public:
 
         auto& Xj = buffer;
         
-        Xj.transpose().array() = (
-            _mat.middleCols(j, q).transpose().array().rowwise() * sqrt_weights
+        auto Xj_array = Xj.array();
+        dmmeq(
+            Xj_array,
+            _mat.middleCols(j, q).array().colwise() * sqrt_weights.matrix().transpose().array(),
+            _n_threads
         );
 
         Eigen::setNbThreads(_n_threads);
         out.noalias() = Xj.transpose() * Xj;
-        Eigen::setNbThreads(0);
+        Eigen::setNbThreads(1);
     }
 
     void sp_btmul(
         const sp_mat_value_t& v, 
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
-    ) const override
+    ) override
     {
         base_t::check_sp_btmul(
             v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
         );
         out.noalias() = v * _mat.transpose();
         out.array().rowwise() *= weights;
-    }
-
-    void means(
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) const override
-    {
-        base_t::check_means(weights.size(), out.size(), rows(), cols());
-        const size_t p = _mat.cols();
-        const int n_blocks = std::min<int>(_n_threads, p);
-        const int block_size = p / n_blocks;
-        const int remainder = p % n_blocks;
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int t = 0; t < n_blocks; ++t) {
-            const auto begin = (
-                std::min<int>(t, remainder) * (block_size + 1) 
-                + std::max<int>(t-remainder, 0) * block_size
-            );
-            const auto size = block_size + (t < remainder);
-            for (int j = 0; j < size; ++j) {
-                out[begin + j] = _mat.col(begin + j).dot(weights.matrix());
-            }
-        }
     }
 };
 

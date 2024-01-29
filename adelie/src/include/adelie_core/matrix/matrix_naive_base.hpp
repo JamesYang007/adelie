@@ -128,23 +128,6 @@ protected:
         }
     }
 
-    static void check_means(
-        int w, int o, int r, int c
-    )
-    {
-        if (
-            (w != r) || (o != c)
-        ) {
-            throw std::runtime_error(
-                util::format(
-                    "means() is given inconsistent inputs! "
-                    "Invoked check_means(w=%d, o=%d, r=%d, c=%d)",
-                    w, o, r, c
-                )
-            );
-        }
-    }
-
 public:
     using value_t = ValueType;
     using index_t = IndexType;
@@ -166,7 +149,7 @@ public:
         value_t v, 
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) const =0;
+    ) =0;
 
     virtual void bmul(
         int j, int q, 
@@ -191,7 +174,7 @@ public:
         const Eigen::Ref<const vec_value_t>& sqrt_weights,
         Eigen::Ref<colmat_value_t> out,
         Eigen::Ref<colmat_value_t> buffer
-    ) const =0;
+    ) =0;
 
     virtual int rows() const =0;
     
@@ -203,12 +186,7 @@ public:
         const sp_mat_value_t& v,
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
-    ) const =0;
-
-    virtual void means(
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) const =0;
+    ) =0;
 };
 
 } // namespace matrix

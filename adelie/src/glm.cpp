@@ -2,6 +2,7 @@
 #include <adelie_core/glm/glm_base.hpp>
 #include <adelie_core/glm/glm_gaussian.hpp>
 #include <adelie_core/glm/glm_binomial.hpp>
+#include <adelie_core/glm/glm_multinomial.hpp>
 #include <adelie_core/glm/glm_poisson.hpp>
 
 namespace py = pybind11;
@@ -84,19 +85,24 @@ void glm_base(py::module_& m, const char* name)
         
         .. math::
             \begin{align*}
-                D(\eta) = -y^\top W \eta + \sum\limits_{i=1}^n W_{ii} A_i(\eta)
+                D(\eta) = \sum\limits_{i=1}^n w_{i} \left(
+                    -y_i \eta_i + A_i(\eta)
+                \right)
             \end{align*}
 
-        We define :math:`D(\eta)` as the *deviance* and :math:`A(\eta) := \sum_{i=1}^n W_{ii} A_i(\eta)`
+        We define :math:`D(\eta)` as the *deviance* and :math:`A(\eta) := \sum_{i=1}^n w_{i} A_i(\eta)`
         as the *log-partition function*.
-        Here, :math:`W \geq 0` is a diagonal matrix and :math:`A_i` are any convex functions.
+        Here, :math:`w \geq 0` and :math:`A_i` are any convex functions.
 
         The purpose of a GLM class is to define methods that evaluate key quantities regarding this model
         that are required for solving the group lasso problem.
 
         .. note::
-            Our definition of deviance is the negative of the standard definition.
-            Moreover, it is off by a factor of 2.
+            Our definition of deviance is non-standard.
+            However, the differences are unimportant since deviance 
+            is only relevant in terms of percent deviance explained.
+            Both our definition and the standard one result in the same quantity
+            for percent deviance explained.
             This was more of a design choice to be consistent with the group lasso problem.
 
         Every GLM-like class must inherit from this class and override the methods
@@ -202,6 +208,18 @@ void glm_binomial(py::module_& m, const char* name)
 }
 
 template <class T>
+void glm_multinomial(py::module_& m, const char* name)
+{
+    using internal_t = ad::glm::GlmMultinomial<T>;
+    using base_t = typename internal_t::base_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(py::init<size_t>(), 
+            py::arg("K")
+        )
+        ;
+}
+
+template <class T>
 void glm_poisson(py::module_& m, const char* name)
 {
     using internal_t = ad::glm::GlmPoisson<T>;
@@ -219,6 +237,8 @@ void register_glm(py::module_& m)
     glm_gaussian<float>(m, "GlmGaussian32");
     glm_binomial<double>(m, "GlmBinomial64");
     glm_binomial<float>(m, "GlmBinomial32");
+    glm_multinomial<double>(m, "GlmMultinomial64");
+    glm_multinomial<float>(m, "GlmMultinomial32");
     glm_poisson<double>(m, "GlmPoisson64");
     glm_poisson<float>(m, "GlmPoisson32");
 }

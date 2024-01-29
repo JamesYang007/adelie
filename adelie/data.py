@@ -1,8 +1,8 @@
 import numpy as np
 from .glm import (
-    binomial,
-    poisson
+    gaussian,
 )
+import warnings 
 
 
 def _sample_y(
@@ -12,15 +12,37 @@ def _sample_y(
     rho: float =0,
     snr: float =1,
 ):
-    n = eta.shape[0]
-    signal_scale = np.sqrt(rho * np.sum(beta) ** 2 + (1-rho) * np.sum(beta ** 2))
-    if glm is None:
+    n, K = eta.shape
+
+    if not glm._is_multi and K > 1:
+        warnings.warn("Ignoring K and taking only first class response.")
+        eta = eta[:, 0][:, None]
+        K = 1
+
+    if "gaussian" in glm._type:
+        signal_scale = np.sqrt(rho * np.sum(beta) ** 2 + (1-rho) * np.sum(beta ** 2))
         noise_scale = signal_scale / np.sqrt(snr)
-        y = eta + noise_scale * np.random.normal(0, 1, n)
+        y = eta + noise_scale * np.random.normal(0, 1, eta.shape)
+        if not glm._is_multi:
+            y = y.ravel()
+    elif glm._type == "multinomial":
+        mu = np.empty((n, K-1), dtype=eta.dtype)
+        glm.gradient(
+            snr * (eta[:,:-1] / np.sqrt(np.sum(beta**2, axis=0)[:-1])[None]).ravel(), 
+            np.ones(n*(K-1)), 
+            mu.ravel(),
+        )
+        mu = np.concatenate([mu, 1-np.sum(mu, axis=-1)[:, None]], axis=-1)
+        y = np.empty(eta.shape, dtype=eta.dtype)
+        for i in range(y.shape[0]):
+            y[i] = glm.sample(mu[i])
+        y = np.array(y[:, :-1], order="C")
     else:
+        eta = eta.ravel()
         mu = np.empty(eta.shape[0], dtype=eta.dtype)
         glm.gradient(snr * eta / np.sqrt(np.sum(beta**2)), np.ones(n), mu)
         y = glm.sample(mu).astype(eta.dtype)
+
     return y
 
 
@@ -29,7 +51,8 @@ def dense(
     p: int, 
     G: int,
     *,
-    glm=None,
+    K: int=1,
+    glm=gaussian(),
     equal_groups=False,
     rho: float =0,
     sparsity: float =0.95,
@@ -58,9 +81,12 @@ def dense(
         Number of features.
     G : int
         Number of groups.
+    K : int, optional
+        Number of classes for multi-response GLMs.
+        Default is ``1``.
     glm : adelie.glm.glm_base, optional
         GLM object.
-        Default is ``None``.
+        Default is ``adelie.glm.gaussian()``.
     equal_groups : bool, optional
         If ``True``, group sizes are made as equal as possible.
         Default is ``False``.
@@ -125,7 +151,7 @@ def dense(
     X = np.sqrt(rho) * Z[:, None] + np.sqrt(1-rho) * X
     X = np.asfortranarray(X)
 
-    beta = np.random.normal(0, 1, p)
+    beta = np.random.normal(0, 1, (p, K))
     beta_zero_indices = np.random.choice(p, int(sparsity * p), replace=False)
     beta_nnz_indices = np.array(list(set(np.arange(p)) - set(beta_zero_indices)))
     X_sub = X[:, beta_nnz_indices]
@@ -153,7 +179,8 @@ def snp_unphased(
     n: int, 
     p: int, 
     *,
-    glm=None,
+    K: int =1,
+    glm=gaussian(),
     sparsity: float =0.95,
     one_ratio: float =0.25,
     two_ratio: float =0.05,
@@ -181,9 +208,12 @@ def snp_unphased(
         Number of data points.
     p : int
         Number of SNPs.
+    K : int, optional
+        Number of classes for multi-response GLMs.
+        Default is ``1``.
     glm : adelie.glm.glm_base, optional
         GLM object.
-        Default is ``None``.
+        Default is ``adelie.glm.gaussian()``.
     sparsity : float, optional
         Proportion of :math:`\\beta` entries to be zeroed out.
         Default is ``0.95``.
@@ -244,7 +274,7 @@ def snp_unphased(
     penalty[np.random.choice(p, int(zero_penalty * p), replace=False)] = 0
     penalty /= np.linalg.norm(penalty) / np.sqrt(p)
 
-    beta = np.random.normal(0, 1, p)
+    beta = np.random.normal(0, 1, (p, K))
     beta_nnz_indices = np.random.choice(p, int((1-sparsity) * p), replace=False)
     X_sub = X[:, beta_nnz_indices]
     beta_sub = beta[beta_nnz_indices]
@@ -271,7 +301,8 @@ def snp_phased_ancestry(
     s: int, 
     A: int,
     *,
-    glm=None,
+    K: int =1,
+    glm=gaussian(),
     sparsity: float =0.95,
     one_ratio: float =0.25,
     two_ratio: float =0.05,
@@ -302,9 +333,12 @@ def snp_phased_ancestry(
         Number of SNPs.
     A : int
         Number of ancestries.
+    K : int, optional
+        Number of classes for multi-response GLMs.
+        Default is ``1``.
     glm : adelie.glm.glm_base, optional
         GLM object.
-        Default is ``None``.
+        Default is ``adelie.glm.gaussian()``.
     sparsity : float, optional
         Proportion of :math:`\\beta` entries to be zeroed out.
         Default is ``0.95``.
@@ -374,7 +408,7 @@ def snp_phased_ancestry(
     penalty[np.random.choice(s, int(zero_penalty * s), replace=False)] = 0
     penalty /= np.linalg.norm(penalty) / np.sqrt(s * A)
 
-    beta = np.random.normal(0, 1, 2 * s)
+    beta = np.random.normal(0, 1, (2 * s, K))
     beta_nnz_indices = np.random.choice(2 * s, int((1-sparsity) * s * 2), replace=False)
     X_sub = X[:, beta_nnz_indices]
     beta_sub = beta[beta_nnz_indices]

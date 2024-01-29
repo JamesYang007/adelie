@@ -99,7 +99,7 @@ public:
         value_t v, 
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) const override
+    ) override
     {
         base_t::check_ctmul(j, weights.size(), out.size(), rows(), cols());
 
@@ -231,7 +231,7 @@ public:
         const Eigen::Ref<const vec_value_t>& sqrt_weights,
         Eigen::Ref<colmat_value_t> out,
         Eigen::Ref<colmat_value_t> buffer
-    ) const override
+    ) override
     {
         base_t::check_cov(
             j, q, sqrt_weights.size(), 
@@ -320,7 +320,7 @@ public:
         const sp_mat_value_t& v,
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
-    ) const override
+    ) override
     {
         base_t::check_sp_btmul(
             v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
@@ -344,27 +344,6 @@ public:
                         if (ancestry[i] != anc) continue;
                         out_k[inner[i]] += weights[inner[i]] * it.value();
                     }
-                }
-            }
-        }
-    }
-
-    void means(
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) const override
-    {
-        base_t::check_means(weights.size(), out.size(), rows(), cols());
-        out.setZero();
-
-        const auto A = ancestries();
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (uint32_t snp = 0; snp < _io.snps(); ++snp) {
-            for (int hap = 0; hap < 2; ++hap) {
-                const auto inner = _io.inner(snp, hap);
-                const auto ancestry = _io.ancestry(snp, hap);
-                for (int i = 0; i < inner.size(); ++i) {
-                    out[A * snp + ancestry[i]] += weights[inner[i]];
                 }
             }
         }

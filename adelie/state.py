@@ -574,7 +574,7 @@ class gaussian_pin_naive_base(gaussian_pin_base):
         n, p = X.rows(), X.cols()
         sqrt_weights = np.sqrt(self._weights)
         X_means = np.empty(p, dtype=dtype)
-        X.means(self._weights, X_means)
+        X.mul(self._weights, X_means)
 
         self._screen_vars = []
         self._screen_X_means = []
@@ -1251,6 +1251,21 @@ class gaussian_naive_base(gaussian_base):
             grad=grad,
         )
 
+        self.basic_check()
+
+    def basic_check(self):
+        n, p = self.X.rows(), self.X.cols()
+        G = self.groups.shape[0]
+        S = self.screen_set.shape[0]
+        assert p == self.X_means.shape[0]
+        assert n == self.resid.shape[0]
+        assert G <= p
+        assert G == self.group_sizes.shape[0]
+        assert G == self.penalty.shape[0]
+        assert n == self.weights.shape[0]
+        assert S == self.screen_is_active.shape[0]
+        assert p == self.grad.shape[0]
+
     def check(
         self,
         method: str =None, 
@@ -1807,6 +1822,8 @@ def gaussian_naive(
         max_screen_size = len(groups)
     if max_active_size is None:
         max_active_size = len(groups)
+    max_screen_size = np.minimum(max_screen_size, len(groups))
+    max_active_size = np.minimum(max_active_size, len(groups))
 
     if max_iters < 0:
         raise ValueError("max_iters must be >= 0.")
@@ -1843,9 +1860,6 @@ def gaussian_naive(
         len(lmda_path)
     )
 
-    max_screen_size = np.minimum(max_screen_size, len(groups))
-    max_active_size = np.minimum(max_active_size, len(groups))
-
     dtype = (
         np.float64
         if isinstance(X, matrix.MatrixNaiveBase64) else
@@ -1871,7 +1885,7 @@ def gaussian_naive(
             # this is to keep the API consistent with grpnet with non-trivial GLM object
             self.y = y
             self.offsets = offsets
-            self.glm = None
+            self.glm = glm.gaussian()
             gaussian_naive_base.default_init(
                 self,
                 core_base,
@@ -1888,7 +1902,7 @@ def gaussian_naive(
             obj._core_type = core_base
             obj.y = y
             obj.offsets = offsets
-            obj.glm = None
+            obj.glm = glm.gaussian()
             gaussian_naive_base.__init__(obj)
             return obj
 
@@ -1991,6 +2005,7 @@ class glm_naive_base:
         # static inputs require a reference to input
         # or copy if it must be made
         self._X = X
+        self._glm = glm
         # this is only needed for check()
         self._y = y
 
@@ -2053,6 +2068,23 @@ class glm_naive_base:
             eta=eta,
             mu=mu,
         )
+
+        self.basic_check()
+
+    def basic_check(self):
+        n, p = self.X.rows(), self.X.cols()
+        G = self.groups.shape[0]
+        S = self.screen_set.shape[0]
+        assert n == self.y.shape[0]
+        assert G <= p
+        assert G == self.group_sizes.shape[0]
+        assert G == self.penalty.shape[0]
+        assert n == self.weights.shape[0]
+        assert n == self.offsets.shape[0]
+        assert S == self.screen_is_active.shape[0]
+        assert p == self.grad.shape[0]
+        assert n == self.eta.shape[0]
+        assert n == self.mu.shape[0]
 
     # TODO: implement check()?
 
@@ -2279,6 +2311,8 @@ def glm_naive(
         max_screen_size = len(groups)
     if max_active_size is None:
         max_active_size = len(groups)
+    max_screen_size = np.minimum(max_screen_size, len(groups))
+    max_active_size = np.minimum(max_active_size, len(groups))
 
     if irls_max_iters < 0:
         raise ValueError("irls_max_iters must be >= 0.")
@@ -2318,9 +2352,6 @@ def glm_naive(
         if lmda_path is None else
         len(lmda_path)
     )
-
-    max_screen_size = np.minimum(max_screen_size, len(groups))
-    max_active_size = np.minimum(max_active_size, len(groups))
 
     dtype = (
         np.float64
