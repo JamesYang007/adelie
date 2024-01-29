@@ -109,6 +109,7 @@ adelie.matrix
     concatenate
     cov_lazy
     dense
+    kronecker_eye
     snp_phased_ancestry
     snp_unphased
 
