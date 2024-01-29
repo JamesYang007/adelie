@@ -75,6 +75,8 @@ adelie.glm
 
     binomial
     gaussian
+    multigaussian
+    multinomial
     poisson
 
 
