@@ -85,12 +85,14 @@ void glm_base(py::module_& m, const char* name)
         
         .. math::
             \begin{align*}
-                D(\eta) = -y^\top W \eta + \sum\limits_{i=1}^n W_{ii} A_i(\eta)
+                D(\eta) = \sum\limits_{i=1}^n w_{i} \left(
+                    -y_i \eta_i + A_i(\eta)
+                \right)
             \end{align*}
 
-        We define :math:`D(\eta)` as the *deviance* and :math:`A(\eta) := \sum_{i=1}^n W_{ii} A_i(\eta)`
+        We define :math:`D(\eta)` as the *deviance* and :math:`A(\eta) := \sum_{i=1}^n w_{i} A_i(\eta)`
         as the *log-partition function*.
-        Here, :math:`W \geq 0` is a diagonal matrix and :math:`A_i` are any convex functions.
+        Here, :math:`w \geq 0` and :math:`A_i` are any convex functions.
 
         The purpose of a GLM class is to define methods that evaluate key quantities regarding this model
         that are required for solving the group lasso problem.
