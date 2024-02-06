@@ -33,3 +33,31 @@ def test_search_pivot():
     test(1000, 24)
     test(234, 123)
     test(2, 239)
+
+
+def test_symmetric_penalty():
+    def compute_y(ts, x, alpha):
+        return np.sum(
+            0.5 * (1-alpha) * (x[:, None] - ts[None]) ** 2 + alpha * np.abs(x[:, None] - ts[None]),
+            axis=0
+        )
+
+    ts = np.linspace(-2, 2, 10000)
+
+    def test(
+        n=10,
+        seed=0,
+    ):
+        np.random.seed(seed)
+        x = np.sort(np.random.uniform(-1, 1, n))
+        alpha = np.random.uniform(0, 1)
+        t_star = opt.symmetric_penalty(x, alpha)
+        ys = compute_y(ts, x, alpha)
+        y_star = compute_y(np.array(t_star), x, alpha)
+        assert np.all(ys >= y_star)
+
+    ns = [3, 5, 10, 20]
+    seeds = np.arange(20)
+    for n in ns:
+        for seed in seeds:
+            test(n, seed)
