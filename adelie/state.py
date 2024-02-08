@@ -508,136 +508,6 @@ class gaussian_pin_base(base):
 
 class gaussian_pin_naive_base(gaussian_pin_base):
     """State wrapper base class for all gaussian pin naive method."""
-    def default_init(
-        self, 
-        base_type: Union[core.state.StateGaussianPinNaive64, core.state.StateGaussianPinNaive32],
-        *,
-        X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
-        y_mean: float,
-        y_var: float,
-        groups: np.ndarray,
-        group_sizes: np.ndarray,
-        alpha: float,
-        penalty: np.ndarray,
-        weights: np.ndarray,
-        screen_set: np.ndarray,
-        lmda_path: np.ndarray,
-        rsq: float,
-        resid: np.ndarray,
-        screen_beta: np.ndarray,
-        screen_is_active: np.ndarray,
-        intercept: bool,
-        max_active_size: int,
-        max_iters: int,
-        tol: float,
-        adev_tol: float,
-        ddev_tol: float,
-        newton_tol: float,
-        newton_max_iters: int,
-        n_threads: int,
-        dtype: Union[np.float32, np.float64],
-    ):
-        """Default initialization method.
-        """
-        ## save inputs due to lifetime issues
-        # static inputs require a reference to input
-        # or copy if it must be made
-        self._X = X
-
-        self._groups = np.array(groups, copy=False, dtype=int)
-        self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
-        self._penalty = np.array(penalty, copy=False, dtype=dtype)
-        self._weights = np.array(weights, copy=False, dtype=dtype)
-        self._screen_set = np.array(screen_set, copy=False, dtype=int)
-        self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
-
-        # dynamic inputs require a copy to not modify user's inputs
-        self._resid = np.copy(resid).astype(dtype)
-        self._screen_beta = np.copy(screen_beta).astype(dtype)
-        self._screen_is_active = np.copy(screen_is_active).astype(bool)
-
-        (
-            self._screen_g1,
-            self._screen_g2,
-            self._screen_begins,
-        ) = deduce_states(
-            group_sizes=group_sizes,
-            screen_set=screen_set,
-        )
-
-        max_active_size = (
-            len(self._groups)
-            if max_active_size is None else
-            np.minimum(max_active_size, len(self._groups))
-        )
-
-        n, p = X.rows(), X.cols()
-        sqrt_weights = np.sqrt(self._weights)
-        X_means = np.empty(p, dtype=dtype)
-        X.mul(self._weights, X_means)
-
-        self._screen_vars = []
-        self._screen_X_means = []
-        self._screen_transforms = []
-        for i in self._screen_set:
-            g, gs = groups[i], group_sizes[i]
-            XiTXi = np.empty((gs, gs), dtype=dtype, order="F")
-            buffer = np.empty((n, gs), dtype=dtype, order="F")
-            X.cov(g, gs, sqrt_weights, XiTXi, buffer)
-            Xi_means = X_means[g:g+gs]
-            if intercept:
-                XiTXi -= Xi_means[:, None] @ Xi_means[None]
-            vars, v = np.linalg.eigh(XiTXi)
-            self._screen_vars.append(np.maximum(vars, 0))
-            self._screen_X_means.append(Xi_means)
-            self._screen_transforms.append(np.array(v, copy=False, dtype=dtype, order="F"))
-        self._screen_vars = np.concatenate(self._screen_vars, dtype=dtype)
-        self._screen_X_means = np.concatenate(self._screen_X_means, dtype=dtype)
-        vecmat_type = (
-            core.VectorMatrix64
-            if dtype == np.float64 else
-            core.VectorMatrix32
-        )
-        self._screen_transforms = vecmat_type(self._screen_transforms)
-
-        resid_sum = np.sum(self._resid)
-
-        # MUST call constructor directly and not use super()!
-        # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
-        base_type.__init__(
-            self,
-            X=X,
-            y_mean=y_mean,
-            y_var=y_var,
-            groups=self._groups,
-            group_sizes=self._group_sizes,
-            alpha=alpha,
-            penalty=self._penalty,
-            weights=self._weights,
-            screen_set=self._screen_set,
-            screen_g1=self._screen_g1,
-            screen_g2=self._screen_g2,
-            screen_begins=self._screen_begins,
-            screen_vars=self._screen_vars,
-            screen_X_means=self._screen_X_means,
-            screen_transforms=self._screen_transforms,
-            lmda_path=self._lmda_path,
-            intercept=intercept,
-            max_active_size=max_active_size,
-            max_iters=max_iters,
-            tol=tol,
-            adev_tol=adev_tol,
-            ddev_tol=ddev_tol,
-            newton_tol=newton_tol,
-            newton_max_iters=newton_max_iters,
-            n_threads=n_threads,
-            rsq=rsq,
-            resid=self._resid,
-            resid_sum=resid_sum,
-            screen_beta=self._screen_beta,
-            screen_is_active=self._screen_is_active,
-        )
-
     def check(
         self, 
         method: str =None, 
@@ -792,14 +662,106 @@ def gaussian_pin_naive(
     core_base = dispatcher[dtype]
 
     class _gaussian_pin_naive(gaussian_pin_naive_base, core_base):
-        def __init__(self, *args, **kwargs):
+        def __init__(self):
             self._core_type = core_base
-            gaussian_pin_naive_base.default_init(
+
+            ## save inputs due to lifetime issues
+            # static inputs require a reference to input
+            # or copy if it must be made
+            self._X = X
+
+            self._groups = np.array(groups, copy=False, dtype=int)
+            self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
+            self._penalty = np.array(penalty, copy=False, dtype=dtype)
+            self._weights = np.array(weights, copy=False, dtype=dtype)
+            self._screen_set = np.array(screen_set, copy=False, dtype=int)
+            self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
+
+            # dynamic inputs require a copy to not modify user's inputs
+            self._resid = np.copy(resid).astype(dtype)
+            self._screen_beta = np.copy(screen_beta).astype(dtype)
+            self._screen_is_active = np.copy(screen_is_active).astype(bool)
+
+            (
+                self._screen_g1,
+                self._screen_g2,
+                self._screen_begins,
+            ) = deduce_states(
+                group_sizes=group_sizes,
+                screen_set=screen_set,
+            )
+
+            self._max_active_size = (
+                len(self._groups)
+                if max_active_size is None else
+                np.minimum(max_active_size, len(self._groups))
+            )
+
+            n, p = X.rows(), X.cols()
+            sqrt_weights = np.sqrt(self._weights)
+            X_means = np.empty(p, dtype=dtype)
+            X.mul(self._weights, X_means)
+
+            self._screen_vars = []
+            self._screen_X_means = []
+            self._screen_transforms = []
+            for i in self._screen_set:
+                g, gs = groups[i], group_sizes[i]
+                XiTXi = np.empty((gs, gs), dtype=dtype, order="F")
+                buffer = np.empty((n, gs), dtype=dtype, order="F")
+                X.cov(g, gs, sqrt_weights, XiTXi, buffer)
+                Xi_means = X_means[g:g+gs]
+                if intercept:
+                    XiTXi -= Xi_means[:, None] @ Xi_means[None]
+                vars, v = np.linalg.eigh(XiTXi)
+                self._screen_vars.append(np.maximum(vars, 0))
+                self._screen_X_means.append(Xi_means)
+                self._screen_transforms.append(np.array(v, copy=False, dtype=dtype, order="F"))
+            self._screen_vars = np.concatenate(self._screen_vars, dtype=dtype)
+            self._screen_X_means = np.concatenate(self._screen_X_means, dtype=dtype)
+            vecmat_type = (
+                core.VectorMatrix64
+                if dtype == np.float64 else
+                core.VectorMatrix32
+            )
+            self._screen_transforms = vecmat_type(self._screen_transforms)
+
+            resid_sum = np.sum(self._resid)
+
+            # MUST call constructor directly and not use super()!
+            # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
+            core_base.__init__(
                 self,
-                core_base,
-                *args,
-                dtype=dtype,
-                **kwargs,
+                X=X,
+                y_mean=y_mean,
+                y_var=y_var,
+                groups=self._groups,
+                group_sizes=self._group_sizes,
+                alpha=alpha,
+                penalty=self._penalty,
+                weights=self._weights,
+                screen_set=self._screen_set,
+                screen_g1=self._screen_g1,
+                screen_g2=self._screen_g2,
+                screen_begins=self._screen_begins,
+                screen_vars=self._screen_vars,
+                screen_X_means=self._screen_X_means,
+                screen_transforms=self._screen_transforms,
+                lmda_path=self._lmda_path,
+                intercept=intercept,
+                max_active_size=self._max_active_size,
+                max_iters=max_iters,
+                tol=tol,
+                adev_tol=adev_tol,
+                ddev_tol=ddev_tol,
+                newton_tol=newton_tol,
+                newton_max_iters=newton_max_iters,
+                n_threads=n_threads,
+                rsq=rsq,
+                resid=self._resid,
+                resid_sum=resid_sum,
+                screen_beta=self._screen_beta,
+                screen_is_active=self._screen_is_active,
             )
 
         @classmethod
@@ -812,139 +774,11 @@ def gaussian_pin_naive(
             return obj
 
 
-    return _gaussian_pin_naive(
-        X=X,
-        y_mean=y_mean,
-        y_var=y_var,
-        groups=groups,
-        group_sizes=group_sizes,
-        alpha=alpha,
-        penalty=penalty,
-        weights=weights,
-        screen_set=screen_set,
-        lmda_path=lmda_path,
-        rsq=rsq,
-        resid=resid,
-        screen_beta=screen_beta,
-        screen_is_active=screen_is_active,
-        intercept=intercept,
-        max_active_size=max_active_size,
-        max_iters=max_iters,
-        tol=tol,
-        adev_tol=adev_tol,
-        ddev_tol=ddev_tol,
-        newton_tol=newton_tol,
-        newton_max_iters=newton_max_iters,
-        n_threads=n_threads,
-    )
+    return _gaussian_pin_naive()
 
 
 class gaussian_pin_cov_base(gaussian_pin_base):
     """State wrapper base class for all pin, covariance method."""
-    def default_init(
-        self, 
-        base_type: Union[core.state.StateGaussianPinCov64, core.state.StateGaussianPinCov32],
-        *,
-        A: Union[matrix.MatrixCovBase64, matrix.MatrixCovBase32],
-        y_var: float,
-        groups: np.ndarray,
-        group_sizes: np.ndarray,
-        alpha: float,
-        penalty: np.ndarray,
-        screen_set: np.ndarray,
-        lmda_path: np.ndarray,
-        rsq: float,
-        screen_beta: np.ndarray,
-        screen_grad: np.ndarray,
-        screen_is_active: np.ndarray,
-        max_active_size: int,
-        max_iters: int,
-        tol: float,
-        adev_tol: float,
-        ddev_tol: float,
-        newton_tol: float,
-        newton_max_iters: int,
-        n_threads: int,
-        dtype: Union[np.float32, np.float64],
-    ):
-        """Default initialization method.
-        """
-        ## save inputs due to lifetime issues
-        # static inputs require a reference to input
-        # or copy if it must be made
-        self._A = A
-
-        self._groups = np.array(groups, copy=False, dtype=int)
-        self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
-        self._penalty = np.array(penalty, copy=False, dtype=dtype)
-        self._screen_set = np.array(screen_set, copy=False, dtype=int)
-        self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
-
-        # dynamic inputs require a copy to not modify user's inputs
-        self._screen_beta = np.copy(screen_beta).astype(dtype)
-        self._screen_grad = np.copy(screen_grad).astype(dtype)
-        self._screen_is_active = np.copy(screen_is_active).astype(bool)
-
-        (
-            self._screen_g1,
-            self._screen_g2,
-            self._screen_begins,
-        ) = deduce_states(
-            group_sizes=group_sizes,
-            screen_set=screen_set,
-        )
-
-        max_active_size = (
-            len(self._groups)
-            if max_active_size is None else
-            np.minimum(max_active_size, len(self._groups))
-        )
-
-        self._screen_vars = []
-        self._screen_transforms = []
-        for i in self._screen_set:
-            g, gs = groups[i], group_sizes[i]
-            Aii = np.empty((gs, gs), dtype=dtype, order="F")
-            A.to_dense(g, g, gs, gs, Aii)  
-            dsq, v = np.linalg.eigh(Aii)
-            self._screen_vars.append(np.maximum(dsq, 0))
-            self._screen_transforms.append(v)
-        self._screen_vars = np.concatenate(self._screen_vars, dtype=dtype)
-        vecmat_type = (
-            core.VectorMatrix64
-            if dtype == np.float64 else
-            core.VectorMatrix32
-        )
-        self._screen_transforms = vecmat_type(self._screen_transforms)
-
-        base_type.__init__(
-            self,
-            A=A,
-            y_var=y_var,
-            groups=self._groups,
-            group_sizes=self._group_sizes,
-            alpha=alpha,
-            penalty=self._penalty,
-            screen_set=self._screen_set,
-            screen_g1=self._screen_g1,
-            screen_g2=self._screen_g2,
-            screen_begins=self._screen_begins,
-            screen_vars=self._screen_vars,
-            screen_transforms=self._screen_transforms,
-            lmda_path=self._lmda_path,
-            max_active_size=max_active_size,
-            max_iters=max_iters,
-            tol=tol,
-            adev_tol=adev_tol,
-            ddev_tol=ddev_tol,
-            newton_tol=newton_tol,
-            newton_max_iters=newton_max_iters,
-            n_threads=n_threads,
-            rsq=rsq,
-            screen_beta=self._screen_beta,
-            screen_grad=self._screen_grad,
-            screen_is_active=self._screen_is_active,
-        )
 
     def check(
         self, 
@@ -1096,14 +930,84 @@ def gaussian_pin_cov(
     core_base = dispatcher[dtype]
 
     class _gaussian_pin_cov(gaussian_pin_cov_base, core_base):
-        def __init__(self, *args, **kwargs):
+        def __init__(self):
             self._core_type = core_base
-            gaussian_pin_cov_base.default_init(
+
+            ## save inputs due to lifetime issues
+            # static inputs require a reference to input
+            # or copy if it must be made
+            self._A = A
+
+            self._groups = np.array(groups, copy=False, dtype=int)
+            self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
+            self._penalty = np.array(penalty, copy=False, dtype=dtype)
+            self._screen_set = np.array(screen_set, copy=False, dtype=int)
+            self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
+
+            # dynamic inputs require a copy to not modify user's inputs
+            self._screen_beta = np.copy(screen_beta).astype(dtype)
+            self._screen_grad = np.copy(screen_grad).astype(dtype)
+            self._screen_is_active = np.copy(screen_is_active).astype(bool)
+
+            (
+                self._screen_g1,
+                self._screen_g2,
+                self._screen_begins,
+            ) = deduce_states(
+                group_sizes=group_sizes,
+                screen_set=screen_set,
+            )
+
+            self._max_active_size = (
+                len(self._groups)
+                if max_active_size is None else
+                np.minimum(max_active_size, len(self._groups))
+            )
+
+            self._screen_vars = []
+            self._screen_transforms = []
+            for i in self._screen_set:
+                g, gs = groups[i], group_sizes[i]
+                Aii = np.empty((gs, gs), dtype=dtype, order="F")
+                A.to_dense(g, g, gs, gs, Aii)  
+                dsq, v = np.linalg.eigh(Aii)
+                self._screen_vars.append(np.maximum(dsq, 0))
+                self._screen_transforms.append(v)
+            self._screen_vars = np.concatenate(self._screen_vars, dtype=dtype)
+            vecmat_type = (
+                core.VectorMatrix64
+                if dtype == np.float64 else
+                core.VectorMatrix32
+            )
+            self._screen_transforms = vecmat_type(self._screen_transforms)
+
+            core_base.__init__(
                 self,
-                core_base,
-                *args,
-                dtype=dtype,
-                **kwargs,
+                A=A,
+                y_var=y_var,
+                groups=self._groups,
+                group_sizes=self._group_sizes,
+                alpha=alpha,
+                penalty=self._penalty,
+                screen_set=self._screen_set,
+                screen_g1=self._screen_g1,
+                screen_g2=self._screen_g2,
+                screen_begins=self._screen_begins,
+                screen_vars=self._screen_vars,
+                screen_transforms=self._screen_transforms,
+                lmda_path=self._lmda_path,
+                max_active_size=self._max_active_size,
+                max_iters=max_iters,
+                tol=tol,
+                adev_tol=adev_tol,
+                ddev_tol=ddev_tol,
+                newton_tol=newton_tol,
+                newton_max_iters=newton_max_iters,
+                n_threads=n_threads,
+                rsq=rsq,
+                screen_beta=self._screen_beta,
+                screen_grad=self._screen_grad,
+                screen_is_active=self._screen_is_active,
             )
 
         @classmethod
@@ -1115,28 +1019,7 @@ def gaussian_pin_cov(
             gaussian_pin_cov_base.__init__(obj)
             return obj
 
-    return _gaussian_pin_cov(
-        A=A,
-        y_var=y_var,
-        groups=groups,
-        group_sizes=group_sizes,
-        alpha=alpha,
-        penalty=penalty,
-        screen_set=screen_set,
-        lmda_path=lmda_path,
-        rsq=rsq,
-        screen_beta=screen_beta,
-        screen_grad=screen_grad,
-        screen_is_active=screen_is_active,
-        max_active_size=max_active_size,
-        max_iters=max_iters,
-        tol=tol,
-        adev_tol=adev_tol,
-        ddev_tol=ddev_tol,
-        newton_tol=newton_tol,
-        newton_max_iters=newton_max_iters,
-        n_threads=n_threads,
-    )
+    return _gaussian_pin_cov()
 
 
 class gaussian_base(base):
@@ -1145,114 +1028,6 @@ class gaussian_base(base):
 
 class gaussian_naive_base(gaussian_base):
     """State wrapper base class for all gaussian naive method."""
-    def default_init(
-        self, 
-        base_type: Union[core.state.StateGaussianNaive64, core.state.StateGaussianNaive32],
-        *,
-        X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
-        X_means: np.ndarray,
-        y_mean: float,
-        y_var: float,
-        resid: np.ndarray,
-        resid_sum: float,
-        groups: np.ndarray,
-        group_sizes: np.ndarray,
-        alpha: float,
-        penalty: np.ndarray,
-        weights: np.ndarray,
-        lmda_path: np.ndarray,
-        lmda_max: float,
-        min_ratio: float,
-        lmda_path_size: int,
-        max_screen_size: int,
-        max_active_size: int,
-        pivot_subset_ratio: float,
-        pivot_subset_min: int,
-        pivot_slack_ratio: float,
-        screen_rule: str,
-        max_iters: int,
-        tol: float,
-        adev_tol: float,
-        ddev_tol: float,
-        newton_tol: float,
-        newton_max_iters: int,
-        early_exit: bool,
-        setup_lmda_max: bool,
-        setup_lmda_path: bool,
-        intercept: bool,
-        n_threads: int,
-        screen_set: np.ndarray,
-        screen_beta: np.ndarray,
-        screen_is_active: np.ndarray,
-        rsq: float,
-        lmda: float,
-        grad: np.ndarray,
-        dtype: Union[np.float32, np.float64],
-    ):
-        """Default initialization method.
-        """
-        ## save inputs due to lifetime issues
-        # static inputs require a reference to input
-        # or copy if it must be made
-        self._X = X
-
-        self._X_means = np.array(X_means, copy=False, dtype=dtype)
-        self._groups = np.array(groups, copy=False, dtype=int)
-        self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
-        self._penalty = np.array(penalty, copy=False, dtype=dtype)
-        self._weights = np.array(weights, copy=False, dtype=dtype)
-        self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
-        screen_set = np.array(screen_set, copy=False, dtype=int)
-        screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
-        screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-        grad = np.array(grad, copy=False, dtype=dtype)
-
-        # MUST call constructor directly and not use super()!
-        # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
-        base_type.__init__(
-            self,
-            X=X,
-            X_means=self._X_means,
-            y_mean=y_mean,
-            y_var=y_var,
-            resid=resid,
-            resid_sum=resid_sum,
-            groups=self._groups,
-            group_sizes=self._group_sizes,
-            alpha=alpha,
-            penalty=self._penalty,
-            weights=self._weights,
-            lmda_path=self._lmda_path,
-            lmda_max=lmda_max,
-            min_ratio=min_ratio,
-            lmda_path_size=lmda_path_size,
-            max_screen_size=max_screen_size,
-            max_active_size=max_active_size,
-            pivot_subset_ratio=pivot_subset_ratio,
-            pivot_subset_min=pivot_subset_min,
-            pivot_slack_ratio=pivot_slack_ratio,
-            screen_rule=screen_rule,
-            max_iters=max_iters,
-            tol=tol,
-            adev_tol=adev_tol,
-            ddev_tol=ddev_tol,
-            newton_tol=newton_tol,
-            newton_max_iters=newton_max_iters,
-            early_exit=early_exit,
-            setup_lmda_max=setup_lmda_max,
-            setup_lmda_path=setup_lmda_path,
-            intercept=intercept,
-            n_threads=n_threads,
-            screen_set=screen_set,
-            screen_beta=screen_beta,
-            screen_is_active=screen_is_active,
-            rsq=rsq,
-            lmda=lmda,
-            grad=grad,
-        )
-
-        self.basic_check()
-
     def basic_check(self):
         n, p = self.X.rows(), self.X.cols()
         G = self.groups.shape[0]
@@ -1880,19 +1655,73 @@ def gaussian_naive(
     if setup_lmda_path: lmda_path = np.empty(0, dtype=dtype)
 
     class _gaussian_naive(gaussian_naive_base, core_base):
-        def __init__(self, *args, **kwargs):
+        def __init__(self):
             self._core_type = core_base
             # this is to keep the API consistent with grpnet with non-trivial GLM object
             self.y = y
             self.offsets = offsets
             self.glm = glm.gaussian()
-            gaussian_naive_base.default_init(
+
+            ## save inputs due to lifetime issues
+            # static inputs require a reference to input
+            # or copy if it must be made
+            self._X = X
+
+            self._X_means = np.array(X_means, copy=False, dtype=dtype)
+            self._groups = np.array(groups, copy=False, dtype=int)
+            self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
+            self._penalty = np.array(penalty, copy=False, dtype=dtype)
+            self._weights = np.array(weights, copy=False, dtype=dtype)
+            self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
+            self._screen_set = np.array(screen_set, copy=False, dtype=int)
+            self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
+            self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
+            self._grad = np.array(grad, copy=False, dtype=dtype)
+
+            # MUST call constructor directly and not use super()!
+            # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
+            core_base.__init__(
                 self,
-                core_base,
-                *args,
-                dtype=dtype,
-                **kwargs,
+                X=X,
+                X_means=self._X_means,
+                y_mean=y_mean,
+                y_var=y_var,
+                resid=resid,
+                resid_sum=resid_sum,
+                groups=self._groups,
+                group_sizes=self._group_sizes,
+                alpha=alpha,
+                penalty=self._penalty,
+                weights=self._weights,
+                lmda_path=self._lmda_path,
+                lmda_max=lmda_max,
+                min_ratio=min_ratio,
+                lmda_path_size=lmda_path_size,
+                max_screen_size=max_screen_size,
+                max_active_size=max_active_size,
+                pivot_subset_ratio=pivot_subset_ratio,
+                pivot_subset_min=pivot_subset_min,
+                pivot_slack_ratio=pivot_slack_ratio,
+                screen_rule=screen_rule,
+                max_iters=max_iters,
+                tol=tol,
+                adev_tol=adev_tol,
+                ddev_tol=ddev_tol,
+                newton_tol=newton_tol,
+                newton_max_iters=newton_max_iters,
+                early_exit=early_exit,
+                setup_lmda_max=setup_lmda_max,
+                setup_lmda_path=setup_lmda_path,
+                intercept=intercept,
+                n_threads=n_threads,
+                screen_set=self._screen_set,
+                screen_beta=self._screen_beta,
+                screen_is_active=self._screen_is_active,
+                rsq=rsq,
+                lmda=lmda,
+                grad=self._grad,
             )
+            self.basic_check()
 
         @classmethod
         def create_from_core(cls, state, core_state):
@@ -1906,171 +1735,11 @@ def gaussian_naive(
             gaussian_naive_base.__init__(obj)
             return obj
 
-    return _gaussian_naive(
-        X=X,
-        X_means=X_means,
-        y_mean=y_mean,
-        y_var=y_var,
-        resid=resid,
-        resid_sum=resid_sum,
-        groups=groups,
-        group_sizes=group_sizes,
-        alpha=alpha,
-        penalty=penalty,
-        weights=weights,
-        lmda_path=lmda_path,
-        lmda_max=lmda_max,
-        setup_lmda_max=setup_lmda_max,
-        setup_lmda_path=setup_lmda_path,
-        max_screen_size=max_screen_size,
-        max_active_size=max_active_size,
-        pivot_subset_ratio=pivot_subset_ratio,
-        pivot_subset_min=pivot_subset_min,
-        pivot_slack_ratio=pivot_slack_ratio,
-        screen_rule=screen_rule,
-        max_iters=max_iters,
-        tol=tol,
-        adev_tol=adev_tol,
-        ddev_tol=ddev_tol,
-        newton_tol=newton_tol,
-        newton_max_iters=newton_max_iters,
-        early_exit=early_exit,
-        min_ratio=min_ratio,
-        lmda_path_size=lmda_path_size,
-        intercept=intercept,
-        n_threads=n_threads,
-        screen_set=screen_set,
-        screen_beta=screen_beta,
-        screen_is_active=screen_is_active,
-        rsq=rsq,
-        lmda=lmda,
-        grad=grad,
-    )
+    return _gaussian_naive()
 
 
 class glm_naive_base:
     """State wrapper base class for all glm naive method."""
-    def default_init(
-        self, 
-        base_type: Union[core.state.StateGlmNaive64, core.state.StateGlmNaive32],
-        *,
-        glm: Union[glm.GlmBase64, glm.GlmBase32],
-        X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
-        y: np.ndarray,
-        groups: np.ndarray,
-        group_sizes: np.ndarray,
-        alpha: float,
-        penalty: np.ndarray,
-        weights: np.ndarray,
-        offsets: np.ndarray,
-        lmda_path: np.ndarray,
-        dev_null: float,
-        dev_full: float,
-        lmda_max: float,
-        min_ratio: float,
-        lmda_path_size: int,
-        max_screen_size: int,
-        max_active_size: int,
-        pivot_subset_ratio: float,
-        pivot_subset_min: int,
-        pivot_slack_ratio: float,
-        screen_rule: str,
-        irls_max_iters: int,
-        irls_tol: float,
-        max_iters: int,
-        tol: float,
-        adev_tol: float,
-        ddev_tol: float,
-        newton_tol: float,
-        newton_max_iters: int,
-        early_exit: bool,
-        setup_dev_null: bool,
-        setup_lmda_max: bool,
-        setup_lmda_path: bool,
-        intercept: bool,
-        n_threads: int,
-        screen_set: np.ndarray,
-        screen_beta: np.ndarray,
-        screen_is_active: np.ndarray,
-        beta0: float,
-        lmda: float,
-        grad: np.ndarray,
-        eta: np.ndarray,
-        mu: np.ndarray,
-        dtype: Union[np.float32, np.float64],
-    ):
-        """Default initialization method.
-        """
-        ## save inputs due to lifetime issues
-        # static inputs require a reference to input
-        # or copy if it must be made
-        self._X = X
-        self._glm = glm
-        # this is only needed for check()
-        self._y = y
-
-        self._groups = np.array(groups, copy=False, dtype=int)
-        self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
-        self._penalty = np.array(penalty, copy=False, dtype=dtype)
-        self._weights = np.array(weights, copy=False, dtype=dtype)
-        self._offsets = np.array(offsets, copy=False, dtype=dtype)
-        self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
-        screen_set = np.array(screen_set, copy=False, dtype=int)
-        screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
-        screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-        grad = np.array(grad, copy=False, dtype=dtype)
-
-        # MUST call constructor directly and not use super()!
-        # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
-        base_type.__init__(
-            self,
-            glm=glm,
-            X=X,
-            y=y,
-            groups=self._groups,
-            group_sizes=self._group_sizes,
-            alpha=alpha,
-            penalty=self._penalty,
-            weights=self._weights,
-            offsets=self._offsets,
-            lmda_path=self._lmda_path,
-            dev_null=dev_null,
-            dev_full=dev_full,
-            lmda_max=lmda_max,
-            min_ratio=min_ratio,
-            lmda_path_size=lmda_path_size,
-            max_screen_size=max_screen_size,
-            max_active_size=max_active_size,
-            pivot_subset_ratio=pivot_subset_ratio,
-            pivot_subset_min=pivot_subset_min,
-            pivot_slack_ratio=pivot_slack_ratio,
-            screen_rule=screen_rule,
-            irls_max_iters=irls_max_iters,
-            irls_tol=irls_tol,
-            max_iters=max_iters,
-            tol=tol,
-            adev_tol=adev_tol,
-            ddev_tol=ddev_tol,
-            newton_tol=newton_tol,
-            newton_max_iters=newton_max_iters,
-            early_exit=early_exit,
-            setup_dev_null=setup_dev_null,
-            setup_lmda_max=setup_lmda_max,
-            setup_lmda_path=setup_lmda_path,
-            intercept=intercept,
-            n_threads=n_threads,
-            screen_set=screen_set,
-            screen_beta=screen_beta,
-            screen_is_active=screen_is_active,
-            beta0=beta0,
-            lmda=lmda,
-            grad=grad,
-            eta=eta,
-            mu=mu,
-        )
-
-        self.basic_check()
-
     def basic_check(self):
         n, p = self.X.rows(), self.X.cols()
         G = self.groups.shape[0]
@@ -2375,15 +2044,76 @@ def glm_naive(
     if setup_lmda_path: lmda_path = np.empty(0, dtype=dtype)
 
     class _glm_naive(glm_naive_base, core_base):
-        def __init__(self, *args, **kwargs):
+        def __init__(self):
             self._core_type = core_base
-            glm_naive_base.default_init(
+            ## save inputs due to lifetime issues
+            # static inputs require a reference to input
+            # or copy if it must be made
+            self._X = X
+            self._glm = glm
+            # this is only needed for check()
+            self._y = y
+
+            self._groups = np.array(groups, copy=False, dtype=int)
+            self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
+            self._penalty = np.array(penalty, copy=False, dtype=dtype)
+            self._weights = np.array(weights, copy=False, dtype=dtype)
+            self._offsets = np.array(offsets, copy=False, dtype=dtype)
+            self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
+            self._screen_set = np.array(screen_set, copy=False, dtype=int)
+            self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
+            self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
+            self._grad = np.array(grad, copy=False, dtype=dtype)
+
+            # MUST call constructor directly and not use super()!
+            # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
+            core_base.__init__(
                 self,
-                core_base,
-                *args,
-                dtype=dtype,
-                **kwargs,
+                glm=glm,
+                X=X,
+                y=y,
+                groups=self._groups,
+                group_sizes=self._group_sizes,
+                alpha=alpha,
+                penalty=self._penalty,
+                weights=self._weights,
+                offsets=self._offsets,
+                lmda_path=self._lmda_path,
+                dev_null=dev_null,
+                dev_full=dev_full,
+                lmda_max=lmda_max,
+                min_ratio=min_ratio,
+                lmda_path_size=lmda_path_size,
+                max_screen_size=max_screen_size,
+                max_active_size=max_active_size,
+                pivot_subset_ratio=pivot_subset_ratio,
+                pivot_subset_min=pivot_subset_min,
+                pivot_slack_ratio=pivot_slack_ratio,
+                screen_rule=screen_rule,
+                irls_max_iters=irls_max_iters,
+                irls_tol=irls_tol,
+                max_iters=max_iters,
+                tol=tol,
+                adev_tol=adev_tol,
+                ddev_tol=ddev_tol,
+                newton_tol=newton_tol,
+                newton_max_iters=newton_max_iters,
+                early_exit=early_exit,
+                setup_dev_null=setup_dev_null,
+                setup_lmda_max=setup_lmda_max,
+                setup_lmda_path=setup_lmda_path,
+                intercept=intercept,
+                n_threads=n_threads,
+                screen_set=self._screen_set,
+                screen_beta=self._screen_beta,
+                screen_is_active=self._screen_is_active,
+                beta0=beta0,
+                lmda=lmda,
+                grad=self._grad,
+                eta=eta,
+                mu=mu,
             )
+            self.basic_check()
 
         @classmethod
         def create_from_core(cls, state, core_state):
@@ -2394,48 +2124,4 @@ def glm_naive(
             glm_naive_base.__init__(obj)
             return obj
 
-    return _glm_naive(
-        glm=glm,
-        X=X,
-        y=y,
-        groups=groups,
-        group_sizes=group_sizes,
-        alpha=alpha,
-        penalty=penalty,
-        weights=weights,
-        offsets=offsets,
-        lmda_path=lmda_path,
-        dev_null=dev_null,
-        dev_full=dev_full,
-        lmda_max=lmda_max,
-        setup_dev_null=setup_dev_null,
-        setup_lmda_max=setup_lmda_max,
-        setup_lmda_path=setup_lmda_path,
-        max_screen_size=max_screen_size,
-        max_active_size=max_active_size,
-        pivot_subset_ratio=pivot_subset_ratio,
-        pivot_subset_min=pivot_subset_min,
-        pivot_slack_ratio=pivot_slack_ratio,
-        screen_rule=screen_rule,
-        irls_max_iters=irls_max_iters,
-        irls_tol=irls_tol,
-        max_iters=max_iters,
-        tol=tol,
-        adev_tol=adev_tol,
-        ddev_tol=ddev_tol,
-        newton_tol=newton_tol,
-        newton_max_iters=newton_max_iters,
-        early_exit=early_exit,
-        min_ratio=min_ratio,
-        lmda_path_size=lmda_path_size,
-        intercept=intercept,
-        n_threads=n_threads,
-        screen_set=screen_set,
-        screen_beta=screen_beta,
-        screen_is_active=screen_is_active,
-        beta0=beta0,
-        lmda=lmda,
-        grad=grad,
-        eta=eta,
-        mu=mu,
-    )
+    return _glm_naive()
