@@ -6,13 +6,13 @@
 #include <adelie_core/state/state_gaussian_pin_cov.hpp>
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
 #include <adelie_core/state/state_glm_naive.hpp>
-#include <adelie_core/state/state_multi_gaussian_naive.hpp>
+#include <adelie_core/state/state_multigaussian_naive.hpp>
 #include <adelie_core/solver/solver_gaussian_naive.hpp>
 #include <adelie_core/solver/solver_gaussian_pin_cov.hpp>
 #include <adelie_core/solver/solver_gaussian_pin_naive.hpp>
 #include <adelie_core/solver/solver_gaussian_pin_naive.hpp>
 #include <adelie_core/solver/solver_glm_naive.hpp>
-#include <adelie_core/solver/solver_multi_gaussian_naive.hpp>
+#include <adelie_core/solver/solver_multigaussian_naive.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -154,7 +154,7 @@ py::dict solve_gaussian_naive(
 } 
 
 template <class StateType>
-py::dict solve_multi_gaussian_naive(
+py::dict solve_multigaussian_naive(
     StateType state,
     bool display_progress_bar
 )
@@ -266,7 +266,7 @@ using state_gaussian_pin_cov_t = ad::state::StateGaussianPinCov<ad::matrix::Matr
 template <class T> 
 using state_gaussian_naive_t = ad::state::StateGaussianNaive<ad::matrix::MatrixNaiveBase<T>>;
 template <class T> 
-using state_multi_gaussian_naive_t = ad::state::StateMultiGaussianNaive<ad::matrix::MatrixNaiveBase<T>>;
+using state_multigaussian_naive_t = ad::state::StateMultiGaussianNaive<ad::matrix::MatrixNaiveBase<T>>;
 template <class T> 
 using state_glm_naive_t = ad::state::StateGlmNaive<
     ad::glm::GlmBase<T>,
@@ -284,8 +284,8 @@ void register_solver(py::module_& m)
     /* solve gaussian method */
     m.def("solve_gaussian_naive_64", &solve_gaussian_naive<state_gaussian_naive_t<double>>);
     m.def("solve_gaussian_naive_32", &solve_gaussian_naive<state_gaussian_naive_t<float>>);
-    m.def("solve_multi_gaussian_naive_64", &solve_multi_gaussian_naive<state_multi_gaussian_naive_t<double>>);
-    m.def("solve_multi_gaussian_naive_32", &solve_multi_gaussian_naive<state_multi_gaussian_naive_t<float>>);
+    m.def("solve_multigaussian_naive_64", &solve_multigaussian_naive<state_multigaussian_naive_t<double>>);
+    m.def("solve_multigaussian_naive_32", &solve_multigaussian_naive<state_multigaussian_naive_t<float>>);
     m.def("solve_glm_naive_64", &solve_glm_naive<state_glm_naive_t<double>>);
     m.def("solve_glm_naive_32", &solve_glm_naive<state_glm_naive_t<float>>);
 }

@@ -13,7 +13,7 @@ public:
     using typename base_t::vec_value_t;
 
     explicit GlmBinomial():
-        base_t("binomial", false)
+        base_t("binomial")
     {}
 
     void gradient(

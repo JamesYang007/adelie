@@ -1,6 +1,6 @@
 #pragma once
 #include <adelie_core/state/state_gaussian_naive.hpp>
-#include <adelie_core/state/state_multi_gaussian_naive.hpp>
+#include <adelie_core/state/state_multigaussian_naive.hpp>
 #include <adelie_core/solver/solver_gaussian_naive.hpp>
 #include <adelie_core/util/functional.hpp>
 #include <memory>

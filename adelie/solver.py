@@ -191,8 +191,8 @@ def solve_gaussian(state, progress_bar: bool =False):
     f_dict = {
         core.state.StateGaussianNaive64: core.solver.solve_gaussian_naive_64,
         core.state.StateGaussianNaive32: core.solver.solve_gaussian_naive_32,
-        core.state.StateMultiGaussianNaive64: core.solver.solve_multi_gaussian_naive_64,
-        core.state.StateMultiGaussianNaive32: core.solver.solve_multi_gaussian_naive_32,
+        core.state.StateMultiGaussianNaive64: core.solver.solve_multigaussian_naive_64,
+        core.state.StateMultiGaussianNaive32: core.solver.solve_multigaussian_naive_32,
     }
 
     # solve group elastic net
@@ -693,7 +693,7 @@ def grpnet(
         solver_args["screen_beta"] = screen_beta
         solver_args["screen_is_active"] = screen_is_active
 
-        state = ad.state.multi_gaussian_naive(**solver_args)
+        state = ad.state.multigaussian_naive(**solver_args)
 
     else:
         if groups is None:

@@ -1736,7 +1736,7 @@ def gaussian_naive(
     return _gaussian_naive()
 
 
-def multi_gaussian_naive(
+def multigaussian_naive(
     *,
     X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
     y: np.ndarray,
@@ -2024,7 +2024,7 @@ def multi_gaussian_naive(
         ], method="naive", n_threads=n_threads)
     assert X_means.shape[0] == X.cols(), "X_means must have the same length as the number of columns of X after reshaping."
 
-    class _multi_gaussian_naive(gaussian_naive_base, core_base):
+    class _multigaussian_naive(gaussian_naive_base, core_base):
         def __init__(self):
             self._core_type = core_base
             # this is to keep the API consistent with grpnet with non-trivial GLM object
@@ -2100,12 +2100,12 @@ def multi_gaussian_naive(
         @classmethod
         def create_from_core(cls, state, core_state):
             obj = base.create_from_core(
-                cls, state, core_state, _multi_gaussian_naive, core_base,
+                cls, state, core_state, _multigaussian_naive, core_base,
             )
             gaussian_naive_base.__init__(obj)
             return obj
 
-    return _multi_gaussian_naive()
+    return _multigaussian_naive()
 
 
 class glm_naive_base:

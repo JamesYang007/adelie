@@ -6,7 +6,7 @@
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
 #include <adelie_core/state/state_glm_naive.hpp>
-#include <adelie_core/state/state_multi_gaussian_naive.hpp>
+#include <adelie_core/state/state_multigaussian_naive.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -1052,7 +1052,7 @@ public:
 };
 
 template <class MatrixType>
-void state_multi_gaussian_naive(py::module_& m, const char* name)
+void state_multigaussian_naive(py::module_& m, const char* name)
 {
     using matrix_t = MatrixType;
     using state_t = ad::state::StateMultiGaussianNaive<matrix_t>;
@@ -1705,8 +1705,8 @@ void register_state(py::module_& m)
     state_gaussian_base<float>(m, "StateGaussianBase32");
     state_gaussian_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateGaussianNaive64");
     state_gaussian_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateGaussianNaive32");
-    state_multi_gaussian_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateMultiGaussianNaive64");
-    state_multi_gaussian_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateMultiGaussianNaive32");
+    state_multigaussian_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateMultiGaussianNaive64");
+    state_multigaussian_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateMultiGaussianNaive32");
     state_glm_base<ad::glm::GlmBase<double>>(m, "StateGlmBase64");
     state_glm_base<ad::glm::GlmBase<float>>(m, "StateGlmBase32");
     state_glm_naive<
