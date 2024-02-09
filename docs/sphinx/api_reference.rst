@@ -129,6 +129,7 @@ adelie.state
     gaussian_pin_cov
     gaussian_pin_naive
     glm_naive
+    multi_gaussian_naive
 
 
 adelie.solver

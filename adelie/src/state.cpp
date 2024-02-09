@@ -6,6 +6,7 @@
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
 #include <adelie_core/state/state_glm_naive.hpp>
+#include <adelie_core/state/state_multi_gaussian_naive.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -1041,6 +1042,130 @@ void state_gaussian_naive(py::module_& m, const char* name)
         ;
 }
 
+template <class MatrixType>
+class PyStateMultiGaussianNaive : public ad::state::StateMultiGaussianNaive<MatrixType>
+{
+    using base_t = ad::state::StateMultiGaussianNaive<MatrixType>;
+public:
+    using base_t::base_t;
+    PyStateMultiGaussianNaive(base_t&& base) : base_t(std::move(base)) {}
+};
+
+template <class MatrixType>
+void state_multi_gaussian_naive(py::module_& m, const char* name)
+{
+    using matrix_t = MatrixType;
+    using state_t = ad::state::StateMultiGaussianNaive<matrix_t>;
+    using base_t = typename state_t::base_t;
+    using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_bool_t = typename state_t::vec_bool_t;
+    py::class_<state_t, base_t, PyStateMultiGaussianNaive<matrix_t>>(m, name)
+        .def(py::init<
+            size_t,
+            bool,
+            matrix_t&,
+            const Eigen::Ref<const vec_value_t>&,
+            value_t,
+            value_t,
+            const Eigen::Ref<const vec_value_t>&,
+            value_t,
+            const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_index_t>&,
+            value_t, 
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            value_t,
+            value_t,
+            size_t,
+            size_t,
+            size_t,
+            value_t,
+            size_t,
+            value_t,
+            const std::string&,
+            size_t,
+            value_t,
+            value_t,
+            value_t,
+            value_t,
+            size_t,
+            bool,
+            bool,
+            bool,
+            bool,
+            size_t,
+            const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_value_t>&, 
+            const Eigen::Ref<const vec_bool_t>&,
+            value_t,
+            value_t,
+            const Eigen::Ref<const vec_value_t>& 
+        >(),
+            py::arg("n_classes"),
+            py::arg("multi_intercept"),
+            py::arg("X"),
+            py::arg("X_means").noconvert(),
+            py::arg("y_mean"),
+            py::arg("y_var"),
+            py::arg("resid").noconvert(),
+            py::arg("resid_sum"),
+            py::arg("groups").noconvert(),
+            py::arg("group_sizes").noconvert(),
+            py::arg("alpha"),
+            py::arg("penalty").noconvert(),
+            py::arg("weights").noconvert(),
+            py::arg("lmda_path").noconvert(),
+            py::arg("lmda_max"),
+            py::arg("min_ratio"),
+            py::arg("lmda_path_size"),
+            py::arg("max_screen_size"),
+            py::arg("max_active_size"),
+            py::arg("pivot_subset_ratio"),
+            py::arg("pivot_subset_min"),
+            py::arg("pivot_slack_ratio"),
+            py::arg("screen_rule"),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("adev_tol"),
+            py::arg("ddev_tol"),
+            py::arg("newton_tol"),
+            py::arg("newton_max_iters"),
+            py::arg("early_exit"),
+            py::arg("setup_lmda_max"),
+            py::arg("setup_lmda_path"),
+            py::arg("intercept"),
+            py::arg("n_threads"),
+            py::arg("screen_set").noconvert(),
+            py::arg("screen_beta").noconvert(),
+            py::arg("screen_is_active").noconvert(),
+            py::arg("rsq"),
+            py::arg("lmda"),
+            py::arg("grad").noconvert()
+        )
+        .def(py::init([](const state_t& s) { return new state_t(s); }))
+        .def_readonly("n_classes", &state_t::n_classes, R"delimiter(
+        Number of classes.
+        )delimiter")
+        .def_readonly("multi_intercept", &state_t::multi_intercept, R"delimiter(
+        ``True`` if an intercept is added for each response.
+        )delimiter")
+        .def_property_readonly("betas", [](const state_t& s) {
+            return convert_betas(
+                s.group_sizes.sum() -  s.multi_intercept * s.n_classes,
+                s.betas
+            );
+        }, R"delimiter(
+        ``betas[i]`` is the (untransformed) solution corresponding to ``lmdas[i]``.
+        )delimiter")
+        .def_readonly("intercepts", &state_t::intercepts, R"delimiter(
+        ``intercepts[i]`` is the intercept solution corresponding to ``lmdas[i]`` for each class.
+        )delimiter")
+        ;
+}
+
 // ========================================================================
 // GLM State 
 // ========================================================================
@@ -1580,6 +1705,8 @@ void register_state(py::module_& m)
     state_gaussian_base<float>(m, "StateGaussianBase32");
     state_gaussian_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateGaussianNaive64");
     state_gaussian_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateGaussianNaive32");
+    state_multi_gaussian_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateMultiGaussianNaive64");
+    state_multi_gaussian_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateMultiGaussianNaive32");
     state_glm_base<ad::glm::GlmBase<double>>(m, "StateGlmBase64");
     state_glm_base<ad::glm::GlmBase<float>>(m, "StateGlmBase32");
     state_glm_naive<
