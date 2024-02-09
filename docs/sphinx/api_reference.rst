@@ -129,7 +129,7 @@ adelie.state
     gaussian_pin_cov
     gaussian_pin_naive
     glm_naive
-    multi_gaussian_naive
+    multigaussian_naive
 
 
 adelie.solver
@@ -167,6 +167,7 @@ Internal
     adelie_core.state.StateGaussianNaive64
     adelie_core.state.StateGlmNaive64
     glm.GlmBase64
+    glm.GlmMultiBase64
     matrix.MatrixCovBase64
     matrix.MatrixNaiveBase64
     state.base

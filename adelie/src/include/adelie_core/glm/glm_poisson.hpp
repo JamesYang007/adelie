@@ -13,7 +13,7 @@ public:
     using typename base_t::vec_value_t;
 
     explicit GlmPoisson():
-        base_t("poisson", false)
+        base_t("poisson")
     {}
 
     void gradient(

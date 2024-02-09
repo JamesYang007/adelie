@@ -13,7 +13,7 @@ public:
     using typename base_t::vec_value_t;
 
     explicit GlmGaussian():
-        base_t("gaussian", false)
+        base_t("gaussian")
     {}
 
     void gradient(
