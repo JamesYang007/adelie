@@ -440,7 +440,7 @@ def run_solve_gaussian(state, X, y):
                 alpha=state.alpha,
                 penalty=state.penalty,
                 weights=state.weights,
-                offsets=state.offsets,
+                offsets=state._offsets,
             )
             for beta0, beta, lmda in zip(beta0s, betas, lmdas)
         ])
@@ -456,7 +456,7 @@ def run_solve_gaussian(state, X, y):
                 alpha=state.alpha,
                 penalty=state.penalty,
                 weights=state.weights,
-                offsets=state.offsets,
+                offsets=state._offsets,
             )
             for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
         ])
@@ -494,7 +494,7 @@ def test_solve_gaussian():
                 alpha=state.alpha,
                 penalty=state.penalty,
                 weights=state.weights,
-                offsets=state.offsets,
+                offsets=state._offsets,
                 screen_set=state.screen_set,
                 screen_beta=state.screen_beta,
                 screen_is_active=state.screen_is_active,

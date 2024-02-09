@@ -1048,7 +1048,7 @@ class gaussian_naive_base(gaussian_base):
     ):
         n, p = self.X.rows(), self.X.cols()
 
-        yc = self.y
+        yc = self._y
         if self.intercept:
             yc = yc - np.sum(yc * self.weights)
 
@@ -1466,7 +1466,7 @@ def gaussian_naive(
         It must be a non-negative vector.
     weights : (n,) np.ndarray
         Observation weights.
-        Internally, it is normalized to sum to one.
+        The weights must sum to 1.
     offsets : (n,) np.ndarray
         Observation offsets :math:`\\eta^0`.
     screen_set : (s,) np.ndarray
@@ -1585,6 +1585,8 @@ def gaussian_naive(
     --------
     adelie.adelie_core.state.StateGaussianNaive64
     """
+    if isinstance(X, np.ndarray):
+        X = matrix.dense(X, method="naive", n_threads=n_threads)
     if not (
         isinstance(X, matrix.MatrixNaiveBase64) or 
         isinstance(X, matrix.MatrixNaiveBase32)
@@ -1658,9 +1660,9 @@ def gaussian_naive(
         def __init__(self):
             self._core_type = core_base
             # this is to keep the API consistent with grpnet with non-trivial GLM object
-            self.y = y
-            self.offsets = offsets
-            self.glm = glm.gaussian()
+            self._y = y
+            self._offsets = offsets
+            self._glm = glm.gaussian()
 
             ## save inputs due to lifetime issues
             # static inputs require a reference to input
@@ -1728,14 +1730,382 @@ def gaussian_naive(
             obj = base.create_from_core(
                 cls, state, core_state, _gaussian_naive, core_base,
             )
-            obj._core_type = core_base
-            obj.y = y
-            obj.offsets = offsets
-            obj.glm = glm.gaussian()
             gaussian_naive_base.__init__(obj)
             return obj
 
     return _gaussian_naive()
+
+
+def multi_gaussian_naive(
+    *,
+    X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
+    y: np.ndarray,
+    X_means: np.ndarray,
+    y_var: float,
+    resid: np.ndarray,
+    resid_sum: float,
+    groups: np.ndarray,
+    group_sizes: np.ndarray,
+    alpha: float,
+    penalty: np.ndarray,
+    weights: np.ndarray,
+    offsets: np.ndarray,
+    screen_set: np.ndarray,
+    screen_beta: np.ndarray,
+    screen_is_active: np.ndarray,
+    rsq: float,
+    lmda: float,
+    grad: np.ndarray,
+    lmda_path: np.ndarray =None,
+    lmda_max: float =None,
+    max_iters: int =int(1e5),
+    tol: float =1e-7,
+    adev_tol: float =0.9,
+    ddev_tol: float =1e-4,
+    newton_tol: float =1e-12,
+    newton_max_iters: int =1000,
+    n_threads: int =1,
+    early_exit: bool =True,
+    intercept: bool =True,
+    screen_rule: str ="pivot",
+    min_ratio: float =1e-2,
+    lmda_path_size: int =100,
+    max_screen_size: int =None,
+    max_active_size: int =None,
+    pivot_subset_ratio: float =0.1,
+    pivot_subset_min: int =1,
+    pivot_slack_ratio: float =1.25,
+):
+    """Creates a multi-gaussian, naive method state object.
+
+    Define the following quantities: 
+
+        - :math:`\\tilde{X} = X\\otimes I_K` if ``intercept`` is ``False``, 
+          and otherwise :math:`[1 \\otimes I_K, X \\otimes I_K]`.
+        - :math:`\\tilde{y}` as the flattened version of :math:`y` as row-major.
+        - :math:`\\tilde{W} = K^{-1} (W \\otimes I_K)`. 
+
+    Parameters
+    ----------
+    X : (n, p) Union[adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
+        Feature matrix.
+        It is typically one of the matrices defined in ``adelie.matrix`` sub-module.
+    y : (n, K) np.ndarray
+        Response matrix.
+        
+        .. note::
+            This is the original response vector not offsetted!
+            All other arguments related to :math:`y` are offsetted by ``offset``.
+
+    X_means : (p*K,) or ((p+1)*K,) np.ndarray
+        Column means (weighted by :math:`\\tilde{W}`) of :math:`\\tilde{X}`.
+    y_var : float
+        The average of the variance for each response vector (each column of ``y``)
+        where variance is given by :math:`\\|y_{k,c}\\|_W^2` and 
+        :math:`y_{k,c}` is the centered 
+        (if ``intercept`` is ``True``) ``k`` th column.
+    resid : (n*K,) np.ndarray
+        Residual :math:`\\tilde{W}(\\tilde{y} - \\tilde{X} \\beta)` 
+        where :math:`\\beta` is given by ``screen_beta``.
+    resid_sum : float
+        Sum of ``resid``.
+    groups : (G,) np.ndarray
+        List of starting indices to each group where `G` is the number of groups.
+        ``groups[i]`` is the starting index of the ``i`` th group. 
+    group_sizes : (G,) np.ndarray
+        List of group sizes corresponding to each element of ``groups``.
+        ``group_sizes[i]`` is the size of the ``i`` th group.
+    alpha : float
+        Elastic net parameter.
+        It must be in the range :math:`[0,1]`.
+    penalty : (G,) np.ndarray
+        Penalty factor for each group in the same order as ``groups``.
+        It must be a non-negative vector.
+    weights : (n,) np.ndarray
+        Observation weights.
+        The weights must sum to 1.
+    offsets : (n, K) np.ndarray
+        Observation offsets :math:`\\eta^0`.
+    screen_set : (s,) np.ndarray
+        List of indices into ``groups`` that correspond to the screen groups.
+        ``screen_set[i]`` is ``i`` th screen group.
+        ``screen_set`` must contain at least the true (optimal) active groups
+        when the regularization is given by ``lmda``.
+    screen_beta : (ws,) np.ndarray
+        Coefficient vector on the screen set.
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
+        where
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
+        and ``p = group_sizes[k]``.
+        The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
+    screen_is_active : (a,) np.ndarray
+        Boolean vector that indicates whether each screen group in ``groups`` is active or not.
+        ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    rsq : float
+        The unnormalized :math:`R^2` given by 
+        :math:`\\|\\tilde{y}\\|_{\\tilde{W}}^2 - \\|\\tilde{y}-\\tilde{X}\\beta\\|_{\\tilde{W}}^2`
+        where :math:`\\beta` is given by ``screen_beta``.
+    lmda : float
+        The regularization parameter at which the solution is given by ``screen_beta``
+        (in the transformed space).
+    grad : (p*K,) or ((p+1)*K,) np.ndarray
+        The full gradient :math:`\\tilde{X}^\\top \\tilde{W} (\\tilde{y} - \\tilde{X}\\beta)` in the original space where
+        :math:`\\beta` is given by ``screen_beta``.
+    lmda_path : (l,) np.ndarray, optional
+        The regularization path to solve for.
+        The full path is not considered if ``early_exit`` is ``True``.
+        It is recommended that the path is sorted in decreasing order.
+        If ``None``, the path will be generated.
+        Default is ``None``.
+    lmda_max : float
+        The smallest :math:`\\lambda` such that the true solution is zero
+        for all coefficients that have a non-vanishing group lasso penalty (:math:`\\ell_2`-norm).
+        If ``None``, it will be computed.
+        Default is ``None``.
+    max_iters : int, optional
+        Maximum number of coordinate descents.
+        Default is ``int(1e5)``.
+    tol : float, optional
+        Convergence tolerance.
+        Default is ``1e-7``.
+    adev_tol : float, optional
+        Percent deviance explained tolerance.
+        Default is ``0.9``.
+    ddev_tol : float, optional
+        Difference in percent deviance explained tolerance.
+        Default is ``1e-4``.
+    newton_tol : float, optional
+        Convergence tolerance for the BCD update.
+        Default is ``1e-12``.
+    newton_max_iters : int, optional
+        Maximum number of iterations for the BCD update.
+        Default is ``1000``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+    early_exit : bool, optional
+        ``True`` if the function should early exit based on training :math:`R^2`.
+        Default is ``True``.
+    min_ratio : float, optional
+        The ratio between the largest and smallest :math:`\\lambda` in the regularization sequence
+        if it is to be generated.
+        Default is ``1e-2``.
+    lmda_path_size : int, optional
+        Number of regularizations in the path if it is to be generated.
+        Default is ``100``.
+    intercept : bool, optional 
+        ``True`` if the function should fit with intercept for each class.
+        Default is ``True``.
+    screen_rule : str, optional
+        The type of screening rule to use. It must be one of the following options:
+
+            - ``"strong"``: adds groups whose active scores are above the strong threshold.
+            - ``"pivot"``: adds groups whose active scores are above the pivot cutoff with slack.
+
+        Default is ``"pivot"``.
+    max_screen_size : int, optional
+        Maximum number of screen groups allowed.
+        The function will return a valid state and guarantees to have screen set size
+        less than or equal to ``max_screen_size``.
+        If ``None``, it will be set to the total number of groups.
+        Default is ``None``.
+    max_active_size : int, optional
+        Maximum number of active groups allowed.
+        The function will return a valid state and guarantees to have active set size
+        less than or equal to ``max_active_size``.
+        If ``None``, it will be set to the total number of groups.
+        Default is ``None``.
+    pivot_subset_ratio : float, optional
+        If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
+        largest gradient norms are used to determine the pivot point
+        where ``s`` is the current screen set size.
+        It is only used if ``screen_rule == "pivot"``.
+        Default is ``0.1``.
+    pivot_subset_min : int, optional
+        If screening takes place, then at least ``pivot_subset_min``
+        number of gradient norms are used to determine the pivot point.
+        It is only used if ``screen_rule == "pivot"``.
+        Default is ``1``.
+    pivot_slack_ratio : float, optional
+        If screening takes place, then ``pivot_slack_ratio``
+        number of groups with next smallest (new) active scores 
+        below the pivot point are also added to the screen set as slack.
+        It is only used if ``screen_rule == "pivot"``.
+        Default is ``1.25``.
+
+    Returns
+    -------
+    wrap
+        Wrapper state object.
+    """
+    if not (
+        isinstance(X, matrix.MatrixNaiveBase64) or 
+        isinstance(X, matrix.MatrixNaiveBase32) or
+        isinstance(X, np.ndarray)
+    ):
+        raise ValueError(
+            "X must be an instance of matrix.MatrixNaiveBase32, matrix.MatrixNaiveBase64, or np.ndarray."
+        )
+
+    if max_screen_size is None:
+        max_screen_size = len(groups)
+    if max_active_size is None:
+        max_active_size = len(groups)
+    max_screen_size = np.minimum(max_screen_size, len(groups))
+    max_active_size = np.minimum(max_active_size, len(groups))
+
+    if max_iters < 0:
+        raise ValueError("max_iters must be >= 0.")
+    if tol <= 0:
+        raise ValueError("tol must be > 0.")
+    if adev_tol < 0 or adev_tol > 1:
+        raise ValueError("adev_tol must be in [0,1].")
+    if ddev_tol < 0 or ddev_tol > 1:
+        raise ValueError("ddev_tol must be in [0,1].")
+    if newton_tol < 0:
+        raise ValueError("newton_tol must be >= 0.")
+    if newton_max_iters < 0:
+        raise ValueError("newton_max_iters must be >= 0.")
+    if n_threads < 1:
+        raise ValueError("n_threads must be >= 1.")
+    if min_ratio <= 0:
+        raise ValueError("min_ratio must be > 0.")
+    if lmda_path_size < 0:
+        raise ValueError("lmda_path_size must be >= 0.")
+    if max_screen_size < 0:
+        raise ValueError("max_screen_size must be >= 0.")
+    if max_active_size < 0:
+        raise ValueError("max_active_size must be >= 0.")
+    if pivot_subset_ratio <= 0 or pivot_subset_ratio > 1:
+        raise ValueError("pivot_subset_ratio must be in (0, 1].")
+    if pivot_subset_min < 1:
+        raise ValueError("pivot_subset_min must be >= 1.")
+    if pivot_slack_ratio < 0:
+        raise ValueError("pivot_slack_ratio must be >= 0.")
+
+    lmda_path_size = (
+        lmda_path_size
+        if lmda_path is None else
+        len(lmda_path)
+    )
+
+    dtype = (
+        np.float64
+        if (
+            isinstance(X, matrix.MatrixNaiveBase64) or
+            (isinstance(X, np.ndarray) and X.dtype == np.dtype("float64"))
+        ) else
+        np.float32
+    )
+        
+    dispatcher = {
+        np.float64: core.state.StateMultiGaussianNaive64,
+        np.float32: core.state.StateMultiGaussianNaive32,
+    }
+
+    core_base = dispatcher[dtype]
+
+    setup_lmda_max = lmda_max is None
+    setup_lmda_path = lmda_path is None
+
+    if setup_lmda_max: lmda_max = -1
+    if setup_lmda_path: lmda_path = np.empty(0, dtype=dtype)
+
+    n, n_classes = y.shape
+    y = np.array(y, order="C", copy=False)
+    offsets = np.array(offsets, order="C", copy=False)
+    X_raw = X
+    X = matrix.kronecker_eye(X_raw, n_classes, n_threads=n_threads)
+    if intercept:
+        X = matrix.concatenate([
+            matrix.kronecker_eye(np.ones((n, 1)), n_classes, n_threads=n_threads),
+            X,
+        ], method="naive", n_threads=n_threads)
+    assert X_means.shape[0] == X.cols(), "X_means must have the same length as the number of columns of X after reshaping."
+
+    class _multi_gaussian_naive(gaussian_naive_base, core_base):
+        def __init__(self):
+            self._core_type = core_base
+            # this is to keep the API consistent with grpnet with non-trivial GLM object
+            self._y = y
+            self._offsets = offsets
+            self._glm = glm.multigaussian()
+
+            ## save inputs due to lifetime issues
+            # static inputs require a reference to input
+            # or copy if it must be made
+            self._X = X_raw
+            self._X_expanded = X
+
+            self._X_means = np.array(X_means, copy=False, dtype=dtype)
+            self._groups = np.array(groups, copy=False, dtype=int)
+            self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
+            self._penalty = np.array(penalty, copy=False, dtype=dtype)
+            self._weights = np.array(weights, copy=False, dtype=dtype)
+            self._weights_expanded = np.repeat(self._weights, repeats=n_classes) / n_classes
+            self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
+            self._screen_set = np.array(screen_set, copy=False, dtype=int)
+            self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
+            self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
+            self._grad = np.array(grad, copy=False, dtype=dtype)
+
+            # MUST call constructor directly and not use super()!
+            # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
+            core_base.__init__(
+                self,
+                n_classes=n_classes,
+                multi_intercept=intercept,
+                X=self._X_expanded,
+                X_means=self._X_means,
+                y_mean=0.0,
+                y_var=y_var,
+                resid=resid,
+                resid_sum=resid_sum,
+                groups=self._groups,
+                group_sizes=self._group_sizes,
+                alpha=alpha,
+                penalty=self._penalty,
+                weights=self._weights_expanded,
+                lmda_path=self._lmda_path,
+                lmda_max=lmda_max,
+                min_ratio=min_ratio,
+                lmda_path_size=lmda_path_size,
+                max_screen_size=max_screen_size,
+                max_active_size=max_active_size,
+                pivot_subset_ratio=pivot_subset_ratio,
+                pivot_subset_min=pivot_subset_min,
+                pivot_slack_ratio=pivot_slack_ratio,
+                screen_rule=screen_rule,
+                max_iters=max_iters,
+                tol=tol,
+                adev_tol=adev_tol,
+                ddev_tol=ddev_tol,
+                newton_tol=newton_tol,
+                newton_max_iters=newton_max_iters,
+                early_exit=early_exit,
+                setup_lmda_max=setup_lmda_max,
+                setup_lmda_path=setup_lmda_path,
+                intercept=False,
+                n_threads=n_threads,
+                screen_set=self._screen_set,
+                screen_beta=self._screen_beta,
+                screen_is_active=self._screen_is_active,
+                rsq=rsq,
+                lmda=lmda,
+                grad=self._grad,
+            )
+            self.basic_check()
+
+        @classmethod
+        def create_from_core(cls, state, core_state):
+            obj = base.create_from_core(
+                cls, state, core_state, _multi_gaussian_naive, core_base,
+            )
+            gaussian_naive_base.__init__(obj)
+            return obj
+
+    return _multi_gaussian_naive()
 
 
 class glm_naive_base:
@@ -1968,6 +2338,8 @@ def glm_naive(
     --------
     adelie.adelie_core.state.StateGlmNaive64
     """
+    if isinstance(X, np.ndarray):
+        X = matrix.dense(X, method="naive", n_threads=n_threads)
     if not (
         isinstance(X, matrix.MatrixNaiveBase64) or 
         isinstance(X, matrix.MatrixNaiveBase32)

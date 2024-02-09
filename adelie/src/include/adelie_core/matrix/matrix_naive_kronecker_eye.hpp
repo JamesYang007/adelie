@@ -298,7 +298,7 @@ public:
         _mat(mat.data(), mat.rows(), mat.cols()),
         _K(K),
         _n_threads(n_threads),
-        _buff(_n_threads, std::min(mat.rows(), mat.cols()))
+        _buff(_n_threads, K)
     {}
 
     value_t cmul(
