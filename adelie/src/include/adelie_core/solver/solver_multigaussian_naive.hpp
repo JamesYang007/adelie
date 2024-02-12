@@ -21,17 +21,8 @@ inline void solve(
 )
 {
     using state_t = std::decay_t<StateType>;
-    using matrix_t = typename state_t::matrix_t;
-    using value_t = typename state_t::value_t;
-    using index_t = typename state_t::index_t;
-    using bool_t = typename state_t::bool_t;
     using vec_value_t = typename state_t::vec_value_t;
-    using state_gaussian_naive_t = state::StateGaussianNaive<
-        matrix_t,
-        value_t,
-        index_t,
-        bool_t
-    >;
+    using state_gaussian_naive_t = typename state_t::base_t;
 
     const auto n_classes = state.n_classes;
     const auto multi_intercept = state.multi_intercept;

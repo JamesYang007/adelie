@@ -18,7 +18,7 @@ private:
 
 public:
     explicit GlmMultinomial():
-        base_t("multinomial")
+        base_t("multinomial", true)
     {}
 
     void gradient(
@@ -27,7 +27,7 @@ public:
         Eigen::Ref<rowarr_value_t> mu
     ) override
     {
-        mu = eta.exp();
+        mu = (eta.colwise() - eta.rowwise().maxCoeff()).exp();
         _buff = weights.matrix().transpose().array() / (eta.cols() * mu.rowwise().sum());
         mu.colwise() *= _buff.matrix().transpose().array();
     }
@@ -51,10 +51,14 @@ public:
         const Eigen::Ref<const vec_value_t>& weights
     ) override
     {
+        _buff = eta.rowwise().maxCoeff();
+        // TODO: this gets evaluated twice below.
+        // For simplicity, we keep this code since this is not speed critical.
+        const auto eta_relative = (eta.colwise() - _buff.matrix().transpose().array());
         return (
             weights.matrix().transpose().array() * (
-                - (y * eta).rowwise().sum()
-                + eta.exp().rowwise().sum().log()
+                - (y * eta_relative).rowwise().sum()
+                + eta_relative.exp().rowwise().sum().log()
             )
         ).sum() / y.cols();
     }

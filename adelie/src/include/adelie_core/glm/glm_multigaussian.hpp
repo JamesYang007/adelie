@@ -14,7 +14,7 @@ public:
     using typename base_t::rowarr_value_t;
 
     explicit GlmMultiGaussian():
-        base_t("multigaussian")
+        base_t("multigaussian", false)
     {}
 
     void gradient(

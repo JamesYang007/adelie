@@ -313,7 +313,7 @@ void glm_multibase(py::module_& m, const char* name)
                 \right)
             \end{align*}
 
-        We define :math:`D(\eta)` as the *deviance* and :math:`A(\eta) := \sum_{i=1}^n w_{i} A_i(\eta)`
+        We define :math:`D(\eta)` as the *deviance* and :math:`A(\eta) := K^{-1} \sum_{i=1}^n w_{i} A_i(\eta)`
         as the *log-partition function*.
         Here, :math:`w \geq 0` and :math:`A_i` are any convex functions.
 
@@ -331,15 +331,20 @@ void glm_multibase(py::module_& m, const char* name)
         Every multi-response GLM-like class must inherit from this class and override the methods
         before passing into the solver.
         )delimiter")
-        .def(py::init<const string_t&>(),
-            py::arg("name")
+        .def(py::init<const string_t&, bool>(),
+            py::arg("name"),
+            py::arg("is_symmetric")
         )
         .def_readonly("name", &internal_t::name, R"delimiter(
             Name of the GLM family.
         )delimiter")
         .def_readonly("is_multi", &internal_t::is_multi, R"delimiter(
-            ``True`` if it defines a multi-response GLM family.
-            It is always ``True`` for this base class.
+        ``True`` if it defines a multi-response GLM family.
+        It is always ``True`` for this base class.
+        )delimiter")
+        .def_readonly("is_symmetric", &internal_t::is_symmetric, R"delimiter(
+        ``True`` if the deviance portion remains invariant under common scalar shift
+        in the coefficients across the different responses.
         )delimiter")
         .def("gradient", &internal_t::gradient, R"delimiter(
         Gradient of the log-partition function.
