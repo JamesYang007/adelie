@@ -1724,18 +1724,18 @@ def gaussian_naive(
         If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
         largest active scores are used to determine the pivot point
         where ``s`` is the current screen set size.
-        It is only used if ``screen_rule == "pivot"``.
+        It is only used if ``screen_rule="pivot"``.
         Default is ``0.1``.
     pivot_subset_min : int, optional
         If screening takes place, then at least ``pivot_subset_min``
         number of active scores are used to determine the pivot point.
-        It is only used if ``screen_rule == "pivot"``.
+        It is only used if ``screen_rule="pivot"``.
         Default is ``1``.
     pivot_slack_ratio : float, optional
         If screening takes place, then ``pivot_slack_ratio``
         number of groups with next smallest (new) active scores 
         below the pivot point are also added to the screen set as slack.
-        It is only used if ``screen_rule == "pivot"``.
+        It is only used if ``screen_rule="pivot"``.
         Default is ``1.25``.
 
     Returns
@@ -2052,18 +2052,18 @@ def multigaussian_naive(
         If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
         largest active scores are used to determine the pivot point
         where ``s`` is the current screen set size.
-        It is only used if ``screen_rule == "pivot"``.
+        It is only used if ``screen_rule="pivot"``.
         Default is ``0.1``.
     pivot_subset_min : int, optional
         If screening takes place, then at least ``pivot_subset_min``
         number of active scores are used to determine the pivot point.
-        It is only used if ``screen_rule == "pivot"``.
+        It is only used if ``screen_rule="pivot"``.
         Default is ``1``.
     pivot_slack_ratio : float, optional
         If screening takes place, then ``pivot_slack_ratio``
         number of groups with next smallest (new) active scores 
         below the pivot point are also added to the screen set as slack.
-        It is only used if ``screen_rule == "pivot"``.
+        It is only used if ``screen_rule="pivot"``.
         Default is ``1.25``.
 
     Returns
@@ -2440,18 +2440,18 @@ def glm_naive(
         If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
         largest active scores are used to determine the pivot point
         where ``s`` is the current screen set size.
-        It is only used if ``screen_rule == "pivot"``.
+        It is only used if ``screen_rule="pivot"``.
         Default is ``0.1``.
     pivot_subset_min : int, optional
         If screening takes place, then at least ``pivot_subset_min``
         number of active scores are used to determine the pivot point.
-        It is only used if ``screen_rule == "pivot"``.
+        It is only used if ``screen_rule="pivot"``.
         Default is ``1``.
     pivot_slack_ratio : float, optional
         If screening takes place, then ``pivot_slack_ratio``
         number of groups with next smallest (new) active scores 
         below the pivot point are also added to the screen set as slack.
-        It is only used if ``screen_rule == "pivot"``.
+        It is only used if ``screen_rule="pivot"``.
         Default is ``1.25``.
 
     Returns
@@ -2786,18 +2786,18 @@ def multiglm_naive(
         If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
         largest active scores are used to determine the pivot point
         where ``s`` is the current screen set size.
-        It is only used if ``screen_rule == "pivot"``.
+        It is only used if ``screen_rule="pivot"``.
         Default is ``0.1``.
     pivot_subset_min : int, optional
         If screening takes place, then at least ``pivot_subset_min``
         number of active scores are used to determine the pivot point.
-        It is only used if ``screen_rule == "pivot"``.
+        It is only used if ``screen_rule="pivot"``.
         Default is ``1``.
     pivot_slack_ratio : float, optional
         If screening takes place, then ``pivot_slack_ratio``
         number of groups with next smallest (new) active scores 
         below the pivot point are also added to the screen set as slack.
-        It is only used if ``screen_rule == "pivot"``.
+        It is only used if ``screen_rule="pivot"``.
         Default is ``1.25``.
 
     Returns

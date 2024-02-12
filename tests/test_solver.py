@@ -1,7 +1,6 @@
 from adelie.solver import (
     objective,
-    solve_gaussian_pin,
-    solve_gaussian,
+    _solve,
 )
 import adelie as ad
 import cvxpy as cp
@@ -9,7 +8,7 @@ import numpy as np
 import os
 
 # ========================================================================
-# TEST solve_gaussian_pin
+# TEST _solve
 # ========================================================================
 
 def create_test_data_gaussian_pin(
@@ -109,7 +108,7 @@ def solve_cvxpy(
 def run_solve_gaussian_pin(state, X, y, weights):
     state.check(method="assert")
 
-    state = solve_gaussian_pin(state)    
+    state = _solve(state)    
 
     # get solved lmdas
     lmdas = state.lmdas
@@ -396,7 +395,7 @@ def create_dense(
 def run_solve_gaussian(state, X, y):
     state.check(method="assert")
 
-    state = solve_gaussian(state)    
+    state = _solve(state)    
 
     state.check(method="assert")
 
@@ -581,7 +580,7 @@ def test_solve_gaussian_concatenate():
         }
 
         for Xpy in Xs:
-            state_special = ad.solver.solve_gaussian(
+            state_special = ad.solver._solve(
                 ad.state.gaussian_naive(
                     X=Xpy,
                     **test_data,
@@ -592,7 +591,7 @@ def test_solve_gaussian_concatenate():
                 method="naive", 
                 n_threads=n_threads,
             )
-            state_dense = ad.solver.solve_gaussian(
+            state_dense = ad.solver._solve(
                 ad.state.gaussian_naive(
                     X=X_dense,
                     **test_data,
@@ -658,7 +657,7 @@ def test_solve_gaussian_snp_unphased():
 
         for Xpy in Xs:
             test_data["X"] = Xpy
-            state_special = ad.solver.solve_gaussian(
+            state_special = ad.solver._solve(
                 ad.state.gaussian_naive(**test_data),
             )
             test_data["X"] = ad.matrix.dense(
@@ -666,7 +665,7 @@ def test_solve_gaussian_snp_unphased():
                 method="naive", 
                 n_threads=n_threads,
             )
-            state_dense = ad.solver.solve_gaussian(
+            state_dense = ad.solver._solve(
                 ad.state.gaussian_naive(**test_data),
             )
 
@@ -732,7 +731,7 @@ def test_solve_gaussian_snp_phased_ancestry():
 
         for Xpy in Xs:
             test_data["X"] = Xpy
-            state_special = ad.solver.solve_gaussian(
+            state_special = ad.solver._solve(
                 ad.state.gaussian_naive(**test_data),
             )
             test_data["X"] = ad.matrix.dense(
@@ -740,7 +739,7 @@ def test_solve_gaussian_snp_phased_ancestry():
                 method="naive", 
                 n_threads=n_threads,
             )
-            state_dense = ad.solver.solve_gaussian(
+            state_dense = ad.solver._solve(
                 ad.state.gaussian_naive(**test_data),
             )
 

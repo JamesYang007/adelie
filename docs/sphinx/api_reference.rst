@@ -146,9 +146,6 @@ adelie.solver
 
     grpnet
     objective
-    solve_gaussian_pin
-    solve_gaussian
-    solve_glm
 
 
 Internal
