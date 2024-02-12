@@ -11,20 +11,20 @@ import warnings
 
 def objective(
     *,
-    X: Union[matrix.MatrixNaiveBase32, matrix.MatrixNaiveBase64], 
+    X: Union[matrix.MatrixNaiveBase32, matrix.MatrixNaiveBase64, np.ndarray], 
     y: np.ndarray, 
-    groups: np.ndarray, 
-    group_sizes: np.ndarray, 
-    lmda: float, 
-    alpha: float, 
-    penalty: np.ndarray,
-    weights: np.ndarray,
-    offsets: np.ndarray,
-    beta0: float,
-    beta: Union[np.ndarray, csr_matrix], 
+    betas: Union[np.ndarray, csr_matrix], 
+    intercepts: np.ndarray,
+    lmdas: np.ndarray, 
     glm: Union[glm.GlmBase32, glm.GlmBase64] =glm.gaussian(),
+    groups: np.ndarray =None, 
+    alpha: float =1, 
+    penalty: np.ndarray =None,
+    weights: np.ndarray =None,
+    offsets: np.ndarray =None,
     relative: bool =True,
     add_penalty: bool =True,
+    n_threads: int =1,
 ):
     """Computes the group elastic net objective.
 
@@ -34,139 +34,172 @@ def objective(
     ----------
     X : (n, p) Union[adelie.matrix.MatrixNaiveBase32, adelie.matrix.MatrixNaiveBase64]
         Feature matrix :math:`X`.
-    y : (n,) np.ndarray
-        Response vector :math:`y`.
-    groups : (G,) np.ndarray
-        List of starting column indices of ``X`` for each group.
-    group_sizes : (G,) np.ndarray
-        List of group sizes corresponding to each element of ``groups``.
-    lmda : float
-        Regularization parameter :math:`\\lambda`.
-    alpha : float
-        Elastic net parameter :math:`\\alpha`.
-    penalty : (G,) np.ndarray
-        List of penalty factors :math:`p_g` corresponding to each element of ``groups``.
-    weights : (n,) np.ndarray
-        Observation weights :math:`w`.
-    offsets : (n,) np.ndarray
-        Observation offsets :math:`\\eta^0`.
-    beta0 : float
-        Intercept.
-    beta : (p,) np.ndarray, (1, p) scipy.sparse.csr_matrix
-        Coefficient vector :math:`\\beta`.
+        It is typically one of the matrices defined in ``adelie.matrix`` submodule or ``np.ndarray``.
+    y : (n,) or (n, K) np.ndarray
+        Response vector or multi-response matrix.
+    betas : (L, p) or (L, p*K) Union[np.ndarray, scipy.sparse.csr_matrix]
+        Coefficient vectors :math:`\\beta`.
+    intercepts : (L,) or (L, K) np.ndarray
+        Intercepts :math:`\\beta_0`.
+    lmdas : (L,) np.ndarray 
+        Regularization parameters :math:`\\lambda`.
+        It is only used when ``add_penalty=True``.
+        Otherwise, the user may pass ``None``.
     glm : Union[glm.GlmBase32, glm.GlmBase64], optional
         GLM object.
+        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
         Default is ``adelie.glm.gaussian()``.
+    groups : (G,) np.ndarray, optional
+        List of starting indices to each group where `G` is the number of groups.
+        ``groups[i]`` is the starting index of the ``i`` th group. 
+        If ``glm`` is multi-response type, then we only allow two types of groupings:
+
+            - ``"grouped"``: coefficients for each predictor is grouped across the classes.
+            - ``"ungrouped"``: every coefficient is its own group.
+
+        It is only used when ``add_penalty=True``.
+        Default is ``None``, in which case it is set to
+        ``np.arange(p)`` if ``y`` is single-response
+        and ``"grouped"`` if multi-response.
+    alpha : float, optional
+        Elastic net parameter :math:`\\alpha`.
+        It must be in the range :math:`[0,1]`.
+        It is only used when ``add_penalty=True``.
+        Otherwise, the user may pass ``None``.
+        Default is ``1``.
+    penalty : (G,) np.ndarray, optional
+        Penalty factor for each group in the same order as ``groups``.
+        It must be a non-negative vector.
+        It is only used when ``add_penalty=True``.
+        Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
+    weights : (n,) np.ndarray, optional
+        Observation weights :math:`w`.
+        Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
+        
+        .. note::
+            The user is responsible for making sure that ``weights`` and ``lmdas``
+            are under the same scale.
+            A common pitfall is passing unnormalized ``weights`` 
+            to ``adelie.solver.grpnet()`` and blindly using ``lmdas`` from the output.
+            Since ``adelie.solver.grpnet()`` always normalizes the weights,
+            the user must pass ``lmdas * np.sum(weights)`` to this function.
+
+    offsets : (n,) or (n, K) np.ndarray
+        Observation offsets :math:`\\eta^0`.
+        Default is ``None``, in which case, it is set to 
+        ``np.zeros(n)`` if ``y`` is single-response
+        and ``np.zeros((n, K))`` if multi-response.
     relative : bool, optional
-        If ``True``, then the full deviance, :math:`D^\\star`, is computed at the saturated model
-        and the difference :math:`D-D^\\star` is provided,
+        If ``True``, then the full deviance, :math:`D(\\eta^\\star)`, is computed at the saturated model
+        and the difference :math:`D(\\eta)-D(\\eta^\\star)` is provided,
         which will always be non-negative.
-        This effectively computes deviance *relative* to the saturated model.
+        This effectively computes deviance *relative* to the saturated model
+        rather than a fictitious model that achieves zero deviance.
         Default is ``True``.
     add_penalty : bool, optional
-        If ``False``, the regularization term is removed. 
+        If ``False``, the regularization term is removed 
+        so that only the deviance part is calculated. 
         Default is ``True``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
     
     Returns
     -------
-    obj : float
-        Group elastic net objective.
+    obj : (L,) np.ndarray
+        Group elastic net objectives.
 
     See Also
     --------
     adelie.solver.grpnet
     """
-    n, p = X.rows(), X.cols()
+    if glm.is_multi:
+        K = y.shape[1]
+        X = matrix.kronecker_eye(X, K, n_threads=n_threads)
+        n, p = X.rows() // K, X.cols() // K
+        if groups is None:
+            groups = "grouped"
+        if groups == "grouped":
+            groups = K * np.arange(p, dtype=int)
+        elif groups == "ungrouped":
+            groups = np.arange(K * p, dtype=int)
+        else:
+            raise RuntimeError(
+                "groups must be one of \"grouped\" or \"ungrouped\" for multi-response."
+            )
+        group_sizes = np.concatenate([groups, [p*K]], dtype=int)
+        group_sizes = group_sizes[1:] - group_sizes[:-1]
+    else:
+        if isinstance(X, np.ndarray):
+            X = matrix.dense(X, method="naive", n_threads=n_threads)
+        n, p = X.rows(), X.cols()
+        if groups is None:
+            groups = np.arange(p)
+        group_sizes = np.concatenate([groups, [p]], dtype=int)
+        group_sizes = group_sizes[1:] - group_sizes[:-1]
+
+    if penalty is None:
+        penalty = np.sqrt(group_sizes)
+    if weights is None:
+        weights = np.full(n, 1/n)
+    if offsets is None:
+        offsets = np.zeros(y.shape)
+
+    L = betas.shape[0]
 
     # if numpy array, add an extra dimension to beta 
     # for code consistency with sparse case.
-    eta = np.empty(n)
-    if isinstance(beta, np.ndarray):
-        assert beta.shape == (p,), "beta must be (p,) array."
-        X.btmul(0, p, beta, np.ones(n), eta)
-    elif isinstance(beta, csr_matrix):
-        assert beta.shape == (1, p), "beta must be (1, p) scipy.sparse.csr_matrix."
-        X.sp_btmul(beta, np.ones(n), eta[None]) 
-        beta = beta.toarray()[0]
+    etas = np.empty((L,) + y.shape, order="C")
+    ones = np.ones(X.rows())
+    if isinstance(betas, np.ndarray):
+        for i in range(etas.shape[0]):
+            X.btmul(0, X.cols(), betas[i], ones, etas[i].ravel())
+    elif isinstance(betas, csr_matrix):
+        X.sp_btmul(betas, ones, etas.reshape((L, -1))) 
     else:
         raise RuntimeError("beta is not one of np.ndarray or scipy.sparse.csr_matrix.")
-    eta += beta0 + offsets
+    etas += intercepts[:, None] + offsets
 
     # compute deviance part
-    obj = glm.deviance(y, eta, weights)
+    objs = np.array([
+        glm.deviance(y, etas[i], weights)
+        for i in range(etas.shape[0])
+    ])
 
     # relative to saturated model
     if relative:
-        obj -= glm.deviance_full(y, weights)
+        objs -= glm.deviance_full(y, weights)
 
     # compute regularization part
     if add_penalty:
-        reg = lmda * np.sum([
-            pi * (
-                alpha * np.linalg.norm(beta[g:g+gs])
-                +
-                0.5 * (1-alpha) * np.sum(beta[g:g+gs] ** 2)
-            )
-            for g, gs, pi in zip(groups, group_sizes, penalty)
-        ])
-        obj += reg
+        penalty_f = None
+        if isinstance(betas, np.ndarray):
+            penalty_f = core.solver.compute_penalty_dense
+        elif isinstance(betas, csr_matrix): 
+            penalty_f = core.solver.compute_penalty_sparse
+        objs += lmdas * penalty_f(
+            groups,
+            group_sizes,
+            penalty,
+            alpha,
+            betas,
+            n_threads,
+        )
 
-    return obj
+    return objs
 
 
-def solve_gaussian_pin(state):
-    """Solves the pinned gaussian group elastic net problem.
+def _solve(state, progress_bar: bool =False):
+    """Solves the group elastic net problem.
 
     The gaussian pin group elastic net problem is given by
     minimizing the objective defined in ``adelie.solver.objective``
-    for the Gaussian GLM object
-    with the additional constraint that :math:`\\beta_{-S} = 0`
+    for the Gaussian GLM with the additional constraint that :math:`\\beta_{-S} = 0`
     where :math:`S` denotes the screen set,
     that is, the coefficient vector is forced to be zero
     for groups outside the screen set.
 
-    Parameters
-    ----------
-    state
-        See the documentation for one of the states below.
-
-    Returns
-    -------
-    result
-        The resulting state after running the solver.
-        The type is the same as that of ``state``.
-
-    See Also
-    --------
-    adelie.state.gaussian_pin_cov
-    adelie.state.gaussian_pin_naive
-    adelie.solver.objective
-    """
-    # mapping of each state type to the corresponding solver
-    f_dict = {
-        core.state.StateGaussianPinNaive64: core.solver.solve_gaussian_pin_naive_64,
-        core.state.StateGaussianPinNaive32: core.solver.solve_gaussian_pin_naive_32,
-        core.state.StateGaussianPinCov64: core.solver.solve_gaussian_pin_cov_64,
-        core.state.StateGaussianPinCov32: core.solver.solve_gaussian_pin_cov_32,
-    }
-
-    # solve group elastic net
-    f = f_dict[state._core_type]
-    out = f(state)
-
-    # raise any errors
-    if out["error"] != "":
-        logger.logger.warning(RuntimeError(out["error"]))
-
-    # return a subsetted Python result object
-    core_state = out["state"]
-    state = type(state).create_from_core(state, core_state)
-
-    return state
-
-
-def solve_gaussian(state, progress_bar: bool =False):
-    """Solves the gaussian group elastic net problem.
+    For details on the other group elastic net problems, see ``adelie.solver.grpnet``.
 
     Parameters
     ----------
@@ -174,6 +207,7 @@ def solve_gaussian(state, progress_bar: bool =False):
         See the documentation for one of the states below.
     progress_bar : bool, optional
         ``True`` to enable progress bar.
+        It is ignored for gaussian pin methods.
         Default is ``False``.
 
     Returns
@@ -185,69 +219,58 @@ def solve_gaussian(state, progress_bar: bool =False):
     See Also
     --------
     adelie.state.gaussian_naive
-    adelie.state.multigaussian_naive
-    adelie.solver.objective
-    """
-    # mapping of each state type to the corresponding solver
-    f_dict = {
-        core.state.StateGaussianNaive64: core.solver.solve_gaussian_naive_64,
-        core.state.StateGaussianNaive32: core.solver.solve_gaussian_naive_32,
-        core.state.StateMultiGaussianNaive64: core.solver.solve_multigaussian_naive_64,
-        core.state.StateMultiGaussianNaive32: core.solver.solve_multigaussian_naive_32,
-    }
-
-    # solve group elastic net
-    f = f_dict[state._core_type]
-    out = f(state, progress_bar)
-
-    # raise any errors
-    if out["error"] != "":
-        logger.logger.warning(RuntimeError(out["error"]))
-
-    # return a subsetted Python result object
-    core_state = out["state"]
-    state = type(state).create_from_core(state, core_state)
-
-    # add extra total time information
-    state.total_time = out["total_time"]
-
-    return state
-
-
-def solve_glm(state, progress_bar: bool =False):
-    """Solves the GLM group elastic net problem.
-
-    Parameters
-    ----------
-    state
-        See the documentation for one of the states below.
-    progress_bar : bool, optional
-        ``True`` to enable progress bar.
-        Default is ``False``.
-
-    Returns
-    -------
-    result
-        The resulting state after running the solver.
-        The type is the same as that of ``state``.
-
-    See Also
-    --------
+    adelie.state.gaussian_pin_cov
+    adelie.state.gaussian_pin_naive
     adelie.state.glm_naive
+    adelie.state.multigaussian_naive
     adelie.state.multiglm_naive
     adelie.solver.objective
     """
     # mapping of each state type to the corresponding solver
     f_dict = {
+        core.state.StateGaussianPinNaive64: core.solver.solve_gaussian_pin_naive_64,
+        core.state.StateGaussianPinNaive32: core.solver.solve_gaussian_pin_naive_32,
+        core.state.StateGaussianPinCov64: core.solver.solve_gaussian_pin_cov_64,
+        core.state.StateGaussianPinCov32: core.solver.solve_gaussian_pin_cov_32,
+        core.state.StateGaussianNaive64: core.solver.solve_gaussian_naive_64,
+        core.state.StateGaussianNaive32: core.solver.solve_gaussian_naive_32,
+        core.state.StateMultiGaussianNaive64: core.solver.solve_multigaussian_naive_64,
+        core.state.StateMultiGaussianNaive32: core.solver.solve_multigaussian_naive_32,
         core.state.StateGlmNaive64: core.solver.solve_glm_naive_64,
         core.state.StateGlmNaive32: core.solver.solve_glm_naive_32,
         core.state.StateMultiGlmNaive64: core.solver.solve_multiglm_naive_64,
         core.state.StateMultiGlmNaive32: core.solver.solve_multiglm_naive_32,
     }
 
+    is_gaussian_pin = (
+        isinstance(state, core.state.StateGaussianPinNaive64) or
+        isinstance(state, core.state.StateGaussianPinNaive32) or
+        isinstance(state, core.state.StateGaussianPinCov64) or
+        isinstance(state, core.state.StateGaussianPinCov32)
+    )
+    is_gaussian = (
+        isinstance(state, core.state.StateGaussianNaive64) or
+        isinstance(state, core.state.StateGaussianNaive32) or
+        isinstance(state, core.state.StateMultiGaussianNaive64) or
+        isinstance(state, core.state.StateMultiGaussianNaive32)
+    )
+    is_glm = (
+        isinstance(state, core.state.StateGlmNaive64) or
+        isinstance(state, core.state.StateGlmNaive32) or
+        isinstance(state, core.state.StateMultiGlmNaive64) or
+        isinstance(state, core.state.StateMultiGlmNaive32)
+    )
+
     # solve group elastic net
     f = f_dict[state._core_type]
-    out = f(state, state._glm, progress_bar)
+    if is_gaussian_pin:
+        out = f(state)
+    elif is_gaussian:
+        out = f(state, progress_bar)
+    elif is_glm:
+        out = f(state, state._glm, progress_bar)
+    else:
+        raise RuntimeError("Unexpected state type.")
 
     # raise any errors
     if out["error"] != "":
@@ -470,18 +493,18 @@ def grpnet(
         If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
         largest active scores are used to determine the pivot point
         where ``s`` is the current screen set size.
-        It is only used if ``screen_rule == "pivot"``.
+        It is only used if ``screen_rule="pivot"``.
         Default is ``0.1``.
     pivot_subset_min : int, optional
         If screening takes place, then at least ``pivot_subset_min``
         number of active scores are used to determine the pivot point.
-        It is only used if ``screen_rule == "pivot"``.
+        It is only used if ``screen_rule="pivot"``.
         Default is ``1``.
     pivot_slack_ratio : float, optional
         If screening takes place, then ``pivot_slack_ratio``
         number of groups with next smallest (new) active scores 
         below the pivot point are also added to the screen set as slack.
-        It is only used if ``screen_rule == "pivot"``.
+        It is only used if ``screen_rule="pivot"``.
         Default is ``1.25``.
     check_state : bool, optional 
         ``True`` is state should be checked for inconsistencies before calling solver.
@@ -517,11 +540,6 @@ def grpnet(
     -------
     state
         The resulting state after running the solver.
-
-    See Also
-    --------
-    adelie.solver.solve_gaussian
-    adelie.solver.solve_glm
     """
     X_raw = X
 
@@ -547,7 +565,10 @@ def grpnet(
     if not (weights is None):
         if weights.shape != (n,):
             raise RuntimeError("weights must be (n,) array if 1-dimensional.")
-        weights = weights / np.sum(weights)
+        weights_sum = np.sum(weights)
+        if weights_sum != 1:
+            warnings.warn("Normalizing weights to sum to 1.")
+            weights = weights / np.sum(weights)
     else:
         weights = np.full(n, 1/n, dtype=dtype)
 
@@ -836,12 +857,7 @@ def grpnet(
     if check_state:
         state.check(method="assert")
 
-    solve_fun = (
-        solve_gaussian
-        if is_gaussian_opt else
-        solve_glm
-    )
-    return solve_fun(
+    return _solve(
         state=state,
         progress_bar=progress_bar,
     )
