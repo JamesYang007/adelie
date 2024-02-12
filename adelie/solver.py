@@ -185,6 +185,7 @@ def solve_gaussian(state, progress_bar: bool =False):
     See Also
     --------
     adelie.state.gaussian_naive
+    adelie.state.multigaussian_naive
     adelie.solver.objective
     """
     # mapping of each state type to the corresponding solver
@@ -233,17 +234,20 @@ def solve_glm(state, progress_bar: bool =False):
     See Also
     --------
     adelie.state.glm_naive
+    adelie.state.multiglm_naive
     adelie.solver.objective
     """
     # mapping of each state type to the corresponding solver
     f_dict = {
         core.state.StateGlmNaive64: core.solver.solve_glm_naive_64,
         core.state.StateGlmNaive32: core.solver.solve_glm_naive_32,
+        core.state.StateMultiGlmNaive64: core.solver.solve_multiglm_naive_64,
+        core.state.StateMultiGlmNaive32: core.solver.solve_multiglm_naive_32,
     }
 
     # solve group elastic net
     f = f_dict[state._core_type]
-    out = f(state, progress_bar)
+    out = f(state, state._glm, progress_bar)
 
     # raise any errors
     if out["error"] != "":
@@ -327,46 +331,43 @@ def grpnet(
     and :math:`A_i` define the log-partition function in the GLM family.
 
     For multi-response problems (i.e. when :math:`y` is 2-dimensional)
-    such as in multigaussian or multinomial GLM,
-    the group elastic net problem can still be formulated as above after flattening the inputs
-    and modifying the :math:`X` matrix.
-    Concretely, we solve
+    such as in multigaussian or multinomial,
+    the group elastic net problem minimizes the objective given by:
 
     .. math::
         \\begin{align*}
             \\mathrm{minimize}_{\\beta, \\beta_0} \\quad&
-            \\sum_{i=1}^{nK}
+            \\frac{1}{K}
+            \\sum_{i=1}^{n}
             w_{i} \\left(
-                -y_{i} \\eta_{i} + A_{i}(\\eta)
+                -\\sum\\limits_{k=1}^K y_{ik} \\eta_{ik} + A_{i}(\\eta)
             \\right)
             + \\lambda \\sum\\limits_{g=1}^G p_g \\left(
                 \\alpha \\|\\beta_g\\|_2 + \\frac{1-\\alpha}{2} \\|\\beta_g\\|_2^2
             \\right)
             \\\\
             \\text{subject to} \\quad&
-            \\eta = (X\\otimes I_K) \\beta + (\\mathbf{1}\\otimes I_K) \\beta_0 + \\eta^0
+            \\mathrm{vec}(\\eta^\\top) 
+            = 
+            (X\\otimes I_K) \\beta + (\\mathbf{1}\\otimes I_K) \\beta_0 
+            + 
+            \\mathrm{vec}(\\eta^{0\\top})
         \\end{align*}
 
-    where
-    :math:`y`, :math:`w`, :math:`\\beta`, and :math:`\\eta^0`
-    are flattened row-major matrices.
+    where :math:`\\mathrm{vec}(x)` is the operator that flattens the input as column-major.
     Note that if ``intercept`` is ``True``, then an intercept for each class is provided
     as additional unpenalized features in the data matrix and the global intercept is turned off.
-
-    .. note::
-        Some multi-response GLM families require further restrictions
-        on the structure of the objective (e.g. see ``adelie.glm.multinomial``).
 
     Parameters
     ----------
     X : (n, p) matrix-like
         Feature matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` sub-module
-        or a ``numpy`` array.
+        It is typically one of the matrices defined in ``adelie.matrix`` submodule or ``np.ndarray``.
     y : (n,) or (n, K) np.ndarray
         Response vector or multi-response matrix.
-    glm : Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64], optional
+    glm : Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64, adelie.glm.GlmMultiBase32, adelie.glm.GlmMultiBase64], optional
         GLM object.
+        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
         Default is ``adelie.glm.gaussian()``.
     groups : (G,) np.ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
@@ -388,7 +389,7 @@ def grpnet(
         It must be a non-negative vector.
         Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
     weights : (n,) np.ndarray, optional
-        Observation weights.
+        Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
     offsets : (n,) or (n, K) np.ndarray, optional
@@ -414,7 +415,7 @@ def grpnet(
         Maximum number of coordinate descents.
         Default is ``int(1e5)``.
     tol : float, optional
-        Convergence tolerance.
+        Coordinate descent convergence tolerance.
         Default is ``1e-7``.
     adev_tol : float, optional
         Percent deviance explained tolerance.
@@ -467,7 +468,7 @@ def grpnet(
         Default is ``None``.
     pivot_subset_ratio : float, optional
         If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
-        largest gradient norms are used to determine the pivot point
+        largest active scores are used to determine the pivot point
         where ``s`` is the current screen set size.
         It is only used if ``screen_rule == "pivot"``.
         Default is ``0.1``.
@@ -485,6 +486,10 @@ def grpnet(
     check_state : bool, optional 
         ``True`` is state should be checked for inconsistencies before calling solver.
         Default is ``False``.
+
+        .. warning::
+            The check may take a long time if the inputs are big!
+
     progress_bar : bool, optional
         ``True`` to enable progress bar.
         Default is ``False``.
@@ -493,7 +498,7 @@ def grpnet(
         and other invariance quantities are set accordingly.
         Otherwise, the warm-start is used to extract all necessary state variables.
         If warm-start is used, the user *must* still provide consistent inputs,
-        that is, warm-start will not overwrite the arguments passed into this function.
+        that is, warm-start will not overwrite most arguments passed into this function.
         However, changing configuration settings such as tolerance levels is well-defined.
         Default is ``None``.
 
@@ -505,7 +510,7 @@ def grpnet(
 
         .. warning::
             We have only tested warm-starts in the setting described in the note above,
-            that is, when ``lmda_path`` is changed and no other arguments are changed.
+            that is, when ``lmda_path`` and possibly static configurations have changed.
             Use with caution in other settings!
 
     Returns
@@ -589,7 +594,13 @@ def grpnet(
         glm.opt
     )
 
-    # if multi-response GLMs
+    # add a few more configs in GLM case
+    if not is_gaussian_opt:
+        solver_args["glm"] = glm
+        solver_args["irls_max_iters"] = irls_max_iters
+        solver_args["irls_tol"] = irls_tol
+
+    # multi-response GLMs
     if glm.is_multi:
         if len(y.shape) != 2:
             raise RuntimeError("y must be 2-dimensional.")
@@ -601,7 +612,7 @@ def grpnet(
         if groups == "grouped":
             groups = K * np.arange(p, dtype=int)
         elif groups == "ungrouped":
-            groups = np.arange(y.size, dtype=int)
+            groups = np.arange(K * p, dtype=int)
         else:
             raise RuntimeError(
                 "groups must be one of \"grouped\" or \"ungrouped\" for multi-response."
@@ -620,58 +631,12 @@ def grpnet(
                 penalty = np.concatenate([np.zeros(K), penalty])
 
         if warm_start is None:
-            weights_mscaled = weights / K
-            X_means = np.empty(p, dtype=dtype)
-            X.mul(weights_mscaled, X_means)
-            X_means = np.repeat(X_means, K)
-            if intercept:
-                X_means = np.concatenate([
-                    np.full(K, 1/K),
-                    X_means,
-                ])
-            y_off = y - offsets
-            # variance of y that gaussian solver expects
-            y_var = np.sum(weights_mscaled[:, None] * y_off ** 2)
-            # variance for the null model with multi-intercept
-            # R^2 can be initialized to MSE under intercept-model - y_var.
-            # This is a negative quantity in general, but will be corrected to 0
-            # when the model fits the unpenalized (including intercept) term.
-            # Then, supplying y_var as the normalization will result in R^2 
-            # relative to the intercept-model.
-            # This is really taking advantage of the fact that our solver first
-            # solves for unpenalized terms before starting the path and that rsq gets incremented.
-            if intercept:
-                y_off_c = y_off - (y_off.T @ weights)[None] # NOT a typo: weights
-                yc_var = np.sum(weights_mscaled[:, None] * y_off_c ** 2)
-                rsq = yc_var - y_var
-                y_var = yc_var
-            else:
-                rsq = 0
-            resid = weights_mscaled[:, None] * y_off
-            resid = resid.ravel()
-            resid_sum = np.sum(resid)
-            X_aug = matrix.kronecker_eye(X_raw, K, n_threads=n_threads)
-            if intercept:
-                X_aug = matrix.concatenate([
-                    matrix.kronecker_eye(
-                        np.ones((n, 1)), K, n_threads=n_threads
-                    ),
-                    X_aug,
-                ], n_threads=n_threads)
-            grad = np.empty(X_aug.cols(), dtype=dtype)
-            X_aug.mul(resid, grad)
             lmda = np.inf
             lmda_max = None
             screen_set = np.arange(groups.shape[0])[(penalty <= 0) | (alpha <= 0)]
             screen_beta = np.zeros(np.sum(group_sizes[screen_set]), dtype=dtype)
             screen_is_active = np.ones(screen_set.shape[0], dtype=bool)
         else:
-            X_means = warm_start.X_means
-            y_var = warm_start.y_var
-            rsq = warm_start.rsq
-            resid = warm_start.resid
-            resid_sum = warm_start.resid_sum
-            grad = warm_start.grad
             lmda = warm_start.lmda
             lmda_max = warm_start.lmda_max
             screen_set = warm_start.screen_set
@@ -681,20 +646,99 @@ def grpnet(
         solver_args["groups"] = groups
         solver_args["group_sizes"] = group_sizes
         solver_args["penalty"] = penalty
-        solver_args["X_means"] = X_means
-        solver_args["y_var"] = y_var
-        solver_args["rsq"] = rsq
-        solver_args["resid"] = resid
-        solver_args["resid_sum"] = resid_sum
-        solver_args["grad"] = grad
         solver_args["lmda"] = lmda
         solver_args["lmda_max"] = lmda_max
         solver_args["screen_set"] = screen_set
         solver_args["screen_beta"] = screen_beta
         solver_args["screen_is_active"] = screen_is_active
 
-        state = ad.state.multigaussian_naive(**solver_args)
+        # represent the augmented X matrix as used in single-response reformatted problem.
+        X_aug = matrix.kronecker_eye(X_raw, K, n_threads=n_threads)
+        if intercept:
+            X_aug = matrix.concatenate([
+                matrix.kronecker_eye(
+                    np.ones((n, 1)), K, n_threads=n_threads
+                ),
+                X_aug,
+            ], n_threads=n_threads)
+        weights_mscaled = weights / K
 
+        # special gaussian case
+        if is_gaussian_opt:
+            if warm_start is None:
+                X_means = np.empty(p, dtype=dtype)
+                X.mul(weights_mscaled, X_means)
+                X_means = np.repeat(X_means, K)
+                if intercept:
+                    X_means = np.concatenate([
+                        np.full(K, 1/K),
+                        X_means,
+                    ])
+                y_off = y - offsets
+                # variance of y that gaussian solver expects
+                y_var = np.sum(weights_mscaled[:, None] * y_off ** 2)
+                # variance for the null model with multi-intercept
+                # R^2 can be initialized to MSE under intercept-model minus y_var.
+                # This is a negative quantity in general, but will be corrected to 0
+                # when the model fits the unpenalized (including intercept) term.
+                # Then, supplying y_var as the normalization will result in R^2 
+                # relative to the intercept-model.
+                if intercept:
+                    y_off_c = y_off - (y_off.T @ weights)[None] # NOT a typo: weights
+                    yc_var = np.sum(weights_mscaled[:, None] * y_off_c ** 2)
+                    rsq = yc_var - y_var
+                    y_var = yc_var
+                else:
+                    rsq = 0
+                resid = weights_mscaled[:, None] * y_off
+                resid = resid.ravel()
+                resid_sum = np.sum(resid)
+                grad = np.empty(X_aug.cols(), dtype=dtype)
+                X_aug.mul(resid, grad)
+            else:
+                X_means = warm_start.X_means
+                y_var = warm_start.y_var
+                rsq = warm_start.rsq
+                resid = warm_start.resid
+                resid_sum = warm_start.resid_sum
+                grad = warm_start.grad
+
+            solver_args["X_means"] = X_means
+            solver_args["y_var"] = y_var
+            solver_args["rsq"] = rsq
+            solver_args["resid"] = resid
+            solver_args["resid_sum"] = resid_sum
+            solver_args["grad"] = grad
+
+            state = ad.state.multigaussian_naive(**solver_args)
+        
+        # GLM case
+        else:
+            if warm_start is None:
+                eta = offsets
+                mu = np.empty(offsets.shape); glm.gradient(eta, weights, mu)
+                resid = (weights_mscaled[:, None] * y - mu).ravel()
+                grad = np.empty(X_aug.cols()); X_aug.mul(resid, grad)
+                dev_null = None
+                dev_full = glm.deviance_full(y, weights)
+                eta = eta.ravel()
+                mu = mu.ravel()
+            else:
+                eta = warm_start.eta
+                mu = warm_start.mu
+                grad = warm_start.grad
+                dev_null = warm_start.dev_null
+                dev_full = warm_start.dev_full
+
+            solver_args["grad"] = grad
+            solver_args["eta"] = eta
+            solver_args["mu"] = mu
+            solver_args["dev_null"] = dev_null
+            solver_args["dev_full"] = dev_full
+
+            state = ad.state.multiglm_naive(**solver_args)
+
+    # single-response GLMs
     else:
         if groups is None:
             groups = np.arange(p, dtype=int)
@@ -728,6 +772,7 @@ def grpnet(
         solver_args["screen_beta"] = screen_beta
         solver_args["screen_is_active"] = screen_is_active
 
+        # special gaussian case
         if is_gaussian_opt:
             if warm_start is None:
                 X_means = np.empty(p, dtype=dtype)
@@ -762,6 +807,7 @@ def grpnet(
 
             state = ad.state.gaussian_naive(**solver_args)
 
+        # GLM case
         else:
             if warm_start is None:
                 beta0 = 0
@@ -779,15 +825,12 @@ def grpnet(
                 dev_null = warm_start.dev_null
                 dev_full = warm_start.dev_full
 
-            solver_args["glm"] = glm
             solver_args["beta0"] = beta0
             solver_args["grad"] = grad
             solver_args["eta"] = eta
             solver_args["mu"] = mu
             solver_args["dev_null"] = dev_null
             solver_args["dev_full"] = dev_full
-            solver_args["irls_max_iters"] = irls_max_iters
-            solver_args["irls_tol"] = irls_tol
             state = ad.state.glm_naive(**solver_args)
 
     if check_state:

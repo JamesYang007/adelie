@@ -166,7 +166,7 @@ class snp_unphased(snp_base):
 
 
 class snp_phased_ancestry(snp_base):
-    """IO handler for SNP phased ancestry data.
+    """IO handler for SNP phased, ancestry data.
 
     Parameters
     ----------

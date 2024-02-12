@@ -54,14 +54,14 @@ struct GlmNaiveBufferPack
 };
 
 template <class StateType, 
-          class ValueType,
-          class StateGaussianPinType, 
-          class BufferPackType>
+          class GlmType,
+          class StateGaussianPinType,
+          class ValueType>
 ADELIE_CORE_STRONG_INLINE
 void update_solutions(
     StateType& state,
+    GlmType& glm,
     StateGaussianPinType& state_gaussian_pin_naive,
-    BufferPackType& buffer_pack,
     ValueType lmda
 )
 {
@@ -70,7 +70,6 @@ void update_solutions(
     const auto& y0 = state.y;
     const auto& weights0 = state.weights;
     const auto& eta = state.eta;
-    auto& glm = *state.glm;
     auto& betas = state.betas;
     auto& devs = state.devs;
     auto& lmdas = state.lmdas;
@@ -88,10 +87,12 @@ void update_solutions(
 }
 
 template <class StateType,
+          class GlmType,
           class BufferPackType>
 ADELIE_CORE_STRONG_INLINE
 void update_dev_null(
     StateType& state,
+    GlmType& glm,
     BufferPackType& buffer_pack
 )
 {
@@ -103,7 +104,6 @@ void update_dev_null(
     const auto& weights0 = state.weights;
     const auto& offsets = state.offsets;
     const auto intercept = state.intercept;
-    auto& glm = *state.glm;
     auto& dev_null = state.dev_null;
 
     if (!intercept) {
@@ -163,6 +163,7 @@ void update_dev_null(
 }
 
 template <class StateType,
+          class GlmType,
           class BufferPackType,
           class ValueType,
           class UpdateCoefficientsType,
@@ -170,6 +171,7 @@ template <class StateType,
 ADELIE_CORE_STRONG_INLINE
 auto fit(
     StateType& state,
+    GlmType& glm,
     BufferPackType& buffer_pack,
     ValueType lmda,
     UpdateCoefficientsType update_coefficients_f,
@@ -191,7 +193,6 @@ auto fit(
         safe_bool_t
     >;
 
-    auto& glm = *state.glm;
     auto& X = *state.X;
     const auto& y0 = state.y;
     const auto& groups = state.groups;
@@ -424,13 +425,17 @@ size_t kkt(
 }
 
 template <class StateType,
+          class GlmType,
+          class UpdateDevNullType,
           class UpdateCoefficientsType,
-          class CUIType=util::no_op>
+          class CUIType>
 inline void solve(
     StateType&& state,
+    GlmType&& glm,
     bool display,
+    UpdateDevNullType update_dev_null_f,
     UpdateCoefficientsType update_coefficients_f,
-    CUIType check_user_interrupt = CUIType()
+    CUIType check_user_interrupt
 )
 {
     using state_t = std::decay_t<StateType>;
@@ -483,7 +488,7 @@ inline void solve(
     // Initial fit with beta = 0 to get dev_null.
     // ==================================================================================== 
     if (setup_dev_null) {
-        update_dev_null(state, buffer_pack);
+        update_dev_null_f(state, glm, buffer_pack);
     }
 
     // ==================================================================================== 
@@ -498,6 +503,7 @@ inline void solve(
 
         fit(
             state,
+            glm,
             buffer_pack,
             large_lmda,
             update_coefficients_f,
@@ -560,6 +566,7 @@ inline void solve(
         for (int i = 0; i < large_lmda_path.size(); ++i) {
             auto tup = fit(
                 state, 
+                glm,
                 buffer_pack,
                 large_lmda_path[i], 
                 update_coefficients_f, 
@@ -572,8 +579,8 @@ inline void solve(
             if (i < large_lmda_path.size()-1) {
                 update_solutions(
                     state, 
+                    glm,
                     state_gaussian_pin_naive,
-                    buffer_pack,
                     large_lmda_path[i]
                 );
             // otherwise, put the state at the last fitted lambda (lmda_max)
@@ -656,6 +663,7 @@ inline void solve(
                 // This is needed in case we exit with exception and need to restore invariance.
                 auto tup = fit(
                     state,
+                    glm,
                     buffer_pack,
                     lmda_curr,
                     update_coefficients_f,
@@ -686,8 +694,8 @@ inline void solve(
                 if (kkt_passed) {
                     update_solutions(
                         state, 
+                        glm,
                         state_gaussian_pin_naive,
-                        buffer_pack,
                         lmda_curr
                     );
                 }
@@ -719,6 +727,30 @@ inline void solve(
 
         pb_add_suffix();
     }
+}
+
+template <class StateType,
+          class GlmType,
+          class UpdateCoefficientsType,
+          class CUIType=util::no_op>
+inline void solve(
+    StateType&& state,
+    GlmType&& glm,
+    bool display,
+    UpdateCoefficientsType update_coefficients_f,
+    CUIType check_user_interrupt = CUIType()
+)
+{
+    solve(
+        std::forward<StateType>(state), 
+        std::forward<GlmType>(glm), 
+        display, 
+        [](auto& state, auto& glm, auto& buffer_pack) {
+            update_dev_null(state, glm, buffer_pack);
+        },
+        update_coefficients_f, 
+        check_user_interrupt
+    );
 }
 
 } // namespace naive 

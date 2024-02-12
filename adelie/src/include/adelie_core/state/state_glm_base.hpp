@@ -5,14 +5,13 @@
 namespace adelie_core {
 namespace state {
 
-template <class GlmType,
+template <class ValueType,
           class IndexType=Eigen::Index,
           class BoolType=bool
         >
 struct StateGlmBase
 {
-    using glm_t = GlmType;
-    using value_t = typename glm_t::value_t;
+    using value_t = ValueType;
     using index_t = IndexType;
     using bool_t = BoolType;
     using safe_bool_t = int8_t;
@@ -60,7 +59,6 @@ struct StateGlmBase
     const value_t ddev_tol;
     const value_t newton_tol;
     const size_t newton_max_iters;
-
     const bool early_exit;
 
     // other configs
@@ -71,7 +69,6 @@ struct StateGlmBase
     const size_t n_threads;
 
     /* dynamic states */
-    glm_t* glm;
     value_t dev_null;
     value_t lmda_max;
     vec_value_t lmda_path;
@@ -108,7 +105,6 @@ struct StateGlmBase
     virtual ~StateGlmBase() =default;
 
     explicit StateGlmBase(
-        glm_t& glm,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
@@ -177,7 +173,6 @@ struct StateGlmBase
         setup_lmda_path(setup_lmda_path),
         intercept(intercept),
         n_threads(n_threads),
-        glm(&glm),
         dev_null(dev_null),
         lmda_max(lmda_max),
         lmda_path(lmda_path),

@@ -186,7 +186,7 @@ def snp_unphased(
     snr: float =1,
     seed: int =0,
 ):
-    """Creates a SNP Unphased dataset.
+    """Creates a SNP unphased dataset.
 
     - This dataset is only used for lasso, so ``groups`` is simply each individual feature
       and ``group_sizes`` is a vector of ones.
@@ -308,7 +308,7 @@ def snp_phased_ancestry(
     snr: float =1,
     seed: int =0,
 ):
-    """Creates a SNP Unphased dataset.
+    """Creates a SNP phased, ancestry dataset.
 
     - The groups and group sizes are generated randomly
       such that ``G`` groups are created and the sum of the group sizes is ``p``.

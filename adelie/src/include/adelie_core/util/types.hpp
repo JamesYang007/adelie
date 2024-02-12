@@ -33,13 +33,28 @@ enum class screen_rule_type
     _pivot
 };
 
-inline util::screen_rule_type convert_screen_rule(
+enum class multi_group_type
+{
+    _grouped,
+    _ungrouped
+};
+
+inline screen_rule_type convert_screen_rule(
     const std::string& rule
 )
 {
     if (rule == "strong") return screen_rule_type::_strong;
     if (rule == "pivot") return screen_rule_type::_pivot;
     throw std::runtime_error("Invalid screen rule type: " + rule);
+}
+
+inline multi_group_type convert_multi_group(
+    const std::string& group
+) 
+{
+    if (group == "grouped") return multi_group_type::_grouped;
+    if (group == "ungrouped") return multi_group_type::_ungrouped;
+    throw std::runtime_error("Invalid multi-response grouping type: " + group);
 }
 
 } // namespace util

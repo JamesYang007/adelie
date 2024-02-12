@@ -42,6 +42,7 @@ public:
     ) override
     {
         // numerically stable so that exp == 0 when y = 1 and eta = inf or y = 0 and eta = -inf.
+        // NOTE: this only works when y takes values in {0,1}
         return (weights * (1 + ((1-2*y) * eta).exp()).log()).sum();
     }
 

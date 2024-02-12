@@ -16,11 +16,14 @@ public:
 
     const string_t name;
     const bool is_multi = true;
+    const bool is_symmetric = false;
 
     explicit GlmMultiBase(
-        const string_t& name
+        const string_t& name,
+        bool is_symmetric
     ):
-        name(name)
+        name(name),
+        is_symmetric(is_symmetric)
     {}
 
     virtual ~GlmMultiBase() =default;
