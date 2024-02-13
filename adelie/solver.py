@@ -3,190 +3,9 @@ from . import adelie_core as core
 from . import logger
 from . import matrix
 from . import glm
-from scipy.sparse import csr_matrix
 import adelie as ad
 import numpy as np
 import warnings
-
-
-def objective(
-    *,
-    X: Union[matrix.MatrixNaiveBase32, matrix.MatrixNaiveBase64, np.ndarray], 
-    y: np.ndarray, 
-    betas: Union[np.ndarray, csr_matrix], 
-    intercepts: np.ndarray,
-    lmdas: np.ndarray, 
-    glm: Union[glm.GlmBase32, glm.GlmBase64] =glm.gaussian(),
-    groups: np.ndarray =None, 
-    alpha: float =1, 
-    penalty: np.ndarray =None,
-    weights: np.ndarray =None,
-    offsets: np.ndarray =None,
-    relative: bool =True,
-    add_penalty: bool =True,
-    n_threads: int =1,
-):
-    """Computes the group elastic net objective.
-
-    See ``adelie.solver.grpnet`` for details.
-
-    Parameters
-    ----------
-    X : (n, p) Union[adelie.matrix.MatrixNaiveBase32, adelie.matrix.MatrixNaiveBase64]
-        Feature matrix :math:`X`.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule or ``np.ndarray``.
-    y : (n,) or (n, K) np.ndarray
-        Response vector or multi-response matrix.
-    betas : (L, p) or (L, p*K) Union[np.ndarray, scipy.sparse.csr_matrix]
-        Coefficient vectors :math:`\\beta`.
-    intercepts : (L,) or (L, K) np.ndarray
-        Intercepts :math:`\\beta_0`.
-    lmdas : (L,) np.ndarray 
-        Regularization parameters :math:`\\lambda`.
-        It is only used when ``add_penalty=True``.
-        Otherwise, the user may pass ``None``.
-    glm : Union[glm.GlmBase32, glm.GlmBase64], optional
-        GLM object.
-        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
-        Default is ``adelie.glm.gaussian()``.
-    groups : (G,) np.ndarray, optional
-        List of starting indices to each group where `G` is the number of groups.
-        ``groups[i]`` is the starting index of the ``i`` th group. 
-        If ``glm`` is multi-response type, then we only allow two types of groupings:
-
-            - ``"grouped"``: coefficients for each predictor is grouped across the classes.
-            - ``"ungrouped"``: every coefficient is its own group.
-
-        It is only used when ``add_penalty=True``.
-        Default is ``None``, in which case it is set to
-        ``np.arange(p)`` if ``y`` is single-response
-        and ``"grouped"`` if multi-response.
-    alpha : float, optional
-        Elastic net parameter :math:`\\alpha`.
-        It must be in the range :math:`[0,1]`.
-        It is only used when ``add_penalty=True``.
-        Otherwise, the user may pass ``None``.
-        Default is ``1``.
-    penalty : (G,) np.ndarray, optional
-        Penalty factor for each group in the same order as ``groups``.
-        It must be a non-negative vector.
-        It is only used when ``add_penalty=True``.
-        Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
-    weights : (n,) np.ndarray, optional
-        Observation weights :math:`w`.
-        Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-        
-        .. note::
-            The user is responsible for making sure that ``weights`` and ``lmdas``
-            are under the same scale.
-            A common pitfall is passing unnormalized ``weights`` 
-            to ``adelie.solver.grpnet()`` and blindly using ``lmdas`` from the output.
-            Since ``adelie.solver.grpnet()`` always normalizes the weights,
-            the user must pass ``lmdas * np.sum(weights)`` to this function.
-
-    offsets : (n,) or (n, K) np.ndarray
-        Observation offsets :math:`\\eta^0`.
-        Default is ``None``, in which case, it is set to 
-        ``np.zeros(n)`` if ``y`` is single-response
-        and ``np.zeros((n, K))`` if multi-response.
-    relative : bool, optional
-        If ``True``, then the full deviance, :math:`D(\\eta^\\star)`, is computed at the saturated model
-        and the difference :math:`D(\\eta)-D(\\eta^\\star)` is provided,
-        which will always be non-negative.
-        This effectively computes deviance *relative* to the saturated model
-        rather than a fictitious model that achieves zero deviance.
-        Default is ``True``.
-    add_penalty : bool, optional
-        If ``False``, the regularization term is removed 
-        so that only the deviance part is calculated. 
-        Default is ``True``.
-    n_threads : int, optional
-        Number of threads.
-        Default is ``1``.
-    
-    Returns
-    -------
-    obj : (L,) np.ndarray
-        Group elastic net objectives.
-
-    See Also
-    --------
-    adelie.solver.grpnet
-    """
-    if glm.is_multi:
-        K = y.shape[1]
-        X = matrix.kronecker_eye(X, K, n_threads=n_threads)
-        n, p = X.rows() // K, X.cols() // K
-        if groups is None:
-            groups = "grouped"
-        if groups == "grouped":
-            groups = K * np.arange(p, dtype=int)
-        elif groups == "ungrouped":
-            groups = np.arange(K * p, dtype=int)
-        else:
-            raise RuntimeError(
-                "groups must be one of \"grouped\" or \"ungrouped\" for multi-response."
-            )
-        group_sizes = np.concatenate([groups, [p*K]], dtype=int)
-        group_sizes = group_sizes[1:] - group_sizes[:-1]
-    else:
-        if isinstance(X, np.ndarray):
-            X = matrix.dense(X, method="naive", n_threads=n_threads)
-        n, p = X.rows(), X.cols()
-        if groups is None:
-            groups = np.arange(p)
-        group_sizes = np.concatenate([groups, [p]], dtype=int)
-        group_sizes = group_sizes[1:] - group_sizes[:-1]
-
-    if penalty is None:
-        penalty = np.sqrt(group_sizes)
-    if weights is None:
-        weights = np.full(n, 1/n)
-    if offsets is None:
-        offsets = np.zeros(y.shape)
-
-    L = betas.shape[0]
-
-    # if numpy array, add an extra dimension to beta 
-    # for code consistency with sparse case.
-    etas = np.empty((L,) + y.shape, order="C")
-    ones = np.ones(X.rows())
-    if isinstance(betas, np.ndarray):
-        for i in range(etas.shape[0]):
-            X.btmul(0, X.cols(), betas[i], ones, etas[i].ravel())
-    elif isinstance(betas, csr_matrix):
-        X.sp_btmul(betas, ones, etas.reshape((L, -1))) 
-    else:
-        raise RuntimeError("beta is not one of np.ndarray or scipy.sparse.csr_matrix.")
-    etas += intercepts[:, None] + offsets
-
-    # compute deviance part
-    objs = np.array([
-        glm.deviance(y, etas[i], weights)
-        for i in range(etas.shape[0])
-    ])
-
-    # relative to saturated model
-    if relative:
-        objs -= glm.deviance_full(y, weights)
-
-    # compute regularization part
-    if add_penalty:
-        penalty_f = None
-        if isinstance(betas, np.ndarray):
-            penalty_f = core.solver.compute_penalty_dense
-        elif isinstance(betas, csr_matrix): 
-            penalty_f = core.solver.compute_penalty_sparse
-        objs += lmdas * penalty_f(
-            groups,
-            group_sizes,
-            penalty,
-            alpha,
-            betas,
-            n_threads,
-        )
-
-    return objs
 
 
 def _solve(state, progress_bar: bool =False):
@@ -380,6 +199,14 @@ def grpnet(
     where :math:`\\mathrm{vec}(x)` is the operator that flattens the input as column-major.
     Note that if ``intercept`` is ``True``, then an intercept for each class is provided
     as additional unpenalized features in the data matrix and the global intercept is turned off.
+
+    .. note::
+        Multi-response GLMs that are symmetric (i.e., ``glm.is_symmetric == True``)
+        may observe slow convergence due to the Hessian being singular.
+        This becomes especially pronounced when ``X`` has strongly correlated features.
+        Counter-intuitively, increasing ``tol`` such as ``1e-8`` may result in faster convergence
+        since the quadratic approximation finds a more accurate solution,
+        thereby warm-starting with a better initialization.
 
     Parameters
     ----------

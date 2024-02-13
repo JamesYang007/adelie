@@ -1154,6 +1154,7 @@ def _render_multi_input(
     *,
     X,
     y,
+    groups,
     offsets,
     intercept,
     n_threads,
@@ -1169,8 +1170,17 @@ def _render_multi_input(
             method="naive", 
             n_threads=n_threads,
         )
+
+    # G == (p+intercept) * K if and only if ungrouped
+    if groups.shape[0] == X.cols():
+        group_type = "ungrouped"
+    else:
+        if groups.shape[0] != X.cols() // n_classes + (n_classes - 1) * intercept:
+            raise RuntimeError("groups must be of the \"grouped\" or \"ungrouped\" type.")
+        group_type = "grouped"
+
     return (
-        X, y, offsets,
+        X, y, offsets, group_type
     )
     
 
@@ -2118,9 +2128,11 @@ def multigaussian_naive(
         X,
         y,
         offsets,
+        group_type,
     ) = _render_multi_input(
         X=X,
         y=y,
+        groups=groups,
         offsets=offsets,
         intercept=intercept,
         n_threads=n_threads,
@@ -2154,6 +2166,7 @@ def multigaussian_naive(
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
             core_base.__init__(
                 self,
+                group_type=group_type,
                 n_classes=n_classes,
                 multi_intercept=intercept,
                 X=self._X_expanded,
@@ -2857,21 +2870,15 @@ def multiglm_naive(
         X,
         y,
         offsets,
+        group_type,
     ) = _render_multi_input(
         X=X,
         y=y,
+        groups=groups,
         offsets=offsets,
         intercept=intercept,
         n_threads=n_threads,
     )
-
-    # G == (p+intercept) * K if and only if ungrouped
-    if groups.shape[0] == X.cols():
-        group_type = "ungrouped"
-    else:
-        if groups.shape[0] != X.cols() // n_classes + (n_classes - 1) * intercept:
-            raise RuntimeError("groups must be of the \"grouped\" or \"ungrouped\" type.")
-        group_type = "grouped"
 
     class _multiglm_naive(glm_naive_base, core_base):
         def __init__(self):

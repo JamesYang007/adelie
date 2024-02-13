@@ -53,6 +53,7 @@ adelie.diagnostic
     gradients
     gradient_norms
     gradient_scores
+    objective
     plot_benchmark
     plot_coefficients
     plot_devs
@@ -145,7 +146,6 @@ adelie.solver
 
 
     grpnet
-    objective
 
 
 Internal

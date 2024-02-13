@@ -29,21 +29,29 @@ inline void solve(
     auto& betas = state.betas;
     auto& intercepts = state.intercepts;
 
-    gaussian::naive::solve(
-        static_cast<state_gaussian_naive_t&>(state),
-        display,
-        update_coefficients_f,
-        check_user_interrupt
-    );
-
-    intercepts.resize(betas.size(), n_classes);
-    if (multi_intercept) {
-        for (int i = 0; i < betas.size(); ++i) {
-            intercepts.row(i) = Eigen::Map<const vec_value_t>(betas[i].valuePtr(), n_classes);
-            betas[i] = betas[i].tail(betas[i].size() - n_classes);
+    const auto tidy = [&]() {
+        intercepts.resize(betas.size(), n_classes);
+        if (multi_intercept) {
+            for (int i = 0; i < betas.size(); ++i) {
+                intercepts.row(i) = Eigen::Map<const vec_value_t>(betas[i].valuePtr(), n_classes);
+                betas[i] = betas[i].tail(betas[i].size() - n_classes);
+            }
+        } else {
+            intercepts.setZero();
         }
-    } else {
-        intercepts.setZero();
+    };
+
+    try {
+        gaussian::naive::solve(
+            static_cast<state_gaussian_naive_t&>(state),
+            display,
+            update_coefficients_f,
+            check_user_interrupt
+        );
+        tidy();
+    } catch(...) {
+        tidy();
+        throw;
     }
 }
 
