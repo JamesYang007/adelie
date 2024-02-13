@@ -3,6 +3,8 @@ from . import adelie_core as core
 from .adelie_core.glm import (
     GlmBase64,
     GlmBase32,
+    GlmMultiBase64,
+    GlmMultiBase32,
 )
 import numpy as np
 
@@ -44,6 +46,8 @@ def gaussian(
 
     .. math::
         \\begin{align*}
+            \\ell(\\eta)
+            =
             \\sum\\limits_{i=1}^n w_i \\left(
                 -y_i \\eta_i + \\frac{\\eta_i^2}{2}
             \\right) 
@@ -95,22 +99,21 @@ def multigaussian(
     dtype: Union[np.float32, np.float64] =np.float64,
     opt: bool =True,
 ):
-    """Creates a Multi-Response Gaussian GLM family object.
+    """Creates a Multi-response Gaussian GLM family object.
 
     The Multi-Response Gaussian GLM family specifies the loss function as:
 
     .. math::
         \\begin{align*}
+            \\ell(\\eta)
+            =
+            \\frac{1}{K}
             \\sum\\limits_{i=1}^n 
-            \\sum\\limits_{k=1}^K 
-            w_{ik} \\left(
-                -y_{ik} \\eta_{ik} + \\frac{\\eta_{ik}^2}{2}
+            w_{i} \\left(
+                -\\sum\\limits_{k=1}^K y_{ik} \\eta_{ik} 
+                +\\frac{\\|\\eta_{i\\cdot}\\|^2}{2}
             \\right)
         \\end{align*}
-
-    Implementation-wise, it is no different from ``adelie.glm.gaussian``,
-    however, it allows ``adelie.grpnet`` to interpret the inputs such as ``X``, ``y``, and ``w``
-    differently so that they are reshaped properly.
 
     Parameters
     ----------
@@ -127,7 +130,7 @@ def multigaussian(
     Returns
     -------
     glm
-        Multi-Response Gaussian GLM object.
+        Multi-response Gaussian GLM object.
 
     See Also
     --------
@@ -163,6 +166,8 @@ def binomial(
 
     .. math::
         \\begin{align*}
+            \\ell(\\eta)
+            =
             \\sum\\limits_{i=1}^n w_i \\left(
                 -y_i \\eta_i + \\log(1 + e^{\\eta_i})
             \\right)
@@ -205,7 +210,6 @@ def binomial(
 
 
 def multinomial(
-    K: int,
     *,
     dtype: Union[np.float32, np.float64] =np.float64,
 ):
@@ -215,48 +219,25 @@ def multinomial(
 
     .. math::
         \\begin{align*}
+            \\ell(\\eta)
+            =
+            \\frac{1}{K}
             \\sum\\limits_{i=1}^n 
             w_i
             \\left(
             -\\sum\\limits_{k=1}^{K} y_{ik} \\eta_{ik} 
             + \\log\\left(
-                1 + \\sum\\limits_{\\ell=1}^{K} e^{\\eta_{i\\ell}}
+                \\sum\\limits_{\\ell=1}^{K} e^{\\eta_{i\\ell}}
             \\right)
             \\right)
         \\end{align*}
 
     We assume that every :math:`y_{ik} \\in \\{0,1\\}` and
     for each fixed :math:`i`, 
-    there is at most one :math:`k` such that :math:`y_{ik} = 1`.
-    Here, :math:`K+1` is the total number of classes,
-    however only the first :math:`K` classes are needed since 
-    the probability estimate for the last class is fully determined by them.
+    there is excatly one :math:`k` such that :math:`y_{ik} = 1`.
 
-    .. note::
-        We may think of the weights as :math:`w_{ik} = w_i`
-        with log-partition function as 
-        
-        .. math::
-            \\begin{align*}
-                A(\\eta) 
-                &= 
-                \\sum\\limits_{i=1}^n 
-                \\sum\\limits_{k=1}^{K} 
-                w_{ik} A_{ik}(\\eta)
-                \\\\
-                A_{ik}(\\eta)
-                &=
-                \\frac{1}{K}
-                \\log\\left(1 + \\sum\\limits_{\\ell=1}^{K} e^{\\eta_{i\\ell}} \\right)
-            \\end{align*}
-
-        Hence, all weights will be of length :math:`nK` and it can be assumed that
-        for each :math:`i`, :math:`w_{ik}` is identical across :math:`k`.
-    
     Parameters
     ----------
-    K : int
-        Number of effective classes.
     dtype : Union[np.float32, np.float64], optional
         The underlying data type.
         Default is ``np.float64``.
@@ -268,7 +249,7 @@ def multinomial(
 
     See Also
     --------
-    adelie.glm.GlmBase64
+    adelie.glm.GlmMultiBase64
     """
     dispatcher = {
         np.float64: core.glm.GlmMultinomial64,
@@ -280,14 +261,13 @@ def multinomial(
     class _multinomial(core_base, glm_base):
         def __init__(
             self,
-            K,
         ):
-            core_base.__init__(self, K)
+            core_base.__init__(self)
 
         def sample(self, mu):
             return np.random.multinomial(1, mu)
 
-    return _multinomial(K)
+    return _multinomial()
 
 
 def poisson(
@@ -300,6 +280,8 @@ def poisson(
 
     .. math::
         \\begin{align*}
+            \\ell(\\eta)
+            =
             \\sum\\limits_{i=1}^n w_i \\left(
                 -y_i \\eta_i + e^{\\eta_i}
             \\right) 

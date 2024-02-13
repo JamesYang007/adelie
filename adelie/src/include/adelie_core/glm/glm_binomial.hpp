@@ -13,7 +13,7 @@ public:
     using typename base_t::vec_value_t;
 
     explicit GlmBinomial():
-        base_t("binomial", false)
+        base_t("binomial")
     {}
 
     void gradient(
@@ -35,17 +35,18 @@ public:
         var = (mu * (weights-mu)) / (weights + (weights <= 0).template cast<value_t>());
     }
 
-    value_t deviance(
+    value_t loss(
         const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& eta,
         const Eigen::Ref<const vec_value_t>& weights
     ) override
     {
         // numerically stable so that exp == 0 when y = 1 and eta = inf or y = 0 and eta = -inf.
+        // NOTE: this only works when y takes values in {0,1}
         return (weights * (1 + ((1-2*y) * eta).exp()).log()).sum();
     }
 
-    value_t deviance_full(
+    value_t loss_full(
         const Eigen::Ref<const vec_value_t>&,
         const Eigen::Ref<const vec_value_t>& 
     ) override

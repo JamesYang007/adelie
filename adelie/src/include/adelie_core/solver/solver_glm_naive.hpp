@@ -54,23 +54,22 @@ struct GlmNaiveBufferPack
 };
 
 template <class StateType, 
-          class ValueType,
-          class StateGaussianPinType, 
-          class BufferPackType>
+          class GlmType,
+          class StateGaussianPinType,
+          class ValueType>
 ADELIE_CORE_STRONG_INLINE
 void update_solutions(
     StateType& state,
+    GlmType& glm,
     StateGaussianPinType& state_gaussian_pin_naive,
-    BufferPackType& buffer_pack,
     ValueType lmda
 )
 {
-    const auto dev_null = state.dev_null;
-    const auto dev_full = state.dev_full;
+    const auto loss_null = state.loss_null;
+    const auto loss_full = state.loss_full;
     const auto& y0 = state.y;
     const auto& weights0 = state.weights;
     const auto& eta = state.eta;
-    auto& glm = *state.glm;
     auto& betas = state.betas;
     auto& devs = state.devs;
     auto& lmdas = state.lmdas;
@@ -80,18 +79,20 @@ void update_solutions(
     intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
     lmdas.emplace_back(lmda);
 
-    const auto dev = glm.deviance(y0, eta, weights0);
+    const auto loss = glm.loss(y0, eta, weights0);
     devs.emplace_back(
-        (dev_null - dev) /
-        (dev_null - dev_full)
+        (loss_null - loss) /
+        (loss_null - loss_full)
     );
 }
 
 template <class StateType,
+          class GlmType,
           class BufferPackType>
 ADELIE_CORE_STRONG_INLINE
-void update_dev_null(
+void update_loss_null(
     StateType& state,
+    GlmType& glm,
     BufferPackType& buffer_pack
 )
 {
@@ -103,11 +104,10 @@ void update_dev_null(
     const auto& weights0 = state.weights;
     const auto& offsets = state.offsets;
     const auto intercept = state.intercept;
-    auto& glm = *state.glm;
-    auto& dev_null = state.dev_null;
+    auto& loss_null = state.loss_null;
 
     if (!intercept) {
-        dev_null = glm.deviance(y0, offsets, weights0);
+        loss_null = glm.loss(y0, offsets, weights0);
         return;
     }
 
@@ -115,7 +115,7 @@ void update_dev_null(
     const auto irls_tol = state.irls_tol;
 
     // make copies since we do not want to mess with the warm-start.
-    // this function is only needed to fit intercept-only model and get dev_null.
+    // this function is only needed to fit intercept-only model and get loss_null.
     value_t beta0 = state.beta0;
     vec_value_t eta = state.eta;
     vec_value_t mu = state.mu;
@@ -154,7 +154,7 @@ void update_dev_null(
 
         /* check convergence */
         if ((mu - mu_prev).square().sum() <= irls_tol) {
-            dev_null = glm.deviance(y0, eta, weights0);
+            loss_null = glm.loss(y0, eta, weights0);
             return;
         }
 
@@ -163,15 +163,19 @@ void update_dev_null(
 }
 
 template <class StateType,
+          class GlmType,
           class BufferPackType,
           class ValueType,
+          class UpdateSymmetricType,
           class UpdateCoefficientsType,
           class CUIType=util::no_op>
 ADELIE_CORE_STRONG_INLINE
 auto fit(
     StateType& state,
+    GlmType& glm,
     BufferPackType& buffer_pack,
     ValueType lmda,
+    UpdateSymmetricType update_symmetric_f,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
@@ -191,7 +195,6 @@ auto fit(
         safe_bool_t
     >;
 
-    auto& glm = *state.glm;
     auto& X = *state.X;
     const auto& y0 = state.y;
     const auto& groups = state.groups;
@@ -362,6 +365,8 @@ auto fit(
             intercept * (beta0 - y_mean)
         );
 
+        update_symmetric_f(state, glm, buffer_pack);
+
         // update mu
         mu_prev.swap(mu);
         glm.gradient(eta, weights0, mu); 
@@ -424,13 +429,19 @@ size_t kkt(
 }
 
 template <class StateType,
+          class GlmType,
+          class UpdateDevNullType,
+          class UpdateSymmetricType,
           class UpdateCoefficientsType,
-          class CUIType=util::no_op>
+          class CUIType>
 inline void solve(
     StateType&& state,
+    GlmType&& glm,
     bool display,
+    UpdateDevNullType update_loss_null_f,
+    UpdateSymmetricType update_symmetric_f,
     UpdateCoefficientsType update_coefficients_f,
-    CUIType check_user_interrupt = CUIType()
+    CUIType check_user_interrupt
 )
 {
     using state_t = std::decay_t<StateType>;
@@ -446,7 +457,7 @@ inline void solve(
     const auto& screen_set = state.screen_set;
     const auto early_exit = state.early_exit;
     const auto max_screen_size = state.max_screen_size;
-    const auto setup_dev_null = state.setup_dev_null;
+    const auto setup_loss_null = state.setup_loss_null;
     const auto setup_lmda_max = state.setup_lmda_max;
     const auto setup_lmda_path = state.setup_lmda_path;
     const auto lmda_path_size = state.lmda_path_size;
@@ -480,10 +491,10 @@ inline void solve(
     auto& buffer_n = buffer_pack.buffer_n;
 
     // ==================================================================================== 
-    // Initial fit with beta = 0 to get dev_null.
+    // Initial fit with beta = 0 to get loss_null.
     // ==================================================================================== 
-    if (setup_dev_null) {
-        update_dev_null(state, buffer_pack);
+    if (setup_loss_null) {
+        update_loss_null_f(state, glm, buffer_pack);
     }
 
     // ==================================================================================== 
@@ -498,8 +509,10 @@ inline void solve(
 
         fit(
             state,
+            glm,
             buffer_pack,
             large_lmda,
+            update_symmetric_f,
             update_coefficients_f,
             check_user_interrupt
         );
@@ -560,8 +573,10 @@ inline void solve(
         for (int i = 0; i < large_lmda_path.size(); ++i) {
             auto tup = fit(
                 state, 
+                glm,
                 buffer_pack,
                 large_lmda_path[i], 
+                update_symmetric_f,
                 update_coefficients_f, 
                 check_user_interrupt
             );
@@ -572,8 +587,8 @@ inline void solve(
             if (i < large_lmda_path.size()-1) {
                 update_solutions(
                     state, 
+                    glm,
                     state_gaussian_pin_naive,
-                    buffer_pack,
                     large_lmda_path[i]
                 );
             // otherwise, put the state at the last fitted lambda (lmda_max)
@@ -656,8 +671,10 @@ inline void solve(
                 // This is needed in case we exit with exception and need to restore invariance.
                 auto tup = fit(
                     state,
+                    glm,
                     buffer_pack,
                     lmda_curr,
+                    update_symmetric_f,
                     update_coefficients_f,
                     check_user_interrupt
                 );
@@ -686,8 +703,8 @@ inline void solve(
                 if (kkt_passed) {
                     update_solutions(
                         state, 
+                        glm,
                         state_gaussian_pin_naive,
-                        buffer_pack,
                         lmda_curr
                     );
                 }
@@ -719,6 +736,31 @@ inline void solve(
 
         pb_add_suffix();
     }
+}
+
+template <class StateType,
+          class GlmType,
+          class UpdateCoefficientsType,
+          class CUIType=util::no_op>
+inline void solve(
+    StateType&& state,
+    GlmType&& glm,
+    bool display,
+    UpdateCoefficientsType update_coefficients_f,
+    CUIType check_user_interrupt = CUIType()
+)
+{
+    solve(
+        std::forward<StateType>(state), 
+        std::forward<GlmType>(glm), 
+        display, 
+        [](auto& state, auto& glm, auto& buffer_pack) {
+            update_loss_null(state, glm, buffer_pack);
+        },
+        [](auto&, auto&, auto&) {},
+        update_coefficients_f, 
+        check_user_interrupt
+    );
 }
 
 } // namespace naive 

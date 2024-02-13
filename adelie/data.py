@@ -26,17 +26,15 @@ def _sample_y(
         if not glm.is_multi:
             y = y.ravel()
     elif glm.name == "multinomial":
-        mu = np.empty((n, K-1), dtype=eta.dtype)
+        mu = np.empty((n, K), dtype=eta.dtype)
         glm.gradient(
-            snr * (eta[:,:-1] / np.sqrt(np.sum(beta**2, axis=0)[:-1])[None]).ravel(), 
-            np.ones(n*(K-1)), 
-            mu.ravel(),
+            snr * (eta / np.sqrt(np.sum(beta**2, axis=0))[None]), 
+            np.full(n, K), 
+            mu,
         )
-        mu = np.concatenate([mu, 1-np.sum(mu, axis=-1)[:, None]], axis=-1)
         y = np.empty(eta.shape, dtype=eta.dtype)
         for i in range(y.shape[0]):
             y[i] = glm.sample(mu[i])
-        y = np.array(y[:, :-1], order="C")
     else:
         eta = eta.ravel()
         mu = np.empty(eta.shape[0], dtype=eta.dtype)
@@ -188,7 +186,7 @@ def snp_unphased(
     snr: float =1,
     seed: int =0,
 ):
-    """Creates a SNP Unphased dataset.
+    """Creates a SNP unphased dataset.
 
     - This dataset is only used for lasso, so ``groups`` is simply each individual feature
       and ``group_sizes`` is a vector of ones.
@@ -310,7 +308,7 @@ def snp_phased_ancestry(
     snr: float =1,
     seed: int =0,
 ):
-    """Creates a SNP Unphased dataset.
+    """Creates a SNP phased, ancestry dataset.
 
     - The groups and group sizes are generated randomly
       such that ``G`` groups are created and the sum of the group sizes is ``p``.

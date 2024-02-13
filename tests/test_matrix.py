@@ -15,7 +15,6 @@ def run_naive(
     atol = 1e-5 if dtype == np.float32 else 1e-14
 
     w = np.random.uniform(1, 2, n).astype(dtype)
-    w = w / np.sum(w)
 
     # test cmul
     v = np.random.normal(0, 1, n).astype(dtype)
@@ -139,7 +138,7 @@ def test_naive_concat():
     dtypes = [np.float32, np.float64]
     ps = [1, 7, 41, 13, 113]
     for dtype in dtypes:
-        _test(2, ps, dtype)
+        _test(20, ps, dtype)
 
 
 def test_naive_dense():
@@ -174,7 +173,7 @@ def test_naive_kronecker_eye():
     orders = ["C", "F"]
     for dtype in dtypes:
         for order in orders:
-            _test(2, 2, 3, dtype, order)
+            _test(10, 1, 3, dtype, order)
             _test(100, 20, 2, dtype, order)
             _test(20, 100, 4, dtype, order)
 
@@ -194,7 +193,7 @@ def test_naive_kronecker_eye_dense():
     orders = ["C", "F"]
     for dtype in dtypes:
         for order in orders:
-            _test(2, 2, 3, dtype, order)
+            _test(10, 1, 3, dtype, order)
             _test(100, 20, 2, dtype, order)
 
 

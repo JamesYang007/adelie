@@ -13,7 +13,7 @@ public:
     using typename base_t::vec_value_t;
 
     explicit GlmGaussian():
-        base_t("gaussian", false)
+        base_t("gaussian")
     {}
 
     void gradient(
@@ -34,7 +34,7 @@ public:
         var = weights;
     }
 
-    value_t deviance(
+    value_t loss(
         const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& eta,
         const Eigen::Ref<const vec_value_t>& weights
@@ -43,7 +43,7 @@ public:
         return (weights * (0.5 * eta.square() - y * eta)).sum();
     }
 
-    value_t deviance_full(
+    value_t loss_full(
         const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& weights
     ) override

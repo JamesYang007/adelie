@@ -5,14 +5,13 @@
 namespace adelie_core {
 namespace state {
 
-template <class GlmType,
+template <class ValueType,
           class IndexType=Eigen::Index,
           class BoolType=bool
         >
 struct StateGlmBase
 {
-    using glm_t = GlmType;
-    using value_t = typename glm_t::value_t;
+    using value_t = ValueType;
     using index_t = IndexType;
     using bool_t = BoolType;
     using safe_bool_t = int8_t;
@@ -30,7 +29,7 @@ struct StateGlmBase
     using dyn_vec_sp_vec_t = std::vector<sp_vec_value_t>;
 
     /* static states */
-    const value_t dev_full;
+    const value_t loss_full;
     const map_cvec_index_t groups;
     const map_cvec_index_t group_sizes;
     const value_t alpha;
@@ -60,19 +59,17 @@ struct StateGlmBase
     const value_t ddev_tol;
     const value_t newton_tol;
     const size_t newton_max_iters;
-
     const bool early_exit;
 
     // other configs
-    const bool setup_dev_null;
+    const bool setup_loss_null;
     const bool setup_lmda_max;
     const bool setup_lmda_path;
     const bool intercept;
     const size_t n_threads;
 
     /* dynamic states */
-    glm_t* glm;
-    value_t dev_null;
+    value_t loss_null;
     value_t lmda_max;
     vec_value_t lmda_path;
 
@@ -108,7 +105,6 @@ struct StateGlmBase
     virtual ~StateGlmBase() =default;
 
     explicit StateGlmBase(
-        glm_t& glm,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
@@ -116,8 +112,8 @@ struct StateGlmBase
         const Eigen::Ref<const vec_value_t>& weights,
         const Eigen::Ref<const vec_value_t>& offsets,
         const Eigen::Ref<const vec_value_t>& lmda_path,
-        value_t dev_null,
-        value_t dev_full,
+        value_t loss_null,
+        value_t loss_full,
         value_t lmda_max,
         value_t min_ratio,
         size_t lmda_path_size,
@@ -136,7 +132,7 @@ struct StateGlmBase
         value_t newton_tol,
         size_t newton_max_iters,
         bool early_exit,
-        bool setup_dev_null,
+        bool setup_loss_null,
         bool setup_lmda_max,
         bool setup_lmda_path,
         bool intercept,
@@ -148,7 +144,7 @@ struct StateGlmBase
         value_t lmda,
         const Eigen::Ref<const vec_value_t>& grad
     ): 
-        dev_full(dev_full),
+        loss_full(loss_full),
         groups(groups.data(), groups.size()),
         group_sizes(group_sizes.data(), group_sizes.size()),
         alpha(alpha),
@@ -172,13 +168,12 @@ struct StateGlmBase
         newton_tol(newton_tol),
         newton_max_iters(newton_max_iters),
         early_exit(early_exit),
-        setup_dev_null(setup_dev_null),
+        setup_loss_null(setup_loss_null),
         setup_lmda_max(setup_lmda_max),
         setup_lmda_path(setup_lmda_path),
         intercept(intercept),
         n_threads(n_threads),
-        glm(&glm),
-        dev_null(dev_null),
+        loss_null(loss_null),
         lmda_max(lmda_max),
         lmda_path(lmda_path),
         screen_set(screen_set.data(), screen_set.data() + screen_set.size()),

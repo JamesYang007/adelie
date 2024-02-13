@@ -13,7 +13,7 @@ public:
     using typename base_t::vec_value_t;
 
     explicit GlmPoisson():
-        base_t("poisson", false)
+        base_t("poisson")
     {}
 
     void gradient(
@@ -34,7 +34,7 @@ public:
         var = mu;
     }
 
-    value_t deviance(
+    value_t loss(
         const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& eta,
         const Eigen::Ref<const vec_value_t>& weights
@@ -44,7 +44,7 @@ public:
         return (weights * ((-eta).min(std::numeric_limits<value_t>::max()) * y + eta.exp())).sum();
     }
 
-    value_t deviance_full(
+    value_t loss_full(
         const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& weights
     ) override

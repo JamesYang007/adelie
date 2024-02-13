@@ -1,80 +1,24 @@
 #pragma once
-#include <adelie_core/state/state_gaussian_naive.hpp>
-#include <adelie_core/state/state_glm_base.hpp>
+#include <adelie_core/state/state_glm_naive.hpp>
+#include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
 namespace state {
-namespace glm {
-namespace naive {
-
-/**
- * Unlike the similar function in gaussian::naive,
- * this does not call the base version to update the base classes's screen derived quantities.
- * This is because in GLM fitting, the three screen_* inputs are modified at every IRLS loop,
- * while the base quantities remain the same. 
- * It is only when IRLS finishes and we must screen for variables where we have to update the base quantities.
- * In gaussian naive setting, the IRLS has loop size of 1 essentially, so the two versions are synonymous.
- */
-template <class StateType, class XMType, class WType,
-          class SXMType, class STType, class SVType>
-void update_screen_derived(
-    StateType& state,
-    const XMType& X_means,
-    const WType& weights_sqrt,
-    size_t begin,
-    size_t size,
-    SXMType& screen_X_means,
-    STType& screen_transforms,
-    SVType& screen_vars
-)
-{
-    const auto& group_sizes = state.group_sizes;
-    const auto& screen_set = state.screen_set;
-    const auto& screen_begins = state.screen_begins;
-
-    const auto new_screen_size = screen_set.size();
-    const int new_screen_value_size = (
-        (screen_begins.size() == 0) ? 0 : (
-            screen_begins.back() + group_sizes[screen_set.back()]
-        )
-    );
-
-    screen_X_means.resize(new_screen_value_size);    
-    screen_transforms.resize(new_screen_size);
-    screen_vars.resize(new_screen_value_size, 0);
-
-    gaussian::naive::update_screen_derived(
-        *state.X,
-        X_means,
-        weights_sqrt,
-        state.groups,
-        state.group_sizes,
-        state.screen_set,
-        state.screen_begins,
-        begin,
-        size,
-        state.intercept,
-        screen_X_means,
-        screen_transforms,
-        screen_vars
-    );
-}
-
-} // namespace naive
-} // namespace glm
 
 template <class MatrixType, 
           class ValueType=typename std::decay_t<MatrixType>::value_t,
           class IndexType=Eigen::Index,
           class BoolType=bool
         >
-struct StateGlmNaive: StateGlmBase<
+struct StateMultiGlmNaive: StateGlmNaive<
+        MatrixType,
         ValueType,
         IndexType,
         BoolType
     >
 {
-    using base_t = StateGlmBase<
+    using base_t = StateGlmNaive<
+        MatrixType,
         ValueType,
         IndexType,
         BoolType
@@ -89,19 +33,23 @@ struct StateGlmNaive: StateGlmBase<
     using typename base_t::dyn_vec_value_t;
     using typename base_t::dyn_vec_index_t;
     using typename base_t::dyn_vec_bool_t;
-    using matrix_t = MatrixType;
+    using typename base_t::matrix_t;
+    using rowarr_value_t = util::rowarr_type<value_t>;
 
     /* static states */
-    const map_cvec_value_t y;
-
-    /* configurations */
+    const util::multi_group_type group_type;
+    const size_t n_classes;
+    const bool multi_intercept;
+    const map_cvec_value_t weights_orig;
 
     /* dynamic states */
-    matrix_t* X;
-    vec_value_t eta;
-    vec_value_t mu;
+    rowarr_value_t intercepts;
 
-    explicit StateGlmNaive(
+    explicit StateMultiGlmNaive(
+        const std::string& group_type,
+        size_t n_classes,
+        bool multi_intercept,
+        const Eigen::Ref<const vec_value_t>& weights_orig,
         matrix_t& X,
         const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& eta,
@@ -146,17 +94,17 @@ struct StateGlmNaive: StateGlmBase<
         const Eigen::Ref<const vec_value_t>& grad
     ):
         base_t(
-            groups, group_sizes, alpha, penalty, weights, offsets, lmda_path, 
+            X, y, eta, mu, groups, group_sizes, alpha, penalty, weights, offsets, lmda_path, 
             loss_null, loss_full, lmda_max, min_ratio, lmda_path_size, max_screen_size, max_active_size,
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             irls_max_iters, irls_tol, max_iters, tol, adev_tol, ddev_tol,
             newton_tol, newton_max_iters, early_exit, setup_loss_null, setup_lmda_max, setup_lmda_path, intercept, n_threads,
             screen_set, screen_beta, screen_is_active, beta0, lmda, grad
         ),
-        y(y.data(), y.size()),
-        X(&X),
-        eta(eta),
-        mu(mu)
+        group_type(util::convert_multi_group(group_type)),
+        n_classes(n_classes),
+        multi_intercept(multi_intercept),
+        weights_orig(weights_orig.data(), weights_orig.size())
     {}
 };
 

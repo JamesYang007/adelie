@@ -53,6 +53,7 @@ adelie.diagnostic
     gradients
     gradient_norms
     gradient_scores
+    objective
     plot_benchmark
     plot_coefficients
     plot_devs
@@ -129,6 +130,8 @@ adelie.state
     gaussian_pin_cov
     gaussian_pin_naive
     glm_naive
+    multigaussian_naive
+    multiglm_naive
 
 
 adelie.solver
@@ -143,10 +146,6 @@ adelie.solver
 
 
     grpnet
-    objective
-    solve_gaussian_pin
-    solve_gaussian
-    solve_glm
 
 
 Internal
@@ -165,7 +164,10 @@ Internal
     adelie_core.state.StateGaussianPinNaive64
     adelie_core.state.StateGaussianNaive64
     adelie_core.state.StateGlmNaive64
+    adelie_core.state.StateMultiGaussianNaive64
+    adelie_core.state.StateMultiGlmNaive64
     glm.GlmBase64
+    glm.GlmMultiBase64
     matrix.MatrixCovBase64
     matrix.MatrixNaiveBase64
     state.base

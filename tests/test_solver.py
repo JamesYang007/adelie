@@ -1,7 +1,8 @@
 from adelie.solver import (
+    _solve,
+)
+from adelie.diagnostic import (
     objective,
-    solve_gaussian_pin,
-    solve_gaussian,
 )
 import adelie as ad
 import cvxpy as cp
@@ -9,7 +10,7 @@ import numpy as np
 import os
 
 # ========================================================================
-# TEST solve_gaussian_pin
+# TEST _solve
 # ========================================================================
 
 def create_test_data_gaussian_pin(
@@ -109,13 +110,13 @@ def solve_cvxpy(
 def run_solve_gaussian_pin(state, X, y, weights):
     state.check(method="assert")
 
-    state = solve_gaussian_pin(state)    
+    state = _solve(state)    
 
     # get solved lmdas
     lmdas = state.lmdas
 
     # check beta matches (if not, at least that objective is better)
-    betas = state.betas.toarray()
+    betas = state.betas
     beta0s = state.intercepts
     cvxpy_res = [
         solve_cvxpy(
@@ -133,43 +134,33 @@ def run_solve_gaussian_pin(state, X, y, weights):
         )
         for lmda in lmdas
     ]
-    cvxpy_beta0s = [out[0] for out in cvxpy_res]
-    cvxpy_betas = [out[1] for out in cvxpy_res]
+    cvxpy_beta0s = np.array([out[0][0] for out in cvxpy_res])
+    cvxpy_betas = np.array([out[1] for out in cvxpy_res])
 
-    is_beta_close = np.allclose(betas, cvxpy_betas, atol=1e-6)
+    is_beta_close = np.allclose(betas.toarray(), cvxpy_betas, atol=1e-6)
     if not is_beta_close:
-        my_objs = np.array([
-            objective(
-                beta0=beta0,
-                beta=beta,
-                X=ad.matrix.dense(X),
-                y=y,
-                groups=state.groups,
-                group_sizes=state.group_sizes,
-                lmda=lmda,
-                alpha=state.alpha,
-                penalty=state.penalty,
-                weights=weights,
-                offsets=np.zeros_like(weights),
-            )
-            for beta0, beta, lmda in zip(beta0s, betas, lmdas)
-        ])
-        cvxpy_objs = np.array([
-            objective(
-                beta0=beta0,
-                beta=beta,
-                X=ad.matrix.dense(X),
-                y=y,
-                groups=state.groups,
-                group_sizes=state.group_sizes,
-                lmda=lmda,
-                alpha=state.alpha,
-                penalty=state.penalty,
-                weights=weights,
-                offsets=np.zeros_like(weights),
-            )
-            for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
-        ])
+        my_objs = objective(
+            X=X,
+            y=y,
+            betas=betas,
+            intercepts=beta0s,
+            lmdas=lmdas,
+            groups=state.groups,
+            alpha=state.alpha,
+            penalty=state.penalty,
+            weights=weights,
+        )
+        cvxpy_objs = objective(
+            X=X,
+            y=y,
+            betas=cvxpy_betas,
+            intercepts=cvxpy_beta0s,
+            lmdas=lmdas,
+            groups=state.groups,
+            alpha=state.alpha,
+            penalty=state.penalty,
+            weights=weights,
+        )
         assert np.all(my_objs <= cvxpy_objs * (1 + 1e-5))
 
     return state
@@ -396,7 +387,7 @@ def create_dense(
 def run_solve_gaussian(state, X, y):
     state.check(method="assert")
 
-    state = solve_gaussian(state)    
+    state = _solve(state)    
 
     state.check(method="assert")
 
@@ -404,7 +395,7 @@ def run_solve_gaussian(state, X, y):
     lmdas = state.lmdas
 
     # check beta matches (if not, at least that objective is better)
-    betas = state.betas.toarray()
+    betas = state.betas
     beta0s = state.intercepts
     cvxpy_res = [
         solve_cvxpy(
@@ -423,43 +414,35 @@ def run_solve_gaussian(state, X, y):
         for lmda in lmdas
     ]
 
-    cvxpy_beta0s = [out[0] for out in cvxpy_res]
-    cvxpy_betas = [out[1] for out in cvxpy_res]
+    cvxpy_beta0s = np.array([out[0][0] for out in cvxpy_res])
+    cvxpy_betas = np.array([out[1] for out in cvxpy_res])
 
-    is_beta_close = np.allclose(betas, cvxpy_betas, atol=1e-6)
+    is_beta_close = np.allclose(betas.toarray(), cvxpy_betas, atol=1e-6)
     if not is_beta_close:
-        my_objs = np.array([
-            objective(
-                beta0=beta0,
-                beta=beta,
-                X=ad.matrix.dense(X),
-                y=y,
-                groups=state.groups,
-                group_sizes=state.group_sizes,
-                lmda=lmda,
-                alpha=state.alpha,
-                penalty=state.penalty,
-                weights=state.weights,
-                offsets=state.offsets,
-            )
-            for beta0, beta, lmda in zip(beta0s, betas, lmdas)
-        ])
-        cvxpy_objs = np.array([
-            objective(
-                beta0=beta0,
-                beta=beta,
-                X=ad.matrix.dense(X),
-                y=y,
-                groups=state.groups,
-                group_sizes=state.group_sizes,
-                lmda=lmda,
-                alpha=state.alpha,
-                penalty=state.penalty,
-                weights=state.weights,
-                offsets=state.offsets,
-            )
-            for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
-        ])
+        my_objs = objective(
+            X=X,
+            y=y,
+            betas=betas,
+            intercepts=beta0s,
+            lmdas=lmdas,
+            groups=state.groups,
+            alpha=state.alpha,
+            penalty=state.penalty,
+            weights=state._weights,
+            offsets=state._offsets,
+        )
+        cvxpy_objs = objective(
+            X=X,
+            y=y,
+            betas=cvxpy_betas,
+            intercepts=cvxpy_beta0s,
+            lmdas=lmdas,
+            groups=state.groups,
+            alpha=state.alpha,
+            penalty=state.penalty,
+            weights=state._weights,
+            offsets=state._offsets,
+        )
         assert np.all(my_objs <= cvxpy_objs * (1 + 1e-8))
 
     return state
@@ -494,7 +477,7 @@ def test_solve_gaussian():
                 alpha=state.alpha,
                 penalty=state.penalty,
                 weights=state.weights,
-                offsets=state.offsets,
+                offsets=state._offsets,
                 screen_set=state.screen_set,
                 screen_beta=state.screen_beta,
                 screen_is_active=state.screen_is_active,
@@ -581,7 +564,7 @@ def test_solve_gaussian_concatenate():
         }
 
         for Xpy in Xs:
-            state_special = ad.solver.solve_gaussian(
+            state_special = ad.solver._solve(
                 ad.state.gaussian_naive(
                     X=Xpy,
                     **test_data,
@@ -592,7 +575,7 @@ def test_solve_gaussian_concatenate():
                 method="naive", 
                 n_threads=n_threads,
             )
-            state_dense = ad.solver.solve_gaussian(
+            state_dense = ad.solver._solve(
                 ad.state.gaussian_naive(
                     X=X_dense,
                     **test_data,
@@ -658,7 +641,7 @@ def test_solve_gaussian_snp_unphased():
 
         for Xpy in Xs:
             test_data["X"] = Xpy
-            state_special = ad.solver.solve_gaussian(
+            state_special = ad.solver._solve(
                 ad.state.gaussian_naive(**test_data),
             )
             test_data["X"] = ad.matrix.dense(
@@ -666,7 +649,7 @@ def test_solve_gaussian_snp_unphased():
                 method="naive", 
                 n_threads=n_threads,
             )
-            state_dense = ad.solver.solve_gaussian(
+            state_dense = ad.solver._solve(
                 ad.state.gaussian_naive(**test_data),
             )
 
@@ -732,7 +715,7 @@ def test_solve_gaussian_snp_phased_ancestry():
 
         for Xpy in Xs:
             test_data["X"] = Xpy
-            state_special = ad.solver.solve_gaussian(
+            state_special = ad.solver._solve(
                 ad.state.gaussian_naive(**test_data),
             )
             test_data["X"] = ad.matrix.dense(
@@ -740,7 +723,7 @@ def test_solve_gaussian_snp_phased_ancestry():
                 method="naive", 
                 n_threads=n_threads,
             )
-            state_dense = ad.solver.solve_gaussian(
+            state_dense = ad.solver._solve(
                 ad.state.gaussian_naive(**test_data),
             )
 
