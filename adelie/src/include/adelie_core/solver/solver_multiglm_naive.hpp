@@ -1,4 +1,5 @@
 #pragma once
+#include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/solver/solver_glm_naive.hpp>
 
 namespace adelie_core {
@@ -161,15 +162,8 @@ void update_dev_null(
         );
         beta0 = (weights_arr * y_arr).colwise().sum() / weights_arr.colwise().sum();
 
-        if (glm.is_symmetric) {
-            if (state.group_type == util::multi_group_type::_grouped) {
-                //beta0 -= beta0.mean();
-            } else if (state.group_type == util::multi_group_type::_ungrouped) {
-                // TODO
-            } else {
-                throw std::runtime_error("Unexpected multi-response group type!");
-            }
-        }
+        // TODO: this doesn't seem necessary either..
+        //if (glm.is_symmetric) beta0 -= beta0.mean();
 
         // update eta
         Eigen::Map<rowarr_value_t> eta_arr(
@@ -191,6 +185,64 @@ void update_dev_null(
         }
 
         ++irls_it;
+    }
+}
+
+/**
+ * TODO: glmnet performs a modification to the coefficients to accelerate convergence
+ * for the case when the log-likelihood is symmetric in the groups (e.g. multinomial).
+ * Doesn't seem to work well...
+ */
+template <class StateType,
+          class GlmType,
+          class BufferPackType,
+          class OnesType>
+inline void update_symmetric(
+    StateType& state,
+    GlmType& glm,
+    BufferPackType& buffer_pack,
+    const OnesType& ones
+)
+{
+    using state_t = std::decay_t<StateType>;
+    using vec_value_t = typename state_t::vec_value_t;
+
+    if (!glm.is_symmetric) return;
+
+    const auto group_type = state.group_type;
+    const auto& groups = state.groups;
+    const auto& group_sizes = state.group_sizes;
+    const auto& screen_set = state.screen_set;
+    const auto& screen_begins = state.screen_begins;
+    const auto& screen_is_active = state.screen_is_active;
+    const auto n_threads = state.n_threads;
+    auto& X = *state.X;
+    auto& screen_beta = state.screen_beta;
+    auto& eta = state.eta;
+    auto& buffer_n = buffer_pack.buffer_n;
+
+    const auto n = X.rows();
+
+    if (group_type == util::multi_group_type::_grouped) {
+        for (int ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) {
+            const auto ss = screen_set[ss_idx];
+            const auto sb = screen_begins[ss_idx];
+            const auto g = groups[ss];
+            const auto gs = group_sizes[ss];
+
+            if (!screen_is_active[ss_idx]) continue;
+
+            Eigen::Map<vec_value_t> beta_g(screen_beta.data() + sb, gs);
+            const auto beta_g_mean = beta_g.mean();
+            beta_g -= beta_g_mean;
+
+            X.btmul(g, gs, ones.head(gs), ones.head(n), buffer_n);
+            matrix::dvsubi(eta, beta_g_mean * buffer_n, n_threads);
+        }
+    } else if (group_type == util::multi_group_type::_ungrouped) {
+        // TODO
+    } else {
+        throw std::runtime_error("Group type must be _grouped or _ungrouped.");
     }
 }
 
@@ -219,26 +271,43 @@ inline void solve(
 
     GlmWrap<glm_t> glm_wrap(glm, n_classes, weights_orig);
 
-    glm::naive::solve(
-        static_cast<state_glm_naive_t&>(state),
-        glm_wrap,
-        display,
-        [&](auto&, auto& glm, auto& buffer_pack) {
-            // ignore casted down state and use derived state
-            multiglm::naive::update_dev_null(state, glm, buffer_pack);
-        },
-        update_coefficients_f,
-        check_user_interrupt
-    );
-
-    intercepts.resize(betas.size(), n_classes);
-    if (multi_intercept) {
-        for (int i = 0; i < betas.size(); ++i) {
-            intercepts.row(i) = Eigen::Map<const vec_value_t>(betas[i].valuePtr(), n_classes);
-            betas[i] = betas[i].tail(betas[i].size() - n_classes);
+    const auto tidy = [&]() {
+        intercepts.resize(betas.size(), n_classes);
+        if (multi_intercept) {
+            for (int i = 0; i < betas.size(); ++i) {
+                intercepts.row(i) = Eigen::Map<const vec_value_t>(betas[i].valuePtr(), n_classes);
+                betas[i] = betas[i].tail(betas[i].size() - n_classes);
+            }
+        } else {
+            intercepts.setZero();
         }
-    } else {
-        intercepts.setZero();
+    };
+
+    // TODO: only needed for the update_symmetric.
+    //vec_value_t ones = vec_value_t::Ones(
+    //    std::max<size_t>(n_classes, state.X->rows())
+    //);
+
+    try {
+        glm::naive::solve(
+            static_cast<state_glm_naive_t&>(state),
+            glm_wrap,
+            display,
+            [&](auto&, auto& glm, auto& buffer_pack) {
+                // ignore casted down state and use derived state
+                multiglm::naive::update_dev_null(state, glm, buffer_pack);
+            },
+            [&](auto&, auto& glm, auto& buffer_pack) {
+                // TODO: keep? This update doesn't seem to make things converge.
+                //multiglm::naive::update_symmetric(state, glm, buffer_pack, ones);
+            },
+            update_coefficients_f,
+            check_user_interrupt
+        );
+        tidy();
+    } catch(...) {
+        tidy();
+        throw;
     }
 }
 

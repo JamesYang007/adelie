@@ -166,6 +166,7 @@ template <class StateType,
           class GlmType,
           class BufferPackType,
           class ValueType,
+          class UpdateSymmetricType,
           class UpdateCoefficientsType,
           class CUIType=util::no_op>
 ADELIE_CORE_STRONG_INLINE
@@ -174,6 +175,7 @@ auto fit(
     GlmType& glm,
     BufferPackType& buffer_pack,
     ValueType lmda,
+    UpdateSymmetricType update_symmetric_f,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
@@ -363,6 +365,8 @@ auto fit(
             intercept * (beta0 - y_mean)
         );
 
+        update_symmetric_f(state, glm, buffer_pack);
+
         // update mu
         mu_prev.swap(mu);
         glm.gradient(eta, weights0, mu); 
@@ -427,6 +431,7 @@ size_t kkt(
 template <class StateType,
           class GlmType,
           class UpdateDevNullType,
+          class UpdateSymmetricType,
           class UpdateCoefficientsType,
           class CUIType>
 inline void solve(
@@ -434,6 +439,7 @@ inline void solve(
     GlmType&& glm,
     bool display,
     UpdateDevNullType update_dev_null_f,
+    UpdateSymmetricType update_symmetric_f,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt
 )
@@ -506,6 +512,7 @@ inline void solve(
             glm,
             buffer_pack,
             large_lmda,
+            update_symmetric_f,
             update_coefficients_f,
             check_user_interrupt
         );
@@ -569,6 +576,7 @@ inline void solve(
                 glm,
                 buffer_pack,
                 large_lmda_path[i], 
+                update_symmetric_f,
                 update_coefficients_f, 
                 check_user_interrupt
             );
@@ -666,6 +674,7 @@ inline void solve(
                     glm,
                     buffer_pack,
                     lmda_curr,
+                    update_symmetric_f,
                     update_coefficients_f,
                     check_user_interrupt
                 );
@@ -748,6 +757,7 @@ inline void solve(
         [](auto& state, auto& glm, auto& buffer_pack) {
             update_dev_null(state, glm, buffer_pack);
         },
+        [](auto&, auto&, auto&) {},
         update_coefficients_f, 
         check_user_interrupt
     );

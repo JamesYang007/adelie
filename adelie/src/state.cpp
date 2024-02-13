@@ -1052,6 +1052,7 @@ void state_multigaussian_naive(py::module_& m, const char* name)
     using vec_bool_t = typename state_t::vec_bool_t;
     py::class_<state_t, base_t, PyStateMultiGaussianNaive<matrix_t>>(m, name)
         .def(py::init<
+            const std::string&,
             size_t,
             bool,
             matrix_t&,
@@ -1093,6 +1094,7 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             value_t,
             const Eigen::Ref<const vec_value_t>& 
         >(),
+            py::arg("group_type"),
             py::arg("n_classes"),
             py::arg("multi_intercept"),
             py::arg("X"),
@@ -1135,6 +1137,17 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             py::arg("grad").noconvert()
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
+        .def_property_readonly("group_type", [](const state_t& s) -> std::string {
+            switch (s.group_type) {
+                case ad::util::multi_group_type::_grouped:
+                    return "grouped";
+                case ad::util::multi_group_type::_ungrouped:
+                    return "ungrouped";
+            }
+            throw std::runtime_error("Invalid multi-response group type!");
+        }, R"delimiter(
+        Multi-response group type.
+        )delimiter")
         .def_readonly("n_classes", &state_t::n_classes, R"delimiter(
         Number of classes.
         )delimiter")
