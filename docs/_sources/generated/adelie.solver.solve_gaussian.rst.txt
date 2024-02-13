@@ -1,6 +1,0 @@
-﻿adelie.solver.solve\_gaussian
-=============================
-
-.. currentmodule:: adelie.solver
-
-.. autofunction:: solve_gaussian

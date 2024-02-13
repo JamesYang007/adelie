@@ -1,9 +1,9 @@
-﻿adelie.glm.GlmBase64
-====================
+﻿adelie.glm.GlmMultiBase64
+=========================
 
 .. currentmodule:: adelie.glm
 
-.. autoclass:: GlmBase64
+.. autoclass:: GlmMultiBase64
 
    
    
@@ -11,11 +11,11 @@
 
    .. autosummary::
    
-      ~GlmBase64.__init__
-      ~GlmBase64.gradient
-      ~GlmBase64.hessian
-      ~GlmBase64.loss
-      ~GlmBase64.loss_full
+      ~GlmMultiBase64.__init__
+      ~GlmMultiBase64.gradient
+      ~GlmMultiBase64.hessian
+      ~GlmMultiBase64.loss
+      ~GlmMultiBase64.loss_full
    
    
 
@@ -25,8 +25,9 @@
 
    .. autosummary::
    
-      ~GlmBase64.is_multi
-      ~GlmBase64.name
+      ~GlmMultiBase64.is_multi
+      ~GlmMultiBase64.is_symmetric
+      ~GlmMultiBase64.name
    
    
 
@@ -45,6 +46,7 @@
    
    
    .. autoattribute:: is_multi
+   .. autoattribute:: is_symmetric
    .. autoattribute:: name
    
    

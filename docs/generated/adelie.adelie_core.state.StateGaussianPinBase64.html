@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.adelie_core.state.StateGaussianPinBase64 &#8212; adelie 1.1.9
+    <title>adelie.adelie_core.state.StateGaussianPinBase64 &#8212; adelie 1.1.10
  documentation</title>
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=7b68ca77"></script>
+    <script src="../_static/documentation_options.js?v=25b84aaa"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -47,7 +47,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="adelie.adelie_core.state.StateGaussianPinCov64" href="adelie.adelie_core.state.StateGaussianPinCov64.html" />
-    <link rel="prev" title="adelie.solver.solve_glm" href="adelie.solver.solve_glm.html" />
+    <link rel="prev" title="adelie.solver.grpnet" href="adelie.solver.grpnet.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.9
+    <p class="title logo__title">adelie 1.1.10
  documentation</p>
   
 </a></div>
@@ -334,6 +334,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.objective.html">adelie.diagnostic.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_devs.html">adelie.diagnostic.plot_devs</a></li>
@@ -366,13 +367,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.glm_naive.html">adelie.state.glm_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multigaussian_naive.html">adelie.state.multigaussian_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian_pin.html">adelie.solver.solve_gaussian_pin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian.html">adelie.solver.solve_gaussian</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_glm.html">adelie.solver.solve_glm</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
@@ -380,7 +379,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive64.html">adelie.adelie_core.state.StateMultiGlmNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmBase64.html">adelie.glm.GlmBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmMultiBase64.html">adelie.glm.GlmMultiBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
@@ -486,7 +488,7 @@ document.write(`
 <td><p>Benchmark time for performing coordinate-descent on the screen set for each <span class="math notranslate nohighlight">\(\lambda\)</span>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.betas" title="adelie.adelie_core.state.StateGaussianPinBase64.betas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">betas</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> corresponds to the solution corresponding to <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> is the solution at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.ddev_tol" title="adelie.adelie_core.state.StateGaussianPinBase64.ddev_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ddev_tol</span></code></a></p></td>
 <td><p>Difference in percent deviance explained tolerance.</p></td>
@@ -498,7 +500,7 @@ document.write(`
 <td><p>List of starting indices to each group where <cite>G</cite> is the number of groups.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.intercept" title="adelie.adelie_core.state.StateGaussianPinBase64.intercept"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercept</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> to fit with intercept.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should fit with intercept.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.intercepts" title="adelie.adelie_core.state.StateGaussianPinBase64.intercepts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercepts</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">intercepts[i]</span></code> is the intercept at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
@@ -507,10 +509,10 @@ document.write(`
 <td><p>Number of coordinate descents taken.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.lmda_path" title="adelie.adelie_core.state.StateGaussianPinBase64.lmda_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_path</span></code></a></p></td>
-<td><p>Regularization sequence to fit on.</p></td>
+<td><p>The regularization path to solve for.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.lmdas" title="adelie.adelie_core.state.StateGaussianPinBase64.lmdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code> corresponds to the regularization <span class="math notranslate nohighlight">\(\lambda\)</span> used for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th outputted solution.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code> is the regularization <span class="math notranslate nohighlight">\(\lambda\)</span> used for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th solution.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.max_active_size" title="adelie.adelie_core.state.StateGaussianPinBase64.max_active_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_active_size</span></code></a></p></td>
 <td><p>Maximum number of active groups allowed.</p></td>
@@ -531,10 +533,10 @@ document.write(`
 <td><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.rsq" title="adelie.adelie_core.state.StateGaussianPinBase64.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></p></td>
-<td><p>Unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> value at <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p></td>
+<td><p>The change in unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> given by  <span class="math notranslate nohighlight">\(\|y_c-X_c\beta_{\mathrm{old}}\|_{W}^2 - \|y_c-X_c\beta_{\mathrm{curr}}\|_{W}^2\)</span>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.rsqs" title="adelie.adelie_core.state.StateGaussianPinBase64.rsqs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsqs</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">rsqs[i]</span></code> corresponds to the unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rsqs[i]</span></code> is the unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.screen_begins" title="adelie.adelie_core.state.StateGaussianPinBase64.screen_begins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_begins</span></code></a></p></td>
 <td><p>List of indices that index a corresponding list of values for each screen group.</p></td>
@@ -561,7 +563,7 @@ document.write(`
 <td><p>List of <span class="math notranslate nohighlight">\(D_k^2\)</span> where <span class="math notranslate nohighlight">\(D_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span>  along the screen groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinBase64.tol" title="adelie.adelie_core.state.StateGaussianPinBase64.tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tol</span></code></a></p></td>
-<td><p>Convergence tolerance.</p></td>
+<td><p>Coordinate descent convergence tolerance.</p></td>
 </tr>
 </tbody>
 </table>
@@ -619,8 +621,7 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.alpha">
 <span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.alpha" title="Link to this definition">#</a></dt>
-<dd><p>Elastic net parameter.
-It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</span>.</p>
+<dd><p>Elastic net parameter.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -638,7 +639,7 @@ It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</sp
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.betas">
 <span class="sig-name descname"><span class="pre">betas</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.betas" title="Link to this definition">#</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> corresponds to the solution corresponding to <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> is the solution at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -664,7 +665,7 @@ It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</sp
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.intercept">
 <span class="sig-name descname"><span class="pre">intercept</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.intercept" title="Link to this definition">#</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> to fit with intercept.</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should fit with intercept.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -682,14 +683,14 @@ It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</sp
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.lmda_path">
 <span class="sig-name descname"><span class="pre">lmda_path</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.lmda_path" title="Link to this definition">#</a></dt>
-<dd><p>Regularization sequence to fit on.</p>
+<dd><p>The regularization path to solve for.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.lmdas">
 <span class="sig-name descname"><span class="pre">lmdas</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.lmdas" title="Link to this definition">#</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code> corresponds to the regularization <span class="math notranslate nohighlight">\(\lambda\)</span>
-used for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th outputted solution.</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code> is the regularization <span class="math notranslate nohighlight">\(\lambda\)</span>
+used for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th solution.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -725,21 +726,20 @@ used for the <code class="docutils literal notranslate"><span class="pre">i</spa
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.penalty">
 <span class="sig-name descname"><span class="pre">penalty</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.penalty" title="Link to this definition">#</a></dt>
-<dd><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.
-It must be a non-negative vector.</p>
+<dd><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.rsq">
 <span class="sig-name descname"><span class="pre">rsq</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.rsq" title="Link to this definition">#</a></dt>
-<dd><p>Unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> value at <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.
-The unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> is given by <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2 - \|y_c-X_c\beta\|_{W}^2\)</span>.</p>
+<dd><p>The change in unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> given by 
+<span class="math notranslate nohighlight">\(\|y_c-X_c\beta_{\mathrm{old}}\|_{W}^2 - \|y_c-X_c\beta_{\mathrm{curr}}\|_{W}^2\)</span>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.rsqs">
 <span class="sig-name descname"><span class="pre">rsqs</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.rsqs" title="Link to this definition">#</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">rsqs[i]</span></code> corresponds to the unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">rsqs[i]</span></code> is the unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -816,7 +816,7 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinBase64.tol">
 <span class="sig-name descname"><span class="pre">tol</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinBase64.tol" title="Link to this definition">#</a></dt>
-<dd><p>Convergence tolerance.</p>
+<dd><p>Coordinate descent convergence tolerance.</p>
 </dd></dl>
 
 </dd></dl>
@@ -834,12 +834,12 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.solver.solve_glm.html"
+       href="adelie.solver.grpnet.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.solver.solve_glm</p>
+        <p class="prev-next-title">adelie.solver.grpnet</p>
       </div>
     </a>
     <a class="right-next"

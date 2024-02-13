@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.glm.multinomial &#8212; adelie 1.1.9
+    <title>adelie.glm.multinomial &#8212; adelie 1.1.10
  documentation</title>
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=7b68ca77"></script>
+    <script src="../_static/documentation_options.js?v=25b84aaa"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.9
+    <p class="title logo__title">adelie 1.1.10
  documentation</p>
   
 </a></div>
@@ -334,6 +334,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.objective.html">adelie.diagnostic.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_devs.html">adelie.diagnostic.plot_devs</a></li>
@@ -366,13 +367,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.glm_naive.html">adelie.state.glm_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multigaussian_naive.html">adelie.state.multigaussian_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian_pin.html">adelie.solver.solve_gaussian_pin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian.html">adelie.solver.solve_gaussian</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_glm.html">adelie.solver.solve_glm</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
@@ -380,7 +379,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive64.html">adelie.adelie_core.state.StateMultiGlmNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmBase64.html">adelie.glm.GlmBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmMultiBase64.html">adelie.glm.GlmMultiBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
@@ -445,51 +447,29 @@ document.write(`
 <h1>adelie.glm.multinomial<a class="headerlink" href="#adelie-glm-multinomial" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.glm.multinomial">
-<span class="sig-prename descclassname"><span class="pre">adelie.glm.</span></span><span class="sig-name descname"><span class="pre">multinomial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">~numpy.float32</span> <span class="pre">|</span> <span class="pre">~numpy.float64</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.glm.multinomial" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.glm.</span></span><span class="sig-name descname"><span class="pre">multinomial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">~numpy.float32</span> <span class="pre">|</span> <span class="pre">~numpy.float64</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.glm.multinomial" title="Link to this definition">#</a></dt>
 <dd><p>Creates a Multinomial GLM family object.</p>
 <p>The Multinomial GLM family specifies the loss function as:</p>
 <div class="math notranslate nohighlight">
 \[\begin{align*}
+    \ell(\eta)
+    =
+    \frac{1}{K}
     \sum\limits_{i=1}^n 
     w_i
     \left(
     -\sum\limits_{k=1}^{K} y_{ik} \eta_{ik} 
     + \log\left(
-        1 + \sum\limits_{\ell=1}^{K} e^{\eta_{i\ell}}
+        \sum\limits_{\ell=1}^{K} e^{\eta_{i\ell}}
     \right)
     \right)
 \end{align*}\]</div>
 <p>We assume that every <span class="math notranslate nohighlight">\(y_{ik} \in \{0,1\}\)</span> and
 for each fixed <span class="math notranslate nohighlight">\(i\)</span>, 
-there is at most one <span class="math notranslate nohighlight">\(k\)</span> such that <span class="math notranslate nohighlight">\(y_{ik} = 1\)</span>.
-Here, <span class="math notranslate nohighlight">\(K+1\)</span> is the total number of classes,
-however only the first <span class="math notranslate nohighlight">\(K\)</span> classes are needed since 
-the probability estimate for the last class is fully determined by them.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>We may think of the weights as <span class="math notranslate nohighlight">\(w_{ik} = w_i\)</span>
-with log-partition function as</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}\begin{align*}
-    A(\eta) 
-    &amp;= 
-    \sum\limits_{i=1}^n 
-    \sum\limits_{k=1}^{K} 
-    w_{ik} A_{ik}(\eta)
-    \\
-    A_{ik}(\eta)
-    &amp;=
-    \frac{1}{K}
-    \log\left(1 + \sum\limits_{\ell=1}^{K} e^{\eta_{i\ell}} \right)
-\end{align*}\end{split}\]</div>
-<p>Hence, all weights will be of length <span class="math notranslate nohighlight">\(nK\)</span> and it can be assumed that
-for each <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(w_{ik}\)</span> is identical across <span class="math notranslate nohighlight">\(k\)</span>.</p>
-</div>
+there is excatly one <span class="math notranslate nohighlight">\(k\)</span> such that <span class="math notranslate nohighlight">\(y_{ik} = 1\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>K</strong><span class="classifier">int</span></dt><dd><p>Number of effective classes.</p>
-</dd>
 <dt><strong>dtype</strong><span class="classifier">Union[np.float32, np.float64], optional</span></dt><dd><p>The underlying data type.
 Default is <code class="docutils literal notranslate"><span class="pre">np.float64</span></code>.</p>
 </dd>
@@ -505,7 +485,7 @@ Default is <code class="docutils literal notranslate"><span class="pre">np.float
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="adelie.glm.GlmBase64.html#adelie.glm.GlmBase64" title="adelie.glm.GlmBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.glm.GlmBase64</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.glm.GlmMultiBase64.html#adelie.glm.GlmMultiBase64" title="adelie.glm.GlmMultiBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.glm.GlmMultiBase64</span></code></a></dt><dd></dd>
 </dl>
 </div>
 </dd></dl>

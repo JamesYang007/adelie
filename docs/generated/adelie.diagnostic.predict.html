@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.diagnostic.predict &#8212; adelie 1.1.9
+    <title>adelie.diagnostic.predict &#8212; adelie 1.1.10
  documentation</title>
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=7b68ca77"></script>
+    <script src="../_static/documentation_options.js?v=25b84aaa"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.9
+    <p class="title logo__title">adelie 1.1.10
  documentation</p>
   
 </a></div>
@@ -334,6 +334,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.objective.html">adelie.diagnostic.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_devs.html">adelie.diagnostic.plot_devs</a></li>
@@ -366,13 +367,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.glm_naive.html">adelie.state.glm_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multigaussian_naive.html">adelie.state.multigaussian_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian_pin.html">adelie.solver.solve_gaussian_pin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian.html">adelie.solver.solve_gaussian</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_glm.html">adelie.solver.solve_glm</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
@@ -380,7 +379,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive64.html">adelie.adelie_core.state.StateMultiGlmNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmBase64.html">adelie.glm.GlmBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmMultiBase64.html">adelie.glm.GlmMultiBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
@@ -445,38 +447,56 @@ document.write(`
 <h1>adelie.diagnostic.predict<a class="headerlink" href="#adelie-diagnostic-predict" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.diagnostic.predict">
-<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X:</span> <span class="pre">~adelie.adelie_core.matrix.MatrixNaiveBase32</span> <span class="pre">|</span> <span class="pre">~adelie.adelie_core.matrix.MatrixNaiveBase64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas:</span> <span class="pre">~numpy.ndarray</span> <span class="pre">|</span> <span class="pre">~scipy.sparse._csr.csr_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intercepts:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glm:</span> <span class="pre">~adelie.adelie_core.glm.GlmBase32</span> <span class="pre">|</span> <span class="pre">~adelie.adelie_core.glm.GlmBase64</span> <span class="pre">=</span> <span class="pre">&lt;adelie.glm.gaussian.&lt;locals&gt;._gaussian</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.predict" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X:</span> <span class="pre">~adelie.adelie_core.matrix.MatrixNaiveBase32</span> <span class="pre">|</span> <span class="pre">~adelie.adelie_core.matrix.MatrixNaiveBase64</span> <span class="pre">|</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas:</span> <span class="pre">~numpy.ndarray</span> <span class="pre">|</span> <span class="pre">~scipy.sparse._csr.csr_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intercepts:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights:</span> <span class="pre">~numpy.ndarray</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets:</span> <span class="pre">~numpy.ndarray</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glm:</span> <span class="pre">~adelie.adelie_core.glm.GlmBase32</span> <span class="pre">|</span> <span class="pre">~adelie.adelie_core.glm.GlmBase64</span> <span class="pre">|</span> <span class="pre">~adelie.adelie_core.glm.GlmMultiBase32</span> <span class="pre">|</span> <span class="pre">~adelie.adelie_core.glm.GlmMultiBase64</span> <span class="pre">=</span> <span class="pre">&lt;adelie.glm.gaussian.&lt;locals&gt;._gaussian</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.predict" title="Link to this definition">#</a></dt>
 <dd><p>Computes the predictions.</p>
-<p>The prediction is given by</p>
+<p>The single-response prediction is given by</p>
 <div class="math notranslate nohighlight">
 \[\begin{align*}
     \hat{y} = W^{-1} \nabla A(X\beta + \beta_0 \mathbf{1} + \eta^0)
 \end{align*}\]</div>
+<p>The multi-response prediction is given by</p>
+<div class="math notranslate nohighlight">
+\[\begin{align*}
+    \hat{y} = (K^{-1} W \otimes I_K)^{-1} \nabla A(
+        (X\otimes I_K) \beta + 
+        (\mathbf{1}\otimes I_k) \beta_0 + 
+        \eta^0
+    )
+\end{align*}\]</div>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>X</strong><span class="classifier">(n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64]</span></dt><dd><p>Feature matrix.</p>
+<dt><strong>X</strong><span class="classifier">(n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64, np.ndarray]</span></dt><dd><p>Feature matrix.
+It is typically one of the matrices defined in <code class="docutils literal notranslate"><span class="pre">adelie.matrix</span></code> submodule.</p>
 </dd>
-<dt><strong>weights</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Observation weights.</p>
+<dt><strong>betas</strong><span class="classifier">(L, p) or (L, p*K) Union[np.ndarray, scipy.sparse.csr_matrix]</span></dt><dd><p>Coefficient vectors <span class="math notranslate nohighlight">\(\beta\)</span>.</p>
+</dd>
+<dt><strong>intercepts</strong><span class="classifier">(L,) or (L, K) np.ndarray</span></dt><dd><p>Intercepts <span class="math notranslate nohighlight">\(\beta_0\)</span>.</p>
+</dd>
+<dt><strong>weights</strong><span class="classifier">(n,) np.ndarray, optional</span></dt><dd><p>Observation weights <span class="math notranslate nohighlight">\(W\)</span>.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to <code class="docutils literal notranslate"><span class="pre">np.full(n,</span> <span class="pre">1/n)</span></code>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Currently, the return value is only well-defined if weights are positive!</p>
+<p>Currently, it is only well-defined if weights are all positive!</p>
 </div>
 </dd>
-<dt><strong>offsets</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Observation offsets.</p>
+<dt><strong>offsets</strong><span class="classifier">(n,) or (n, K) np.ndarray, optional</span></dt><dd><p>Observation offsets <span class="math notranslate nohighlight">\(\eta^0\)</span>.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to 
+<code class="docutils literal notranslate"><span class="pre">np.zeros(n)</span></code> if <code class="docutils literal notranslate"><span class="pre">y</span></code> is single-response
+and <code class="docutils literal notranslate"><span class="pre">np.zeros((n,</span> <span class="pre">K))</span></code> if multi-response.</p>
 </dd>
-<dt><strong>betas</strong><span class="classifier">(l, p) Union[np.ndarray, scipy.sparse.csr_matrix]</span></dt><dd><p>Matrix with each row being a coefficient vector.</p>
+<dt><strong>glm</strong><span class="classifier">Union[glm.GlmBase32, glm.GlmBase64, glm.GlmMultiBase32, glm.GlmMultiBase64], optional</span></dt><dd><p>GLM object.
+It is typically one of the GLM classes defined in <code class="docutils literal notranslate"><span class="pre">adelie.glm</span></code> submodule.
+Default is <code class="docutils literal notranslate"><span class="pre">adelie.glm.gaussian()</span></code>.</p>
 </dd>
-<dt><strong>intercepts</strong><span class="classifier">(l,) np.ndarray</span></dt><dd><p>Intercept corresponding to <code class="docutils literal notranslate"><span class="pre">betas</span></code>.</p>
-</dd>
-<dt><strong>glm</strong><span class="classifier">Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64], optional</span></dt><dd><p>GLM object.
-Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
+Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>preds</strong><span class="classifier">(l, n) np.ndarray</span></dt><dd><p>Predictions.</p>
+<dt><strong>preds</strong><span class="classifier">(L, n) or (L, n, K) np.ndarray</span></dt><dd><p>Predictions.</p>
 </dd>
 </dl>
 </dd>
@@ -485,6 +505,7 @@ Default is <code class="docutils literal notranslate"><span class="pre">None</sp
 <p class="admonition-title">See also</p>
 <dl class="simple">
 <dt><a class="reference internal" href="adelie.glm.GlmBase64.html#adelie.glm.GlmBase64" title="adelie.glm.GlmBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.glm.GlmBase64</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.glm.GlmMultiBase64.html#adelie.glm.GlmMultiBase64" title="adelie.glm.GlmMultiBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.glm.GlmMultiBase64</span></code></a></dt><dd></dd>
 </dl>
 </div>
 </dd></dl>

@@ -1,6 +1,0 @@
-﻿adelie.solver.solve\_glm
-========================
-
-.. currentmodule:: adelie.solver
-
-.. autofunction:: solve_glm

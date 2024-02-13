@@ -34,12 +34,9 @@
       ~StateGlmNaive64.beta0
       ~StateGlmNaive64.betas
       ~StateGlmNaive64.ddev_tol
-      ~StateGlmNaive64.dev_full
-      ~StateGlmNaive64.dev_null
       ~StateGlmNaive64.devs
       ~StateGlmNaive64.early_exit
       ~StateGlmNaive64.eta
-      ~StateGlmNaive64.glm
       ~StateGlmNaive64.grad
       ~StateGlmNaive64.group_sizes
       ~StateGlmNaive64.groups
@@ -52,6 +49,8 @@
       ~StateGlmNaive64.lmda_path
       ~StateGlmNaive64.lmda_path_size
       ~StateGlmNaive64.lmdas
+      ~StateGlmNaive64.loss_full
+      ~StateGlmNaive64.loss_null
       ~StateGlmNaive64.max_active_size
       ~StateGlmNaive64.max_iters
       ~StateGlmNaive64.max_screen_size
@@ -75,9 +74,9 @@
       ~StateGlmNaive64.screen_rule
       ~StateGlmNaive64.screen_set
       ~StateGlmNaive64.screen_sizes
-      ~StateGlmNaive64.setup_dev_null
       ~StateGlmNaive64.setup_lmda_max
       ~StateGlmNaive64.setup_lmda_path
+      ~StateGlmNaive64.setup_loss_null
       ~StateGlmNaive64.tol
       ~StateGlmNaive64.weights
       ~StateGlmNaive64.y
@@ -107,12 +106,9 @@
    .. autoattribute:: beta0
    .. autoattribute:: betas
    .. autoattribute:: ddev_tol
-   .. autoattribute:: dev_full
-   .. autoattribute:: dev_null
    .. autoattribute:: devs
    .. autoattribute:: early_exit
    .. autoattribute:: eta
-   .. autoattribute:: glm
    .. autoattribute:: grad
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
@@ -125,6 +121,8 @@
    .. autoattribute:: lmda_path
    .. autoattribute:: lmda_path_size
    .. autoattribute:: lmdas
+   .. autoattribute:: loss_full
+   .. autoattribute:: loss_null
    .. autoattribute:: max_active_size
    .. autoattribute:: max_iters
    .. autoattribute:: max_screen_size
@@ -148,9 +146,9 @@
    .. autoattribute:: screen_rule
    .. autoattribute:: screen_set
    .. autoattribute:: screen_sizes
-   .. autoattribute:: setup_dev_null
    .. autoattribute:: setup_lmda_max
    .. autoattribute:: setup_lmda_path
+   .. autoattribute:: setup_loss_null
    .. autoattribute:: tol
    .. autoattribute:: weights
    .. autoattribute:: y

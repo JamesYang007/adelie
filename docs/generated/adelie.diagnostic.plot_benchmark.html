@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.diagnostic.plot_benchmark &#8212; adelie 1.1.9
+    <title>adelie.diagnostic.plot_benchmark &#8212; adelie 1.1.10
  documentation</title>
   
   
@@ -37,15 +37,17 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=7b68ca77"></script>
+    <script src="../_static/documentation_options.js?v=25b84aaa"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.diagnostic.plot_benchmark';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="adelie.diagnostic.plot_coefficients" href="adelie.diagnostic.plot_coefficients.html" />
-    <link rel="prev" title="adelie.diagnostic.gradient_scores" href="adelie.diagnostic.gradient_scores.html" />
+    <link rel="prev" title="adelie.diagnostic.objective" href="adelie.diagnostic.objective.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -119,7 +121,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.9
+    <p class="title logo__title">adelie 1.1.10
  documentation</p>
   
 </a></div>
@@ -332,6 +334,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.objective.html">adelie.diagnostic.objective</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.diagnostic.plot_benchmark</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_devs.html">adelie.diagnostic.plot_devs</a></li>
@@ -364,13 +367,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.glm_naive.html">adelie.state.glm_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multigaussian_naive.html">adelie.state.multigaussian_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian_pin.html">adelie.solver.solve_gaussian_pin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian.html">adelie.solver.solve_gaussian</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_glm.html">adelie.solver.solve_glm</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
@@ -378,7 +379,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive64.html">adelie.adelie_core.state.StateMultiGlmNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmBase64.html">adelie.glm.GlmBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmMultiBase64.html">adelie.glm.GlmMultiBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
@@ -450,19 +454,19 @@ document.write(`
 <dd class="field-odd"><dl class="simple">
 <dt><strong>total_time</strong><span class="classifier">float</span></dt><dd><p>Total time taken for the core routine.</p>
 </dd>
-<dt><strong>benchmark_screen</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Benchmark timings for screening.</p>
+<dt><strong>benchmark_screen</strong><span class="classifier">(B,) np.ndarray</span></dt><dd><p>Benchmark timings for screening.</p>
 </dd>
-<dt><strong>benchmark_fit_screen</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Benchmark timings for fitting on screen set.</p>
+<dt><strong>benchmark_fit_screen</strong><span class="classifier">(B,) np.ndarray</span></dt><dd><p>Benchmark timings for fitting on screen set.</p>
 </dd>
-<dt><strong>benchmark_fit_active</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Benchmark timings for fitting on active set.</p>
+<dt><strong>benchmark_fit_active</strong><span class="classifier">(B,) np.ndarray</span></dt><dd><p>Benchmark timings for fitting on active set.</p>
 </dd>
-<dt><strong>benchmark_kkt</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Benchmark timings for KKT checks.</p>
+<dt><strong>benchmark_kkt</strong><span class="classifier">(B,) np.ndarray</span></dt><dd><p>Benchmark timings for KKT checks.</p>
 </dd>
-<dt><strong>benchmark_invariance</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Benchmark timings for invariance step.</p>
+<dt><strong>benchmark_invariance</strong><span class="classifier">(B,) np.ndarray</span></dt><dd><p>Benchmark timings for invariance step.</p>
 </dd>
-<dt><strong>n_valid_solutions</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Flags that indicate whether each iteration resulted in a valid solution.</p>
+<dt><strong>n_valid_solutions</strong><span class="classifier">(B,) np.ndarray</span></dt><dd><p>Flags that indicate whether each iteration resulted in a valid solution.</p>
 </dd>
-<dt><strong>lmdas</strong><span class="classifier">(l,) np.ndarray</span></dt><dd><p>Regularizations.</p>
+<dt><strong>lmdas</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Regularization parameters <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
 </dd>
 <dt><strong>relative</strong><span class="classifier">bool, optional</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the time breakdown plot is relative to the total time,
 therefore plotting the proportion of time spent in each category.
@@ -492,12 +496,12 @@ Default is <code class="docutils literal notranslate"><span class="pre">False</s
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.diagnostic.gradient_scores.html"
+       href="adelie.diagnostic.objective.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.diagnostic.gradient_scores</p>
+        <p class="prev-next-title">adelie.diagnostic.objective</p>
       </div>
     </a>
     <a class="right-next"

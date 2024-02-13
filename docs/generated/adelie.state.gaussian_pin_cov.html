@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.state.gaussian_pin_cov &#8212; adelie 1.1.9
+    <title>adelie.state.gaussian_pin_cov &#8212; adelie 1.1.10
  documentation</title>
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=7b68ca77"></script>
+    <script src="../_static/documentation_options.js?v=25b84aaa"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.9
+    <p class="title logo__title">adelie 1.1.10
  documentation</p>
   
 </a></div>
@@ -334,6 +334,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.objective.html">adelie.diagnostic.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_devs.html">adelie.diagnostic.plot_devs</a></li>
@@ -366,13 +367,11 @@ document.write(`
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.state.gaussian_pin_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.glm_naive.html">adelie.state.glm_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multigaussian_naive.html">adelie.state.multigaussian_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian_pin.html">adelie.solver.solve_gaussian_pin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian.html">adelie.solver.solve_gaussian</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_glm.html">adelie.solver.solve_glm</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
@@ -380,7 +379,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive64.html">adelie.adelie_core.state.StateMultiGlmNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmBase64.html">adelie.glm.GlmBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmMultiBase64.html">adelie.glm.GlmMultiBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
@@ -447,13 +449,20 @@ document.write(`
 <dt class="sig sig-object py" id="adelie.state.gaussian_pin_cov">
 <span class="sig-prename descclassname"><span class="pre">adelie.state.</span></span><span class="sig-name descname"><span class="pre">gaussian_pin_cov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html#adelie.matrix.MatrixCovBase64" title="adelie.adelie_core.matrix.MatrixCovBase64"><span class="pre">MatrixCovBase64</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">MatrixCovBase32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_grad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_is_active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_active_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-07</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adev_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddev_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.gaussian_pin_cov" title="Link to this definition">#</a></dt>
 <dd><p>Creates a gaussian pin covariance method state object.</p>
+<p>Define the following quantities:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(X_c\)</span> as <span class="math notranslate nohighlight">\(X\)</span> if <code class="docutils literal notranslate"><span class="pre">intercept</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code> and otherwise 
+the column-centered version.</p></li>
+<li><p><span class="math notranslate nohighlight">\(y_c\)</span> as <span class="math notranslate nohighlight">\(y - \eta^0\)</span> if <code class="docutils literal notranslate"><span class="pre">intercept</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code> and otherwise
+the centered version.</p></li>
+</ul>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>A</strong><span class="classifier">Union[adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]</span></dt><dd><p>Covariance matrix <span class="math notranslate nohighlight">\(X_c^\top W X_c\)</span> where <span class="math notranslate nohighlight">\(X_c\)</span> 
-is column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) if fitting with intercept
-and <span class="math notranslate nohighlight">\(W\)</span> is the observation weights.
-It is typically one of the matrices defined in <code class="docutils literal notranslate"><span class="pre">adelie.matrix</span></code> sub-module.</p>
+<dt><strong>A</strong><span class="classifier">Union[adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]</span></dt><dd><p>Covariance matrix <span class="math notranslate nohighlight">\(X_c^\top W X_c\)</span>.
+It is typically one of the matrices defined in <code class="docutils literal notranslate"><span class="pre">adelie.matrix</span></code> submodule.</p>
 </dd>
 <dt><strong>groups</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>List of starting indices to each group where <cite>G</cite> is the number of groups.
 <code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group.</p>
@@ -465,21 +474,25 @@ It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</sp
 It must be a non-negative vector.</p>
 </dd>
 <dt><strong>screen_set</strong><span class="classifier">(s,) np.ndarray</span></dt><dd><p>List of indices into <code class="docutils literal notranslate"><span class="pre">groups</span></code> that correspond to the screen groups.
-<code class="docutils literal notranslate"><span class="pre">screen_set[i]</span></code> is <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group.</p>
+<code class="docutils literal notranslate"><span class="pre">screen_set[i]</span></code> is <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group.
+<code class="docutils literal notranslate"><span class="pre">screen_set</span></code> must contain at least the true (optimal) active groups
+when the regularization is given by <code class="docutils literal notranslate"><span class="pre">lmda</span></code>.</p>
 </dd>
-<dt><strong>lmda_path</strong><span class="classifier">(l,) np.ndarray</span></dt><dd><p>Regularization sequence to fit on.</p>
+<dt><strong>lmda_path</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>The regularization path to solve for.
+It is recommended that the path is sorted in decreasing order.</p>
 </dd>
-<dt><strong>rsq</strong><span class="classifier">float</span></dt><dd><p>Unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> value at <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.
-The unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> is given by <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2 - \|y_c-X_c\beta\|_{W}^2\)</span>.</p>
-</dd>
-<dt><strong>resid</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Residual <span class="math notranslate nohighlight">\(W(y_c-X\beta)\)</span> at <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p>
+<dt><strong>rsq</strong><span class="classifier">float</span></dt><dd><p>The change in unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> given by 
+<span class="math notranslate nohighlight">\(\|y_c-X_c\beta_{\mathrm{old}}\|_{W}^2 - \|y_c-X_c\beta_{\mathrm{curr}}\|_{W}^2\)</span>.
+Usually, <span class="math notranslate nohighlight">\(\beta_{\mathrm{old}} = 0\)</span> 
+and <span class="math notranslate nohighlight">\(\beta_{\mathrm{curr}}\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p>
 </dd>
 <dt><strong>screen_beta</strong><span class="classifier">(ws,) np.ndarray</span></dt><dd><p>Coefficient vector on the screen set.
 <code class="docutils literal notranslate"><span class="pre">screen_beta[b:b+p]</span></code> is the coefficient for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group 
 where
 <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">screen_set[i]</span></code>,
 <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">screen_begins[i]</span></code>,
-and <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">group_sizes[k]</span></code>.</p>
+and <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">group_sizes[k]</span></code>.
+The values can be arbitrary but it is recommended to be close to the solution at <code class="docutils literal notranslate"><span class="pre">lmda</span></code>.</p>
 </dd>
 <dt><strong>screen_grad</strong><span class="classifier">(ws,) np.ndarray</span></dt><dd><p>Gradient <span class="math notranslate nohighlight">\(X_{c,k}^\top W (y_c-X_c\beta)\)</span> on the screen groups <span class="math notranslate nohighlight">\(k\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.
 <code class="docutils literal notranslate"><span class="pre">screen_grad[b:b+p]</span></code> is the gradient for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group
@@ -491,11 +504,12 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 <dt><strong>screen_is_active</strong><span class="classifier">(a,) np.ndarray</span></dt><dd><p>Boolean vector that indicates whether each screen group in <code class="docutils literal notranslate"><span class="pre">groups</span></code> is active or not.
 <code class="docutils literal notranslate"><span class="pre">screen_is_active[i]</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> if and only if <code class="docutils literal notranslate"><span class="pre">screen_set[i]</span></code> is active.</p>
 </dd>
-<dt><strong>y_var</strong><span class="classifier">float, optional</span></dt><dd><p><span class="math notranslate nohighlight">\(\ell_2\)</span> norm squared of <span class="math notranslate nohighlight">\(y_c\)</span> (weighted by <span class="math notranslate nohighlight">\(W\)</span>).
+<dt><strong>y_var</strong><span class="classifier">float, optional</span></dt><dd><p>Variance of the offsetted response vector <span class="math notranslate nohighlight">\(y-\eta^0\)</span> (weighted by <span class="math notranslate nohighlight">\(W\)</span>), 
+i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span>.
+This is only used to check convergence as a relative measure,
+i.e. this quantity is the “null” model MSE.
 If the user does not have access to this quantity, 
-they may be set it to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.
-The only effect this variable has on the algorithm is early stopping rule.
-Hence, with <code class="docutils literal notranslate"><span class="pre">-1</span></code>, the early stopping rule is effectively disabled.
+they may be set it to <code class="docutils literal notranslate"><span class="pre">-1</span></code>, which disables the check.
 Default is <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p>
 </dd>
 <dt><strong>max_active_size</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum number of active groups allowed.
@@ -507,13 +521,17 @@ Default is <code class="docutils literal notranslate"><span class="pre">None</sp
 <dt><strong>max_iters</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum number of coordinate descents.
 Default is <code class="docutils literal notranslate"><span class="pre">int(1e5)</span></code>.</p>
 </dd>
-<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Convergence tolerance.
+<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Coordinate descent convergence tolerance.
 Default is <code class="docutils literal notranslate"><span class="pre">1e-7</span></code>.</p>
 </dd>
 <dt><strong>adev_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Percent deviance explained tolerance.
+If the training percent deviance explained exceeds this quantity, 
+then the solver terminates.
 Default is <code class="docutils literal notranslate"><span class="pre">0.9</span></code>.</p>
 </dd>
 <dt><strong>ddev_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Difference in percent deviance explained tolerance.
+If the difference of the last two training percent deviance explained exceeds this quantity, 
+then the solver terminates.
 Default is <code class="docutils literal notranslate"><span class="pre">1e-4</span></code>.</p>
 </dd>
 <dt><strong>newton_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Convergence tolerance for the BCD update.

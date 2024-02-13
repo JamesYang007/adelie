@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.solver.grpnet &#8212; adelie 1.1.9
+    <title>adelie.solver.grpnet &#8212; adelie 1.1.10
  documentation</title>
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=7b68ca77"></script>
+    <script src="../_static/documentation_options.js?v=25b84aaa"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -46,8 +46,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.solver.grpnet';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.solver.objective" href="adelie.solver.objective.html" />
-    <link rel="prev" title="adelie.state.glm_naive" href="adelie.state.glm_naive.html" />
+    <link rel="next" title="adelie.adelie_core.state.StateGaussianPinBase64" href="adelie.adelie_core.state.StateGaussianPinBase64.html" />
+    <link rel="prev" title="adelie.state.multiglm_naive" href="adelie.state.multiglm_naive.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.9
+    <p class="title logo__title">adelie 1.1.10
  documentation</p>
   
 </a></div>
@@ -334,6 +334,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.objective.html">adelie.diagnostic.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_devs.html">adelie.diagnostic.plot_devs</a></li>
@@ -366,13 +367,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.glm_naive.html">adelie.state.glm_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multigaussian_naive.html">adelie.state.multigaussian_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.solver.grpnet</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian_pin.html">adelie.solver.solve_gaussian_pin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian.html">adelie.solver.solve_gaussian</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_glm.html">adelie.solver.solve_glm</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
@@ -380,7 +379,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive64.html">adelie.adelie_core.state.StateMultiGlmNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmBase64.html">adelie.glm.GlmBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmMultiBase64.html">adelie.glm.GlmMultiBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
@@ -476,52 +478,63 @@ the objective given by <span class="math notranslate nohighlight">\(\mathcal{L}(
 <span class="math notranslate nohighlight">\(\beta_g\)</span> are the coefficients for the <span class="math notranslate nohighlight">\(g\)</span> th group,
 and <span class="math notranslate nohighlight">\(A_i\)</span> define the log-partition function in the GLM family.</p>
 <p>For multi-response problems (i.e. when <span class="math notranslate nohighlight">\(y\)</span> is 2-dimensional)
-such as in multigaussian or multinomial GLM,
-the group elastic net problem can still be formulated as above after flattening the inputs
-and modifying the <span class="math notranslate nohighlight">\(X\)</span> matrix.
-Concretely, we solve</p>
+such as in multigaussian or multinomial,
+the group elastic net problem minimizes the objective given by:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{align*}
     \mathrm{minimize}_{\beta, \beta_0} \quad&amp;
-    \sum_{i=1}^{nK}
+    \frac{1}{K}
+    \sum_{i=1}^{n}
     w_{i} \left(
-        -y_{i} \eta_{i} + A_{i}(\eta)
+        -\sum\limits_{k=1}^K y_{ik} \eta_{ik} + A_{i}(\eta)
     \right)
     + \lambda \sum\limits_{g=1}^G p_g \left(
         \alpha \|\beta_g\|_2 + \frac{1-\alpha}{2} \|\beta_g\|_2^2
     \right)
     \\
     \text{subject to} \quad&amp;
-    \eta = (X\otimes I_K) \beta + (\mathbf{1}\otimes I_K) \beta_0 + \eta^0
+    \mathrm{vec}(\eta^\top) 
+    = 
+    (X\otimes I_K) \beta + (\mathbf{1}\otimes I_K) \beta_0 
+    + 
+    \mathrm{vec}(\eta^{0\top})
 \end{align*}\end{split}\]</div>
-<p>where
-<span class="math notranslate nohighlight">\(y\)</span>, <span class="math notranslate nohighlight">\(w\)</span>, <span class="math notranslate nohighlight">\(\beta\)</span>, and <span class="math notranslate nohighlight">\(\eta^0\)</span>
-are flattened row-major matrices.
+<p>where <span class="math notranslate nohighlight">\(\mathrm{vec}(x)\)</span> is the operator that flattens the input as column-major.
 Note that if <code class="docutils literal notranslate"><span class="pre">intercept</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, then an intercept for each class is provided
 as additional unpenalized features in the data matrix and the global intercept is turned off.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Some multi-response GLM families require further restrictions
-on the structure of the objective (e.g. see <code class="docutils literal notranslate"><span class="pre">adelie.glm.multinomial</span></code>).</p>
+<p>Multi-response GLMs that are symmetric (i.e., <code class="docutils literal notranslate"><span class="pre">glm.is_symmetric</span> <span class="pre">==</span> <span class="pre">True</span></code>)
+may observe slow convergence due to the Hessian being singular.
+This becomes especially pronounced when <code class="docutils literal notranslate"><span class="pre">X</span></code> has strongly correlated features.
+Counter-intuitively, increasing <code class="docutils literal notranslate"><span class="pre">tol</span></code> such as <code class="docutils literal notranslate"><span class="pre">1e-8</span></code> may result in faster convergence
+since the quadratic approximation finds a more accurate solution,
+thereby warm-starting with a better initialization.</p>
 </div>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
 <dt><strong>X</strong><span class="classifier">(n, p) matrix-like</span></dt><dd><p>Feature matrix.
-It is typically one of the matrices defined in <code class="docutils literal notranslate"><span class="pre">adelie.matrix</span></code> sub-module
-or a <code class="docutils literal notranslate"><span class="pre">numpy</span></code> array.</p>
+It is typically one of the matrices defined in <code class="docutils literal notranslate"><span class="pre">adelie.matrix</span></code> submodule or <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code>.</p>
 </dd>
 <dt><strong>y</strong><span class="classifier">(n,) or (n, K) np.ndarray</span></dt><dd><p>Response vector or multi-response matrix.</p>
 </dd>
-<dt><strong>glm</strong><span class="classifier">Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64], optional</span></dt><dd><p>GLM object.
+<dt><strong>glm</strong><span class="classifier">Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64, adelie.glm.GlmMultiBase32, adelie.glm.GlmMultiBase64], optional</span></dt><dd><p>GLM object.
+It is typically one of the GLM classes defined in <code class="docutils literal notranslate"><span class="pre">adelie.glm</span></code> submodule.
 Default is <code class="docutils literal notranslate"><span class="pre">adelie.glm.gaussian()</span></code>.</p>
 </dd>
 <dt><strong>groups</strong><span class="classifier">(G,) np.ndarray, optional</span></dt><dd><p>List of starting indices to each group where <cite>G</cite> is the number of groups.
 <code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group. 
-If <code class="docutils literal notranslate"><span class="pre">y</span></code> is multi-response, then the groups must correspond 
-to the flattened <span class="math notranslate nohighlight">\(\beta\)</span> (row-major) matrix.
-Default is <code class="docutils literal notranslate"><span class="pre">np.arange(p)</span></code> if <code class="docutils literal notranslate"><span class="pre">y</span></code> is single-response
-and <code class="docutils literal notranslate"><span class="pre">K</span> <span class="pre">*</span> <span class="pre">np.arange(p)</span></code> if multi-response.</p>
+If <code class="docutils literal notranslate"><span class="pre">glm</span></code> is multi-response type, then we only allow two types of groupings:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;grouped&quot;</span></code>: coefficients for each predictor is grouped across the classes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;ungrouped&quot;</span></code>: every coefficient is its own group.</p></li>
+</ul>
+</div></blockquote>
+<p>Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case it is set to
+<code class="docutils literal notranslate"><span class="pre">np.arange(p)</span></code> if <code class="docutils literal notranslate"><span class="pre">y</span></code> is single-response
+and <code class="docutils literal notranslate"><span class="pre">&quot;grouped&quot;</span></code> if multi-response.</p>
 </dd>
 <dt><strong>alpha</strong><span class="classifier">float, optional</span></dt><dd><p>Elastic net parameter.
 It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</span>.
@@ -531,33 +544,33 @@ Default is <code class="docutils literal notranslate"><span class="pre">1</span>
 It must be a non-negative vector.
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to <code class="docutils literal notranslate"><span class="pre">np.sqrt(group_sizes)</span></code>.</p>
 </dd>
-<dt><strong>weights</strong><span class="classifier">(n,) or (n, K) np.ndarray, optional</span></dt><dd><p>Observation weights.
+<dt><strong>weights</strong><span class="classifier">(n,) np.ndarray, optional</span></dt><dd><p>Observation weights <span class="math notranslate nohighlight">\(W\)</span>.
 Weights are normalized such that they sum to <code class="docutils literal notranslate"><span class="pre">1</span></code>.
-Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to <code class="docutils literal notranslate"><span class="pre">np.full(n,</span> <span class="pre">1/n)</span></code> if <code class="docutils literal notranslate"><span class="pre">y</span></code> is single-response
-and <code class="docutils literal notranslate"><span class="pre">np.full((n,</span> <span class="pre">K),</span> <span class="pre">1/(n*K))</span></code> if multi-response.</p>
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to <code class="docutils literal notranslate"><span class="pre">np.full(n,</span> <span class="pre">1/n)</span></code>.</p>
 </dd>
 <dt><strong>offsets</strong><span class="classifier">(n,) or (n, K) np.ndarray, optional</span></dt><dd><p>Observation offsets <span class="math notranslate nohighlight">\(\eta^0\)</span>.
-Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to <code class="docutils literal notranslate"><span class="pre">np.zeros(n)</span></code> if <code class="docutils literal notranslate"><span class="pre">y</span></code> is single-response
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to 
+<code class="docutils literal notranslate"><span class="pre">np.zeros(n)</span></code> if <code class="docutils literal notranslate"><span class="pre">y</span></code> is single-response
 and <code class="docutils literal notranslate"><span class="pre">np.zeros((n,</span> <span class="pre">K))</span></code> if multi-response.</p>
 </dd>
-<dt><strong>lmda_path</strong><span class="classifier">(l,) np.ndarray, optional</span></dt><dd><p>The regularization path to solve for.
+<dt><strong>lmda_path</strong><span class="classifier">(L,) np.ndarray, optional</span></dt><dd><p>The regularization path to solve for.
 The full path is not considered if <code class="docutils literal notranslate"><span class="pre">early_exit</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.
 It is recommended that the path is sorted in decreasing order.
 If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the path will be generated.
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </dd>
 <dt><strong>irls_max_iters</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum number of IRLS iterations.
-This parameter is only used if <code class="docutils literal notranslate"><span class="pre">glm</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>.
+This parameter is only used if <code class="docutils literal notranslate"><span class="pre">glm</span></code> is not of gaussian type.
 Default is <code class="docutils literal notranslate"><span class="pre">int(1e4)</span></code>.</p>
 </dd>
 <dt><strong>irls_tol</strong><span class="classifier">float, optional</span></dt><dd><p>IRLS convergence tolerance.
-This parameter is only used if <code class="docutils literal notranslate"><span class="pre">glm</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>.
+This parameter is only used if <code class="docutils literal notranslate"><span class="pre">glm</span></code> is not of gaussian type.
 Default is <code class="docutils literal notranslate"><span class="pre">1e-7</span></code>.</p>
 </dd>
 <dt><strong>max_iters</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum number of coordinate descents.
 Default is <code class="docutils literal notranslate"><span class="pre">int(1e5)</span></code>.</p>
 </dd>
-<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Convergence tolerance.
+<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Coordinate descent convergence tolerance.
 Default is <code class="docutils literal notranslate"><span class="pre">1e-7</span></code>.</p>
 </dd>
 <dt><strong>adev_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Percent deviance explained tolerance.
@@ -575,7 +588,7 @@ Default is <code class="docutils literal notranslate"><span class="pre">1000</sp
 <dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
 Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </dd>
-<dt><strong>early_exit</strong><span class="classifier">bool, optional</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should early exit based on training <span class="math notranslate nohighlight">\(R^2\)</span>.
+<dt><strong>early_exit</strong><span class="classifier">bool, optional</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should early exit based on training deviance explained.
 Default is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
 </dd>
 <dt><strong>min_ratio</strong><span class="classifier">float, optional</span></dt><dd><p>The ratio between the largest and smallest <span class="math notranslate nohighlight">\(\lambda\)</span> in the regularization sequence
@@ -586,8 +599,8 @@ Default is <code class="docutils literal notranslate"><span class="pre">1e-2</sp
 Default is <code class="docutils literal notranslate"><span class="pre">100</span></code>.</p>
 </dd>
 <dt><strong>intercept</strong><span class="classifier">bool, optional</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should fit with intercept.
-If <code class="docutils literal notranslate"><span class="pre">y</span></code> is multi-response, then an intercept for each class is added as an unpenalized feature 
-to the data matrix and the global intercept is turned off.
+If <code class="docutils literal notranslate"><span class="pre">y</span></code> is multi-response, then an intercept for each class is added
+and the global intercept is turned off.
 Default is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
 </dd>
 <dt><strong>screen_rule</strong><span class="classifier">str, optional</span></dt><dd><p>The type of screening rule to use. It must be one of the following options:</p>
@@ -612,24 +625,28 @@ If <code class="docutils literal notranslate"><span class="pre">None</span></cod
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </dd>
 <dt><strong>pivot_subset_ratio</strong><span class="classifier">float, optional</span></dt><dd><p>If screening takes place, then the <code class="docutils literal notranslate"><span class="pre">(1</span> <span class="pre">+</span> <span class="pre">pivot_subset_ratio)</span> <span class="pre">*</span> <span class="pre">s</span></code>
-largest gradient norms are used to determine the pivot point
+largest active scores are used to determine the pivot point
 where <code class="docutils literal notranslate"><span class="pre">s</span></code> is the current screen set size.
-It is only used if <code class="docutils literal notranslate"><span class="pre">screen_rule</span> <span class="pre">==</span> <span class="pre">&quot;pivot&quot;</span></code>.
+It is only used if <code class="docutils literal notranslate"><span class="pre">screen_rule=&quot;pivot&quot;</span></code>.
 Default is <code class="docutils literal notranslate"><span class="pre">0.1</span></code>.</p>
 </dd>
 <dt><strong>pivot_subset_min</strong><span class="classifier">int, optional</span></dt><dd><p>If screening takes place, then at least <code class="docutils literal notranslate"><span class="pre">pivot_subset_min</span></code>
 number of active scores are used to determine the pivot point.
-It is only used if <code class="docutils literal notranslate"><span class="pre">screen_rule</span> <span class="pre">==</span> <span class="pre">&quot;pivot&quot;</span></code>.
+It is only used if <code class="docutils literal notranslate"><span class="pre">screen_rule=&quot;pivot&quot;</span></code>.
 Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </dd>
 <dt><strong>pivot_slack_ratio</strong><span class="classifier">float, optional</span></dt><dd><p>If screening takes place, then <code class="docutils literal notranslate"><span class="pre">pivot_slack_ratio</span></code>
 number of groups with next smallest (new) active scores 
 below the pivot point are also added to the screen set as slack.
-It is only used if <code class="docutils literal notranslate"><span class="pre">screen_rule</span> <span class="pre">==</span> <span class="pre">&quot;pivot&quot;</span></code>.
+It is only used if <code class="docutils literal notranslate"><span class="pre">screen_rule=&quot;pivot&quot;</span></code>.
 Default is <code class="docutils literal notranslate"><span class="pre">1.25</span></code>.</p>
 </dd>
 <dt><strong>check_state</strong><span class="classifier">bool, optional</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> is state should be checked for inconsistencies before calling solver.
 Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The check may take a long time if the inputs are big!</p>
+</div>
 </dd>
 <dt><strong>progress_bar</strong><span class="classifier">bool, optional</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> to enable progress bar.
 Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
@@ -638,9 +655,7 @@ Default is <code class="docutils literal notranslate"><span class="pre">False</s
 and other invariance quantities are set accordingly.
 Otherwise, the warm-start is used to extract all necessary state variables.
 If warm-start is used, the user <em>must</em> still provide consistent inputs,
-that is, warm-start will not overwrite the arguments passed into this function.
-For example, if <code class="docutils literal notranslate"><span class="pre">X</span></code> were a different matrix object from <code class="docutils literal notranslate"><span class="pre">warm_start.X</span></code>,
-it is undefined behavior.
+that is, warm-start will not overwrite most arguments passed into this function.
 However, changing configuration settings such as tolerance levels is well-defined.
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 <div class="admonition note">
@@ -653,7 +668,7 @@ but can simply continue from the last state <code class="docutils literal notran
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>We have only tested warm-starts in the setting described in the note above,
-that is, when <code class="docutils literal notranslate"><span class="pre">lmda_path</span></code> is changed and no other arguments are changed.
+that is, when <code class="docutils literal notranslate"><span class="pre">lmda_path</span></code> and possibly static configurations have changed.
 Use with caution in other settings!</p>
 </div>
 </dd>
@@ -666,13 +681,6 @@ Use with caution in other settings!</p>
 </dl>
 </dd>
 </dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="adelie.solver.solve_gaussian.html#adelie.solver.solve_gaussian" title="adelie.solver.solve_gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.solver.solve_gaussian</span></code></a></dt><dd></dd>
-<dt><a class="reference internal" href="adelie.solver.solve_glm.html#adelie.solver.solve_glm" title="adelie.solver.solve_glm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.solver.solve_glm</span></code></a></dt><dd></dd>
-</dl>
-</div>
 </dd></dl>
 
 </section>
@@ -688,20 +696,20 @@ Use with caution in other settings!</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.state.glm_naive.html"
+       href="adelie.state.multiglm_naive.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.state.glm_naive</p>
+        <p class="prev-next-title">adelie.state.multiglm_naive</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.solver.objective.html"
+       href="adelie.adelie_core.state.StateGaussianPinBase64.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.solver.objective</p>
+        <p class="prev-next-title">adelie.adelie_core.state.StateGaussianPinBase64</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Quickstart &#8212; adelie 1.1.9
+    <title>Quickstart &#8212; adelie 1.1.10
  documentation</title>
   
   
@@ -38,7 +38,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=7b68ca77"></script>
+    <script src="../_static/documentation_options.js?v=25b84aaa"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -122,7 +122,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.9
+    <p class="title logo__title">adelie 1.1.10
  documentation</p>
   
 </a></div>
@@ -437,10 +437,10 @@ document.write(`
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span><span class="o">.</span><span class="n">betas</span>         <span class="c1"># (l, p) sparse matrix of solutions (one for each row)</span>
-<span class="n">state</span><span class="o">.</span><span class="n">intercepts</span>    <span class="c1"># (l,) intercepts</span>
-<span class="n">state</span><span class="o">.</span><span class="n">devs</span>          <span class="c1"># (l,) vector of % deviance explained</span>
-<span class="n">state</span><span class="o">.</span><span class="n">lmdas</span>         <span class="c1"># (l,) regularization at each saved solution</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span><span class="o">.</span><span class="n">betas</span>         <span class="c1"># (L, p) sparse matrix of solutions (one for each row)</span>
+<span class="n">state</span><span class="o">.</span><span class="n">intercepts</span>    <span class="c1"># (L,) intercepts</span>
+<span class="n">state</span><span class="o">.</span><span class="n">devs</span>          <span class="c1"># (L,) vector of % deviance explained</span>
+<span class="n">state</span><span class="o">.</span><span class="n">lmdas</span>         <span class="c1"># (L,) regularization at each saved solution</span>
 <span class="k">assert</span> <span class="kc">True</span>         <span class="c1"># barrier to not output anything</span>
 </pre></div>
 </div>
@@ -499,7 +499,8 @@ document.write(`
 </section>
 <section id="Group-Lasso">
 <h4><strong>Group Lasso</strong><a class="headerlink" href="#Group-Lasso" title="Link to this heading">#</a></h4>
-<p>To fit group lasso, the user simply needs to supply a <code class="docutils literal notranslate"><span class="pre">groups</span></code> argument that defines the starting column index for each group. For example, if there are <code class="docutils literal notranslate"><span class="pre">4</span></code> features grouped every two features, then <code class="docutils literal notranslate"><span class="pre">groups</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">2]</span></code>. For demonstration, we take the same data as before and group every <code class="docutils literal notranslate"><span class="pre">10</span></code> features. We then fit group lasso using the same function.</p>
+<p>To fit group lasso, the user simply needs to supply a <code class="docutils literal notranslate"><span class="pre">groups</span></code> argument that defines the starting column index for each group. For example, if there are <code class="docutils literal notranslate"><span class="pre">4</span></code> features grouped every two features, then <code class="docutils literal notranslate"><span class="pre">groups</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">2]</span></code>. For demonstration, we take the same data as before and group every <code class="docutils literal notranslate"><span class="pre">10</span></code> features. In general, the user may define any <em>contiguous</em> set of groups. For example, <code class="docutils literal notranslate"><span class="pre">groups</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">2,</span> <span class="pre">5]</span></code> with <code class="docutils literal notranslate"><span class="pre">10</span></code> total number of features results in <code class="docutils literal notranslate"><span class="pre">3</span></code> groups with group sizes <code class="docutils literal notranslate"><span class="pre">[2,</span> <span class="pre">3,</span> <span class="pre">5]</span></code>,
+respectively. We then fit group lasso using the same function.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>

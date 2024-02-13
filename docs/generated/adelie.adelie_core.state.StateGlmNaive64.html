@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.adelie_core.state.StateGlmNaive64 &#8212; adelie 1.1.9
+    <title>adelie.adelie_core.state.StateGlmNaive64 &#8212; adelie 1.1.10
  documentation</title>
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=7b68ca77"></script>
+    <script src="../_static/documentation_options.js?v=25b84aaa"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -46,7 +46,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.adelie_core.state.StateGlmNaive64';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.glm.GlmBase64" href="adelie.glm.GlmBase64.html" />
+    <link rel="next" title="adelie.adelie_core.state.StateMultiGaussianNaive64" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html" />
     <link rel="prev" title="adelie.adelie_core.state.StateGaussianNaive64" href="adelie.adelie_core.state.StateGaussianNaive64.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.9
+    <p class="title logo__title">adelie 1.1.10
  documentation</p>
   
 </a></div>
@@ -334,6 +334,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.objective.html">adelie.diagnostic.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_devs.html">adelie.diagnostic.plot_devs</a></li>
@@ -366,13 +367,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.glm_naive.html">adelie.state.glm_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multigaussian_naive.html">adelie.state.multigaussian_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.objective.html">adelie.solver.objective</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian_pin.html">adelie.solver.solve_gaussian_pin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_gaussian.html">adelie.solver.solve_gaussian</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.solve_glm.html">adelie.solver.solve_glm</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
@@ -380,7 +379,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.adelie_core.state.StateGlmNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive64.html">adelie.adelie_core.state.StateMultiGlmNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmBase64.html">adelie.glm.GlmBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmMultiBase64.html">adelie.glm.GlmMultiBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
@@ -473,34 +475,28 @@ document.write(`
 <td><p>Elastic net parameter.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.benchmark_fit_active" title="adelie.adelie_core.state.StateGlmNaive64.benchmark_fit_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_fit_active</span></code></a></p></td>
-<td><p>Fit time on the active set for a given BASIL iteration.</p></td>
+<td><p>Fit time on the active set for each iteration.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.benchmark_fit_screen" title="adelie.adelie_core.state.StateGlmNaive64.benchmark_fit_screen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_fit_screen</span></code></a></p></td>
-<td><p>Fit time on the screen set for a given BASIL iteration.</p></td>
+<td><p>Fit time on the screen set for each iteration.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.benchmark_invariance" title="adelie.adelie_core.state.StateGlmNaive64.benchmark_invariance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_invariance</span></code></a></p></td>
-<td><p>Invariance time for a given BASIL iteration.</p></td>
+<td><p>Invariance time for each iteration.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.benchmark_kkt" title="adelie.adelie_core.state.StateGlmNaive64.benchmark_kkt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_kkt</span></code></a></p></td>
-<td><p>KKT time for a given BASIL iteration.</p></td>
+<td><p>KKT time for each iteration.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.benchmark_screen" title="adelie.adelie_core.state.StateGlmNaive64.benchmark_screen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_screen</span></code></a></p></td>
-<td><p>Screen time for a given BASIL iteration.</p></td>
+<td><p>Screen time for each iteration.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.beta0" title="adelie.adelie_core.state.StateGlmNaive64.beta0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">beta0</span></code></a></p></td>
 <td><p>The current intercept value.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.betas" title="adelie.adelie_core.state.StateGlmNaive64.betas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">betas</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> is the solution corresponding to <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> is the solution at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.ddev_tol" title="adelie.adelie_core.state.StateGlmNaive64.ddev_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ddev_tol</span></code></a></p></td>
 <td><p>Difference in percent deviance explained tolerance.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.dev_full" title="adelie.adelie_core.state.StateGlmNaive64.dev_full"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dev_full</span></code></a></p></td>
-<td><p>Full deviance <span class="math notranslate nohighlight">\(D(\eta^\star)\)</span> where <span class="math notranslate nohighlight">\(\eta^\star\)</span> is the minimizer.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.dev_null" title="adelie.adelie_core.state.StateGlmNaive64.dev_null"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dev_null</span></code></a></p></td>
-<td><p>Null deviance <span class="math notranslate nohighlight">\(D(\beta_0^\star \mathbf{1} + \eta^0)\)</span> from fitting an intercept-only model (if <code class="docutils literal notranslate"><span class="pre">intercept</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>).</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.devs" title="adelie.adelie_core.state.StateGlmNaive64.devs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">devs</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">devs[i]</span></code> is the (normalized) deviance at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p></td>
@@ -509,118 +505,118 @@ document.write(`
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should early exit based on training percent deviance explained.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.eta" title="adelie.adelie_core.state.StateGlmNaive64.eta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eta</span></code></a></p></td>
-<td><p>The natural parameter <span class="math notranslate nohighlight">\(\eta = X\beta + \beta_0 \mathbf{1} + \eta^0\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span>, <span class="math notranslate nohighlight">\(\beta_0\)</span>, and <span class="math notranslate nohighlight">\(\eta^0\)</span> are given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>, <code class="docutils literal notranslate"><span class="pre">beta0</span></code>, and <code class="docutils literal notranslate"><span class="pre">offsets</span></code>.</p></td>
+<td><p>The natural parameter <span class="math notranslate nohighlight">\(\eta = X\beta + \beta_0 \mathbf{1} + \eta^0\)</span> where  <span class="math notranslate nohighlight">\(\beta\)</span> and <span class="math notranslate nohighlight">\(\beta_0\)</span> are given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code> and <code class="docutils literal notranslate"><span class="pre">beta0</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.glm" title="adelie.adelie_core.state.StateGlmNaive64.glm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">glm</span></code></a></p></td>
-<td><p>GLM object.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.grad" title="adelie.adelie_core.state.StateGlmNaive64.grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grad</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.grad" title="adelie.adelie_core.state.StateGlmNaive64.grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grad</span></code></a></p></td>
 <td><p>The full gradient <span class="math notranslate nohighlight">\(X^\top (W y - \nabla A(\eta))\)</span> where <span class="math notranslate nohighlight">\(\eta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">eta</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.group_sizes" title="adelie.adelie_core.state.StateGlmNaive64.group_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_sizes</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.group_sizes" title="adelie.adelie_core.state.StateGlmNaive64.group_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_sizes</span></code></a></p></td>
 <td><p>List of group sizes corresponding to each element in <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.groups" title="adelie.adelie_core.state.StateGlmNaive64.groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">groups</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.groups" title="adelie.adelie_core.state.StateGlmNaive64.groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">groups</span></code></a></p></td>
 <td><p>List of starting indices to each group where <cite>G</cite> is the number of groups.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.intercept" title="adelie.adelie_core.state.StateGlmNaive64.intercept"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercept</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.intercept" title="adelie.adelie_core.state.StateGlmNaive64.intercept"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercept</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should fit with intercept.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.intercepts" title="adelie.adelie_core.state.StateGlmNaive64.intercepts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercepts</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">intercepts[i]</span></code> is the intercept solution corresponding to <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.intercepts" title="adelie.adelie_core.state.StateGlmNaive64.intercepts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercepts</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">intercepts[i]</span></code> is the intercept at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.irls_max_iters" title="adelie.adelie_core.state.StateGlmNaive64.irls_max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">irls_max_iters</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.irls_max_iters" title="adelie.adelie_core.state.StateGlmNaive64.irls_max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">irls_max_iters</span></code></a></p></td>
 <td><p>Maximum number of IRLS iterations.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.irls_tol" title="adelie.adelie_core.state.StateGlmNaive64.irls_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">irls_tol</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.irls_tol" title="adelie.adelie_core.state.StateGlmNaive64.irls_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">irls_tol</span></code></a></p></td>
 <td><p>IRLS convergence tolerance.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.lmda" title="adelie.adelie_core.state.StateGlmNaive64.lmda"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.lmda" title="adelie.adelie_core.state.StateGlmNaive64.lmda"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda</span></code></a></p></td>
 <td><p>The last regularization parameter that was attempted to be solved.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.lmda_max" title="adelie.adelie_core.state.StateGlmNaive64.lmda_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_max</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.lmda_max" title="adelie.adelie_core.state.StateGlmNaive64.lmda_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_max</span></code></a></p></td>
 <td><p>The smallest <span class="math notranslate nohighlight">\(\lambda\)</span> such that the true solution is zero for all coefficients that have a non-vanishing group lasso penalty (<span class="math notranslate nohighlight">\(\ell_2\)</span>-norm).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.lmda_path" title="adelie.adelie_core.state.StateGlmNaive64.lmda_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_path</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.lmda_path" title="adelie.adelie_core.state.StateGlmNaive64.lmda_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_path</span></code></a></p></td>
 <td><p>The regularization path to solve for.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.lmda_path_size" title="adelie.adelie_core.state.StateGlmNaive64.lmda_path_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_path_size</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.lmda_path_size" title="adelie.adelie_core.state.StateGlmNaive64.lmda_path_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_path_size</span></code></a></p></td>
 <td><p>Number of regularizations in the path if it is to be generated.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.lmdas" title="adelie.adelie_core.state.StateGlmNaive64.lmdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th <span class="math notranslate nohighlight">\(\lambda\)</span> regularization in the solution set.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.lmdas" title="adelie.adelie_core.state.StateGlmNaive64.lmdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code> is the regularization <span class="math notranslate nohighlight">\(\lambda\)</span>  used for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th solution.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.max_active_size" title="adelie.adelie_core.state.StateGlmNaive64.max_active_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_active_size</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.loss_full" title="adelie.adelie_core.state.StateGlmNaive64.loss_full"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loss_full</span></code></a></p></td>
+<td><p>Full loss <span class="math notranslate nohighlight">\(\ell(\eta^\star)\)</span> where <span class="math notranslate nohighlight">\(\eta^\star\)</span> is the minimizer.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.loss_null" title="adelie.adelie_core.state.StateGlmNaive64.loss_null"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loss_null</span></code></a></p></td>
+<td><p>Null loss <span class="math notranslate nohighlight">\(\ell(\beta_0^\star \mathbf{1} + \eta^0)\)</span> from fitting an intercept-only model (if <code class="docutils literal notranslate"><span class="pre">intercept</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>) and otherwise <span class="math notranslate nohighlight">\(\ell(\eta^0)\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.max_active_size" title="adelie.adelie_core.state.StateGlmNaive64.max_active_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_active_size</span></code></a></p></td>
 <td><p>Maximum number of active groups allowed.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.max_iters" title="adelie.adelie_core.state.StateGlmNaive64.max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_iters</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.max_iters" title="adelie.adelie_core.state.StateGlmNaive64.max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_iters</span></code></a></p></td>
 <td><p>Maximum number of coordinate descents.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.max_screen_size" title="adelie.adelie_core.state.StateGlmNaive64.max_screen_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_screen_size</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.max_screen_size" title="adelie.adelie_core.state.StateGlmNaive64.max_screen_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_screen_size</span></code></a></p></td>
 <td><p>Maximum number of screen groups allowed.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.min_ratio" title="adelie.adelie_core.state.StateGlmNaive64.min_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_ratio</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.min_ratio" title="adelie.adelie_core.state.StateGlmNaive64.min_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_ratio</span></code></a></p></td>
 <td><p>The ratio between the largest and smallest <span class="math notranslate nohighlight">\(\lambda\)</span> in the regularization sequence if it is to be generated.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.mu" title="adelie.adelie_core.state.StateGlmNaive64.mu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mu</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.mu" title="adelie.adelie_core.state.StateGlmNaive64.mu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mu</span></code></a></p></td>
 <td><p>The mean parameter <span class="math notranslate nohighlight">\(\mu = \nabla A(\eta)\)</span> where <span class="math notranslate nohighlight">\(\eta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">eta</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.n_threads" title="adelie.adelie_core.state.StateGlmNaive64.n_threads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_threads</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.n_threads" title="adelie.adelie_core.state.StateGlmNaive64.n_threads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_threads</span></code></a></p></td>
 <td><p>Number of threads.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.n_valid_solutions" title="adelie.adelie_core.state.StateGlmNaive64.n_valid_solutions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_valid_solutions</span></code></a></p></td>
-<td><p>Number of valid solutions for a given BASIL iteration.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.n_valid_solutions" title="adelie.adelie_core.state.StateGlmNaive64.n_valid_solutions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_valid_solutions</span></code></a></p></td>
+<td><p>Number of valid solutions for each iteration.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.newton_max_iters" title="adelie.adelie_core.state.StateGlmNaive64.newton_max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_max_iters</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.newton_max_iters" title="adelie.adelie_core.state.StateGlmNaive64.newton_max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_max_iters</span></code></a></p></td>
 <td><p>Maximum number of iterations for the BCD update.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.newton_tol" title="adelie.adelie_core.state.StateGlmNaive64.newton_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_tol</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.newton_tol" title="adelie.adelie_core.state.StateGlmNaive64.newton_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_tol</span></code></a></p></td>
 <td><p>Convergence tolerance for the BCD update.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.offsets" title="adelie.adelie_core.state.StateGlmNaive64.offsets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">offsets</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.offsets" title="adelie.adelie_core.state.StateGlmNaive64.offsets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">offsets</span></code></a></p></td>
 <td><p>Observation offsets <span class="math notranslate nohighlight">\(\eta^0\)</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.penalty" title="adelie.adelie_core.state.StateGlmNaive64.penalty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">penalty</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.penalty" title="adelie.adelie_core.state.StateGlmNaive64.penalty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">penalty</span></code></a></p></td>
 <td><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.pivot_slack_ratio" title="adelie.adelie_core.state.StateGlmNaive64.pivot_slack_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pivot_slack_ratio</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.pivot_slack_ratio" title="adelie.adelie_core.state.StateGlmNaive64.pivot_slack_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pivot_slack_ratio</span></code></a></p></td>
 <td><p>If screening takes place, then <code class="docutils literal notranslate"><span class="pre">pivot_slack_ratio</span></code> number of groups with next smallest (new) active scores  below the pivot point are also added to the screen set as slack.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.pivot_subset_min" title="adelie.adelie_core.state.StateGlmNaive64.pivot_subset_min"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pivot_subset_min</span></code></a></p></td>
-<td><p>If screening takes place, then at least <code class="docutils literal notranslate"><span class="pre">pivot_subset_min</span></code> number of gradient norms are used to determine the pivot point.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.pivot_subset_min" title="adelie.adelie_core.state.StateGlmNaive64.pivot_subset_min"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pivot_subset_min</span></code></a></p></td>
+<td><p>If screening takes place, then at least <code class="docutils literal notranslate"><span class="pre">pivot_subset_min</span></code> number of active scores are used to determine the pivot point.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.pivot_subset_ratio" title="adelie.adelie_core.state.StateGlmNaive64.pivot_subset_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pivot_subset_ratio</span></code></a></p></td>
-<td><p>If screening takes place, then the <code class="docutils literal notranslate"><span class="pre">(1</span> <span class="pre">+</span> <span class="pre">pivot_subset_ratio)</span> <span class="pre">*</span> <span class="pre">s</span></code> largest gradient norms are used to determine the pivot point where <code class="docutils literal notranslate"><span class="pre">s</span></code> is the current screen set size.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.pivot_subset_ratio" title="adelie.adelie_core.state.StateGlmNaive64.pivot_subset_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pivot_subset_ratio</span></code></a></p></td>
+<td><p>If screening takes place, then the <code class="docutils literal notranslate"><span class="pre">(1</span> <span class="pre">+</span> <span class="pre">pivot_subset_ratio)</span> <span class="pre">*</span> <span class="pre">s</span></code> largest active scores are used to determine the pivot point where <code class="docutils literal notranslate"><span class="pre">s</span></code> is the current screen set size.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_begins" title="adelie.adelie_core.state.StateGlmNaive64.screen_begins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_begins</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_begins" title="adelie.adelie_core.state.StateGlmNaive64.screen_begins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_begins</span></code></a></p></td>
 <td><p>List of indices that index a corresponding list of values for each screen group.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_beta" title="adelie.adelie_core.state.StateGlmNaive64.screen_beta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_beta</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_beta" title="adelie.adelie_core.state.StateGlmNaive64.screen_beta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_beta</span></code></a></p></td>
 <td><p>Coefficient vector on the screen set.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_g1" title="adelie.adelie_core.state.StateGlmNaive64.screen_g1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_g1</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_g1" title="adelie.adelie_core.state.StateGlmNaive64.screen_g1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_g1</span></code></a></p></td>
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">screen_set</span></code> that correspond to groups of size <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_g2" title="adelie.adelie_core.state.StateGlmNaive64.screen_g2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_g2</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_g2" title="adelie.adelie_core.state.StateGlmNaive64.screen_g2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_g2</span></code></a></p></td>
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">screen_set</span></code> that correspond to groups more than size <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_hashset" title="adelie.adelie_core.state.StateGlmNaive64.screen_hashset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_hashset</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_hashset" title="adelie.adelie_core.state.StateGlmNaive64.screen_hashset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_hashset</span></code></a></p></td>
 <td><p>Hashmap containing the same values as <code class="docutils literal notranslate"><span class="pre">screen_set</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_is_active" title="adelie.adelie_core.state.StateGlmNaive64.screen_is_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_is_active</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_is_active" title="adelie.adelie_core.state.StateGlmNaive64.screen_is_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_is_active</span></code></a></p></td>
 <td><p>Boolean vector that indicates whether each screen group in <code class="docutils literal notranslate"><span class="pre">groups</span></code> is active or not.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_rule" title="adelie.adelie_core.state.StateGlmNaive64.screen_rule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_rule</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_rule" title="adelie.adelie_core.state.StateGlmNaive64.screen_rule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_rule</span></code></a></p></td>
 <td><p>Strong rule type.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_set" title="adelie.adelie_core.state.StateGlmNaive64.screen_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_set</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_set" title="adelie.adelie_core.state.StateGlmNaive64.screen_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_set</span></code></a></p></td>
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">groups</span></code> that correspond to the screen groups.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_sizes" title="adelie.adelie_core.state.StateGlmNaive64.screen_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_sizes</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.screen_sizes" title="adelie.adelie_core.state.StateGlmNaive64.screen_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_sizes</span></code></a></p></td>
 <td><p>Strong set size for every saved solution.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.setup_dev_null" title="adelie.adelie_core.state.StateGlmNaive64.setup_dev_null"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup_dev_null</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should setup <code class="docutils literal notranslate"><span class="pre">dev_null</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.setup_lmda_max" title="adelie.adelie_core.state.StateGlmNaive64.setup_lmda_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup_lmda_max</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should setup <span class="math notranslate nohighlight">\(\lambda_\max\)</span>.</p></td>
@@ -628,13 +624,16 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.setup_lmda_path" title="adelie.adelie_core.state.StateGlmNaive64.setup_lmda_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup_lmda_path</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should setup the regularization path.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.tol" title="adelie.adelie_core.state.StateGlmNaive64.tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tol</span></code></a></p></td>
-<td><p>Convergence tolerance.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.setup_loss_null" title="adelie.adelie_core.state.StateGlmNaive64.setup_loss_null"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup_loss_null</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should setup <code class="docutils literal notranslate"><span class="pre">loss_null</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.weights" title="adelie.adelie_core.state.StateGlmNaive64.weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">weights</span></code></a></p></td>
-<td><p>Observation weights.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.tol" title="adelie.adelie_core.state.StateGlmNaive64.tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tol</span></code></a></p></td>
+<td><p>Coordinate descent convergence tolerance.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.y" title="adelie.adelie_core.state.StateGlmNaive64.y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.weights" title="adelie.adelie_core.state.StateGlmNaive64.weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">weights</span></code></a></p></td>
+<td><p>Observation weights <span class="math notranslate nohighlight">\(W\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGlmNaive64.y" title="adelie.adelie_core.state.StateGlmNaive64.y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y</span></code></a></p></td>
 <td><p>Response vector.</p></td>
 </tr>
 </tbody>
@@ -644,7 +643,7 @@ document.write(`
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.__init__" title="Link to this definition">#</a></dt>
 <dd><p>Overloaded function.</p>
 <ol class="arabic simple">
-<li><p>__init__(self: adelie.adelie_core.state.StateGlmNaive64, glm: adelie.adelie_core.glm.GlmBase64, X: adelie.adelie_core.matrix.MatrixNaiveBase64, y: numpy.ndarray[numpy.float64[1, n]], eta: numpy.ndarray[numpy.float64[1, n]], mu: numpy.ndarray[numpy.float64[1, n]], groups: numpy.ndarray[numpy.int64[1, n]], group_sizes: numpy.ndarray[numpy.int64[1, n]], alpha: float, penalty: numpy.ndarray[numpy.float64[1, n]], weights: numpy.ndarray[numpy.float64[1, n]], offsets: numpy.ndarray[numpy.float64[1, n]], lmda_path: numpy.ndarray[numpy.float64[1, n]], dev_null: float, dev_full: float, lmda_max: float, min_ratio: float, lmda_path_size: int, max_screen_size: int, max_active_size: int, pivot_subset_ratio: float, pivot_subset_min: int, pivot_slack_ratio: float, screen_rule: str, irls_max_iters: int, irls_tol: float, max_iters: int, tol: float, adev_tol: float, ddev_tol: float, newton_tol: float, newton_max_iters: int, early_exit: bool, setup_dev_null: bool, setup_lmda_max: bool, setup_lmda_path: bool, intercept: bool, n_threads: int, screen_set: numpy.ndarray[numpy.int64[1, n]], screen_beta: numpy.ndarray[numpy.float64[1, n]], screen_is_active: numpy.ndarray[bool[1, n]], beta0: float, lmda: float, grad: numpy.ndarray[numpy.float64[1, n]]) -&gt; None</p></li>
+<li><p>__init__(self: adelie.adelie_core.state.StateGlmNaive64, X: adelie.adelie_core.matrix.MatrixNaiveBase64, y: numpy.ndarray[numpy.float64[1, n]], eta: numpy.ndarray[numpy.float64[1, n]], mu: numpy.ndarray[numpy.float64[1, n]], groups: numpy.ndarray[numpy.int64[1, n]], group_sizes: numpy.ndarray[numpy.int64[1, n]], alpha: float, penalty: numpy.ndarray[numpy.float64[1, n]], weights: numpy.ndarray[numpy.float64[1, n]], offsets: numpy.ndarray[numpy.float64[1, n]], lmda_path: numpy.ndarray[numpy.float64[1, n]], loss_null: float, loss_full: float, lmda_max: float, min_ratio: float, lmda_path_size: int, max_screen_size: int, max_active_size: int, pivot_subset_ratio: float, pivot_subset_min: int, pivot_slack_ratio: float, screen_rule: str, irls_max_iters: int, irls_tol: float, max_iters: int, tol: float, adev_tol: float, ddev_tol: float, newton_tol: float, newton_max_iters: int, early_exit: bool, setup_loss_null: bool, setup_lmda_max: bool, setup_lmda_path: bool, intercept: bool, n_threads: int, screen_set: numpy.ndarray[numpy.int64[1, n]], screen_beta: numpy.ndarray[numpy.float64[1, n]], screen_is_active: numpy.ndarray[bool[1, n]], beta0: float, lmda: float, grad: numpy.ndarray[numpy.float64[1, n]]) -&gt; None</p></li>
 <li><p>__init__(self: adelie.adelie_core.state.StateGlmNaive64, arg0: adelie.adelie_core.state.StateGlmNaive64) -&gt; None</p></li>
 </ol>
 </dd></dl>
@@ -680,70 +679,55 @@ and <code class="docutils literal notranslate"><span class="pre">beta</span></co
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.alpha">
 <span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.alpha" title="Link to this definition">#</a></dt>
-<dd><p>Elastic net parameter.
-It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</span>.</p>
+<dd><p>Elastic net parameter.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.benchmark_fit_active">
 <span class="sig-name descname"><span class="pre">benchmark_fit_active</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.benchmark_fit_active" title="Link to this definition">#</a></dt>
-<dd><p>Fit time on the active set for a given BASIL iteration.</p>
+<dd><p>Fit time on the active set for each iteration.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.benchmark_fit_screen">
 <span class="sig-name descname"><span class="pre">benchmark_fit_screen</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.benchmark_fit_screen" title="Link to this definition">#</a></dt>
-<dd><p>Fit time on the screen set for a given BASIL iteration.</p>
+<dd><p>Fit time on the screen set for each iteration.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.benchmark_invariance">
 <span class="sig-name descname"><span class="pre">benchmark_invariance</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.benchmark_invariance" title="Link to this definition">#</a></dt>
-<dd><p>Invariance time for a given BASIL iteration.</p>
+<dd><p>Invariance time for each iteration.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.benchmark_kkt">
 <span class="sig-name descname"><span class="pre">benchmark_kkt</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.benchmark_kkt" title="Link to this definition">#</a></dt>
-<dd><p>KKT time for a given BASIL iteration.</p>
+<dd><p>KKT time for each iteration.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.benchmark_screen">
 <span class="sig-name descname"><span class="pre">benchmark_screen</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.benchmark_screen" title="Link to this definition">#</a></dt>
-<dd><p>Screen time for a given BASIL iteration.</p>
+<dd><p>Screen time for each iteration.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.beta0">
 <span class="sig-name descname"><span class="pre">beta0</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.beta0" title="Link to this definition">#</a></dt>
-<dd><p>The current intercept value.
-The value can be arbitrary but it is recommended to be close to the solution at <code class="docutils literal notranslate"><span class="pre">lmda</span></code>.</p>
+<dd><p>The current intercept value.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.betas">
 <span class="sig-name descname"><span class="pre">betas</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.betas" title="Link to this definition">#</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> is the solution corresponding to <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> is the solution at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.ddev_tol">
 <span class="sig-name descname"><span class="pre">ddev_tol</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.ddev_tol" title="Link to this definition">#</a></dt>
 <dd><p>Difference in percent deviance explained tolerance.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.dev_full">
-<span class="sig-name descname"><span class="pre">dev_full</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.dev_full" title="Link to this definition">#</a></dt>
-<dd><p>Full deviance <span class="math notranslate nohighlight">\(D(\eta^\star)\)</span> where <span class="math notranslate nohighlight">\(\eta^\star\)</span> is the minimizer.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.dev_null">
-<span class="sig-name descname"><span class="pre">dev_null</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.dev_null" title="Link to this definition">#</a></dt>
-<dd><p>Null deviance <span class="math notranslate nohighlight">\(D(\beta_0^\star \mathbf{1} + \eta^0)\)</span>
-from fitting an intercept-only model (if <code class="docutils literal notranslate"><span class="pre">intercept</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -762,14 +746,10 @@ from fitting an intercept-only model (if <code class="docutils literal notransla
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.eta">
 <span class="sig-name descname"><span class="pre">eta</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.eta" title="Link to this definition">#</a></dt>
 <dd><p>The natural parameter <span class="math notranslate nohighlight">\(\eta = X\beta + \beta_0 \mathbf{1} + \eta^0\)</span>
-where <span class="math notranslate nohighlight">\(\beta\)</span>, <span class="math notranslate nohighlight">\(\beta_0\)</span>, and <span class="math notranslate nohighlight">\(\eta^0\)</span> are given by
-<code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>, <code class="docutils literal notranslate"><span class="pre">beta0</span></code>, and <code class="docutils literal notranslate"><span class="pre">offsets</span></code>.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.glm">
-<span class="sig-name descname"><span class="pre">glm</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.glm" title="Link to this definition">#</a></dt>
-<dd><p>GLM object.</p>
+where 
+<span class="math notranslate nohighlight">\(\beta\)</span>
+and <span class="math notranslate nohighlight">\(\beta_0\)</span> are given by
+<code class="docutils literal notranslate"><span class="pre">screen_beta</span></code> and <code class="docutils literal notranslate"><span class="pre">beta0</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -802,7 +782,7 @@ where <span class="math notranslate nohighlight">\(\beta\)</span>, <span class="
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.intercepts">
 <span class="sig-name descname"><span class="pre">intercepts</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.intercepts" title="Link to this definition">#</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">intercepts[i]</span></code> is the intercept solution corresponding to <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">intercepts[i]</span></code> is the intercept at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -833,9 +813,7 @@ for all coefficients that have a non-vanishing group lasso penalty (<span class=
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.lmda_path">
 <span class="sig-name descname"><span class="pre">lmda_path</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.lmda_path" title="Link to this definition">#</a></dt>
-<dd><p>The regularization path to solve for.
-The full path is not considered if <code class="docutils literal notranslate"><span class="pre">early_exit</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.
-It is recommended that the path is sorted in decreasing order.</p>
+<dd><p>The regularization path to solve for.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -847,15 +825,28 @@ It is recommended that the path is sorted in decreasing order.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.lmdas">
 <span class="sig-name descname"><span class="pre">lmdas</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.lmdas" title="Link to this definition">#</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th <span class="math notranslate nohighlight">\(\lambda\)</span> regularization in the solution set.</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code> is the regularization <span class="math notranslate nohighlight">\(\lambda\)</span> 
+used for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th solution.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.loss_full">
+<span class="sig-name descname"><span class="pre">loss_full</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.loss_full" title="Link to this definition">#</a></dt>
+<dd><p>Full loss <span class="math notranslate nohighlight">\(\ell(\eta^\star)\)</span> where <span class="math notranslate nohighlight">\(\eta^\star\)</span> is the minimizer.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.loss_null">
+<span class="sig-name descname"><span class="pre">loss_null</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.loss_null" title="Link to this definition">#</a></dt>
+<dd><p>Null loss <span class="math notranslate nohighlight">\(\ell(\beta_0^\star \mathbf{1} + \eta^0)\)</span>
+from fitting an intercept-only model (if <code class="docutils literal notranslate"><span class="pre">intercept</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>)
+and otherwise <span class="math notranslate nohighlight">\(\ell(\eta^0)\)</span>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.max_active_size">
 <span class="sig-name descname"><span class="pre">max_active_size</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.max_active_size" title="Link to this definition">#</a></dt>
-<dd><p>Maximum number of active groups allowed.
-The function will return a valid state and guarantees to have active set size
-less than or equal to <code class="docutils literal notranslate"><span class="pre">max_active_size</span></code>.</p>
+<dd><p>Maximum number of active groups allowed.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -867,9 +858,7 @@ less than or equal to <code class="docutils literal notranslate"><span class="pr
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.max_screen_size">
 <span class="sig-name descname"><span class="pre">max_screen_size</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.max_screen_size" title="Link to this definition">#</a></dt>
-<dd><p>Maximum number of screen groups allowed.
-The function will return a valid state and guarantees to have screen size
-less than or equal to <code class="docutils literal notranslate"><span class="pre">max_screen_size</span></code>.</p>
+<dd><p>Maximum number of screen groups allowed.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -895,7 +884,7 @@ where <span class="math notranslate nohighlight">\(\eta\)</span> is given by <co
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.n_valid_solutions">
 <span class="sig-name descname"><span class="pre">n_valid_solutions</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.n_valid_solutions" title="Link to this definition">#</a></dt>
-<dd><p>Number of valid solutions for a given BASIL iteration.</p>
+<dd><p>Number of valid solutions for each iteration.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -919,8 +908,7 @@ where <span class="math notranslate nohighlight">\(\eta\)</span> is given by <co
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.penalty">
 <span class="sig-name descname"><span class="pre">penalty</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.penalty" title="Link to this definition">#</a></dt>
-<dd><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.
-It must be a non-negative vector.</p>
+<dd><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -928,25 +916,22 @@ It must be a non-negative vector.</p>
 <span class="sig-name descname"><span class="pre">pivot_slack_ratio</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.pivot_slack_ratio" title="Link to this definition">#</a></dt>
 <dd><p>If screening takes place, then <code class="docutils literal notranslate"><span class="pre">pivot_slack_ratio</span></code>
 number of groups with next smallest (new) active scores 
-below the pivot point are also added to the screen set as slack.
-It is only used if <code class="docutils literal notranslate"><span class="pre">screen_rule</span> <span class="pre">==</span> <span class="pre">&quot;pivot&quot;</span></code>.</p>
+below the pivot point are also added to the screen set as slack.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.pivot_subset_min">
 <span class="sig-name descname"><span class="pre">pivot_subset_min</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.pivot_subset_min" title="Link to this definition">#</a></dt>
 <dd><p>If screening takes place, then at least <code class="docutils literal notranslate"><span class="pre">pivot_subset_min</span></code>
-number of gradient norms are used to determine the pivot point.
-It is only used if <code class="docutils literal notranslate"><span class="pre">screen_rule</span> <span class="pre">==</span> <span class="pre">&quot;pivot&quot;</span></code>.</p>
+number of active scores are used to determine the pivot point.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.pivot_subset_ratio">
 <span class="sig-name descname"><span class="pre">pivot_subset_ratio</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.pivot_subset_ratio" title="Link to this definition">#</a></dt>
 <dd><p>If screening takes place, then the <code class="docutils literal notranslate"><span class="pre">(1</span> <span class="pre">+</span> <span class="pre">pivot_subset_ratio)</span> <span class="pre">*</span> <span class="pre">s</span></code>
-largest gradient norms are used to determine the pivot point
-where <code class="docutils literal notranslate"><span class="pre">s</span></code> is the current screen set size.
-It is only used if <code class="docutils literal notranslate"><span class="pre">screen_rule</span> <span class="pre">==</span> <span class="pre">&quot;pivot&quot;</span></code>.</p>
+largest active scores are used to determine the pivot point
+where <code class="docutils literal notranslate"><span class="pre">s</span></code> is the current screen set size.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -966,8 +951,7 @@ will grab values corresponding to the full <code class="docutils literal notrans
 where
 <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">screen_set[i]</span></code>,
 <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">screen_begins[i]</span></code>,
-and <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">group_sizes[k]</span></code>.
-The values can be arbitrary but it is recommended to be close to the solution at <code class="docutils literal notranslate"><span class="pre">lmda</span></code>.</p>
+and <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">group_sizes[k]</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -989,8 +973,7 @@ such that <code class="docutils literal notranslate"><span class="pre">group_siz
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.screen_hashset">
 <span class="sig-name descname"><span class="pre">screen_hashset</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.screen_hashset" title="Link to this definition">#</a></dt>
-<dd><p>Hashmap containing the same values as <code class="docutils literal notranslate"><span class="pre">screen_set</span></code>.
-It is used to check if a given group is screen or not.</p>
+<dd><p>Hashmap containing the same values as <code class="docutils literal notranslate"><span class="pre">screen_set</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1010,21 +993,13 @@ It is used to check if a given group is screen or not.</p>
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.screen_set">
 <span class="sig-name descname"><span class="pre">screen_set</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.screen_set" title="Link to this definition">#</a></dt>
 <dd><p>List of indices into <code class="docutils literal notranslate"><span class="pre">groups</span></code> that correspond to the screen groups.
-<code class="docutils literal notranslate"><span class="pre">screen_set[i]</span></code> is <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group.
-<code class="docutils literal notranslate"><span class="pre">screen_set</span></code> must contain at least the true (optimal) active groups
-when the regularization is given by <code class="docutils literal notranslate"><span class="pre">lmda</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">screen_set[i]</span></code> is <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.screen_sizes">
 <span class="sig-name descname"><span class="pre">screen_sizes</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.screen_sizes" title="Link to this definition">#</a></dt>
 <dd><p>Strong set size for every saved solution.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.setup_dev_null">
-<span class="sig-name descname"><span class="pre">setup_dev_null</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.setup_dev_null" title="Link to this definition">#</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should setup <code class="docutils literal notranslate"><span class="pre">dev_null</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1040,15 +1015,21 @@ when the regularization is given by <code class="docutils literal notranslate"><
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.setup_loss_null">
+<span class="sig-name descname"><span class="pre">setup_loss_null</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.setup_loss_null" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should setup <code class="docutils literal notranslate"><span class="pre">loss_null</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.tol">
 <span class="sig-name descname"><span class="pre">tol</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.tol" title="Link to this definition">#</a></dt>
-<dd><p>Convergence tolerance.</p>
+<dd><p>Coordinate descent convergence tolerance.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGlmNaive64.weights">
 <span class="sig-name descname"><span class="pre">weights</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGlmNaive64.weights" title="Link to this definition">#</a></dt>
-<dd><p>Observation weights.</p>
+<dd><p>Observation weights <span class="math notranslate nohighlight">\(W\)</span>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1081,11 +1062,11 @@ when the regularization is given by <code class="docutils literal notranslate"><
       </div>
     </a>
     <a class="right-next"
-       href="adelie.glm.GlmBase64.html"
+       href="adelie.adelie_core.state.StateMultiGaussianNaive64.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.glm.GlmBase64</p>
+        <p class="prev-next-title">adelie.adelie_core.state.StateMultiGaussianNaive64</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1120,12 +1101,9 @@ when the regularization is given by <code class="docutils literal notranslate"><
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.beta0"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.beta0</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.betas"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.betas</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.ddev_tol"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.ddev_tol</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.dev_full"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.dev_full</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.dev_null"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.dev_null</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.devs"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.devs</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.early_exit"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.early_exit</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.eta"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.eta</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.glm"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.glm</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.grad"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.grad</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.group_sizes"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.group_sizes</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.groups"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.groups</span></code></a></li>
@@ -1138,6 +1116,8 @@ when the regularization is given by <code class="docutils literal notranslate"><
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.lmda_path"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.lmda_path</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.lmda_path_size"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.lmda_path_size</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.lmdas"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.lmdas</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.loss_full"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.loss_full</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.loss_null"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.loss_null</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.max_active_size"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.max_active_size</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.max_iters"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.max_iters</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.max_screen_size"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.max_screen_size</span></code></a></li>
@@ -1161,9 +1141,9 @@ when the regularization is given by <code class="docutils literal notranslate"><
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.screen_rule"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.screen_rule</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.screen_set"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.screen_set</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.screen_sizes"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.screen_sizes</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.setup_dev_null"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.setup_dev_null</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.setup_lmda_max"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.setup_lmda_max</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.setup_lmda_path"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.setup_lmda_path</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.setup_loss_null"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.setup_loss_null</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.tol"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.tol</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.weights"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.weights</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGlmNaive64.y"><code class="docutils literal notranslate"><span class="pre">StateGlmNaive64.y</span></code></a></li>

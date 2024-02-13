@@ -1,6 +1,0 @@
-﻿adelie.solver.solve\_gaussian\_pin
-==================================
-
-.. currentmodule:: adelie.solver
-
-.. autofunction:: solve_gaussian_pin

@@ -1,0 +1,6 @@
+﻿adelie.state.multigaussian\_naive
+=================================
+
+.. currentmodule:: adelie.state
+
+.. autofunction:: multigaussian_naive
