@@ -591,7 +591,7 @@ def gaussian_pin_naive(
         ``screen_set[i]`` is ``i`` th screen group.
         ``screen_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
-    lmda_path : (l,) np.ndarray
+    lmda_path : (L,) np.ndarray
         The regularization path to solve for.
         It is recommended that the path is sorted in decreasing order.
     rsq : float
@@ -858,7 +858,7 @@ def gaussian_pin_cov(
         ``screen_set[i]`` is ``i`` th screen group.
         ``screen_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
-    lmda_path : (l,) np.ndarray
+    lmda_path : (L,) np.ndarray
         The regularization path to solve for.
         It is recommended that the path is sorted in decreasing order.
     rsq : float
@@ -1662,7 +1662,7 @@ def gaussian_naive(
     grad : (p,) np.ndarray
         The full gradient :math:`X_c^\\top W (y_c - X_c\\beta)` where
         :math:`\\beta` is given by ``screen_beta``.
-    lmda_path : (l,) np.ndarray, optional
+    lmda_path : (L,) np.ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
@@ -1934,7 +1934,7 @@ def multigaussian_naive(
         .. note::
             This is the original response vector not offsetted!
 
-    X_means : (p*K,) or ((p+1)*K,) np.ndarray
+    X_means : ((p+intercept)*K,) np.ndarray
         Column means (weighted by :math:`\\tilde{W}`) of :math:`\\tilde{X}`.
     y_var : float
         The average of the variance for each response vector
@@ -1987,10 +1987,10 @@ def multigaussian_naive(
         and :math:`\\beta_{\\mathrm{curr}}` is given by ``screen_beta``.
     lmda : float
         The last regularization parameter that was attempted to be solved.
-    grad : (p*K,) or ((p+1)*K,) np.ndarray
+    grad : ((p+intercept)*K,) np.ndarray
         The full gradient :math:`\\tilde{X}^\\top \\tilde{W} (\\tilde{y} - \\tilde{X}\\beta)` where
         :math:`\\beta` is given by ``screen_beta``.
-    lmda_path : (l,) np.ndarray, optional
+    lmda_path : (L,) np.ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
@@ -2245,7 +2245,7 @@ def _render_glm_naive_inputs(
     *,
     irls_max_iters,
     irls_tol,
-    dev_null,
+    loss_null,
     **kwargs,
 ):
     out = _render_gaussian_naive_inputs(**kwargs)
@@ -2255,10 +2255,10 @@ def _render_glm_naive_inputs(
     if irls_tol <= 0:
         raise ValueError("irls_tol must be > 0.")
 
-    setup_dev_null = dev_null is None
-    if setup_dev_null: dev_null = np.inf
+    setup_loss_null = loss_null is None
+    if setup_loss_null: loss_null = np.inf
 
-    return out + (setup_dev_null, dev_null)
+    return out + (setup_loss_null, loss_null)
 
 
 def glm_naive(
@@ -2280,8 +2280,8 @@ def glm_naive(
     grad: np.ndarray,
     eta: np.ndarray,
     mu: np.ndarray,
-    dev_full: float,
-    dev_null: float =None,
+    loss_full: float,
+    loss_null: float =None,
     lmda_path: np.ndarray =None,
     lmda_max: float =None,
     irls_max_iters: int =int(1e4),
@@ -2366,16 +2366,16 @@ def glm_naive(
     mu : (n,) np.ndarray
         The mean parameter :math:`\\mu = \\nabla A(\\eta)`
         where :math:`\\eta` is given by ``eta``.
-    dev_full : float
-        Full deviance :math:`D(\\eta^\\star)`
+    loss_full : float
+        Full loss :math:`\\ell(\\eta^\\star)`
         where :math:`\\eta^\\star` is the minimizer.
-    dev_null : float, optional
-        Null deviance :math:`D(\\beta_0^\\star \\mathbf{1} + \\eta^0)`
+    loss_null : float, optional
+        Null loss :math:`\\ell(\\beta_0^\\star \\mathbf{1} + \\eta^0)`
         from fitting an intercept-only model (if ``intercept`` is ``True``)
-        and otherwise :math:`D(\\eta^0)`.
+        and otherwise :math:`\\ell(\\eta^0)`.
         If ``None``, it will be computed.
         Default is ``None``. 
-    lmda_path : (l,) np.ndarray, optional
+    lmda_path : (L,) np.ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
@@ -2486,8 +2486,8 @@ def glm_naive(
         setup_lmda_path,
         lmda_max,
         lmda_path,
-        setup_dev_null,
-        dev_null,
+        setup_loss_null,
+        loss_null,
     ) = _render_glm_naive_inputs(
         X=X,
         groups=groups,
@@ -2509,7 +2509,7 @@ def glm_naive(
         pivot_slack_ratio=pivot_slack_ratio,
         irls_max_iters=irls_max_iters,
         irls_tol=irls_tol,
-        dev_null=dev_null,
+        loss_null=loss_null,
     )
 
     dispatcher = {
@@ -2554,8 +2554,8 @@ def glm_naive(
                 weights=self._weights,
                 offsets=self._offsets,
                 lmda_path=self._lmda_path,
-                dev_null=dev_null,
-                dev_full=dev_full,
+                loss_null=loss_null,
+                loss_full=loss_full,
                 lmda_max=lmda_max,
                 min_ratio=min_ratio,
                 lmda_path_size=lmda_path_size,
@@ -2574,7 +2574,7 @@ def glm_naive(
                 newton_tol=newton_tol,
                 newton_max_iters=newton_max_iters,
                 early_exit=early_exit,
-                setup_dev_null=setup_dev_null,
+                setup_loss_null=setup_loss_null,
                 setup_lmda_max=setup_lmda_max,
                 setup_lmda_path=setup_lmda_path,
                 intercept=intercept,
@@ -2619,8 +2619,8 @@ def multiglm_naive(
     grad: np.ndarray,
     eta: np.ndarray,
     mu: np.ndarray,
-    dev_full: float,
-    dev_null: float =None,
+    loss_full: float,
+    loss_null: float =None,
     lmda_path: np.ndarray =None,
     lmda_max: float =None,
     irls_max_iters: int =int(1e4),
@@ -2699,7 +2699,7 @@ def multiglm_naive(
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
     lmda : float
         The last regularization parameter that was attempted to be solved.
-    grad : (p*K,) or ((p+1)*K,) np.ndarray
+    grad : ((p+intercept)*K,) np.ndarray
         The full gradient :math:`\\tilde{X}^\\top (\\tilde{W} \\tilde{y} - \\nabla A(\\tilde{\\eta}))` where
         :math:`\\tilde{\\eta}` is given by ``eta``.
     eta : (n*K,) np.ndarray
@@ -2711,17 +2711,17 @@ def multiglm_naive(
     mu : (n*K,) np.ndarray
         The mean parameter :math:`\\tilde{\\mu} = \\nabla A(\\tilde{\\eta})`
         where :math:`\\tilde{\\eta}` is given by ``eta``.
-    dev_full : float
-        Full deviance :math:`D(\\eta^\\star)`
+    loss_full : float
+        Full loss :math:`\\ell(\\eta^\\star)`
         where :math:`\\eta^\\star` is the minimizer.
-    dev_null : float, optional
-        Null deviance :math:`D(\\mathbf{1} \\beta_0^{\\star\\top} + \\eta^0)`
+    loss_null : float, optional
+        Null loss :math:`\\ell(\\mathbf{1} \\beta_0^{\\star\\top} + \\eta^0)`
         from fitting an intercept-only model (if ``intercept`` is ``True``)
         where an intercept is given for each class
-        and otherwise :math:`D(\\eta^0)`.
+        and otherwise :math:`\\ell(\\eta^0)`.
         If ``None``, it will be computed.
         Default is ``None``. 
-    lmda_path : (l,) np.ndarray, optional
+    lmda_path : (L,) np.ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
@@ -2832,8 +2832,8 @@ def multiglm_naive(
         setup_lmda_path,
         lmda_max,
         lmda_path,
-        setup_dev_null,
-        dev_null,
+        setup_loss_null,
+        loss_null,
     ) = _render_glm_naive_inputs(
         X=X,
         groups=groups,
@@ -2855,7 +2855,7 @@ def multiglm_naive(
         pivot_slack_ratio=pivot_slack_ratio,
         irls_max_iters=irls_max_iters,
         irls_tol=irls_tol,
-        dev_null=dev_null,
+        loss_null=loss_null,
     )
 
     dispatcher = {
@@ -2919,8 +2919,8 @@ def multiglm_naive(
                 weights=self._weights_expanded,
                 offsets=self._offsets.ravel(),
                 lmda_path=self._lmda_path,
-                dev_null=dev_null,
-                dev_full=dev_full,
+                loss_null=loss_null,
+                loss_full=loss_full,
                 lmda_max=lmda_max,
                 min_ratio=min_ratio,
                 lmda_path_size=lmda_path_size,
@@ -2939,7 +2939,7 @@ def multiglm_naive(
                 newton_tol=newton_tol,
                 newton_max_iters=newton_max_iters,
                 early_exit=early_exit,
-                setup_dev_null=setup_dev_null,
+                setup_loss_null=setup_loss_null,
                 setup_lmda_max=setup_lmda_max,
                 setup_lmda_path=setup_lmda_path,
                 intercept=False,

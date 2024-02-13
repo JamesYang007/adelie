@@ -35,7 +35,7 @@ public:
         var.colwise() = weights.matrix().transpose().array() / var.cols();
     }
 
-    value_t deviance(
+    value_t loss(
         const Eigen::Ref<const rowarr_value_t>& y,
         const Eigen::Ref<const rowarr_value_t>& eta,
         const Eigen::Ref<const vec_value_t>& weights
@@ -47,7 +47,7 @@ public:
         ).sum() / y.cols();
     }
 
-    value_t deviance_full(
+    value_t loss_full(
         const Eigen::Ref<const rowarr_value_t>& y,
         const Eigen::Ref<const vec_value_t>& weights
     ) override

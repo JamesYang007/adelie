@@ -12,7 +12,7 @@ def _solve(state, progress_bar: bool =False):
     """Solves the group elastic net problem.
 
     The gaussian pin group elastic net problem is given by
-    minimizing the objective defined in ``adelie.solver.objective``
+    minimizing the objective defined in ``adelie.solver.grpnet``
     for the Gaussian GLM with the additional constraint that :math:`\\beta_{-S} = 0`
     where :math:`S` denotes the screen set,
     that is, the coefficient vector is forced to be zero
@@ -43,7 +43,6 @@ def _solve(state, progress_bar: bool =False):
     adelie.state.glm_naive
     adelie.state.multigaussian_naive
     adelie.state.multiglm_naive
-    adelie.solver.objective
     """
     # mapping of each state type to the corresponding solver
     f_dict = {
@@ -247,7 +246,7 @@ def grpnet(
         Default is ``None``, in which case, it is set to 
         ``np.zeros(n)`` if ``y`` is single-response
         and ``np.zeros((n, K))`` if multi-response.
-    lmda_path : (l,) np.ndarray, optional
+    lmda_path : (L,) np.ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
@@ -567,22 +566,22 @@ def grpnet(
                 mu = np.empty(offsets.shape); glm.gradient(eta, weights, mu)
                 resid = (weights_mscaled[:, None] * y - mu).ravel()
                 grad = np.empty(X_aug.cols()); X_aug.mul(resid, grad)
-                dev_null = None
-                dev_full = glm.deviance_full(y, weights)
+                loss_null = None
+                loss_full = glm.loss_full(y, weights)
                 eta = eta.ravel()
                 mu = mu.ravel()
             else:
                 eta = warm_start.eta
                 mu = warm_start.mu
                 grad = warm_start.grad
-                dev_null = warm_start.dev_null
-                dev_full = warm_start.dev_full
+                loss_null = warm_start.loss_null
+                loss_full = warm_start.loss_full
 
             solver_args["grad"] = grad
             solver_args["eta"] = eta
             solver_args["mu"] = mu
-            solver_args["dev_null"] = dev_null
-            solver_args["dev_full"] = dev_full
+            solver_args["loss_null"] = loss_null
+            solver_args["loss_full"] = loss_full
 
             state = ad.state.multiglm_naive(**solver_args)
 
@@ -663,22 +662,22 @@ def grpnet(
                 mu = np.empty(n); glm.gradient(eta, weights, mu)
                 resid = (weights * y - mu)
                 grad = np.empty(p); X.mul(resid, grad)
-                dev_null = None
-                dev_full = glm.deviance_full(y, weights)
+                loss_null = None
+                loss_full = glm.loss_full(y, weights)
             else:
                 beta0 = warm_start.beta0
                 eta = warm_start.eta
                 mu = warm_start.mu
                 grad = warm_start.grad
-                dev_null = warm_start.dev_null
-                dev_full = warm_start.dev_full
+                loss_null = warm_start.loss_null
+                loss_full = warm_start.loss_full
 
             solver_args["beta0"] = beta0
             solver_args["grad"] = grad
             solver_args["eta"] = eta
             solver_args["mu"] = mu
-            solver_args["dev_null"] = dev_null
-            solver_args["dev_full"] = dev_full
+            solver_args["loss_null"] = loss_null
+            solver_args["loss_full"] = loss_full
             state = ad.state.glm_naive(**solver_args)
 
     if check_state:

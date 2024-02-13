@@ -1,6 +1,8 @@
 from adelie.solver import (
-    objective,
     _solve,
+)
+from adelie.diagnostic import (
+    objective,
 )
 import adelie as ad
 import cvxpy as cp
@@ -114,7 +116,7 @@ def run_solve_gaussian_pin(state, X, y, weights):
     lmdas = state.lmdas
 
     # check beta matches (if not, at least that objective is better)
-    betas = state.betas.toarray()
+    betas = state.betas
     beta0s = state.intercepts
     cvxpy_res = [
         solve_cvxpy(
@@ -132,43 +134,33 @@ def run_solve_gaussian_pin(state, X, y, weights):
         )
         for lmda in lmdas
     ]
-    cvxpy_beta0s = [out[0] for out in cvxpy_res]
-    cvxpy_betas = [out[1] for out in cvxpy_res]
+    cvxpy_beta0s = np.array([out[0][0] for out in cvxpy_res])
+    cvxpy_betas = np.array([out[1] for out in cvxpy_res])
 
-    is_beta_close = np.allclose(betas, cvxpy_betas, atol=1e-6)
+    is_beta_close = np.allclose(betas.toarray(), cvxpy_betas, atol=1e-6)
     if not is_beta_close:
-        my_objs = np.array([
-            objective(
-                beta0=beta0,
-                beta=beta,
-                X=ad.matrix.dense(X),
-                y=y,
-                groups=state.groups,
-                group_sizes=state.group_sizes,
-                lmda=lmda,
-                alpha=state.alpha,
-                penalty=state.penalty,
-                weights=weights,
-                offsets=np.zeros_like(weights),
-            )
-            for beta0, beta, lmda in zip(beta0s, betas, lmdas)
-        ])
-        cvxpy_objs = np.array([
-            objective(
-                beta0=beta0,
-                beta=beta,
-                X=ad.matrix.dense(X),
-                y=y,
-                groups=state.groups,
-                group_sizes=state.group_sizes,
-                lmda=lmda,
-                alpha=state.alpha,
-                penalty=state.penalty,
-                weights=weights,
-                offsets=np.zeros_like(weights),
-            )
-            for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
-        ])
+        my_objs = objective(
+            X=X,
+            y=y,
+            betas=betas,
+            intercepts=beta0s,
+            lmdas=lmdas,
+            groups=state.groups,
+            alpha=state.alpha,
+            penalty=state.penalty,
+            weights=weights,
+        )
+        cvxpy_objs = objective(
+            X=X,
+            y=y,
+            betas=cvxpy_betas,
+            intercepts=cvxpy_beta0s,
+            lmdas=lmdas,
+            groups=state.groups,
+            alpha=state.alpha,
+            penalty=state.penalty,
+            weights=weights,
+        )
         assert np.all(my_objs <= cvxpy_objs * (1 + 1e-5))
 
     return state
@@ -403,7 +395,7 @@ def run_solve_gaussian(state, X, y):
     lmdas = state.lmdas
 
     # check beta matches (if not, at least that objective is better)
-    betas = state.betas.toarray()
+    betas = state.betas
     beta0s = state.intercepts
     cvxpy_res = [
         solve_cvxpy(
@@ -422,43 +414,35 @@ def run_solve_gaussian(state, X, y):
         for lmda in lmdas
     ]
 
-    cvxpy_beta0s = [out[0] for out in cvxpy_res]
-    cvxpy_betas = [out[1] for out in cvxpy_res]
+    cvxpy_beta0s = np.array([out[0][0] for out in cvxpy_res])
+    cvxpy_betas = np.array([out[1] for out in cvxpy_res])
 
-    is_beta_close = np.allclose(betas, cvxpy_betas, atol=1e-6)
+    is_beta_close = np.allclose(betas.toarray(), cvxpy_betas, atol=1e-6)
     if not is_beta_close:
-        my_objs = np.array([
-            objective(
-                beta0=beta0,
-                beta=beta,
-                X=ad.matrix.dense(X),
-                y=y,
-                groups=state.groups,
-                group_sizes=state.group_sizes,
-                lmda=lmda,
-                alpha=state.alpha,
-                penalty=state.penalty,
-                weights=state.weights,
-                offsets=state._offsets,
-            )
-            for beta0, beta, lmda in zip(beta0s, betas, lmdas)
-        ])
-        cvxpy_objs = np.array([
-            objective(
-                beta0=beta0,
-                beta=beta,
-                X=ad.matrix.dense(X),
-                y=y,
-                groups=state.groups,
-                group_sizes=state.group_sizes,
-                lmda=lmda,
-                alpha=state.alpha,
-                penalty=state.penalty,
-                weights=state.weights,
-                offsets=state._offsets,
-            )
-            for beta0, beta, lmda in zip(cvxpy_beta0s, cvxpy_betas, lmdas)
-        ])
+        my_objs = objective(
+            X=X,
+            y=y,
+            betas=betas,
+            intercepts=beta0s,
+            lmdas=lmdas,
+            groups=state.groups,
+            alpha=state.alpha,
+            penalty=state.penalty,
+            weights=state._weights,
+            offsets=state._offsets,
+        )
+        cvxpy_objs = objective(
+            X=X,
+            y=y,
+            betas=cvxpy_betas,
+            intercepts=cvxpy_beta0s,
+            lmdas=lmdas,
+            groups=state.groups,
+            alpha=state.alpha,
+            penalty=state.penalty,
+            weights=state._weights,
+            offsets=state._offsets,
+        )
         assert np.all(my_objs <= cvxpy_objs * (1 + 1e-8))
 
     return state

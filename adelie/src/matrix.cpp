@@ -259,11 +259,11 @@ void matrix_naive_base(py::module_& m, const char* name)
 
         Parameters
         ----------
-        v : (l, p) scipy.sparse.csr_matrix
+        v : (L, p) scipy.sparse.csr_matrix
             Sparse matrix to multiply with the matrix.
         w : (n,) np.ndarray
             Vector of weights.
-        out : (l, n) np.ndarray
+        out : (L, n) np.ndarray
             Matrix to store in-place the result.
         )delimiter")
         .def("cov", &internal_t::cov, R"delimiter(

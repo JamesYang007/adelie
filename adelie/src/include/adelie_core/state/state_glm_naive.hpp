@@ -113,8 +113,8 @@ struct StateGlmNaive: StateGlmBase<
         const Eigen::Ref<const vec_value_t>& weights,
         const Eigen::Ref<const vec_value_t>& offsets,
         const Eigen::Ref<const vec_value_t>& lmda_path,
-        value_t dev_null,
-        value_t dev_full,
+        value_t loss_null,
+        value_t loss_full,
         value_t lmda_max,
         value_t min_ratio,
         size_t lmda_path_size,
@@ -133,7 +133,7 @@ struct StateGlmNaive: StateGlmBase<
         value_t newton_tol,
         size_t newton_max_iters,
         bool early_exit,
-        bool setup_dev_null, 
+        bool setup_loss_null, 
         bool setup_lmda_max,
         bool setup_lmda_path,
         bool intercept,
@@ -147,10 +147,10 @@ struct StateGlmNaive: StateGlmBase<
     ):
         base_t(
             groups, group_sizes, alpha, penalty, weights, offsets, lmda_path, 
-            dev_null, dev_full, lmda_max, min_ratio, lmda_path_size, max_screen_size, max_active_size,
+            loss_null, loss_full, lmda_max, min_ratio, lmda_path_size, max_screen_size, max_active_size,
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             irls_max_iters, irls_tol, max_iters, tol, adev_tol, ddev_tol,
-            newton_tol, newton_max_iters, early_exit, setup_dev_null, setup_lmda_max, setup_lmda_path, intercept, n_threads,
+            newton_tol, newton_max_iters, early_exit, setup_loss_null, setup_lmda_max, setup_lmda_path, intercept, n_threads,
             screen_set, screen_beta, screen_is_active, beta0, lmda, grad
         ),
         y(y.data(), y.size()),
