@@ -2238,7 +2238,13 @@ class glm_naive_base:
         assert n == self.eta.shape[0]
         assert n == self.mu.shape[0]
 
-    # TODO: implement check()?
+    def check(
+        self,
+        method: str =None, 
+        logger=logger.logger,
+    ):
+        # TODO: implement check()?
+        return
 
 
 def _render_glm_naive_inputs(
