@@ -101,15 +101,14 @@ def objective(
         ``np.zeros(n)`` if ``y`` is single-response
         and ``np.zeros((n, K))`` if multi-response.
     relative : bool, optional
-        If ``True``, then the full deviance, :math:`D(\\eta^\\star)`, is computed at the saturated model
-        and the difference :math:`D(\\eta)-D(\\eta^\\star)` is provided,
+        If ``True``, then the full loss, :math:`\\ell(\\eta^\\star)`, is computed at the saturated model
+        and the difference :math:`\\ell(\\eta)-\\ell(\\eta^\\star)` is provided,
         which will always be non-negative.
-        This effectively computes deviance *relative* to the saturated model
-        rather than a fictitious model that achieves zero deviance.
+        This effectively computes loss *relative* to the saturated model.
         Default is ``True``.
     add_penalty : bool, optional
         If ``False``, the regularization term is removed 
-        so that only the deviance part is calculated. 
+        so that only the loss part is calculated. 
         Default is ``True``.
     n_threads : int, optional
         Number of threads.
@@ -171,15 +170,15 @@ def objective(
         raise RuntimeError("beta is not one of np.ndarray or scipy.sparse.csr_matrix.")
     etas += intercepts[:, None] + offsets
 
-    # compute deviance part
+    # compute loss part
     objs = np.array([
-        glm.deviance(y, etas[i], weights)
+        glm.loss(y, etas[i], weights)
         for i in range(etas.shape[0])
     ])
 
     # relative to saturated model
     if relative:
-        objs -= glm.deviance_full(y, weights)
+        objs -= glm.loss_full(y, weights)
 
     # compute regularization part
     if add_penalty:
@@ -223,7 +222,7 @@ def predict(
 
     .. math::
         \\begin{align*}
-            \\hat{y} = K (W \otimes I_K)^{-1} \\nabla A(
+            \\hat{y} = (K^{-1} W \otimes I_K)^{-1} \\nabla A(
                 (X\\otimes I_K) \\beta + 
                 (\mathbf{1}\\otimes I_k) \\beta_0 + 
                 \\eta^0
@@ -720,7 +719,7 @@ def plot_devs(
     Parameters
     ----------
     lmdas : (L,) np.ndarray
-        Regularizations.
+        Regularization parameters :math:`\\lambda`.
     devs : (L,) np.ndarray
         Deviances.
 
@@ -762,7 +761,7 @@ def plot_set_sizes(
     active_sizes : (L,) np.ndarray
         Active set sizes.
     lmdas : (L,) np.ndarray
-        Regularizations.
+        Regularization parameters :math:`\\lambda`.
     ratio : bool, optional
         ``True`` if plot should normalize the set sizes
         by the total number of groups.
@@ -886,7 +885,7 @@ def plot_benchmark(
     n_valid_solutions : (B,) np.ndarray
         Flags that indicate whether each iteration resulted in a valid solution.
     lmdas : (L,) np.ndarray
-        Regularizations.
+        Regularization parameters :math:`\\lambda`.
     relative : bool, optional
         If ``True``, the time breakdown plot is relative to the total time,
         therefore plotting the proportion of time spent in each category.
@@ -997,7 +996,7 @@ def plot_kkt(
     Parameters
     ----------
     lmdas : (L,) np.ndarray
-        Regularizations.
+        Regularization parameters :math:`\\lambda`.
     scores : (L, G) np.ndarray
         Gradient scores.
     idx : int, optional
@@ -1005,7 +1004,7 @@ def plot_kkt(
         If ``None``, then an animation of the plots at every index is shown.
         Default is ``None``.
     relative : bool, optional
-        If ``True``, then plots the relative error ``score / lmda - 1``.
+        If ``True``, then plots the relative error ``score / lmda[:, None] - 1``.
         Otherwise, the absolute values are used.
         Default is ``False``.
 

@@ -40,13 +40,13 @@ public:
         Eigen::Ref<rowarr_value_t> var
     ) =0;
 
-    virtual value_t deviance(
+    virtual value_t loss(
         const Eigen::Ref<const rowarr_value_t>& y,
         const Eigen::Ref<const rowarr_value_t>& eta,
         const Eigen::Ref<const vec_value_t>& weights
     ) =0;
 
-    virtual value_t deviance_full(
+    virtual value_t loss_full(
         const Eigen::Ref<const rowarr_value_t>& y,
         const Eigen::Ref<const vec_value_t>& weights
     ) =0;

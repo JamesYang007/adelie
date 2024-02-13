@@ -46,6 +46,8 @@ def gaussian(
 
     .. math::
         \\begin{align*}
+            \\ell(\\eta)
+            =
             \\sum\\limits_{i=1}^n w_i \\left(
                 -y_i \\eta_i + \\frac{\\eta_i^2}{2}
             \\right) 
@@ -103,6 +105,8 @@ def multigaussian(
 
     .. math::
         \\begin{align*}
+            \\ell(\\eta)
+            =
             \\frac{1}{K}
             \\sum\\limits_{i=1}^n 
             w_{i} \\left(
@@ -162,6 +166,8 @@ def binomial(
 
     .. math::
         \\begin{align*}
+            \\ell(\\eta)
+            =
             \\sum\\limits_{i=1}^n w_i \\left(
                 -y_i \\eta_i + \\log(1 + e^{\\eta_i})
             \\right)
@@ -213,6 +219,8 @@ def multinomial(
 
     .. math::
         \\begin{align*}
+            \\ell(\\eta)
+            =
             \\frac{1}{K}
             \\sum\\limits_{i=1}^n 
             w_i
@@ -226,7 +234,7 @@ def multinomial(
 
     We assume that every :math:`y_{ik} \\in \\{0,1\\}` and
     for each fixed :math:`i`, 
-    there is at most one :math:`k` such that :math:`y_{ik} = 1`.
+    there is excatly one :math:`k` such that :math:`y_{ik} = 1`.
 
     Parameters
     ----------
@@ -272,6 +280,8 @@ def poisson(
 
     .. math::
         \\begin{align*}
+            \\ell(\\eta)
+            =
             \\sum\\limits_{i=1}^n w_i \\left(
                 -y_i \\eta_i + e^{\\eta_i}
             \\right) 

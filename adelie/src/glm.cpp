@@ -47,7 +47,7 @@ public:
         );
     }
 
-    value_t deviance(
+    value_t loss(
         const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& eta,
         const Eigen::Ref<const vec_value_t>& weights
@@ -56,12 +56,12 @@ public:
         PYBIND11_OVERRIDE_PURE(
             value_t,
             base_t,
-            deviance,
+            loss,
             y, eta, weights
         );
     }
 
-    value_t deviance_full(
+    value_t loss_full(
         const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& weights
     ) override
@@ -69,7 +69,7 @@ public:
         PYBIND11_OVERRIDE_PURE(
             value_t,
             base_t,
-            deviance_full,
+            loss_full,
             y, weights
         );
     }
@@ -88,25 +88,17 @@ void glm_base(py::module_& m, const char* name)
         
         .. math::
             \begin{align*}
-                D(\eta) = \sum\limits_{i=1}^n w_{i} \left(
+                \ell(\eta) = \sum\limits_{i=1}^n w_{i} \left(
                     -y_i \eta_i + A_i(\eta)
                 \right)
             \end{align*}
 
-        We define :math:`D(\eta)` as the *deviance* and :math:`A(\eta) := \sum_{i=1}^n w_{i} A_i(\eta)`
+        We define :math:`\ell(\eta)` as the *loss* and :math:`A(\eta) := \sum_{i=1}^n w_{i} A_i(\eta)`
         as the *log-partition function*.
         Here, :math:`w \geq 0` and :math:`A_i` are any convex functions.
 
         The purpose of a GLM class is to define methods that evaluate key quantities regarding this model
         that are required for solving the group lasso problem.
-
-        .. note::
-            Our definition of deviance is non-standard.
-            However, the differences are unimportant since deviance 
-            is only relevant in terms of percent deviance explained.
-            Both our definition and the standard one result in the same quantity
-            for percent deviance explained.
-            This was more of a design choice to be consistent with the group lasso problem.
 
         Every GLM-like class must inherit from this class and override the methods
         before passing into the solver.
@@ -158,10 +150,10 @@ void glm_base(py::module_& m, const char* name)
         var : (n,) np.ndarray
             The hessian, or variance parameter, to store.
         )delimiter")
-        .def("deviance", &internal_t::deviance, R"delimiter(
-        Deviance function.
+        .def("loss", &internal_t::loss, R"delimiter(
+        Loss function.
 
-        Computes :math:`D(\eta)`.
+        Computes :math:`\ell(\eta)`.
 
         Parameters
         ----------
@@ -175,13 +167,13 @@ void glm_base(py::module_& m, const char* name)
 
         Returns
         -------
-        dev : float
-            Deviance.
+        loss : float
+            Loss.
         )delimiter")
-        .def("deviance_full", &internal_t::deviance_full, R"delimiter(
-        Deviance function at the full-model.
+        .def("loss_full", &internal_t::loss_full, R"delimiter(
+        Loss function at the full-model.
 
-        Computes :math:`D(\eta^\star)` where :math:`\eta^\star` is the minimizer.
+        Computes :math:`\ell(\eta^\star)` where :math:`\eta^\star` is the minimizer.
 
         Parameters
         ----------
@@ -193,8 +185,8 @@ void glm_base(py::module_& m, const char* name)
 
         Returns
         -------
-        dev : float
-            Deviance at the full model.
+        loss : float
+            Loss at the full model.
         )delimiter")
         ;
 }
@@ -267,7 +259,7 @@ public:
         );
     }
 
-    value_t deviance(
+    value_t loss(
         const Eigen::Ref<const rowarr_value_t>& y,
         const Eigen::Ref<const rowarr_value_t>& eta,
         const Eigen::Ref<const vec_value_t>& weights
@@ -276,12 +268,12 @@ public:
         PYBIND11_OVERRIDE_PURE(
             value_t,
             base_t,
-            deviance,
+            loss,
             y, eta, weights
         );
     }
 
-    value_t deviance_full(
+    value_t loss_full(
         const Eigen::Ref<const rowarr_value_t>& y,
         const Eigen::Ref<const vec_value_t>& weights
     ) override
@@ -289,7 +281,7 @@ public:
         PYBIND11_OVERRIDE_PURE(
             value_t,
             base_t,
-            deviance_full,
+            loss_full,
             y, weights
         );
     }
@@ -308,25 +300,17 @@ void glm_multibase(py::module_& m, const char* name)
         
         .. math::
             \begin{align*}
-                D(\eta) = \frac{1}{K} \sum\limits_{i=1}^n w_{i} \left(
+                \ell(\eta) = \frac{1}{K} \sum\limits_{i=1}^n w_{i} \left(
                     -\sum\limits_{k=1}^K y_{ik} \eta_{ik} + A_i(\eta)
                 \right)
             \end{align*}
 
-        We define :math:`D(\eta)` as the *deviance* and :math:`A(\eta) := K^{-1} \sum_{i=1}^n w_{i} A_i(\eta)`
+        We define :math:`\ell(\eta)` as the *loss* and :math:`A(\eta) := K^{-1} \sum_{i=1}^n w_{i} A_i(\eta)`
         as the *log-partition function*.
         Here, :math:`w \geq 0` and :math:`A_i` are any convex functions.
 
         The purpose of a GLM class is to define methods that evaluate key quantities regarding this model
         that are required for solving the group lasso problem.
-
-        .. note::
-            Our definition of deviance is non-standard.
-            However, the differences are unimportant since deviance 
-            is only relevant in terms of percent deviance explained.
-            Both our definition and the standard one result in the same quantity
-            for percent deviance explained.
-            This was more of a design choice to be consistent with the group lasso problem.
 
         Every multi-response GLM-like class must inherit from this class and override the methods
         before passing into the solver.
@@ -343,7 +327,7 @@ void glm_multibase(py::module_& m, const char* name)
         It is always ``True`` for this base class.
         )delimiter")
         .def_readonly("is_symmetric", &internal_t::is_symmetric, R"delimiter(
-        ``True`` if the deviance portion remains invariant under common scalar shift
+        ``True`` if the loss portion remains invariant under common scalar shift
         in the coefficients across the different responses.
         )delimiter")
         .def("gradient", &internal_t::gradient, R"delimiter(
@@ -383,10 +367,10 @@ void glm_multibase(py::module_& m, const char* name)
         var : (n, K) np.ndarray
             The hessian, or variance parameter, to store.
         )delimiter")
-        .def("deviance", &internal_t::deviance, R"delimiter(
-        Deviance function.
+        .def("loss", &internal_t::loss, R"delimiter(
+        Loss function.
 
-        Computes :math:`D(\eta)`.
+        Computes :math:`\ell(\eta)`.
 
         Parameters
         ----------
@@ -400,13 +384,13 @@ void glm_multibase(py::module_& m, const char* name)
 
         Returns
         -------
-        dev : float
-            Deviance.
+        loss : float
+            Loss.
         )delimiter")
-        .def("deviance_full", &internal_t::deviance_full, R"delimiter(
-        Deviance function at the full-model.
+        .def("loss_full", &internal_t::loss_full, R"delimiter(
+        Loss function at the full-model.
 
-        Computes :math:`D(\eta^\star)` where :math:`\eta^\star` is the minimizer.
+        Computes :math:`\ell(\eta^\star)` where :math:`\eta^\star` is the minimizer.
 
         Parameters
         ----------
@@ -418,8 +402,8 @@ void glm_multibase(py::module_& m, const char* name)
 
         Returns
         -------
-        dev : float
-            Deviance at the full model.
+        loss : float
+            Loss at the full model.
         )delimiter")
         ;
 }

@@ -67,7 +67,7 @@ struct GlmWrap
         glm.hessian(M, weights_orig, V);
     }
 
-    value_t deviance(
+    value_t loss(
         const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& eta,
         const Eigen::Ref<const vec_value_t>& 
@@ -77,10 +77,10 @@ struct GlmWrap
         const auto K = n_classes;
         Eigen::Map<const rowarr_value_t> Y(y.data(), n, K);
         Eigen::Map<const rowarr_value_t> E(eta.data(), n, K);
-        return glm.deviance(Y, E, weights_orig);
+        return glm.loss(Y, E, weights_orig);
     }
 
-    value_t deviance_full(
+    value_t loss_full(
         const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& 
     )
@@ -88,7 +88,7 @@ struct GlmWrap
         const auto n = weights_orig.size();
         const auto K = n_classes;
         Eigen::Map<const rowarr_value_t> Y(y.data(), n, K);
-        return glm.deviance_full(Y, weights_orig);
+        return glm.loss_full(Y, weights_orig);
     }
 };
 
@@ -96,7 +96,7 @@ template <class StateType,
           class GlmType,
           class BufferPackType>
 ADELIE_CORE_STRONG_INLINE
-void update_dev_null(
+void update_loss_null(
     StateType& state,
     GlmType& glm,
     BufferPackType& buffer_pack
@@ -111,10 +111,10 @@ void update_dev_null(
     const auto& offsets = state.offsets;
     const auto n_classes = state.n_classes;
     const auto multi_intercept = state.multi_intercept;
-    auto& dev_null = state.dev_null;
+    auto& loss_null = state.loss_null;
 
     if (!multi_intercept) {
-        dev_null = glm.deviance(y0, offsets, weights0);
+        loss_null = glm.loss(y0, offsets, weights0);
         return;
     }
 
@@ -122,7 +122,7 @@ void update_dev_null(
     const auto irls_tol = state.irls_tol;
 
     // make copies since we do not want to mess with the warm-start.
-    // this function is only needed to fit intercept-only model and get dev_null.
+    // this function is only needed to fit intercept-only model and get loss_null.
     vec_value_t beta0 = Eigen::Map<const vec_value_t>(
         state.screen_beta.data(),
         n_classes
@@ -180,7 +180,7 @@ void update_dev_null(
 
         /* check convergence */
         if ((mu - mu_prev).square().sum() <= irls_tol) {
-            dev_null = glm.deviance(y0, eta, weights0);
+            loss_null = glm.loss(y0, eta, weights0);
             return;
         }
 
@@ -295,7 +295,7 @@ inline void solve(
             display,
             [&](auto&, auto& glm, auto& buffer_pack) {
                 // ignore casted down state and use derived state
-                multiglm::naive::update_dev_null(state, glm, buffer_pack);
+                multiglm::naive::update_loss_null(state, glm, buffer_pack);
             },
             [&](auto&, auto& glm, auto& buffer_pack) {
                 // TODO: keep? This update doesn't seem to make things converge.

@@ -65,8 +65,8 @@ void update_solutions(
     ValueType lmda
 )
 {
-    const auto dev_null = state.dev_null;
-    const auto dev_full = state.dev_full;
+    const auto loss_null = state.loss_null;
+    const auto loss_full = state.loss_full;
     const auto& y0 = state.y;
     const auto& weights0 = state.weights;
     const auto& eta = state.eta;
@@ -79,10 +79,10 @@ void update_solutions(
     intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
     lmdas.emplace_back(lmda);
 
-    const auto dev = glm.deviance(y0, eta, weights0);
+    const auto loss = glm.loss(y0, eta, weights0);
     devs.emplace_back(
-        (dev_null - dev) /
-        (dev_null - dev_full)
+        (loss_null - loss) /
+        (loss_null - loss_full)
     );
 }
 
@@ -90,7 +90,7 @@ template <class StateType,
           class GlmType,
           class BufferPackType>
 ADELIE_CORE_STRONG_INLINE
-void update_dev_null(
+void update_loss_null(
     StateType& state,
     GlmType& glm,
     BufferPackType& buffer_pack
@@ -104,10 +104,10 @@ void update_dev_null(
     const auto& weights0 = state.weights;
     const auto& offsets = state.offsets;
     const auto intercept = state.intercept;
-    auto& dev_null = state.dev_null;
+    auto& loss_null = state.loss_null;
 
     if (!intercept) {
-        dev_null = glm.deviance(y0, offsets, weights0);
+        loss_null = glm.loss(y0, offsets, weights0);
         return;
     }
 
@@ -115,7 +115,7 @@ void update_dev_null(
     const auto irls_tol = state.irls_tol;
 
     // make copies since we do not want to mess with the warm-start.
-    // this function is only needed to fit intercept-only model and get dev_null.
+    // this function is only needed to fit intercept-only model and get loss_null.
     value_t beta0 = state.beta0;
     vec_value_t eta = state.eta;
     vec_value_t mu = state.mu;
@@ -154,7 +154,7 @@ void update_dev_null(
 
         /* check convergence */
         if ((mu - mu_prev).square().sum() <= irls_tol) {
-            dev_null = glm.deviance(y0, eta, weights0);
+            loss_null = glm.loss(y0, eta, weights0);
             return;
         }
 
@@ -438,7 +438,7 @@ inline void solve(
     StateType&& state,
     GlmType&& glm,
     bool display,
-    UpdateDevNullType update_dev_null_f,
+    UpdateDevNullType update_loss_null_f,
     UpdateSymmetricType update_symmetric_f,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt
@@ -457,7 +457,7 @@ inline void solve(
     const auto& screen_set = state.screen_set;
     const auto early_exit = state.early_exit;
     const auto max_screen_size = state.max_screen_size;
-    const auto setup_dev_null = state.setup_dev_null;
+    const auto setup_loss_null = state.setup_loss_null;
     const auto setup_lmda_max = state.setup_lmda_max;
     const auto setup_lmda_path = state.setup_lmda_path;
     const auto lmda_path_size = state.lmda_path_size;
@@ -491,10 +491,10 @@ inline void solve(
     auto& buffer_n = buffer_pack.buffer_n;
 
     // ==================================================================================== 
-    // Initial fit with beta = 0 to get dev_null.
+    // Initial fit with beta = 0 to get loss_null.
     // ==================================================================================== 
-    if (setup_dev_null) {
-        update_dev_null_f(state, glm, buffer_pack);
+    if (setup_loss_null) {
+        update_loss_null_f(state, glm, buffer_pack);
     }
 
     // ==================================================================================== 
@@ -755,7 +755,7 @@ inline void solve(
         std::forward<GlmType>(glm), 
         display, 
         [](auto& state, auto& glm, auto& buffer_pack) {
-            update_dev_null(state, glm, buffer_pack);
+            update_loss_null(state, glm, buffer_pack);
         },
         [](auto&, auto&, auto&) {},
         update_coefficients_f, 

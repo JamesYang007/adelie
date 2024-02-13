@@ -993,7 +993,7 @@ void state_gaussian_naive(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("y_mean", &state_t::y_mean, R"delimiter(
         Mean of the response vector :math:`y` (weighted by :math:`W`),
-        i.e. :math:`\mathbf{1}^\top W (y-\eta^0)`.
+        i.e. :math:`\mathbf{1}^\top W y`.
         )delimiter")
         .def_readonly("y_var", &state_t::y_var, R"delimiter(
         Variance of the response vector :math:`y` (weighted by :math:`W`), 
@@ -1231,8 +1231,8 @@ void state_glm_base(py::module_& m, const char* name)
             py::arg("weights").noconvert(),
             py::arg("offsets").noconvert(),
             py::arg("lmda_path").noconvert(),
-            py::arg("dev_null"),
-            py::arg("dev_full"),
+            py::arg("loss_null"),
+            py::arg("loss_full"),
             py::arg("lmda_max"),
             py::arg("min_ratio"),
             py::arg("lmda_path_size"),
@@ -1251,7 +1251,7 @@ void state_glm_base(py::module_& m, const char* name)
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("early_exit"),
-            py::arg("setup_dev_null"),
+            py::arg("setup_loss_null"),
             py::arg("setup_lmda_max"),
             py::arg("setup_lmda_path"),
             py::arg("intercept"),
@@ -1348,8 +1348,8 @@ void state_glm_base(py::module_& m, const char* name)
         .def_readonly("early_exit", &state_t::early_exit, R"delimiter(
         ``True`` if the function should early exit based on training percent deviance explained.
         )delimiter")
-        .def_readonly("setup_dev_null", &state_t::setup_dev_null, R"delimiter(
-        ``True`` if the function should setup ``dev_null``.
+        .def_readonly("setup_loss_null", &state_t::setup_loss_null, R"delimiter(
+        ``True`` if the function should setup ``loss_null``.
         )delimiter")
         .def_readonly("setup_lmda_max", &state_t::setup_lmda_max, R"delimiter(
         ``True`` if the function should setup :math:`\lambda_\max`.
@@ -1363,13 +1363,13 @@ void state_glm_base(py::module_& m, const char* name)
         .def_readonly("n_threads", &state_t::n_threads, R"delimiter(
         Number of threads.
         )delimiter")
-        .def_readonly("dev_null", &state_t::dev_null, R"delimiter(
-        Null deviance :math:`D(\beta_0^\star \mathbf{1} + \eta^0)`
+        .def_readonly("loss_null", &state_t::loss_null, R"delimiter(
+        Null loss :math:`\ell(\beta_0^\star \mathbf{1} + \eta^0)`
         from fitting an intercept-only model (if ``intercept`` is ``True``)
-        and otherwise :math:`D(\eta^0)`.
+        and otherwise :math:`\ell(\eta^0)`.
         )delimiter")
-        .def_readonly("dev_full", &state_t::dev_full, R"delimiter(
-        Full deviance :math:`D(\eta^\star)` where :math:`\eta^\star` is the minimizer.
+        .def_readonly("loss_full", &state_t::loss_full, R"delimiter(
+        Full loss :math:`\ell(\eta^\star)` where :math:`\eta^\star` is the minimizer.
         )delimiter")
         .def_readonly("lmda_max", &state_t::lmda_max, R"delimiter(
         The smallest :math:`\lambda` such that the true solution is zero
@@ -1620,8 +1620,8 @@ void state_glm_naive(py::module_& m, const char* name)
             py::arg("weights").noconvert(),
             py::arg("offsets").noconvert(),
             py::arg("lmda_path").noconvert(),
-            py::arg("dev_null"),
-            py::arg("dev_full"),
+            py::arg("loss_null"),
+            py::arg("loss_full"),
             py::arg("lmda_max"),
             py::arg("min_ratio"),
             py::arg("lmda_path_size"),
@@ -1640,7 +1640,7 @@ void state_glm_naive(py::module_& m, const char* name)
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("early_exit"),
-            py::arg("setup_dev_null"),
+            py::arg("setup_loss_null"),
             py::arg("setup_lmda_max"),
             py::arg("setup_lmda_path"),
             py::arg("intercept"),
@@ -1756,8 +1756,8 @@ void state_multiglm_naive(py::module_& m, const char* name)
             py::arg("weights").noconvert(),
             py::arg("offsets").noconvert(),
             py::arg("lmda_path").noconvert(),
-            py::arg("dev_null"),
-            py::arg("dev_full"),
+            py::arg("loss_null"),
+            py::arg("loss_full"),
             py::arg("lmda_max"),
             py::arg("min_ratio"),
             py::arg("lmda_path_size"),
@@ -1776,7 +1776,7 @@ void state_multiglm_naive(py::module_& m, const char* name)
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("early_exit"),
-            py::arg("setup_dev_null"),
+            py::arg("setup_loss_null"),
             py::arg("setup_lmda_max"),
             py::arg("setup_lmda_path"),
             py::arg("intercept"),
