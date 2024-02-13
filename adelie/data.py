@@ -25,7 +25,7 @@ def _sample_y(
         y = eta + noise_scale * np.random.normal(0, 1, eta.shape)
         if not glm.is_multi:
             y = y.ravel()
-    elif glm.name == "multinomial":
+    elif glm.is_multi:
         mu = np.empty((n, K), dtype=eta.dtype)
         glm.gradient(
             snr * (eta / np.sqrt(np.sum(beta**2, axis=0))[None]), 
