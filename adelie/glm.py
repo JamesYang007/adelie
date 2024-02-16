@@ -209,6 +209,94 @@ def binomial(
     return _binomial()
 
 
+def cox(
+    *,
+    dtype: Union[np.float32, np.float64] =np.float64,
+):
+    """Creates a Cox GLM family object.
+
+    The Cox GLM family specifies the loss function as:
+
+    .. math::
+        \\begin{align*}
+            \\ell(\\eta)
+            &=
+            -\\sum\\limits_{i=1}^n w_i \\delta_i \\eta_i
+            +\\sum\\limits_{i=1}^n \\overline{w}_i \\delta_i A_i(\\eta)
+            \\\\
+            A_i(\\eta)
+            &=
+            \\log\\left(
+                \\sum\\limits_{k \\in R(t_i)} w_k e^{\\eta_k}
+                -
+                \\sigma_i \\sum\\limits_{k \\in H(t_i)} w_k e^{\\eta_k}
+            \\right)
+        \\end{align*}
+
+    where
+    
+    .. math::
+        \\begin{align*}
+            R(u)
+            &=
+            \\{i : u \in (s_i, t_i]\\}
+            \\\\
+            H(u)
+            &=
+            \\{i : t_i = u, \\delta_i = 1\\}
+            \\\\
+            \\overline{w}_i 
+            &= 
+            \\frac{\\sum_{k \\in H(t_i)} w_k}{\\sum_{k \\in H(t_i)} 1_{w_k > 0}} 
+        \\end{align*}
+
+    Here,
+    :math:`\\delta` is the status (``1`` for event, ``0`` for censored) vector,
+    :math:`s` is the vector of start times,
+    :math:`t` is the vector of stop times,
+    :math:`R(u)` is the at-risk set at time :math:`u`,
+    :math:`H(u)` is the set of ties at event time :math:`u`,
+    :math:`\\overline{w}` is the vector of average weights within ties with positive weights,
+    :math:`\\sigma` is the correction scale for tie-breaks, 
+    which is determined by the type of correction method (Breslow or Efron).
+    Note that :math:`\\overline{w}_i` and :math:`A_i(\\eta)` are only well-defined 
+    whenever :math:`\\delta_i=1`, which is not an issue in the computation of :math:`\\ell(\\eta)`.
+
+    Parameters
+    ----------
+    dtype : Union[np.float32, np.float64], optional
+        The underlying data type.
+        Default is ``np.float64``.
+
+    Returns
+    -------
+    glm
+        Cox GLM object.
+
+    See Also
+    --------
+    adelie.glm.GlmBase64
+    """
+    dispatcher = {
+        np.float64: core.glm.GlmCox64,
+        np.float32: core.glm.GlmCox32,
+    }
+
+    core_base = dispatcher[dtype]
+
+    class _cox(core_base, glm_base):
+        def __init__(
+            self,
+        ):
+            core_base.__init__(self)
+
+        def sample(self, mu):
+            pass
+            #return np.random.binomial(1, mu)
+
+    return _cox()
+
+
 def multinomial(
     *,
     dtype: Union[np.float32, np.float64] =np.float64,
