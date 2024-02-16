@@ -75,6 +75,7 @@ adelie.glm
 
 
     binomial
+    cox
     gaussian
     multigaussian
     multinomial

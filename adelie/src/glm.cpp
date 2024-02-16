@@ -1,6 +1,7 @@
 #include "decl.hpp"
 #include <adelie_core/glm/glm_base.hpp>
 #include <adelie_core/glm/glm_binomial.hpp>
+#include <adelie_core/glm/glm_cox.hpp>
 #include <adelie_core/glm/glm_gaussian.hpp>
 #include <adelie_core/glm/glm_multibase.hpp>
 #include <adelie_core/glm/glm_multigaussian.hpp>
@@ -198,6 +199,27 @@ void glm_binomial(py::module_& m, const char* name)
     using base_t = typename internal_t::base_t;
     py::class_<internal_t, base_t>(m, name)
         .def(py::init<>())
+        ;
+}
+
+template <class T>
+void glm_cox(py::module_& m, const char* name)
+{
+    using internal_t = ad::glm::GlmCox<T>;
+    using base_t = typename internal_t::base_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(py::init<>())
+        .def_static("_partial_sum", &ad::glm::cox::_partial_sum<
+            Eigen::Ref<const ad::util::rowvec_type<T>>,
+            Eigen::Ref<const ad::util::rowvec_type<T>>,
+            Eigen::Ref<const ad::util::rowvec_type<T>>,
+            Eigen::Ref<ad::util::rowvec_type<T>>
+        >)
+        .def_static("_average_ties", &ad::glm::cox::_average_ties<
+            Eigen::Ref<const ad::util::rowvec_type<T>>,
+            Eigen::Ref<const ad::util::rowvec_type<T>>,
+            Eigen::Ref<ad::util::rowvec_type<T>>
+        >)
         ;
 }
 
@@ -436,6 +458,8 @@ void register_glm(py::module_& m)
     glm_multibase<float>(m, "GlmMultiBase32");
     glm_binomial<double>(m, "GlmBinomial64");
     glm_binomial<float>(m, "GlmBinomial32");
+    glm_cox<double>(m, "GlmCox64");
+    glm_cox<float>(m, "GlmCox32");
     glm_gaussian<double>(m, "GlmGaussian64");
     glm_gaussian<float>(m, "GlmGaussian32");
     glm_multigaussian<double>(m, "GlmMultiGaussian64");
