@@ -373,12 +373,12 @@ def gradient_norms(
 
     .. math::
         \\begin{align*}
-            h_g = \\|\\hat{\\gamma}_g - \\lambda (1-\\alpha) p_g \\beta_g\\|_2  \\quad g=1,\\ldots, G
+            h_g = \\|\\hat{\\gamma}_g - \\lambda (1-\\alpha) \\omega_g \\beta_g\\|_2  \\quad g=1,\\ldots, G
         \\end{align*}
 
     where
     :math:`\\hat{\\gamma}_g` is the gradient,
-    :math:`p_g` is the penalty factor,
+    :math:`\\omega_g` is the penalty factor,
     and :math:`\\beta_g` is the coefficient block for group :math:`g`.
 
     Parameters
@@ -1076,7 +1076,7 @@ class diagnostic:
             0
         )
         return plot_coefficients(
-            groups=self.state.groups[p_begin:],
+            groups=self.state.groups[p_begin:]-p_begin,
             group_sizes=self.state.group_sizes[p_begin:],
             lmdas=self.state.lmdas,
             betas=self.betas,
