@@ -1153,15 +1153,13 @@ def _render_gaussian_naive_inputs(
 def _render_multi_input(
     *,
     X,
-    y,
     groups,
     offsets,
     intercept,
     n_threads,
 ):
-    n, n_classes = y.shape
-    y = np.array(y, order="C", copy=False)
     offsets = np.array(offsets, order="C", copy=False)
+    n, n_classes = offsets.shape
     X = matrix.kronecker_eye(X, n_classes, n_threads=n_threads)
     if intercept:
         ones_kron = matrix.kronecker_eye(np.ones((n, 1)), n_classes, n_threads=n_threads)
@@ -1180,7 +1178,7 @@ def _render_multi_input(
         group_type = "grouped"
 
     return (
-        X, y, offsets, group_type
+        X, offsets, group_type
     )
     
 
@@ -1206,7 +1204,7 @@ class gaussian_naive_base(gaussian_base):
     ):
         n, p = self.X.rows(), self.X.cols()
 
-        yc = self._y
+        yc = self._glm.y
         if self.intercept:
             yc = yc - np.sum(yc * self.weights)
 
@@ -1803,14 +1801,12 @@ def gaussian_naive(
             ## save inputs due to lifetime issues
             # static inputs require a reference to input
             # or copy if it must be made
-            self._glm = glm.gaussian()
+            self._glm = glm.gaussian(y=y, weights=weights)
             self._X = X
-            self._y = y
             self._X_means = np.array(X_means, copy=False, dtype=dtype)
             self._groups = np.array(groups, copy=False, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
             self._penalty = np.array(penalty, copy=False, dtype=dtype)
-            self._weights = np.array(weights, copy=False, dtype=dtype)
             self._offsets = np.array(offsets, copy=False, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
@@ -1832,7 +1828,7 @@ def gaussian_naive(
                 group_sizes=self._group_sizes,
                 alpha=alpha,
                 penalty=self._penalty,
-                weights=self._weights,
+                weights=self._glm.weights,
                 lmda_path=self._lmda_path,
                 lmda_max=lmda_max,
                 min_ratio=min_ratio,
@@ -2126,12 +2122,10 @@ def multigaussian_naive(
     n_classes = y.shape[-1]
     (
         X,
-        y,
         offsets,
         group_type,
     ) = _render_multi_input(
         X=X,
-        y=y,
         groups=groups,
         offsets=offsets,
         intercept=intercept,
@@ -2145,16 +2139,14 @@ def multigaussian_naive(
             ## save inputs due to lifetime issues
             # static inputs require a reference to input
             # or copy if it must be made
-            self._glm = glm.multigaussian()
+            self._glm = glm.multigaussian(y=y, weights=weights)
             self._X = X_raw
             self._X_expanded = X
-            self._y = y
             self._X_means = np.array(X_means, copy=False, dtype=dtype)
             self._groups = np.array(groups, copy=False, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
             self._penalty = np.array(penalty, copy=False, dtype=dtype)
-            self._weights = np.array(weights, copy=False, dtype=dtype)
-            self._weights_expanded = np.repeat(self._weights, repeats=n_classes) / n_classes
+            self._weights_expanded = np.repeat(self._glm.weights, repeats=n_classes) / n_classes
             self._offsets = np.array(offsets, copy=False, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
@@ -2227,16 +2219,14 @@ class glm_naive_base:
         n, p = self.X.rows(), self.X.cols()
         G = self.groups.shape[0]
         S = self.screen_set.shape[0]
-        assert n == self.y.shape[0]
         assert G <= p
         assert G == self.group_sizes.shape[0]
         assert G == self.penalty.shape[0]
-        assert n == self.weights.shape[0]
         assert n == self.offsets.shape[0]
         assert S == self.screen_is_active.shape[0]
         assert p == self.grad.shape[0]
         assert n == self.eta.shape[0]
-        assert n == self.mu.shape[0]
+        assert n == self.resid.shape[0]
 
     def check(
         self,
@@ -2269,14 +2259,12 @@ def _render_glm_naive_inputs(
 
 def glm_naive(
     *,
-    glm: Union[glm.GlmBase64, glm.GlmBase32],
     X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
-    y: np.ndarray,
+    glm: Union[glm.GlmBase64, glm.GlmBase32],
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
-    weights: np.ndarray,
     offsets: np.ndarray,
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
@@ -2285,7 +2273,7 @@ def glm_naive(
     lmda: float,
     grad: np.ndarray,
     eta: np.ndarray,
-    mu: np.ndarray,
+    resid: np.ndarray,
     loss_full: float,
     loss_null: float =None,
     lmda_path: np.ndarray =None,
@@ -2314,14 +2302,12 @@ def glm_naive(
 
     Parameters
     ----------
-    glm : Union[adelie.glm.GlmBase64, adelie.glm.GlmBase32]
-        GLM object.
-        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
     X : (n, p) Union[adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
         Feature matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    y : (n,) np.ndarray
-        Response vector.
+    glm : Union[adelie.glm.GlmBase64, adelie.glm.GlmBase32]
+        GLM object.
+        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -2334,9 +2320,6 @@ def glm_naive(
     penalty : (G,) np.ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
-    weights : (n,) np.ndarray
-        Observation weights :math:`W`.
-        The weights must sum to 1.
     offsets : (n,) np.ndarray
         Observation offsets :math:`\\eta^0`.
     screen_set : (s,) np.ndarray
@@ -2361,7 +2344,7 @@ def glm_naive(
     lmda : float
         The last regularization parameter that was attempted to be solved.
     grad : (p,) np.ndarray
-        The full gradient :math:`X^\\top (Wy - \\nabla A(\\eta))` where
+        The full gradient :math:`-X^\\top \\nabla \\ell(\\eta)` where
         :math:`\\eta` is given by ``eta``.
     eta : (n,) np.ndarray
         The natural parameter :math:`\\eta = X\\beta + \\beta_0 \\mathbf{1} + \\eta^0`
@@ -2369,8 +2352,8 @@ def glm_naive(
         :math:`\\beta`
         and :math:`\\beta_0` are given by
         ``screen_beta`` and ``beta0``.
-    mu : (n,) np.ndarray
-        The mean parameter :math:`\\mu = \\nabla A(\\eta)`
+    resid : (n,) np.ndarray
+        Residual :math:`-\\nabla \\ell(\\eta)`
         where :math:`\\eta` is given by ``eta``.
     loss_full : float
         Full loss :math:`\\ell(\\eta^\\star)`
@@ -2535,11 +2518,9 @@ def glm_naive(
             # or copy if it must be made
             self._glm = glm
             self._X = X
-            self._y = np.array(y, copy=False, dtype=dtype)
             self._groups = np.array(groups, copy=False, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
             self._penalty = np.array(penalty, copy=False, dtype=dtype)
-            self._weights = np.array(weights, copy=False, dtype=dtype)
             self._offsets = np.array(offsets, copy=False, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
@@ -2552,12 +2533,10 @@ def glm_naive(
             core_base.__init__(
                 self,
                 X=self._X,
-                y=self._y,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
                 alpha=alpha,
                 penalty=self._penalty,
-                weights=self._weights,
                 offsets=self._offsets,
                 lmda_path=self._lmda_path,
                 loss_null=loss_null,
@@ -2592,7 +2571,7 @@ def glm_naive(
                 lmda=lmda,
                 grad=self._grad,
                 eta=eta,
-                mu=mu,
+                resid=resid,
             )
             self.basic_check()
 
@@ -2609,14 +2588,12 @@ def glm_naive(
 
 def multiglm_naive(
     *,
-    glm: Union[glm.GlmMultiBase64, glm.GlmMultiBase32],
     X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
-    y: np.ndarray,
+    glm: Union[glm.GlmMultiBase64, glm.GlmMultiBase32],
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
-    weights: np.ndarray,
     offsets: np.ndarray,
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
@@ -2624,7 +2601,7 @@ def multiglm_naive(
     lmda: float,
     grad: np.ndarray,
     eta: np.ndarray,
-    mu: np.ndarray,
+    resid: np.ndarray,
     loss_full: float,
     loss_null: float =None,
     lmda_path: np.ndarray =None,
@@ -2662,14 +2639,12 @@ def multiglm_naive(
 
     Parameters
     ----------
-    glm : Union[adelie.glm.GlmMultiBase64, adelie.glm.GlmMultiBase32]
-        Multi-response GLM object.
-        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
     X : (n, p) Union[adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
         Feature matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    y : (n, K) np.ndarray
-        Response matrix.
+    glm : Union[adelie.glm.GlmMultiBase64, adelie.glm.GlmMultiBase32]
+        Multi-response GLM object.
+        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -2682,9 +2657,6 @@ def multiglm_naive(
     penalty : (G,) np.ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
-    weights : (n,) np.ndarray
-        Observation weights :math:`W`.
-        The weights must sum to 1.
     offsets : (n, K) np.ndarray
         Observation offsets :math:`\\eta^0`.
     screen_set : (s,) np.ndarray
@@ -2706,7 +2678,7 @@ def multiglm_naive(
     lmda : float
         The last regularization parameter that was attempted to be solved.
     grad : ((p+intercept)*K,) np.ndarray
-        The full gradient :math:`\\tilde{X}^\\top (\\tilde{W} \\tilde{y} - \\nabla A(\\tilde{\\eta}))` where
+        The full gradient :math:`-\\tilde{X}^\\top \\nabla \\ell(\\tilde{\\eta})` where
         :math:`\\tilde{\\eta}` is given by ``eta``.
     eta : (n*K,) np.ndarray
         The natural parameter :math:`\\tilde{\\eta} = \\tilde{X}\\beta + \\tilde{\\eta}^0`
@@ -2714,8 +2686,8 @@ def multiglm_naive(
         :math:`\\beta`,
         and :math:`\\tilde{\\eta}^0` are given by
         ``screen_beta`` and ``offsets``.
-    mu : (n*K,) np.ndarray
-        The mean parameter :math:`\\tilde{\\mu} = \\nabla A(\\tilde{\\eta})`
+    resid : (n*K,) np.ndarray
+        Residual :math:`-\\nabla \\ell(\\tilde{\\eta})`
         where :math:`\\tilde{\\eta}` is given by ``eta``.
     loss_full : float
         Full loss :math:`\\ell(\\eta^\\star)`
@@ -2871,15 +2843,13 @@ def multiglm_naive(
     core_base = dispatcher[dtype]
 
     X_raw = X
-    n_classes = y.shape[-1]
+    n_classes = glm.y.shape[-1]
     (
         X,
-        y,
         offsets,
         group_type,
     ) = _render_multi_input(
         X=X,
-        y=y,
         groups=groups,
         offsets=offsets,
         intercept=intercept,
@@ -2895,12 +2865,9 @@ def multiglm_naive(
             self._glm = glm
             self._X = X_raw
             self._X_expanded = X
-            self._y = y
             self._groups = np.array(groups, copy=False, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
             self._penalty = np.array(penalty, copy=False, dtype=dtype)
-            self._weights = np.array(weights, copy=False, dtype=dtype)
-            self._weights_expanded = np.repeat(self._weights, repeats=n_classes) / n_classes
             self._offsets = np.array(offsets, copy=False, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
@@ -2915,14 +2882,11 @@ def multiglm_naive(
                 group_type=group_type,
                 n_classes=n_classes,
                 multi_intercept=intercept,
-                weights_orig=self._weights,
                 X=self._X_expanded,
-                y=self._y.ravel(),
                 groups=self._groups,
                 group_sizes=self._group_sizes,
                 alpha=alpha,
                 penalty=self._penalty,
-                weights=self._weights_expanded,
                 offsets=self._offsets.ravel(),
                 lmda_path=self._lmda_path,
                 loss_null=loss_null,
@@ -2957,7 +2921,7 @@ def multiglm_naive(
                 lmda=lmda,
                 grad=self._grad,
                 eta=eta,
-                mu=mu,
+                resid=resid,
             )
             self.basic_check()
 

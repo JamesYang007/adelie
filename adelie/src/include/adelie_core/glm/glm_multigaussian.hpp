@@ -12,45 +12,47 @@ public:
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
     using typename base_t::rowarr_value_t;
+    using base_t::y;
+    using base_t::weights;
 
-    explicit GlmMultiGaussian():
-        base_t("multigaussian", false)
+    explicit GlmMultiGaussian(
+        const Eigen::Ref<const rowarr_value_t>& y,
+        const Eigen::Ref<const vec_value_t>& weights
+    ):
+        base_t("multigaussian", y, weights)
     {}
 
     void gradient(
         const Eigen::Ref<const rowarr_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<rowarr_value_t> mu
+        Eigen::Ref<rowarr_value_t> grad
     ) override
     {
-        mu = (eta.colwise() * weights.matrix().transpose().array()) / eta.cols();
+        base_t::check_gradient(eta, grad);
+        grad = ((y-eta).colwise() * weights.matrix().transpose().array()) / eta.cols();
     }
 
     void hessian(
-        const Eigen::Ref<const rowarr_value_t>&,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<rowarr_value_t> var
+        const Eigen::Ref<const rowarr_value_t>& eta,
+        const Eigen::Ref<const rowarr_value_t>& grad,
+        Eigen::Ref<rowarr_value_t> hess
     ) override
     {
-        var.colwise() = weights.matrix().transpose().array() / var.cols();
+        base_t::check_hessian(eta, grad, hess);
+        hess.colwise() = weights.matrix().transpose().array() / hess.cols();
     }
 
     value_t loss(
-        const Eigen::Ref<const rowarr_value_t>& y,
-        const Eigen::Ref<const rowarr_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& weights
+        const Eigen::Ref<const rowarr_value_t>& eta
     ) override
     {
+        base_t::check_loss(eta);
         return (
             weights.matrix().transpose().array() * 
             (0.5 * eta.square() - y * eta).rowwise().sum()
         ).sum() / y.cols();
     }
 
-    value_t loss_full(
-        const Eigen::Ref<const rowarr_value_t>& y,
-        const Eigen::Ref<const vec_value_t>& weights
-    ) override
+    value_t loss_full() override
     {
         return -0.5 * (
             (y.square().colwise() * weights.matrix().transpose().array()).sum()

@@ -196,12 +196,11 @@ def run_solve_gaussian(state, args, pin):
     if not is_beta_close:
         objective_args = {
             "X": X,
-            "y": y,
+            "glm": ad.glm.gaussian(y=y, weights=weights),
             "lmdas": lmdas,
             "groups": state.groups,
             "alpha": state.alpha,
             "penalty": state.penalty,
-            "weights": weights,
         }
         my_objs = objective(
             **objective_args,

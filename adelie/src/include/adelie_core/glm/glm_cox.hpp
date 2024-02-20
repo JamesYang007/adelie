@@ -100,40 +100,98 @@ public:
     using base_t = GlmBase<ValueType>;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
+    using typename base_t::map_cvec_value_t;
+    using index_t = int;
+    using vec_index_t = util::rowvec_type<index_t>;
+    using base_t::y;
+    using base_t::weights;
 
-    explicit GlmCox():
-        base_t("cox")
-    {}
+    const map_cvec_value_t start;
+    const map_cvec_value_t stop;
+    const vec_index_t stop_order;
+    const vec_value_t stop_sorted;
+    vec_value_t buffer1_n;
+    vec_value_t buffer2_n;
+    vec_value_t buffer3_n;
+
+private:
+    static auto init_stop_order(
+        const Eigen::Ref<const vec_value_t>& stop
+    )
+    {
+        vec_index_t stop_order = vec_index_t::LinSpaced(stop.size(), 0, stop.size()-1);
+        std::sort(
+            stop_order.data(), 
+            stop_order.data() + stop_order.size(),
+            [&](auto i, auto j) { return stop[i] < stop[j]; }
+        );
+        return stop_order;
+    }
+
+    static auto init_stop_sorted(
+        const Eigen::Ref<const vec_value_t>& stop,
+        const Eigen::Ref<const vec_index_t>& order
+    )
+    {
+        vec_value_t stop_sorted(stop.size());
+        for (int i = 0; i < order.size(); ++i) {
+            stop_sorted[i] = stop[order[i]];
+        }
+        return stop_sorted;
+    } 
+
+public:
+    explicit GlmCox(
+        const Eigen::Ref<const vec_value_t>& start,
+        const Eigen::Ref<const vec_value_t>& stop,
+        const Eigen::Ref<const vec_value_t>& status,
+        const Eigen::Ref<const vec_value_t>& weights
+    ):
+        base_t("cox", status, weights),
+        start(start.data(), start.size()),
+        stop(stop.data(), stop.size()),
+        stop_order(init_stop_order(stop)),
+        stop_sorted(init_stop_sorted(stop, stop_order)),
+        buffer1_n(start.size()),
+        buffer2_n(start.size()),
+        buffer3_n(start.size())
+    {
+        const auto n = start.size();
+        if (stop.size() != n) {
+            throw std::runtime_error("stop vector must be same length as start.");
+        }
+        if (status.size() != n) {
+            throw std::runtime_error("status vector must be same length as start.");
+        }
+        // don't check weights size since it can be lazily assigned
+    }
 
     void gradient(
         const Eigen::Ref<const vec_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> mu
+        Eigen::Ref<vec_value_t> grad
     ) override
     {
+        base_t::check_gradient(eta, grad);
     }
 
     void hessian(
-        const Eigen::Ref<const vec_value_t>&,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> var
+        const Eigen::Ref<const vec_value_t>& eta,
+        const Eigen::Ref<const vec_value_t>& grad,
+        Eigen::Ref<vec_value_t> hess
     ) override
     {
+        base_t::check_hessian(eta, grad, hess);
     }
 
     value_t loss(
-        const Eigen::Ref<const vec_value_t>& y,
-        const Eigen::Ref<const vec_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& weights
+        const Eigen::Ref<const vec_value_t>& eta
     ) override
     {
+        base_t::check_loss(eta);
         return 0;
     }
 
-    value_t loss_full(
-        const Eigen::Ref<const vec_value_t>& y,
-        const Eigen::Ref<const vec_value_t>& weights
-    ) override
+    value_t loss_full() override
     {
         return 0;
     }

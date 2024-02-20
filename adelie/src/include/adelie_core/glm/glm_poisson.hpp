@@ -11,43 +11,45 @@ public:
     using base_t = GlmBase<ValueType>;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
+    using base_t::y;
+    using base_t::weights;
 
-    explicit GlmPoisson():
-        base_t("poisson")
+    explicit GlmPoisson(
+        const Eigen::Ref<const vec_value_t>& y,
+        const Eigen::Ref<const vec_value_t>& weights
+    ):
+        base_t("poisson", y, weights)
     {}
 
     void gradient(
         const Eigen::Ref<const vec_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> mu
+        Eigen::Ref<vec_value_t> grad
     ) override
     {
-        mu = weights * eta.exp();
+        base_t::check_gradient(eta, grad);
+        grad = weights * (y - eta.exp());
     }
 
     void hessian(
-        const Eigen::Ref<const vec_value_t>& mu,
-        const Eigen::Ref<const vec_value_t>&,
-        Eigen::Ref<vec_value_t> var
+        const Eigen::Ref<const vec_value_t>& eta,
+        const Eigen::Ref<const vec_value_t>& grad,
+        Eigen::Ref<vec_value_t> hess
     ) override
     {
-        var = mu;
+        base_t::check_hessian(eta, grad, hess);
+        hess = weights * y - grad;
     }
 
     value_t loss(
-        const Eigen::Ref<const vec_value_t>& y,
-        const Eigen::Ref<const vec_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& weights
+        const Eigen::Ref<const vec_value_t>& eta
     ) override
     {
+        base_t::check_loss(eta);
         // numerically stable when y == 0 and eta could be -inf
         return (weights * ((-eta).min(std::numeric_limits<value_t>::max()) * y + eta.exp())).sum();
     }
 
-    value_t loss_full(
-        const Eigen::Ref<const vec_value_t>& y,
-        const Eigen::Ref<const vec_value_t>& weights
-    ) override
+    value_t loss_full() override
     {
         return (weights * ((-y.log()).min(std::numeric_limits<value_t>::max()) * y + y)).sum();
     }

@@ -12,61 +12,74 @@ public:
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
     using typename base_t::rowarr_value_t;
+    using base_t::y;
+    using base_t::weights;
 
 private:
     vec_value_t _buff;
+    rowarr_value_t _buff2;
 
 public:
-    explicit GlmMultinomial():
-        base_t("multinomial", true)
+    explicit GlmMultinomial(
+        const Eigen::Ref<const rowarr_value_t>& y,
+        const Eigen::Ref<const vec_value_t>& weights
+    ):
+        base_t("multinomial", y, weights),
+        _buff(weights.size()),
+        _buff2(y.rows(), y.cols())
     {}
 
     void gradient(
         const Eigen::Ref<const rowarr_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<rowarr_value_t> mu
+        Eigen::Ref<rowarr_value_t> grad
     ) override
     {
-        mu = (eta.colwise() - eta.rowwise().maxCoeff()).exp();
-        _buff = weights.matrix().transpose().array() / (eta.cols() * mu.rowwise().sum());
-        mu.colwise() *= _buff.matrix().transpose().array();
+        base_t::check_gradient(eta, grad);
+        _buff = eta.rowwise().maxCoeff();
+        grad = (eta.colwise() - _buff.matrix().transpose().array()).exp();
+        _buff = grad.rowwise().sum();
+        grad = (
+            (y - grad.colwise() / _buff.matrix().transpose().array()).colwise() * 
+            weights.matrix().transpose().array() / eta.cols()
+        );
     }
 
     void hessian(
-        const Eigen::Ref<const rowarr_value_t>& mu,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<rowarr_value_t> var
+        const Eigen::Ref<const rowarr_value_t>& eta,
+        const Eigen::Ref<const rowarr_value_t>& grad,
+        Eigen::Ref<rowarr_value_t> hess
     ) override
     {
-        var = mu.cols() * (
-            mu.colwise() /
-            (weights + (weights <= 0).template cast<value_t>()).matrix().transpose().array()
+        base_t::check_hessian(eta, grad, hess);
+         // K^{-1} W[:, None] * P
+        hess = (
+            y.colwise() * weights.matrix().transpose().array() / eta.cols() 
+            - grad
         );
-        var = mu * (1 - var);
+        // K^{-1} W[:, None] * P * (1 - P)
+        hess = hess * (1 - grad.cols() * (
+                hess.colwise() /
+                (weights + (weights <= 0).template cast<value_t>()).matrix().transpose().array()
+            )
+        );
     }
 
     value_t loss(
-        const Eigen::Ref<const rowarr_value_t>& y,
-        const Eigen::Ref<const rowarr_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& weights
+        const Eigen::Ref<const rowarr_value_t>& eta
     ) override
     {
+        base_t::check_loss(eta);
         _buff = eta.rowwise().maxCoeff();
-        // TODO: this gets evaluated twice below.
-        // For simplicity, we keep this code since this is not speed critical.
-        const auto eta_relative = (eta.colwise() - _buff.matrix().transpose().array());
+        _buff2 = (eta.colwise() - _buff.matrix().transpose().array());
         return (
             weights.matrix().transpose().array() * (
-                - (y * eta_relative).rowwise().sum()
-                + eta_relative.exp().rowwise().sum().log()
+                - (y * _buff2).rowwise().sum()
+                + _buff2.exp().rowwise().sum().log()
             )
         ).sum() / y.cols();
     }
 
-    value_t loss_full(
-        const Eigen::Ref<const rowarr_value_t>&,
-        const Eigen::Ref<const vec_value_t>& 
-    ) override
+    value_t loss_full() override
     {
         return 0;
     }

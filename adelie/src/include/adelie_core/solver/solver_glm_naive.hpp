@@ -27,12 +27,12 @@ struct GlmNaiveBufferPack
         size_t p
     ):
         X_means(p),
-        weights(n),
-        weights_sqrt(n),
-        y(n),
-        resid(n),
-        mu_prev(n),
-        var(n),
+        irls_weights(n),
+        irls_weights_sqrt(n),
+        irls_y(n),
+        irls_resid(n),
+        resid_prev(n),
+        hess(n),
         buffer_n(n)
     {}
 
@@ -40,12 +40,12 @@ struct GlmNaiveBufferPack
     dyn_vec_value_t screen_X_means; // (ss,) buffer for X column means on screen groups
     dyn_vec_mat_value_t screen_transforms; // (s,) buffer for eigenvectors on screen groups
     dyn_vec_value_t screen_vars;    // (s,) buffer for eigenvalues on screen groups
-    vec_value_t weights;            // (n,) IRLS weights
-    vec_value_t weights_sqrt;       // (n,) IRLS weights sqrt
-    vec_value_t y;                  // (n,) IRLS response
-    vec_value_t resid;              // (n,) IRLS residual
-    vec_value_t mu_prev;            // (n,) previous mean
-    vec_value_t var;                // (n,) variance 
+    vec_value_t irls_weights;            // (n,) IRLS weights
+    vec_value_t irls_weights_sqrt;       // (n,) IRLS weights sqrt
+    vec_value_t irls_y;                  // (n,) IRLS response
+    vec_value_t irls_resid;              // (n,) IRLS residual
+    vec_value_t resid_prev;            // (n,) previous residual
+    vec_value_t hess;                // (n,) hessian 
 
     dyn_vec_value_t screen_beta_prev;
     dyn_vec_bool_t screen_is_active_prev;
@@ -67,8 +67,6 @@ void update_solutions(
 {
     const auto loss_null = state.loss_null;
     const auto loss_full = state.loss_full;
-    const auto& y0 = state.y;
-    const auto& weights0 = state.weights;
     const auto& eta = state.eta;
     auto& betas = state.betas;
     auto& devs = state.devs;
@@ -79,7 +77,7 @@ void update_solutions(
     intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
     lmdas.emplace_back(lmda);
 
-    const auto loss = glm.loss(y0, eta, weights0);
+    const auto loss = glm.loss(eta);
     devs.emplace_back(
         (loss_null - loss) /
         (loss_null - loss_full)
@@ -100,14 +98,12 @@ void update_loss_null(
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
 
-    const auto& y0 = state.y;
-    const auto& weights0 = state.weights;
     const auto& offsets = state.offsets;
     const auto intercept = state.intercept;
     auto& loss_null = state.loss_null;
 
     if (!intercept) {
-        loss_null = glm.loss(y0, offsets, weights0);
+        loss_null = glm.loss(offsets);
         return;
     }
 
@@ -118,12 +114,12 @@ void update_loss_null(
     // this function is only needed to fit intercept-only model and get loss_null.
     value_t beta0 = state.beta0;
     vec_value_t eta = state.eta;
-    vec_value_t mu = state.mu;
+    vec_value_t resid = state.resid;
 
-    auto& weights = buffer_pack.weights;
-    auto& y = buffer_pack.y;
-    auto& mu_prev = buffer_pack.mu_prev;
-    auto& var = buffer_pack.var;
+    auto& irls_weights = buffer_pack.irls_weights;
+    auto& irls_y = buffer_pack.irls_y;
+    auto& resid_prev = buffer_pack.resid_prev;
+    auto& hess = buffer_pack.hess;
 
     size_t irls_it = 0;
 
@@ -133,28 +129,27 @@ void update_loss_null(
         }
 
         /* compute rest of quadratic approximation quantities */
-        glm.hessian(mu, weights0, var);
-        const auto var_sum = var.sum();
-        weights = var / var_sum;
-        y = weights0 * y0 - mu;
-        y = y.NullaryExpr(y.size(), [&](auto i) {
-            const auto ratio = y[i] / var[i]; 
-            return std::isnan(ratio) ? y[i] : ratio;
+        glm.hessian(eta, resid, hess);
+        const auto hess_sum = hess.sum();
+        irls_weights = hess / hess_sum;
+        irls_y = resid.NullaryExpr(resid.size(), [&](auto i) {
+            const auto ratio = resid[i] / hess[i]; 
+            return std::isnan(ratio) ? resid[i] : ratio;
         }) + eta - offsets;
 
         /* fit beta0 */
-        beta0 = (weights * y).sum();
+        beta0 = (irls_weights * irls_y).sum();
 
         // update eta
         eta = beta0 + offsets;
 
-        // update mu
-        mu_prev.swap(mu);
-        glm.gradient(eta, weights0, mu); 
+        // update resid
+        resid_prev.swap(resid);
+        glm.gradient(eta, resid); 
 
         /* check convergence */
-        if ((mu - mu_prev).square().sum() <= irls_tol) {
-            loss_null = glm.loss(y0, eta, weights0);
+        if ((resid - resid_prev).square().sum() <= irls_tol) {
+            loss_null = glm.loss(eta);
             return;
         }
 
@@ -166,7 +161,6 @@ template <class StateType,
           class GlmType,
           class BufferPackType,
           class ValueType,
-          class UpdateSymmetricType,
           class UpdateCoefficientsType,
           class CUIType=util::no_op>
 ADELIE_CORE_STRONG_INLINE
@@ -175,7 +169,6 @@ auto fit(
     GlmType& glm,
     BufferPackType& buffer_pack,
     ValueType lmda,
-    UpdateSymmetricType update_symmetric_f,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
@@ -196,12 +189,10 @@ auto fit(
     >;
 
     auto& X = *state.X;
-    const auto& y0 = state.y;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
-    const auto& weights0 = state.weights;
     const auto& offsets = state.offsets;
     const auto& screen_set = state.screen_set;
     const auto& screen_g1 = state.screen_g1;
@@ -220,18 +211,18 @@ auto fit(
     auto& screen_is_active = state.screen_is_active;
     auto& beta0 = state.beta0;
     auto& eta = state.eta;
-    auto& mu = state.mu;
+    auto& resid = state.resid;
 
     auto& X_means = buffer_pack.X_means;
     auto& screen_X_means = buffer_pack.screen_X_means;
     auto& screen_transforms = buffer_pack.screen_transforms;
     auto& screen_vars = buffer_pack.screen_vars;
-    auto& weights = buffer_pack.weights;
-    auto& weights_sqrt = buffer_pack.weights_sqrt;
-    auto& y = buffer_pack.y;
-    auto& resid = buffer_pack.resid;
-    auto& mu_prev = buffer_pack.mu_prev;
-    auto& var = buffer_pack.var;
+    auto& irls_weights = buffer_pack.irls_weights;
+    auto& irls_weights_sqrt = buffer_pack.irls_weights_sqrt;
+    auto& irls_y = buffer_pack.irls_y;
+    auto& irls_resid = buffer_pack.irls_resid;
+    auto& resid_prev = buffer_pack.resid_prev;
+    auto& hess = buffer_pack.hess;
     auto& screen_beta_prev = buffer_pack.screen_beta_prev;
     auto& screen_is_active_prev = buffer_pack.screen_is_active_prev;
 
@@ -258,20 +249,19 @@ auto fit(
         save_prev_valid();
 
         /* compute rest of quadratic approximation quantities */
-        glm.hessian(mu, weights0, var);
-        const auto var_sum = var.sum();
-        weights = var / var_sum;
-        weights_sqrt = weights.sqrt();
-        y = weights0 * y0 - mu;
-        y = y.NullaryExpr(y.size(), [&](auto i) {
-            const auto ratio = y[i] / var[i]; 
-            return std::isnan(ratio) ? y[i] : ratio;
+        glm.hessian(eta, resid, hess);
+        const auto hess_sum = hess.sum();
+        irls_weights = hess / hess_sum;
+        irls_weights_sqrt = irls_weights.sqrt();
+        irls_y = resid.NullaryExpr(resid.size(), [&](auto i) {
+            const auto ratio = resid[i] / hess[i]; 
+            return std::isnan(ratio) ? resid[i] : ratio;
         }) + eta - offsets;
-        const auto y_mean = (weights * y).sum();
-        const auto y_var = (weights * y.square()).sum() - intercept * y_mean * y_mean;
-        resid = weights * (y + offsets - eta + intercept * (beta0 - y_mean));
-        const auto resid_sum = resid.sum();
-        lmda_path_adjusted = lmda / var_sum;
+        const auto y_mean = (irls_weights * irls_y).sum();
+        const auto y_var = (irls_weights * irls_y.square()).sum() - intercept * y_mean * y_mean;
+        irls_resid = irls_weights * (irls_y + offsets - eta + intercept * (beta0 - y_mean));
+        const auto resid_sum = irls_resid.sum();
+        lmda_path_adjusted = lmda / hess_sum;
         if (std::isinf(lmda_path_adjusted[0])) {
             if (lmda == std::numeric_limits<value_t>::max()) {
                 lmda_path_adjusted = lmda;
@@ -288,10 +278,10 @@ auto fit(
             const auto g = groups[i];
             const size_t gs = group_sizes[i];
             if (gs == 1) {
-                X_means[g] = X.cmul(g, weights);
+                X_means[g] = X.cmul(g, irls_weights);
             } else {
                 Eigen::Map<vec_value_t> Xi_means(X_means.data() + g, gs);
-                X.bmul(g, gs, weights, Xi_means);
+                X.bmul(g, gs, irls_weights, Xi_means);
             }
         }
         // this call should only adjust the size of screen_* quantities
@@ -299,7 +289,7 @@ auto fit(
         state::glm::naive::update_screen_derived(
             state,
             X_means,
-            weights_sqrt,
+            irls_weights_sqrt,
             0,
             screen_set.size(),
             screen_X_means,
@@ -317,7 +307,7 @@ auto fit(
             group_sizes,
             alpha, 
             penalty,
-            weights,
+            irls_weights,
             Eigen::Map<const vec_index_t>(screen_set.data(), screen_set.size()), 
             Eigen::Map<const vec_index_t>(screen_g1.data(), screen_g1.size()), 
             Eigen::Map<const vec_index_t>(screen_g2.data(), screen_g2.size()), 
@@ -329,7 +319,7 @@ auto fit(
             intercept, max_active_size, max_iters, tol, 0 /* adev_tol */, 0 /* ddev_tol */,
             newton_tol, newton_max_iters, n_threads,
             0 /* rsq (no need to track) */,
-            Eigen::Map<vec_value_t>(resid.data(), resid.size()),
+            Eigen::Map<vec_value_t>(irls_resid.data(), irls_resid.size()),
             resid_sum,
             Eigen::Map<vec_value_t>(screen_beta.data(), screen_beta.size()), 
             Eigen::Map<vec_safe_bool_t>(screen_is_active.data(), screen_is_active.size())
@@ -360,19 +350,17 @@ auto fit(
 
         // update eta
         eta = (
-            y + offsets - 
-            resid / (weights + (weights <= 0).template cast<value_t>()) + 
+            irls_y + offsets - 
+            irls_resid / (irls_weights + (irls_weights <= 0).template cast<value_t>()) + 
             intercept * (beta0 - y_mean)
         );
 
-        update_symmetric_f(state, glm, buffer_pack);
-
-        // update mu
-        mu_prev.swap(mu);
-        glm.gradient(eta, weights0, mu); 
+        // update resid
+        resid_prev.swap(resid);
+        glm.gradient(eta, resid); 
 
         /* check convergence */
-        if ((mu - mu_prev).square().sum() <= irls_tol) {
+        if ((resid - resid_prev).square().sum() <= irls_tol) {
             return std::make_tuple(
                 std::move(state_gaussian_pin_naive),
                 screen_time,
@@ -388,34 +376,28 @@ auto fit(
  * Checks the KKT condition on the proposed solutions in state_gaussian_pin_naive.
  */
 template <class StateType, 
-          class ValueType,
-          class BufferPackType>
+          class ValueType>
 ADELIE_CORE_STRONG_INLINE
 size_t kkt(
     StateType& state,
-    BufferPackType& buffer_pack,
     ValueType lmda
 )
 {
-    const auto& y0 = state.y;
-    const auto& weights0 = state.weights;
     const auto& groups = state.groups;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
     const auto& screen_hashset = state.screen_hashset;
     const auto& abs_grad = state.abs_grad;
-    const auto& mu = state.mu;
+    const auto& resid = state.resid;
     auto& X = *state.X;
     auto& grad = state.grad;
-    auto& buffer_n = buffer_pack.buffer_n;
 
     const auto is_screen = [&](auto i) {
         return screen_hashset.find(i) != screen_hashset.end();
     };
 
     // NOTE: no matter what, every gradient must be computed for pivot method.
-    buffer_n = (weights0 * y0 - mu);
-    X.mul(buffer_n, grad);
+    X.mul(resid, grad);
     state::gaussian::update_abs_grad(state, lmda);
 
     for (int k = 0; k < groups.size(); ++k) {
@@ -431,7 +413,6 @@ size_t kkt(
 template <class StateType,
           class GlmType,
           class UpdateDevNullType,
-          class UpdateSymmetricType,
           class UpdateCoefficientsType,
           class CUIType>
 inline void solve(
@@ -439,7 +420,6 @@ inline void solve(
     GlmType&& glm,
     bool display,
     UpdateDevNullType update_loss_null_f,
-    UpdateSymmetricType update_symmetric_f,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt
 )
@@ -450,10 +430,8 @@ inline void solve(
     using vec_safe_bool_t = typename state_t::vec_safe_bool_t;
     using sw_t = util::Stopwatch;
 
-    const auto& y0 = state.y;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
-    const auto& weights0 = state.weights;
     const auto& screen_set = state.screen_set;
     const auto early_exit = state.early_exit;
     const auto max_screen_size = state.max_screen_size;
@@ -466,7 +444,7 @@ inline void solve(
     const auto ddev_tol = state.ddev_tol;
     const auto& screen_is_active = state.screen_is_active;
     const auto& abs_grad = state.abs_grad;
-    const auto& mu = state.mu;
+    const auto& resid = state.resid;
     const auto& devs = state.devs;
     auto& X = *state.X;
     auto& lmda_max = state.lmda_max;
@@ -487,8 +465,6 @@ inline void solve(
     const auto n = X.rows();
     const auto p = X.cols();
     GlmNaiveBufferPack<value_t> buffer_pack(n, p);
-
-    auto& buffer_n = buffer_pack.buffer_n;
 
     // ==================================================================================== 
     // Initial fit with beta = 0 to get loss_null.
@@ -512,15 +488,13 @@ inline void solve(
             glm,
             buffer_pack,
             large_lmda,
-            update_symmetric_f,
             update_coefficients_f,
             check_user_interrupt
         );
 
         /* Invariance */
         lmda = large_lmda;
-        buffer_n = (weights0 * y0 - mu);
-        X.mul(buffer_n, grad);
+        X.mul(resid, grad);
         state::gaussian::update_abs_grad(state, lmda);
 
         /* Compute lmda_max */
@@ -576,7 +550,6 @@ inline void solve(
                 glm,
                 buffer_pack,
                 large_lmda_path[i], 
-                update_symmetric_f,
                 update_coefficients_f, 
                 check_user_interrupt
             );
@@ -594,8 +567,7 @@ inline void solve(
             // otherwise, put the state at the last fitted lambda (lmda_max)
             } else {
                 lmda = large_lmda_path[i];
-                buffer_n = (weights0 * y0 - mu);
-                X.mul(buffer_n, grad);
+                X.mul(resid, grad);
                 state::gaussian::update_abs_grad(state, lmda);
             }
         }
@@ -674,7 +646,6 @@ inline void solve(
                     glm,
                     buffer_pack,
                     lmda_curr,
-                    update_symmetric_f,
                     update_coefficients_f,
                     check_user_interrupt
                 );
@@ -688,7 +659,6 @@ inline void solve(
                 sw.start();
                 kkt_passed = kkt(
                     state,
-                    buffer_pack,
                     lmda_curr
                 );
                 benchmark_kkt.push_back(sw.elapsed());
@@ -757,7 +727,6 @@ inline void solve(
         [](auto& state, auto& glm, auto& buffer_pack) {
             update_loss_null(state, glm, buffer_pack);
         },
-        [](auto&, auto&, auto&) {},
         update_coefficients_f, 
         check_user_interrupt
     );

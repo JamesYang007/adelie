@@ -1,45 +1,47 @@
+import adelie as ad
 import numpy as np
-from .glm import (
-    gaussian,
-)
 import warnings 
 
 
 def _sample_y(
-    glm,
+    glm: str,
     eta: np.ndarray,
     beta: np.ndarray,
     rho: float =0,
     snr: float =1,
 ):
     n, K = eta.shape
-
-    if not glm.is_multi and K > 1:
+    is_multi = "multi" in glm
+    if not is_multi and K > 1:
         warnings.warn("Ignoring K and taking only first class response.")
         eta = eta[:, 0][:, None]
         K = 1
 
-    if "gaussian" in glm.name:
+    if "gaussian" in glm:
         signal_scale = np.sqrt(rho * np.sum(beta) ** 2 + (1-rho) * np.sum(beta ** 2))
         noise_scale = signal_scale / np.sqrt(snr)
         y = eta + noise_scale * np.random.normal(0, 1, eta.shape)
-        if not glm.is_multi:
+        # multigaussian
+        if not is_multi:
             y = y.ravel()
-    elif glm.is_multi:
-        mu = np.empty((n, K), dtype=eta.dtype)
+    elif glm == "multinomial":
+        resid = np.empty((n, K), dtype=eta.dtype)
+        glm = ad.glm.multinomial(y=np.zeros(eta.shape)) 
         glm.gradient(
             snr * (eta / np.sqrt(np.sum(beta**2, axis=0))[None]), 
-            np.full(n, K), 
-            mu,
+            resid,
         )
-        y = np.empty(eta.shape, dtype=eta.dtype)
-        for i in range(y.shape[0]):
-            y[i] = glm.sample(mu[i])
+        y = glm.sample(-K * n * resid).astype(eta.dtype)
     else:
+        func_map = {
+            "binomial": ad.glm.binomial,
+            "poisson": ad.glm.poisson,
+        }
+        glm = func_map[glm](y=np.zeros(n))
         eta = eta.ravel()
-        mu = np.empty(eta.shape[0], dtype=eta.dtype)
-        glm.gradient(snr * eta / np.sqrt(np.sum(beta**2)), np.ones(n), mu)
-        y = glm.sample(mu).astype(eta.dtype)
+        resid = np.empty(eta.shape[0], dtype=eta.dtype)
+        glm.gradient(snr * eta / np.sqrt(np.sum(beta**2)), resid)
+        y = glm.sample(-n * resid).astype(eta.dtype)
 
     return y
 
@@ -50,7 +52,7 @@ def dense(
     G: int,
     *,
     K: int=1,
-    glm=gaussian(),
+    glm: str ="gaussian",
     equal_groups=False,
     rho: float =0,
     sparsity: float =0.95,
@@ -82,9 +84,17 @@ def dense(
     K : int, optional
         Number of classes for multi-response GLMs.
         Default is ``1``.
-    glm : adelie.glm.glm_base, optional
-        GLM object.
-        Default is ``adelie.glm.gaussian()``.
+    glm : str, optional
+        GLM name.
+        It must be one of the following:
+
+            - ``"gaussian"``
+            - ``"binomial"``
+            - ``"poisson"``
+            - ``"multigaussian"``
+            - ``"multinomial"``
+
+        Default is ``"gaussian"``.
     equal_groups : bool, optional
         If ``True``, group sizes are made as equal as possible.
         Default is ``False``.
@@ -178,7 +188,7 @@ def snp_unphased(
     p: int, 
     *,
     K: int =1,
-    glm=gaussian(),
+    glm: str ="gaussian",
     sparsity: float =0.95,
     one_ratio: float =0.25,
     two_ratio: float =0.05,
@@ -209,9 +219,17 @@ def snp_unphased(
     K : int, optional
         Number of classes for multi-response GLMs.
         Default is ``1``.
-    glm : adelie.glm.glm_base, optional
-        GLM object.
-        Default is ``adelie.glm.gaussian()``.
+    glm : str, optional
+        GLM name.
+        It must be one of the following:
+
+            - ``"gaussian"``
+            - ``"binomial"``
+            - ``"poisson"``
+            - ``"multigaussian"``
+            - ``"multinomial"``
+
+        Default is ``"gaussian"``.
     sparsity : float, optional
         Proportion of :math:`\\beta` entries to be zeroed out.
         Default is ``0.95``.
@@ -300,7 +318,7 @@ def snp_phased_ancestry(
     A: int,
     *,
     K: int =1,
-    glm=gaussian(),
+    glm: str ="gaussian",
     sparsity: float =0.95,
     one_ratio: float =0.25,
     two_ratio: float =0.05,
@@ -334,9 +352,17 @@ def snp_phased_ancestry(
     K : int, optional
         Number of classes for multi-response GLMs.
         Default is ``1``.
-    glm : adelie.glm.glm_base, optional
-        GLM object.
-        Default is ``adelie.glm.gaussian()``.
+    glm : str, optional
+        GLM name.
+        It must be one of the following:
+
+            - ``"gaussian"``
+            - ``"binomial"``
+            - ``"poisson"``
+            - ``"multigaussian"``
+            - ``"multinomial"``
+
+        Default is ``"gaussian"``.
     sparsity : float, optional
         Proportion of :math:`\\beta` entries to be zeroed out.
         Default is ``0.95``.
