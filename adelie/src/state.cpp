@@ -1199,7 +1199,6 @@ void state_glm_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
-            const Eigen::Ref<const vec_value_t>&,
             value_t,
             value_t,
             value_t,
@@ -1236,7 +1235,6 @@ void state_glm_base(py::module_& m, const char* name)
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
-            py::arg("weights").noconvert(),
             py::arg("offsets").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("loss_null"),
@@ -1284,9 +1282,6 @@ void state_glm_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("penalty", &state_t::penalty, R"delimiter(
         Penalty factor for each group in the same order as ``groups``.
-        )delimiter")
-        .def_readonly("weights", &state_t::weights, R"delimiter(
-        Observation weights :math:`W`.
         )delimiter")
         .def_readonly("offsets", &state_t::offsets, R"delimiter(
         Observation offsets :math:`\eta^0`.
@@ -1443,7 +1438,7 @@ void state_glm_base(py::module_& m, const char* name)
         The last regularization parameter that was attempted to be solved.
         )delimiter")
         .def_readonly("grad", &state_t::grad, R"delimiter(
-        The full gradient :math:`X^\top (W y - \nabla A(\eta))` where
+        The full gradient :math:`-X^\top \nabla \ell(\eta)` where
         :math:`\eta` is given by ``eta``.
         )delimiter")
         .def_readonly("abs_grad", &state_t::abs_grad, R"delimiter(
@@ -1579,11 +1574,9 @@ void state_glm_naive(py::module_& m, const char* name)
             matrix_t&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
-            const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
-            const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
@@ -1620,14 +1613,12 @@ void state_glm_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>& 
         >(),
             py::arg("X"),
-            py::arg("y").noconvert(),
             py::arg("eta").noconvert(),
-            py::arg("mu").noconvert(),
+            py::arg("resid").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
-            py::arg("weights").noconvert(),
             py::arg("offsets").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("loss_null"),
@@ -1663,9 +1654,6 @@ void state_glm_naive(py::module_& m, const char* name)
             py::arg("grad").noconvert()
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
-        .def_readonly("y", &state_t::y, R"delimiter(
-        Response vector.
-        )delimiter")
         .def_readonly("X", &state_t::X, R"delimiter(
         Feature matrix.
         )delimiter")
@@ -1676,8 +1664,8 @@ void state_glm_naive(py::module_& m, const char* name)
         and :math:`\beta_0` are given by
         ``screen_beta`` and ``beta0``.
         )delimiter")
-        .def_readonly("mu", &state_t::mu, R"delimiter(
-        The mean parameter :math:`\mu = \nabla A(\eta)`
+        .def_readonly("resid", &state_t::resid, R"delimiter(
+        Residual :math:`-\nabla \ell(\eta)`
         where :math:`\eta` is given by ``eta``.
         )delimiter")
         ;
@@ -1709,15 +1697,12 @@ void state_multiglm_naive(py::module_& m, const char* name)
             const std::string&,
             size_t,
             bool,
-            const Eigen::Ref<const vec_value_t>&,
             matrix_t&,
-            const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
-            const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
@@ -1756,16 +1741,13 @@ void state_multiglm_naive(py::module_& m, const char* name)
             py::arg("group_type"),
             py::arg("n_classes"),
             py::arg("multi_intercept"),
-            py::arg("weights_orig"),
             py::arg("X"),
-            py::arg("y").noconvert(),
             py::arg("eta").noconvert(),
-            py::arg("mu").noconvert(),
+            py::arg("resid").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
-            py::arg("weights").noconvert(),
             py::arg("offsets").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("loss_null"),
@@ -1811,9 +1793,6 @@ void state_multiglm_naive(py::module_& m, const char* name)
             throw std::runtime_error("Invalid multi-response group type!");
         }, R"delimiter(
         Multi-response group type.
-        )delimiter")
-        .def_readonly("n_classes", &state_t::n_classes, R"delimiter(
-        Number of classes.
         )delimiter")
         .def_readonly("multi_intercept", &state_t::multi_intercept, R"delimiter(
         ``True`` if an intercept is added for each response.

@@ -107,12 +107,10 @@ def _solve(state, progress_bar: bool =False):
 def grpnet(
     *,
     X: np.ndarray,
-    y: np.ndarray,
-    glm: Union[glm.GlmBase32, glm.GlmBase64] =glm.gaussian(),
+    glm: Union[glm.GlmBase32, glm.GlmBase64],
     groups: np.ndarray =None,
     alpha: float =1,
     penalty: np.ndarray =None,
-    weights: np.ndarray =None,
     offsets: np.ndarray =None,
     lmda_path: np.ndarray =None,
     irls_max_iters: int =int(1e4),
@@ -140,16 +138,13 @@ def grpnet(
 ):
     """Group elastic net solver.
 
-    The group elastic net problem minimizes 
-    the objective given by :math:`\\mathcal{L}(\\beta_0, \\beta)`:
+    The group elastic net problem minimizes the following:
 
     .. math::
         \\begin{align*}
             \\mathrm{minimize}_{\\beta, \\beta_0} \\quad&
-            \\sum_{i=1}^n w_i \\left(
-                -y_i \\eta_i + A_i(\\eta)
-            \\right)
-            + \\lambda \\sum\\limits_{g=1}^G p_g \\left(
+            \\ell(\\eta)
+            + \\lambda \\sum\\limits_{g=1}^G \\omega_g \\left(
                 \\alpha \\|\\beta_g\\|_2 + \\frac{1-\\alpha}{2} \\|\\beta_g\\|_2^2
             \\right)
             \\\\
@@ -161,29 +156,23 @@ def grpnet(
     :math:`\\beta_0` is the intercept,
     :math:`\\beta` is the coefficient vector,
     :math:`X` is the feature matrix,
-    :math:`y` is the response vector,
-    :math:`w \\geq 0` is the observation weight vector (that sum to 1),
     :math:`\\eta^0` is a fixed offset vector,
     :math:`\\lambda \\geq 0` is the regularization parameter,
     :math:`G` is the number of groups,
-    :math:`p \\geq 0` is the penalty factor,
+    :math:`\\omega \\geq 0` is the penalty factor,
     :math:`\\alpha \\in [0,1]` is the elastic net parameter,
     :math:`\\beta_g` are the coefficients for the :math:`g` th group,
-    and :math:`A_i` define the log-partition function in the GLM family.
+    and :math:`\\ell(\\cdot)` is the loss function defined by a GLM.
 
     For multi-response problems (i.e. when :math:`y` is 2-dimensional)
     such as in multigaussian or multinomial,
-    the group elastic net problem minimizes the objective given by:
+    the group elastic net problem minimizes the following:
 
     .. math::
         \\begin{align*}
             \\mathrm{minimize}_{\\beta, \\beta_0} \\quad&
-            \\frac{1}{K}
-            \\sum_{i=1}^{n}
-            w_{i} \\left(
-                -\\sum\\limits_{k=1}^K y_{ik} \\eta_{ik} + A_{i}(\\eta)
-            \\right)
-            + \\lambda \\sum\\limits_{g=1}^G p_g \\left(
+            \\ell(\\eta)
+            + \\lambda \\sum\\limits_{g=1}^G \\omega_g \\left(
                 \\alpha \\|\\beta_g\\|_2 + \\frac{1-\\alpha}{2} \\|\\beta_g\\|_2^2
             \\right)
             \\\\
@@ -200,7 +189,7 @@ def grpnet(
     as additional unpenalized features in the data matrix and the global intercept is turned off.
 
     .. note::
-        Multi-response GLMs that are symmetric (i.e., ``glm.is_symmetric == True``)
+        Multi-response GLMs that are symmetric across the class coefficients (e.g. multinomial)
         may observe slow convergence due to the Hessian being singular.
         This becomes especially pronounced when ``X`` has strongly correlated features.
         Counter-intuitively, increasing ``tol`` such as ``1e-8`` may result in faster convergence
@@ -212,12 +201,9 @@ def grpnet(
     X : (n, p) matrix-like
         Feature matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` submodule or ``np.ndarray``.
-    y : (n,) or (n, K) np.ndarray
-        Response vector or multi-response matrix.
-    glm : Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64, adelie.glm.GlmMultiBase32, adelie.glm.GlmMultiBase64], optional
+    glm : Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64, adelie.glm.GlmMultiBase32, adelie.glm.GlmMultiBase64]
         GLM object.
         It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
-        Default is ``adelie.glm.gaussian()``.
     groups : (G,) np.ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -237,10 +223,6 @@ def grpnet(
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
         Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
-    weights : (n,) np.ndarray, optional
-        Observation weights :math:`W`.
-        Weights are normalized such that they sum to ``1``.
-        Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
     offsets : (n,) or (n, K) np.ndarray, optional
         Observation offsets :math:`\\eta^0`.
         Default is ``None``, in which case, it is set to 
@@ -386,24 +368,12 @@ def grpnet(
     n, p = X.rows(), X.cols()
 
     # compute common quantities
-    y = np.array(y, order="C", copy=False)
-
-    if not (weights is None):
-        if weights.shape != (n,):
-            raise RuntimeError("weights must be (n,) array if 1-dimensional.")
-        weights_sum = np.sum(weights)
-        if weights_sum != 1:
-            warnings.warn("Normalizing weights to sum to 1.")
-            weights = weights / np.sum(weights)
-    else:
-        weights = np.full(n, 1/n, dtype=dtype)
-
     if not (offsets is None): 
-        if offsets.shape != y.shape:
+        if offsets.shape != glm.y.shape:
             raise RuntimeError("offsets must be same shape as y if not None.")
-        offsets = np.array(offsets, order="C", copy=False)
+        offsets = np.array(offsets, order="C", copy=False, dtype=dtype)
     else:
-        offsets = np.zeros(y.shape, dtype=dtype)
+        offsets = np.zeros(glm.y.shape, dtype=dtype)
 
     if not (lmda_path is None):
         # MUST evaluate the flip to be able to pass into C++ backend.
@@ -411,9 +381,7 @@ def grpnet(
 
     solver_args = {
         "X": X_raw,
-        "y": y,
         "alpha": alpha,
-        "weights": weights,
         "offsets": offsets,
         "lmda_path": lmda_path,
         "max_iters": max_iters,
@@ -446,13 +414,13 @@ def grpnet(
         solver_args["glm"] = glm
         solver_args["irls_max_iters"] = irls_max_iters
         solver_args["irls_tol"] = irls_tol
+    else:
+        solver_args["y"] = glm.y
+        solver_args["weights"] = glm.weights
 
     # multi-response GLMs
     if glm.is_multi:
-        if len(y.shape) != 2:
-            raise RuntimeError("y must be 2-dimensional.")
-
-        K = y.shape[-1]
+        K = glm.y.shape[-1]
 
         if groups is None:
             groups = "grouped"
@@ -508,10 +476,12 @@ def grpnet(
                 ),
                 X_aug,
             ], n_threads=n_threads)
-        weights_mscaled = weights / K
 
         # special gaussian case
         if is_gaussian_opt:
+            y = glm.y
+            weights = glm.weights
+            weights_mscaled = weights / K
             if warm_start is None:
                 X_means = np.empty(p, dtype=dtype)
                 X.mul(weights_mscaled, X_means)
@@ -563,23 +533,22 @@ def grpnet(
         else:
             if warm_start is None:
                 eta = offsets
-                mu = np.empty(offsets.shape); glm.gradient(eta, weights, mu)
-                resid = (weights_mscaled[:, None] * y - mu).ravel()
+                resid = np.empty(eta.shape); glm.gradient(eta, resid)
+                resid = resid.ravel()
                 grad = np.empty(X_aug.cols()); X_aug.mul(resid, grad)
                 loss_null = None
-                loss_full = glm.loss_full(y, weights)
+                loss_full = glm.loss_full()
                 eta = eta.ravel()
-                mu = mu.ravel()
             else:
                 eta = warm_start.eta
-                mu = warm_start.mu
+                resid = warm_start.resid
                 grad = warm_start.grad
                 loss_null = warm_start.loss_null
                 loss_full = warm_start.loss_full
 
             solver_args["grad"] = grad
             solver_args["eta"] = eta
-            solver_args["mu"] = mu
+            solver_args["resid"] = resid
             solver_args["loss_null"] = loss_null
             solver_args["loss_full"] = loss_full
 
@@ -621,6 +590,8 @@ def grpnet(
 
         # special gaussian case
         if is_gaussian_opt:
+            y = glm.y
+            weights = glm.weights
             if warm_start is None:
                 X_means = np.empty(p, dtype=dtype)
                 X.mul(weights, X_means)
@@ -659,15 +630,14 @@ def grpnet(
             if warm_start is None:
                 beta0 = 0
                 eta = offsets
-                mu = np.empty(n); glm.gradient(eta, weights, mu)
-                resid = (weights * y - mu)
+                resid = np.empty(n); glm.gradient(eta, resid)
                 grad = np.empty(p); X.mul(resid, grad)
                 loss_null = None
-                loss_full = glm.loss_full(y, weights)
+                loss_full = glm.loss_full()
             else:
                 beta0 = warm_start.beta0
                 eta = warm_start.eta
-                mu = warm_start.mu
+                resid = warm_start.resid
                 grad = warm_start.grad
                 loss_null = warm_start.loss_null
                 loss_full = warm_start.loss_full
@@ -675,7 +645,7 @@ def grpnet(
             solver_args["beta0"] = beta0
             solver_args["grad"] = grad
             solver_args["eta"] = eta
-            solver_args["mu"] = mu
+            solver_args["resid"] = resid
             solver_args["loss_null"] = loss_null
             solver_args["loss_full"] = loss_full
             state = ad.state.glm_naive(**solver_args)

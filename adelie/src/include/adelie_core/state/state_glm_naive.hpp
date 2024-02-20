@@ -92,25 +92,22 @@ struct StateGlmNaive: StateGlmBase<
     using matrix_t = MatrixType;
 
     /* static states */
-    const map_cvec_value_t y;
 
     /* configurations */
 
     /* dynamic states */
     matrix_t* X;
     vec_value_t eta;
-    vec_value_t mu;
+    vec_value_t resid;
 
     explicit StateGlmNaive(
         matrix_t& X,
-        const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& mu,
+        const Eigen::Ref<const vec_value_t>& resid,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
-        const Eigen::Ref<const vec_value_t>& weights,
         const Eigen::Ref<const vec_value_t>& offsets,
         const Eigen::Ref<const vec_value_t>& lmda_path,
         value_t loss_null,
@@ -146,17 +143,16 @@ struct StateGlmNaive: StateGlmBase<
         const Eigen::Ref<const vec_value_t>& grad
     ):
         base_t(
-            groups, group_sizes, alpha, penalty, weights, offsets, lmda_path, 
+            groups, group_sizes, alpha, penalty, offsets, lmda_path, 
             loss_null, loss_full, lmda_max, min_ratio, lmda_path_size, max_screen_size, max_active_size,
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             irls_max_iters, irls_tol, max_iters, tol, adev_tol, ddev_tol,
             newton_tol, newton_max_iters, early_exit, setup_loss_null, setup_lmda_max, setup_lmda_path, intercept, n_threads,
             screen_set, screen_beta, screen_is_active, beta0, lmda, grad
         ),
-        y(y.data(), y.size()),
         X(&X),
         eta(eta),
-        mu(mu)
+        resid(resid)
     {}
 };
 

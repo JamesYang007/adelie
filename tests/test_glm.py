@@ -1,4 +1,5 @@
 import adelie.glm as glm
+import adelie.adelie_core as core
 import numpy as np
 
 
@@ -17,8 +18,7 @@ def test_cox_partial_sum():
         t = np.sort(np.random.uniform(0, 1, m))
 
         out = np.empty(m+1)
-        cox = glm.cox()
-        cox._partial_sum(v, s, t, out)
+        core.glm.GlmCox64._partial_sum(v, s, t, out)
         expected = np.sum((s[None] >= t[:, None]) * v[None], axis=-1)
         assert np.allclose(out[:-1], expected)
 
@@ -26,8 +26,7 @@ def test_cox_partial_sum():
         s = np.sort(np.random.choice(20, n))
         t = np.sort(np.random.choice(20, m))
         out = np.empty(m+1)
-        cox = glm.cox()
-        cox._partial_sum(v, s, t, out)
+        core.glm.GlmCox64._partial_sum(v, s, t, out)
         expected = np.sum((s[None] >= t[:, None]) * v[None], axis=-1)
         assert np.allclose(out[:-1], expected)
 
@@ -47,8 +46,7 @@ def test_cox_average_ties():
         t = np.sort(np.random.uniform(0, 1, n))
 
         out = np.empty(n)
-        cox = glm.cox()
-        cox._average_ties(v, t, out)
+        core.glm.GlmCox64._average_ties(v, t, out)
         expected = (
             np.sum((t[None] == t[:, None]) * v[None], axis=-1) /
             np.sum((t[None] == t[:, None]), axis=-1)
@@ -58,8 +56,7 @@ def test_cox_average_ties():
         # discrete time (create ties)
         t = np.sort(np.random.choice(20, n))
         out = np.empty(n)
-        cox = glm.cox()
-        cox._average_ties(v, t, out)
+        core.glm.GlmCox64._average_ties(v, t, out)
         expected = (
             np.sum((t[None] == t[:, None]) * v[None], axis=-1) /
             np.sum((t[None] == t[:, None]), axis=-1)

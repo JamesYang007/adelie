@@ -40,7 +40,6 @@ struct StateMultiGlmNaive: StateGlmNaive<
     const util::multi_group_type group_type;
     const size_t n_classes;
     const bool multi_intercept;
-    const map_cvec_value_t weights_orig;
 
     /* dynamic states */
     rowarr_value_t intercepts;
@@ -49,16 +48,13 @@ struct StateMultiGlmNaive: StateGlmNaive<
         const std::string& group_type,
         size_t n_classes,
         bool multi_intercept,
-        const Eigen::Ref<const vec_value_t>& weights_orig,
         matrix_t& X,
-        const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& mu,
+        const Eigen::Ref<const vec_value_t>& resid,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
-        const Eigen::Ref<const vec_value_t>& weights,
         const Eigen::Ref<const vec_value_t>& offsets,
         const Eigen::Ref<const vec_value_t>& lmda_path,
         value_t loss_null,
@@ -94,7 +90,7 @@ struct StateMultiGlmNaive: StateGlmNaive<
         const Eigen::Ref<const vec_value_t>& grad
     ):
         base_t(
-            X, y, eta, mu, groups, group_sizes, alpha, penalty, weights, offsets, lmda_path, 
+            X, eta, resid, groups, group_sizes, alpha, penalty, offsets, lmda_path, 
             loss_null, loss_full, lmda_max, min_ratio, lmda_path_size, max_screen_size, max_active_size,
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             irls_max_iters, irls_tol, max_iters, tol, adev_tol, ddev_tol,
@@ -103,8 +99,7 @@ struct StateMultiGlmNaive: StateGlmNaive<
         ),
         group_type(util::convert_multi_group(group_type)),
         n_classes(n_classes),
-        multi_intercept(multi_intercept),
-        weights_orig(weights_orig.data(), weights_orig.size())
+        multi_intercept(multi_intercept)
     {}
 };
 

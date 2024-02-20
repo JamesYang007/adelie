@@ -34,7 +34,6 @@ struct StateGlmBase
     const map_cvec_index_t group_sizes;
     const value_t alpha;
     const map_cvec_value_t penalty;
-    const map_cvec_value_t weights;
     const map_cvec_value_t offsets;
 
     /* configurations */
@@ -109,7 +108,6 @@ struct StateGlmBase
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
-        const Eigen::Ref<const vec_value_t>& weights,
         const Eigen::Ref<const vec_value_t>& offsets,
         const Eigen::Ref<const vec_value_t>& lmda_path,
         value_t loss_null,
@@ -149,7 +147,6 @@ struct StateGlmBase
         group_sizes(group_sizes.data(), group_sizes.size()),
         alpha(alpha),
         penalty(penalty.data(), penalty.size()),
-        weights(weights.data(), weights.size()),
         offsets(offsets.data(), offsets.size()),
         min_ratio(min_ratio),
         lmda_path_size(lmda_path_size),
