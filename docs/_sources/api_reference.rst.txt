@@ -75,6 +75,7 @@ adelie.glm
 
 
     binomial
+    cox
     gaussian
     multigaussian
     multinomial
@@ -159,7 +160,6 @@ Internal
     :toctree: generated/
     
 
-    adelie_core.state.StateGaussianPinBase64
     adelie_core.state.StateGaussianPinCov64
     adelie_core.state.StateGaussianPinNaive64
     adelie_core.state.StateGaussianNaive64

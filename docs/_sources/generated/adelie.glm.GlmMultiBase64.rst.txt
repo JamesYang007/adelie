@@ -26,7 +26,6 @@
    .. autosummary::
    
       ~GlmMultiBase64.is_multi
-      ~GlmMultiBase64.is_symmetric
       ~GlmMultiBase64.name
    
    
@@ -46,7 +45,6 @@
    
    
    .. autoattribute:: is_multi
-   .. autoattribute:: is_symmetric
    .. autoattribute:: name
    
    

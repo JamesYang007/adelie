@@ -345,6 +345,7 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.cox.html">adelie.glm.cox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.multigaussian.html">adelie.glm.multigaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.multinomial.html">adelie.glm.multinomial</a></li>
@@ -374,7 +375,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.adelie_core.state.StateGaussianNaive64</a></li>
@@ -506,7 +506,7 @@ document.write(`
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should early exit based on training percent deviance explained.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianNaive64.grad" title="adelie.adelie_core.state.StateGaussianNaive64.grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grad</span></code></a></p></td>
-<td><p>The full gradient <span class="math notranslate nohighlight">\(X_c^\top W (y_c - X_c\beta)\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p></td>
+<td><p>The full gradient <span class="math notranslate nohighlight">\(-X^\top \nabla \ell(\eta)\)</span>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianNaive64.group_sizes" title="adelie.adelie_core.state.StateGaussianNaive64.group_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_sizes</span></code></a></p></td>
 <td><p>List of group sizes corresponding to each element in <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
@@ -534,6 +534,12 @@ document.write(`
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianNaive64.lmdas" title="adelie.adelie_core.state.StateGaussianNaive64.lmdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code> is the regularization <span class="math notranslate nohighlight">\(\lambda\)</span> used for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th solution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianNaive64.loss_full" title="adelie.adelie_core.state.StateGaussianNaive64.loss_full"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loss_full</span></code></a></p></td>
+<td><p>Full loss <span class="math notranslate nohighlight">\(-\frac{1}{2} \|y\|_W^2\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianNaive64.loss_null" title="adelie.adelie_core.state.StateGaussianNaive64.loss_null"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loss_null</span></code></a></p></td>
+<td><p>Null loss <span class="math notranslate nohighlight">\(-\frac{1}{2} \overline{y}^2\)</span> where <span class="math notranslate nohighlight">\(\overline{y}\)</span> is given by <code class="docutils literal notranslate"><span class="pre">y_mean</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianNaive64.max_active_size" title="adelie.adelie_core.state.StateGaussianNaive64.max_active_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_active_size</span></code></a></p></td>
 <td><p>Maximum number of active groups allowed.</p></td>
@@ -743,8 +749,7 @@ and <code class="docutils literal notranslate"><span class="pre">beta</span></co
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianNaive64.grad">
 <span class="sig-name descname"><span class="pre">grad</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianNaive64.grad" title="Link to this definition">#</a></dt>
-<dd><p>The full gradient <span class="math notranslate nohighlight">\(X_c^\top W (y_c - X_c\beta)\)</span> where
-<span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p>
+<dd><p>The full gradient <span class="math notranslate nohighlight">\(-X^\top \nabla \ell(\eta)\)</span>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -803,6 +808,19 @@ for all coefficients that have a non-vanishing group lasso penalty (<span class=
 <span class="sig-name descname"><span class="pre">lmdas</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianNaive64.lmdas" title="Link to this definition">#</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code> is the regularization <span class="math notranslate nohighlight">\(\lambda\)</span>
 used for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th solution.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianNaive64.loss_full">
+<span class="sig-name descname"><span class="pre">loss_full</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianNaive64.loss_full" title="Link to this definition">#</a></dt>
+<dd><p>Full loss <span class="math notranslate nohighlight">\(-\frac{1}{2} \|y\|_W^2\)</span>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianNaive64.loss_null">
+<span class="sig-name descname"><span class="pre">loss_null</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianNaive64.loss_null" title="Link to this definition">#</a></dt>
+<dd><p>Null loss <span class="math notranslate nohighlight">\(-\frac{1}{2} \overline{y}^2\)</span> where <span class="math notranslate nohighlight">\(\overline{y}\)</span>
+is given by <code class="docutils literal notranslate"><span class="pre">y_mean</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1110,6 +1128,8 @@ i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span>.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianNaive64.lmda_path"><code class="docutils literal notranslate"><span class="pre">StateGaussianNaive64.lmda_path</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianNaive64.lmda_path_size"><code class="docutils literal notranslate"><span class="pre">StateGaussianNaive64.lmda_path_size</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianNaive64.lmdas"><code class="docutils literal notranslate"><span class="pre">StateGaussianNaive64.lmdas</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianNaive64.loss_full"><code class="docutils literal notranslate"><span class="pre">StateGaussianNaive64.loss_full</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianNaive64.loss_null"><code class="docutils literal notranslate"><span class="pre">StateGaussianNaive64.loss_null</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianNaive64.max_active_size"><code class="docutils literal notranslate"><span class="pre">StateGaussianNaive64.max_active_size</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianNaive64.max_iters"><code class="docutils literal notranslate"><span class="pre">StateGaussianNaive64.max_iters</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianNaive64.max_screen_size"><code class="docutils literal notranslate"><span class="pre">StateGaussianNaive64.max_screen_size</span></code></a></li>

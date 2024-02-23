@@ -345,6 +345,7 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.glm.binomial.html">adelie.glm.binomial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.glm.cox.html">adelie.glm.cox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.glm.multigaussian.html">adelie.glm.multigaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.glm.multinomial.html">adelie.glm.multinomial</a></li>
@@ -374,7 +375,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
@@ -487,28 +487,28 @@ document.write(`
 <h2>adelie.diagnostic<a class="headerlink" href="#adelie-diagnostic" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.coefficient.html#adelie.diagnostic.coefficient" title="adelie.diagnostic.coefficient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coefficient</span></code></a>(*, lmda, lmdas, betas)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.coefficient.html#adelie.diagnostic.coefficient" title="adelie.diagnostic.coefficient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coefficient</span></code></a>(*, lmda, betas, lmdas)</p></td>
 <td><p>Computes the coefficient at <span class="math notranslate nohighlight">\(\lambda\)</span> using linear interpolation of solutions.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.diagnostic.html#adelie.diagnostic.diagnostic" title="adelie.diagnostic.diagnostic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diagnostic</span></code></a>(state)</p></td>
 <td><p>Diagnostic class for user-friendly API.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.gradients.html#adelie.diagnostic.gradients" title="adelie.diagnostic.gradients"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradients</span></code></a>(*, X, weights, resids[, n_threads])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.gradients.html#adelie.diagnostic.gradients" title="adelie.diagnostic.gradients"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradients</span></code></a>(*, X, resids[, n_threads])</p></td>
 <td><p>Computes the gradients.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.gradient_norms.html#adelie.diagnostic.gradient_norms" title="adelie.diagnostic.gradient_norms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_norms</span></code></a>(*, betas, grads, lmdas[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.gradient_norms.html#adelie.diagnostic.gradient_norms" title="adelie.diagnostic.gradient_norms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_norms</span></code></a>(*, grads, betas, lmdas[, ...])</p></td>
 <td><p>Computes the group-wise gradient norms.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.gradient_scores.html#adelie.diagnostic.gradient_scores" title="adelie.diagnostic.gradient_scores"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_scores</span></code></a>(*, grad_norms, lmdas[, ...])</p></td>
 <td><p>Computes the gradient scores.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.objective.html#adelie.diagnostic.objective" title="adelie.diagnostic.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">objective</span></code></a>(*, X, y, betas, intercepts, lmdas)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.objective.html#adelie.diagnostic.objective" title="adelie.diagnostic.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">objective</span></code></a>(*, X, glm, betas, intercepts, lmdas)</p></td>
 <td><p>Computes the group elastic net objective.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_benchmark.html#adelie.diagnostic.plot_benchmark" title="adelie.diagnostic.plot_benchmark"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_benchmark</span></code></a>(*, total_time, ...[, relative])</p></td>
 <td><p>Plots benchmark times.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_coefficients.html#adelie.diagnostic.plot_coefficients" title="adelie.diagnostic.plot_coefficients"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_coefficients</span></code></a>(*, groups, group_sizes, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_coefficients.html#adelie.diagnostic.plot_coefficients" title="adelie.diagnostic.plot_coefficients"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_coefficients</span></code></a>(*, betas, lmdas, groups, ...)</p></td>
 <td><p>Plots the coefficient profile.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_devs.html#adelie.diagnostic.plot_devs" title="adelie.diagnostic.plot_devs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_devs</span></code></a>(*, lmdas, devs)</p></td>
@@ -520,10 +520,10 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.plot_set_sizes.html#adelie.diagnostic.plot_set_sizes" title="adelie.diagnostic.plot_set_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_set_sizes</span></code></a>(*, groups, screen_sizes, ...)</p></td>
 <td><p>Plots the set sizes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.predict.html#adelie.diagnostic.predict" title="adelie.diagnostic.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(*, X, betas, intercepts[, weights, ...])</p></td>
-<td><p>Computes the predictions.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.predict.html#adelie.diagnostic.predict" title="adelie.diagnostic.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(*, X, betas, intercepts[, offsets, ...])</p></td>
+<td><p>Computes the linear predictions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.residuals.html#adelie.diagnostic.residuals" title="adelie.diagnostic.residuals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">residuals</span></code></a>(*, X, y, betas, intercepts[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.residuals.html#adelie.diagnostic.residuals" title="adelie.diagnostic.residuals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">residuals</span></code></a>(*, glm, etas)</p></td>
 <td><p>Computes the residuals.</p></td>
 </tr>
 </tbody>
@@ -533,19 +533,22 @@ document.write(`
 <h2>adelie.glm<a class="headerlink" href="#adelie-glm" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.binomial.html#adelie.glm.binomial" title="adelie.glm.binomial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">binomial</span></code></a>(*[, dtype])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.binomial.html#adelie.glm.binomial" title="adelie.glm.binomial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">binomial</span></code></a>(*, y[, weights, dtype])</p></td>
 <td><p>Creates a Binomial GLM family object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.gaussian.html#adelie.glm.gaussian" title="adelie.glm.gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian</span></code></a>(*[, dtype, opt])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.cox.html#adelie.glm.cox" title="adelie.glm.cox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cox</span></code></a>(*, start, stop, status[, weights, ...])</p></td>
+<td><p>Creates a Cox GLM family object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.gaussian.html#adelie.glm.gaussian" title="adelie.glm.gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian</span></code></a>(*, y[, weights, dtype, opt])</p></td>
 <td><p>Creates a Gaussian GLM family object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.multigaussian.html#adelie.glm.multigaussian" title="adelie.glm.multigaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multigaussian</span></code></a>(*[, dtype, opt])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.multigaussian.html#adelie.glm.multigaussian" title="adelie.glm.multigaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multigaussian</span></code></a>(*, y[, weights, dtype, opt])</p></td>
 <td><p>Creates a Multi-response Gaussian GLM family object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.multinomial.html#adelie.glm.multinomial" title="adelie.glm.multinomial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multinomial</span></code></a>(*[, dtype])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.multinomial.html#adelie.glm.multinomial" title="adelie.glm.multinomial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multinomial</span></code></a>(*, y[, weights, dtype])</p></td>
 <td><p>Creates a Multinomial GLM family object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.poisson.html#adelie.glm.poisson" title="adelie.glm.poisson"><code class="xref py py-obj docutils literal notranslate"><span class="pre">poisson</span></code></a>(*[, dtype])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.poisson.html#adelie.glm.poisson" title="adelie.glm.poisson"><code class="xref py py-obj docutils literal notranslate"><span class="pre">poisson</span></code></a>(*, y[, weights, dtype])</p></td>
 <td><p>Creates a Poisson GLM family object.</p></td>
 </tr>
 </tbody>
@@ -602,13 +605,13 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.gaussian_pin_naive.html#adelie.state.gaussian_pin_naive" title="adelie.state.gaussian_pin_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_pin_naive</span></code></a>(*, X, y_mean, y_var, ...)</p></td>
 <td><p>Creates a gaussian, pin, naive method state object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.glm_naive.html#adelie.state.glm_naive" title="adelie.state.glm_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">glm_naive</span></code></a>(*, glm, X, y, groups, group_sizes, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.glm_naive.html#adelie.state.glm_naive" title="adelie.state.glm_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">glm_naive</span></code></a>(*, X, glm, groups, group_sizes, ...)</p></td>
 <td><p>Creates a GLM, naive method state object.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.multigaussian_naive.html#adelie.state.multigaussian_naive" title="adelie.state.multigaussian_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multigaussian_naive</span></code></a>(*, X, y, X_means, y_var, ...)</p></td>
 <td><p>Creates a multi-gaussian, naive method state object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.multiglm_naive.html#adelie.state.multiglm_naive" title="adelie.state.multiglm_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multiglm_naive</span></code></a>(*, glm, X, y, groups, ...[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.multiglm_naive.html#adelie.state.multiglm_naive" title="adelie.state.multiglm_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multiglm_naive</span></code></a>(*, X, glm, groups, ...[, ...])</p></td>
 <td><p>Creates a multi-response GLM, naive method state object.</p></td>
 </tr>
 </tbody>
@@ -618,7 +621,7 @@ document.write(`
 <h2>adelie.solver<a class="headerlink" href="#adelie-solver" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.grpnet.html#adelie.solver.grpnet" title="adelie.solver.grpnet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grpnet</span></code></a>(*, X, y[, glm, groups, alpha, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.grpnet.html#adelie.solver.grpnet" title="adelie.solver.grpnet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grpnet</span></code></a>(*, X, glm[, groups, alpha, penalty, ...])</p></td>
 <td><p>Group elastic net solver.</p></td>
 </tr>
 </tbody>
@@ -628,40 +631,37 @@ document.write(`
 <h2>Internal<a class="headerlink" href="#internal" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinBase64.html#adelie.adelie_core.state.StateGaussianPinBase64" title="adelie.adelie_core.state.StateGaussianPinBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateGaussianPinBase64</span></code></a></p></td>
-<td><p>Base core state class for all gaussian pin methods.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinCov64.html#adelie.adelie_core.state.StateGaussianPinCov64" title="adelie.adelie_core.state.StateGaussianPinCov64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateGaussianPinCov64</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinCov64.html#adelie.adelie_core.state.StateGaussianPinCov64" title="adelie.adelie_core.state.StateGaussianPinCov64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateGaussianPinCov64</span></code></a></p></td>
 <td><p>Core state class for gaussian, pin, covariance method.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinNaive64.html#adelie.adelie_core.state.StateGaussianPinNaive64" title="adelie.adelie_core.state.StateGaussianPinNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateGaussianPinNaive64</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinNaive64.html#adelie.adelie_core.state.StateGaussianPinNaive64" title="adelie.adelie_core.state.StateGaussianPinNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateGaussianPinNaive64</span></code></a></p></td>
 <td><p>Core state class for gaussian, pin, naive method.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianNaive64.html#adelie.adelie_core.state.StateGaussianNaive64" title="adelie.adelie_core.state.StateGaussianNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateGaussianNaive64</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianNaive64.html#adelie.adelie_core.state.StateGaussianNaive64" title="adelie.adelie_core.state.StateGaussianNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateGaussianNaive64</span></code></a></p></td>
 <td><p>Core state class for gaussian, naive method.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateGlmNaive64.html#adelie.adelie_core.state.StateGlmNaive64" title="adelie.adelie_core.state.StateGlmNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateGlmNaive64</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateGlmNaive64.html#adelie.adelie_core.state.StateGlmNaive64" title="adelie.adelie_core.state.StateGlmNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateGlmNaive64</span></code></a></p></td>
 <td><p>Core state class for glm, naive method.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateMultiGaussianNaive64.html#adelie.adelie_core.state.StateMultiGaussianNaive64" title="adelie.adelie_core.state.StateMultiGaussianNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateMultiGaussianNaive64</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateMultiGaussianNaive64.html#adelie.adelie_core.state.StateMultiGaussianNaive64" title="adelie.adelie_core.state.StateMultiGaussianNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateMultiGaussianNaive64</span></code></a></p></td>
 <td><p>Core state class for multigaussian, naive method.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateMultiGlmNaive64.html#adelie.adelie_core.state.StateMultiGlmNaive64" title="adelie.adelie_core.state.StateMultiGlmNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateMultiGlmNaive64</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateMultiGlmNaive64.html#adelie.adelie_core.state.StateMultiGlmNaive64" title="adelie.adelie_core.state.StateMultiGlmNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateMultiGlmNaive64</span></code></a></p></td>
 <td><p>Core state class for multiglm, naive method.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.GlmBase64.html#adelie.glm.GlmBase64" title="adelie.glm.GlmBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">glm.GlmBase64</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.GlmBase64.html#adelie.glm.GlmBase64" title="adelie.glm.GlmBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">glm.GlmBase64</span></code></a></p></td>
 <td><p>Base GLM class.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.GlmMultiBase64.html#adelie.glm.GlmMultiBase64" title="adelie.glm.GlmMultiBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">glm.GlmMultiBase64</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.GlmMultiBase64.html#adelie.glm.GlmMultiBase64" title="adelie.glm.GlmMultiBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">glm.GlmMultiBase64</span></code></a></p></td>
 <td><p>Base Multi-response GLM class.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixCovBase64.html#adelie.matrix.MatrixCovBase64" title="adelie.matrix.MatrixCovBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixCovBase64</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixCovBase64.html#adelie.matrix.MatrixCovBase64" title="adelie.matrix.MatrixCovBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixCovBase64</span></code></a></p></td>
 <td><p>Base matrix class for covariance method.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixNaiveBase64.html#adelie.matrix.MatrixNaiveBase64" title="adelie.matrix.MatrixNaiveBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixNaiveBase64</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.matrix.MatrixNaiveBase64.html#adelie.matrix.MatrixNaiveBase64" title="adelie.matrix.MatrixNaiveBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix.MatrixNaiveBase64</span></code></a></p></td>
 <td><p>Base matrix class for naive method.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.base.html#adelie.state.base" title="adelie.state.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.base</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.base.html#adelie.state.base" title="adelie.state.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state.base</span></code></a>()</p></td>
 <td><p>Base wrapper state class.</p></td>
 </tr>
 </tbody>

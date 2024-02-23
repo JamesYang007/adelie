@@ -47,6 +47,8 @@
       ~StateMultiGaussianNaive64.lmda_path
       ~StateMultiGaussianNaive64.lmda_path_size
       ~StateMultiGaussianNaive64.lmdas
+      ~StateMultiGaussianNaive64.loss_full
+      ~StateMultiGaussianNaive64.loss_null
       ~StateMultiGaussianNaive64.max_active_size
       ~StateMultiGaussianNaive64.max_iters
       ~StateMultiGaussianNaive64.max_screen_size
@@ -121,6 +123,8 @@
    .. autoattribute:: lmda_path
    .. autoattribute:: lmda_path_size
    .. autoattribute:: lmdas
+   .. autoattribute:: loss_full
+   .. autoattribute:: loss_null
    .. autoattribute:: max_active_size
    .. autoattribute:: max_iters
    .. autoattribute:: max_screen_size

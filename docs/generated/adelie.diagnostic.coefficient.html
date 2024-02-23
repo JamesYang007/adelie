@@ -345,6 +345,7 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.cox.html">adelie.glm.cox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.multigaussian.html">adelie.glm.multigaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.multinomial.html">adelie.glm.multinomial</a></li>
@@ -374,7 +375,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
@@ -447,7 +447,7 @@ document.write(`
 <h1>adelie.diagnostic.coefficient<a class="headerlink" href="#adelie-diagnostic-coefficient" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.diagnostic.coefficient">
-<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csr_matrix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.coefficient" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csr_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.coefficient" title="Link to this definition">#</a></dt>
 <dd><p>Computes the coefficient at <span class="math notranslate nohighlight">\(\lambda\)</span> using linear interpolation of solutions.</p>
 <p>The linearly interpolated coefficient is given by</p>
 <div class="math notranslate nohighlight">
@@ -468,9 +468,9 @@ then we simply take the solution at the respective ends.</p>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>lmda</strong><span class="classifier">float</span></dt><dd><p>New regularization parameter at which to find the solution.</p>
 </dd>
-<dt><strong>lmdas</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Regularization parameters <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
-</dd>
 <dt><strong>betas</strong><span class="classifier">(L, p) np.ndarray</span></dt><dd><p>Coefficient vectors <span class="math notranslate nohighlight">\(\beta\)</span>.</p>
+</dd>
+<dt><strong>lmdas</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Regularization parameters <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
 </dd>
 </dl>
 </dd>

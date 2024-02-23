@@ -56,9 +56,7 @@
       ~StateMultiGlmNaive64.max_iters
       ~StateMultiGlmNaive64.max_screen_size
       ~StateMultiGlmNaive64.min_ratio
-      ~StateMultiGlmNaive64.mu
       ~StateMultiGlmNaive64.multi_intercept
-      ~StateMultiGlmNaive64.n_classes
       ~StateMultiGlmNaive64.n_threads
       ~StateMultiGlmNaive64.n_valid_solutions
       ~StateMultiGlmNaive64.newton_max_iters
@@ -68,6 +66,7 @@
       ~StateMultiGlmNaive64.pivot_slack_ratio
       ~StateMultiGlmNaive64.pivot_subset_min
       ~StateMultiGlmNaive64.pivot_subset_ratio
+      ~StateMultiGlmNaive64.resid
       ~StateMultiGlmNaive64.screen_begins
       ~StateMultiGlmNaive64.screen_beta
       ~StateMultiGlmNaive64.screen_g1
@@ -81,8 +80,6 @@
       ~StateMultiGlmNaive64.setup_lmda_path
       ~StateMultiGlmNaive64.setup_loss_null
       ~StateMultiGlmNaive64.tol
-      ~StateMultiGlmNaive64.weights
-      ~StateMultiGlmNaive64.y
    
    
 
@@ -131,9 +128,7 @@
    .. autoattribute:: max_iters
    .. autoattribute:: max_screen_size
    .. autoattribute:: min_ratio
-   .. autoattribute:: mu
    .. autoattribute:: multi_intercept
-   .. autoattribute:: n_classes
    .. autoattribute:: n_threads
    .. autoattribute:: n_valid_solutions
    .. autoattribute:: newton_max_iters
@@ -143,6 +138,7 @@
    .. autoattribute:: pivot_slack_ratio
    .. autoattribute:: pivot_subset_min
    .. autoattribute:: pivot_subset_ratio
+   .. autoattribute:: resid
    .. autoattribute:: screen_begins
    .. autoattribute:: screen_beta
    .. autoattribute:: screen_g1
@@ -156,7 +152,5 @@
    .. autoattribute:: setup_lmda_path
    .. autoattribute:: setup_loss_null
    .. autoattribute:: tol
-   .. autoattribute:: weights
-   .. autoattribute:: y
    
    

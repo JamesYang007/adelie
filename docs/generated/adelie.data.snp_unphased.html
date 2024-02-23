@@ -345,6 +345,7 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.cox.html">adelie.glm.cox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.multigaussian.html">adelie.glm.multigaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.multinomial.html">adelie.glm.multinomial</a></li>
@@ -374,7 +375,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
@@ -447,7 +447,7 @@ document.write(`
 <h1>adelie.data.snp_unphased<a class="headerlink" href="#adelie-data-snp-unphased" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.data.snp_unphased">
-<span class="sig-prename descclassname"><span class="pre">adelie.data.</span></span><span class="sig-name descname"><span class="pre">snp_unphased</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glm=&lt;adelie.glm.gaussian.&lt;locals&gt;._gaussian</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sparsity:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_ratio:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">two_ratio:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_penalty:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snr:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.data.snp_unphased" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.data.</span></span><span class="sig-name descname"><span class="pre">snp_unphased</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sparsity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">two_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.data.snp_unphased" title="Link to this definition">#</a></dt>
 <dd><p>Creates a SNP unphased dataset.</p>
 <ul class="simple">
 <li><p>This dataset is only used for lasso, so <code class="docutils literal notranslate"><span class="pre">groups</span></code> is simply each individual feature
@@ -464,7 +464,7 @@ in which case, <code class="docutils literal notranslate"><span class="pre">pena
 </ul>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>n</strong><span class="classifier">int</span></dt><dd><p>Number of data points.</p>
 </dd>
 <dt><strong>p</strong><span class="classifier">int</span></dt><dd><p>Number of SNPs.</p>
@@ -472,8 +472,19 @@ in which case, <code class="docutils literal notranslate"><span class="pre">pena
 <dt><strong>K</strong><span class="classifier">int, optional</span></dt><dd><p>Number of classes for multi-response GLMs.
 Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </dd>
-<dt><strong>glm</strong><span class="classifier">adelie.glm.glm_base, optional</span></dt><dd><p>GLM object.
-Default is <code class="docutils literal notranslate"><span class="pre">adelie.glm.gaussian()</span></code>.</p>
+<dt><strong>glm</strong><span class="classifier">str, optional</span></dt><dd><p>GLM name.
+It must be one of the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;binomial&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;cox&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;gaussian&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;multigaussian&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;multinomial&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;poisson&quot;</span></code></p></li>
+</ul>
+</div></blockquote>
+<p>Default is <code class="docutils literal notranslate"><span class="pre">&quot;gaussian&quot;</span></code>.</p>
 </dd>
 <dt><strong>sparsity</strong><span class="classifier">float, optional</span></dt><dd><p>Proportion of <span class="math notranslate nohighlight">\(\beta\)</span> entries to be zeroed out.
 Default is <code class="docutils literal notranslate"><span class="pre">0.95</span></code>.</p>

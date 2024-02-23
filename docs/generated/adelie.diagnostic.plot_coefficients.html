@@ -345,6 +345,7 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.cox.html">adelie.glm.cox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.multigaussian.html">adelie.glm.multigaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.multinomial.html">adelie.glm.multinomial</a></li>
@@ -374,7 +375,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
@@ -447,20 +447,20 @@ document.write(`
 <h1>adelie.diagnostic.plot_coefficients<a class="headerlink" href="#adelie-diagnostic-plot-coefficients" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.diagnostic.plot_coefficients">
-<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">plot_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csr_matrix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.plot_coefficients" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">plot_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csr_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.plot_coefficients" title="Link to this definition">#</a></dt>
 <dd><p>Plots the coefficient profile.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
+<dt><strong>betas</strong><span class="classifier">(L, p) np.ndarray</span></dt><dd><p>Coefficient vectors <span class="math notranslate nohighlight">\(\beta\)</span>.</p>
+</dd>
+<dt><strong>lmdas</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Regularization parameters <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
+</dd>
 <dt><strong>groups</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>List of starting indices to each group where <cite>G</cite> is the number of groups.
 <code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group.</p>
 </dd>
 <dt><strong>group_sizes</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>List of group sizes corresponding to each element of <code class="docutils literal notranslate"><span class="pre">groups</span></code>.
 <code class="docutils literal notranslate"><span class="pre">group_sizes[i]</span></code> is the size of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group.</p>
-</dd>
-<dt><strong>lmdas</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Regularization parameters <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
-</dd>
-<dt><strong>betas</strong><span class="classifier">(L, p) np.ndarray</span></dt><dd><p>Coefficient vectors <span class="math notranslate nohighlight">\(\beta\)</span>.</p>
 </dd>
 </dl>
 </dd>

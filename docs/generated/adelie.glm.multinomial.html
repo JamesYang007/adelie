@@ -345,6 +345,7 @@ document.write(`
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.cox.html">adelie.glm.cox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.multigaussian.html">adelie.glm.multigaussian</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.glm.multinomial</a></li>
@@ -374,7 +375,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinBase64.html">adelie.adelie_core.state.StateGaussianPinBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
@@ -447,7 +447,7 @@ document.write(`
 <h1>adelie.glm.multinomial<a class="headerlink" href="#adelie-glm-multinomial" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.glm.multinomial">
-<span class="sig-prename descclassname"><span class="pre">adelie.glm.</span></span><span class="sig-name descname"><span class="pre">multinomial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">~numpy.float32</span> <span class="pre">|</span> <span class="pre">~numpy.float64</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.glm.multinomial" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.glm.</span></span><span class="sig-name descname"><span class="pre">multinomial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights:</span> <span class="pre">~numpy.ndarray</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">~numpy.float32</span> <span class="pre">|</span> <span class="pre">~numpy.float64</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.glm.multinomial" title="Link to this definition">#</a></dt>
 <dd><p>Creates a Multinomial GLM family object.</p>
 <p>The Multinomial GLM family specifies the loss function as:</p>
 <div class="math notranslate nohighlight">
@@ -466,10 +466,16 @@ document.write(`
 \end{align*}\]</div>
 <p>We assume that every <span class="math notranslate nohighlight">\(y_{ik} \in \{0,1\}\)</span> and
 for each fixed <span class="math notranslate nohighlight">\(i\)</span>, 
-there is excatly one <span class="math notranslate nohighlight">\(k\)</span> such that <span class="math notranslate nohighlight">\(y_{ik} = 1\)</span>.</p>
+there is exactly one <span class="math notranslate nohighlight">\(k\)</span> such that <span class="math notranslate nohighlight">\(y_{ik} = 1\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
+<dt><strong>y</strong><span class="classifier">(n, K) np.ndarray</span></dt><dd><p>Response matrix <span class="math notranslate nohighlight">\(y\)</span>.</p>
+</dd>
+<dt><strong>weights</strong><span class="classifier">(n,) np.ndarray, optional</span></dt><dd><p>Observation weights <span class="math notranslate nohighlight">\(W\)</span>.
+Weights are normalized such that they sum to <code class="docutils literal notranslate"><span class="pre">1</span></code>.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to <code class="docutils literal notranslate"><span class="pre">np.full(n,</span> <span class="pre">1/n)</span></code>.</p>
+</dd>
 <dt><strong>dtype</strong><span class="classifier">Union[np.float32, np.float64], optional</span></dt><dd><p>The underlying data type.
 Default is <code class="docutils literal notranslate"><span class="pre">np.float64</span></code>.</p>
 </dd>
