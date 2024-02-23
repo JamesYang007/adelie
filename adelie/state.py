@@ -1047,30 +1047,15 @@ def gaussian_pin_cov(
     return _gaussian_pin_cov()
 
 
-class gaussian_base(base):
-    pass
-
-
 def _render_gaussian_naive_inputs(
     *,
     X,
     groups,
     lmda_max,
     lmda_path,
-    max_iters,
-    tol,
-    adev_tol,
-    ddev_tol,
-    newton_tol,
-    newton_max_iters,
-    n_threads,
-    min_ratio,
     lmda_path_size,
     max_screen_size,
     max_active_size,
-    pivot_subset_ratio,
-    pivot_subset_min,
-    pivot_slack_ratio,
 ):
     if not (
         isinstance(X, matrix.MatrixNaiveBase64) or 
@@ -1087,35 +1072,6 @@ def _render_gaussian_naive_inputs(
         max_active_size = len(groups)
     max_screen_size = np.minimum(max_screen_size, len(groups))
     max_active_size = np.minimum(max_active_size, len(groups))
-
-    if max_iters < 0:
-        raise ValueError("max_iters must be >= 0.")
-    if tol <= 0:
-        raise ValueError("tol must be > 0.")
-    if adev_tol < 0 or adev_tol > 1:
-        raise ValueError("adev_tol must be in [0,1].")
-    if ddev_tol < 0 or ddev_tol > 1:
-        raise ValueError("ddev_tol must be in [0,1].")
-    if newton_tol < 0:
-        raise ValueError("newton_tol must be >= 0.")
-    if newton_max_iters < 0:
-        raise ValueError("newton_max_iters must be >= 0.")
-    if n_threads < 1:
-        raise ValueError("n_threads must be >= 1.")
-    if min_ratio <= 0:
-        raise ValueError("min_ratio must be > 0.")
-    if lmda_path_size < 0:
-        raise ValueError("lmda_path_size must be >= 0.")
-    if max_screen_size < 0:
-        raise ValueError("max_screen_size must be >= 0.")
-    if max_active_size < 0:
-        raise ValueError("max_active_size must be >= 0.")
-    if pivot_subset_ratio <= 0 or pivot_subset_ratio > 1:
-        raise ValueError("pivot_subset_ratio must be in (0, 1].")
-    if pivot_subset_min < 1:
-        raise ValueError("pivot_subset_min must be >= 1.")
-    if pivot_slack_ratio < 0:
-        raise ValueError("pivot_slack_ratio must be >= 0.")
 
     lmda_path_size = (
         lmda_path_size
@@ -1182,21 +1138,7 @@ def _render_multi_input(
     )
     
 
-class gaussian_naive_base(gaussian_base):
-    """State wrapper base class for all gaussian naive method."""
-    def basic_check(self):
-        n, p = self.X.rows(), self.X.cols()
-        G = self.groups.shape[0]
-        S = self.screen_set.shape[0]
-        assert p == self.X_means.shape[0]
-        assert n == self.resid.shape[0]
-        assert G <= p
-        assert G == self.group_sizes.shape[0]
-        assert G == self.penalty.shape[0]
-        assert n == self.weights.shape[0]
-        assert S == self.screen_is_active.shape[0]
-        assert p == self.grad.shape[0]
-
+class gaussian_naive_base(base):
     def check(
         self,
         method: str =None, 
@@ -1770,20 +1712,9 @@ def gaussian_naive(
         groups=groups,
         lmda_max=lmda_max,
         lmda_path=lmda_path,
-        max_iters=max_iters,
-        tol=tol,
-        adev_tol=adev_tol,
-        ddev_tol=ddev_tol,
-        newton_tol=newton_tol,
-        newton_max_iters=newton_max_iters,
-        n_threads=n_threads,
-        min_ratio=min_ratio,
         lmda_path_size=lmda_path_size,
         max_screen_size=max_screen_size,
         max_active_size=max_active_size,
-        pivot_subset_ratio=pivot_subset_ratio,
-        pivot_subset_min=pivot_subset_min,
-        pivot_slack_ratio=pivot_slack_ratio,
     )
 
     dispatcher = {
@@ -1857,7 +1788,6 @@ def gaussian_naive(
                 lmda=lmda,
                 grad=self._grad,
             )
-            self.basic_check()
 
         @classmethod
         def create_from_core(cls, state, core_state):
@@ -2096,20 +2026,9 @@ def multigaussian_naive(
         groups=groups,
         lmda_max=lmda_max,
         lmda_path=lmda_path,
-        max_iters=max_iters,
-        tol=tol,
-        adev_tol=adev_tol,
-        ddev_tol=ddev_tol,
-        newton_tol=newton_tol,
-        newton_max_iters=newton_max_iters,
-        n_threads=n_threads,
-        min_ratio=min_ratio,
         lmda_path_size=lmda_path_size,
         max_screen_size=max_screen_size,
         max_active_size=max_active_size,
-        pivot_subset_ratio=pivot_subset_ratio,
-        pivot_subset_min=pivot_subset_min,
-        pivot_slack_ratio=pivot_slack_ratio,
     )
         
     dispatcher = {
@@ -2163,7 +2082,11 @@ def multigaussian_naive(
                 multi_intercept=intercept,
                 X=self._X_expanded,
                 X_means=self._X_means,
-                y_mean=0.0,
+                # y_mean is not used in the solver since global intercept is turned off,
+                # but it is used to compute loss_null and loss_full.
+                # This is not the actual y_mean, but it is a value that will result in correct
+                # calculation of loss_null and loss_full.
+                y_mean=np.linalg.norm(np.sum(weights[:, None] * (y - offsets), axis=-1) / n_classes),
                 y_var=y_var,
                 resid=resid,
                 resid_sum=resid_sum,
@@ -2200,7 +2123,6 @@ def multigaussian_naive(
                 lmda=lmda,
                 grad=self._grad,
             )
-            self.basic_check()
 
         @classmethod
         def create_from_core(cls, state, core_state):
@@ -2213,43 +2135,12 @@ def multigaussian_naive(
     return _multigaussian_naive()
 
 
-class glm_naive_base:
-    """State wrapper base class for all glm naive method."""
-    def basic_check(self):
-        n, p = self.X.rows(), self.X.cols()
-        G = self.groups.shape[0]
-        S = self.screen_set.shape[0]
-        assert G <= p
-        assert G == self.group_sizes.shape[0]
-        assert G == self.penalty.shape[0]
-        assert n == self.offsets.shape[0]
-        assert S == self.screen_is_active.shape[0]
-        assert p == self.grad.shape[0]
-        assert n == self.eta.shape[0]
-        assert n == self.resid.shape[0]
-
-    def check(
-        self,
-        method: str =None, 
-        logger=logger.logger,
-    ):
-        # TODO: implement check()?
-        return
-
-
 def _render_glm_naive_inputs(
     *,
-    irls_max_iters,
-    irls_tol,
     loss_null,
     **kwargs,
 ):
     out = _render_gaussian_naive_inputs(**kwargs)
-
-    if irls_max_iters < 0:
-        raise ValueError("irls_max_iters must be >= 0.")
-    if irls_tol <= 0:
-        raise ValueError("irls_tol must be > 0.")
 
     setup_loss_null = loss_null is None
     if setup_loss_null: loss_null = np.inf
@@ -2482,22 +2373,9 @@ def glm_naive(
         groups=groups,
         lmda_max=lmda_max,
         lmda_path=lmda_path,
-        max_iters=max_iters,
-        tol=tol,
-        adev_tol=adev_tol,
-        ddev_tol=ddev_tol,
-        newton_tol=newton_tol,
-        newton_max_iters=newton_max_iters,
-        n_threads=n_threads,
-        min_ratio=min_ratio,
         lmda_path_size=lmda_path_size,
         max_screen_size=max_screen_size,
         max_active_size=max_active_size,
-        pivot_subset_ratio=pivot_subset_ratio,
-        pivot_subset_min=pivot_subset_min,
-        pivot_slack_ratio=pivot_slack_ratio,
-        irls_max_iters=irls_max_iters,
-        irls_tol=irls_tol,
         loss_null=loss_null,
     )
 
@@ -2510,7 +2388,7 @@ def glm_naive(
     if isinstance(X, np.ndarray):
         X = matrix.dense(X, method="naive", n_threads=n_threads)
 
-    class _glm_naive(glm_naive_base, core_base):
+    class _glm_naive(base, core_base):
         def __init__(self):
             self._core_type = core_base
             ## save inputs due to lifetime issues
@@ -2573,14 +2451,12 @@ def glm_naive(
                 eta=eta,
                 resid=resid,
             )
-            self.basic_check()
 
         @classmethod
         def create_from_core(cls, state, core_state):
             obj = base.create_from_core(
                 cls, state, core_state, _glm_naive, core_base,
             )
-            glm_naive_base.__init__(obj)
             return obj
 
     return _glm_naive()
@@ -2817,22 +2693,9 @@ def multiglm_naive(
         groups=groups,
         lmda_max=lmda_max,
         lmda_path=lmda_path,
-        max_iters=max_iters,
-        tol=tol,
-        adev_tol=adev_tol,
-        ddev_tol=ddev_tol,
-        newton_tol=newton_tol,
-        newton_max_iters=newton_max_iters,
-        n_threads=n_threads,
-        min_ratio=min_ratio,
         lmda_path_size=lmda_path_size,
         max_screen_size=max_screen_size,
         max_active_size=max_active_size,
-        pivot_subset_ratio=pivot_subset_ratio,
-        pivot_subset_min=pivot_subset_min,
-        pivot_slack_ratio=pivot_slack_ratio,
-        irls_max_iters=irls_max_iters,
-        irls_tol=irls_tol,
         loss_null=loss_null,
     )
 
@@ -2856,7 +2719,7 @@ def multiglm_naive(
         n_threads=n_threads,
     )
 
-    class _multiglm_naive(glm_naive_base, core_base):
+    class _multiglm_naive(base, core_base):
         def __init__(self):
             self._core_type = core_base
             ## save inputs due to lifetime issues
@@ -2923,14 +2786,12 @@ def multiglm_naive(
                 eta=eta,
                 resid=resid,
             )
-            self.basic_check()
 
         @classmethod
         def create_from_core(cls, state, core_state):
             obj = base.create_from_core(
                 cls, state, core_state, _multiglm_naive, core_base,
             )
-            glm_naive_base.__init__(obj)
             return obj
 
     return _multiglm_naive()

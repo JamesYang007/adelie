@@ -39,6 +39,12 @@ enum class multi_group_type
     _ungrouped
 };
 
+enum class tie_method_type
+{
+    _efron,
+    _breslow
+};
+
 inline screen_rule_type convert_screen_rule(
     const std::string& rule
 )
@@ -55,6 +61,15 @@ inline multi_group_type convert_multi_group(
     if (group == "grouped") return multi_group_type::_grouped;
     if (group == "ungrouped") return multi_group_type::_ungrouped;
     throw std::runtime_error("Invalid multi-response grouping type: " + group);
+}
+
+inline tie_method_type convert_tie_method(
+    const std::string& method
+) 
+{
+    if (method == "breslow") return tie_method_type::_breslow;
+    if (method == "efron") return tie_method_type::_efron;
+    throw std::runtime_error("Invalid tie method: " + method);
 }
 
 } // namespace util

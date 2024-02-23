@@ -99,20 +99,6 @@ public:
 
     virtual ~GlmBase() =default;
 
-    virtual void set_response(
-        const Eigen::Ref<const vec_value_t>& y
-    )
-    {
-        new (&this->y) Eigen::Map<const vec_value_t>(y.data(), y.size());
-    }
-
-    virtual void set_weights(
-        const Eigen::Ref<const vec_value_t>& weights
-    )
-    {
-        new (&this->weights) Eigen::Map<const vec_value_t>(weights.data(), weights.size());
-    }
-
     virtual void gradient(
         const Eigen::Ref<const vec_value_t>& eta,
         Eigen::Ref<vec_value_t> grad

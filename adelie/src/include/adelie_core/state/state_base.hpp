@@ -1,13 +1,10 @@
 #pragma once
-#include <vector>
-#include <string>
-#include <unordered_set>
+#include <unordered_map>
 #include <adelie_core/util/types.hpp>
 #include <adelie_core/util/macros.hpp>
 
 namespace adelie_core {
 namespace state {
-namespace gaussian {
 
 template <class GroupsType, class GroupSizesType,
           class PenaltyType, class GradType, 
@@ -144,13 +141,11 @@ void update_screen_derived_base(
     screen_is_active.resize(screen_set.size(), false);
 }
 
-} // namespace gaussian
-
 template <class ValueType,
           class IndexType=Eigen::Index,
           class BoolType=bool
         >
-struct StateGaussianBase
+struct StateBase
 {
     using value_t = ValueType;
     using index_t = IndexType;
@@ -174,7 +169,6 @@ struct StateGaussianBase
     const map_cvec_index_t group_sizes;
     const value_t alpha;
     const map_cvec_value_t penalty;
-    const map_cvec_value_t weights;
 
     /* configurations */
     // lambda path configs
@@ -216,7 +210,6 @@ struct StateGaussianBase
     dyn_vec_index_t screen_begins;
     dyn_vec_value_t screen_beta;
     dyn_vec_bool_t screen_is_active;
-    value_t rsq;
     value_t lmda;
     vec_value_t grad;
     vec_value_t abs_grad;
@@ -237,14 +230,13 @@ struct StateGaussianBase
     std::vector<int> active_sizes;
     std::vector<int> screen_sizes;
 
-    virtual ~StateGaussianBase() =default;
+    virtual ~StateBase() =default;
 
-    explicit StateGaussianBase(
+    explicit StateBase(
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
-        const Eigen::Ref<const vec_value_t>& weights,
         const Eigen::Ref<const vec_value_t>& lmda_path,
         value_t lmda_max,
         value_t min_ratio,
@@ -269,15 +261,13 @@ struct StateGaussianBase
         const Eigen::Ref<const vec_index_t>& screen_set,
         const Eigen::Ref<const vec_value_t>& screen_beta,
         const Eigen::Ref<const vec_bool_t>& screen_is_active,
-        value_t rsq,
         value_t lmda,
         const Eigen::Ref<const vec_value_t>& grad
-    ): 
+    ):
         groups(groups.data(), groups.size()),
         group_sizes(group_sizes.data(), group_sizes.size()),
         alpha(alpha),
         penalty(penalty.data(), penalty.size()),
-        weights(weights.data(), weights.size()),
         min_ratio(min_ratio),
         lmda_path_size(lmda_path_size),
         max_screen_size(max_screen_size),
@@ -302,24 +292,73 @@ struct StateGaussianBase
         screen_set(screen_set.data(), screen_set.data() + screen_set.size()),
         screen_beta(screen_beta.data(), screen_beta.data() + screen_beta.size()),
         screen_is_active(screen_is_active.data(), screen_is_active.data() + screen_is_active.size()),
-        rsq(rsq),
         lmda(lmda),
         grad(grad),
         abs_grad(groups.size())
     {
-        initialize();
-    }
+        // sanity checks
+        const auto G = groups.size();
+        if (group_sizes.size() != G) {
+            throw std::runtime_error("group_sizes must have the same length as groups.");
+        }
+        if (penalty.size() != G) {
+            throw std::runtime_error("penalty must have the same length as groups.");
+        }
+        if (alpha < 0 || alpha > 1) {
+            throw std::runtime_error("alpha must be in [0,1].");
+        }
+        if (tol <= 0) {
+            throw std::runtime_error("tol must be > 0.");
+        }
+        if (adev_tol < 0 || adev_tol > 1) {
+            throw std::runtime_error("adev_tol must be in [0,1].");
+        }
+        if (ddev_tol < 0 || ddev_tol > 1) {
+            throw std::runtime_error("ddev_tol must be in [0,1].");
+        }
+        if (newton_tol < 0) {
+            throw std::runtime_error("newton_tol must be >= 0.");
+        }
+        if (n_threads < 1) {
+            throw std::runtime_error("n_threads must be >= 1.");
+        }
+        if (min_ratio <= 0) {
+            throw std::runtime_error("min_ratio must be > 0.");
+        }
+        if (pivot_subset_ratio <= 0 || pivot_subset_ratio > 1) {
+            throw std::runtime_error("pivot_subset_ratio must be in (0, 1].");
+        }
+        if (pivot_subset_min < 1) {
+            throw std::runtime_error("pivot_subset_min must be >= 1.");
+        }
+        if (pivot_slack_ratio < 0) {
+            throw std::runtime_error("pivot_slack_ratio must be >= 0.");
+        }
+        if (screen_set.size() != screen_is_active.size()) {
+            throw std::runtime_error("screen_is_active must have the same length as screen_set.");
+        }
+        if (screen_beta.size() < screen_set.size()) {
+            throw std::runtime_error(
+                "screen_beta has smaller length than screen_set. "
+                "It is likely screen_beta has been initialized incorrectly."
+            );
+        }
+        if (grad.size() != groups[G-1] + group_sizes[G-1]) {
+            throw std::runtime_error(
+                "grad.size() != groups[G-1] + group_sizes[G-1]. "
+                "It is likely either grad has the wrong shape, "
+                "or groups/group_sizes have been initialized incorrectly."
+            );
+        }
 
-    void initialize()
-    {
         /* initialize screen_set derived quantities */
         screen_begins.reserve(screen_set.size());
         screen_g1.reserve(screen_set.size());
         screen_g2.reserve(screen_set.size());
-        gaussian::update_screen_derived_base(*this);
+        update_screen_derived_base(*this);
 
         /* initialize abs_grad */
-        gaussian::update_abs_grad(*this, lmda);
+        update_abs_grad(*this, lmda);
 
         /* optimize for output storage size */
         const auto n_lmdas = std::max<size_t>(lmda_path.size(), lmda_path_size);

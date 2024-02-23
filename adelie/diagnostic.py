@@ -360,8 +360,8 @@ def gradients(
 
 def gradient_norms(
     *, 
-    betas: csr_matrix,
     grads: np.ndarray,
+    betas: csr_matrix,
     lmdas: np.ndarray,
     groups: np.ndarray =None,
     alpha: float =1,
@@ -383,10 +383,10 @@ def gradient_norms(
 
     Parameters
     ----------
-    betas : (L, p) or (L, p*K) scipy.sparse.csr_matrix
-        Coefficient vectors :math:`\\beta`.
     grads : (L, p) or (L, p, K) np.ndarray
         Gradients.
+    betas : (L, p) or (L, p*K) scipy.sparse.csr_matrix
+        Coefficient vectors :math:`\\beta`.
     lmdas : (L,) np.ndarray
         Regularization parameters :math:`\\lambda`.
     groups : (G,) np.ndarray, optional
@@ -507,8 +507,8 @@ def gradient_scores(
 def coefficient(
     *,
     lmda: float,
-    lmdas: np.ndarray,
     betas: csr_matrix,
+    lmdas: np.ndarray,
 ):
     """Computes the coefficient at :math:`\\lambda` using linear interpolation of solutions.
 
@@ -533,10 +533,10 @@ def coefficient(
     ----------
     lmda : float
         New regularization parameter at which to find the solution.
-    lmdas : (L,) np.ndarray
-        Regularization parameters :math:`\\lambda`.
     betas : (L, p) np.ndarray
         Coefficient vectors :math:`\\beta`.
+    lmdas : (L,) np.ndarray
+        Regularization parameters :math:`\\lambda`.
 
     Returns
     -------
@@ -566,25 +566,25 @@ def coefficient(
 
 def plot_coefficients(
     *,
+    betas: csr_matrix,
+    lmdas: np.ndarray,
     groups: np.ndarray,
     group_sizes: np.ndarray,
-    lmdas: np.ndarray,
-    betas: csr_matrix,
 ):
     """Plots the coefficient profile.
 
     Parameters
     ----------
+    betas : (L, p) np.ndarray
+        Coefficient vectors :math:`\\beta`.
+    lmdas : (L,) np.ndarray
+        Regularization parameters :math:`\\lambda`.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
     group_sizes : (G,) np.ndarray
         List of group sizes corresponding to each element of ``groups``.
         ``group_sizes[i]`` is the size of the ``i`` th group.
-    lmdas : (L,) np.ndarray
-        Regularization parameters :math:`\\lambda`.
-    betas : (L, p) np.ndarray
-        Coefficient vectors :math:`\\beta`.
 
     Returns
     -------
@@ -1049,8 +1049,8 @@ class diagnostic:
             n_threads=self.state.n_threads,
         )
         self.gradient_norms = gradient_norms(
-            betas=self.betas,
             grads=self.gradients,
+            betas=self.betas,
             lmdas=self.state.lmdas,
             groups=self._args["groups"],
             alpha=self.state.alpha,
@@ -1076,10 +1076,10 @@ class diagnostic:
             0
         )
         return plot_coefficients(
+            betas=self.betas,
+            lmdas=self.state.lmdas,
             groups=self.state.groups[p_begin:]-p_begin,
             group_sizes=self.state.group_sizes[p_begin:],
-            lmdas=self.state.lmdas,
-            betas=self.betas,
         )
 
     def plot_devs(self):

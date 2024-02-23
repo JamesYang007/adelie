@@ -20,30 +20,6 @@ public:
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
 
-    void set_response(
-        const Eigen::Ref<const vec_value_t>& y
-    ) override
-    {
-        PYBIND11_OVERRIDE(
-            void,
-            base_t,
-            set_response,
-            y
-        );
-    }
-
-    void set_weights(
-        const Eigen::Ref<const vec_value_t>& weights
-    ) override
-    {
-        PYBIND11_OVERRIDE(
-            void,
-            base_t,
-            set_weights,
-            weights
-        );
-    }
-
     void gradient(
         const Eigen::Ref<const vec_value_t>& eta,
         Eigen::Ref<vec_value_t> grad
@@ -138,22 +114,6 @@ void glm_base(py::module_& m, const char* name)
             ``True`` if it defines a multi-response GLM family.
             It is always ``False`` for this base class.
         )delimiter")
-        .def("set_response", &internal_t::set_response, R"delimiter(
-        Sets the response vector.
-
-        Parameters
-        ----------
-        y : (n,) np.ndarray
-            Response vector.
-        )delimiter")
-        .def("set_weights", &internal_t::set_weights, R"delimiter(
-        Sets the weights.
-
-        Parameters
-        ----------
-        w : (n,) np.ndarray
-            Observation weights.
-        )delimiter")
         .def("gradient", &internal_t::gradient, R"delimiter(
         Gradient of the negative loss function.
 
@@ -242,24 +202,62 @@ void glm_cox(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
-            const Eigen::Ref<const vec_value_t>& 
+            const Eigen::Ref<const vec_value_t>& ,
+            const std::string&
         >(),
             py::arg("start"),
             py::arg("stop"),
             py::arg("status"),
-            py::arg("weights")
+            py::arg("weights"),
+            py::arg("tie_method")
         )
-        .def_static("_partial_sum", &ad::glm::cox::_partial_sum<
+        .def_readonly("start_order", &internal_t::start_order)
+        .def_readonly("start_so", &internal_t::start_so)
+        .def_readonly("stop_order", &internal_t::stop_order)
+        .def_readonly("stop_to", &internal_t::stop_to)
+        .def_readonly("status_to", &internal_t::status_to)
+        .def_readonly("weights_to", &internal_t::weights_to)
+        .def_readonly("weights_size_to", &internal_t::weights_size_to)
+        .def_readonly("weights_mean_to", &internal_t::weights_mean_to)
+        .def_readonly("scale_to", &internal_t::scale_to)
+        .def_static("_partial_sum_fwd", &ad::glm::cox::_partial_sum_fwd<
             Eigen::Ref<const vec_value_t>,
             Eigen::Ref<const vec_value_t>,
             Eigen::Ref<const vec_value_t>,
             Eigen::Ref<vec_value_t>
         >)
-        .def_static("_average_ties", &ad::glm::cox::_average_ties<
+        .def_static("_partial_sum_bwd", &ad::glm::cox::_partial_sum_bwd<
+            Eigen::Ref<const vec_value_t>,
             Eigen::Ref<const vec_value_t>,
             Eigen::Ref<const vec_value_t>,
             Eigen::Ref<vec_value_t>
         >)
+        .def_static("_at_risk_sum", &ad::glm::cox::_at_risk_sum<
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<vec_value_t>,
+            Eigen::Ref<vec_value_t>,
+            Eigen::Ref<vec_value_t>
+        >)
+        .def_static("_nnz_event_ties_sum", &ad::glm::cox::_nnz_event_ties_sum<
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<vec_value_t>
+        >)
+        .def_static("_scale", [](
+            const Eigen::Ref<const vec_value_t>& t,
+            const Eigen::Ref<const vec_value_t>& status,
+            const Eigen::Ref<const vec_value_t>& w,
+            const std::string& tie_method,
+            Eigen::Ref<vec_value_t> out
+        ){
+            ad::glm::cox::_scale(t, status, w, ad::util::convert_tie_method(tie_method), out);
+        })
         ;
 }
 
@@ -300,30 +298,6 @@ public:
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
     using typename base_t::rowarr_value_t;
-
-    void set_response(
-        const Eigen::Ref<const rowarr_value_t>& y
-    ) override
-    {
-        PYBIND11_OVERRIDE(
-            void,
-            base_t,
-            set_response,
-            y
-        );
-    }
-
-    void set_weights(
-        const Eigen::Ref<const vec_value_t>& weights
-    ) override
-    {
-        PYBIND11_OVERRIDE(
-            void,
-            base_t,
-            set_weights,
-            weights
-        );
-    }
 
     void gradient(
         const Eigen::Ref<const rowarr_value_t>& eta,
@@ -419,22 +393,6 @@ void glm_multibase(py::module_& m, const char* name)
         .def_readonly("is_multi", &internal_t::is_multi, R"delimiter(
         ``True`` if it defines a multi-response GLM family.
         It is always ``True`` for this base class.
-        )delimiter")
-        .def("set_response", &internal_t::set_response, R"delimiter(
-        Sets the response matrix.
-
-        Parameters
-        ----------
-        y : (n, K) np.ndarray
-            Response matrix.
-        )delimiter")
-        .def("set_weights", &internal_t::set_weights, R"delimiter(
-        Sets the weights.
-
-        Parameters
-        ----------
-        w : (n,) np.ndarray
-            Observation weights.
         )delimiter")
         .def("gradient", &internal_t::gradient, R"delimiter(
         Gradient of the negative loss function.

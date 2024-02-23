@@ -21,9 +21,10 @@ def _sample_y(
         signal_scale = np.sqrt(rho * np.sum(beta) ** 2 + (1-rho) * np.sum(beta ** 2))
         noise_scale = signal_scale / np.sqrt(snr)
         y = eta + noise_scale * np.random.normal(0, 1, eta.shape)
-        # multigaussian
         if not is_multi:
             y = y.ravel()
+            return ad.glm.gaussian(y=y)
+        return ad.glm.multigaussian(y=y)
     elif glm == "multinomial":
         resid = np.empty((n, K), dtype=eta.dtype)
         glm = ad.glm.multinomial(y=np.zeros(eta.shape)) 
@@ -32,18 +33,32 @@ def _sample_y(
             resid,
         )
         y = glm.sample(-K * n * resid).astype(eta.dtype)
+        return ad.glm.multinomial(y=y)
+    elif glm == "cox":
+        signal_scale = np.sqrt(rho * np.sum(beta) ** 2 + (1-rho) * np.sum(beta ** 2))
+        noise_scale = signal_scale / np.sqrt(snr)
+        eta = eta.ravel()
+        s = np.round(np.random.exponential(1, n))
+        t = 1 + s + np.round(np.exp(eta / noise_scale + np.random.normal(0, 1, n)))
+        C = 1 + s + np.round(np.exp(np.random.normal(0, 1, n)))
+        d = t < C
+        t = np.minimum(t, C)
+        return ad.glm.cox(
+            start=s,
+            stop=t,
+            status=d,
+        )
     else:
         func_map = {
             "binomial": ad.glm.binomial,
             "poisson": ad.glm.poisson,
         }
-        glm = func_map[glm](y=np.zeros(n))
+        glm_o = func_map[glm](y=np.zeros(n))
         eta = eta.ravel()
         resid = np.empty(eta.shape[0], dtype=eta.dtype)
-        glm.gradient(snr * eta / np.sqrt(np.sum(beta**2)), resid)
-        y = glm.sample(-n * resid).astype(eta.dtype)
-
-    return y
+        glm_o.gradient(snr * eta / np.sqrt(np.sum(beta**2)), resid)
+        y = glm_o.sample(-n * resid).astype(eta.dtype)
+        return func_map[glm](y=y)
 
 
 def dense(
@@ -88,11 +103,12 @@ def dense(
         GLM name.
         It must be one of the following:
 
-            - ``"gaussian"``
             - ``"binomial"``
-            - ``"poisson"``
+            - ``"cox"``
+            - ``"gaussian"``
             - ``"multigaussian"``
             - ``"multinomial"``
+            - ``"poisson"``
 
         Default is ``"gaussian"``.
     equal_groups : bool, optional
@@ -166,7 +182,7 @@ def dense(
     beta_sub = beta[beta_nnz_indices]
 
     eta = X_sub @ beta_sub
-    y = _sample_y(
+    glm = _sample_y(
         glm=glm,
         eta=eta,
         beta=beta_sub,
@@ -176,7 +192,7 @@ def dense(
 
     return {
         "X": X, 
-        "y": y,
+        "glm": glm,
         "groups": groups,
         "group_sizes": group_sizes,
         "penalty": penalty,
@@ -223,11 +239,12 @@ def snp_unphased(
         GLM name.
         It must be one of the following:
 
-            - ``"gaussian"``
             - ``"binomial"``
-            - ``"poisson"``
+            - ``"cox"``
+            - ``"gaussian"``
             - ``"multigaussian"``
             - ``"multinomial"``
+            - ``"poisson"``
 
         Default is ``"gaussian"``.
     sparsity : float, optional
@@ -296,7 +313,7 @@ def snp_unphased(
     beta_sub = beta[beta_nnz_indices]
 
     eta = X_sub @ beta_sub 
-    y = _sample_y(
+    glm = _sample_y(
         glm=glm,
         eta=eta,
         beta=beta_sub,
@@ -305,7 +322,7 @@ def snp_unphased(
 
     return {
         "X": np.asfortranarray(X), 
-        "y": y,
+        "glm": glm,
         "groups": groups,
         "group_sizes": group_sizes,
         "penalty": penalty,
@@ -356,11 +373,12 @@ def snp_phased_ancestry(
         GLM name.
         It must be one of the following:
 
-            - ``"gaussian"``
             - ``"binomial"``
-            - ``"poisson"``
+            - ``"cox"``
+            - ``"gaussian"``
             - ``"multigaussian"``
             - ``"multinomial"``
+            - ``"poisson"``
 
         Default is ``"gaussian"``.
     sparsity : float, optional
@@ -438,7 +456,7 @@ def snp_phased_ancestry(
     beta_sub = beta[beta_nnz_indices]
 
     eta = X_sub @ beta_sub 
-    y = _sample_y(
+    glm = _sample_y(
         glm=glm,
         eta=eta,
         beta=beta_sub,
@@ -448,7 +466,7 @@ def snp_phased_ancestry(
     return {
         "X": np.asfortranarray(X), 
         "ancestries": np.asfortranarray(ancestries),
-        "y": y,
+        "glm": glm,
         "groups": groups,
         "group_sizes": group_sizes,
         "penalty": penalty,
