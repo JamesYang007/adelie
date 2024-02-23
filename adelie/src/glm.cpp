@@ -1,6 +1,7 @@
 #include "decl.hpp"
 #include <adelie_core/glm/glm_base.hpp>
 #include <adelie_core/glm/glm_binomial.hpp>
+#include <adelie_core/glm/glm_cox.hpp>
 #include <adelie_core/glm/glm_gaussian.hpp>
 #include <adelie_core/glm/glm_multibase.hpp>
 #include <adelie_core/glm/glm_multigaussian.hpp>
@@ -21,56 +22,49 @@ public:
 
     void gradient(
         const Eigen::Ref<const vec_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> mu
+        Eigen::Ref<vec_value_t> grad
     ) override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
             base_t,
             gradient,
-            eta, weights, mu
+            eta, grad
         );
     }
 
     void hessian(
-        const Eigen::Ref<const vec_value_t>& mu,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> var
+        const Eigen::Ref<const vec_value_t>& eta,
+        const Eigen::Ref<const vec_value_t>& grad,
+        Eigen::Ref<vec_value_t> hess
     ) override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
             base_t,
             hessian,
-            mu, weights, var
+            eta, grad, hess
         );
     }
 
     value_t loss(
-        const Eigen::Ref<const vec_value_t>& y,
-        const Eigen::Ref<const vec_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& weights
+        const Eigen::Ref<const vec_value_t>& eta
     ) override
     {
         PYBIND11_OVERRIDE_PURE(
             value_t,
             base_t,
             loss,
-            y, eta, weights
+            eta 
         );
     }
 
-    value_t loss_full(
-        const Eigen::Ref<const vec_value_t>& y,
-        const Eigen::Ref<const vec_value_t>& weights
-    ) override
+    value_t loss_full() override
     {
         PYBIND11_OVERRIDE_PURE(
             value_t,
             base_t,
             loss_full,
-            y, weights
         );
     }
 };
@@ -81,6 +75,7 @@ void glm_base(py::module_& m, const char* name)
     using trampoline_t = PyGlmBase<T>;
     using internal_t = ad::glm::GlmBase<T>;
     using string_t = typename internal_t::string_t;
+    using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
         Base GLM class.
 
@@ -103,8 +98,14 @@ void glm_base(py::module_& m, const char* name)
         Every GLM-like class must inherit from this class and override the methods
         before passing into the solver.
         )delimiter")
-        .def(py::init<const string_t&>(),
-            py::arg("name")
+        .def(py::init<
+            const string_t&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&
+        >(),
+            py::arg("name"),
+            py::arg("y"),
+            py::arg("weights")
         )
         .def_readonly("name", &internal_t::name, R"delimiter(
             Name of the GLM family.
@@ -114,23 +115,21 @@ void glm_base(py::module_& m, const char* name)
             It is always ``False`` for this base class.
         )delimiter")
         .def("gradient", &internal_t::gradient, R"delimiter(
-        Gradient of the log-partition function.
+        Gradient of the negative loss function.
 
-        Computes :math:`\nabla A(\eta)`.
+        Computes :math:`-\nabla \ell(\eta)`.
 
         Parameters
         ----------
         eta : (n,) np.ndarray
             Natural parameter.
-        weights : (n,) np.ndarray
-            Observation weights.
-        mu : (n,) np.ndarray
-            The gradient, or mean parameter, to store.
+        grad : (n,) np.ndarray
+            The gradient to store.
         )delimiter")
         .def("hessian", &internal_t::hessian, R"delimiter(
-        Hessian of the log-partition function.
+        Hessian of the loss function.
 
-        Computes :math:`\nabla^2 A(\eta)`.
+        Computes :math:`\nabla^2 \ell(\eta)`.
 
         .. note::
             Although the hessian is in general a fully dense matrix,
@@ -143,12 +142,12 @@ void glm_base(py::module_& m, const char* name)
 
         Parameters
         ----------
-        mu : (n,) np.ndarray
-            Mean parameter.
-        weights : (n,) np.ndarray
-            Observation weights.
-        var : (n,) np.ndarray
-            The hessian, or variance parameter, to store.
+        eta : (n,) np.ndarray
+            Natural parameter.
+        grad : (n,) np.ndarray
+            Gradient.
+        hess : (n,) np.ndarray
+            The hessian to store.
         )delimiter")
         .def("loss", &internal_t::loss, R"delimiter(
         Loss function.
@@ -157,13 +156,8 @@ void glm_base(py::module_& m, const char* name)
 
         Parameters
         ----------
-        y : (n,) np.ndarray
-            Observations (sufficient statistics).
-            It is assumed that ``y`` only takes on values assumed by the GLM.
         eta : (n,) np.ndarray
             Natural parameter.
-        weights : (n,) np.ndarray
-            Observation weights.
 
         Returns
         -------
@@ -171,22 +165,14 @@ void glm_base(py::module_& m, const char* name)
             Loss.
         )delimiter")
         .def("loss_full", &internal_t::loss_full, R"delimiter(
-        Loss function at the full-model.
+        Loss function at the saturated model.
 
         Computes :math:`\ell(\eta^\star)` where :math:`\eta^\star` is the minimizer.
-
-        Parameters
-        ----------
-        y : (n,) np.ndarray
-            Observations (sufficient statistics).
-            It is assumed that ``y`` only takes on values assumed by the GLM.
-        weights : (n,) np.ndarray
-            Observation weights.
 
         Returns
         -------
         loss : float
-            Loss at the full model.
+            Loss at the saturated model.
         )delimiter")
         ;
 }
@@ -196,8 +182,82 @@ void glm_binomial(py::module_& m, const char* name)
 {
     using internal_t = ad::glm::GlmBinomial<T>;
     using base_t = typename internal_t::base_t;
+    using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, base_t>(m, name)
-        .def(py::init<>())
+        .def(py::init<
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&
+        >())
+        ;
+}
+
+template <class T>
+void glm_cox(py::module_& m, const char* name)
+{
+    using internal_t = ad::glm::GlmCox<T>;
+    using base_t = typename internal_t::base_t;
+    using vec_value_t = typename internal_t::vec_value_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(py::init<
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>& ,
+            const std::string&
+        >(),
+            py::arg("start"),
+            py::arg("stop"),
+            py::arg("status"),
+            py::arg("weights"),
+            py::arg("tie_method")
+        )
+        .def_readonly("start_order", &internal_t::start_order)
+        .def_readonly("start_so", &internal_t::start_so)
+        .def_readonly("stop_order", &internal_t::stop_order)
+        .def_readonly("stop_to", &internal_t::stop_to)
+        .def_readonly("status_to", &internal_t::status_to)
+        .def_readonly("weights_to", &internal_t::weights_to)
+        .def_readonly("weights_size_to", &internal_t::weights_size_to)
+        .def_readonly("weights_mean_to", &internal_t::weights_mean_to)
+        .def_readonly("scale_to", &internal_t::scale_to)
+        .def_static("_partial_sum_fwd", &ad::glm::cox::_partial_sum_fwd<
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<vec_value_t>
+        >)
+        .def_static("_partial_sum_bwd", &ad::glm::cox::_partial_sum_bwd<
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<vec_value_t>
+        >)
+        .def_static("_at_risk_sum", &ad::glm::cox::_at_risk_sum<
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<vec_value_t>,
+            Eigen::Ref<vec_value_t>,
+            Eigen::Ref<vec_value_t>
+        >)
+        .def_static("_nnz_event_ties_sum", &ad::glm::cox::_nnz_event_ties_sum<
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<const vec_value_t>,
+            Eigen::Ref<vec_value_t>
+        >)
+        .def_static("_scale", [](
+            const Eigen::Ref<const vec_value_t>& t,
+            const Eigen::Ref<const vec_value_t>& status,
+            const Eigen::Ref<const vec_value_t>& w,
+            const std::string& tie_method,
+            Eigen::Ref<vec_value_t> out
+        ){
+            ad::glm::cox::_scale(t, status, w, ad::util::convert_tie_method(tie_method), out);
+        })
         ;
 }
 
@@ -206,8 +266,12 @@ void glm_gaussian(py::module_& m, const char* name)
 {
     using internal_t = ad::glm::GlmGaussian<T>;
     using base_t = typename internal_t::base_t;
+    using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, base_t>(m, name)
-        .def(py::init<>())
+        .def(py::init<
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&
+        >())
         ;
 }
 
@@ -216,8 +280,12 @@ void glm_poisson(py::module_& m, const char* name)
 {
     using internal_t = ad::glm::GlmPoisson<T>;
     using base_t = typename internal_t::base_t;
+    using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, base_t>(m, name)
-        .def(py::init<>())
+        .def(py::init<
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&
+        >())
         ;
 }
 
@@ -233,56 +301,49 @@ public:
 
     void gradient(
         const Eigen::Ref<const rowarr_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<rowarr_value_t> mu
+        Eigen::Ref<rowarr_value_t> grad
     ) override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
             base_t,
             gradient,
-            eta, weights, mu
+            eta, grad
         );
     }
 
     void hessian(
-        const Eigen::Ref<const rowarr_value_t>& mu,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<rowarr_value_t> var
+        const Eigen::Ref<const rowarr_value_t>& eta,
+        const Eigen::Ref<const rowarr_value_t>& grad,
+        Eigen::Ref<rowarr_value_t> hess
     ) override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
             base_t,
             hessian,
-            mu, weights, var
+            eta, grad, hess
         );
     }
 
     value_t loss(
-        const Eigen::Ref<const rowarr_value_t>& y,
-        const Eigen::Ref<const rowarr_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& weights
+        const Eigen::Ref<const rowarr_value_t>& eta
     ) override
     {
         PYBIND11_OVERRIDE_PURE(
             value_t,
             base_t,
             loss,
-            y, eta, weights
+            eta 
         );
     }
 
-    value_t loss_full(
-        const Eigen::Ref<const rowarr_value_t>& y,
-        const Eigen::Ref<const vec_value_t>& weights
-    ) override
+    value_t loss_full() override
     {
         PYBIND11_OVERRIDE_PURE(
             value_t,
             base_t,
             loss_full,
-            y, weights
         );
     }
 };
@@ -293,6 +354,8 @@ void glm_multibase(py::module_& m, const char* name)
     using trampoline_t = PyGlmMultiBase<T>;
     using internal_t = ad::glm::GlmMultiBase<T>;
     using string_t = typename internal_t::string_t;
+    using rowarr_value_t = typename internal_t::rowarr_value_t;
+    using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
         Base Multi-response GLM class.
 
@@ -315,9 +378,14 @@ void glm_multibase(py::module_& m, const char* name)
         Every multi-response GLM-like class must inherit from this class and override the methods
         before passing into the solver.
         )delimiter")
-        .def(py::init<const string_t&, bool>(),
+        .def(py::init<
+            const string_t&,
+            const Eigen::Ref<const rowarr_value_t>&,
+            const Eigen::Ref<const vec_value_t>& 
+        >(),
             py::arg("name"),
-            py::arg("is_symmetric")
+            py::arg("y"),
+            py::arg("weights")
         )
         .def_readonly("name", &internal_t::name, R"delimiter(
             Name of the GLM family.
@@ -326,28 +394,22 @@ void glm_multibase(py::module_& m, const char* name)
         ``True`` if it defines a multi-response GLM family.
         It is always ``True`` for this base class.
         )delimiter")
-        .def_readonly("is_symmetric", &internal_t::is_symmetric, R"delimiter(
-        ``True`` if the loss portion remains invariant under common scalar shift
-        in the coefficients across the different responses.
-        )delimiter")
         .def("gradient", &internal_t::gradient, R"delimiter(
-        Gradient of the log-partition function.
+        Gradient of the negative loss function.
 
-        Computes :math:`\nabla A(\eta)`.
+        Computes :math:`-\nabla \ell(\eta)`.
 
         Parameters
         ----------
         eta : (n, K) np.ndarray
             Natural parameter.
-        weights : (n,) np.ndarray
-            Observation weights.
-        mu : (n, K) np.ndarray
-            The gradient, or mean parameter, to store.
+        grad : (n, K) np.ndarray
+            The gradient to store.
         )delimiter")
         .def("hessian", &internal_t::hessian, R"delimiter(
-        Hessian of the log-partition function.
+        Hessian of the loss function.
 
-        Computes :math:`\nabla^2 A(\eta)`.
+        Computes :math:`\nabla^2 \ell(\eta)`.
 
         .. note::
             Although the hessian is in general a fully dense matrix,
@@ -360,12 +422,12 @@ void glm_multibase(py::module_& m, const char* name)
 
         Parameters
         ----------
-        mu : (n, K) np.ndarray
-            Mean parameter.
-        weights : (n,) np.ndarray
-            Observation weights.
-        var : (n, K) np.ndarray
-            The hessian, or variance parameter, to store.
+        eta : (n, K) np.ndarray
+            Natural parameter.
+        grad : (n, K) np.ndarray
+            Gradient.
+        hess : (n, K) np.ndarray
+            The hessian to store.
         )delimiter")
         .def("loss", &internal_t::loss, R"delimiter(
         Loss function.
@@ -374,13 +436,8 @@ void glm_multibase(py::module_& m, const char* name)
 
         Parameters
         ----------
-        y : (n, K) np.ndarray
-            Observations (sufficient statistics).
-            It is assumed that ``y`` only takes on values assumed by the GLM.
         eta : (n, K) np.ndarray
             Natural parameter.
-        weights : (n,) np.ndarray
-            Observation weights.
 
         Returns
         -------
@@ -388,22 +445,14 @@ void glm_multibase(py::module_& m, const char* name)
             Loss.
         )delimiter")
         .def("loss_full", &internal_t::loss_full, R"delimiter(
-        Loss function at the full-model.
+        Loss function at the saturated model.
 
         Computes :math:`\ell(\eta^\star)` where :math:`\eta^\star` is the minimizer.
-
-        Parameters
-        ----------
-        y : (n, K) np.ndarray
-            Observations (sufficient statistics).
-            It is assumed that ``y`` only takes on values assumed by the GLM.
-        weights : (n,) np.ndarray
-            Observation weights.
 
         Returns
         -------
         loss : float
-            Loss at the full model.
+            Loss at the saturated model.
         )delimiter")
         ;
 }
@@ -413,8 +462,13 @@ void glm_multigaussian(py::module_& m, const char* name)
 {
     using internal_t = ad::glm::GlmMultiGaussian<T>;
     using base_t = typename internal_t::base_t;
+    using rowarr_value_t = typename internal_t::rowarr_value_t;
+    using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, base_t>(m, name)
-        .def(py::init<>())
+        .def(py::init<
+            const Eigen::Ref<const rowarr_value_t>&,
+            const Eigen::Ref<const vec_value_t>& 
+        >())
         ;
 }
 
@@ -423,8 +477,13 @@ void glm_multinomial(py::module_& m, const char* name)
 {
     using internal_t = ad::glm::GlmMultinomial<T>;
     using base_t = typename internal_t::base_t;
+    using rowarr_value_t = typename internal_t::rowarr_value_t;
+    using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, base_t>(m, name)
-        .def(py::init<>())
+        .def(py::init<
+            const Eigen::Ref<const rowarr_value_t>&,
+            const Eigen::Ref<const vec_value_t>& 
+        >())
         ;
 }
 
@@ -436,6 +495,8 @@ void register_glm(py::module_& m)
     glm_multibase<float>(m, "GlmMultiBase32");
     glm_binomial<double>(m, "GlmBinomial64");
     glm_binomial<float>(m, "GlmBinomial32");
+    glm_cox<double>(m, "GlmCox64");
+    glm_cox<float>(m, "GlmCox32");
     glm_gaussian<double>(m, "GlmGaussian64");
     glm_gaussian<float>(m, "GlmGaussian32");
     glm_multigaussian<double>(m, "GlmMultiGaussian64");

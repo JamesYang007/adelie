@@ -6,7 +6,6 @@ from .glm import (
     GlmBase64,
     GlmMultiBase32,
     GlmMultiBase64,
-    gaussian,
 )
 from .matrix import (
     MatrixNaiveBase32,
@@ -20,18 +19,106 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
+def predict(
+    *,
+    X: Union[MatrixNaiveBase32, MatrixNaiveBase64, np.ndarray],
+    betas: Union[np.ndarray, csr_matrix],
+    intercepts: np.ndarray,
+    offsets: np.ndarray =None,
+    n_threads: int =1,
+):
+    """Computes the linear predictions.
+
+    The single-response linear prediction is given by
+    
+    .. math::
+        \\begin{align*}
+            \\hat{\\eta} = X\\beta + \\beta_0 \\mathbf{1} + \\eta^0
+        \\end{align*}
+
+    The multi-response linear prediction is given by
+
+    .. math::
+        \\begin{align*}
+            \\hat{\\eta} = 
+            (X\\otimes I_K) \\beta + 
+            (\\mathbf{1}\\otimes I_k) \\beta_0 + 
+            \\eta^0
+        \\end{align*}
+
+    The single or multi-response is detected based on the shape of ``intercepts``.
+    If ``intercepts`` one-dimensional, we assume single-response.
+    Otherwise, we assume multi-response.
+
+    Parameters
+    ----------
+    X : (n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64, np.ndarray]
+        Feature matrix.
+        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
+    betas : (L, p) or (L, p*K) Union[np.ndarray, scipy.sparse.csr_matrix]
+        Coefficient vectors :math:`\\beta`.
+    intercepts : (L,) or (L, K) np.ndarray
+        Intercepts :math:`\\beta_0`.
+    offsets : (n,) or (n, K) np.ndarray, optional
+        Observation offsets :math:`\\eta^0`.
+        Default is ``None``, in which case, it is set to 
+        ``np.zeros(n)`` if ``y`` is single-response
+        and ``np.zeros((n, K))`` if multi-response.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    linear_preds : (L, n) or (L, n, K) np.ndarray
+        Linear predictions.
+
+    See Also
+    --------
+    adelie.glm.GlmBase64
+    adelie.glm.GlmMultiBase64
+    """
+    is_multi = len(intercepts.shape) == 2
+    if is_multi:
+        K = intercepts.shape[1]
+        X = matrix.kronecker_eye(X, K, n_threads=n_threads)
+        n = X.rows() // K
+        y_shape = (n, K)
+    else:
+        if isinstance(X, np.ndarray):
+            X = matrix.dense(X, method="naive", n_threads=n_threads)
+        n = X.rows()
+        y_shape = (n,)
+
+    if offsets is None:
+        offsets = np.zeros(y_shape)
+
+    L = betas.shape[0]
+
+    etas = np.empty((L,) + y_shape, order="C")
+    ones = np.ones(X.rows())
+    if isinstance(betas, np.ndarray):
+        for i in range(etas.shape[0]):
+            X.btmul(0, X.cols(), betas[i], ones, etas[i].ravel())
+    elif isinstance(betas, csr_matrix):
+        X.sp_btmul(betas, ones, etas.reshape((L, -1))) 
+    else:
+        raise RuntimeError("beta is not one of np.ndarray or scipy.sparse.csr_matrix.")
+    etas += intercepts[:, None] + offsets
+
+    return etas
+
+
 def objective(
     *,
     X: Union[matrix.MatrixNaiveBase32, matrix.MatrixNaiveBase64, np.ndarray], 
-    y: np.ndarray, 
+    glm: Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64],
     betas: Union[np.ndarray, csr_matrix], 
     intercepts: np.ndarray,
     lmdas: np.ndarray, 
-    glm: Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64] =gaussian(),
     groups: np.ndarray =None, 
     alpha: float =1, 
     penalty: np.ndarray =None,
-    weights: np.ndarray =None,
     offsets: np.ndarray =None,
     relative: bool =True,
     add_penalty: bool =True,
@@ -46,8 +133,9 @@ def objective(
     X : (n, p) Union[adelie.matrix.MatrixNaiveBase32, adelie.matrix.MatrixNaiveBase64]
         Feature matrix :math:`X`.
         It is typically one of the matrices defined in ``adelie.matrix`` submodule or ``np.ndarray``.
-    y : (n,) or (n, K) np.ndarray
-        Response vector or multi-response matrix.
+    glm : Union[glm.GlmBase32, glm.GlmBase64, glm.GlmMultiBase32, glm.GlmMultiBase64] 
+        GLM object.
+        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
     betas : (L, p) or (L, p*K) Union[np.ndarray, scipy.sparse.csr_matrix]
         Coefficient vectors :math:`\\beta`.
     intercepts : (L,) or (L, K) np.ndarray
@@ -56,10 +144,6 @@ def objective(
         Regularization parameters :math:`\\lambda`.
         It is only used when ``add_penalty=True``.
         Otherwise, the user may pass ``None``.
-    glm : Union[glm.GlmBase32, glm.GlmBase64, glm.GlmMultiBase32, glm.GlmMultiBase64], optional
-        GLM object.
-        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
-        Default is ``adelie.glm.gaussian()``.
     groups : (G,) np.ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -83,18 +167,6 @@ def objective(
         It must be a non-negative vector.
         It is only used when ``add_penalty=True``.
         Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
-    weights : (n,) np.ndarray, optional
-        Observation weights :math:`W`.
-        Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-        
-        .. note::
-            The user is responsible for making sure that ``weights`` and ``lmdas``
-            are under the same scale.
-            A common pitfall is passing unnormalized ``weights`` 
-            to ``adelie.solver.grpnet()`` and blindly using ``lmdas`` from the output.
-            Since ``adelie.solver.grpnet()`` always normalizes the weights,
-            the user must pass ``lmdas * np.sum(weights)`` to this function.
-
     offsets : (n,) or (n, K) np.ndarray, optional
         Observation offsets :math:`\\eta^0`.
         Default is ``None``, in which case, it is set to 
@@ -123,10 +195,12 @@ def objective(
     --------
     adelie.solver.grpnet
     """
+    X_raw = X
+    y = glm.y
     if glm.is_multi:
         K = y.shape[1]
         X = matrix.kronecker_eye(X, K, n_threads=n_threads)
-        n, p = X.rows() // K, X.cols() // K
+        p = X.cols() // K
         if groups is None:
             groups = "grouped"
         if groups == "grouped":
@@ -142,7 +216,7 @@ def objective(
     else:
         if isinstance(X, np.ndarray):
             X = matrix.dense(X, method="naive", n_threads=n_threads)
-        n, p = X.rows(), X.cols()
+        p = X.cols()
         if groups is None:
             groups = np.arange(p)
         group_sizes = np.concatenate([groups, [p]], dtype=int)
@@ -150,35 +224,24 @@ def objective(
 
     if penalty is None:
         penalty = np.sqrt(group_sizes)
-    if weights is None:
-        weights = np.full(n, 1/n)
-    if offsets is None:
-        offsets = np.zeros(y.shape)
 
-    L = betas.shape[0]
-
-    # if numpy array, add an extra dimension to beta 
-    # for code consistency with sparse case.
-    etas = np.empty((L,) + y.shape, order="C")
-    ones = np.ones(X.rows())
-    if isinstance(betas, np.ndarray):
-        for i in range(etas.shape[0]):
-            X.btmul(0, X.cols(), betas[i], ones, etas[i].ravel())
-    elif isinstance(betas, csr_matrix):
-        X.sp_btmul(betas, ones, etas.reshape((L, -1))) 
-    else:
-        raise RuntimeError("beta is not one of np.ndarray or scipy.sparse.csr_matrix.")
-    etas += intercepts[:, None] + offsets
+    etas = predict(
+        X=X_raw,
+        betas=betas,
+        intercepts=intercepts,
+        offsets=offsets,
+        n_threads=n_threads,
+    )
 
     # compute loss part
     objs = np.array([
-        glm.loss(y, etas[i], weights)
+        glm.loss(etas[i])
         for i in range(etas.shape[0])
     ])
 
     # relative to saturated model
     if relative:
-        objs -= glm.loss_full(y, weights)
+        objs -= glm.loss_full()
 
     # compute regularization part
     if add_penalty:
@@ -199,167 +262,27 @@ def objective(
     return objs
 
 
-def predict(
-    *,
-    X: Union[MatrixNaiveBase32, MatrixNaiveBase64, np.ndarray],
-    betas: Union[np.ndarray, csr_matrix],
-    intercepts: np.ndarray,
-    weights: np.ndarray =None,
-    offsets: np.ndarray =None,
-    glm: Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64] =gaussian(),
-    n_threads: int =1,
-):
-    """Computes the predictions.
-
-    The single-response prediction is given by
-    
-    .. math::
-        \\begin{align*}
-            \\hat{y} = W^{-1} \\nabla A(X\\beta + \\beta_0 \\mathbf{1} + \\eta^0)
-        \\end{align*}
-
-    The multi-response prediction is given by
-
-    .. math::
-        \\begin{align*}
-            \\hat{y} = (K^{-1} W \otimes I_K)^{-1} \\nabla A(
-                (X\\otimes I_K) \\beta + 
-                (\mathbf{1}\\otimes I_k) \\beta_0 + 
-                \\eta^0
-            )
-        \\end{align*}
-
-    Parameters
-    ----------
-    X : (n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64, np.ndarray]
-        Feature matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    betas : (L, p) or (L, p*K) Union[np.ndarray, scipy.sparse.csr_matrix]
-        Coefficient vectors :math:`\\beta`.
-    intercepts : (L,) or (L, K) np.ndarray
-        Intercepts :math:`\\beta_0`.
-    weights : (n,) np.ndarray, optional
-        Observation weights :math:`W`.
-        Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-
-        .. warning::
-            Currently, it is only well-defined if weights are all positive!
-
-    offsets : (n,) or (n, K) np.ndarray, optional
-        Observation offsets :math:`\\eta^0`.
-        Default is ``None``, in which case, it is set to 
-        ``np.zeros(n)`` if ``y`` is single-response
-        and ``np.zeros((n, K))`` if multi-response.
-    glm : Union[glm.GlmBase32, glm.GlmBase64, glm.GlmMultiBase32, glm.GlmMultiBase64], optional
-        GLM object.
-        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
-        Default is ``adelie.glm.gaussian()``.
-    n_threads : int, optional
-        Number of threads.
-        Default is ``1``.
-
-    Returns
-    -------
-    preds : (L, n) or (L, n, K) np.ndarray
-        Predictions.
-
-    See Also
-    --------
-    adelie.glm.GlmBase64
-    adelie.glm.GlmMultiBase64
-    """
-    if glm.is_multi:
-        K = intercepts.shape[1]
-        X = matrix.kronecker_eye(X, K, n_threads=n_threads)
-        n = X.rows() // K
-        y_shape = (n, K)
-    else:
-        if isinstance(X, np.ndarray):
-            X = matrix.dense(X, method="naive", n_threads=n_threads)
-        n = X.rows()
-        y_shape = (n,)
-
-    if weights is None:
-        weights = np.full(n, 1/n)
-    if offsets is None:
-        offsets = np.zeros(y_shape)
-
-    L = betas.shape[0]
-
-    etas = np.empty((L,) + y_shape, order="C")
-    ones = np.ones(X.rows())
-    if isinstance(betas, np.ndarray):
-        for i in range(etas.shape[0]):
-            X.btmul(0, X.cols(), betas[i], ones, etas[i].ravel())
-    elif isinstance(betas, csr_matrix):
-        X.sp_btmul(betas, ones, etas.reshape((L, -1))) 
-    else:
-        raise RuntimeError("beta is not one of np.ndarray or scipy.sparse.csr_matrix.")
-    etas += intercepts[:, None] + offsets
-
-    mus = np.empty((L,) + y_shape, order="C")
-    for i in range(L):
-        glm.gradient(etas[i], weights, mus[i])
-
-    weights = (
-        weights[None, :, None] / K
-        if glm.is_multi else
-        weights[None]
-    )
-    out = np.divide(mus, weights, where=weights>0)
-    return out.reshape((L,) + y_shape)
-
-
 def residuals(
     *,
-    X: Union[MatrixNaiveBase32, MatrixNaiveBase64, np.ndarray],
-    y: np.ndarray,
-    betas: Union[np.ndarray, csr_matrix],
-    intercepts: np.ndarray,
-    weights: np.ndarray =None,
-    offsets: np.ndarray =None,
-    glm: Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64] =gaussian(),
-    n_threads: int =1,
+    glm: Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64],
+    etas: np.ndarray,
 ):
     """Computes the residuals.
 
-    The residual is given by 
+    The (weighted) residual is given by 
     
     .. math::
         \\begin{align*}
-            \\hat{r} = y - \\hat{y}
+            \\hat{r} = -\\nabla \\ell(\\eta)
         \\end{align*}
 
     Parameters
     ----------
-    X : (n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64, np.ndarray]
-        Feature matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    y : (n,) or (n, K) np.ndarray
-        Response vector or multi-response matrix.
-    betas : (L, p) or (L, p*K) Union[np.ndarray, scipy.sparse.csr_matrix]
-        Coefficient vectors :math:`\\beta`.
-    intercepts : (L,) or (L, K) np.ndarray
-        Intercepts :math:`\\beta_0`.
-    weights : (n,) np.ndarray, optional
-        Observation weights :math:`W`.
-        Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-
-        .. warning::
-            Currently, it is only well-defined if weights are all positive!
-
-    offsets : (n,) or (n, K) np.ndarray, optional
-        Observation offsets :math:`\\eta^0`.
-        Default is ``None``, in which case, it is set to 
-        ``np.zeros(n)`` if ``y`` is single-response
-        and ``np.zeros((n, K))`` if multi-response.
-    glm : Union[glm.GlmBase32, glm.GlmBase64, glm.GlmMultiBase32, glm.GlmMultiBase64], optional
+    glm : Union[glm.GlmBase32, glm.GlmBase64, glm.GlmMultiBase32, glm.GlmMultiBase64] 
         GLM object.
         It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
-        Default is ``adelie.glm.gaussian()``.
-    n_threads : int, optional
-        Number of threads.
-        Default is ``1``.
+    etas : (L, n) or (L, n, K) np.ndarray
+        Linear predictions.
 
     Returns
     -------
@@ -370,22 +293,15 @@ def residuals(
     --------
     adelie.diagnostic.predict
     """
-    preds = predict(
-        X=X, 
-        betas=betas, 
-        intercepts=intercepts,
-        weights=weights,
-        offsets=offsets,
-        glm=glm,
-        n_threads=n_threads,
-    )
-    return y[None] - preds
+    resids = np.empty(etas.shape)
+    for eta, resid in zip(etas, resids):
+        glm.gradient(eta, resid)
+    return resids
 
 
 def gradients(
     *, 
     X: Union[MatrixNaiveBase32, MatrixNaiveBase64],
-    weights: np.ndarray,
     resids: np.ndarray,
     n_threads: int =1,
 ):
@@ -395,14 +311,14 @@ def gradients(
 
     .. math::
         \\begin{align*}
-            \\hat{\\gamma} = X^{\\top} W \\hat{r}
+            \\hat{\\gamma} = X^{\\top} \\hat{r}
         \\end{align*}
 
     The gradient for the multi-response is given by
 
     .. math::
         \\begin{align*}
-            \\hat{\\gamma} = (X\\otimes I_K)^{\\top} (K^{-1}W \\otimes I_K) \\hat{r}
+            \\hat{\\gamma} = (X\\otimes I_K)^{\\top} \\mathrm{vec}(\\hat{r}^\\top)
         \\end{align*}
 
     Parameters
@@ -410,13 +326,6 @@ def gradients(
     X : (n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64, np.ndarray]
         Feature matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    weights : (n,) np.ndarray, optional
-        Observation weights :math:`W`.
-        Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-
-        .. warning::
-            Currently, it is only well-defined if weights are all positive!
-
     resids : (L, n) or (L, n, K) np.ndarray
         Residuals.
     n_threads : int, optional
@@ -435,34 +344,24 @@ def gradients(
     is_multi = len(resids.shape) == 3
 
     if is_multi:
-        n, K = resids.shape[1:]
+        K = resids.shape[2]
         X = matrix.kronecker_eye(X, K, n_threads=n_threads)
         grad_shape = (X.cols() // K, K)
     else:
         if isinstance(X, np.ndarray):
             X = matrix.dense(X, method="naive", n_threads=n_threads)
-        n = X.rows()
         grad_shape = (X.cols(),)
 
-    if weights is None:
-        weights = np.full(n, 1/n)
-
-    weights = (
-        weights[None, :, None] / K
-        if is_multi else
-        weights[None]
-    )
-    Wresids = resids * weights
-    grads = np.empty((Wresids.shape[0],) + grad_shape)
+    grads = np.empty((resids.shape[0],) + grad_shape)
     for i in range(grads.shape[0]):
-        X.mul(Wresids[i].ravel(), grads[i].ravel())
+        X.mul(resids[i].ravel(), grads[i].ravel())
     return grads
 
 
 def gradient_norms(
     *, 
-    betas: csr_matrix,
     grads: np.ndarray,
+    betas: csr_matrix,
     lmdas: np.ndarray,
     groups: np.ndarray =None,
     alpha: float =1,
@@ -474,20 +373,20 @@ def gradient_norms(
 
     .. math::
         \\begin{align*}
-            h_g = \\|\\hat{\\gamma}_g - \\lambda (1-\\alpha) p_g \\beta_g\\|_2  \\quad g=1,\\ldots, G
+            h_g = \\|\\hat{\\gamma}_g - \\lambda (1-\\alpha) \\omega_g \\beta_g\\|_2  \\quad g=1,\\ldots, G
         \\end{align*}
 
     where
     :math:`\\hat{\\gamma}_g` is the gradient,
-    :math:`p_g` is the penalty factor,
+    :math:`\\omega_g` is the penalty factor,
     and :math:`\\beta_g` is the coefficient block for group :math:`g`.
 
     Parameters
     ----------
-    betas : (L, p) or (L, p*K) scipy.sparse.csr_matrix
-        Coefficient vectors :math:`\\beta`.
     grads : (L, p) or (L, p, K) np.ndarray
         Gradients.
+    betas : (L, p) or (L, p*K) scipy.sparse.csr_matrix
+        Coefficient vectors :math:`\\beta`.
     lmdas : (L,) np.ndarray
         Regularization parameters :math:`\\lambda`.
     groups : (G,) np.ndarray, optional
@@ -608,8 +507,8 @@ def gradient_scores(
 def coefficient(
     *,
     lmda: float,
-    lmdas: np.ndarray,
     betas: csr_matrix,
+    lmdas: np.ndarray,
 ):
     """Computes the coefficient at :math:`\\lambda` using linear interpolation of solutions.
 
@@ -634,10 +533,10 @@ def coefficient(
     ----------
     lmda : float
         New regularization parameter at which to find the solution.
-    lmdas : (L,) np.ndarray
-        Regularization parameters :math:`\\lambda`.
     betas : (L, p) np.ndarray
         Coefficient vectors :math:`\\beta`.
+    lmdas : (L,) np.ndarray
+        Regularization parameters :math:`\\lambda`.
 
     Returns
     -------
@@ -667,25 +566,25 @@ def coefficient(
 
 def plot_coefficients(
     *,
+    betas: csr_matrix,
+    lmdas: np.ndarray,
     groups: np.ndarray,
     group_sizes: np.ndarray,
-    lmdas: np.ndarray,
-    betas: csr_matrix,
 ):
     """Plots the coefficient profile.
 
     Parameters
     ----------
+    betas : (L, p) np.ndarray
+        Coefficient vectors :math:`\\beta`.
+    lmdas : (L,) np.ndarray
+        Regularization parameters :math:`\\lambda`.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
     group_sizes : (G,) np.ndarray
         List of group sizes corresponding to each element of ``groups``.
         ``group_sizes[i]`` is the size of the ``i`` th group.
-    lmdas : (L,) np.ndarray
-        Regularization parameters :math:`\\lambda`.
-    betas : (L, p) np.ndarray
-        Coefficient vectors :math:`\\beta`.
 
     Returns
     -------
@@ -1122,35 +1021,36 @@ class diagnostic:
     def __init__(self, state):
         self.state = state
         self.betas = state.betas
+        self._n_classes = self.state._glm.y.shape[-1]
         self._is_multi = state._glm.is_multi
         self._args = {}
         if self._is_multi:
             self._args["groups"] = state.group_type
-            p_begin = self.state.multi_intercept * self.state.n_classes
+            p_begin = self.state.multi_intercept * self._n_classes
             self._args["penalty"] = state.penalty[p_begin:]
         else:
             self._args["groups"] = state.groups
             self._args["penalty"] = state.penalty
 
-        self.residuals = residuals(
+        self.linear_preds = predict(
             X=self.state._X,
-            y=self.state._y, 
             betas=self.betas,
             intercepts=self.state.intercepts,
-            weights=self.state._weights,
             offsets=self.state._offsets,
-            glm=self.state._glm,
             n_threads=self.state.n_threads,
+        )
+        self.residuals = residuals(
+            glm=self.state._glm,
+            etas=self.linear_preds,
         )
         self.gradients = gradients(
             X=self.state._X,
-            weights=self.state._weights,
             resids=self.residuals,
             n_threads=self.state.n_threads,
         )
         self.gradient_norms = gradient_norms(
-            betas=self.betas,
             grads=self.gradients,
+            betas=self.betas,
             lmdas=self.state.lmdas,
             groups=self._args["groups"],
             alpha=self.state.alpha,
@@ -1171,15 +1071,15 @@ class diagnostic:
         adelie.diagnostic.plot_coefficients
         """
         p_begin = (
-            self.state.multi_intercept * self.state.n_classes
+            self.state.multi_intercept * self._n_classes
             if self._is_multi else
             0
         )
         return plot_coefficients(
-            groups=self.state.groups[p_begin:],
-            group_sizes=self.state.group_sizes[p_begin:],
-            lmdas=self.state.lmdas,
             betas=self.betas,
+            lmdas=self.state.lmdas,
+            groups=self.state.groups[p_begin:]-p_begin,
+            group_sizes=self.state.group_sizes[p_begin:],
         )
 
     def plot_devs(self):

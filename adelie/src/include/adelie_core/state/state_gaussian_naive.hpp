@@ -1,9 +1,8 @@
 #pragma once
 #include <numeric>
-#include <unordered_map>
 #include <Eigen/Eigenvalues>
 #include <adelie_core/matrix/utils.hpp>
-#include <adelie_core/state/state_gaussian_base.hpp>
+#include <adelie_core/state/state_base.hpp>
 
 namespace adelie_core {
 namespace state {
@@ -148,43 +147,40 @@ template <class MatrixType,
           class IndexType=Eigen::Index,
           class BoolType=bool
         >
-struct StateGaussianNaive : StateGaussianBase<
+struct StateGaussianNaive : StateBase<
         ValueType,
         IndexType,
         BoolType
     >
 {
-    using base_t = StateGaussianBase<
+    using base_t = StateBase<
         ValueType,
         IndexType,
         BoolType
     >;
     using typename base_t::value_t;
-    using typename base_t::index_t;
-    using typename base_t::uset_index_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_index_t;
     using typename base_t::vec_bool_t;
     using typename base_t::map_cvec_value_t;
     using typename base_t::dyn_vec_value_t;
-    using typename base_t::dyn_vec_index_t;
-    using typename base_t::dyn_vec_bool_t;
-    using umap_index_t = std::unordered_map<index_t, index_t>;
     using matrix_t = MatrixType;
     using dyn_vec_mat_value_t = std::vector<util::rowmat_type<value_t>>;
 
     /* static states */
+    const map_cvec_value_t weights;
     const vec_value_t weights_sqrt;
     const map_cvec_value_t X_means;
     const value_t y_mean;
     const value_t y_var;
-
-    /* configurations */
+    const value_t loss_null;
+    const value_t loss_full;
 
     /* dynamic states */
     matrix_t* X;
     vec_value_t resid;
     value_t resid_sum;
+    value_t rsq;
     dyn_vec_value_t screen_X_means;
     dyn_vec_mat_value_t screen_transforms;
     dyn_vec_value_t screen_vars;
@@ -230,29 +226,31 @@ struct StateGaussianNaive : StateGaussianBase<
         const Eigen::Ref<const vec_value_t>& grad
     ):
         base_t(
-            groups, group_sizes, alpha, penalty, weights, lmda_path, lmda_max, min_ratio, lmda_path_size,
+            groups, group_sizes, alpha, penalty, lmda_path, lmda_max, min_ratio, lmda_path_size,
             max_screen_size, max_active_size,
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
-            max_iters, tol, adev_tol, ddev_tol, 
-            newton_tol, newton_max_iters, early_exit, setup_lmda_max, setup_lmda_path, intercept, n_threads,
-            screen_set, screen_beta, screen_is_active, rsq, lmda, grad
+            max_iters, tol, adev_tol, ddev_tol, newton_tol, newton_max_iters, early_exit, 
+            setup_lmda_max, setup_lmda_path, intercept, n_threads,
+            screen_set, screen_beta, screen_is_active, lmda, grad
         ),
+        weights(weights.data(), weights.size()),
         weights_sqrt(weights.sqrt()),
         X_means(X_means.data(), X_means.size()),
         y_mean(y_mean),
         y_var(y_var),
+        loss_null(-0.5 * y_mean * y_mean),
+        loss_full(-0.5 * y_var + loss_null),
         X(&X),
         resid(resid),
-        resid_sum(resid_sum)
+        resid_sum(resid_sum),
+        rsq(rsq)
     { 
-        initialize();
-    }
-
-    /**
-     * The state invariance just needs to hold when lmda > lmda_max.
-     */
-    void initialize() 
-    {
+        if (weights.size() != resid.size()) {
+            throw std::runtime_error("weights must have the same length as resid.");
+        }
+        if (X_means.size() != this->grad.size()) {
+            throw std::runtime_error("X_means must have the same length as grad.");
+        }
         /* initialize the rest of the screen quantities */
         gaussian::naive::update_screen_derived(*this); 
     }

@@ -1047,30 +1047,15 @@ def gaussian_pin_cov(
     return _gaussian_pin_cov()
 
 
-class gaussian_base(base):
-    pass
-
-
 def _render_gaussian_naive_inputs(
     *,
     X,
     groups,
     lmda_max,
     lmda_path,
-    max_iters,
-    tol,
-    adev_tol,
-    ddev_tol,
-    newton_tol,
-    newton_max_iters,
-    n_threads,
-    min_ratio,
     lmda_path_size,
     max_screen_size,
     max_active_size,
-    pivot_subset_ratio,
-    pivot_subset_min,
-    pivot_slack_ratio,
 ):
     if not (
         isinstance(X, matrix.MatrixNaiveBase64) or 
@@ -1087,35 +1072,6 @@ def _render_gaussian_naive_inputs(
         max_active_size = len(groups)
     max_screen_size = np.minimum(max_screen_size, len(groups))
     max_active_size = np.minimum(max_active_size, len(groups))
-
-    if max_iters < 0:
-        raise ValueError("max_iters must be >= 0.")
-    if tol <= 0:
-        raise ValueError("tol must be > 0.")
-    if adev_tol < 0 or adev_tol > 1:
-        raise ValueError("adev_tol must be in [0,1].")
-    if ddev_tol < 0 or ddev_tol > 1:
-        raise ValueError("ddev_tol must be in [0,1].")
-    if newton_tol < 0:
-        raise ValueError("newton_tol must be >= 0.")
-    if newton_max_iters < 0:
-        raise ValueError("newton_max_iters must be >= 0.")
-    if n_threads < 1:
-        raise ValueError("n_threads must be >= 1.")
-    if min_ratio <= 0:
-        raise ValueError("min_ratio must be > 0.")
-    if lmda_path_size < 0:
-        raise ValueError("lmda_path_size must be >= 0.")
-    if max_screen_size < 0:
-        raise ValueError("max_screen_size must be >= 0.")
-    if max_active_size < 0:
-        raise ValueError("max_active_size must be >= 0.")
-    if pivot_subset_ratio <= 0 or pivot_subset_ratio > 1:
-        raise ValueError("pivot_subset_ratio must be in (0, 1].")
-    if pivot_subset_min < 1:
-        raise ValueError("pivot_subset_min must be >= 1.")
-    if pivot_slack_ratio < 0:
-        raise ValueError("pivot_slack_ratio must be >= 0.")
 
     lmda_path_size = (
         lmda_path_size
@@ -1153,15 +1109,13 @@ def _render_gaussian_naive_inputs(
 def _render_multi_input(
     *,
     X,
-    y,
     groups,
     offsets,
     intercept,
     n_threads,
 ):
-    n, n_classes = y.shape
-    y = np.array(y, order="C", copy=False)
     offsets = np.array(offsets, order="C", copy=False)
+    n, n_classes = offsets.shape
     X = matrix.kronecker_eye(X, n_classes, n_threads=n_threads)
     if intercept:
         ones_kron = matrix.kronecker_eye(np.ones((n, 1)), n_classes, n_threads=n_threads)
@@ -1180,25 +1134,11 @@ def _render_multi_input(
         group_type = "grouped"
 
     return (
-        X, y, offsets, group_type
+        X, offsets, group_type
     )
     
 
-class gaussian_naive_base(gaussian_base):
-    """State wrapper base class for all gaussian naive method."""
-    def basic_check(self):
-        n, p = self.X.rows(), self.X.cols()
-        G = self.groups.shape[0]
-        S = self.screen_set.shape[0]
-        assert p == self.X_means.shape[0]
-        assert n == self.resid.shape[0]
-        assert G <= p
-        assert G == self.group_sizes.shape[0]
-        assert G == self.penalty.shape[0]
-        assert n == self.weights.shape[0]
-        assert S == self.screen_is_active.shape[0]
-        assert p == self.grad.shape[0]
-
+class gaussian_naive_base(base):
     def check(
         self,
         method: str =None, 
@@ -1206,7 +1146,7 @@ class gaussian_naive_base(gaussian_base):
     ):
         n, p = self.X.rows(), self.X.cols()
 
-        yc = self._y
+        yc = self._glm.y
         if self.intercept:
             yc = yc - np.sum(yc * self.weights)
 
@@ -1772,20 +1712,9 @@ def gaussian_naive(
         groups=groups,
         lmda_max=lmda_max,
         lmda_path=lmda_path,
-        max_iters=max_iters,
-        tol=tol,
-        adev_tol=adev_tol,
-        ddev_tol=ddev_tol,
-        newton_tol=newton_tol,
-        newton_max_iters=newton_max_iters,
-        n_threads=n_threads,
-        min_ratio=min_ratio,
         lmda_path_size=lmda_path_size,
         max_screen_size=max_screen_size,
         max_active_size=max_active_size,
-        pivot_subset_ratio=pivot_subset_ratio,
-        pivot_subset_min=pivot_subset_min,
-        pivot_slack_ratio=pivot_slack_ratio,
     )
 
     dispatcher = {
@@ -1803,14 +1732,12 @@ def gaussian_naive(
             ## save inputs due to lifetime issues
             # static inputs require a reference to input
             # or copy if it must be made
-            self._glm = glm.gaussian()
+            self._glm = glm.gaussian(y=y, weights=weights)
             self._X = X
-            self._y = y
             self._X_means = np.array(X_means, copy=False, dtype=dtype)
             self._groups = np.array(groups, copy=False, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
             self._penalty = np.array(penalty, copy=False, dtype=dtype)
-            self._weights = np.array(weights, copy=False, dtype=dtype)
             self._offsets = np.array(offsets, copy=False, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
@@ -1832,7 +1759,7 @@ def gaussian_naive(
                 group_sizes=self._group_sizes,
                 alpha=alpha,
                 penalty=self._penalty,
-                weights=self._weights,
+                weights=self._glm.weights,
                 lmda_path=self._lmda_path,
                 lmda_max=lmda_max,
                 min_ratio=min_ratio,
@@ -1861,7 +1788,6 @@ def gaussian_naive(
                 lmda=lmda,
                 grad=self._grad,
             )
-            self.basic_check()
 
         @classmethod
         def create_from_core(cls, state, core_state):
@@ -2100,20 +2026,9 @@ def multigaussian_naive(
         groups=groups,
         lmda_max=lmda_max,
         lmda_path=lmda_path,
-        max_iters=max_iters,
-        tol=tol,
-        adev_tol=adev_tol,
-        ddev_tol=ddev_tol,
-        newton_tol=newton_tol,
-        newton_max_iters=newton_max_iters,
-        n_threads=n_threads,
-        min_ratio=min_ratio,
         lmda_path_size=lmda_path_size,
         max_screen_size=max_screen_size,
         max_active_size=max_active_size,
-        pivot_subset_ratio=pivot_subset_ratio,
-        pivot_subset_min=pivot_subset_min,
-        pivot_slack_ratio=pivot_slack_ratio,
     )
         
     dispatcher = {
@@ -2126,12 +2041,10 @@ def multigaussian_naive(
     n_classes = y.shape[-1]
     (
         X,
-        y,
         offsets,
         group_type,
     ) = _render_multi_input(
         X=X,
-        y=y,
         groups=groups,
         offsets=offsets,
         intercept=intercept,
@@ -2145,16 +2058,14 @@ def multigaussian_naive(
             ## save inputs due to lifetime issues
             # static inputs require a reference to input
             # or copy if it must be made
-            self._glm = glm.multigaussian()
+            self._glm = glm.multigaussian(y=y, weights=weights)
             self._X = X_raw
             self._X_expanded = X
-            self._y = y
             self._X_means = np.array(X_means, copy=False, dtype=dtype)
             self._groups = np.array(groups, copy=False, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
             self._penalty = np.array(penalty, copy=False, dtype=dtype)
-            self._weights = np.array(weights, copy=False, dtype=dtype)
-            self._weights_expanded = np.repeat(self._weights, repeats=n_classes) / n_classes
+            self._weights_expanded = np.repeat(self._glm.weights, repeats=n_classes) / n_classes
             self._offsets = np.array(offsets, copy=False, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
@@ -2171,7 +2082,11 @@ def multigaussian_naive(
                 multi_intercept=intercept,
                 X=self._X_expanded,
                 X_means=self._X_means,
-                y_mean=0.0,
+                # y_mean is not used in the solver since global intercept is turned off,
+                # but it is used to compute loss_null and loss_full.
+                # This is not the actual y_mean, but it is a value that will result in correct
+                # calculation of loss_null and loss_full.
+                y_mean=np.linalg.norm(np.sum(weights[:, None] * (y - offsets), axis=-1) / n_classes),
                 y_var=y_var,
                 resid=resid,
                 resid_sum=resid_sum,
@@ -2208,7 +2123,6 @@ def multigaussian_naive(
                 lmda=lmda,
                 grad=self._grad,
             )
-            self.basic_check()
 
         @classmethod
         def create_from_core(cls, state, core_state):
@@ -2221,45 +2135,12 @@ def multigaussian_naive(
     return _multigaussian_naive()
 
 
-class glm_naive_base:
-    """State wrapper base class for all glm naive method."""
-    def basic_check(self):
-        n, p = self.X.rows(), self.X.cols()
-        G = self.groups.shape[0]
-        S = self.screen_set.shape[0]
-        assert n == self.y.shape[0]
-        assert G <= p
-        assert G == self.group_sizes.shape[0]
-        assert G == self.penalty.shape[0]
-        assert n == self.weights.shape[0]
-        assert n == self.offsets.shape[0]
-        assert S == self.screen_is_active.shape[0]
-        assert p == self.grad.shape[0]
-        assert n == self.eta.shape[0]
-        assert n == self.mu.shape[0]
-
-    def check(
-        self,
-        method: str =None, 
-        logger=logger.logger,
-    ):
-        # TODO: implement check()?
-        return
-
-
 def _render_glm_naive_inputs(
     *,
-    irls_max_iters,
-    irls_tol,
     loss_null,
     **kwargs,
 ):
     out = _render_gaussian_naive_inputs(**kwargs)
-
-    if irls_max_iters < 0:
-        raise ValueError("irls_max_iters must be >= 0.")
-    if irls_tol <= 0:
-        raise ValueError("irls_tol must be > 0.")
 
     setup_loss_null = loss_null is None
     if setup_loss_null: loss_null = np.inf
@@ -2269,14 +2150,12 @@ def _render_glm_naive_inputs(
 
 def glm_naive(
     *,
-    glm: Union[glm.GlmBase64, glm.GlmBase32],
     X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
-    y: np.ndarray,
+    glm: Union[glm.GlmBase64, glm.GlmBase32],
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
-    weights: np.ndarray,
     offsets: np.ndarray,
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
@@ -2285,7 +2164,7 @@ def glm_naive(
     lmda: float,
     grad: np.ndarray,
     eta: np.ndarray,
-    mu: np.ndarray,
+    resid: np.ndarray,
     loss_full: float,
     loss_null: float =None,
     lmda_path: np.ndarray =None,
@@ -2314,14 +2193,12 @@ def glm_naive(
 
     Parameters
     ----------
-    glm : Union[adelie.glm.GlmBase64, adelie.glm.GlmBase32]
-        GLM object.
-        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
     X : (n, p) Union[adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
         Feature matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    y : (n,) np.ndarray
-        Response vector.
+    glm : Union[adelie.glm.GlmBase64, adelie.glm.GlmBase32]
+        GLM object.
+        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -2334,9 +2211,6 @@ def glm_naive(
     penalty : (G,) np.ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
-    weights : (n,) np.ndarray
-        Observation weights :math:`W`.
-        The weights must sum to 1.
     offsets : (n,) np.ndarray
         Observation offsets :math:`\\eta^0`.
     screen_set : (s,) np.ndarray
@@ -2361,7 +2235,7 @@ def glm_naive(
     lmda : float
         The last regularization parameter that was attempted to be solved.
     grad : (p,) np.ndarray
-        The full gradient :math:`X^\\top (Wy - \\nabla A(\\eta))` where
+        The full gradient :math:`-X^\\top \\nabla \\ell(\\eta)` where
         :math:`\\eta` is given by ``eta``.
     eta : (n,) np.ndarray
         The natural parameter :math:`\\eta = X\\beta + \\beta_0 \\mathbf{1} + \\eta^0`
@@ -2369,8 +2243,8 @@ def glm_naive(
         :math:`\\beta`
         and :math:`\\beta_0` are given by
         ``screen_beta`` and ``beta0``.
-    mu : (n,) np.ndarray
-        The mean parameter :math:`\\mu = \\nabla A(\\eta)`
+    resid : (n,) np.ndarray
+        Residual :math:`-\\nabla \\ell(\\eta)`
         where :math:`\\eta` is given by ``eta``.
     loss_full : float
         Full loss :math:`\\ell(\\eta^\\star)`
@@ -2499,22 +2373,9 @@ def glm_naive(
         groups=groups,
         lmda_max=lmda_max,
         lmda_path=lmda_path,
-        max_iters=max_iters,
-        tol=tol,
-        adev_tol=adev_tol,
-        ddev_tol=ddev_tol,
-        newton_tol=newton_tol,
-        newton_max_iters=newton_max_iters,
-        n_threads=n_threads,
-        min_ratio=min_ratio,
         lmda_path_size=lmda_path_size,
         max_screen_size=max_screen_size,
         max_active_size=max_active_size,
-        pivot_subset_ratio=pivot_subset_ratio,
-        pivot_subset_min=pivot_subset_min,
-        pivot_slack_ratio=pivot_slack_ratio,
-        irls_max_iters=irls_max_iters,
-        irls_tol=irls_tol,
         loss_null=loss_null,
     )
 
@@ -2527,7 +2388,7 @@ def glm_naive(
     if isinstance(X, np.ndarray):
         X = matrix.dense(X, method="naive", n_threads=n_threads)
 
-    class _glm_naive(glm_naive_base, core_base):
+    class _glm_naive(base, core_base):
         def __init__(self):
             self._core_type = core_base
             ## save inputs due to lifetime issues
@@ -2535,11 +2396,9 @@ def glm_naive(
             # or copy if it must be made
             self._glm = glm
             self._X = X
-            self._y = np.array(y, copy=False, dtype=dtype)
             self._groups = np.array(groups, copy=False, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
             self._penalty = np.array(penalty, copy=False, dtype=dtype)
-            self._weights = np.array(weights, copy=False, dtype=dtype)
             self._offsets = np.array(offsets, copy=False, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
@@ -2552,12 +2411,10 @@ def glm_naive(
             core_base.__init__(
                 self,
                 X=self._X,
-                y=self._y,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
                 alpha=alpha,
                 penalty=self._penalty,
-                weights=self._weights,
                 offsets=self._offsets,
                 lmda_path=self._lmda_path,
                 loss_null=loss_null,
@@ -2592,16 +2449,14 @@ def glm_naive(
                 lmda=lmda,
                 grad=self._grad,
                 eta=eta,
-                mu=mu,
+                resid=resid,
             )
-            self.basic_check()
 
         @classmethod
         def create_from_core(cls, state, core_state):
             obj = base.create_from_core(
                 cls, state, core_state, _glm_naive, core_base,
             )
-            glm_naive_base.__init__(obj)
             return obj
 
     return _glm_naive()
@@ -2609,14 +2464,12 @@ def glm_naive(
 
 def multiglm_naive(
     *,
-    glm: Union[glm.GlmMultiBase64, glm.GlmMultiBase32],
     X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
-    y: np.ndarray,
+    glm: Union[glm.GlmMultiBase64, glm.GlmMultiBase32],
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
-    weights: np.ndarray,
     offsets: np.ndarray,
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
@@ -2624,7 +2477,7 @@ def multiglm_naive(
     lmda: float,
     grad: np.ndarray,
     eta: np.ndarray,
-    mu: np.ndarray,
+    resid: np.ndarray,
     loss_full: float,
     loss_null: float =None,
     lmda_path: np.ndarray =None,
@@ -2662,14 +2515,12 @@ def multiglm_naive(
 
     Parameters
     ----------
-    glm : Union[adelie.glm.GlmMultiBase64, adelie.glm.GlmMultiBase32]
-        Multi-response GLM object.
-        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
     X : (n, p) Union[adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
         Feature matrix.
         It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    y : (n, K) np.ndarray
-        Response matrix.
+    glm : Union[adelie.glm.GlmMultiBase64, adelie.glm.GlmMultiBase32]
+        Multi-response GLM object.
+        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -2682,9 +2533,6 @@ def multiglm_naive(
     penalty : (G,) np.ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
-    weights : (n,) np.ndarray
-        Observation weights :math:`W`.
-        The weights must sum to 1.
     offsets : (n, K) np.ndarray
         Observation offsets :math:`\\eta^0`.
     screen_set : (s,) np.ndarray
@@ -2706,7 +2554,7 @@ def multiglm_naive(
     lmda : float
         The last regularization parameter that was attempted to be solved.
     grad : ((p+intercept)*K,) np.ndarray
-        The full gradient :math:`\\tilde{X}^\\top (\\tilde{W} \\tilde{y} - \\nabla A(\\tilde{\\eta}))` where
+        The full gradient :math:`-\\tilde{X}^\\top \\nabla \\ell(\\tilde{\\eta})` where
         :math:`\\tilde{\\eta}` is given by ``eta``.
     eta : (n*K,) np.ndarray
         The natural parameter :math:`\\tilde{\\eta} = \\tilde{X}\\beta + \\tilde{\\eta}^0`
@@ -2714,8 +2562,8 @@ def multiglm_naive(
         :math:`\\beta`,
         and :math:`\\tilde{\\eta}^0` are given by
         ``screen_beta`` and ``offsets``.
-    mu : (n*K,) np.ndarray
-        The mean parameter :math:`\\tilde{\\mu} = \\nabla A(\\tilde{\\eta})`
+    resid : (n*K,) np.ndarray
+        Residual :math:`-\\nabla \\ell(\\tilde{\\eta})`
         where :math:`\\tilde{\\eta}` is given by ``eta``.
     loss_full : float
         Full loss :math:`\\ell(\\eta^\\star)`
@@ -2845,22 +2693,9 @@ def multiglm_naive(
         groups=groups,
         lmda_max=lmda_max,
         lmda_path=lmda_path,
-        max_iters=max_iters,
-        tol=tol,
-        adev_tol=adev_tol,
-        ddev_tol=ddev_tol,
-        newton_tol=newton_tol,
-        newton_max_iters=newton_max_iters,
-        n_threads=n_threads,
-        min_ratio=min_ratio,
         lmda_path_size=lmda_path_size,
         max_screen_size=max_screen_size,
         max_active_size=max_active_size,
-        pivot_subset_ratio=pivot_subset_ratio,
-        pivot_subset_min=pivot_subset_min,
-        pivot_slack_ratio=pivot_slack_ratio,
-        irls_max_iters=irls_max_iters,
-        irls_tol=irls_tol,
         loss_null=loss_null,
     )
 
@@ -2871,22 +2706,20 @@ def multiglm_naive(
     core_base = dispatcher[dtype]
 
     X_raw = X
-    n_classes = y.shape[-1]
+    n_classes = glm.y.shape[-1]
     (
         X,
-        y,
         offsets,
         group_type,
     ) = _render_multi_input(
         X=X,
-        y=y,
         groups=groups,
         offsets=offsets,
         intercept=intercept,
         n_threads=n_threads,
     )
 
-    class _multiglm_naive(glm_naive_base, core_base):
+    class _multiglm_naive(base, core_base):
         def __init__(self):
             self._core_type = core_base
             ## save inputs due to lifetime issues
@@ -2895,12 +2728,9 @@ def multiglm_naive(
             self._glm = glm
             self._X = X_raw
             self._X_expanded = X
-            self._y = y
             self._groups = np.array(groups, copy=False, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
             self._penalty = np.array(penalty, copy=False, dtype=dtype)
-            self._weights = np.array(weights, copy=False, dtype=dtype)
-            self._weights_expanded = np.repeat(self._weights, repeats=n_classes) / n_classes
             self._offsets = np.array(offsets, copy=False, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
@@ -2915,14 +2745,11 @@ def multiglm_naive(
                 group_type=group_type,
                 n_classes=n_classes,
                 multi_intercept=intercept,
-                weights_orig=self._weights,
                 X=self._X_expanded,
-                y=self._y.ravel(),
                 groups=self._groups,
                 group_sizes=self._group_sizes,
                 alpha=alpha,
                 penalty=self._penalty,
-                weights=self._weights_expanded,
                 offsets=self._offsets.ravel(),
                 lmda_path=self._lmda_path,
                 loss_null=loss_null,
@@ -2957,16 +2784,14 @@ def multiglm_naive(
                 lmda=lmda,
                 grad=self._grad,
                 eta=eta,
-                mu=mu,
+                resid=resid,
             )
-            self.basic_check()
 
         @classmethod
         def create_from_core(cls, state, core_state):
             obj = base.create_from_core(
                 cls, state, core_state, _multiglm_naive, core_base,
             )
-            glm_naive_base.__init__(obj)
             return obj
 
     return _multiglm_naive()

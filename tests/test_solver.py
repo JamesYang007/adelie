@@ -196,12 +196,11 @@ def run_solve_gaussian(state, args, pin):
     if not is_beta_close:
         objective_args = {
             "X": X,
-            "y": y,
+            "glm": ad.glm.gaussian(y=y, weights=weights),
             "lmdas": lmdas,
             "groups": state.groups,
             "alpha": state.alpha,
             "penalty": state.penalty,
-            "weights": weights,
         }
         my_objs = objective(
             **objective_args,
@@ -386,7 +385,7 @@ def test_solve_gaussian_concatenate():
         X = np.concatenate([
             data["X"] for data in test_datas
         ], axis=-1)
-        y = np.mean([data["y"] for data in test_datas], axis=0)
+        y = np.mean([data["glm"].y for data in test_datas], axis=0)
 
         groups = np.concatenate([
             begin + data["groups"]
@@ -477,11 +476,12 @@ def test_solve_gaussian_snp_unphased():
         ]
         os.remove(filename)
 
-        X, y = test_data["X"], test_data["y"]
+        X, y = test_data["X"], test_data.pop("glm").y
 
         weights = np.random.uniform(1, 2, n)
         weights /= np.sum(weights)
 
+        test_data["y"] = y
         test_data["weights"] = weights
         test_data["offsets"] = np.zeros(n)
         test_data["alpha"] = alpha
@@ -543,11 +543,12 @@ def test_solve_gaussian_snp_phased_ancestry():
         handler.read() 
         os.remove(filename)
 
-        X, y = handler.to_dense(n_threads), test_data["y"]
+        X, y = handler.to_dense(n_threads), test_data.pop("glm").y
 
         weights = np.random.uniform(1, 2, n)
         weights /= np.sum(weights)
 
+        test_data["y"] = y
         test_data["weights"] = weights
         test_data["offsets"] = np.zeros(n)
         test_data["alpha"] = alpha

@@ -4,8 +4,26 @@
 namespace adelie_core {
 namespace solver {
 
+template <class AbsGradType, class ValueType, class PenaltyType>
+auto compute_lmda_max(
+    const AbsGradType& abs_grad,
+    ValueType alpha,
+    const PenaltyType& penalty,
+    ValueType ridge_scale = 1e-3
+)
+{
+    using vec_value_t = std::decay_t<AbsGradType>;
+    const auto factor = (alpha <= 0) ? ridge_scale : alpha;
+    return vec_value_t::NullaryExpr(
+        abs_grad.size(),
+        [&](auto i) { 
+            return (penalty[i] <= 0.0) ? 0.0 : abs_grad[i] / penalty[i];
+        }
+    ).maxCoeff() / factor;
+}
+
 template <class LmdaPathType, class ValueType>
-void generate_lmda_path(
+void compute_lmda_path(
     LmdaPathType& lmda_path,
     ValueType min_ratio,
     ValueType lmda_max
