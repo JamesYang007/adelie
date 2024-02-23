@@ -108,20 +108,6 @@ public:
 
     virtual ~GlmMultiBase() =default;
 
-    virtual void set_response(
-        const Eigen::Ref<const rowarr_value_t>& y
-    )
-    {
-        new (&this->y) Eigen::Map<const rowarr_value_t>(y.data(), y.rows(), y.cols());
-    }
-
-    virtual void set_weights(
-        const Eigen::Ref<const vec_value_t>& weights
-    )
-    {
-        new (&this->weights) Eigen::Map<const vec_value_t>(weights.data(), weights.size());
-    }
-
     virtual void gradient(
         const Eigen::Ref<const rowarr_value_t>& eta,
         Eigen::Ref<rowarr_value_t> grad

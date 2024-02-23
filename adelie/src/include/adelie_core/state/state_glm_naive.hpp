@@ -1,6 +1,6 @@
 #pragma once
+#include <adelie_core/state/state_base.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
-#include <adelie_core/state/state_glm_base.hpp>
 
 namespace adelie_core {
 namespace state {
@@ -68,35 +68,41 @@ template <class MatrixType,
           class IndexType=Eigen::Index,
           class BoolType=bool
         >
-struct StateGlmNaive: StateGlmBase<
+struct StateGlmNaive: StateBase<
         ValueType,
         IndexType,
         BoolType
     >
 {
-    using base_t = StateGlmBase<
+    using base_t = StateBase<
         ValueType,
         IndexType,
         BoolType
     >;
     using typename base_t::value_t;
-    using typename base_t::index_t;
-    using typename base_t::uset_index_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_index_t;
     using typename base_t::vec_bool_t;
     using typename base_t::map_cvec_value_t;
-    using typename base_t::dyn_vec_value_t;
-    using typename base_t::dyn_vec_index_t;
-    using typename base_t::dyn_vec_bool_t;
     using matrix_t = MatrixType;
 
     /* static states */
+    const value_t loss_full;
+    const map_cvec_value_t offsets;
 
-    /* configurations */
+    // convergence configs
+    const size_t irls_max_iters;
+    const value_t irls_tol;
+
+    // other configs
+    const bool setup_loss_null;
 
     /* dynamic states */
+    value_t loss_null;
     matrix_t* X;
+
+    // invariants
+    value_t beta0;
     vec_value_t eta;
     vec_value_t resid;
 
@@ -143,17 +149,34 @@ struct StateGlmNaive: StateGlmBase<
         const Eigen::Ref<const vec_value_t>& grad
     ):
         base_t(
-            groups, group_sizes, alpha, penalty, offsets, lmda_path, 
-            loss_null, loss_full, lmda_max, min_ratio, lmda_path_size, max_screen_size, max_active_size,
+            groups, group_sizes, alpha, penalty, lmda_path, lmda_max, min_ratio, lmda_path_size,
+            max_screen_size, max_active_size,
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
-            irls_max_iters, irls_tol, max_iters, tol, adev_tol, ddev_tol,
-            newton_tol, newton_max_iters, early_exit, setup_loss_null, setup_lmda_max, setup_lmda_path, intercept, n_threads,
-            screen_set, screen_beta, screen_is_active, beta0, lmda, grad
+            max_iters, tol, adev_tol, ddev_tol, newton_tol, newton_max_iters, early_exit, 
+            setup_lmda_max, setup_lmda_path, intercept, n_threads,
+            screen_set, screen_beta, screen_is_active, lmda, grad
         ),
+        loss_full(loss_full),
+        offsets(offsets.data(), offsets.size()),
+        irls_max_iters(irls_max_iters),
+        irls_tol(irls_tol),
+        setup_loss_null(setup_loss_null),
+        loss_null(loss_null),
         X(&X),
+        beta0(beta0),
         eta(eta),
         resid(resid)
-    {}
+    {
+        if (offsets.size() != eta.size()) {
+            throw std::runtime_error("offsets must have the same length as eta.");
+        }
+        if (offsets.size() != resid.size()) {
+            throw std::runtime_error("offsets must have the same length as resid.");
+        }
+        if (irls_tol <= 0) {
+            throw std::runtime_error("irls_tol must be > 0.");
+        }
+    }
 };
 
 } // namespace state

@@ -35,33 +35,6 @@ class glm_base:
             weights = np.full(n, 1/n, dtype=dtype)
         self.weights = np.array(weights, order="C", dtype=dtype)
 
-    def set_response(self, y):
-        """Sets the response vector.
-
-        Parameters
-        ----------
-        y : (n,) np.ndarray
-            Response vector.
-        """
-        self.y = np.array(y, order="C", dtype=self.dtype)
-        self.core_base.set_response(self, self.y)
-
-    def set_weights(self, weights):
-        """Sets the weights.
-
-        Parameters
-        ----------
-        weights : (n,) np.ndarray
-            Observation weights.
-        """
-        weights = np.array(weights, order="C", dtype=self.dtype)
-        weights_sum = np.sum(weights)
-        if not np.allclose(weights_sum, 1):
-            warnings.warn("Normalizing weights to sum to 1.")
-            weights = weights / weights_sum
-        self.weights = weights
-        self.core_base.set_weights(self, self.weights)
-
     def sample(self, mu: np.ndarray):
         """Samples from the GLM distribution.
 
@@ -104,33 +77,6 @@ class multiglm_base:
         else:
             weights = np.full(n, 1/n, dtype=dtype)
         self.weights = np.array(weights, order="C", dtype=dtype)
-
-    def set_response(self, y):
-        """Sets the response matrix.
-
-        Parameters
-        ----------
-        y : (n, K) np.ndarray
-            Response matrix.
-        """
-        self.y = np.array(y, order="C", dtype=self.dtype)
-        self.core_base.set_response(self, self.y)
-
-    def set_weights(self, weights):
-        """Sets the weights.
-
-        Parameters
-        ----------
-        weights : (n,) np.ndarray
-            Observation weights.
-        """
-        weights = np.array(weights, order="C", dtype=self.dtype)
-        weights_sum = np.sum(weights)
-        if not np.allclose(weights_sum, 1):
-            warnings.warn("Normalizing weights to sum to 1.")
-            weights = weights / weights_sum
-        self.weights = weights
-        self.core_base.set_weights(self, self.weights)
 
     def sample(self, mu: np.ndarray):
         """Samples from the Multi-response GLM distribution.
@@ -366,6 +312,7 @@ def cox(
     stop: np.ndarray,
     status: np.ndarray,
     weights: np.ndarray =None,
+    tie_method: str ="efron",
     dtype: Union[np.float32, np.float64] =np.float64,
 ):
     """Creates a Cox GLM family object.
@@ -429,6 +376,14 @@ def cox(
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
+    tie_method : str, optional
+        The tie-breaking method that determines the scales :math:`\\sigma`.
+        It must be one of the following:
+
+            - ``"efron"``
+            - ``"breslow"``
+
+        Default is ``"efron"``.
     dtype : Union[np.float32, np.float64], optional
         The underlying data type.
         Default is ``np.float64``.
@@ -457,7 +412,15 @@ def cox(
             self.stop = stop.astype(dtype)
             glm_base.__init__(self, status, weights, core_base, dtype)
             self.status = self.y
-            core_base.__init__(self, self.start, self.stop, self.status, self.weights)
+            self.tie_method = tie_method
+            core_base.__init__(
+                self, 
+                self.start, 
+                self.stop, 
+                self.status, 
+                self.weights, 
+                self.tie_method,
+            )
 
         def sample(self, mu):
             # TODO

@@ -173,62 +173,6 @@ void update_loss_null(
     }
 }
 
-/**
- * TODO: glmnet performs a modification to the coefficients to accelerate convergence
- * for the case when the log-likelihood is symmetric in the groups (e.g. multinomial).
- * Doesn't seem to work well...
- */
-template <class StateType,
-          class GlmType,
-          class BufferPackType,
-          class OnesType>
-inline void update_symmetric(
-    StateType& state,
-    GlmType& glm,
-    BufferPackType& buffer_pack,
-    const OnesType& ones
-)
-{
-    using state_t = std::decay_t<StateType>;
-    using vec_value_t = typename state_t::vec_value_t;
-
-    const auto group_type = state.group_type;
-    const auto& groups = state.groups;
-    const auto& group_sizes = state.group_sizes;
-    const auto& screen_set = state.screen_set;
-    const auto& screen_begins = state.screen_begins;
-    const auto& screen_is_active = state.screen_is_active;
-    const auto n_threads = state.n_threads;
-    auto& X = *state.X;
-    auto& screen_beta = state.screen_beta;
-    auto& eta = state.eta;
-    auto& buffer_n = buffer_pack.buffer_n;
-
-    const auto n = X.rows();
-
-    if (group_type == util::multi_group_type::_grouped) {
-        for (int ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) {
-            const auto ss = screen_set[ss_idx];
-            const auto sb = screen_begins[ss_idx];
-            const auto g = groups[ss];
-            const auto gs = group_sizes[ss];
-
-            if (!screen_is_active[ss_idx]) continue;
-
-            Eigen::Map<vec_value_t> beta_g(screen_beta.data() + sb, gs);
-            const auto beta_g_mean = beta_g.mean();
-            beta_g -= beta_g_mean;
-
-            X.btmul(g, gs, ones.head(gs), ones.head(n), buffer_n);
-            matrix::dvsubi(eta, beta_g_mean * buffer_n, n_threads);
-        }
-    } else if (group_type == util::multi_group_type::_ungrouped) {
-        // TODO
-    } else {
-        throw std::runtime_error("Group type must be _grouped or _ungrouped.");
-    }
-}
-
 template <class StateType,
           class GlmType,
           class UpdateCoefficientsType,
