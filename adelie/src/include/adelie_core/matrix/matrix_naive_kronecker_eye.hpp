@@ -290,7 +290,7 @@ private:
     util::rowmat_type<value_t> _buff;
     
 public:
-    MatrixNaiveKroneckerEyeDense(
+    explicit MatrixNaiveKroneckerEyeDense(
         const Eigen::Ref<const dense_t>& mat,
         size_t K,
         size_t n_threads

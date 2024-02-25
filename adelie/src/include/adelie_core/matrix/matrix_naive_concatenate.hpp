@@ -90,7 +90,7 @@ private:
     }
 
 public:
-    MatrixNaiveConcatenate(
+    explicit MatrixNaiveConcatenate(
         const std::vector<base_t*>& mat_list,
         size_t n_threads
     ): 

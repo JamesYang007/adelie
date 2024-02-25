@@ -21,7 +21,7 @@ private:
     util::rowmat_type<value_t> _buff;
     
 public:
-    MatrixCovDense(
+    explicit MatrixCovDense(
         const Eigen::Ref<const dense_t>& mat,
         size_t n_threads
     ): 
@@ -39,23 +39,33 @@ public:
     ) override
     {
         base_t::check_bmul(i, j, p, q, v.size(), out.size(), rows(), cols());
+        out.matrix().noalias() = v.matrix() * _mat.block(i, j, p, q);
+    }
+
+    void mul(
+        int i, int p,
+        const Eigen::Ref<const vec_value_t>& v,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        base_t::check_mul(i, p, v.size(), out.size(), rows(), cols());
         auto outm = out.matrix();
         dgemv(
-            _mat.block(i, j, p, q),
+            _mat.middleCols(i, p).transpose(),
             v.matrix(),
             _n_threads,
             _buff,
             outm
         );
-    }
+    } 
 
     void to_dense(
-        int i, int j, int p, int q,
+        int i, int p,
         Eigen::Ref<colmat_value_t> out
-    ) const override
+    ) override
     {
-        base_t::check_to_dense(i, j, p, q, out.rows(), out.cols(), rows(), cols());
-        out = _mat.block(i, j, p, q);
+        base_t::check_to_dense(i, p, out.rows(), out.cols(), rows(), cols());
+        out = _mat.block(i, i, p, p);
     }
 
     int cols() const override

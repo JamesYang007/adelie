@@ -127,6 +127,7 @@ adelie.state
     :toctree: generated/
 
 
+    gaussian_cov
     gaussian_naive
     gaussian_pin_cov
     gaussian_pin_naive
@@ -146,6 +147,7 @@ adelie.solver
     :toctree: generated/
 
 
+    gaussian_cov
     grpnet
 
 
@@ -162,6 +164,7 @@ Internal
 
     adelie_core.state.StateGaussianPinCov64
     adelie_core.state.StateGaussianPinNaive64
+    adelie_core.state.StateGaussianCov64
     adelie_core.state.StateGaussianNaive64
     adelie_core.state.StateGlmNaive64
     adelie_core.state.StateMultiGaussianNaive64

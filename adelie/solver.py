@@ -46,10 +46,14 @@ def _solve(state, progress_bar: bool =False):
     """
     # mapping of each state type to the corresponding solver
     f_dict = {
-        core.state.StateGaussianPinNaive64: core.solver.solve_gaussian_pin_naive_64,
-        core.state.StateGaussianPinNaive32: core.solver.solve_gaussian_pin_naive_32,
+        # cov methods
         core.state.StateGaussianPinCov64: core.solver.solve_gaussian_pin_cov_64,
         core.state.StateGaussianPinCov32: core.solver.solve_gaussian_pin_cov_32,
+        core.state.StateGaussianCov64: core.solver.solve_gaussian_cov_64,
+        core.state.StateGaussianCov32: core.solver.solve_gaussian_cov_32,
+        # naive methods
+        core.state.StateGaussianPinNaive64: core.solver.solve_gaussian_pin_naive_64,
+        core.state.StateGaussianPinNaive32: core.solver.solve_gaussian_pin_naive_32,
         core.state.StateGaussianNaive64: core.solver.solve_gaussian_naive_64,
         core.state.StateGaussianNaive32: core.solver.solve_gaussian_naive_32,
         core.state.StateMultiGaussianNaive64: core.solver.solve_multigaussian_naive_64,
@@ -61,12 +65,14 @@ def _solve(state, progress_bar: bool =False):
     }
 
     is_gaussian_pin = (
-        isinstance(state, core.state.StateGaussianPinNaive64) or
-        isinstance(state, core.state.StateGaussianPinNaive32) or
         isinstance(state, core.state.StateGaussianPinCov64) or
-        isinstance(state, core.state.StateGaussianPinCov32)
+        isinstance(state, core.state.StateGaussianPinCov32) or
+        isinstance(state, core.state.StateGaussianPinNaive64) or
+        isinstance(state, core.state.StateGaussianPinNaive32)
     )
     is_gaussian = (
+        isinstance(state, core.state.StateGaussianCov64) or
+        isinstance(state, core.state.StateGaussianCov32) or
         isinstance(state, core.state.StateGaussianNaive64) or
         isinstance(state, core.state.StateGaussianNaive32) or
         isinstance(state, core.state.StateMultiGaussianNaive64) or
@@ -104,6 +110,281 @@ def _solve(state, progress_bar: bool =False):
     return state
 
 
+def gaussian_cov(
+    *,
+    A: np.ndarray,
+    v: np.ndarray,
+    groups: np.ndarray =None,
+    alpha: float =1,
+    penalty: np.ndarray =None,
+    lmda_path: np.ndarray =None,
+    max_iters: int =int(1e5),
+    tol: float =1e-7,
+    rdev_tol: float =1e-4,
+    newton_tol: float =1e-12,
+    newton_max_iters: int =1000,
+    n_threads: int =1,
+    early_exit: bool =True,
+    screen_rule: str ="pivot",
+    min_ratio: float =1e-2,
+    lmda_path_size: int =100,
+    max_screen_size: int =None,
+    max_active_size: int =None,
+    pivot_subset_ratio: float =0.1,
+    pivot_subset_min: int =1,
+    pivot_slack_ratio: float =1.25,
+    check_state: bool =False,
+    progress_bar: bool =True,
+    warm_start =None,
+):
+    """Gaussian elastic net solver via covariance method.
+
+    The Gaussian elastic net problem via covariance method minimizes the following:
+
+    .. math::
+        \\begin{align*}
+            \\mathrm{minimize}_{\\beta} \\quad&
+            \\frac{1}{2} \\beta^\\top A \\beta - v^\\top \\beta
+            + \\lambda \\sum\\limits_{g=1}^G \\omega_g \\left(
+                \\alpha \\|\\beta_g\\|_2 + \\frac{1-\\alpha}{2} \\|\\beta_g\\|_2^2
+            \\right)
+        \\end{align*}
+
+    where 
+    :math:`\\beta` is the coefficient vector,
+    :math:`A` is any positive semi-definite matrix,
+    :math:`v` is any vector,
+    :math:`\\lambda \\geq 0` is the regularization parameter,
+    :math:`G` is the number of groups,
+    :math:`\\omega \\geq 0` is the penalty factor,
+    :math:`\\alpha \\in [0,1]` is the elastic net parameter,
+    and :math:`\\beta_g` are the coefficients for the :math:`g` th group.
+
+    Parameters
+    ----------
+    A : (p, p) Union[adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]
+        Positive semi-definite matrix.
+        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
+    v : (p,) np.ndarray
+        Linear term.
+    groups : (G,) np.ndarray, optional
+        List of starting indices to each group where `G` is the number of groups.
+        ``groups[i]`` is the starting index of the ``i`` th group. 
+        Default is ``None``, in which case it is set to ``np.arange(p)``.
+    alpha : float, optional
+        Elastic net parameter.
+        It must be in the range :math:`[0,1]`.
+        Default is ``1``.
+    penalty : (G,) np.ndarray, optional
+        Penalty factor for each group in the same order as ``groups``.
+        It must be a non-negative vector.
+        Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
+    lmda_path : (L,) np.ndarray, optional
+        The regularization path to solve for.
+        The full path is not considered if ``early_exit`` is ``True``.
+        It is recommended that the path is sorted in decreasing order.
+        If ``None``, the path will be generated.
+        Default is ``None``.
+    max_iters : int, optional
+        Maximum number of coordinate descents.
+        Default is ``int(1e5)``.
+    tol : float, optional
+        Coordinate descent convergence tolerance.
+        Default is ``1e-7``.
+    rdev_tol : float, optional
+        Relative percent deviance explained tolerance.
+        Default is ``1e-4``.
+    newton_tol : float, optional
+        Convergence tolerance for the BCD update.
+        Default is ``1e-12``.
+    newton_max_iters : int, optional
+        Maximum number of iterations for the BCD update.
+        Default is ``1000``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+    early_exit : bool, optional
+        ``True`` if the function should early exit based on training deviance explained.
+        Default is ``True``.
+    min_ratio : float, optional
+        The ratio between the largest and smallest :math:`\\lambda` in the regularization sequence
+        if it is to be generated.
+        Default is ``1e-2``.
+    lmda_path_size : int, optional
+        Number of regularizations in the path if it is to be generated.
+        Default is ``100``.
+    screen_rule : str, optional
+        The type of screening rule to use. It must be one of the following options:
+
+            - ``"strong"``: adds groups whose active scores are above the strong threshold.
+            - ``"pivot"``: adds groups whose active scores are above the pivot cutoff with slack.
+
+        Default is ``"pivot"``.
+    max_screen_size : int, optional
+        Maximum number of screen groups allowed.
+        The function will return a valid state and guarantees to have screen set size
+        less than or equal to ``max_screen_size``.
+        If ``None``, it will be set to the total number of groups.
+        Default is ``None``.
+    max_active_size : int, optional
+        Maximum number of active groups allowed.
+        The function will return a valid state and guarantees to have active set size
+        less than or equal to ``max_active_size``.
+        If ``None``, it will be set to the total number of groups.
+        Default is ``None``.
+    pivot_subset_ratio : float, optional
+        If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
+        largest active scores are used to determine the pivot point
+        where ``s`` is the current screen set size.
+        It is only used if ``screen_rule="pivot"``.
+        Default is ``0.1``.
+    pivot_subset_min : int, optional
+        If screening takes place, then at least ``pivot_subset_min``
+        number of active scores are used to determine the pivot point.
+        It is only used if ``screen_rule="pivot"``.
+        Default is ``1``.
+    pivot_slack_ratio : float, optional
+        If screening takes place, then ``pivot_slack_ratio``
+        number of groups with next smallest (new) active scores 
+        below the pivot point are also added to the screen set as slack.
+        It is only used if ``screen_rule="pivot"``.
+        Default is ``1.25``.
+    check_state : bool, optional 
+        ``True`` is state should be checked for inconsistencies before calling solver.
+        Default is ``False``.
+
+        .. warning::
+            The check may take a long time if the inputs are big!
+
+    progress_bar : bool, optional
+        ``True`` to enable progress bar.
+        Default is ``True``.
+    warm_start : optional
+        If no warm-start is provided, the initial solution is set to 0
+        and other invariance quantities are set accordingly.
+        Otherwise, the warm-start is used to extract all necessary state variables.
+        If warm-start is used, the user *must* still provide consistent inputs,
+        that is, warm-start will not overwrite most arguments passed into this function.
+        However, changing configuration settings such as tolerance levels is well-defined.
+        Default is ``None``.
+
+        .. note::
+            The primary use-case is when a user already called the function with ``warm_start=False``
+            but would like to continue fitting down a longer path of regularizations.
+            This way, the user does not have to restart the fit at the beginning,
+            but can simply continue from the last returned state.
+
+        .. warning::
+            We have only tested warm-starts in the setting described in the note above,
+            that is, when ``lmda_path`` and possibly static configurations have changed.
+            Use with caution in other settings!
+
+    Returns
+    -------
+    state
+        The resulting state after running the solver.
+
+    See Also
+    --------
+    adelie.adelie_core.state.StateGaussianCov64
+    """
+    if isinstance(A, np.ndarray):
+        A = ad.matrix.dense(A, method="cov", n_threads=n_threads)
+
+    assert (
+        isinstance(A, matrix.MatrixCovBase64) or
+        isinstance(A, matrix.MatrixCovBase32)
+    )
+
+    dtype = (
+        np.float64
+        if isinstance(A, matrix.MatrixCovBase64) else
+        np.float32
+    )
+    
+    p = A.cols()
+
+    if not (lmda_path is None):
+        # MUST evaluate the flip to be able to pass into C++ backend.
+        lmda_path = np.array(np.flip(np.sort(lmda_path)))
+
+    if groups is None:
+        groups = np.arange(p, dtype=int)
+    group_sizes = np.concatenate([groups, [p]], dtype=int)
+    group_sizes = group_sizes[1:] - group_sizes[:-1]
+
+    G = len(groups)
+
+    if penalty is None:
+        penalty = np.sqrt(group_sizes)
+
+    if warm_start is None:
+        lmda = np.inf
+        lmda_max = None
+        screen_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
+        screen_beta = np.zeros(np.sum(group_sizes[screen_set]), dtype=dtype)
+        screen_is_active = np.ones(screen_set.shape[0], dtype=bool)
+        rsq = 0
+
+        grad = v
+        _tmp = np.empty(p, dtype=dtype)
+        _pos = 0
+        for i in range(screen_set.shape[0]):
+            ss = screen_set[i]
+            g, gs = groups[ss], group_sizes[ss]
+            A.mul(g, gs, screen_beta[_pos:_pos+gs], _tmp)
+            grad -= _tmp
+            _pos += gs
+    else:
+        lmda = warm_start.lmda
+        lmda_max = warm_start.lmda_max
+        screen_set = warm_start.screen_set
+        screen_beta = warm_start.screen_beta
+        screen_is_active = warm_start.screen_is_active
+        rsq = warm_start.rsq
+        grad = warm_start.grad
+
+    state = ad.state.gaussian_cov(
+        A=A,
+        v=v,
+        groups=groups,
+        group_sizes=group_sizes,
+        alpha=alpha,
+        penalty=penalty,
+        screen_set=screen_set,
+        screen_beta=screen_beta,
+        screen_is_active=screen_is_active,
+        rsq=rsq,
+        lmda=lmda,
+        grad=grad,
+        lmda_path=lmda_path,
+        lmda_max=lmda_max,
+        max_iters=max_iters,
+        tol=tol,
+        rdev_tol=rdev_tol,
+        newton_tol=newton_tol,
+        newton_max_iters=newton_max_iters,
+        n_threads=n_threads,
+        early_exit=early_exit,
+        screen_rule=screen_rule,
+        min_ratio=min_ratio,
+        lmda_path_size=lmda_path_size,
+        max_screen_size=max_screen_size,
+        max_active_size=max_active_size,
+        pivot_subset_ratio=pivot_subset_ratio,
+        pivot_subset_min=pivot_subset_min,
+        pivot_slack_ratio=pivot_slack_ratio,
+    )
+
+    if check_state:
+        state.check(method="assert")
+
+    return _solve(
+        state=state, 
+        progress_bar=progress_bar,
+    )
+
+
 def grpnet(
     *,
     X: np.ndarray,
@@ -133,7 +414,7 @@ def grpnet(
     pivot_subset_min: int =1,
     pivot_slack_ratio: float =1.25,
     check_state: bool =False,
-    progress_bar: bool =False,
+    progress_bar: bool =True,
     warm_start =None,
 ):
     """Group elastic net solver.
@@ -323,7 +604,7 @@ def grpnet(
 
     progress_bar : bool, optional
         ``True`` to enable progress bar.
-        Default is ``False``.
+        Default is ``True``.
     warm_start : optional
         If no warm-start is provided, the initial solution is set to 0
         and other invariance quantities are set accordingly.
@@ -334,10 +615,10 @@ def grpnet(
         Default is ``None``.
 
         .. note::
-            The primary use-case is when a user already called ``grpnet`` with ``warm_start=False``
+            The primary use-case is when a user already called the function with ``warm_start=False``
             but would like to continue fitting down a longer path of regularizations.
             This way, the user does not have to restart the fit at the beginning,
-            but can simply continue from the last state ``grpnet`` returned.
+            but can simply continue from the last returned state.
 
         .. warning::
             We have only tested warm-starts in the setting described in the note above,
@@ -348,6 +629,13 @@ def grpnet(
     -------
     state
         The resulting state after running the solver.
+
+    See Also
+    --------
+    adelie.adelie_core.state.StateGaussianNaive64
+    adelie.adelie_core.state.StateGlmNaive64
+    adelie.adelie_core.state.StateMultiGaussianNaive64
+    adelie.adelie_core.state.StateMultiGlmNaive64
     """
     X_raw = X
 

@@ -38,16 +38,15 @@ struct StateGaussianPinCov: StateGaussianPinBase<
     using typename base_t::dyn_vec_vec_value_t;
     using matrix_t = MatrixType;
 
-    /* Static states */
-    const value_t y_var;
+    /* configurations */
+    const value_t rdev_tol;
 
-    /* Dynamic states */
+    /* dynamic states */
     matrix_t* A;    // covariance matrix-like
     map_vec_value_t screen_grad;
 
     explicit StateGaussianPinCov(
         matrix_t& A,
-        value_t y_var,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
@@ -62,8 +61,7 @@ struct StateGaussianPinCov: StateGaussianPinBase<
         size_t max_active_size,
         size_t max_iters,
         value_t tol,
-        value_t adev_tol,
-        value_t ddev_tol,
+        value_t rdev_tol,
         value_t newton_tol,
         size_t newton_max_iters,
         size_t n_threads,
@@ -75,10 +73,10 @@ struct StateGaussianPinCov: StateGaussianPinBase<
         base_t(
             groups, group_sizes, alpha, penalty, 
             screen_set, screen_g1, screen_g2, screen_begins, screen_vars, screen_transforms, lmda_path, 
-            false, max_active_size, max_iters, tol, adev_tol, ddev_tol, newton_tol, newton_max_iters, n_threads,
+            false, max_active_size, max_iters, tol, 0, 0, newton_tol, newton_max_iters, n_threads,
             rsq, screen_beta, screen_is_active
         ),
-        y_var(y_var),
+        rdev_tol(rdev_tol),
         A(&A),
         screen_grad(screen_grad.data(), screen_grad.size())
     {}

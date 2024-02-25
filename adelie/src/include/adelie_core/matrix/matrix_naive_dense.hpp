@@ -24,7 +24,7 @@ private:
     util::rowmat_type<value_t> _buff;
     
 public:
-    MatrixNaiveDense(
+    explicit MatrixNaiveDense(
         const Eigen::Ref<const dense_t>& mat,
         size_t n_threads
     ): 

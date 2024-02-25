@@ -56,7 +56,7 @@ protected:
     }
 
 public:
-    MatrixNaiveSNPPhasedAncestry(
+    explicit MatrixNaiveSNPPhasedAncestry(
         const string_t& filename,
         size_t n_threads
     ): 

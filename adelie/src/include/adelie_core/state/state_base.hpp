@@ -1,5 +1,6 @@
 #pragma once
 #include <unordered_map>
+#include <vector>
 #include <adelie_core/util/types.hpp>
 #include <adelie_core/util/macros.hpp>
 

@@ -319,7 +319,6 @@ inline void solve(
     using sw_t = util::Stopwatch;
 
     auto& A = *state.A;
-    const auto y_var = state.y_var;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto& screen_set = state.screen_set;
@@ -329,8 +328,7 @@ inline void solve(
     const auto& lmda_path = state.lmda_path;
     const auto max_active_size = state.max_active_size;
     const auto tol = state.tol;
-    const auto adev_tol = state.adev_tol;
-    const auto ddev_tol = state.ddev_tol;
+    const auto rdev_tol = state.rdev_tol;
     const auto max_iters = state.max_iters;
     auto& active_set = state.active_set;
     auto& active_g1 = state.active_g1;
@@ -504,11 +502,7 @@ inline void solve(
         benchmark_screen.emplace_back(screen_time);
         benchmark_active.emplace_back(active_time);
 
-        // if y variance is provided, do early stopping rule
-        if (y_var != -1) {
-            if (rsq >= adev_tol * y_var) break;
-            if ((l >= 1) && (rsqs[l]-rsqs[l-1] <= ddev_tol * y_var)) break;
-        }
+        if ((l >= 1) && (rsqs[l]-rsqs[l-1] <= rdev_tol * rsqs[l])) break;
     }
 }
 

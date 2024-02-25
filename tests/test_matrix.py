@@ -5,6 +5,95 @@ import scipy
 import os
 
 
+# ==========================================================================================
+# TEST cov
+# ==========================================================================================
+
+
+def run_cov(
+    A,
+    cA,
+    dtype,
+):
+    p = A.shape[0]
+
+    atol = 1e-6 if dtype == np.float32 else 1e-14
+
+    # test bmul
+    out = np.empty(p, dtype=dtype)
+    for i in range(1, p+1):
+        v = np.random.normal(0, 1, i).astype(dtype)
+        cA.bmul(0, 0, i, p, v, out)
+        expected = v.T @ A[:i, :]
+        assert np.allclose(expected, out, atol=atol)
+    q = min(10, p)
+    v = np.random.normal(0, 1, q).astype(dtype)
+    for i in range(p-q+1):
+        cA.bmul(i, 0, q, p, v, out)
+        expected = v.T @ A[i:i+q, :]
+        assert np.allclose(expected, out, atol=atol)
+
+    # test mul
+    v = np.random.normal(0, 1, q).astype(dtype)
+    for i in range(p-q+1):
+        cA.mul(i, q, v, out)
+        expected = v.T @ A[i:i+q, :]
+        assert np.allclose(expected, out, atol=atol)
+
+    # test to_dense
+    out = np.empty((q, q), dtype=dtype, order="F")
+    for i in range(p-q+1):
+        cA.to_dense(i, q, out)
+        expected = A[i:i+q, i:i+q]
+        assert np.allclose(expected, out, atol=atol)
+
+    assert cA.rows() == p
+    assert cA.cols() == p
+
+
+def test_cov_dense():
+    def _test(n, p, dtype, order, seed=0):
+        np.random.seed(seed)
+        X = np.random.normal(0, 1, (n, p))
+        A = X.T @ X / n
+        A = np.array(A, dtype=dtype, order=order)
+        cA = mod.dense(A, method="cov", n_threads=4)
+        run_cov(A, cA, dtype)
+
+    dtypes = [np.float32, np.float64]
+    orders = ["C", "F"]
+    for dtype in dtypes:
+        for order in orders:
+            _test(2, 2, dtype, order)
+            _test(100, 20, dtype, order)
+            _test(20, 100, dtype, order)
+
+
+def test_cov_lazy():
+    def _test(n, p, dtype, order, seed=0):
+        np.random.seed(seed)
+        X = np.random.normal(0, 1, (n, p))
+        X /= np.sqrt(n)
+        A = X.T @ X
+        X = np.array(X, dtype=dtype, order=order)
+        A = np.array(A, dtype=dtype, order=order)
+        cA = mod.cov_lazy(X, n_threads=4)
+        run_cov(A, cA, dtype)
+
+    dtypes = [np.float32, np.float64]
+    orders = ["C", "F"]
+    for dtype in dtypes:
+        for order in orders:
+            _test(2, 2, dtype, order)
+            _test(100, 20, dtype, order)
+            _test(20, 100, dtype, order)
+
+
+# ==========================================================================================
+# TEST naive
+# ==========================================================================================
+
+
 def run_naive(
     X, 
     cX,
@@ -96,30 +185,6 @@ def run_naive(
     assert np.allclose(expected, out, atol=atol)
 
 
-def run_cov(
-    A,
-    cA,
-    dtype,
-):
-    p = A.shape[0]
-
-    atol = 1e-6 if dtype == np.float32 else 1e-14
-
-    # test bmul
-    v = np.random.normal(0, 1, p // 2).astype(dtype)
-    out = np.empty(p, dtype=dtype)
-    cA.bmul(0, 0, p // 2, p, v, out)
-    assert np.allclose(v.T @ A[:p//2, :], out, atol=atol)
-
-    # test to_dense
-    out = np.empty((p // 2, p // 2), dtype=dtype, order="F")
-    cA.to_dense(0, 0, p//2, p//2, out)
-    assert np.allclose(A[:p//2, :p//2], out, atol=atol)
-
-    assert cA.rows() == p
-    assert cA.cols() == p
-
-
 def test_naive_concat():
     def _test(n, ps, dtype, n_threads=7, seed=0):
         np.random.seed(seed)
@@ -130,7 +195,6 @@ def test_naive_concat():
         X = np.concatenate(Xs, axis=1, dtype=dtype)
         cX = mod.concatenate(
             [mod.dense(_X.astype(dtype), method="naive", n_threads=n_threads) for _X in Xs], 
-            method="naive", 
             n_threads=n_threads, 
         )
         run_naive(X, cX, dtype)
@@ -195,44 +259,6 @@ def test_naive_kronecker_eye_dense():
         for order in orders:
             _test(10, 1, 3, dtype, order)
             _test(100, 20, 2, dtype, order)
-
-
-def test_cov_dense():
-    def _test(n, p, dtype, order, seed=0):
-        np.random.seed(seed)
-        X = np.random.normal(0, 1, (n, p))
-        A = X.T @ X / n
-        A = np.array(A, dtype=dtype, order=order)
-        cA = mod.dense(A, method="cov", n_threads=4)
-        run_cov(A, cA, dtype)
-
-    dtypes = [np.float32, np.float64]
-    orders = ["C", "F"]
-    for dtype in dtypes:
-        for order in orders:
-            _test(2, 2, dtype, order)
-            _test(100, 20, dtype, order)
-            _test(20, 100, dtype, order)
-
-
-def test_cov_lazy():
-    def _test(n, p, dtype, order, seed=0):
-        np.random.seed(seed)
-        X = np.random.normal(0, 1, (n, p))
-        X /= np.sqrt(n)
-        A = X.T @ X
-        X = np.array(X, dtype=dtype, order=order)
-        A = np.array(A, dtype=dtype, order=order)
-        cA = mod.cov_lazy(X, n_threads=4)
-        run_cov(A, cA, dtype)
-
-    dtypes = [np.float32, np.float64]
-    orders = ["C", "F"]
-    for dtype in dtypes:
-        for order in orders:
-            _test(2, 2, dtype, order)
-            _test(100, 20, dtype, order)
-            _test(20, 100, dtype, order)
 
 
 def test_snp_unphased():
