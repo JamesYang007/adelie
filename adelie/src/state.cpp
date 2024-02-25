@@ -2,9 +2,10 @@
 #include <adelie_core/glm/glm_base.hpp>
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
+#include <adelie_core/state/state_gaussian_cov.hpp>
+#include <adelie_core/state/state_gaussian_naive.hpp>
 #include <adelie_core/state/state_gaussian_pin_cov.hpp>
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
-#include <adelie_core/state/state_gaussian_naive.hpp>
 #include <adelie_core/state/state_glm_naive.hpp>
 #include <adelie_core/state/state_multigaussian_naive.hpp>
 #include <adelie_core/state/state_multiglm_naive.hpp>
@@ -166,21 +167,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         From this index, reading ``group_sizes[screen_set[i]]`` number of elements
         will grab values corresponding to the full ``i`` th screen group block.
         )delimiter")
-        .def_readonly("screen_vars", &state_t::screen_vars, R"delimiter(
-        List of :math:`D_k^2` where :math:`D_k` is from the SVD of :math:`\sqrt{W} X_{c,k}` 
-        along the screen groups :math:`k` and for possibly column-centered (weighted by :math:`W`) :math:`X_k`.
-        ``screen_vars[b:b+p]`` is :math:`D_k` for the ``i`` th screen group where
-        ``k = screen_set[i]``,
-        ``b = screen_begins[i]``,
-        and ``p = group_sizes[k]``.
-        )delimiter")
-        .def_readonly("screen_transforms", &state_t::screen_transforms, R"delimiter(
-        List of :math:`V_k` where :math:`V_k` is from the SVD of :math:`\sqrt{W} X_{c,k}`
-        along the screen groups :math:`k` and for possibly column-centered (weighted by :math:`W`) :math:`X_k`.
-        It *only* needs to be properly initialized for groups with size > 1.
-        ``screen_transforms[i]`` is :math:`V_k` for the ``i`` th screen group where
-        ``k = screen_set[i]``.
-        )delimiter")
         .def_readonly("lmda_path", &state_t::lmda_path, R"delimiter(
         The regularization path to solve for.
         )delimiter")
@@ -210,10 +196,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("n_threads", &state_t::n_threads, R"delimiter(
         Number of threads.
-        )delimiter")
-        .def_readonly("rsq", &state_t::rsq, R"delimiter(
-        The change in unnormalized :math:`R^2` given by 
-        :math:`\|y_c-X_c\beta_{\mathrm{old}}\|_{W}^2 - \|y_c-X_c\beta_{\mathrm{curr}}\|_{W}^2`.
         )delimiter")
         .def_readonly("screen_beta", &state_t::screen_beta, R"delimiter(
         Coefficient vector on the screen set.
@@ -431,6 +413,25 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
         .def_readonly("screen_X_means", &state_t::screen_X_means, R"delimiter(
         Column means of :math:`X` for screen groups (weighted by :math:`W`).
         )delimiter")
+        .def_readonly("screen_vars", &state_t::screen_vars, R"delimiter(
+        List of :math:`D_k^2` where :math:`D_k` is from the SVD of :math:`\sqrt{W} X_{c,k}` 
+        along the screen groups :math:`k` and for possibly column-centered (weighted by :math:`W`) :math:`X_k`.
+        ``screen_vars[b:b+p]`` is :math:`D_k^2` for the ``i`` th screen group where
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
+        and ``p = group_sizes[k]``.
+        )delimiter")
+        .def_readonly("screen_transforms", &state_t::screen_transforms, R"delimiter(
+        List of :math:`V_k` where :math:`V_k` is from the SVD of :math:`\sqrt{W} X_{c,k}`
+        along the screen groups :math:`k` and for possibly column-centered (weighted by :math:`W`) :math:`X_k`.
+        It *only* needs to be properly initialized for groups with size > 1.
+        ``screen_transforms[i]`` is :math:`V_k` for the ``i`` th screen group where
+        ``k = screen_set[i]``.
+        )delimiter")
+        .def_readonly("rsq", &state_t::rsq, R"delimiter(
+        The change in unnormalized :math:`R^2` given by 
+        :math:`\|y_c-X_c\beta_{\mathrm{old}}\|_{W}^2 - \|y_c-X_c\beta_{\mathrm{curr}}\|_{W}^2`.
+        )delimiter")
         .def_readonly("X", &state_t::X, R"delimiter(
         Feature matrix.
         )delimiter")
@@ -476,7 +477,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
         )delimiter")
         .def(py::init<
             matrix_t&,
-            value_t,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
@@ -493,7 +493,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             value_t,
             value_t,
             value_t,
-            value_t,
             size_t,
             size_t,
             value_t,
@@ -502,7 +501,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             Eigen::Ref<vec_bool_t>
         >(),
             py::arg("A"),
-            py::arg("y_var"),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
@@ -517,8 +515,7 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("max_active_size"),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("adev_tol"),
-            py::arg("ddev_tol"),
+            py::arg("rdev_tol"),
             py::arg("newton_tol"),
             py::arg("newton_max_iters"),
             py::arg("n_threads"),
@@ -528,15 +525,34 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("screen_is_active").noconvert()
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
-        .def_readonly("y_var", &state_t::y_var, R"delimiter(
-        Variance of the response vector :math:`y` (weighted by :math:`W`), 
-        i.e. :math:`\|y_c\|_{W}^2` or ``-1`` to disable early stopping check.
+        .def_readonly("screen_vars", &state_t::screen_vars, R"delimiter(
+        List of :math:`D_k^2` where :math:`D_k^2` are the eigenvalues of :math:`A_{kk}` 
+        along the screen groups :math:`k`.
+        ``screen_vars[b:b+p]`` is :math:`D_k^2` for the ``i`` th screen group where
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
+        and ``p = group_sizes[k]``.
+        )delimiter")
+        .def_readonly("screen_transforms", &state_t::screen_transforms, R"delimiter(
+        List of :math:`V_k` where :math:`V_k` are the eigenvectors of :math:`A_{kk}`
+        along the screen groups :math:`k`.
+        It *only* needs to be properly initialized for groups with size > 1.
+        ``screen_transforms[i]`` is :math:`V_k` for the ``i`` th screen group where
+        ``k = screen_set[i]``.
+        )delimiter")
+        .def_readonly("rsq", &state_t::rsq, R"delimiter(
+        The change in unnormalized :math:`R^2` given by 
+        :math:`2(\ell(\beta_{\mathrm{old}}) - \ell(\beta_{\mathrm{curr}}))`.
+        )delimiter")
+        .def_readonly("rdev_tol", &state_t::rdev_tol, R"delimiter(
+        Relative percent deviance explained tolerance.
         )delimiter")
         .def_readonly("A", &state_t::A, R"delimiter(
-        Covariance matrix :math:`X_c^\top W X_c`.
+        Positive semi-definite matrix :math:`A`.
         )delimiter")
         .def_readonly("screen_grad", &state_t::screen_grad, R"delimiter(
-        Gradient :math:`X_{c,k}^\top W (y_c-X_c\beta)` on the screen groups :math:`k` where :math:`\beta` is given by ``screen_beta``.
+        Gradient :math:`v_k - A_{k,\cdot} \beta` on the screen groups :math:`k` 
+        where :math:`\beta` is given by ``screen_beta``.
         ``screen_grad[b:b+p]`` is the gradient for the ``i`` th screen group
         where 
         ``k = screen_set[i]``,
@@ -1031,7 +1047,7 @@ void state_gaussian_naive(py::module_& m, const char* name)
         }, R"delimiter(
         List of :math:`D_k^2` where :math:`D_k` is from the SVD of :math:`\sqrt{W} X_{c,k}` 
         along the screen groups :math:`k` and for possibly column-centered (weighted by :math:`W`) :math:`X_k`.
-        ``screen_vars[b:b+p]`` is :math:`D_k` for the ``i`` th screen group where
+        ``screen_vars[b:b+p]`` is :math:`D_k^2` for the ``i`` th screen group where
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
@@ -1174,6 +1190,139 @@ void state_multigaussian_naive(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("intercepts", &state_t::intercepts, R"delimiter(
         ``intercepts[i]`` is the intercept at ``lmdas[i]`` for each class.
+        )delimiter")
+        ;
+}
+
+template <class MatrixType>
+class PyStateGaussianCov : public ad::state::StateGaussianCov<MatrixType>
+{
+    using base_t = ad::state::StateGaussianCov<MatrixType>;
+public:
+    using base_t::base_t;
+    PyStateGaussianCov(base_t&& base) : base_t(std::move(base)) {}
+};
+
+template <class MatrixType>
+void state_gaussian_cov(py::module_& m, const char* name)
+{
+    using matrix_t = MatrixType;
+    using state_t = ad::state::StateGaussianCov<matrix_t>;
+    using base_t = typename state_t::base_t;
+    using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_bool_t = typename state_t::vec_bool_t;
+    py::class_<state_t, base_t, PyStateGaussianCov<matrix_t>>(m, name, R"delimiter(
+        Core state class for gaussian, covariance method.
+        )delimiter")
+        .def(py::init<
+            matrix_t&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_index_t>&,
+            value_t, 
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            value_t,
+            value_t,
+            size_t,
+            size_t,
+            size_t,
+            value_t,
+            size_t,
+            value_t,
+            const std::string&,
+            size_t,
+            value_t,
+            value_t,
+            value_t,
+            size_t,
+            bool,
+            bool,
+            bool,
+            size_t,
+            const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_value_t>&, 
+            const Eigen::Ref<const vec_bool_t>&,
+            value_t,
+            value_t,
+            const Eigen::Ref<const vec_value_t>& 
+        >(),
+            py::arg("A"),
+            py::arg("v").noconvert(),
+            py::arg("groups").noconvert(),
+            py::arg("group_sizes").noconvert(),
+            py::arg("alpha"),
+            py::arg("penalty").noconvert(),
+            py::arg("lmda_path").noconvert(),
+            py::arg("lmda_max"),
+            py::arg("min_ratio"),
+            py::arg("lmda_path_size"),
+            py::arg("max_screen_size"),
+            py::arg("max_active_size"),
+            py::arg("pivot_subset_ratio"),
+            py::arg("pivot_subset_min"),
+            py::arg("pivot_slack_ratio"),
+            py::arg("screen_rule"),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("rdev_tol"),
+            py::arg("newton_tol"),
+            py::arg("newton_max_iters"),
+            py::arg("early_exit"),
+            py::arg("setup_lmda_max"),
+            py::arg("setup_lmda_path"),
+            py::arg("n_threads"),
+            py::arg("screen_set").noconvert(),
+            py::arg("screen_beta").noconvert(),
+            py::arg("screen_is_active").noconvert(),
+            py::arg("rsq"),
+            py::arg("lmda"),
+            py::arg("grad").noconvert()
+        )
+        .def(py::init([](const state_t& s) { return new state_t(s); }))
+        .def_readonly("v", &state_t::v, R"delimiter(
+        Linear term.
+        )delimiter")
+        .def_readonly("A", &state_t::A, R"delimiter(
+        Positive semi-definite matrix :math:`A`.
+        )delimiter")
+        .def_readonly("rdev_tol", &state_t::rdev_tol, R"delimiter(
+        Relative percent deviance explained tolerance.
+        )delimiter")
+        .def_readonly("rsq", &state_t::rsq, R"delimiter(
+        The change in unnormalized :math:`R^2` given by 
+        :math:`2(\ell(\beta_{\mathrm{old}}) - \ell(\beta_{\mathrm{curr}}))`.
+        )delimiter")
+        .def_readonly("screen_transforms", &state_t::screen_transforms, R"delimiter(
+        List of :math:`V_k` where :math:`V_k` are the eigenvectors of :math:`A_{kk}`
+        along the screen groups :math:`k`.
+        It *only* needs to be properly initialized for groups with size > 1.
+        ``screen_transforms[i]`` is :math:`V_k` for the ``i`` th screen group where
+        ``k = screen_set[i]``.
+        )delimiter")
+        .def_property_readonly("screen_vars", [](const state_t& s) {
+            return Eigen::Map<const vec_value_t>(s.screen_vars.data(), s.screen_vars.size());
+        }, R"delimiter(
+        List of :math:`D_k^2` where :math:`D_k^2` are the eigenvalues of :math:`A_{kk}` 
+        along the screen groups :math:`k`.
+        ``screen_vars[b:b+p]`` is :math:`D_k^2` for the ``i`` th screen group where
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
+        and ``p = group_sizes[k]``.
+        )delimiter")
+        .def_readonly("screen_grad", &state_t::screen_grad, R"delimiter(
+        Gradient :math:`v_k - A_{k,\cdot} \beta` on the screen groups :math:`k` 
+        where :math:`\beta` is given by ``screen_beta``.
+        ``screen_grad[b:b+p]`` is the gradient for the ``i`` th screen group
+        where 
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
+        and ``p = group_sizes[k]``.
+        )delimiter")
+        .def_readonly("grad", &state_t::grad, R"delimiter(
+        The full gradient :math:`v - A\beta`.
         )delimiter")
         ;
 }
@@ -1479,6 +1628,8 @@ void register_state(py::module_& m)
 
     state_base<double>(m, "StateBase64");
     state_base<float>(m, "StateBase32");
+    state_gaussian_cov<ad::matrix::MatrixCovBase<double>>(m, "StateGaussianCov64");
+    state_gaussian_cov<ad::matrix::MatrixCovBase<float>>(m, "StateGaussianCov32");
     state_gaussian_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateGaussianNaive64");
     state_gaussian_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateGaussianNaive32");
     state_multigaussian_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateMultiGaussianNaive64");

@@ -38,7 +38,7 @@ protected:
     }
 
 public:
-    MatrixNaiveSNPUnphased(
+    explicit MatrixNaiveSNPUnphased(
         const string_t& filename,
         size_t n_threads
     ): 

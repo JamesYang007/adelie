@@ -820,12 +820,10 @@ def gaussian_pin_cov(
     screen_beta: np.ndarray,
     screen_grad: np.ndarray,
     screen_is_active: np.ndarray,
-    y_var: float =-1,
     max_active_size: int =None,
     max_iters: int =int(1e5),
     tol: float =1e-7,
-    adev_tol: float =0.9,
-    ddev_tol: float =1e-4,
+    rdev_tol: float =1e-4,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -884,14 +882,6 @@ def gaussian_pin_cov(
     screen_is_active : (a,) np.ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-    y_var : float, optional
-        Variance of the offsetted response vector :math:`y-\\eta^0` (weighted by :math:`W`), 
-        i.e. :math:`\\|y_c\\|_{W}^2`.
-        This is only used to check convergence as a relative measure,
-        i.e. this quantity is the "null" model MSE.
-        If the user does not have access to this quantity, 
-        they may be set it to ``-1``, which disables the check.
-        Default is ``-1``.
     max_active_size : int, optional
         Maximum number of active groups allowed.
         The function will return a valid state and guarantees to have active set size
@@ -904,14 +894,10 @@ def gaussian_pin_cov(
     tol : float, optional
         Coordinate descent convergence tolerance.
         Default is ``1e-7``.
-    adev_tol : float, optional
-        Percent deviance explained tolerance.
-        If the training percent deviance explained exceeds this quantity, 
-        then the solver terminates.
-        Default is ``0.9``.
-    ddev_tol : float, optional
-        Difference in percent deviance explained tolerance.
-        If the difference of the last two training percent deviance explained exceeds this quantity, 
+    rdev_tol : float, optional
+        Relative percent deviance explained tolerance.
+        If the difference of the last two training percent deviance explained exceeds 
+        the last training percent deviance explained scaled by this quantity,
         then the solver terminates.
         Default is ``1e-4``.
     newton_tol : float, optional
@@ -995,7 +981,7 @@ def gaussian_pin_cov(
             for i in self._screen_set:
                 g, gs = groups[i], group_sizes[i]
                 Aii = np.empty((gs, gs), dtype=dtype, order="F")
-                A.to_dense(g, g, gs, gs, Aii)  
+                A.to_dense(g, gs, Aii)  
                 dsq, v = np.linalg.eigh(Aii)
                 self._screen_vars.append(np.maximum(dsq, 0))
                 self._screen_transforms.append(v)
@@ -1010,7 +996,6 @@ def gaussian_pin_cov(
             core_base.__init__(
                 self,
                 A=A,
-                y_var=y_var,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
                 alpha=alpha,
@@ -1025,8 +1010,7 @@ def gaussian_pin_cov(
                 max_active_size=self._max_active_size,
                 max_iters=max_iters,
                 tol=tol,
-                adev_tol=adev_tol,
-                ddev_tol=ddev_tol,
+                rdev_tol=rdev_tol,
                 newton_tol=newton_tol,
                 newton_max_iters=newton_max_iters,
                 n_threads=n_threads,
@@ -1047,25 +1031,16 @@ def gaussian_pin_cov(
     return _gaussian_pin_cov()
 
 
-def _render_gaussian_naive_inputs(
+def _render_gaussian_inputs(
     *,
-    X,
     groups,
     lmda_max,
     lmda_path,
     lmda_path_size,
     max_screen_size,
     max_active_size,
+    dtype,
 ):
-    if not (
-        isinstance(X, matrix.MatrixNaiveBase64) or 
-        isinstance(X, matrix.MatrixNaiveBase32) or
-        isinstance(X, np.ndarray)
-    ):
-        raise ValueError(
-            "X must be an instance of matrix.MatrixNaiveBase32, matrix.MatrixNaiveBase64, or np.ndarray."
-        )
-
     if max_screen_size is None:
         max_screen_size = len(groups)
     if max_active_size is None:
@@ -1079,15 +1054,6 @@ def _render_gaussian_naive_inputs(
         len(lmda_path)
     )
 
-    dtype = (
-        np.float64
-        if (
-            isinstance(X, matrix.MatrixNaiveBase64) or
-            (isinstance(X, np.ndarray) and X.dtype == np.dtype("float64"))
-        ) else
-        np.float32
-    )
-
     setup_lmda_max = lmda_max is None
     setup_lmda_path = lmda_path is None
 
@@ -1098,12 +1064,64 @@ def _render_gaussian_naive_inputs(
         max_screen_size,
         max_active_size,
         lmda_path_size,
-        dtype,
         setup_lmda_max,
         setup_lmda_path,
         lmda_max,
         lmda_path,
+        dtype,
     )
+
+
+def _render_gaussian_cov_inputs(
+    *,
+    A,
+    **kwargs,
+):
+    if not (
+        isinstance(A, matrix.MatrixCovBase64) or 
+        isinstance(A, matrix.MatrixCovBase32) or
+        isinstance(A, np.ndarray)
+    ):
+        raise ValueError(
+            "A must be an instance of matrix.MatrixCovBase32, matrix.MatrixCovBase64, or np.ndarray."
+        )
+
+    dtype = (
+        np.float64
+        if (
+            isinstance(A, matrix.MatrixCovBase64) or
+            (isinstance(A, np.ndarray) and A.dtype == np.dtype("float64"))
+        ) else
+        np.float32
+    )
+
+    return _render_gaussian_inputs(dtype=dtype, **kwargs)
+
+
+def _render_gaussian_naive_inputs(
+    *,
+    X,
+    **kwargs,
+):
+    if not (
+        isinstance(X, matrix.MatrixNaiveBase64) or 
+        isinstance(X, matrix.MatrixNaiveBase32) or
+        isinstance(X, np.ndarray)
+    ):
+        raise ValueError(
+            "X must be an instance of matrix.MatrixNaiveBase32, matrix.MatrixNaiveBase64, or np.ndarray."
+        )
+
+    dtype = (
+        np.float64
+        if (
+            isinstance(X, matrix.MatrixNaiveBase64) or
+            (isinstance(X, np.ndarray) and X.dtype == np.dtype("float64"))
+        ) else
+        np.float32
+    )
+
+    return _render_gaussian_inputs(dtype=dtype, **kwargs)
 
 
 def _render_multi_input(
@@ -1121,7 +1139,6 @@ def _render_multi_input(
         ones_kron = matrix.kronecker_eye(np.ones((n, 1)), n_classes, n_threads=n_threads)
         X = matrix.concatenate(
             [ones_kron, X], 
-            method="naive", 
             n_threads=n_threads,
         )
 
@@ -1136,6 +1153,268 @@ def _render_multi_input(
     return (
         X, offsets, group_type
     )
+
+
+def gaussian_cov(
+    *,
+    A: Union[matrix.MatrixCovBase64, matrix.MatrixCovBase32],
+    v: np.ndarray,
+    groups: np.ndarray,
+    group_sizes: np.ndarray,
+    alpha: float,
+    penalty: np.ndarray,
+    screen_set: np.ndarray,
+    screen_beta: np.ndarray,
+    screen_is_active: np.ndarray,
+    rsq: float,
+    lmda: float,
+    grad: np.ndarray,
+    lmda_path: np.ndarray =None,
+    lmda_max: float =None,
+    max_iters: int =int(1e5),
+    tol: float =1e-7,
+    rdev_tol: float =1e-4,
+    newton_tol: float =1e-12,
+    newton_max_iters: int =1000,
+    n_threads: int =1,
+    early_exit: bool =True,
+    screen_rule: str ="pivot",
+    min_ratio: float =1e-2,
+    lmda_path_size: int =100,
+    max_screen_size: int =None,
+    max_active_size: int =None,
+    pivot_subset_ratio: float =0.1,
+    pivot_subset_min: int =1,
+    pivot_slack_ratio: float =1.25,
+):
+    """Creates a gaussian, naive method state object.
+
+    Define the following quantities:
+
+    Parameters
+    ----------
+    A : (p, p) Union[adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]
+        Positive semi-definite matrix.
+        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
+    v : (p,) np.ndarray
+        Linear term.
+    groups : (G,) np.ndarray
+        List of starting indices to each group where `G` is the number of groups.
+        ``groups[i]`` is the starting index of the ``i`` th group. 
+    group_sizes : (G,) np.ndarray
+        List of group sizes corresponding to each element of ``groups``.
+        ``group_sizes[i]`` is the size of the ``i`` th group.
+    alpha : float
+        Elastic net parameter.
+        It must be in the range :math:`[0,1]`.
+    penalty : (G,) np.ndarray
+        Penalty factor for each group in the same order as ``groups``.
+        It must be a non-negative vector.
+    screen_set : (s,) np.ndarray
+        List of indices into ``groups`` that correspond to the screen groups.
+        ``screen_set[i]`` is ``i`` th screen group.
+        ``screen_set`` must contain at least the true (optimal) active groups
+        when the regularization is given by ``lmda``.
+    screen_beta : (ws,) np.ndarray
+        Coefficient vector on the screen set.
+        ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
+        where
+        ``k = screen_set[i]``,
+        ``b = screen_begins[i]``,
+        and ``p = group_sizes[k]``.
+        The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
+    screen_is_active : (a,) np.ndarray
+        Boolean vector that indicates whether each screen group in ``groups`` is active or not.
+        ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    rsq : float
+        The change in unnormalized :math:`R^2` given by 
+        :math:`2(\\ell(\\beta_{\\mathrm{old}}) - \\ell(\\beta_{\\mathrm{curr}}))`.
+        Usually, :math:`\\beta_{\\mathrm{old}} = 0` 
+        and :math:`\\beta_{\\mathrm{curr}}` is given by ``screen_beta``.
+    lmda : float
+        The last regularization parameter that was attempted to be solved.
+    grad : (p,) np.ndarray
+        The full gradient :math:`v - A \\beta` where
+        :math:`\\beta` is given by ``screen_beta``.
+    lmda_path : (L,) np.ndarray, optional
+        The regularization path to solve for.
+        The full path is not considered if ``early_exit`` is ``True``.
+        It is recommended that the path is sorted in decreasing order.
+        If ``None``, the path will be generated.
+        Default is ``None``.
+    lmda_max : float
+        The smallest :math:`\\lambda` such that the true solution is zero
+        for all coefficients that have a non-vanishing group lasso penalty (:math:`\\ell_2`-norm).
+        If ``None``, it will be computed.
+        Default is ``None``.
+    max_iters : int, optional
+        Maximum number of coordinate descents.
+        Default is ``int(1e5)``.
+    tol : float, optional
+        Coordinate descent convergence tolerance.
+        Default is ``1e-7``.
+    rdev_tol : float, optional
+        Relative percent deviance explained tolerance.
+        If the difference of the last two training percent deviance explained exceeds 
+        the last training percent deviance explained scaled by this quantity,
+        then the solver terminates.
+        Default is ``1e-4``.
+    newton_tol : float, optional
+        Convergence tolerance for the BCD update.
+        Default is ``1e-12``.
+    newton_max_iters : int, optional
+        Maximum number of iterations for the BCD update.
+        Default is ``1000``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+    early_exit : bool, optional
+        ``True`` if the function should early exit based on training percent deviance explained.
+        Default is ``True``.
+    min_ratio : float, optional
+        The ratio between the largest and smallest :math:`\\lambda` in the regularization sequence
+        if it is to be generated.
+        Default is ``1e-2``.
+    lmda_path_size : int, optional
+        Number of regularizations in the path if it is to be generated.
+        Default is ``100``.
+    screen_rule : str, optional
+        The type of screening rule to use. It must be one of the following options:
+
+            - ``"strong"``: adds groups whose active scores are above the strong threshold.
+            - ``"pivot"``: adds groups whose active scores are above the pivot cutoff with slack.
+
+        Default is ``"pivot"``.
+    max_screen_size : int, optional
+        Maximum number of screen groups allowed.
+        The function will return a valid state and guarantees to have screen set size
+        less than or equal to ``max_screen_size``.
+        If ``None``, it will be set to the total number of groups.
+        Default is ``None``.
+    max_active_size : int, optional
+        Maximum number of active groups allowed.
+        The function will return a valid state and guarantees to have active set size
+        less than or equal to ``max_active_size``.
+        If ``None``, it will be set to the total number of groups.
+        Default is ``None``.
+    pivot_subset_ratio : float, optional
+        If screening takes place, then the ``(1 + pivot_subset_ratio) * s``
+        largest active scores are used to determine the pivot point
+        where ``s`` is the current screen set size.
+        It is only used if ``screen_rule="pivot"``.
+        Default is ``0.1``.
+    pivot_subset_min : int, optional
+        If screening takes place, then at least ``pivot_subset_min``
+        number of active scores are used to determine the pivot point.
+        It is only used if ``screen_rule="pivot"``.
+        Default is ``1``.
+    pivot_slack_ratio : float, optional
+        If screening takes place, then ``pivot_slack_ratio``
+        number of groups with next smallest (new) active scores 
+        below the pivot point are also added to the screen set as slack.
+        It is only used if ``screen_rule="pivot"``.
+        Default is ``1.25``.
+
+    Returns
+    -------
+    wrap
+        Wrapper state object.
+
+    See Also
+    --------
+    adelie.adelie_core.state.StateGaussianCov64
+    adelie.solver.gaussian_cov
+    """
+    (
+        max_screen_size,
+        max_active_size,
+        lmda_path_size,
+        setup_lmda_max,
+        setup_lmda_path,
+        lmda_max,
+        lmda_path,
+        dtype,
+    ) = _render_gaussian_cov_inputs(
+        A=A,
+        groups=groups,
+        lmda_max=lmda_max,
+        lmda_path=lmda_path,
+        lmda_path_size=lmda_path_size,
+        max_screen_size=max_screen_size,
+        max_active_size=max_active_size,
+    )
+
+    dispatcher = {
+        np.float64: core.state.StateGaussianCov64,
+        np.float32: core.state.StateGaussianCov32,
+    }
+    core_base = dispatcher[dtype]
+
+    if isinstance(A, np.ndarray):
+        A = matrix.dense(A, method="cov", n_threads=n_threads)
+
+    class _gaussian_cov(base, core_base):
+        def __init__(self):
+            self._core_type = core_base
+            ## save inputs due to lifetime issues
+            # static inputs require a reference to input
+            # or copy if it must be made
+            self._A = A
+            self._v = np.array(v, copy=False, dtype=dtype)
+            self._groups = np.array(groups, copy=False, dtype=int)
+            self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
+            self._penalty = np.array(penalty, copy=False, dtype=dtype)
+            self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
+            self._screen_set = np.array(screen_set, copy=False, dtype=int)
+            self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
+            self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
+            self._grad = np.array(grad, copy=False, dtype=dtype)
+
+            # MUST call constructor directly and not use super()!
+            # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
+            core_base.__init__(
+                self,
+                A=self._A,
+                v=self._v,
+                groups=self._groups,
+                group_sizes=self._group_sizes,
+                alpha=alpha,
+                penalty=self._penalty,
+                lmda_path=self._lmda_path,
+                lmda_max=lmda_max,
+                min_ratio=min_ratio,
+                lmda_path_size=lmda_path_size,
+                max_screen_size=max_screen_size,
+                max_active_size=max_active_size,
+                pivot_subset_ratio=pivot_subset_ratio,
+                pivot_subset_min=pivot_subset_min,
+                pivot_slack_ratio=pivot_slack_ratio,
+                screen_rule=screen_rule,
+                max_iters=max_iters,
+                tol=tol,
+                rdev_tol=rdev_tol,
+                newton_tol=newton_tol,
+                newton_max_iters=newton_max_iters,
+                early_exit=early_exit,
+                setup_lmda_max=setup_lmda_max,
+                setup_lmda_path=setup_lmda_path,
+                n_threads=n_threads,
+                screen_set=self._screen_set,
+                screen_beta=self._screen_beta,
+                screen_is_active=self._screen_is_active,
+                rsq=rsq,
+                lmda=lmda,
+                grad=self._grad,
+            )
+
+        @classmethod
+        def create_from_core(cls, state, core_state):
+            obj = base.create_from_core(
+                cls, state, core_state, _gaussian_cov, core_base,
+            )
+            return obj
+
+    return _gaussian_cov()
     
 
 class gaussian_naive_base(base):
@@ -1702,11 +1981,11 @@ def gaussian_naive(
         max_screen_size,
         max_active_size,
         lmda_path_size,
-        dtype,
         setup_lmda_max,
         setup_lmda_path,
         lmda_max,
         lmda_path,
+        dtype,
     ) = _render_gaussian_naive_inputs(
         X=X,
         groups=groups,
@@ -2016,11 +2295,11 @@ def multigaussian_naive(
         max_screen_size,
         max_active_size,
         lmda_path_size,
-        dtype,
         setup_lmda_max,
         setup_lmda_path,
         lmda_max,
         lmda_path,
+        dtype,
     ) = _render_gaussian_naive_inputs(
         X=X,
         groups=groups,
@@ -2361,11 +2640,11 @@ def glm_naive(
         max_screen_size,
         max_active_size,
         lmda_path_size,
-        dtype,
         setup_lmda_max,
         setup_lmda_path,
         lmda_max,
         lmda_path,
+        dtype,
         setup_loss_null,
         loss_null,
     ) = _render_glm_naive_inputs(
@@ -2681,11 +2960,11 @@ def multiglm_naive(
         max_screen_size,
         max_active_size,
         lmda_path_size,
-        dtype,
         setup_lmda_max,
         setup_lmda_path,
         lmda_max,
         lmda_path,
+        dtype,
         setup_loss_null,
         loss_null,
     ) = _render_glm_naive_inputs(

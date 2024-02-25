@@ -60,7 +60,6 @@ def create_data_gaussian(
     args = {
         "X": X, 
         "y": y,
-        "y_var": y_var,
         "groups": groups,
         "alpha": alpha,
         "penalty": penalty,
@@ -97,6 +96,7 @@ def create_data_gaussian(
         else:
             args["y_mean"] = y_mean
             args["resid"] = resid
+            args["y_var"] = y_var
     else:
         screen_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
         screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
@@ -104,6 +104,7 @@ def create_data_gaussian(
 
         args["X_means"] = X_means
         args["y_mean"] = y_mean
+        args["y_var"] = y_var
         args["offsets"] = np.zeros(n)
         args["group_sizes"] = group_sizes
         args["resid"] = resid
@@ -378,7 +379,6 @@ def test_solve_gaussian_concatenate():
                     ad.matrix.dense(data["X"], method="naive", n_threads=n_threads) 
                     for data in test_datas
                 ],
-                method="naive",
                 n_threads=n_threads,
             )
         ]
