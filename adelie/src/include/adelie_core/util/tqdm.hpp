@@ -205,6 +205,8 @@ private:
         ss << '|';
         for (int i = 0; i < num_filled; ++i) {
             ss << "\033[1;32m\u2588\033[0m";
+            // TODO: fun penguin!!
+            //ss << "\033[1;32m\U0001f427\033[0m";
         }
         ss << std::string(bar_size_ - num_filled, ' ') << '|';
     }

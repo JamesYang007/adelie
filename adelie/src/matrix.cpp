@@ -322,25 +322,30 @@ public:
         );
     }
 
+    void mul(
+        int i, int p,
+        const Eigen::Ref<const vec_value_t>& v,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            mul,
+            i, p, v, out
+        );
+    }
+
     void to_dense(
-        int i, int j, int p, int q,
+        int i, int p,
         Eigen::Ref<colmat_value_t> out
-    ) const override
+    ) override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
             base_t,
             to_dense,
-            i, j, p, q, out
-        );
-    }
-
-    int rows() const override
-    {
-        PYBIND11_OVERRIDE(
-            int,
-            base_t,
-            rows
+            i, p, out
         );
     }
 
@@ -349,7 +354,7 @@ public:
         PYBIND11_OVERRIDE_PURE(
             int,
             base_t,
-            cols
+            cols,
         );
     }
 };
@@ -384,22 +389,36 @@ void matrix_cov_base(py::module_& m, const char* name)
         out : (q,) np.ndarray
             Vector to store in-place the result.
         )delimiter")
-        .def("to_dense", &internal_t::to_dense, R"delimiter(
-        Converts a block to a dense matrix.
+        .def("mul", &internal_t::mul, R"delimiter(
+        Row matrix-vector multiplication.
 
-        Converts the block ``X[i:i+p, j:j+q]`` into a dense matrix.
+        Computes the row matrix-vector multiplication
+        ``v.T @ A[i:i+p, :]``.
 
         Parameters
         ----------
         i : int
             Row index.
-        j : int
-            Column index.
         p : int
             Number of rows.
-        q : int
-            Number of columns.
-        out : (p, q) np.ndarray
+        v : (p,) np.ndarray
+            Vector to multiply with the block matrix.
+        out : (n,) np.ndarray
+            Vector to store in-place the result.
+            The length is the number of columns of ``A``.
+        )delimiter")
+        .def("to_dense", &internal_t::to_dense, R"delimiter(
+        Converts a block to a dense matrix.
+
+        Converts the block ``A[i:i+p, i:i+p]`` into a dense matrix.
+
+        Parameters
+        ----------
+        i : int
+            Row index.
+        p : int
+            Number of rows.
+        out : (p, p) np.ndarray
             Matrix to store the dense result.
         )delimiter")
         .def("rows", &internal_t::rows, R"delimiter(

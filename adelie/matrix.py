@@ -18,21 +18,17 @@ def _to_dtype(mat):
 def concatenate(
     mats: list,
     *,
-    method: str ="naive",
     n_threads: int =1,
 ):
     """Creates a column-wise concatenation of the matrices.
+
+    .. note::
+        This matrix only works for naive method!
 
     Parameters
     ----------
     mats : list
         List of matrices to concatenate along the columns.
-    method : str, optional
-        Method type. It must be one of the following:
-
-            - ``"naive"``: naive method.
-
-        Default is ``"naive"``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -57,17 +53,12 @@ def concatenate(
         if dtype == _to_dtype(mat): continue
         raise ValueError("All matrices must have the same underlying data type.")
 
-    naive_dispatcher = {
+    dispatcher = {
         np.float64: core.matrix.MatrixNaiveConcatenate64,
         np.float32: core.matrix.MatrixNaiveConcatenate32,
     }
 
-    dispatcher = {
-        "naive" : naive_dispatcher,
-        # TODO: add more?
-    }
-
-    core_base = dispatcher[method][dtype]
+    core_base = dispatcher[dtype]
 
     class _concatenate(core_base):
         def __init__(
@@ -175,6 +166,9 @@ def kronecker_eye(
     The matrix is represented as :math:`X \otimes I_K`
     where :math:`X` is the underlying dense matrix and 
     :math:`I_K` is the identity matrix of dimension :math:`K`.
+
+    .. note::
+        This matrix only works for naive method!
     
     Parameters
     ----------

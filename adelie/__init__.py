@@ -9,4 +9,7 @@ from . import optimization
 from . import research
 from . import state
 from . import solver
-from .solver import grpnet
+from .solver import (
+    gaussian_cov, 
+    grpnet,
+)

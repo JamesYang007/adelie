@@ -38,13 +38,13 @@ struct StateGaussianPinNaive: StateGaussianPinBase<
     using dyn_vec_vec_value_t = std::vector<vec_value_t>;
     using matrix_t = MatrixType;
 
-    /* Static states */
+    /* static states */
     const map_cvec_value_t weights;
     const value_t y_mean;
     const value_t y_var;
     const map_cvec_value_t screen_X_means;
 
-    /* Dynamic states */
+    /* dynamic states */
     matrix_t* X;
     map_vec_value_t resid;
     value_t resid_sum;
