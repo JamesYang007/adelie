@@ -364,6 +364,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_cov.html">adelie.state.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
@@ -372,11 +373,13 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianCov64.html">adelie.adelie_core.state.StateGaussianCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
@@ -452,6 +455,10 @@ document.write(`
 <p>The matrix is represented as <span class="math notranslate nohighlight">\(X \otimes I_K\)</span>
 where <span class="math notranslate nohighlight">\(X\)</span> is the underlying dense matrix and 
 <span class="math notranslate nohighlight">\(I_K\)</span> is the identity matrix of dimension <span class="math notranslate nohighlight">\(K\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This matrix only works for naive method!</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">

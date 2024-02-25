@@ -46,6 +46,7 @@
       ~StateGaussianPinCov64.newton_max_iters
       ~StateGaussianPinCov64.newton_tol
       ~StateGaussianPinCov64.penalty
+      ~StateGaussianPinCov64.rdev_tol
       ~StateGaussianPinCov64.rsq
       ~StateGaussianPinCov64.rsqs
       ~StateGaussianPinCov64.screen_begins
@@ -58,7 +59,6 @@
       ~StateGaussianPinCov64.screen_transforms
       ~StateGaussianPinCov64.screen_vars
       ~StateGaussianPinCov64.tol
-      ~StateGaussianPinCov64.y_var
    
    
 
@@ -97,6 +97,7 @@
    .. autoattribute:: newton_max_iters
    .. autoattribute:: newton_tol
    .. autoattribute:: penalty
+   .. autoattribute:: rdev_tol
    .. autoattribute:: rsq
    .. autoattribute:: rsqs
    .. autoattribute:: screen_begins
@@ -109,6 +110,5 @@
    .. autoattribute:: screen_transforms
    .. autoattribute:: screen_vars
    .. autoattribute:: tol
-   .. autoattribute:: y_var
    
    

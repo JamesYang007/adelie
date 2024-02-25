@@ -364,6 +364,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_cov.html">adelie.state.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
@@ -372,11 +373,13 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianCov64.html">adelie.adelie_core.state.StateGaussianCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
@@ -461,7 +464,7 @@ document.write(`
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.A" title="adelie.adelie_core.state.StateGaussianPinCov64.A"><code class="xref py py-obj docutils literal notranslate"><span class="pre">A</span></code></a></p></td>
-<td><p>Covariance matrix <span class="math notranslate nohighlight">\(X_c^\top W X_c\)</span>.</p></td>
+<td><p>Positive semi-definite matrix <span class="math notranslate nohighlight">\(A\)</span>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.active_begins" title="adelie.adelie_core.state.StateGaussianPinCov64.active_begins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_begins</span></code></a></p></td>
 <td><p>List of indices that index a corresponding list of values for each active group.</p></td>
@@ -535,44 +538,44 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.penalty" title="adelie.adelie_core.state.StateGaussianPinCov64.penalty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">penalty</span></code></a></p></td>
 <td><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.rsq" title="adelie.adelie_core.state.StateGaussianPinCov64.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></p></td>
-<td><p>The change in unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> given by  <span class="math notranslate nohighlight">\(\|y_c-X_c\beta_{\mathrm{old}}\|_{W}^2 - \|y_c-X_c\beta_{\mathrm{curr}}\|_{W}^2\)</span>.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.rdev_tol" title="adelie.adelie_core.state.StateGaussianPinCov64.rdev_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rdev_tol</span></code></a></p></td>
+<td><p>Relative percent deviance explained tolerance.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.rsqs" title="adelie.adelie_core.state.StateGaussianPinCov64.rsqs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsqs</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.rsq" title="adelie.adelie_core.state.StateGaussianPinCov64.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></p></td>
+<td><p>The change in unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> given by  <span class="math notranslate nohighlight">\(2(\ell(\beta_{\mathrm{old}}) - \ell(\beta_{\mathrm{curr}}))\)</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.rsqs" title="adelie.adelie_core.state.StateGaussianPinCov64.rsqs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsqs</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">rsqs[i]</span></code> is the unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_begins" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_begins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_begins</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_begins" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_begins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_begins</span></code></a></p></td>
 <td><p>List of indices that index a corresponding list of values for each screen group.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_beta" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_beta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_beta</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_beta" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_beta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_beta</span></code></a></p></td>
 <td><p>Coefficient vector on the screen set.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_g1" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_g1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_g1</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_g1" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_g1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_g1</span></code></a></p></td>
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">screen_set</span></code> that correspond to groups of size <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_g2" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_g2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_g2</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_g2" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_g2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_g2</span></code></a></p></td>
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">screen_set</span></code> that correspond to groups more than size <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_grad" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_grad</span></code></a></p></td>
-<td><p>Gradient <span class="math notranslate nohighlight">\(X_{c,k}^\top W (y_c-X_c\beta)\)</span> on the screen groups <span class="math notranslate nohighlight">\(k\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_grad" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_grad</span></code></a></p></td>
+<td><p>Gradient <span class="math notranslate nohighlight">\(v_k - A_{k,\cdot} \beta\)</span> on the screen groups <span class="math notranslate nohighlight">\(k\)</span>  where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_is_active" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_is_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_is_active</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_is_active" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_is_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_is_active</span></code></a></p></td>
 <td><p>Boolean vector that indicates whether each screen group in <code class="docutils literal notranslate"><span class="pre">groups</span></code> is active or not.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_set" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_set</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_set" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_set</span></code></a></p></td>
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">groups</span></code> that correspond to the screen groups.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_transforms" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_transforms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_transforms</span></code></a></p></td>
-<td><p>List of <span class="math notranslate nohighlight">\(V_k\)</span> where <span class="math notranslate nohighlight">\(V_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span> along the screen groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_transforms" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_transforms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_transforms</span></code></a></p></td>
+<td><p>List of <span class="math notranslate nohighlight">\(V_k\)</span> where <span class="math notranslate nohighlight">\(V_k\)</span> are the eigenvectors of <span class="math notranslate nohighlight">\(A_{kk}\)</span> along the screen groups <span class="math notranslate nohighlight">\(k\)</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_vars" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_vars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_vars</span></code></a></p></td>
-<td><p>List of <span class="math notranslate nohighlight">\(D_k^2\)</span> where <span class="math notranslate nohighlight">\(D_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span>  along the screen groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_vars" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_vars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_vars</span></code></a></p></td>
+<td><p>List of <span class="math notranslate nohighlight">\(D_k^2\)</span> where <span class="math notranslate nohighlight">\(D_k^2\)</span> are the eigenvalues of <span class="math notranslate nohighlight">\(A_{kk}\)</span>  along the screen groups <span class="math notranslate nohighlight">\(k\)</span>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.tol" title="adelie.adelie_core.state.StateGaussianPinCov64.tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tol</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.tol" title="adelie.adelie_core.state.StateGaussianPinCov64.tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tol</span></code></a></p></td>
 <td><p>Coordinate descent convergence tolerance.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.y_var" title="adelie.adelie_core.state.StateGaussianPinCov64.y_var"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_var</span></code></a></p></td>
-<td><p>Variance of the response vector <span class="math notranslate nohighlight">\(y\)</span> (weighted by <span class="math notranslate nohighlight">\(W\)</span>),  i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span> or <code class="docutils literal notranslate"><span class="pre">-1</span></code> to disable early stopping check.</p></td>
 </tr>
 </tbody>
 </table>
@@ -581,7 +584,7 @@ document.write(`
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinCov64.__init__" title="Link to this definition">#</a></dt>
 <dd><p>Overloaded function.</p>
 <ol class="arabic simple">
-<li><p>__init__(self: adelie.adelie_core.state.StateGaussianPinCov64, A: adelie.adelie_core.matrix.MatrixCovBase64, y_var: float, groups: numpy.ndarray[numpy.int64[1, n]], group_sizes: numpy.ndarray[numpy.int64[1, n]], alpha: float, penalty: numpy.ndarray[numpy.float64[1, n]], screen_set: numpy.ndarray[numpy.int64[1, n]], screen_g1: numpy.ndarray[numpy.int64[1, n]], screen_g2: numpy.ndarray[numpy.int64[1, n]], screen_begins: numpy.ndarray[numpy.int64[1, n]], screen_vars: numpy.ndarray[numpy.float64[1, n]], screen_transforms: adelie.adelie_core.VectorMatrix64, lmda_path: numpy.ndarray[numpy.float64[1, n]], max_active_size: int, max_iters: int, tol: float, adev_tol: float, ddev_tol: float, newton_tol: float, newton_max_iters: int, n_threads: int, rsq: float, screen_beta: numpy.ndarray[numpy.float64[1, n], flags.writeable], screen_grad: numpy.ndarray[numpy.float64[1, n], flags.writeable], screen_is_active: numpy.ndarray[bool[1, n], flags.writeable]) -&gt; None</p></li>
+<li><p>__init__(self: adelie.adelie_core.state.StateGaussianPinCov64, A: adelie.adelie_core.matrix.MatrixCovBase64, groups: numpy.ndarray[numpy.int64[1, n]], group_sizes: numpy.ndarray[numpy.int64[1, n]], alpha: float, penalty: numpy.ndarray[numpy.float64[1, n]], screen_set: numpy.ndarray[numpy.int64[1, n]], screen_g1: numpy.ndarray[numpy.int64[1, n]], screen_g2: numpy.ndarray[numpy.int64[1, n]], screen_begins: numpy.ndarray[numpy.int64[1, n]], screen_vars: numpy.ndarray[numpy.float64[1, n]], screen_transforms: adelie.adelie_core.VectorMatrix64, lmda_path: numpy.ndarray[numpy.float64[1, n]], max_active_size: int, max_iters: int, tol: float, rdev_tol: float, newton_tol: float, newton_max_iters: int, n_threads: int, rsq: float, screen_beta: numpy.ndarray[numpy.float64[1, n], flags.writeable], screen_grad: numpy.ndarray[numpy.float64[1, n], flags.writeable], screen_is_active: numpy.ndarray[bool[1, n], flags.writeable]) -&gt; None</p></li>
 <li><p>__init__(self: adelie.adelie_core.state.StateGaussianPinCov64, arg0: adelie.adelie_core.state.StateGaussianPinCov64) -&gt; None</p></li>
 </ol>
 </dd></dl>
@@ -589,7 +592,7 @@ document.write(`
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinCov64.A">
 <span class="sig-name descname"><span class="pre">A</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinCov64.A" title="Link to this definition">#</a></dt>
-<dd><p>Covariance matrix <span class="math notranslate nohighlight">\(X_c^\top W X_c\)</span>.</p>
+<dd><p>Positive semi-definite matrix <span class="math notranslate nohighlight">\(A\)</span>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -750,10 +753,16 @@ used for the <code class="docutils literal notranslate"><span class="pre">i</spa
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinCov64.rdev_tol">
+<span class="sig-name descname"><span class="pre">rdev_tol</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinCov64.rdev_tol" title="Link to this definition">#</a></dt>
+<dd><p>Relative percent deviance explained tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinCov64.rsq">
 <span class="sig-name descname"><span class="pre">rsq</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinCov64.rsq" title="Link to this definition">#</a></dt>
 <dd><p>The change in unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> given by 
-<span class="math notranslate nohighlight">\(\|y_c-X_c\beta_{\mathrm{old}}\|_{W}^2 - \|y_c-X_c\beta_{\mathrm{curr}}\|_{W}^2\)</span>.</p>
+<span class="math notranslate nohighlight">\(2(\ell(\beta_{\mathrm{old}}) - \ell(\beta_{\mathrm{curr}}))\)</span>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -801,7 +810,8 @@ such that <code class="docutils literal notranslate"><span class="pre">group_siz
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinCov64.screen_grad">
 <span class="sig-name descname"><span class="pre">screen_grad</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_grad" title="Link to this definition">#</a></dt>
-<dd><p>Gradient <span class="math notranslate nohighlight">\(X_{c,k}^\top W (y_c-X_c\beta)\)</span> on the screen groups <span class="math notranslate nohighlight">\(k\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.
+<dd><p>Gradient <span class="math notranslate nohighlight">\(v_k - A_{k,\cdot} \beta\)</span> on the screen groups <span class="math notranslate nohighlight">\(k\)</span> 
+where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.
 <code class="docutils literal notranslate"><span class="pre">screen_grad[b:b+p]</span></code> is the gradient for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group
 where 
 <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">screen_set[i]</span></code>,
@@ -826,8 +836,8 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinCov64.screen_transforms">
 <span class="sig-name descname"><span class="pre">screen_transforms</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_transforms" title="Link to this definition">#</a></dt>
-<dd><p>List of <span class="math notranslate nohighlight">\(V_k\)</span> where <span class="math notranslate nohighlight">\(V_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span>
-along the screen groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.
+<dd><p>List of <span class="math notranslate nohighlight">\(V_k\)</span> where <span class="math notranslate nohighlight">\(V_k\)</span> are the eigenvectors of <span class="math notranslate nohighlight">\(A_{kk}\)</span>
+along the screen groups <span class="math notranslate nohighlight">\(k\)</span>.
 It <em>only</em> needs to be properly initialized for groups with size &gt; 1.
 <code class="docutils literal notranslate"><span class="pre">screen_transforms[i]</span></code> is <span class="math notranslate nohighlight">\(V_k\)</span> for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group where
 <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">screen_set[i]</span></code>.</p>
@@ -836,9 +846,9 @@ It <em>only</em> needs to be properly initialized for groups with size &gt; 1.
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinCov64.screen_vars">
 <span class="sig-name descname"><span class="pre">screen_vars</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_vars" title="Link to this definition">#</a></dt>
-<dd><p>List of <span class="math notranslate nohighlight">\(D_k^2\)</span> where <span class="math notranslate nohighlight">\(D_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span> 
-along the screen groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.
-<code class="docutils literal notranslate"><span class="pre">screen_vars[b:b+p]</span></code> is <span class="math notranslate nohighlight">\(D_k\)</span> for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group where
+<dd><p>List of <span class="math notranslate nohighlight">\(D_k^2\)</span> where <span class="math notranslate nohighlight">\(D_k^2\)</span> are the eigenvalues of <span class="math notranslate nohighlight">\(A_{kk}\)</span> 
+along the screen groups <span class="math notranslate nohighlight">\(k\)</span>.
+<code class="docutils literal notranslate"><span class="pre">screen_vars[b:b+p]</span></code> is <span class="math notranslate nohighlight">\(D_k^2\)</span> for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group where
 <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">screen_set[i]</span></code>,
 <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">screen_begins[i]</span></code>,
 and <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">group_sizes[k]</span></code>.</p>
@@ -848,13 +858,6 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinCov64.tol">
 <span class="sig-name descname"><span class="pre">tol</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinCov64.tol" title="Link to this definition">#</a></dt>
 <dd><p>Coordinate descent convergence tolerance.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinCov64.y_var">
-<span class="sig-name descname"><span class="pre">y_var</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinCov64.y_var" title="Link to this definition">#</a></dt>
-<dd><p>Variance of the response vector <span class="math notranslate nohighlight">\(y\)</span> (weighted by <span class="math notranslate nohighlight">\(W\)</span>), 
-i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span> or <code class="docutils literal notranslate"><span class="pre">-1</span></code> to disable early stopping check.</p>
 </dd></dl>
 
 </dd></dl>
@@ -932,6 +935,7 @@ i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span> or <cod
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.newton_max_iters"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.newton_max_iters</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.newton_tol"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.newton_tol</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.penalty"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.penalty</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.rdev_tol"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.rdev_tol</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.rsq"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.rsq</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.rsqs"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.rsqs</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_begins"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.screen_begins</span></code></a></li>
@@ -944,7 +948,6 @@ i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span> or <cod
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_transforms"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.screen_transforms</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_vars"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.screen_vars</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.tol"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.tol</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.y_var"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.y_var</span></code></a></li>
 </ul>
 </li>
 </ul>

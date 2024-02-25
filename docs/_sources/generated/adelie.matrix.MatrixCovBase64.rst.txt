@@ -14,6 +14,7 @@
       ~MatrixCovBase64.__init__
       ~MatrixCovBase64.bmul
       ~MatrixCovBase64.cols
+      ~MatrixCovBase64.mul
       ~MatrixCovBase64.rows
       ~MatrixCovBase64.to_dense
    
@@ -29,6 +30,7 @@
    .. automethod:: __init__
    .. automethod:: bmul
    .. automethod:: cols
+   .. automethod:: mul
    .. automethod:: rows
    .. automethod:: to_dense
    

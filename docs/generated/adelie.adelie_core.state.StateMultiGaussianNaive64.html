@@ -364,6 +364,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_cov.html">adelie.state.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
@@ -372,11 +373,13 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianCov64.html">adelie.adelie_core.state.StateGaussianCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
@@ -1036,7 +1039,7 @@ It <em>only</em> needs to be properly initialized for groups with size &gt; 1.
 <span class="sig-name descname"><span class="pre">screen_vars</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateMultiGaussianNaive64.screen_vars" title="Link to this definition">#</a></dt>
 <dd><p>List of <span class="math notranslate nohighlight">\(D_k^2\)</span> where <span class="math notranslate nohighlight">\(D_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span> 
 along the screen groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.
-<code class="docutils literal notranslate"><span class="pre">screen_vars[b:b+p]</span></code> is <span class="math notranslate nohighlight">\(D_k\)</span> for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group where
+<code class="docutils literal notranslate"><span class="pre">screen_vars[b:b+p]</span></code> is <span class="math notranslate nohighlight">\(D_k^2\)</span> for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group where
 <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">screen_set[i]</span></code>,
 <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">screen_begins[i]</span></code>,
 and <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">group_sizes[k]</span></code>.</p>
