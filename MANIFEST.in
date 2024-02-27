@@ -1,12 +1,16 @@
 include VERSION
 
+global-exclude *.so
+
 prune .github
 prune .pytest_cache
 prune .vscode
-prune *.egg-info
+prune adelie.egg-info
+prune benchmark
 prune build
+prune data
 prune dist
 prune docs
-prune r-adelie
+prune adelie-r
 prune research
 prune tests
