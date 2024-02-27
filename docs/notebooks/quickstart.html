@@ -48,7 +48,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Pivot Rule" href="pivot_rule.html" />
-    <link rel="prev" title="User Guide" href="../user_guide.html" />
+    <link rel="prev" title="Introduction to Group Elastic Net" href="introduction.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -317,6 +317,7 @@ document.write(`
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html"><strong>Introduction to Group Elastic Net</strong></a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#"><strong>Quickstart</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="pivot_rule.html"><strong>Pivot Rule</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="snp_analysis.html"><strong>SNP Data Analysis</strong></a></li>
@@ -379,7 +380,7 @@ document.write(`
                   
   <section id="Quickstart">
 <h1><strong>Quickstart</strong><a class="headerlink" href="#Quickstart" title="Link to this heading">#</a></h1>
-<p>In this notebook, we cover the basics of <code class="docutils literal notranslate"><span class="pre">adelie</span></code>.</p>
+<p>In this notebook, we cover the basic usage of <code class="docutils literal notranslate"><span class="pre">adelie</span></code>. We assume that the reader is familiar with the group elastic net problem. For an introduction to group elastic net, we refer the readers to <a class="reference internal" href="introduction.html"><span class="doc">Introduction to Group Elastic Net</span></a>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -390,10 +391,8 @@ document.write(`
 </pre></div>
 </div>
 </div>
-<section id="Basic-Usage">
-<h2><strong>Basic Usage</strong><a class="headerlink" href="#Basic-Usage" title="Link to this heading">#</a></h2>
-<section id="Data-Preparation">
-<h3><strong>Data Preparation</strong><a class="headerlink" href="#Data-Preparation" title="Link to this heading">#</a></h3>
+<section id="Least-Squares-Group-Elastic-Net">
+<h2><strong>Least Squares Group Elastic Net</strong><a class="headerlink" href="#Least-Squares-Group-Elastic-Net" title="Link to this heading">#</a></h2>
 <p>Before using <code class="docutils literal notranslate"><span class="pre">adelie</span></code>, we assume that the user has a feature matrix <code class="docutils literal notranslate"><span class="pre">X</span></code> and a response vector <code class="docutils literal notranslate"><span class="pre">y</span></code>. For simplicity, we assume for now that <code class="docutils literal notranslate"><span class="pre">X</span></code> is a dense matrix, although we will later see that <code class="docutils literal notranslate"><span class="pre">X</span></code> can be substituted with a custom matrix as well. For demonstration, we will randomly generate our data.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -409,29 +408,30 @@ document.write(`
 </pre></div>
 </div>
 </div>
-</section>
-<section id="Solver">
-<h3><strong>Solver</strong><a class="headerlink" href="#Solver" title="Link to this heading">#</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">adelie.solver</span></code> is the sub-module that contains all solvers. The highest-level function is <code class="docutils literal notranslate"><span class="pre">adelie.solver.grpnet</span></code>, which we also made visible under <code class="docutils literal notranslate"><span class="pre">adelie</span></code> for convenience. We summarize a few important points <code class="docutils literal notranslate"><span class="pre">grpnet</span></code>:</p>
-<ul class="simple">
-<li><p>Although <code class="docutils literal notranslate"><span class="pre">grpnet</span></code> is in general a group lasso solver, it can solve lasso problems as well, as it is a special case of the group lasso problem. <code class="docutils literal notranslate"><span class="pre">adelie</span></code> is written such that the lasso case is handled in a more optimized way.</p></li>
-<li><p>Since <code class="docutils literal notranslate"><span class="pre">grpnet</span></code> is a path-solver, it will generate a path of regularizations and warm-start using the previous solution on the path. <strong>For this reason, we recommend users to supply a sufficiently fine grid of lambdas or use the default path!</strong></p></li>
-</ul>
-<p>We refer the readers to the documentation page on <a class="reference external" href="https://jamesyang007.github.io/adelie/generated/adelie.solver.grpnet.html#adelie.solver.grpnet">grpnet</a> for more details.</p>
 <section id="Lasso">
-<h4><strong>Lasso</strong><a class="headerlink" href="#Lasso" title="Link to this heading">#</a></h4>
-<p>The most basic call to <code class="docutils literal notranslate"><span class="pre">adelie.grpnet</span></code> simply supplies the <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> data. By default, <code class="docutils literal notranslate"><span class="pre">adelie.grpnet</span></code> will fit lasso by setting each feature as its own group.</p>
-<div class="nbinput nblast docutils container">
+<h3><strong>Lasso</strong><a class="headerlink" href="#Lasso" title="Link to this heading">#</a></h3>
+<p>The most basic call to <code class="docutils literal notranslate"><span class="pre">adelie.grpnet</span></code> simply supplies a <code class="docutils literal notranslate"><span class="pre">X</span></code> matrix and a <code class="docutils literal notranslate"><span class="pre">glm</span></code> object. For example, <code class="docutils literal notranslate"><span class="pre">adelie.glm.gaussian()</span></code> returns a Gaussian GLM object, which corresponds to the usual least squares loss function. By default, <code class="docutils literal notranslate"><span class="pre">adelie.grpnet</span></code> will fit lasso by setting each feature as its own group. <code class="docutils literal notranslate"><span class="pre">adelie</span></code> is written to treat groups of size <code class="docutils literal notranslate"><span class="pre">1</span></code> in a more optimized manner, so it is a competitive lasso solver as well. <code class="docutils literal notranslate"><span class="pre">grpnet</span></code> will also generate a sequence of 100 regularizations
+<span class="math notranslate nohighlight">\(\lambda\)</span> evenly spaced on the log scale by default if the user does not provide the path. Since <code class="docutils literal notranslate"><span class="pre">grpnet</span></code> is a path-solver, it will warm-start at the next <span class="math notranslate nohighlight">\(\lambda\)</span> using the current solution on the path. <strong>For this reason, we recommend users to supply a sufficiently fine grid of</strong> <span class="math notranslate nohighlight">\(\lambda\)</span> <strong>or use the default path!</strong></p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
     <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
-    <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">),</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 46%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 46/100 [00:00:00&lt;00:00:00, 2596.77it/s] [dev:90.6%]
+</pre></div></div>
+</div>
+<p>Note that the solver finished early in this example. We display a progress bar that indicates the number of <span class="math notranslate nohighlight">\(\lambda\)</span>’s processed, time elapsed, time remaining, and the percent deviance explained. By default, the solver terminates if the latter reaches <span class="math notranslate nohighlight">\(90\%\)</span> as a simple heuristic to avoid overfitting. This threshold can be controlled via the argument <code class="docutils literal notranslate"><span class="pre">adev_tol</span></code>.</p>
 <p>The output of <code class="docutils literal notranslate"><span class="pre">adelie.grpnet</span></code> is a <em>state</em> object, which represents the state of the optimizer. For most use-cases, the users do not need to inspect the internals of a state object, with some exceptions:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
@@ -469,17 +469,17 @@ document.write(`
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_quickstart_17_0.png" src="../_images/notebooks_quickstart_17_0.png" />
+<img alt="../_images/notebooks_quickstart_15_0.png" src="../_images/notebooks_quickstart_15_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_quickstart_17_1.png" src="../_images/notebooks_quickstart_17_1.png" />
+<img alt="../_images/notebooks_quickstart_15_1.png" src="../_images/notebooks_quickstart_15_1.png" />
 </div>
 </div>
-<p>Serious developers may be interested in the performance of the solver. We also provide a function to inspect the benchmark timings at each iteration of the solver.</p>
+<p>Serious developers may be interested in the performance of the solver. We also provide a function to inspect the benchmark timings of the solver at each <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
@@ -493,25 +493,32 @@ document.write(`
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_quickstart_19_0.png" src="../_images/notebooks_quickstart_19_0.png" />
+<img alt="../_images/notebooks_quickstart_17_0.png" src="../_images/notebooks_quickstart_17_0.png" />
 </div>
 </div>
 </section>
 <section id="Group-Lasso">
-<h4><strong>Group Lasso</strong><a class="headerlink" href="#Group-Lasso" title="Link to this heading">#</a></h4>
-<p>To fit group lasso, the user simply needs to supply a <code class="docutils literal notranslate"><span class="pre">groups</span></code> argument that defines the starting column index for each group. For example, if there are <code class="docutils literal notranslate"><span class="pre">4</span></code> features grouped every two features, then <code class="docutils literal notranslate"><span class="pre">groups</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">2]</span></code>. For demonstration, we take the same data as before and group every <code class="docutils literal notranslate"><span class="pre">10</span></code> features. In general, the user may define any <em>contiguous</em> set of groups. For example, <code class="docutils literal notranslate"><span class="pre">groups</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">2,</span> <span class="pre">5]</span></code> with <code class="docutils literal notranslate"><span class="pre">10</span></code> total number of features results in <code class="docutils literal notranslate"><span class="pre">3</span></code> groups with group sizes <code class="docutils literal notranslate"><span class="pre">[2,</span> <span class="pre">3,</span> <span class="pre">5]</span></code>,
-respectively. We then fit group lasso using the same function.</p>
-<div class="nbinput nblast docutils container">
+<h3><strong>Group Lasso</strong><a class="headerlink" href="#Group-Lasso" title="Link to this heading">#</a></h3>
+<p>To fit group lasso, the user simply needs to supply a <code class="docutils literal notranslate"><span class="pre">groups</span></code> argument that defines the starting column index of <span class="math notranslate nohighlight">\(X\)</span> for each group. For example, if there are <code class="docutils literal notranslate"><span class="pre">4</span></code> features with two (contiguous) groups of sizes <code class="docutils literal notranslate"><span class="pre">3</span></code> and <code class="docutils literal notranslate"><span class="pre">1</span></code>, respectively, then <code class="docutils literal notranslate"><span class="pre">groups</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">3]</span></code>. For demonstration, we take the same data as before and group every <code class="docutils literal notranslate"><span class="pre">10</span></code> features. We then fit group lasso using the same function.</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
     <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
-    <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">),</span>
     <span class="n">groups</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">10</span><span class="p">),</span>
 <span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 38%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 38/100 [00:00:00&lt;00:00:00, 4184.90it/s] [dev:90.1%]
+</pre></div></div>
 </div>
 <p>As before, we may inspect the same elements of <code class="docutils literal notranslate"><span class="pre">state</span></code> and diagnostics.</p>
 <div class="nbinput nblast docutils container">
@@ -536,14 +543,14 @@ respectively. We then fit group lasso using the same function.</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_quickstart_25_0.png" src="../_images/notebooks_quickstart_25_0.png" />
+<img alt="../_images/notebooks_quickstart_23_0.png" src="../_images/notebooks_quickstart_23_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_quickstart_25_1.png" src="../_images/notebooks_quickstart_25_1.png" />
+<img alt="../_images/notebooks_quickstart_23_1.png" src="../_images/notebooks_quickstart_23_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -559,11 +566,213 @@ respectively. We then fit group lasso using the same function.</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_quickstart_26_0.png" src="../_images/notebooks_quickstart_26_0.png" />
+<img alt="../_images/notebooks_quickstart_24_0.png" src="../_images/notebooks_quickstart_24_0.png" />
+</div>
+</div>
+<section id="Covariance-Method">
+<h4><strong>Covariance Method</strong><a class="headerlink" href="#Covariance-Method" title="Link to this heading">#</a></h4>
+<p>For least squares specifically, we expose an equivalent solver <code class="docutils literal notranslate"><span class="pre">ad.solver.gaussian_cov</span></code> that uses summary statistics rather than individual-level data.</p>
+<p>We show below how to solve the equivalent problem presented in the previous sections. First, we create the summary statistics based on the individual-level data.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Xc</span> <span class="o">=</span> <span class="n">X</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="kc">None</span><span class="p">]</span>
+<span class="n">yc</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">Xc</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Xc</span> <span class="o">/</span> <span class="n">n</span>
+<span class="n">v</span> <span class="o">=</span> <span class="n">Xc</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">yc</span> <span class="o">/</span> <span class="n">n</span>
+</pre></div>
+</div>
+</div>
+<p>Now, we use <code class="docutils literal notranslate"><span class="pre">gaussian_cov</span></code> to solve the Gaussian group elastic net problem.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state_cov</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">gaussian_cov</span><span class="p">(</span>
+    <span class="n">A</span><span class="o">=</span><span class="n">A</span><span class="p">,</span>
+    <span class="n">v</span><span class="o">=</span><span class="n">v</span><span class="p">,</span>
+    <span class="n">groups</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="n">rdev_tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 39%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 39/100 [00:00:00&lt;00:00:00, 2870.79it/s] [rdev:0.9%]
+</pre></div></div>
+</div>
+<p>Note that the progress bar displays a different measurement of deviance explained. For the covariance method, since it is usually infeasible to compute the loss at the saturated model, we only display the relative change in percent deviance explained (which can be computed without knowledge of the saturated loss):</p>
+<div class="math notranslate nohighlight">
+\[\begin{align*}
+    \mathrm{rdev}
+    :=
+    \frac{
+        \ell(\beta_{\mathrm{prev}}) - \ell(\beta_{\mathrm{curr}})
+    }{
+        \ell(\beta_{\mathrm{null}}) - \ell(\beta_{\mathrm{curr}})
+    }
+\end{align*}\]</div>
+<p>so that a <span class="math notranslate nohighlight">\(\mathrm{rdev}\)</span> close to zero indicates overfitting. In this example, we early exit the solver once <span class="math notranslate nohighlight">\(\mathrm{rdev}\)</span> reaches <span class="math notranslate nohighlight">\(1\%\)</span>.</p>
+<p>We can compare the solution with that of the result of <code class="docutils literal notranslate"><span class="pre">grpnet</span></code> from before.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_common_sols</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">state_cov</span><span class="o">.</span><span class="n">betas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">state</span><span class="o">.</span><span class="n">betas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
+    <span class="n">state_cov</span><span class="o">.</span><span class="n">betas</span><span class="p">[:</span><span class="n">n_common_sols</span><span class="p">]</span><span class="o">.</span><span class="n">toarray</span><span class="p">(),</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">betas</span><span class="p">[:</span><span class="n">n_common_sols</span><span class="p">]</span><span class="o">.</span><span class="n">toarray</span><span class="p">(),</span>
+<span class="p">)</span>
+</pre></div>
 </div>
 </div>
 </section>
 </section>
+</section>
+<section id="GLM-Group-Elastic-Net">
+<h2><strong>GLM Group Elastic Net</strong><a class="headerlink" href="#GLM-Group-Elastic-Net" title="Link to this heading">#</a></h2>
+<p>In the previous section, we covered how to solve penalized least squares regression. Nearly all of the content remains the same for fitting penalized GLM regression. The only difference is in the choice of the <code class="docutils literal notranslate"><span class="pre">glm</span></code> object. For brevity, we only discuss logistic regression as our non-trivial GLM example, however the following discussion applies for any GLM.</p>
+<p>Let’s generate our dataset for logistic regression.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>     <span class="c1"># number of observations</span>
+<span class="n">p</span> <span class="o">=</span> <span class="mi">1000</span>    <span class="c1"># number of features</span>
+<span class="n">seed</span> <span class="o">=</span> <span class="mi">0</span>    <span class="c1"># seed</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
+<span class="n">eta</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">eta</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mu</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>To solve the group elastic net problem using the logistic loss, we simply provide the Binomial GLM object. For simplicity, we fit the lasso problem below.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 57%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 57/100 [00:00:00&lt;00:00:00, 1547.44it/s] [dev:90.2%]
+</pre></div></div>
+</div>
+<p>As before, the user may inspect diagnostic elements of the state in the same fashion.</p>
+</section>
+<section id="Multi-Response-GLM-Elastic-Net">
+<h2><strong>Multi-Response GLM Elastic Net</strong><a class="headerlink" href="#Multi-Response-GLM-Elastic-Net" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">grpnet</span></code> is also able to fit multi-response GLM elastic net. Currently, we only support Multigaussian (least squares) and Multinomial GLMs. The only difference in the API from the single-response case is that <code class="docutils literal notranslate"><span class="pre">groups</span></code> argument only takes two possible values: <code class="docutils literal notranslate"><span class="pre">&quot;grouped&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;ungrouped&quot;</span></code>. If <code class="docutils literal notranslate"><span class="pre">groups=&quot;grouped&quot;</span></code> (default), then for each feature, the corresponding coefficients across the responses are grouped. Otherwise, every coefficient is in its own group.</p>
+<p>The following code shows an example of fitting a multi-response least squares group elastic net. For simplicity, we fit the lasso problem.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>     <span class="c1"># number of observations</span>
+<span class="n">p</span> <span class="o">=</span> <span class="mi">1000</span>    <span class="c1"># number of features</span>
+<span class="n">K</span> <span class="o">=</span> <span class="mi">4</span>       <span class="c1"># number of responses</span>
+<span class="n">seed</span> <span class="o">=</span> <span class="mi">0</span>    <span class="c1"># seed</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">:]</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="p">))</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">K</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">multigaussian</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 61%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 61/100 [00:00:00&lt;00:00:00, 945.75it/s] [dev:90.2%]
+</pre></div></div>
+</div>
+<p>Another important difference from the single-response case is that the user must be aware of the shape of the returned coefficients. For multi-response GLMs, the intercept (if <code class="docutils literal notranslate"><span class="pre">intercept=True</span></code>) is added for each response. Hence, <code class="docutils literal notranslate"><span class="pre">state.intercepts</span></code> will be a <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">K)</span></code> matrix. Moreover, <code class="docutils literal notranslate"><span class="pre">state.betas</span></code> will be a <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">pK)</span></code> sparse matrix where every <code class="docutils literal notranslate"><span class="pre">K</span></code> columns correspond to the coefficients associated with a feature and across all responses. So, <code class="docutils literal notranslate"><span class="pre">state.betas[i,</span> <span class="pre">:K]</span></code> are the coefficients
+for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th solution on the path and first feature.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">intercepts</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">betas</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+((61, 4), (61, 4000))
+</pre></div></div>
+</div>
+<p>For completion, we show an example of fitting a multinomial group elastic net. For simplicity, we fit the lasso problem.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>     <span class="c1"># number of observations</span>
+<span class="n">p</span> <span class="o">=</span> <span class="mi">1000</span>    <span class="c1"># number of features</span>
+<span class="n">K</span> <span class="o">=</span> <span class="mi">4</span>       <span class="c1"># number of responses</span>
+<span class="n">seed</span> <span class="o">=</span> <span class="mi">0</span>    <span class="c1"># seed</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
+<span class="n">eta</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">:]</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="p">))</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">K</span><span class="p">))</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">eta</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">mu</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 52%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 52/100 [00:00:00&lt;00:00:00, 250.12it/s] [dev:90.4%]
+</pre></div></div>
+</div>
 </section>
 </section>
 
@@ -578,12 +787,12 @@ respectively. We then fit group lasso using the same function.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../user_guide.html"
+       href="introduction.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">User Guide</p>
+        <p class="prev-next-title"><strong>Introduction to Group Elastic Net</strong></p>
       </div>
     </a>
     <a class="right-next"
@@ -611,15 +820,16 @@ respectively. We then fit group lasso using the same function.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Basic-Usage"><strong>Basic Usage</strong></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Data-Preparation"><strong>Data Preparation</strong></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Solver"><strong>Solver</strong></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Lasso"><strong>Lasso</strong></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Group-Lasso"><strong>Group Lasso</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Least-Squares-Group-Elastic-Net"><strong>Least Squares Group Elastic Net</strong></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Lasso"><strong>Lasso</strong></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Group-Lasso"><strong>Group Lasso</strong></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Covariance-Method"><strong>Covariance Method</strong></a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#GLM-Group-Elastic-Net"><strong>GLM Group Elastic Net</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Multi-Response-GLM-Elastic-Net"><strong>Multi-Response GLM Elastic Net</strong></a></li>
 </ul>
   </nav></div>
 
