@@ -9,5 +9,6 @@ User Guide
     notebooks/introduction
     notebooks/quickstart
     notebooks/matrix
+    notebooks/glm
     notebooks/pivot_rule
     notebooks/snp_analysis
