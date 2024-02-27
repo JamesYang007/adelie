@@ -391,8 +391,8 @@ document.write(`
 </pre></div>
 </div>
 </div>
-<section id="Least-Squares-Group-Elastic-Net">
-<h2><strong>Least Squares Group Elastic Net</strong><a class="headerlink" href="#Least-Squares-Group-Elastic-Net" title="Link to this heading">#</a></h2>
+<section id="Gaussian-Group-Elastic-Net">
+<h2><strong>Gaussian Group Elastic Net</strong><a class="headerlink" href="#Gaussian-Group-Elastic-Net" title="Link to this heading">#</a></h2>
 <p>Before using <code class="docutils literal notranslate"><span class="pre">adelie</span></code>, we assume that the user has a feature matrix <code class="docutils literal notranslate"><span class="pre">X</span></code> and a response vector <code class="docutils literal notranslate"><span class="pre">y</span></code>. For simplicity, we assume for now that <code class="docutils literal notranslate"><span class="pre">X</span></code> is a dense matrix, although we will later see that <code class="docutils literal notranslate"><span class="pre">X</span></code> can be substituted with a custom matrix as well. For demonstration, we will randomly generate our data.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -570,9 +570,8 @@ document.write(`
 </div>
 </div>
 </section>
-</section>
 <section id="Covariance-Method">
-<h2><strong>Covariance Method</strong><a class="headerlink" href="#Covariance-Method" title="Link to this heading">#</a></h2>
+<h3><strong>Covariance Method</strong><a class="headerlink" href="#Covariance-Method" title="Link to this heading">#</a></h3>
 <p>For least squares specifically, we expose an equivalent solver <code class="docutils literal notranslate"><span class="pre">ad.solver.gaussian_cov</span></code> that uses summary statistics rather than individual-level data.</p>
 <p>We show below how to solve the equivalent problem presented in the previous sections. First, we create the summary statistics based on the individual-level data.</p>
 <div class="nbinput nblast docutils container">
@@ -633,6 +632,7 @@ document.write(`
 </pre></div>
 </div>
 </div>
+</section>
 </section>
 <section id="GLM-Group-Elastic-Net">
 <h2><strong>GLM Group Elastic Net</strong><a class="headerlink" href="#GLM-Group-Elastic-Net" title="Link to this heading">#</a></h2>
@@ -820,12 +820,12 @@ for the <code class="docutils literal notranslate"><span class="pre">i</span></c
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Least-Squares-Group-Elastic-Net"><strong>Least Squares Group Elastic Net</strong></a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Gaussian-Group-Elastic-Net"><strong>Gaussian Group Elastic Net</strong></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Lasso"><strong>Lasso</strong></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Group-Lasso"><strong>Group Lasso</strong></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Covariance-Method"><strong>Covariance Method</strong></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Covariance-Method"><strong>Covariance Method</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#GLM-Group-Elastic-Net"><strong>GLM Group Elastic Net</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Multi-Response-GLM-Elastic-Net"><strong>Multi-Response GLM Elastic Net</strong></a></li>
 </ul>

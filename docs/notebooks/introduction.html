@@ -435,7 +435,7 @@ Gaussian GLM (<a class="reference external" href="https://jamesyang007.github.io
 \[\begin{align*}
     \eta = X B + \mathbf{1} \beta_0^\top + \eta^0
 \end{align*}\]</div>
-<p>where <span class="math notranslate nohighlight">\(B = \mathrm{vec}(\beta^\top)\)</span>. This way, we have possibly different linear predictions for each response. Note that if an intercept is included in the model, an intercept is added for each response.</p>
+<p>where <span class="math notranslate nohighlight">\(\beta \equiv \mathrm{vec}(B^\top)\)</span>. This way, we have possibly different linear predictions for each response. Note that if an intercept is included in the model, an intercept is added for each response.</p>
 <p>As indicated above, the multi-response group elastic net problem is technically of the same form as the single-response group elastic net problem. In fact, <code class="docutils literal notranslate"><span class="pre">adelie</span></code> reuses the single-response solver for multi-response problems by modifying the inputs appropriately (e.g. using <a class="reference external" href="https://jamesyang007.github.io/adelie/generated/adelie.matrix.kronecker_eye.html">ad.matrix.kronecker_eye</a> to represent <span class="math notranslate nohighlight">\(X \otimes I_K\)</span>). For the Multigaussian GLM, we wrap the specialized single-response
 Gaussian solver and otherwise for general multi-response GLMs, we wrap the single-response GLM solver.</p>
 </section>
