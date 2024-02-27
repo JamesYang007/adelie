@@ -23,7 +23,7 @@
     "(see [SNP Analysis](./snp_analysis.ipynb)), and generally have over 160 billion entries with 30\\% non-zero entries.\n",
     "\n",
     "For these reasons, we found it fruitful to abstract out the matrix class.\n",
-    "`adelie` provides a few matrix classes in the `adelie.matrix` submodule.\n",
+    "`adelie` provides a few matrix classes in the `ad.matrix` submodule.\n",
     "We discuss below some ways a user may interact with these classes\n",
     "as well as define a class of their own to plug into our solver."
    ]

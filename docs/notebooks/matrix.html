@@ -47,7 +47,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/matrix';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Pivot Rule" href="pivot_rule.html" />
+    <link rel="next" title="Generalized Linear Model" href="glm.html" />
     <link rel="prev" title="Quickstart" href="quickstart.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -320,6 +320,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="introduction.html"><strong>Introduction to Group Elastic Net</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html"><strong>Quickstart</strong></a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#"><strong>Matrix</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="glm.html"><strong>Generalized Linear Model</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="pivot_rule.html"><strong>Pivot Rule</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="snp_analysis.html"><strong>SNP Data Analysis</strong></a></li>
 </ul>
@@ -383,7 +384,7 @@ document.write(`
 <h1><strong>Matrix</strong><a class="headerlink" href="#Matrix" title="Link to this heading">#</a></h1>
 <p>In group elastic net problems, the matrix object plays a crucial role in the performance of the solver. It becomes apparent in our optimization algorithm (and our benchmark analysis) that most of the runtime lies in interacting with the matrix object, e.g. computing inner-products. Hence, a highly performant matrix object implementing a select set of methods that the solver requires will yield tremendous speed gains overall. In addition, we have found numerous examples where a matrix class
 admits some special structure that can be exploited for further speed and memory gains. One simple example is a large sparse matrix, which cannot fit in memory as a dense matrix. Another example is genomics datasets which are not only sparse, but only take on 3 possible integer values (see <a class="reference internal" href="snp_analysis.html"><span class="doc">SNP Analysis</span></a>), and generally have over 160 billion entries with 30% non-zero entries.</p>
-<p>For these reasons, we found it fruitful to abstract out the matrix class. <code class="docutils literal notranslate"><span class="pre">adelie</span></code> provides a few matrix classes in the <code class="docutils literal notranslate"><span class="pre">adelie.matrix</span></code> submodule. We discuss below some ways a user may interact with these classes as well as define a class of their own to plug into our solver.</p>
+<p>For these reasons, we found it fruitful to abstract out the matrix class. <code class="docutils literal notranslate"><span class="pre">adelie</span></code> provides a few matrix classes in the <code class="docutils literal notranslate"><span class="pre">ad.matrix</span></code> submodule. We discuss below some ways a user may interact with these classes as well as define a class of their own to plug into our solver.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -582,11 +583,11 @@ the numerous examples of how to extend the base classes in C++. The associated b
       </div>
     </a>
     <a class="right-next"
-       href="pivot_rule.html"
+       href="glm.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><strong>Pivot Rule</strong></p>
+        <p class="prev-next-title"><strong>Generalized Linear Model</strong></p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
