@@ -8,6 +8,8 @@ PYBIND11_MODULE(adelie_core, m) {
     py::bind_vector<std::vector<ad::util::rowmat_type<double>>>(m, "VectorMatrix64");
     py::bind_vector<std::vector<ad::util::rowmat_type<float>>>(m, "VectorMatrix32");
 
+    register_configs(m);
+
     auto m_bcd = m.def_submodule("bcd", "BCD submodule.");
     register_bcd(m_bcd);
 
