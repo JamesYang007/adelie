@@ -144,7 +144,6 @@ void coordinate_descent(
         );
         gk_transformed -= A_kk * ak_old_transformed; 
 
-        // TODO: just change to == 0?
         if ((ak_old_transformed - ak_transformed).matrix().norm() <= 1e-12 * std::sqrt(gsize)) continue;
         
         auto del_transformed = buffer1.head(ak.size());

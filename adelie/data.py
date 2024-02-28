@@ -26,13 +26,17 @@ def _sample_y(
             return ad.glm.gaussian(y=y)
         return ad.glm.multigaussian(y=y)
     elif glm == "multinomial":
-        resid = np.empty((n, K), dtype=eta.dtype)
+        mu = np.empty((n, K), dtype=eta.dtype)
         glm = ad.glm.multinomial(y=np.zeros(eta.shape)) 
         glm.gradient(
             snr * (eta / np.sqrt(np.sum(beta**2, axis=0))[None]), 
-            resid,
+            mu,
         )
-        y = glm.sample(-K * n * resid).astype(eta.dtype)
+        mu *= -K * n
+        y = np.array([
+            np.random.multinomial(1, m)
+            for m in mu
+        ], dtype=eta.dtype)
         return ad.glm.multinomial(y=y)
     elif glm == "cox":
         signal_scale = np.sqrt(rho * np.sum(beta) ** 2 + (1-rho) * np.sum(beta ** 2))
@@ -53,11 +57,16 @@ def _sample_y(
             "binomial": ad.glm.binomial,
             "poisson": ad.glm.poisson,
         }
+        sample_map = {
+            "binomial": lambda mu: np.random.binomial(1, mu),
+            "poisson": lambda mu: np.random.poisson(mu),
+        }
         glm_o = func_map[glm](y=np.zeros(n))
         eta = eta.ravel()
-        resid = np.empty(eta.shape[0], dtype=eta.dtype)
-        glm_o.gradient(snr * eta / np.sqrt(np.sum(beta**2)), resid)
-        y = glm_o.sample(-n * resid).astype(eta.dtype)
+        mu = np.empty(eta.shape[0], dtype=eta.dtype)
+        glm_o.gradient(snr * eta / np.sqrt(np.sum(beta**2)), mu)
+        mu *= -n
+        y = sample_map[glm](mu).astype(eta.dtype)
         return func_map[glm](y=y)
 
 

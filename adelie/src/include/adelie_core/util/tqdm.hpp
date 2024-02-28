@@ -206,8 +206,6 @@ private:
         ss << '|';
         for (int i = 0; i < num_filled; ++i) {
             ss << Configs::pb_symbol;
-            // TODO: fun penguin!!
-            //ss << "\033[1;32m\U0001f427\033[0m";
         }
         ss << std::string(bar_size_ - num_filled, ' ') << '|';
     }

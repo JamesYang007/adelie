@@ -287,7 +287,6 @@ def test_snp_unphased():
 
 
 def test_snp_phased_ancestry():
-    # TODO: this was copied from test_io.py
     def create_dense(calldata, ancestries, A):
         n, s = calldata.shape[0], calldata.shape[1] // 2
         dense = np.zeros((n, s * A), dtype=np.int8)
