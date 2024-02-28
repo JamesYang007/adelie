@@ -35,23 +35,6 @@ class glm_base:
             weights = np.full(n, 1/n, dtype=dtype)
         self.weights = np.array(weights, order="C", dtype=dtype)
 
-    def sample(self, mu: np.ndarray):
-        """Samples from the GLM distribution.
-
-        This function samples the response from the distribution determined by the GLM.
-        
-        Parameters
-        ----------
-        mu : (n,) np.ndarray
-            The mean parameter of the GLM.
-
-        Returns
-        -------
-        y : (n,) np.ndarray
-            Response samples.
-        """
-        pass
-
 
 class multiglm_base:
     """Base wrapper Multi-response GLM class.
@@ -77,23 +60,6 @@ class multiglm_base:
         else:
             weights = np.full(n, 1/n, dtype=dtype)
         self.weights = np.array(weights, order="C", dtype=dtype)
-
-    def sample(self, mu: np.ndarray):
-        """Samples from the Multi-response GLM distribution.
-
-        This function samples the response from the distribution determined by the GLM.
-        
-        Parameters
-        ----------
-        mu : (n, K) np.ndarray
-            The mean parameter of the GLM.
-
-        Returns
-        -------
-        y : (n, K) np.ndarray
-            Response samples.
-        """
-        pass
 
 
 def gaussian(
@@ -157,9 +123,6 @@ def gaussian(
             self.opt = opt
             glm_base.__init__(self, y, weights, core_base, dtype)
             core_base.__init__(self, self.y, self.weights)
-
-        def sample(self, mu):
-            return np.random.normal(mu)
 
         def copy(self):
             return _gaussian()
@@ -232,9 +195,6 @@ def multigaussian(
             multiglm_base.__init__(self, y, weights, core_base, dtype)
             core_base.__init__(self, self.y, self.weights)
 
-        def sample(self, mu):
-            return np.random.normal(mu)
-
         def copy(self):
             return _multigaussian()
 
@@ -296,9 +256,6 @@ def binomial(
         ):
             glm_base.__init__(self, y, weights, core_base, dtype)
             core_base.__init__(self, self.y, self.weights)
-
-        def sample(self, mu):
-            return np.random.binomial(1, mu)
 
         def copy(self):
             return _binomial()
@@ -422,10 +379,6 @@ def cox(
                 self.tie_method,
             )
 
-        def sample(self, mu):
-            # TODO
-            pass
-
         def copy(self):
             return _cox()
 
@@ -496,12 +449,6 @@ def multinomial(
             multiglm_base.__init__(self, y, weights, core_base, dtype)
             core_base.__init__(self, self.y, self.weights)
 
-        def sample(self, mu):
-            return np.array([
-                np.random.multinomial(1, m)
-                for m in mu
-            ])
-
         def copy(self):
             return _multinomial()
 
@@ -563,9 +510,6 @@ def poisson(
         ):
             glm_base.__init__(self, y, weights, core_base, dtype)
             core_base.__init__(self, self.y, self.weights)
-
-        def sample(self, mu):
-            return np.random.poisson(mu)
 
         def copy(self):
             return _poisson()
