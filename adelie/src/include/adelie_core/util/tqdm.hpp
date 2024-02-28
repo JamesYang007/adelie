@@ -34,6 +34,7 @@
 #include <string>
 #include <sstream>
 #include <type_traits>
+#include <adelie_core/configs.hpp>
 
 namespace adelie_core {
 namespace util {
@@ -204,7 +205,7 @@ private:
         auto num_filled = static_cast<index>(std::round(filled*bar_size_));
         ss << '|';
         for (int i = 0; i < num_filled; ++i) {
-            ss << "\033[1;32m\u2588\033[0m";
+            ss << Configs::pb_symbol;
             // TODO: fun penguin!!
             //ss << "\033[1;32m\U0001f427\033[0m";
         }

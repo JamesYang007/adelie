@@ -1,5 +1,6 @@
 from . import adelie_core
 from . import bcd
+from . import configs
 from . import data
 from . import diagnostic
 from . import glm
