@@ -431,7 +431,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 46%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 46/100 [00:00:00&lt;00:00:00, 2596.77it/s] [dev:90.6%]
+ 46%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 46/100 [00:00:00&lt;00:00:00, 2562.47it/s] [dev:90.6%]
 </pre></div></div>
 </div>
 <p>Note that the solver finished early in this example. We display a progress bar that indicates the number of <span class="math notranslate nohighlight">\(\lambda\)</span>’s processed, time elapsed, time remaining, and the percent deviance explained. By default, the solver terminates if the latter reaches <span class="math notranslate nohighlight">\(90\%\)</span> as a simple heuristic to avoid overfitting. This threshold can be controlled via the argument <code class="docutils literal notranslate"><span class="pre">adev_tol</span></code>.</p>
@@ -520,7 +520,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 38%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 38/100 [00:00:00&lt;00:00:00, 4184.90it/s] [dev:90.1%]
+ 38%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 38/100 [00:00:00&lt;00:00:00, 4163.98it/s] [dev:90.1%]
 </pre></div></div>
 </div>
 <p>As before, we may inspect the same elements of <code class="docutils literal notranslate"><span class="pre">state</span></code> and diagnostics.</p>
@@ -578,7 +578,7 @@ document.write(`
 <p>For least squares specifically, we expose an equivalent solver <code class="docutils literal notranslate"><span class="pre">ad.solver.gaussian_cov</span></code> that uses summary statistics rather than individual-level data.</p>
 <p>We show below how to solve the equivalent problem presented in the previous sections. First, we create the summary statistics based on the individual-level data.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Xc</span> <span class="o">=</span> <span class="n">X</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="kc">None</span><span class="p">]</span>
@@ -590,7 +590,7 @@ document.write(`
 </div>
 <p>Now, we use <code class="docutils literal notranslate"><span class="pre">gaussian_cov</span></code> to solve the Gaussian group elastic net problem.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state_cov</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">gaussian_cov</span><span class="p">(</span>
@@ -607,7 +607,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 39%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 39/100 [00:00:00&lt;00:00:00, 2870.79it/s] [rdev:0.9%]
+ 39%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 39/100 [00:00:00&lt;00:00:00, 1596.08it/s] [rdev:0.9%]
 </pre></div></div>
 </div>
 <p>Note that the progress bar displays a different measurement of deviance explained. For the covariance method, since it is usually infeasible to compute the loss at the saturated model, we only display the relative change in percent deviance explained (which can be computed without knowledge of the saturated loss):</p>
@@ -624,7 +624,7 @@ document.write(`
 <p>so that a <span class="math notranslate nohighlight">\(\mathrm{rdev}\)</span> close to zero indicates overfitting. In this example, we early exit the solver once <span class="math notranslate nohighlight">\(\mathrm{rdev}\)</span> reaches <span class="math notranslate nohighlight">\(1\%\)</span>.</p>
 <p>We can compare the solution with that of the result of <code class="docutils literal notranslate"><span class="pre">grpnet</span></code> from before.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_common_sols</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">state_cov</span><span class="o">.</span><span class="n">betas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">state</span><span class="o">.</span><span class="n">betas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -642,7 +642,7 @@ document.write(`
 <p>In the previous section, we covered how to solve penalized least squares regression. Nearly all of the content remains the same for fitting penalized GLM regression. The only difference is in the choice of the <code class="docutils literal notranslate"><span class="pre">glm</span></code> object. For brevity, we only discuss logistic regression as our non-trivial GLM example, however the following discussion applies for any GLM.</p>
 <p>Let’s generate our dataset for logistic regression.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>     <span class="c1"># number of observations</span>
@@ -659,7 +659,7 @@ document.write(`
 </div>
 <p>To solve the group elastic net problem using the logistic loss, we simply provide the Binomial GLM object. For simplicity, we fit the lasso problem below.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
@@ -674,7 +674,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 57%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 57/100 [00:00:00&lt;00:00:00, 1547.44it/s] [dev:90.2%]
+ 57%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 57/100 [00:00:00&lt;00:00:00, 1583.81it/s] [dev:90.2%]
 </pre></div></div>
 </div>
 <p>As before, the user may inspect diagnostic elements of the state in the same fashion.</p>
@@ -684,7 +684,7 @@ document.write(`
 <p><code class="docutils literal notranslate"><span class="pre">ad.grpnet</span></code> is also able to fit multi-response GLM elastic net. Currently, we only support Multigaussian (least squares) and Multinomial GLMs. The only difference in the API from the single-response case is that <code class="docutils literal notranslate"><span class="pre">groups</span></code> argument only takes two possible values: <code class="docutils literal notranslate"><span class="pre">&quot;grouped&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;ungrouped&quot;</span></code>. If <code class="docutils literal notranslate"><span class="pre">groups=&quot;grouped&quot;</span></code> (default), then for each feature, the corresponding coefficients across the responses are grouped. Otherwise, every coefficient is in its own group.</p>
 <p>The following code shows an example of fitting a multi-response least squares group elastic net. For simplicity, we fit the lasso problem.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>     <span class="c1"># number of observations</span>
@@ -699,7 +699,7 @@ document.write(`
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
@@ -714,13 +714,13 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 61%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 61/100 [00:00:00&lt;00:00:00, 945.75it/s] [dev:90.2%]
+ 61%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 61/100 [00:00:00&lt;00:00:00, 887.50it/s] [dev:90.2%]
 </pre></div></div>
 </div>
 <p>Another important difference from the single-response case is that the user must be aware of the shape of the returned coefficients. For multi-response GLMs, the intercept (if <code class="docutils literal notranslate"><span class="pre">intercept=True</span></code>) is added for each response. Hence, <code class="docutils literal notranslate"><span class="pre">state.intercepts</span></code> will be a <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">K)</span></code> matrix. Moreover, <code class="docutils literal notranslate"><span class="pre">state.betas</span></code> will be a <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">pK)</span></code> sparse matrix where every <code class="docutils literal notranslate"><span class="pre">K</span></code> columns correspond to the coefficients associated with a feature and across all responses. So, <code class="docutils literal notranslate"><span class="pre">state.betas[i,</span> <span class="pre">:K]</span></code> are the coefficients
 for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th solution on the path and first feature.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>
@@ -731,7 +731,7 @@ for the <code class="docutils literal notranslate"><span class="pre">i</span></c
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -741,7 +741,7 @@ for the <code class="docutils literal notranslate"><span class="pre">i</span></c
 </div>
 <p>For completion, we show an example of fitting a multinomial group elastic net. For simplicity, we fit the lasso problem.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>     <span class="c1"># number of observations</span>
@@ -758,7 +758,7 @@ for the <code class="docutils literal notranslate"><span class="pre">i</span></c
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
@@ -773,7 +773,40 @@ for the <code class="docutils literal notranslate"><span class="pre">i</span></c
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 52%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 52/100 [00:00:00&lt;00:00:00, 250.12it/s] [dev:90.4%]
+ 52%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 52/100 [00:00:00&lt;00:00:00, 246.53it/s] [dev:90.4%]
+</pre></div></div>
+</div>
+</section>
+<section id="Global-Configurations">
+<h2><strong>Global Configurations</strong><a class="headerlink" href="#Global-Configurations" title="Link to this heading">#</a></h2>
+<p>Global configurations can be toggled via <code class="docutils literal notranslate"><span class="pre">ad.configs.set_configs</span></code> function.</p>
+<p>To change the progress bar symbol, the user can run the following with the last argument being the desired symbol:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ad</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">set_configs</span><span class="p">(</span><span class="s2">&quot;pb_symbol&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\U0001f427</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Now, the progress bar will print penguins!</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 52%|🐧🐧🐧🐧🐧     | 52/100 [00:00:00&lt;00:00:00, 230.75it/s] [dev:90.4%]
 </pre></div></div>
 </div>
 </section>
@@ -831,6 +864,7 @@ for the <code class="docutils literal notranslate"><span class="pre">i</span></c
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#GLM-Group-Elastic-Net"><strong>GLM Group Elastic Net</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Multi-Response-GLM-Elastic-Net"><strong>Multi-Response GLM Elastic Net</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Global-Configurations"><strong>Global Configurations</strong></a></li>
 </ul>
   </nav></div>
 
