@@ -37,6 +37,42 @@ def run_common_test(
     assert np.allclose(loss_full, loss_full_exp)
 
 
+def run_subset_test(
+    model,
+    model_exp,
+    subset,
+):
+    shape = model.y.shape
+    shape_exp = model_exp.y.shape
+
+    eta = np.random.normal(0, 1, shape)
+    eta_sub = eta[subset]
+
+    # test grad
+    grad = np.empty(shape)
+    grad_exp = np.empty(shape_exp)
+    model.gradient(eta, grad)
+    model_exp.gradient(eta_sub, grad_exp)
+    assert np.allclose(grad[subset], grad_exp)
+
+    # test hessian
+    hess = np.empty(shape)
+    hess_exp = np.empty(shape_exp)
+    model.hessian(eta, grad, hess)
+    model_exp.hessian(eta_sub, grad_exp, hess_exp)
+    assert np.allclose(hess[subset], hess_exp)
+
+    # test loss
+    loss = model.loss(eta)
+    loss_exp = model_exp.loss(eta_sub)
+    assert np.allclose(loss, loss_exp)
+
+    # test loss_full
+    loss_full = model.loss_full()
+    loss_full_exp = model_exp.loss_full()
+    assert np.allclose(loss_full, loss_full_exp)
+
+
 # =====================================================================================
 # TEST gaussian
 # =====================================================================================
@@ -71,6 +107,11 @@ def test_gaussian():
         model = glm.gaussian(y=y, weights=w)
         model_exp = TestGaussian(y=y, weights=w)
         run_common_test(model, model_exp)
+
+        subset = w != 0
+        y, w = y[subset], w[subset]
+        model_exp = glm.gaussian(y=y, weights=w)
+        run_subset_test(model, model_exp, subset)
 
     ns = [1, 2, 5, 10, 20, 100]
     for n in ns:
@@ -115,6 +156,11 @@ def test_binomial():
         model_exp = TestBinomial(y=y, weights=w)
         run_common_test(model, model_exp)
 
+        subset = w != 0
+        y, w = y[subset], w[subset]
+        model_exp = glm.binomial(y=y, weights=w)
+        run_subset_test(model, model_exp, subset)
+
     ns = [1, 2, 5, 10, 20, 100]
     for n in ns:
         _test(n)
@@ -156,6 +202,11 @@ def test_poisson():
         model = glm.poisson(y=y, weights=w)
         model_exp = TestPoisson(y=y, weights=w)
         run_common_test(model, model_exp)
+
+        subset = w != 0
+        y, w = y[subset], w[subset]
+        model_exp = glm.poisson(y=y, weights=w)
+        run_subset_test(model, model_exp, subset)
 
     ns = [1, 2, 5, 10, 20, 100]
     for n in ns:
@@ -500,7 +551,6 @@ def test_cox():
         w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
         w[0] = 1
         w /= np.sum(w)
-
         model = glm.cox(
             start=s,
             stop=t,
@@ -513,8 +563,17 @@ def test_cox():
             status=d,
             weights=w,
         )
-
         run_common_test(model, model_exp)
+
+        subset = w != 0
+        s, t, d, w = s[subset], t[subset], d[subset], w[subset]
+        model_exp = glm.cox(
+            start=s, 
+            stop=t,
+            status=d,
+            weights=w,
+        )
+        run_subset_test(model, model_exp, subset)
 
     ns = [1, 2, 5, 10, 20, 100]
     for n in ns:
@@ -559,6 +618,11 @@ def test_multigaussian():
         model = glm.multigaussian(y=y, weights=w)
         model_exp = TestMultiGaussian(y=y, weights=w)
         run_common_test(model, model_exp)
+
+        subset = w != 0
+        y, w = y[subset], w[subset]
+        model_exp = glm.multigaussian(y=y, weights=w)
+        run_subset_test(model, model_exp, subset)
 
     ns = [1, 2, 5, 10, 20, 100]
     Ks = [1, 2, 3, 4]
@@ -609,6 +673,11 @@ def test_multinomial():
         model = glm.multinomial(y=y, weights=w)
         model_exp = TestMultinomial(y=y, weights=w)
         run_common_test(model, model_exp)
+
+        subset = w != 0
+        y, w = y[subset], w[subset]
+        model_exp = glm.multinomial(y=y, weights=w)
+        run_subset_test(model, model_exp, subset)
 
     ns = [1, 2, 5, 10, 20, 100]
     Ks = [1, 2, 3, 4]
