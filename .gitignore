@@ -21,3 +21,4 @@ bazel-out
 bazel-testlogs
 .bazelrc
 .vscode
+research/
