@@ -124,8 +124,9 @@ def gaussian(
             glm_base.__init__(self, y, weights, core_base, dtype)
             core_base.__init__(self, self.y, self.weights)
 
-        def copy(self):
-            return _gaussian()
+        def reweight(self, weights=None):
+            weights = self.weights if weights is None else weights
+            return gaussian(y=y, weights=weights, dtype=dtype, opt=opt)
 
     return _gaussian()
 
@@ -195,8 +196,9 @@ def multigaussian(
             multiglm_base.__init__(self, y, weights, core_base, dtype)
             core_base.__init__(self, self.y, self.weights)
 
-        def copy(self):
-            return _multigaussian()
+        def reweight(self, weights=None):
+            weights = self.weights if weights is None else weights
+            return multigaussian(y=y, weights=weights, dtype=dtype, opt=opt)
 
     return _multigaussian()
 
@@ -257,8 +259,9 @@ def binomial(
             glm_base.__init__(self, y, weights, core_base, dtype)
             core_base.__init__(self, self.y, self.weights)
 
-        def copy(self):
-            return _binomial()
+        def reweight(self, weights=None):
+            weights = self.weights if weights is None else weights
+            return binomial(y=y, weights=weights, dtype=dtype)
 
     return _binomial()
 
@@ -379,8 +382,16 @@ def cox(
                 self.tie_method,
             )
 
-        def copy(self):
-            return _cox()
+        def reweight(self, weights=None):
+            weights = self.weights if weights is None else weights
+            return cox(
+                start=start, 
+                stop=stop,
+                status=status,
+                weights=weights, 
+                tie_method=tie_method,
+                dtype=dtype,
+            )
 
     return _cox()
 
@@ -449,8 +460,9 @@ def multinomial(
             multiglm_base.__init__(self, y, weights, core_base, dtype)
             core_base.__init__(self, self.y, self.weights)
 
-        def copy(self):
-            return _multinomial()
+        def reweight(self, weights=None):
+            weights = self.weights if weights is None else weights
+            return multinomial(y=y, weights=weights, dtype=dtype)
 
     return _multinomial()
 
@@ -511,7 +523,8 @@ def poisson(
             glm_base.__init__(self, y, weights, core_base, dtype)
             core_base.__init__(self, self.y, self.weights)
 
-        def copy(self):
-            return _poisson()
+        def reweight(self, weights=None):
+            weights = self.weights if weights is None else weights
+            return poisson(y=y, weights=weights, dtype=dtype)
 
     return _poisson()

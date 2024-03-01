@@ -21,6 +21,21 @@ adelie.bcd
     solve
 
 
+adelie.cv
+---------
+
+
+.. currentmodule:: adelie.cv
+
+
+.. autosummary::
+    :toctree: generated/
+
+
+    CVGrpnetResult
+    cv_grpnet
+
+
 adelie.data
 -----------------
 

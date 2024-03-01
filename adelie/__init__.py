@@ -1,6 +1,7 @@
 from . import adelie_core
 from . import bcd
 from . import configs
+from . import cv
 from . import data
 from . import diagnostic
 from . import glm
@@ -10,6 +11,9 @@ from . import optimization
 from . import research
 from . import state
 from . import solver
+from .cv import (
+    cv_grpnet,
+)
 from .solver import (
     gaussian_cov, 
     grpnet,

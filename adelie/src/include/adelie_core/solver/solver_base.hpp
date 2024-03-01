@@ -45,7 +45,7 @@ bool early_exit(
     if (devs.size() == 1) return false;
 
     const auto dev_m = devs[devs.size()-2];
-    if (dev_u-dev_m <= ddev_tol) return true;
+    if (std::abs(dev_u-dev_m) < ddev_tol) return true;
 
     return false;
 }
