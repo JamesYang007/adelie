@@ -6,6 +6,7 @@ dependencies:
   - eigen=3.4.0
   - pip
   - ffmpeg
+  - ocl-icd-system
   - pip:
     - pip
     - poetry
