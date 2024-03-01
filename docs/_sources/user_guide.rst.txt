@@ -11,5 +11,4 @@ User Guide
     notebooks/matrix
     notebooks/glm
     notebooks/parallelism
-    notebooks/pivot_rule
     notebooks/snp_analysis
