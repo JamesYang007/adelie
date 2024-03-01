@@ -508,6 +508,7 @@ def coefficient(
     *,
     lmda: float,
     betas: csr_matrix,
+    intercepts: np.ndarray,
     lmdas: np.ndarray,
 ):
     """Computes the coefficient at :math:`\\lambda` using linear interpolation of solutions.
@@ -528,6 +529,7 @@ def coefficient(
     if :math:`\\lambda \\in [\\lambda_{k+1}, \\lambda_k]`.
     If :math:`\\lambda` lies above the largest value in ``lmdas`` or below the smallest value,
     then we simply take the solution at the respective ends.
+    The same formula holds for intercepts.
 
     Parameters
     ----------
@@ -535,6 +537,8 @@ def coefficient(
         New regularization parameter at which to find the solution.
     betas : (L, p) np.ndarray
         Coefficient vectors :math:`\\beta`.
+    intercepts : (L,) np.ndarray
+        Intercepts.
     lmdas : (L,) np.ndarray
         Regularization parameters :math:`\\lambda`.
 
@@ -542,7 +546,13 @@ def coefficient(
     -------
     beta : (1, p) scipy.sparse.csr_matrix
         Linearly interpolated coefficient vector at :math:`\\lambda`.
+    intercept : float
+        Linearly interpolated intercept at :math:`\\lambda`.
     """
+    if len(lmdas) == 0:
+        raise RuntimeError("lmdas must be non-empty!")
+    if len(lmdas) == 1:
+        return betas, lmdas
     order = np.argsort(lmdas)
     idx = np.searchsorted(
         lmdas,
@@ -556,12 +566,15 @@ def coefficient(
             "Returning boundary solution."
         )
         idx = np.clip(idx, 0, lmdas.shape[0]-1)
-        return betas[idx]
+        return betas[idx], intercepts[idx]
 
     left, right = betas[idx-1], betas[idx]
     weight = (lmda - lmdas[idx]) / (lmdas[idx-1] - lmdas[idx])
+    beta = left.multiply(weight) + right.multiply(1-weight)
+    left, right = intercepts[idx-1], intercepts[idx]
+    intercept = weight * left + (1-weight) * right
 
-    return left.multiply(weight) + right.multiply(1-weight)
+    return beta, intercept
 
 
 def plot_coefficients(
