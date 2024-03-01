@@ -1,0 +1,6 @@
+﻿adelie.cv.cv\_grpnet
+====================
+
+.. currentmodule:: adelie.cv
+
+.. autofunction:: cv_grpnet

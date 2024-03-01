@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.diagnostic.objective &#8212; adelie 1.1.13
+    <title>adelie.cv.CVGrpnetResult &#8212; adelie 1.1.13
  documentation</title>
   
   
@@ -43,11 +43,11 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.diagnostic.objective';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.cv.CVGrpnetResult';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.diagnostic.plot_benchmark" href="adelie.diagnostic.plot_benchmark.html" />
-    <link rel="prev" title="adelie.diagnostic.gradient_scores" href="adelie.diagnostic.gradient_scores.html" />
+    <link rel="next" title="adelie.cv.cv_grpnet" href="adelie.cv.cv_grpnet.html" />
+    <link rel="prev" title="adelie.bcd.solve" href="adelie.bcd.solve.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -323,8 +323,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.cv.CVGrpnetResult.html">adelie.cv.CVGrpnetResult</a></li>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.cv.CVGrpnetResult</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.cv.cv_grpnet.html">adelie.cv.cv_grpnet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -332,13 +332,13 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_phased_ancestry.html">adelie.data.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_unphased.html">adelie.data.snp_unphased</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.diagnostic.html">adelie.diagnostic.diagnostic</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.diagnostic.objective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.objective.html">adelie.diagnostic.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_devs.html">adelie.diagnostic.plot_devs</a></li>
@@ -433,7 +433,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.diagn...</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.cv.CV...</li>
   </ul>
 </nav>
 </div>
@@ -450,78 +450,65 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-diagnostic-objective">
-<h1>adelie.diagnostic.objective<a class="headerlink" href="#adelie-diagnostic-objective" title="Link to this heading">#</a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="adelie.diagnostic.objective">
-<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MatrixNaiveBase32</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html#adelie.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">MatrixNaiveBase64</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GlmBase32</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.glm.GlmBase64.html#adelie.glm.GlmBase64" title="adelie.adelie_core.glm.GlmBase64"><span class="pre">GlmBase64</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">GlmMultiBase32</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.glm.GlmMultiBase64.html#adelie.glm.GlmMultiBase64" title="adelie.adelie_core.glm.GlmMultiBase64"><span class="pre">GlmMultiBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">csr_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intercepts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.objective" title="Link to this definition">#</a></dt>
-<dd><p>Computes the group elastic net objective.</p>
-<p>See <code class="docutils literal notranslate"><span class="pre">adelie.solver.grpnet</span></code> for details.</p>
-<dl class="field-list">
+  <section id="adelie-cv-cvgrpnetresult">
+<h1>adelie.cv.CVGrpnetResult<a class="headerlink" href="#adelie-cv-cvgrpnetresult" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.cv.</span></span><span class="sig-name descname"><span class="pre">CVGrpnetResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">losses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_losses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.cv.CVGrpnetResult" title="Link to this definition">#</a></dt>
+<dd><p>Result of K-fold CV group elastic net.</p>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.__init__" title="adelie.cv.CVGrpnetResult.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(lmdas, losses, avg_losses, best_idx)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.fit" title="adelie.cv.CVGrpnetResult.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(*[, lmda_path_size])</p></td>
+<td><p>Fit group elastic net until the best CV <span class="math notranslate nohighlight">\(\lambda\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.plot_loss" title="adelie.cv.CVGrpnetResult.plot_loss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_loss</span></code></a>()</p></td>
+<td><p>Plots the average K-fold CV loss.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.lmdas" title="adelie.cv.CVGrpnetResult.lmdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.losses" title="adelie.cv.CVGrpnetResult.losses"><code class="xref py py-obj docutils literal notranslate"><span class="pre">losses</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.avg_losses" title="adelie.cv.CVGrpnetResult.avg_losses"><code class="xref py py-obj docutils literal notranslate"><span class="pre">avg_losses</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.best_idx" title="adelie.cv.CVGrpnetResult.best_idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">best_idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">losses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_losses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.cv.CVGrpnetResult.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">grpnet_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.cv.CVGrpnetResult.fit" title="Link to this definition">#</a></dt>
+<dd><p>Fit group elastic net until the best CV <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>X</strong><span class="classifier">(n, p) Union[adelie.matrix.MatrixNaiveBase32, adelie.matrix.MatrixNaiveBase64]</span></dt><dd><p>Feature matrix <span class="math notranslate nohighlight">\(X\)</span>.
-It is typically one of the matrices defined in <code class="docutils literal notranslate"><span class="pre">adelie.matrix</span></code> submodule or <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code>.</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>lmda_path_size</strong><span class="classifier">int, optional</span></dt><dd><p>Number of regularizations in the path.
+Default is <code class="docutils literal notranslate"><span class="pre">100</span></code>.</p>
 </dd>
-<dt><strong>glm</strong><span class="classifier">Union[glm.GlmBase32, glm.GlmBase64, glm.GlmMultiBase32, glm.GlmMultiBase64]</span></dt><dd><p>GLM object.
-It is typically one of the GLM classes defined in <code class="docutils literal notranslate"><span class="pre">adelie.glm</span></code> submodule.</p>
-</dd>
-<dt><strong>betas</strong><span class="classifier">(L, p) or (L, p*K) Union[np.ndarray, scipy.sparse.csr_matrix]</span></dt><dd><p>Coefficient vectors <span class="math notranslate nohighlight">\(\beta\)</span>.</p>
-</dd>
-<dt><strong>intercepts</strong><span class="classifier">(L,) or (L, K) np.ndarray</span></dt><dd><p>Intercepts <span class="math notranslate nohighlight">\(\beta_0\)</span>.</p>
-</dd>
-<dt><strong>lmdas</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Regularization parameters <span class="math notranslate nohighlight">\(\lambda\)</span>.
-It is only used when <code class="docutils literal notranslate"><span class="pre">add_penalty=True</span></code>.
-Otherwise, the user may pass <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
-</dd>
-<dt><strong>groups</strong><span class="classifier">(G,) np.ndarray, optional</span></dt><dd><p>List of starting indices to each group where <cite>G</cite> is the number of groups.
-<code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group. 
-If <code class="docutils literal notranslate"><span class="pre">glm</span></code> is multi-response type, then we only allow two types of groupings:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;grouped&quot;</span></code>: coefficients for each predictor is grouped across the classes.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;ungrouped&quot;</span></code>: every coefficient is its own group.</p></li>
-</ul>
-</div></blockquote>
-<p>It is only used when <code class="docutils literal notranslate"><span class="pre">add_penalty=True</span></code>.
-Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case it is set to
-<code class="docutils literal notranslate"><span class="pre">np.arange(p)</span></code> if <code class="docutils literal notranslate"><span class="pre">y</span></code> is single-response
-and <code class="docutils literal notranslate"><span class="pre">&quot;grouped&quot;</span></code> if multi-response.</p>
-</dd>
-<dt><strong>alpha</strong><span class="classifier">float, optional</span></dt><dd><p>Elastic net parameter <span class="math notranslate nohighlight">\(\alpha\)</span>.
-It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</span>.
-It is only used when <code class="docutils literal notranslate"><span class="pre">add_penalty=True</span></code>.
-Otherwise, the user may pass <code class="docutils literal notranslate"><span class="pre">None</span></code>.
-Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
-</dd>
-<dt><strong>penalty</strong><span class="classifier">(G,) np.ndarray, optional</span></dt><dd><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.
-It must be a non-negative vector.
-It is only used when <code class="docutils literal notranslate"><span class="pre">add_penalty=True</span></code>.
-Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to <code class="docutils literal notranslate"><span class="pre">np.sqrt(group_sizes)</span></code>.</p>
-</dd>
-<dt><strong>offsets</strong><span class="classifier">(n,) or (n, K) np.ndarray, optional</span></dt><dd><p>Observation offsets <span class="math notranslate nohighlight">\(\eta^0\)</span>.
-Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to 
-<code class="docutils literal notranslate"><span class="pre">np.zeros(n)</span></code> if <code class="docutils literal notranslate"><span class="pre">y</span></code> is single-response
-and <code class="docutils literal notranslate"><span class="pre">np.zeros((n,</span> <span class="pre">K))</span></code> if multi-response.</p>
-</dd>
-<dt><strong>relative</strong><span class="classifier">bool, optional</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, then the full loss, <span class="math notranslate nohighlight">\(\ell(\eta^\star)\)</span>, is computed at the saturated model
-and the difference <span class="math notranslate nohighlight">\(\ell(\eta)-\ell(\eta^\star)\)</span> is provided,
-which will always be non-negative.
-This effectively computes loss <em>relative</em> to the saturated model.
-Default is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
-</dd>
-<dt><strong>add_penalty</strong><span class="classifier">bool, optional</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">False</span></code>, the regularization term is removed 
-so that only the loss part is calculated. 
-Default is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
-</dd>
-<dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
-Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+<dt><strong>**grpnet_params</strong></dt><dd><p>Parameters to <code class="docutils literal notranslate"><span class="pre">adelie.solver.grpnet</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>obj</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Group elastic net objectives.</p>
+<dt>state</dt><dd><p>Result of calling <code class="docutils literal notranslate"><span class="pre">adelie.solver.grpnet</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -532,6 +519,36 @@ Default is <code class="docutils literal notranslate"><span class="pre">1</span>
 <dt><a class="reference internal" href="adelie.solver.grpnet.html#adelie.solver.grpnet" title="adelie.solver.grpnet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.solver.grpnet</span></code></a></dt><dd></dd>
 </dl>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult.plot_loss">
+<span class="sig-name descname"><span class="pre">plot_loss</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adelie.cv.CVGrpnetResult.plot_loss" title="Link to this definition">#</a></dt>
+<dd><p>Plots the average K-fold CV loss.</p>
+<p>For each fitted <span class="math notranslate nohighlight">\(\lambda\)</span>, the average K-fold CV loss
+as well as an error bar of one standard deviation (above and below) is plotted.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult.lmdas">
+<span class="sig-name descname"><span class="pre">lmdas</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.cv.CVGrpnetResult.lmdas" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult.losses">
+<span class="sig-name descname"><span class="pre">losses</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.cv.CVGrpnetResult.losses" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult.avg_losses">
+<span class="sig-name descname"><span class="pre">avg_losses</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.cv.CVGrpnetResult.avg_losses" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult.best_idx">
+<span class="sig-name descname"><span class="pre">best_idx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#adelie.cv.CVGrpnetResult.best_idx" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </section>
@@ -547,20 +564,20 @@ Default is <code class="docutils literal notranslate"><span class="pre">1</span>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.diagnostic.gradient_scores.html"
+       href="adelie.bcd.solve.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.diagnostic.gradient_scores</p>
+        <p class="prev-next-title">adelie.bcd.solve</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.diagnostic.plot_benchmark.html"
+       href="adelie.cv.cv_grpnet.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.diagnostic.plot_benchmark</p>
+        <p class="prev-next-title">adelie.cv.cv_grpnet</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -580,14 +597,23 @@ Default is <code class="docutils literal notranslate"><span class="pre">1</span>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.diagnostic.objective"><code class="docutils literal notranslate"><span class="pre">objective()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.cv.CVGrpnetResult"><code class="docutils literal notranslate"><span class="pre">CVGrpnetResult</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.cv.CVGrpnetResult.__init__"><code class="docutils literal notranslate"><span class="pre">CVGrpnetResult.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.cv.CVGrpnetResult.fit"><code class="docutils literal notranslate"><span class="pre">CVGrpnetResult.fit()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.cv.CVGrpnetResult.plot_loss"><code class="docutils literal notranslate"><span class="pre">CVGrpnetResult.plot_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.cv.CVGrpnetResult.lmdas"><code class="docutils literal notranslate"><span class="pre">CVGrpnetResult.lmdas</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.cv.CVGrpnetResult.losses"><code class="docutils literal notranslate"><span class="pre">CVGrpnetResult.losses</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.cv.CVGrpnetResult.avg_losses"><code class="docutils literal notranslate"><span class="pre">CVGrpnetResult.avg_losses</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.cv.CVGrpnetResult.best_idx"><code class="docutils literal notranslate"><span class="pre">CVGrpnetResult.best_idx</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.diagnostic.objective.rst.txt">
+    <a href="../_sources/generated/adelie.cv.CVGrpnetResult.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.diagnostic.coefficient &#8212; adelie 1.1.12
+    <title>adelie.diagnostic.coefficient &#8212; adelie 1.1.13
  documentation</title>
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=b63844d9"></script>
+    <script src="../_static/documentation_options.js?v=1240c0c0"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.12
+    <p class="title logo__title">adelie 1.1.13
  documentation</p>
   
 </a></div>
@@ -324,6 +324,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.cv.CVGrpnetResult.html">adelie.cv.CVGrpnetResult</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.cv.cv_grpnet.html">adelie.cv.cv_grpnet</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.dense.html">adelie.data.dense</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_phased_ancestry.html">adelie.data.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_unphased.html">adelie.data.snp_unphased</a></li>
@@ -450,7 +454,7 @@ document.write(`
 <h1>adelie.diagnostic.coefficient<a class="headerlink" href="#adelie-diagnostic-coefficient" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.diagnostic.coefficient">
-<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csr_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.coefficient" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csr_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intercepts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.coefficient" title="Link to this definition">#</a></dt>
 <dd><p>Computes the coefficient at <span class="math notranslate nohighlight">\(\lambda\)</span> using linear interpolation of solutions.</p>
 <p>The linearly interpolated coefficient is given by</p>
 <div class="math notranslate nohighlight">
@@ -465,13 +469,16 @@ document.write(`
 \end{align*}\]</div>
 <p>if <span class="math notranslate nohighlight">\(\lambda \in [\lambda_{k+1}, \lambda_k]\)</span>.
 If <span class="math notranslate nohighlight">\(\lambda\)</span> lies above the largest value in <code class="docutils literal notranslate"><span class="pre">lmdas</span></code> or below the smallest value,
-then we simply take the solution at the respective ends.</p>
+then we simply take the solution at the respective ends.
+The same formula holds for intercepts.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>lmda</strong><span class="classifier">float</span></dt><dd><p>New regularization parameter at which to find the solution.</p>
 </dd>
 <dt><strong>betas</strong><span class="classifier">(L, p) np.ndarray</span></dt><dd><p>Coefficient vectors <span class="math notranslate nohighlight">\(\beta\)</span>.</p>
+</dd>
+<dt><strong>intercepts</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Intercepts.</p>
 </dd>
 <dt><strong>lmdas</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Regularization parameters <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
 </dd>
@@ -480,6 +487,8 @@ then we simply take the solution at the respective ends.</p>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>beta</strong><span class="classifier">(1, p) scipy.sparse.csr_matrix</span></dt><dd><p>Linearly interpolated coefficient vector at <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
+</dd>
+<dt><strong>intercept</strong><span class="classifier">float</span></dt><dd><p>Linearly interpolated intercept at <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
 </dd>
 </dl>
 </dd>

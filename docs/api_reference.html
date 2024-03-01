@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>API Reference &#8212; adelie 1.1.12
+    <title>API Reference &#8212; adelie 1.1.13
  documentation</title>
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="_static/documentation_options.js?v=b63844d9"></script>
+    <script src="_static/documentation_options.js?v=1240c0c0"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.12
+    <p class="title logo__title">adelie 1.1.13
  documentation</p>
   
 </a></div>
@@ -324,6 +324,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.cv.CVGrpnetResult.html">adelie.cv.CVGrpnetResult</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.cv.cv_grpnet.html">adelie.cv.cv_grpnet</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.data.dense.html">adelie.data.dense</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.data.snp_phased_ancestry.html">adelie.data.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.data.snp_unphased.html">adelie.data.snp_unphased</a></li>
@@ -470,6 +474,19 @@ document.write(`
 </tbody>
 </table>
 </section>
+<section id="adelie-cv">
+<h2>adelie.cv<a class="headerlink" href="#adelie-cv" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.cv.CVGrpnetResult.html#adelie.cv.CVGrpnetResult" title="adelie.cv.CVGrpnetResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CVGrpnetResult</span></code></a>(lmdas, losses, avg_losses, ...)</p></td>
+<td><p>Result of K-fold CV group elastic net.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.cv.cv_grpnet.html#adelie.cv.cv_grpnet" title="adelie.cv.cv_grpnet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cv_grpnet</span></code></a>(*, X, glm[, n_threads, ...])</p></td>
+<td><p>Cross-validation group elastic net solver.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 <section id="adelie-data">
 <h2>adelie.data<a class="headerlink" href="#adelie-data" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
@@ -490,7 +507,7 @@ document.write(`
 <h2>adelie.diagnostic<a class="headerlink" href="#adelie-diagnostic" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.coefficient.html#adelie.diagnostic.coefficient" title="adelie.diagnostic.coefficient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coefficient</span></code></a>(*, lmda, betas, lmdas)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.diagnostic.coefficient.html#adelie.diagnostic.coefficient" title="adelie.diagnostic.coefficient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coefficient</span></code></a>(*, lmda, betas, intercepts, lmdas)</p></td>
 <td><p>Computes the coefficient at <span class="math notranslate nohighlight">\(\lambda\)</span> using linear interpolation of solutions.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.diagnostic.diagnostic.html#adelie.diagnostic.diagnostic" title="adelie.diagnostic.diagnostic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diagnostic</span></code></a>(state)</p></td>
@@ -726,6 +743,7 @@ document.write(`
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-bcd">adelie.bcd</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-cv">adelie.cv</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-data">adelie.data</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-diagnostic">adelie.diagnostic</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-glm">adelie.glm</a></li>
