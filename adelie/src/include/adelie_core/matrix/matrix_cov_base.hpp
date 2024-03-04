@@ -10,20 +10,21 @@ class MatrixCovBase
 {
 protected:
     static void check_bmul(
-        int i, int j, int p, int q, int v, int o, int r, int c
+        int g, int gs, int ri, int ci, int v, int o, int r, int c
     )
     {
         if (
-            (i < 0 || i > r-p) ||
-            (j < 0 || j > c-q) ||
-            (v != p) ||
-            (o != q)
+            (g != gs) ||
+            (ri < 0 || ri > g) ||
+            (ci < 0 || ci > g) ||
+            (v < 0 || v > r) ||
+            (o < 0 || o > c)
         ) {
             throw std::runtime_error(
                 util::format(
                     "bmul() is given inconsistent inputs! "
-                    "Invoked check_bmul(i=%d, j=%d, p=%d, q=%d, v=%d, o=%d, r=%d, c=%d)",
-                    i, j, p, q, v, o, r, c
+                    "Invoked check_bmul(g=%d, gs=%d, ri=%d, ci=%d, v=%d, o=%d, r=%d, c=%d)",
+                    g, gs, ri, ci, v, o, r, c
                 )
             );
         }
@@ -71,13 +72,18 @@ protected:
 
 public:
     using value_t = ValueType;
+    using index_t = int;
+    using vec_index_t = util::rowvec_type<index_t>;
     using vec_value_t = util::rowvec_type<value_t>;
     using colmat_value_t = util::colmat_type<value_t>;
     
     virtual ~MatrixCovBase() {}
 
     virtual void bmul(
-        int i, int j, int p, int q, 
+        const Eigen::Ref<const vec_index_t>& groups,
+        const Eigen::Ref<const vec_index_t>& group_sizes,
+        const Eigen::Ref<const vec_index_t>& row_indices,
+        const Eigen::Ref<const vec_index_t>& col_indices,
         const Eigen::Ref<const vec_value_t>& v, 
         Eigen::Ref<vec_value_t> out
     ) =0;
