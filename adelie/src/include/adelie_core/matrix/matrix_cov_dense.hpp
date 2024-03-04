@@ -27,19 +27,55 @@ public:
     ): 
         _mat(mat.data(), mat.rows(), mat.cols()),
         _n_threads(n_threads),
-        _buff(_n_threads, std::min(mat.rows(), mat.cols()))
-    {}
+        _buff(_n_threads, mat.cols())
+    {
+        if (mat.rows() != mat.cols()) {
+            throw std::runtime_error("Matrix must be square!");
+        }
+    }
 
     using base_t::rows;
     
     void bmul(
-        int i, int j, int p, int q, 
+        const Eigen::Ref<const vec_index_t>& groups,
+        const Eigen::Ref<const vec_index_t>& group_sizes,
+        const Eigen::Ref<const vec_index_t>& row_indices,
+        const Eigen::Ref<const vec_index_t>& col_indices,
         const Eigen::Ref<const vec_value_t>& v, 
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_bmul(i, j, p, q, v.size(), out.size(), rows(), cols());
-        out.matrix().noalias() = v.matrix() * _mat.block(i, j, p, q);
+        base_t::check_bmul(
+            groups.size(), 
+            group_sizes.size(), 
+            row_indices.size(), 
+            col_indices.size(), 
+            v.size(), 
+            out.size(), 
+            rows(), 
+            cols()
+        );
+        auto _vbuff = _buff.row(0).head(out.size());
+        out.setZero();
+        int rpos = 0;
+        for (int i = 0; i < row_indices.size(); ++i) {
+            const auto r = row_indices[i];
+            const auto rg = groups[r];
+            const auto rgs = group_sizes[r];
+            const auto rv = v.segment(rpos, rgs);
+
+            int cpos = 0;
+            for (int j = 0; j < col_indices.size(); ++j) {
+                const auto c = col_indices[j];
+                const auto cg = groups[c];
+                const auto cgs = group_sizes[c];
+                _vbuff.segment(cpos, cgs).noalias() = rv.matrix() * _mat.block(rg, cg, rgs, cgs);
+                cpos += cgs;
+            }
+            dvaddi(out, _vbuff, _n_threads);
+
+            rpos += rgs;
+        }
     }
 
     void mul(
