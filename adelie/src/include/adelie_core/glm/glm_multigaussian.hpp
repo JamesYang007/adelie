@@ -19,7 +19,7 @@ public:
         const Eigen::Ref<const rowarr_value_t>& y,
         const Eigen::Ref<const vec_value_t>& weights
     ):
-        base_t("multigaussian", y, weights)
+        base_t("multigaussian", y, weights, false)
     {}
 
     void gradient(

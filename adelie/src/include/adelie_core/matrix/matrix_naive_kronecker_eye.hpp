@@ -33,61 +33,55 @@ public:
         _mat(&mat),
         _K(K),
         _n_threads(n_threads),
-        _buff(2 * mat.rows() + mat.cols())
+        _buff(3 * mat.rows() + mat.cols())
     {}
 
     value_t cmul(
         int j, 
-        const Eigen::Ref<const vec_value_t>& v
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& weights
     ) override 
     {
-        base_t::check_cmul(j, v.size(), rows(), cols());
+        base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
         Eigen::Map<const rowmat_value_t> V(v.data(), rows() / _K, _K);
+        Eigen::Map<const rowmat_value_t> W(weights.data(), V.rows(), V.cols());
         int i = j / _K;
         int l = j - _K * i;
-        Eigen::Map<vec_value_t> _vbuff(
-            _buff.data(),
-            V.rows()
-        );
-        _vbuff = V.col(l);
-        return _mat->cmul(i, _vbuff);
+        Eigen::Map<vec_value_t> _v(_buff.data(), V.rows());
+        Eigen::Map<vec_value_t> _w(_buff.data() + V.rows(), V.rows());
+        _v = V.col(l);
+        _w = W.col(l);
+        return _mat->cmul(i, _v, _w);
     }
 
     void ctmul(
         int j, 
         value_t v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_ctmul(j, weights.size(), out.size(), rows(), cols());
+        base_t::check_ctmul(j, out.size(), rows(), cols());
         Eigen::Map<rowmat_value_t> Out(out.data(), rows() / _K, _K);
-        Eigen::Map<const rowmat_value_t> W(weights.data(), Out.rows(), Out.cols());
         int i = j / _K;
         int l = j - _K * i;
         dvzero(out, _n_threads);
-        Eigen::Map<vec_value_t> _weights(
-            _buff.data(),
-            W.rows()
-        );
-        _weights = W.col(l);
-        Eigen::Map<vec_value_t> _out(
-            _buff.data() + W.rows(),
-            W.rows()
-        );
-        _mat->ctmul(i, v, _weights, _out);
+        Eigen::Map<vec_value_t> _out(_buff.data(), Out.rows());
+        _mat->ctmul(i, v, _out);
         Out.col(l) = _out;
     }
 
     void bmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_bmul(j, q, v.size(), out.size(), rows(), cols());
+        base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
         Eigen::Map<const rowmat_value_t> V(v.data(), rows() / _K, _K);
+        Eigen::Map<const rowmat_value_t> W(weights.data(), V.rows(), V.cols());
         Eigen::Map<vec_value_t> _v(_buff.data(), V.rows());
+        Eigen::Map<vec_value_t> _w(_buff.data() + V.rows(), V.rows());
         for (int l = 0; l < _K; ++l) {
             const auto j_l = std::max(j-l, 0);
             const auto i_begin = j_l / static_cast<int>(_K) + ((j_l % _K) != 0);
@@ -96,11 +90,12 @@ public:
             const auto i_q = i_end - i_begin;
             if (i_q <= 0) continue;
             _v = V.col(l);
+            _w = W.col(l);
             Eigen::Map<vec_value_t> _out(
-                _buff.data() + V.rows(),
+                _buff.data() + 2 * V.rows(),
                 i_q
             );
-            _mat->bmul(i_begin, i_q, _v, _out);
+            _mat->bmul(i_begin, i_q, _v, _w, _out);
             for (int i = i_begin; i < i_end; ++i){
                 out[i*_K+l-j] = _out[i-i_begin];
             }
@@ -110,14 +105,11 @@ public:
     void btmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_btmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-        Eigen::Map<const rowmat_value_t> W(weights.data(), rows() / _K, _K);
-        Eigen::Map<vec_value_t> _weights(_buff.data(), W.rows());
-        Eigen::Map<rowmat_value_t> Out(out.data(), W.rows(), W.cols());
+        base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
+        Eigen::Map<rowmat_value_t> Out(out.data(), rows() / _K, _K);
         for (int l = 0; l < _K; ++l) {
             const auto j_l = std::max(j-l, 0);
             const auto i_begin = j_l / static_cast<int>(_K) + ((j_l % _K) != 0);
@@ -131,29 +123,26 @@ public:
                 Out.col(l).setZero();
                 continue;
             }
-            _weights = W.col(l);
-            Eigen::Map<vec_value_t> _v(
-                _buff.data() + _weights.size(),
-                i_q
-            );
+            Eigen::Map<vec_value_t> _v(_buff.data(), i_q);
             for (int i = i_begin; i < i_end; ++i) {
                 _v[i-i_begin] = v[i*_K+l-j];
             }
             Eigen::Map<vec_value_t> _out(
-                _buff.data() + _weights.size() + i_q,
-                _weights.size()
+                _buff.data() + i_q,
+                Out.rows()
             );
-            _mat->btmul(i_begin, i_q, _v, _weights, _out);
+            _mat->btmul(i_begin, i_q, _v, _out);
             Out.col(l) = _out;
         }
     }
 
     void mul(
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        bmul(0, cols(), v, out);
+        bmul(0, cols(), v, weights, out);
     }
 
     void cov(
@@ -207,15 +196,12 @@ public:
 
     void sp_btmul(
         const sp_mat_value_t& v,
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
         base_t::check_sp_btmul(
-            v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
+            v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
-
-        Eigen::Map<const rowmat_value_t> W(weights.data(), rows() / _K, _K);
 
         std::vector<int> outers(v.outerSize()+1); 
         outers[0] = 0;
@@ -224,15 +210,9 @@ public:
         inners.reserve(v.nonZeros());
         values.reserve(v.nonZeros());
 
-        rowmat_value_t _out(out.rows(), W.rows());
+        rowmat_value_t _out(out.rows(), rows() / _K);
 
         for (int l = 0; l < _K; ++l) {
-            Eigen::Map<vec_value_t> _weights(
-                _buff.data(),
-                W.rows()
-            );
-            _weights = W.col(l);
-
             inners.clear();
             values.clear();
 
@@ -257,12 +237,12 @@ public:
                 values.data()
             );
 
-            _mat->sp_btmul(_v, _weights, _out);
+            _mat->sp_btmul(_v, _out);
 
             #pragma omp parallel for schedule(static) num_threads(_n_threads)
             for (int k = 0; k < out.rows(); ++k) {
                 Eigen::Map<rowmat_value_t> out_k(
-                    out.row(k).data(), W.rows(), W.cols()
+                    out.row(k).data(), _out.cols(), _K                
                 );
                 out_k.col(l) = _out.row(k);
             }
@@ -287,7 +267,8 @@ private:
     const Eigen::Map<const dense_t> _mat;
     const size_t _K;
     const size_t _n_threads;
-    util::rowmat_type<value_t> _buff;
+    rowmat_value_t _buff;
+    vec_value_t _vbuff;
     
 public:
     explicit MatrixNaiveKroneckerEyeDense(
@@ -298,47 +279,50 @@ public:
         _mat(mat.data(), mat.rows(), mat.cols()),
         _K(K),
         _n_threads(n_threads),
-        _buff(_n_threads, K)
+        _buff(_n_threads, K),
+        _vbuff(mat.rows() * K)
     {}
 
     value_t cmul(
         int j, 
-        const Eigen::Ref<const vec_value_t>& v
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& weights
     ) override 
     {
-        base_t::check_cmul(j, v.size(), rows(), cols());
+        base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
         Eigen::Map<const rowmat_value_t> V(v.data(), rows() / _K, _K);
+        Eigen::Map<const rowmat_value_t> W(weights.data(), V.rows(), V.cols());
         const int i = j / _K;
         const int l = j - _K * i;
-        Eigen::Map<vec_value_t> _vbuff(_buff.data(), _n_threads);
-        return ddot(V.col(l), _mat.col(i), _n_threads, _vbuff);
+        Eigen::Map<vec_value_t> vbuff(_buff.data(), _n_threads);
+        return ddot(V.col(l).cwiseProduct(W.col(l)), _mat.col(i), _n_threads, vbuff);
     }
 
     void ctmul(
         int j, 
         value_t v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_ctmul(j, weights.size(), out.size(), rows(), cols());
+        base_t::check_ctmul(j, out.size(), rows(), cols());
         Eigen::Map<rowmat_value_t> Out(out.data(), rows() / _K, _K);
-        Eigen::Map<const rowmat_value_t> W(weights.data(), Out.rows(), Out.cols());
         const int i = j / _K;
         const int l = j - _K * i;
         dvzero(out, _n_threads);
         auto _out = Out.col(l);
-        dax(v, _mat.col(i).cwiseProduct(W.col(l)), _n_threads, _out);
+        dax(v, _mat.col(i), _n_threads, _out);
     }
 
     void bmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_bmul(j, q, v.size(), out.size(), rows(), cols());
-        Eigen::Map<const rowmat_value_t> V(v.data(), rows() / _K, _K);
+        base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+        dvveq(_vbuff, v * weights, _n_threads);
+        Eigen::Map<const rowmat_value_t> VW(_vbuff.data(), rows() / _K, _K);
         int n_processed = 0;
         while (n_processed < q) {
             const int i = (j + n_processed) / _K;
@@ -346,7 +330,7 @@ public:
             const int size = std::min<int>(_K-l, q-n_processed);
             auto _out = out.segment(n_processed, size).matrix();
             dgemv(
-                V.middleCols(l, size), 
+                VW.middleCols(l, size), 
                 _mat.col(i).transpose(), 
                 _n_threads, 
                 _buff, 
@@ -359,13 +343,11 @@ public:
     void btmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_btmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+        base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         Eigen::Map<rowmat_value_t> Out(out.data(), rows() / _K, _K);
-        Eigen::Map<const rowmat_value_t> W(weights.data(), Out.rows(), Out.cols());
         dvzero(out, _n_threads);
         int n_processed = 0;
         while (n_processed < q) {
@@ -379,19 +361,20 @@ public:
             }
             n_processed += size;
         }
-        Out.array() *= W.array();
     }
 
     void mul(
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_bmul(0, cols(), v.size(), out.size(), rows(), cols());
-        Eigen::Map<const rowmat_value_t> V(v.data(), rows() / _K, _K);
+        base_t::check_bmul(0, cols(), v.size(), weights.size(), out.size(), rows(), cols());
+        dvveq(_vbuff, v * weights, _n_threads);
+        Eigen::Map<const rowmat_value_t> VW(_vbuff.data(), rows() / _K, _K);
         Eigen::Map<rowmat_value_t> Out(out.data(), cols() / _K, _K);
         Eigen::setNbThreads(_n_threads);
-        Out.noalias() = _mat.transpose() * V;
+        Out.noalias() = _mat.transpose() * VW;
         Eigen::setNbThreads(1);
     }
 
@@ -439,15 +422,12 @@ public:
 
     void sp_btmul(
         const sp_mat_value_t& v,
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
         base_t::check_sp_btmul(
-            v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
+            v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
-
-        Eigen::Map<const rowmat_value_t> W(weights.data(), rows() / _K, _K);
 
         std::vector<int> outers(v.outerSize()+1); 
         outers[0] = 0;
@@ -456,7 +436,7 @@ public:
         inners.reserve(v.nonZeros());
         values.reserve(v.nonZeros());
 
-        rowmat_value_t _out(out.rows(), W.rows());
+        rowmat_value_t _out(out.rows(), rows() / _K);
 
         for (int l = 0; l < _K; ++l) {
             inners.clear();
@@ -484,12 +464,11 @@ public:
             );
 
             _out.noalias() = _v * _mat.transpose();
-            _out.array().rowwise() *= W.col(l).transpose().array();
 
             #pragma omp parallel for schedule(static) num_threads(_n_threads)
             for (int k = 0; k < out.rows(); ++k) {
                 Eigen::Map<rowmat_value_t> out_k(
-                    out.row(k).data(), W.rows(), W.cols()
+                    out.row(k).data(), _out.cols(), _K
                 );
                 out_k.col(l) = _out.row(k);
             }

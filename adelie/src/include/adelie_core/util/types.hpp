@@ -45,6 +45,12 @@ enum class tie_method_type
     _breslow
 };
 
+enum class hessian_type
+{
+    _diagonal,
+    _full
+};
+
 inline screen_rule_type convert_screen_rule(
     const std::string& rule
 )
@@ -70,6 +76,15 @@ inline tie_method_type convert_tie_method(
     if (method == "breslow") return tie_method_type::_breslow;
     if (method == "efron") return tie_method_type::_efron;
     throw std::runtime_error("Invalid tie method: " + method);
+}
+
+inline hessian_type convert_hessian(
+    const std::string& hessian
+) 
+{
+    if (hessian == "diagonal") return hessian_type::_diagonal;
+    if (hessian == "full") return hessian_type::_full;
+    throw std::runtime_error("Invalid hessian type: " + hessian);
 }
 
 } // namespace util

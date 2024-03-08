@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdio>
 #include <string>
+#include <adelie_core/configs.hpp>
 #include <adelie_core/util/types.hpp>
 #include <adelie_core/util/format.hpp>
 
@@ -22,6 +23,7 @@ public:
     map_carr_value_t y;
     map_cvec_value_t weights;
     const bool is_multi = true;
+    const bool is_symmetric = false;
 
 protected:
     void check_gradient(
@@ -72,6 +74,36 @@ protected:
         }
     }
 
+    void check_inv_hessian_gradient(
+        const Eigen::Ref<const rowarr_value_t>& eta,
+        const Eigen::Ref<const rowarr_value_t>& grad,
+        const Eigen::Ref<const rowarr_value_t>& hess,
+        const Eigen::Ref<const rowarr_value_t>& inv_hess_grad
+    ) const
+    {
+        if (
+            (weights.size() != y.rows()) ||
+            (weights.size() != eta.rows()) ||
+            (weights.size() != grad.rows()) ||
+            (weights.size() != hess.rows()) ||
+            (weights.size() != inv_hess_grad.rows()) ||
+            (eta.cols() != y.cols()) ||
+            (eta.cols() != grad.cols()) ||
+            (eta.cols() != hess.cols()) ||
+            (eta.cols() != inv_hess_grad.cols())
+        ) {
+            throw std::runtime_error(
+                util::format(
+                    "inv_hessian_gradient() is given inconsistent inputs! "
+                    "(weights=%d, y=(%d, %d), eta=(%d, %d), grad=(%d, %d), hess=(%d, %d), inv_hess_grad=(%d, %d))",
+                    weights.size(), y.rows(), y.cols(), eta.rows(), eta.cols(), 
+                    grad.rows(), grad.cols(), hess.rows(), hess.cols(),
+                    inv_hess_grad.rows(), inv_hess_grad.cols()
+                )
+            );
+        }
+    }
+
     void check_loss(
         const Eigen::Ref<const rowarr_value_t>& eta
     ) const
@@ -95,11 +127,13 @@ public:
     explicit GlmMultiBase(
         const string_t& name,
         const Eigen::Ref<const rowarr_value_t>& y,
-        const Eigen::Ref<const vec_value_t>& weights
+        const Eigen::Ref<const vec_value_t>& weights,
+        bool is_symmetric
     ):
         name(name),
         y(y.data(), y.rows(), y.cols()),
-        weights(weights.data(), weights.size())
+        weights(weights.data(), weights.size()),
+        is_symmetric(is_symmetric)
     {
         if (y.rows() != weights.size()) {
             throw std::runtime_error("y must have same number of rows as weights length.");
@@ -118,6 +152,20 @@ public:
         const Eigen::Ref<const rowarr_value_t>& grad,
         Eigen::Ref<rowarr_value_t> hess
     ) =0;
+
+    virtual void inv_hessian_gradient(
+        const Eigen::Ref<const rowarr_value_t>& eta,
+        const Eigen::Ref<const rowarr_value_t>& grad,
+        const Eigen::Ref<const rowarr_value_t>& hess,
+        Eigen::Ref<rowarr_value_t> inv_hess_grad
+    )
+    {
+        check_inv_hessian_gradient(eta, grad, hess, inv_hess_grad);
+        inv_hess_grad = grad / (
+            hess.max(0) + 
+            value_t(Configs::hessian_min) * (hess <= 0).template cast<value_t>()
+        );
+    }
 
     virtual value_t loss(
         const Eigen::Ref<const rowarr_value_t>& eta

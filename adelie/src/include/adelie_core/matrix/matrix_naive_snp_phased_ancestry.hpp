@@ -71,10 +71,11 @@ public:
 
     value_t cmul(
         int j, 
-        const Eigen::Ref<const vec_value_t>& v
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& weights
     ) override
     {
-        base_t::check_cmul(j, v.size(), rows(), cols());
+        base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
 
         const auto A = ancestries();
         const auto snp = j / A;
@@ -87,7 +88,7 @@ public:
 
             for (int i = 0; i < inner.size(); ++i) {
                 if (ancestry[i] != anc) continue;
-                sum += v[inner[i]];
+                sum += v[inner[i]] * weights[inner[i]];
             }
         }
 
@@ -97,11 +98,10 @@ public:
     void ctmul(
         int j, 
         value_t v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_ctmul(j, weights.size(), out.size(), rows(), cols());
+        base_t::check_ctmul(j, out.size(), rows(), cols());
 
         const auto A = ancestries();
         const auto snp = j / A;
@@ -114,7 +114,7 @@ public:
             const auto ancestry = _io.ancestry(snp, hap);
             for (int i = 0; i < inner.size(); ++i) {
                 if (ancestry[i] != anc) continue;
-                out[inner[i]] += v * weights[inner[i]];
+                out[inner[i]] += v;
             }
         }
     }
@@ -122,10 +122,11 @@ public:
     void bmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_bmul(j, q, v.size(), out.size(), rows(), cols());
+        base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
 
         const int A = ancestries();
 
@@ -156,14 +157,14 @@ public:
             if (ancestry_lower == 0 && ancestry_upper == A) {
                 _common_routine([&](const auto& inner, const auto& ancestry) {
                     for (int i = 0; i < inner.size(); ++i) {
-                        out[n_solved+ancestry[i]] += v[inner[i]];
+                        out[n_solved+ancestry[i]] += v[inner[i]] * weights[inner[i]];
                     }
                 });
             } else {
                 _common_routine([&](const auto& inner, const auto& ancestry) {
                     for (int i = 0; i < inner.size(); ++i) {
                         if (ancestry[i] < ancestry_lower || ancestry[i] >= ancestry_upper) continue;
-                        out[n_solved+ancestry[i]-ancestry_lower] += v[inner[i]];
+                        out[n_solved+ancestry[i]-ancestry_lower] += v[inner[i]] * weights[inner[i]];
                     }
                 });
             }
@@ -173,11 +174,10 @@ public:
     void btmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_btmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+        base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
 
         const int A = ancestries();
 
@@ -202,14 +202,14 @@ public:
             if (ancestry_lower == 0 && ancestry_upper == A) {
                 _common_routine([&](const auto& inner, const auto& ancestry) {
                     for (int i = 0; i < inner.size(); ++i) {
-                        out[inner[i]] += weights[inner[i]] * v[n_solved + ancestry[i]];
+                        out[inner[i]] += v[n_solved + ancestry[i]];
                     }
                 });
             } else {
                 _common_routine([&](const auto& inner, const auto& ancestry) {
                     for (int i = 0; i < inner.size(); ++i) {
                         if (ancestry[i] < ancestry_lower || ancestry[i] >= ancestry_upper) continue;
-                        out[inner[i]] += weights[inner[i]] * v[n_solved + ancestry[i] - ancestry_lower];
+                        out[inner[i]] += v[n_solved + ancestry[i] - ancestry_lower];
                     }
                 });
             }
@@ -220,10 +220,11 @@ public:
 
     void mul(
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        bmul(0, out.size(), v, out);
+        bmul(0, out.size(), v, weights, out);
     }
 
     void cov(
@@ -318,12 +319,11 @@ public:
 
     void sp_btmul(
         const sp_mat_value_t& v,
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
         base_t::check_sp_btmul(
-            v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
+            v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
         const auto A = ancestries();
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
@@ -342,7 +342,7 @@ public:
                     const auto ancestry = _io.ancestry(snp, hap);
                     for (int i = 0; i < inner.size(); ++i) {
                         if (ancestry[i] != anc) continue;
-                        out_k[inner[i]] += weights[inner[i]] * it.value();
+                        out_k[inner[i]] += it.value();
                     }
                 }
             }

@@ -108,51 +108,51 @@ def run_naive(
     # test cmul
     v = np.random.normal(0, 1, n).astype(dtype)
     for i in range(p):
-        out = cX.cmul(i, v)
-        expected = v @ X[:, i]
+        out = cX.cmul(i, v, w)
+        expected = (v * w) @ X[:, i]
         assert np.allclose(expected, out, atol=atol)
 
     # test ctmul
     v = np.random.normal(0, 1)
     out = np.empty(n, dtype=dtype)
     for i in range(p):
-        cX.ctmul(i, v, w, out)
-        expected = v * (w * X[:, i])
+        cX.ctmul(i, v, out)
+        expected = v * X[:, i]
         assert np.allclose(expected, out, atol=atol)
 
     # test bmul
     v = np.random.normal(0, 1, n).astype(dtype)
     for i in range(1, p+1):
         out = np.empty(i, dtype=dtype)
-        cX.bmul(0, i, v, out)
-        expected = v.T @ X[:, :i]
+        cX.bmul(0, i, v, w, out)
+        expected = (v * w).T @ X[:, :i]
         assert np.allclose(expected, out, atol=atol)
     q = min(10, p)
     out = np.empty(q, dtype=dtype)
     for i in range(p-q+1):
-        cX.bmul(i, q, v, out)
-        expected = v.T @ X[:, i:i+q]
+        cX.bmul(i, q, v, w, out)
+        expected = (v * w).T @ X[:, i:i+q]
         assert np.allclose(expected, out, atol=atol)
 
     # test btmul
     out = np.empty(n, dtype=dtype)
     for i in range(1, p+1):
         v = np.random.normal(0, 1, i).astype(dtype)
-        cX.btmul(0, i, v, w, out)
-        expected = v.T @ (w[:, None] * X[:, :i]).T
+        cX.btmul(0, i, v, out)
+        expected = v.T @ X[:, :i].T
         assert np.allclose(expected, out, atol=atol)
     q = min(10, p)
     v = np.random.normal(0, 1, q).astype(dtype)
     for i in range(p-q+1):
-        cX.btmul(i, q, v, w, out)
-        expected = v.T @ (w[:, None] * X[:, i:i+q]).T
+        cX.btmul(i, q, v, out)
+        expected = v.T @ X[:, i:i+q].T
         assert np.allclose(expected, out, atol=atol)
 
     # test mul
     v = np.random.normal(0, 1, n).astype(dtype)
     out = np.empty(p, dtype=dtype)
-    cX.mul(v, out)
-    expected = v.T @ X
+    cX.mul(v, w, out)
+    expected = (v * w).T @ X
     assert np.allclose(expected, out, atol=atol)
 
     # test cov
@@ -179,9 +179,9 @@ def run_naive(
     out = np.empty((2, n), dtype=dtype)
     v = np.random.normal(0, 1, (2, p)).astype(dtype)
     v[:, :p//2] = 0
-    expected = v @ (w[:, None] * X).T
+    expected = v @ X.T
     v = scipy.sparse.csr_matrix(v)
-    cX.sp_btmul(v, w, out)
+    cX.sp_btmul(v, out)
     assert np.allclose(expected, out, atol=atol)
 
 
@@ -228,7 +228,7 @@ def test_naive_kronecker_eye():
         X = np.random.normal(0, 1, (n, p))
         X = np.array(X, dtype=dtype, order=order)
         cX = mod.kronecker_eye(
-            mod.dense(X, method="naive"), K, n_threads=7
+            mod.dense(X, method="naive"), K, n_threads=2
         )
         X = np.kron(X, np.eye(K))
         run_naive(X, cX, dtype)
