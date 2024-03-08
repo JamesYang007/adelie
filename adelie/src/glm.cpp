@@ -47,6 +47,21 @@ public:
         );
     }
 
+    void inv_hessian_gradient(
+        const Eigen::Ref<const vec_value_t>& eta,
+        const Eigen::Ref<const vec_value_t>& grad,
+        const Eigen::Ref<const vec_value_t>& hess,
+        Eigen::Ref<vec_value_t> inv_hess_grad
+    ) override
+    {
+        PYBIND11_OVERRIDE(
+            void,
+            base_t,
+            inv_hessian_gradient,
+            eta, grad, hess, inv_hess_grad
+        );
+    }
+
     value_t loss(
         const Eigen::Ref<const vec_value_t>& eta
     ) override
@@ -111,7 +126,11 @@ void glm_base(py::module_& m, const char* name)
             Name of the GLM family.
         )delimiter")
         .def_readonly("is_multi", &internal_t::is_multi, R"delimiter(
-            ``True`` if it defines a multi-response GLM family.
+            See ``adelie.glm.GlmMultiBase64``.
+            It is always ``False`` for this base class.
+        )delimiter")
+        .def_readonly("is_symmetric", &internal_t::is_symmetric, R"delimiter(
+            See ``adelie.glm.GlmMultiBase64``.
             It is always ``False`` for this base class.
         )delimiter")
         .def("gradient", &internal_t::gradient, R"delimiter(
@@ -127,27 +146,49 @@ void glm_base(py::module_& m, const char* name)
             The gradient to store.
         )delimiter")
         .def("hessian", &internal_t::hessian, R"delimiter(
-        Hessian of the loss function.
+        Diagonal hessian majorization of the loss function.
 
-        Computes :math:`\nabla^2 \ell(\eta)`.
+        Computes a diagonal majorization of the hessian :math:`\nabla^2 \ell(\eta)`.
 
         .. note::
             Although the hessian is in general a fully dense matrix,
             we only require the user to output a diagonal matrix.
-            It is recommended that the diagonal matrix dominate the true hessian.
-            However, in some cases, the diagonal of the hessian suffices.
+            It is recommended that the diagonal matrix dominates the full hessian.
+            However, in some cases, the diagonal of the hessian suffices even when it does not majorize the hessian.
             Interestingly, most hessian computations become greatly simplified
-            when evaluated using the mean parameter instead of the natural parameter.
-            Hence, the hessian computation assumes the mean parameter is provided.
+            when evaluated using the gradient.
 
         Parameters
         ----------
         eta : (n,) np.ndarray
             Natural parameter.
         grad : (n,) np.ndarray
-            Gradient.
+            Gradient as in ``gradient()`` method.
         hess : (n,) np.ndarray
             The hessian to store.
+        )delimiter")
+        .def("inv_hessian_gradient", &internal_t::inv_hessian_gradient, R"delimiter(
+        Inverse hessian of the (negative) gradient of the loss function.
+
+        Computes :math:`-(\nabla^2 \ell(\eta))^{-1} \nabla \ell(\eta)`.
+
+        .. note::
+            Unlike the ``hessian()`` method, this function may use the full hessian matrix.
+            The diagonal hessian majorization is provided in case it speeds-up computations,
+            but it can be ignored.
+            The default implementation simply computes ``grad / (hess + eps * (hess <= 0))``
+            where ``eps`` is given by ``adelie.configs.Configs.hessian_min``.
+
+        Parameters
+        ----------
+        eta : (n,) np.ndarray
+            Natural parameter.
+        grad : (n,) np.ndarray
+            Gradient as in ``gradient()`` method.
+        hess : (n,) np.ndarray
+            Hessian as in ``hessian()`` method.
+        inv_hess_grad : (n,) np.ndarray
+            The inverse hessian gradient to store.
         )delimiter")
         .def("loss", &internal_t::loss, R"delimiter(
         Loss function.
@@ -326,6 +367,21 @@ public:
         );
     }
 
+    void inv_hessian_gradient(
+        const Eigen::Ref<const rowarr_value_t>& eta,
+        const Eigen::Ref<const rowarr_value_t>& grad,
+        const Eigen::Ref<const rowarr_value_t>& hess,
+        Eigen::Ref<rowarr_value_t> inv_hess_grad
+    ) override
+    {
+        PYBIND11_OVERRIDE(
+            void,
+            base_t,
+            inv_hessian_gradient,
+            eta, grad, hess, inv_hess_grad
+        );
+    }
+
     value_t loss(
         const Eigen::Ref<const rowarr_value_t>& eta
     ) override
@@ -381,11 +437,13 @@ void glm_multibase(py::module_& m, const char* name)
         .def(py::init<
             const string_t&,
             const Eigen::Ref<const rowarr_value_t>&,
-            const Eigen::Ref<const vec_value_t>& 
+            const Eigen::Ref<const vec_value_t>& ,
+            bool
         >(),
             py::arg("name"),
             py::arg("y"),
-            py::arg("weights")
+            py::arg("weights"),
+            py::arg("is_symmetric")
         )
         .def_readonly("name", &internal_t::name, R"delimiter(
             Name of the GLM family.
@@ -393,6 +451,10 @@ void glm_multibase(py::module_& m, const char* name)
         .def_readonly("is_multi", &internal_t::is_multi, R"delimiter(
         ``True`` if it defines a multi-response GLM family.
         It is always ``True`` for this base class.
+        )delimiter")
+        .def_readonly("is_symmetric", &internal_t::is_symmetric, R"delimiter(
+        ``True`` if the GLM is symmetric in :math:`\eta_{i\cdot}` (along the classes)
+        for each :math:`i`.
         )delimiter")
         .def("gradient", &internal_t::gradient, R"delimiter(
         Gradient of the negative loss function.
@@ -407,27 +469,49 @@ void glm_multibase(py::module_& m, const char* name)
             The gradient to store.
         )delimiter")
         .def("hessian", &internal_t::hessian, R"delimiter(
-        Hessian of the loss function.
+        Diagonal hessian majorization of the loss function.
 
-        Computes :math:`\nabla^2 \ell(\eta)`.
+        Computes a diagonal majorization of the hessian :math:`\nabla^2 \ell(\eta)`.
 
         .. note::
             Although the hessian is in general a fully dense matrix,
             we only require the user to output a diagonal matrix.
-            It is recommended that the diagonal matrix dominate the true hessian.
-            However, in some cases, the diagonal of the hessian suffices.
+            It is recommended that the diagonal matrix dominates the full hessian.
+            However, in some cases, the diagonal of the hessian suffices even when it does not majorize the hessian.
             Interestingly, most hessian computations become greatly simplified
-            when evaluated using the mean parameter instead of the natural parameter.
-            Hence, the hessian computation assumes the mean parameter is provided.
+            when evaluated using the gradient.
 
         Parameters
         ----------
         eta : (n, K) np.ndarray
             Natural parameter.
         grad : (n, K) np.ndarray
-            Gradient.
+            Gradient as in ``gradient()`` method.
         hess : (n, K) np.ndarray
             The hessian to store.
+        )delimiter")
+        .def("inv_hessian_gradient", &internal_t::inv_hessian_gradient, R"delimiter(
+        Inverse hessian of the (negative) gradient of the loss function.
+
+        Computes :math:`-(\nabla^2 \ell(\eta))^{-1} \nabla \ell(\eta)`.
+
+        .. note::
+            Unlike the ``hessian()`` method, this function may use the full hessian matrix.
+            The diagonal hessian majorization is provided in case it speeds-up computations,
+            but it can be ignored.
+            The default implementation simply computes ``grad / (hess + eps * (hess <= 0))``
+            where ``eps`` is given by ``adelie.configs.Configs.hessian_min``.
+
+        Parameters
+        ----------
+        eta : (n, K) np.ndarray
+            Natural parameter.
+        grad : (n, K) np.ndarray
+            Gradient as in ``gradient()`` method.
+        hess : (n, K) np.ndarray
+            Hessian as in ``hessian()`` method.
+        inv_hess_grad : (n, K) np.ndarray
+            The inverse hessian gradient to store.
         )delimiter")
         .def("loss", &internal_t::loss, R"delimiter(
         Loss function.
@@ -482,7 +566,7 @@ void glm_multinomial(py::module_& m, const char* name)
     py::class_<internal_t, base_t>(m, name)
         .def(py::init<
             const Eigen::Ref<const rowarr_value_t>&,
-            const Eigen::Ref<const vec_value_t>& 
+            const Eigen::Ref<const vec_value_t>&
         >())
         ;
 }

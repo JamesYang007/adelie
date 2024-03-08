@@ -436,7 +436,7 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
         Feature matrix.
         )delimiter")
         .def_readonly("resid", &state_t::resid, R"delimiter(
-        Residual :math:`W(y_c - X \beta)` where :math:`\beta` is given by ``screen_beta``.
+        Residual :math:`y_c - X \beta` where :math:`\beta` is given by ``screen_beta``.
 
         .. note:: 
             This definition is unconventional.
@@ -446,7 +446,7 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
 
         )delimiter")
         .def_readonly("resid_sum", &state_t::resid_sum, R"delimiter(
-        Sum of ``resid``.
+        Weighted (by :math:`W`) sum of ``resid``.
         )delimiter")
         ;
 }
@@ -1023,10 +1023,10 @@ void state_gaussian_naive(py::module_& m, const char* name)
         Feature matrix.
         )delimiter")
         .def_readonly("resid", &state_t::resid, R"delimiter(
-        Residual :math:`W(y_c - X \beta)` where :math:`\beta` is given by ``screen_beta``.
+        Residual :math:`y_c - X \beta` where :math:`\beta` is given by ``screen_beta``.
         )delimiter")
         .def_readonly("resid_sum", &state_t::resid_sum, R"delimiter(
-        Sum of ``resid``.
+        Weighted (by :math:`W`) sum of ``resid``.
         )delimiter")
         .def_readonly("rsq", &state_t::rsq, R"delimiter(
         The change in unnormalized :math:`R^2` given by 

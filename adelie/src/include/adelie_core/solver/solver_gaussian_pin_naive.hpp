@@ -74,7 +74,7 @@ void coordinate_descent(
         const auto ak_old = ak;
 
         // compute gradient
-        gk = X.cmul(groups[k], resid) - Xk_mean * resid_sum * intercept;
+        gk = X.cmul(groups[k], resid, weights) - Xk_mean * resid_sum * intercept;
 
         update_coefficient(
             ak, A_kk, l1, l2, pk, gk
@@ -90,7 +90,7 @@ void coordinate_descent(
 
         // update residual 
         auto dresid = buffer4_n.head(resid.size());
-        X.ctmul(groups[k], del, weights, dresid);
+        X.ctmul(groups[k], del, dresid);
         matrix::dvsubi(resid, dresid, n_threads);
         resid_sum -= Xk_mean * del;
 
@@ -111,7 +111,7 @@ void coordinate_descent(
         const auto pk = penalty[k]; // corresponding penalty
 
         // compute current gradient
-        X.bmul(groups[k], gsize, resid, gk);
+        X.bmul(groups[k], gsize, resid, weights, gk);
         if (intercept) {
             gk -= resid_sum * Xk_mean;
         }
@@ -154,7 +154,7 @@ void coordinate_descent(
         auto del = buffer1.head(ak.size());
         del = ak - ak_old;
         auto dresid = buffer4_n.head(resid.size());
-        X.btmul(groups[k], gsize, del, weights, dresid);
+        X.btmul(groups[k], gsize, del, dresid);
         matrix::dvsubi(resid, dresid, n_threads);
         resid_sum -= (Xk_mean * del).sum();
 

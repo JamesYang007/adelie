@@ -50,21 +50,21 @@ public:
     /* Trampoline (need one for each virtual function) */
     value_t cmul(
         int j, 
-        const Eigen::Ref<const vec_value_t>& v
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& weights
     ) override
     {
         PYBIND11_OVERRIDE_PURE(
             value_t,
             base_t,
             cmul,
-            j, v 
+            j, v, weights
         );
     }
 
     void ctmul(
         int j, 
         value_t v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
@@ -72,13 +72,14 @@ public:
             void,
             base_t,
             ctmul,
-            j, v, weights, out
+            j, v, out
         );
     }
 
     void bmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
@@ -86,14 +87,13 @@ public:
             void,
             base_t,
             bmul,
-            j, q, v, out
+            j, q, v, weights, out
         );
     }
 
     void btmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
@@ -101,12 +101,13 @@ public:
             void,
             base_t,
             btmul,
-            j, q, v, weights, out
+            j, q, v, out
         );
     }
 
     void mul(
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
@@ -114,13 +115,12 @@ public:
             void,
             base_t,
             mul,
-            v, out
+            v, weights, out
         );
     }
 
     void sp_btmul(
         const sp_mat_value_t& v,
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
@@ -128,7 +128,7 @@ public:
             void,
             base_t,
             sp_btmul,
-            v, weights, out
+            v, out
         );
     }
 
@@ -178,7 +178,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         .def("cmul", &internal_t::cmul, R"delimiter(
         Column vector-vector multiplication.
 
-        Computes the dot-product ``v.T @ X[:,j]`` for a column ``j``.
+        Computes the dot-product ``(v * w).T @ X[:,j]`` for a column ``j``.
 
         Parameters
         ----------
@@ -186,11 +186,13 @@ void matrix_naive_base(py::module_& m, const char* name)
             Column index.
         v : (n,) np.ndarray
             Vector to dot product with the ``j`` th column with.
+        w : (n,) np.ndarray
+            Vector of weights.
         )delimiter")
         .def("ctmul", &internal_t::ctmul, R"delimiter(
         Column vector-scalar multiplication.
 
-        Computes the vector-scalar multiplication ``v * X[:,j] * w`` for a column ``j``.
+        Computes the vector-scalar multiplication ``v * X[:,j]`` for a column ``j``.
 
         Parameters
         ----------
@@ -198,15 +200,13 @@ void matrix_naive_base(py::module_& m, const char* name)
             Column index.
         v : float
             Scalar to multiply with the ``j`` th column.
-        w : (n,) np.ndarray
-            Vector of weights.
         out : (n,) np.ndarray
             Vector to store in-place the result.
         )delimiter")
         .def("bmul", &internal_t::bmul, R"delimiter(
         Column block matrix-vector multiplication.
 
-        Computes the matrix-vector multiplication ``v.T @ X[:, j:j+q]``.
+        Computes the matrix-vector multiplication ``(v * w).T @ X[:, j:j+q]``.
 
         Parameters
         ----------
@@ -216,6 +216,8 @@ void matrix_naive_base(py::module_& m, const char* name)
             Number of columns.
         v : (n,) np.ndarray
             Vector to multiply with the block matrix.
+        w : (n,) np.ndarray
+            Vector of weights.
         out : (q,) np.ndarray
             Vector to store in-place the result.
         )delimiter")
@@ -223,7 +225,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         Column block matrix transpose-vector multiplication.
 
         Computes the matrix-vector multiplication
-        ``(v.T @ X[:, j:j+q].T) * w``.
+        ``v.T @ X[:, j:j+q].T``.
 
         Parameters
         ----------
@@ -233,8 +235,6 @@ void matrix_naive_base(py::module_& m, const char* name)
             Number of columns.
         v : (q,) np.ndarray
             Vector to multiply with the block matrix.
-        w : (n,) np.ndarray
-            Vector of weights.
         out : (n,) np.ndarray
             Vector to store in-place the result.
         )delimiter")
@@ -242,12 +242,14 @@ void matrix_naive_base(py::module_& m, const char* name)
         Matrix-vector multiplication.
 
         Computes the matrix-vector multiplication
-        ``v.T @ X``.
+        ``(v * w).T @ X``.
 
         Parameters
         ----------
         v : (n,) np.ndarray
             Vector to multiply with the block matrix.
+        w : (n,) np.ndarray
+            Vector of weights.
         out : (q,) np.ndarray
             Vector to store in-place the result.
         )delimiter")
@@ -255,14 +257,12 @@ void matrix_naive_base(py::module_& m, const char* name)
         Matrix transpose-sparse matrix multiplication.
 
         Computes the matrix transpose-sparse matrix multiplication
-        ``v @ X.T @ w[None]``.
+        ``v @ X.T``.
 
         Parameters
         ----------
         v : (L, p) scipy.sparse.csr_matrix
             Sparse matrix to multiply with the matrix.
-        w : (n,) np.ndarray
-            Vector of weights.
         out : (L, n) np.ndarray
             Matrix to store in-place the result.
         )delimiter")
