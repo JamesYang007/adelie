@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.diagnostic.gradient_norms &#8212; adelie 1.1.13
+    <title>adelie.diagnostic.gradient_norms &#8212; adelie 1.1.14
  documentation</title>
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=1240c0c0"></script>
+    <script src="../_static/documentation_options.js?v=d9c9500d"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.13
+    <p class="title logo__title">adelie 1.1.14
  documentation</p>
   
 </a></div>
@@ -456,14 +456,15 @@ document.write(`
 <dt class="sig sig-object py" id="adelie.diagnostic.gradient_norms">
 <span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">gradient_norms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csr_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.diagnostic.gradient_norms" title="Link to this definition">#</a></dt>
 <dd><p>Computes the group-wise gradient norms.</p>
-<p>The group-wise gradient norm is given by <span class="math notranslate nohighlight">\(h \in \mathbb{R}^{G}\)</span> where</p>
+<p>The group-wise gradient norm is given by <span class="math notranslate nohighlight">\(\hat{h} \in \mathbb{R}^{G}\)</span> where</p>
 <div class="math notranslate nohighlight">
 \[\begin{align*}
-    h_g = \|\hat{\gamma}_g - \lambda (1-\alpha) \omega_g \beta_g\|_2  \quad g=1,\ldots, G
+    \hat{h}_g = \|\hat{\gamma}_g - \lambda (1-\alpha) \omega_g \beta_g\|_2  \quad g=1,\ldots, G
 \end{align*}\]</div>
 <p>where
-<span class="math notranslate nohighlight">\(\hat{\gamma}_g\)</span> is the gradient,
+<span class="math notranslate nohighlight">\(\hat{\gamma}_g\)</span> is the gradient as in <code class="docutils literal notranslate"><span class="pre">adelie.diagnostic.gradients()</span></code>,
 <span class="math notranslate nohighlight">\(\omega_g\)</span> is the penalty factor,
+<span class="math notranslate nohighlight">\(\lambda\)</span> is the regularization,
 and <span class="math notranslate nohighlight">\(\beta_g\)</span> is the coefficient block for group <span class="math notranslate nohighlight">\(g\)</span>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

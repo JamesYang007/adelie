@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Generalized Linear Model &#8212; adelie 1.1.13
+    <title>Generalized Linear Model &#8212; adelie 1.1.14
  documentation</title>
   
   
@@ -38,7 +38,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=1240c0c0"></script>
+    <script src="../_static/documentation_options.js?v=d9c9500d"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -122,7 +122,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.13
+    <p class="title logo__title">adelie 1.1.14
  documentation</p>
   
 </a></div>
@@ -384,7 +384,7 @@ document.write(`
 <h1><strong>Generalized Linear Model</strong><a class="headerlink" href="#Generalized-Linear-Model" title="Link to this heading">#</a></h1>
 <p>The Generalized Linear Model (GLM) defines the loss function in group elastic net problems. Many GLMs have already been implemented in the <code class="docutils literal notranslate"><span class="pre">adelie.glm</span></code> submodule. In this notebook, we show how to use GLM objects and write custom GLM classes.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">adelie</span> <span class="k">as</span> <span class="nn">ad</span>
@@ -396,7 +396,7 @@ document.write(`
 <h2><strong>Single-Response GLM</strong><a class="headerlink" href="#Single-Response-GLM" title="Link to this heading">#</a></h2>
 <p>The most commonly used GLMs are of single-response type. Some examples of single-response GLMs are Gaussian, Binomial, Poisson, and Cox models. As an example, we show below how to construct a gaussian GLM object.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>     <span class="c1"># number of observations</span>
@@ -412,7 +412,7 @@ document.write(`
 <p>It is possible to also specify observation weights <span class="math notranslate nohighlight">\(w\)</span>. This may be useful if the user wishes to incorporate prior knowledge that some data points carry more signal or information in the underlying pattern. By default, our GLM classes will initialize the weights to be uniform across all data points. Moreover, the weights will be normalized to sum to <span class="math notranslate nohighlight">\(1\)</span>. The Gaussian solvers <em>require</em> the weights to be normalized to <span class="math notranslate nohighlight">\(1\)</span>, although the general GLM solvers do not have the same
 requirements. However, all types of solvers benefit from numerical stability if the weights are normalized. For these reasons, we enforce that the weights are normalized.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># raises warning about normalization!</span>
@@ -431,7 +431,7 @@ requirements. However, all types of solvers benefit from numerical stability if 
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># no warnings!</span>
@@ -442,7 +442,7 @@ requirements. However, all types of solvers benefit from numerical stability if 
 </div>
 <p>The single-response GLM classes expose a few member functions required by the GLM solver. For example, <code class="docutils literal notranslate"><span class="pre">.gradient()</span></code> is a member function that computes the (negative) gradient of the loss function. We show below the equivalence between calling <code class="docutils literal notranslate"><span class="pre">.gradient()</span></code> and the corresponding numpy code.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">eta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
@@ -462,7 +462,7 @@ requirements. However, all types of solvers benefit from numerical stability if 
 <h2><strong>Multi-Response GLM</strong><a class="headerlink" href="#Multi-Response-GLM" title="Link to this heading">#</a></h2>
 <p>The multi-response GLM classes correspond to GLMs with multiple responses. Some examples are multigaussian and multinomial GLMs. We show below an example of constructing a multigaussian GLM object.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>     <span class="c1"># number of observations</span>
@@ -476,7 +476,7 @@ requirements. However, all types of solvers benefit from numerical stability if 
 </div>
 <p>Multi-response GLMs work similarly as single-response GLMs except that arguments to the member functions are of different shapes. For example, the <code class="docutils literal notranslate"><span class="pre">.gradient()</span></code> member function expects <code class="docutils literal notranslate"><span class="pre">eta</span></code> to be of <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">K)</span></code> shape rather than <code class="docutils literal notranslate"><span class="pre">(n,)</span></code> shape as before. We show below an example of calling <code class="docutils literal notranslate"><span class="pre">.gradient()</span></code>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">eta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">K</span><span class="p">))</span>
@@ -496,7 +496,7 @@ requirements. However, all types of solvers benefit from numerical stability if 
 <p>A key feature of <code class="docutils literal notranslate"><span class="pre">adelie</span></code> is the ability to define a user-specific GLM class. This custom class can be implemented in either C++ <em>or</em> Python! In this section, we show how to implement a custom single-response GLM class for the Gaussian family equivalent to <code class="docutils literal notranslate"><span class="pre">ad.glm.gaussian</span></code>. All of the discussion carries through for the multi-response GLM classes.</p>
 <p>We first show the full code for our custom GLM class.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Gaussian</span><span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">GlmBase64</span><span class="p">):</span>
@@ -529,7 +529,7 @@ requirements. However, all types of solvers benefit from numerical stability if 
 </ul>
 <p>We now show that the GLM object can be passed into our existing solver <code class="docutils literal notranslate"><span class="pre">ad.grpnet</span></code> with no further changes to the code. We first generate our data and call <code class="docutils literal notranslate"><span class="pre">ad.grpnet</span></code>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>     <span class="c1"># number of observations</span>
@@ -541,7 +541,7 @@ requirements. However, all types of solvers benefit from numerical stability if 
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
@@ -556,12 +556,12 @@ requirements. However, all types of solvers benefit from numerical stability if 
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 47%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 47/100 [00:00:00&lt;00:00:00, 2796.14it/s] [dev:90.3%]
+ 44%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 44/100 [00:00:00&lt;00:00:00, 2091.87it/s] [dev:90.7%]
 </pre></div></div>
 </div>
 <p>We can compare solutions with our Gaussian solver. To demonstrate an exact match in coefficients, we pass in a Gaussian GLM object with optimization flag turned off so that the general GLM solver is used rather than our special Gaussian solver.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state_exp</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
@@ -576,11 +576,11 @@ requirements. However, all types of solvers benefit from numerical stability if 
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 47%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 47/100 [00:00:00&lt;00:00:00, 2315.27it/s] [dev:90.3%]
+ 44%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 44/100 [00:00:00&lt;00:00:00, 2814.88it/s] [dev:90.7%]
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
@@ -592,6 +592,10 @@ requirements. However, all types of solvers benefit from numerical stability if 
 </div>
 <p>Based on our experience, the part of the solver that interacts with the GLM object is not speed critical, so there is seldom a noticeable performance cost by using a Python GLM class. However, for the best performance, users may be interested in porting the code to C++ and exporting the bindings. We refer the readers to the <a class="reference external" href="https://github.com/JamesYang007/adelie/tree/main/adelie/src/include/adelie_core/glm">glm</a> directory in our C++ backend for the numerous examples of how to extend the base
 classes in C++. The associated binding code can be found in <a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/src/glm.cpp">glm.cpp</a>.</p>
+</section>
+<section id="Thread-Safety">
+<h2><strong>Thread Safety</strong><a class="headerlink" href="#Thread-Safety" title="Link to this heading">#</a></h2>
+<p>Like the matrix classes in <code class="docutils literal notranslate"><span class="pre">ad.matrix</span></code>, the member functions of GLM classes are <strong>not thread safe</strong>!</p>
 </section>
 </section>
 
@@ -642,6 +646,7 @@ classes in C++. The associated binding code can be found in <a class="reference 
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Single-Response-GLM"><strong>Single-Response GLM</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Multi-Response-GLM"><strong>Multi-Response GLM</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Custom-GLM-Class"><strong>Custom GLM Class</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Thread-Safety"><strong>Thread Safety</strong></a></li>
 </ul>
   </nav></div>
 

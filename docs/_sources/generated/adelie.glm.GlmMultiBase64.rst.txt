@@ -14,6 +14,7 @@
       ~GlmMultiBase64.__init__
       ~GlmMultiBase64.gradient
       ~GlmMultiBase64.hessian
+      ~GlmMultiBase64.inv_hessian_gradient
       ~GlmMultiBase64.loss
       ~GlmMultiBase64.loss_full
    
@@ -26,6 +27,7 @@
    .. autosummary::
    
       ~GlmMultiBase64.is_multi
+      ~GlmMultiBase64.is_symmetric
       ~GlmMultiBase64.name
    
    
@@ -36,6 +38,7 @@
    .. automethod:: __init__
    .. automethod:: gradient
    .. automethod:: hessian
+   .. automethod:: inv_hessian_gradient
    .. automethod:: loss
    .. automethod:: loss_full
    
@@ -45,6 +48,7 @@
    
    
    .. autoattribute:: is_multi
+   .. autoattribute:: is_symmetric
    .. autoattribute:: name
    
    

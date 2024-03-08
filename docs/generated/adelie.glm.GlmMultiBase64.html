@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.glm.GlmMultiBase64 &#8212; adelie 1.1.13
+    <title>adelie.glm.GlmMultiBase64 &#8212; adelie 1.1.14
  documentation</title>
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=1240c0c0"></script>
+    <script src="../_static/documentation_options.js?v=d9c9500d"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.13
+    <p class="title logo__title">adelie 1.1.14
  documentation</p>
   
 </a></div>
@@ -473,19 +473,22 @@ before passing into the solver.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.glm.GlmMultiBase64.__init__" title="adelie.glm.GlmMultiBase64.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(self, name, y, weights)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.glm.GlmMultiBase64.__init__" title="adelie.glm.GlmMultiBase64.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(self, name, y, weights, is_symmetric)</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.glm.GlmMultiBase64.gradient" title="adelie.glm.GlmMultiBase64.gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient</span></code></a>(self, arg0, arg1)</p></td>
 <td><p>Gradient of the negative loss function.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.glm.GlmMultiBase64.hessian" title="adelie.glm.GlmMultiBase64.hessian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hessian</span></code></a>(self, arg0, arg1, arg2)</p></td>
-<td><p>Hessian of the loss function.</p></td>
+<td><p>Diagonal hessian majorization of the loss function.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.glm.GlmMultiBase64.loss" title="adelie.glm.GlmMultiBase64.loss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loss</span></code></a>(self, arg0)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.glm.GlmMultiBase64.inv_hessian_gradient" title="adelie.glm.GlmMultiBase64.inv_hessian_gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inv_hessian_gradient</span></code></a>(self, arg0, arg1, arg2, ...)</p></td>
+<td><p>Inverse hessian of the (negative) gradient of the loss function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.glm.GlmMultiBase64.loss" title="adelie.glm.GlmMultiBase64.loss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loss</span></code></a>(self, arg0)</p></td>
 <td><p>Loss function.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.glm.GlmMultiBase64.loss_full" title="adelie.glm.GlmMultiBase64.loss_full"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loss_full</span></code></a>(self)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.glm.GlmMultiBase64.loss_full" title="adelie.glm.GlmMultiBase64.loss_full"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loss_full</span></code></a>(self)</p></td>
 <td><p>Loss function at the saturated model.</p></td>
 </tr>
 </tbody>
@@ -496,14 +499,17 @@ before passing into the solver.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.glm.GlmMultiBase64.is_multi" title="adelie.glm.GlmMultiBase64.is_multi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_multi</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if it defines a multi-response GLM family.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.glm.GlmMultiBase64.name" title="adelie.glm.GlmMultiBase64.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.glm.GlmMultiBase64.is_symmetric" title="adelie.glm.GlmMultiBase64.is_symmetric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_symmetric</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the GLM is symmetric in <span class="math notranslate nohighlight">\(\eta_{i\cdot}\)</span> (along the classes) for each <span class="math notranslate nohighlight">\(i\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.glm.GlmMultiBase64.name" title="adelie.glm.GlmMultiBase64.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></a></p></td>
 <td><p>Name of the GLM family.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.glm.GlmMultiBase64.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.glm.GlmMultiBase64" title="adelie.adelie_core.glm.GlmMultiBase64"><span class="pre">adelie.adelie_core.glm.GlmMultiBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.c_contiguous</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.glm.GlmMultiBase64.__init__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.glm.GlmMultiBase64" title="adelie.adelie_core.glm.GlmMultiBase64"><span class="pre">adelie.adelie_core.glm.GlmMultiBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.c_contiguous</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_symmetric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.glm.GlmMultiBase64.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -526,26 +532,54 @@ before passing into the solver.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.glm.GlmMultiBase64.hessian">
 <span class="sig-name descname"><span class="pre">hessian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.glm.GlmMultiBase64" title="adelie.adelie_core.glm.GlmMultiBase64"><span class="pre">adelie.adelie_core.glm.GlmMultiBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.c_contiguous</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.c_contiguous</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.c_contiguous</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.glm.GlmMultiBase64.hessian" title="Link to this definition">#</a></dt>
-<dd><p>Hessian of the loss function.</p>
-<p>Computes <span class="math notranslate nohighlight">\(\nabla^2 \ell(\eta)\)</span>.</p>
+<dd><p>Diagonal hessian majorization of the loss function.</p>
+<p>Computes a diagonal majorization of the hessian <span class="math notranslate nohighlight">\(\nabla^2 \ell(\eta)\)</span>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Although the hessian is in general a fully dense matrix,
 we only require the user to output a diagonal matrix.
-It is recommended that the diagonal matrix dominate the true hessian.
-However, in some cases, the diagonal of the hessian suffices.
+It is recommended that the diagonal matrix dominates the full hessian.
+However, in some cases, the diagonal of the hessian suffices even when it does not majorize the hessian.
 Interestingly, most hessian computations become greatly simplified
-when evaluated using the mean parameter instead of the natural parameter.
-Hence, the hessian computation assumes the mean parameter is provided.</p>
+when evaluated using the gradient.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>eta</strong><span class="classifier">(n, K) np.ndarray</span></dt><dd><p>Natural parameter.</p>
 </dd>
-<dt><strong>grad</strong><span class="classifier">(n, K) np.ndarray</span></dt><dd><p>Gradient.</p>
+<dt><strong>grad</strong><span class="classifier">(n, K) np.ndarray</span></dt><dd><p>Gradient as in <code class="docutils literal notranslate"><span class="pre">gradient()</span></code> method.</p>
 </dd>
 <dt><strong>hess</strong><span class="classifier">(n, K) np.ndarray</span></dt><dd><p>The hessian to store.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.glm.GlmMultiBase64.inv_hessian_gradient">
+<span class="sig-name descname"><span class="pre">inv_hessian_gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.glm.GlmMultiBase64" title="adelie.adelie_core.glm.GlmMultiBase64"><span class="pre">adelie.adelie_core.glm.GlmMultiBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.c_contiguous</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.c_contiguous</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.c_contiguous</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg3</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.c_contiguous</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.glm.GlmMultiBase64.inv_hessian_gradient" title="Link to this definition">#</a></dt>
+<dd><p>Inverse hessian of the (negative) gradient of the loss function.</p>
+<p>Computes <span class="math notranslate nohighlight">\(-(\nabla^2 \ell(\eta))^{-1} \nabla \ell(\eta)\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Unlike the <code class="docutils literal notranslate"><span class="pre">hessian()</span></code> method, this function may use the full hessian matrix.
+The diagonal hessian majorization is provided in case it speeds-up computations,
+but it can be ignored.
+The default implementation simply computes <code class="docutils literal notranslate"><span class="pre">grad</span> <span class="pre">/</span> <span class="pre">(hess</span> <span class="pre">+</span> <span class="pre">eps</span> <span class="pre">*</span> <span class="pre">(hess</span> <span class="pre">&lt;=</span> <span class="pre">0))</span></code>
+where <code class="docutils literal notranslate"><span class="pre">eps</span></code> is given by <code class="docutils literal notranslate"><span class="pre">adelie.configs.Configs.hessian_min</span></code>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>eta</strong><span class="classifier">(n, K) np.ndarray</span></dt><dd><p>Natural parameter.</p>
+</dd>
+<dt><strong>grad</strong><span class="classifier">(n, K) np.ndarray</span></dt><dd><p>Gradient as in <code class="docutils literal notranslate"><span class="pre">gradient()</span></code> method.</p>
+</dd>
+<dt><strong>hess</strong><span class="classifier">(n, K) np.ndarray</span></dt><dd><p>Hessian as in <code class="docutils literal notranslate"><span class="pre">hessian()</span></code> method.</p>
+</dd>
+<dt><strong>inv_hess_grad</strong><span class="classifier">(n, K) np.ndarray</span></dt><dd><p>The inverse hessian gradient to store.</p>
 </dd>
 </dl>
 </dd>
@@ -593,6 +627,13 @@ Hence, the hessian computation assumes the mean parameter is provided.</p>
 <span class="sig-name descname"><span class="pre">is_multi</span></span><a class="headerlink" href="#adelie.glm.GlmMultiBase64.is_multi" title="Link to this definition">#</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if it defines a multi-response GLM family.
 It is always <code class="docutils literal notranslate"><span class="pre">True</span></code> for this base class.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.glm.GlmMultiBase64.is_symmetric">
+<span class="sig-name descname"><span class="pre">is_symmetric</span></span><a class="headerlink" href="#adelie.glm.GlmMultiBase64.is_symmetric" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the GLM is symmetric in <span class="math notranslate nohighlight">\(\eta_{i\cdot}\)</span> (along the classes)
+for each <span class="math notranslate nohighlight">\(i\)</span>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -653,9 +694,11 @@ It is always <code class="docutils literal notranslate"><span class="pre">True</
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmMultiBase64.__init__"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmMultiBase64.gradient"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.gradient()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmMultiBase64.hessian"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.hessian()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmMultiBase64.inv_hessian_gradient"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.inv_hessian_gradient()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmMultiBase64.loss"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.loss()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmMultiBase64.loss_full"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.loss_full()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmMultiBase64.is_multi"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.is_multi</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmMultiBase64.is_symmetric"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.is_symmetric</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.GlmMultiBase64.name"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.name</span></code></a></li>
 </ul>
 </li>

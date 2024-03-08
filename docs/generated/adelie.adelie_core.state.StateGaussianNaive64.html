@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.adelie_core.state.StateGaussianNaive64 &#8212; adelie 1.1.13
+    <title>adelie.adelie_core.state.StateGaussianNaive64 &#8212; adelie 1.1.14
  documentation</title>
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=1240c0c0"></script>
+    <script src="../_static/documentation_options.js?v=d9c9500d"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.13
+    <p class="title logo__title">adelie 1.1.14
  documentation</p>
   
 </a></div>
@@ -585,10 +585,10 @@ document.write(`
 <td><p>If screening takes place, then the <code class="docutils literal notranslate"><span class="pre">(1</span> <span class="pre">+</span> <span class="pre">pivot_subset_ratio)</span> <span class="pre">*</span> <span class="pre">s</span></code> largest active scores are used to determine the pivot point where <code class="docutils literal notranslate"><span class="pre">s</span></code> is the current screen set size.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianNaive64.resid" title="adelie.adelie_core.state.StateGaussianNaive64.resid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resid</span></code></a></p></td>
-<td><p>Residual <span class="math notranslate nohighlight">\(W(y_c - X \beta)\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p></td>
+<td><p>Residual <span class="math notranslate nohighlight">\(y_c - X \beta\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianNaive64.resid_sum" title="adelie.adelie_core.state.StateGaussianNaive64.resid_sum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resid_sum</span></code></a></p></td>
-<td><p>Sum of <code class="docutils literal notranslate"><span class="pre">resid</span></code>.</p></td>
+<td><p>Weighted (by <span class="math notranslate nohighlight">\(W\)</span>) sum of <code class="docutils literal notranslate"><span class="pre">resid</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianNaive64.rsq" title="adelie.adelie_core.state.StateGaussianNaive64.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></p></td>
 <td><p>The change in unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> given by  <span class="math notranslate nohighlight">\(\|y_c-X_c\beta_{\mathrm{old}}\|_{W}^2 - \|y_c-X_c\beta_{\mathrm{curr}}\|_{W}^2\)</span>.</p></td>
@@ -911,13 +911,13 @@ where <code class="docutils literal notranslate"><span class="pre">s</span></cod
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianNaive64.resid">
 <span class="sig-name descname"><span class="pre">resid</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianNaive64.resid" title="Link to this definition">#</a></dt>
-<dd><p>Residual <span class="math notranslate nohighlight">\(W(y_c - X \beta)\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p>
+<dd><p>Residual <span class="math notranslate nohighlight">\(y_c - X \beta\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianNaive64.resid_sum">
 <span class="sig-name descname"><span class="pre">resid_sum</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianNaive64.resid_sum" title="Link to this definition">#</a></dt>
-<dd><p>Sum of <code class="docutils literal notranslate"><span class="pre">resid</span></code>.</p>
+<dd><p>Weighted (by <span class="math notranslate nohighlight">\(W\)</span>) sum of <code class="docutils literal notranslate"><span class="pre">resid</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
