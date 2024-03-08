@@ -771,8 +771,9 @@ def grpnet(
             weights = glm.weights
             weights_mscaled = weights / K
             if warm_start is None:
+                ones = np.ones(n, dtype=dtype)
                 X_means = np.empty(p, dtype=dtype)
-                X.mul(weights_mscaled, X_means)
+                X.mul(ones, weights_mscaled, X_means)
                 X_means = np.repeat(X_means, K)
                 if intercept:
                     X_means = np.concatenate([
@@ -795,11 +796,11 @@ def grpnet(
                     y_var = yc_var
                 else:
                     rsq = 0
-                resid = weights_mscaled[:, None] * y_off
-                resid = resid.ravel()
-                resid_sum = np.sum(resid)
+                resid = y_off.ravel()
+                resid_sum = np.sum(weights_mscaled[:, None] * y_off)
                 grad = np.empty(X_aug.cols(), dtype=dtype)
-                X_aug.mul(resid, grad)
+                weights_mscaled = np.repeat(weights_mscaled, K)
+                X_aug.mul(resid, weights_mscaled, grad)
             else:
                 X_means = warm_start.X_means
                 y_var = warm_start.y_var
@@ -820,10 +821,13 @@ def grpnet(
         # GLM case
         else:
             if warm_start is None:
+                ones = np.ones(offsets.size, dtype=dtype)
                 eta = offsets
-                resid = np.empty(eta.shape); glm.gradient(eta, resid)
+                resid = np.empty(eta.shape, dtype=dtype)
+                glm.gradient(eta, resid)
                 resid = resid.ravel()
-                grad = np.empty(X_aug.cols()); X_aug.mul(resid, grad)
+                grad = np.empty(X_aug.cols(), dtype=dtype)
+                X_aug.mul(resid, ones, grad)
                 loss_null = None
                 loss_full = glm.loss_full()
                 eta = eta.ravel()
@@ -881,8 +885,9 @@ def grpnet(
             y = glm.y
             weights = glm.weights
             if warm_start is None:
+                ones = np.ones(n, dtype=dtype)
                 X_means = np.empty(p, dtype=dtype)
-                X.mul(weights, X_means)
+                X.mul(ones, weights, X_means)
                 y_off = y - offsets
                 y_mean = np.sum(y_off * weights)
                 yc = y_off
@@ -890,10 +895,10 @@ def grpnet(
                     yc = yc - y_mean
                 y_var = np.sum(weights * yc ** 2)
                 rsq = 0
-                resid = weights * yc
-                resid_sum = np.sum(resid)
+                resid = yc
+                resid_sum = np.sum(weights * resid)
                 grad = np.empty(p, dtype=dtype)
-                X.mul(resid, grad)
+                X.mul(resid, weights, grad)
             else:
                 X_means = warm_start.X_means
                 y_mean = warm_start.y_mean
@@ -916,10 +921,13 @@ def grpnet(
         # GLM case
         else:
             if warm_start is None:
+                ones = np.ones(n, dtype=dtype)
                 beta0 = 0
                 eta = offsets
-                resid = np.empty(n); glm.gradient(eta, resid)
-                grad = np.empty(p); X.mul(resid, grad)
+                resid = np.empty(n, dtype=dtype)
+                glm.gradient(eta, resid)
+                grad = np.empty(p, dtype=dtype)
+                X.mul(resid, ones, grad)
                 loss_null = None
                 loss_full = glm.loss_full()
             else:

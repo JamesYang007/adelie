@@ -1,4 +1,5 @@
 #pragma once
+#include <adelie_core/configs.hpp>
 #include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/solver/solver_glm_naive.hpp>
 
@@ -29,13 +30,15 @@ struct GlmWrap
     glm_t& glm;
     const map_carr_value_t y;
     const map_cvec_value_t weights;
+    const bool is_symmetric;
 
     explicit GlmWrap(
         glm_t& glm
     ):
         glm(glm),
         y(glm.y.data(), glm.y.rows(), glm.y.cols()),
-        weights(glm.weights.data(), glm.weights.size())
+        weights(glm.weights.data(), glm.weights.size()),
+        is_symmetric(glm.is_symmetric)
     {}
 
     void gradient(
@@ -43,7 +46,6 @@ struct GlmWrap
         Eigen::Ref<vec_value_t> resid
     )
     {
-        const auto& y = glm.y;
         const auto n = y.rows();
         const auto K = y.cols();
         Eigen::Map<const rowarr_value_t> E(eta.data(), n, K);
@@ -57,7 +59,6 @@ struct GlmWrap
         Eigen::Ref<vec_value_t> hess
     )
     {
-        const auto& y = glm.y;
         const auto n = y.rows();
         const auto K = y.cols();
         Eigen::Map<const rowarr_value_t> E(eta.data(), n, K);
@@ -66,11 +67,26 @@ struct GlmWrap
         glm.hessian(E, R, H);
     }
 
+    void inv_hessian_gradient(
+        const Eigen::Ref<const vec_value_t>& eta,
+        const Eigen::Ref<const vec_value_t>& resid,
+        const Eigen::Ref<const vec_value_t>& hess,
+        Eigen::Ref<vec_value_t> inv_hess_grad
+    )
+    {
+        const auto n = y.rows();
+        const auto K = y.cols();
+        Eigen::Map<const rowarr_value_t> E(eta.data(), n, K);
+        Eigen::Map<const rowarr_value_t> R(resid.data(), n, K);
+        Eigen::Map<const rowarr_value_t> H(hess.data(), n, K);
+        Eigen::Map<rowarr_value_t> IHG(inv_hess_grad.data(), n, K);
+        glm.inv_hessian_gradient(E, R, H, IHG);
+    }
+
     value_t loss(
         const Eigen::Ref<const vec_value_t>& eta
     )
     {
-        const auto& y = glm.y;
         const auto n = y.rows();
         const auto K = y.cols();
         Eigen::Map<const rowarr_value_t> E(eta.data(), n, K);
@@ -94,6 +110,7 @@ void update_loss_null(
 )
 {
     using state_t = std::decay_t<StateType>;
+    using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
     using rowarr_value_t = typename state_t::rowarr_value_t;
 
@@ -112,16 +129,14 @@ void update_loss_null(
 
     // make copies since we do not want to mess with the warm-start.
     // this function is only needed to fit intercept-only model and get loss_null.
-    vec_value_t beta0 = Eigen::Map<const vec_value_t>(
-        state.screen_beta.data(),
-        n_classes
-    );
+    vec_value_t beta0(n_classes);
     vec_value_t eta = state.eta;
     vec_value_t resid = state.resid;
 
     auto& irls_weights = buffer_pack.irls_weights;
     auto& irls_y = buffer_pack.irls_y;
     auto& resid_prev = buffer_pack.resid_prev;
+    auto& eta_prev = buffer_pack.eta_prev;
     auto& hess = buffer_pack.hess;
 
     size_t irls_it = 0;
@@ -133,12 +148,12 @@ void update_loss_null(
 
         /* compute rest of quadratic approximation quantities */
         glm.hessian(eta, resid, hess);
+        glm.inv_hessian_gradient(eta, resid, hess, irls_y);
+        // hessian is raised whenever <= 0 for well-defined proximal Newton iterations
+        hess = hess.max(0) + value_t(Configs::hessian_min) * (hess <= 0).template cast<value_t>();
         const auto hess_sum = hess.sum();
         irls_weights = hess / hess_sum;
-        irls_y = resid.NullaryExpr(resid.size(), [&](auto i) {
-            const auto ratio = resid[i] / hess[i]; 
-            return std::isnan(ratio) ? resid[i] : ratio;
-        }) + eta - offsets;
+        irls_y += eta - offsets;
 
         /* fit beta0 */
         const auto n = irls_weights.size() / n_classes;
@@ -148,9 +163,13 @@ void update_loss_null(
         Eigen::Map<const rowarr_value_t> irls_y_arr(
             irls_y.data(), n, n_classes
         );
-        beta0 = (irls_weights_arr * irls_y_arr).colwise().sum() / irls_weights_arr.colwise().sum();
+        beta0 = (
+            (irls_weights_arr * irls_y_arr).colwise().sum() / 
+            irls_weights_arr.colwise().sum()
+        );
 
         // update eta
+        eta.swap(eta_prev);
         Eigen::Map<rowarr_value_t> eta_arr(
             eta.data(), n, n_classes
         );
@@ -164,7 +183,7 @@ void update_loss_null(
         glm.gradient(eta, resid); 
 
         /* check convergence */
-        if ((resid - resid_prev).square().sum() <= irls_tol) {
+        if (std::abs(((resid - resid_prev) * (eta - eta_prev)).sum()) <= irls_tol) {
             loss_null = glm.loss(eta);
             return;
         }

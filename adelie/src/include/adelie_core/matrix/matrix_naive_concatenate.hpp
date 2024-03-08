@@ -105,37 +105,38 @@ public:
 
     value_t cmul(
         int j, 
-        const Eigen::Ref<const vec_value_t>& v
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& weights
     ) override
     {
-        base_t::check_cmul(j, v.size(), rows(), cols());
+        base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
         const auto slice = _slice_map[j];
         auto& mat = *_mat_list[slice];
         const auto index = _index_map[j];
-        return mat.cmul(index, v);
+        return mat.cmul(index, v, weights);
     }
 
     void ctmul(
         int j, 
         value_t v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_ctmul(j, weights.size(), out.size(), rows(), cols());
+        base_t::check_ctmul(j, out.size(), rows(), cols());
         const auto slice = _slice_map[j];
         auto& mat = *_mat_list[slice];
         const auto index = _index_map[j];
-        mat.ctmul(index, v, weights, out);
+        mat.ctmul(index, v, out);
     }
 
     void bmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_bmul(j, q, v.size(), out.size(), rows(), cols());
+        base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
         int n_processed = 0;
         while (n_processed < q) {
             const auto j_curr = j + n_processed;
@@ -143,7 +144,7 @@ public:
             auto& mat = *_mat_list[slice];
             const auto index = _index_map[j_curr];
             const int q_curr = std::min(mat.cols()-index, q-n_processed);
-            mat.bmul(index, q_curr, v, out.segment(n_processed, q_curr));
+            mat.bmul(index, q_curr, v, weights, out.segment(n_processed, q_curr));
             n_processed += q_curr;
         }
     }
@@ -151,11 +152,10 @@ public:
     void btmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_btmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+        base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         dvzero(out, _n_threads);
         int n_processed = 0;
         while (n_processed < q) {
@@ -164,7 +164,7 @@ public:
             auto& mat = *_mat_list[slice];
             const auto index = _index_map[j_curr];
             const int q_curr = std::min(mat.cols()-index, q-n_processed);
-            mat.btmul(index, q_curr, v.segment(n_processed, q_curr), weights, _buff);
+            mat.btmul(index, q_curr, v.segment(n_processed, q_curr), _buff);
             dvaddi(out, _buff, _n_threads);
             n_processed += q_curr;
         }
@@ -172,10 +172,11 @@ public:
 
     void mul(
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        bmul(0, cols(), v, out);
+        bmul(0, cols(), v, weights, out);
     }
 
     int rows() const override
@@ -217,12 +218,11 @@ public:
 
     void sp_btmul(
         const sp_mat_value_t& v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
         base_t::check_sp_btmul(
-            v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
+            v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
         out.setZero();
         rowmat_value_t buff(out.rows(), out.cols());
@@ -230,7 +230,7 @@ public:
         for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto q_curr = mat.cols();
-            mat.sp_btmul(v.middleCols(n_processed, q_curr), weights, buff);
+            mat.sp_btmul(v.middleCols(n_processed, q_curr), buff);
             out += buff;
             n_processed += q_curr;
         }

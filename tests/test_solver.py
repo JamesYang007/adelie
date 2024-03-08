@@ -54,8 +54,8 @@ def create_data_gaussian(
     y_mean = np.sum(weights * y)
     y_c = (y - intercept * y_mean)
     y_var = np.sum(weights * y_c ** 2)
-    resid = weights * y_c
-    grad = X_c.T @ resid
+    resid = y_c
+    grad = X_c.T @ (weights * resid)
 
     args = {
         "X": X, 
@@ -100,7 +100,7 @@ def create_data_gaussian(
     else:
         screen_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
         screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
-        resid_sum = np.sum(resid)
+        resid_sum = np.sum(weights * resid)
 
         args["X_means"] = X_means
         args["y_mean"] = y_mean
