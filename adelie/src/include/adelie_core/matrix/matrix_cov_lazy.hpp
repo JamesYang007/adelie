@@ -13,6 +13,7 @@ class MatrixCovLazy: public MatrixCovBase<typename std::decay_t<DenseType>::Scal
 public: 
     using base_t = MatrixCovBase<typename std::decay_t<DenseType>::Scalar>;
     using typename base_t::value_t;
+    using typename base_t::vec_index_t;
     using typename base_t::vec_value_t;
     using typename base_t::colmat_value_t;
     using dense_t = DenseType;
@@ -24,8 +25,6 @@ private:
     std::vector<util::rowmat_type<value_t>> _cache; // cache of covariance slices
     std::vector<index_t> _index_map; // map feature i to index of _cache
     std::vector<index_t> _slice_map; // map feature i to slice of _cache[_index_map[i]]
-    util::rowmat_type<value_t> _buff;
-    util::rowvec_type<value_t> _vbuff;
 
     void cache(int i, int p) 
     {
@@ -64,11 +63,8 @@ public:
     ): 
         _X(X.data(), X.rows(), X.cols()),
         _n_threads(n_threads),
-        _cache(),
         _index_map(X.cols(), -1),
-        _slice_map(X.cols(), -1),
-        _buff(_n_threads, X.cols()),
-        _vbuff(X.cols())
+        _slice_map(X.cols(), -1)
     {
         _cache.reserve(X.cols());
     }
@@ -76,61 +72,50 @@ public:
     using base_t::rows;
 
     void bmul(
-        int i, int j, int p, int q, 
-        const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_index_t>& subset,
+        const Eigen::Ref<const vec_index_t>& indices,
+        const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_bmul(i, j, p, q, v.size(), out.size(), rows(), cols());
-        Eigen::Map<vec_value_t> vbuff(_vbuff.data(), q);
-        int n_processed = 0;
+        base_t::check_bmul(subset.size(), indices.size(), values.size(), out.size(), rows(), cols());
         out.setZero();
-        while (n_processed < p) {
-            const auto k = i + n_processed;
-            const auto ck = _index_map[k];
-            if (ck < 0) {
+        for (int i_idx = 0; i_idx < indices.size(); ++i_idx) {
+            const auto i = indices[i_idx];
+            if (_index_map[i] < 0) {
                 int cache_size = 0;
-                for(; k+cache_size < cols() && _index_map[k+cache_size] < 0; ++cache_size);
-                cache(k, cache_size);
+                for(; i+cache_size < cols() && _index_map[i+cache_size] < 0 && 
+                      indices[i_idx+cache_size] == i+cache_size; ++cache_size);
+                cache(i, cache_size);
             }
-            const auto& mat = _cache[_index_map[k]];
-            const auto size = std::min<size_t>(mat.rows(), p-n_processed);
-            vbuff = v.matrix().segment(n_processed, size) * mat.block(_slice_map[k], j, size, q);
-            out += vbuff;
-            n_processed += size;
+            const auto& mat = _cache[_index_map[i]];
+            const auto v = values[i_idx];
+            for (int j_idx = 0; j_idx < subset.size(); ++j_idx) {
+                const auto j = subset[j_idx];
+                out[j_idx] += v * mat(i, j);
+            }
         }
     }
 
     void mul(
-        int i, int p,
-        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_index_t>& indices,
+        const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_mul(i, p, v.size(), out.size(), rows(), cols());
-        Eigen::Map<vec_value_t> vbuff(_vbuff.data(), cols());
-        int n_processed = 0;
+        base_t::check_mul(indices.size(), values.size(), out.size(), rows(), cols());
         out.setZero();
-        while (n_processed < p) {
-            const auto k = i + n_processed;
-            const auto ck = _index_map[k];
-            if (ck < 0) {
+        for (int i_idx = 0; i_idx < indices.size(); ++i_idx) {
+            const auto i = indices[i_idx];
+            if (_index_map[i] < 0) {
                 int cache_size = 0;
-                for(; k+cache_size < cols() && _index_map[k+cache_size] < 0; ++cache_size);
-                cache(k, cache_size);
+                for(; i+cache_size < cols() && _index_map[i+cache_size] < 0 && 
+                      indices[i_idx+cache_size] == i+cache_size; ++cache_size);
+                cache(i, cache_size);
             }
-            const auto& mat = _cache[_index_map[k]];
-            const auto size = std::min<size_t>(mat.rows(), p-n_processed);
-            auto vbuffm = vbuff.matrix();
-            dgemv(
-                mat.middleRows(_slice_map[k], size),
-                v.matrix().segment(n_processed, size),
-                _n_threads,
-                _buff,
-                vbuffm
-            );
-            dvaddi(out, vbuff, _n_threads);
-            n_processed += size;
+            const auto& mat = _cache[_index_map[i]];
+            const auto v = values[i_idx];
+            dvaddi(out, v * mat.row(i).array(), _n_threads);
         }
     }
 

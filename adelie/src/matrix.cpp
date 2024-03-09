@@ -305,12 +305,14 @@ public:
     /* Inherit the constructors */
     using base_t::base_t;
     using typename base_t::value_t;
+    using typename base_t::vec_index_t;
     using typename base_t::vec_value_t;
     using typename base_t::colmat_value_t;
 
     void bmul(
-        int i, int j, int p, int q, 
-        const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_index_t>& subset,
+        const Eigen::Ref<const vec_index_t>& indices,
+        const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
     ) override
     {
@@ -318,13 +320,13 @@ public:
             void,
             base_t,
             bmul,
-            i, j, p, q, v, out
+            subset, indices, values, out
         );
     }
 
     void mul(
-        int i, int p,
-        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_index_t>& indices,
+        const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
     ) override
     {
@@ -332,7 +334,7 @@ public:
             void,
             base_t,
             mul,
-            i, p, v, out
+            indices, values, out
         );
     }
 
@@ -369,40 +371,36 @@ void matrix_cov_base(py::module_& m, const char* name)
     )delimiter")
         .def(py::init<>())
         .def("bmul", &internal_t::bmul, R"delimiter(
-        Block matrix-vector multiplication.
+        Block matrix-sparse vector multiplication.
 
-        Computes the matrix-vector multiplication
-        ``v.T @ A[i:i+p, j:j+q]``.
+        Computes the matrix-sparse vector multiplication
+        ``v.T @ A[:, subset]`` where ``v`` is represented by the sparse-format
+        ``indices`` and ``values``.
 
         Parameters
         ----------
-        i : int
-            Row index.
-        j : int
-            Column index.
-        p : int
-            Number of rows.
-        q : int
-            Number of columns.
-        v : (p,) np.ndarray
-            Vector to multiply with the block matrix.
-        out : (q,) np.ndarray
-            Vector to store in-place the result.
+        subset : (s,) np.ndarray
+            Vector of column indices of ``A`` to subset in increasing order.
+        indices : (nnz,) np.ndarray
+            Vector of indices in increasing order.
+        values : (nnz,) np.ndarray
+            Vector of values associated with ``indices``.
+        out : (s,) np.ndarray
+            Vector to store the result.
         )delimiter")
         .def("mul", &internal_t::mul, R"delimiter(
-        Row matrix-vector multiplication.
+        Matrix-sparse vector multiplication.
 
-        Computes the row matrix-vector multiplication
-        ``v.T @ A[i:i+p, :]``.
+        Computes the matrix-sparse vector multiplication
+        ``v.T @ A`` where ``v`` is represented by the sparse-format
+        ``indices`` and ``values``.
 
         Parameters
         ----------
-        i : int
-            Row index.
-        p : int
-            Number of rows.
-        v : (p,) np.ndarray
-            Vector to multiply with the block matrix.
+        indices : (nnz,) np.ndarray
+            Vector of indices in increasing order.
+        values : (nnz,) np.ndarray
+            Vector of values associated with ``indices``.
         out : (n,) np.ndarray
             Vector to store in-place the result.
             The length is the number of columns of ``A``.

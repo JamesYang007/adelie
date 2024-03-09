@@ -10,41 +10,41 @@ class MatrixCovBase
 {
 protected:
     static void check_bmul(
-        int g, int gs, int ri, int ci, int v, int o, int r, int c
+        int s, int i, int v, int o, int r, int c
     )
     {
         if (
-            (g != gs) ||
-            (ri < 0 || ri > g) ||
-            (ci < 0 || ci > g) ||
+            (s < 0 || s > r) ||
+            (i < 0 || i > r) ||
+            (i != v) ||
             (v < 0 || v > r) ||
-            (o < 0 || o > c)
+            (o != s)
         ) {
             throw std::runtime_error(
                 util::format(
                     "bmul() is given inconsistent inputs! "
-                    "Invoked check_bmul(g=%d, gs=%d, ri=%d, ci=%d, v=%d, o=%d, r=%d, c=%d)",
-                    g, gs, ri, ci, v, o, r, c
+                    "Invoked check_bmul(s=%d, i=%d, v=%d, o=%d, r=%d, c=%d)",
+                    s, i, v, o, r, c
                 )
             );
         }
     }
 
     static void check_mul(
-        int i, int p, int v, int o, int r, int c
+        int i, int v, int o, int r, int c
     )
     {
         if (
-            (i < 0 || i > r-p) ||
-            (v != p) ||
+            (i < 0 || i > r) ||
+            (i != v) ||
             (o != c) ||
             (r != c)
         ) {
             throw std::runtime_error(
                 util::format(
-                    "bmul() is given inconsistent inputs! "
-                    "Invoked check_bmul(i=%d, p=%d, v=%d, o=%d, r=%d, c=%d)",
-                    i, p, v, o, r, c
+                    "mul() is given inconsistent inputs! "
+                    "Invoked check_mul(i=%d, v=%d, o=%d, r=%d, c=%d)",
+                    i, v, o, r, c
                 )
             );
         }
@@ -80,17 +80,15 @@ public:
     virtual ~MatrixCovBase() {}
 
     virtual void bmul(
-        const Eigen::Ref<const vec_index_t>& groups,
-        const Eigen::Ref<const vec_index_t>& group_sizes,
-        const Eigen::Ref<const vec_index_t>& row_indices,
-        const Eigen::Ref<const vec_index_t>& col_indices,
-        const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_index_t>& subset,
+        const Eigen::Ref<const vec_index_t>& indices,
+        const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
     ) =0;
 
     virtual void mul(
-        int i, int p,
-        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_index_t>& indices,
+        const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
     ) =0;
 
