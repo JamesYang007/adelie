@@ -23,6 +23,7 @@ release = open("../../VERSION", "r").read()
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx_design",
     "numpydoc",
     "nbsphinx",
 ]
