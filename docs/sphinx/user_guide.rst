@@ -6,6 +6,7 @@ User Guide
     :maxdepth: 1
 
 
+    notebooks/installation
     notebooks/introduction
     notebooks/quickstart
     notebooks/matrix
