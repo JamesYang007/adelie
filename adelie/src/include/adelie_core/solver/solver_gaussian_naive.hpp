@@ -211,6 +211,7 @@ inline void solve(
     const auto update_loss_null_f = [](const auto&) {};
     const auto update_invariance_f = [&](auto& state, auto lmda) {
         const auto& X_means = state.X_means;
+        const auto& weights = state.weights;
         const auto intercept = state.intercept;
         const auto n_threads = state.n_threads;
         const auto& resid = state.resid;
@@ -219,7 +220,7 @@ inline void solve(
         auto& grad = state.grad;
 
         state.lmda = lmda;
-        X.mul(resid, grad);
+        X.mul(resid, weights, grad);
         if (intercept) {
             matrix::dvsubi(grad, resid_sum * X_means, n_threads);
         }

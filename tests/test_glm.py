@@ -1,5 +1,6 @@
 from scipy.special import xlogy
 import adelie.glm as glm
+import adelie.configs as configs
 import adelie.adelie_core as core
 import numpy as np
 
@@ -23,8 +24,15 @@ def run_common_test(
     hess = np.empty(shape)
     hess_exp = np.empty(shape)
     model.hessian(eta, grad, hess)
-    model_exp.hessian(eta, grad_exp, hess_exp)
+    model_exp.hessian(eta, grad, hess_exp)
     assert np.allclose(hess, hess_exp)
+
+    # test inv_hessian_gradient
+    inv_hess_grad = np.empty(shape)
+    inv_hess_grad_exp = np.empty(shape)
+    model.inv_hessian_gradient(eta, grad, hess, inv_hess_grad)
+    model_exp.inv_hessian_gradient(eta, grad, hess, inv_hess_grad_exp)
+    assert np.allclose(inv_hess_grad, inv_hess_grad_exp, atol=1e-6)
 
     # test loss
     loss = model.loss(eta)
@@ -62,6 +70,13 @@ def run_subset_test(
     model_exp.hessian(eta_sub, grad_exp, hess_exp)
     assert np.allclose(hess[subset], hess_exp)
 
+    # test inv_hessian_gradient
+    inv_hess_grad = np.empty(shape)
+    inv_hess_grad_exp = np.empty(shape_exp)
+    model.inv_hessian_gradient(eta, grad, hess, inv_hess_grad)
+    model_exp.inv_hessian_gradient(eta_sub, grad_exp, hess_exp, inv_hess_grad_exp)
+    assert np.allclose(inv_hess_grad[subset], inv_hess_grad_exp, atol=1e-6)
+
     # test loss
     loss = model.loss(eta)
     loss_exp = model_exp.loss(eta_sub)
@@ -73,12 +88,17 @@ def run_subset_test(
     assert np.allclose(loss_full, loss_full_exp)
 
 
+class TestGlm():
+    def inv_hessian_gradient(self, eta, grad, hess, inv_hess_grad):
+        inv_hess_grad[...] = grad / (np.maximum(hess, 0) + configs.Configs.hessian_min * (hess <= 0))
+
+
 # =====================================================================================
 # TEST gaussian
 # =====================================================================================
 
 
-class TestGaussian():
+class TestGaussian(TestGlm):
     def __init__(self, y, weights):
         self.y = y
         self.weights = weights
@@ -123,7 +143,7 @@ def test_gaussian():
 # =====================================================================================
 
 
-class TestBinomial():
+class TestBinomial(TestGlm):
     def __init__(self, y, weights):
         self.y = y
         self.weights = weights
@@ -171,7 +191,7 @@ def test_binomial():
 # =====================================================================================
 
 
-class TestPoisson():
+class TestPoisson(TestGlm):
     def __init__(self, y, weights):
         self.y = y
         self.weights = weights
@@ -401,7 +421,7 @@ def test_cox_scale():
         _test(n)
 
 
-class TestCox:
+class TestCox(TestGlm):
     def __init__(
         self,
         start,
@@ -585,7 +605,7 @@ def test_cox():
 # =====================================================================================
 
 
-class TestMultiGaussian():
+class TestMultiGaussian(TestGlm):
     def __init__(self, y, weights):
         self.y = y
         self.weights = weights
@@ -636,7 +656,7 @@ def test_multigaussian():
 # =====================================================================================
 
 
-class TestMultinomial():
+class TestMultinomial(TestGlm):
     def __init__(self, y, weights):
         self.y = y
         self.weights = weights
@@ -651,7 +671,7 @@ class TestMultinomial():
         K = self.y.shape[-1]
         mu = np.exp(eta)
         mu = mu / np.sum(mu, axis=-1)[:, None]
-        hess[...] = self.weights[:, None] / K * mu * (1 - mu)
+        hess[...] = 2 * self.weights[:, None] / K * mu * (1 - mu)
 
     def loss(self, eta):
         K = self.y.shape[-1]

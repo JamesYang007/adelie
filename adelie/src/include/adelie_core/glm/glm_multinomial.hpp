@@ -17,16 +17,14 @@ public:
 
 private:
     vec_value_t _buff;
-    rowarr_value_t _buff2;
 
 public:
     explicit GlmMultinomial(
         const Eigen::Ref<const rowarr_value_t>& y,
         const Eigen::Ref<const vec_value_t>& weights
     ):
-        base_t("multinomial", y, weights),
-        _buff(weights.size()),
-        _buff2(y.rows(), y.cols())
+        base_t("multinomial", y, weights, true),
+        _buff(y.rows() * (y.cols() + 1))
     {}
 
     void gradient(
@@ -35,11 +33,13 @@ public:
     ) override
     {
         base_t::check_gradient(eta, grad);
-        _buff = eta.rowwise().maxCoeff();
-        grad = (eta.colwise() - _buff.matrix().transpose().array()).exp();
-        _buff = grad.rowwise().sum();
+        Eigen::Map<vec_value_t> eta_max(_buff.data(), y.rows());
+        eta_max = eta.rowwise().maxCoeff();
+        grad = (eta.colwise() - eta_max.matrix().transpose().array()).exp();
+        auto& sum_exp = eta_max;
+        sum_exp = grad.rowwise().sum();
         grad = (
-            (y - grad.colwise() / _buff.matrix().transpose().array()).colwise() * 
+            (y - grad.colwise() / sum_exp.matrix().transpose().array()).colwise() * 
             weights.matrix().transpose().array() / eta.cols()
         );
     }
@@ -56,8 +56,8 @@ public:
             y.colwise() * weights.matrix().transpose().array() / eta.cols() 
             - grad
         );
-        // K^{-1} W[:, None] * P * (1 - P)
-        hess = hess * (1 - grad.cols() * (
+        // 2 * K^{-1} W[:, None] * P * (1 - P)
+        hess *= 2 * (1 - grad.cols() * (
                 hess.colwise() /
                 (weights + (weights <= 0).template cast<value_t>()).matrix().transpose().array()
             )
@@ -69,12 +69,14 @@ public:
     ) override
     {
         base_t::check_loss(eta);
-        _buff = eta.rowwise().maxCoeff();
-        _buff2 = (eta.colwise() - _buff.matrix().transpose().array());
+        Eigen::Map<vec_value_t> eta_max(_buff.data(), y.rows());
+        eta_max = eta.rowwise().maxCoeff();
+        Eigen::Map<rowarr_value_t> eta_shift(_buff.data() + y.rows(), y.rows(), y.cols());
+        eta_shift = (eta.colwise() - eta_max.matrix().transpose().array());
         return (
             weights.matrix().transpose().array() * (
-                - (y * _buff2).rowwise().sum()
-                + _buff2.exp().rowwise().sum().log()
+                - (y * eta_shift).rowwise().sum()
+                + eta_shift.exp().rowwise().sum().log()
             )
         ).sum() / y.cols();
     }

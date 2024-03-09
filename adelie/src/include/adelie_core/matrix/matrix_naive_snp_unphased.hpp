@@ -49,74 +49,75 @@ public:
 
     value_t cmul(
         int j, 
-        const Eigen::Ref<const vec_value_t>& v
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& weights
     ) override
     {
-        base_t::check_cmul(j, v.size(), rows(), cols());
+        base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
         const auto inner = _io.inner(j);
         const auto value = _io.value(j);
-        return spddot(inner, value, v);
+        return spddot(inner, value, v * weights);
     }
 
     void ctmul(
         int j, 
         value_t v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_ctmul(j, weights.size(), out.size(), rows(), cols());
+        base_t::check_ctmul(j, out.size(), rows(), cols());
         const auto inner = _io.inner(j);
         const auto value = _io.value(j);
 
         dvzero(out, _n_threads);
 
         for (int i = 0; i < inner.size(); ++i) {
-            out[inner[i]] = v * value[i] * weights[inner[i]];
+            out[inner[i]] = v * value[i];
         }
     }
 
     void bmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_bmul(j, q, v.size(), out.size(), rows(), cols());
+        base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int t = 0; t < q; ++t) 
         {
             const auto inner = _io.inner(j+t);
             const auto value = _io.value(j+t);
-            out[t] = spddot(inner, value, v);
+            out[t] = spddot(inner, value, v * weights);
         }
     }
 
     void btmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_btmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+        base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         dvzero(out, _n_threads);
         for (int t = 0; t < q; ++t) 
         {
             const auto inner = _io.inner(j+t);
             const auto value = _io.value(j+t);
             for (int i = 0; i < inner.size(); ++i) {
-                out[inner[i]] += value[i] * weights[inner[i]] * v[t];
+                out[inner[i]] += value[i] * v[t];
             } 
         }
     }
 
     void mul(
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        bmul(0, cols(), v, out);
+        bmul(0, cols(), v, weights, out);
     }
 
     void cov(
@@ -161,12 +162,11 @@ public:
 
     void sp_btmul(
         const sp_mat_value_t& v,
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
         base_t::check_sp_btmul(
-            v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
+            v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int k = 0; k < v.outerSize(); ++k) {
@@ -179,7 +179,7 @@ public:
                 const auto inner = _io.inner(t);
                 const auto value = _io.value(t);
                 for (int i = 0; i < inner.size(); ++i) {
-                    out_k[inner[i]] += value[i] * weights[inner[i]] * it.value();
+                    out_k[inner[i]] += value[i] * it.value();
                 } 
             }
         }

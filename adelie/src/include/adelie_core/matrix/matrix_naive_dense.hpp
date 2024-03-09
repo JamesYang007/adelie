@@ -21,7 +21,8 @@ public:
 private:
     const Eigen::Map<const dense_t> _mat;   // underlying dense matrix
     const size_t _n_threads;                // number of threads
-    util::rowmat_type<value_t> _buff;
+    rowmat_value_t _buff;
+    vec_value_t _vbuff;
     
 public:
     explicit MatrixNaiveDense(
@@ -30,41 +31,44 @@ public:
     ): 
         _mat(mat.data(), mat.rows(), mat.cols()),
         _n_threads(n_threads),
-        _buff(_n_threads, std::min(mat.rows(), mat.cols()))
+        _buff(_n_threads, std::min(mat.rows(), mat.cols())),
+        _vbuff(mat.rows())
     {}
 
     value_t cmul(
         int j, 
-        const Eigen::Ref<const vec_value_t>& v
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& weights
     ) override
     {
-        base_t::check_cmul(j, v.size(), rows(), cols());
-        Eigen::Map<vec_value_t> _vbuff(_buff.data(), _n_threads);
-        return ddot(_mat.col(j), v.matrix(), _n_threads, _vbuff);
+        base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
+        Eigen::Map<vec_value_t> vbuff(_buff.data(), _n_threads);
+        return ddot(_mat.col(j), (v * weights).matrix(), _n_threads, vbuff);
     }
 
     void ctmul(
         int j, 
         value_t v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_ctmul(j, weights.size(), out.size(), rows(), cols());
-        dax(v, _mat.transpose().row(j).array() * weights, _n_threads, out);
+        base_t::check_ctmul(j, out.size(), rows(), cols());
+        dax(v, _mat.transpose().row(j).array(), _n_threads, out);
     }
 
     void bmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_bmul(j, q, v.size(), out.size(), rows(), cols());
+        base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
         auto outm = out.matrix();
+        dvveq(_vbuff, v * weights, _n_threads);
         dgemv(
             _mat.middleCols(j, q),
-            v.matrix(),
+            _vbuff.matrix(),
             _n_threads,
             _buff,
             outm
@@ -74,11 +78,10 @@ public:
     void btmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_btmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+        base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         auto outm = out.matrix();
         dgemv(
             _mat.middleCols(j, q).transpose(),
@@ -87,18 +90,19 @@ public:
             _buff,
             outm
         );
-        dvmuli(out, weights, _n_threads);
     }
 
     void mul(
         const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
     ) override
     {
         auto outm = out.matrix();
+        dvveq(_vbuff, v * weights, _n_threads);
         dgemv(
             _mat,
-            v.matrix(),
+            _vbuff.matrix(),
             _n_threads,
             _buff,
             outm
@@ -149,15 +153,13 @@ public:
 
     void sp_btmul(
         const sp_mat_value_t& v, 
-        const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
         base_t::check_sp_btmul(
-            v.rows(), v.cols(), weights.size(), out.rows(), out.cols(), rows(), cols()
+            v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
         out.noalias() = v * _mat.transpose();
-        out.array().rowwise() *= weights;
     }
 };
 
