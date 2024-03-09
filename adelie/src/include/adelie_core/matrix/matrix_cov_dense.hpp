@@ -12,13 +12,13 @@ public:
     using base_t = MatrixCovBase<typename DenseType::Scalar>;
     using dense_t = DenseType;
     using typename base_t::value_t;
+    using typename base_t::vec_index_t;
     using typename base_t::vec_value_t;
     using typename base_t::colmat_value_t;
     
 private:
     const Eigen::Map<const dense_t> _mat;   // underlying dense matrix
     const size_t _n_threads;                // number of threads
-    util::rowmat_type<value_t> _buff;
     
 public:
     explicit MatrixCovDense(
@@ -26,8 +26,7 @@ public:
         size_t n_threads
     ): 
         _mat(mat.data(), mat.rows(), mat.cols()),
-        _n_threads(n_threads),
-        _buff(_n_threads, mat.cols())
+        _n_threads(n_threads)
     {
         if (mat.rows() != mat.cols()) {
             throw std::runtime_error("Matrix must be square!");
@@ -37,62 +36,41 @@ public:
     using base_t::rows;
     
     void bmul(
-        const Eigen::Ref<const vec_index_t>& groups,
-        const Eigen::Ref<const vec_index_t>& group_sizes,
-        const Eigen::Ref<const vec_index_t>& row_indices,
-        const Eigen::Ref<const vec_index_t>& col_indices,
-        const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_index_t>& subset,
+        const Eigen::Ref<const vec_index_t>& indices,
+        const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_bmul(
-            groups.size(), 
-            group_sizes.size(), 
-            row_indices.size(), 
-            col_indices.size(), 
-            v.size(), 
-            out.size(), 
-            rows(), 
-            cols()
-        );
-        auto _vbuff = _buff.row(0).head(out.size());
+        base_t::check_bmul(subset.size(), indices.size(), values.size(), out.size(), rows(), cols());
         out.setZero();
-        int rpos = 0;
-        for (int i = 0; i < row_indices.size(); ++i) {
-            const auto r = row_indices[i];
-            const auto rg = groups[r];
-            const auto rgs = group_sizes[r];
-            const auto rv = v.segment(rpos, rgs);
-
-            int cpos = 0;
-            for (int j = 0; j < col_indices.size(); ++j) {
-                const auto c = col_indices[j];
-                const auto cg = groups[c];
-                const auto cgs = group_sizes[c];
-                _vbuff.segment(cpos, cgs).noalias() = rv.matrix() * _mat.block(rg, cg, rgs, cgs);
-                cpos += cgs;
+        for (int i_idx = 0; i_idx < indices.size(); ++i_idx) {
+            const auto i = indices[i_idx];
+            const auto v = values[i_idx];
+            for (int j_idx = 0; j_idx < subset.size(); ++j_idx) {
+                const auto j = subset[j_idx];
+                out[j_idx] += v * _mat(i, j);
             }
-            dvaddi(out, _vbuff, _n_threads);
-
-            rpos += rgs;
         }
     }
 
     void mul(
-        int i, int p,
-        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_index_t>& indices,
+        const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        base_t::check_mul(i, p, v.size(), out.size(), rows(), cols());
-        auto outm = out.matrix();
-        dgemv(
-            _mat.middleCols(i, p).transpose(),
-            v.matrix(),
-            _n_threads,
-            _buff,
-            outm
-        );
+        base_t::check_mul(indices.size(), values.size(), out.size(), rows(), cols());
+        out.setZero();
+        for (int i_idx = 0; i_idx < indices.size(); ++i_idx) {
+            const auto i = indices[i_idx];
+            const auto v = values[i_idx];
+            if constexpr (dense_t::IsRowMajor) {
+                dvaddi(out, v * _mat.row(i).array(), _n_threads);
+            } else {
+                dvaddi(out, v * _mat.col(i).array(), _n_threads);
+            }
+        }
     } 
 
     void to_dense(
