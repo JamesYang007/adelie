@@ -600,7 +600,7 @@ def gaussian_pin_naive(
         Usually, :math:`\\beta_{\\mathrm{old}} = 0` 
         and :math:`\\beta_{\\mathrm{curr}}` is given by ``screen_beta``.
     resid : (n,) np.ndarray
-        Residual :math:`W(y_c - X \\beta)` where :math:`\\beta` is given by ``screen_beta``.
+        Residual :math:`y_c - X \\beta` where :math:`\\beta` is given by ``screen_beta``.
     screen_beta : (ws,) np.ndarray
         Coefficient vector on the screen set.
         ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
@@ -716,8 +716,9 @@ def gaussian_pin_naive(
 
             n, p = X.rows(), X.cols()
             sqrt_weights = np.sqrt(self._weights)
+            ones = np.ones(n, dtype=dtype)
             X_means = np.empty(p, dtype=dtype)
-            X.mul(self._weights, X_means)
+            X.mul(ones, self._weights, X_means)
 
             self._screen_vars = []
             self._screen_X_means = []
@@ -743,7 +744,7 @@ def gaussian_pin_naive(
             )
             self._screen_transforms = vecmat_type(self._screen_transforms)
 
-            resid_sum = np.sum(self._resid)
+            resid_sum = np.sum(self._weights * self._resid)
 
             # MUST call constructor directly and not use super()!
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
@@ -1493,7 +1494,7 @@ class gaussian_naive_base(base):
             method, logger,
         )
 
-        # ================ penalty check ====================
+        # ================ weights check ====================
         self._check(
             np.all(self.weights >= 0),
             "check weights is non-negative",
@@ -1502,48 +1503,6 @@ class gaussian_naive_base(base):
         self._check(
             np.allclose(np.sum(self.weights), 1),
             "check weights sum to 1",
-            method, logger,
-        )
-
-        # ================ configurations check ====================
-        self._check(
-            0 < self.min_ratio,
-            "check min_ratio is > 0",
-            method, logger,
-        )
-        self._check(
-            ~self.setup_lmda_path | (self.lmda_path_size > 0),
-            "check either lmda_path is not setup or if it is, then path size is > 0",
-            method, logger,
-        )
-        self._check(
-            self.max_screen_size >= 0,
-            "check max_screen_size >= 0",
-            method, logger,
-        )
-        self._check(
-            self.max_iters >= 0,
-            "check max_iters >= 0",
-            method, logger,
-        )
-        self._check(
-            self.tol >= 0,
-            "check tol >= 0",
-            method, logger,
-        )
-        self._check(
-            self.newton_tol >= 0,
-            "check newton_tol >= 0",
-            method, logger,
-        )
-        self._check(
-            self.newton_max_iters >= 0,
-            "check newton_max_iters >= 0",
-            method, logger,
-        )
-        self._check(
-            self.n_threads > 0,
-            "check n_threads > 0",
             method, logger,
         )
 
@@ -1660,27 +1619,27 @@ class gaussian_naive_base(base):
         # ================ rsq check ====================
         screen_indices = []
         tmp = np.empty(n)
-        WXbeta = np.zeros(n)
+        Xbeta = np.zeros(n)
         for g, gs, b in zip(
             self.groups[self.screen_set], 
             self.group_sizes[self.screen_set],
             self.screen_begins,
         ):
             screen_indices.append(np.arange(g, g + gs))
-            self.X.btmul(g, gs, self.screen_beta[b:b+gs], self.weights, tmp)
-            WXbeta += tmp
+            self.X.btmul(g, gs, self.screen_beta[b:b+gs], tmp)
+            Xbeta += tmp
 
         if len(screen_indices) == 0:
             screen_indices = np.array(screen_indices, dtype=int)
         else:
             screen_indices = np.concatenate(screen_indices, dtype=int)
 
-        resid = self.weights * yc - WXbeta
+        resid = yc - Xbeta
         grad = np.empty(p)
-        self.X.mul(resid, grad)
+        self.X.mul(resid, self.weights, grad)
         if self.intercept:
-            grad -= self.X_means * np.sum(resid)
-        WXcbeta = WXbeta - self.weights * (self.screen_X_means @ self.screen_beta)
+            grad -= self.X_means * np.sum(self.weights * resid)
+        WXcbeta = self.weights * (Xbeta - self.screen_X_means @ self.screen_beta)
         expected = 2 * np.sum(yc * WXcbeta) - np.linalg.norm(WXcbeta / np.sqrt(self.weights)) ** 2
         self._check(
             np.allclose(self.rsq, expected),
@@ -1724,7 +1683,7 @@ class gaussian_naive_base(base):
 
         # ================ resid_sum check ====================
         self._check(
-            np.allclose(self.resid_sum, np.sum(resid)),
+            np.allclose(self.resid_sum, np.sum(self.weights * resid)),
             "check resid_sum",
             method, logger,
         )
@@ -1835,9 +1794,9 @@ def gaussian_naive(
         This is only used for outputting the training :math:`R^2` relative to this value,
         i.e. this quantity is the "null" model MSE.
     resid : (n,) np.ndarray
-        Residual :math:`W(y_c - X \\beta)` where :math:`\\beta` is given by ``screen_beta``.
+        Residual :math:`y_c - X \\beta` where :math:`\\beta` is given by ``screen_beta``.
     resid_sum : float
-        Sum of ``resid``.
+        Weighted (by :math:`W`) sum of ``resid``.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -2148,10 +2107,10 @@ def multigaussian_naive(
         This is only used for outputting the training :math:`R^2` relative to this value,
         i.e. this quantity is the "null" model MSE.
     resid : (n*K,) np.ndarray
-        Residual :math:`\\tilde{W}(\\tilde{y} - \\tilde{X} \\beta)` 
+        Residual :math:`\\tilde{y} - \\tilde{X} \\beta` 
         where :math:`\\beta` is given by ``screen_beta``.
     resid_sum : float
-        Sum of ``resid``.
+        Weighted (by :math:`\\tilde{W}`) sum of ``resid``.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 

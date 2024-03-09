@@ -1,4 +1,5 @@
 #pragma once
+#include <adelie_core/configs.hpp>
 #include <adelie_core/solver/solver_base.hpp>
 #include <adelie_core/solver/solver_gaussian_pin_naive.hpp>
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
@@ -29,7 +30,9 @@ struct GlmNaiveBufferPack
         irls_y(n),
         irls_resid(n),
         resid_prev(n),
+        eta_prev(n),
         hess(n),
+        ones(vec_value_t::Ones(n)),
         buffer_n(n)
     {}
 
@@ -42,11 +45,13 @@ struct GlmNaiveBufferPack
     vec_value_t irls_y;                  // (n,) IRLS response
     vec_value_t irls_resid;              // (n,) IRLS residual
     vec_value_t resid_prev;            // (n,) previous residual
+    vec_value_t eta_prev;            // (n,) previous eta
     vec_value_t hess;                // (n,) hessian 
 
     dyn_vec_value_t screen_beta_prev;
     dyn_vec_bool_t screen_is_active_prev;
 
+    vec_value_t ones;       // (n,) vector of ones
     vec_value_t buffer_n;   // (n,) extra buffer
 };
 
@@ -116,6 +121,7 @@ void update_loss_null(
     auto& irls_weights = buffer_pack.irls_weights;
     auto& irls_y = buffer_pack.irls_y;
     auto& resid_prev = buffer_pack.resid_prev;
+    auto& eta_prev = buffer_pack.eta_prev;
     auto& hess = buffer_pack.hess;
 
     size_t irls_it = 0;
@@ -127,17 +133,18 @@ void update_loss_null(
 
         /* compute rest of quadratic approximation quantities */
         glm.hessian(eta, resid, hess);
+        glm.inv_hessian_gradient(eta, resid, hess, irls_y);
+        // hessian is raised whenever <= 0 for well-defined proximal Newton iterations
+        hess = hess.max(0) + value_t(Configs::hessian_min) * (hess <= 0).template cast<value_t>();
         const auto hess_sum = hess.sum();
         irls_weights = hess / hess_sum;
-        irls_y = resid.NullaryExpr(resid.size(), [&](auto i) {
-            const auto ratio = resid[i] / hess[i]; 
-            return std::isnan(ratio) ? resid[i] : ratio;
-        }) + eta - offsets;
+        irls_y += eta - offsets;
 
         /* fit beta0 */
         beta0 = (irls_weights * irls_y).sum();
 
         // update eta
+        eta.swap(eta_prev);
         eta = beta0 + offsets;
 
         // update resid
@@ -145,7 +152,7 @@ void update_loss_null(
         glm.gradient(eta, resid); 
 
         /* check convergence */
-        if ((resid - resid_prev).square().sum() <= irls_tol) {
+        if (std::abs(((resid - resid_prev) * (eta - eta_prev)).sum()) <= irls_tol) {
             loss_null = glm.loss(eta);
             return;
         }
@@ -210,6 +217,7 @@ auto fit(
     auto& eta = state.eta;
     auto& resid = state.resid;
 
+    const auto& ones = buffer_pack.ones;
     auto& X_means = buffer_pack.X_means;
     auto& screen_X_means = buffer_pack.screen_X_means;
     auto& screen_transforms = buffer_pack.screen_transforms;
@@ -218,6 +226,7 @@ auto fit(
     auto& irls_weights_sqrt = buffer_pack.irls_weights_sqrt;
     auto& irls_y = buffer_pack.irls_y;
     auto& irls_resid = buffer_pack.irls_resid;
+    auto& eta_prev = buffer_pack.eta_prev;
     auto& resid_prev = buffer_pack.resid_prev;
     auto& hess = buffer_pack.hess;
     auto& screen_beta_prev = buffer_pack.screen_beta_prev;
@@ -250,17 +259,17 @@ auto fit(
 
         /* compute rest of quadratic approximation quantities */
         glm.hessian(eta, resid, hess);
+        glm.inv_hessian_gradient(eta, resid, hess, irls_y);
+        // hessian is raised whenever <= 0 for well-defined proximal Newton iterations
+        hess = hess.max(0) + value_t(Configs::hessian_min) * (hess <= 0).template cast<value_t>();
         const auto hess_sum = hess.sum();
         irls_weights = hess / hess_sum;
         irls_weights_sqrt = irls_weights.sqrt();
-        irls_y = resid.NullaryExpr(resid.size(), [&](auto i) {
-            const auto ratio = resid[i] / hess[i]; 
-            return std::isnan(ratio) ? resid[i] : ratio;
-        }) + eta - offsets;
+        irls_y += eta - offsets;
         const auto y_mean = (irls_weights * irls_y).sum();
         const auto y_var = (irls_weights * irls_y.square()).sum() - intercept * y_mean * y_mean;
-        irls_resid = irls_weights * (irls_y + offsets - eta + intercept * (beta0 - y_mean));
-        const auto resid_sum = irls_resid.sum();
+        irls_resid = irls_y + offsets - eta + intercept * (beta0 - y_mean);
+        const auto resid_sum = (irls_weights * irls_resid).sum();
         lmda_path_adjusted = lmda / hess_sum;
         if (std::isinf(lmda_path_adjusted[0])) {
             if (lmda == std::numeric_limits<value_t>::max()) {
@@ -278,10 +287,10 @@ auto fit(
             const auto g = groups[i];
             const size_t gs = group_sizes[i];
             if (gs == 1) {
-                X_means[g] = X.cmul(g, irls_weights);
+                X_means[g] = X.cmul(g, ones, irls_weights);
             } else {
                 Eigen::Map<vec_value_t> Xi_means(X_means.data() + g, gs);
-                X.bmul(g, gs, irls_weights, Xi_means);
+                X.bmul(g, gs, ones, irls_weights, Xi_means);
             }
         }
         // this call should only adjust the size of screen_* quantities
@@ -349,18 +358,24 @@ auto fit(
         beta0 = state_gaussian_pin_naive.intercepts[0];
 
         // update eta
-        eta = (
-            irls_y + offsets - 
-            irls_resid / (irls_weights + (irls_weights <= 0).template cast<value_t>()) + 
-            intercept * (beta0 - y_mean)
-        );
+        eta.swap(eta_prev);
+        eta = irls_y + offsets - irls_resid + intercept * (beta0 - y_mean);
 
         // update resid
         resid_prev.swap(resid);
         glm.gradient(eta, resid); 
 
         /* check convergence */
-        if ((resid - resid_prev).square().sum() <= irls_tol) {
+        // check directional derivative of gradient (resid) as an approximation
+        // to the quadratic loss. 
+        const auto& active_set = state_gaussian_pin_naive.active_set;
+        const auto& active_begins = state_gaussian_pin_naive.active_begins;
+        const auto n_active = (
+            (active_begins.size() == 0) ? 1 : (
+                active_begins.back() + group_sizes[screen_set[active_set.back()]]
+            )
+        );
+        if (std::abs(((resid - resid_prev) * (eta - eta_prev)).sum()) <= irls_tol * n_active) {
             return std::make_tuple(
                 std::move(state_gaussian_pin_naive),
                 screen_time,
@@ -400,12 +415,13 @@ inline void solve(
         const auto setup_loss_null = state.setup_loss_null;
         if (setup_loss_null) update_loss_null_f(state, glm, buffer_pack);
     };
-    const auto update_invariance_f = [](auto& state, auto lmda) {
+    const auto update_invariance_f = [&](auto& state, auto lmda) {
         const auto& resid = state.resid;
         auto& X = *state.X;
         auto& grad = state.grad;
+        const auto& ones = buffer_pack.ones;
         state.lmda = lmda;
-        X.mul(resid, grad);
+        X.mul(resid, ones, grad);
         state::update_abs_grad(state, lmda);
     };
     const auto update_solutions_f = [&](auto& state, auto& state_gaussian_pin_naive, auto lmda) {

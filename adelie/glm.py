@@ -425,6 +425,10 @@ def multinomial(
     for each fixed :math:`i`, 
     there is exactly one :math:`k` such that :math:`y_{ik} = 1`.
 
+    .. note::
+        The ``hessian()`` method computes :math:`2 \\mathrm{diag}(\\nabla^2 \\ell(\\eta))`
+        as the diagonal majorization.
+
     Parameters
     ----------
     y : (n, K) np.ndarray 
