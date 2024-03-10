@@ -33,6 +33,7 @@ dependencies = [
     "tabulate",
     "scikit-learn",
     "ipython",
+    "pybind11",
 ]
 
 [project.urls]
@@ -56,6 +57,7 @@ matplotlib = "^3.7.0"
 tabulate = "^0.9.0"
 scikit-learn = "^1.3.2"
 ipython = "^8.17.2"
+pybind11 = "^2.11.1"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.2.1"
@@ -71,7 +73,6 @@ sphinx-design = "^0.5.0"
 
 [tool.poetry.group.dev.dependencies]
 pandas = "^1.5.3"
-pybind11 = "^2.11.1"
 pre-commit = "^3.1.1"
 ipython = "^8.11.0"
 nbformat = "^5.7.3"
