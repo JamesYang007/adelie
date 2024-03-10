@@ -5,7 +5,10 @@ on: push
 jobs:
   build:
     name: Build distribution 📦
-    runs-on: ubuntu-latest
+    runs-on: {{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
     defaults:
       run:
         shell: bash -l {0}
@@ -121,6 +124,9 @@ jobs:
       with:
         name: python-package-distributions
         path: dist/
+    - name: Remove linux_x86_64
+      run: |
+        rm -f dist/*linux_x84_64*
     - name: Publish distribution 📦 to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
