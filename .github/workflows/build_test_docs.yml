@@ -41,7 +41,6 @@ jobs:
     steps:
     - uses: mamba-org/setup-micromamba@v1
       with:
-        environment-file: environment.yml
         init-shell: >-
           bash
     - name: Run tests
@@ -60,7 +59,6 @@ jobs:
     steps:
     - uses: mamba-org/setup-micromamba@v1
       with:
-        environment-file: environment.yml
         init-shell: >-
           bash
     - name: Install pandoc
