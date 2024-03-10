@@ -10,7 +10,7 @@ jobs:
     name: Build distribution 📦
     strategy:
       matrix:
-        os: [ubuntu-latest, flyci-macos-14-m1]
+        os: [ubuntu-latest, flyci-macos-14-m2]
         python_version: ["3.9", "3.10", "3.11", "3.12"]
     runs-on: ${{ matrix.os }}
     defaults:
