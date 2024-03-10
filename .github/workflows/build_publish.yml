@@ -10,7 +10,8 @@ jobs:
     name: Build distribution 📦
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, flyci-macos-large-latest-m1]
+        python_version: [3.9, 3.10, 3.11, 3.12]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -20,11 +21,14 @@ jobs:
     - uses: actions/checkout@v4
     - uses: mamba-org/setup-micromamba@v1
       with:
+        create-args: >-
+          python=${{ matrix.python_version }}
         environment-file: environment.yml
         init-shell: >-
           bash
         post-cleanup: 'all'
-    - name: Set up dependencies
+    - if: ${{ matrix.os == 'flyci-macos-large-latest-m1'}}
+      name: Set up dependencies
       run: |
         poetry install --without test,dev,doc --no-root
     - name: Install pypa/build
@@ -33,11 +37,11 @@ jobs:
         pip install
         build
         --user
-    - name: Build a binary wheel and a source tarball
-      run: python3 -m build
-    - name: Remove Linux wheels
-      run: |
-        rm -f dist/*linux_x86_64*
+    - name: Build source tarball
+      run: python3 -m build --sdist
+    - if: ${{ matrix.os == 'flyci-macos-large-latest-m1'}}
+      name: Build a binary wheel
+      run: python3 -m build --wheel
     - name: Store the distribution packages
       uses: actions/upload-artifact@v3
       with:
@@ -47,7 +51,6 @@ jobs:
   publish-to-pypi:
     name: >-
       Publish Python 🐍 distribution 📦 to PyPI
-    if: startsWith(github.ref, 'refs/tags/')  # only publish to PyPI on tag pushes
     needs:
     - build
     runs-on: ubuntu-latest
