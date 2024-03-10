@@ -41,6 +41,9 @@ jobs:
     steps:
     - uses: mamba-org/setup-micromamba@v1
       with:
+        # persist only for runs on this commit.
+        cache-environment-key: environment-${{ github.sha }}
+        cache-downloads-key: downloads-${{ github.sha }}
         init-shell: >-
           bash
     - name: Run tests
@@ -59,6 +62,9 @@ jobs:
     steps:
     - uses: mamba-org/setup-micromamba@v1
       with:
+        # persist only for runs on this commit.
+        cache-environment-key: environment-${{ github.sha }}
+        cache-downloads-key: downloads-${{ github.sha }}
         init-shell: >-
           bash
     - name: Install pandoc
