@@ -1,0 +1,140 @@
+name: Publish Python 🐍 distribution 📦 to PyPI and TestPyPI
+
+on: 
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+    name: Build distribution 📦
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-14]
+        python_version: ["3.9", "3.10", "3.11", "3.12"]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: mamba-org/setup-micromamba@v1
+      with:
+        create-args: >-
+          python=${{ matrix.python_version }}
+        environment-file: environment.yml
+        init-shell: >-
+          bash
+        post-cleanup: 'all'
+    - if: ${{ matrix.os == 'macos-14'}}
+      name: Set up dependencies
+      run: |
+        poetry install --without test,dev,doc --no-root
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        brew install libomp
+    - name: Install pypa/build
+      run: >-
+        python3 -m
+        pip install
+        build
+        --user
+    - if: ${{ matrix.os == 'ubuntu-latest' }}
+      name: Build source tarball
+      run: python3 -m build --sdist
+    - if: ${{ matrix.os == 'macos-14'}}
+      name: Build a binary wheel
+      run: python3 -m build --wheel
+    - name: Store the distribution packages
+      uses: actions/upload-artifact@v3
+      with:
+        name: python-package-distributions
+        path: dist/
+
+  publish-to-pypi:
+    name: >-
+      Publish Python 🐍 distribution 📦 to PyPI
+    needs:
+    - build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/adelie
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v3
+      with:
+        name: python-package-distributions
+        path: dist/
+    - name: Publish distribution 📦 to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    name: >-
+      Sign the Python 🐍 distribution 📦 with Sigstore
+      and upload them to GitHub Release
+    needs:
+    - publish-to-pypi
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # IMPORTANT: mandatory for making GitHub Releases
+      id-token: write  # IMPORTANT: mandatory for sigstore
+
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v3
+      with:
+        name: python-package-distributions
+        path: dist/
+    - name: Sign the dists with Sigstore
+      uses: sigstore/gh-action-sigstore-python@v1.2.3
+      with:
+        inputs: >-
+          ./dist/*.tar.gz
+          ./dist/*.whl
+    - name: Create GitHub Release
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: >-
+        gh release create
+        '${{ github.ref_name }}'
+        --repo '${{ github.repository }}'
+        --notes ""
+    - name: Upload artifact signatures to GitHub Release
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      # Upload to GitHub Release using the `gh` CLI.
+      # `dist/` contains the built packages, and the
+      # sigstore-produced signatures and certificates.
+      run: >-
+        gh release upload
+        '${{ github.ref_name }}' dist/**
+        --repo '${{ github.repository }}'
+
+  publish-to-testpypi:
+    name: Publish Python 🐍 distribution 📦 to TestPyPI
+    needs:
+    - build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/adelie
+
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v3
+      with:
+        name: python-package-distributions
+        path: dist/
+    - name: Publish distribution 📦 to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
