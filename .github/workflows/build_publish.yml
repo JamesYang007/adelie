@@ -1,6 +1,9 @@
 name: Publish Python 🐍 distribution 📦 to PyPI and TestPyPI
 
-on: push
+on: 
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -123,9 +126,9 @@ jobs:
       with:
         name: python-package-distributions
         path: dist/
-    - name: Remove linux_x86_64
+    - name: Remove Linux wheels
       run: |
-        rm -f dist/*linux_x84_64*
+        rm -f dist/*linux_x86_64*
     - name: Publish distribution 📦 to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
