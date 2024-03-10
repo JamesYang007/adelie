@@ -27,29 +27,23 @@ jobs:
         init-shell: >-
           bash
         post-cleanup: 'all'
-    - if: ${{ matrix.os == 'macos-14'}}
-      name: Set up dependencies
+    - name: Set up dependencies
       run: |
         poetry install --without test,dev,doc --no-root
+    - if: ${{ matrix.os == 'macos-14'}}
+      name: Install Homebrew and libomp
+      run: |
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         brew install libomp
-    - name: Install pypa/build
-      run: >-
-        python3 -m
-        pip install
-        build
-        --user
-    - if: ${{ matrix.os == 'ubuntu-latest' }}
-      name: Build source tarball
-      run: python3 -m build --sdist
-    - if: ${{ matrix.os == 'macos-14'}}
-      name: Build a binary wheel
-      run: python3 -m build --wheel
+    - name: Install cibuildwheel
+      run: pip install cibuildwheel
+    - name: Build wheels
+      run: python -m cibuildwheel --output-dir wheelhouse
     - name: Store the distribution packages
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: python-package-distributions
-        path: dist/
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
 
   publish-to-pypi:
     name: >-

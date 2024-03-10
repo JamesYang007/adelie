@@ -39,8 +39,10 @@ jobs:
         shell: bash -l {0}
 
     steps:
+    - uses: actions/checkout@v4
     - uses: mamba-org/setup-micromamba@v1
       with:
+        environment-file: environment.yml
         # persist only for runs on this commit.
         cache-environment-key: environment-${{ github.sha }}
         cache-downloads-key: downloads-${{ github.sha }}
@@ -60,8 +62,10 @@ jobs:
         shell: bash -l {0}
 
     steps:
+    - uses: actions/checkout@v4
     - uses: mamba-org/setup-micromamba@v1
       with:
+        environment-file: environment.yml
         # persist only for runs on this commit.
         cache-environment-key: environment-${{ github.sha }}
         cache-downloads-key: downloads-${{ github.sha }}
