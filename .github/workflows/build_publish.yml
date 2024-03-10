@@ -10,7 +10,7 @@ jobs:
     name: Build distribution 📦
     strategy:
       matrix:
-        os: [ubuntu-latest, flyci-macos-large-latest-m1]
+        os: [ubuntu-latest, flyci-macos-14-m1]
         python_version: ["3.9", "3.10", "3.11", "3.12"]
     runs-on: ${{ matrix.os }}
     defaults:
@@ -27,7 +27,7 @@ jobs:
         init-shell: >-
           bash
         post-cleanup: 'all'
-    - if: ${{ matrix.os == 'flyci-macos-large-latest-m1'}}
+    - if: ${{ matrix.os == 'flyci-macos-14-m1'}}
       name: Set up dependencies
       run: |
         poetry install --without test,dev,doc --no-root
@@ -42,7 +42,7 @@ jobs:
     - if: ${{ matrix.os == 'ubuntu-latest' }}
       name: Build source tarball
       run: python3 -m build --sdist
-    - if: ${{ matrix.os == 'flyci-macos-large-latest-m1'}}
+    - if: ${{ matrix.os == 'flyci-macos-14-m1'}}
       name: Build a binary wheel
       run: python3 -m build --wheel
     - name: Store the distribution packages
