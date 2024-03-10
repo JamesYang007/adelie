@@ -573,6 +573,12 @@ Wall time: 40.1 ms
 <p>There is a question of the optimal number of threads to use. This is completely application and hardware dependent and cannot be answered universally. Our only advice is to experiment with the number of threads (while following the rest of the tips). Our experience shows that most of the time, i.e. with small to moderately sized data, single-threaded runs are actually the fastest because the OpenMP thread management cost dominates. We only recommend increasing the number of threads for large
 data. Even then, you may experience negligible improvements since multithreading is oftentimes bottlenecked by memory bandwidth. So machines with more NUMA nodes, larger RAM, or faster RAM access (e.g. large machines in a cluster) will reap more benefits from parallelism.</p>
 </section>
+<section id="Thread-Safety">
+<h2><strong>Thread Safety</strong><a class="headerlink" href="#Thread-Safety" title="Link to this heading">#</a></h2>
+<p><strong>We do not assume that class member functions are thread safe!</strong></p>
+<p>This means that calling <code class="docutils literal notranslate"><span class="pre">.bmul()</span></code> for a matrix class or <code class="docutils literal notranslate"><span class="pre">.gradient()</span></code> for a GLM class, for example, in a parallel fashion is <em>undefined behavior</em>. This is worth mentioning for those who wish to interact with the matrix and GLM classes beyond the simple use-case of passing into the solver. It is guaranteed that the solver will not invoke such member functions in a parallel fashion. This was done mostly out of simplicity, assuming that the primary use-case is to pass to the solver. Many of the
+provided classes internally contain buffers that are used to accelerate computations of the member functions to minimize on-the-fly allocation costs. It would take considerable amount of extra work to make this thread safe.</p>
+</section>
 </section>
 
 
@@ -622,6 +628,7 @@ data. Even then, you may experience negligible improvements since multithreading
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Examples-of-Parallelism"><strong>Examples of Parallelism</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Common-Number-of-Threads"><strong>Common Number of Threads</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Optimal-Number-of-Threads"><strong>Optimal Number of Threads</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Thread-Safety"><strong>Thread Safety</strong></a></li>
 </ul>
   </nav></div>
 

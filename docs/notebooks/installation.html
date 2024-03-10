@@ -399,11 +399,27 @@ document.write(`
 </section>
 <section id="Developer-Installation">
 <h2><strong>Developer Installation</strong><a class="headerlink" href="#Developer-Installation" title="Link to this heading">#</a></h2>
-<ol class="arabic simple">
-<li><p>Install conda. We recommend installing <code class="docutils literal notranslate"><span class="pre">Mambaforge</span></code>, which is a conda installation with <code class="docutils literal notranslate"><span class="pre">mamba</span></code> installed by default and set to use <code class="docutils literal notranslate"><span class="pre">conda-forge</span></code> as the default set of package repositories.</p></li>
-<li><p>Clone the git repo: <code class="docutils literal notranslate"><span class="pre">bash</span>&#160;&#160;&#160;&#160; <span class="pre">git</span> <span class="pre">clone</span> <span class="pre">git&#64;github.com:JamesYang007/adelie.git</span></code></p></li>
-<li><p>Set up <code class="docutils literal notranslate"><span class="pre">adelie</span></code> conda environment. The list of packages that will be installed in the environment is in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>. <code class="docutils literal notranslate"><span class="pre">bash</span>&#160;&#160;&#160;&#160; <span class="pre">mamba</span> <span class="pre">update</span> <span class="pre">-y</span> <span class="pre">conda</span> <span class="pre">mamba</span>&#160;&#160;&#160;&#160; <span class="pre">mamba</span> <span class="pre">env</span> <span class="pre">create</span>&#160;&#160;&#160;&#160; <span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">adelie</span>&#160;&#160;&#160;&#160; <span class="pre">poetry</span> <span class="pre">config</span> <span class="pre">virtualenvs.create</span> <span class="pre">false</span> <span class="pre">--local</span>&#160;&#160;&#160;&#160; <span class="pre">poetry</span> <span class="pre">install</span> <span class="pre">--no-root</span></code></p></li>
-<li><p>Install <code class="docutils literal notranslate"><span class="pre">adelie</span></code> in editable mode: <code class="docutils literal notranslate"><span class="pre">bash</span>&#160;&#160;&#160;&#160; <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code></p></li>
+<ol class="arabic">
+<li><p>Install conda. We recommend installing <a class="reference external" href="https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html">Mambaforge</a>, which is a conda installation with <code class="docutils literal notranslate"><span class="pre">mamba</span></code> installed by default and set to use <code class="docutils literal notranslate"><span class="pre">conda-forge</span></code> as the default set of package repositories.</p></li>
+<li><p>Clone the git repo:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:JamesYang007/adelie.git
+</pre></div>
+</div>
+</li>
+<li><p>Set up <code class="docutils literal notranslate"><span class="pre">adelie</span></code> conda environment. The list of packages that will be installed in the environment is in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>update<span class="w"> </span>-y<span class="w"> </span>conda<span class="w"> </span>mamba
+mamba<span class="w"> </span>env<span class="w"> </span>create
+conda<span class="w"> </span>activate<span class="w"> </span>adelie
+poetry<span class="w"> </span>config<span class="w"> </span>virtualenvs.create<span class="w"> </span><span class="nb">false</span><span class="w"> </span>--local
+poetry<span class="w"> </span>install<span class="w"> </span>--no-root
+</pre></div>
+</div>
+</li>
+<li><p>Install <code class="docutils literal notranslate"><span class="pre">adelie</span></code> in editable mode:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
+</li>
 </ol>
 </section>
 <section id="Verify-Installation">

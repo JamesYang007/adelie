@@ -594,10 +594,6 @@ requirements. However, all types of solvers benefit from numerical stability if 
 <p>Based on our experience, the part of the solver that interacts with the GLM object is not speed critical, so there is seldom a noticeable performance cost by using a Python GLM class. However, for the best performance, users may be interested in porting the code to C++ and exporting the bindings. We refer the readers to the <a class="reference external" href="https://github.com/JamesYang007/adelie/tree/main/adelie/src/include/adelie_core/glm">glm</a> directory in our C++ backend for the numerous examples of how to extend the base
 classes in C++. The associated binding code can be found in <a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/src/glm.cpp">glm.cpp</a>.</p>
 </section>
-<section id="Thread-Safety">
-<h2><strong>Thread Safety</strong><a class="headerlink" href="#Thread-Safety" title="Link to this heading">#</a></h2>
-<p>Like the matrix classes in <code class="docutils literal notranslate"><span class="pre">ad.matrix</span></code>, the member functions of GLM classes are <strong>not thread safe</strong>!</p>
-</section>
 </section>
 
 
@@ -647,7 +643,6 @@ classes in C++. The associated binding code can be found in <a class="reference 
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Single-Response-GLM"><strong>Single-Response GLM</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Multi-Response-GLM"><strong>Multi-Response GLM</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Custom-GLM-Class"><strong>Custom GLM Class</strong></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Thread-Safety"><strong>Thread Safety</strong></a></li>
 </ul>
   </nav></div>
 

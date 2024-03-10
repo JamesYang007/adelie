@@ -281,6 +281,31 @@
     "So machines with more NUMA nodes, larger RAM, or faster RAM access \n",
     "(e.g. large machines in a cluster) will reap more benefits from parallelism. "
    ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## __Thread Safety__"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "__We do not assume that class member functions are thread safe!__\n",
+    "\n",
+    "This means that calling `.bmul()` for a matrix class\n",
+    "or `.gradient()` for a GLM class, for example, \n",
+    "in a parallel fashion is _undefined behavior_.\n",
+    "This is worth mentioning for those who wish to interact with the matrix and GLM classes\n",
+    "beyond the simple use-case of passing into the solver.\n",
+    "It is guaranteed that the solver will not invoke such member functions in a parallel fashion.\n",
+    "This was done mostly out of simplicity, assuming that the primary use-case is to pass to the solver.\n",
+    "Many of the provided classes internally contain buffers that are used to accelerate\n",
+    "computations of the member functions to minimize on-the-fly allocation costs.\n",
+    "It would take considerable amount of extra work to make this thread safe."
+   ]
   }
  ],
  "metadata": {
