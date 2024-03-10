@@ -39,6 +39,17 @@ extra_link_args = []
 
 system_name = platform.system()
 if (system_name == "Darwin"):
+    no_omp_msg = (
+        "OpenMP is not detected. "
+        "MacOS users should install Homebrew and run 'brew install libomp' "
+        "to install OpenMP. "
+    )
+    try:
+        libomp_info = run_cmd("brew info libomp")
+    except:
+        raise RuntimeError(no_omp_msg)
+    if "Not installed" in libomp_info:
+        raise RuntimeError(no_omp_msg)
     omp_prefix = run_cmd("brew --prefix libomp")
     omp_include = os.path.join(omp_prefix, "include")
     omp_lib = os.path.join(omp_prefix, "lib")
