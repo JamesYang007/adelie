@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-14]
-        python_version: ["3.9", "3.10", "3.11", "3.12"]
+        #python_version: ["3.9", "3.10", "3.11", "3.12"]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -19,16 +19,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: mamba-org/setup-micromamba@v1
-      with:
-        create-args: >-
-          python=${{ matrix.python_version }}
-        environment-file: environment.yml
-        init-shell: >-
-          bash
-        post-cleanup: 'all'
+    - uses: actions/setup-python@v3
+    #- uses: mamba-org/setup-micromamba@v1
+    #  with:
+    #    create-args: >-
+    #      python=${{ matrix.python_version }}
+    #    environment-file: environment.yml
+    #    init-shell: >-
+    #      bash
+    #    post-cleanup: 'all'
     - name: Set up dependencies
       run: |
+        pip install poetry 
         poetry install --without test,dev,doc --no-root
     - if: ${{ matrix.os == 'macos-14'}}
       name: Install Homebrew and libomp

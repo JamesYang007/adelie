@@ -48,6 +48,9 @@ jobs:
         cache-downloads-key: downloads-${{ github.sha }}
         init-shell: >-
           bash
+    - name: Set up dependencies
+      run: |
+        poetry install --without dev --no-root
     - name: Run tests
       run: python3 -m pytest tests
 
@@ -60,6 +63,8 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for publishing
 
     steps:
     - uses: actions/checkout@v4
