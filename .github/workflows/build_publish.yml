@@ -8,11 +8,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - uses: actions/checkout@v1
+    #- name: Set up Python
+    #  uses: actions/setup-python@v4
+    #  with:
+    #    python-version: "3.x"
+    - uses: mamba-org/setup-micromamba@v1
       with:
-        python-version: "3.x"
+        micromamba-version: '1.3.1-0'
+        environment-file: environment.yml
+        init-shell: >-
+          bash
+          powershell
+        post-cleanup: 'all'
+    - name: Set up dependencies
+      run: |
+        poetry install --without test,dev,doc --no-root
     - name: Install pypa/build
       run: >-
         python3 -m
