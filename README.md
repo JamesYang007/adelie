@@ -1,61 +1,17 @@
 # Adelie
 
-_A fast, flexible Python package for group elastic net._
+Adelie is a fast and flexible Python package for solving group elastic net problems. 
 
-TODO: details.
+- **Installation**: [https://jamesyang007.github.io/adelie/notebooks/installation.html](https://jamesyang007.github.io/adelie/notebooks/installation.html)
+- **Documentation**: [https://jamesyang007.github.io/adelie](https://jamesyang007.github.io/adelie/)
+- **Source code**: [https://github.com/JamesYang007/adelie](https://github.com/JamesYang007/adelie)
+- **Issue Tracker**: [https://github.com/JamesYang007/adelie/issues](https://github.com/JamesYang007/adelie/issues)
 
-## Installation
-
-Users must have `OpenMP` installed in their system as a prerequisite.
-
-For MacOS/Linux users using `gcc` compiler,
-there is nothing to do since
-`OpenMP` is already shipped with `gcc`.
-
-For MacOS users using `clang` compiler, the simplest method is to install with `brew`:
-```
-brew install libomp
-```
-
-Install `adelie` (stable) with `pip`:
-```
-pip install adelie
-```
-
-For the bleeding edge version, follow the instructions in [Developer Installation](#developer-installation).
-
-## Developer Installation
-
-1. Install conda. We recommend installing `Mambaforge`, which is a conda installation with
-`mamba` installed by default and set to use `conda-forge` as the default set of package repositories.
-
-2. Clone the git repo:
-    ```
-    git clone git@github.com:JamesYang007/adelie.git
-    ```
-
-3. Set up `adelie` conda environment. The list of packages that will be installed in the environment
-is in `pyproject.toml`.
-    ```
-    mamba update -y conda mamba
-    mamba env create
-    conda activate adelie
-    poetry config virtualenvs.create false --local
-    poetry install --no-root
-    ```
-
-4. Install `adelie` in editable mode:
-    ```
-    pip install -e .
-    ```
-
-## References
-
-- [Strong Rules for Discarding Predictors in Lasso-type Problems](https://www.stat.cmu.edu/~ryantibs/papers/strongrules.pdf)
-- [sparsegl: An R Package for Estimating Sparse Group Lasso](https://arxiv.org/abs/2208.02942)
-- [Hybrid safe-strong rules for efficient optimization in lasso-type problems](https://arxiv.org/abs/1704.08742)
-- [A Fast Iterative Shrinkage-Thresholding Algorithm
-for Linear Inverse Problems](https://www.cs.cmu.edu/afs/cs/Web/People/airg/readings/2012_02_21_a_fast_iterative_shrinkage-thresholding.pdf)
-- [STANDARDIZATION AND THE GROUP LASSO PENALTY](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4527185/)
-    - `Many works explicitly do not sphere (Puig, Wiesel, and Hero (2009), Foygel and Drton (2010), Jacob, Obozinski, and Vert (2009), Hastie, Tibshirani, and Friedman (2008), among others), and many more make no mention of normalization`.
-- Successive over-relaxation (SOR)!
+It offers a general purpose group elastic net solver, 
+a wide range of matrix classes that can exploit special structure to allow large-scale inputs,
+and an assortment of generalized linear model (GLM) classes for fitting various types of data.
+These matrix and GLM classes can be extended by the user for added flexibility.
+Many inner routines such as matrix-vector products
+and gradient, hessian, and loss of GLM functions have been heavily optimized and parallelized.
+Algorithmic optimizations such as the pivot rule for screening variables
+and the proximal Newton method have been carefully tuned for convergence and numerical stability.
