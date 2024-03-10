@@ -2,7 +2,7 @@ name: adelie
 channels:
   - conda-forge
 dependencies:
-  - python=3.10
+  - python
   - eigen=3.4.0
   - pip
   - ffmpeg
