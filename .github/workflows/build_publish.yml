@@ -5,10 +5,10 @@ on: push
 jobs:
   build:
     name: Build distribution 📦
-    runs-on: {{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         shell: bash -l {0}
