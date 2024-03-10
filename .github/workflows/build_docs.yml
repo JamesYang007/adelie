@@ -21,7 +21,6 @@ jobs:
         sudo dpkg -i /tmp/pandoc-3.1.8-1-amd64.deb
     - uses: mamba-org/setup-micromamba@v1
       with:
-        micromamba-version: '1.3.1-0'
         environment-file: environment.yml
         init-shell: >-
           bash
