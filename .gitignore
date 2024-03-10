@@ -22,3 +22,4 @@ bazel-testlogs
 .bazelrc
 .vscode
 research/
+adelie/lib/
