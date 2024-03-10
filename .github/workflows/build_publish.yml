@@ -22,8 +22,8 @@ jobs:
           powershell
         post-cleanup: 'all'
     - name: Set up dependencies
-      run: >-
-        mamba activate adelie
+      run: |
+        pip3 install poetry
         poetry install --without test,dev,doc --no-root
     - name: Install pypa/build
       run: >-
