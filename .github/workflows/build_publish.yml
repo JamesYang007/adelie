@@ -6,13 +6,12 @@ jobs:
   build:
     name: Build distribution 📦
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
 
     steps:
     - uses: actions/checkout@v4
-    #- name: Set up Python
-    #  uses: actions/setup-python@v4
-    #  with:
-    #    python-version: "3.x"
     - uses: mamba-org/setup-micromamba@v1
       with:
         micromamba-version: '1.3.1-0'
@@ -23,7 +22,6 @@ jobs:
         post-cleanup: 'all'
     - name: Set up dependencies
       run: |
-        pip3 install poetry
         poetry install --without test,dev,doc --no-root
     - name: Install pypa/build
       run: >-
