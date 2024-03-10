@@ -37,7 +37,8 @@ jobs:
         pip install
         build
         --user
-    - name: Build source tarball
+    - if: ${{ matrix.os == 'ubuntu-latest' }}
+      name: Build source tarball
       run: python3 -m build --sdist
     - if: ${{ matrix.os == 'flyci-macos-large-latest-m1'}}
       name: Build a binary wheel
