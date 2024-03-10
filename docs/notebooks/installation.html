@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Installation &#8212; adelie 1.1.18.dev1 documentation</title>
+    <title>Installation &#8212; adelie 1.1.19 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=12f04634"></script>
+    <script src="../_static/documentation_options.js?v=a253fdbc"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -123,7 +123,7 @@
   
   
   
-    <p class="title logo__title">adelie 1.1.18.dev1 documentation</p>
+    <p class="title logo__title">adelie 1.1.19 documentation</p>
   
 </a></div>
     
@@ -383,14 +383,31 @@ document.write(`
                   
   <section id="Installation">
 <h1><strong>Installation</strong><a class="headerlink" href="#Installation" title="Link to this heading">#</a></h1>
-<p>Users must have <code class="docutils literal notranslate"><span class="pre">OpenMP</span></code> installed in their system as a prerequisite. For <code class="docutils literal notranslate"><span class="pre">gcc</span></code> users, there is nothing to do since <code class="docutils literal notranslate"><span class="pre">OpenMP</span></code> is shipped with the compiler. For MacOS users using <code class="docutils literal notranslate"><span class="pre">clang</span></code> (default), we recommend installing through <code class="docutils literal notranslate"><span class="pre">brew</span></code>:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>brew<span class="w"> </span>install<span class="w"> </span>libomp
-</pre></div>
-</div>
-<p>Install the stable version of adelie using <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
+<p>We assume that the user has installed Python in their system. <code class="docutils literal notranslate"><span class="pre">adelie</span></code> can be installed with <code class="docutils literal notranslate"><span class="pre">pip</span></code> or from source. If the user uses <code class="docutils literal notranslate"><span class="pre">pip</span></code> and MacOS (arm64) on the more recent OS and Python version, they will install from a pre-built wheel. All other users will build from source and therefore require more setup explained in <a class="reference internal" href="#Prerequisites"><span class="std std-ref">Prerequisites</span></a>.</p>
+<p>To install <code class="docutils literal notranslate"><span class="pre">adelie</span></code> with <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>adelie
 </pre></div>
 </div>
+<p>For users who successfully built <code class="docutils literal notranslate"><span class="pre">adelie</span></code> from a pre-built wheel using <code class="docutils literal notranslate"><span class="pre">pip</span></code>, they may skip <a class="reference internal" href="#Prerequisites"><span class="std std-ref">Prerequisites</span></a>.</p>
+<p>For the bleeding edge version, follow the instructions in <a class="reference internal" href="#Developer-Installation"><span class="std std-ref">Developer Installation</span></a>.</p>
+<section id="Prerequisites">
+<h2><strong>Prerequisites</strong><a class="headerlink" href="#Prerequisites" title="Link to this heading">#</a></h2>
+<p>If the user builds from source either through <code class="docutils literal notranslate"><span class="pre">pip</span></code> or directly, <code class="docutils literal notranslate"><span class="pre">OpenMP</span></code> must be installed on their system. For <code class="docutils literal notranslate"><span class="pre">gcc</span></code> users, there is nothing to do since <code class="docutils literal notranslate"><span class="pre">OpenMP</span></code> is shipped with the compiler. For MacOS users using <code class="docutils literal notranslate"><span class="pre">clang</span></code> (default), we recommend installing it through <code class="docutils literal notranslate"><span class="pre">brew</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>brew<span class="w"> </span>install<span class="w"> </span>libomp
+</pre></div>
+</div>
+</section>
+<section id="Developer-Installation">
+<h2><strong>Developer Installation</strong><a class="headerlink" href="#Developer-Installation" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Install conda. We recommend installing <code class="docutils literal notranslate"><span class="pre">Mambaforge</span></code>, which is a conda installation with <code class="docutils literal notranslate"><span class="pre">mamba</span></code> installed by default and set to use <code class="docutils literal notranslate"><span class="pre">conda-forge</span></code> as the default set of package repositories.</p></li>
+<li><p>Clone the git repo: <code class="docutils literal notranslate"><span class="pre">bash</span>&#160;&#160;&#160;&#160; <span class="pre">git</span> <span class="pre">clone</span> <span class="pre">git&#64;github.com:JamesYang007/adelie.git</span></code></p></li>
+<li><p>Set up <code class="docutils literal notranslate"><span class="pre">adelie</span></code> conda environment. The list of packages that will be installed in the environment is in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>. <code class="docutils literal notranslate"><span class="pre">bash</span>&#160;&#160;&#160;&#160; <span class="pre">mamba</span> <span class="pre">update</span> <span class="pre">-y</span> <span class="pre">conda</span> <span class="pre">mamba</span>&#160;&#160;&#160;&#160; <span class="pre">mamba</span> <span class="pre">env</span> <span class="pre">create</span>&#160;&#160;&#160;&#160; <span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">adelie</span>&#160;&#160;&#160;&#160; <span class="pre">poetry</span> <span class="pre">config</span> <span class="pre">virtualenvs.create</span> <span class="pre">false</span> <span class="pre">--local</span>&#160;&#160;&#160;&#160; <span class="pre">poetry</span> <span class="pre">install</span> <span class="pre">--no-root</span></code></p></li>
+<li><p>Install <code class="docutils literal notranslate"><span class="pre">adelie</span></code> in editable mode: <code class="docutils literal notranslate"><span class="pre">bash</span>&#160;&#160;&#160;&#160; <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code></p></li>
+</ol>
+</section>
+<section id="Verify-Installation">
+<h2><strong>Verify Installation</strong><a class="headerlink" href="#Verify-Installation" title="Link to this heading">#</a></h2>
 <p>Now, we load <code class="docutils literal notranslate"><span class="pre">adelie</span></code> to check that the installation was successful.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -400,6 +417,7 @@ document.write(`
 </pre></div>
 </div>
 </div>
+</section>
 </section>
 
 
@@ -438,6 +456,19 @@ document.write(`
             
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Prerequisites"><strong>Prerequisites</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Developer-Installation"><strong>Developer Installation</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Verify-Installation"><strong>Verify Installation</strong></a></li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
 
