@@ -21,16 +21,10 @@ jobs:
         environment-file: environment.yml
         init-shell: >-
           bash
-          powershell
         post-cleanup: 'all'
     - name: Set up dependencies
       run: |
         poetry install --without test,dev,doc --no-root
-    - if: matrix.os == 'macos-latest'
-      name: Install Homebrew and libomp
-      run: |
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        brew install libomp
     - name: Install pypa/build
       run: >-
         python3 -m
