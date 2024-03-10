@@ -25,7 +25,6 @@ jobs:
         environment-file: environment.yml
         init-shell: >-
           bash
-          powershell
         post-cleanup: 'all'
     - name: Set up dependencies
       run: |
