@@ -23,7 +23,7 @@ def run_cmd(cmd):
 # Optional multithreaded build
 ParallelCompile("NPY_NUM_BUILD_JOBS").install()
 
-__version__ = open("VERSION", "r").read()
+__version__ = open("VERSION", "r").read().strip()
 
 ENVPATH = os.getenv("CONDA_PREFIX")
 
@@ -58,7 +58,6 @@ ext_modules = [
     Pybind11Extension(
         "adelie.adelie_core",
         sorted(glob("adelie/src/*.cpp")),  # Sort source files for reproducibility
-        defines=[],
         include_dirs=[
             "adelie/src",
             "adelie/src/include",
@@ -81,7 +80,7 @@ setup(
     author_email='jamesyang916@gmail.com',
     maintainer='James Yang',
     maintainer_email='jamesyang916@gmail.com',
-    packages=["adelie"], 
+    packages=find_packages(include=["adelie", "adelie.*"]), 
     package_data={
         "adelie": [
             "src/**/*.hpp", 
