@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     #- name: Set up Python
     #  uses: actions/setup-python@v4
     #  with:
@@ -22,7 +22,8 @@ jobs:
           powershell
         post-cleanup: 'all'
     - name: Set up dependencies
-      run: |
+      run: >-
+        mamba activate adelie
         poetry install --without test,dev,doc --no-root
     - name: Install pypa/build
       run: >-
