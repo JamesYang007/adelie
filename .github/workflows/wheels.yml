@@ -19,40 +19,14 @@ jobs:
           - ["cp311", '3.11']
           - ["cp312", '3.12']
     runs-on: ${{ matrix.buildplat[0] }}
-    #defaults:
-    #  run:
-    #    shell: bash -l {0}
 
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v3
-    #  with:
-    #    python-version: ${{ matrix.python[1] }}
-    #- uses: mamba-org/setup-micromamba@v1
-    #  with:
-    #    create-args: >-
-    #      python=${{ matrix.python[1] }}
-    #    environment-file: environment.yml
-    #    init-shell: >-
-    #      bash
-    #    post-cleanup: 'all'
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.16.5
       env:
-        CIBW_BEFORE_BUILD: |
-          python --version
-          pip --version
-          pip list
-          # install homebrew + libomp
-          if [[ "$OSTYPE" == "darwin"* ]]; then
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-            brew install libomp
-          fi
-          # install poetry
-          pip install poetry 
-          # install dependencies
-          poetry install --without test,dev,doc --no-root
-          pip install .
+        CIBW_BEFORE_BUILD: bash tools/wheels/cibw_before_build.sh
         CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}
     - name: Store the distribution packages
       uses: actions/upload-artifact@v4
