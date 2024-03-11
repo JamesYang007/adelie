@@ -28,19 +28,22 @@ jobs:
     - uses: actions/setup-python@v3
     #  with:
     #    python-version: ${{ matrix.python[1] }}
-    #- uses: mamba-org/setup-micromamba@v1
-    #  with:
-    #    create-args: >-
-    #      python=${{ matrix.python[1] }}
-    #    environment-file: environment.yml
-    #    init-shell: >-
-    #      bash
-    #    post-cleanup: 'all'
+    - uses: mamba-org/setup-micromamba@v1
+      with:
+        create-args: >-
+          python=${{ matrix.python[1] }}
+        environment-file: environment.yml
+        init-shell: >-
+          bash
+        post-cleanup: 'all'
+    - name: Testing
+      run: mamba --version
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.16.5
       env:
         #CIBW_PROJECT_REQUIRES_PYTHON: ">=${{ matrix.python[1] }}"
         CIBW_BEFORE_BUILD: |
+          mamba --version
           python --version
           pip --version
           # install homebrew + libomp
