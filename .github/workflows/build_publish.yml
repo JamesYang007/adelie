@@ -36,16 +36,18 @@ jobs:
     #    init-shell: >-
     #      bash
     #    post-cleanup: 'all'
-    - if: ${{ matrix.buildplat[0] == 'macos-14' }}
-      name: Install Homebrew and libomp
-      run: |
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        brew install libomp
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.16.5
       env:
         CIBW_BEFORE_BUILD: |
+          # install homebrew + libomp
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            brew install libomp
+          fi
+          # install poetry
           pip install poetry 
+          # install dependencies
           poetry install --without test,dev,doc --no-root
         CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}
     - name: Store the distribution packages
