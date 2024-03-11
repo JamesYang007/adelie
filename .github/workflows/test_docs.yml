@@ -1,0 +1,77 @@
+name: Test ✔️ and document 📄
+
+on:
+  push:
+    branches:    
+      - main
+
+jobs:
+  test:
+    name: Test ✔️
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v3
+    - name: Set up dependencies
+      run: |
+        pip install poetry
+        poetry install --without dev,doc --no-root
+    - name: Install Adelie
+      run: pip install -e .
+    - name: Move Mosek license
+      run: |
+        mkdir -p $HOME/mosek
+        cp docs/mosek/mosek.lic $HOME/mosek
+    - name: Run tests
+      run: python3 -m pytest tests
+
+  doc:
+    name: Document 📄
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    permissions:
+      contents: write   # IMPORTANT: mandatory for pushing to gh-pages 
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v3
+    - name: Set up dependencies
+      run: |
+        pip install poetry
+        poetry install --without test,dev --no-root
+    - name: Install Adelie
+      run: pip install -e .
+    - name: Install pandoc
+      run: |
+        sudo wget https://github.com/jgm/pandoc/releases/download/3.1.8/pandoc-3.1.8-1-amd64.deb -O /tmp/pandoc-3.1.8-1-amd64.deb
+        sudo dpkg -i /tmp/pandoc-3.1.8-1-amd64.deb
+    - name: Build documentation
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git fetch --all
+        git checkout gh-pages
+        git merge main -Xtheirs --allow-unrelated-histories # keeps main changes over gh-pages
+        cd docs
+        rm -rf _images _sources _static .doctrees generated notebooks *.html *.inv *.js .buildinfo
+        cd sphinx
+        make clean && make html
+        cp -r _build/html/* ..
+        touch .nojekyll
+    - name: Commit documentation changes
+      run: |
+        git add .
+        git commit -m "Update documentation" -a || true
+        # The above command will fail if no changes were present, so we ignore that.
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        branch: gh-pages
+        directory: docs
+        github_token: ${{ secrets.GITHUB_TOKEN }}
