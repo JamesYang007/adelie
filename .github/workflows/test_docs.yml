@@ -1,4 +1,4 @@
-name: Build, Test, and Document
+name: Test ✔️ and document 📄
 
 on:
   push:
@@ -6,28 +6,8 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -l {0}
-        
-    steps:
-    - uses: actions/checkout@v4
-    - uses: mamba-org/setup-micromamba@v1
-      with:
-        environment-file: environment.yml
-        # persist only for runs on this commit.
-        cache-environment-key: environment-${{ github.sha }}
-        cache-downloads-key: downloads-${{ github.sha }}
-        init-shell: >-
-          bash
-
   test:
-    name: >-
-      Test distribution
-    needs:
-    - build
+    name: Test ✔️
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -35,17 +15,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: mamba-org/setup-micromamba@v1
-      with:
-        environment-file: environment.yml
-        # persist only for runs on this commit.
-        cache-environment-key: environment-${{ github.sha }}
-        cache-downloads-key: downloads-${{ github.sha }}
-        init-shell: >-
-          bash
+    - uses: actions/setup-python@v3
     - name: Set up dependencies
       run: |
-        poetry install --without dev --no-root
+        pip install poetry
+        poetry install --without dev,docs --no-root
     - name: Install Adelie
       run: pip install -e .
     - name: Move Mosek license
@@ -56,10 +30,7 @@ jobs:
       run: python3 -m pytest tests
 
   doc:
-    name: >-
-      Build documentation
-    needs:
-    - build
+    name: Document 📄
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -69,14 +40,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: mamba-org/setup-micromamba@v1
-      with:
-        environment-file: environment.yml
-        # persist only for runs on this commit.
-        cache-environment-key: environment-${{ github.sha }}
-        cache-downloads-key: downloads-${{ github.sha }}
-        init-shell: >-
-          bash
+    - uses: actions/setup-python@v3
+    - name: Set up dependencies
+      run: |
+        pip install poetry
+        poetry install --without dev,docs --no-root
     - name: Install Adelie
       run: pip install -e .
     - name: Install pandoc

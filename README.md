@@ -1,6 +1,6 @@
 # Adelie
 
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JamesYang007/adelie/build_test_docs.yml)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JamesYang007/adelie/test_docs.yml)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/adelie.svg?label=PyPI%20downloads)](https://pypi.org/project/adelie/)
 ![versions](https://img.shields.io/pypi/pyversions/adelie.svg)
 ![PyPI - Version](https://img.shields.io/pypi/v/adelie)
