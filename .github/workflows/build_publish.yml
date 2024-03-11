@@ -19,28 +19,32 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v3
-    #- uses: mamba-org/setup-micromamba@v1
+    #- uses: actions/setup-python@v5
     #  with:
-    #    create-args: >-
-    #      python=${{ matrix.python_version }}
-    #    environment-file: environment.yml
-    #    init-shell: >-
-    #      bash
-    #    post-cleanup: 'all'
+    #    python-version: '3.10'
+    - uses: mamba-org/setup-micromamba@v1
+      with:
+        #create-args: >-
+        #  python=${{ matrix.python_version }}
+        environment-file: environment.yml
+        init-shell: >-
+          bash
+        post-cleanup: 'all'
     - name: Set up dependencies
       run: |
-        pip install poetry 
+        #pip install poetry 
         poetry install --without test,dev,doc --no-root
-    - if: ${{ matrix.os == 'macos-14'}}
+    - if: ${{ matrix.os == 'macos-14' }}
       name: Install Homebrew and libomp
       run: |
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         brew install libomp
-    - name: Install cibuildwheel
-      run: pip install cibuildwheel
+    #- name: Install cibuildwheel
+    #  run: pip install cibuildwheel
+    #- name: Build wheels
+    #  run: python -m cibuildwheel --output-dir wheelhouse
     - name: Build wheels
-      run: python -m cibuildwheel --output-dir wheelhouse
+      uses: pypa/cibuildwheel@v2.16.5
     - name: Store the distribution packages
       uses: actions/upload-artifact@v4
       with:

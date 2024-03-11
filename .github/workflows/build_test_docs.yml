@@ -25,8 +25,6 @@ jobs:
     - name: Set up dependencies
       run: |
         poetry install --without dev --no-root
-    - name: Install Adelie
-      run: pip install .
 
   test:
     name: >-
@@ -51,6 +49,8 @@ jobs:
     - name: Set up dependencies
       run: |
         poetry install --without dev --no-root
+    - name: Install Adelie
+      run: pip install .
     - name: Run tests
       run: python3 -m pytest tests
 
@@ -76,6 +76,8 @@ jobs:
         cache-downloads-key: downloads-${{ github.sha }}
         init-shell: >-
           bash
+    - name: Install Adelie
+      run: pip install .
     - name: Install pandoc
       run: |
         sudo wget https://github.com/jgm/pandoc/releases/download/3.1.8/pandoc-3.1.8-1-amd64.deb -O /tmp/pandoc-3.1.8-1-amd64.deb
