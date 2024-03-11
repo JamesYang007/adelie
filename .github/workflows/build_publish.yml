@@ -52,7 +52,7 @@ jobs:
           pip install poetry 
           # install dependencies
           poetry install --without test,dev,doc --no-root
-          pip install wheel
+          pip install .
         CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}
     - name: Store the distribution packages
       uses: actions/upload-artifact@v4
