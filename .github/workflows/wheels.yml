@@ -6,8 +6,8 @@ on:
       - v*
 
 jobs:
-  build:
-    name: Build distribution 📦
+  build-wheel:
+    name: Build wheel 🛞
     strategy:
       matrix:
         buildplat: 
@@ -31,14 +31,31 @@ jobs:
     - name: Store the distribution packages
       uses: actions/upload-artifact@v4
       with:
-          name: python-package-distributions
-          path: wheelhouse/
+          name: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}
+          path: wheelhouse/*.whl
+
+  build-sdist:
+    name: Build source 🛈
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v3
+    - name: Build sdist
+      run: |
+        python -m pip install -U pip build
+        python -m build --sdist 
+    - name: Store the distribution packages
+      uses: actions/upload-artifact@v4
+      with:
+          name: sdist
+          path: dist/*
 
   publish-to-pypi:
     name: >-
       Publish Python 🐍 distribution 📦 to PyPI
     needs:
-    - build
+    - build-wheel
+    - build-sdist
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -48,10 +65,10 @@ jobs:
 
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: python-package-distributions
-        path: wheelhouse/
+        path: dist/
+        merge-multiple: true
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
 
@@ -69,10 +86,10 @@ jobs:
 
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: python-package-distributions
-        path: wheelhouse/
+        path: dist/
+        merge-multiple: true
     - name: Sign the dists with Sigstore
       uses: sigstore/gh-action-sigstore-python@v1.2.3
       with:
@@ -99,11 +116,12 @@ jobs:
         --repo '${{ github.repository }}'
 
   publish-to-testpypi:
-    name: Publish Python 🐍 distribution 📦 to TestPyPI
+    name: >-
+      Publish Python 🐍 distribution 📦 to TestPyPI
     needs:
-    - build
+    - build-wheel
+    - build-sdist
     runs-on: ubuntu-latest
-
     environment:
       name: testpypi
       url: https://test.pypi.org/p/adelie
@@ -113,10 +131,10 @@ jobs:
 
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: python-package-distributions
-        path: wheelhouse/
+        path: dist/
+        merge-multiple: true
     - name: Publish distribution 📦 to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:

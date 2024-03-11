@@ -23,7 +23,7 @@ jobs:
     - name: Install Adelie
       run: pip install -e .
     - name: Move Mosek license
-      run: 
+      run: |
         mkdir -p $HOME/mosek
         cp docs/mosek/mosek.lic $HOME/mosek
     - name: Run tests
@@ -36,7 +36,7 @@ jobs:
       run:
         shell: bash -l {0}
     permissions:
-      id-token: write  # IMPORTANT: mandatory for publishing
+      contents: write   # IMPORTANT: mandatory for pushing to gh-pages 
 
     steps:
     - uses: actions/checkout@v4
@@ -73,4 +73,4 @@ jobs:
       with:
         branch: gh-pages
         directory: docs
-        github_token: ${{ secrets.ACTIONS_TOKEN }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
