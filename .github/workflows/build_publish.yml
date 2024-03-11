@@ -37,13 +37,13 @@ jobs:
           bash
         post-cleanup: 'all'
     - name: Testing
-      run: mamba --version
+      run: micromamba --version
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.16.5
       env:
         #CIBW_PROJECT_REQUIRES_PYTHON: ">=${{ matrix.python[1] }}"
         CIBW_BEFORE_BUILD: |
-          mamba --version
+          micromamba --version
           python --version
           pip --version
           # install homebrew + libomp
