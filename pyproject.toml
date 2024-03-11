@@ -98,4 +98,7 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[tool.cibuildwheel]
+build-frontend = "build"
+
 [tool.setuptools_scm]
