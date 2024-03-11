@@ -19,7 +19,7 @@ jobs:
     - name: Set up dependencies
       run: |
         pip install poetry
-        poetry install --without dev,docs --no-root
+        poetry install --without dev,doc --no-root
     - name: Install Adelie
       run: pip install -e .
     - name: Move Mosek license
@@ -44,7 +44,7 @@ jobs:
     - name: Set up dependencies
       run: |
         pip install poetry
-        poetry install --without dev,docs --no-root
+        poetry install --without test,dev --no-root
     - name: Install Adelie
       run: pip install -e .
     - name: Install pandoc
