@@ -31,7 +31,7 @@ jobs:
     - name: Store the distribution packages
       uses: actions/upload-artifact@v4
       with:
-          name: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}
+          name: python-package-distributions
           path: ./wheelhouse/*.whl
 
   publish-to-pypi:
