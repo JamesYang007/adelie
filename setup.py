@@ -27,8 +27,6 @@ ParallelCompile("NPY_NUM_BUILD_JOBS").install()
 
 __version__ = open("VERSION", "r").read().strip()
 
-ENVPATH = os.getenv("CONDA_PREFIX")
-
 extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
 extra_compile_args += [
     "-Wall", 
@@ -100,7 +98,6 @@ ext_modules = [
             "adelie/src",
             "adelie/src/include",
             "adelie/src/third_party/eigen3",
-            os.path.join(ENVPATH, 'include'),
         ],
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
