@@ -22,9 +22,6 @@ jobs:
         cache-downloads-key: downloads-${{ github.sha }}
         init-shell: >-
           bash
-    - name: Set up dependencies
-      run: |
-        poetry install --without dev --no-root
 
   test:
     name: >-
@@ -50,7 +47,11 @@ jobs:
       run: |
         poetry install --without dev --no-root
     - name: Install Adelie
-      run: pip install .
+      run: pip install -e .
+    - name: Move Mosek license
+      run: 
+        mkdir -p $HOME/mosek
+        cp docs/mosek/mosek.lic $HOME/mosek
     - name: Run tests
       run: python3 -m pytest tests
 
@@ -77,7 +78,7 @@ jobs:
         init-shell: >-
           bash
     - name: Install Adelie
-      run: pip install .
+      run: pip install -e .
     - name: Install pandoc
       run: |
         sudo wget https://github.com/jgm/pandoc/releases/download/3.1.8/pandoc-3.1.8-1-amd64.deb -O /tmp/pandoc-3.1.8-1-amd64.deb
