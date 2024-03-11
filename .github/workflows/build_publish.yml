@@ -44,7 +44,9 @@ jobs:
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.16.5
       env:
-        CIBW_BEFORE_BUILD: poetry install --without test,dev,doc --no-root
+        CIBW_BEFORE_BUILD: |
+          pip install poetry 
+          poetry install --without test,dev,doc --no-root
         CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}
     - name: Store the distribution packages
       uses: actions/upload-artifact@v4
