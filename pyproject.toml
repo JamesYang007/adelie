@@ -94,7 +94,6 @@ cell_metadata_filter = "-all"
 requires = [
     "setuptools", 
     "pybind11",
-    "poetry",
 ]
 build-backend = "setuptools.build_meta"
 
