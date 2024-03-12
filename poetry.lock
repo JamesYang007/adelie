@@ -1347,13 +1347,13 @@ qtconsole = "*"
 
 [[package]]
 name = "jupyter-client"
-version = "8.6.0"
+version = "8.6.1"
 description = "Jupyter protocol implementation and client libraries"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "jupyter_client-8.6.0-py3-none-any.whl", hash = "sha256:909c474dbe62582ae62b758bca86d6518c85234bdee2d908c778db6d72f39d99"},
-    {file = "jupyter_client-8.6.0.tar.gz", hash = "sha256:0642244bb83b4764ae60d07e010e15f0e2d275ec4e918a8f7b80fbbef3ca60c7"},
+    {file = "jupyter_client-8.6.1-py3-none-any.whl", hash = "sha256:3b7bd22f058434e3b9a7ea4b1500ed47de2713872288c0d511d19926f99b459f"},
+    {file = "jupyter_client-8.6.1.tar.gz", hash = "sha256:e842515e2bab8e19186d89fdfea7abd15e39dd581f94e399f00e2af5a1652d3f"},
 ]
 
 [package.dependencies]
@@ -1394,13 +1394,13 @@ test = ["flaky", "pexpect", "pytest"]
 
 [[package]]
 name = "jupyter-core"
-version = "5.7.1"
+version = "5.7.2"
 description = "Jupyter core package. A base package on which Jupyter projects rely."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "jupyter_core-5.7.1-py3-none-any.whl", hash = "sha256:c65c82126453a723a2804aa52409930434598fd9d35091d63dfb919d2b765bb7"},
-    {file = "jupyter_core-5.7.1.tar.gz", hash = "sha256:de61a9d7fc71240f688b2fb5ab659fbb56979458dc66a71decd098e03c79e218"},
+    {file = "jupyter_core-5.7.2-py3-none-any.whl", hash = "sha256:4f7315d2f6b4bcf2e3e7cb6e46772eba760ae459cd1f59d29eb57b0a01bd7409"},
+    {file = "jupyter_core-5.7.2.tar.gz", hash = "sha256:aa5f8d32bbf6b431ac830496da7392035d6f61b4f54872f15c4bd2a9c3f536d9"},
 ]
 
 [package.dependencies]
@@ -1410,7 +1410,7 @@ traitlets = ">=5.3"
 
 [package.extras]
 docs = ["myst-parser", "pydata-sphinx-theme", "sphinx-autodoc-typehints", "sphinxcontrib-github-alt", "sphinxcontrib-spelling", "traitlets"]
-test = ["ipykernel", "pre-commit", "pytest", "pytest-cov", "pytest-timeout"]
+test = ["ipykernel", "pre-commit", "pytest (<8)", "pytest-cov", "pytest-timeout"]
 
 [[package]]
 name = "jupyter-events"
@@ -1553,13 +1553,13 @@ files = [
 
 [[package]]
 name = "jupyterlab-server"
-version = "2.25.3"
+version = "2.25.4"
 description = "A set of server components for JupyterLab and JupyterLab like applications."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "jupyterlab_server-2.25.3-py3-none-any.whl", hash = "sha256:c48862519fded9b418c71645d85a49b2f0ec50d032ba8316738e9276046088c1"},
-    {file = "jupyterlab_server-2.25.3.tar.gz", hash = "sha256:846f125a8a19656611df5b03e5912c8393cea6900859baa64fa515eb64a8dc40"},
+    {file = "jupyterlab_server-2.25.4-py3-none-any.whl", hash = "sha256:eb645ecc8f9b24bac5decc7803b6d5363250e16ec5af814e516bc2c54dd88081"},
+    {file = "jupyterlab_server-2.25.4.tar.gz", hash = "sha256:2098198e1e82e0db982440f9b5136175d73bea2cd42a6480aa6fd502cb23c4f9"},
 ]
 
 [package.dependencies]
@@ -1575,7 +1575,7 @@ requests = ">=2.31"
 [package.extras]
 docs = ["autodoc-traits", "jinja2 (<3.2.0)", "mistune (<4)", "myst-parser", "pydata-sphinx-theme", "sphinx", "sphinx-copybutton", "sphinxcontrib-openapi (>0.8)"]
 openapi = ["openapi-core (>=0.18.0,<0.19.0)", "ruamel-yaml"]
-test = ["hatch", "ipykernel", "openapi-core (>=0.18.0,<0.19.0)", "openapi-spec-validator (>=0.6.0,<0.8.0)", "pytest (>=7.0)", "pytest-console-scripts", "pytest-cov", "pytest-jupyter[server] (>=0.6.2)", "pytest-timeout", "requests-mock", "ruamel-yaml", "sphinxcontrib-spelling", "strict-rfc3339", "werkzeug"]
+test = ["hatch", "ipykernel", "openapi-core (>=0.18.0,<0.19.0)", "openapi-spec-validator (>=0.6.0,<0.8.0)", "pytest (>=7.0,<8)", "pytest-console-scripts", "pytest-cov", "pytest-jupyter[server] (>=0.6.2)", "pytest-timeout", "requests-mock", "ruamel-yaml", "sphinxcontrib-spelling", "strict-rfc3339", "werkzeug"]
 
 [[package]]
 name = "jupyterlab-widgets"
@@ -1977,16 +1977,16 @@ files = [
 
 [[package]]
 name = "mosek"
-version = "10.1.27"
+version = "10.1.28"
 description = "Python API for Mosek"
 optional = false
 python-versions = "<3.13,>=3.7"
 files = [
-    {file = "Mosek-10.1.27-cp37-abi3-macosx_10_15_x86_64.whl", hash = "sha256:da06f9cbddf045bb0c99d066c3371a82215fc2a4422e4c5b96903369262ef210"},
-    {file = "Mosek-10.1.27-cp37-abi3-manylinux2014_x86_64.whl", hash = "sha256:bc138263ada0df5faf7518f8613d4e9afcde0b1d73a3c805c41b3e8f80149baa"},
-    {file = "Mosek-10.1.27-cp37-abi3-manylinux_2_29_aarch64.whl", hash = "sha256:10a3f0b7bb5d973b1ec8f22209a2b1ed92ff02c40581ca7364b11a360352440c"},
-    {file = "Mosek-10.1.27-cp37-abi3-win_amd64.whl", hash = "sha256:8ff3f27d9c998e342fdbf8e46f6d7cc92407e705d4c3d8785e3064edb353396f"},
-    {file = "Mosek-10.1.27-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:58e15474637fd4d5c7b7a88679537ef33c180b39e5faa0d1ef29b5ff75aa8e8f"},
+    {file = "Mosek-10.1.28-cp37-abi3-macosx_10_15_x86_64.whl", hash = "sha256:51497eb726af583d6cb041c4ad33379bd9865542db20a36b70dead6fc2780381"},
+    {file = "Mosek-10.1.28-cp37-abi3-manylinux2014_x86_64.whl", hash = "sha256:7c1815081174a0393bebaf589e074f7257a6e15b1b4adb535fa99173516713d6"},
+    {file = "Mosek-10.1.28-cp37-abi3-manylinux_2_29_aarch64.whl", hash = "sha256:0518dab67c54785005a7d8d02e6fc7ce23fe57fddc171b61e8f4edefec26b9dc"},
+    {file = "Mosek-10.1.28-cp37-abi3-win_amd64.whl", hash = "sha256:f105f89822ec91b77b344450b62a049c3373ce349eaa227d3a747ee079d078f0"},
+    {file = "Mosek-10.1.28-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:e12aad5a8d55e5c99bc49faec43512574bed002f56ddd29cbf0a3620a6574575"},
 ]
 
 [package.dependencies]
@@ -3808,18 +3808,18 @@ telegram = ["requests"]
 
 [[package]]
 name = "traitlets"
-version = "5.14.1"
+version = "5.14.2"
 description = "Traitlets Python configuration system"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "traitlets-5.14.1-py3-none-any.whl", hash = "sha256:2e5a030e6eff91737c643231bfcf04a65b0132078dad75e4936700b213652e74"},
-    {file = "traitlets-5.14.1.tar.gz", hash = "sha256:8585105b371a04b8316a43d5ce29c098575c2e477850b62b848b964f1444527e"},
+    {file = "traitlets-5.14.2-py3-none-any.whl", hash = "sha256:fcdf85684a772ddeba87db2f398ce00b40ff550d1528c03c14dbf6a02003cd80"},
+    {file = "traitlets-5.14.2.tar.gz", hash = "sha256:8cdd83c040dab7d1dee822678e5f5d100b514f7b72b01615b26fc5718916fdf9"},
 ]
 
 [package.extras]
 docs = ["myst-parser", "pydata-sphinx-theme", "sphinx"]
-test = ["argcomplete (>=3.0.3)", "mypy (>=1.7.0)", "pre-commit", "pytest (>=7.0,<7.5)", "pytest-mock", "pytest-mypy-testing"]
+test = ["argcomplete (>=3.0.3)", "mypy (>=1.7.0)", "pre-commit", "pytest (>=7.0,<8.1)", "pytest-mock", "pytest-mypy-testing"]
 
 [[package]]
 name = "twine"
@@ -3998,4 +3998,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9"
-content-hash = "d0257057e1d158dfbd2c2ba97fc149934ade2b831f99fa0224feef374fffdb6e"
+content-hash = "4c029e320f8ae98fde435f40a3bda8f738d6a484aef59438e21c80ee3bddd3b9"
