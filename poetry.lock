@@ -1977,31 +1977,20 @@ files = [
 
 [[package]]
 name = "mosek"
-version = "10.0.47"
+version = "10.1.27"
 description = "Python API for Mosek"
 optional = false
-python-versions = "*"
+python-versions = "<3.13,>=3.7"
 files = [
-    {file = "Mosek-10.0.47-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:6fb49c50fea12ebc0e48ab1d8ce80d0e0fe87369795c9f73312c73d253438f66"},
-    {file = "Mosek-10.0.47-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:73f91c797966f153dc494ebf8e256dbd659f395918f87e1d33913450ff9bbaed"},
-    {file = "Mosek-10.0.47-cp310-cp310-manylinux2014_aarch64.whl", hash = "sha256:0f8ad11acf2f8e07abcd0e2384966d307bf1a21cf2ab8a94cca03052f67aeb76"},
-    {file = "Mosek-10.0.47-cp310-cp310-manylinux2014_x86_64.whl", hash = "sha256:a0c3ae04c3ad0b625afb3399b5de0bc36ca1ede8e2d17e04effcbb23a10e5414"},
-    {file = "Mosek-10.0.47-cp310-cp310-win_amd64.whl", hash = "sha256:cd84d0cb450e4e576ee92a1dc33da8b63c7af629c4f99f26ab86ac95462cbe8d"},
-    {file = "Mosek-10.0.47-cp37-cp37m-macosx_10_15_x86_64.whl", hash = "sha256:d6d806d3db044201ac5e50da259b5354837f2d2e69ae666a30cb6a4acaa2da2b"},
-    {file = "Mosek-10.0.47-cp37-cp37m-manylinux2014_aarch64.whl", hash = "sha256:cb7108665663e0d4450e4913d7102e217a8392a3c40e7a9537158e6d5a7a9101"},
-    {file = "Mosek-10.0.47-cp37-cp37m-manylinux2014_x86_64.whl", hash = "sha256:230980e6444bb5ded52f7af21f5154eae4196fe67fefc1bad5b44e0ca26704d1"},
-    {file = "Mosek-10.0.47-cp37-cp37m-win_amd64.whl", hash = "sha256:b143e847d3c3803e87f820649c1ceffc2f4abea05440ef6e8be36754063f4d67"},
-    {file = "Mosek-10.0.47-cp38-cp38-macosx_10_15_x86_64.whl", hash = "sha256:c21f73c30aae87d139b4d05040b9289ce484ed3b0b1d300a3b975c4d1b314862"},
-    {file = "Mosek-10.0.47-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:d79f008865a7748ed9e0ded57cc978353c7d736afcd5939d78a1b4455d779d81"},
-    {file = "Mosek-10.0.47-cp38-cp38-manylinux2014_aarch64.whl", hash = "sha256:0e834f2400dbc5021f7d2c0ba628426f29b65dbd9379bf9fdf8d3608e2f503ca"},
-    {file = "Mosek-10.0.47-cp38-cp38-manylinux2014_x86_64.whl", hash = "sha256:952bdc59438b5de67fc10a84392cb6308b856bffa39ab6a2e804ae41ef824657"},
-    {file = "Mosek-10.0.47-cp38-cp38-win_amd64.whl", hash = "sha256:c4fdb6f8d259e8f65729b7a5eafdb0faa0a06b85feb9aed6f2e5f087d348a0e8"},
-    {file = "Mosek-10.0.47-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:9d4b8b7d60ae84a3666febfb5bcfae11022f0b08654ede97d855fc8a8b9ff7a3"},
-    {file = "Mosek-10.0.47-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:12290b32df15de3518cb58c198a20ebdb7df59d42b437eb5a4d5fb9ebceb4da3"},
-    {file = "Mosek-10.0.47-cp39-cp39-manylinux2014_aarch64.whl", hash = "sha256:81edd312c79a416a294f40454af092791fc805e101a5b9026b6700d4dfb2e3a2"},
-    {file = "Mosek-10.0.47-cp39-cp39-manylinux2014_x86_64.whl", hash = "sha256:375b11a82933e554c12f96675f601849d27e38bbbd179d3262d58061f31877a8"},
-    {file = "Mosek-10.0.47-cp39-cp39-win_amd64.whl", hash = "sha256:68ee31836ca570472eff427f6a72b940dc06c9d7b7720d8bebc6614a0d4cad6b"},
+    {file = "Mosek-10.1.27-cp37-abi3-macosx_10_15_x86_64.whl", hash = "sha256:da06f9cbddf045bb0c99d066c3371a82215fc2a4422e4c5b96903369262ef210"},
+    {file = "Mosek-10.1.27-cp37-abi3-manylinux2014_x86_64.whl", hash = "sha256:bc138263ada0df5faf7518f8613d4e9afcde0b1d73a3c805c41b3e8f80149baa"},
+    {file = "Mosek-10.1.27-cp37-abi3-manylinux_2_29_aarch64.whl", hash = "sha256:10a3f0b7bb5d973b1ec8f22209a2b1ed92ff02c40581ca7364b11a360352440c"},
+    {file = "Mosek-10.1.27-cp37-abi3-win_amd64.whl", hash = "sha256:8ff3f27d9c998e342fdbf8e46f6d7cc92407e705d4c3d8785e3064edb353396f"},
+    {file = "Mosek-10.1.27-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:58e15474637fd4d5c7b7a88679537ef33c180b39e5faa0d1ef29b5ff75aa8e8f"},
 ]
+
+[package.dependencies]
+numpy = "*"
 
 [[package]]
 name = "nbclient"
@@ -2316,13 +2305,13 @@ files = [
 
 [[package]]
 name = "packaging"
-version = "23.2"
+version = "24.0"
 description = "Core utilities for Python packages"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "packaging-23.2-py3-none-any.whl", hash = "sha256:8c491190033a9af7e1d931d0b5dacc2ef47509b34dd0de67ed209b5203fc88c7"},
-    {file = "packaging-23.2.tar.gz", hash = "sha256:048fb0e9405036518eaaf48a55953c750c11e1a1b68e0dd1a9d62ed0c092cfc5"},
+    {file = "packaging-24.0-py3-none-any.whl", hash = "sha256:2ddfb553fdf02fb784c234c7ba6ccc288296ceabec964ad2eae3777778130bc5"},
+    {file = "packaging-24.0.tar.gz", hash = "sha256:eb82c5e3e56209074766e6885bb04b8c38a0c015d0a30036ebe7ece34c9989e9"},
 ]
 
 [[package]]
@@ -3856,13 +3845,13 @@ urllib3 = ">=1.26.0"
 
 [[package]]
 name = "types-python-dateutil"
-version = "2.8.19.20240106"
+version = "2.8.19.20240311"
 description = "Typing stubs for python-dateutil"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "types-python-dateutil-2.8.19.20240106.tar.gz", hash = "sha256:1f8db221c3b98e6ca02ea83a58371b22c374f42ae5bbdf186db9c9a76581459f"},
-    {file = "types_python_dateutil-2.8.19.20240106-py3-none-any.whl", hash = "sha256:efbbdc54590d0f16152fa103c9879c7d4a00e82078f6e2cf01769042165acaa2"},
+    {file = "types-python-dateutil-2.8.19.20240311.tar.gz", hash = "sha256:51178227bbd4cbec35dc9adffbf59d832f20e09842d7dcb8c73b169b8780b7cb"},
+    {file = "types_python_dateutil-2.8.19.20240311-py3-none-any.whl", hash = "sha256:ef813da0809aca76472ca88807addbeea98b19339aebe56159ae2f4b4f70857a"},
 ]
 
 [[package]]
@@ -4009,4 +3998,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9"
-content-hash = "d529cd06ec22a97a8f13c1a15a88e92edbc29e0729e621dafb0cae8784219add"
+content-hash = "d0257057e1d158dfbd2c2ba97fc149934ade2b831f99fa0224feef374fffdb6e"

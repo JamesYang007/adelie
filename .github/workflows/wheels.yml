@@ -6,56 +6,57 @@ on:
       - v*
 
 jobs:
-  build:
-    name: Build distribution 📦
+  build-wheel:
+    name: Build wheel 🛞
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-14]
-        python_version: ["3.9", "3.10", "3.11", "3.12"]
-    runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: bash -l {0}
+        buildplat: 
+          - [ubuntu-latest, manylinux_x86_64]
+          - [macos-14, macosx_arm64]
+          - [macos-13, macosx_x86_64]
+        python: 
+          - ["cp39", '3.9']
+          - ["cp310", '3.10']
+          - ["cp311", '3.11']
+          - ["cp312", '3.12']
+    runs-on: ${{ matrix.buildplat[0] }}
 
     steps:
     - uses: actions/checkout@v4
-    - uses: mamba-org/setup-micromamba@v1
-      with:
-        create-args: >-
-          python=${{ matrix.python_version }}
-        environment-file: environment.yml
-        init-shell: >-
-          bash
-        post-cleanup: 'all'
-    - if: ${{ matrix.os == 'macos-14'}}
-      name: Set up dependencies
-      run: |
-        poetry install --without test,dev,doc --no-root
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        brew install libomp
-    - name: Install pypa/build
-      run: >-
-        python3 -m
-        pip install
-        build
-        --user
-    - if: ${{ matrix.os == 'ubuntu-latest' }}
-      name: Build source tarball
-      run: python3 -m build --sdist
-    - if: ${{ matrix.os == 'macos-14'}}
-      name: Build a binary wheel
-      run: python3 -m build --wheel
+    - uses: actions/setup-python@v3
+    - name: Build wheels
+      uses: pypa/cibuildwheel@v2.16.5
+      env:
+        CIBW_BEFORE_BUILD: bash tools/wheels/cibw_before_build.sh
+        CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}
     - name: Store the distribution packages
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: python-package-distributions
-        path: dist/
+          name: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}
+          path: wheelhouse/*.whl
+
+  build-sdist:
+    name: Build source 🛈
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v3
+    - name: Build sdist
+      run: |
+        python -m pip install -U pip build
+        python -m build --sdist 
+    - name: Store the distribution packages
+      uses: actions/upload-artifact@v4
+      with:
+          name: sdist
+          path: dist/*
 
   publish-to-pypi:
     name: >-
       Publish Python 🐍 distribution 📦 to PyPI
     needs:
-    - build
+    - build-wheel
+    - build-sdist
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -65,10 +66,10 @@ jobs:
 
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: python-package-distributions
         path: dist/
+        merge-multiple: true
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
 
@@ -86,10 +87,10 @@ jobs:
 
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: python-package-distributions
         path: dist/
+        merge-multiple: true
     - name: Sign the dists with Sigstore
       uses: sigstore/gh-action-sigstore-python@v1.2.3
       with:
@@ -116,11 +117,12 @@ jobs:
         --repo '${{ github.repository }}'
 
   publish-to-testpypi:
-    name: Publish Python 🐍 distribution 📦 to TestPyPI
+    name: >-
+      Publish Python 🐍 distribution 📦 to TestPyPI
     needs:
-    - build
+    - build-wheel
+    - build-sdist
     runs-on: ubuntu-latest
-
     environment:
       name: testpypi
       url: https://test.pypi.org/p/adelie
@@ -130,10 +132,10 @@ jobs:
 
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: python-package-distributions
         path: dist/
+        merge-multiple: true
     - name: Publish distribution 📦 to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:

@@ -37,6 +37,10 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'pydata_sphinx_theme'
 html_theme_options = {
+    "logo": {
+        "image_light": "../logos/adelie-penguin.svg",
+        "image_dark": "../logos/adelie-penguin-dark.svg",
+    },
     "github_url": "https://github.com/JamesYang007/adelie",
     "collapse_navigation": True,
     "navbar_end": ["theme-switcher", "navbar-icon-links"],

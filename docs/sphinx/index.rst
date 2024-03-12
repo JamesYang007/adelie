@@ -1,4 +1,4 @@
-Adelie Documentation
+Adelie documentation
 ====================
 
 .. toctree::

@@ -3,9 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - python
-  - eigen=3.4.0
   - pip
   - ffmpeg
   - pip:
-    - pip
     - poetry
