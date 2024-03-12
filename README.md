@@ -1,4 +1,6 @@
-# Adelie
+<h1 align="center">
+<img src="docs/logos/adelie-penguin.svg" width="500">
+</h1><br>
 
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JamesYang007/adelie/test_docs.yml)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/adelie.svg?label=PyPI%20downloads)](https://pypi.org/project/adelie/)
