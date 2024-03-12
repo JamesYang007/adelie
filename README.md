@@ -1,5 +1,5 @@
 <h1 align="center">
-<img src="docs/logos/adelie-penguin.svg" width="500">
+<img src="https://raw.githubusercontent.com/JamesYang007/adelie/main/docs/logos/adelie-penguin.svg" width="500">
 </h1><br>
 
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JamesYang007/adelie/test_docs.yml)
