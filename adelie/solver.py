@@ -3,9 +3,14 @@ from . import adelie_core as core
 from . import logger
 from . import matrix
 from . import glm
-import adelie as ad
+from .state import (
+    gaussian_cov,
+    gaussian_naive,
+    glm_naive,
+    multigaussian_naive,
+    multiglm_naive,
+) 
 import numpy as np
-import warnings
 
 
 def _solve(state, progress_bar: bool =False):
@@ -289,7 +294,7 @@ def gaussian_cov(
     adelie.adelie_core.state.StateGaussianCov64
     """
     if isinstance(A, np.ndarray):
-        A = ad.matrix.dense(A, method="cov", n_threads=n_threads)
+        A = matrix.dense(A, method="cov", n_threads=n_threads)
 
     assert (
         isinstance(A, matrix.MatrixCovBase64) or
@@ -344,7 +349,7 @@ def gaussian_cov(
         rsq = warm_start.rsq
         grad = warm_start.grad
 
-    state = ad.state.gaussian_cov(
+    state = gaussian_cov(
         A=A,
         v=v,
         groups=groups,
@@ -632,7 +637,7 @@ def grpnet(
     X_raw = X
 
     if isinstance(X, np.ndarray):
-        X = ad.matrix.dense(X, method="naive", n_threads=n_threads)
+        X = matrix.dense(X, method="naive", n_threads=n_threads)
 
     assert (
         isinstance(X, matrix.MatrixNaiveBase64) or
@@ -808,7 +813,7 @@ def grpnet(
             solver_args["resid_sum"] = resid_sum
             solver_args["grad"] = grad
 
-            state = ad.state.multigaussian_naive(**solver_args)
+            state = multigaussian_naive(**solver_args)
         
         # GLM case
         else:
@@ -836,7 +841,7 @@ def grpnet(
             solver_args["loss_null"] = loss_null
             solver_args["loss_full"] = loss_full
 
-            state = ad.state.multiglm_naive(**solver_args)
+            state = multiglm_naive(**solver_args)
 
     # single-response GLMs
     else:
@@ -908,7 +913,7 @@ def grpnet(
             solver_args["resid_sum"] = resid_sum
             solver_args["grad"] = grad
 
-            state = ad.state.gaussian_naive(**solver_args)
+            state = gaussian_naive(**solver_args)
 
         # GLM case
         else:
@@ -936,7 +941,7 @@ def grpnet(
             solver_args["resid"] = resid
             solver_args["loss_null"] = loss_null
             solver_args["loss_full"] = loss_full
-            state = ad.state.glm_naive(**solver_args)
+            state = glm_naive(**solver_args)
 
     if check_state:
         state.check(method="assert")

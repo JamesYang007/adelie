@@ -1,4 +1,11 @@
-import adelie as ad
+from .glm import (
+    binomial,
+    cox,
+    gaussian,
+    multigaussian,
+    multinomial,
+    poisson,
+)
 import numpy as np
 import warnings 
 
@@ -23,11 +30,11 @@ def _sample_y(
         y = eta + noise_scale * np.random.normal(0, 1, eta.shape)
         if not is_multi:
             y = y.ravel()
-            return ad.glm.gaussian(y=y)
-        return ad.glm.multigaussian(y=y)
+            return gaussian(y=y)
+        return multigaussian(y=y)
     elif glm == "multinomial":
         mu = np.empty((n, K), dtype=eta.dtype)
-        glm = ad.glm.multinomial(y=np.zeros(eta.shape)) 
+        glm = multinomial(y=np.zeros(eta.shape)) 
         glm.gradient(
             snr * (eta / np.sqrt(np.sum(beta**2, axis=0))[None]), 
             mu,
@@ -37,7 +44,7 @@ def _sample_y(
             np.random.multinomial(1, m)
             for m in mu
         ], dtype=eta.dtype)
-        return ad.glm.multinomial(y=y)
+        return multinomial(y=y)
     elif glm == "cox":
         signal_scale = np.sqrt(rho * np.sum(beta) ** 2 + (1-rho) * np.sum(beta ** 2))
         noise_scale = signal_scale / np.sqrt(snr)
@@ -47,15 +54,15 @@ def _sample_y(
         C = 1 + s + np.round(np.exp(np.random.normal(0, 1, n)))
         d = t < C
         t = np.minimum(t, C)
-        return ad.glm.cox(
+        return cox(
             start=s,
             stop=t,
             status=d,
         )
     else:
         func_map = {
-            "binomial": ad.glm.binomial,
-            "poisson": ad.glm.poisson,
+            "binomial": binomial,
+            "poisson": poisson,
         }
         sample_map = {
             "binomial": lambda mu: np.random.binomial(1, mu),
