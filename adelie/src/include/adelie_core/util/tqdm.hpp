@@ -75,7 +75,7 @@ public:
 };
 
 // -------------------- progress_bar --------------------
-void clamp(double& x, double a, double b)
+inline void clamp(double& x, double a, double b)
 {
     if (x < a) x = a;
     if (x > b) x = b;
@@ -413,31 +413,31 @@ tqdm_for_rvalues(Container &&)->tqdm_for_rvalues<Container>;
 
 // -------------------- tqdm --------------------
 template <class ForwardIter>
-auto tqdm(const ForwardIter& first, const ForwardIter& last)
+inline auto tqdm(const ForwardIter& first, const ForwardIter& last)
 {
     return tqdm_for_lvalues(first, last);
 }
 
 template <class ForwardIter>
-auto tqdm(const ForwardIter& first, const ForwardIter& last, index total)
+inline auto tqdm(const ForwardIter& first, const ForwardIter& last, index total)
 {
     return tqdm_for_lvalues(first, last, total);
 }
 
 template <class Container>
-auto tqdm(const Container& C)
+inline auto tqdm(const Container& C)
 {
     return tqdm_for_lvalues(C);
 }
 
 template <class Container>
-auto tqdm(Container& C)
+inline auto tqdm(Container& C)
 {
     return tqdm_for_lvalues(C);
 }
 
 template <class Container>
-auto tqdm(Container&& C)
+inline auto tqdm(Container&& C)
 {
     return tqdm_for_rvalues(std::forward<Container>(C));
 }
@@ -635,7 +635,7 @@ private:
     progress_bar bar_;
 };
 
-auto tqdm(timer t)
+inline auto tqdm(timer t)
 {
     return tqdm_timer(t.num_seconds);
 }
