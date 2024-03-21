@@ -10,11 +10,11 @@ namespace solver {
 namespace glm {
 namespace naive {
 
-template <class ValueType>
+template <class ValueType, class SafeBoolType=int8_t>
 struct GlmNaiveBufferPack
 {
     using value_t = ValueType;
-    using safe_bool_t = int8_t;
+    using safe_bool_t = SafeBoolType;
     using vec_value_t = util::rowvec_type<value_t>;
     using dyn_vec_value_t = std::vector<value_t>;
     using dyn_vec_bool_t = std::vector<safe_bool_t>;
@@ -403,10 +403,11 @@ inline void solve(
 {
     using state_t = std::decay_t<StateType>;
     using value_t = typename state_t::value_t;
+    using safe_bool_t = typename state_t::safe_bool_t;
 
     const auto n = state.X->rows();
     const auto p = state.X->cols();
-    GlmNaiveBufferPack<value_t> buffer_pack(n, p);
+    GlmNaiveBufferPack<value_t, safe_bool_t> buffer_pack(n, p);
 
     const auto pb_add_suffix_f = [&](const auto& state, auto& pb) {
         if (display) solver::pb_add_suffix(state, pb);
