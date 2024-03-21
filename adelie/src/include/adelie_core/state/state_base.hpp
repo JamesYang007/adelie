@@ -144,14 +144,15 @@ void update_screen_derived_base(
 
 template <class ValueType,
           class IndexType=Eigen::Index,
-          class BoolType=bool
+          class BoolType=bool,
+          class SafeBoolType=int8_t
         >
 struct StateBase
 {
     using value_t = ValueType;
     using index_t = IndexType;
     using bool_t = BoolType;
-    using safe_bool_t = int8_t;
+    using safe_bool_t = SafeBoolType;
     using uset_index_t = std::unordered_set<index_t>;
     using vec_value_t = util::rowvec_type<value_t>;
     using vec_index_t = util::rowvec_type<index_t>;
