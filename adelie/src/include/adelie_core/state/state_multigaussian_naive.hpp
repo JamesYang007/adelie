@@ -9,20 +9,23 @@ namespace state {
 template <class MatrixType, 
           class ValueType=typename std::decay_t<MatrixType>::value_t,
           class IndexType=Eigen::Index,
-          class BoolType=bool
+          class BoolType=bool,
+          class SafeBoolType=int8_t
         >
 struct StateMultiGaussianNaive : StateGaussianNaive<
         MatrixType,
         ValueType,
         IndexType,
-        BoolType
+        BoolType,
+        SafeBoolType
     >
 {
     using base_t = StateGaussianNaive<
         MatrixType,
         ValueType,
         IndexType,
-        BoolType
+        BoolType,
+        SafeBoolType
     >;
     using typename base_t::value_t;
     using typename base_t::index_t;
