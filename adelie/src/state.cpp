@@ -796,14 +796,6 @@ void state_base(py::module_& m, const char* name)
         ``gs = group_sizes[i]``,
         and ``beta`` is the full solution vector represented by ``screen_beta``.
         )delimiter")
-        .def_property_readonly("betas", [](const state_t& s) {
-            return convert_betas(
-                s.group_sizes.sum(),
-                s.betas
-            );
-        }, R"delimiter(
-        ``betas[i]`` is the solution at ``lmdas[i]``.
-        )delimiter")
         .def_property_readonly("devs", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<value_t>>(
                 s.devs.data(),
@@ -1052,6 +1044,14 @@ void state_gaussian_naive(py::module_& m, const char* name)
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         )delimiter")
+        .def_property_readonly("betas", [](const state_t& s) {
+            return convert_betas(
+                s.X->cols(),
+                s.betas
+            );
+        }, R"delimiter(
+        ``betas[i]`` is the solution at ``lmdas[i]``.
+        )delimiter")
         ;
 }
 
@@ -1182,7 +1182,7 @@ void state_multigaussian_naive(py::module_& m, const char* name)
         )delimiter")
         .def_property_readonly("betas", [](const state_t& s) {
             return convert_betas(
-                s.group_sizes.sum() -  s.multi_intercept * s.n_classes,
+                s.X->cols() -  s.multi_intercept * s.n_classes,
                 s.betas
             );
         }, R"delimiter(
@@ -1323,6 +1323,14 @@ void state_gaussian_cov(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("grad", &state_t::grad, R"delimiter(
         The full gradient :math:`v - A\beta`.
+        )delimiter")
+        .def_property_readonly("betas", [](const state_t& s) {
+            return convert_betas(
+                s.A->cols(),
+                s.betas
+            );
+        }, R"delimiter(
+        ``betas[i]`` is the solution at ``lmdas[i]``.
         )delimiter")
         ;
 }
@@ -1474,6 +1482,14 @@ void state_glm_naive(py::module_& m, const char* name)
         Residual :math:`-\nabla \ell(\eta)`
         where :math:`\eta` is given by ``eta``.
         )delimiter")
+        .def_property_readonly("betas", [](const state_t& s) {
+            return convert_betas(
+                s.X->cols(),
+                s.betas
+            );
+        }, R"delimiter(
+        ``betas[i]`` is the solution at ``lmdas[i]``.
+        )delimiter")
         ;
 }
 
@@ -1605,7 +1621,7 @@ void state_multiglm_naive(py::module_& m, const char* name)
         )delimiter")
         .def_property_readonly("betas", [](const state_t& s) {
             return convert_betas(
-                s.group_sizes.sum() -  s.multi_intercept * s.n_classes,
+                s.X->cols() -  s.multi_intercept * s.n_classes,
                 s.betas
             );
         }, R"delimiter(
