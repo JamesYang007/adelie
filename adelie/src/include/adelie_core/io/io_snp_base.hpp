@@ -44,6 +44,8 @@ protected:
         if (!fp) {
             throw std::runtime_error("Cannot open file " + std::string(filename));
         }
+        // disable internal buffering
+        std::setvbuf(fp, nullptr, _IONBF, 0);
         return file_ptr;
     }
 
