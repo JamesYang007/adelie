@@ -26,6 +26,12 @@
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveBase64.shape
+   
    
 
    
@@ -45,5 +51,8 @@
    
 
    
+   
+   
+   .. autoattribute:: shape
    
    
