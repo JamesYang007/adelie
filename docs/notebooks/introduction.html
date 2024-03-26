@@ -435,7 +435,7 @@ Gaussian GLM (<a class="reference external" href="https://jamesyang007.github.io
         \alpha \|\beta_g\|_2 + \frac{1-\alpha}{2} \|\beta_g\|_2^2
     \right)
     \\\text{subject to}\quad&amp;
-    \mathrm{vec}(\eta^\top) = (X \otimes I_K) \beta + (\mathbf{1} \otimes I_k) \beta_0 + \mathrm{vec}(\eta^{0\top})
+    \mathrm{vec}(\eta^\top) = (X \otimes I_K) \beta + (\mathbf{1} \otimes I_K) \beta_0 + \mathrm{vec}(\eta^{0\top})
 \end{align*}\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathrm{vec}(\cdot)\)</span> is the operator that flattens a column-major matrix into a vector, and <span class="math notranslate nohighlight">\(A \otimes B\)</span> is the Kronecker product operator. The more familiar (but equivalent) constraint form is</p>
 <div class="math notranslate nohighlight">
