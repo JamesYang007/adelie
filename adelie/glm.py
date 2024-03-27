@@ -310,6 +310,7 @@ def cox(
             \\overline{w}_i 
             &= 
             \\frac{\\sum_{k \\in H(t_i)} w_k}{\\sum_{k \\in H(t_i)} 1_{w_k > 0}} 
+            1_{\\delta_i = 1, w_i > 0}
         \\end{align*}
 
     Here,
