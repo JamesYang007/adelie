@@ -474,14 +474,6 @@ def grpnet(
     Note that if ``intercept`` is ``True``, then an intercept for each class is provided
     as additional unpenalized features in the data matrix and the global intercept is turned off.
 
-    .. note::
-        Multi-response GLMs that are symmetric across the class coefficients (e.g. multinomial)
-        may observe slow convergence due to the Hessian being singular.
-        This becomes especially pronounced when ``X`` has strongly correlated features.
-        Counter-intuitively, increasing ``tol`` such as ``1e-8`` may result in faster convergence
-        since the quadratic approximation finds a more accurate solution,
-        thereby warm-starting with a better initialization.
-
     Parameters
     ----------
     X : (n, p) matrix-like
