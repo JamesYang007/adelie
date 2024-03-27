@@ -89,10 +89,11 @@ public:
                 cache(i, cache_size);
             }
             const auto& mat = _cache[_index_map[i]];
+            const auto i_rel = _slice_map[i];
             const auto v = values[i_idx];
             for (int j_idx = 0; j_idx < subset.size(); ++j_idx) {
                 const auto j = subset[j_idx];
-                out[j_idx] += v * mat(i, j);
+                out[j_idx] += v * mat(i_rel, j);
             }
         }
     }
@@ -114,8 +115,9 @@ public:
                 cache(i, cache_size);
             }
             const auto& mat = _cache[_index_map[i]];
+            const auto i_rel = _slice_map[i];
             const auto v = values[i_idx];
-            dvaddi(out, v * mat.row(i).array(), _n_threads);
+            dvaddi(out, v * mat.row(i_rel).array(), _n_threads);
         }
     }
 
@@ -128,15 +130,15 @@ public:
         int n_processed = 0;
         while (n_processed < p) {
             const auto k = i + n_processed;
-            const auto ck = _index_map[k];
-            if (ck < 0) {
+            if (_index_map[k] < 0) {
                 int cache_size = 0;
                 for(; k+cache_size < cols() && _index_map[k+cache_size] < 0; ++cache_size);
                 cache(k, cache_size);
             }
             const auto& mat = _cache[_index_map[k]];
-            const auto size = std::min<size_t>(mat.rows(), p-n_processed);
-            out.middleRows(n_processed, size) = mat.block(_slice_map[k], i, size, p);
+            const auto k_rel = _slice_map[k];
+            const auto size = std::min<size_t>(mat.rows()-k_rel, p-n_processed);
+            out.middleRows(n_processed, size) = mat.block(k_rel, i, size, p);
             n_processed += size;
         }
     }
