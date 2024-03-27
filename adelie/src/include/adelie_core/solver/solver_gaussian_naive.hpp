@@ -150,7 +150,10 @@ auto fit(
         Eigen::Map<const vec_value_t>(screen_X_means.data(), screen_X_means.size()), 
         screen_transforms,
         lmda_path,
-        intercept, max_active_size, max_iters, tol, adev_tol, ddev_tol, 
+        intercept, max_active_size, max_iters, 
+        // tolerance is relative to the scaling of null deviance and current total weight sum (== 1)
+        tol * std::max<value_t>(y_var, 1), 
+        adev_tol, ddev_tol, 
         newton_tol, newton_max_iters, n_threads,
         rsq,
         Eigen::Map<vec_value_t>(resid.data(), resid.size()),
