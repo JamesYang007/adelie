@@ -1125,7 +1125,7 @@ def _render_gaussian_naive_inputs(
     return _render_gaussian_inputs(dtype=dtype, **kwargs)
 
 
-def _render_multi_input(
+def _render_multi_inputs(
     *,
     X,
     groups,
@@ -2281,7 +2281,7 @@ def multigaussian_naive(
         X,
         offsets,
         group_type,
-    ) = _render_multi_input(
+    ) = _render_multi_inputs(
         X=X,
         groups=groups,
         offsets=offsets,
@@ -2949,7 +2949,7 @@ def multiglm_naive(
         X,
         offsets,
         group_type,
-    ) = _render_multi_input(
+    ) = _render_multi_inputs(
         X=X,
         groups=groups,
         offsets=offsets,

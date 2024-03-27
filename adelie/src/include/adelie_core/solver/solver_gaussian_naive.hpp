@@ -9,11 +9,11 @@ namespace solver {
 namespace gaussian {
 namespace naive {
 
-template <class ValueType>
+template <class ValueType, class SafeBoolType=int8_t>
 struct GaussianNaiveBufferPack
 {
     using value_t = ValueType;
-    using safe_bool_t = int8_t;
+    using safe_bool_t = SafeBoolType;
     using vec_value_t = util::rowvec_type<value_t>;
     using dyn_vec_value_t = std::vector<value_t>;
     using dyn_vec_bool_t = std::vector<safe_bool_t>;
@@ -150,7 +150,10 @@ auto fit(
         Eigen::Map<const vec_value_t>(screen_X_means.data(), screen_X_means.size()), 
         screen_transforms,
         lmda_path,
-        intercept, max_active_size, max_iters, tol, adev_tol, ddev_tol, 
+        intercept, max_active_size, max_iters, 
+        // tolerance is relative to the scaling of null deviance and current total weight sum (== 1)
+        tol * std::max<value_t>(y_var, 1), 
+        adev_tol, ddev_tol, 
         newton_tol, newton_max_iters, n_threads,
         rsq,
         Eigen::Map<vec_value_t>(resid.data(), resid.size()),
@@ -201,9 +204,10 @@ inline void solve(
 {
     using state_t = std::decay_t<StateType>;
     using value_t = typename state_t::value_t;
+    using safe_bool_t = typename state_t::safe_bool_t;
 
     const auto n = state.X->rows();
-    GaussianNaiveBufferPack<value_t> buffer_pack(n);
+    GaussianNaiveBufferPack<value_t, safe_bool_t> buffer_pack(n);
 
     const auto pb_add_suffix_f = [&](const auto& state, auto& pb) {
         if (display) solver::pb_add_suffix(state, pb);

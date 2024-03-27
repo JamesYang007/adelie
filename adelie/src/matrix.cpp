@@ -294,6 +294,11 @@ void matrix_naive_base(py::module_& m, const char* name)
         .def("cols", &internal_t::cols, R"delimiter(
         Number of columns.
         )delimiter")
+        .def_property_readonly("shape", [](const internal_t& m) {
+            return std::make_tuple(m.rows(), m.cols());
+        }, R"delimiter(
+        Shape of the matrix.
+        )delimiter")
         ;
 }
 
@@ -424,6 +429,11 @@ void matrix_cov_base(py::module_& m, const char* name)
         )delimiter")
         .def("cols", &internal_t::cols, R"delimiter(
         Number of columns.
+        )delimiter")
+        .def_property_readonly("shape", [](const internal_t& m) {
+            return std::make_tuple(m.rows(), m.cols());
+        }, R"delimiter(
+        Shape of the matrix.
         )delimiter")
         ;
 }
