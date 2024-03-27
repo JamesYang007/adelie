@@ -504,15 +504,6 @@ the group elastic net problem minimizes the following:</p>
 <p>where <span class="math notranslate nohighlight">\(\mathrm{vec}(x)\)</span> is the operator that flattens the input as column-major.
 Note that if <code class="docutils literal notranslate"><span class="pre">intercept</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, then an intercept for each class is provided
 as additional unpenalized features in the data matrix and the global intercept is turned off.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Multi-response GLMs that are symmetric across the class coefficients (e.g. multinomial)
-may observe slow convergence due to the Hessian being singular.
-This becomes especially pronounced when <code class="docutils literal notranslate"><span class="pre">X</span></code> has strongly correlated features.
-Counter-intuitively, increasing <code class="docutils literal notranslate"><span class="pre">tol</span></code> such as <code class="docutils literal notranslate"><span class="pre">1e-8</span></code> may result in faster convergence
-since the quadratic approximation finds a more accurate solution,
-thereby warm-starting with a better initialization.</p>
-</div>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
