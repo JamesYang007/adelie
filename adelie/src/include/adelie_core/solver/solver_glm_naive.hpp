@@ -211,6 +211,8 @@ auto fit(
     const auto newton_tol = state.newton_tol;
     const auto newton_max_iters = state.newton_max_iters;
     const auto n_threads = state.n_threads;
+    const auto loss_null = state.loss_null;
+    const auto loss_full = state.loss_full;
     auto& screen_beta = state.screen_beta;
     auto& screen_is_active = state.screen_is_active;
     auto& beta0 = state.beta0;
@@ -325,7 +327,10 @@ auto fit(
             Eigen::Map<const vec_value_t>(screen_X_means.data(), screen_X_means.size()), 
             screen_transforms,
             lmda_path_adjusted,
-            intercept, max_active_size, max_iters, tol, 0 /* adev_tol */, 0 /* ddev_tol */,
+            intercept, max_active_size, max_iters, 
+            // tolerance is relative to the scaling of null deviance and current total weight sum
+            tol * std::max<value_t>((loss_null - loss_full) / hess_sum, 1), 
+            0 /* adev_tol */, 0 /* ddev_tol */,
             newton_tol, newton_max_iters, n_threads,
             0 /* rsq (no need to track) */,
             Eigen::Map<vec_value_t>(irls_resid.data(), irls_resid.size()),
