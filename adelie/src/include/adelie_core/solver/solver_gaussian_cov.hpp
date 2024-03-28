@@ -131,6 +131,8 @@ auto fit(
     const auto& screen_g1 = state.screen_g1;
     const auto& screen_g2 = state.screen_g2;
     const auto& screen_begins = state.screen_begins;
+    const auto& screen_subset_order = state.screen_subset_order;
+    const auto& screen_subset_ordered = state.screen_subset_ordered;
     const auto& screen_vars = state.screen_vars;
     const auto& screen_transforms = state.screen_transforms;
     const auto max_active_size = state.max_active_size;
@@ -168,10 +170,6 @@ auto fit(
 
     save_prev_valid();
 
-    const value_t max_screen_vars = screen_vars.size() ?
-        Eigen::Map<const vec_value_t>(
-            screen_vars.data(), screen_vars.size()
-        ).maxCoeff() : 0;
     state_gaussian_pin_cov_t state_gaussian_pin_cov(
         A,
         groups, 
@@ -184,9 +182,11 @@ auto fit(
         Eigen::Map<const vec_index_t>(screen_begins.data(), screen_begins.size()), 
         Eigen::Map<const vec_value_t>(screen_vars.data(), screen_vars.size()), 
         screen_transforms,
+        Eigen::Map<const vec_index_t>(screen_subset_order.data(), screen_subset_order.size()),
+        Eigen::Map<const vec_index_t>(screen_subset_ordered.data(), screen_subset_ordered.size()),
         lmda_path,
         max_active_size, max_iters, 
-        tol * std::max<value_t>(max_screen_vars, 1), 
+        tol, 
         rdev_tol,
         newton_tol, newton_max_iters, n_threads,
         rsq,

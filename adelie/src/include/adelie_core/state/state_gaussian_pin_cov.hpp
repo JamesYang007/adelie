@@ -94,15 +94,16 @@ struct StateGaussianPinCov: StateGaussianPinBase<
     using typename base_t::dyn_vec_vec_value_t;
     using matrix_t = MatrixType;
 
+    /* static states */
+    const map_cvec_index_t screen_subset_order;
+    const map_cvec_index_t screen_subset_ordered;
+
     /* configurations */
     const value_t rdev_tol;
 
     /* dynamic states */
     matrix_t* A;    // covariance matrix-like
     map_vec_value_t screen_grad;
-    vec_index_t screen_subset;
-    vec_index_t screen_subset_order;
-    vec_index_t screen_subset_ordered;
     vec_bool_t screen_is_active_subset;
     dyn_vec_index_t active_subset_order;
     dyn_vec_index_t active_subset_ordered;
@@ -121,6 +122,8 @@ struct StateGaussianPinCov: StateGaussianPinBase<
         const Eigen::Ref<const vec_index_t>& screen_begins, 
         const Eigen::Ref<const vec_value_t>& screen_vars,
         const dyn_vec_mat_value_t& screen_transforms,
+        const Eigen::Ref<const vec_index_t>& screen_subset_order,
+        const Eigen::Ref<const vec_index_t>& screen_subset_ordered,
         const Eigen::Ref<const vec_value_t>& lmda_path, 
         size_t max_active_size,
         size_t max_iters,
@@ -140,46 +143,18 @@ struct StateGaussianPinCov: StateGaussianPinBase<
             false, max_active_size, max_iters, tol, 0, 0, newton_tol, newton_max_iters, n_threads,
             rsq, screen_beta, screen_is_active
         ),
+        screen_subset_order(screen_subset_order.data(), screen_subset_order.size()),
+        screen_subset_ordered(screen_subset_ordered.data(), screen_subset_ordered.size()),
         rdev_tol(rdev_tol),
         A(&A),
         screen_grad(screen_grad.data(), screen_grad.size()),
-        screen_subset(screen_grad.size()),
-        screen_subset_order(screen_grad.size()),
-        screen_subset_ordered(screen_grad.size()),
         screen_is_active_subset(screen_grad.size())
     {
-        // update screen_subset
-        int n_processed = 0;
-        for (int ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) {
-            const auto ss = screen_set[ss_idx];
-            const auto g = groups[ss];
-            const auto gs = group_sizes[ss];
-            Eigen::Map<vec_index_t>(
-                screen_subset.data() + n_processed, gs
-            ) = vec_index_t::LinSpaced(gs, g, g + gs - 1);
-            n_processed += gs;
-        }
-
-        // update screen_subset_order
-        screen_subset_order = vec_index_t::LinSpaced(
-            screen_grad.size(), 0, screen_grad.size()-1
-        );
-        std::sort(
-            screen_subset_order.data(),
-            screen_subset_order.data() + screen_subset_order.size(),
-            [&](auto i, auto j) { return screen_subset[i] < screen_subset[j]; }
-        );
-
-        // update screen_subset_ordered
-        for (int i = 0; i < screen_subset_order.size(); ++i) {
-            screen_subset_ordered[i] = screen_subset[screen_subset_order[i]];
-        }
-
         // optimization
-        active_subset_order.reserve(screen_subset.size());
-        active_subset_ordered.reserve(screen_subset.size());
-        inactive_subset_order.reserve(screen_subset.size());
-        inactive_subset_ordered.reserve(screen_subset.size());
+        active_subset_order.reserve(screen_subset_order.size());
+        active_subset_ordered.reserve(screen_subset_order.size());
+        inactive_subset_order.reserve(screen_subset_order.size());
+        inactive_subset_ordered.reserve(screen_subset_order.size());
 
         gaussian::pin::cov::update_active_inactive_subset(*this);
     }

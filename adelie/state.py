@@ -994,6 +994,13 @@ def gaussian_pin_cov(
             )
             self._screen_transforms = vecmat_type(self._screen_transforms)
 
+            self._screen_subset = np.concatenate([
+                np.arange(groups[i], groups[i] + group_sizes[i])
+                for i in self._screen_set
+            ], dtype=int)
+            self._screen_subset_order = np.argsort(self._screen_subset)
+            self._screen_subset_ordered = self._screen_subset[self._screen_subset_order]
+
             core_base.__init__(
                 self,
                 A=A,
@@ -1007,6 +1014,8 @@ def gaussian_pin_cov(
                 screen_begins=self._screen_begins,
                 screen_vars=self._screen_vars,
                 screen_transforms=self._screen_transforms,
+                screen_subset_order=self._screen_subset_order,
+                screen_subset_ordered=self._screen_subset_ordered,
                 lmda_path=self._lmda_path,
                 max_active_size=self._max_active_size,
                 max_iters=max_iters,
