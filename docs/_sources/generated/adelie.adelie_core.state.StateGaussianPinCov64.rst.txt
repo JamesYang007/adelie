@@ -56,6 +56,8 @@
       ~StateGaussianPinCov64.screen_grad
       ~StateGaussianPinCov64.screen_is_active
       ~StateGaussianPinCov64.screen_set
+      ~StateGaussianPinCov64.screen_subset_order
+      ~StateGaussianPinCov64.screen_subset_ordered
       ~StateGaussianPinCov64.screen_transforms
       ~StateGaussianPinCov64.screen_vars
       ~StateGaussianPinCov64.tol
@@ -107,6 +109,8 @@
    .. autoattribute:: screen_grad
    .. autoattribute:: screen_is_active
    .. autoattribute:: screen_set
+   .. autoattribute:: screen_subset_order
+   .. autoattribute:: screen_subset_ordered
    .. autoattribute:: screen_transforms
    .. autoattribute:: screen_vars
    .. autoattribute:: tol

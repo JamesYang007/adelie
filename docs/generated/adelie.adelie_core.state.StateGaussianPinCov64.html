@@ -576,6 +576,12 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_set" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_set</span></code></a></p></td>
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">groups</span></code> that correspond to the screen groups.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_subset_order" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_subset_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_subset_order</span></code></a></p></td>
+<td><p>Ordering such that <code class="docutils literal notranslate"><span class="pre">screen_subset</span></code> is sorted in ascending order where <code class="docutils literal notranslate"><span class="pre">screen_subset</span></code> is a list of column indices into <span class="math notranslate nohighlight">\(A\)</span> in the implicit ordering of <code class="docutils literal notranslate"><span class="pre">screen_grad</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_subset_ordered" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_subset_ordered"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_subset_ordered</span></code></a></p></td>
+<td><p>Ordered <code class="docutils literal notranslate"><span class="pre">screen_subset</span></code> (see <code class="docutils literal notranslate"><span class="pre">screen_subset_order</span></code> for its definition).</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_transforms" title="adelie.adelie_core.state.StateGaussianPinCov64.screen_transforms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_transforms</span></code></a></p></td>
 <td><p>List of <span class="math notranslate nohighlight">\(V_k\)</span> where <span class="math notranslate nohighlight">\(V_k\)</span> are the eigenvectors of <span class="math notranslate nohighlight">\(A_{kk}\)</span> along the screen groups <span class="math notranslate nohighlight">\(k\)</span>.</p></td>
 </tr>
@@ -592,7 +598,7 @@ document.write(`
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinCov64.__init__" title="Link to this definition">#</a></dt>
 <dd><p>Overloaded function.</p>
 <ol class="arabic simple">
-<li><p>__init__(self: adelie.adelie_core.state.StateGaussianPinCov64, A: adelie.adelie_core.matrix.MatrixCovBase64, groups: numpy.ndarray[numpy.int64[1, n]], group_sizes: numpy.ndarray[numpy.int64[1, n]], alpha: float, penalty: numpy.ndarray[numpy.float64[1, n]], screen_set: numpy.ndarray[numpy.int64[1, n]], screen_g1: numpy.ndarray[numpy.int64[1, n]], screen_g2: numpy.ndarray[numpy.int64[1, n]], screen_begins: numpy.ndarray[numpy.int64[1, n]], screen_vars: numpy.ndarray[numpy.float64[1, n]], screen_transforms: adelie.adelie_core.VectorMatrix64, lmda_path: numpy.ndarray[numpy.float64[1, n]], max_active_size: int, max_iters: int, tol: float, rdev_tol: float, newton_tol: float, newton_max_iters: int, n_threads: int, rsq: float, screen_beta: numpy.ndarray[numpy.float64[1, n], flags.writeable], screen_grad: numpy.ndarray[numpy.float64[1, n], flags.writeable], screen_is_active: numpy.ndarray[bool[1, n], flags.writeable]) -&gt; None</p></li>
+<li><p>__init__(self: adelie.adelie_core.state.StateGaussianPinCov64, A: adelie.adelie_core.matrix.MatrixCovBase64, groups: numpy.ndarray[numpy.int64[1, n]], group_sizes: numpy.ndarray[numpy.int64[1, n]], alpha: float, penalty: numpy.ndarray[numpy.float64[1, n]], screen_set: numpy.ndarray[numpy.int64[1, n]], screen_g1: numpy.ndarray[numpy.int64[1, n]], screen_g2: numpy.ndarray[numpy.int64[1, n]], screen_begins: numpy.ndarray[numpy.int64[1, n]], screen_vars: numpy.ndarray[numpy.float64[1, n]], screen_transforms: adelie.adelie_core.VectorMatrix64, screen_subset_order: numpy.ndarray[numpy.int64[1, n]], screen_subset_ordered: numpy.ndarray[numpy.int64[1, n]], lmda_path: numpy.ndarray[numpy.float64[1, n]], max_active_size: int, max_iters: int, tol: float, rdev_tol: float, newton_tol: float, newton_max_iters: int, n_threads: int, rsq: float, screen_beta: numpy.ndarray[numpy.float64[1, n], flags.writeable], screen_grad: numpy.ndarray[numpy.float64[1, n], flags.writeable], screen_is_active: numpy.ndarray[bool[1, n], flags.writeable]) -&gt; None</p></li>
 <li><p>__init__(self: adelie.adelie_core.state.StateGaussianPinCov64, arg0: adelie.adelie_core.state.StateGaussianPinCov64) -&gt; None</p></li>
 </ol>
 </dd></dl>
@@ -626,7 +632,7 @@ document.write(`
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinCov64.active_order">
 <span class="sig-name descname"><span class="pre">active_order</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinCov64.active_order" title="Link to this definition">#</a></dt>
 <dd><p>Ordering such that <code class="docutils literal notranslate"><span class="pre">groups</span></code> is sorted in ascending order for the active groups.
-<code class="docutils literal notranslate"><span class="pre">groups[screen_set[active_order[i]]]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th active group in ascending order.</p>
+<code class="docutils literal notranslate"><span class="pre">groups[screen_set[active_set[active_order[i]]]]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th active group in ascending order.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -842,6 +848,25 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinCov64.screen_subset_order">
+<span class="sig-name descname"><span class="pre">screen_subset_order</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_subset_order" title="Link to this definition">#</a></dt>
+<dd><p>Ordering such that <code class="docutils literal notranslate"><span class="pre">screen_subset</span></code> is sorted in ascending order where
+<code class="docutils literal notranslate"><span class="pre">screen_subset</span></code> is a list of column indices into <span class="math notranslate nohighlight">\(A\)</span>
+in the implicit ordering of <code class="docutils literal notranslate"><span class="pre">screen_grad</span></code>.
+<code class="docutils literal notranslate"><span class="pre">screen_subset[screen_subset_order[i]]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th
+column index into <span class="math notranslate nohighlight">\(A\)</span> corresponding to 
+<code class="docutils literal notranslate"><span class="pre">screen_grad[screen_subset_order[i]]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinCov64.screen_subset_ordered">
+<span class="sig-name descname"><span class="pre">screen_subset_ordered</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_subset_ordered" title="Link to this definition">#</a></dt>
+<dd><p>Ordered <code class="docutils literal notranslate"><span class="pre">screen_subset</span></code> (see <code class="docutils literal notranslate"><span class="pre">screen_subset_order</span></code> for its definition).
+We have the equivalence
+<code class="docutils literal notranslate"><span class="pre">screen_subset_ordered[i]</span> <span class="pre">==</span> <span class="pre">screen_subset[screen_subset_order[i]]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinCov64.screen_transforms">
 <span class="sig-name descname"><span class="pre">screen_transforms</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_transforms" title="Link to this definition">#</a></dt>
 <dd><p>List of <span class="math notranslate nohighlight">\(V_k\)</span> where <span class="math notranslate nohighlight">\(V_k\)</span> are the eigenvectors of <span class="math notranslate nohighlight">\(A_{kk}\)</span>
@@ -953,6 +978,8 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_grad"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.screen_grad</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_is_active"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.screen_is_active</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_set"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.screen_set</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_subset_order"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.screen_subset_order</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_subset_ordered"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.screen_subset_ordered</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_transforms"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.screen_transforms</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.screen_vars"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.screen_vars</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinCov64.tol"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinCov64.tol</span></code></a></li>
