@@ -593,6 +593,23 @@ inline void solve(
                     active_beta_size += curr_size;
                 }
 
+                // update active_order
+                // NOTE: this is different from naive version.
+                // solve_active() requires active_order so it must be updated.
+                const auto old_active_size = active_order.size();
+                active_order.resize(active_set.size());
+                std::iota(
+                    std::next(active_order.begin(), old_active_size), 
+                    active_order.end(), 
+                    old_active_size
+                );
+                std::sort(
+                    active_order.begin(), active_order.end(),
+                    [&](auto i, auto j) { 
+                        return groups[screen_set[active_set[i]]] < groups[screen_set[active_set[j]]];
+                    }
+                );
+
                 state::gaussian::pin::cov::update_active_inactive_subset(state);
             }
 
@@ -603,21 +620,6 @@ inline void solve(
             lasso_active_and_update(l);
             active_time += stopwatch.elapsed();
         }
-
-        // update active_order
-        const auto old_active_size = active_order.size();
-        active_order.resize(active_set.size());
-        std::iota(
-            std::next(active_order.begin(), old_active_size), 
-            active_order.end(), 
-            old_active_size
-        );
-        std::sort(
-            active_order.begin(), active_order.end(),
-            [&](auto i, auto j) { 
-                return groups[screen_set[active_set[i]]] < groups[screen_set[active_set[j]]];
-            }
-        );
 
         // order the active betas
         active_beta_indices.resize(active_beta_size);
