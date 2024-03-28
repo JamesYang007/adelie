@@ -21,6 +21,7 @@ void update_screen_derived(
     using state_t = typename std::decay_t<StateType>;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
+    using vec_index_t = typename state_t::vec_index_t;
 
     update_screen_derived_base(state);
 
@@ -33,9 +34,13 @@ void update_screen_derived(
     auto& screen_transforms = state.screen_transforms;
     auto& screen_vars = state.screen_vars;
     auto& screen_grad = state.screen_grad;
+    auto& screen_subset = state.screen_subset;
+    auto& screen_subset_order = state.screen_subset_order;
+    auto& screen_subset_ordered = state.screen_subset_ordered;
 
     const auto old_screen_size = screen_transforms.size();
     const auto new_screen_size = screen_set.size();
+    const int old_screen_value_size = screen_subset.size();
     const int new_screen_value_size = (
         (screen_begins.size() == 0) ? 0 : (
             screen_begins.back() + group_sizes[screen_set.back()]
@@ -92,6 +97,39 @@ void update_screen_derived(
             gs
         ) = grad.segment(g, gs);
     }
+
+    /* update screen_subset */
+    screen_subset.resize(new_screen_value_size);
+    int n_processed = 0;
+    for (int ss_idx = old_screen_size; ss_idx < new_screen_size; ++ss_idx) {
+        const auto ss = screen_set[ss_idx];
+        const auto g = groups[ss];
+        const auto gs = group_sizes[ss];
+        Eigen::Map<vec_index_t>(
+            screen_subset.data() + old_screen_value_size + n_processed, gs
+        ) = vec_index_t::LinSpaced(gs, g, g + gs - 1);
+        n_processed += gs;
+    }
+
+    /* update screen_subset_order */
+    screen_subset_order.resize(new_screen_value_size);
+    std::iota(
+        std::next(screen_subset_order.begin(), old_screen_value_size),
+        screen_subset_order.end(),
+        old_screen_value_size
+    );
+    std::sort(
+        screen_subset_order.data(),
+        screen_subset_order.data() + screen_subset_order.size(),
+        [&](auto i, auto j) { return screen_subset[i] < screen_subset[j]; }
+    );
+
+    /* update screen_subset_ordered */
+    screen_subset_ordered.resize(new_screen_value_size);
+    for (int i = 0; i < screen_subset_order.size(); ++i) {
+        screen_subset_ordered[i] = screen_subset[screen_subset_order[i]];
+    }
+
 }
 
 } // namespace cov
@@ -122,6 +160,7 @@ struct StateGaussianCov: public StateBase<
     using typename base_t::vec_bool_t;
     using typename base_t::map_cvec_value_t;
     using typename base_t::dyn_vec_value_t;
+    using typename base_t::dyn_vec_index_t;
     using matrix_t = MatrixType;
     using dyn_vec_mat_value_t = std::vector<util::rowmat_type<value_t>>;
 
@@ -135,6 +174,9 @@ struct StateGaussianCov: public StateBase<
     dyn_vec_mat_value_t screen_transforms;
     dyn_vec_value_t screen_vars;
     dyn_vec_value_t screen_grad;
+    dyn_vec_index_t screen_subset;
+    dyn_vec_index_t screen_subset_order;
+    dyn_vec_index_t screen_subset_ordered;
 
     explicit StateGaussianCov(
         matrix_t& A,
