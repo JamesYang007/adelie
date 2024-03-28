@@ -44,11 +44,11 @@ public:
     {
         base_t::check_bmul(subset.size(), indices.size(), values.size(), out.size(), rows(), cols());
         out.setZero();
-        for (int i_idx = 0; i_idx < indices.size(); ++i_idx) {
-            const auto i = indices[i_idx];
-            const auto v = values[i_idx];
-            for (int j_idx = 0; j_idx < subset.size(); ++j_idx) {
-                const auto j = subset[j_idx];
+        for (int j_idx = 0; j_idx < subset.size(); ++j_idx) {
+            const auto j = subset[j_idx];
+            for (int i_idx = 0; i_idx < indices.size(); ++i_idx) {
+                const auto i = indices[i_idx];
+                const auto v = values[i_idx];
                 out[j_idx] += v * _mat(i, j);
             }
         }
