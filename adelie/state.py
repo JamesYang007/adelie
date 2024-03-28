@@ -1197,7 +1197,7 @@ def gaussian_cov(
     pivot_subset_min: int =1,
     pivot_slack_ratio: float =1.25,
 ):
-    """Creates a gaussian, naive method state object.
+    """Creates a gaussian, covariance method state object.
 
     Define the following quantities:
 
