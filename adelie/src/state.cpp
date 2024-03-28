@@ -257,7 +257,7 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             );
         }, R"delimiter(
         Ordering such that ``groups`` is sorted in ascending order for the active groups.
-        ``groups[screen_set[active_order[i]]]`` is the ``i`` th active group in ascending order.
+        ``groups[screen_set[active_set[active_order[i]]]]`` is the ``i`` th active group in ascending order.
         )delimiter")
         .def_property_readonly("intercepts", [](const state_t& s) {
             return Eigen::Map<const vec_value_t>(s.intercepts.data(), s.intercepts.size());
