@@ -4,11 +4,11 @@ from . import logger
 from . import matrix
 from . import glm
 from .state import (
-    gaussian_cov,
-    gaussian_naive,
-    glm_naive,
-    multigaussian_naive,
-    multiglm_naive,
+    gaussian_cov as state_gaussian_cov,
+    gaussian_naive as state_gaussian_naive,
+    glm_naive as state_glm_naive,
+    multigaussian_naive as state_multigaussian_naive,
+    multiglm_naive as state_multiglm_naive,
 ) 
 import numpy as np
 
@@ -125,7 +125,7 @@ def gaussian_cov(
     lmda_path: np.ndarray =None,
     max_iters: int =int(1e5),
     tol: float =1e-7,
-    rdev_tol: float =1e-4,
+    rdev_tol: float =1e-3,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -198,7 +198,7 @@ def gaussian_cov(
         Default is ``1e-7``.
     rdev_tol : float, optional
         Relative percent deviance explained tolerance.
-        Default is ``1e-4``.
+        Default is ``1e-3``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
@@ -331,15 +331,18 @@ def gaussian_cov(
         screen_is_active = np.ones(screen_set.shape[0], dtype=bool)
         rsq = 0
 
-        grad = v
-        _tmp = np.empty(p, dtype=dtype)
-        _pos = 0
-        for i in range(screen_set.shape[0]):
-            ss = screen_set[i]
-            g, gs = groups[ss], group_sizes[ss]
-            A.mul(g, gs, screen_beta[_pos:_pos+gs], _tmp)
-            grad -= _tmp
-            _pos += gs
+        subset = np.array([
+            np.arange(groups[ss], groups[ss] + group_sizes[ss]) 
+            for ss in screen_set
+        ])
+        order = np.argsort(subset)
+        indices = subset[order]
+        values = screen_beta[order]
+
+        grad = np.empty(p, dtype=dtype)
+        A.mul(indices, values, grad)
+        grad = v - grad
+
     else:
         lmda = warm_start.lmda
         lmda_max = warm_start.lmda_max
@@ -349,7 +352,7 @@ def gaussian_cov(
         rsq = warm_start.rsq
         grad = warm_start.grad
 
-    state = gaussian_cov(
+    state = state_gaussian_cov(
         A=A,
         v=v,
         groups=groups,
@@ -813,7 +816,7 @@ def grpnet(
             solver_args["resid_sum"] = resid_sum
             solver_args["grad"] = grad
 
-            state = multigaussian_naive(**solver_args)
+            state = state_multigaussian_naive(**solver_args)
         
         # GLM case
         else:
@@ -841,7 +844,7 @@ def grpnet(
             solver_args["loss_null"] = loss_null
             solver_args["loss_full"] = loss_full
 
-            state = multiglm_naive(**solver_args)
+            state = state_multiglm_naive(**solver_args)
 
     # single-response GLMs
     else:
@@ -913,7 +916,7 @@ def grpnet(
             solver_args["resid_sum"] = resid_sum
             solver_args["grad"] = grad
 
-            state = gaussian_naive(**solver_args)
+            state = state_gaussian_naive(**solver_args)
 
         # GLM case
         else:
@@ -941,7 +944,7 @@ def grpnet(
             solver_args["resid"] = resid
             solver_args["loss_null"] = loss_null
             solver_args["loss_full"] = loss_full
-            state = glm_naive(**solver_args)
+            state = state_glm_naive(**solver_args)
 
     if check_state:
         state.check(method="assert")

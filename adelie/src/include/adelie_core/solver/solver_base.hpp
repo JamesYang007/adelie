@@ -277,9 +277,10 @@ inline void solve_core(
     if (setup_lmda_max) {
         const auto large_lmda = std::numeric_limits<value_t>::max(); 
 
-        fit_f(state, large_lmda);
+        auto tup = fit_f(state, large_lmda);
+        auto&& state_gaussian_pin = std::get<0>(tup);
 
-        update_invariance_f(state, large_lmda);
+        update_invariance_f(state, state_gaussian_pin, large_lmda);
 
         lmda_max = compute_lmda_max(abs_grad, alpha, penalty);
     }
@@ -335,7 +336,7 @@ inline void solve_core(
                 );
             // otherwise, put the state at the last fitted lambda (lmda_max)
             } else {
-                update_invariance_f(state, large_lmda_path[i]);
+                update_invariance_f(state, state_gaussian_pin, large_lmda_path[i]);
             }
         }
     }
@@ -393,7 +394,7 @@ inline void solve_core(
                 // Invariance step
                 // ==================================================================================== 
                 sw.start();
-                update_invariance_f(state, lmda_curr);
+                update_invariance_f(state, state_gaussian_pin, lmda_curr);
                 benchmark_invariance.push_back(sw.elapsed());
 
                 // ==================================================================================== 

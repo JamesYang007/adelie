@@ -19,28 +19,27 @@ def run_cov(
 
     atol = 1e-6 if dtype == np.float32 else 1e-14
 
+    v = np.random.normal(0, 1, p)
+    nnzs = np.random.binomial(1, 0.7, p).astype(bool)
+    v[~nnzs] = 0
+    indices = np.arange(p)[nnzs]
+    values = v[indices]
+
     # test bmul
-    out = np.empty(p, dtype=dtype)
     for i in range(1, p+1):
-        v = np.random.normal(0, 1, i).astype(dtype)
-        cA.bmul(0, 0, i, p, v, out)
-        expected = v.T @ A[:i, :]
-        assert np.allclose(expected, out, atol=atol)
-    q = min(10, p)
-    v = np.random.normal(0, 1, q).astype(dtype)
-    for i in range(p-q+1):
-        cA.bmul(i, 0, q, p, v, out)
-        expected = v.T @ A[i:i+q, :]
+        subset = np.random.choice(p, i, replace=False)
+        out = np.empty(i, dtype=dtype)
+        cA.bmul(subset, indices, values, out)
+        expected = v.T @ A[:, subset]
         assert np.allclose(expected, out, atol=atol)
 
     # test mul
-    v = np.random.normal(0, 1, q).astype(dtype)
-    for i in range(p-q+1):
-        cA.mul(i, q, v, out)
-        expected = v.T @ A[i:i+q, :]
-        assert np.allclose(expected, out, atol=atol)
+    cA.mul(indices, values, out)
+    expected = v.T @ A
+    assert np.allclose(expected, out, atol=atol)
 
     # test to_dense
+    q = min(10, p)
     out = np.empty((q, q), dtype=dtype, order="F")
     for i in range(p-q+1):
         cA.to_dense(i, q, out)
@@ -74,8 +73,8 @@ def test_cov_lazy():
         np.random.seed(seed)
         X = np.random.normal(0, 1, (n, p))
         X /= np.sqrt(n)
-        A = X.T @ X
         X = np.array(X, dtype=dtype, order=order)
+        A = X.T @ X
         A = np.array(A, dtype=dtype, order=order)
         cA = mod.cov_lazy(X, n_threads=4)
         run_cov(A, cA, dtype)

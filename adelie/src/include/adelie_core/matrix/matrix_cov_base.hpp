@@ -5,45 +5,46 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
 class MatrixCovBase
 {
 protected:
     static void check_bmul(
-        int i, int j, int p, int q, int v, int o, int r, int c
+        int s, int i, int v, int o, int r, int c
     )
     {
         if (
-            (i < 0 || i > r-p) ||
-            (j < 0 || j > c-q) ||
-            (v != p) ||
-            (o != q)
+            (s < 0 || s > r) ||
+            (i < 0 || i > r) ||
+            (i != v) ||
+            (v < 0 || v > r) ||
+            (o != s)
         ) {
             throw std::runtime_error(
                 util::format(
                     "bmul() is given inconsistent inputs! "
-                    "Invoked check_bmul(i=%d, j=%d, p=%d, q=%d, v=%d, o=%d, r=%d, c=%d)",
-                    i, j, p, q, v, o, r, c
+                    "Invoked check_bmul(s=%d, i=%d, v=%d, o=%d, r=%d, c=%d)",
+                    s, i, v, o, r, c
                 )
             );
         }
     }
 
     static void check_mul(
-        int i, int p, int v, int o, int r, int c
+        int i, int v, int o, int r, int c
     )
     {
         if (
-            (i < 0 || i > r-p) ||
-            (v != p) ||
+            (i < 0 || i > r) ||
+            (i != v) ||
             (o != c) ||
             (r != c)
         ) {
             throw std::runtime_error(
                 util::format(
-                    "bmul() is given inconsistent inputs! "
-                    "Invoked check_bmul(i=%d, p=%d, v=%d, o=%d, r=%d, c=%d)",
-                    i, p, v, o, r, c
+                    "mul() is given inconsistent inputs! "
+                    "Invoked check_mul(i=%d, v=%d, o=%d, r=%d, c=%d)",
+                    i, v, o, r, c
                 )
             );
         }
@@ -71,20 +72,23 @@ protected:
 
 public:
     using value_t = ValueType;
+    using index_t = IndexType;
+    using vec_index_t = util::rowvec_type<index_t>;
     using vec_value_t = util::rowvec_type<value_t>;
     using colmat_value_t = util::colmat_type<value_t>;
     
     virtual ~MatrixCovBase() {}
 
     virtual void bmul(
-        int i, int j, int p, int q, 
-        const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_index_t>& subset,
+        const Eigen::Ref<const vec_index_t>& indices,
+        const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
     ) =0;
 
     virtual void mul(
-        int i, int p,
-        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_index_t>& indices,
+        const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
     ) =0;
 

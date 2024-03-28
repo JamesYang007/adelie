@@ -12,36 +12,36 @@ namespace pin {
  * Pack of buffers used in solvers.
  * This class is purely for convenience purposes.
  */
-template <class ValueType>
+template <class ValueType, class IndexType>
 struct GaussianPinBufferPack 
 {
     using value_t = ValueType;
+    using index_t = IndexType;
     
     util::rowvec_type<value_t> buffer1;
     util::rowvec_type<value_t> buffer2;
     util::rowvec_type<value_t> buffer3;
     util::rowvec_type<value_t> buffer4;
 
-    explicit GaussianPinBufferPack(
-        size_t buffer_size,
-        size_t n
-    ): 
-        GaussianPinBufferPack(
-            buffer_size, buffer_size, buffer_size, n
-        ) 
-    {}
+    std::vector<index_t> active_beta_indices;
+    std::vector<value_t> active_beta_ordered;
 
     explicit GaussianPinBufferPack(
-            size_t buffer1_size, 
-            size_t buffer2_size,
-            size_t buffer3_size,
-            size_t buffer4_size
+        size_t buffer1_size, 
+        size_t buffer2_size,
+        size_t buffer3_size,
+        size_t buffer4_size,
+        size_t active_beta_size
     ): 
         buffer1(buffer1_size),
         buffer2(buffer2_size),
         buffer3(buffer3_size),
         buffer4(buffer4_size)
-    {}
+    {
+        // allocate buffers for optimization
+        active_beta_indices.reserve(active_beta_size);
+        active_beta_ordered.reserve(active_beta_size);
+    }
 };
 
 /**

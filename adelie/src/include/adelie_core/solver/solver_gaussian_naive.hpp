@@ -213,7 +213,7 @@ inline void solve(
         if (display) solver::pb_add_suffix(state, pb);
     };
     const auto update_loss_null_f = [](const auto&) {};
-    const auto update_invariance_f = [&](auto& state, auto lmda) {
+    const auto update_invariance_f = [&](auto& state, const auto&, auto lmda) {
         const auto& X_means = state.X_means;
         const auto& weights = state.weights;
         const auto intercept = state.intercept;

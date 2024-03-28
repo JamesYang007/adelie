@@ -1,5 +1,6 @@
 #pragma once
 #include <numeric>
+#include <adelie_core/configs.hpp>
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/functional.hpp>
 #include <adelie_core/util/stopwatch.hpp>
@@ -14,7 +15,7 @@ namespace pin {
 namespace naive {
 
 template <class StateType, class G1Iter, class G2Iter,
-          class ValueType, class BufferType,
+          class ValueType, class BufferPackType,
           class UpdateCoefficientsType,
           class AdditionalStepType=util::no_op>
 ADELIE_CORE_STRONG_INLINE
@@ -26,10 +27,7 @@ void coordinate_descent(
     G2Iter g2_end,
     size_t lmda_idx,
     ValueType& convg_measure,
-    BufferType& buffer1,
-    BufferType& buffer2,
-    BufferType& buffer3,
-    BufferType& buffer4_n,
+    BufferPackType& buffer_pack,
     UpdateCoefficientsType update_coefficients_f,
     AdditionalStepType additional_step=AdditionalStepType()
 )
@@ -55,6 +53,11 @@ void coordinate_descent(
     auto& resid = state.resid;
     auto& resid_sum = state.resid_sum;
     auto& rsq = state.rsq;
+
+    auto& buffer1 = buffer_pack.buffer1;
+    auto& buffer2 = buffer_pack.buffer2;
+    auto& buffer3 = buffer_pack.buffer3;
+    auto& buffer4 = buffer_pack.buffer4;
 
     const auto l1 = lmda * alpha;
     const auto l2 = lmda * (1-alpha);
@@ -89,7 +92,7 @@ void coordinate_descent(
         update_rsq(rsq, del, A_kk, gk);
 
         // update residual 
-        auto dresid = buffer4_n.head(resid.size());
+        auto dresid = buffer4.head(resid.size());
         X.ctmul(groups[k], del, dresid);
         matrix::dvsubi(resid, dresid, n_threads);
         resid_sum -= Xk_mean * del;
@@ -122,11 +125,11 @@ void coordinate_descent(
         );
 
         // save old beta in buffer with transformation
-        auto ak_old = buffer4_n.head(ak.size());
+        auto ak_old = buffer4.head(ak.size());
         ak_old = ak;
-        auto ak_old_transformed = buffer4_n.segment(ak.size(), ak.size());
+        auto ak_old_transformed = buffer4.segment(ak.size(), ak.size());
         ak_old_transformed.matrix().noalias() = ak_old.matrix() * Vk; 
-        auto ak_transformed = buffer4_n.segment(2 * ak.size(), ak.size());
+        auto ak_transformed = buffer4.segment(2 * ak.size(), ak.size());
 
         // update group coefficients
         size_t iters;
@@ -138,7 +141,8 @@ void coordinate_descent(
         );
         gk_transformed -= A_kk * ak_old_transformed; 
         
-        if ((ak_old_transformed - ak_transformed).matrix().norm() <= 1e-12 * std::sqrt(gsize)) continue;
+        if ((ak_old_transformed - ak_transformed).matrix().norm() <=  
+            Configs::dbeta_tol * std::sqrt(gsize)) continue;
 
         auto del_transformed = buffer1.head(ak.size());
         del_transformed = ak_transformed - ak_old_transformed;
@@ -153,7 +157,7 @@ void coordinate_descent(
         // update residual
         auto del = buffer1.head(ak.size());
         del = ak - ak_old;
-        auto dresid = buffer4_n.head(resid.size());
+        auto dresid = buffer4.head(resid.size());
         X.btmul(groups[k], gsize, del, dresid);
         matrix::dvsubi(resid, dresid, n_threads);
         resid_sum -= (Xk_mean * del).sum();
@@ -166,17 +170,14 @@ void coordinate_descent(
  * Applies multiple blockwise coordinate descent on the active set.
  */
 template <class StateType, 
-          class BufferType, 
+          class BufferPackType, 
           class UpdateCoefficientsType,
           class CUIType>
 ADELIE_CORE_STRONG_INLINE
 void solve_active(
     StateType&& state,
     size_t lmda_idx,
-    BufferType& buffer1,
-    BufferType& buffer2,
-    BufferType& buffer3,
-    BufferType& buffer4_n,
+    BufferPackType& buffer_pack,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt
 )
@@ -198,7 +199,9 @@ void solve_active(
             state, 
             active_g1.data(), active_g1.data() + active_g1.size(),
             active_g2.data(), active_g2.data() + active_g2.size(),
-            lmda_idx, convg_measure, buffer1, buffer2, buffer3, buffer4_n,
+            lmda_idx, 
+            convg_measure, 
+            buffer_pack,
             update_coefficients_f
         );
         if (convg_measure < tol) break;
@@ -230,9 +233,9 @@ inline void solve(
     const auto& screen_g1 = state.screen_g1;
     const auto& screen_g2 = state.screen_g2;
     const auto& screen_beta = state.screen_beta;
-    const auto& screen_X_means = state.screen_X_means;
     const auto& lmda_path = state.lmda_path;
     const auto& rsq = state.rsq;
+    const auto& resid_sum = state.resid_sum;
     const auto intercept = state.intercept;
     const auto tol = state.tol;
     const auto max_active_size = state.max_active_size;
@@ -259,18 +262,16 @@ inline void solve(
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
-    GaussianPinBufferPack<value_t> buffer_pack(
+    GaussianPinBufferPack<value_t, index_t> buffer_pack(
         max_group_size, 
-        std::max<size_t>(3 * max_group_size, n)
+        max_group_size, 
+        max_group_size, 
+        std::max<size_t>(3 * max_group_size, n),
+        screen_beta.size()
     );
-    
     // buffer to store final result
-    std::vector<index_t> active_beta_indices;
-    std::vector<value_t> active_beta_ordered;
-
-    // allocate buffers for optimization
-    active_beta_indices.reserve(screen_beta.size());
-    active_beta_ordered.reserve(screen_beta.size());
+    auto& active_beta_indices = buffer_pack.active_beta_indices; 
+    auto& active_beta_ordered = buffer_pack.active_beta_ordered;
 
     // compute number of active coefficients
     size_t active_beta_size = 0;
@@ -304,11 +305,9 @@ inline void solve(
 
     const auto lasso_active_and_update = [&](size_t l) {
         solve_active(
-            state, l, 
-            buffer_pack.buffer1,
-            buffer_pack.buffer2,
-            buffer_pack.buffer3,
-            buffer_pack.buffer4,
+            state, 
+            l, 
+            buffer_pack,
             update_coefficients_f,
             check_user_interrupt
         );
@@ -335,11 +334,9 @@ inline void solve(
                 state,
                 screen_g1.data(), screen_g1.data() + screen_g1.size(),
                 screen_g2.data(), screen_g2.data() + screen_g2.size(),
-                l, convg_measure,
-                buffer_pack.buffer1,
-                buffer_pack.buffer2,
-                buffer_pack.buffer3,
-                buffer_pack.buffer4,
+                l, 
+                convg_measure,
+                buffer_pack,
                 update_coefficients_f,
                 add_active_set
             );
@@ -395,11 +392,7 @@ inline void solve(
         );
 
         betas.emplace_back(beta_map);
-        if (intercept) {
-            intercepts.emplace_back(y_mean - (screen_X_means * screen_beta).sum());
-        } else {
-            intercepts.emplace_back(0);
-        }
+        intercepts.emplace_back(intercept * (y_mean + resid_sum));
         rsqs.emplace_back(rsq);
         lmdas.emplace_back(lmda_path[l]);
         benchmark_screen.emplace_back(screen_time);

@@ -421,7 +421,7 @@ inline void solve(
         const auto setup_loss_null = state.setup_loss_null;
         if (setup_loss_null) update_loss_null_f(state, glm, buffer_pack);
     };
-    const auto update_invariance_f = [&](auto& state, auto lmda) {
+    const auto update_invariance_f = [&](auto& state, const auto&, auto lmda) {
         const auto& resid = state.resid;
         auto& X = *state.X;
         auto& grad = state.grad;

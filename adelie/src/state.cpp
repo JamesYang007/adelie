@@ -257,7 +257,7 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             );
         }, R"delimiter(
         Ordering such that ``groups`` is sorted in ascending order for the active groups.
-        ``groups[screen_set[active_order[i]]]`` is the ``i`` th active group in ascending order.
+        ``groups[screen_set[active_set[active_order[i]]]]`` is the ``i`` th active group in ascending order.
         )delimiter")
         .def_property_readonly("intercepts", [](const state_t& s) {
             return Eigen::Map<const vec_value_t>(s.intercepts.data(), s.intercepts.size());
@@ -487,6 +487,8 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&,
             const dyn_vec_mat_value_t&,
+            const Eigen::Ref<const vec_index_t>&, 
+            const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&, 
             size_t,
             size_t,
@@ -511,6 +513,8 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("screen_begins").noconvert(),
             py::arg("screen_vars").noconvert(),
             py::arg("screen_transforms").noconvert(),
+            py::arg("screen_subset_order").noconvert(),
+            py::arg("screen_subset_ordered").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("max_active_size"),
             py::arg("max_iters"),
@@ -525,6 +529,19 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("screen_is_active").noconvert()
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
+        .def_readonly("screen_subset_order", &state_t::screen_subset_order, R"delimiter(
+        Ordering such that ``screen_subset`` is sorted in ascending order where
+        ``screen_subset`` is a list of column indices into :math:`A`
+        in the implicit ordering of ``screen_grad``.
+        ``screen_subset[screen_subset_order[i]]`` is the ``i`` th
+        column index into :math:`A` corresponding to 
+        ``screen_grad[screen_subset_order[i]]``.
+        )delimiter")
+        .def_readonly("screen_subset_ordered", &state_t::screen_subset_ordered, R"delimiter(
+        Ordered ``screen_subset`` (see ``screen_subset_order`` for its definition).
+        We have the equivalence
+        ``screen_subset_ordered[i] == screen_subset[screen_subset_order[i]]``.
+        )delimiter")
         .def_readonly("screen_vars", &state_t::screen_vars, R"delimiter(
         List of :math:`D_k^2` where :math:`D_k^2` are the eigenvalues of :math:`A_{kk}` 
         along the screen groups :math:`k`.
