@@ -438,7 +438,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 46%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 46/100 [00:00:00&lt;00:00:00, 2486.81it/s] [dev:90.6%]
+ 46%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 46/100 [00:00:00&lt;00:00:00, 3564.27it/s] [dev:90.6%]
 </pre></div></div>
 </div>
 <p>Note that the solver finished early in this example. We display a progress bar that indicates the number of <span class="math notranslate nohighlight">\(\lambda\)</span>’s processed, time elapsed, time remaining, and the percent deviance explained. By default, the solver terminates if the latter reaches <span class="math notranslate nohighlight">\(90\%\)</span> as a simple heuristic to avoid overfitting. This threshold can be controlled via the argument <code class="docutils literal notranslate"><span class="pre">adev_tol</span></code>.</p>
@@ -527,7 +527,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 38%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 38/100 [00:00:00&lt;00:00:00, 4196.94it/s] [dev:90.1%]
+ 38%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 38/100 [00:00:00&lt;00:00:00, 5126.30it/s] [dev:90.1%]
 </pre></div></div>
 </div>
 <p>As before, we may inspect the same elements of <code class="docutils literal notranslate"><span class="pre">state</span></code> and diagnostics.</p>
@@ -604,7 +604,6 @@ document.write(`
     <span class="n">A</span><span class="o">=</span><span class="n">A</span><span class="p">,</span>
     <span class="n">v</span><span class="o">=</span><span class="n">v</span><span class="p">,</span>
     <span class="n">groups</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">10</span><span class="p">),</span>
-    <span class="n">rdev_tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -614,7 +613,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 39%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 39/100 [00:00:00&lt;00:00:00, 1822.63it/s] [rdev:0.9%]
+ 63%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 63/100 [00:00:00&lt;00:00:00, 452.93it/s] [rdev:0.1%]
 </pre></div></div>
 </div>
 <p>Note that the progress bar displays a different measurement of deviance explained. For the covariance method, since it is usually infeasible to compute the loss at the saturated model, we only display the relative change in percent deviance explained (which can be computed without knowledge of the saturated loss):</p>
@@ -628,7 +627,7 @@ document.write(`
         \ell(\beta_{\mathrm{null}}) - \ell(\beta_{\mathrm{curr}})
     }
 \end{align*}\]</div>
-<p>so that a <span class="math notranslate nohighlight">\(\mathrm{rdev}\)</span> close to zero indicates overfitting. In this example, we early exit the solver once <span class="math notranslate nohighlight">\(\mathrm{rdev}\)</span> reaches <span class="math notranslate nohighlight">\(1\%\)</span>.</p>
+<p>so that a <span class="math notranslate nohighlight">\(\mathrm{rdev}\)</span> close to zero indicates overfitting. In this example, we early exit the solver once <span class="math notranslate nohighlight">\(\mathrm{rdev}\)</span> reaches <span class="math notranslate nohighlight">\(0.1\%\)</span>.</p>
 <p>We can compare the solution with that of the result of <code class="docutils literal notranslate"><span class="pre">grpnet</span></code> from before.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
@@ -638,6 +637,7 @@ document.write(`
 <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
     <span class="n">state_cov</span><span class="o">.</span><span class="n">betas</span><span class="p">[:</span><span class="n">n_common_sols</span><span class="p">]</span><span class="o">.</span><span class="n">toarray</span><span class="p">(),</span>
     <span class="n">state</span><span class="o">.</span><span class="n">betas</span><span class="p">[:</span><span class="n">n_common_sols</span><span class="p">]</span><span class="o">.</span><span class="n">toarray</span><span class="p">(),</span>
+    <span class="n">atol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -681,7 +681,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 57%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 57/100 [00:00:00&lt;00:00:00, 1522.21it/s] [dev:90.2%]
+ 57%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 57/100 [00:00:00&lt;00:00:00, 2702.83it/s] [dev:90.2%]
 </pre></div></div>
 </div>
 <p>As before, the user may inspect diagnostic elements of the state in the same fashion.</p>
@@ -721,7 +721,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 61%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 61/100 [00:00:00&lt;00:00:00, 826.35it/s] [dev:90.2%]
+ 61%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 61/100 [00:00:00&lt;00:00:00, 1127.60it/s] [dev:90.2%]
 </pre></div></div>
 </div>
 <p>Another important difference from the single-response case is that the user must be aware of the shape of the returned coefficients. For multi-response GLMs, the intercept (if <code class="docutils literal notranslate"><span class="pre">intercept=True</span></code>) is added for each response. Hence, <code class="docutils literal notranslate"><span class="pre">state.intercepts</span></code> will be a <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">K)</span></code> matrix. Moreover, <code class="docutils literal notranslate"><span class="pre">state.betas</span></code> will be a <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">pK)</span></code> sparse matrix where every <code class="docutils literal notranslate"><span class="pre">K</span></code> columns correspond to the coefficients associated with a feature and across all responses. So, <code class="docutils literal notranslate"><span class="pre">state.betas[i,</span> <span class="pre">:K]</span></code> are the coefficients
@@ -780,7 +780,7 @@ for the <code class="docutils literal notranslate"><span class="pre">i</span></c
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 52%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 52/100 [00:00:00&lt;00:00:00, 298.13it/s] [dev:90.2%]
+ 52%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 52/100 [00:00:00&lt;00:00:00, 450.28it/s] [dev:90.2%]
 </pre></div></div>
 </div>
 </section>
@@ -813,7 +813,7 @@ for the <code class="docutils literal notranslate"><span class="pre">i</span></c
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 52%|🐧🐧🐧🐧🐧     | 52/100 [00:00:00&lt;00:00:00, 305.35it/s] [dev:90.2%]
+ 52%|🐧🐧🐧🐧🐧     | 52/100 [00:00:00&lt;00:00:00, 484.31it/s] [dev:90.2%]
 </pre></div></div>
 </div>
 </section>

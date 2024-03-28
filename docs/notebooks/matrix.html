@@ -394,7 +394,7 @@ document.write(`
 admits some special structure that can be exploited for further speed and memory gains. One simple example is a large sparse matrix, which cannot fit in memory as a dense matrix. Another example is genomics datasets which are not only sparse, but only take on 3 possible integer values (see <a class="reference internal" href="snp_analysis.html"><span class="doc">SNP Analysis</span></a>), and generally have over 160 billion entries with 30% non-zero entries.</p>
 <p>For these reasons, we found it fruitful to abstract out the matrix class. <code class="docutils literal notranslate"><span class="pre">adelie</span></code> provides a few matrix classes in the <code class="docutils literal notranslate"><span class="pre">ad.matrix</span></code> submodule. We discuss below some ways a user may interact with these classes as well as define a class of their own to plug into our solver.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">adelie</span> <span class="k">as</span> <span class="nn">ad</span>
@@ -406,7 +406,7 @@ admits some special structure that can be exploited for further speed and memory
 <h2><strong>Naive Matrix Class</strong><a class="headerlink" href="#Naive-Matrix-Class" title="Link to this heading">#</a></h2>
 <p>The <em>naive matrix class</em> refers to matrix classes that abstract out the feature matrix <span class="math notranslate nohighlight">\(X\)</span>. The simplest example of such a matrix is simply a dense matrix. Let us first construct a dense matrix and wrap it using <code class="docutils literal notranslate"><span class="pre">ad.matrix.dense</span></code>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>
@@ -422,7 +422,7 @@ admits some special structure that can be exploited for further speed and memory
 <p><code class="docutils literal notranslate"><span class="pre">X_wrap</span></code> can be thought of a simple wrapper of <code class="docutils literal notranslate"><span class="pre">X</span></code>, only exposing a few methods that our solver requires. For example, <code class="docutils literal notranslate"><span class="pre">.bmul()</span></code> is a method that computes <code class="docutils literal notranslate"><span class="pre">X[:,</span> <span class="pre">i:i+q].T</span> <span class="pre">&#64;</span> <span class="pre">(w</span> <span class="pre">*</span> <span class="pre">v)</span></code>. The canonical application of <code class="docutils literal notranslate"><span class="pre">.bmul()</span></code> is in computing the correlation between the feature matrix and the residual with observation weights <code class="docutils literal notranslate"><span class="pre">w</span></code>. It is worth mentioning that <code class="docutils literal notranslate"><span class="pre">adelie</span></code> also relies on such member functions when computing diagnostic quantities in <code class="docutils literal notranslate"><span class="pre">ad.diagnostic</span></code>.</p>
 <p>As an example, we generate data below and show the equivalence of calling <code class="docutils literal notranslate"><span class="pre">.bmul()</span></code> and the equivalent numpy code.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">i</span> <span class="o">=</span> <span class="mi">10</span>      <span class="c1"># starting column index</span>
@@ -443,10 +443,10 @@ admits some special structure that can be exploited for further speed and memory
 </section>
 <section id="Covariance-Matrix-Class">
 <h2><strong>Covariance Matrix Class</strong><a class="headerlink" href="#Covariance-Matrix-Class" title="Link to this heading">#</a></h2>
-<p>The <em>covariance matrix class</em> refers to matrix classes that abstract out the covariance matrix <span class="math notranslate nohighlight">\(A = X^\top X\)</span>. This matrix is currently only used in the context of <code class="docutils literal notranslate"><span class="pre">ad.gaussian_cov</span></code> solver. Nonetheless, like the naive matrix class, it exposes its own set of member functions that the covariance method solver requires. For example, it also exposes <code class="docutils literal notranslate"><span class="pre">.bmul()</span></code> but computes a different quantity: <code class="docutils literal notranslate"><span class="pre">A[i:i+p,</span> <span class="pre">j:j+q].T</span> <span class="pre">&#64;</span> <span class="pre">v</span></code>.</p>
+<p>The <em>covariance matrix class</em> refers to matrix classes that abstract out the covariance matrix <span class="math notranslate nohighlight">\(A = X^\top X\)</span>. This matrix is currently only used in the context of <code class="docutils literal notranslate"><span class="pre">ad.gaussian_cov</span></code> solver. Nonetheless, like the naive matrix class, it exposes its own set of member functions that the covariance method solver requires. For example, it also exposes <code class="docutils literal notranslate"><span class="pre">.bmul()</span></code> but computes a different quantity: <code class="docutils literal notranslate"><span class="pre">A[:,</span> <span class="pre">subset].T</span> <span class="pre">&#64;</span> <span class="pre">v</span></code> where <code class="docutils literal notranslate"><span class="pre">subset</span></code> is a subset of column indices.</p>
 <p>We take the same data as above and show the equivalence of calling <code class="docutils literal notranslate"><span class="pre">.bmul()</span></code> and the equivalent numpy code.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">A</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">X</span>
@@ -455,12 +455,14 @@ admits some special structure that can be exploited for further speed and memory
 <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span>     <span class="c1"># starting (i, j) position of the block of A</span>
 <span class="n">p</span><span class="p">,</span> <span class="n">q</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span>     <span class="c1"># number of rows/cols of the block</span>
 
-<span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+<span class="n">subset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="n">q</span><span class="p">)</span>
+<span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">p</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
 <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-<span class="n">A_wrap</span><span class="o">.</span><span class="n">bmul</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+<span class="n">A_wrap</span><span class="o">.</span><span class="n">bmul</span><span class="p">(</span><span class="n">subset</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
 <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
     <span class="n">out</span><span class="p">,</span>
-    <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">p</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">v</span><span class="p">,</span>
+    <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">p</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">values</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -472,7 +474,7 @@ admits some special structure that can be exploited for further speed and memory
 <p>One of the defining features of <code class="docutils literal notranslate"><span class="pre">adelie</span></code> is the flexibility for the user to specify her own matrix classes. The custom matrix class can be implemented in either C++ <em>or</em> Python! In this section, we demonstrate this feature by defining a custom naive matrix class equivalent to <code class="docutils literal notranslate"><span class="pre">ad.matrix.dense</span></code> in Python. All of the discussion carries through for the covariance matrix class and any important differences will be mentioned in passing.</p>
 <p>We first show the full code for our custom matrix class.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Dense</span><span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">MatrixNaiveBase64</span><span class="p">):</span>
@@ -510,7 +512,7 @@ admits some special structure that can be exploited for further speed and memory
 </ul>
 <p>We now show that the matrix can be passed into our existing solver <code class="docutils literal notranslate"><span class="pre">ad.grpnet</span></code> with no further changes to the code. We first generate a response vector and call <code class="docutils literal notranslate"><span class="pre">ad.grpnet</span></code>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
@@ -518,7 +520,7 @@ admits some special structure that can be exploited for further speed and memory
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
@@ -528,17 +530,25 @@ admits some special structure that can be exploited for further speed and memory
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+  0%|          | 0/100 [00:00:00&lt;?, ?it/s]
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 52%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 52/100 [00:00:00&lt;00:00:00, 246.32it/s] [dev:90.2%]
+ 52%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 52/100 [00:00:00&lt;00:00:00, 722.13it/s] [dev:90.2%]
 </pre></div></div>
 </div>
 <p>We can compare solutions by comparing with the solutions from passing in a dense matrix, which will internally get wrapped using <code class="docutils literal notranslate"><span class="pre">ad.matrix.dense</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state_exp</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
@@ -553,11 +563,11 @@ admits some special structure that can be exploited for further speed and memory
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 52%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 52/100 [00:00:00&lt;00:00:00, 3753.69it/s] [dev:90.2%]
+ 52%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 52/100 [00:00:00&lt;00:00:00, 7122.56it/s] [dev:90.2%]
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
