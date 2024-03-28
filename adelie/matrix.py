@@ -163,7 +163,7 @@ def kronecker_eye(
 ):
     """Creates a viewer of a matrix Kronecker product identity matrix.
 
-    The matrix is represented as :math:`X \otimes I_K`
+    The matrix is represented as :math:`X \\otimes I_K`
     where :math:`X` is the underlying dense matrix and 
     :math:`I_K` is the identity matrix of dimension :math:`K`.
 
