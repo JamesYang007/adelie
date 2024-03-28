@@ -13,11 +13,11 @@ class MatrixCovLazy: public MatrixCovBase<typename std::decay_t<DenseType>::Scal
 public: 
     using base_t = MatrixCovBase<typename std::decay_t<DenseType>::Scalar>;
     using typename base_t::value_t;
+    using typename base_t::index_t;
     using typename base_t::vec_index_t;
     using typename base_t::vec_value_t;
     using typename base_t::colmat_value_t;
     using dense_t = DenseType;
-    using index_t = Eigen::Index;
     
 private:
     const Eigen::Map<const dense_t> _X;     // ref of data matrix
@@ -79,7 +79,7 @@ public:
     ) override
     {
         base_t::check_bmul(subset.size(), indices.size(), values.size(), out.size(), rows(), cols());
-        out.setZero();
+        // cache first
         for (int i_idx = 0; i_idx < indices.size(); ++i_idx) {
             const auto i = indices[i_idx];
             if (_index_map[i] < 0) {
@@ -88,11 +88,17 @@ public:
                       indices[i_idx+cache_size] == i+cache_size; ++cache_size);
                 cache(i, cache_size);
             }
-            const auto& mat = _cache[_index_map[i]];
-            const auto i_rel = _slice_map[i];
-            const auto v = values[i_idx];
-            for (int j_idx = 0; j_idx < subset.size(); ++j_idx) {
-                const auto j = subset[j_idx];
+        }
+
+        // update output
+        out.setZero();
+        for (int j_idx = 0; j_idx < subset.size(); ++j_idx) {
+            const auto j = subset[j_idx];
+            for (int i_idx = 0; i_idx < indices.size(); ++i_idx) {
+                const auto i = indices[i_idx];
+                const auto& mat = _cache[_index_map[i]];
+                const auto i_rel = _slice_map[i];
+                const auto v = values[i_idx];
                 out[j_idx] += v * mat(i_rel, j);
             }
         }
@@ -132,13 +138,13 @@ public:
             const auto k = i + n_processed;
             if (_index_map[k] < 0) {
                 int cache_size = 0;
-                for(; k+cache_size < cols() && _index_map[k+cache_size] < 0; ++cache_size);
+                for(; k+cache_size < i+p && _index_map[k+cache_size] < 0; ++cache_size);
                 cache(k, cache_size);
             }
             const auto& mat = _cache[_index_map[k]];
             const auto k_rel = _slice_map[k];
             const auto size = std::min<size_t>(mat.rows()-k_rel, p-n_processed);
-            out.middleRows(n_processed, size) = mat.block(k_rel, i, size, p);
+            out.middleCols(n_processed, size) = mat.block(k_rel, i, size, p).transpose();
             n_processed += size;
         }
     }

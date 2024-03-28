@@ -480,14 +480,14 @@ void register_solver(py::module_& m)
     m.def("compute_penalty_dense", &compute_penalty_dense<double>);
 
     /* solve pinned method */
-    //m.def("solve_gaussian_pin_cov_64", &solve_gaussian_pin_cov<state_gaussian_pin_cov_t<double>>);
-    //m.def("solve_gaussian_pin_cov_32", &solve_gaussian_pin_cov<state_gaussian_pin_cov_t<float>>);
+    m.def("solve_gaussian_pin_cov_64", &solve_gaussian_pin_cov<state_gaussian_pin_cov_t<double>>);
+    m.def("solve_gaussian_pin_cov_32", &solve_gaussian_pin_cov<state_gaussian_pin_cov_t<float>>);
     m.def("solve_gaussian_pin_naive_64", &solve_gaussian_pin_naive<state_gaussian_pin_naive_t<double>>);
     m.def("solve_gaussian_pin_naive_32", &solve_gaussian_pin_naive<state_gaussian_pin_naive_t<float>>);
 
     /* solve gaussian method */
-    //m.def("solve_gaussian_cov_64", &solve_gaussian_cov<state_gaussian_cov_t<double>>);
-    //m.def("solve_gaussian_cov_32", &solve_gaussian_cov<state_gaussian_cov_t<float>>);
+    m.def("solve_gaussian_cov_64", &solve_gaussian_cov<state_gaussian_cov_t<double>>);
+    m.def("solve_gaussian_cov_32", &solve_gaussian_cov<state_gaussian_cov_t<float>>);
     m.def("solve_gaussian_naive_64", &solve_gaussian_naive<state_gaussian_naive_t<double>>);
     m.def("solve_gaussian_naive_32", &solve_gaussian_naive<state_gaussian_naive_t<float>>);
     m.def("solve_multigaussian_naive_64", &solve_multigaussian_naive<state_multigaussian_naive_t<double>>);

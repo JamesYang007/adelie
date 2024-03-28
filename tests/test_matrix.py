@@ -27,7 +27,7 @@ def run_cov(
 
     # test bmul
     for i in range(1, p+1):
-        subset = np.sort(np.random.choice(p, i, replace=False))
+        subset = np.random.choice(p, i, replace=False)
         out = np.empty(i, dtype=dtype)
         cA.bmul(subset, indices, values, out)
         expected = v.T @ A[:, subset]

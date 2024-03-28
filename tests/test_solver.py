@@ -193,8 +193,9 @@ def run_solve_gaussian(state, args, pin):
     cvxpy_intercepts = np.array([out[0][0] for out in cvxpy_res])
     cvxpy_betas = np.array([out[1] for out in cvxpy_res])
 
+    is_intercept_close = np.allclose(intercepts, cvxpy_intercepts, atol=1e-6)
     is_beta_close = np.allclose(betas.toarray(), cvxpy_betas, atol=1e-6)
-    if not is_beta_close:
+    if not (is_beta_close and is_intercept_close):
         objective_args = {
             "X": X,
             "glm": ad.glm.gaussian(y=y, weights=weights),

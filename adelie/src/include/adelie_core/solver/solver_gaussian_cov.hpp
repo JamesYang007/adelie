@@ -168,6 +168,10 @@ auto fit(
 
     save_prev_valid();
 
+    const value_t max_screen_vars = screen_vars.size() ?
+        Eigen::Map<const vec_value_t>(
+            screen_vars.data(), screen_vars.size()
+        ).maxCoeff() : 0;
     state_gaussian_pin_cov_t state_gaussian_pin_cov(
         A,
         groups, 
@@ -181,7 +185,9 @@ auto fit(
         Eigen::Map<const vec_value_t>(screen_vars.data(), screen_vars.size()), 
         screen_transforms,
         lmda_path,
-        max_active_size, max_iters, tol, rdev_tol,
+        max_active_size, max_iters, 
+        tol * std::max<value_t>(max_screen_vars, 1), 
+        rdev_tol,
         newton_tol, newton_max_iters, n_threads,
         rsq,
         Eigen::Map<vec_value_t>(screen_beta.data(), screen_beta.size()), 
@@ -232,6 +238,7 @@ inline void solve(
     using value_t = typename state_t::value_t;
     using safe_bool_t = typename state_t::safe_bool_t;
     using vec_value_t = typename state_t::vec_value_t;
+    using vec_index_t = typename state_t::vec_index_t;
 
     const auto p = state.A->cols();
     GaussianCovBufferPack<value_t, safe_bool_t> buffer_pack(p);
@@ -240,7 +247,11 @@ inline void solve(
         if (display) cov::pb_add_suffix(state, pb);
     };
     const auto update_loss_null_f = [](const auto&) {};
-    const auto update_invariance_f = [&](auto& state, auto lmda) {
+    const auto update_invariance_f = [&](
+        auto& state, 
+        const auto& state_gaussian_pin_cov,
+        auto lmda
+    ) {
         const auto& v = state.v;
         const auto& groups = state.groups;
         const auto& group_sizes = state.group_sizes;
@@ -255,19 +266,19 @@ inline void solve(
 
         state.lmda = lmda;
         grad = v;
-        for (int ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) {
-            if (!screen_is_active[ss_idx]) continue;
-            const auto ss = screen_set[ss_idx];
-            const auto sb = screen_begins[ss_idx];
-            const auto g = groups[ss];
-            const auto gs = group_sizes[ss];
-            const Eigen::Map<const vec_value_t> beta_g(
-                screen_beta.data() + sb,
-                gs
-            );
-            A.mul(g, gs, beta_g, buffer_p);
-            matrix::dvsubi(grad, buffer_p, n_threads);
-        }
+
+        const auto& beta = state_gaussian_pin_cov.betas.back();
+        const Eigen::Map<const vec_index_t> beta_indices(
+            beta.innerIndexPtr(),
+            beta.nonZeros()
+        );
+        const Eigen::Map<const vec_value_t> beta_values(
+            beta.valuePtr(),
+            beta.nonZeros()
+        );
+        A.mul(beta_indices, beta_values, grad);
+        matrix::dvveq(grad, v - grad, n_threads);
+
         state::update_abs_grad(state, lmda);
     };
     const auto update_solutions_f = [](auto& state, auto& state_gaussian_pin_cov, auto lmda) {

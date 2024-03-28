@@ -5,7 +5,7 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
 class MatrixCovBase
 {
 protected:
@@ -72,7 +72,7 @@ protected:
 
 public:
     using value_t = ValueType;
-    using index_t = int;
+    using index_t = IndexType;
     using vec_index_t = util::rowvec_type<index_t>;
     using vec_value_t = util::rowvec_type<value_t>;
     using colmat_value_t = util::colmat_type<value_t>;
