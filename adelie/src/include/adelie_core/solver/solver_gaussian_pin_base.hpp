@@ -159,6 +159,9 @@ void update_coefficients(
         L, v, l1, l2, tol, max_iters,
         x, iters, buffer1, buffer2
     );
+    if (iters >= max_iters) {
+        throw std::runtime_error("Newton-ABS max iteration reached! Try increasing newton_max_iters.");
+    }
 }
 
 template <class ValueType>
