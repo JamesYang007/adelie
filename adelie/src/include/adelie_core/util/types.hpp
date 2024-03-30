@@ -51,6 +51,13 @@ enum class hessian_type
     _full
 };
 
+enum class read_mode_type
+{
+    _file,
+    _mmap,
+    _auto
+};
+
 inline screen_rule_type convert_screen_rule(
     const std::string& rule
 )
@@ -85,6 +92,16 @@ inline hessian_type convert_hessian(
     if (hessian == "diagonal") return hessian_type::_diagonal;
     if (hessian == "full") return hessian_type::_full;
     throw std::runtime_error("Invalid hessian type: " + hessian);
+}
+
+inline read_mode_type convert_read_mode(
+    const std::string& read_mode
+)
+{
+    if (read_mode == "file") return read_mode_type::_file;
+    if (read_mode == "mmap") return read_mode_type::_mmap;
+    if (read_mode == "auto") return read_mode_type::_auto;
+    throw std::runtime_error("Invalid read mode type: " + read_mode);
 }
 
 } // namespace util
