@@ -10,8 +10,12 @@ void io_snp_base(py::module_& m)
     using io_t = ad::io::IOSNPBase;
     using string_t = typename io_t::string_t;
     py::class_<io_t>(m, "IOSNPBase")
-        .def(py::init<const string_t&>(),
-            py::arg("filename")
+        .def(py::init<
+            const string_t&,
+            const string_t&
+        >(),
+            py::arg("filename"),
+            py::arg("read_mode")
         )
         .def("endian", &io_t::endian)
         .def("read", &io_t::read)
@@ -24,8 +28,12 @@ void io_snp_unphased(py::module_& m)
     using base_t = typename io_t::base_t;
     using string_t = typename io_t::string_t;
     py::class_<io_t, base_t>(m, "IOSNPUnphased")
-        .def(py::init<const string_t&>(),
-            py::arg("filename")
+        .def(py::init<
+            const string_t&,
+            const string_t&
+        >(),
+            py::arg("filename"),
+            py::arg("read_mode")
         )
         .def("rows", &io_t::rows)
         .def("snps", &io_t::snps)
@@ -48,8 +56,12 @@ void io_snp_phased_ancestry(py::module_& m)
     using base_t = typename io_t::base_t;
     using string_t = typename io_t::string_t;
     py::class_<io_t, base_t>(m, "IOSNPPhasedAncestry")
-        .def(py::init<const string_t&>(),
-            py::arg("filename")
+        .def(py::init<
+            const string_t&,
+            const string_t&
+        >(),
+            py::arg("filename"),
+            py::arg("read_mode")
         )
         .def("rows", &io_t::rows)
         .def("snps", &io_t::snps)

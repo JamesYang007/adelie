@@ -19,14 +19,13 @@ def create_calldata(
 
 
 def test_io_snp_unphased():
-    def _test(n, p, seed=0):
+    def _test(n, p, read_mode, seed=0):
         calldata = create_calldata(n, p, seed)
 
         filename = "/tmp/dummy_snp_unphased.snpdat"
-        handler = ad.io.snp_unphased(filename)
+        handler = ad.io.snp_unphased(filename, read_mode=read_mode)
         w_bytes = handler.write(calldata)
         r_bytes = handler.read()
-        os.remove(filename)
 
         total_bytes_exp = (
             1 + 2 * 4 + 8 * (p + 1) + 5 * np.sum(calldata != 0)
@@ -54,11 +53,14 @@ def test_io_snp_unphased():
 
         dense = handler.to_dense()
         assert np.allclose(dense, calldata)
+        os.remove(filename)
 
-    _test(1, 1)
-    _test(200, 32)
-    _test(2000, 3000)
-    _test(1421, 927)
+    read_modes = ["file", "mmap"]
+    for read_mode in read_modes:
+        _test(1, 1, read_mode)
+        _test(200, 32, read_mode)
+        _test(2000, 3000, read_mode)
+        _test(1421, 927, read_mode)
 
 
 def test_io_snp_phased_ancestry():
@@ -76,17 +78,16 @@ def test_io_snp_phased_ancestry():
         ] += calldata.reshape(n, s, 2)[:,:,1].ravel()
         return dense
 
-    def _test(n, s, A, seed=0):
+    def _test(n, s, A, read_mode, seed=0):
         data = ad.data.snp_phased_ancestry(n, s, A, seed=seed)
         calldata = data["X"]
         ancestries = data["ancestries"]
         dense = create_dense(calldata, ancestries, A)
 
         filename = "/tmp/dummy_snp_phased_ancestry.snpdat"
-        handler = ad.io.snp_phased_ancestry(filename)
+        handler = ad.io.snp_phased_ancestry(filename, read_mode=read_mode)
         w_bytes = handler.write(calldata, ancestries, A, n_threads=8)
         r_bytes = handler.read()
-        os.remove(filename)
 
         assert w_bytes == r_bytes
         assert handler.rows() == n
@@ -110,8 +111,11 @@ def test_io_snp_phased_ancestry():
 
         my_dense = handler.to_dense()
         assert np.allclose(my_dense, dense)
+        os.remove(filename)
 
-    _test(1, 1, 1)
-    _test(200, 32, 4)
-    _test(2000, 3000, 7)
-    _test(1421, 927, 8)
+    read_modes = ["file", "mmap"]
+    for read_mode in read_modes:
+        _test(1, 1, 1, read_mode)
+        _test(200, 32, 4, read_mode)
+        _test(2000, 3000, 7, read_mode)
+        _test(1421, 927, 8, read_mode)

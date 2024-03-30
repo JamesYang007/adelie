@@ -261,7 +261,7 @@ def test_naive_kronecker_eye_dense():
 
 
 def test_snp_unphased():
-    def _test(n, p, dtype, seed=0):
+    def _test(n, p, read_mode, dtype, seed=0):
         np.random.seed(seed)
         data = ad.data.snp_unphased(n, p, seed=seed)
         filename = "/tmp/test_snp_unphased.snpdat"
@@ -269,20 +269,22 @@ def test_snp_unphased():
         handler.write(data["X"])
         cX = mod.snp_unphased(
             filename=filename,
+            read_mode=read_mode,
             dtype=dtype,
             n_threads=7,
         )
-        os.remove(filename)
 
         X = data["X"].astype(np.int8)
         run_naive(X, cX, dtype)
+        os.remove(filename)
 
-
+    read_modes = ["file", "mmap"]
     dtypes = [np.float64, np.float32]
-    for dtype in dtypes:
-        _test(10, 20, dtype)
-        _test(1, 13, dtype)
-        _test(144, 1, dtype)
+    for read_mode in read_modes:
+        for dtype in dtypes:
+            _test(10, 20, read_mode, dtype)
+            _test(1, 13, read_mode, dtype)
+            _test(144, 1, read_mode, dtype)
 
 
 def test_snp_phased_ancestry():
@@ -300,7 +302,7 @@ def test_snp_phased_ancestry():
         ] += calldata.reshape(n, s, 2)[:,:,1].ravel()
         return dense
 
-    def _test(n, s, A, dtype, seed=0):
+    def _test(n, s, A, read_mode, dtype, seed=0):
         np.random.seed(seed)
         data = ad.data.snp_phased_ancestry(n, s, A, seed=seed)
         filename = "/tmp/test_snp_phased_ancestry.snpdat"
@@ -308,6 +310,7 @@ def test_snp_phased_ancestry():
         handler.write(data["X"], data["ancestries"], A)
         cX = mod.snp_phased_ancestry(
             filename=filename,
+            read_mode=read_mode,
             dtype=dtype,
             n_threads=7,
         )
@@ -317,8 +320,10 @@ def test_snp_phased_ancestry():
         run_naive(X, cX, dtype)
 
 
+    read_modes = ["file", "mmap"]
     dtypes = [np.float64, np.float32]
-    for dtype in dtypes:
-        _test(10, 20, 4, dtype)
-        _test(1, 13, 3, dtype)
-        _test(144, 1, 2, dtype)
+    for read_mode in read_modes:
+        for dtype in dtypes:
+            _test(10, 20, 4, read_mode, dtype)
+            _test(1, 13, 3, read_mode, dtype)
+            _test(144, 1, 2, read_mode, dtype)

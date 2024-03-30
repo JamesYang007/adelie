@@ -29,10 +29,11 @@ protected:
     const size_t _n_threads;    // number of threads
 
     static auto init_io(
-        const string_t& filename
+        const string_t& filename,
+        const string_t& read_mode
     )
     {
-        io_t io(filename);
+        io_t io(filename, read_mode);
         io.read();
         return io;
     }
@@ -40,10 +41,11 @@ protected:
 public:
     explicit MatrixNaiveSNPUnphased(
         const string_t& filename,
+        const string_t& read_mode,
         size_t n_threads
     ): 
         _filename(filename),
-        _io(init_io(filename)),
+        _io(init_io(filename, read_mode)),
         _n_threads(n_threads)
     {}
 

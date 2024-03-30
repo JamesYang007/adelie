@@ -2,6 +2,11 @@
 #include <adelie_core/util/types.hpp>
 #include <cstdio>
 #include <memory>
+#if defined(__linux__) || defined(__APPLE__)
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
+#endif
 
 namespace ad = adelie_core;
 
@@ -45,6 +50,7 @@ static void BM_alloc(benchmark::State& state)
     const auto n = state.range(0);
     for (auto _ : state) {
         ad::util::rowvec_type<char> buffer(n); 
+        buffer.setZero();
         buffer.setZero();
         benchmark::DoNotOptimize(buffer);
     }
@@ -112,5 +118,78 @@ BENCHMARK(BM_fread_buffered)
     -> Args({1000000000}) // 10GB
     ;
 BENCHMARK(BM_fread_unbuffered)
+    -> Args({1000000000}) // 10GB
+    ;
+
+static void BM_fread_read_copy(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const char* filename = "/tmp/dummy";
+    {
+        ad::util::rowvec_type<char> buffer(n); 
+        buffer.setZero();
+        auto file = fopen_safe(filename, "wb");
+        std::fwrite(buffer.data(), sizeof(char), n, file.get());
+    }
+
+    auto file = fopen_safe(filename, "rb");
+    std::setvbuf(file.get(), nullptr, _IONBF, 0);
+    ad::util::rowvec_type<char> buffer(n); 
+    std::fread(buffer.data(), sizeof(char), n, file.get()); 
+    ad::util::rowvec_type<char> buffer2(n);
+    buffer2.setZero();
+    for (auto _ : state) {
+        const auto pos = rand() % n;
+        const auto size = std::min<int>(n - pos, 1000000);
+        buffer2.head(size) = Eigen::Map<const ad::util::rowvec_type<char>>(
+            buffer.data() + pos, size
+        );
+        benchmark::DoNotOptimize(buffer2);
+    }
+
+    std::remove(filename);    
+}
+
+static void BM_mmap_read_copy(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const char* filename = "/tmp/dummy";
+    {
+        ad::util::rowvec_type<char> buffer(n); 
+        buffer.setZero();
+        auto file = fopen_safe(filename, "wb");
+        std::fwrite(buffer.data(), sizeof(char), n, file.get());
+    }
+
+    int fd = open(filename, O_RDONLY); 
+    char* addr = (char*) mmap(
+        nullptr,
+        n,
+        PROT_READ,
+        MAP_PRIVATE,
+        fd,
+        0
+    );
+    close(fd);
+
+    ad::util::rowvec_type<char> buffer(n);
+    buffer.setZero();
+    for (auto _ : state) {
+        const auto pos = rand() % n;
+        const auto size = std::min<int>(n - pos, 1000000);
+        buffer.head(size) = Eigen::Map<const ad::util::rowvec_type<char>>(
+            addr + pos, size
+        );
+        benchmark::DoNotOptimize(buffer);
+    }
+
+    munmap(addr, n);
+    std::remove(filename);    
+}
+
+BENCHMARK(BM_fread_read_copy)
+    -> Args({1000000000}) // 10GB
+    ;
+BENCHMARK(BM_mmap_read_copy)
     -> Args({1000000000}) // 10GB
     ;

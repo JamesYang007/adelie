@@ -80,12 +80,28 @@ class snp_unphased(snp_base):
     ----------
     filename : str
         File name containing the SNP data in ``.snpdat`` format.
+    read_mode : str, optional
+        Reading mode of the SNP data. 
+        It must be one of the following:
+
+            - ``"file"``: reads the file using standard file IO.
+              This method is the most general and portable,
+              however, with large files, it is the slowest option.
+            - ``"mmap"``: reads the file using mmap.
+              This method is only supported on Linux and MacOS.
+              It is the most efficient way to read large files.
+            - ``"auto"``: automatic way of choosing one of the options above.
+              The mode is set to ``"mmap"`` whenever the option is allowed.
+              Otherwise, the mode is set to ``"file"``.
+
+        Default is ``"auto"``.
     """
     def __init__(
         self,
-        filename,
+        filename: str,
+        read_mode: str ="auto",
     ):
-        super().__init__(core_io.IOSNPUnphased(filename))
+        super().__init__(core_io.IOSNPUnphased(filename, read_mode))
 
     def outer(self):
         """Outer indexing vector.
@@ -172,12 +188,28 @@ class snp_phased_ancestry(snp_base):
     ----------
     filename : str
         File name containing the SNP data in ``.snpdat`` format.
+    read_mode : str, optional
+        Reading mode of the SNP data. 
+        It must be one of the following:
+
+            - ``"file"``: reads the file using standard file IO.
+              This method is the most general and portable,
+              however, with large files, it is the slowest option.
+            - ``"mmap"``: reads the file using mmap.
+              This method is only supported on Linux and MacOS.
+              It is the most efficient way to read large files.
+            - ``"auto"``: automatic way of choosing one of the options above.
+              The mode is set to ``"mmap"`` whenever the option is allowed.
+              Otherwise, the mode is set to ``"file"``.
+
+        Default is ``"auto"``.
     """
     def __init__(
         self,
-        filename,
+        filename: str,
+        read_mode: str ="auto",
     ):
-        super().__init__(core_io.IOSNPPhasedAncestry(filename))
+        super().__init__(core_io.IOSNPPhasedAncestry(filename, read_mode))
 
     def outer(self):
         """Outer indexing vector.

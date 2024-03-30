@@ -61,15 +61,11 @@ def concatenate(
     core_base = dispatcher[dtype]
 
     class _concatenate(core_base):
-        def __init__(
-            self,
-            mats: list,
-            n_threads: int,
-        ):
+        def __init__(self):
             self.mats = mats
             core_base.__init__(self, self.mats, n_threads)
 
-    return _concatenate(mats, n_threads)
+    return _concatenate()
 
 
 def dense(
@@ -144,15 +140,11 @@ def dense(
     core_base = dispatcher[method][dtype][order]
 
     class _dense(core_base):
-        def __init__(
-            self,
-            mat: np.ndarray,
-            n_threads: int,
-        ):
+        def __init__(self):
             self.mat = mat
             core_base.__init__(self, self.mat, n_threads)
 
-    return _dense(mat, n_threads)
+    return _dense()
 
 
 def kronecker_eye(
@@ -222,21 +214,17 @@ def kronecker_eye(
         core_base = dispatcher[dtype]
 
     class _kronecker_eye(core_base):
-        def __init__(
-            self,
-            mat,
-            K: int,
-            n_threads: int,
-        ):
+        def __init__(self):
             self.mat = mat
             core_base.__init__(self, self.mat, K, n_threads)
 
-    return _kronecker_eye(mat, K, n_threads)
+    return _kronecker_eye()
 
 
 def snp_unphased(
     filename: str,
     *,
+    read_mode: str ="auto",
     n_threads: int =1,
     dtype: Union[np.float32, np.float64] =np.float64,
 ):
@@ -249,6 +237,9 @@ def snp_unphased(
     ----------
     filename : str
         File name that contains unphased calldata in ``.snpdat`` format.
+    read_mode : str, optional
+        See the corresponding parameter in ``adelie.io.snp_unphased``.
+        Default is ``"auto"``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -276,19 +267,16 @@ def snp_unphased(
     core_base = dispatcher[dtype]
 
     class _snp_unphased(core_base):
-        def __init__(
-            self,
-            filename: str,
-            n_threads: int,
-        ):
-            core_base.__init__(self, filename, n_threads)
+        def __init__(self):
+            core_base.__init__(self, filename, read_mode, n_threads)
 
-    return _snp_unphased(filename, n_threads)
+    return _snp_unphased()
 
 
 def snp_phased_ancestry(
     filename: str,
     *,
+    read_mode: str ="auto",
     n_threads: int =1,
     dtype: Union[np.float32, np.float64] =np.float64,
 ):
@@ -301,6 +289,9 @@ def snp_phased_ancestry(
     ----------
     filename : str
         File name that contains phased calldata with ancestry information in ``.snpdat`` format.
+    read_mode : str, optional
+        See the corresponding parameter in ``adelie.io.snp_phased_ancestry``.
+        Default is ``"auto"``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -328,14 +319,10 @@ def snp_phased_ancestry(
     core_base = dispatcher[dtype]
 
     class _snp_phased_ancestry(core_base):
-        def __init__(
-            self,
-            filename: str,
-            n_threads: int,
-        ):
-            core_base.__init__(self, filename, n_threads)
+        def __init__(self):
+            core_base.__init__(self, filename, read_mode, n_threads)
 
-    return _snp_phased_ancestry(filename, n_threads)
+    return _snp_phased_ancestry()
 
 
 def cov_lazy(
@@ -388,12 +375,8 @@ def cov_lazy(
     core_base = dispatcher[dtype][order]
 
     class _cov_lazy(core_base):
-        def __init__(
-            self,
-            mat: np.ndarray,
-            n_threads: int,
-        ):
+        def __init__(self):
             self.mat = mat
             core_base.__init__(self, self.mat, n_threads)
 
-    return _cov_lazy(mat, n_threads)
+    return _cov_lazy()

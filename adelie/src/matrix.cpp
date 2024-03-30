@@ -515,9 +515,11 @@ void matrix_naive_snp_unphased(py::module_& m, const char* name)
         .def(
             py::init<
                 const string_t&,
+                const string_t&,
                 size_t
             >(), 
             py::arg("filename"),
+            py::arg("read_mode"),
             py::arg("n_threads")
         )
         ;
@@ -533,9 +535,11 @@ void matrix_naive_snp_phased_ancestry(py::module_& m, const char* name)
         .def(
             py::init<
                 const string_t&,
+                const string_t&,
                 size_t
             >(), 
             py::arg("filename"),
+            py::arg("read_mode"),
             py::arg("n_threads")
         )
         ;
