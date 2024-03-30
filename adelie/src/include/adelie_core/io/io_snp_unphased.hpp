@@ -16,6 +16,7 @@ public:
     using vec_value_t = util::rowvec_type<value_t>;
     using rowarr_value_t = util::rowarr_type<value_t>;
     using colarr_value_t = util::colarr_type<value_t>;
+    using typename base_t::buffer_t;
 
 protected:
     static constexpr size_t _multiplier = (
@@ -128,8 +129,7 @@ public:
             outer.size() * sizeof(outer_t)
         );
 
-        auto& buffer = _buffer;
-        buffer.resize(outer[p]);
+        buffer_t buffer(outer[p]);
 
         size_t idx = 0;
         reinterpret_cast<bool_t&>(buffer[idx]) = endian; idx += sizeof(bool_t);

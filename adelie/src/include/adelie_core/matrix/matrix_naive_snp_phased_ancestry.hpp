@@ -31,10 +31,11 @@ protected:
     util::rowarr_type<value_t> _buff;           // buffer
 
     static auto init_io(
-        const string_t& filename
+        const string_t& filename,
+        const string_t& read_mode
     )
     {
-        io_t io(filename);
+        io_t io(filename, read_mode);
         io.read();
         return io;
     }
@@ -58,10 +59,11 @@ protected:
 public:
     explicit MatrixNaiveSNPPhasedAncestry(
         const string_t& filename,
+        const string_t& read_mode,
         size_t n_threads
     ): 
         _filename(filename),
-        _io(init_io(filename)),
+        _io(init_io(filename, read_mode)),
         _n_threads(n_threads),
         _vbuff(n_threads),
         _buff(n_threads, _io.ancestries())
