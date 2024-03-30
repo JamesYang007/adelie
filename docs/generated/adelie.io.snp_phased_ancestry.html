@@ -459,12 +459,29 @@ document.write(`
 <h1>adelie.io.snp_phased_ancestry<a class="headerlink" href="#adelie-io-snp-phased-ancestry" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.io.</span></span><span class="sig-name descname"><span class="pre">snp_phased_ancestry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.io.</span></span><span class="sig-name descname"><span class="pre">snp_phased_ancestry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry" title="Link to this definition">#</a></dt>
 <dd><p>IO handler for SNP phased, ancestry data.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>filename</strong><span class="classifier">str</span></dt><dd><p>File name containing the SNP data in <code class="docutils literal notranslate"><span class="pre">.snpdat</span></code> format.</p>
+</dd>
+<dt><strong>read_mode</strong><span class="classifier">str, optional</span></dt><dd><p>Reading mode of the SNP data. 
+It must be one of the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;file&quot;</span></code>: reads the file using standard file IO.
+This method is the most general and portable,
+however, with large files, it is the slowest option.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;mmap&quot;</span></code>: reads the file using mmap.
+This method is only supported on Linux and MacOS.
+It is the most efficient way to read large files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>: automatic way of choosing one of the options above.
+The mode is set to <code class="docutils literal notranslate"><span class="pre">&quot;mmap&quot;</span></code> whenever the option is allowed.
+Otherwise, the mode is set to <code class="docutils literal notranslate"><span class="pre">&quot;file&quot;</span></code>.</p></li>
+</ul>
+</div></blockquote>
+<p>Default is <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -472,7 +489,7 @@ document.write(`
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_phased_ancestry.__init__" title="adelie.io.snp_phased_ancestry.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(filename)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_phased_ancestry.__init__" title="adelie.io.snp_phased_ancestry.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(filename[, read_mode])</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_phased_ancestry.ancestry" title="adelie.io.snp_phased_ancestry.ancestry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ancestry</span></code></a>(j, hap)</p></td>
@@ -509,7 +526,7 @@ document.write(`
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry.__init__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.io.snp_phased_ancestry.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
