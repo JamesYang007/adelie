@@ -10,6 +10,14 @@
 #include <unistd.h>
 #endif
 
+#if defined(__linux__) 
+#define MAP_FLAGS MAP_PRIVATE | MAP_NORESERVE | MAP_POPULATE
+#elif defined(__APPLE__)
+#define MAP_FLAGS MAP_PRIVATE
+#else
+#define MAP_FLAGS 0
+#endif
+
 namespace adelie_core {
 namespace io {
 
@@ -123,7 +131,7 @@ public:
                     nullptr, 
                     total_bytes, 
                     PROT_READ,
-                    MAP_PRIVATE,
+                    MAP_FLAGS,
                     fd,
                     0
                 )
@@ -131,11 +139,7 @@ public:
             close(fd);
             _mmap_ptr = mmap_unique_ptr_t(
                 addr, 
-                [=](char* ptr) {
-                    if (ptr) {
-                        munmap(ptr, total_bytes);
-                    }
-                }
+                [=](char* ptr) { if (ptr) munmap(ptr, total_bytes); }
             );
             new (&_buffer) Eigen::Map<buffer_t>(addr, total_bytes);
 #else
@@ -170,3 +174,5 @@ public:
 
 } // namespace io
 } // namespace adelie_core
+
+#undef MAP_FLAGS 
