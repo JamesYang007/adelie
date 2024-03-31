@@ -207,11 +207,13 @@ def binomial(
     *,
     y: np.ndarray,
     weights: np.ndarray =None,
+    link: str ="logit",
     dtype: Union[np.float32, np.float64] =np.float64,
 ):
     """Creates a Binomial GLM family object.
 
-    The Binomial GLM family specifies the loss function as:
+    The Binomial GLM family with the logit link function 
+    specifies the loss function as:
 
     .. math::
         \\begin{align*}
@@ -222,7 +224,21 @@ def binomial(
             \\right)
         \\end{align*}
 
-    We assume that :math:`y_i \\in \\{0,1\\}`.
+    The Binomial GLM family with the probit link function 
+    specifies the loss function as:
+
+    .. math::
+        \\begin{align*}
+            \\ell(\\eta)
+            =
+            -\\sum\\limits_{i=1}^n w_i \\left(
+                y_i \\log(\\Phi(\\eta_i)) + (1-y_i) \\log(1-\\Phi(\\eta_i))
+            \\right)
+        \\end{align*}
+
+    where :math:`\\Phi` is the standard normal CDF.
+
+    We assume that :math:`y_i \\in [0,1]`.
 
     Parameters
     ----------
@@ -232,6 +248,14 @@ def binomial(
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
+    link : str, optional
+        The link function type.
+        It must be one of the following:
+
+            - ``"logit"``: the logit link function.
+            - ``"probit"``: the probit link function.
+
+        Default is ``"logit"``.
     dtype : Union[np.float32, np.float64], optional
         The underlying data type.
         Default is ``np.float64``.
@@ -246,11 +270,17 @@ def binomial(
     adelie.glm.GlmBase64
     """
     dispatcher = {
-        np.float64: core.glm.GlmBinomial64,
-        np.float32: core.glm.GlmBinomial32,
+        "logit": {
+            np.float64: core.glm.GlmBinomialLogit64,
+            np.float32: core.glm.GlmBinomialLogit32,
+        },
+        "probit": {
+            np.float64: core.glm.GlmBinomialProbit64,
+            np.float32: core.glm.GlmBinomialProbit32,
+        },
     }
 
-    core_base = dispatcher[dtype]
+    core_base = dispatcher[link][dtype]
 
     class _binomial(glm_base, core_base):
         def __init__(

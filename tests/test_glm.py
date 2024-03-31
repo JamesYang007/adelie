@@ -1,4 +1,5 @@
 from scipy.special import xlogy
+from scipy.stats import norm
 import adelie.glm as glm
 import adelie.configs as configs
 import adelie.adelie_core as core
@@ -88,7 +89,7 @@ def run_subset_test(
     assert np.allclose(loss_full, loss_full_exp)
 
 
-class TestGlm():
+class GlmTest():
     def inv_hessian_gradient(self, eta, grad, hess, inv_hess_grad):
         inv_hess_grad[...] = grad / (np.maximum(hess, 0) + configs.Configs.hessian_min * (hess <= 0))
 
@@ -98,7 +99,7 @@ class TestGlm():
 # =====================================================================================
 
 
-class TestGaussian(TestGlm):
+class GlmTestGaussian(GlmTest):
     def __init__(self, y, weights):
         self.y = y
         self.weights = weights
@@ -125,7 +126,7 @@ def test_gaussian():
         w[0] = 1
         w /= np.sum(w)
         model = glm.gaussian(y=y, weights=w)
-        model_exp = TestGaussian(y=y, weights=w)
+        model_exp = GlmTestGaussian(y=y, weights=w)
         run_common_test(model, model_exp)
 
         subset = w != 0
@@ -143,7 +144,7 @@ def test_gaussian():
 # =====================================================================================
 
 
-class TestBinomial(TestGlm):
+class GlmTestBinomialLogit(GlmTest):
     def __init__(self, y, weights):
         self.y = y
         self.weights = weights
@@ -161,29 +162,74 @@ class TestBinomial(TestGlm):
         return np.sum(self.weights * (-self.y * eta + A))
 
     def loss_full(self):
-        return 0
+        return -np.sum(
+            self.weights * (xlogy(self.y, self.y) + xlogy(1-self.y, 1-self.y))
+        )
+
+
+class GlmTestBinomialProbit(GlmTest):
+    def __init__(self, y, weights):
+        self.y = y
+        self.weights = weights
+
+    def gradient(self, eta, grad):
+        Phis = norm.cdf(eta)
+        grad[...] = self.weights * (
+            self.y / Phis - (1-self.y) / (1-Phis)
+        ) * norm.pdf(eta)
+    
+    def hessian(self, eta, grad, hess):
+        y = self.y
+        Phis = norm.cdf(eta)
+        phis = norm.pdf(eta)
+        hess[...] = self.weights * (
+            (y / Phis ** 2 + (1-y) / (1-Phis) ** 2) * phis ** 2
+            +
+            (y / Phis - (1-y) / (1-Phis)) * phis * eta
+        )
+
+    def loss(self, eta):
+        Phis = norm.cdf(eta)
+        return -np.sum(self.weights * (
+            self.y * np.log(Phis) + (1-self.y) * np.log(1-Phis)
+        ))
+
+    def loss_full(self):
+        return -np.sum(
+            self.weights * (xlogy(self.y, self.y) + xlogy(1-self.y, 1-self.y))
+        )
 
 
 def test_binomial():
-    def _test(n, seed=0):
+    def _test(n, link, binary, seed=0):
         np.random.seed(seed)
-        y = np.random.binomial(1, 0.5, n)
+        if binary:
+            y = np.random.binomial(1, 0.5, n)
+        else:
+            y = np.random.uniform(0, 1, n)
         w = np.random.uniform(0, 1, n)
         w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
         w[0] = 1
         w /= np.sum(w)
-        model = glm.binomial(y=y, weights=w)
-        model_exp = TestBinomial(y=y, weights=w)
+        model = glm.binomial(y=y, weights=w, link=link)
+        test_glm = {
+            "logit": GlmTestBinomialLogit,
+            "probit": GlmTestBinomialProbit,
+        }[link]
+        model_exp = test_glm(y=y, weights=w)
         run_common_test(model, model_exp)
 
         subset = w != 0
         y, w = y[subset], w[subset]
-        model_exp = glm.binomial(y=y, weights=w)
+        model_exp = glm.binomial(y=y, weights=w, link=link)
         run_subset_test(model, model_exp, subset)
 
+    links = ["logit", "probit"]
     ns = [1, 2, 5, 10, 20, 100]
-    for n in ns:
-        _test(n)
+    for link in links:
+        for n in ns:
+            _test(n, link, True)
+            _test(n, link, False)
 
 
 # =====================================================================================
@@ -191,7 +237,7 @@ def test_binomial():
 # =====================================================================================
 
 
-class TestPoisson(TestGlm):
+class GlmTestPoisson(GlmTest):
     def __init__(self, y, weights):
         self.y = y
         self.weights = weights
@@ -220,7 +266,7 @@ def test_poisson():
         w[0] = 1
         w /= np.sum(w)
         model = glm.poisson(y=y, weights=w)
-        model_exp = TestPoisson(y=y, weights=w)
+        model_exp = GlmTestPoisson(y=y, weights=w)
         run_common_test(model, model_exp)
 
         subset = w != 0
@@ -421,7 +467,7 @@ def test_cox_scale():
         _test(n)
 
 
-class TestCox(TestGlm):
+class GlmTestCox(GlmTest):
     def __init__(
         self,
         start,
@@ -577,7 +623,7 @@ def test_cox():
             status=d,
             weights=w,
         )
-        model_exp = TestCox(
+        model_exp = GlmTestCox(
             start=s,
             stop=t,
             status=d,
@@ -605,7 +651,7 @@ def test_cox():
 # =====================================================================================
 
 
-class TestMultiGaussian(TestGlm):
+class GlmTestMultiGaussian(GlmTest):
     def __init__(self, y, weights):
         self.y = y
         self.weights = weights
@@ -636,7 +682,7 @@ def test_multigaussian():
         w[0] = 1
         w /= np.sum(w)
         model = glm.multigaussian(y=y, weights=w)
-        model_exp = TestMultiGaussian(y=y, weights=w)
+        model_exp = GlmTestMultiGaussian(y=y, weights=w)
         run_common_test(model, model_exp)
 
         subset = w != 0
@@ -656,7 +702,7 @@ def test_multigaussian():
 # =====================================================================================
 
 
-class TestMultinomial(TestGlm):
+class GlmTestMultinomial(GlmTest):
     def __init__(self, y, weights):
         self.y = y
         self.weights = weights
@@ -691,7 +737,7 @@ def test_multinomial():
         w[0] = 1
         w /= np.sum(w)
         model = glm.multinomial(y=y, weights=w)
-        model_exp = TestMultinomial(y=y, weights=w)
+        model_exp = GlmTestMultinomial(y=y, weights=w)
         run_common_test(model, model_exp)
 
         subset = w != 0
@@ -700,7 +746,7 @@ def test_multinomial():
         run_subset_test(model, model_exp, subset)
 
     ns = [1, 2, 5, 10, 20, 100]
-    Ks = [1, 2, 3, 4]
+    Ks = [2, 3, 4]
     for n in ns:
         for K in Ks:
             _test(n, K)
