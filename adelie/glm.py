@@ -452,9 +452,8 @@ def multinomial(
             \\right)
         \\end{align*}
 
-    We assume that every :math:`y_{ik} \\in \\{0,1\\}` and
-    for each fixed :math:`i`, 
-    there is exactly one :math:`k` such that :math:`y_{ik} = 1`.
+    We assume that every :math:`y_{ik} \\in [0,1]` and
+    for each fixed :math:`i`, :math:`\\sum_{k=1}^K y_{ik} = 1`.
 
     .. note::
         The ``hessian()`` method computes :math:`2 \\mathrm{diag}(\\nabla^2 \\ell(\\eta))`

@@ -725,13 +725,17 @@ class GlmTestMultinomial(GlmTest):
         return np.sum(self.weights * (-np.sum(self.y * eta, axis=-1) + A)) / K
 
     def loss_full(self):
-        return 0
+        K = self.y.shape[-1]
+        return -np.sum(self.weights * np.sum(xlogy(self.y, self.y), axis=-1)) / K
 
 
 def test_multinomial():
-    def _test(n, K, seed=0):
+    def _test(n, K, binary=True, seed=0):
         np.random.seed(seed)
-        y = np.random.multinomial(1, np.full(K, 1/K), n)
+        if binary:
+            y = np.random.multinomial(1, np.full(K, 1/K), n)
+        else:
+            y = np.random.dirichlet(np.ones(K), n)
         w = np.random.uniform(0, 1, n)
         w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
         w[0] = 1
@@ -749,4 +753,5 @@ def test_multinomial():
     Ks = [2, 3, 4]
     for n in ns:
         for K in Ks:
-            _test(n, K)
+            _test(n, K, True)
+            _test(n, K, False)
