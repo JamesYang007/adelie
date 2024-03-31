@@ -199,9 +199,7 @@ def cv_grpnet(
     )
     full_lmdas = state.lmda_max * np.logspace(0, np.log10(min_ratio), lmda_path_size)
 
-    # augmented lambda sequence
-    glms = []
-    lmdas = []
+    cv_losses = np.empty((n_folds, full_lmdas.shape[0]))
     for fold in range(n_folds):
         # current validation fold range
         begin = (
@@ -216,8 +214,8 @@ def cv_grpnet(
         weights_sum = np.sum(weights)
         weights /= weights_sum
         glm_c = glm.reweight(weights)
-        glms.append(glm_c)
 
+        # initial call to compute current lambda path augmented with full path
         state = grpnet(
             X=X_raw,
             glm=glm_c,
@@ -226,25 +224,13 @@ def cv_grpnet(
             progress_bar=False,
         )
         curr_lmdas = state.lmda_max * np.logspace(0, np.log10(min_ratio), lmda_path_size)
-        curr_lmdas = curr_lmdas[
-            (curr_lmdas > full_lmdas[0]) | (curr_lmdas < full_lmdas[-1])
-        ]
-        lmdas.append(curr_lmdas)
-    aug_lmdas = np.sort(np.concatenate([full_lmdas] + lmdas))[::-1]
+        curr_lmdas = curr_lmdas[curr_lmdas > full_lmdas[0]]
+        aug_lmdas = np.sort(np.concatenate([full_lmdas, curr_lmdas]))[::-1]
 
-    # fit each training fold on the common augmented path
-    cv_losses = np.empty((n_folds, aug_lmdas.shape[0]))
-    for fold, glm_fold in enumerate(glms):
-        # current validation fold range
-        begin = (
-            (fold_size + 1) * min(fold, remaining) + 
-            max(fold - remaining, 0) * fold_size
-        )
-        curr_fold_size = fold_size + (fold < remaining)
-
+        # fit on training fold
         state = grpnet(
             X=X_raw,
-            glm=glm_fold,
+            glm=glm_c,
             ddev_tol=0,
             n_threads=n_threads,
             early_exit=early_exit,
@@ -252,12 +238,10 @@ def cv_grpnet(
             **grpnet_params,
         )
 
-        weights = np.zeros(n)
-        weights[order[begin:begin+curr_fold_size]] = glm.weights[order[begin:begin+curr_fold_size]]
-        weights_sum = np.sum(weights)
-        weights /= weights_sum
-        glm_c = glm_fold.reweight(weights)
+        # compute validation weight sum
+        weights_sum_val = np.sum(glm.weights[order[begin:begin+curr_fold_size]])
 
+        # get coefficients/intercepts only on full_lmdas
         betas = state.betas
         intercepts = state.intercepts
         lmdas = state.lmdas
@@ -268,25 +252,37 @@ def cv_grpnet(
                 intercepts=intercepts,
                 lmdas=lmdas,
             )
-            for lmda in aug_lmdas
+            for lmda in full_lmdas
         ]
-        aug_betas = scipy.sparse.vstack([x[0] for x in beta_ints])
-        aug_intercepts = np.array([x[1] for x in beta_ints])
+        full_betas = scipy.sparse.vstack([x[0] for x in beta_ints])
+        full_intercepts = np.array([x[1] for x in beta_ints])
+
+        # compute linear predictions
         etas = predict(
             X=X_raw,
-            betas=aug_betas,
-            intercepts=aug_intercepts,
+            betas=full_betas,
+            intercepts=full_intercepts,
             offsets=state._offsets,
             n_threads=n_threads,
         )
-        cv_losses[fold] = np.array([glm_c.loss(eta) for eta in etas])
+
+        # compute loss on full data
+        full_data_losses = np.array([glm.loss(eta) for eta in etas])
+        # compute loss on training data
+        train_losses = weights_sum * np.array([glm_c.loss(eta) for eta in etas])
+        # compute induced loss on validation data
+        cv_losses[fold] = (
+            (full_data_losses - train_losses) / weights_sum_val
+            if weights_sum_val > 0 else
+            0
+        )
     logger.logger.setLevel(logger_level)
 
     avg_losses = np.mean(cv_losses, axis=0)
     best_idx = np.argmin(avg_losses)
 
     return CVGrpnetResult(
-        lmdas=aug_lmdas,
+        lmdas=full_lmdas,
         losses=cv_losses,
         avg_losses=avg_losses,
         best_idx=best_idx,

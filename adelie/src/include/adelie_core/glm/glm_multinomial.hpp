@@ -25,7 +25,13 @@ public:
     ):
         base_t("multinomial", y, weights, true),
         _buff(y.rows() * (y.cols() + 1))
-    {}
+    {
+        if (y.cols() <= 1) {
+            throw std::runtime_error(
+                "y must have at least 2 columns (classes)."
+            );
+        }
+    }
 
     void gradient(
         const Eigen::Ref<const rowarr_value_t>& eta,
