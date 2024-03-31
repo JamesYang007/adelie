@@ -14,7 +14,7 @@ auto loss_full(
     const WeightsType& weights
 )
 {
-    using value_t = std::decay_t<YType>::Scalar;
+    using value_t = typename std::decay_t<YType>::Scalar;
 
     value_t loss = 0;
     for (int i = 0; i < weights.size(); ++i) {
