@@ -1,3 +1,4 @@
+from itertools import cycle
 from typing import Union
 from . import adelie_core as core
 from . import logger
@@ -590,6 +591,7 @@ def plot_coefficients(
     lmdas: np.ndarray,
     groups: np.ndarray,
     group_sizes: np.ndarray,
+    l2_norm: bool =False,
 ):
     """Plots the coefficient profile.
 
@@ -605,6 +607,12 @@ def plot_coefficients(
     group_sizes : (G,) np.ndarray
         List of group sizes corresponding to each element of ``groups``.
         ``group_sizes[i]`` is the size of the ``i`` th group.
+    l2_norm : bool, optional
+        If ``True``, the :math:`\\ell_2` norms of each coefficient group
+        is plotted rather than the raw coefficient values.
+        This may be more intuitive to visualize since there is only one path
+        associated with a group.
+        Default is ``False``.
 
     Returns
     -------
@@ -613,17 +621,34 @@ def plot_coefficients(
     tls = -np.log(lmdas)
 
     fig, ax = plt.subplots(figsize=(9, 6), layout="constrained")
+    colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+    colors_it = cycle(colors)
 
-    for g, gs in zip(groups, group_sizes):
-        curr_block = betas[:, g:g+gs]
-        if curr_block.nnz == 0:
-            continue
-        curr_block = curr_block.toarray()
-        ax.plot(tls, curr_block, linestyle="-")
+    if l2_norm:
+        for g, gs in zip(groups, group_sizes):
+            curr_block = betas[:, g:g+gs]
+            if curr_block.nnz == 0:
+                continue
+            curr_block = curr_block.toarray()
+            curr_block_norms = np.linalg.norm(curr_block, axis=-1)
+            color = next(colors_it)
+            ax.plot(tls, curr_block_norms, linestyle="-", color=color)
 
-    ax.set_title("Coefficient Profile")
-    ax.set_ylabel(r"$\beta$")
-    ax.set_xlabel(r"-$\log(\lambda)$")
+        ax.set_title("Coefficient $\ell_2$-Norm Profile")
+        ax.set_ylabel(r"$\|\beta\|_2$")
+        ax.set_xlabel(r"-$\log(\lambda)$")
+    else:
+        for g, gs in zip(groups, group_sizes):
+            curr_block = betas[:, g:g+gs]
+            if curr_block.nnz == 0:
+                continue
+            curr_block = curr_block.toarray()
+            color = next(colors_it)
+            ax.plot(tls, curr_block, linestyle="-", color=color)
+
+        ax.set_title("Coefficient Profile")
+        ax.set_ylabel(r"$\beta$")
+        ax.set_xlabel(r"-$\log(\lambda)$")
 
     return fig, ax
 
@@ -1083,7 +1108,7 @@ class diagnostic:
             penalty=self._args["penalty"],
         )
 
-    def plot_coefficients(self):
+    def plot_coefficients(self, **kwargs):
         """Plots the coefficient profile.
 
         See Also
@@ -1100,6 +1125,7 @@ class diagnostic:
             lmdas=self.state.lmdas,
             groups=self.state.groups[p_begin:]-p_begin,
             group_sizes=self.state.group_sizes[p_begin:],
+            **kwargs,
         )
 
     def plot_devs(self):
