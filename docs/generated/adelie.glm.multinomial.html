@@ -478,9 +478,8 @@ document.write(`
     \right)
     \right)
 \end{align*}\]</div>
-<p>We assume that every <span class="math notranslate nohighlight">\(y_{ik} \in \{0,1\}\)</span> and
-for each fixed <span class="math notranslate nohighlight">\(i\)</span>, 
-there is exactly one <span class="math notranslate nohighlight">\(k\)</span> such that <span class="math notranslate nohighlight">\(y_{ik} = 1\)</span>.</p>
+<p>We assume that every <span class="math notranslate nohighlight">\(y_{ik} \in [0,1]\)</span> and
+for each fixed <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(\sum_{k=1}^K y_{ik} = 1\)</span>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">hessian()</span></code> method computes <span class="math notranslate nohighlight">\(2 \mathrm{diag}(\nabla^2 \ell(\eta))\)</span>

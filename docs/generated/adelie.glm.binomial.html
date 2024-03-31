@@ -461,9 +461,10 @@ document.write(`
 <h1>adelie.glm.binomial<a class="headerlink" href="#adelie-glm-binomial" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.glm.binomial">
-<span class="sig-prename descclassname"><span class="pre">adelie.glm.</span></span><span class="sig-name descname"><span class="pre">binomial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights:</span> <span class="pre">~numpy.ndarray</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">~numpy.float32</span> <span class="pre">|</span> <span class="pre">~numpy.float64</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.glm.binomial" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.glm.</span></span><span class="sig-name descname"><span class="pre">binomial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights:</span> <span class="pre">~numpy.ndarray</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">link:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'logit'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">~numpy.float32</span> <span class="pre">|</span> <span class="pre">~numpy.float64</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.glm.binomial" title="Link to this definition">#</a></dt>
 <dd><p>Creates a Binomial GLM family object.</p>
-<p>The Binomial GLM family specifies the loss function as:</p>
+<p>The Binomial GLM family with the logit link function 
+specifies the loss function as:</p>
 <div class="math notranslate nohighlight">
 \[\begin{align*}
     \ell(\eta)
@@ -472,15 +473,36 @@ document.write(`
         -y_i \eta_i + \log(1 + e^{\eta_i})
     \right)
 \end{align*}\]</div>
-<p>We assume that <span class="math notranslate nohighlight">\(y_i \in \{0,1\}\)</span>.</p>
-<dl class="field-list simple">
+<p>The Binomial GLM family with the probit link function 
+specifies the loss function as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{align*}
+    \ell(\eta)
+    =
+    -\sum\limits_{i=1}^n w_i \left(
+        y_i \log(\Phi(\eta_i)) + (1-y_i) \log(1-\Phi(\eta_i))
+    \right)
+\end{align*}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\Phi\)</span> is the standard normal CDF.</p>
+<p>We assume that <span class="math notranslate nohighlight">\(y_i \in [0,1]\)</span>.</p>
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>y</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Response vector <span class="math notranslate nohighlight">\(y\)</span>.</p>
 </dd>
 <dt><strong>weights</strong><span class="classifier">(n,) np.ndarray, optional</span></dt><dd><p>Observation weights <span class="math notranslate nohighlight">\(W\)</span>.
 Weights are normalized such that they sum to <code class="docutils literal notranslate"><span class="pre">1</span></code>.
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to <code class="docutils literal notranslate"><span class="pre">np.full(n,</span> <span class="pre">1/n)</span></code>.</p>
+</dd>
+<dt><strong>link</strong><span class="classifier">str, optional</span></dt><dd><p>The link function type.
+It must be one of the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;logit&quot;</span></code>: the logit link function.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;probit&quot;</span></code>: the probit link function.</p></li>
+</ul>
+</div></blockquote>
+<p>Default is <code class="docutils literal notranslate"><span class="pre">&quot;logit&quot;</span></code>.</p>
 </dd>
 <dt><strong>dtype</strong><span class="classifier">Union[np.float32, np.float64], optional</span></dt><dd><p>The underlying data type.
 Default is <code class="docutils literal notranslate"><span class="pre">np.float64</span></code>.</p>
