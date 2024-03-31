@@ -219,9 +219,23 @@ void glm_base(py::module_& m, const char* name)
 }
 
 template <class T>
-void glm_binomial(py::module_& m, const char* name)
+void glm_binomial_logit(py::module_& m, const char* name)
 {
-    using internal_t = ad::glm::GlmBinomial<T>;
+    using internal_t = ad::glm::GlmBinomialLogit<T>;
+    using base_t = typename internal_t::base_t;
+    using vec_value_t = typename internal_t::vec_value_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(py::init<
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&
+        >())
+        ;
+}
+
+template <class T>
+void glm_binomial_probit(py::module_& m, const char* name)
+{
+    using internal_t = ad::glm::GlmBinomialProbit<T>;
     using base_t = typename internal_t::base_t;
     using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, base_t>(m, name)
@@ -577,8 +591,10 @@ void register_glm(py::module_& m)
     glm_base<float>(m, "GlmBase32");
     glm_multibase<double>(m, "GlmMultiBase64");
     glm_multibase<float>(m, "GlmMultiBase32");
-    glm_binomial<double>(m, "GlmBinomial64");
-    glm_binomial<float>(m, "GlmBinomial32");
+    glm_binomial_logit<double>(m, "GlmBinomialLogit64");
+    glm_binomial_logit<float>(m, "GlmBinomialLogit32");
+    glm_binomial_probit<double>(m, "GlmBinomialProbit64");
+    glm_binomial_probit<float>(m, "GlmBinomialProbit32");
     glm_cox<double>(m, "GlmCox64");
     glm_cox<float>(m, "GlmCox32");
     glm_gaussian<double>(m, "GlmGaussian64");

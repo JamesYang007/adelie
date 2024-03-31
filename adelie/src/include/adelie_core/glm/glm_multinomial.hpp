@@ -89,7 +89,18 @@ public:
 
     value_t loss_full() override
     {
-        return 0;
+        value_t loss = 0;
+        for (int i = 0; i < y.rows(); ++i) {
+            value_t sum = 0;
+            for (int k = 0; k < y.cols(); ++k) {
+                const auto log_yik = std::log(y(i,k));
+                if (!(std::isinf(log_yik) || std::isnan(log_yik))) {
+                    sum += y(i,k) * log_yik;
+                }
+            }
+            loss -= sum * weights[i] / y.cols();
+        }    
+        return loss;
     }
 };
 
