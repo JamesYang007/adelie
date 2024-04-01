@@ -1055,13 +1055,132 @@ def plot_kkt(
     return HTML(anim.to_html5_video())
 
 
-class diagnostic:
-    """Diagnostic class for user-friendly API.
+class DiagnosticCov:
+    """Diagnostic class for covariance states.
+
+    .. note::
+        Currently, the only supported covariance state
+        is the Gaussian covariance state from calling ``adelie.gaussian_cov``.
 
     Parameters
     ----------
     state
-        A state object from solving group elastic net.
+        A state object of covariance type from solving group elastic net.
+    """
+    def __init__(self, state):
+        self.state = state
+        self.betas = state.betas
+
+        # keep same format as DiagnosticNaive for consistency
+        self._args = {}
+        self._args["groups"] = state.groups
+        self._args["penalty"] = state.penalty
+
+        A, v = state.A, state.v
+        L, p = self.betas.shape
+        self.gradients = np.empty((L, p))
+        for i in range(L):
+            beta_i = self.betas[i]
+            A.mul(beta_i.indices, beta_i.data, self.gradients[i]) 
+        self.gradients = v[None] - self.gradients
+        self.gradient_norms = gradient_norms(
+            grads=self.gradients,
+            betas=self.betas,
+            lmdas=self.state.lmdas,
+            groups=self._args["groups"],
+            alpha=self.state.alpha,
+            penalty=self._args["penalty"],
+        )
+        self.gradient_scores = gradient_scores(
+            grad_norms=self.gradient_norms,
+            lmdas=self.state.lmdas,
+            alpha=self.state.alpha,
+            penalty=self._args["penalty"],
+        )
+
+    def plot_coefficients(self, **kwargs):
+        """Plots the coefficient profile.
+
+        See Also
+        --------
+        adelie.diagnostic.plot_coefficients
+        """
+        return plot_coefficients(
+            betas=self.betas,
+            lmdas=self.state.lmdas,
+            groups=self.state.groups,
+            group_sizes=self.state.group_sizes,
+            **kwargs,
+        )
+
+    def plot_devs(self):
+        """Plots the deviance profile.
+
+        See Also
+        --------
+        adelie.diagnostic.plot_devs
+        """
+        return plot_devs(
+            lmdas=self.state.lmdas,
+            devs=self.state.devs,
+        )
+
+    def plot_set_sizes(self, **kwargs):
+        """Plots the set sizes.
+
+        See Also
+        --------
+        adelie.diagnostic.plot_set_sizes
+        """
+        return plot_set_sizes(
+            groups=self.state.groups,
+            screen_sizes=self.state.screen_sizes,
+            active_sizes=self.state.active_sizes,
+            lmdas=self.state.lmdas,
+            screen_rule=self.state.screen_rule,
+            **kwargs,
+        )
+
+    def plot_benchmark(self, **kwargs):
+        """Plots benchmark times.
+
+        See Also
+        --------
+        adelie.diagnostic.plot_benchmark
+        """
+        return plot_benchmark(
+            total_time=self.state.total_time,
+            benchmark_screen=self.state.benchmark_screen,
+            benchmark_fit_screen=self.state.benchmark_fit_screen,
+            benchmark_fit_active=self.state.benchmark_fit_active,
+            benchmark_kkt=self.state.benchmark_kkt,
+            benchmark_invariance=self.state.benchmark_invariance,
+            n_valid_solutions=self.state.n_valid_solutions,
+            lmdas=self.state.lmdas,
+            **kwargs,
+        )
+
+    def plot_kkt(self, **kwargs):
+        """Plots KKT failures.
+
+        See Also
+        --------
+        adelie.diagnostic.plot_kkt
+        """
+        return plot_kkt(
+            lmdas=self.state.lmdas,
+            scores=self.gradient_scores,
+            **kwargs,
+        )
+    
+
+class DiagnosticNaive:
+    """Diagnostic class for naive states.
+
+    Parameters
+    ----------
+    state
+        A state object of naive type from solving group elastic net.
     """
     def __init__(self, state):
         self.state = state
@@ -1187,3 +1306,11 @@ class diagnostic:
             scores=self.gradient_scores,
             **kwargs,
         )
+
+
+def diagnostic(state):
+    if "naive" in type(state).__name__:
+        return DiagnosticNaive(state)
+    elif "cov" in type(state).__name__:
+        return DiagnosticCov(state)
+    raise TypeError("state must be one of the supported state types in adelie.")
