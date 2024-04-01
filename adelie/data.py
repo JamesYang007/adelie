@@ -33,10 +33,12 @@ def _sample_y(
             return gaussian(y=y)
         return multigaussian(y=y)
     elif glm == "multinomial":
+        signal_scale = np.sqrt(rho * np.sum(beta, axis=0) ** 2 + (1-rho) * np.sum(beta ** 2, axis=0))
+        noise_scale = signal_scale / np.sqrt(snr)
         mu = np.empty((n, K), dtype=eta.dtype)
         glm = multinomial(y=np.zeros(eta.shape)) 
         glm.gradient(
-            snr * (eta / np.sqrt(np.sum(beta**2, axis=0))[None]), 
+            snr * (eta / noise_scale[None]), 
             mu,
         )
         mu *= -K * n
@@ -60,6 +62,8 @@ def _sample_y(
             status=d,
         )
     else:
+        signal_scale = np.sqrt(rho * np.sum(beta) ** 2 + (1-rho) * np.sum(beta ** 2))
+        noise_scale = signal_scale / np.sqrt(snr)
         func_map = {
             "binomial": binomial,
             "poisson": poisson,
@@ -71,7 +75,7 @@ def _sample_y(
         glm_o = func_map[glm](y=np.zeros(n))
         eta = eta.ravel()
         mu = np.empty(eta.shape[0], dtype=eta.dtype)
-        glm_o.gradient(snr * eta / np.sqrt(np.sum(beta**2)), mu)
+        glm_o.gradient(eta / noise_scale, mu)
         mu *= -n
         y = sample_map[glm](mu).astype(eta.dtype)
         return func_map[glm](y=y)
