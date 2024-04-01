@@ -1309,6 +1309,13 @@ class DiagnosticNaive:
 
 
 def diagnostic(state):
+    """Creates a diagnostic class appropriate for the state.
+
+    Parameters
+    ----------
+    state
+        A state object from solving group elastic net.
+    """
     if "naive" in type(state).__name__:
         return DiagnosticNaive(state)
     elif "cov" in type(state).__name__:
