@@ -1,7 +1,8 @@
 #include "decl.hpp"
 #include <adelie_core/matrix/matrix_cov_base.hpp>
+#include <adelie_core/matrix/matrix_cov_block_diag.hpp>
 #include <adelie_core/matrix/matrix_cov_dense.hpp>
-#include <adelie_core/matrix/matrix_cov_lazy.hpp>
+#include <adelie_core/matrix/matrix_cov_lazy_cov.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/matrix/matrix_naive_concatenate.hpp>
 #include <adelie_core/matrix/matrix_naive_dense.hpp>
@@ -33,6 +34,70 @@ void utils(py::module_& m)
     m.def("dax", ad::matrix::dax<value_t, cref_vec_value_t, ref_vec_value_t>);
     m.def("dgemv", ad::matrix::dgemv<cref_colmat_value_t, cref_mvec_value_t, ref_rowmat_value_t, ref_mvec_value_t>);
 }
+
+template <class T>
+class PyMatrixCovBase: public ad::matrix::MatrixCovBase<T>
+{
+    using base_t = ad::matrix::MatrixCovBase<T>;
+public:
+    /* Inherit the constructors */
+    using base_t::base_t;
+    using typename base_t::value_t;
+    using typename base_t::vec_index_t;
+    using typename base_t::vec_value_t;
+    using typename base_t::colmat_value_t;
+
+    void bmul(
+        const Eigen::Ref<const vec_index_t>& subset,
+        const Eigen::Ref<const vec_index_t>& indices,
+        const Eigen::Ref<const vec_value_t>& values,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            bmul,
+            subset, indices, values, out
+        );
+    }
+
+    void mul(
+        const Eigen::Ref<const vec_index_t>& indices,
+        const Eigen::Ref<const vec_value_t>& values,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            mul,
+            indices, values, out
+        );
+    }
+
+    void to_dense(
+        int i, int p,
+        Eigen::Ref<colmat_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            to_dense,
+            i, p, out
+        );
+    }
+
+    int cols() const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            int,
+            base_t,
+            cols,
+        );
+    }
+};
 
 template <class T>
 class PyMatrixNaiveBase: public ad::matrix::MatrixNaiveBase<T>
@@ -304,70 +369,6 @@ void matrix_naive_base(py::module_& m, const char* name)
 }
 
 template <class T>
-class PyMatrixCovBase: public ad::matrix::MatrixCovBase<T>
-{
-    using base_t = ad::matrix::MatrixCovBase<T>;
-public:
-    /* Inherit the constructors */
-    using base_t::base_t;
-    using typename base_t::value_t;
-    using typename base_t::vec_index_t;
-    using typename base_t::vec_value_t;
-    using typename base_t::colmat_value_t;
-
-    void bmul(
-        const Eigen::Ref<const vec_index_t>& subset,
-        const Eigen::Ref<const vec_index_t>& indices,
-        const Eigen::Ref<const vec_value_t>& values,
-        Eigen::Ref<vec_value_t> out
-    ) override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            void,
-            base_t,
-            bmul,
-            subset, indices, values, out
-        );
-    }
-
-    void mul(
-        const Eigen::Ref<const vec_index_t>& indices,
-        const Eigen::Ref<const vec_value_t>& values,
-        Eigen::Ref<vec_value_t> out
-    ) override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            void,
-            base_t,
-            mul,
-            indices, values, out
-        );
-    }
-
-    void to_dense(
-        int i, int p,
-        Eigen::Ref<colmat_value_t> out
-    ) override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            void,
-            base_t,
-            to_dense,
-            i, p, out
-        );
-    }
-
-    int cols() const override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            int,
-            base_t,
-            cols,
-        );
-    }
-};
-
-template <class T>
 void matrix_cov_base(py::module_& m, const char* name)
 {
     using trampoline_t = PyMatrixCovBase<T>;
@@ -436,6 +437,57 @@ void matrix_cov_base(py::module_& m, const char* name)
         }, R"delimiter(
         Shape of the matrix.
         )delimiter")
+        ;
+}
+
+template <class ValueType>
+void matrix_cov_block_diag(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixCovBlockDiag<ValueType>;
+    using base_t = typename internal_t::base_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(
+            py::init([](py::list mat_list_py, size_t n_threads) {
+                std::vector<base_t*> mat_list;
+                mat_list.reserve(mat_list_py.size());
+                for (auto obj : mat_list_py) {
+                    mat_list.push_back(py::cast<base_t*>(obj));
+                }
+                return new internal_t(mat_list, n_threads);
+            }), 
+            py::arg("mat_list").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+template <class DenseType>
+void matrix_cov_dense(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixCovDense<DenseType>;
+    using base_t = typename internal_t::base_t;
+    using dense_t = typename internal_t::dense_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(
+            py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
+            py::arg("mat").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+template <class DenseType>
+void matrix_cov_lazy_cov(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixCovLazyCov<DenseType>;
+    using base_t = typename internal_t::base_t;
+    using dense_t = typename internal_t::dense_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(
+            py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
+            py::arg("mat").noconvert(),
+            py::arg("n_threads")
+        )
         ;
 }
 
@@ -576,36 +628,6 @@ void matrix_naive_sparse(py::module_& m, const char* name)
         ;
 }
 
-template <class DenseType>
-void matrix_cov_dense(py::module_& m, const char* name)
-{
-    using internal_t = ad::matrix::MatrixCovDense<DenseType>;
-    using base_t = typename internal_t::base_t;
-    using dense_t = typename internal_t::dense_t;
-    py::class_<internal_t, base_t>(m, name)
-        .def(
-            py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
-            py::arg("mat").noconvert(),
-            py::arg("n_threads")
-        )
-        ;
-}
-
-template <class DenseType>
-void matrix_cov_lazy(py::module_& m, const char* name)
-{
-    using internal_t = ad::matrix::MatrixCovLazy<DenseType>;
-    using base_t = typename internal_t::base_t;
-    using dense_t = typename internal_t::dense_t;
-    py::class_<internal_t, base_t>(m, name)
-        .def(
-            py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
-            py::arg("mat").noconvert(),
-            py::arg("n_threads")
-        )
-        ;
-}
-
 template <class T, int Storage>
 using dense_type = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Storage>;
 template <class T, int Storage>
@@ -621,6 +643,20 @@ void register_matrix(py::module_& m)
     matrix_naive_base<float>(m, "MatrixNaiveBase32");
     matrix_cov_base<double>(m, "MatrixCovBase64");
     matrix_cov_base<float>(m, "MatrixCovBase32");
+
+    /* cov matrices */
+    matrix_cov_dense<dense_type<double, Eigen::RowMajor>>(m, "MatrixCovDense64C");
+    matrix_cov_dense<dense_type<double, Eigen::ColMajor>>(m, "MatrixCovDense64F");
+    matrix_cov_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixCovDense32C");
+    matrix_cov_dense<dense_type<float, Eigen::ColMajor>>(m, "MatrixCovDense32F");
+
+    matrix_cov_lazy_cov<dense_type<double, Eigen::RowMajor>>(m, "MatrixCovLazyCov64C");
+    matrix_cov_lazy_cov<dense_type<double, Eigen::ColMajor>>(m, "MatrixCovLazyCov64F");
+    matrix_cov_lazy_cov<dense_type<float, Eigen::RowMajor>>(m, "MatrixCovLazyCov32C");
+    matrix_cov_lazy_cov<dense_type<float, Eigen::ColMajor>>(m, "MatrixCovLazyCov32F");
+
+    matrix_cov_block_diag<double>(m, "MatrixCovBlockDiag64");
+    matrix_cov_block_diag<float>(m, "MatrixCovBlockDiag32");
 
     /* naive matrices */
     matrix_naive_concatenate<double>(m, "MatrixNaiveConcatenate64");
@@ -645,14 +681,4 @@ void register_matrix(py::module_& m)
 
     matrix_naive_sparse<sparse_type<double, Eigen::ColMajor>>(m, "MatrixNaiveSparse64F");
     matrix_naive_sparse<sparse_type<float, Eigen::ColMajor>>(m, "MatrixNaiveSparse32F");
-
-    /* cov matrices */
-    matrix_cov_dense<dense_type<double, Eigen::RowMajor>>(m, "MatrixCovDense64C");
-    matrix_cov_dense<dense_type<double, Eigen::ColMajor>>(m, "MatrixCovDense64F");
-    matrix_cov_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixCovDense32C");
-    matrix_cov_dense<dense_type<float, Eigen::ColMajor>>(m, "MatrixCovDense32F");
-    matrix_cov_lazy<dense_type<double, Eigen::RowMajor>>(m, "MatrixCovLazy64C");
-    matrix_cov_lazy<dense_type<double, Eigen::ColMajor>>(m, "MatrixCovLazy64F");
-    matrix_cov_lazy<dense_type<float, Eigen::RowMajor>>(m, "MatrixCovLazy32C");
-    matrix_cov_lazy<dense_type<float, Eigen::ColMajor>>(m, "MatrixCovLazy32F");
 }

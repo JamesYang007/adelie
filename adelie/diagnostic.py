@@ -634,7 +634,7 @@ def plot_coefficients(
             color = next(colors_it)
             ax.plot(tls, curr_block_norms, linestyle="-", color=color)
 
-        ax.set_title("Coefficient $\ell_2$-Norm Profile")
+        ax.set_title(r"Coefficient $\ell_2$-Norm Profile")
         ax.set_ylabel(r"$\|\beta\|_2$")
         ax.set_xlabel(r"-$\log(\lambda)$")
     else:
@@ -646,7 +646,7 @@ def plot_coefficients(
             color = next(colors_it)
             ax.plot(tls, curr_block, linestyle="-", color=color)
 
-        ax.set_title("Coefficient Profile")
+        ax.set_title(r"Coefficient Profile")
         ax.set_ylabel(r"$\beta$")
         ax.set_xlabel(r"-$\log(\lambda)$")
 
