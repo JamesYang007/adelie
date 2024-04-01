@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.bcd.solve &#8212; adelie 1.1.23 documentation</title>
+    <title>adelie.matrix.sparse &#8212; adelie 1.1.23 documentation</title>
   
   
   
@@ -42,13 +42,11 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.bcd.solve';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.matrix.sparse';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.cv.CVGrpnetResult" href="adelie.cv.CVGrpnetResult.html" />
-    <link rel="prev" title="adelie.bcd.root_upper_bound" href="adelie.bcd.root_upper_bound.html" />
+    <link rel="next" title="adelie.state.gaussian_cov" href="adelie.state.gaussian_cov.html" />
+    <link rel="prev" title="adelie.matrix.snp_unphased" href="adelie.matrix.snp_unphased.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -319,13 +317,13 @@ document.write(`
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.objective.html">adelie.bcd.objective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root.html">adelie.bcd.root</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_lower_bound.html">adelie.bcd.root_lower_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.bcd.solve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.cv.CVGrpnetResult.html">adelie.cv.CVGrpnetResult</a></li>
@@ -365,14 +363,14 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.concatenate.html">adelie.matrix.concatenate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.cov_lazy.html">adelie.matrix.cov_lazy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.kronecker_eye.html">adelie.matrix.kronecker_eye</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.sparse.html">adelie.matrix.sparse</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.matrix.sparse</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_cov.html">adelie.state.gaussian_cov</a></li>
@@ -440,7 +438,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.bcd.solve</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.matrix.sparse</li>
   </ul>
 </nav>
 </div>
@@ -457,71 +455,34 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-bcd-solve">
-<h1>adelie.bcd.solve<a class="headerlink" href="#adelie-bcd-solve" title="Link to this heading">#</a></h1>
+  <section id="adelie-matrix-sparse">
+<h1>adelie.matrix.sparse<a class="headerlink" href="#adelie-matrix-sparse" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="adelie.bcd.solve">
-<span class="sig-prename descclassname"><span class="pre">adelie.bcd.</span></span><span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'newton_abs'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/bcd.py#L179-L250"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.bcd.solve" title="Link to this definition">#</a></dt>
-<dd><p>Solves the BCD update.</p>
-<p>The BCD update for the group elastic net is obtained by minimizing
-the BCD objective given in <code class="docutils literal notranslate"><span class="pre">objective()</span></code>.
-The solution only exists when <span class="math notranslate nohighlight">\(\|v\|_2 &lt; \lambda_1\)</span>
-or <span class="math notranslate nohighlight">\(\|v_S\|_2 &lt; \lambda_1\)</span>,
-where <span class="math notranslate nohighlight">\(S\)</span> is the subset of indices
-such that <span class="math notranslate nohighlight">\(\Sigma_{ii} + \lambda_2 = 0\)</span>.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>quad</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">objective()</span></code>.</p>
-</dd>
-<dt><strong>linear</strong><span class="classifier">(p,) np.ndarray</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">objective()</span></code>.</p>
-</dd>
-<dt><strong>l1</strong><span class="classifier">float</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">objective()</span></code>.</p>
-</dd>
-<dt><strong>l2</strong><span class="classifier">float</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">objective()</span></code>.</p>
-</dd>
-<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Convergence tolerance. Default is <code class="docutils literal notranslate"><span class="pre">1e-12</span></code>.</p>
-</dd>
-<dt><strong>max_iters</strong><span class="classifier">int, optional</span></dt><dd><p>Max number of iterations. Default is <code class="docutils literal notranslate"><span class="pre">1000</span></code>.</p>
-</dd>
-<dt><strong>solver</strong><span class="classifier">str, optional</span></dt><dd><p>Solver type must be one of the following:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;brent&quot;</span></code>: Brent method.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;ista&quot;</span></code>: ISTA method.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;fista&quot;</span></code>: FISTA method.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;fista_adares&quot;</span></code>: FISTA with Adaptive Restarts method.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;newton&quot;</span></code>: Newton method.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;newton_abs&quot;</span></code>: Newton method combined with Adaptive Bisection Starts for initialization.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;newton_abs_debug&quot;</span></code>: same as <code class="docutils literal notranslate"><span class="pre">&quot;newton_abs&quot;</span></code> but with more debug information.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;newton_brent&quot;</span></code>: Newton method combined with Brent method for initialization.</p></li>
-</ul>
-</div></blockquote>
-<p>Default is <code class="docutils literal notranslate"><span class="pre">&quot;newton_abs&quot;</span></code>.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>The following methods are known to have poor convergence:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;brent&quot;</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;ista&quot;</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;fista&quot;</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;fista_adares&quot;</span></code></p></li>
-</ul>
-</div></blockquote>
+<dt class="sig sig-object py" id="adelie.matrix.sparse">
+<span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">sparse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csc_matrix</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">csr_matrix</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/matrix.py#L368-L431"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.matrix.sparse" title="Link to this definition">#</a></dt>
+<dd><p>Creates a viewer of a sparse matrix.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This matrix only works for naive method!</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Regardless of the storage order of the input matrix,
+we internally convert the matrix to CSC order for performance reasons.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>mat</strong><span class="classifier">Union[scipy.sparse.csc_matrix, scipy.sparse.csr_matrix]</span></dt><dd><p>The sparse matrix to view.</p>
 </dd>
-<dt><strong>smart_init</strong><span class="classifier">bool</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the ABS method is invoked to find a smart initial point before starting Newton’s method.
-It is only used when <code class="docutils literal notranslate"><span class="pre">solver</span></code> is <code class="docutils literal notranslate"><span class="pre">&quot;newton_abs_debug&quot;</span></code>.</p>
+<dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
+Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>result</strong><span class="classifier">Dict[str, Any]</span></dt><dd><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">result[&quot;beta&quot;]</span></code>: solution vector.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">result[&quot;iters&quot;]</span></code>: number of iterations taken.</p></li>
-</ul>
+<dt>wrap</dt><dd><p>Wrapper matrix object.</p>
 </dd>
 </dl>
 </dd>
@@ -529,8 +490,7 @@ It is only used when <code class="docutils literal notranslate"><span class="pre
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="adelie.bcd.objective.html#adelie.bcd.objective" title="adelie.bcd.objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.bcd.objective</span></code></a></dt><dd></dd>
-<dt><a class="reference internal" href="adelie.bcd.root.html#adelie.bcd.root" title="adelie.bcd.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.bcd.root</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html#adelie.matrix.MatrixNaiveBase64" title="adelie.matrix.MatrixNaiveBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.matrix.MatrixNaiveBase64</span></code></a></dt><dd></dd>
 </dl>
 </div>
 </dd></dl>
@@ -548,20 +508,20 @@ It is only used when <code class="docutils literal notranslate"><span class="pre
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.bcd.root_upper_bound.html"
+       href="adelie.matrix.snp_unphased.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.bcd.root_upper_bound</p>
+        <p class="prev-next-title">adelie.matrix.snp_unphased</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.cv.CVGrpnetResult.html"
+       href="adelie.state.gaussian_cov.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.cv.CVGrpnetResult</p>
+        <p class="prev-next-title">adelie.state.gaussian_cov</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -581,14 +541,14 @@ It is only used when <code class="docutils literal notranslate"><span class="pre
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.bcd.solve"><code class="docutils literal notranslate"><span class="pre">solve()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.sparse"><code class="docutils literal notranslate"><span class="pre">sparse()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.bcd.solve.rst.txt">
+    <a href="../_sources/generated/adelie.matrix.sparse.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>
