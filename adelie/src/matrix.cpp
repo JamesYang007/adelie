@@ -3,6 +3,7 @@
 #include <adelie_core/matrix/matrix_cov_block_diag.hpp>
 #include <adelie_core/matrix/matrix_cov_dense.hpp>
 #include <adelie_core/matrix/matrix_cov_lazy_cov.hpp>
+#include <adelie_core/matrix/matrix_cov_sparse.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/matrix/matrix_naive_concatenate.hpp>
 #include <adelie_core/matrix/matrix_naive_dense.hpp>
@@ -491,6 +492,36 @@ void matrix_cov_lazy_cov(py::module_& m, const char* name)
         ;
 }
 
+template <class SparseType>
+void matrix_cov_sparse(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixCovSparse<SparseType>;
+    using base_t = typename internal_t::base_t;
+    using sparse_t = typename internal_t::sparse_t; 
+    using vec_sp_value_t = typename internal_t::vec_sp_value_t;
+    using vec_sp_index_t = typename internal_t::vec_sp_index_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(
+            py::init<
+                size_t,
+                size_t,
+                size_t,
+                const Eigen::Ref<const vec_sp_index_t>&,
+                const Eigen::Ref<const vec_sp_index_t>&,
+                const Eigen::Ref<const vec_sp_value_t>&,
+                size_t
+            >(), 
+            py::arg("rows"),
+            py::arg("cols"),
+            py::arg("nnz"),
+            py::arg("outer"),
+            py::arg("inner"),
+            py::arg("value"),
+            py::arg("n_threads")
+        )
+        ;
+}
+
 template <class ValueType>
 void matrix_naive_concatenate(py::module_& m, const char* name)
 {
@@ -645,6 +676,9 @@ void register_matrix(py::module_& m)
     matrix_cov_base<float>(m, "MatrixCovBase32");
 
     /* cov matrices */
+    matrix_cov_block_diag<double>(m, "MatrixCovBlockDiag64");
+    matrix_cov_block_diag<float>(m, "MatrixCovBlockDiag32");
+
     matrix_cov_dense<dense_type<double, Eigen::RowMajor>>(m, "MatrixCovDense64C");
     matrix_cov_dense<dense_type<double, Eigen::ColMajor>>(m, "MatrixCovDense64F");
     matrix_cov_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixCovDense32C");
@@ -655,8 +689,8 @@ void register_matrix(py::module_& m)
     matrix_cov_lazy_cov<dense_type<float, Eigen::RowMajor>>(m, "MatrixCovLazyCov32C");
     matrix_cov_lazy_cov<dense_type<float, Eigen::ColMajor>>(m, "MatrixCovLazyCov32F");
 
-    matrix_cov_block_diag<double>(m, "MatrixCovBlockDiag64");
-    matrix_cov_block_diag<float>(m, "MatrixCovBlockDiag32");
+    matrix_cov_sparse<sparse_type<double, Eigen::ColMajor>>(m, "MatrixCovSparse64F");
+    matrix_cov_sparse<sparse_type<float, Eigen::ColMajor>>(m, "MatrixCovSparse32F");
 
     /* naive matrices */
     matrix_naive_concatenate<double>(m, "MatrixNaiveConcatenate64");
