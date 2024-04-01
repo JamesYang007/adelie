@@ -567,22 +567,22 @@ document.write(`
 <h2>adelie.glm<a class="headerlink" href="#adelie-glm" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.binomial.html#adelie.glm.binomial" title="adelie.glm.binomial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">binomial</span></code></a>(*, y[, weights, link, dtype])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.binomial.html#adelie.glm.binomial" title="adelie.glm.binomial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">binomial</span></code></a>(y, *[, weights, link, dtype])</p></td>
 <td><p>Creates a Binomial GLM family object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.cox.html#adelie.glm.cox" title="adelie.glm.cox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cox</span></code></a>(*, start, stop, status[, weights, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.cox.html#adelie.glm.cox" title="adelie.glm.cox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cox</span></code></a>(start, stop, status, *[, weights, ...])</p></td>
 <td><p>Creates a Cox GLM family object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.gaussian.html#adelie.glm.gaussian" title="adelie.glm.gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian</span></code></a>(*, y[, weights, dtype, opt])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.gaussian.html#adelie.glm.gaussian" title="adelie.glm.gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian</span></code></a>(y, *[, weights, dtype, opt])</p></td>
 <td><p>Creates a Gaussian GLM family object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.multigaussian.html#adelie.glm.multigaussian" title="adelie.glm.multigaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multigaussian</span></code></a>(*, y[, weights, dtype, opt])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.multigaussian.html#adelie.glm.multigaussian" title="adelie.glm.multigaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multigaussian</span></code></a>(y, *[, weights, dtype, opt])</p></td>
 <td><p>Creates a Multi-response Gaussian GLM family object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.multinomial.html#adelie.glm.multinomial" title="adelie.glm.multinomial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multinomial</span></code></a>(*, y[, weights, dtype])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.glm.multinomial.html#adelie.glm.multinomial" title="adelie.glm.multinomial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multinomial</span></code></a>(y, *[, weights, dtype])</p></td>
 <td><p>Creates a Multinomial GLM family object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.poisson.html#adelie.glm.poisson" title="adelie.glm.poisson"><code class="xref py py-obj docutils literal notranslate"><span class="pre">poisson</span></code></a>(*, y[, weights, dtype])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.glm.poisson.html#adelie.glm.poisson" title="adelie.glm.poisson"><code class="xref py py-obj docutils literal notranslate"><span class="pre">poisson</span></code></a>(y, *[, weights, dtype])</p></td>
 <td><p>Creates a Poisson GLM family object.</p></td>
 </tr>
 </tbody>
@@ -664,10 +664,10 @@ document.write(`
 <h2>adelie.solver<a class="headerlink" href="#adelie-solver" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.gaussian_cov.html#adelie.solver.gaussian_cov" title="adelie.solver.gaussian_cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_cov</span></code></a>(*, A, v[, groups, alpha, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.gaussian_cov.html#adelie.solver.gaussian_cov" title="adelie.solver.gaussian_cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_cov</span></code></a>(A, v, *[, groups, alpha, ...])</p></td>
 <td><p>Gaussian elastic net solver via covariance method.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.solver.grpnet.html#adelie.solver.grpnet" title="adelie.solver.grpnet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grpnet</span></code></a>(*, X, glm[, groups, alpha, penalty, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.solver.grpnet.html#adelie.solver.grpnet" title="adelie.solver.grpnet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grpnet</span></code></a>(X, glm, *[, groups, alpha, penalty, ...])</p></td>
 <td><p>Group elastic net solver.</p></td>
 </tr>
 </tbody>
