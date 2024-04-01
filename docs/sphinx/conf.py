@@ -16,13 +16,15 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'adelie'
 copyright = '2023, James Yang'
 author = 'James Yang'
-release = open("../../VERSION", "r").read()
+release = open("../../VERSION", "r").read().strip()
+version = release
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.linkcode",
     "sphinx_design",
     "numpydoc",
     "nbsphinx",
@@ -50,3 +52,69 @@ html_static_path = ['_static']
 html_css_files = ["numpy.css"]
 
 numpydoc_show_class_members = False
+
+# -----------------------------------------------------------------------------
+# Source code links
+# -----------------------------------------------------------------------------
+import adelie
+import inspect
+from os.path import relpath, dirname
+
+def linkcode_resolve(domain, info):
+    """
+    Determine the URL corresponding to Python object
+    """
+    if domain != 'py':
+        return None
+
+    modname = info['module']
+    fullname = info['fullname']
+
+    submod = sys.modules.get(modname)
+    if submod is None:
+        return None
+
+    obj = submod
+    for part in fullname.split('.'):
+        try:
+            obj = getattr(obj, part)
+        except Exception:
+            return None
+
+    # strip decorators, which would resolve to the source of the decorator
+    # possibly an upstream bug in getsourcefile, bpo-1764286
+    try:
+        unwrap = inspect.unwrap
+    except AttributeError:
+        pass
+    else:
+        obj = unwrap(obj)
+
+    fn = None
+    lineno = None
+
+    try:
+        fn = inspect.getsourcefile(obj)
+    except Exception:
+        fn = None
+    if not fn:
+        return None
+
+    # Ignore re-exports as their source files are not within the numpy repo
+    module = inspect.getmodule(obj)
+    if module is not None and not module.__name__.startswith("adelie"):
+        return None
+
+    try:
+        source, lineno = inspect.getsourcelines(obj)
+    except Exception:
+        lineno = None
+    fn = relpath(fn, start=dirname(adelie.__file__))
+
+    if lineno:
+        linespec = f"#L{lineno}-L{lineno + len(source) - 1}"
+    else:
+        linespec = ""
+
+    path = f"https://github.com/JamesYang007/adelie/blob/main/adelie/{fn}{linespec}"
+    return path
