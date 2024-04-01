@@ -336,5 +336,19 @@ auto spddot(
     return sum;
 }
 
+template <class InnerType, class ValueType, class T, class OutType>
+ADELIE_CORE_STRONG_INLINE
+void spaxi(
+    const InnerType& inner, 
+    const ValueType& value,
+    T v,
+    OutType& out
+)
+{
+    for (int i = 0; i < inner.size(); ++i) {
+        out[inner[i]] += v * value[i];
+    }
+}
+
 } // namespace matrix
 } // namespace adelie_core

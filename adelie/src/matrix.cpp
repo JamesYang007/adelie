@@ -8,6 +8,7 @@
 #include <adelie_core/matrix/matrix_naive_kronecker_eye.hpp>
 #include <adelie_core/matrix/matrix_naive_snp_unphased.hpp>
 #include <adelie_core/matrix/matrix_naive_snp_phased_ancestry.hpp>
+#include <adelie_core/matrix/matrix_naive_sparse.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -545,6 +546,36 @@ void matrix_naive_snp_phased_ancestry(py::module_& m, const char* name)
         ;
 }
 
+template <class SparseType>
+void matrix_naive_sparse(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveSparse<SparseType>;
+    using base_t = typename internal_t::base_t;
+    using sparse_t = typename internal_t::sparse_t; 
+    using vec_sp_value_t = typename internal_t::vec_sp_value_t;
+    using vec_sp_index_t = typename internal_t::vec_sp_index_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(
+            py::init<
+                size_t,
+                size_t,
+                size_t,
+                const Eigen::Ref<const vec_sp_index_t>&,
+                const Eigen::Ref<const vec_sp_index_t>&,
+                const Eigen::Ref<const vec_sp_value_t>&,
+                size_t
+            >(), 
+            py::arg("rows"),
+            py::arg("cols"),
+            py::arg("nnz"),
+            py::arg("outer"),
+            py::arg("inner"),
+            py::arg("value"),
+            py::arg("n_threads")
+        )
+        ;
+}
+
 template <class DenseType>
 void matrix_cov_dense(py::module_& m, const char* name)
 {
@@ -577,6 +608,8 @@ void matrix_cov_lazy(py::module_& m, const char* name)
 
 template <class T, int Storage>
 using dense_type = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Storage>;
+template <class T, int Storage>
+using sparse_type = Eigen::SparseMatrix<T, Storage>;
 
 void register_matrix(py::module_& m)
 {
@@ -609,6 +642,9 @@ void register_matrix(py::module_& m)
     matrix_naive_snp_unphased<float>(m, "MatrixNaiveSNPUnphased32");
     matrix_naive_snp_phased_ancestry<double>(m, "MatrixNaiveSNPPhasedAncestry64");
     matrix_naive_snp_phased_ancestry<float>(m, "MatrixNaiveSNPPhasedAncestry32");
+
+    matrix_naive_sparse<sparse_type<double, Eigen::ColMajor>>(m, "MatrixNaiveSparse64F");
+    matrix_naive_sparse<sparse_type<float, Eigen::ColMajor>>(m, "MatrixNaiveSparse32F");
 
     /* cov matrices */
     matrix_cov_dense<dense_type<double, Eigen::RowMajor>>(m, "MatrixCovDense64C");
