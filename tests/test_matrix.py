@@ -28,7 +28,7 @@ def run_cov(
 
     # test bmul
     for i in range(1, p+1):
-        subset = np.random.choice(p, i, replace=False)
+        subset = np.sort(np.random.choice(p, i, replace=False))
         out = np.empty(i, dtype=dtype)
         cA.bmul(subset, indices, values, out)
         expected = v.T @ A[:, subset]
@@ -51,6 +51,29 @@ def run_cov(
     assert cA.cols() == p
 
 
+def test_cov_block_diag():
+    def _test(n, ps, dtype, seed=0):
+        np.random.seed(seed)
+        Xs = [np.random.normal(0, 1, (n, p)).astype(dtype) for p in ps]
+        As = [X.T @ X / n for X in Xs]
+        p = np.sum(ps)
+        A = np.zeros((p, p), dtype=dtype)
+        pos = 0
+        for i, pi in enumerate(ps):
+            A[pos:pos+pi, pos:pos+pi] = As[i]
+            pos += pi
+        cA = mod.block_diag(As, n_threads=4)
+        run_cov(A, cA, dtype)
+
+    np.random.seed(69)
+    dtypes = [np.float32, np.float64]
+    for dtype in dtypes:
+        ps = np.random.choice(10, size=4, replace=True)
+        _test(2, ps, dtype)
+        _test(100, ps, dtype)
+        _test(20, ps, dtype)
+
+
 def test_cov_dense():
     def _test(n, p, dtype, order, seed=0):
         np.random.seed(seed)
@@ -69,7 +92,7 @@ def test_cov_dense():
             _test(20, 100, dtype, order)
 
 
-def test_cov_lazy():
+def test_cov_lazy_cov():
     def _test(n, p, dtype, order, seed=0):
         np.random.seed(seed)
         X = np.random.normal(0, 1, (n, p))
@@ -77,7 +100,7 @@ def test_cov_lazy():
         X = np.array(X, dtype=dtype, order=order)
         A = X.T @ X
         A = np.array(A, dtype=dtype, order=order)
-        cA = mod.cov_lazy(X, n_threads=4)
+        cA = mod.lazy_cov(X, n_threads=4)
         run_cov(A, cA, dtype)
 
     dtypes = [np.float32, np.float64]
