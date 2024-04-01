@@ -63,8 +63,8 @@ class multiglm_base:
 
 
 def gaussian(
-    *,
     y: np.ndarray,
+    *,
     weights: np.ndarray =None,
     dtype: Union[np.float32, np.float64] =np.float64,
     opt: bool =True,
@@ -117,9 +117,7 @@ def gaussian(
     core_base = dispatcher[dtype]
 
     class _gaussian(glm_base, core_base):
-        def __init__(
-            self,
-        ):
+        def __init__(self):
             self.opt = opt
             glm_base.__init__(self, y, weights, core_base, dtype)
             core_base.__init__(self, self.y, self.weights)
@@ -132,8 +130,8 @@ def gaussian(
 
 
 def multigaussian(
-    *,
     y: np.ndarray,
+    *,
     weights: np.ndarray =None,
     dtype: Union[np.float32, np.float64] =np.float64,
     opt: bool =True,
@@ -189,9 +187,7 @@ def multigaussian(
     core_base = dispatcher[dtype]
 
     class _multigaussian(multiglm_base, core_base):
-        def __init__(
-            self,
-        ):
+        def __init__(self):
             self.opt = opt
             multiglm_base.__init__(self, y, weights, core_base, dtype)
             core_base.__init__(self, self.y, self.weights)
@@ -204,8 +200,8 @@ def multigaussian(
 
 
 def binomial(
-    *,
     y: np.ndarray,
+    *,
     weights: np.ndarray =None,
     link: str ="logit",
     dtype: Union[np.float32, np.float64] =np.float64,
@@ -283,9 +279,7 @@ def binomial(
     core_base = dispatcher[link][dtype]
 
     class _binomial(glm_base, core_base):
-        def __init__(
-            self,
-        ):
+        def __init__(self):
             glm_base.__init__(self, y, weights, core_base, dtype)
             core_base.__init__(self, self.y, self.weights)
 
@@ -297,10 +291,10 @@ def binomial(
 
 
 def cox(
-    *,
     start: np.ndarray,
     stop: np.ndarray,
     status: np.ndarray,
+    *,
     weights: np.ndarray =None,
     tie_method: str ="efron",
     dtype: Union[np.float32, np.float64] =np.float64,
@@ -396,9 +390,7 @@ def cox(
     core_base = dispatcher[dtype]
 
     class _cox(glm_base, core_base):
-        def __init__(
-            self,
-        ):
+        def __init__(self):
             self.start = start.astype(dtype)
             self.stop = stop.astype(dtype)
             glm_base.__init__(self, status, weights, core_base, dtype)
@@ -428,8 +420,8 @@ def cox(
 
 
 def multinomial(
-    *,
     y: np.ndarray,
+    *,
     weights: np.ndarray =None,
     dtype: Union[np.float32, np.float64] =np.float64,
 ):
@@ -488,9 +480,7 @@ def multinomial(
     core_base = dispatcher[dtype]
 
     class _multinomial(multiglm_base, core_base):
-        def __init__(
-            self,
-        ):
+        def __init__(self):
             multiglm_base.__init__(self, y, weights, core_base, dtype)
             core_base.__init__(self, self.y, self.weights)
 
@@ -502,8 +492,8 @@ def multinomial(
 
 
 def poisson(
-    *,
     y: np.ndarray,
+    *,
     weights: np.ndarray =None,
     dtype: Union[np.float32, np.float64] =np.float64,
 ):
@@ -551,9 +541,7 @@ def poisson(
     core_base = dispatcher[dtype]
 
     class _poisson(glm_base, core_base):
-        def __init__(
-            self,
-        ):
+        def __init__(self):
             glm_base.__init__(self, y, weights, core_base, dtype)
             core_base.__init__(self, self.y, self.weights)
 
