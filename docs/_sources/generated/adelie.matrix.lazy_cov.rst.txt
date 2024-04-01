@@ -1,6 +1,6 @@
-﻿adelie.matrix.cov\_lazy
+﻿adelie.matrix.lazy\_cov
 =======================
 
 .. currentmodule:: adelie.matrix
 
-.. autofunction:: cov_lazy
+.. autofunction:: lazy_cov

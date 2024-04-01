@@ -124,10 +124,11 @@ adelie.matrix
     :toctree: generated/
 
 
+    block_diag
     concatenate
-    cov_lazy
     dense
     kronecker_eye
+    lazy_cov
     snp_phased_ancestry
     snp_unphased
     sparse
