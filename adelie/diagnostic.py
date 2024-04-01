@@ -543,7 +543,7 @@ def coefficient(
     ----------
     lmda : float
         New regularization parameter at which to find the solution.
-    betas : (L, p) np.ndarray
+    betas : (L, p) scipy.sparse.csr_matrix
         Coefficient vectors :math:`\\beta`.
     intercepts : (L,) np.ndarray
         Intercepts.
@@ -597,7 +597,7 @@ def plot_coefficients(
 
     Parameters
     ----------
-    betas : (L, p) np.ndarray
+    betas : (L, p) scipy.sparse.csr_matrix
         Coefficient vectors :math:`\\beta`.
     lmdas : (L,) np.ndarray
         Regularization parameters :math:`\\lambda`.
@@ -1309,12 +1309,17 @@ class DiagnosticNaive:
 
 
 def diagnostic(state):
-    """Creates a diagnostic class appropriate for the state.
+    """Creates a diagnostic class object appropriate for the state.
 
     Parameters
     ----------
     state
         A state object from solving group elastic net.
+    
+    Returns
+    -------
+    dg
+        Diagnostic class object.
     """
     if "naive" in type(state).__name__:
         return DiagnosticNaive(state)
