@@ -111,6 +111,33 @@ def test_cov_lazy_cov():
             _test(100, 20, dtype, order)
             _test(20, 100, dtype, order)
 
+def test_cov_sparse():
+    def _test(n, p, dtype, order, seed=0):
+        np.random.seed(seed)
+        X = np.random.normal(0, 1, (n, p))
+        X /= np.sqrt(n)
+        X = np.array(X, dtype=dtype, order=order)
+        A = X.T @ X
+        subset = np.sort(np.random.choice(p, p // 2, replace=False))
+        A[subset, :] = 0
+        A[:, subset] = 0
+        A_sp = {
+            "C": scipy.sparse.csr_matrix,
+            "F": scipy.sparse.csc_matrix,
+        }[order](A)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            cA = mod.sparse(A_sp, method="cov", n_threads=3)
+        run_cov(A, cA, dtype)
+
+    dtypes = [np.float32, np.float64]
+    orders = ["C", "F"]
+    for dtype in dtypes:
+        for order in orders:
+            _test(2, 2, dtype, order)
+            _test(100, 20, dtype, order)
+            _test(20, 100, dtype, order)
+
 
 # ==========================================================================================
 # TEST naive
@@ -364,7 +391,7 @@ def test_naive_sparse():
         }[order](X)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            cX = mod.sparse(X_sp, n_threads=3)
+            cX = mod.sparse(X_sp, method="naive", n_threads=3)
         run_naive(X, cX, dtype)
 
     dtypes = [np.float32, np.float64]

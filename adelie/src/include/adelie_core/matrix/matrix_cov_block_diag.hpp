@@ -21,7 +21,6 @@ private:
     const vec_index_t _mat_size_cumsum;     // (L+1,) list of matrix size cumulative sum.
     const size_t _cols;                     // number of columns
     const vec_index_t _slice_map;           // (p,) array mapping to matrix slice
-    const vec_index_t _index_map;           // (p,) array mapping to (relative) index of the slice
     const size_t _n_threads;                // number of threads
     vec_index_t _ibuff;
     vec_value_t _vbuff;
@@ -65,24 +64,6 @@ private:
         return slice_map;
     }
 
-    static inline auto init_index_map(
-        const std::vector<base_t*>& mat_list,
-        size_t p
-    )
-    {
-        vec_index_t index_map(p);
-        size_t begin = 0;
-        for (size_t i = 0; i < mat_list.size(); ++i) {
-            const auto& mat = *mat_list[i];
-            const auto pi = mat.cols();
-            for (int j = 0; j < pi; ++j) {
-                index_map[begin + j] = j;
-            }
-            begin += pi;
-        } 
-        return index_map;
-    }
-
 public:
     explicit MatrixCovBlockDiag(
         const std::vector<base_t*>& mat_list,
@@ -92,7 +73,6 @@ public:
         _mat_size_cumsum(init_mat_size_cumsum(mat_list)),
         _cols(init_cols(mat_list)),
         _slice_map(init_slice_map(mat_list, _cols)),
-        _index_map(init_index_map(mat_list, _cols)),
         _n_threads(n_threads),
         _ibuff(_cols),
         _vbuff(_cols) // just optimization

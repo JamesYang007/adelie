@@ -25,9 +25,6 @@ public:
 private:
     const Eigen::Map<const sparse_t> _mat;  // underlying sparse matrix
     const size_t _n_threads;                // number of threads
-    // TODO
-    //rowmat_value_t _buff;
-    //vec_value_t _vbuff;
     
 public:
     explicit MatrixNaiveSparse(
@@ -41,8 +38,6 @@ public:
     ): 
         _mat(rows, cols, nnz, outer.data(), inner.data(), value.data()),
         _n_threads(n_threads)
-        //_buff(_n_threads, std::min(mat.rows(), mat.cols())),
-        //_vbuff(mat.rows())
     {
         if (n_threads < 1) {
             throw std::runtime_error("n_threads must be >= 1.");

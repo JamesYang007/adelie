@@ -436,12 +436,10 @@ def snp_unphased(
 def sparse(
     mat: Union[csc_matrix, csr_matrix],
     *,
+    method: str ="naive",
     n_threads: int =1,
 ):
     """Creates a viewer of a sparse matrix.
-
-    .. note::
-        This matrix only works for naive method!
 
     .. note::
         Regardless of the storage order of the input matrix,
@@ -451,6 +449,13 @@ def sparse(
     ----------
     mat : Union[scipy.sparse.csc_matrix, scipy.sparse.csr_matrix]
         The sparse matrix to view.
+    method : str, optional
+        Method type. It must be one of the following:
+
+            - ``"naive"``: naive method.
+            - ``"cov"``: covariance method.
+
+        Default is ``"naive"``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -462,6 +467,7 @@ def sparse(
 
     See Also
     --------
+    adelie.matrix.MatrixCovBase64
     adelie.matrix.MatrixNaiveBase64
     """
     if not (isinstance(mat, csr_matrix) or isinstance(mat, csc_matrix)):
@@ -474,13 +480,23 @@ def sparse(
         warnings.warn("Converting to CSC format.")
         mat = mat.tocsc(copy=True)
 
-    dispatcher = {
+    naive_dispatcher = {
         np.dtype("float64"): core.matrix.MatrixNaiveSparse64F,
         np.dtype("float32"): core.matrix.MatrixNaiveSparse32F,
     }
+    
+    cov_dispatcher = {
+        np.dtype("float64"): core.matrix.MatrixCovSparse64F,
+        np.dtype("float32"): core.matrix.MatrixCovSparse32F,
+    }
+
+    dispatcher = {
+        "naive" : naive_dispatcher,
+        "cov" : cov_dispatcher,
+    }
 
     dtype = mat.dtype
-    core_base = dispatcher[dtype]
+    core_base = dispatcher[method][dtype]
 
     class _sparse(core_base):
         def __init__(self):
