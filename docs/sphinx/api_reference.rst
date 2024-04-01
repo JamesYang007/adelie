@@ -62,7 +62,8 @@ adelie.diagnostic
 .. autosummary::
     :toctree: generated/
 
-
+    DiagnosticCov
+    DiagnosticNaive
     coefficient
     diagnostic
     gradients
