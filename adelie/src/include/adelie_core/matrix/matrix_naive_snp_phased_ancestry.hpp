@@ -67,7 +67,11 @@ public:
         _n_threads(n_threads),
         _vbuff(n_threads),
         _buff(n_threads, _io.ancestries())
-    {}
+    {
+        if (n_threads < 1) {
+            throw std::runtime_error("n_threads must be >= 1.");
+        }
+    }
 
     auto ancestries() const { return _io.ancestries(); }
 
