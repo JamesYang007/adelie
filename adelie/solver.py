@@ -116,9 +116,9 @@ def _solve(state, progress_bar: bool =False):
 
 
 def gaussian_cov(
-    *,
     A: np.ndarray,
     v: np.ndarray,
+    *,
     groups: np.ndarray =None,
     alpha: float =1,
     penalty: np.ndarray =None,
@@ -394,9 +394,9 @@ def gaussian_cov(
 
 
 def grpnet(
-    *,
     X: np.ndarray,
     glm: Union[glm.GlmBase32, glm.GlmBase64],
+    *,
     groups: np.ndarray =None,
     alpha: float =1,
     penalty: np.ndarray =None,
