@@ -15,9 +15,71 @@ import warnings
 
 
 def _to_dtype(mat):
-    if isinstance(mat, MatrixNaiveBase32): return np.float32
-    elif isinstance(mat, MatrixNaiveBase64): return np.float64
-    else: return None
+    if (
+        isinstance(mat, MatrixNaiveBase32) or
+        isinstance(mat, MatrixCovBase32)
+    ): 
+        return np.float32
+    elif (
+        isinstance(mat, MatrixNaiveBase64) or
+        isinstance(mat, MatrixCovBase64)
+    ): 
+        return np.float64
+    return None
+
+
+def block_diag(
+    mats: list,
+    *,
+    n_threads: int =1,
+):
+    """Creates a block-diagonal matrix given by the list of matrices.
+
+    .. note::
+        This matrix only works for covariance method!
+
+    Parameters
+    ----------
+    mats : list
+        List of matrices to represent the block diagonal matrix.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.matrix.MatrixCovBase64
+    """
+    mats = [
+        dense(mat, method="cov", n_threads=1)
+        if isinstance(mat, np.ndarray) else
+        mat
+        for mat in mats
+    ]
+    dtype = _to_dtype(mats[0])
+
+    for mat in mats:
+        if dtype == _to_dtype(mat): continue
+        raise ValueError("All matrices must have the same underlying data type.")
+
+    dispatcher = {
+        np.float64: core.matrix.MatrixCovBlockDiag64,
+        np.float32: core.matrix.MatrixCovBlockDiag32,
+    }
+
+    core_base = dispatcher[dtype]
+
+    class _block_diag(core_base):
+        def __init__(self):
+            self.mats = mats
+            core_base.__init__(self, self.mats, n_threads)
+
+    return _block_diag()
 
 
 def concatenate(
@@ -47,6 +109,12 @@ def concatenate(
     --------
     adelie.matrix.MatrixNaiveBase64
     """
+    mats = [
+        dense(mat, method="naive", n_threads=n_threads)
+        if isinstance(mat, np.ndarray) else
+        mat
+        for mat in mats
+    ]
     dtype = _to_dtype(mats[0])
 
     for mat in mats:
@@ -66,60 +134,6 @@ def concatenate(
             core_base.__init__(self, self.mats, n_threads)
 
     return _concatenate()
-
-
-def cov_lazy(
-    mat: np.ndarray,
-    *,
-    n_threads: int =1,
-):
-    """Creates a viewer of a lazy covariance matrix.
-    
-    .. note::
-        This matrix only works for covariance method!
-
-    Parameters
-    ----------
-    mat : (n, p) np.ndarray
-        The data matrix from which to lazily compute the covariance.
-    n_threads : int, optional
-        Number of threads.
-        Default is ``1``.
-
-    Returns
-    -------
-    wrap
-        Wrapper matrix object.
-
-    See Also
-    --------
-    adelie.matrix.MatrixCovBase64
-    """
-    dispatcher = {
-        np.dtype("float64"): {
-            "C": core.matrix.MatrixCovLazy64C,
-            "F": core.matrix.MatrixCovLazy64F,
-        },
-        np.dtype("float32"): {
-            "C": core.matrix.MatrixCovLazy32C,
-            "F": core.matrix.MatrixCovLazy32F,
-        },
-    }
-
-    dtype = mat.dtype
-    order = (
-        "C"
-        if mat.flags.c_contiguous else
-        "F"
-    )
-    core_base = dispatcher[dtype][order]
-
-    class _cov_lazy(core_base):
-        def __init__(self):
-            self.mat = mat
-            core_base.__init__(self, self.mat, n_threads)
-
-    return _cov_lazy()
 
 
 def dense(
@@ -265,6 +279,60 @@ def kronecker_eye(
             core_base.__init__(self, self.mat, K, n_threads)
 
     return _kronecker_eye()
+
+
+def lazy_cov(
+    mat: np.ndarray,
+    *,
+    n_threads: int =1,
+):
+    """Creates a viewer of a lazy covariance matrix.
+    
+    .. note::
+        This matrix only works for covariance method!
+
+    Parameters
+    ----------
+    mat : (n, p) np.ndarray
+        The data matrix from which to lazily compute the covariance.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.matrix.MatrixCovBase64
+    """
+    dispatcher = {
+        np.dtype("float64"): {
+            "C": core.matrix.MatrixCovLazyCov64C,
+            "F": core.matrix.MatrixCovLazyCov64F,
+        },
+        np.dtype("float32"): {
+            "C": core.matrix.MatrixCovLazyCov32C,
+            "F": core.matrix.MatrixCovLazyCov32F,
+        },
+    }
+
+    dtype = mat.dtype
+    order = (
+        "C"
+        if mat.flags.c_contiguous else
+        "F"
+    )
+    core_base = dispatcher[dtype][order]
+
+    class _lazy_cov(core_base):
+        def __init__(self):
+            self.mat = mat
+            core_base.__init__(self, self.mat, n_threads)
+
+    return _lazy_cov()
 
 
 def snp_phased_ancestry(

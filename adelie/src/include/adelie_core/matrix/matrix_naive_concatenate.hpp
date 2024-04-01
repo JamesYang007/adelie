@@ -103,7 +103,7 @@ public:
         _buff(_rows)
     {
         if (mat_list.size() <= 0) {
-            throw std::runtime_error("mats must be non-empty.");
+            throw std::runtime_error("mat_list must be non-empty.");
         }
         if (n_threads < 1) {
             throw std::runtime_error("n_threads must be >= 1.");

@@ -8,7 +8,7 @@ namespace adelie_core {
 namespace matrix {
 
 template <class DenseType>
-class MatrixCovLazy: public MatrixCovBase<typename std::decay_t<DenseType>::Scalar>
+class MatrixCovLazyCov: public MatrixCovBase<typename std::decay_t<DenseType>::Scalar>
 {
 public: 
     using base_t = MatrixCovBase<typename std::decay_t<DenseType>::Scalar>;
@@ -57,7 +57,7 @@ private:
     }
 
 public: 
-    explicit MatrixCovLazy(
+    explicit MatrixCovLazyCov(
         const Eigen::Ref<const dense_t>& X,
         size_t n_threads
     ): 

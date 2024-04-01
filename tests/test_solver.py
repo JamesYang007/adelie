@@ -282,7 +282,7 @@ def test_solve_gaussian_pin_cov():
         # list of different types of cov matrices to test
         As = [
             ad.matrix.dense(args["A"], method="cov", n_threads=3),
-            ad.matrix.cov_lazy(args["WsqrtX"], n_threads=3),
+            ad.matrix.lazy_cov(args["WsqrtX"], n_threads=3),
         ]
 
         for Apy in As:
