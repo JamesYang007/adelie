@@ -319,6 +319,42 @@ auto svsvwdot(
     return sum;
 }
 
+template <class Inner1Type, class Value1Type,
+          class Inner2Type, class Value2Type>
+ADELIE_CORE_STRONG_INLINE
+auto svsvdot(
+    const Inner1Type& inner_1,
+    const Value1Type& value_1,
+    const Inner2Type& inner_2,
+    const Value2Type& value_2
+)
+{
+    using value_t = typename std::decay_t<Value1Type>::Scalar;
+
+    int i1 = 0;
+    int i2 = 0;
+    value_t sum = 0;
+    while (
+        (i1 < inner_1.size()) &&
+        (i2 < inner_2.size())
+    ) {
+        while ((i1 < inner_1.size()) && (inner_1[i1] < inner_2[i2])) ++i1;
+        if (i1 == inner_1.size()) break;
+        while ((i2 < inner_2.size()) && (inner_2[i2] < inner_1[i1])) ++i2;
+        if (i2 == inner_2.size()) break;
+        while (
+            (i1 < inner_1.size()) &&
+            (i2 < inner_2.size()) &&
+            (inner_1[i1] == inner_2[i2])
+        ) {
+            sum += value_1[i1] * value_2[i2];
+            ++i1;
+            ++i2;
+        }
+    }
+    return sum;
+}
+
 template <class InnerType, class ValueType, class DenseType>
 ADELIE_CORE_STRONG_INLINE
 auto spddot(
