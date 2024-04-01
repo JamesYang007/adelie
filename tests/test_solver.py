@@ -4,14 +4,163 @@ from adelie.solver import (
 from adelie.diagnostic import (
     objective,
 )
+from adelie import adelie_core as core
 import adelie as ad
 import cvxpy as cp
 import numpy as np
 import os
 
 # ========================================================================
+# Helper Classes
+# ========================================================================
+
+class CvxpyGlmGaussian():
+    def __init__(self, y, weights):
+        self.y = y
+        self.weights = weights
+        self.is_multi = False
+
+    def loss(self, eta):
+        return self.weights @ (
+            -cp.multiply(self.y, eta) + 0.5 * cp.square(eta)
+        )
+
+    def to_adelie(self):
+        return ad.glm.gaussian(self.y, weights=self.weights)
+
+
+class CvxpyGlmBinomial():
+    def __init__(self, y, weights):
+        self.y = y
+        self.weights = weights
+        self.is_multi = False
+
+    def loss(self, eta):
+        return self.weights @ (
+            -cp.multiply(self.y, eta) + cp.logistic(eta)
+        )
+
+    def to_adelie(self):
+        return ad.glm.binomial(self.y, weights=self.weights)
+
+
+class CvxpyGlmPoisson():
+    def __init__(self, y, weights):
+        self.y = y
+        self.weights = weights
+        self.is_multi = False
+
+    def loss(self, eta):
+        return self.weights @ (
+            -cp.multiply(self.y, eta) + cp.exp(eta)
+        )
+
+    def to_adelie(self):
+        return ad.glm.poisson(self.y, weights=self.weights)
+
+
+class CvxpyGlmCox():
+    def __init__(self, start, stop, status, weights):
+        self.start = start
+        self.stop = stop
+        self.status = status
+        self.weights = weights
+        self.is_multi = False
+
+        n = start.shape[0]
+
+        self.stop_order = np.argsort(stop)
+        self.inv_stop_order = np.argsort(self.stop_order)
+
+        self.weights_sum = np.empty(n)
+        core.glm.GlmCox64._nnz_event_ties_sum(
+            self.weights[self.stop_order], 
+            stop[self.stop_order], 
+            status[self.stop_order], 
+            weights[self.stop_order], 
+            self.weights_sum,
+        )
+        self.weights_sum = self.weights_sum[self.inv_stop_order]
+
+        self.weights_size = np.empty(n)
+        core.glm.GlmCox64._nnz_event_ties_sum(
+            np.ones(n),
+            stop[self.stop_order], 
+            status[self.stop_order], 
+            weights[self.stop_order], 
+            self.weights_size,
+        )
+        self.weights_size = self.weights_size[self.inv_stop_order]
+
+        self.weights_mean = np.divide(
+            self.weights_sum,
+            self.weights_size,
+            where=self.weights_size > 0,
+        )
+        self.weights_mean[self.weights_size == 0] = 0
+
+    def loss(self, eta):
+        is_at_risk = (
+            (self.start[None] < self.stop[:, None]) &
+            (self.stop[None] >= self.stop[:, None])
+        )
+        # Should be -np.inf but MOSEK cannot understand it
+        is_at_risk = np.where(is_at_risk, is_at_risk, -1e4)
+        A = cp.log_sum_exp(
+            cp.multiply(is_at_risk, (eta + np.log(self.weights))[None]),
+            axis=1
+        )
+        return (
+            - (self.weights * self.status) @ eta
+            + (self.weights_mean * self.status) @ A
+        )
+
+    def to_adelie(self):
+        return ad.glm.cox(
+            self.start,
+            self.stop,
+            self.status,
+            weights=self.weights,
+            tie_method="breslow",
+        )
+
+
+class CvxpyGlmMultiGaussian():
+    def __init__(self, y, weights):
+        self.y = y
+        self.weights = weights
+        self.is_multi = True
+
+    def loss(self, eta):
+        return self.weights @ cp.sum(
+            -cp.multiply(self.y, eta) + 0.5 * cp.square(eta),
+            axis=1,
+        ) / self.y.shape[-1]
+
+    def to_adelie(self):
+        return ad.glm.multigaussian(self.y, weights=self.weights)
+
+
+class CvxpyGlmMultinomial():
+    def __init__(self, y, weights):
+        self.y = y
+        self.weights = weights
+        self.is_multi = True
+
+    def loss(self, eta):
+        return self.weights @ (
+            - cp.sum(cp.multiply(self.y, eta), axis=1) 
+            + cp.log_sum_exp(eta, axis=1)
+        ) / self.y.shape[-1]
+
+    def to_adelie(self):
+        return ad.glm.multinomial(self.y, weights=self.weights)
+
+
+# ========================================================================
 # TEST _solve
 # ========================================================================
+
 
 def create_data_gaussian(
     n, p, G, S, 
@@ -121,86 +270,102 @@ def create_data_gaussian(
 
 def solve_cvxpy(
     X: np.ndarray,
-    y: np.ndarray,
+    cvxpy_glm,
     groups: np.ndarray,
-    group_sizes: np.ndarray,
     lmda: float,
     alpha: float,
     penalty: np.ndarray,
-    weights: np.ndarray,
-    screen_set: np.ndarray,
     intercept: bool,
-    pin: bool,
+    pin: bool =False,
+    screen_set: np.ndarray =None,
 ):
     _, p = X.shape
-    beta = cp.Variable(p)
-    beta0 = cp.Variable(1)
-    expr = (
-        0.5 * cp.sum(cp.multiply(weights, (y - X @ beta - beta0) ** 2))
-    )
-    for g, gs, w in zip(groups, group_sizes, penalty):
-        expr += lmda * w * (
-            alpha * cp.norm(beta[g:g+gs]) 
-            + 0.5 * (1-alpha) * cp.sum_squares(beta[g:g+gs])
-        )
     constraints = [] 
-    if pin:
-        constraints = [
-            beta[groups[i] : groups[i] + group_sizes[i]] == 0
-            for i in range(len(groups))
-            if not (i in screen_set)
-        ]
+    if cvxpy_glm.is_multi:
+        assert groups == "grouped"
+        K = cvxpy_glm.y.shape[-1]
+        penalty = penalty[K:] if intercept else penalty
+        beta = cp.Variable((p, K))
+        beta0 = cp.Variable(K)
+        eta = X @ beta + beta0[None]
+        expr = cvxpy_glm.loss(eta)
+        expr += lmda * penalty @ (
+            alpha * cp.norm(beta, axis=1) 
+            + 0.5 * (1-alpha) * cp.sum(cp.square(beta), axis=1)
+        )
+    else:
+        group_sizes = np.concatenate([groups, [p]], dtype=int)
+        group_sizes = group_sizes[1:] - group_sizes[:-1]
+
+        beta = cp.Variable(p)
+        beta0 = cp.Variable(1)
+        eta = X @ beta + beta0
+        expr = cvxpy_glm.loss(eta)
+        for g, gs, w in zip(groups, group_sizes, penalty):
+            expr += (lmda * w) * (
+                alpha * cp.norm(beta[g:g+gs]) 
+                + 0.5 * (1-alpha) * cp.sum_squares(beta[g:g+gs])
+            )
+        if pin:
+            constraints = [
+                beta[groups[i] : groups[i] + group_sizes[i]] == 0
+                for i in range(len(groups))
+                if not (i in screen_set)
+            ]
     if not intercept:
         constraints += [ beta0 == 0 ]
     prob = cp.Problem(cp.Minimize(expr), constraints)
     prob.solve()
-    return beta0.value, beta.value
+
+    if cvxpy_glm.is_multi:
+        return beta0.value, beta.value.ravel()
+    else:
+        return beta0.value[0], beta.value
 
 
-def run_solve_gaussian(state, args, pin):
-    state.check(method="assert")
-
-    state = _solve(state)    
-
-    state.check(method="assert")
-
+def check_solutions(
+    args,
+    state,
+    cvxpy_glm,
+    pin: bool =False,
+    eps: float =1e-8,
+):
     # get solved lmdas
     lmdas = state.lmdas
 
-    # check beta matches (if not, at least that objective is better)
     X = args["X"]
-    y = args["y"]
     intercept = args["intercept"]
-    weights = args["weights"]
-    betas = state.betas
-    intercepts = state.intercepts
+    groups = args["groups"]
     cvxpy_res = [
         solve_cvxpy(
             X=X,
-            y=y,
-            groups=state.groups,
-            group_sizes=state.group_sizes,
+            cvxpy_glm=cvxpy_glm,
+            groups=groups,
             lmda=lmda,
             alpha=state.alpha,
             penalty=state.penalty,
-            weights=weights,
-            screen_set=state.screen_set,
             intercept=intercept,
             pin=pin,
+            screen_set=state.screen_set,
         )
         for lmda in lmdas
     ]
-    cvxpy_intercepts = np.array([out[0][0] for out in cvxpy_res])
+    cvxpy_intercepts = np.array([out[0] for out in cvxpy_res])
     cvxpy_betas = np.array([out[1] for out in cvxpy_res])
+
+    # check beta matches (if not, at least that objective is better)
+    betas = state.betas
+    intercepts = state.intercepts
 
     is_intercept_close = np.allclose(intercepts, cvxpy_intercepts, atol=1e-6)
     is_beta_close = np.allclose(betas.toarray(), cvxpy_betas, atol=1e-6)
+
     if not (is_beta_close and is_intercept_close):
         objective_args = {
             "X": X,
-            "glm": ad.glm.gaussian(y=y, weights=weights),
+            "glm": cvxpy_glm.to_adelie(),
             "lmdas": lmdas,
-            "groups": state.groups,
+            "groups": groups,
             "alpha": state.alpha,
             "penalty": state.penalty,
         }
@@ -214,8 +379,15 @@ def run_solve_gaussian(state, args, pin):
             betas=cvxpy_betas,
             intercepts=cvxpy_intercepts,
         )
-        assert np.all(my_objs <= cvxpy_objs * (1 + 1e-8))
+        assert np.all(my_objs <= cvxpy_objs * (1 + eps))
 
+
+def run_solve_gaussian(state, args, pin):
+    state.check(method="assert")
+    state = _solve(state)    
+    state.check(method="assert")
+    cvxpy_glm = CvxpyGlmGaussian(args["y"], args["weights"])
+    check_solutions(args, state, cvxpy_glm, pin)
     return state
 
 
@@ -595,3 +767,94 @@ def test_solve_gaussian_snp_phased_ancestry():
     _test(100, 23)
     _test(100, 100)
     _test(100, 10000)
+
+
+# ==========================================================================================
+# TEST grpnet
+# ==========================================================================================
+
+def run_test_grpnet(n, p, G, glm_type, intercept=True, adev_tol=0.4):
+    K = 3 if "multi" in glm_type else 1
+    data = ad.data.dense(n, p, p, K=K, glm=glm_type)
+    X, glm = data["X"], data["glm"]
+    if glm.is_multi:
+        groups = "grouped"
+        cvxpy_glm = {
+            "multigaussian": CvxpyGlmMultiGaussian,
+            "multinomial": CvxpyGlmMultinomial,
+        }[glm_type](glm.y, glm.weights)
+    else:
+        groups = np.concatenate([
+            [0],
+            np.random.choice(np.arange(1, p), size=G-1, replace=False)
+        ])
+        groups = np.sort(groups).astype(int)
+
+        if glm_type == "cox":
+            cvxpy_glm = CvxpyGlmCox(
+                glm.start,
+                glm.stop,
+                glm.status,
+                glm.weights,
+            )
+            glm = cvxpy_glm.to_adelie()
+        else:
+            cvxpy_glm = {
+                "gaussian": CvxpyGlmGaussian,
+                "binomial": CvxpyGlmBinomial,
+                "poisson": CvxpyGlmPoisson,
+            }[glm_type](glm.y, glm.weights)
+
+    args = {
+        "X": X,
+        "intercept": intercept,
+        "groups": groups,
+    }
+    state = ad.grpnet(
+        X=X, 
+        glm=glm, 
+        groups=groups,
+        intercept=intercept,
+        adev_tol=adev_tol,
+        irls_tol=1e-8,
+        tol=1e-10,
+        progress_bar=False,
+    )
+    check_solutions(args, state, cvxpy_glm, eps=1e-4)
+
+
+def test_grpnet_gaussian():
+    glm_type = "gaussian"
+    run_test_grpnet(10, 50, 10, glm_type)
+    run_test_grpnet(40, 13, 7, glm_type)
+
+
+def test_grpnet_binomial():
+    glm_type = "binomial"
+    run_test_grpnet(10, 50, 10, glm_type)
+    run_test_grpnet(40, 13, 7, glm_type)
+
+
+def test_grpnet_poisson():
+    glm_type = "poisson"
+    run_test_grpnet(10, 50, 10, glm_type)
+    run_test_grpnet(40, 13, 7, glm_type)
+
+
+def test_grpnet_cox():
+    glm_type = "cox"
+    # lower adev_tol to make the test run faster
+    run_test_grpnet(10, 50, 10, glm_type, adev_tol=0.2)
+    run_test_grpnet(40, 13, 7, glm_type, adev_tol=0.2)
+
+
+def test_grpnet_multigaussian():
+    glm_type = "multigaussian"
+    run_test_grpnet(10, 50, 10, glm_type)
+    run_test_grpnet(40, 13, 7, glm_type)
+
+
+def test_grpnet_multinomial():
+    glm_type = "multinomial"
+    run_test_grpnet(10, 50, 10, glm_type)
+    run_test_grpnet(40, 13, 7, glm_type)
