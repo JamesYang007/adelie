@@ -1,4 +1,3 @@
-from typing import Union
 from . import adelie_core as core
 from .adelie_core.matrix import (
     MatrixNaiveBase64,
@@ -6,7 +5,13 @@ from .adelie_core.matrix import (
     MatrixCovBase64,
     MatrixCovBase32,
 )
+from scipy.sparse import (
+    csc_matrix,
+    csr_matrix,
+)
+from typing import Union
 import numpy as np
+import warnings
 
 
 def _to_dtype(mat):
@@ -42,11 +47,6 @@ def concatenate(
     --------
     adelie.matrix.MatrixNaiveBase64
     """
-    if n_threads < 1:
-        raise ValueError("Number of threads must be >= 1.")
-    if len(mats) == 0:
-        raise ValueError("mats must be non-empty.")
-    
     dtype = _to_dtype(mats[0])
 
     for mat in mats:
@@ -68,6 +68,60 @@ def concatenate(
     return _concatenate()
 
 
+def cov_lazy(
+    mat: np.ndarray,
+    *,
+    n_threads: int =1,
+):
+    """Creates a viewer of a lazy covariance matrix.
+    
+    .. note::
+        This matrix only works for covariance method!
+
+    Parameters
+    ----------
+    mat : (n, p) np.ndarray
+        The data matrix from which to lazily compute the covariance.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.matrix.MatrixCovBase64
+    """
+    dispatcher = {
+        np.dtype("float64"): {
+            "C": core.matrix.MatrixCovLazy64C,
+            "F": core.matrix.MatrixCovLazy64F,
+        },
+        np.dtype("float32"): {
+            "C": core.matrix.MatrixCovLazy32C,
+            "F": core.matrix.MatrixCovLazy32F,
+        },
+    }
+
+    dtype = mat.dtype
+    order = (
+        "C"
+        if mat.flags.c_contiguous else
+        "F"
+    )
+    core_base = dispatcher[dtype][order]
+
+    class _cov_lazy(core_base):
+        def __init__(self):
+            self.mat = mat
+            core_base.__init__(self, self.mat, n_threads)
+
+    return _cov_lazy()
+
+
 def dense(
     mat: np.ndarray,
     *,
@@ -79,7 +133,7 @@ def dense(
     Parameters
     ----------
     mat : np.ndarray
-        The matrix to view.
+        The dense matrix to view.
     method : str, optional
         Method type. It must be one of the following:
 
@@ -101,9 +155,6 @@ def dense(
     adelie.matrix.MatrixCovBase64
     adelie.matrix.MatrixNaiveBase64
     """
-    if n_threads < 1:
-        raise ValueError("Number of threads must be >= 1.")
-
     naive_dispatcher = {
         np.dtype("float64"): {
             "C": core.matrix.MatrixNaiveDense64C,
@@ -182,11 +233,6 @@ def kronecker_eye(
     --------
     adelie.matrix.MatrixNaiveBase64
     """
-    if n_threads < 1:
-        raise ValueError("Number of threads must be >= 1.")
-    if K < 1:
-        raise ValueError("K must be >= 1.")
-
     if isinstance(mat, np.ndarray):
         dispatcher = {
             np.dtype("float64"): {
@@ -219,58 +265,6 @@ def kronecker_eye(
             core_base.__init__(self, self.mat, K, n_threads)
 
     return _kronecker_eye()
-
-
-def snp_unphased(
-    filename: str,
-    *,
-    read_mode: str ="auto",
-    n_threads: int =1,
-    dtype: Union[np.float32, np.float64] =np.float64,
-):
-    """Creates a SNP unphased matrix.
-
-    .. note::
-        This matrix only works for naive method!
-    
-    Parameters
-    ----------
-    filename : str
-        File name that contains unphased calldata in ``.snpdat`` format.
-    read_mode : str, optional
-        See the corresponding parameter in ``adelie.io.snp_unphased``.
-        Default is ``"auto"``.
-    n_threads : int, optional
-        Number of threads.
-        Default is ``1``.
-    dtype : Union[np.float32, np.float64], optional
-        Underlying value type.
-        Default is ``np.float64``.
-
-    Returns
-    -------
-    wrap
-        Wrapper matrix object.
-
-    See Also
-    --------
-    adelie.io.snp_unphased
-    adelie.matrix.MatrixNaiveBase64
-    """
-    if n_threads < 1:
-        raise ValueError("Number of threads must be >= 1.")
-
-    dispatcher = {
-        np.float64: core.matrix.MatrixNaiveSNPUnphased64,
-        np.float32: core.matrix.MatrixNaiveSNPUnphased32,
-    }
-    core_base = dispatcher[dtype]
-
-    class _snp_unphased(core_base):
-        def __init__(self):
-            core_base.__init__(self, filename, read_mode, n_threads)
-
-    return _snp_unphased()
 
 
 def snp_phased_ancestry(
@@ -309,9 +303,6 @@ def snp_phased_ancestry(
     adelie.io.snp_phased_ancestry
     adelie.matrix.MatrixNaiveBase64
     """
-    if n_threads < 1:
-        raise ValueError("Number of threads must be >= 1.")
-
     dispatcher = {
         np.float64: core.matrix.MatrixNaiveSNPPhasedAncestry64,
         np.float32: core.matrix.MatrixNaiveSNPPhasedAncestry32,
@@ -325,20 +316,73 @@ def snp_phased_ancestry(
     return _snp_phased_ancestry()
 
 
-def cov_lazy(
-    mat: np.ndarray,
+def snp_unphased(
+    filename: str,
+    *,
+    read_mode: str ="auto",
+    n_threads: int =1,
+    dtype: Union[np.float32, np.float64] =np.float64,
+):
+    """Creates a SNP unphased matrix.
+
+    .. note::
+        This matrix only works for naive method!
+    
+    Parameters
+    ----------
+    filename : str
+        File name that contains unphased calldata in ``.snpdat`` format.
+    read_mode : str, optional
+        See the corresponding parameter in ``adelie.io.snp_unphased``.
+        Default is ``"auto"``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+    dtype : Union[np.float32, np.float64], optional
+        Underlying value type.
+        Default is ``np.float64``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.io.snp_unphased
+    adelie.matrix.MatrixNaiveBase64
+    """
+    dispatcher = {
+        np.float64: core.matrix.MatrixNaiveSNPUnphased64,
+        np.float32: core.matrix.MatrixNaiveSNPUnphased32,
+    }
+    core_base = dispatcher[dtype]
+
+    class _snp_unphased(core_base):
+        def __init__(self):
+            core_base.__init__(self, filename, read_mode, n_threads)
+
+    return _snp_unphased()
+
+
+def sparse(
+    mat: Union[csc_matrix, csr_matrix],
     *,
     n_threads: int =1,
 ):
-    """Creates a viewer of a lazy covariance matrix.
-    
-    .. note::
-        This matrix only works for covariance method!
+    """Creates a viewer of a sparse matrix.
 
+    .. note::
+        This matrix only works for naive method!
+
+    .. note::
+        Regardless of the storage order of the input matrix,
+        we internally convert the matrix to CSC order for performance reasons.
+    
     Parameters
     ----------
-    mat : (n, p) np.ndarray
-        The data matrix from which to lazily compute the covariance.
+    mat : Union[scipy.sparse.csc_matrix, scipy.sparse.csr_matrix]
+        The sparse matrix to view.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -350,33 +394,38 @@ def cov_lazy(
 
     See Also
     --------
-    adelie.matrix.MatrixCovBase64
+    adelie.matrix.MatrixNaiveBase64
     """
-    if n_threads < 1:
-        raise ValueError("Number of threads must be >= 1.")
+    if not (isinstance(mat, csr_matrix) or isinstance(mat, csc_matrix)):
+        raise TypeError("mat must be scipy.sparse.csr_matrix or scipy.sparse.csc_matrix.")
+
+    mat.prune()
+    mat.sort_indices()
+
+    if isinstance(mat, csr_matrix):
+        warnings.warn("Converting to CSC format.")
+        mat = mat.tocsc(copy=True)
 
     dispatcher = {
-        np.dtype("float64"): {
-            "C": core.matrix.MatrixCovLazy64C,
-            "F": core.matrix.MatrixCovLazy64F,
-        },
-        np.dtype("float32"): {
-            "C": core.matrix.MatrixCovLazy32C,
-            "F": core.matrix.MatrixCovLazy32F,
-        },
+        np.dtype("float64"): core.matrix.MatrixNaiveSparse64F,
+        np.dtype("float32"): core.matrix.MatrixNaiveSparse32F,
     }
 
     dtype = mat.dtype
-    order = (
-        "C"
-        if mat.flags.c_contiguous else
-        "F"
-    )
-    core_base = dispatcher[dtype][order]
+    core_base = dispatcher[dtype]
 
-    class _cov_lazy(core_base):
+    class _sparse(core_base):
         def __init__(self):
             self.mat = mat
-            core_base.__init__(self, self.mat, n_threads)
+            core_base.__init__(
+                self, 
+                self.mat.shape[0], 
+                self.mat.shape[1], 
+                self.mat.nnz,
+                self.mat.indptr,
+                self.mat.indices,
+                self.mat.data,
+                n_threads,
+            )
 
-    return _cov_lazy()
+    return _sparse()

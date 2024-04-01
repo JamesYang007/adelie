@@ -33,7 +33,11 @@ public:
         _n_threads(n_threads),
         _buff(_n_threads, std::min(mat.rows(), mat.cols())),
         _vbuff(mat.rows())
-    {}
+    {
+        if (n_threads < 1) {
+            throw std::runtime_error("n_threads must be >= 1.");
+        }
+    }
 
     value_t cmul(
         int j, 

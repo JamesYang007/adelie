@@ -31,6 +31,9 @@ public:
         if (mat.rows() != mat.cols()) {
             throw std::runtime_error("Matrix must be square!");
         }
+        if (n_threads < 1) {
+            throw std::runtime_error("n_threads must be >= 1.");
+        }
     }
 
     using base_t::rows;

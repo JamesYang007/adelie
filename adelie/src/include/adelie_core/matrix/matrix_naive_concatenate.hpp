@@ -101,7 +101,14 @@ public:
         _index_map(init_index_map(mat_list, _cols)),
         _n_threads(n_threads),
         _buff(_rows)
-    {}
+    {
+        if (mat_list.size() <= 0) {
+            throw std::runtime_error("mats must be non-empty.");
+        }
+        if (n_threads < 1) {
+            throw std::runtime_error("n_threads must be >= 1.");
+        }
+    }
 
     value_t cmul(
         int j, 

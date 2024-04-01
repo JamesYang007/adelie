@@ -3,6 +3,7 @@ import adelie.matrix as mod
 import numpy as np
 import scipy
 import os
+import warnings
 
 
 # ==========================================================================================
@@ -260,7 +261,7 @@ def test_naive_kronecker_eye_dense():
             _test(100, 20, 2, dtype, order)
 
 
-def test_snp_unphased():
+def test_naive_snp_unphased():
     def _test(n, p, read_mode, dtype, seed=0):
         np.random.seed(seed)
         data = ad.data.snp_unphased(n, p, seed=seed)
@@ -287,7 +288,7 @@ def test_snp_unphased():
             _test(144, 1, read_mode, dtype)
 
 
-def test_snp_phased_ancestry():
+def test_naive_snp_phased_ancestry():
     def create_dense(calldata, ancestries, A):
         n, s = calldata.shape[0], calldata.shape[1] // 2
         dense = np.zeros((n, s * A), dtype=np.int8)
@@ -327,3 +328,26 @@ def test_snp_phased_ancestry():
             _test(10, 20, 4, read_mode, dtype)
             _test(1, 13, 3, read_mode, dtype)
             _test(144, 1, 2, read_mode, dtype)
+
+
+def test_naive_sparse():
+    def _test(n, p, dtype, order, seed=0):
+        np.random.seed(seed)
+        X = np.random.normal(0, 1, (n, p)).astype(dtype)
+        X.flat[np.random.binomial(1, 0.3, X.size)] = 0
+        X_sp = {
+            "C": scipy.sparse.csr_matrix,
+            "F": scipy.sparse.csc_matrix,
+        }[order](X)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            cX = mod.sparse(X_sp, n_threads=3)
+        run_naive(X, cX, dtype)
+
+    dtypes = [np.float32, np.float64]
+    orders = ["C", "F"]
+    for dtype in dtypes:
+        for order in orders:
+            _test(2, 2, dtype, order)
+            _test(100, 20, dtype, order)
+            _test(20, 100, dtype, order)
