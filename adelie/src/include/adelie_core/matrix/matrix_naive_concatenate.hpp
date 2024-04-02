@@ -31,13 +31,13 @@ private:
     )
     {
         if (mat_list.size() == 0) {
-            throw std::runtime_error("List must be non-empty.");
+            throw util::adelie_core_error("List must be non-empty.");
         }
 
         const auto n = mat_list[0]->rows();
         for (auto mat : mat_list) {
             if (n != mat->rows()) {
-                throw std::runtime_error("All matrices must have the same number of rows.");
+                throw util::adelie_core_error("All matrices must have the same number of rows.");
             }
         }
 
@@ -103,10 +103,10 @@ public:
         _buff(_rows)
     {
         if (mat_list.size() <= 0) {
-            throw std::runtime_error("mat_list must be non-empty.");
+            throw util::adelie_core_error("mat_list must be non-empty.");
         }
         if (n_threads < 1) {
-            throw std::runtime_error("n_threads must be >= 1.");
+            throw util::adelie_core_error("n_threads must be >= 1.");
         }
     }
 
@@ -215,7 +215,7 @@ public:
 
         // check that the block is fully contained in one matrix
         if (slice != _slice_map[j+q-1]) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 "MatrixNaiveConcatenate::cov() only allows the block to be fully contained in one of the matrices in the list."
             );
         }

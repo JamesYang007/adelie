@@ -78,10 +78,10 @@ public:
         _vbuff(_cols) // just optimization
     {
         if (mat_list.size() <= 0) {
-            throw std::runtime_error("mat_list must be non-empty.");
+            throw util::adelie_core_error("mat_list must be non-empty.");
         }
         if (n_threads < 1) {
-            throw std::runtime_error("n_threads must be >= 1.");
+            throw util::adelie_core_error("n_threads must be >= 1.");
         }
     }
 

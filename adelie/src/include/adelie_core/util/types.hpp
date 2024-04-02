@@ -2,6 +2,7 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 #include <string>
+#include <adelie_core/util/exceptions.hpp>
 
 namespace adelie_core {
 namespace util {
@@ -64,7 +65,7 @@ inline screen_rule_type convert_screen_rule(
 {
     if (rule == "strong") return screen_rule_type::_strong;
     if (rule == "pivot") return screen_rule_type::_pivot;
-    throw std::runtime_error("Invalid screen rule type: " + rule);
+    throw util::adelie_core_error("Invalid screen rule type: " + rule);
 }
 
 inline multi_group_type convert_multi_group(
@@ -73,7 +74,7 @@ inline multi_group_type convert_multi_group(
 {
     if (group == "grouped") return multi_group_type::_grouped;
     if (group == "ungrouped") return multi_group_type::_ungrouped;
-    throw std::runtime_error("Invalid multi-response grouping type: " + group);
+    throw util::adelie_core_error("Invalid multi-response grouping type: " + group);
 }
 
 inline tie_method_type convert_tie_method(
@@ -82,7 +83,7 @@ inline tie_method_type convert_tie_method(
 {
     if (method == "breslow") return tie_method_type::_breslow;
     if (method == "efron") return tie_method_type::_efron;
-    throw std::runtime_error("Invalid tie method: " + method);
+    throw util::adelie_core_error("Invalid tie method: " + method);
 }
 
 inline hessian_type convert_hessian(
@@ -91,7 +92,7 @@ inline hessian_type convert_hessian(
 {
     if (hessian == "diagonal") return hessian_type::_diagonal;
     if (hessian == "full") return hessian_type::_full;
-    throw std::runtime_error("Invalid hessian type: " + hessian);
+    throw util::adelie_core_error("Invalid hessian type: " + hessian);
 }
 
 inline read_mode_type convert_read_mode(
@@ -101,7 +102,7 @@ inline read_mode_type convert_read_mode(
     if (read_mode == "file") return read_mode_type::_file;
     if (read_mode == "mmap") return read_mode_type::_mmap;
     if (read_mode == "auto") return read_mode_type::_auto;
-    throw std::runtime_error("Invalid read mode type: " + read_mode);
+    throw util::adelie_core_error("Invalid read mode type: " + read_mode);
 }
 
 } // namespace util

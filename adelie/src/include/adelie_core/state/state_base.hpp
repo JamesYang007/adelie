@@ -1,8 +1,9 @@
 #pragma once
 #include <unordered_map>
 #include <vector>
-#include <adelie_core/util/types.hpp>
+#include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/macros.hpp>
+#include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
 namespace state {
@@ -301,52 +302,52 @@ struct StateBase
         // sanity checks
         const auto G = groups.size();
         if (group_sizes.size() != G) {
-            throw std::runtime_error("group_sizes must have the same length as groups.");
+            throw util::adelie_core_error("group_sizes must have the same length as groups.");
         }
         if (penalty.size() != G) {
-            throw std::runtime_error("penalty must have the same length as groups.");
+            throw util::adelie_core_error("penalty must have the same length as groups.");
         }
         if (alpha < 0 || alpha > 1) {
-            throw std::runtime_error("alpha must be in [0,1].");
+            throw util::adelie_core_error("alpha must be in [0,1].");
         }
         if (tol <= 0) {
-            throw std::runtime_error("tol must be > 0.");
+            throw util::adelie_core_error("tol must be > 0.");
         }
         if (adev_tol < 0 || adev_tol > 1) {
-            throw std::runtime_error("adev_tol must be in [0,1].");
+            throw util::adelie_core_error("adev_tol must be in [0,1].");
         }
         if (ddev_tol < 0 || ddev_tol > 1) {
-            throw std::runtime_error("ddev_tol must be in [0,1].");
+            throw util::adelie_core_error("ddev_tol must be in [0,1].");
         }
         if (newton_tol < 0) {
-            throw std::runtime_error("newton_tol must be >= 0.");
+            throw util::adelie_core_error("newton_tol must be >= 0.");
         }
         if (n_threads < 1) {
-            throw std::runtime_error("n_threads must be >= 1.");
+            throw util::adelie_core_error("n_threads must be >= 1.");
         }
         if (min_ratio <= 0) {
-            throw std::runtime_error("min_ratio must be > 0.");
+            throw util::adelie_core_error("min_ratio must be > 0.");
         }
         if (pivot_subset_ratio <= 0 || pivot_subset_ratio > 1) {
-            throw std::runtime_error("pivot_subset_ratio must be in (0, 1].");
+            throw util::adelie_core_error("pivot_subset_ratio must be in (0, 1].");
         }
         if (pivot_subset_min < 1) {
-            throw std::runtime_error("pivot_subset_min must be >= 1.");
+            throw util::adelie_core_error("pivot_subset_min must be >= 1.");
         }
         if (pivot_slack_ratio < 0) {
-            throw std::runtime_error("pivot_slack_ratio must be >= 0.");
+            throw util::adelie_core_error("pivot_slack_ratio must be >= 0.");
         }
         if (screen_set.size() != screen_is_active.size()) {
-            throw std::runtime_error("screen_is_active must have the same length as screen_set.");
+            throw util::adelie_core_error("screen_is_active must have the same length as screen_set.");
         }
         if (screen_beta.size() < screen_set.size()) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 "screen_beta has smaller length than screen_set. "
                 "It is likely screen_beta has been initialized incorrectly."
             );
         }
         if (grad.size() != groups[G-1] + group_sizes[G-1]) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 "grad.size() != groups[G-1] + group_sizes[G-1]. "
                 "It is likely either grad has the wrong shape, "
                 "or groups/group_sizes have been initialized incorrectly."

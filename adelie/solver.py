@@ -75,7 +75,10 @@ def _solve(
 
     # raise any errors
     if out["error"] != "":
-        logger.logger.warning(RuntimeError(out["error"]))
+        if out["error"].startswith("adelie_core solver: "):
+            logger.logger.warning(RuntimeError(out["error"]))
+        else:
+            logger.logger.error(RuntimeError(out["error"]))
 
     # return a subsetted Python result object
     core_state = out["state"]

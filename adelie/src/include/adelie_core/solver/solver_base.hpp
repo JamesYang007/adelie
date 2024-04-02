@@ -172,7 +172,7 @@ void screen(
     } else if (screen_rule == util::screen_rule_type::_pivot) {
         do_pivot();
     } else {
-        throw std::runtime_error("Unknown screen rule!");
+        throw util::adelie_core_solver_error("Unknown screen rule!");
     }
 
     // If adding new amount went over max screen size, 
@@ -182,7 +182,7 @@ void screen(
             std::next(screen_set.begin(), old_screen_set_size),
             screen_set.end()
         );
-        throw util::max_basil_screen_set();
+        throw util::max_screen_set_error();
     }
 }
 
@@ -263,7 +263,7 @@ inline void solve_core(
     auto& active_sizes = state.active_sizes;
     auto& screen_sizes = state.screen_sizes;
 
-    if (screen_set.size() > max_screen_size) throw util::max_basil_screen_set();
+    if (screen_set.size() > max_screen_size) throw util::max_screen_set_error();
 
     update_loss_null_f(state);
 
@@ -289,7 +289,7 @@ inline void solve_core(
     // Generate lambda path if needed
     // ==================================================================================== 
     if (setup_lmda_path) {
-        if (lmda_path_size <= 0) throw std::runtime_error("lmda_path_size must be > 0.");
+        if (lmda_path_size <= 0) throw util::adelie_core_solver_error("lmda_path_size must be > 0.");
 
         lmda_path.resize(lmda_path_size);
 

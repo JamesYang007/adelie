@@ -42,7 +42,7 @@ protected:
 
     static void throw_bad_start_index(int j, int A)
     {
-        throw std::runtime_error(
+        throw util::adelie_core_error(
             "Bad starting index " + std::to_string(j) +
             " with ancestries " + std::to_string(A)
         );
@@ -50,7 +50,7 @@ protected:
 
     static void throw_bad_size(int q, int A)
     {
-        throw std::runtime_error(
+        throw util::adelie_core_error(
             "Bad size " + std::to_string(q) +
             " with ancestries " + std::to_string(A)
         );
@@ -69,7 +69,7 @@ public:
         _buff(n_threads, _io.ancestries())
     {
         if (n_threads < 1) {
-            throw std::runtime_error("n_threads must be >= 1.");
+            throw util::adelie_core_error("n_threads must be >= 1.");
         }
     }
 

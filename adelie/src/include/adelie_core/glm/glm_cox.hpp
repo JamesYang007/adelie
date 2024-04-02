@@ -378,13 +378,13 @@ public:
     {
         const auto n = start.size();
         if (stop.size() != n) {
-            throw std::runtime_error("stop vector must be same length as start.");
+            throw util::adelie_core_error("stop vector must be same length as start.");
         }
         if (status.size() != n) {
-            throw std::runtime_error("status vector must be same length as start.");
+            throw util::adelie_core_error("status vector must be same length as start.");
         }
         if (weights.size() != n) {
-            throw std::runtime_error("weights vector must be same length as start.");
+            throw util::adelie_core_error("weights vector must be same length as start.");
         }
     }
 
