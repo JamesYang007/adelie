@@ -103,7 +103,17 @@ def concatenate(
     """Creates a column-wise concatenation of the matrices.
 
     If ``mats`` represents a list of matrices :math:`X_1,\\ldots, X_L`,
-    then, the resulting matrix represents :math:`[X_1,\\ldots, X_L]`.
+    then the resulting matrix represents the column-wise concatenated matrix
+    given by
+
+    .. math::
+        \\begin{align*}
+            \\begin{bmatrix}
+                \\vert & \\vert & \\cdots & \\vert \\\\
+                X_1 & X_2 & \\cdots & X_L \\\\
+                \\vert & \\vert & \\cdots & \\vert
+            \\end{bmatrix}
+        \\end{align*}
 
     .. note::
         This matrix only works for naive method!
