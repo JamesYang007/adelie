@@ -35,7 +35,7 @@ public:
         _vbuff(mat.rows())
     {
         if (n_threads < 1) {
-            throw std::runtime_error("n_threads must be >= 1.");
+            throw util::adelie_core_error("n_threads must be >= 1.");
         }
     }
 

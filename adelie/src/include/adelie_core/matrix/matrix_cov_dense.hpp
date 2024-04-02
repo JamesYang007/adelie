@@ -29,10 +29,10 @@ public:
         _n_threads(n_threads)
     {
         if (mat.rows() != mat.cols()) {
-            throw std::runtime_error("Matrix must be square!");
+            throw util::adelie_core_error("Matrix must be square!");
         }
         if (n_threads < 1) {
-            throw std::runtime_error("n_threads must be >= 1.");
+            throw util::adelie_core_error("n_threads must be >= 1.");
         }
     }
 

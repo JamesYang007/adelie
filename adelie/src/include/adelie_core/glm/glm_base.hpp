@@ -2,8 +2,9 @@
 #include <cstdio>
 #include <string>
 #include <adelie_core/configs.hpp>
-#include <adelie_core/util/types.hpp>
+#include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/format.hpp>
+#include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
 namespace glm {
@@ -34,7 +35,7 @@ protected:
             (weights.size() != eta.size()) ||
             (weights.size() != grad.size())
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "gradient() is given inconsistent inputs! "
                     "(weights=%d, y=%d, eta=%d, grad=%d)",
@@ -56,7 +57,7 @@ protected:
             (weights.size() != grad.size()) ||
             (weights.size() != hess.size())
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "hessian() is given inconsistent inputs! "
                     "(weights=%d, y=%d, eta=%d, grad=%d, hess=%d)",
@@ -80,7 +81,7 @@ protected:
             (weights.size() != hess.size()) ||
             (weights.size() != inv_hess_grad.size())
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "inv_hessian_grad() is given inconsistent inputs! "
                     "(weights=%d, y=%d, eta=%d, grad=%d, hess=%d, inv_hess_grad=%d)",
@@ -98,7 +99,7 @@ protected:
             (y.size() != weights.size()) ||
             (y.size() != eta.size())
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "loss() is given inconsistent inputs! "
                     "(y=%d, weights=%d, eta=%d)",
@@ -119,7 +120,7 @@ public:
         weights(weights.data(), weights.size())
     {
         if (y.size() != weights.size()) {
-            throw std::runtime_error("y and weights must have same length.");
+            throw util::adelie_core_error("y and weights must have same length.");
         }
     }
 

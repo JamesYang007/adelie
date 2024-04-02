@@ -3,6 +3,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/types.hpp>
 #if defined(__linux__) || defined(__APPLE__)
 #include <sys/mman.h>
@@ -46,7 +47,7 @@ protected:
 
     static void throw_no_read() 
     {
-        throw std::runtime_error(
+        throw util::adelie_core_error(
             "File is not read yet. Call read() first."
         );
     }
@@ -62,7 +63,7 @@ protected:
         );
         auto fp = file_ptr.get();
         if (!fp) {
-            throw std::runtime_error("Cannot open file " + std::string(filename));
+            throw util::adelie_core_error("Cannot open file " + std::string(filename));
         }
         // disable internal buffering
         std::setvbuf(fp, nullptr, _IONBF, 0);
@@ -143,25 +144,25 @@ public:
             );
             new (&_buffer) Eigen::Map<buffer_t>(addr, total_bytes);
 #else
-            throw std::runtime_error("Only Linux and MacOS support the mmap feature.");
+            throw util::adelie_core_error("Only Linux and MacOS support the mmap feature.");
 #endif
         // otherwise use the more general routine using file IO
         } else if (_read_mode == util::read_mode_type::_file) {
             _buffer_w.resize(total_bytes);
             const size_t read = std::fread(_buffer_w.data(), sizeof(char), _buffer_w.size(), fp);
             if (read != static_cast<size_t>(_buffer_w.size())) {
-                throw std::runtime_error(
+                throw util::adelie_core_error(
                     "Could not read the whole file into buffer."
                 );
             }
             new (&_buffer) Eigen::Map<buffer_t>(_buffer_w.data(), _buffer_w.size());
 
         } else {
-            throw std::runtime_error("Unsupported read mode.");
+            throw util::adelie_core_error("Unsupported read mode.");
         }
 
         if (endian() != is_big_endian()) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 "Endianness is inconsistent! "
                 "Regenerate the file on a machine with the same endianness."
             );

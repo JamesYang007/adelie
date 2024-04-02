@@ -5,59 +5,53 @@
 namespace adelie_core {
 namespace util {
 
-class adelie_core_error: public std::exception {};
-
-class max_cds_error : public adelie_core_error
+class adelie_core_error: public std::exception 
 {
-    std::string msg_;
+    std::string _msg;
 
+public:
+    adelie_core_error(
+        const std::string& msg
+    ):
+        _msg("adelie_core: " + msg)
+    {}
+
+    adelie_core_error(
+        const std::string& prefix,
+        const std::string& msg
+    ):
+        _msg("adelie_core " + prefix + ": " + msg)
+    {}
+
+    const char* what() const noexcept override {
+        return _msg.data();
+    }
+};
+
+class adelie_core_solver_error: public adelie_core_error
+{
+public:
+    adelie_core_solver_error(
+        const std::string& msg
+    ):
+        adelie_core_error("solver", msg)
+    {}
+};
+
+class max_cds_error : public adelie_core_solver_error
+{
 public:
     max_cds_error(int lmda_idx)
-        : msg_{"Basil max coordinate descents reached at lambda index: " + std::to_string(lmda_idx) + "."}
+        : adelie_core_solver_error("max coordinate descents reached at lambda index: " + std::to_string(lmda_idx) + ".")
     {}
-
-    const char* what() const noexcept override {
-        return msg_.data();
-    }
 };
 
-class max_basil_screen_set : public adelie_core_error
+class max_screen_set_error : public adelie_core_solver_error
 {
-    std::string msg_;
 public:
-    max_basil_screen_set(): 
-        msg_{"Basil maximum screen set size reached."}
+    max_screen_set_error(): 
+        adelie_core_solver_error("maximum screen set size reached.")
     {}
-
-    const char* what() const noexcept override {
-        return msg_.data();
-    }
-};
-
-class basil_finished_early_error : public adelie_core_error
-{
-    std::string msg_;
-public:
-    basil_finished_early_error(): 
-        msg_{"Basil finished early due to minimal change in R^2."}
-    {}
-
-    const char* what() const noexcept override {
-        return msg_.data();
-    }
-};
-
-class group_elnet_max_newton_iters : public adelie_core_error
-{
-    std::string msg_;
-public:
-    group_elnet_max_newton_iters():
-        msg_{"Max number of Newton iterations reached."}
-    {}
-    
-    const char* what() const noexcept override {
-        return msg_.data(); 
-    }
 };
 
 } // namespace util

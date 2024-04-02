@@ -128,7 +128,7 @@ void update_loss_null(
 
     while (1) {
         if (irls_it >= irls_max_iters) {
-            throw std::runtime_error("Maximum IRLS iterations reached.");
+            throw util::adelie_core_solver_error("Maximum IRLS iterations reached.");
         }
 
         /* compute rest of quadratic approximation quantities */
@@ -254,7 +254,7 @@ auto fit(
 
     while (1) {
         if (irls_it >= irls_max_iters) {
-            throw std::runtime_error("Maximum IRLS iterations reached.");
+            throw util::adelie_core_solver_error("Maximum IRLS iterations reached.");
         }
 
         save_prev_valid();
@@ -278,7 +278,7 @@ auto fit(
                 lmda_path_adjusted = lmda;
             }
             else {
-                throw std::runtime_error(
+                throw util::adelie_core_solver_error(
                     "IRLS lambda is unexpectedly inf. "
                     "This likely indicates a bug in the code. Please report this!"
                 );

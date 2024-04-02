@@ -171,13 +171,13 @@ struct StateGlmNaive: StateBase<
         resid(resid)
     {
         if (offsets.size() != eta.size()) {
-            throw std::runtime_error("offsets must have the same length as eta.");
+            throw util::adelie_core_error("offsets must have the same length as eta.");
         }
         if (offsets.size() != resid.size()) {
-            throw std::runtime_error("offsets must have the same length as resid.");
+            throw util::adelie_core_error("offsets must have the same length as resid.");
         }
         if (irls_tol <= 0) {
-            throw std::runtime_error("irls_tol must be > 0.");
+            throw util::adelie_core_error("irls_tol must be > 0.");
         }
     }
 };

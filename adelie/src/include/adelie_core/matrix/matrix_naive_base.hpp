@@ -1,7 +1,8 @@
 #pragma once
 #include <cstdio>
-#include <adelie_core/util/types.hpp>
+#include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/format.hpp>
+#include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
 namespace matrix {
@@ -19,7 +20,7 @@ protected:
             (v != r) ||
             (w != r)
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "cmul() is given inconsistent inputs! "
                     "Invoked check_cmul(j=%d, v=%d, w=%d, r=%d, c=%d)",
@@ -37,7 +38,7 @@ protected:
             (j < 0 || j > c) ||
             (o != r)
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "ctmul() is given inconsistent inputs! "
                     "Invoked check_ctmul(j=%d, o=%d, r=%d, c=%d)",
@@ -57,7 +58,7 @@ protected:
             (w != r) ||
             (o != q)
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "bmul() is given inconsistent inputs! "
                     "Invoked check_bmul(j=%d, q=%d, v=%d, w=%d, o=%d, r=%d, c=%d)",
@@ -76,7 +77,7 @@ protected:
             (v != q) ||
             (o != r)
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "btmul() is given inconsistent inputs! "
                     "Invoked check_btmul(j=%d, q=%d, v=%d, o=%d, r=%d, c=%d)",
@@ -98,7 +99,7 @@ protected:
             (br != r) ||
             (bc != q)
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "cov() is given inconsistent inputs! "
                     "Invoked check_cov(j=%d, q=%d, w=%d, o_r=%d, o_c=%d, br=%d, bc=%d, r=%d, c=%d)",
@@ -117,7 +118,7 @@ protected:
             (vc != c) ||
             (o_c != r)
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "sp_btmul() is given inconsistent inputs! "
                     "Invoked check_sp_btmul(vr=%d, vc=%d, o_r=%d, o_c=%d, r=%d, c=%d)",
