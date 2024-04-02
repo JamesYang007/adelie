@@ -1,4 +1,3 @@
-from typing import Union
 from . import adelie_core as core
 from .adelie_core.glm import (
     GlmBase64,
@@ -6,6 +5,7 @@ from .adelie_core.glm import (
     GlmMultiBase64,
     GlmMultiBase32,
 )
+from typing import Union
 import numpy as np
 import warnings
 
@@ -60,143 +60,6 @@ class multiglm_base:
         else:
             weights = np.full(n, 1/n, dtype=dtype)
         self.weights = np.array(weights, order="C", dtype=dtype)
-
-
-def gaussian(
-    y: np.ndarray,
-    *,
-    weights: np.ndarray =None,
-    dtype: Union[np.float32, np.float64] =np.float64,
-    opt: bool =True,
-):
-    """Creates a Gaussian GLM family object.
-
-    The Gaussian GLM family specifies the loss function as:
-
-    .. math::
-        \\begin{align*}
-            \\ell(\\eta)
-            =
-            \\sum\\limits_{i=1}^n w_i \\left(
-                -y_i \\eta_i + \\frac{\\eta_i^2}{2}
-            \\right) 
-        \\end{align*}
-
-    Parameters
-    ----------
-    y : (n,) np.ndarray 
-        Response vector :math:`y`.
-    weights : (n,) np.ndarray, optional
-        Observation weights :math:`W`.
-        Weights are normalized such that they sum to ``1``.
-        Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-    dtype : Union[np.float32, np.float64], optional
-        The underlying data type.
-        Default is ``np.float64``.
-    opt : bool, optional
-        If ``True``, an optimized routine is used when passed into ``adelie.grpnet``.
-        Otherwise, a general routine with IRLS is used.
-        This flag is mainly for developers for testing purposes.
-        We advise users to use the default value.
-        Default is ``True``.
-
-    Returns
-    -------
-    glm
-        Gaussian GLM object.
-
-    See Also
-    --------
-    adelie.glm.GlmBase64
-    """
-    dispatcher = {
-        np.float64: core.glm.GlmGaussian64,
-        np.float32: core.glm.GlmGaussian32,
-    }
-
-    core_base = dispatcher[dtype]
-
-    class _gaussian(glm_base, core_base):
-        def __init__(self):
-            self.opt = opt
-            glm_base.__init__(self, y, weights, core_base, dtype)
-            core_base.__init__(self, self.y, self.weights)
-
-        def reweight(self, weights=None):
-            weights = self.weights if weights is None else weights
-            return gaussian(y=y, weights=weights, dtype=dtype, opt=opt)
-
-    return _gaussian()
-
-
-def multigaussian(
-    y: np.ndarray,
-    *,
-    weights: np.ndarray =None,
-    dtype: Union[np.float32, np.float64] =np.float64,
-    opt: bool =True,
-):
-    """Creates a Multi-response Gaussian GLM family object.
-
-    The Multi-Response Gaussian GLM family specifies the loss function as:
-
-    .. math::
-        \\begin{align*}
-            \\ell(\\eta)
-            =
-            \\frac{1}{K}
-            \\sum\\limits_{i=1}^n 
-            w_{i} \\left(
-                -\\sum\\limits_{k=1}^K y_{ik} \\eta_{ik} 
-                +\\frac{\\|\\eta_{i\\cdot}\\|^2}{2}
-            \\right)
-        \\end{align*}
-
-    Parameters
-    ----------
-    y : (n, K) np.ndarray 
-        Response matrix :math:`y`.
-    weights : (n,) np.ndarray, optional
-        Observation weights :math:`W`.
-        Weights are normalized such that they sum to ``1``.
-        Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-    dtype : Union[np.float32, np.float64], optional
-        The underlying data type.
-        Default is ``np.float64``.
-    opt : bool, optional
-        If ``True``, an optimized routine is used when passed into ``adelie.grpnet``.
-        Otherwise, a general routine with IRLS is used.
-        This flag is mainly for developers for testing purposes.
-        We advise users to use the default value.
-        Default is ``True``.
-
-    Returns
-    -------
-    glm
-        Multi-response Gaussian GLM object.
-
-    See Also
-    --------
-    adelie.glm.GlmBase64
-    """
-    dispatcher = {
-        np.float64: core.glm.GlmMultiGaussian64,
-        np.float32: core.glm.GlmMultiGaussian32,
-    }
-
-    core_base = dispatcher[dtype]
-
-    class _multigaussian(multiglm_base, core_base):
-        def __init__(self):
-            self.opt = opt
-            multiglm_base.__init__(self, y, weights, core_base, dtype)
-            core_base.__init__(self, self.y, self.weights)
-
-        def reweight(self, weights=None):
-            weights = self.weights if weights is None else weights
-            return multigaussian(y=y, weights=weights, dtype=dtype, opt=opt)
-
-    return _multigaussian()
 
 
 def binomial(
@@ -419,6 +282,143 @@ def cox(
     return _cox()
 
 
+def gaussian(
+    y: np.ndarray,
+    *,
+    weights: np.ndarray =None,
+    dtype: Union[np.float32, np.float64] =np.float64,
+    opt: bool =True,
+):
+    """Creates a Gaussian GLM family object.
+
+    The Gaussian GLM family specifies the loss function as:
+
+    .. math::
+        \\begin{align*}
+            \\ell(\\eta)
+            =
+            \\sum\\limits_{i=1}^n w_i \\left(
+                -y_i \\eta_i + \\frac{\\eta_i^2}{2}
+            \\right) 
+        \\end{align*}
+
+    Parameters
+    ----------
+    y : (n,) np.ndarray 
+        Response vector :math:`y`.
+    weights : (n,) np.ndarray, optional
+        Observation weights :math:`W`.
+        Weights are normalized such that they sum to ``1``.
+        Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
+    dtype : Union[np.float32, np.float64], optional
+        The underlying data type.
+        Default is ``np.float64``.
+    opt : bool, optional
+        If ``True``, an optimized routine is used when passed into ``adelie.grpnet``.
+        Otherwise, a general routine with IRLS is used.
+        This flag is mainly for developers for testing purposes.
+        We advise users to use the default value.
+        Default is ``True``.
+
+    Returns
+    -------
+    glm
+        Gaussian GLM object.
+
+    See Also
+    --------
+    adelie.glm.GlmBase64
+    """
+    dispatcher = {
+        np.float64: core.glm.GlmGaussian64,
+        np.float32: core.glm.GlmGaussian32,
+    }
+
+    core_base = dispatcher[dtype]
+
+    class _gaussian(glm_base, core_base):
+        def __init__(self):
+            self.opt = opt
+            glm_base.__init__(self, y, weights, core_base, dtype)
+            core_base.__init__(self, self.y, self.weights)
+
+        def reweight(self, weights=None):
+            weights = self.weights if weights is None else weights
+            return gaussian(y=y, weights=weights, dtype=dtype, opt=opt)
+
+    return _gaussian()
+
+
+def multigaussian(
+    y: np.ndarray,
+    *,
+    weights: np.ndarray =None,
+    dtype: Union[np.float32, np.float64] =np.float64,
+    opt: bool =True,
+):
+    """Creates a Multi-response Gaussian GLM family object.
+
+    The Multi-Response Gaussian GLM family specifies the loss function as:
+
+    .. math::
+        \\begin{align*}
+            \\ell(\\eta)
+            =
+            \\frac{1}{K}
+            \\sum\\limits_{i=1}^n 
+            w_{i} \\left(
+                -\\sum\\limits_{k=1}^K y_{ik} \\eta_{ik} 
+                +\\frac{\\|\\eta_{i\\cdot}\\|^2}{2}
+            \\right)
+        \\end{align*}
+
+    Parameters
+    ----------
+    y : (n, K) np.ndarray 
+        Response matrix :math:`y`.
+    weights : (n,) np.ndarray, optional
+        Observation weights :math:`W`.
+        Weights are normalized such that they sum to ``1``.
+        Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
+    dtype : Union[np.float32, np.float64], optional
+        The underlying data type.
+        Default is ``np.float64``.
+    opt : bool, optional
+        If ``True``, an optimized routine is used when passed into ``adelie.grpnet``.
+        Otherwise, a general routine with IRLS is used.
+        This flag is mainly for developers for testing purposes.
+        We advise users to use the default value.
+        Default is ``True``.
+
+    Returns
+    -------
+    glm
+        Multi-response Gaussian GLM object.
+
+    See Also
+    --------
+    adelie.glm.GlmBase64
+    """
+    dispatcher = {
+        np.float64: core.glm.GlmMultiGaussian64,
+        np.float32: core.glm.GlmMultiGaussian32,
+    }
+
+    core_base = dispatcher[dtype]
+
+    class _multigaussian(multiglm_base, core_base):
+        def __init__(self):
+            self.opt = opt
+            multiglm_base.__init__(self, y, weights, core_base, dtype)
+            core_base.__init__(self, self.y, self.weights)
+
+        def reweight(self, weights=None):
+            weights = self.weights if weights is None else weights
+            return multigaussian(y=y, weights=weights, dtype=dtype, opt=opt)
+
+    return _multigaussian()
+
+
 def multinomial(
     y: np.ndarray,
     *,
@@ -448,7 +448,7 @@ def multinomial(
     for each fixed :math:`i`, :math:`\\sum_{k=1}^K y_{ik} = 1`.
 
     .. note::
-        The ``hessian()`` method computes :math:`2 \\mathrm{diag}(\\nabla^2 \\ell(\\eta))`
+        The ``hessian`` method computes :math:`2 \\mathrm{diag}(\\nabla^2 \\ell(\\eta))`
         as the diagonal majorization.
 
     Parameters

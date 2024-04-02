@@ -1,16 +1,16 @@
 from typing import Union
-from .solver import grpnet
 from .diagnostic import (
     coefficient,
     predict,
 )
+from .solver import grpnet
 from . import glm
 from . import logger
 from . import matrix
 from dataclasses import dataclass
 import numpy as np
-import scipy.sparse
 import matplotlib.pyplot as plt
+import scipy.sparse
 
 
 @dataclass
@@ -98,9 +98,9 @@ class CVGrpnetResult:
 
 
 def cv_grpnet(
-    *,
     X: np.ndarray,
     glm: Union[glm.GlmBase32, glm.GlmBase64],
+    *,
     n_threads: int =1,
     early_exit: bool =False,
     min_ratio: float =1e-1,
@@ -110,6 +110,12 @@ def cv_grpnet(
     **grpnet_params,
 ):
     """Cross-validation group elastic net solver.
+
+    This function was written with the intent that ``glm``
+    is to be one of the GLMs defined in ``adelie.glm``.
+    In particular, we assume the observation weights ``w`` associated with ``glm``
+    has the property that if ``w[i] == 0``,
+    then the ``i`` th prediction :math:`\\eta_i` is ignored in the computation of the loss.
 
     Parameters
     ----------
@@ -165,8 +171,8 @@ def cv_grpnet(
 
     See Also
     --------
-    adelie.solver.grpnet
     adelie.cv.CVGrpnetResult
+    adelie.solver.grpnet
     """
     X_raw = X
 

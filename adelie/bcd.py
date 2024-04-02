@@ -12,17 +12,17 @@ def root_lower_bound(
 
     The lower bound :math:`h_\\star` is guaranteed to be non-negative
     and satisfies :math:`\\varphi(h_\\star) \\geq 0` where :math:`\\varphi`
-    is given by ``root_function()`` whenever :math:`\\|v\\|_2 > \\lambda`.
+    is given by ``adelie.bcd.root_function`` whenever :math:`\\|v\\|_2 > \\lambda`.
     It is undefined behavior if the condition is not satisfied.
 
     Parameters
     ----------
     quad : (p,) np.ndarray
-        See ``root_function()``.
+        See ``adelie.bcd.root_function``.
     linear : (p,) np.ndarray
-        See ``root_function()``.
+        See ``adelie.bcd.root_function``.
     l1 : float
-        See ``root_function()``.
+        See ``adelie.bcd.root_function``.
     
     See Also
     --------
@@ -47,7 +47,7 @@ def root_upper_bound(
 
     The upper bound :math:`h^\\star` is guaranteed to be non-negative.
     However, it *may not satisfy* :math:`\\varphi(h^\\star) \\leq 0` where :math:`\\varphi`
-    is given by ``root_function()`` if ``zero_tol`` is too large.
+    is given by ``adelie.bcd.root_function`` if ``zero_tol`` is too large.
     Even when ``zero_tol`` is small enough, 
     we assume that :math:`v_i=0` whenever :math:`\\Sigma_{ii} = 0`.
     It is undefined behavior if the condition is not satisfied.
@@ -55,9 +55,9 @@ def root_upper_bound(
     Parameters
     ----------
     quad : (p,) np.ndarray
-        See ``root_function()``.
+        See ``adelie.bcd.root_function``.
     linear : (p,) np.ndarray
-        See ``root_function()``.
+        See ``adelie.bcd.root_function``.
     zero_tol : float, optional
         A value is considered zero if its absolute value is less than or equal to ``zero_tol``.
         Default is ``1e-10``.
@@ -190,7 +190,7 @@ def solve(
     """Solves the BCD update.
 
     The BCD update for the group elastic net is obtained by minimizing
-    the BCD objective given in ``objective()``.
+    the BCD objective given in ``adelie.bcd.objective``.
     The solution only exists when :math:`\\|v\\|_2 < \\lambda_1`
     or :math:`\\|v_S\\|_2 < \\lambda_1`,
     where :math:`S` is the subset of indices
@@ -199,13 +199,13 @@ def solve(
     Parameters
     ----------
     quad : (p,) np.ndarray
-        See ``objective()``.
+        See ``adelie.bcd.objective``.
     linear : (p,) np.ndarray
-        See ``objective()``.
+        See ``adelie.bcd.objective``.
     l1 : float
-        See ``objective()``.
+        See ``adelie.bcd.objective``.
     l2 : float
-        See ``objective()``.
+        See ``adelie.bcd.objective``.
     tol : float, optional
         Convergence tolerance. Default is ``1e-12``.
     max_iters : int, optional
@@ -261,7 +261,7 @@ def root(
 ):
     """Solves the non-negative root of the BCD root function.
 
-    The BCD root function is given in ``root_function()``.
+    The BCD root function is given in ``adelie.bcd.root_function``.
     The non-negative root only exists when
     :math:`\\|v_S\\|_2 < \\lambda_1 < \\|v\\|_2`
     where :math:`S` is the subset of indices
@@ -270,11 +270,11 @@ def root(
     Parameters
     ----------
     quad : (p,) np.ndarray
-        See ``root_function()``.
+        See ``adelie.bcd.root_function``.
     linear : (p,) np.ndarray
-        See ``root_function()``.
+        See ``adelie.bcd.root_function``.
     l1 : float
-        See ``root_function()``.
+        See ``adelie.bcd.root_function``.
     tol : float, optional
         Convergence tolerance. Default is ``1e-12``.
     max_iters : int, optional

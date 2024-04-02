@@ -163,7 +163,7 @@ void glm_base(py::module_& m, const char* name)
         eta : (n,) np.ndarray
             Natural parameter.
         grad : (n,) np.ndarray
-            Gradient as in ``gradient()`` method.
+            Gradient as in ``gradient`` method.
         hess : (n,) np.ndarray
             The hessian to store.
         )delimiter")
@@ -173,7 +173,7 @@ void glm_base(py::module_& m, const char* name)
         Computes :math:`-(\nabla^2 \ell(\eta))^{-1} \nabla \ell(\eta)`.
 
         .. note::
-            Unlike the ``hessian()`` method, this function may use the full hessian matrix.
+            Unlike the ``hessian`` method, this function may use the full hessian matrix.
             The diagonal hessian majorization is provided in case it speeds-up computations,
             but it can be ignored.
             The default implementation simply computes ``grad / (hess + eps * (hess <= 0))``
@@ -184,9 +184,9 @@ void glm_base(py::module_& m, const char* name)
         eta : (n,) np.ndarray
             Natural parameter.
         grad : (n,) np.ndarray
-            Gradient as in ``gradient()`` method.
+            Gradient as in ``gradient`` method.
         hess : (n,) np.ndarray
-            Hessian as in ``hessian()`` method.
+            Hessian as in ``hessian`` method.
         inv_hess_grad : (n,) np.ndarray
             The inverse hessian gradient to store.
         )delimiter")
@@ -500,7 +500,7 @@ void glm_multibase(py::module_& m, const char* name)
         eta : (n, K) np.ndarray
             Natural parameter.
         grad : (n, K) np.ndarray
-            Gradient as in ``gradient()`` method.
+            Gradient as in ``gradient`` method.
         hess : (n, K) np.ndarray
             The hessian to store.
         )delimiter")
@@ -510,7 +510,7 @@ void glm_multibase(py::module_& m, const char* name)
         Computes :math:`-(\nabla^2 \ell(\eta))^{-1} \nabla \ell(\eta)`.
 
         .. note::
-            Unlike the ``hessian()`` method, this function may use the full hessian matrix.
+            Unlike the ``hessian`` method, this function may use the full hessian matrix.
             The diagonal hessian majorization is provided in case it speeds-up computations,
             but it can be ignored.
             The default implementation simply computes ``grad / (hess + eps * (hess <= 0))``
@@ -521,9 +521,9 @@ void glm_multibase(py::module_& m, const char* name)
         eta : (n, K) np.ndarray
             Natural parameter.
         grad : (n, K) np.ndarray
-            Gradient as in ``gradient()`` method.
+            Gradient as in ``gradient`` method.
         hess : (n, K) np.ndarray
-            Hessian as in ``hessian()`` method.
+            Hessian as in ``hessian`` method.
         inv_hess_grad : (n, K) np.ndarray
             The inverse hessian gradient to store.
         )delimiter")
