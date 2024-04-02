@@ -134,6 +134,21 @@ adelie.matrix
     sparse
 
 
+adelie.solver
+-------------
+
+
+.. currentmodule:: adelie.solver
+
+
+.. autosummary::
+    :toctree: generated/
+
+
+    gaussian_cov
+    grpnet
+
+
 adelie.state
 ------------
 
@@ -152,21 +167,6 @@ adelie.state
     glm_naive
     multigaussian_naive
     multiglm_naive
-
-
-adelie.solver
--------------
-
-
-.. currentmodule:: adelie.solver
-
-
-.. autosummary::
-    :toctree: generated/
-
-
-    gaussian_cov
-    grpnet
 
 
 Internal
