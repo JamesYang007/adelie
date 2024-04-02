@@ -11,11 +11,13 @@ namespace multigaussian {
 namespace naive {
 
 template <class StateType,
+          class ExitCondType,
           class UpdateCoefficientsType,
           class CUIType=util::no_op>
 inline void solve(
     StateType&& state,
     bool display,
+    ExitCondType exit_cond_f,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
@@ -30,29 +32,27 @@ inline void solve(
     auto& intercepts = state.intercepts;
 
     const auto tidy = [&]() {
-        intercepts.resize(betas.size(), n_classes);
         if (multi_intercept) {
-            for (int i = 0; i < betas.size(); ++i) {
-                intercepts.row(i) = Eigen::Map<const vec_value_t>(betas[i].valuePtr(), n_classes);
-                betas[i] = betas[i].tail(betas[i].size() - n_classes);
-            }
+            auto& beta = betas.back();
+            intercepts.push_back(
+                Eigen::Map<const vec_value_t>(beta.valuePtr(), n_classes)
+            );
+            beta = beta.tail(beta.size() - n_classes);
         } else {
-            intercepts.setZero();
+            intercepts.push_back(
+                vec_value_t::Zero(n_classes)
+            );
         }
     };
 
-    try {
-        gaussian::naive::solve(
-            static_cast<state_gaussian_naive_t&>(state),
-            display,
-            update_coefficients_f,
-            check_user_interrupt
-        );
-        tidy();
-    } catch(...) {
-        tidy();
-        throw;
-    }
+    gaussian::naive::solve(
+        static_cast<state_gaussian_naive_t&>(state),
+        display,
+        exit_cond_f,
+        update_coefficients_f,
+        tidy,
+        check_user_interrupt
+    );
 }
 
 } // namespace naive

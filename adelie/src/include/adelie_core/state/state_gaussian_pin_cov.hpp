@@ -30,7 +30,6 @@ void update_active_inactive_subset(StateType& state)
     int n_processed = 0;
     for (int ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) {
         const auto ss = screen_set[ss_idx];
-        const auto g = groups[ss];
         const auto gs = group_sizes[ss];
         Eigen::Map<vec_bool_t>(
             screen_is_active_subset.data() + n_processed, gs

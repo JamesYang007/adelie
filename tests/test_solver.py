@@ -1,8 +1,8 @@
-from adelie.solver import (
-    _solve,
-)
 from adelie.diagnostic import (
     objective,
+)
+from adelie.solver import (
+    _solve,
 )
 from adelie import adelie_core as core
 import adelie as ad
@@ -11,7 +11,7 @@ import numpy as np
 import os
 
 # ========================================================================
-# Helper Classes
+# Helper Classes and Functions
 # ========================================================================
 
 class CvxpyGlmGaussian():
@@ -155,11 +155,6 @@ class CvxpyGlmMultinomial():
 
     def to_adelie(self):
         return ad.glm.multinomial(self.y, weights=self.weights)
-
-
-# ========================================================================
-# TEST _solve
-# ========================================================================
 
 
 def create_data_gaussian(
@@ -382,6 +377,11 @@ def check_solutions(
         assert np.all(my_objs <= cvxpy_objs * (1 + eps))
 
 
+# ========================================================================
+# TEST Gaussian
+# ========================================================================
+
+
 def run_solve_gaussian(state, args, pin):
     state.check(method="assert")
     state = _solve(state)    
@@ -487,10 +487,6 @@ def test_solve_gaussian_pin_cov():
     _test(100, 23, 4, 3)
     _test(100, 100, 50, 20)
 
-
-# ========================================================================
-# TEST solve_gaussian
-# ========================================================================
 
 def test_solve_gaussian():
     def _test(n, p, G, intercept=True, alpha=1, sparsity=0.95, seed=0):
@@ -772,6 +768,7 @@ def test_solve_gaussian_snp_phased_ancestry():
 # ==========================================================================================
 # TEST grpnet
 # ==========================================================================================
+
 
 def run_test_grpnet(n, p, G, glm_type, intercept=True, adev_tol=0.4):
     K = 3 if "multi" in glm_type else 1

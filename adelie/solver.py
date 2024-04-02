@@ -1,4 +1,7 @@
-from typing import Union
+from typing import (
+    Callable,
+    Union,
+)
 from . import adelie_core as core
 from . import logger
 from . import matrix
@@ -13,42 +16,11 @@ from .state import (
 import numpy as np
 
 
-def _solve(state, progress_bar: bool =False):
-    """Solves the group elastic net problem.
-
-    The gaussian pin group elastic net problem is given by
-    minimizing the objective defined in ``adelie.solver.grpnet``
-    for the Gaussian GLM with the additional constraint that :math:`\\beta_{-S} = 0`
-    where :math:`S` denotes the screen set,
-    that is, the coefficient vector is forced to be zero
-    for groups outside the screen set.
-
-    For details on the other group elastic net problems, see ``adelie.solver.grpnet``.
-
-    Parameters
-    ----------
-    state
-        See the documentation for one of the states below.
-    progress_bar : bool, optional
-        ``True`` to enable progress bar.
-        It is ignored for gaussian pin methods.
-        Default is ``False``.
-
-    Returns
-    -------
-    result
-        The resulting state after running the solver.
-        The type is the same as that of ``state``.
-
-    See Also
-    --------
-    adelie.state.gaussian_naive
-    adelie.state.gaussian_pin_cov
-    adelie.state.gaussian_pin_naive
-    adelie.state.glm_naive
-    adelie.state.multigaussian_naive
-    adelie.state.multiglm_naive
-    """
+def _solve(
+    state, 
+    progress_bar: bool =False,
+    exit_cond: Callable =None,
+):
     # mapping of each state type to the corresponding solver
     f_dict = {
         # cov methods
@@ -95,9 +67,9 @@ def _solve(state, progress_bar: bool =False):
     if is_gaussian_pin:
         out = f(state)
     elif is_gaussian:
-        out = f(state, progress_bar)
+        out = f(state, progress_bar, exit_cond)
     elif is_glm:
-        out = f(state, state._glm, progress_bar)
+        out = f(state, state._glm, progress_bar, exit_cond)
     else:
         raise RuntimeError("Unexpected state type.")
 
@@ -141,6 +113,7 @@ def gaussian_cov(
     check_state: bool =False,
     progress_bar: bool =True,
     warm_start =None,
+    exit_cond: Callable =None,
 ):
     """Gaussian elastic net solver via covariance method.
 
@@ -284,6 +257,20 @@ def gaussian_cov(
             that is, when ``lmda_path`` and possibly static configurations have changed.
             Use with caution in other settings!
 
+    exit_cond : Callable, optional
+        If not ``None``, it must be a callable object that takes in a single argument.
+        The argument is the current state object of the same type as the return value.
+        During the optimization, 
+        after obtaining the solution at each regularization value,
+        ``exit_cond(state)`` is evaluated as an opportunity
+        for the user to early exit the program based on their own rule.
+        Default is ``None``.
+
+        .. note::
+            The algorithm early exits if ``exit_cond(state)``
+            evaluates to ``True`` *or* the built-in early exit
+            function evaluates to ``True`` (if ``early_exit`` is ``True``).
+
     Returns
     -------
     state
@@ -390,6 +377,7 @@ def gaussian_cov(
     return _solve(
         state=state, 
         progress_bar=progress_bar,
+        exit_cond=exit_cond,
     )
 
 
@@ -424,6 +412,7 @@ def grpnet(
     check_state: bool =False,
     progress_bar: bool =True,
     warm_start =None,
+    exit_cond: Callable =None,
 ):
     """Group elastic net solver.
 
@@ -624,6 +613,20 @@ def grpnet(
             We have only tested warm-starts in the setting described in the note above,
             that is, when ``lmda_path`` and possibly static configurations have changed.
             Use with caution in other settings!
+
+    exit_cond : Callable, optional
+        If not ``None``, it must be a callable object that takes in a single argument.
+        The argument is the current state object of the same type as the return value.
+        During the optimization, 
+        after obtaining the solution at each regularization value,
+        ``exit_cond(state)`` is evaluated as an opportunity
+        for the user to early exit the program based on their own rule.
+        Default is ``None``.
+
+        .. note::
+            The algorithm early exits if ``exit_cond(state)``
+            evaluates to ``True`` *or* the built-in early exit
+            function evaluates to ``True`` (if ``early_exit`` is ``True``).
 
     Returns
     -------
@@ -952,4 +955,5 @@ def grpnet(
     return _solve(
         state=state,
         progress_bar=progress_bar,
+        exit_cond=exit_cond,
     )

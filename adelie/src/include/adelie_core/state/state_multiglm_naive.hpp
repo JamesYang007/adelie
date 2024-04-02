@@ -45,7 +45,7 @@ struct StateMultiGlmNaive: StateGlmNaive<
     const bool multi_intercept;
 
     /* dynamic states */
-    rowarr_value_t intercepts;
+    std::vector<vec_value_t> intercepts;
 
     explicit StateMultiGlmNaive(
         const std::string& group_type,
