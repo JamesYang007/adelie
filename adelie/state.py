@@ -1,8 +1,8 @@
-from typing import Union
 from . import adelie_core as core
 from . import matrix
-from . import glm
 from . import logger
+from . import glm
+from typing import Union
 import numpy as np
 import scipy
 
@@ -12,28 +12,6 @@ def deduce_states(
     group_sizes: np.ndarray,
     screen_set: np.ndarray,
 ):
-    """Deduce state variables.
-
-    Parameters
-    ----------
-    group_sizes : (G,) np.ndarray
-        See ``adelie.adelie_core.state.StateGaussianPinBase64``.
-    screen_set : (s,) np.ndarray
-        See ``adelie.adelie_core.state.StateGaussianPinBase64``.
-
-    Returns
-    -------
-    screen_g1 : (s1,) np.ndarray
-        See ``adelie.adelie_core.state.StateGaussianPinBase64``.
-    screen_g2 : (s2,) np.ndarray
-        See ``adelie.adelie_core.state.StateGaussianPinBase64``.
-    screen_begins : (s,) np.ndarray
-        See ``adelie.adelie_core.state.StateGaussianPinBase64``.
-
-    See Also
-    --------
-    adelie.adelie_core.state.StateGaussianPinBase64
-    """
     S = screen_set.shape[0]
     screen_g1 = np.arange(S)[group_sizes[screen_set] == 1]
     screen_g2 = np.arange(S)[group_sizes[screen_set] > 1]
@@ -46,6 +24,7 @@ def deduce_states(
         screen_g2,
         screen_begins,
     )
+
 
 class base:
     """Base wrapper state class.

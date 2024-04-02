@@ -1,30 +1,30 @@
-from itertools import cycle
-from typing import Union
 from . import adelie_core as core
-from . import logger
 from .glm import (
     GlmBase32,
     GlmBase64,
     GlmMultiBase32,
     GlmMultiBase64,
 )
+from . import logger
+from . import matrix
 from .matrix import (
     MatrixNaiveBase32,
     MatrixNaiveBase64,
 )
-from . import matrix
-from scipy.sparse import csr_matrix
 from IPython.display import HTML
+from itertools import cycle
+from scipy.sparse import csr_matrix
+from typing import Union
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
 def predict(
-    *,
     X: Union[MatrixNaiveBase32, MatrixNaiveBase64, np.ndarray],
     betas: Union[np.ndarray, csr_matrix],
     intercepts: np.ndarray,
+    *,
     offsets: np.ndarray =None,
     n_threads: int =1,
 ):
@@ -110,12 +110,12 @@ def predict(
 
 
 def objective(
-    *,
     X: Union[matrix.MatrixNaiveBase32, matrix.MatrixNaiveBase64, np.ndarray], 
     glm: Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64],
     betas: Union[np.ndarray, csr_matrix], 
     intercepts: np.ndarray,
     lmdas: np.ndarray, 
+    *,
     groups: np.ndarray =None, 
     alpha: float =1, 
     penalty: np.ndarray =None,
@@ -263,7 +263,6 @@ def objective(
 
 
 def residuals(
-    *,
     glm: Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64],
     etas: np.ndarray,
 ):
@@ -300,9 +299,9 @@ def residuals(
 
 
 def gradients(
-    *, 
     X: Union[MatrixNaiveBase32, MatrixNaiveBase64],
     resids: np.ndarray,
+    *, 
     n_threads: int =1,
 ):
     """Computes the gradients.
@@ -322,7 +321,7 @@ def gradients(
         \\end{align*}
 
     In both cases, :math:`\\hat{r}` is the residual as in
-    ``adelie.diagnostic.residuals()``.
+    ``adelie.diagnostic.residuals``.
 
     Parameters
     ----------
@@ -363,10 +362,10 @@ def gradients(
 
 
 def gradient_norms(
-    *, 
     grads: np.ndarray,
     betas: csr_matrix,
     lmdas: np.ndarray,
+    *, 
     groups: np.ndarray =None,
     alpha: float =1,
     penalty: np.ndarray =None,
@@ -381,7 +380,7 @@ def gradient_norms(
         \\end{align*}
 
     where
-    :math:`\\hat{\\gamma}_g` is the gradient as in ``adelie.diagnostic.gradients()``,
+    :math:`\\hat{\\gamma}_g` is the gradient as in ``adelie.diagnostic.gradients``,
     :math:`\\omega_g` is the penalty factor,
     :math:`\\lambda` is the regularization,
     and :math:`\\beta_g` is the coefficient block for group :math:`g`.
@@ -459,9 +458,9 @@ def gradient_norms(
 
 
 def gradient_scores(
-    *, 
     grad_norms: np.ndarray,
     lmdas: np.ndarray,
+    *, 
     alpha: float =1,
     penalty: np.ndarray =None,
 ):
@@ -481,7 +480,7 @@ def gradient_scores(
         \\end{align*}
 
     where :math:`\\hat{h}` is the gradient norm as in
-    ``adelie.diagnostic.gradient_norms()``.
+    ``adelie.diagnostic.gradient_norms``.
 
     Parameters
     ----------
@@ -513,7 +512,6 @@ def gradient_scores(
 
 
 def coefficient(
-    *,
     lmda: float,
     betas: csr_matrix,
     intercepts: np.ndarray,
@@ -586,11 +584,11 @@ def coefficient(
 
 
 def plot_coefficients(
-    *,
     betas: csr_matrix,
     lmdas: np.ndarray,
     groups: np.ndarray,
     group_sizes: np.ndarray,
+    *,
     l2_norm: bool =False,
 ):
     """Plots the coefficient profile.
@@ -654,7 +652,6 @@ def plot_coefficients(
 
 
 def plot_devs(
-    *,
     lmdas: np.ndarray,
     devs: np.ndarray,
 ):
@@ -683,12 +680,12 @@ def plot_devs(
 
 
 def plot_set_sizes(
-    *,
     groups: np.ndarray,
     screen_sizes: np.ndarray,
     active_sizes: np.ndarray,
     lmdas: np.ndarray,
     screen_rule: str,
+    *,
     ratio: bool =False,
     exclude: list =[],
     axes = None,
@@ -799,7 +796,6 @@ def plot_set_sizes(
 
 
 def plot_benchmark(
-    *,
     total_time: np.ndarray,
     benchmark_screen: np.ndarray,
     benchmark_fit_screen: np.ndarray,
@@ -808,6 +804,7 @@ def plot_benchmark(
     benchmark_invariance: np.ndarray,
     n_valid_solutions: np.ndarray,
     lmdas: np.ndarray,
+    *,
     relative: bool =False,
 ):
     """Plots benchmark times.
@@ -929,13 +926,21 @@ def plot_benchmark(
 
 
 def plot_kkt(
-    *,
     lmdas: np.ndarray,
     scores: np.ndarray, 
+    *,
     idx: int =None,
     relative: bool =False,
 ):
     """Plots KKT failures.
+
+    This function only plots a subset of the scores.
+    Specifically (assuming ``idx`` is not ``None``),
+    if there are ``n`` number of scores in ``scores[idx]``
+    above the threshold ``lmdas[idx]``, then these ``n`` scores 
+    as well as the ``n`` largest scores below the threshold are shown.
+    If ``idx`` is ``None``, then the same plot is drawn at every index
+    as an animation.
 
     Parameters
     ----------
@@ -956,8 +961,8 @@ def plot_kkt(
     -------
     fig, ax
         If ``idx`` is not ``None``, then a figure and axes is returned.
-    anim 
-        If ``Idx`` is ``None``, then an animation of the plots is returned.
+    anim
+        If ``idx`` is ``None``, then an animation of the plots is returned.
     """
     G = scores.shape[-1]
 
@@ -1320,6 +1325,11 @@ def diagnostic(state):
     -------
     dg
         Diagnostic class object.
+
+    See Also
+    --------
+    adelie.diagnostic.DiagnosticCov
+    adelie.diagnostic.DiagnosticNaive
     """
     if "naive" in type(state).__name__:
         return DiagnosticNaive(state)

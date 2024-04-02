@@ -35,6 +35,19 @@ def block_diag(
 ):
     """Creates a block-diagonal matrix given by the list of matrices.
 
+    If ``mats`` represents a list of matrices :math:`A_1,\\ldots, A_L`,
+    then the resulting matrix represents the block-diagonal matrix given by
+
+    .. math::
+        \\begin{align*}
+            \\begin{bmatrix}
+                A_1 & 0 & \\cdots & 0 \\\\
+                0 & A_2 & \\cdots & 0 \\\\
+                \\vdots & \\vdots & \\ddots & \\vdots \\\\
+                0 & 0 & \\cdots & A_L
+            \\end{bmatrix}
+        \\end{align*}
+
     .. note::
         This matrix only works for covariance method!
 
@@ -88,6 +101,9 @@ def concatenate(
     n_threads: int =1,
 ):
     """Creates a column-wise concatenation of the matrices.
+
+    If ``mats`` represents a list of matrices :math:`X_1,\\ldots, X_L`,
+    then, the resulting matrix represents :math:`[X_1,\\ldots, X_L]`.
 
     .. note::
         This matrix only works for naive method!
@@ -287,6 +303,15 @@ def lazy_cov(
     n_threads: int =1,
 ):
     """Creates a viewer of a lazy covariance matrix.
+
+    The lazy covariance matrix :math:`A` uses 
+    the underlying matrix :math:`X` given by ``mat``
+    to compute the values of :math:`A` dynamically.
+    It only computes rows of :math:`A`
+    on-the-fly that are needed when calling its member functions.
+    This is useful in ``adelie.solver.gaussian_cov`` where
+    the covariance method must be used but the dimensions of :math:`A`
+    is too large to construct the entire matrix as a dense matrix.
     
     .. note::
         This matrix only works for covariance method!
@@ -344,6 +369,11 @@ def snp_phased_ancestry(
 ):
     """Creates a SNP phased ancestry matrix.
 
+    The SNP phased ancestry matrix is represented by a file with name ``filename``.
+    It must be in the same format as described in ``adelie.io.snp_phased_ancestry``.
+    Typically, the user first writes into the file ``filename`` 
+    using ``adelie.io.snp_phased_ancestry`` and then loads the matrix using this function.
+
     .. note::
         This matrix only works for naive method!
     
@@ -392,6 +422,11 @@ def snp_unphased(
     dtype: Union[np.float32, np.float64] =np.float64,
 ):
     """Creates a SNP unphased matrix.
+
+    The SNP unphased matrix is represented by a file with name ``filename``.
+    It must be in the same format as described in ``adelie.io.snp_unphased``.
+    Typically, the user first writes into the file ``filename`` 
+    using ``adelie.io.snp_unphased`` and then loads the matrix using this function.
 
     .. note::
         This matrix only works for naive method!
