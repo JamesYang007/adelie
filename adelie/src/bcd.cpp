@@ -1,5 +1,6 @@
 #include "decl.hpp"
 #include <adelie_core/bcd.hpp>
+#include <adelie_core/util/stopwatch.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -188,18 +189,54 @@ py::dict brent_solver(
     return d;
 }
 
+py::dict admm_cnstr_solver(
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& quad_c,
+    double l1,
+    double l2,
+    const Eigen::Ref<const ad::util::rowmat_type<double>>& Q_c,
+    const Eigen::Ref<const ad::util::rowmat_type<double>>& AQ_c,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& QTv_c,
+    const Eigen::Ref<const ad::util::rowmat_type<double>>& A,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& b,
+    double rho,
+    size_t max_iters,
+    double tol_abs,
+    double tol_rel
+)
+{
+    using sw_t = ad::util::Stopwatch;
+
+    const auto m = A.rows();
+    const auto d = A.cols();
+    ad::util::rowvec_type<double> x(d); x.setZero();
+    ad::util::rowvec_type<double> z(m); z.setZero();
+    ad::util::rowvec_type<double> u(m); u.setZero();
+    ad::util::rowvec_type<double> buff(3*m + 4*d);
+    size_t iters;
+    sw_t sw;
+    sw.start();
+    ad::bcd::admm_cnstr_solver(
+        quad_c, l1, l2, Q_c, AQ_c, QTv_c, A, b, rho, max_iters, tol_abs, tol_rel,
+        x, z, u, iters, buff
+    );
+    const auto elapsed = sw.elapsed();
+    py::dict dct("x"_a=x, "z"_a=z, "u"_a=u, "iters"_a=iters, "time_elapsed"_a=elapsed);
+    return dct;
+}
 
 void register_bcd(py::module_& m)
 {
+    m.def("admm_cnstr_solver", &admm_cnstr_solver);
     m.def("brent_solver", &brent_solver);
+    m.def("brent_solver", &brent_solver);
+    m.def("ista_solver", &ista_solver);
+    m.def("fista_adares_solver", &fista_adares_solver);
+    m.def("fista_solver", &fista_solver);
     m.def("newton_solver", &newton_solver);
     m.def("newton_brent_solver", &newton_brent_solver);
     m.def("newton_abs_solver", &newton_abs_solver);
     m.def("newton_abs_debug_solver", &newton_abs_debug_solver);
-    m.def("ista_solver", &ista_solver);
-    m.def("fista_solver", &fista_solver);
-    m.def("fista_adares_solver", &fista_adares_solver);
+    m.def("root_function", &root_function);
     m.def("root_lower_bound", &root_lower_bound);
     m.def("root_upper_bound", &root_upper_bound);
-    m.def("root_function", &root_function);
 }
