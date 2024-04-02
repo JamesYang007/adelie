@@ -143,7 +143,7 @@ void update_loss_null(
 
     while (1) {
         if (irls_it >= irls_max_iters) {
-            throw std::runtime_error("Maximum IRLS iterations reached.");
+            throw util::adelie_core_solver_error("Maximum IRLS iterations reached.");
         }
 
         /* compute rest of quadratic approximation quantities */

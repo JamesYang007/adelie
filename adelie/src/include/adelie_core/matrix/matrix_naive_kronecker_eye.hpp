@@ -36,10 +36,10 @@ public:
         _buff(3 * mat.rows() + mat.cols())
     {
         if (K < 1) {
-            throw std::runtime_error("K must be >= 1.");
+            throw util::adelie_core_error("K must be >= 1.");
         }
         if (n_threads < 1) {
-            throw std::runtime_error("n_threads must be >= 1.");
+            throw util::adelie_core_error("n_threads must be >= 1.");
         }
     }
 
@@ -290,10 +290,10 @@ public:
         _vbuff(mat.rows() * K)
     {
         if (K < 1) {
-            throw std::runtime_error("K must be >= 1.");
+            throw util::adelie_core_error("K must be >= 1.");
         }
         if (n_threads < 1) {
-            throw std::runtime_error("n_threads must be >= 1.");
+            throw util::adelie_core_error("n_threads must be >= 1.");
         }
     }
 

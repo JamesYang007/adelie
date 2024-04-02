@@ -287,7 +287,7 @@ inline void solve(
     const auto add_active_set = [&](auto ss_idx) {
         if (!screen_is_active[ss_idx]) {
             if (active_set.size() >= max_active_size) {
-                throw std::runtime_error("Maximum number of active groups reached.");
+                throw util::adelie_core_solver_error("Maximum number of active groups reached.");
             }
             screen_is_active[ss_idx] = true;
 

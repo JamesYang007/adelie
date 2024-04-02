@@ -38,7 +38,7 @@ protected:
             (eta.cols() != y.cols()) ||
             (eta.cols() != grad.cols())
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "gradient() is given inconsistent inputs! "
                     "(weights=%d, y=(%d, %d), eta=(%d, %d), grad=(%d, %d))",
@@ -63,7 +63,7 @@ protected:
             (eta.cols() != grad.cols()) ||
             (eta.cols() != hess.cols())
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "hessian() is given inconsistent inputs! "
                     "(weights=%d, y=(%d, %d), eta=(%d, %d), grad=(%d, %d), hess=(%d, %d))",
@@ -92,7 +92,7 @@ protected:
             (eta.cols() != hess.cols()) ||
             (eta.cols() != inv_hess_grad.cols())
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "inv_hessian_gradient() is given inconsistent inputs! "
                     "(weights=%d, y=(%d, %d), eta=(%d, %d), grad=(%d, %d), hess=(%d, %d), inv_hess_grad=(%d, %d))",
@@ -113,7 +113,7 @@ protected:
             (y.rows() != eta.rows()) ||
             (y.cols() != eta.cols())
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "loss() is given inconsistent inputs! "
                     "(y=(%d, %d), weights=%d, eta=(%d, %d))",
@@ -136,7 +136,7 @@ public:
         is_symmetric(is_symmetric)
     {
         if (y.rows() != weights.size()) {
-            throw std::runtime_error("y must have same number of rows as weights length.");
+            throw util::adelie_core_error("y must have same number of rows as weights length.");
         }
     }
 

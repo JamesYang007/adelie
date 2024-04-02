@@ -38,7 +38,7 @@ def _sample_y(
         mu = np.empty((n, K), dtype=eta.dtype)
         glm = multinomial(y=np.zeros(eta.shape)) 
         glm.gradient(
-            snr * (eta / noise_scale[None]), 
+            eta / noise_scale[None], 
             mu,
         )
         mu *= -K * n

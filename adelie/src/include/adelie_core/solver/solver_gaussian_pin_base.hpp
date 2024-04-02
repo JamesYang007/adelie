@@ -160,7 +160,7 @@ void update_coefficients(
         x, iters, buffer1, buffer2
     );
     if (iters >= max_iters) {
-        throw std::runtime_error("Newton-ABS max iteration reached! Try increasing newton_max_iters.");
+        throw util::adelie_core_solver_error("Newton-ABS max iteration reached! Try increasing newton_max_iters.");
     }
 }
 

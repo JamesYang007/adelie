@@ -1,11 +1,7 @@
-from typing import (
-    Callable,
-    Union,
-)
 from . import adelie_core as core
+from . import glm
 from . import logger
 from . import matrix
-from . import glm
 from .state import (
     gaussian_cov as state_gaussian_cov,
     gaussian_naive as state_gaussian_naive,
@@ -13,6 +9,10 @@ from .state import (
     multigaussian_naive as state_multigaussian_naive,
     multiglm_naive as state_multiglm_naive,
 ) 
+from typing import (
+    Callable,
+    Union,
+)
 import numpy as np
 
 
@@ -75,7 +75,10 @@ def _solve(
 
     # raise any errors
     if out["error"] != "":
-        logger.logger.warning(RuntimeError(out["error"]))
+        if out["error"].startswith("adelie_core solver: "):
+            logger.logger.warning(RuntimeError(out["error"]))
+        else:
+            logger.logger.error(RuntimeError(out["error"]))
 
     # return a subsetted Python result object
     core_state = out["state"]
@@ -462,7 +465,7 @@ def grpnet(
             \\mathrm{vec}(\\eta^{0\\top})
         \\end{align*}
 
-    where :math:`\\mathrm{vec}(x)` is the operator that flattens the input as column-major.
+    where :math:`\\mathrm{vec}(\\cdot)` is the operator that flattens the input as column-major.
     Note that if ``intercept`` is ``True``, then an intercept for each class is provided
     as additional unpenalized features in the data matrix and the global intercept is turned off.
 

@@ -249,10 +249,10 @@ struct StateGaussianNaive : StateBase<
         rsq(rsq)
     { 
         if (weights.size() != resid.size()) {
-            throw std::runtime_error("weights must have the same length as resid.");
+            throw util::adelie_core_error("weights must have the same length as resid.");
         }
         if (X_means.size() != this->grad.size()) {
-            throw std::runtime_error("X_means must have the same length as grad.");
+            throw util::adelie_core_error("X_means must have the same length as grad.");
         }
         /* initialize the rest of the screen quantities */
         gaussian::naive::update_screen_derived(*this); 

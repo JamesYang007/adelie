@@ -1,6 +1,7 @@
 #pragma once
-#include <adelie_core/util/types.hpp>
+#include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/format.hpp>
+#include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
 namespace matrix {
@@ -20,7 +21,7 @@ protected:
             (v < 0 || v > r) ||
             (o != s)
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "bmul() is given inconsistent inputs! "
                     "Invoked check_bmul(s=%d, i=%d, v=%d, o=%d, r=%d, c=%d)",
@@ -40,7 +41,7 @@ protected:
             (o != c) ||
             (r != c)
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "mul() is given inconsistent inputs! "
                     "Invoked check_mul(i=%d, v=%d, o=%d, r=%d, c=%d)",
@@ -60,7 +61,7 @@ protected:
             (o_c != p) ||
             (r != c)
         ) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 util::format(
                     "to_dense() is given inconsistent inputs! "
                     "Invoked check_to_dense(i=%d, p=%d, o_r=%d, o_c=%d, r=%d, c=%d)",

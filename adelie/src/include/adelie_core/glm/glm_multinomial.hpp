@@ -27,7 +27,7 @@ public:
         _buff(y.rows() * (y.cols() + 1))
     {
         if (y.cols() <= 1) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 "y must have at least 2 columns (classes)."
             );
         }

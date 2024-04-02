@@ -67,7 +67,7 @@ public:
         _slice_map(X.cols(), -1)
     {
         if (n_threads < 1) {
-            throw std::runtime_error("n_threads must be >= 1.");
+            throw util::adelie_core_error("n_threads must be >= 1.");
         }
         _cache.reserve(X.cols());
     }

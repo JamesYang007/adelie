@@ -167,7 +167,7 @@ public:
         auto fp = file_ptr.get();
         auto total_bytes = std::fwrite(buffer.data(), sizeof(char), buffer.size(), fp);
         if (total_bytes != static_cast<size_t>(buffer.size())) {
-            throw std::runtime_error(
+            throw util::adelie_core_error(
                 "Could not write the full buffer."
             );
         }
