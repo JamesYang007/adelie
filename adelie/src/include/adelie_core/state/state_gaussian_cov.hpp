@@ -101,7 +101,7 @@ void update_screen_derived(
     /* update screen_subset */
     screen_subset.resize(new_screen_value_size);
     int n_processed = 0;
-    for (int ss_idx = old_screen_size; ss_idx < new_screen_size; ++ss_idx) {
+    for (size_t ss_idx = old_screen_size; ss_idx < new_screen_size; ++ss_idx) {
         const auto ss = screen_set[ss_idx];
         const auto g = groups[ss];
         const auto gs = group_sizes[ss];

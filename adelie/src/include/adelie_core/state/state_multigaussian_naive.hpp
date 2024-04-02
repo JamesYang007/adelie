@@ -38,7 +38,6 @@ struct StateMultiGaussianNaive : StateGaussianNaive<
     using typename base_t::dyn_vec_index_t;
     using typename base_t::dyn_vec_bool_t;
     using matrix_t = MatrixType;
-    using rowarr_value_t = util::rowarr_type<value_t>;
 
     /* static states */
     const util::multi_group_type group_type;
@@ -46,7 +45,7 @@ struct StateMultiGaussianNaive : StateGaussianNaive<
     const bool multi_intercept;
 
     /* dynamic states */
-    rowarr_value_t intercepts;
+    std::vector<vec_value_t> intercepts;
 
     explicit StateMultiGaussianNaive(
         const std::string& group_type,

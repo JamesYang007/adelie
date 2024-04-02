@@ -101,6 +101,54 @@ ad::util::rowvec_type<T> compute_penalty_dense(
     return out;
 }
 
+template <class StateType, class SolveType>
+py::dict _solve(
+    StateType& state,
+    SolveType solve_f
+)
+{
+    using sw_t = ad::util::Stopwatch;
+
+    const auto update_coefficients_f = [](
+        const auto& L,
+        const auto& v,
+        auto l1,
+        auto l2,
+        auto tol,
+        size_t max_iters,
+        auto& x,
+        auto& iters,
+        auto& buffer1,
+        auto& buffer2
+    ){
+        ad::solver::gaussian::pin::update_coefficients(
+            L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
+        );
+    };
+
+    const auto check_user_interrupt = [&]() {
+        if (PyErr_CheckSignals() != 0) {
+            throw py::error_already_set();
+        }
+    };
+
+    std::string error;
+
+    // this is to redirect std::cerr to sys.stderr in Python.
+    // https://pybind11.readthedocs.io/en/stable/advanced/pycpp/utilities.html?highlight=cout#capturing-standard-output-from-ostream
+    py::scoped_estream_redirect _estream;
+    sw_t sw;
+    sw.start();
+    try {
+        solve_f(state, update_coefficients_f, check_user_interrupt);
+    } catch(const std::exception& e) {
+        error = e.what(); 
+    }
+    double total_time = sw.elapsed();
+
+    return py::dict("state"_a=state, "error"_a=error, "total_time"_a=total_time);
+}
+
 // =================================================================
 // Solve Pinned Method
 // =================================================================
@@ -108,85 +156,23 @@ ad::util::rowvec_type<T> compute_penalty_dense(
 template <class StateType>
 py::dict solve_gaussian_pin_cov(StateType state)
 {
-    using sw_t = ad::util::Stopwatch;
-    const auto update_coefficients_f = [](
-        const auto& L,
-        const auto& v,
-        auto l1,
-        auto l2,
-        auto tol,
-        size_t max_iters,
-        auto& x,
-        auto& iters,
-        auto& buffer1,
-        auto& buffer2
-    ){
-        ad::solver::gaussian::pin::update_coefficients(
-            L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
-        );
-    };
-
-    const auto check_user_interrupt = [&]() {
-        if (PyErr_CheckSignals() != 0) {
-            throw py::error_already_set();
+    return _solve(
+        state, 
+        [](auto& state, auto u, auto c) {
+            ad::solver::gaussian::pin::cov::solve(state, u, c);
         }
-    };
-
-    std::string error;
-    sw_t sw;
-    sw.start();
-    try {
-        ad::solver::gaussian::pin::cov::solve(
-            state, update_coefficients_f, check_user_interrupt
-        );
-    } catch(const std::exception& e) {
-        error = e.what(); 
-    }
-    double total_time = sw.elapsed();
-
-    return py::dict("state"_a=state, "error"_a=error, "total_time"_a=total_time);
+    );
 } 
 
 template <class StateType>
 py::dict solve_gaussian_pin_naive(StateType state)
 {
-    using sw_t = ad::util::Stopwatch;
-    const auto update_coefficients_f = [](
-        const auto& L,
-        const auto& v,
-        auto l1,
-        auto l2,
-        auto tol,
-        size_t max_iters,
-        auto& x,
-        auto& iters,
-        auto& buffer1,
-        auto& buffer2
-    ){
-        ad::solver::gaussian::pin::update_coefficients(
-            L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
-        );
-    };
-
-    const auto check_user_interrupt = [&]() {
-        if (PyErr_CheckSignals() != 0) {
-            throw py::error_already_set();
+    return _solve(
+        state,
+        [](auto& state, auto u, auto c) {
+            ad::solver::gaussian::pin::naive::solve(state, u, c);
         }
-    };
-
-    std::string error;
-    sw_t sw;
-    sw.start();
-    try {
-        ad::solver::gaussian::pin::naive::solve(
-            state, update_coefficients_f, check_user_interrupt
-        );
-    } catch(const std::exception& e) {
-        error = e.what(); 
-    }
-    double total_time = sw.elapsed();
-
-    return py::dict("state"_a=state, "error"_a=error, "total_time"_a=total_time);
+    );
 } 
 
 // =================================================================
@@ -196,154 +182,61 @@ py::dict solve_gaussian_pin_naive(StateType state)
 template <class StateType>
 py::dict solve_gaussian_cov(
     StateType state,
-    bool display_progress_bar
+    bool display_progress_bar,
+    std::function<bool(const StateType&)> exit_cond
 )
 {
-    using sw_t = ad::util::Stopwatch;
-
-    const auto update_coefficients_f = [](
-        const auto& L,
-        const auto& v,
-        auto l1,
-        auto l2,
-        auto tol,
-        size_t max_iters,
-        auto& x,
-        auto& iters,
-        auto& buffer1,
-        auto& buffer2
-    ){
-        ad::solver::gaussian::pin::update_coefficients(
-            L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
-        );
-    };
-
-    const auto check_user_interrupt = [&]() {
-        if (PyErr_CheckSignals() != 0) {
-            throw py::error_already_set();
+    return _solve(
+        state,
+        [&](auto& state, auto u, auto c) {
+            const auto exit_cond_f = [&]() {
+                return exit_cond && exit_cond(state);
+            };
+            ad::solver::gaussian::cov::solve(
+                state, display_progress_bar, exit_cond_f, u, c
+            );
         }
-    };
-
-    std::string error;
-
-    // this is to redirect std::cerr to sys.stderr in Python.
-    // https://pybind11.readthedocs.io/en/stable/advanced/pycpp/utilities.html?highlight=cout#capturing-standard-output-from-ostream
-    py::scoped_estream_redirect _estream;
-    sw_t sw;
-    sw.start();
-    try {
-        ad::solver::gaussian::cov::solve(
-            state, display_progress_bar, 
-            update_coefficients_f, check_user_interrupt
-        );
-    } catch(const std::exception& e) {
-        error = e.what(); 
-    }
-    double total_time = sw.elapsed();
-
-    return py::dict("state"_a=state, "error"_a=error, "total_time"_a=total_time);
+    );
 } 
 
 template <class StateType>
 py::dict solve_gaussian_naive(
     StateType state,
-    bool display_progress_bar
+    bool display_progress_bar,
+    std::function<bool(const StateType&)> exit_cond
 )
 {
-    using sw_t = ad::util::Stopwatch;
-
-    const auto update_coefficients_f = [](
-        const auto& L,
-        const auto& v,
-        auto l1,
-        auto l2,
-        auto tol,
-        size_t max_iters,
-        auto& x,
-        auto& iters,
-        auto& buffer1,
-        auto& buffer2
-    ){
-        ad::solver::gaussian::pin::update_coefficients(
-            L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
-        );
-    };
-
-    const auto check_user_interrupt = [&]() {
-        if (PyErr_CheckSignals() != 0) {
-            throw py::error_already_set();
+    return _solve(
+        state,
+        [&](auto& state, auto u, auto c) {
+            const auto exit_cond_f = [&]() {
+                return exit_cond && exit_cond(state);
+            };
+            return ad::solver::gaussian::naive::solve(
+                state, display_progress_bar, exit_cond_f, u, c
+            );
         }
-    };
-
-    std::string error;
-
-    // this is to redirect std::cerr to sys.stderr in Python.
-    // https://pybind11.readthedocs.io/en/stable/advanced/pycpp/utilities.html?highlight=cout#capturing-standard-output-from-ostream
-    py::scoped_estream_redirect _estream;
-    sw_t sw;
-    sw.start();
-    try {
-        ad::solver::gaussian::naive::solve(
-            state, display_progress_bar, 
-            update_coefficients_f, check_user_interrupt
-        );
-    } catch(const std::exception& e) {
-        error = e.what(); 
-    }
-    double total_time = sw.elapsed();
-
-    return py::dict("state"_a=state, "error"_a=error, "total_time"_a=total_time);
+    );
 } 
 
 template <class StateType>
 py::dict solve_multigaussian_naive(
     StateType state,
-    bool display_progress_bar
+    bool display_progress_bar,
+    std::function<bool(const StateType&)> exit_cond
 )
 {
-    using sw_t = ad::util::Stopwatch;
-
-    const auto update_coefficients_f = [](
-        const auto& L,
-        const auto& v,
-        auto l1,
-        auto l2,
-        auto tol,
-        size_t max_iters,
-        auto& x,
-        auto& iters,
-        auto& buffer1,
-        auto& buffer2
-    ){
-        ad::solver::gaussian::pin::update_coefficients(
-            L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
-        );
-    };
-
-    const auto check_user_interrupt = [&]() {
-        if (PyErr_CheckSignals() != 0) {
-            throw py::error_already_set();
+    return _solve(
+        state,
+        [&](auto& state, auto u, auto c) {
+            const auto exit_cond_f = [&]() {
+                return exit_cond && exit_cond(state);
+            };
+            ad::solver::multigaussian::naive::solve(
+                state, display_progress_bar, exit_cond_f, u, c
+            );
         }
-    };
-
-    std::string error;
-
-    // this is to redirect std::cerr to sys.stderr in Python.
-    // https://pybind11.readthedocs.io/en/stable/advanced/pycpp/utilities.html?highlight=cout#capturing-standard-output-from-ostream
-    py::scoped_estream_redirect _estream;
-    sw_t sw;
-    sw.start();
-    try {
-        ad::solver::multigaussian::naive::solve(
-            state, display_progress_bar, 
-            update_coefficients_f, check_user_interrupt
-        );
-    } catch(const std::exception& e) {
-        error = e.what(); 
-    }
-    double total_time = sw.elapsed();
-
-    return py::dict("state"_a=state, "error"_a=error, "total_time"_a=total_time);
+    );
 } 
 
 // =================================================================
@@ -354,104 +247,42 @@ template <class StateType, class GlmType>
 py::dict solve_glm_naive(
     StateType state,
     GlmType& glm,
-    bool display_progress_bar
+    bool display_progress_bar,
+    std::function<bool(const StateType&)> exit_cond
 )
 {
-    using sw_t = ad::util::Stopwatch;
-
-    const auto update_coefficients_f = [](
-        const auto& L,
-        const auto& v,
-        auto l1,
-        auto l2,
-        auto tol,
-        size_t max_iters,
-        auto& x,
-        auto& iters,
-        auto& buffer1,
-        auto& buffer2
-    ){
-        ad::solver::gaussian::pin::update_coefficients(
-            L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
-        );
-    };
-
-    const auto check_user_interrupt = [&]() {
-        if (PyErr_CheckSignals() != 0) {
-            throw py::error_already_set();
+    return _solve(
+        state,
+        [&](auto& state, auto u, auto c) {
+            const auto exit_cond_f = [&]() {
+                return exit_cond && exit_cond(state);
+            };
+            ad::solver::glm::naive::solve(
+                state, glm, display_progress_bar, exit_cond_f, u, c
+            );
         }
-    };
-
-    std::string error;
-
-    // this is to redirect std::cerr to sys.stderr in Python.
-    // https://pybind11.readthedocs.io/en/stable/advanced/pycpp/utilities.html?highlight=cout#capturing-standard-output-from-ostream
-    py::scoped_estream_redirect _estream;
-    sw_t sw;
-    sw.start();
-    try {
-        ad::solver::glm::naive::solve(
-            state, glm, display_progress_bar, 
-            update_coefficients_f, check_user_interrupt
-        );
-    } catch(const std::exception& e) {
-        error = e.what(); 
-    }
-
-    double total_time = sw.elapsed();
-    return py::dict("state"_a=state, "error"_a=error, "total_time"_a=total_time);
+    );
 } 
 
 template <class StateType, class GlmType>
 py::dict solve_multiglm_naive(
     StateType state,
     GlmType& glm,
-    bool display_progress_bar
+    bool display_progress_bar,
+    std::function<bool(const StateType&)> exit_cond
 )
 {
-    using sw_t = ad::util::Stopwatch;
-
-    const auto update_coefficients_f = [](
-        const auto& L,
-        const auto& v,
-        auto l1,
-        auto l2,
-        auto tol,
-        size_t max_iters,
-        auto& x,
-        auto& iters,
-        auto& buffer1,
-        auto& buffer2
-    ){
-        ad::solver::gaussian::pin::update_coefficients(
-            L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
-        );
-    };
-
-    const auto check_user_interrupt = [&]() {
-        if (PyErr_CheckSignals() != 0) {
-            throw py::error_already_set();
+    return _solve(
+        state,
+        [&](auto& state, auto u, auto c) {
+            const auto exit_cond_f = [&]() {
+                return exit_cond && exit_cond(state);
+            };
+            ad::solver::multiglm::naive::solve(
+                state, glm, display_progress_bar, exit_cond_f, u, c
+            );
         }
-    };
-
-    std::string error;
-
-    // this is to redirect std::cerr to sys.stderr in Python.
-    // https://pybind11.readthedocs.io/en/stable/advanced/pycpp/utilities.html?highlight=cout#capturing-standard-output-from-ostream
-    py::scoped_estream_redirect _estream;
-    sw_t sw;
-    sw.start();
-    try {
-        ad::solver::multiglm::naive::solve(
-            state, glm, display_progress_bar, 
-            update_coefficients_f, check_user_interrupt
-        );
-    } catch(const std::exception& e) {
-        error = e.what(); 
-    }
-
-    double total_time = sw.elapsed();
-    return py::dict("state"_a=state, "error"_a=error, "total_time"_a=total_time);
+    );
 } 
 
 template <class T> 
