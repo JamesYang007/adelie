@@ -225,11 +225,13 @@ auto fit(
 }
 
 template <class StateType,
+          class ExitCondType,
           class UpdateCoefficientsType,
           class CUIType=util::no_op>
 inline void solve(
     StateType&& state,
     bool display,
+    ExitCondType exit_cond_f,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
@@ -288,8 +290,8 @@ inline void solve(
             lmda
         );
     };
-    const auto early_exit_f = [](const auto& state) {
-        return cov::early_exit(state);
+    const auto early_exit_f = [&](const auto& state) {
+        return cov::early_exit(state) || exit_cond_f();
     };
     const auto screen_f = [](auto& state, auto lmda, auto kkt_passed, auto n_new_active) {
         solver::screen(

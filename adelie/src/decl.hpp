@@ -3,6 +3,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
+#include <pybind11/functional.h>
 #include <pybind11/iostream.h>
 #include <adelie_core/util/types.hpp>
 

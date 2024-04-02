@@ -193,13 +193,17 @@ auto fit(
 }
 
 template <class StateType,
+          class ExitCondType,
           class UpdateCoefficientsType,
-          class CUIType=util::no_op>
+          class TidyType,
+          class CUIType>
 inline void solve(
     StateType&& state,
     bool display,
+    ExitCondType exit_cond_f,
     UpdateCoefficientsType update_coefficients_f,
-    CUIType check_user_interrupt = CUIType()
+    TidyType tidy_f,
+    CUIType check_user_interrupt
 )
 {
     using state_t = std::decay_t<StateType>;
@@ -230,15 +234,16 @@ inline void solve(
         }
         state::update_abs_grad(state, lmda);
     };
-    const auto update_solutions_f = [](auto& state, auto& state_gaussian_pin_naive, auto lmda) {
+    const auto update_solutions_f = [&](auto& state, auto& state_gaussian_pin_naive, auto lmda) {
         update_solutions(
             state, 
             state_gaussian_pin_naive,
             lmda
         );
+        tidy_f();
     };
-    const auto early_exit_f = [](const auto& state) {
-        return solver::early_exit(state);
+    const auto early_exit_f = [&](const auto& state) {
+        return solver::early_exit(state) || exit_cond_f();
     };
     const auto screen_f = [](auto& state, auto lmda, auto kkt_passed, auto n_new_active) {
         solver::screen(
@@ -269,6 +274,28 @@ inline void solve(
         early_exit_f,
         screen_f,
         fit_f
+    );
+}
+
+template <class StateType,
+          class ExitCondType,
+          class UpdateCoefficientsType,
+          class CUIType=util::no_op>
+inline void solve(
+    StateType&& state,
+    bool display,
+    ExitCondType exit_cond_f,
+    UpdateCoefficientsType update_coefficients_f,
+    CUIType check_user_interrupt = CUIType()
+)
+{
+    solve(
+        state,
+        display,
+        exit_cond_f,
+        update_coefficients_f,
+        [](){},
+        check_user_interrupt
     );
 }
 

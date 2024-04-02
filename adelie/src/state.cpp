@@ -1213,7 +1213,15 @@ void state_multigaussian_naive(py::module_& m, const char* name)
         }, R"delimiter(
         ``betas[i]`` is the solution at ``lmdas[i]``.
         )delimiter")
-        .def_readonly("intercepts", &state_t::intercepts, R"delimiter(
+        .def_property_readonly("intercepts", [](const state_t& s) {
+            ad::util::rowarr_type<value_t> intercepts(
+                s.intercepts.size(), s.n_classes
+            );
+            for (int i = 0; i < s.intercepts.size(); ++i) {
+                intercepts.row(i) = s.intercepts[i];
+            }
+            return intercepts;
+        }, R"delimiter(
         ``intercepts[i]`` is the intercept at ``lmdas[i]`` for each class.
         )delimiter")
         ;
@@ -1652,7 +1660,15 @@ void state_multiglm_naive(py::module_& m, const char* name)
         }, R"delimiter(
         ``betas[i]`` is the solution at ``lmdas[i]``.
         )delimiter")
-        .def_readonly("intercepts", &state_t::intercepts, R"delimiter(
+        .def_property_readonly("intercepts", [](const state_t& s) {
+            ad::util::rowarr_type<value_t> intercepts(
+                s.intercepts.size(), s.n_classes
+            );
+            for (int i = 0; i < s.intercepts.size(); ++i) {
+                intercepts.row(i) = s.intercepts[i];
+            }
+            return intercepts;
+        }, R"delimiter(
         ``intercepts[i]`` is the intercept at ``lmdas[i]`` for each class.
         )delimiter")
         ;

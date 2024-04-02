@@ -394,15 +394,19 @@ auto fit(
 
 template <class StateType,
           class GlmType,
+          class ExitCondType,
           class UpdateLossNullType,
           class UpdateCoefficientsType,
+          class TidyType,
           class CUIType>
 inline void solve(
     StateType&& state,
     GlmType&& glm,
     bool display,
+    ExitCondType exit_cond_f,
     UpdateLossNullType update_loss_null_f,
     UpdateCoefficientsType update_coefficients_f,
+    TidyType tidy_f,
     CUIType check_user_interrupt
 )
 {
@@ -437,9 +441,10 @@ inline void solve(
             state_gaussian_pin_naive,
             lmda
         );
+        tidy_f();
     };
-    const auto early_exit_f = [](const auto& state) {
-        return solver::early_exit(state);
+    const auto early_exit_f = [&](const auto& state) {
+        return solver::early_exit(state) || exit_cond_f();
     };
     const auto screen_f = [](auto& state, auto lmda, auto kkt_passed, auto n_new_active) {
         solver::screen(
@@ -476,12 +481,14 @@ inline void solve(
 
 template <class StateType,
           class GlmType,
+          class ExitCondType,
           class UpdateCoefficientsType,
           class CUIType=util::no_op>
 inline void solve(
     StateType&& state,
     GlmType&& glm,
     bool display,
+    ExitCondType exit_cond_f,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
@@ -490,10 +497,12 @@ inline void solve(
         std::forward<StateType>(state), 
         std::forward<GlmType>(glm), 
         display, 
+        exit_cond_f,
         [](auto& state, auto& glm, auto& buffer_pack) {
             update_loss_null(state, glm, buffer_pack);
         },
         update_coefficients_f, 
+        [](){},
         check_user_interrupt
     );
 }

@@ -194,12 +194,14 @@ void update_loss_null(
 
 template <class StateType,
           class GlmType,
+          class ExitCondType,
           class UpdateCoefficientsType,
           class CUIType=util::no_op>
 inline void solve(
     StateType&& state,
     GlmType&& glm,
     bool display,
+    ExitCondType exit_cond_f,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
@@ -217,34 +219,32 @@ inline void solve(
     GlmWrap<glm_t> glm_wrap(glm);
 
     const auto tidy = [&]() {
-        intercepts.resize(betas.size(), n_classes);
         if (multi_intercept) {
-            for (int i = 0; i < betas.size(); ++i) {
-                intercepts.row(i) = Eigen::Map<const vec_value_t>(betas[i].valuePtr(), n_classes);
-                betas[i] = betas[i].tail(betas[i].size() - n_classes);
-            }
+            auto& beta = betas.back();
+            intercepts.push_back(
+                Eigen::Map<const vec_value_t>(beta.valuePtr(), n_classes)
+            );
+            beta = beta.tail(beta.size() - n_classes);
         } else {
-            intercepts.setZero();
+            intercepts.push_back(
+                vec_value_t::Zero(n_classes)
+            );
         }
     };
 
-    try {
-        glm::naive::solve(
-            static_cast<state_glm_naive_t&>(state),
-            glm_wrap,
-            display,
-            [&](auto&, auto& glm, auto& buffer_pack) {
-                // ignore casted down state and use derived state
-                multiglm::naive::update_loss_null(state, glm, buffer_pack);
-            },
-            update_coefficients_f,
-            check_user_interrupt
-        );
-        tidy();
-    } catch(...) {
-        tidy();
-        throw;
-    }
+    glm::naive::solve(
+        static_cast<state_glm_naive_t&>(state),
+        glm_wrap,
+        display,
+        exit_cond_f,
+        [&](auto&, auto& glm, auto& buffer_pack) {
+            // ignore casted down state and use derived state
+            multiglm::naive::update_loss_null(state, glm, buffer_pack);
+        },
+        update_coefficients_f,
+        tidy,
+        check_user_interrupt
+    );
 }
 
 } // namespace naive 
