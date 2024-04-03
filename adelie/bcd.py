@@ -191,7 +191,8 @@ def solve(
 
     The BCD update for the group elastic net is obtained by minimizing
     the BCD objective given in ``adelie.bcd.objective``.
-    The solution only exists when :math:`\\|v\\|_2 < \\lambda_1`
+    The solution exists uniquely if and only if 
+    :math:`\\|v\\|_2 \\leq \\lambda_1`
     or :math:`\\|v_S\\|_2 < \\lambda_1`,
     where :math:`S` is the subset of indices
     such that :math:`\\Sigma_{ii} + \\lambda_2 = 0`.
