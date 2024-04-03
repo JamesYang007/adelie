@@ -770,5 +770,107 @@ void admm_cnstr_solver(
     }
 }
 
+template <class QuadType, class LinearType, class ValueType,
+          class AType, class BType, 
+          class AVarType,
+          class OutType, class BuffType>
+void newton_cnstr_solver(
+    const QuadType& quad,
+    const LinearType& linear,
+    ValueType l1,
+    ValueType l2,
+    const AType& A,
+    const BType& b,
+    const AVarType& A_var,
+    size_t max_iters,
+    ValueType tol,
+    size_t newton_max_iters,
+    ValueType newton_tol,
+    size_t& iters,
+    OutType& x,
+    OutType& mu,
+    BuffType& buff
+)
+{
+    using value_t = ValueType;
+    using vec_value_t = util::rowvec_type<value_t>;
+
+    const auto m = A.rows();
+    const auto d = A.cols();
+    const auto& S = quad;
+    const auto& v = linear;
+
+    /* initialization */
+
+    /* static quantities */
+    Eigen::Map<vec_value_t> Av(buff.data(), m);
+    Av.matrix().noalias() = v * A.transpose();
+
+    /* invariance quantities */
+    iters = 0;      // number of iterations
+    mu.setZero();   // TODO: better initialization?
+    // resid = v - A.T @ mu
+    Eigen::Map<vec_value_t> resid(buff.data() + m, d); resid = v;
+    // rsq = ||resid||_2^2
+    value_t rsq = resid.square().sum();
+
+    while (iters < max_iters) {
+        value_t convg_measure = 0;
+        ++iters;
+
+        // coordinate descent
+        for (int k = 0; k < m; ++k) {
+            // check if 0 is a possible primal solution.
+            if (b[k] == 0) {
+                const auto Ak_resid = A.row(k).dot(resid.matrix());
+                const auto A_vars_k = A_vars[k];
+                const auto del_k = Ak_resid / A_vars_k;
+                const auto rsq_new = rsq - del_k * (2 * Ak_resid - A_vars_k * del_k);
+
+                // if 0 is possible, keep the update;
+                // otherwise, go to the general routine.
+                if (rsq_new <= l1 * l1) {
+                    mu[k] += del_k;
+                    resid -= A.row(k).array() * del_k;
+                    rsq = rsq_new;
+                    continue;
+                }
+            }
+
+            /* general routine */
+            const auto initial_f = [&]() {
+                return std::make_tuple(mu[k], 0);
+            };
+            const auto step_f = [&](auto muk) {
+                // compute ||x^star(mu)||_2
+                // TODO: currently using an existing function above,
+                // which computes the entire vector, but we only need the norm.
+                Eigen::Map<vec_value_t> x_star(buff.data()+m+d, d);
+                Eigen::Map<vec_value_t> x_buffer1(buff.data()+m+2*d, d);
+                Eigen::Map<vec_value_t> x_buffer2(buff.data()+m+3*d, d);
+                size_t x_iters;
+                newton_abs_solver(
+                    quad, resid, l1, l2, 1e-12, 1000, 
+                    x_star, x_iters, x_buffer1, x_buffer2
+                );
+                const auto x_star_norm = x_star.matrix().norm();
+
+                // compute k  
+                value_t fh = 
+            };
+            const auto project_f = [&](auto h) { return h; };
+            optimization::newton_root_find(
+                initial_f,
+                step_f,
+                project_f,
+                newton_tol,
+                newton_max_iters
+            );
+        }
+
+        // check convergence
+    }    
+}
+
 } // namespace bcd
 } // namespace adelie_core
