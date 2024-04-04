@@ -129,8 +129,7 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < out.size(); ++k) {
+        const auto routine = [&](int k) {
             const auto outer = _mat.outerIndexPtr()[k];
             const auto size = _mat.outerIndexPtr()[k+1] - outer;
             const Eigen::Map<const vec_sp_index_t> inner(
@@ -140,9 +139,15 @@ public:
                 _mat.valuePtr() + outer, size
             );
             out[k] = spddot(inner, value, v * weights);
+        };
+        if (_n_threads <= 1) {
+            for (int k = 0; k < out.size(); ++k) routine(k);
+        } else {
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int k = 0; k < out.size(); ++k) routine(k);
         }
     }
-
+    
     int rows() const override
     {
         return _mat.rows();
@@ -165,9 +170,7 @@ public:
             out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
             rows(), cols()
         );
-        
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int i1 = 0; i1 < q; ++i1) {
+        const auto routine = [&](int i1) {
             for (int i2 = 0; i2 <= i1; ++i2) {
                 const auto index_1 = j+i1;
                 const auto index_2 = j+i2;
@@ -194,6 +197,12 @@ public:
                     sqrt_weights.square()
                 );
             }
+        };
+        if (_n_threads <= 1) {
+            for (int i1 = 0; i1 < q; ++i1) routine(i1);
+        } else {
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int i1 = 0; i1 < q; ++i1) routine(i1);
         }
         for (int i1 = 0; i1 < q; ++i1) {
             for (int i2 = i1+1; i2 < q; ++i2) {
