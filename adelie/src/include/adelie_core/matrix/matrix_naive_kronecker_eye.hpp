@@ -246,12 +246,17 @@ public:
 
             _mat->sp_btmul(_v, _out);
 
-            #pragma omp parallel for schedule(static) num_threads(_n_threads)
-            for (int k = 0; k < out.rows(); ++k) {
+            const auto routine = [&](int k) {
                 Eigen::Map<rowmat_value_t> out_k(
                     out.row(k).data(), _out.cols(), _K                
                 );
                 out_k.col(l) = _out.row(k);
+            };
+            if (_n_threads <= 1) {
+                for (int k = 0; k < out.rows(); ++k) routine(k);
+            } else {
+                #pragma omp parallel for schedule(static) num_threads(_n_threads)
+                for (int k = 0; k < out.rows(); ++k) routine(k);
             }
         }
     }
@@ -479,12 +484,17 @@ public:
 
             _out.noalias() = _v * _mat.transpose();
 
-            #pragma omp parallel for schedule(static) num_threads(_n_threads)
-            for (int k = 0; k < out.rows(); ++k) {
+            const auto routine = [&](int k) {
                 Eigen::Map<rowmat_value_t> out_k(
-                    out.row(k).data(), _out.cols(), _K
+                    out.row(k).data(), _out.cols(), _K                
                 );
                 out_k.col(l) = _out.row(k);
+            };
+            if (_n_threads <= 1) {
+                for (int k = 0; k < out.rows(); ++k) routine(k);
+            } else {
+                #pragma omp parallel for schedule(static) num_threads(_n_threads)
+                for (int k = 0; k < out.rows(); ++k) routine(k);
             }
         }
     }
