@@ -37,11 +37,15 @@ private:
         }
 
         const auto block = _X.middleCols(i, p);
-
+        util::rowmat_type<value_t> cov(p, _X.cols());
+        if (_n_threads <= 1) { 
+            cov.noalias() = block.transpose() * _X; 
+            _cache.emplace_back(std::move(cov));
+            return;
+        }
         const int n_blocks = std::min<size_t>(_n_threads, p);
         const int block_size = p / n_blocks;
         const int remainder = p % n_blocks;
-        util::rowmat_type<value_t> cov(p, _X.cols());
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int t = 0; t < n_blocks; ++t) {
             const auto begin = (

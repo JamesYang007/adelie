@@ -90,12 +90,16 @@ public:
     ) override
     {
         base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int t = 0; t < q; ++t) 
-        {
+        const auto routine = [&](int t) {
             const auto inner = _io.inner(j+t);
             const auto value = _io.value(j+t);
             out[t] = spddot(inner, value, v * weights);
+        };
+        if (_n_threads <= 1) {
+            for (int t = 0; t < q; ++t) routine(t);
+        } else {
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int t = 0; t < q; ++t) routine(t);
         }
     }
 
@@ -138,9 +142,7 @@ public:
             out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
             rows(), cols()
         );
-
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int i1 = 0; i1 < q; ++i1) {
+        const auto routine = [&](int i1) {
             for (int i2 = 0; i2 <= i1; ++i2) {
                 const auto index_1 = j+i1;
                 const auto index_2 = j+i2;
@@ -155,6 +157,12 @@ public:
                     sqrt_weights.square()
                 );
             }
+        };
+        if (_n_threads <= 1) {
+            for (int i1 = 0; i1 < q; ++i1) routine(i1);
+        } else {
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int i1 = 0; i1 < q; ++i1) routine(i1);
         }
         for (int i1 = 0; i1 < q; ++i1) {
             for (int i2 = i1+1; i2 < q; ++i2) {
@@ -174,8 +182,7 @@ public:
         base_t::check_sp_btmul(
             v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < v.outerSize(); ++k) {
+        const auto routine = [&](int k) {
             typename sp_mat_value_t::InnerIterator it(v, k);
             auto out_k = out.row(k);
             out_k.setZero();
@@ -188,6 +195,12 @@ public:
                     out_k[inner[i]] += value[i] * it.value();
                 } 
             }
+        };
+        if (_n_threads <= 1) {
+            for (int k = 0; k < v.outerSize(); ++k) routine(k);
+        } else {
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int k = 0; k < v.outerSize(); ++k) routine(k);
         }
     }
 };
