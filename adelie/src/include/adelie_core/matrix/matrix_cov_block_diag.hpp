@@ -149,9 +149,7 @@ public:
     ) override
     {
         base_t::check_mul(indices.size(), values.size(), out.size(), rows(), cols());
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int i = 0; i < _mat_list.size(); ++i) 
-        {
+        const auto routine = [&](int i) {
             auto& mat = *_mat_list[i];
             const auto mat_pos = _mat_size_cumsum[i];
             const auto begin = std::lower_bound(
@@ -178,6 +176,12 @@ public:
                 indices.data() + begin, new_indices_size
             ) - mat_pos;
             mat.mul(new_indices, new_values, new_out);
+        };
+        if (_n_threads <= 1) {
+            for (int i = 0; i < _mat_list.size(); ++i) routine(i);
+        } else {
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int i = 0; i < _mat_list.size(); ++i) routine(i);
         }
     } 
 

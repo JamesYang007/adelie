@@ -90,8 +90,7 @@ public:
         const auto p = cols();
         rowarr_value_t dense(n, p);
 
-        #pragma omp parallel for schedule(auto) num_threads(n_threads)
-        for (inner_t j = 0; j < p; ++j) {
+        const auto routine = [&](inner_t j) {
             const auto _inner = inner(j);
             const auto _value = value(j);
             auto dense_j = dense.col(j);
@@ -99,6 +98,12 @@ public:
             for (inner_t i = 0; i < _inner.size(); ++i) {
                 dense_j[_inner[i]] = _value[i];
             }
+        };
+        if (n_threads <= 1) {
+            for (inner_t j = 0; j < p; ++j) routine(j);
+        } else {
+            #pragma omp parallel for schedule(auto) num_threads(n_threads)
+            for (inner_t j = 0; j < p; ++j) routine(j);
         }
 
         return dense;
@@ -140,8 +145,7 @@ public:
             outer.size()
         ) = outer;
 
-        #pragma omp parallel for schedule(auto) num_threads(n_threads)
-        for (inner_t j = 0; j < p; ++j) {
+        const auto routine = [&](inner_t j) {
             const auto col_j = calldata.col(j);
             const auto nnz_bytes = outer[j+1] - outer[j];
             const auto nnz = nnz_bytes / _multiplier;
@@ -161,6 +165,12 @@ public:
                 value[count] = col_j[i];
                 ++count;
             }
+        };
+        if (n_threads <= 1) {
+            for (inner_t j = 0; j < p; ++j) routine(j);
+        } else {
+            #pragma omp parallel for schedule(auto) num_threads(n_threads)
+            for (inner_t j = 0; j < p; ++j) routine(j);
         }
 
         auto file_ptr = fopen_safe(_filename.c_str(), "wb");

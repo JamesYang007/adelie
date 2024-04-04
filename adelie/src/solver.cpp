@@ -42,9 +42,7 @@ ad::util::rowvec_type<T> compute_penalty_sparse(
 
     vec_value_t out(betas.outerSize());
 
-    #pragma omp parallel for schedule(static) num_threads(n_threads)
-    for (int k = 0; k < betas.outerSize(); ++k)
-    {
+    const auto routine = [&](int k) {
         typename sp_mat_value_t::InnerIterator it(betas, k);
         value_t pnlty = 0;
         for (int i = 0; i < groups.size(); ++i) {
@@ -61,6 +59,12 @@ ad::util::rowvec_type<T> compute_penalty_sparse(
             pnlty += pg * norm * (alpha + 0.5 * (1-alpha) * norm);
         }
         out[k] = pnlty;
+    };
+    if (n_threads <= 1) {
+        for (int k = 0; k < betas.outerSize(); ++k) routine(k);
+    } else {
+        #pragma omp parallel for schedule(static) num_threads(n_threads)
+        for (int k = 0; k < betas.outerSize(); ++k) routine(k);
     }
 
     return out;
@@ -81,9 +85,7 @@ ad::util::rowvec_type<T> compute_penalty_dense(
 
     vec_value_t out(betas.rows());
 
-    #pragma omp parallel for schedule(static) num_threads(n_threads)
-    for (int k = 0; k < betas.rows(); ++k)
-    {
+    const auto routine = [&](int k) {
         const auto beta_k = betas.row(k);
         value_t pnlty = 0;
         for (int i = 0; i < groups.size(); ++i) {
@@ -96,6 +98,12 @@ ad::util::rowvec_type<T> compute_penalty_dense(
             pnlty += pg * norm * (alpha + 0.5 * (1-alpha) * norm);
         }
         out[k] = pnlty;
+    };
+    if (n_threads <= 1) {
+        for (int k = 0; k < betas.rows(); ++k) routine(k);
+    } else {
+        #pragma omp parallel for schedule(static) num_threads(n_threads)
+        for (int k = 0; k < betas.rows(); ++k) routine(k);
     }
 
     return out;

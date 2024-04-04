@@ -71,3 +71,26 @@ BENCHMARK(BM_copy)
     -> Args({10000})
     -> Args({100000})
     ;
+
+static void BM_dot(benchmark::State& state) {
+    const auto n = state.range(0);
+    ad::util::rowvec_type<double> x(n);
+    x.setRandom();
+    ad::util::rowvec_type<double> y(n);
+    y.setRandom();
+    ad::util::rowvec_type<double> z(n);
+    z.setRandom();
+
+    for (auto _ : state) {
+        auto out = (x * y * z).sum();
+        benchmark::DoNotOptimize(out);
+    }
+}
+
+BENCHMARK(BM_dot)
+    -> Args({10})
+    -> Args({100})
+    -> Args({1000})
+    -> Args({10000})
+    -> Args({100000})
+    ;

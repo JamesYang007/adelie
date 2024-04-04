@@ -142,9 +142,7 @@ public:
             (j + q - A * (j / A) + A - 1) / A
         );
 
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int b = 0; b < n_batches; ++b)
-        {
+        const auto routine = [&](int b) {
             const auto n_solved =  (b > 0) * (A * ((j / A) + 1) - j + (b-1) * A);
             const auto begin = j + n_solved;
             const auto snp = begin / A;
@@ -174,7 +172,13 @@ public:
                     }
                 });
             }
-        }     
+        };
+        if (_n_threads <= 1) {
+            for (int b = 0; b < n_batches; ++b) routine(b);
+        } else {
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int b = 0; b < n_batches; ++b) routine(b);
+        }
     }
 
     void btmul(
@@ -332,8 +336,7 @@ public:
             v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
         const auto A = ancestries();
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < v.outerSize(); ++k) {
+        const auto routine = [&](int k) {
             typename sp_mat_value_t::InnerIterator it(v, k);
             auto out_k = out.row(k);
             out_k.setZero();
@@ -352,6 +355,12 @@ public:
                     }
                 }
             }
+        };
+        if (_n_threads <= 1) {
+            for (int k = 0; k < v.outerSize(); ++k) routine(k);
+        } else {
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int k = 0; k < v.outerSize(); ++k) routine(k);
         }
     }
 };

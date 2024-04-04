@@ -224,10 +224,16 @@ def dense(
 
     dtype = mat.dtype
     order = (
-        "C"
-        if mat.flags.c_contiguous else
         "F"
+        # prioritize choosing Fortran contiguity
+        if mat.flags.f_contiguous else
+        "C"
     )
+    if order == "C":
+        warnings.warn(
+            "Detected matrix to be C-contiguous. "
+            "Performance may improve with F-contiguous matrix."
+        )
     core_base = dispatcher[method][dtype][order]
 
     class _dense(core_base):

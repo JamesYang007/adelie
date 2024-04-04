@@ -53,13 +53,17 @@ void update_abs_grad(
 
     // can be parallelized since access is in linear order.
     // any false sharing is happening near the beginning/ends of the block of indices.
-    #pragma omp parallel for schedule(static) num_threads(n_threads)
-    for (int i = 0; i < groups.size(); ++i) 
-    {
-        if (is_screen(i)) continue;
+    const auto routine = [&](int i) {
+        if (is_screen(i)) return;
         const auto k = groups[i];
         const auto size_k = group_sizes[i];
         abs_grad[i] = grad.segment(k, size_k).matrix().norm();
+    };
+    if (n_threads <= 1) {
+        for (int i = 0; i < groups.size(); ++i) routine(i);
+    } else {
+        #pragma omp parallel for schedule(static) num_threads(n_threads)
+        for (int i = 0; i < groups.size(); ++i) routine(i);
     }
 }
 
