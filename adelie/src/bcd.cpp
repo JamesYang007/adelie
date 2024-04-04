@@ -224,18 +224,59 @@ py::dict admm_cnstr_solver(
     return dct;
 }
 
+py::dict newton_cnstr_solver(
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& mu0,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& quad,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& linear,
+    double l1,
+    double l2,
+    const Eigen::Ref<const ad::util::rowmat_type<double>>& A,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& b,
+    size_t max_iters,
+    double tol,
+    size_t pnewton_max_iters,
+    double pnewton_tol,
+    size_t newton_max_iters,
+    double newton_tol
+)
+{
+    using sw_t = ad::util::Stopwatch;
+
+    const auto m = A.rows();
+    const auto d = A.cols();
+    ad::util::rowvec_type<double> A_vars = A.array().square().rowwise().sum();
+    ad::util::rowvec_type<double> buff(4*d);
+    ad::util::rowvec_type<double> x(d);
+    ad::util::rowvec_type<double> mu = mu0;
+    ad::util::rowvec_type<double> mu_resid = (
+        linear.matrix() - mu.matrix() * A
+    );
+    double mu_rsq = mu_resid.square().sum();
+    size_t iters;
+    sw_t sw;
+    sw.start();
+    ad::bcd::newton_cnstr_solver(
+        quad, linear, l1, l2, A, b, A_vars,
+        max_iters, tol, pnewton_max_iters, pnewton_tol, newton_max_iters, newton_tol,
+        iters, x, mu, mu_resid, mu_rsq, buff
+    );
+    const auto elapsed = sw.elapsed();
+    py::dict dct("x"_a=x, "mu"_a=mu, "iters"_a=iters, "time_elapsed"_a=elapsed);
+    return dct;
+}
+
 void register_bcd(py::module_& m)
 {
     m.def("admm_cnstr_solver", &admm_cnstr_solver);
     m.def("brent_solver", &brent_solver);
-    m.def("brent_solver", &brent_solver);
-    m.def("ista_solver", &ista_solver);
     m.def("fista_adares_solver", &fista_adares_solver);
     m.def("fista_solver", &fista_solver);
-    m.def("newton_solver", &newton_solver);
-    m.def("newton_brent_solver", &newton_brent_solver);
-    m.def("newton_abs_solver", &newton_abs_solver);
+    m.def("ista_solver", &ista_solver);
     m.def("newton_abs_debug_solver", &newton_abs_debug_solver);
+    m.def("newton_abs_solver", &newton_abs_solver);
+    m.def("newton_brent_solver", &newton_brent_solver);
+    m.def("newton_cnstr_solver", &newton_cnstr_solver);
+    m.def("newton_solver", &newton_solver);
     m.def("root_function", &root_function);
     m.def("root_lower_bound", &root_lower_bound);
     m.def("root_upper_bound", &root_upper_bound);
