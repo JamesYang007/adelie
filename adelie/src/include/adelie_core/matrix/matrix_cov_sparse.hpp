@@ -74,8 +74,7 @@ public:
     ) override
     {
         base_t::check_mul(indices.size(), values.size(), out.size(), rows(), cols());
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int j = 0; j < _mat.cols(); ++j) {
+        const auto routine = [&](int j) {
             const auto outer = _mat.outerIndexPtr()[j];
             const auto size = _mat.outerIndexPtr()[j+1] - outer;
             const Eigen::Map<const vec_sp_index_t> inner(
@@ -85,6 +84,12 @@ public:
                 _mat.valuePtr() + outer, size
             );
             out[j] = svsvdot(indices, values, inner, value);
+        };
+        if (_n_threads <= 1) {
+            for (int j = 0; j < _mat.cols(); ++j) routine(j);
+        } else {
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int j = 0; j < _mat.cols(); ++j) routine(j);
         }
     } 
 

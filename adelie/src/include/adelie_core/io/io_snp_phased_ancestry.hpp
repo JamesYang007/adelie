@@ -107,8 +107,7 @@ public:
         const auto A = ancestries();
         rowarr_value_t dense(n, s * A);
 
-        #pragma omp parallel for schedule(auto) num_threads(n_threads)
-        for (inner_t j = 0; j < s; ++j) {
+        const auto routine = [&](inner_t j) {
             auto dense_j = dense.middleCols(A * j, A);
             dense_j.setZero();
             for (char hap = 0; hap < 2; ++hap) {
@@ -118,6 +117,12 @@ public:
                     dense_j(_inner[i], _ancestry[i]) += 1;
                 }
             }
+        };
+        if (n_threads <= 1) {
+            for (inner_t j = 0; j < s; ++j) routine(j);
+        } else {
+            #pragma omp parallel for schedule(auto) num_threads(n_threads)
+            for (inner_t j = 0; j < s; ++j) routine(j);
         }
 
         return dense;
@@ -163,8 +168,7 @@ public:
             outer.size()
         ) = outer;
 
-        #pragma omp parallel for schedule(auto) num_threads(n_threads)
-        for (inner_t j = 0; j < calldata.cols(); ++j) {
+        const auto routine = [&](inner_t j) {
             const auto col_j = calldata.col(j);
             const auto ancestry_j = ancestries.col(j);
             const auto nnz_bytes = outer[j+1] - outer[j];
@@ -185,6 +189,12 @@ public:
                 ancestry[count] = ancestry_j(i);
                 ++count;
             }
+        };
+        if (n_threads <= 1) {
+            for (inner_t j = 0; j < calldata.cols(); ++j) routine(j);
+        } else {
+            #pragma omp parallel for schedule(auto) num_threads(n_threads)
+            for (inner_t j = 0; j < calldata.cols(); ++j) routine(j);
         }
 
         auto file_ptr = fopen_safe(_filename.c_str(), "wb");
