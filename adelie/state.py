@@ -1128,6 +1128,7 @@ def _render_multi_inputs(
         ones_kron = matrix.kronecker_eye(np.ones((n, 1)), n_classes, n_threads=n_threads)
         X = matrix.concatenate(
             [ones_kron, X], 
+            axis=1,
             n_threads=n_threads,
         )
 

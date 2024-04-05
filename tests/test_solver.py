@@ -548,6 +548,7 @@ def test_solve_gaussian_concatenate():
                     ad.matrix.dense(data["X"], method="naive", n_threads=n_threads) 
                     for data in test_datas
                 ],
+                axis=1,
                 n_threads=n_threads,
             )
         ]
