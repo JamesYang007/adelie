@@ -1,9 +1,12 @@
 #include "decl.hpp"
+#include <adelie_core/optimization/nnls.hpp>
 #include <adelie_core/optimization/search_pivot.hpp>
 #include <adelie_core/optimization/symmetric_penalty.hpp>
+#include <adelie_core/util/stopwatch.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
+using namespace pybind11::literals; // to bring in the `_a` literal
 
 py::tuple search_pivot(
     const Eigen::Ref<const ad::util::rowvec_type<double>>& x,
@@ -21,6 +24,37 @@ double symmetric_penalty(
 )
 {
     return ad::optimization::symmetric_penalty(x, alpha);
+}
+
+py::dict nnls_cov_full(
+    const Eigen::Ref<const ad::util::rowmat_type<double>>& quad,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& linear,
+    double l2,
+    size_t max_iters,
+    double tol,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& x0
+)
+{
+    using sw_t = ad::util::Stopwatch;
+    const auto d = quad.cols();
+    size_t iters;
+    ad::util::rowvec_type<double> x = x0;
+    ad::util::rowvec_type<double> grad = (
+        linear.matrix() - x.matrix() * quad.transpose()
+    );
+    grad -= l2 * x;
+    sw_t sw;
+    sw.start();
+    ad::optimization::nnls_cov_full(
+        quad, l2, max_iters, tol, iters, x, grad
+    );
+    const auto time_elapsed = sw.elapsed();
+    return py::dict(
+        "x"_a=x, 
+        "grad"_a=grad, 
+        "iters"_a=iters, 
+        "time_elapsed"_a=time_elapsed
+    );
 }
 
 void register_optimization(py::module_& m)
@@ -72,5 +106,32 @@ void register_optimization(py::module_& m)
     -------
     t_star : float
         The argmin of the minimization problem.
+    )delimiter");
+    m.def("nnls_cov_full", &nnls_cov_full, R"delimiter(
+    Solves the non-negative least squares (NNLS) problem
+    with a full quadratic component.
+
+    The non-negative least squares problem is given by
+
+    .. math::
+        \begin{align*}
+            \mathrm{minimize}_{x \geq 0} 
+            \frac{1}{2} x^\top Q x - v^\top x
+        \end{align*}
+
+    where :math:`Q` is a dense positive semi-definite matrix.
+
+    Parameters
+    ----------
+    quad : (d, d) np.ndarray
+        Full positive semi-definite dense matrix :math:`Q`.
+    linear : (d,) np.ndarray 
+        Linear component :math:`v`.
+    max_iters : int
+        Maximum number of coordinate descent iterations.
+    tol : float
+        Convergence tolerance.
+    x : (d,) np.ndarray
+        Initial starting value.
     )delimiter");
 }
