@@ -1,7 +1,7 @@
 #pragma once
 #include <adelie_core/util/types.hpp>
 #include <adelie_core/util/macros.hpp>
-#include <adelie_core/bcd.hpp>
+#include <adelie_core/bcd/unconstrained/newton.hpp>
 
 namespace adelie_core {
 namespace solver {
@@ -155,12 +155,15 @@ void update_coefficients(
     BufferType& buffer2
 )
 {
-    bcd::newton_abs_solver(
+    bcd::unconstrained::newton_abs_solver(
         L, v, l1, l2, tol, max_iters,
         x, iters, buffer1, buffer2
     );
     if (iters >= max_iters) {
-        throw util::adelie_core_solver_error("Newton-ABS max iteration reached! Try increasing newton_max_iters.");
+        throw util::adelie_core_solver_error(
+            "Newton-ABS max iteration reached! "
+            "Try increasing newton_max_iters."
+        );
     }
 }
 

@@ -165,14 +165,14 @@ def objective(
 
 
 _solver_dict = {
-    "brent":            core.bcd.brent_solver,
-    "newton":           core.bcd.newton_solver,
-    "newton_brent":     core.bcd.newton_brent_solver,
-    "newton_abs":       core.bcd.newton_abs_solver,
-    "newton_abs_debug": core.bcd.newton_abs_debug_solver,
-    "ista":             core.bcd.ista_solver,
-    "fista":            core.bcd.fista_solver,
-    "fista_adares":     core.bcd.fista_adares_solver,
+    "brent":            core.bcd.unconstrained_brent_solver,
+    "newton":           core.bcd.unconstrained_newton_solver,
+    "newton_brent":     core.bcd.unconstrained_newton_brent_solver,
+    "newton_abs":       core.bcd.unconstrained_newton_abs_solver,
+    "newton_abs_debug": core.bcd.unconstrained_newton_abs_debug_solver,
+    "ista":             core.bcd.unconstrained_ista_solver,
+    "fista":            core.bcd.unconstrained_fista_solver,
+    "fista_adares":     core.bcd.unconstrained_fista_adares_solver,
 }
 
 
