@@ -1,58 +1,18 @@
 #include "decl.hpp"
-#include <adelie_core/bcd.hpp>
+#include <adelie_core/bcd/constrained/admm.hpp>
+#include <adelie_core/bcd/constrained/coordinate_descent.hpp>
+#include <adelie_core/bcd/unconstrained/brent.hpp>
+#include <adelie_core/bcd/unconstrained/ista.hpp>
+#include <adelie_core/bcd/unconstrained/newton.hpp>
 #include <adelie_core/util/stopwatch.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
 using namespace pybind11::literals; // to bring in the `_a` literal
 
-py::dict ista_solver(
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
-    double l1,
-    double l2,
-    double tol,
-    size_t max_iters
-)
-{
-    ad::util::rowvec_type<double> x(L.size());
-    size_t iters = 0;
-    ad::bcd::ista_solver(L, v, l1, l2, tol, max_iters, x, iters);
-    py::dict d("beta"_a=x, "iters"_a=iters);
-    return d;
-}
-
-py::dict fista_solver(
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
-    double l1,
-    double l2,
-    double tol,
-    size_t max_iters
-)
-{
-    ad::util::rowvec_type<double> x(L.size());
-    size_t iters = 0;
-    ad::bcd::fista_solver(L, v, l1, l2, tol, max_iters, x, iters);
-    py::dict d("beta"_a=x, "iters"_a=iters);
-    return d;
-}
-
-py::dict fista_adares_solver(
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
-    double l1,
-    double l2,
-    double tol,
-    size_t max_iters
-)
-{
-    ad::util::rowvec_type<double> x(L.size());
-    size_t iters = 0;
-    ad::bcd::fista_adares_solver(L, v, l1, l2, tol, max_iters, x, iters);
-    py::dict d("beta"_a=x, "iters"_a=iters);
-    return d;
-}
+// ================================================================
+// Utility functions
+// ================================================================
 
 double root_lower_bound(
     const Eigen::Ref<const ad::util::rowvec_type<double>>& quad,
@@ -83,7 +43,59 @@ double root_function(
     return ad::bcd::root_function(h, D, v, l1);
 }
 
-py::dict newton_solver(
+// ================================================================
+// Unconstrained
+// ================================================================
+
+py::dict unconstrained_ista_solver(
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
+    double l1,
+    double l2,
+    double tol,
+    size_t max_iters
+)
+{
+    ad::util::rowvec_type<double> x(L.size());
+    size_t iters = 0;
+    ad::bcd::unconstrained::ista_solver(L, v, l1, l2, tol, max_iters, x, iters);
+    py::dict d("beta"_a=x, "iters"_a=iters);
+    return d;
+}
+
+py::dict unconstrained_fista_solver(
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
+    double l1,
+    double l2,
+    double tol,
+    size_t max_iters
+)
+{
+    ad::util::rowvec_type<double> x(L.size());
+    size_t iters = 0;
+    ad::bcd::unconstrained::fista_solver(L, v, l1, l2, tol, max_iters, x, iters);
+    py::dict d("beta"_a=x, "iters"_a=iters);
+    return d;
+}
+
+py::dict unconstrained_fista_adares_solver(
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
+    double l1,
+    double l2,
+    double tol,
+    size_t max_iters
+)
+{
+    ad::util::rowvec_type<double> x(L.size());
+    size_t iters = 0;
+    ad::bcd::unconstrained::fista_adares_solver(L, v, l1, l2, tol, max_iters, x, iters);
+    py::dict d("beta"_a=x, "iters"_a=iters);
+    return d;
+}
+
+py::dict unconstrained_newton_solver(
     const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
     const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
     double l1,
@@ -96,13 +108,13 @@ py::dict newton_solver(
     ad::util::rowvec_type<double> buffer1(L.size());
     ad::util::rowvec_type<double> buffer2(L.size());
     size_t iters = 0;
-    ad::bcd::newton_solver(L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2);
+    ad::bcd::unconstrained::newton_solver(L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2);
 
     py::dict d("beta"_a=x, "iters"_a=iters);
     return d;
 }
 
-py::dict newton_brent_solver(
+py::dict unconstrained_newton_brent_solver(
     const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
     const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
     double l1,
@@ -115,13 +127,13 @@ py::dict newton_brent_solver(
     ad::util::rowvec_type<double> buffer1(L.size());
     ad::util::rowvec_type<double> buffer2(L.size());
     size_t iters = 0;
-    ad::bcd::newton_brent_solver(L, v, l1, l2, tol, tol, max_iters, x, iters, buffer1, buffer2);
+    ad::bcd::unconstrained::newton_brent_solver(L, v, l1, l2, tol, tol, max_iters, x, iters, buffer1, buffer2);
 
     py::dict d("beta"_a=x, "iters"_a=iters);
     return d;
 }
 
-py::dict newton_abs_solver(
+py::dict unconstrained_newton_abs_solver(
     const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
     const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
     double l1,
@@ -134,13 +146,13 @@ py::dict newton_abs_solver(
     ad::util::rowvec_type<double> buffer1(L.size());
     ad::util::rowvec_type<double> buffer2(L.size());
     size_t iters = 0;
-    ad::bcd::newton_abs_solver(L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2);
+    ad::bcd::unconstrained::newton_abs_solver(L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2);
 
     py::dict d("beta"_a=x, "iters"_a=iters);
     return d;
 }
 
-py::dict newton_abs_debug_solver(
+py::dict unconstrained_newton_abs_debug_solver(
     const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
     const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
     double l1,
@@ -158,7 +170,7 @@ py::dict newton_abs_debug_solver(
     iters.reserve(L.size());
     std::vector<double> smart_iters;
     smart_iters.reserve(L.size());
-    ad::bcd::newton_abs_debug_solver(
+    ad::bcd::unconstrained::newton_abs_debug_solver(
         L, v, l1, l2, tol, max_iters, smart_init, 
         h_min, h_max, x, iters, smart_iters, buffer1, buffer2
     );
@@ -173,7 +185,7 @@ py::dict newton_abs_debug_solver(
     return d;
 }
 
-py::dict brent_solver(
+py::dict unconstrained_brent_solver(
     const Eigen::Ref<const ad::util::rowvec_type<double>>& L,
     const Eigen::Ref<const ad::util::rowvec_type<double>>& v,
     double l1,
@@ -184,12 +196,16 @@ py::dict brent_solver(
 {
     ad::util::rowvec_type<double> x(v.size());
     size_t iters = 0;
-    ad::bcd::brent_solver(L, v, l1, l2, tol, max_iters, x, iters);
+    ad::bcd::unconstrained::brent_solver(L, v, l1, l2, tol, max_iters, x, iters);
     py::dict d("beta"_a=x, "iters"_a=iters);
     return d;
 }
 
-py::dict admm_cnstr_solver(
+// ================================================================
+// Constrained
+// ================================================================
+
+py::dict constrained_admm_solver(
     const Eigen::Ref<const ad::util::rowvec_type<double>>& quad_c,
     double l1,
     double l2,
@@ -215,7 +231,7 @@ py::dict admm_cnstr_solver(
     size_t iters;
     sw_t sw;
     sw.start();
-    ad::bcd::admm_cnstr_solver(
+    ad::bcd::constrained::admm_solver(
         quad_c, l1, l2, Q_c, AQ_c, QTv_c, A, b, rho, max_iters, tol_abs, tol_rel,
         x, z, u, iters, buff
     );
@@ -224,7 +240,7 @@ py::dict admm_cnstr_solver(
     return dct;
 }
 
-py::dict newton_cnstr_solver(
+py::dict constrained_coordinate_descent_solver(
     const Eigen::Ref<const ad::util::rowvec_type<double>>& mu0,
     const Eigen::Ref<const ad::util::rowvec_type<double>>& quad,
     const Eigen::Ref<const ad::util::rowvec_type<double>>& linear,
@@ -255,7 +271,7 @@ py::dict newton_cnstr_solver(
     size_t iters;
     sw_t sw;
     sw.start();
-    ad::bcd::newton_cnstr_solver(
+    ad::bcd::constrained::coordinate_descent_solver(
         quad, linear, l1, l2, A, b, A_vars,
         max_iters, tol, pnewton_max_iters, pnewton_tol, newton_max_iters, newton_tol,
         iters, x, mu, mu_resid, mu_rsq, buff
@@ -267,17 +283,22 @@ py::dict newton_cnstr_solver(
 
 void register_bcd(py::module_& m)
 {
-    m.def("admm_cnstr_solver", &admm_cnstr_solver);
-    m.def("brent_solver", &brent_solver);
-    m.def("fista_adares_solver", &fista_adares_solver);
-    m.def("fista_solver", &fista_solver);
-    m.def("ista_solver", &ista_solver);
-    m.def("newton_abs_debug_solver", &newton_abs_debug_solver);
-    m.def("newton_abs_solver", &newton_abs_solver);
-    m.def("newton_brent_solver", &newton_brent_solver);
-    m.def("newton_cnstr_solver", &newton_cnstr_solver);
-    m.def("newton_solver", &newton_solver);
+    /* utility functions */
     m.def("root_function", &root_function);
     m.def("root_lower_bound", &root_lower_bound);
     m.def("root_upper_bound", &root_upper_bound);
+
+    /* constrained */
+    m.def("constrained_admm_solver", &constrained_admm_solver);
+    m.def("constrained_coordinate_descent_solver", &constrained_coordinate_descent_solver);
+
+    /* unconstrained */
+    m.def("unconstrained_brent_solver", &unconstrained_brent_solver);
+    m.def("unconstrained_fista_adares_solver", &unconstrained_fista_adares_solver);
+    m.def("unconstrained_fista_solver", &unconstrained_fista_solver);
+    m.def("unconstrained_ista_solver", &unconstrained_ista_solver);
+    m.def("unconstrained_newton_abs_debug_solver", &unconstrained_newton_abs_debug_solver);
+    m.def("unconstrained_newton_abs_solver", &unconstrained_newton_abs_solver);
+    m.def("unconstrained_newton_brent_solver", &unconstrained_newton_brent_solver);
+    m.def("unconstrained_newton_solver", &unconstrained_newton_solver);
 }
