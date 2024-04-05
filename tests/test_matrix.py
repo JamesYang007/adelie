@@ -217,7 +217,7 @@ def run_naive(
             assert np.allclose(expected, out, atol=atol)
         except RuntimeError as err:
             err_msg = str(err)
-            if "MatrixNaiveConcatenate::cov() only allows the block to be fully contained in one of the matrices in the list." in err_msg:
+            if "MatrixNaiveCConcatenate::cov() only allows the block to be fully contained in one of the matrices in the list." in err_msg:
                 pass
             else:
                 raise err
@@ -235,7 +235,7 @@ def run_naive(
     assert np.allclose(expected, out, atol=atol)
 
 
-def test_naive_concat():
+def test_naive_cconcatenate():
     def _test(n, ps, dtype, n_threads=7, seed=0):
         np.random.seed(seed)
         Xs = [
@@ -245,6 +245,7 @@ def test_naive_concat():
         X = np.concatenate(Xs, axis=1, dtype=dtype)
         cX = mod.concatenate(
             [mod.dense(_X.astype(dtype), method="naive", n_threads=n_threads) for _X in Xs], 
+            axis=1,
             n_threads=n_threads, 
         )
         run_naive(X, cX, dtype)
@@ -253,6 +254,27 @@ def test_naive_concat():
     ps = [1, 7, 41, 13, 113]
     for dtype in dtypes:
         _test(20, ps, dtype)
+
+
+def test_naive_rconcatenate():
+    def _test(ns, p, dtype, n_threads=2, seed=0):
+        np.random.seed(seed)
+        Xs = [
+            np.random.normal(0, 1, (n, p))
+            for n in ns
+        ]
+        X = np.concatenate(Xs, axis=0, dtype=dtype)
+        cX = mod.concatenate(
+            [mod.dense(_X.astype(dtype), method="naive", n_threads=n_threads) for _X in Xs], 
+            axis=0,
+            n_threads=n_threads, 
+        )
+        run_naive(X, cX, dtype)
+
+    dtypes = [np.float32, np.float64]
+    ns = [1, 7, 41, 13, 113]
+    for dtype in dtypes:
+        _test(ns, 20, dtype)
 
 
 def test_naive_dense():

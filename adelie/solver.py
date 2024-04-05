@@ -764,12 +764,16 @@ def grpnet(
         # represent the augmented X matrix as used in single-response reformatted problem.
         X_aug = matrix.kronecker_eye(X_raw, K, n_threads=n_threads)
         if intercept:
-            X_aug = matrix.concatenate([
-                matrix.kronecker_eye(
-                    np.ones((n, 1)), K, n_threads=n_threads
-                ),
-                X_aug,
-            ], n_threads=n_threads)
+            X_aug = matrix.concatenate(
+                [
+                    matrix.kronecker_eye(
+                        np.ones((n, 1)), K, n_threads=n_threads
+                    ),
+                    X_aug,
+                ], 
+                axis=1, 
+                n_threads=n_threads,
+            )
 
         # special gaussian case
         if is_gaussian_opt:
