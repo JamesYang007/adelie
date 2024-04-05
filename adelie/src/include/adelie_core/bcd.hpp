@@ -798,6 +798,13 @@ void newton_cnstr_solver(
     using value_t = ValueType;
     using vec_value_t = util::rowvec_type<value_t>;
 
+    if (l1 <= 0) {
+        // TODO: this is just QP with linear inequality constraint.
+        throw util::adelie_core_error(
+            "newton_cnstr_solver: case l1 <= 0 not implemented yet!"
+        );
+    }
+
     const auto m = A.rows();
     const auto d = A.cols();
     const auto& S = quad;
@@ -808,7 +815,7 @@ void newton_cnstr_solver(
     Eigen::Map<vec_value_t> x_buffer1(buff.data(), d);
     Eigen::Map<vec_value_t> x_buffer2(buff.data()+d, d);
 
-    // optimization
+    // optimization: check if unconstrained solution is feasible.
     {
         Eigen::Map<vec_value_t> x_uncnstr(buff.data()+2*d, d);
         size_t x_iters;
@@ -827,13 +834,7 @@ void newton_cnstr_solver(
         }
     }
 
-    // optimization
-    if (l1 <= 0) {
-        // TODO: this is just QP with linear inequality constraint.
-        throw util::adelie_core_error(
-            "newton_cnstr_solver: case l1 <= 0 not implemented yet!"
-        );
-    }
+    // since unconstrained solution is wrong, 
 
     /* invariance quantities */
     // mu_resid = v - A.T @ mu
@@ -937,10 +938,9 @@ void newton_cnstr_solver(
 
                 // NOTE: this really should not happen, but just in case..
                 if (x_norm <= 0) {
-                    throw util::adelie_core_error("Unexpected x_norm <= 0!");
-                    //const value_t fh = -b[k];
-                    //const value_t dfh = -Akr * Akr / ((S + l2) * mu_resid.square()).sum();
-                    //return std::make_tuple(fh, dfh);
+                    const value_t fh = -b[k];
+                    const value_t dfh = -Akr * Akr / ((S + l2) * mu_resid.square()).sum();
+                    return std::make_tuple(fh, dfh);
                 }
 
                 // Since x_norm > 0 and l1 > 0,
