@@ -98,13 +98,28 @@ def block_diag(
 def concatenate(
     mats: list,
     *,
+    axis: int=0,
     n_threads: int =1,
 ):
-    """Creates a column-wise concatenation of the matrices.
+    """Creates a concatenation of the matrices.
 
     If ``mats`` represents a list of matrices :math:`X_1,\\ldots, X_L`,
-    then the resulting matrix represents the column-wise concatenated matrix
-    given by
+    then the resulting matrix represents the concatenated matrix along 
+    the given axis ``axis``.
+    
+    If ``axis=0``, the matrix is concatenated row-wise:
+
+    .. math::
+        \\begin{align*}
+            \\begin{bmatrix}
+                \\unicode{x2014} & X_1 & \\unicode{x2014} \\\\
+                \\unicode{x2014} & X_2 & \\unicode{x2014} \\\\
+                \\vdots & \\vdots & \\vdots \\\\
+                \\unicode{x2014} & X_L & \\unicode{x2014}
+            \\end{bmatrix}
+        \\end{align*}
+
+    If ``axis=1``, the matrix is concatenated column-wise:
 
     .. math::
         \\begin{align*}
@@ -121,7 +136,10 @@ def concatenate(
     Parameters
     ----------
     mats : list
-        List of matrices to concatenate along the columns.
+        List of matrices to concatenate.
+    axis : int, optional
+        The axis along which the matrices will be joined.
+        Default is ``0``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -147,12 +165,20 @@ def concatenate(
         if dtype == _to_dtype(mat): continue
         raise ValueError("All matrices must have the same underlying data type.")
 
+    cdispatcher = {
+        np.float64: core.matrix.MatrixNaiveCConcatenate64,
+        np.float32: core.matrix.MatrixNaiveCConcatenate32,
+    }
+    rdispatcher = {
+        np.float64: core.matrix.MatrixNaiveRConcatenate64,
+        np.float32: core.matrix.MatrixNaiveRConcatenate32,
+    }
     dispatcher = {
-        np.float64: core.matrix.MatrixNaiveConcatenate64,
-        np.float32: core.matrix.MatrixNaiveConcatenate32,
+        0: rdispatcher,
+        1: cdispatcher,
     }
 
-    core_base = dispatcher[dtype]
+    core_base = dispatcher[axis][dtype]
 
     class _concatenate(core_base):
         def __init__(self):
