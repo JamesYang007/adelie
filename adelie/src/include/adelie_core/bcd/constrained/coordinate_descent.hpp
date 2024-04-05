@@ -38,7 +38,7 @@ void coordinate_descent_solver(
     if (l1 <= 0) {
         // TODO: this is just QP with linear inequality constraint.
         throw util::adelie_core_error(
-            "newton_cnstr_solver: case l1 <= 0 not implemented yet!"
+            "coordinate_descent_solver: case l1 <= 0 not implemented yet!"
         );
     }
 
