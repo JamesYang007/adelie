@@ -6,7 +6,7 @@ namespace adelie_core {
 namespace matrix {
 
 template <class ValueType>
-class MatrixNaiveConcatenate: public MatrixNaiveBase<ValueType>
+class MatrixNaiveCConcatenate: public MatrixNaiveBase<ValueType>
 {
 public:
     using base_t = MatrixNaiveBase<ValueType>;
@@ -90,7 +90,7 @@ private:
     }
 
 public:
-    explicit MatrixNaiveConcatenate(
+    explicit MatrixNaiveCConcatenate(
         const std::vector<base_t*>& mat_list,
         size_t n_threads
     ): 
@@ -216,7 +216,7 @@ public:
         // check that the block is fully contained in one matrix
         if (slice != _slice_map[j+q-1]) {
             throw util::adelie_core_error(
-                "MatrixNaiveConcatenate::cov() only allows the block to be fully contained in one of the matrices in the list."
+                "MatrixNaiveCConcatenate::cov() only allows the block to be fully contained in one of the matrices in the list."
             );
         }
 
@@ -240,6 +240,254 @@ public:
             mat.sp_btmul(v.middleCols(n_processed, q_curr), buff);
             out += buff;
             n_processed += q_curr;
+        }
+    }
+};
+
+template <class ValueType>
+class MatrixNaiveRConcatenate: public MatrixNaiveBase<ValueType>
+{
+public:
+    using base_t = MatrixNaiveBase<ValueType>;
+    using typename base_t::value_t;
+    using typename base_t::vec_value_t;
+    using typename base_t::vec_index_t;
+    using typename base_t::colmat_value_t;
+    using typename base_t::rowmat_value_t;
+    using typename base_t::sp_mat_value_t;
+    
+private:
+    const std::vector<base_t*> _mat_list;   // (L,) list of naive matrices
+    const size_t _rows;                     // number of rows
+    const size_t _cols;                     // number of columns
+    const size_t _n_threads;                // number of threads (currently not used)
+    vec_value_t _buff;                      // (p,) buffer
+
+    static inline auto init_rows(
+        const std::vector<base_t*>& mat_list
+    )
+    {
+        size_t n = 0;
+        for (auto mat : mat_list) n += mat->rows();
+        return n;
+    }
+
+    static inline auto init_cols(
+        const std::vector<base_t*>& mat_list
+    )
+    {
+        if (mat_list.size() == 0) {
+            throw util::adelie_core_error("List must be non-empty.");
+        }
+
+        const auto p = mat_list[0]->cols();
+        for (auto mat : mat_list) {
+            if (p != mat->cols()) {
+                throw util::adelie_core_error("All matrices must have the same number of columns.");
+            }
+        }
+
+        return p;
+    }
+
+public:
+    explicit MatrixNaiveRConcatenate(
+        const std::vector<base_t*>& mat_list,
+        size_t n_threads
+    ): 
+        _mat_list(mat_list),
+        _rows(init_rows(mat_list)),
+        _cols(init_cols(mat_list)),
+        _n_threads(n_threads),
+        _buff(_cols)
+    {
+        if (mat_list.size() <= 0) {
+            throw util::adelie_core_error("mat_list must be non-empty.");
+        }
+        if (n_threads < 1) {
+            throw util::adelie_core_error("n_threads must be >= 1.");
+        }
+    }
+
+    value_t cmul(
+        int j, 
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& weights
+    ) override
+    {
+        base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
+        size_t begin = 0;
+        value_t sum = 0;
+        for (int i = 0; i < _mat_list.size(); ++i) {
+            auto& mat = *_mat_list[i];
+            const auto rows_curr = mat.rows();
+            const Eigen::Map<const vec_value_t> v_curr(
+                v.data() + begin, rows_curr
+            );
+            const Eigen::Map<const vec_value_t> weights_curr(
+                weights.data() + begin, rows_curr
+            );
+            sum += mat.cmul(j, v_curr, weights_curr);
+            begin += rows_curr;
+        }
+        return sum;
+    }
+
+    void ctmul(
+        int j, 
+        value_t v, 
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        base_t::check_ctmul(j, out.size(), rows(), cols());
+        size_t begin = 0;
+        for (int i = 0; i < _mat_list.size(); ++i) {
+            auto& mat = *_mat_list[i];
+            const auto rows_curr = mat.rows();
+            Eigen::Map<vec_value_t> out_curr(
+                out.data() + begin, rows_curr
+            );
+            mat.ctmul(j, v, out_curr);
+            begin += rows_curr;
+        }
+    }
+
+    void bmul(
+        int j, int q, 
+        const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+        size_t begin = 0;
+        out.setZero();
+        Eigen::Map<vec_value_t> buff(_buff.data(), q);
+        for (int i = 0; i < _mat_list.size(); ++i) {
+            auto& mat = *_mat_list[i];
+            const auto rows_curr = mat.rows();
+            const Eigen::Map<const vec_value_t> v_curr(
+                v.data() + begin, rows_curr
+            );
+            const Eigen::Map<const vec_value_t> weights_curr(
+                weights.data() + begin, rows_curr
+            );
+            mat.bmul(j, q, v_curr, weights_curr, buff);
+            out += buff;
+            begin += rows_curr;
+        }
+    }
+
+    void btmul(
+        int j, int q, 
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
+        size_t begin = 0;
+        for (int i = 0; i < _mat_list.size(); ++i) {
+            auto& mat = *_mat_list[i];
+            const auto rows_curr = mat.rows();
+            Eigen::Map<vec_value_t> out_curr(
+                out.data() + begin, rows_curr
+            );
+            mat.btmul(j, q, v, out_curr);
+            begin += rows_curr;
+        }
+    }
+
+    void mul(
+        const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        size_t begin = 0;
+        out.setZero();
+        Eigen::Map<vec_value_t> buff(_buff.data(), out.size());
+        for (int i = 0; i < _mat_list.size(); ++i) {
+            auto& mat = *_mat_list[i];
+            const auto rows_curr = mat.rows();
+            const Eigen::Map<const vec_value_t> v_curr(
+                v.data() + begin, rows_curr
+            );
+            const Eigen::Map<const vec_value_t> weights_curr(
+                weights.data() + begin, rows_curr
+            );
+            mat.mul(v_curr, weights_curr, buff);
+            out += buff;
+            begin += rows_curr;
+        }
+    }
+
+    int rows() const override
+    {
+        return _rows;
+    }
+    
+    int cols() const override
+    {
+        return _cols;
+    }
+
+    void cov(
+        int j, int q,
+        const Eigen::Ref<const vec_value_t>& sqrt_weights,
+        Eigen::Ref<colmat_value_t> out,
+        Eigen::Ref<colmat_value_t> buffer
+    ) override
+    {
+        base_t::check_cov(
+            j, q, sqrt_weights.size(), 
+            out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
+            rows(), cols()
+        );
+
+        if (_buff.size() < q * q) _buff.resize(q * q);
+
+        size_t begin = 0;
+        out.setZero();
+        for (int i = 0; i < _mat_list.size(); ++i) {
+            auto& mat = *_mat_list[i];
+            const auto rows_curr = mat.rows();
+            const Eigen::Map<const vec_value_t> sqrt_weights_curr(
+                sqrt_weights.data() + begin, rows_curr
+            );
+            Eigen::Map<colmat_value_t> out_curr(
+                _buff.data(), q, q
+            );
+            Eigen::Map<colmat_value_t> buffer_curr(
+                buffer.data(), rows_curr, q
+            );
+            mat.cov(j, q, sqrt_weights_curr, out_curr, buffer_curr);
+            out += out_curr;
+            begin += rows_curr;
+        }
+    }
+
+    void sp_btmul(
+        const sp_mat_value_t& v, 
+        Eigen::Ref<rowmat_value_t> out
+    ) override
+    {
+        base_t::check_sp_btmul(
+            v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
+        );
+        vec_value_t buff;
+
+        const auto L = v.rows();
+        size_t begin = 0;
+        for (int i = 0; i < _mat_list.size(); ++i) {
+            auto& mat = *_mat_list[i];
+            const auto rows_curr = mat.rows();
+            if (buff.size() < L * rows_curr) buff.resize(L * rows_curr);
+            Eigen::Map<rowmat_value_t> out_curr(
+                buff.data(), L, rows_curr
+            );
+            mat.sp_btmul(v, out_curr);
+            out.middleCols(begin, rows_curr) = out_curr;
+            begin += rows_curr;
         }
     }
 };
