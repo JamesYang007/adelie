@@ -65,40 +65,95 @@ def test_symmetric_penalty():
 
 
 def test_nnls_cov_full():
-    def run_cvxpy(X, y, l2):
-        d = X.shape[1]
+    def run_cvxpy(quad, linear):
+        d = quad.shape[0]
         x = cp.Variable(d)
-        expr = 0.5 * cp.sum_squares(y - X @ x) + (0.5 * l2) * cp.sum_squares(x)
+        expr = 0.5 * cp.quad_form(x, quad) - linear @ x
         constraints = [x >= 0]
         prob = cp.Problem(cp.Minimize(expr), constraints)
         prob.solve()
         return x.value
 
-    def objective(x, X, y, l2):
-        return 0.5 * np.sum((y - X @ x) ** 2) + (0.5 * l2) * np.sum(x ** 2)
+    def objective(x, quad, linear):
+        return 0.5 * (x.T @ quad @ x) - linear @ x
 
     def test(d, seed):
         np.random.seed(seed)
         n = 10
-        l2 = 0
+        X = np.random.normal(0, 1, (n, d))
+        y = np.random.normal(0, 1, n)
+        X /= np.sqrt(n)
+        y /= np.sqrt(n)
+        quad = X.T @ X
+        linear = X.T @ y
+
+        x_cvxpy = run_cvxpy(quad, linear)
+
+        x0 = np.zeros(d)
+        out = opt.nnls_cov_full(
+            x0, quad, linear, 1000000, 1e-24, 0,
+        )
+        x = out["x"]
+
+        # test loss against truth
+        loss_actual = objective(x, quad, linear)
+        loss_expected = objective(x_cvxpy, quad, linear)
+        assert np.allclose(loss_actual, loss_expected)
+        loss_actual = out["loss"]
+        assert np.allclose(loss_actual, loss_expected)
+
+        # test gradient
+        grad_actual = out["grad"]
+        grad_expected = linear - quad @ x
+        assert np.allclose(grad_actual, grad_expected)
+
+    ds = [1, 5, 10, 20]
+    seeds = np.arange(20)
+    for d in ds:
+        for seed in seeds:
+            test(d, seed)
+
+
+def test_nnls_naive():
+    def run_cvxpy(X, y):
+        d = X.shape[1]
+        x = cp.Variable(d)
+        expr = 0.5 * cp.sum_squares(y - X @ x)
+        constraints = [x >= 0]
+        prob = cp.Problem(cp.Minimize(expr), constraints)
+        prob.solve()
+        return x.value
+
+    def objective(x, X, y):
+        return 0.5 * np.sum((y - X @ x) ** 2)
+
+    def test(d, seed):
+        np.random.seed(seed)
+        n = 10
         X = np.random.normal(0, 1, (n, d))
         y = np.random.normal(0, 1, n)
         X /= np.sqrt(n)
         y /= np.sqrt(n)
 
-        x_cvxpy = run_cvxpy(X, y, l2)
+        x_cvxpy = run_cvxpy(X, y)
 
-        quad = X.T @ X
-        linear = X.T @ y
         x0 = np.zeros(d)
-        out = opt.nnls_cov_full(
-            quad, linear, l2, 1000000, 1e-24, x0, 
+        out = opt.nnls_naive(
+            x0, X, y, 1000000, 1e-24, 0,
         )
         x = out["x"]
 
-        loss_actual = objective(x, X, y, l2)
-        loss_expected = objective(x_cvxpy, X, y, l2)
+        # test loss against truth
+        loss_actual = objective(x, X, y)
+        loss_expected = objective(x_cvxpy, X, y)
         assert np.allclose(loss_actual, loss_expected)
+        loss_actual = out["loss"]
+        assert np.allclose(loss_actual, loss_expected)
+
+        # test residual
+        resid_actual = out["resid"]
+        resid_expected = y - X @ x
+        assert np.allclose(resid_actual, resid_expected)
 
     ds = [1, 5, 10, 20]
     seeds = np.arange(20)
