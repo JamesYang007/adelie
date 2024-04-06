@@ -27,12 +27,12 @@ double symmetric_penalty(
 }
 
 py::dict nnls_cov_full(
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& x0,
     const Eigen::Ref<const ad::util::rowmat_type<double>>& quad,
     const Eigen::Ref<const ad::util::rowvec_type<double>>& linear,
-    double l2,
     size_t max_iters,
     double tol,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& x0
+    double dtol
 )
 {
     using sw_t = ad::util::Stopwatch;
@@ -42,16 +42,55 @@ py::dict nnls_cov_full(
     ad::util::rowvec_type<double> grad = (
         linear.matrix() - x.matrix() * quad.transpose()
     );
-    grad -= l2 * x;
+    double loss = 0.5 * (x.matrix() * quad).dot(x.matrix()) - (linear * x).sum();
     sw_t sw;
     sw.start();
     ad::optimization::nnls_cov_full(
-        quad, l2, max_iters, tol, iters, x, grad
+        quad, max_iters, tol, dtol, 
+        iters, x, grad, loss, [](){return false;}
     );
     const auto time_elapsed = sw.elapsed();
     return py::dict(
         "x"_a=x, 
         "grad"_a=grad, 
+        "loss"_a=loss,
+        "iters"_a=iters, 
+        "time_elapsed"_a=time_elapsed
+    );
+}
+
+py::dict nnls_naive(
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& beta0,
+    const Eigen::Ref<const ad::util::colmat_type<double>>& X,
+    const Eigen::Ref<const ad::util::rowvec_type<double>>& y,
+    size_t max_iters,
+    double tol,
+    double dtol
+)
+{
+    using sw_t = ad::util::Stopwatch;
+    const auto d = X.cols();
+    size_t iters;
+    ad::util::rowvec_type<double> X_vars = (
+        X.array().square().colwise().sum()
+    );
+    ad::util::rowvec_type<double> beta = beta0;
+    ad::util::rowvec_type<double> resid = (
+        y.matrix() - beta0.matrix() * X.transpose()
+    );
+    double loss = 0.5 * resid.square().sum();
+    sw_t sw;
+    sw.start();
+    ad::optimization::nnls_naive(
+        X, X_vars, max_iters, tol, dtol, 
+        iters, beta, resid, loss, 
+        [](){return false;}, [](auto) {return false;}
+    );
+    const auto time_elapsed = sw.elapsed();
+    return py::dict(
+        "x"_a=beta, 
+        "resid"_a=resid, 
+        "loss"_a=loss,
         "iters"_a=iters, 
         "time_elapsed"_a=time_elapsed
     );
@@ -123,6 +162,8 @@ void register_optimization(py::module_& m)
 
     Parameters
     ----------
+    x : (d,) np.ndarray
+        Initial starting value.
     quad : (d, d) np.ndarray
         Full positive semi-definite dense matrix :math:`Q`.
     linear : (d,) np.ndarray 
@@ -131,7 +172,38 @@ void register_optimization(py::module_& m)
         Maximum number of coordinate descent iterations.
     tol : float
         Convergence tolerance.
-    x : (d,) np.ndarray
+    dtol : float
+        Difference tolerance at each coordinate update.
+        If the absolute difference is below this value,
+        then the update does not take place, which saves computation.
+    )delimiter");
+    m.def("nnls_naive", &nnls_naive, R"delimiter(
+    Solves the non-negative least squares (NNLS) problem
+    in the regression form.
+
+    The non-negative least squares problem in the regression form is given by
+
+    .. math::
+        \begin{align*}
+            \mathrm{minimize}_{\beta \geq 0} 
+            \frac{1}{2} \|y - X\beta\|_2^2
+        \end{align*}
+
+    Parameters
+    ----------
+    beta0 : (d,) np.ndarray
         Initial starting value.
+    X : (n, d) np.ndarray
+        Feature matrix.
+    y : (n,) np.ndarray
+        Response vector.
+    max_iters : int
+        Maximum number of coordinate descent iterations.
+    tol : float
+        Convergence tolerance.
+    dtol : float
+        Difference tolerance at each coordinate update.
+        If the absolute difference is below this value,
+        then the update does not take place, which saves computation.
     )delimiter");
 }
