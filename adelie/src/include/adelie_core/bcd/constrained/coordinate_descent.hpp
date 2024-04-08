@@ -181,21 +181,21 @@ void coordinate_descent_solver(
                 }
 
                 // Since x_norm > 0 and l1 > 0,
-                //x_buffer1 = S + l2;
-                //x_buffer2 = x_buffer1 * x_norm + l1;
+                //x_buffer1 = S + l2
+                //x_buffer2 = 1 / (x_buffer1 * x_norm + l1)
 
                 // compute intermediate values
                 Eigen::Map<vec_value_t> t1(buff.data()+2*d, d);
                 Eigen::Map<vec_value_t> t2(buff.data()+3*d, d);
-                t1 = A.row(k).array() / x_buffer2;
-                t2 = mu_resid / x_buffer2;
+                t1 = A.row(k).array() * x_buffer2;
+                t2 = mu_resid * x_buffer2;
                 const auto t3 = (t1 * t2).sum();
 
                 // compute output
                 const value_t fh = x_norm * (t1 * mu_resid).sum() - b[k];
                 const value_t dfh = -(
                     x_norm * (t1 * A.row(k).array()).sum()
-                    + l1 * t3 * t3 / (x_buffer1 * t2.square() / x_buffer2).sum()
+                    + l1 * t3 * t3 / (x_buffer1 * t2.square() * x_buffer2).sum()
                 );
                 return std::make_tuple(fh, dfh);
             };

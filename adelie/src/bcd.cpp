@@ -314,11 +314,12 @@ py::dict constrained_proximal_newton_solver(
     ad::util::rowvec_type<double> AT_vars = (
         A.array().square().rowwise().sum()
     );
+    ad::util::rowmat_type<double> AAT = A * A.transpose();
 
     sw_t sw;
     sw.start();
     ad::bcd::constrained::proximal_newton_solver(
-        quad, linear, l1, l2, A, b, AT_vars,
+        quad, linear, l1, l2, A, b, AT_vars, AAT,
         max_iters, tol, newton_max_iters, newton_tol, nnls_max_iters, nnls_tol, nnls_dtol,
         iters, x, mu, mu_resid, buff
     );
