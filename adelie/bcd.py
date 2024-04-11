@@ -41,15 +41,16 @@ def root_upper_bound(
     *,
     quad: np.ndarray,
     linear: np.ndarray,
-    zero_tol: float=1e-10,
+    l1: float,
+    zero_tol: float=1e-14,
 ):
     """Computes an upper bound on the root of BCD root function.
 
     The upper bound :math:`h^\\star` is guaranteed to be non-negative.
     However, it *may not satisfy* :math:`\\varphi(h^\\star) \\leq 0` where :math:`\\varphi`
     is given by ``adelie.bcd.root_function`` if ``zero_tol`` is too large.
-    Even when ``zero_tol`` is small enough, 
-    we assume that :math:`v_i=0` whenever :math:`\\Sigma_{ii} = 0`.
+    We assume that :math:`\\|v_S\\|_2 < \\lambda` 
+    where :math:`S = \\{i : \\Sigma_{ii} = 0\\}`.
     It is undefined behavior if the condition is not satisfied.
 
     Parameters
@@ -58,9 +59,11 @@ def root_upper_bound(
         See ``adelie.bcd.root_function``.
     linear : (p,) np.ndarray
         See ``adelie.bcd.root_function``.
+    l1 : float
+        See ``adelie.bcd.root_function``.
     zero_tol : float, optional
         A value is considered zero if its absolute value is less than or equal to ``zero_tol``.
-        Default is ``1e-10``.
+        Default is ``1e-14``.
     
     See Also
     --------
@@ -72,7 +75,7 @@ def root_upper_bound(
     upper : float
         Upper bound on the root.
     """
-    return core.bcd.root_upper_bound(quad, linear, zero_tol)
+    return core.bcd.root_upper_bound(quad, linear, l1, zero_tol)
 
 
 def root_function(
@@ -165,14 +168,14 @@ def objective(
 
 
 _solver_dict = {
-    "brent":            core.bcd.brent_solver,
-    "newton":           core.bcd.newton_solver,
-    "newton_brent":     core.bcd.newton_brent_solver,
-    "newton_abs":       core.bcd.newton_abs_solver,
-    "newton_abs_debug": core.bcd.newton_abs_debug_solver,
-    "ista":             core.bcd.ista_solver,
-    "fista":            core.bcd.fista_solver,
-    "fista_adares":     core.bcd.fista_adares_solver,
+    "brent":            core.bcd.unconstrained_brent_solver,
+    "newton":           core.bcd.unconstrained_newton_solver,
+    "newton_brent":     core.bcd.unconstrained_newton_brent_solver,
+    "newton_abs":       core.bcd.unconstrained_newton_abs_solver,
+    "newton_abs_debug": core.bcd.unconstrained_newton_abs_debug_solver,
+    "ista":             core.bcd.unconstrained_ista_solver,
+    "fista":            core.bcd.unconstrained_fista_solver,
+    "fista_adares":     core.bcd.unconstrained_fista_adares_solver,
 }
 
 
