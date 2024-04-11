@@ -41,15 +41,16 @@ def root_upper_bound(
     *,
     quad: np.ndarray,
     linear: np.ndarray,
-    zero_tol: float=1e-10,
+    l1: float,
+    zero_tol: float=1e-14,
 ):
     """Computes an upper bound on the root of BCD root function.
 
     The upper bound :math:`h^\\star` is guaranteed to be non-negative.
     However, it *may not satisfy* :math:`\\varphi(h^\\star) \\leq 0` where :math:`\\varphi`
     is given by ``adelie.bcd.root_function`` if ``zero_tol`` is too large.
-    Even when ``zero_tol`` is small enough, 
-    we assume that :math:`v_i=0` whenever :math:`\\Sigma_{ii} = 0`.
+    We assume that :math:`\\|v_S\\|_2 < \\lambda` 
+    where :math:`S = \\{i : \\Sigma_{ii} = 0\\}`.
     It is undefined behavior if the condition is not satisfied.
 
     Parameters
@@ -58,9 +59,11 @@ def root_upper_bound(
         See ``adelie.bcd.root_function``.
     linear : (p,) np.ndarray
         See ``adelie.bcd.root_function``.
+    l1 : float
+        See ``adelie.bcd.root_function``.
     zero_tol : float, optional
         A value is considered zero if its absolute value is less than or equal to ``zero_tol``.
-        Default is ``1e-10``.
+        Default is ``1e-14``.
     
     See Also
     --------
@@ -72,7 +75,7 @@ def root_upper_bound(
     upper : float
         Upper bound on the root.
     """
-    return core.bcd.root_upper_bound(quad, linear, zero_tol)
+    return core.bcd.root_upper_bound(quad, linear, l1, zero_tol)
 
 
 def root_function(

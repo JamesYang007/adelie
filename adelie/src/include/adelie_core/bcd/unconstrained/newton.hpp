@@ -75,11 +75,11 @@ void newton_solver_base(
     vbuffer1 = (L + l2);
 
     const auto step_f = [&](auto h) {
-        vbuffer2 = vbuffer1 * h + l1;
-        x = (v / vbuffer2).square();
+        vbuffer2 = 1 / (vbuffer1 * h + l1);
+        x = (v * vbuffer2).square();
         auto fh = x.sum() - 1.0;
         auto dfh = -2.0 * (
-            x * (vbuffer1 / vbuffer2)
+            x * vbuffer1 * vbuffer2
         ).sum();
         return std::make_pair(fh, dfh);
     };
@@ -98,7 +98,7 @@ void newton_solver_base(
 
     const auto h = std::get<0>(root_find_state);
 
-    x = h * v / vbuffer2;
+    x = h * v * vbuffer2;
     iters = std::get<3>(root_find_state);
 }
 
@@ -153,7 +153,7 @@ void newton_brent_solver(
 
     const auto initial_f = [&]() {
         const value_t h_min = root_lower_bound(vbuffer1, v, l1);
-        const auto h_max_out = root_upper_bound(vbuffer1, v, 0.0); // IMPORTANT: NEEDS GUARANTEE
+        const auto h_max_out = root_upper_bound(vbuffer1, v, l1, 0.0); // IMPORTANT: NEEDS GUARANTEE
         const value_t h_max = std::get<0>(h_max_out);
 
         value_t h = 0;

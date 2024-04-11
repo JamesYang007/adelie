@@ -275,7 +275,13 @@ inline void solve_core(
     // We solve for large lambda, then back-track the KKT condition to find the lambda
     // that leads to that solution where all penalized variables have 0 coefficient.
     if (setup_lmda_max) {
-        const auto large_lmda = std::numeric_limits<value_t>::max(); 
+        // Must divide by at least the max penalty amount
+        // so that we don't overflow.
+       // Just to be safe, we divide by at least a fixed constant > 1 as well.
+        const value_t large_lmda = (
+            1e-3 * std::numeric_limits<value_t>::max() /
+            std::max<value_t>(1, penalty.maxCoeff())
+        ); 
 
         auto tup = fit_f(state, large_lmda);
         auto&& state_gaussian_pin = std::get<0>(tup);
@@ -307,6 +313,11 @@ inline void solve_core(
     // Otherwise, it is in its invariance at lmda = lmda_max.
     // All solutions to lambda > lambda_max are saved.
 
+    // initialize progress bar
+    auto pb = util::tq::trange(lmda_path.size());
+    pb.set_display(display);
+    auto pb_it = pb.begin();
+
     // slice lambda_path up to lmda_max
     const auto large_lmda_path_size = std::find_if(
         lmda_path.data(), 
@@ -323,6 +334,19 @@ inline void solve_core(
         large_lmda_path[large_lmda_path_size] = lmda_max;
 
         for (int i = 0; i < large_lmda_path.size(); ++i) {
+            if (i < large_lmda_path.size()-1) {
+                // update progress bar
+                pb_it != pb.end();
+
+                // Do not check for early-stopping.
+                // This choice is deliberate for these reasons:
+                // We are in this loop only because the user has supplied their path.
+                // In this case, we should provide what they asked for.
+                // If alpha == 0, this loop is costly but this is also the only time the solutions are actually changing.
+                // If alpha > 0, the solution is the same at every iteration.
+                // Depending on alpha, we have different reasons for not early stopping.
+            }
+
             auto tup = fit_f(state, large_lmda_path[i]);
             auto&& state_gaussian_pin = std::get<0>(tup);
 
@@ -334,6 +358,8 @@ inline void solve_core(
                     state_gaussian_pin,
                     large_lmda_path[i]
                 );
+                pb_add_suffix_f(state, pb);
+                ++pb_it;
             // otherwise, put the state at the last fitted lambda (lmda_max)
             } else {
                 update_invariance_f(state, state_gaussian_pin, large_lmda_path[i]);
@@ -356,13 +382,8 @@ inline void solve_core(
     bool kkt_passed = true;
     int n_new_active = 0;
 
-    auto pb = util::tq::trange(lmda_path.size() - lmda_path_idx);
-    pb.set_display(display);
-
-    for (int _ : pb)
+    for (; pb_it != pb.end(); ++pb_it)
     {
-        static_cast<void>(_);
-
         // check early exit
         if (early_exit_f(state)) {
             pb_add_suffix_f(state, pb);

@@ -27,10 +27,11 @@ double root_lower_bound(
 double root_upper_bound(
     const Eigen::Ref<const ad::util::rowvec_type<double>>& quad,
     const Eigen::Ref<const ad::util::rowvec_type<double>>& linear,
-    double zero_tol=1e-10
+    double l1,
+    double zero_tol=1e-14
 )
 {
-    const auto out = ad::bcd::root_upper_bound(quad, linear, zero_tol); 
+    const auto out = ad::bcd::root_upper_bound(quad, linear, l1, zero_tol); 
     return std::get<0>(out);
 }
 

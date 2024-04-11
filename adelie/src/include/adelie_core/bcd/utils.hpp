@@ -61,7 +61,8 @@ inline
 auto root_upper_bound(
     const DiagType& vbuffer1,
     const VType& v,
-    ValueType zero_tol=1e-10
+    ValueType l1,
+    ValueType zero_tol=1e-14
 )
 {
     using value_t = ValueType;
@@ -70,6 +71,7 @@ auto root_upper_bound(
 
     value_t vbuffer1_min_nnz = std::numeric_limits<value_t>::infinity();
     value_t h_max = 0;
+    value_t v_S = 0;
 
     // If L+l2 have entries <= threshold,
     // find h_max with more numerically-stable routine.
@@ -80,10 +82,11 @@ auto root_upper_bound(
         for (int i = 0; i < vbuffer1.size(); ++i) {
             const bool is_nonzero = vbuffer1[i] > zero_tol;
             const auto vi2 = v[i] * v[i];
-            h_max += is_nonzero ? vi2 / (vbuffer1[i] * vbuffer1[i]) : 0;
+            h_max += is_nonzero ? (vi2 / (vbuffer1[i] * vbuffer1[i])) : 0;
+            v_S += (vbuffer1[i] <= 0) ? vi2 : 0;
             vbuffer1_min_nnz = is_nonzero ? std::min(vbuffer1_min_nnz, vbuffer1[i]) : vbuffer1_min_nnz;
         }
-        h_max = std::sqrt(h_max);
+        h_max = std::sqrt(std::max<value_t>(h_max / (1 - v_S / (l1 * l1)), 0));
     } else {
         vbuffer1_min_nnz = vbuffer1_min;
         h_max = (v / vbuffer1).matrix().norm();

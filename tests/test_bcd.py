@@ -51,7 +51,7 @@ def test_root_upper_bound():
         np.random.seed(seed)
         quad = np.random.uniform(quad_lower, quad_upper, p)
         linear = np.random.normal(0, 1, p)
-        l1 = np.random.uniform(0, 1)
+        l1 = np.random.uniform(0, 1) * np.linalg.norm(linear)
 
         zero_idx = np.random.choice(np.arange(p), size=int(sparsity * p), replace=False)
         quad[zero_idx] = 0
@@ -60,7 +60,8 @@ def test_root_upper_bound():
         out = mod.root_upper_bound(
             quad=quad, 
             linear=linear, 
-            zero_tol=1e-6 * quad_upper,
+            l1=l1,
+            zero_tol=0,
         )
         f_out = mod.root_function(
             out, 
