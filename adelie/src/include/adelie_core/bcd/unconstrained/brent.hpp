@@ -23,7 +23,7 @@ void brent_solver(
     value_t h = 0;
     const util::rowvec_type<value_t> buffer1 = L + l2;
     const auto a = root_lower_bound(buffer1, v, l1);
-    const auto b = std::get<0>(root_upper_bound(buffer1, v, 0.0));
+    const auto b = std::get<0>(root_upper_bound(buffer1, v, l1, 0.0));
     iters = 0;
     const auto phi = [&](auto h) {
         return root_function(h, buffer1, v, l1);
