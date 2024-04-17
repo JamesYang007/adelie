@@ -282,7 +282,7 @@ inline void solve(
         active_beta_size = active_begins[last_idx] + group_size;
     }
     
-    bool lasso_active_called = false;
+    bool lasso_active_called = true;
 
     const auto add_active_set = [&](auto ss_idx) {
         if (!screen_is_active[ss_idx]) {
