@@ -137,7 +137,7 @@ void screen(
         // add some slack of new groups below the pivot
         int count = 0;
         for (int ii = full_pivot_idx - 1; ii >= 0; --ii) {
-            if (count >= pivot_slack_ratio * std::max<int>(n_new_active, 1)) break;
+            if (count >= pivot_slack_ratio * n_new_active) break;
             const auto i = order[ii]; 
             if (is_screen(i)) continue;
             screen_set.push_back(i);
