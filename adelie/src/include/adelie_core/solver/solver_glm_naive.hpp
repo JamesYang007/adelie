@@ -270,7 +270,8 @@ auto fit(
         irls_y += eta - offsets;
         const auto y_mean = (irls_weights * irls_y).sum();
         const auto y_var = (irls_weights * irls_y.square()).sum() - intercept * y_mean * y_mean;
-        irls_resid = irls_y + offsets - eta + intercept * (beta0 - y_mean);
+        irls_resid = irls_y + offsets - eta;
+        if (intercept) irls_resid += (beta0 - y_mean);
         const auto resid_sum = (irls_weights * irls_resid).sum();
         lmda_path_adjusted = lmda / hess_sum;
         if (std::isinf(lmda_path_adjusted[0])) {
@@ -364,7 +365,8 @@ auto fit(
 
         // update eta
         eta.swap(eta_prev);
-        eta = irls_y + offsets - irls_resid + intercept * (beta0 - y_mean);
+        eta = irls_y + offsets - irls_resid;
+        if (intercept) eta += beta0 - y_mean;
 
         // update resid
         resid_prev.swap(resid);

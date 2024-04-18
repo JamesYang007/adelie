@@ -71,10 +71,10 @@ public:
         Eigen::Map<rowmat_value_t> Out(out.data(), rows() / _K, _K);
         int i = j / _K;
         int l = j - _K * i;
-        dvzero(out, _n_threads);
         Eigen::Map<vec_value_t> _out(_buff.data(), Out.rows());
+        dvzero(_out, _n_threads);
         _mat->ctmul(i, v, _out);
-        Out.col(l) = _out;
+        Out.col(l).array() += _out;
     }
 
     void bmul(
@@ -120,16 +120,10 @@ public:
         for (int l = 0; l < _K; ++l) {
             const auto j_l = std::max(j-l, 0);
             const auto i_begin = j_l / static_cast<int>(_K) + ((j_l % _K) != 0);
-            if (j-l+q <= 0) {
-                Out.col(l).setZero();
-                continue;
-            }
+            if (j-l+q <= 0) continue;
             const auto i_end = (j-l+q-1) / static_cast<int>(_K) + 1;
             const auto i_q = i_end - i_begin;
-            if (i_q <= 0) {
-                Out.col(l).setZero();
-                continue;
-            }
+            if (i_q <= 0) continue;
             Eigen::Map<vec_value_t> _v(_buff.data(), i_q);
             for (int i = i_begin; i < i_end; ++i) {
                 _v[i-i_begin] = v[i*_K+l-j];
@@ -138,8 +132,9 @@ public:
                 _buff.data() + i_q,
                 Out.rows()
             );
+            _out.setZero();
             _mat->btmul(i_begin, i_q, _v, _out);
-            Out.col(l) = _out;
+            Out.col(l).array() += _out;
         }
     }
 
@@ -327,9 +322,8 @@ public:
         Eigen::Map<rowmat_value_t> Out(out.data(), rows() / _K, _K);
         const int i = j / _K;
         const int l = j - _K * i;
-        dvzero(out, _n_threads);
         auto _out = Out.col(l);
-        dax(v, _mat.col(i), _n_threads, _out);
+        dvaddi(_out, v * _mat.col(i), _n_threads);
     }
 
     void bmul(
@@ -367,7 +361,6 @@ public:
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         Eigen::Map<rowmat_value_t> Out(out.data(), rows() / _K, _K);
-        dvzero(out, _n_threads);
         int n_processed = 0;
         while (n_processed < q) {
             const int i = (j + n_processed) / _K;

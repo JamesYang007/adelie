@@ -33,7 +33,7 @@ void utils(py::module_& m)
     m.def("dvzero", ad::matrix::dvzero<ref_vec_value_t>);
     m.def("ddot", ad::matrix::ddot<cref_mvec_value_t, cref_mvec_value_t, ref_vec_value_t>);
     m.def("dax", ad::matrix::dax<value_t, cref_vec_value_t, ref_vec_value_t>);
-    m.def("dgemv", ad::matrix::dgemv<cref_colmat_value_t, cref_mvec_value_t, ref_rowmat_value_t, ref_mvec_value_t>);
+    m.def("dgemv", ad::matrix::dgemv<ad::util::operator_type::_eq, cref_colmat_value_t, cref_mvec_value_t, ref_rowmat_value_t, ref_mvec_value_t>);
 }
 
 template <class T>
@@ -260,6 +260,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         Column vector-scalar multiplication.
 
         Computes the vector-scalar multiplication ``v * X[:,j]`` for a column ``j``.
+        The result is *incremented* into the output vector.
 
         Parameters
         ----------
@@ -268,7 +269,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         v : float
             Scalar to multiply with the ``j`` th column.
         out : (n,) np.ndarray
-            Vector to store in-place the result.
+            Vector to increment in-place the result.
         )delimiter")
         .def("bmul", &internal_t::bmul, R"delimiter(
         Column block matrix-vector multiplication.
@@ -293,6 +294,7 @@ void matrix_naive_base(py::module_& m, const char* name)
 
         Computes the matrix-vector multiplication
         ``v.T @ X[:, j:j+q].T``.
+        The result is *incremented* into the output vector.
 
         Parameters
         ----------
@@ -303,7 +305,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         v : (q,) np.ndarray
             Vector to multiply with the block matrix.
         out : (n,) np.ndarray
-            Vector to store in-place the result.
+            Vector to increment in-place the result.
         )delimiter")
         .def("mul", &internal_t::mul, R"delimiter(
         Matrix-vector multiplication.

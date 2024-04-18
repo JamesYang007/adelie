@@ -96,7 +96,7 @@ def predict(
 
     L = betas.shape[0]
 
-    etas = np.empty((L,) + y_shape, order="C")
+    etas = np.zeros((L,) + y_shape, order="C")
     if isinstance(betas, np.ndarray):
         for i in range(etas.shape[0]):
             X.btmul(0, X.cols(), betas[i], etas[i].ravel())
