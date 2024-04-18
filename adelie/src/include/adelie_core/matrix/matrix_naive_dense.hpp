@@ -57,7 +57,7 @@ public:
     ) override
     {
         base_t::check_ctmul(j, out.size(), rows(), cols());
-        dvaddi(out, v * _mat.transpose().row(j).array(), _n_threads);
+        dvaddi(out, v * _mat.col(j).transpose().array(), _n_threads);
     }
 
     void bmul(

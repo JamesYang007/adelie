@@ -364,3 +364,49 @@ BENCHMARK(BM_bmul_cached)
     -> Args({10000})
     -> Args({100000})
     ;
+
+static void BM_dot_1prod(benchmark::State& state) {
+    const auto n = state.range(0);
+    ad::util::colmat_type<double> x(n, 100);
+    x.setRandom();
+    ad::util::rowvec_type<double> v(n);
+    v.setRandom();
+    double sum = 0;
+
+    for (auto _ : state) {
+        sum += x.col(50).dot(v.matrix());
+        benchmark::DoNotOptimize(sum);
+    }
+}
+
+BENCHMARK(BM_dot_1prod)
+    -> Args({10})
+    -> Args({100})
+    -> Args({1000})
+    -> Args({10000})
+    -> Args({100000})
+    ;
+
+static void BM_dot_2prod(benchmark::State& state) {
+    const auto n = state.range(0);
+    ad::util::colmat_type<double> x(n, 100);
+    x.setRandom();
+    ad::util::rowvec_type<double> v(n);
+    v.setRandom();
+    ad::util::rowvec_type<double> w(n);
+    w.setRandom();
+    double sum = 0;
+
+    for (auto _ : state) {
+        sum += x.col(50).dot((v*w).matrix());
+        benchmark::DoNotOptimize(sum);
+    }
+}
+
+BENCHMARK(BM_dot_2prod)
+    -> Args({10})
+    -> Args({100})
+    -> Args({1000})
+    -> Args({10000})
+    -> Args({100000})
+    ;
