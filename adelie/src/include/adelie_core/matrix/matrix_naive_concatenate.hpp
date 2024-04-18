@@ -163,7 +163,6 @@ public:
     ) override
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
-        dvzero(out, _n_threads);
         int n_processed = 0;
         while (n_processed < q) {
             const auto j_curr = j + n_processed;
@@ -171,8 +170,7 @@ public:
             auto& mat = *_mat_list[slice];
             const auto index = _index_map[j_curr];
             const int q_curr = std::min(mat.cols()-index, q-n_processed);
-            mat.btmul(index, q_curr, v.segment(n_processed, q_curr), _buff);
-            dvaddi(out, _buff, _n_threads);
+            mat.btmul(index, q_curr, v.segment(n_processed, q_curr), out);
             n_processed += q_curr;
         }
     }

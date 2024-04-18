@@ -38,6 +38,30 @@ protected:
         return io;
     }
 
+    // NOTE: benchmark shows that this version of spddot is faster
+    // only for this matrix because the non-zero entries can only take on 2 possible values.
+    // As soon as we have 3 or more, this analogous implementation becomes inefficient!
+    // We intentionally avoided `cache[value[i]-1] += x[inner[i]]`.
+    // This is somehow less efficient..
+    template <class _InnerType, class _ValueType, class _VType>
+    static auto spddot_cached(
+        const _InnerType& inner, 
+        const _ValueType& value, 
+        const _VType& v
+    )
+    {
+        util::rowvec_type<value_t, 2> cache;
+        cache.setZero();
+        for (int i = 0; i < inner.size(); ++i) {
+            if (value[i] == 1) {
+                cache[0] += v[inner[i]];
+            } else {
+                cache[1] += v[inner[i]];
+            }
+        }
+        return cache[0] + 2 * cache[1];
+    }
+
 public:
     explicit MatrixNaiveSNPUnphased(
         const string_t& filename,
@@ -62,7 +86,7 @@ public:
         base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
         const auto inner = _io.inner(j);
         const auto value = _io.value(j);
-        return spddot(inner, value, v * weights);
+        return spddot_cached(inner, value, v * weights);
     }
 
     void ctmul(
@@ -75,10 +99,8 @@ public:
         const auto inner = _io.inner(j);
         const auto value = _io.value(j);
 
-        dvzero(out, _n_threads);
-
         for (int i = 0; i < inner.size(); ++i) {
-            out[inner[i]] = v * value[i];
+            out[inner[i]] += v * value[i];
         }
     }
 
@@ -93,7 +115,7 @@ public:
         const auto routine = [&](int t) {
             const auto inner = _io.inner(j+t);
             const auto value = _io.value(j+t);
-            out[t] = spddot(inner, value, v * weights);
+            out[t] = spddot_cached(inner, value, v * weights);
         };
         if (_n_threads <= 1) {
             for (int t = 0; t < q; ++t) routine(t);
@@ -110,7 +132,6 @@ public:
     ) override
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
-        dvzero(out, _n_threads);
         for (int t = 0; t < q; ++t) 
         {
             const auto inner = _io.inner(j+t);

@@ -164,10 +164,11 @@ def run_naive(
 
     # test ctmul
     v = np.random.normal(0, 1)
-    out = np.empty(n, dtype=dtype)
+    out = np.zeros(n, dtype=dtype)
     for i in range(p):
+        out_old = out.copy()
         cX.ctmul(i, v, out)
-        expected = v * X[:, i]
+        expected = out_old + v * X[:, i]
         assert np.allclose(expected, out, atol=atol)
 
     # test bmul
@@ -185,17 +186,19 @@ def run_naive(
         assert np.allclose(expected, out, atol=atol)
 
     # test btmul
-    out = np.empty(n, dtype=dtype)
+    out = np.zeros(n, dtype=dtype)
     for i in range(1, p+1):
+        out_old = out.copy()
         v = np.random.normal(0, 1, i).astype(dtype)
         cX.btmul(0, i, v, out)
-        expected = v.T @ X[:, :i].T
+        expected = out_old + v.T @ X[:, :i].T
         assert np.allclose(expected, out, atol=atol)
     q = min(10, p)
     v = np.random.normal(0, 1, q).astype(dtype)
     for i in range(p-q+1):
+        out_old = out.copy()
         cX.btmul(i, q, v, out)
-        expected = v.T @ X[:, i:i+q].T
+        expected = out_old + v.T @ X[:, i:i+q].T
         assert np.allclose(expected, out, atol=atol)
 
     # test mul

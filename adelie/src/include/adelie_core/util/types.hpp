@@ -59,6 +59,12 @@ enum class read_mode_type
     _auto
 };
 
+enum class operator_type
+{
+    _eq,
+    _add
+};
+
 inline screen_rule_type convert_screen_rule(
     const std::string& rule
 )

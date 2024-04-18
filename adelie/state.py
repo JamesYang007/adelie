@@ -1607,7 +1607,6 @@ class gaussian_naive_base(base):
 
         # ================ rsq check ====================
         screen_indices = []
-        tmp = np.empty(n)
         Xbeta = np.zeros(n)
         for g, gs, b in zip(
             self.groups[self.screen_set], 
@@ -1615,8 +1614,7 @@ class gaussian_naive_base(base):
             self.screen_begins,
         ):
             screen_indices.append(np.arange(g, g + gs))
-            self.X.btmul(g, gs, self.screen_beta[b:b+gs], tmp)
-            Xbeta += tmp
+            self.X.btmul(g, gs, self.screen_beta[b:b+gs], Xbeta)
 
         if len(screen_indices) == 0:
             screen_indices = np.array(screen_indices, dtype=int)

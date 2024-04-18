@@ -69,7 +69,6 @@ public:
     ) override
     {
         base_t::check_ctmul(j, out.size(), rows(), cols());
-        out.setZero();
         const auto outer = _mat.outerIndexPtr()[j];
         const auto size = _mat.outerIndexPtr()[j+1] - outer;
         const Eigen::Map<const vec_sp_index_t> inner(
@@ -109,7 +108,6 @@ public:
     ) override
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
-        out.setZero();
         for (int k = 0; k < q; ++k) {
             const auto outer = _mat.outerIndexPtr()[j+k];
             const auto size = _mat.outerIndexPtr()[j+k+1] - outer;

@@ -192,7 +192,8 @@ void dvzero(
     }
 }
 
-template <class MType, class VType, class BuffType, class OutType>
+template <util::operator_type op=util::operator_type::_eq, 
+          class MType, class VType, class BuffType, class OutType>
 ADELIE_CORE_STRONG_INLINE
 void dgemv(
     const MType& m,
@@ -203,7 +204,16 @@ void dgemv(
 )
 {
     assert(n_threads > 0);
-    if (n_threads <= 1) { out.noalias() = v * m; return; }
+    if (n_threads <= 1) { 
+        if constexpr (op == util::operator_type::_eq) {
+            out.noalias() = v * m; 
+        } else if constexpr (op == util::operator_type::_add) {
+            out += v * m; 
+        } else {
+            static_assert("Bad operator type!");
+        }
+        return; 
+    }
     const size_t n = m.rows();
     const size_t p = m.cols();
     const size_t max_np = std::max(n, p);
@@ -220,7 +230,13 @@ void dgemv(
                 + std::max<int>(t-remainder, 0) * block_size
             );
             const auto size = block_size + (t < remainder);
-            out.segment(begin, size).noalias() = v * m.middleCols(begin, size);
+            if constexpr (op == util::operator_type::_eq) {
+                out.segment(begin, size).noalias() = v * m.middleCols(begin, size);
+            } else if constexpr (op == util::operator_type::_add) {
+                out.segment(begin, size).noalias() += v * m.middleCols(begin, size);
+            } else {
+                static_assert("Bad operator type!");
+            }
         }
     } else {
         assert(buff.rows() >= n_blocks);
@@ -237,7 +253,13 @@ void dgemv(
                 v.segment(begin, size) * m.middleRows(begin, size)
             );
         }
-        out = buff.block(0, 0, n_blocks, p).colwise().sum();
+        if constexpr (op == util::operator_type::_eq) {
+            out = buff.block(0, 0, n_blocks, p).colwise().sum();
+        } else if constexpr (op == util::operator_type::_add) {
+            out += buff.block(0, 0, n_blocks, p).colwise().sum();
+        } else {
+            static_assert("Bad operator type!");
+        }
     }
 }
 
