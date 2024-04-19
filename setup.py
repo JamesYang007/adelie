@@ -103,7 +103,7 @@ ext_modules = [
         extra_link_args=extra_link_args,
         runtime_library_dirs=runtime_library_dirs,
         libraries=libraries,
-        cxx_std=17, # TODO: changed from 14 to 17 just because of tqdm
+        cxx_std=17,
     ),
 ]
 

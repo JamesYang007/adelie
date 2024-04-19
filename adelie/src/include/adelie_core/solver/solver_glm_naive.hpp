@@ -323,6 +323,7 @@ auto fit(
             screen_transforms,
             lmda_path_adjusted,
             intercept, max_active_size, max_iters, 
+            // TODO: still unclear whether we should be max'ing or not.
             // tolerance is relative to the scaling of null deviance and current total weight sum
             tol * std::max<value_t>((loss_null - loss_full) / hess_sum, 1), 
             0 /* adev_tol */, 0 /* ddev_tol */,
