@@ -88,6 +88,8 @@ struct StateMultiGlmNaive: StateGlmNaive<
         const Eigen::Ref<const vec_index_t>& screen_set,
         const Eigen::Ref<const vec_value_t>& screen_beta,
         const Eigen::Ref<const vec_bool_t>& screen_is_active,
+        size_t active_set_size,
+        const Eigen::Ref<const vec_index_t>& active_set,
         value_t beta0,
         value_t lmda,
         const Eigen::Ref<const vec_value_t>& grad
@@ -98,7 +100,7 @@ struct StateMultiGlmNaive: StateGlmNaive<
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             irls_max_iters, irls_tol, max_iters, tol, adev_tol, ddev_tol,
             newton_tol, newton_max_iters, early_exit, setup_loss_null, setup_lmda_max, setup_lmda_path, intercept, n_threads,
-            screen_set, screen_beta, screen_is_active, beta0, lmda, grad
+            screen_set, screen_beta, screen_is_active, active_set_size, active_set, beta0, lmda, grad
         ),
         group_type(util::convert_multi_group(group_type)),
         n_classes(n_classes),

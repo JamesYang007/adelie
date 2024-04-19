@@ -128,8 +128,6 @@ auto fit(
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
     const auto& screen_set = state.screen_set;
-    const auto& screen_g1 = state.screen_g1;
-    const auto& screen_g2 = state.screen_g2;
     const auto& screen_begins = state.screen_begins;
     const auto& screen_subset_order = state.screen_subset_order;
     const auto& screen_subset_ordered = state.screen_subset_ordered;
@@ -146,6 +144,8 @@ auto fit(
     auto& screen_beta = state.screen_beta;
     auto& screen_grad = state.screen_grad;
     auto& screen_is_active = state.screen_is_active;
+    auto& active_set_size = state.active_set_size;
+    auto& active_set = state.active_set;
 
     auto& screen_grad_prev = buffer_pack.screen_grad_prev;
     auto& screen_beta_prev = buffer_pack.screen_beta_prev;
@@ -177,8 +177,6 @@ auto fit(
         alpha, 
         penalty,
         Eigen::Map<const vec_index_t>(screen_set.data(), screen_set.size()), 
-        Eigen::Map<const vec_index_t>(screen_g1.data(), screen_g1.size()), 
-        Eigen::Map<const vec_index_t>(screen_g2.data(), screen_g2.size()), 
         Eigen::Map<const vec_index_t>(screen_begins.data(), screen_begins.size()), 
         Eigen::Map<const vec_value_t>(screen_vars.data(), screen_vars.size()), 
         screen_transforms,
@@ -192,7 +190,9 @@ auto fit(
         rsq,
         Eigen::Map<vec_value_t>(screen_beta.data(), screen_beta.size()), 
         Eigen::Map<vec_value_t>(screen_grad.data(), screen_grad.size()), 
-        Eigen::Map<vec_safe_bool_t>(screen_is_active.data(), screen_is_active.size())
+        Eigen::Map<vec_safe_bool_t>(screen_is_active.data(), screen_is_active.size()),
+        active_set_size,
+        active_set
     );
 
     try {
@@ -207,6 +207,7 @@ auto fit(
     }
 
     rsq = state_gaussian_pin_cov.rsq;
+    active_set_size = state_gaussian_pin_cov.active_set_size;
 
     const auto screen_time = Eigen::Map<const util::rowvec_type<double>>(
         state_gaussian_pin_cov.benchmark_screen.data(),
@@ -267,7 +268,6 @@ inline void solve(
         auto& buffer_p = buffer_pack.buffer_p;
 
         state.lmda = lmda;
-        grad = v;
 
         const auto& beta = state_gaussian_pin_cov.betas.back();
         const Eigen::Map<const vec_index_t> beta_indices(

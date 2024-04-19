@@ -256,6 +256,7 @@ inline void solve_core(
     const auto lmda_path_size = state.lmda_path_size;
     const auto min_ratio = state.min_ratio;
     const auto& screen_is_active = state.screen_is_active;
+    const auto& active_set_size = state.active_set_size;
     const auto& abs_grad = state.abs_grad;
     auto& lmda_max = state.lmda_max;
     auto& lmda_path = state.lmda_path;
@@ -380,10 +381,7 @@ inline void solve_core(
     // In this case, screen_set may not contain the true active set.
     // We must go through BASIL iterations to solve each lambda.
     sw_t sw;
-    int current_active_size = Eigen::Map<const vec_safe_bool_t>(
-        screen_is_active.data(),
-        screen_is_active.size()
-    ).sum();
+    int current_active_size = active_set_size;
     bool kkt_passed = true;
     int n_new_active = 0;
 
@@ -443,13 +441,13 @@ inline void solve_core(
                 // Diagnostic step
                 // ==================================================================================== 
                 if (kkt_passed) {
-                    active_sizes.push_back(state_gaussian_pin.active_set.size());
+                    active_sizes.push_back(active_set_size);
                     screen_sizes.push_back(state.screen_set.size());
                 }
                 // compute the number of new active groups 
                 n_new_active = (
                     kkt_passed ?
-                    active_sizes.back() - current_active_size : n_new_active
+                    (active_sizes.back() - current_active_size) : n_new_active
                 );
                 current_active_size = (
                     kkt_passed ?

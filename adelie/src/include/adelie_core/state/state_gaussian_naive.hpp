@@ -224,6 +224,8 @@ struct StateGaussianNaive : StateBase<
         const Eigen::Ref<const vec_index_t>& screen_set,
         const Eigen::Ref<const vec_value_t>& screen_beta,
         const Eigen::Ref<const vec_bool_t>& screen_is_active,
+        size_t active_set_size,
+        const Eigen::Ref<const vec_index_t>& active_set,
         value_t rsq,
         value_t lmda,
         const Eigen::Ref<const vec_value_t>& grad
@@ -234,7 +236,7 @@ struct StateGaussianNaive : StateBase<
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             max_iters, tol, adev_tol, ddev_tol, newton_tol, newton_max_iters, early_exit, 
             setup_lmda_max, setup_lmda_path, intercept, n_threads,
-            screen_set, screen_beta, screen_is_active, lmda, grad
+            screen_set, screen_beta, screen_is_active, active_set_size, active_set, lmda, grad
         ),
         weights(weights.data(), weights.size()),
         weights_sqrt(weights.sqrt()),

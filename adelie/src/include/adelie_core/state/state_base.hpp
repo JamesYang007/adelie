@@ -113,8 +113,6 @@ void update_screen_derived_base(
     const auto& group_sizes = state.group_sizes;
     const auto& screen_set = state.screen_set;
     auto& screen_hashset = state.screen_hashset;
-    auto& screen_g1 = state.screen_g1;
-    auto& screen_g2 = state.screen_g2;
     auto& screen_begins = state.screen_begins;
     auto& screen_beta = state.screen_beta;
     auto& screen_is_active = state.screen_is_active;
@@ -124,18 +122,13 @@ void update_screen_derived_base(
     const auto screen_set_new_begin = std::next(screen_set.begin(), old_screen_size);
     screen_hashset.insert(screen_set_new_begin, screen_set.end());
 
-    /* update screen_g1, screen_g2, screen_begins */
+    /* update screen_begins */
     size_t screen_value_size = (
         (old_screen_size == 0) ? 
         0 : (screen_begins.back() + group_sizes[screen_set[old_screen_size-1]])
     );
     for (size_t i = old_screen_size; i < screen_set.size(); ++i) {
         const auto curr_size = group_sizes[screen_set[i]];
-        if (curr_size == 1) {
-            screen_g1.push_back(i);
-        } else {
-            screen_g2.push_back(i);
-        }
         screen_begins.push_back(screen_value_size);
         screen_value_size += curr_size;
     }
@@ -212,11 +205,11 @@ struct StateBase
     // invariants
     uset_index_t screen_hashset;
     dyn_vec_index_t screen_set; 
-    dyn_vec_index_t screen_g1;
-    dyn_vec_index_t screen_g2;
     dyn_vec_index_t screen_begins;
     dyn_vec_value_t screen_beta;
     dyn_vec_bool_t screen_is_active;
+    size_t active_set_size;
+    vec_index_t active_set;
     value_t lmda;
     vec_value_t grad;
     vec_value_t abs_grad;
@@ -268,6 +261,8 @@ struct StateBase
         const Eigen::Ref<const vec_index_t>& screen_set,
         const Eigen::Ref<const vec_value_t>& screen_beta,
         const Eigen::Ref<const vec_bool_t>& screen_is_active,
+        size_t active_set_size,
+        const Eigen::Ref<const vec_index_t>& active_set,
         value_t lmda,
         const Eigen::Ref<const vec_value_t>& grad
     ):
@@ -299,6 +294,8 @@ struct StateBase
         screen_set(screen_set.data(), screen_set.data() + screen_set.size()),
         screen_beta(screen_beta.data(), screen_beta.data() + screen_beta.size()),
         screen_is_active(screen_is_active.data(), screen_is_active.data() + screen_is_active.size()),
+        active_set_size(active_set_size),
+        active_set(active_set),
         lmda(lmda),
         grad(grad),
         abs_grad(groups.size())
@@ -350,6 +347,16 @@ struct StateBase
                 "It is likely screen_beta has been initialized incorrectly."
             );
         }
+        if (active_set_size > G) {
+            throw util::adelie_core_error(
+                "active_set_size must be <= active_set.size()."
+            );
+        }
+        if (active_set.size() != G) {
+            throw util::adelie_core_error(
+                "active_set must have the same length as groups."
+            );
+        }
         if (grad.size() != groups[G-1] + group_sizes[G-1]) {
             throw util::adelie_core_error(
                 "grad.size() != groups[G-1] + group_sizes[G-1]. "
@@ -360,8 +367,6 @@ struct StateBase
 
         /* initialize screen_set derived quantities */
         screen_begins.reserve(screen_set.size());
-        screen_g1.reserve(screen_set.size());
-        screen_g2.reserve(screen_set.size());
         update_screen_derived_base(*this);
 
         /* initialize abs_grad */

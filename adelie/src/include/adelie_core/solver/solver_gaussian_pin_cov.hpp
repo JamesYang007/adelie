@@ -1,5 +1,6 @@
 #pragma once
 #include <adelie_core/configs.hpp>
+#include <adelie_core/util/counting_iterator.hpp>
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/functional.hpp>
 #include <adelie_core/util/stopwatch.hpp>
@@ -174,7 +175,7 @@ void sparsify_active_beta_diff(
     }        
 }
 
-template <class StateType, class G1Iter, class G2Iter,
+template <class StateType, class Iter,
           class ValueType, class BufferPackType,
           class UpdateCoefficientsType,
           class UpdateScreenGradType,
@@ -182,10 +183,8 @@ template <class StateType, class G1Iter, class G2Iter,
 ADELIE_CORE_STRONG_INLINE
 void coordinate_descent(
     StateType&& state,
-    G1Iter g1_begin,
-    G1Iter g1_end,
-    G2Iter g2_begin,
-    G2Iter g2_end,
+    Iter begin,
+    Iter end,
     size_t lmda_idx,
     ValueType& convg_measure,
     BufferPackType& buffer_pack,
@@ -223,99 +222,92 @@ void coordinate_descent(
     const auto l2 = lmda * (1-alpha);
 
     convg_measure = 0;
-    // iterate over the groups of size 1
-    for (auto it = g1_begin; it != g1_end; ++it) {
-        const auto ss_idx = *it;              // index to screen set
-        const auto k = screen_set[ss_idx];    // actual group index
-        const auto ss_value_begin = screen_begins[ss_idx]; // value begin index at ss_idx
-        auto& ak = screen_beta[ss_value_begin]; // corresponding beta
-        const auto gk = screen_grad[ss_value_begin]; // corresponding gradient
-        const auto A_kk = screen_vars[ss_value_begin];  // corresponding A diagonal 
-        const auto pk = penalty[k];
-
-        const auto ak_old = ak;
-
-        // update coefficient
-        update_coefficient(
-            ak, A_kk, l1, l2, pk, gk
-        );
-
-        if (ak_old == ak) continue;
-
-        auto del = ak - ak_old;
-
-        // update measure of convergence
-        update_convergence_measure(convg_measure, del, A_kk);
-
-        update_rsq(rsq, del, A_kk, gk);
-
-        // update gradient 
-        util::rowvec_type<index_t, 1> indices; 
-        util::rowvec_type<value_t, 1> values;
-        indices[0] = groups[k];
-        values[0] = del;
-        update_screen_grad_f(state, buffer_pack, indices, values);
-
-        additional_step(ss_idx);
-    }
-    
-    // iterate over the groups of dynamic size
-    for (auto it = g2_begin; it != g2_end; ++it) {
+    for (auto it = begin; it != end; ++it) {
         const auto ss_idx = *it;              // index to screen set
         const auto k = screen_set[ss_idx];    // actual group index
         const auto ss_value_begin = screen_begins[ss_idx]; // value begin index at ss_idx
         const auto gsize = group_sizes[k]; // group size  
-        auto ak = screen_beta.segment(ss_value_begin, gsize); // corresponding beta
-        auto gk = screen_grad.segment(ss_value_begin, gsize); // corresponding gradient
-        const auto& Vk = screen_transforms[ss_idx]; // corresponding V in SVD of X_c
-        const auto A_kk = screen_vars.segment(ss_value_begin, gsize);  // corresponding A diagonal 
-        const auto pk = penalty[k];
 
-        auto gk_transformed = buffer3.head(ak.size());
-        gk_transformed.matrix().noalias() = (
-            gk.matrix() * Vk
-        );
+        if (gsize == 1) {
+            auto& ak = screen_beta[ss_value_begin]; // corresponding beta
+            const auto gk = screen_grad[ss_value_begin]; // corresponding gradient
+            const auto A_kk = screen_vars[ss_value_begin];  // corresponding A diagonal 
+            const auto pk = penalty[k];
 
-        // save old beta in buffer with transformation
-        auto ak_old = buffer4.head(ak.size());
-        ak_old = ak;
-        auto ak_old_transformed = buffer4.segment(ak.size(), ak.size());
-        ak_old_transformed.matrix().noalias() = ak_old.matrix() * Vk; 
-        auto ak_transformed = buffer4.segment(2 * ak.size(), ak.size());
+            const auto ak_old = ak;
 
-        // update group coefficients
-        size_t iters;
-        gk_transformed += A_kk * ak_old_transformed; 
-        update_coefficients_f(
-            A_kk, gk_transformed, l1 * pk, l2 * pk, 
-            newton_tol, newton_max_iters,
-            ak_transformed, iters, buffer1, buffer2
-        );
-        gk_transformed -= A_kk * ak_old_transformed; 
+            update_coefficient(
+                ak, A_kk, l1, l2, pk, gk
+            );
 
-        if ((ak_old_transformed - ak_transformed).matrix().norm() <=  
-            Configs::dbeta_tol * std::sqrt(gsize)) continue;
-        
-        auto del_transformed = buffer1.head(ak.size());
-        del_transformed = ak_transformed - ak_old_transformed;
+            if (ak_old == ak) continue;
 
-        update_convergence_measure(convg_measure, del_transformed, A_kk);
+            auto del = ak - ak_old;
 
-        update_rsq(rsq, del_transformed, A_kk, gk_transformed);
+            update_convergence_measure(convg_measure, del, A_kk);
 
-        // update new coefficient
-        ak.matrix().noalias() = ak_transformed.matrix() * Vk.transpose();
+            update_rsq(rsq, del, A_kk, gk);
 
-        // update gradient
-        auto del = buffer2.head(ak.size());
-        del = ak - ak_old;
-        auto indices = buffer_index.head(ak.size());
-        indices = util::rowvec_type<index_t>::LinSpaced(
-            ak.size(), 
-            groups[k], 
-            groups[k] + ak.size() - 1
-        );
-        update_screen_grad_f(state, buffer_pack, indices, del);
+            // update gradient 
+            util::rowvec_type<index_t, 1> indices; 
+            util::rowvec_type<value_t, 1> values;
+            indices[0] = groups[k];
+            values[0] = del;
+            update_screen_grad_f(state, buffer_pack, indices, values);
+
+        } else {
+            auto ak = screen_beta.segment(ss_value_begin, gsize); // corresponding beta
+            auto gk = screen_grad.segment(ss_value_begin, gsize); // corresponding gradient
+            const auto& Vk = screen_transforms[ss_idx]; // corresponding V in SVD of X_c
+            const auto A_kk = screen_vars.segment(ss_value_begin, gsize);  // corresponding A diagonal 
+            const auto pk = penalty[k];
+
+            auto gk_transformed = buffer3.head(ak.size());
+            gk_transformed.matrix().noalias() = (
+                gk.matrix() * Vk
+            );
+
+            // save old beta in buffer with transformation
+            auto ak_old = buffer4.head(ak.size());
+            ak_old = ak;
+            auto ak_old_transformed = buffer4.segment(ak.size(), ak.size());
+            ak_old_transformed.matrix().noalias() = ak_old.matrix() * Vk; 
+            auto ak_transformed = buffer4.segment(2 * ak.size(), ak.size());
+
+            // update group coefficients
+            size_t iters;
+            gk_transformed += A_kk * ak_old_transformed; 
+            update_coefficients_f(
+                A_kk, gk_transformed, l1 * pk, l2 * pk, 
+                newton_tol, newton_max_iters,
+                ak_transformed, iters, buffer1, buffer2
+            );
+            gk_transformed -= A_kk * ak_old_transformed; 
+
+            if ((ak_old_transformed - ak_transformed).matrix().norm() <=  
+                Configs::dbeta_tol * std::sqrt(gsize)) continue;
+            
+            auto del_transformed = buffer1.head(ak.size());
+            del_transformed = ak_transformed - ak_old_transformed;
+
+            update_convergence_measure(convg_measure, del_transformed, A_kk);
+
+            update_rsq(rsq, del_transformed, A_kk, gk_transformed);
+
+            // update new coefficient
+            ak.matrix().noalias() = ak_transformed.matrix() * Vk.transpose();
+
+            // update gradient
+            auto del = buffer2.head(ak.size());
+            del = ak - ak_old;
+            auto indices = buffer_index.head(ak.size());
+            indices = util::rowvec_type<index_t>::LinSpaced(
+                ak.size(), 
+                groups[k], 
+                groups[k] + ak.size() - 1
+            );
+            update_screen_grad_f(state, buffer_pack, indices, del);
+        }
 
         additional_step(ss_idx);
     }
@@ -345,9 +337,8 @@ void solve_active(
     const auto& group_sizes = state.group_sizes;
     const auto& screen_set = state.screen_set;
     const auto& screen_begins = state.screen_begins;
+    const auto& active_set_size = state.active_set_size;
     const auto& active_set = state.active_set;
-    const auto& active_g1 = state.active_g1;
-    const auto& active_g2 = state.active_g2;
     const auto& active_begins = state.active_begins;
     const auto& screen_beta = state.screen_beta;
     const auto tol = state.tol;
@@ -360,8 +351,8 @@ void solve_active(
 
     // update sizes
     size_t active_beta_size = 0;
-    if (active_set.size()) {
-        const auto last_idx = active_set.size()-1;
+    if (active_set_size) {
+        const auto last_idx = active_set_size-1;
         const auto last_group = screen_set[active_set[last_idx]];
         const auto group_size = group_sizes[last_group];
         active_beta_size = active_begins[last_idx] + group_size;
@@ -376,7 +367,7 @@ void solve_active(
     );
     
     // save old active beta
-    for (size_t i = 0; i < active_set.size(); ++i) {
+    for (size_t i = 0; i < active_set_size; ++i) {
         const auto ss_idx_group = active_set[i];
         const auto ss_group = screen_set[ss_idx_group];
         const auto ss_group_size = group_sizes[ss_group];
@@ -393,8 +384,7 @@ void solve_active(
         value_t convg_measure;
         coordinate_descent(
             state, 
-            active_g1.data(), active_g1.data() + active_g1.size(),
-            active_g2.data(), active_g2.data() + active_g2.size(),
+            active_set.data(), active_set.data() + active_set_size,
             lmda_idx, 
             convg_measure, 
             buffer_pack,
@@ -408,7 +398,7 @@ void solve_active(
     }
     
     // compute new active beta - old active beta
-    for (size_t i = 0; i < active_set.size(); ++i) {
+    for (size_t i = 0; i < active_set_size; ++i) {
         const auto ss_idx_group = active_set[i];
         const auto ss_group = screen_set[ss_idx_group];
         const auto ss_group_size = group_sizes[ss_group];
@@ -423,7 +413,7 @@ void solve_active(
 
     // optimization: if active set is empty or active set is the same as screen set.
     if ((ab_diff_view.size() == 0) ||
-        (static_cast<size_t>(active_set.size()) 
+        (static_cast<size_t>(active_set_size) 
             == static_cast<size_t>(screen_set.size()))) return;
 
     // sparsify ab_diff_view_curr
@@ -469,17 +459,14 @@ inline void solve(
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto& screen_set = state.screen_set;
-    const auto& screen_g1 = state.screen_g1;
-    const auto& screen_g2 = state.screen_g2;
     const auto& screen_beta = state.screen_beta;
     const auto& lmda_path = state.lmda_path;
     const auto max_active_size = state.max_active_size;
     const auto tol = state.tol;
     const auto rdev_tol = state.rdev_tol;
     const auto max_iters = state.max_iters;
+    auto& active_set_size = state.active_set_size;
     auto& active_set = state.active_set;
-    auto& active_g1 = state.active_g1;
-    auto& active_g2 = state.active_g2;
     auto& active_begins = state.active_begins;
     auto& active_order = state.active_order;
     auto& screen_is_active = state.screen_is_active;
@@ -512,32 +499,23 @@ inline void solve(
 
     // compute number of active coefficients
     size_t active_beta_size = 0;
-    if (active_set.size()) {
-        const auto last_idx = active_set.size()-1;
+    if (active_set_size) {
+        const auto last_idx = active_set_size-1;
         const auto last_group = screen_set[active_set[last_idx]];
         const auto group_size = group_sizes[last_group];
         active_beta_size = active_begins[last_idx] + group_size;
     }
     
-    bool lasso_active_called = false;
-
     const auto add_active_set = [&](auto ss_idx) {
         if (!screen_is_active[ss_idx]) {
-            if (active_set.size() >= max_active_size) {
+            if (active_set_size >= max_active_size) {
                 throw util::adelie_core_solver_error("Maximum number of active groups reached.");
             }
 
             screen_is_active[ss_idx] = true;
 
-            active_set.push_back(ss_idx);
-
-            const auto group = screen_set[ss_idx];
-            const auto group_size = group_sizes[group];
-            if (group_size == 1) {
-                active_g1.push_back(ss_idx);
-            } else {
-                active_g2.push_back(ss_idx);
-            }
+            active_set[active_set_size] = ss_idx;
+            ++active_set_size;
         }
     };
 
@@ -549,29 +527,26 @@ inline void solve(
             update_coefficients_f,
             check_user_interrupt
         );
-        lasso_active_called = true;
     };
 
     for (int l = 0; l < lmda_path.size(); ++l) {
         double screen_time = 0;
         double active_time = 0;
 
-        if (lasso_active_called) {
+        while (1) {
             stopwatch.start();
             lasso_active_and_update(l);
             active_time += stopwatch.elapsed();
-        }
 
-        while (1) {
             check_user_interrupt();
             ++iters;
             value_t convg_measure;
-            const auto old_active_size = active_set.size();
+            const auto old_active_size = active_set_size;
             stopwatch.start();
             coordinate_descent(
                 state,
-                screen_g1.data(), screen_g1.data() + screen_g1.size(),
-                screen_g2.data(), screen_g2.data() + screen_g2.size(),
+                util::counting_iterator<size_t>(0),
+                util::counting_iterator<size_t>(screen_set.size()),
                 l, 
                 convg_measure,
                 buffer_pack,
@@ -582,10 +557,10 @@ inline void solve(
                 add_active_set
             );
             screen_time += stopwatch.elapsed();
-            const bool new_active_added = (old_active_size < active_set.size());
+            const bool new_active_added = (old_active_size < active_set_size);
 
             if (new_active_added) {
-                active_begins.resize(active_set.size());
+                active_begins.resize(active_set_size);
                 for (size_t i = old_active_size; i < active_begins.size(); ++i) {
                     active_begins[i] = active_beta_size;
                     const auto curr_group = screen_set[active_set[i]];
@@ -596,8 +571,7 @@ inline void solve(
                 // update active_order
                 // NOTE: this is different from naive version.
                 // solve_active() requires active_order so it must be updated.
-                const auto old_active_size = active_order.size();
-                active_order.resize(active_set.size());
+                active_order.resize(active_set_size);
                 std::iota(
                     std::next(active_order.begin(), old_active_size), 
                     active_order.end(), 
@@ -615,10 +589,6 @@ inline void solve(
 
             if (convg_measure < tol) break;
             if (iters >= max_iters) throw util::max_cds_error(l);
-
-            stopwatch.start();
-            lasso_active_and_update(l);
-            active_time += stopwatch.elapsed();
         }
 
         // order the active betas

@@ -195,17 +195,29 @@ static void BM_spdot(benchmark::State& state) {
     const auto n = state.range(0);
     ad::util::rowvec_type<int> inner = ad::util::rowvec_type<int>::LinSpaced(n, 0, n-1);
     ad::util::rowvec_type<int> value(n);
-    constexpr int max_val = 2;
+    constexpr int max_val = 3;
     value.setRandom();
     value = value.unaryExpr([&](auto x) { return std::abs(x) % max_val + 1; });
     ad::util::rowvec_type<double> v(n);
     v.setRandom();
     double sum = 0;
+    double sum2 = 0;
+    double na_sum = 0;
 
     for (auto _ : state) {
         for (int i = 0; i < inner.size(); ++i) {
-            sum += value[i] * v[inner[i]];
+            if (value[i] < 0) {
+                na_sum += v[inner[i]];
+            } else {
+                //if (value[i] == 1) {
+                //    sum += v[inner[i]];
+                //} else {
+                //    sum2 += v[inner[i]];
+                //}
+                sum += value[i] * v[inner[i]];
+            }
         } 
+        sum += 2.3 * na_sum + 2 * sum2;
         benchmark::DoNotOptimize(sum);
     }
 }
@@ -222,7 +234,7 @@ static void BM_spdot_cached(benchmark::State& state) {
     const auto n = state.range(0);
     ad::util::rowvec_type<int> inner = ad::util::rowvec_type<int>::LinSpaced(n, 0, n-1);
     ad::util::rowvec_type<int> value(n);
-    constexpr int max_val = 2;
+    constexpr int max_val = 3;
     value.setRandom();
     value = value.unaryExpr([&](auto x) { return std::abs(x) % max_val + 1; });
     ad::util::rowvec_type<double> v(n);
@@ -233,13 +245,29 @@ static void BM_spdot_cached(benchmark::State& state) {
     for (auto _ : state) {
         cache.setZero();
         for (int i = 0; i < inner.size(); ++i) {
-            if (value[i] == 1) {
+            //switch (value[i]) {
+            //    case 1: {
+            //        cache[0] += v[inner[i]];
+            //        break;
+            //    }
+            //    case 2: {
+            //        cache[1] += v[inner[i]];
+            //        break;
+            //    }
+            //    case 3: {
+            //        cache[2] += v[inner[i]];
+            //        break;
+            //    }
+            //}
+            if (value[i] < 0) {
                 cache[0] += v[inner[i]];
-            } else {
+            } else if (value[i] == 1) {
                 cache[1] += v[inner[i]];
+            } else {
+                cache[2] += v[inner[i]];
             }
         } 
-        sum = cache[0] + 2 * cache[1];
+        sum = cache[0] + 2 * cache[1] + 3 * cache[2];
         benchmark::DoNotOptimize(sum);
     }
 }
