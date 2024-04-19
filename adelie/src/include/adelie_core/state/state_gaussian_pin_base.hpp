@@ -20,6 +20,7 @@ struct StateGaussianPinBase
     using vec_bool_t = util::rowvec_type<bool_t>;
     using sp_vec_value_t = util::sp_vec_type<value_t, Eigen::RowMajor, index_t>;
     using map_vec_value_t = Eigen::Map<vec_value_t>;
+    using map_vec_index_t = Eigen::Map<vec_index_t>;
     using map_vec_bool_t = Eigen::Map<vec_bool_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
     using map_cvec_index_t = Eigen::Map<const vec_index_t>;
@@ -36,8 +37,6 @@ struct StateGaussianPinBase
     const value_t alpha;
     const map_cvec_value_t penalty;
     const map_cvec_index_t screen_set;
-    const map_cvec_index_t screen_g1;
-    const map_cvec_index_t screen_g2;
     const map_cvec_index_t screen_begins;
     const map_cvec_value_t screen_vars;
     const dyn_vec_mat_value_t* screen_transforms;
@@ -58,9 +57,8 @@ struct StateGaussianPinBase
     value_t rsq;
     map_vec_value_t screen_beta;
     map_vec_bool_t screen_is_active;
-    dyn_vec_index_t active_set;
-    dyn_vec_index_t active_g1;
-    dyn_vec_index_t active_g2;
+    size_t active_set_size;
+    map_vec_index_t active_set;
     dyn_vec_index_t active_begins;
     dyn_vec_index_t active_order;
     dyn_vec_sp_vec_t betas;
@@ -81,8 +79,6 @@ struct StateGaussianPinBase
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_index_t>& screen_set, 
-        const Eigen::Ref<const vec_index_t>& screen_g1,
-        const Eigen::Ref<const vec_index_t>& screen_g2,
         const Eigen::Ref<const vec_index_t>& screen_begins, 
         const Eigen::Ref<const vec_value_t>& screen_vars,
         const dyn_vec_mat_value_t& screen_transforms,
@@ -98,15 +94,15 @@ struct StateGaussianPinBase
         size_t n_threads,
         value_t rsq,
         Eigen::Ref<vec_value_t> screen_beta, 
-        Eigen::Ref<vec_bool_t> screen_is_active
+        Eigen::Ref<vec_bool_t> screen_is_active,
+        size_t active_set_size,
+        Eigen::Ref<vec_index_t> active_set
     ): 
         groups(groups.data(), groups.size()),
         group_sizes(group_sizes.data(), group_sizes.size()),
         alpha(alpha),
         penalty(penalty.data(), penalty.size()),
         screen_set(screen_set.data(), screen_set.size()),
-        screen_g1(screen_g1.data(), screen_g1.size()),
-        screen_g2(screen_g2.data(), screen_g2.size()),
         screen_begins(screen_begins.data(), screen_begins.size()),
         screen_vars(screen_vars.data(), screen_vars.size()),
         screen_transforms(&screen_transforms),
@@ -122,27 +118,20 @@ struct StateGaussianPinBase
         n_threads(n_threads),
         rsq(rsq),
         screen_beta(screen_beta.data(), screen_beta.size()),
-        screen_is_active(screen_is_active.data(), screen_is_active.size())
+        screen_is_active(screen_is_active.data(), screen_is_active.size()),
+        active_set_size(active_set_size),
+        active_set(active_set.data(), active_set.size())
     {
-        active_set.reserve(screen_set.size());
-        active_g1.reserve(screen_set.size());
-        active_g2.reserve(screen_set.size());
-        active_begins.reserve(screen_beta.size());
+        active_begins.reserve(screen_set.size());
         int active_begin = 0;
-        for (int i = 0; i < screen_is_active.size(); ++i) {
-            if (!screen_is_active[i]) continue;
-            active_set.push_back(i);
-            int curr_size = group_sizes[screen_set[i]];
-            if (curr_size == 1) {
-                active_g1.push_back(i);
-            } else {
-                active_g2.push_back(i);
-            }
+        for (int i = 0; i < active_set_size; ++i) {
+            const auto ia = active_set[i];
+            const auto curr_size = group_sizes[screen_set[ia]];
             active_begins.push_back(active_begin);
             active_begin += curr_size;
         }
 
-        active_order.resize(active_set.size());
+        active_order.resize(active_set_size);
         std::iota(active_order.begin(), active_order.end(), 0);
         std::sort(
             active_order.begin(),

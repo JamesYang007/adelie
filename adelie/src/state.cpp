@@ -90,8 +90,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_index_t>&, 
-            const Eigen::Ref<const vec_index_t>&,
-            const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&,
             const dyn_vec_mat_value_t&,
@@ -107,15 +105,15 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             size_t,
             value_t,
             Eigen::Ref<vec_value_t>,
-            Eigen::Ref<vec_bool_t>
+            Eigen::Ref<vec_bool_t>,
+            size_t,
+            Eigen::Ref<vec_index_t>
         >(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("screen_set").noconvert(),
-            py::arg("screen_g1").noconvert(),
-            py::arg("screen_g2").noconvert(),
             py::arg("screen_begins").noconvert(),
             py::arg("screen_vars").noconvert(),
             py::arg("screen_transforms").noconvert(),
@@ -131,7 +129,9 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             py::arg("n_threads"),
             py::arg("rsq"),
             py::arg("screen_beta").noconvert(),
-            py::arg("screen_is_active").noconvert()
+            py::arg("screen_is_active").noconvert(),
+            py::arg("active_set_size"),
+            py::arg("active_set").noconvert()
         )
         .def_readonly("groups", &state_t::groups, R"delimiter(
         List of starting indices to each group where `G` is the number of groups.
@@ -150,16 +150,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         .def_readonly("screen_set", &state_t::screen_set, R"delimiter(
         List of indices into ``groups`` that correspond to the screen groups.
         ``screen_set[i]`` is ``i`` th screen group.
-        )delimiter")
-        .def_readonly("screen_g1", &state_t::screen_g1, R"delimiter(
-        List of indices into ``screen_set`` that correspond to groups of size ``1``.
-        ``screen_set[screen_g1[i]]`` is the ``i`` th screen group of size ``1``
-        such that ``group_sizes[screen_set[screen_g1[i]]]`` is ``1``.
-        )delimiter")
-        .def_readonly("screen_g2", &state_t::screen_g2, R"delimiter(
-        List of indices into ``screen_set`` that correspond to groups more than size ``1``.
-        ``screen_set[screen_g2[i]]`` is the ``i`` th screen group of size more than ``1``
-        such that ``group_sizes[screen_set[screen_g2[i]]]`` is more than ``1``.
         )delimiter")
         .def_readonly("screen_begins", &state_t::screen_begins, R"delimiter(
         List of indices that index a corresponding list of values for each screen group.
@@ -209,6 +199,11 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
         )delimiter")
+        .def_readonly("active_set_size", &state_t::active_set_size, R"delimiter(
+        Number of active groups.
+        ``active_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, active_set_size)``.
+        )delimiter")
         .def_property_readonly("active_set", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<index_t>>(
                 s.active_set.data(),
@@ -224,22 +219,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         ``k = screen_set[j]``,
         ``b = screen_begins[j]``,
         and ``p = group_sizes[k]``.
-        )delimiter")
-        .def_property_readonly("active_g1", [](const state_t& s) {
-            return Eigen::Map<const ad::util::rowvec_type<index_t>>(
-                s.active_g1.data(),
-                s.active_g1.size()
-            );
-        }, R"delimiter(
-        Subset of ``active_set`` that correspond to groups of size ``1``.
-        )delimiter")
-        .def_property_readonly("active_g2", [](const state_t& s) {
-            return Eigen::Map<const ad::util::rowvec_type<index_t>>(
-                s.active_g2.data(),
-                s.active_g2.size()
-            );
-        }, R"delimiter(
-        Subset of ``active_set`` that correspond to groups of size more than ``1``.
         )delimiter")
         .def_property_readonly("active_begins", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<index_t>>(
@@ -337,8 +316,6 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_index_t>&, 
-            const Eigen::Ref<const vec_index_t>&,
-            const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
@@ -357,7 +334,9 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             Eigen::Ref<vec_value_t>,
             value_t,
             Eigen::Ref<vec_value_t>, 
-            Eigen::Ref<vec_bool_t>
+            Eigen::Ref<vec_bool_t>,
+            size_t,
+            Eigen::Ref<vec_index_t>
         >(),
             py::arg("X"),
             py::arg("y_mean"),
@@ -368,8 +347,6 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             py::arg("penalty").noconvert(),
             py::arg("weights").noconvert(),
             py::arg("screen_set").noconvert(),
-            py::arg("screen_g1").noconvert(),
-            py::arg("screen_g2").noconvert(),
             py::arg("screen_begins").noconvert(),
             py::arg("screen_vars").noconvert(),
             py::arg("screen_X_means").noconvert(),
@@ -388,7 +365,9 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             py::arg("resid").noconvert(),
             py::arg("resid_sum"),
             py::arg("screen_beta").noconvert(),
-            py::arg("screen_is_active").noconvert()
+            py::arg("screen_is_active").noconvert(),
+            py::arg("active_set_size"),
+            py::arg("active_set").noconvert()
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
         .def_readonly("weights", &state_t::weights, R"delimiter(
@@ -482,8 +461,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_index_t>&, 
-            const Eigen::Ref<const vec_index_t>&,
-            const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&,
             const dyn_vec_mat_value_t&,
@@ -500,7 +477,9 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             value_t,
             Eigen::Ref<vec_value_t>, 
             Eigen::Ref<vec_value_t>,
-            Eigen::Ref<vec_bool_t>
+            Eigen::Ref<vec_bool_t>,
+            size_t,
+            Eigen::Ref<vec_index_t>
         >(),
             py::arg("A"),
             py::arg("groups").noconvert(),
@@ -508,8 +487,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("screen_set").noconvert(),
-            py::arg("screen_g1").noconvert(),
-            py::arg("screen_g2").noconvert(),
             py::arg("screen_begins").noconvert(),
             py::arg("screen_vars").noconvert(),
             py::arg("screen_transforms").noconvert(),
@@ -526,7 +503,9 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("rsq"),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_grad").noconvert(),
-            py::arg("screen_is_active").noconvert()
+            py::arg("screen_is_active").noconvert(),
+            py::arg("active_set_size"),
+            py::arg("active_set").noconvert()
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
         .def_readonly("screen_subset_order", &state_t::screen_subset_order, R"delimiter(
@@ -596,6 +575,7 @@ void state_base(py::module_& m, const char* name)
 {
     using state_t = ad::state::StateBase<ValueType>;
     using value_t = typename state_t::value_t;
+    using index_t = typename state_t::index_t;
     using safe_bool_t = typename state_t::safe_bool_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
@@ -632,6 +612,8 @@ void state_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
+            size_t,
+            const Eigen::Ref<const vec_index_t>&,
             value_t,
             const Eigen::Ref<const vec_value_t>& 
         >(),
@@ -663,6 +645,8 @@ void state_base(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
+            py::arg("active_set_size"),
+            py::arg("active_set").noconvert(),
             py::arg("lmda"),
             py::arg("grad").noconvert()
         )
@@ -767,20 +751,6 @@ void state_base(py::module_& m, const char* name)
         List of indices into ``groups`` that correspond to the screen groups.
         ``screen_set[i]`` is ``i`` th screen group.
         )delimiter")
-        .def_property_readonly("screen_g1", [](const state_t& s) {
-            return Eigen::Map<const vec_index_t>(s.screen_g1.data(), s.screen_g1.size());
-        }, R"delimiter(
-        List of indices into ``screen_set`` that correspond to groups of size ``1``.
-        ``screen_set[screen_g1[i]]`` is the ``i`` th screen group of size ``1``
-        such that ``group_sizes[screen_set[screen_g1[i]]]`` is ``1``.
-        )delimiter")
-        .def_property_readonly("screen_g2", [](const state_t& s) {
-            return Eigen::Map<const vec_index_t>(s.screen_g2.data(), s.screen_g2.size());
-        }, R"delimiter(
-        List of indices into ``screen_set`` that correspond to groups more than size ``1``.
-        ``screen_set[screen_g2[i]]`` is the ``i`` th screen group of size more than ``1``
-        such that ``group_sizes[screen_set[screen_g2[i]]]`` is more than ``1``.
-        )delimiter")
         .def_property_readonly("screen_begins", [](const state_t& s) {
             return Eigen::Map<const vec_index_t>(s.screen_begins.data(), s.screen_begins.size());
         }, R"delimiter(
@@ -807,6 +777,27 @@ void state_base(py::module_& m, const char* name)
         }, R"delimiter(
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+        )delimiter")
+        .def_readonly("active_set_size", &state_t::active_set_size, R"delimiter(
+        Number of active groups.
+        ``active_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, active_set_size)``.
+        )delimiter")
+        .def_property_readonly("active_set", [](const state_t& s) {
+            return Eigen::Map<const ad::util::rowvec_type<index_t>>(
+                s.active_set.data(),
+                s.active_set.size()
+            );
+        }, R"delimiter(
+        List of indices into ``screen_set`` that correspond to active groups.
+        ``screen_set[active_set[i]]`` is the ``i`` th active group.
+        An active group is one with non-zero coefficient block,
+        that is, for every ``i`` th active group, 
+        ``screen_beta[b:b+p] == 0`` where 
+        ``j = active_set[i]``,
+        ``k = screen_set[j]``,
+        ``b = screen_begins[j]``,
+        and ``p = group_sizes[k]``.
         )delimiter")
         .def_readonly("lmda", &state_t::lmda, R"delimiter(
         The last regularization parameter that was attempted to be solved.
@@ -971,6 +962,8 @@ void state_gaussian_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
+            size_t,
+            const Eigen::Ref<const vec_index_t>&,
             value_t,
             value_t,
             const Eigen::Ref<const vec_value_t>& 
@@ -1010,6 +1003,8 @@ void state_gaussian_naive(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
+            py::arg("active_set_size"),
+            py::arg("active_set").noconvert(),
             py::arg("rsq"),
             py::arg("lmda"),
             py::arg("grad").noconvert()
@@ -1141,6 +1136,8 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
+            size_t,
+            const Eigen::Ref<const vec_index_t>&,
             value_t,
             value_t,
             const Eigen::Ref<const vec_value_t>& 
@@ -1183,6 +1180,8 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
+            py::arg("active_set_size"),
+            py::arg("active_set").noconvert(),
             py::arg("rsq"),
             py::arg("lmda"),
             py::arg("grad").noconvert()
@@ -1278,6 +1277,8 @@ void state_gaussian_cov(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
+            size_t,
+            const Eigen::Ref<const vec_index_t>&,
             value_t,
             value_t,
             const Eigen::Ref<const vec_value_t>& 
@@ -1310,6 +1311,8 @@ void state_gaussian_cov(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
+            py::arg("active_set_size"),
+            py::arg("active_set").noconvert(),
             py::arg("rsq"),
             py::arg("lmda"),
             py::arg("grad").noconvert()
@@ -1432,6 +1435,8 @@ void state_glm_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
+            size_t,
+            const Eigen::Ref<const vec_index_t>&,
             value_t,
             value_t,
             const Eigen::Ref<const vec_value_t>& 
@@ -1473,6 +1478,8 @@ void state_glm_naive(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
+            py::arg("active_set_size"),
+            py::arg("active_set").noconvert(),
             py::arg("beta0"),
             py::arg("lmda"),
             py::arg("grad").noconvert()
@@ -1589,6 +1596,8 @@ void state_multiglm_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
+            size_t,
+            const Eigen::Ref<const vec_index_t>&,
             value_t,
             value_t,
             const Eigen::Ref<const vec_value_t>& 
@@ -1633,6 +1642,8 @@ void state_multiglm_naive(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
+            py::arg("active_set_size"),
+            py::arg("active_set").noconvert(),
             py::arg("beta0"),
             py::arg("lmda"),
             py::arg("grad").noconvert()
@@ -1678,10 +1689,10 @@ void register_state(py::module_& m)
 {
     state_gaussian_pin_base<double>(m, "StateGaussianPinBase64");
     state_gaussian_pin_base<float>(m, "StateGaussianPinBase32");
-    state_gaussian_pin_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateGaussianPinNaive64");
-    state_gaussian_pin_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateGaussianPinNaive32");
     state_gaussian_pin_cov<ad::matrix::MatrixCovBase<double>>(m, "StateGaussianPinCov64");
     state_gaussian_pin_cov<ad::matrix::MatrixCovBase<float>>(m, "StateGaussianPinCov32");
+    state_gaussian_pin_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateGaussianPinNaive64");
+    state_gaussian_pin_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateGaussianPinNaive32");
 
     state_base<double>(m, "StateBase64");
     state_base<float>(m, "StateBase32");

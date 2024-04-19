@@ -62,8 +62,6 @@ struct StateGaussianPinNaive: StateGaussianPinBase<
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_value_t>& weights,
         const Eigen::Ref<const vec_index_t>& screen_set, 
-        const Eigen::Ref<const vec_index_t>& screen_g1,
-        const Eigen::Ref<const vec_index_t>& screen_g2,
         const Eigen::Ref<const vec_index_t>& screen_begins, 
         const Eigen::Ref<const vec_value_t>& screen_vars,
         const Eigen::Ref<const vec_value_t>& screen_X_means,
@@ -82,13 +80,15 @@ struct StateGaussianPinNaive: StateGaussianPinBase<
         Eigen::Ref<vec_value_t> resid,
         value_t resid_sum,
         Eigen::Ref<vec_value_t> screen_beta, 
-        Eigen::Ref<vec_bool_t> screen_is_active
+        Eigen::Ref<vec_bool_t> screen_is_active,
+        size_t active_set_size,
+        Eigen::Ref<vec_index_t> active_set
     ): 
         base_t(
             groups, group_sizes, alpha, penalty,
-            screen_set, screen_g1, screen_g2, screen_begins, screen_vars, screen_transforms, lmda_path, 
+            screen_set, screen_begins, screen_vars, screen_transforms, lmda_path, 
             intercept, max_active_size, max_iters, tol, adev_tol, ddev_tol, newton_tol, newton_max_iters, n_threads,
-            rsq, screen_beta, screen_is_active
+            rsq, screen_beta, screen_is_active, active_set_size, active_set
         ),
         weights(weights.data(), weights.size()),
         y_mean(y_mean),

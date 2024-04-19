@@ -26,6 +26,8 @@ def test_state_gaussian_pin_naive():
     weights /= np.sum(weights)
     screen_beta = np.zeros(p)
     screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
+    active_set_size = 0
+    active_set = np.empty(G, dtype=int)
 
     state = mod.gaussian_pin_naive(
         X=X,
@@ -41,6 +43,8 @@ def test_state_gaussian_pin_naive():
         resid=resid,
         screen_beta=screen_beta,
         screen_is_active=screen_is_active,
+        active_set_size=active_set_size,
+        active_set=active_set,
     )
 
     state.check(method="assert")
@@ -73,6 +77,8 @@ def test_state_gaussian_pin_cov():
     screen_beta = np.zeros(p)
     screen_grad = X.T @ np.random.normal(0, 1, n)
     screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
+    active_set_size = 0
+    active_set = np.empty(G, dtype=int)
 
     state = mod.gaussian_pin_cov(
         A=A,
@@ -85,6 +91,8 @@ def test_state_gaussian_pin_cov():
         screen_beta=screen_beta,
         screen_grad=screen_grad,
         screen_is_active=screen_is_active,
+        active_set_size=active_set_size,
+        active_set=active_set,
     )
 
     state.check(method="assert")
@@ -130,6 +138,8 @@ def test_state_gaussian_naive():
     resid_sum = np.sum(resid)
     screen_beta = np.zeros(p)
     screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
+    active_set_size = 0
+    active_set = np.empty(G, dtype=int)
 
     state = mod.gaussian_naive(
         X=X,
@@ -150,6 +160,8 @@ def test_state_gaussian_naive():
         screen_set=screen_set,
         screen_beta=screen_beta,
         screen_is_active=screen_is_active,
+        active_set_size=active_set_size,
+        active_set=active_set,
         rsq=rsq,
         lmda=lmda,
         grad=grad,

@@ -673,7 +673,7 @@ def plot_devs(
     fig, ax = plt.subplots(figsize=(9, 6), layout="constrained")
     ax.plot(tls, devs, linestyle='-', color='r', marker='.')
     ax.set_title(r"Deviance Profile")
-    ax.set_ylabel(r"Deviance Explained (%)")
+    ax.set_ylabel(r"Deviance Explained (\%)")
     ax.set_xlabel(r"$-\log(\lambda)$")
 
     return fig, ax

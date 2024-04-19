@@ -116,8 +116,6 @@ struct StateGaussianPinCov: StateGaussianPinBase<
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_index_t>& screen_set, 
-        const Eigen::Ref<const vec_index_t>& screen_g1,
-        const Eigen::Ref<const vec_index_t>& screen_g2,
         const Eigen::Ref<const vec_index_t>& screen_begins, 
         const Eigen::Ref<const vec_value_t>& screen_vars,
         const dyn_vec_mat_value_t& screen_transforms,
@@ -134,13 +132,15 @@ struct StateGaussianPinCov: StateGaussianPinBase<
         value_t rsq,
         Eigen::Ref<vec_value_t> screen_beta, 
         Eigen::Ref<vec_value_t> screen_grad,
-        Eigen::Ref<vec_bool_t> screen_is_active
+        Eigen::Ref<vec_bool_t> screen_is_active,
+        size_t active_set_size,
+        Eigen::Ref<vec_index_t> active_set
     ): 
         base_t(
             groups, group_sizes, alpha, penalty, 
-            screen_set, screen_g1, screen_g2, screen_begins, screen_vars, screen_transforms, lmda_path, 
+            screen_set, screen_begins, screen_vars, screen_transforms, lmda_path, 
             false, max_active_size, max_iters, tol, 0, 0, newton_tol, newton_max_iters, n_threads,
-            rsq, screen_beta, screen_is_active
+            rsq, screen_beta, screen_is_active, active_set_size, active_set
         ),
         screen_subset_order(screen_subset_order.data(), screen_subset_order.size()),
         screen_subset_ordered(screen_subset_ordered.data(), screen_subset_ordered.size()),
