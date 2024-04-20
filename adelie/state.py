@@ -13,15 +13,11 @@ def deduce_states(
     screen_set: np.ndarray,
 ):
     S = screen_set.shape[0]
-    screen_g1 = np.arange(S)[group_sizes[screen_set] == 1]
-    screen_g2 = np.arange(S)[group_sizes[screen_set] > 1]
     screen_begins = np.cumsum(
         np.concatenate([[0], group_sizes[screen_set]]),
         dtype=int,
     )[:-1]
     return (
-        screen_g1,
-        screen_g2,
         screen_begins,
     )
 
@@ -158,22 +154,10 @@ class gaussian_pin_base(base):
             method, logger,
         )
 
-        # ================ alpha check ====================
-        self._check(
-            (self.alpha >= 0) and (self.alpha <= 1),
-            "check alpha is in [0, 1]",
-            method, logger,
-        )
-
         # ================ penalty check ====================
         self._check(
             np.all(self.penalty >= 0),
             "check penalty is non-negative",
-            method, logger,
-        )
-        self._check(
-            len(self.penalty) == G,
-            "check penalty and groups have same length",
             method, logger,
         )
 
@@ -194,55 +178,6 @@ class gaussian_pin_base(base):
             method, logger,
         )
         S = len(self.screen_set)
-
-        # ================ screen_g1 check ====================
-        self._check(
-            np.all((0 <= self.screen_g1) & (self.screen_g1 < S)),
-            "check screen_g1 is in [0, S)",
-            method, logger,
-        )
-        self._check(
-            len(self.screen_g1) == len(np.unique(self.screen_g1)),
-            "check screen_g1 has unique values",
-            method, logger,
-        )
-        self._check(
-            np.all(self.group_sizes[self.screen_set[self.screen_g1]] == 1),
-            "check screen_g1 has group sizes of 1",
-            method, logger,
-        )
-        self._check(
-            self.screen_g1.dtype == np.dtype("int"),
-            "check screen_g1 dtype is int",
-            method, logger,
-        )
-
-        # ================ screen_g2 check ====================
-        self._check(
-            np.all((0 <= self.screen_g2) & (self.screen_g2 < S)),
-            "check screen_g2 is in [0, S)",
-            method, logger,
-        )
-        self._check(
-            len(self.screen_g2) == len(np.unique(self.screen_g2)),
-            "check screen_g2 has unique values",
-            method, logger,
-        )
-        self._check(
-            np.all(self.group_sizes[self.screen_set[self.screen_g2]] > 1),
-            "check screen_g2 has group sizes more than 1",
-            method, logger,
-        )
-        self._check(
-            self.screen_g2.dtype == np.dtype("int"),
-            "check screen_g2 dtype is int",
-            method, logger,
-        )
-        self._check(
-            len(self.screen_g1) + len(self.screen_g2) == S,
-            "check screen_g1 and screen_g2 combined have length S",
-            method, logger,
-        )
 
         # ================ screen_begins check ====================
         expected = np.cumsum(
@@ -290,58 +225,10 @@ class gaussian_pin_base(base):
         if np.any(self.lmda_path != np.sort(self.lmda_path)[::-1]):
             logger.warning("lmda_path are not sorted in decreasing order")
 
-        # ================ max_iters check ====================
-        self._check(
-            self.max_iters >= 0,
-            "check max_iters >= 0",
-            method, logger,
-        )
-
-        # ================ tol check ====================
-        self._check(
-            self.tol >= 0,
-            "check tol >= 0",
-            method, logger,
-        )
-
-        # ================ newton_tol check ====================
-        self._check(
-            self.newton_tol >= 0,
-            "check newton_tol >= 0",
-            method, logger,
-        )
-
-        # ================ newton_max_iters check ====================
-        self._check(
-            self.newton_max_iters >= 0,
-            "check newton_max_iters >= 0",
-            method, logger,
-        )
-
-        # ================ newton_max_iters check ====================
-        self._check(
-            self.n_threads > 0,
-            "check n_threads > 0",
-            method, logger,
-        )
-
-        # ================ rsq check ====================
-        self._check(
-            self.rsq >= 0,
-            "check rsq >= 0",
-            method, logger,
-        )
-
-        # ================ screen_beta check ====================
-        self._check(
-            len(self.screen_beta) == WS,
-            "check screen_beta size",
-            method, logger,
-        )
-
         # ================ screen_is_active check ====================
+        active_set = self.active_set[:self.active_set_size]
         self._check(
-            np.all(np.arange(S)[self.screen_is_active] == np.sort(self.active_set)),
+            np.all(np.arange(S)[self.screen_is_active] == np.sort(active_set)),
             "check screen_is_active is consistent with active_set",
             method, logger,
         )
@@ -353,74 +240,25 @@ class gaussian_pin_base(base):
 
         # ================ active_set check ====================
         self._check(
-            np.all((0 <= self.active_set) & (self.active_set < S)),
+            np.all((0 <= active_set) & (active_set < S)),
             "check active_set is in [0, S)",
             method, logger,
         )
         self._check(
-            len(self.active_set) == len(np.unique(self.active_set)),
+            len(active_set) == len(np.unique(active_set)),
             "check active_set is unique",
             method, logger,
         )
         self._check(
-            self.active_set.dtype == np.dtype("int"),
+            active_set.dtype == np.dtype("int"),
             "check active_set dtype is int",
             method, logger,
         )
-        A = len(self.active_set)
-
-        # ================ active_g1 check ====================
-        self._check(
-            set(self.active_g1) <= set(self.active_set),
-            "check active_g1 subset of active_set",
-            method, logger,
-        )
-        self._check(
-            len(self.active_g1) == len(np.unique(self.active_g1)),
-            "check active_g1 is unique",
-            method, logger,
-        )
-        self._check(
-            np.all(self.group_sizes[self.screen_set[self.active_g1]] == 1),
-            "check active_g1 has group sizes of 1",
-            method, logger,
-        )
-        self._check(
-            self.active_g1.dtype == np.dtype("int"),
-            "check active_g1 dtype is int",
-            method, logger,
-        )
-
-        # ================ active_g2 check ====================
-        self._check(
-            set(self.active_g2) <= set(self.active_set),
-            "check active_g2 subset of active_set",
-            method, logger,
-        )
-        self._check(
-            len(self.active_g2) == len(np.unique(self.active_g2)),
-            "check active_g2 is unique",
-            method, logger,
-        )
-        self._check(
-            np.all(self.group_sizes[self.screen_set[self.active_g2]] > 1),
-            "check active_g2 has group sizes more than 1",
-            method, logger,
-        )
-        self._check(
-            self.active_g2.dtype == np.dtype("int"),
-            "check active_g2 dtype is int",
-            method, logger,
-        )
-        self._check(
-            len(self.active_g1) + len(self.active_g2) == A,
-            "check active_g1 and active_g2 combined have length A",
-            method, logger,
-        )
+        A = len(active_set)
 
         # ================ active_begins check ====================
         expected = np.cumsum(
-            np.concatenate([[0], self.group_sizes[self.screen_set[self.active_set]]], dtype=int)
+            np.concatenate([[0], self.group_sizes[self.screen_set[active_set]]], dtype=int)
         )
         WA = expected[-1]
         expected = expected[:-1]
@@ -436,7 +274,7 @@ class gaussian_pin_base(base):
         )
 
         # ================ active_order check ====================
-        actual = self.groups[self.screen_set[self.active_set[self.active_order]]]
+        actual = self.groups[self.screen_set[active_set[self.active_order]]]
         self._check(
             np.all(actual == np.sort(actual)),
             "check active_order orders active_set such that groups is ordered",
@@ -520,6 +358,8 @@ def gaussian_pin_naive(
     resid: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
+    active_set_size: int,
+    active_set: np.ndarray,
     intercept: bool =True,
     max_active_size: int =None,
     max_iters: int =int(1e5),
@@ -588,9 +428,23 @@ def gaussian_pin_naive(
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
-    screen_is_active : (a,) np.ndarray
+    screen_is_active : (s,) np.ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    active_set_size : int
+        Number of active groups.
+        ``active_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, active_set_size)``.
+    active_set : (G,) np.ndarray
+        List of indices into ``screen_set`` that correspond to active groups.
+        ``screen_set[active_set[i]]`` is the ``i`` th active group.
+        An active group is one with non-zero coefficient block,
+        that is, for every ``i`` th active group, 
+        ``screen_beta[b:b+p] == 0`` where 
+        ``j = active_set[i]``,
+        ``k = screen_set[j]``,
+        ``b = screen_begins[j]``,
+        and ``p = group_sizes[k]``.
     intercept : bool, optional
         ``True`` to fit with intercept.
         Default is ``True``.
@@ -677,10 +531,9 @@ def gaussian_pin_naive(
             self._resid = np.copy(resid).astype(dtype)
             self._screen_beta = np.copy(screen_beta).astype(dtype)
             self._screen_is_active = np.copy(screen_is_active).astype(bool)
+            self._active_set = np.copy(active_set).astype(int)
 
             (
-                self._screen_g1,
-                self._screen_g2,
                 self._screen_begins,
             ) = deduce_states(
                 group_sizes=group_sizes,
@@ -710,8 +563,8 @@ def gaussian_pin_naive(
                 Xi_means = X_means[g:g+gs]
                 if intercept:
                     XiTXi -= Xi_means[:, None] @ Xi_means[None]
-                vars, v = np.linalg.eigh(XiTXi)
-                self._screen_vars.append(np.maximum(vars, 0))
+                evars, v = np.linalg.eigh(XiTXi)
+                self._screen_vars.append(np.maximum(evars, 0))
                 self._screen_X_means.append(Xi_means)
                 self._screen_transforms.append(np.array(v, copy=False, dtype=dtype, order="F"))
             self._screen_vars = np.concatenate(self._screen_vars, dtype=dtype)
@@ -738,8 +591,6 @@ def gaussian_pin_naive(
                 penalty=self._penalty,
                 weights=self._weights,
                 screen_set=self._screen_set,
-                screen_g1=self._screen_g1,
-                screen_g2=self._screen_g2,
                 screen_begins=self._screen_begins,
                 screen_vars=self._screen_vars,
                 screen_X_means=self._screen_X_means,
@@ -759,6 +610,8 @@ def gaussian_pin_naive(
                 resid_sum=resid_sum,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
+                active_set_size=active_set_size,
+                active_set=self._active_set,
             )
 
         @classmethod
@@ -800,6 +653,8 @@ def gaussian_pin_cov(
     screen_beta: np.ndarray,
     screen_grad: np.ndarray,
     screen_is_active: np.ndarray,
+    active_set_size: int,
+    active_set: np.ndarray,
     max_active_size: int =None,
     max_iters: int =int(1e5),
     tol: float =1e-7,
@@ -859,9 +714,23 @@ def gaussian_pin_cov(
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
-    screen_is_active : (a,) np.ndarray
+    screen_is_active : (s,) np.ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    active_set_size : int
+        Number of active groups.
+        ``active_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, active_set_size)``.
+    active_set : (G,) np.ndarray
+        List of indices into ``screen_set`` that correspond to active groups.
+        ``screen_set[active_set[i]]`` is the ``i`` th active group.
+        An active group is one with non-zero coefficient block,
+        that is, for every ``i`` th active group, 
+        ``screen_beta[b:b+p] == 0`` where 
+        ``j = active_set[i]``,
+        ``k = screen_set[j]``,
+        ``b = screen_begins[j]``,
+        and ``p = group_sizes[k]``.
     max_active_size : int, optional
         Maximum number of active groups allowed.
         The function will return a valid state and guarantees to have active set size
@@ -940,10 +809,9 @@ def gaussian_pin_cov(
             self._screen_beta = np.copy(screen_beta).astype(dtype)
             self._screen_grad = np.copy(screen_grad).astype(dtype)
             self._screen_is_active = np.copy(screen_is_active).astype(bool)
+            self._active_set = np.copy(active_set).astype(int)
 
             (
-                self._screen_g1,
-                self._screen_g2,
                 self._screen_begins,
             ) = deduce_states(
                 group_sizes=group_sizes,
@@ -988,8 +856,6 @@ def gaussian_pin_cov(
                 alpha=alpha,
                 penalty=self._penalty,
                 screen_set=self._screen_set,
-                screen_g1=self._screen_g1,
-                screen_g2=self._screen_g2,
                 screen_begins=self._screen_begins,
                 screen_vars=self._screen_vars,
                 screen_transforms=self._screen_transforms,
@@ -1007,6 +873,8 @@ def gaussian_pin_cov(
                 screen_beta=self._screen_beta,
                 screen_grad=self._screen_grad,
                 screen_is_active=self._screen_is_active,
+                active_set_size=active_set_size,
+                active_set=self._active_set,
             )
 
         @classmethod
@@ -1156,6 +1024,8 @@ def gaussian_cov(
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
+    active_set_size: int,
+    active_set: np.ndarray,
     rsq: float,
     lmda: float,
     grad: np.ndarray,
@@ -1178,8 +1048,6 @@ def gaussian_cov(
     pivot_slack_ratio: float =1.25,
 ):
     """Creates a gaussian, covariance method state object.
-
-    Define the following quantities:
 
     Parameters
     ----------
@@ -1213,9 +1081,23 @@ def gaussian_cov(
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
-    screen_is_active : (a,) np.ndarray
+    screen_is_active : (s,) np.ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    active_set_size : int
+        Number of active groups.
+        ``active_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, active_set_size)``.
+    active_set : (G,) np.ndarray
+        List of indices into ``screen_set`` that correspond to active groups.
+        ``screen_set[active_set[i]]`` is the ``i`` th active group.
+        An active group is one with non-zero coefficient block,
+        that is, for every ``i`` th active group, 
+        ``screen_beta[b:b+p] == 0`` where 
+        ``j = active_set[i]``,
+        ``k = screen_set[j]``,
+        ``b = screen_begins[j]``,
+        and ``p = group_sizes[k]``.
     rsq : float
         The change in unnormalized :math:`R^2` given by 
         :math:`2(\\ell(\\beta_{\\mathrm{old}}) - \\ell(\\beta_{\\mathrm{curr}}))`.
@@ -1359,6 +1241,7 @@ def gaussian_cov(
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
             self._grad = np.array(grad, copy=False, dtype=dtype)
+            self._active_set = np.array(active_set, copy=False, dtype=int)
 
             # MUST call constructor directly and not use super()!
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
@@ -1392,6 +1275,8 @@ def gaussian_cov(
                 screen_set=self._screen_set,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
+                active_set_size=active_set_size,
+                active_set=self._active_set,
                 rsq=rsq,
                 lmda=lmda,
                 grad=self._grad,
@@ -1464,13 +1349,6 @@ class gaussian_naive_base(base):
             method, logger,
         )
 
-        # ================ alpha check ====================
-        self._check(
-            (self.alpha >= 0) and (self.alpha <= 1),
-            "check alpha is in [0, 1]",
-            method, logger,
-        )
-
         # ================ penalty check ====================
         self._check(
             np.all(self.penalty >= 0),
@@ -1512,55 +1390,6 @@ class gaussian_naive_base(base):
             method, logger,
         )
         S = len(self.screen_set)
-
-        # ================ screen_g1 check ====================
-        self._check(
-            np.all((0 <= self.screen_g1) & (self.screen_g1 < S)),
-            "check screen_g1 is in [0, S)",
-            method, logger,
-        )
-        self._check(
-            len(self.screen_g1) == len(np.unique(self.screen_g1)),
-            "check screen_g1 has unique values",
-            method, logger,
-        )
-        self._check(
-            np.all(self.group_sizes[self.screen_set[self.screen_g1]] == 1),
-            "check screen_g1 has group sizes of 1",
-            method, logger,
-        )
-        self._check(
-            self.screen_g1.dtype == np.dtype("int"),
-            "check screen_g1 dtype is int",
-            method, logger,
-        )
-
-        # ================ screen_g2 check ====================
-        self._check(
-            np.all((0 <= self.screen_g2) & (self.screen_g2 < S)),
-            "check screen_g2 is in [0, S)",
-            method, logger,
-        )
-        self._check(
-            len(self.screen_g2) == len(np.unique(self.screen_g2)),
-            "check screen_g2 has unique values",
-            method, logger,
-        )
-        self._check(
-            np.all(self.group_sizes[self.screen_set[self.screen_g2]] > 1),
-            "check screen_g2 has group sizes more than 1",
-            method, logger,
-        )
-        self._check(
-            self.screen_g2.dtype == np.dtype("int"),
-            "check screen_g2 dtype is int",
-            method, logger,
-        )
-        self._check(
-            len(self.screen_g1) + len(self.screen_g2) == S,
-            "check screen_g1 and screen_g2 combined have length S",
-            method, logger,
-        )
 
         # ================ screen_begins check ====================
         expected = np.cumsum(
@@ -1607,7 +1436,6 @@ class gaussian_naive_base(base):
 
         # ================ rsq check ====================
         screen_indices = []
-        tmp = np.empty(n)
         Xbeta = np.zeros(n)
         for g, gs, b in zip(
             self.groups[self.screen_set], 
@@ -1615,8 +1443,7 @@ class gaussian_naive_base(base):
             self.screen_begins,
         ):
             screen_indices.append(np.arange(g, g + gs))
-            self.X.btmul(g, gs, self.screen_beta[b:b+gs], tmp)
-            Xbeta += tmp
+            self.X.btmul(g, gs, self.screen_beta[b:b+gs], Xbeta)
 
         if len(screen_indices) == 0:
             screen_indices = np.array(screen_indices, dtype=int)
@@ -1729,6 +1556,8 @@ def gaussian_naive(
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
+    active_set_size: int,
+    active_set: np.ndarray,
     rsq: float,
     lmda: float,
     grad: np.ndarray,
@@ -1816,9 +1645,23 @@ def gaussian_naive(
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
-    screen_is_active : (a,) np.ndarray
+    screen_is_active : (s,) np.ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    active_set_size : int
+        Number of active groups.
+        ``active_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, active_set_size)``.
+    active_set : (G,) np.ndarray
+        List of indices into ``screen_set`` that correspond to active groups.
+        ``screen_set[active_set[i]]`` is the ``i`` th active group.
+        An active group is one with non-zero coefficient block,
+        that is, for every ``i`` th active group, 
+        ``screen_beta[b:b+p] == 0`` where 
+        ``j = active_set[i]``,
+        ``k = screen_set[j]``,
+        ``b = screen_begins[j]``,
+        and ``p = group_sizes[k]``.
     rsq : float
         The change in unnormalized :math:`R^2` given by 
         :math:`\\|y_c-X_c\\beta_{\\mathrm{old}}\\|_{W}^2 - \\|y_c-X_c\\beta_{\\mathrm{curr}}\\|_{W}^2`.
@@ -1970,6 +1813,7 @@ def gaussian_naive(
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
+            self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
 
             # MUST call constructor directly and not use super()!
@@ -2011,6 +1855,8 @@ def gaussian_naive(
                 screen_set=self._screen_set,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
+                active_set_size=active_set_size,
+                active_set=self._active_set,
                 rsq=rsq,
                 lmda=lmda,
                 grad=self._grad,
@@ -2044,6 +1890,8 @@ def multigaussian_naive(
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
+    active_set_size: int,
+    active_set: np.ndarray,
     rsq: float,
     lmda: float,
     grad: np.ndarray,
@@ -2130,9 +1978,23 @@ def multigaussian_naive(
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
-    screen_is_active : (a,) np.ndarray
+    screen_is_active : (s,) np.ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    active_set_size : int
+        Number of active groups.
+        ``active_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, active_set_size)``.
+    active_set : (G,) np.ndarray
+        List of indices into ``screen_set`` that correspond to active groups.
+        ``screen_set[active_set[i]]`` is the ``i`` th active group.
+        An active group is one with non-zero coefficient block,
+        that is, for every ``i`` th active group, 
+        ``screen_beta[b:b+p] == 0`` where 
+        ``j = active_set[i]``,
+        ``k = screen_set[j]``,
+        ``b = screen_begins[j]``,
+        and ``p = group_sizes[k]``.
     rsq : float
         The change in unnormalized :math:`R^2` given by 
         :math:`\\|\\tilde{y}-\\tilde{X}\\beta_{\\mathrm{old}}\\|_{\\tilde{W}}^2 - \\|\\tilde{y}-\\tilde{X}\\beta_{\\mathrm{curr}}\\|_{\\tilde{W}}^2`.
@@ -2298,6 +2160,7 @@ def multigaussian_naive(
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
+            self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
 
             # MUST call constructor directly and not use super()!
@@ -2346,6 +2209,8 @@ def multigaussian_naive(
                 screen_set=self._screen_set,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
+                active_set_size=active_set_size,
+                active_set=self._active_set,
                 rsq=rsq,
                 lmda=lmda,
                 grad=self._grad,
@@ -2387,6 +2252,8 @@ def glm_naive(
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
+    active_set_size: int,
+    active_set: np.ndarray,
     beta0: float,
     lmda: float,
     grad: np.ndarray,
@@ -2453,9 +2320,23 @@ def glm_naive(
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
-    screen_is_active : (a,) np.ndarray
+    screen_is_active : (s,) np.ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    active_set_size : int
+        Number of active groups.
+        ``active_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, active_set_size)``.
+    active_set : (G,) np.ndarray
+        List of indices into ``screen_set`` that correspond to active groups.
+        ``screen_set[active_set[i]]`` is the ``i`` th active group.
+        An active group is one with non-zero coefficient block,
+        that is, for every ``i`` th active group, 
+        ``screen_beta[b:b+p] == 0`` where 
+        ``j = active_set[i]``,
+        ``k = screen_set[j]``,
+        ``b = screen_begins[j]``,
+        and ``p = group_sizes[k]``.
     beta0 : float
         The current intercept value.
         The value can be arbitrary but it is recommended to be close to the solution at ``lmda``.
@@ -2631,6 +2512,7 @@ def glm_naive(
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
+            self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
 
             # MUST call constructor directly and not use super()!
@@ -2672,6 +2554,8 @@ def glm_naive(
                 screen_set=self._screen_set,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
+                active_set_size=active_set_size,
+                active_set=self._active_set,
                 beta0=beta0,
                 lmda=lmda,
                 grad=self._grad,
@@ -2701,6 +2585,8 @@ def multiglm_naive(
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
+    active_set_size: int,
+    active_set: np.ndarray,
     lmda: float,
     grad: np.ndarray,
     eta: np.ndarray,
@@ -2775,9 +2661,23 @@ def multiglm_naive(
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
-    screen_is_active : (a,) np.ndarray
+    screen_is_active : (s,) np.ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    active_set_size : int
+        Number of active groups.
+        ``active_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, active_set_size)``.
+    active_set : (G,) np.ndarray
+        List of indices into ``screen_set`` that correspond to active groups.
+        ``screen_set[active_set[i]]`` is the ``i`` th active group.
+        An active group is one with non-zero coefficient block,
+        that is, for every ``i`` th active group, 
+        ``screen_beta[b:b+p] == 0`` where 
+        ``j = active_set[i]``,
+        ``k = screen_set[j]``,
+        ``b = screen_begins[j]``,
+        and ``p = group_sizes[k]``.
     lmda : float
         The last regularization parameter that was attempted to be solved.
     grad : ((p+intercept)*K,) np.ndarray
@@ -2963,6 +2863,7 @@ def multiglm_naive(
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
+            self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
 
             # MUST call constructor directly and not use super()!
@@ -3007,6 +2908,8 @@ def multiglm_naive(
                 screen_set=self._screen_set,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
+                active_set_size=active_set_size,
+                active_set=self._active_set,
                 beta0=0,
                 lmda=lmda,
                 grad=self._grad,

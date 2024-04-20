@@ -210,6 +210,8 @@ def create_data_gaussian(
         "weights": weights,
         "rsq": 0,
         "intercept": intercept,
+        "active_set_size": 0,
+        "active_set": np.empty(G, dtype=int),
     }
 
     if pin:
@@ -422,6 +424,8 @@ def test_solve_gaussian_pin_naive():
             args_c["resid"] = state.resid
             args_c["screen_beta"] = state.screen_beta
             args_c["screen_is_active"] = state.screen_is_active
+            args_c["active_set_size"] = state.active_set_size
+            args_c["active_set"] = state.active_set
             state = ad.state.gaussian_pin_naive(
                 **args_c,
                 tol=1e-7,
@@ -475,6 +479,8 @@ def test_solve_gaussian_pin_cov():
             args_c["screen_beta"] = state.screen_beta
             args_c["screen_grad"] = state.screen_grad
             args_c["screen_is_active"] = state.screen_is_active
+            args_c["active_set_size"] = state.active_set_size
+            args_c["active_set"] = state.active_set
             state = ad.state.gaussian_pin_cov(
                 **args_c,
                 tol=1e-7,
@@ -518,6 +524,8 @@ def test_solve_gaussian():
             args_c["screen_set"] = state.screen_set
             args_c["screen_beta"] = state.screen_beta
             args_c["screen_is_active"] = state.screen_is_active
+            args_c["active_set_size"] = state.active_set_size
+            args_c["active_set"] = state.active_set
             args_c["rsq"] = state.rsq
             args_c["lmda"] = state.lmda
             args_c["grad"] = state.grad
@@ -598,6 +606,8 @@ def test_solve_gaussian_concatenate():
             "screen_set": screen_set,
             "screen_beta": screen_beta,
             "screen_is_active": screen_is_active,
+            "active_set_size": 0,
+            "active_set": np.empty(groups.shape[0], dtype=int),
             "rsq": 0,
             "lmda": np.inf,
             "grad": grad,
@@ -665,6 +675,8 @@ def test_solve_gaussian_snp_unphased():
         test_data["screen_set"] = np.arange(p)[(test_data["penalty"] <= 0) | (alpha <= 0)]
         test_data["screen_beta"] = np.zeros(np.sum(test_data["group_sizes"][test_data["screen_set"]]))
         test_data["screen_is_active"] = np.zeros(test_data["screen_set"].shape[0], dtype=bool)
+        test_data["active_set_size"] = 0
+        test_data["active_set"] = np.empty(p, dtype=int)
         test_data["grad"] = X_c.T @ test_data["resid"]
         test_data["rsq"] = 0 
         test_data["lmda"] = np.inf
@@ -732,6 +744,8 @@ def test_solve_gaussian_snp_phased_ancestry():
         test_data["screen_set"] = np.arange(p)[(test_data["penalty"] <= 0) | (alpha <= 0)]
         test_data["screen_beta"] = np.zeros(np.sum(test_data["group_sizes"][test_data["screen_set"]]))
         test_data["screen_is_active"] = np.zeros(test_data["screen_set"].shape[0], dtype=bool)
+        test_data["active_set_size"] = 0
+        test_data["active_set"] = np.empty(p, dtype=int)
         test_data["grad"] = X_c.T @ test_data["resid"]
         test_data["rsq"] = 0 
         test_data["lmda"] = np.inf

@@ -319,6 +319,9 @@ def gaussian_cov(
         screen_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
         screen_beta = np.zeros(np.sum(group_sizes[screen_set]), dtype=dtype)
         screen_is_active = np.ones(screen_set.shape[0], dtype=bool)
+        active_set_size = screen_set.shape[0]
+        active_set = np.empty(G, dtype=int)
+        active_set[:active_set_size] = np.arange(active_set_size)
         rsq = 0
 
         subset = np.array([
@@ -339,6 +342,8 @@ def gaussian_cov(
         screen_set = warm_start.screen_set
         screen_beta = warm_start.screen_beta
         screen_is_active = warm_start.screen_is_active
+        active_set_size = warm_start.active_set_size
+        active_set = warm_start.active_set
         rsq = warm_start.rsq
         grad = warm_start.grad
 
@@ -352,6 +357,8 @@ def gaussian_cov(
         screen_set=screen_set,
         screen_beta=screen_beta,
         screen_is_active=screen_is_active,
+        active_set_size=active_set_size,
+        active_set=active_set,
         rsq=rsq,
         lmda=lmda,
         grad=grad,
@@ -745,12 +752,17 @@ def grpnet(
             screen_set = np.arange(groups.shape[0])[(penalty <= 0) | (alpha <= 0)]
             screen_beta = np.zeros(np.sum(group_sizes[screen_set]), dtype=dtype)
             screen_is_active = np.ones(screen_set.shape[0], dtype=bool)
+            active_set_size = screen_set.shape[0]
+            active_set = np.empty(groups.shape[0], dtype=int)
+            active_set[:active_set_size] = np.arange(active_set_size)
         else:
             lmda = warm_start.lmda
             lmda_max = warm_start.lmda_max
             screen_set = warm_start.screen_set
             screen_beta = warm_start.screen_beta
             screen_is_active = warm_start.screen_is_active
+            active_set_size = warm_start.active_set_size
+            active_set = warm_start.active_set
 
         solver_args["groups"] = groups
         solver_args["group_sizes"] = group_sizes
@@ -760,6 +772,8 @@ def grpnet(
         solver_args["screen_set"] = screen_set
         solver_args["screen_beta"] = screen_beta
         solver_args["screen_is_active"] = screen_is_active
+        solver_args["active_set_size"] = active_set_size
+        solver_args["active_set"] = active_set
 
         # represent the augmented X matrix as used in single-response reformatted problem.
         X_aug = matrix.kronecker_eye(X_raw, K, n_threads=n_threads)
@@ -874,12 +888,18 @@ def grpnet(
             screen_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
             screen_beta = np.zeros(np.sum(group_sizes[screen_set]), dtype=dtype)
             screen_is_active = np.ones(screen_set.shape[0], dtype=bool)
+            active_set_size = screen_set.shape[0]
+            active_set = np.empty(groups.shape[0], dtype=int)
+            active_set[:active_set_size] = np.arange(active_set_size)
+
         else:
             lmda = warm_start.lmda
             lmda_max = warm_start.lmda_max
             screen_set = warm_start.screen_set
             screen_beta = warm_start.screen_beta
             screen_is_active = warm_start.screen_is_active
+            active_set_size = warm_start.active_set_size
+            active_set = warm_start.active_set
 
         solver_args["groups"] = groups
         solver_args["group_sizes"] = group_sizes
@@ -889,6 +909,8 @@ def grpnet(
         solver_args["screen_set"] = screen_set
         solver_args["screen_beta"] = screen_beta
         solver_args["screen_is_active"] = screen_is_active
+        solver_args["active_set_size"] = active_set_size
+        solver_args["active_set"] = active_set
 
         # special gaussian case
         if is_gaussian_opt:

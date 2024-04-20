@@ -113,8 +113,6 @@ public:
         const auto snp = j / A;
         const auto anc = j % A;
 
-        dvzero(out, _n_threads);
-
         for (int hap = 0; hap < 2; ++hap) {
             const auto inner = _io.inner(snp, hap);
             const auto ancestry = _io.ancestry(snp, hap);
@@ -190,8 +188,6 @@ public:
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
 
         const int A = ancestries();
-
-        dvzero(out, _n_threads);
 
         int n_solved = 0;
         while (n_solved < q) 

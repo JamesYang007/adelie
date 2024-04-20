@@ -96,7 +96,7 @@ def predict(
 
     L = betas.shape[0]
 
-    etas = np.empty((L,) + y_shape, order="C")
+    etas = np.zeros((L,) + y_shape, order="C")
     if isinstance(betas, np.ndarray):
         for i in range(etas.shape[0]):
             X.btmul(0, X.cols(), betas[i], etas[i].ravel())
@@ -673,7 +673,7 @@ def plot_devs(
     fig, ax = plt.subplots(figsize=(9, 6), layout="constrained")
     ax.plot(tls, devs, linestyle='-', color='r', marker='.')
     ax.set_title(r"Deviance Profile")
-    ax.set_ylabel(r"Deviance Explained (%)")
+    ax.set_ylabel(r"Deviance Explained (\%)")
     ax.set_xlabel(r"$-\log(\lambda)$")
 
     return fig, ax

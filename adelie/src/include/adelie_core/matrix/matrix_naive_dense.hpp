@@ -57,7 +57,7 @@ public:
     ) override
     {
         base_t::check_ctmul(j, out.size(), rows(), cols());
-        dax(v, _mat.transpose().row(j).array(), _n_threads, out);
+        dvaddi(out, v * _mat.col(j).transpose().array(), _n_threads);
     }
 
     void bmul(
@@ -87,7 +87,7 @@ public:
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         auto outm = out.matrix();
-        dgemv(
+        dgemv<util::operator_type::_add>(
             _mat.middleCols(j, q).transpose(),
             v.matrix(),
             _n_threads,

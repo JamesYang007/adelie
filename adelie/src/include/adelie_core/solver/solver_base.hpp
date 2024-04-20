@@ -94,54 +94,59 @@ void screen(
     };
 
     const auto do_pivot = [&]() {
-        const int G = abs_grad.size();
-        vec_index_t order = vec_index_t::LinSpaced(G, 0, G-1);
-        vec_value_t weights = vec_value_t::NullaryExpr(
-            G, [&](auto i) { 
-                return (penalty[i] <= 0) ? 
-                    alpha * lmda : std::min(abs_grad[i] / penalty[i], alpha * lmda); 
-            }
-        );
-        std::sort(
-            order.data(), 
-            order.data() + order.size(), 
-            [&](auto i, auto j) { 
-                return weights[i] < weights[j]; 
-            }
-        );
-        const int subset_size = std::min<int>(std::max<int>(
-            old_screen_set_size * (1 + pivot_subset_ratio),
-            pivot_subset_min
-        ), G);
-        // top largest subset_size number of weights
-        vec_value_t weights_sorted_sub = vec_value_t::NullaryExpr(
-            subset_size,
-            [&](auto i) { return weights[order[G-subset_size+i]]; } 
-        );
+        // Only compute pivot rule if new active variables entered.
+        // The pivot rule doesn't include new screen variables otherwise,
+        // so no need to do any computations.
+        if (n_new_active) {
+            const int G = abs_grad.size();
+            vec_index_t order = vec_index_t::LinSpaced(G, 0, G-1);
+            vec_value_t weights = vec_value_t::NullaryExpr(
+                G, [&](auto i) { 
+                    return (penalty[i] <= 0) ? 
+                        alpha * lmda : std::min(abs_grad[i] / penalty[i], alpha * lmda); 
+                }
+            );
+            std::sort(
+                order.data(), 
+                order.data() + order.size(), 
+                [&](auto i, auto j) { 
+                    return weights[i] < weights[j]; 
+                }
+            );
+            const int subset_size = std::min<int>(std::max<int>(
+                old_screen_set_size * (1 + pivot_subset_ratio),
+                pivot_subset_min
+            ), G);
+            // top largest subset_size number of weights
+            vec_value_t weights_sorted_sub = vec_value_t::NullaryExpr(
+                subset_size,
+                [&](auto i) { return weights[order[G-subset_size+i]]; } 
+            );
 
-        vec_value_t mses(subset_size);
-        vec_value_t indices = vec_value_t::LinSpaced(subset_size, 0, subset_size-1);
-        const int pivot_idx = optimization::search_pivot(
-            indices, 
-            weights_sorted_sub, 
-            mses
-        );
-        const int full_pivot_idx = G - subset_size + pivot_idx;
+            vec_value_t mses(subset_size);
+            vec_value_t indices = vec_value_t::LinSpaced(subset_size, 0, subset_size-1);
+            const int pivot_idx = optimization::search_pivot(
+                indices, 
+                weights_sorted_sub, 
+                mses
+            );
+            const int full_pivot_idx = G - subset_size + pivot_idx;
 
-        // add everything beyond the cutoff index that isn't screen yet
-        for (int ii = G-1; ii >= full_pivot_idx; --ii) {
-            const auto i = order[ii];
-            if (is_screen(i)) continue;
-            screen_set.push_back(i); 
-        }
-        // add some slack of new groups below the pivot
-        int count = 0;
-        for (int ii = full_pivot_idx - 1; ii >= 0; --ii) {
-            if (count >= pivot_slack_ratio * std::max<int>(n_new_active, 1)) break;
-            const auto i = order[ii]; 
-            if (is_screen(i)) continue;
-            screen_set.push_back(i);
-            ++count;
+            // add everything beyond the cutoff index that isn't screen yet
+            for (int ii = G-1; ii >= full_pivot_idx; --ii) {
+                const auto i = order[ii];
+                if (is_screen(i)) continue;
+                screen_set.push_back(i); 
+            }
+            // add some slack of new groups below the pivot
+            int count = 0;
+            for (int ii = full_pivot_idx - 1; ii >= 0; --ii) {
+                if (count >= pivot_slack_ratio * n_new_active) break;
+                const auto i = order[ii]; 
+                if (is_screen(i)) continue;
+                screen_set.push_back(i);
+                ++count;
+            }
         }
 
         // this case should rarely happen, but we arrived here because
@@ -251,6 +256,7 @@ inline void solve_core(
     const auto lmda_path_size = state.lmda_path_size;
     const auto min_ratio = state.min_ratio;
     const auto& screen_is_active = state.screen_is_active;
+    const auto& active_set_size = state.active_set_size;
     const auto& abs_grad = state.abs_grad;
     auto& lmda_max = state.lmda_max;
     auto& lmda_path = state.lmda_path;
@@ -375,10 +381,7 @@ inline void solve_core(
     // In this case, screen_set may not contain the true active set.
     // We must go through BASIL iterations to solve each lambda.
     sw_t sw;
-    int current_active_size = Eigen::Map<const vec_safe_bool_t>(
-        screen_is_active.data(),
-        screen_is_active.size()
-    ).sum();
+    int current_active_size = active_set_size;
     bool kkt_passed = true;
     int n_new_active = 0;
 
@@ -438,13 +441,13 @@ inline void solve_core(
                 // Diagnostic step
                 // ==================================================================================== 
                 if (kkt_passed) {
-                    active_sizes.push_back(state_gaussian_pin.active_set.size());
+                    active_sizes.push_back(active_set_size);
                     screen_sizes.push_back(state.screen_set.size());
                 }
                 // compute the number of new active groups 
                 n_new_active = (
                     kkt_passed ?
-                    active_sizes.back() - current_active_size : n_new_active
+                    (active_sizes.back() - current_active_size) : n_new_active
                 );
                 current_active_size = (
                     kkt_passed ?

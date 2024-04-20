@@ -118,7 +118,6 @@ void update_loss_null(
     vec_value_t eta = state.eta;
     vec_value_t resid = state.resid;
 
-    auto& irls_weights = buffer_pack.irls_weights;
     auto& irls_y = buffer_pack.irls_y;
     auto& resid_prev = buffer_pack.resid_prev;
     auto& eta_prev = buffer_pack.eta_prev;
@@ -137,11 +136,9 @@ void update_loss_null(
         // hessian is raised whenever <= 0 for well-defined proximal Newton iterations
         hess = hess.max(0) + value_t(Configs::hessian_min) * (hess <= 0).template cast<value_t>();
         const auto hess_sum = hess.sum();
-        irls_weights = hess / hess_sum;
-        irls_y += eta - offsets;
 
         /* fit beta0 */
-        beta0 = (irls_weights * irls_y).sum();
+        beta0 = (hess * (irls_y + eta - offsets)).sum() / hess_sum;
 
         // update eta
         eta.swap(eta_prev);
@@ -199,8 +196,6 @@ auto fit(
     const auto& penalty = state.penalty;
     const auto& offsets = state.offsets;
     const auto& screen_set = state.screen_set;
-    const auto& screen_g1 = state.screen_g1;
-    const auto& screen_g2 = state.screen_g2;
     const auto& screen_begins = state.screen_begins;
     const auto intercept = state.intercept;
     const auto max_active_size = state.max_active_size;
@@ -215,6 +210,8 @@ auto fit(
     const auto loss_full = state.loss_full;
     auto& screen_beta = state.screen_beta;
     auto& screen_is_active = state.screen_is_active;
+    auto& active_set_size = state.active_set_size;
+    auto& active_set = state.active_set;
     auto& beta0 = state.beta0;
     auto& eta = state.eta;
     auto& resid = state.resid;
@@ -261,16 +258,16 @@ auto fit(
 
         /* compute rest of quadratic approximation quantities */
         glm.hessian(eta, resid, hess);
-        glm.inv_hessian_gradient(eta, resid, hess, irls_y);
+        glm.inv_hessian_gradient(eta, resid, hess, irls_resid);
         // hessian is raised whenever <= 0 for well-defined proximal Newton iterations
         hess = hess.max(0) + value_t(Configs::hessian_min) * (hess <= 0).template cast<value_t>();
         const auto hess_sum = hess.sum();
         irls_weights = hess / hess_sum;
         irls_weights_sqrt = irls_weights.sqrt();
-        irls_y += eta - offsets;
+        irls_y = irls_resid + eta - offsets;
         const auto y_mean = (irls_weights * irls_y).sum();
         const auto y_var = (irls_weights * irls_y.square()).sum() - intercept * y_mean * y_mean;
-        irls_resid = irls_y + offsets - eta + intercept * (beta0 - y_mean);
+        if (intercept) irls_resid += (beta0 - y_mean);
         const auto resid_sum = (irls_weights * irls_resid).sum();
         lmda_path_adjusted = lmda / hess_sum;
         if (std::isinf(lmda_path_adjusted[0])) {
@@ -320,14 +317,13 @@ auto fit(
             penalty,
             irls_weights,
             Eigen::Map<const vec_index_t>(screen_set.data(), screen_set.size()), 
-            Eigen::Map<const vec_index_t>(screen_g1.data(), screen_g1.size()), 
-            Eigen::Map<const vec_index_t>(screen_g2.data(), screen_g2.size()), 
             Eigen::Map<const vec_index_t>(screen_begins.data(), screen_begins.size()), 
             Eigen::Map<const vec_value_t>(screen_vars.data(), screen_vars.size()), 
             Eigen::Map<const vec_value_t>(screen_X_means.data(), screen_X_means.size()), 
             screen_transforms,
             lmda_path_adjusted,
             intercept, max_active_size, max_iters, 
+            // TODO: still unclear whether we should be max'ing or not.
             // tolerance is relative to the scaling of null deviance and current total weight sum
             tol * std::max<value_t>((loss_null - loss_full) / hess_sum, 1), 
             0 /* adev_tol */, 0 /* ddev_tol */,
@@ -336,7 +332,9 @@ auto fit(
             Eigen::Map<vec_value_t>(irls_resid.data(), irls_resid.size()),
             resid_sum,
             Eigen::Map<vec_value_t>(screen_beta.data(), screen_beta.size()), 
-            Eigen::Map<vec_safe_bool_t>(screen_is_active.data(), screen_is_active.size())
+            Eigen::Map<vec_safe_bool_t>(screen_is_active.data(), screen_is_active.size()),
+            active_set_size,
+            active_set
         );
         try { 
             gaussian::pin::naive::solve(
@@ -359,12 +357,14 @@ auto fit(
             state_gaussian_pin_naive.benchmark_active.size()
         ).sum();
 
-        // update beta0
+        // update invariants
+        active_set_size = state_gaussian_pin_naive.active_set_size;
         beta0 = state_gaussian_pin_naive.intercepts[0];
 
         // update eta
         eta.swap(eta_prev);
-        eta = irls_y + offsets - irls_resid + intercept * (beta0 - y_mean);
+        eta = irls_y + offsets - irls_resid;
+        if (intercept) eta += beta0 - y_mean;
 
         // update resid
         resid_prev.swap(resid);
@@ -377,7 +377,7 @@ auto fit(
         const auto& active_begins = state_gaussian_pin_naive.active_begins;
         const auto n_active = (
             (active_begins.size() == 0) ? 1 : (
-                active_begins.back() + group_sizes[screen_set[active_set.back()]]
+                active_begins.back() + group_sizes[screen_set[active_set[active_set_size-1]]]
             )
         );
         if (std::abs(((resid - resid_prev) * (eta - eta_prev)).sum()) <= irls_tol * n_active) {
