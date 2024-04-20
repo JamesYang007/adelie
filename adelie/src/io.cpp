@@ -7,7 +7,7 @@ namespace ad = adelie_core;
 
 void io_snp_base(py::module_& m)
 {
-    using io_t = ad::io::IOSNPBase;
+    using io_t = ad::io::IOSNPBase<>;
     using string_t = typename io_t::string_t;
     py::class_<io_t>(m, "IOSNPBase")
         .def(py::init<
@@ -24,7 +24,7 @@ void io_snp_base(py::module_& m)
 
 void io_snp_unphased(py::module_& m)
 {
-    using io_t = ad::io::IOSNPUnphased;
+    using io_t = ad::io::IOSNPUnphased<>;
     using base_t = typename io_t::base_t;
     using string_t = typename io_t::string_t;
     py::class_<io_t, base_t>(m, "IOSNPUnphased")
@@ -52,7 +52,7 @@ void io_snp_unphased(py::module_& m)
 
 void io_snp_phased_ancestry(py::module_& m)
 {
-    using io_t = ad::io::IOSNPPhasedAncestry;
+    using io_t = ad::io::IOSNPPhasedAncestry<>;
     using base_t = typename io_t::base_t;
     using string_t = typename io_t::string_t;
     py::class_<io_t, base_t>(m, "IOSNPPhasedAncestry")

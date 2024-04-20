@@ -22,6 +22,7 @@
 namespace adelie_core {
 namespace io {
 
+template <class MmapPtrType=std::unique_ptr<char, std::function<void(char*)>>>
 class IOSNPBase
 {
 public:
@@ -30,6 +31,7 @@ public:
         std::FILE, 
         std::function<void(std::FILE*)>
     >;
+    using mmap_ptr_t = MmapPtrType;
     using bool_t = bool;
     using buffer_t = util::rowvec_type<char>;
 
@@ -37,9 +39,7 @@ protected:
     const string_t _filename;
     const util::read_mode_type _read_mode;
     buffer_t _buffer_w;             // only used when _read_mode == _file
-    char* _mmap_ptr;                // only used when _read_mode == _mmap 
-                                    // don't use unique_ptr: non-copy-constructible
-    size_t _mmap_size;              // only used when _read_mode == _mmap
+    mmap_ptr_t _mmap_ptr;           // only used when _read_mode == _mmap 
     Eigen::Map<buffer_t> _buffer;
     bool_t _is_read;
 
@@ -93,15 +93,6 @@ protected:
         return read_mode_enum;
     }
 
-    void unmap()
-    {
-        if (_mmap_ptr) {
-            munmap(_mmap_ptr, _mmap_size);
-            _mmap_ptr = nullptr;
-            _mmap_size = 0;
-        }
-    }
-
 public:
     IOSNPBase(
         const string_t& filename,
@@ -110,12 +101,9 @@ public:
         _filename(filename),
         _read_mode(convert_read_mode(read_mode)),
         _mmap_ptr(nullptr),
-        _mmap_size(0),
         _buffer(nullptr, 0),
         _is_read(false)
     {}
-
-    ~IOSNPBase() { unmap(); }
 
     bool_t endian() const { 
         if (!_is_read) throw_no_read();
@@ -125,10 +113,6 @@ public:
     size_t read()
     {
         _is_read = true;
-
-        // if _read_mode == _file, no-op.
-        // if _read_mode == _mmap, any previously mmap will be unmapped.
-        unmap();
 
         // compute the total number of bytes
         auto file_ptr = fopen_safe(_filename.c_str(), "rb");
@@ -141,6 +125,10 @@ public:
         if (_read_mode == util::read_mode_type::_mmap) {
 #if defined(__linux__) || defined(__APPLE__)
             int fd = open(_filename.c_str(), O_RDONLY);
+            if (fd == -1) {
+                perror("open");
+                throw util::adelie_core_error("open failed.");
+            }
             char* addr = static_cast<char*>(
                 mmap(
                     nullptr, 
@@ -156,8 +144,7 @@ public:
                 perror("mmap");
                 throw util::adelie_core_error("mmap failed.");
             }
-            _mmap_ptr = addr;
-            _mmap_size = total_bytes;
+            _mmap_ptr = mmap_ptr_t(addr, [=](char* ptr) { munmap(ptr, total_bytes); } );
             new (&_buffer) Eigen::Map<buffer_t>(addr, total_bytes);
 #else
             throw util::adelie_core_error("Only Linux and MacOS support the mmap feature.");

@@ -8,7 +8,8 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType>
+template <class ValueType,
+          class MmapPtrType=std::unique_ptr<char, std::function<void(char*)>>>
 class MatrixNaiveSNPPhasedAncestry: public MatrixNaiveBase<ValueType>
 {
 public:
@@ -20,8 +21,7 @@ public:
     using typename base_t::rowmat_value_t;
     using typename base_t::sp_mat_value_t;
     using string_t = std::string;
-    using io_t = io::IOSNPPhasedAncestry;
-    using dyn_vec_io_t = std::vector<io_t>;
+    using io_t = io::IOSNPPhasedAncestry<MmapPtrType>;
     
 protected:
     const string_t _filename;   // filename because why not? :)
