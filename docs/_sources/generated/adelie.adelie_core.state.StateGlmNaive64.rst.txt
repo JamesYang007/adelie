@@ -23,6 +23,8 @@
    
       ~StateGlmNaive64.X
       ~StateGlmNaive64.abs_grad
+      ~StateGlmNaive64.active_set
+      ~StateGlmNaive64.active_set_size
       ~StateGlmNaive64.active_sizes
       ~StateGlmNaive64.adev_tol
       ~StateGlmNaive64.alpha
@@ -67,8 +69,6 @@
       ~StateGlmNaive64.resid
       ~StateGlmNaive64.screen_begins
       ~StateGlmNaive64.screen_beta
-      ~StateGlmNaive64.screen_g1
-      ~StateGlmNaive64.screen_g2
       ~StateGlmNaive64.screen_hashset
       ~StateGlmNaive64.screen_is_active
       ~StateGlmNaive64.screen_rule
@@ -93,6 +93,8 @@
    
    .. autoattribute:: X
    .. autoattribute:: abs_grad
+   .. autoattribute:: active_set
+   .. autoattribute:: active_set_size
    .. autoattribute:: active_sizes
    .. autoattribute:: adev_tol
    .. autoattribute:: alpha
@@ -137,8 +139,6 @@
    .. autoattribute:: resid
    .. autoattribute:: screen_begins
    .. autoattribute:: screen_beta
-   .. autoattribute:: screen_g1
-   .. autoattribute:: screen_g2
    .. autoattribute:: screen_hashset
    .. autoattribute:: screen_is_active
    .. autoattribute:: screen_rule

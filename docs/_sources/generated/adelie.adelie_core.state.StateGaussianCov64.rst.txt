@@ -23,6 +23,8 @@
    
       ~StateGaussianCov64.A
       ~StateGaussianCov64.abs_grad
+      ~StateGaussianCov64.active_set
+      ~StateGaussianCov64.active_set_size
       ~StateGaussianCov64.active_sizes
       ~StateGaussianCov64.adev_tol
       ~StateGaussianCov64.alpha
@@ -61,8 +63,6 @@
       ~StateGaussianCov64.rsq
       ~StateGaussianCov64.screen_begins
       ~StateGaussianCov64.screen_beta
-      ~StateGaussianCov64.screen_g1
-      ~StateGaussianCov64.screen_g2
       ~StateGaussianCov64.screen_grad
       ~StateGaussianCov64.screen_hashset
       ~StateGaussianCov64.screen_is_active
@@ -90,6 +90,8 @@
    
    .. autoattribute:: A
    .. autoattribute:: abs_grad
+   .. autoattribute:: active_set
+   .. autoattribute:: active_set_size
    .. autoattribute:: active_sizes
    .. autoattribute:: adev_tol
    .. autoattribute:: alpha
@@ -128,8 +130,6 @@
    .. autoattribute:: rsq
    .. autoattribute:: screen_begins
    .. autoattribute:: screen_beta
-   .. autoattribute:: screen_g1
-   .. autoattribute:: screen_g2
    .. autoattribute:: screen_grad
    .. autoattribute:: screen_hashset
    .. autoattribute:: screen_is_active

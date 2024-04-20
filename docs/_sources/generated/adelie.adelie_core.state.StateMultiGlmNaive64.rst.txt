@@ -23,6 +23,8 @@
    
       ~StateMultiGlmNaive64.X
       ~StateMultiGlmNaive64.abs_grad
+      ~StateMultiGlmNaive64.active_set
+      ~StateMultiGlmNaive64.active_set_size
       ~StateMultiGlmNaive64.active_sizes
       ~StateMultiGlmNaive64.adev_tol
       ~StateMultiGlmNaive64.alpha
@@ -69,8 +71,6 @@
       ~StateMultiGlmNaive64.resid
       ~StateMultiGlmNaive64.screen_begins
       ~StateMultiGlmNaive64.screen_beta
-      ~StateMultiGlmNaive64.screen_g1
-      ~StateMultiGlmNaive64.screen_g2
       ~StateMultiGlmNaive64.screen_hashset
       ~StateMultiGlmNaive64.screen_is_active
       ~StateMultiGlmNaive64.screen_rule
@@ -95,6 +95,8 @@
    
    .. autoattribute:: X
    .. autoattribute:: abs_grad
+   .. autoattribute:: active_set
+   .. autoattribute:: active_set_size
    .. autoattribute:: active_sizes
    .. autoattribute:: adev_tol
    .. autoattribute:: alpha
@@ -141,8 +143,6 @@
    .. autoattribute:: resid
    .. autoattribute:: screen_begins
    .. autoattribute:: screen_beta
-   .. autoattribute:: screen_g1
-   .. autoattribute:: screen_g2
    .. autoattribute:: screen_hashset
    .. autoattribute:: screen_is_active
    .. autoattribute:: screen_rule

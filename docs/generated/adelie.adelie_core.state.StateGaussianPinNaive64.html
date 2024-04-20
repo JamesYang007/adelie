@@ -481,124 +481,115 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_begins" title="adelie.adelie_core.state.StateGaussianPinNaive64.active_begins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_begins</span></code></a></p></td>
 <td><p>List of indices that index a corresponding list of values for each active group.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_g1" title="adelie.adelie_core.state.StateGaussianPinNaive64.active_g1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_g1</span></code></a></p></td>
-<td><p>Subset of <code class="docutils literal notranslate"><span class="pre">active_set</span></code> that correspond to groups of size <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_g2" title="adelie.adelie_core.state.StateGaussianPinNaive64.active_g2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_g2</span></code></a></p></td>
-<td><p>Subset of <code class="docutils literal notranslate"><span class="pre">active_set</span></code> that correspond to groups of size more than <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
-</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_order" title="adelie.adelie_core.state.StateGaussianPinNaive64.active_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_order</span></code></a></p></td>
 <td><p>Ordering such that <code class="docutils literal notranslate"><span class="pre">groups</span></code> is sorted in ascending order for the active groups.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_set" title="adelie.adelie_core.state.StateGaussianPinNaive64.active_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_set</span></code></a></p></td>
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">screen_set</span></code> that correspond to active groups.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.adev_tol" title="adelie.adelie_core.state.StateGaussianPinNaive64.adev_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adev_tol</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_set_size" title="adelie.adelie_core.state.StateGaussianPinNaive64.active_set_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_set_size</span></code></a></p></td>
+<td><p>Number of active groups.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.adev_tol" title="adelie.adelie_core.state.StateGaussianPinNaive64.adev_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adev_tol</span></code></a></p></td>
 <td><p>Percent deviance explained tolerance.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.alpha" title="adelie.adelie_core.state.StateGaussianPinNaive64.alpha"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alpha</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.alpha" title="adelie.adelie_core.state.StateGaussianPinNaive64.alpha"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alpha</span></code></a></p></td>
 <td><p>Elastic net parameter.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.benchmark_active" title="adelie.adelie_core.state.StateGaussianPinNaive64.benchmark_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_active</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.benchmark_active" title="adelie.adelie_core.state.StateGaussianPinNaive64.benchmark_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_active</span></code></a></p></td>
 <td><p>Benchmark time for performing coordinate-descent on the active set for each <span class="math notranslate nohighlight">\(\lambda\)</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.benchmark_screen" title="adelie.adelie_core.state.StateGaussianPinNaive64.benchmark_screen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_screen</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.benchmark_screen" title="adelie.adelie_core.state.StateGaussianPinNaive64.benchmark_screen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_screen</span></code></a></p></td>
 <td><p>Benchmark time for performing coordinate-descent on the screen set for each <span class="math notranslate nohighlight">\(\lambda\)</span>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.betas" title="adelie.adelie_core.state.StateGaussianPinNaive64.betas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">betas</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.betas" title="adelie.adelie_core.state.StateGaussianPinNaive64.betas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">betas</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> is the solution at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.ddev_tol" title="adelie.adelie_core.state.StateGaussianPinNaive64.ddev_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ddev_tol</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.ddev_tol" title="adelie.adelie_core.state.StateGaussianPinNaive64.ddev_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ddev_tol</span></code></a></p></td>
 <td><p>Difference in percent deviance explained tolerance.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.group_sizes" title="adelie.adelie_core.state.StateGaussianPinNaive64.group_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_sizes</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.group_sizes" title="adelie.adelie_core.state.StateGaussianPinNaive64.group_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_sizes</span></code></a></p></td>
 <td><p>List of group sizes corresponding to each element in <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.groups" title="adelie.adelie_core.state.StateGaussianPinNaive64.groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">groups</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.groups" title="adelie.adelie_core.state.StateGaussianPinNaive64.groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">groups</span></code></a></p></td>
 <td><p>List of starting indices to each group where <cite>G</cite> is the number of groups.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.intercept" title="adelie.adelie_core.state.StateGaussianPinNaive64.intercept"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercept</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.intercept" title="adelie.adelie_core.state.StateGaussianPinNaive64.intercept"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercept</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should fit with intercept.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.intercepts" title="adelie.adelie_core.state.StateGaussianPinNaive64.intercepts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercepts</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.intercepts" title="adelie.adelie_core.state.StateGaussianPinNaive64.intercepts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercepts</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">intercepts[i]</span></code> is the intercept at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.iters" title="adelie.adelie_core.state.StateGaussianPinNaive64.iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iters</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.iters" title="adelie.adelie_core.state.StateGaussianPinNaive64.iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iters</span></code></a></p></td>
 <td><p>Number of coordinate descents taken.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.lmda_path" title="adelie.adelie_core.state.StateGaussianPinNaive64.lmda_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_path</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.lmda_path" title="adelie.adelie_core.state.StateGaussianPinNaive64.lmda_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_path</span></code></a></p></td>
 <td><p>The regularization path to solve for.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.lmdas" title="adelie.adelie_core.state.StateGaussianPinNaive64.lmdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.lmdas" title="adelie.adelie_core.state.StateGaussianPinNaive64.lmdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code> is the regularization <span class="math notranslate nohighlight">\(\lambda\)</span> used for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th solution.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.max_active_size" title="adelie.adelie_core.state.StateGaussianPinNaive64.max_active_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_active_size</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.max_active_size" title="adelie.adelie_core.state.StateGaussianPinNaive64.max_active_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_active_size</span></code></a></p></td>
 <td><p>Maximum number of active groups allowed.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.max_iters" title="adelie.adelie_core.state.StateGaussianPinNaive64.max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_iters</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.max_iters" title="adelie.adelie_core.state.StateGaussianPinNaive64.max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_iters</span></code></a></p></td>
 <td><p>Maximum number of coordinate descents.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.n_threads" title="adelie.adelie_core.state.StateGaussianPinNaive64.n_threads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_threads</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.n_threads" title="adelie.adelie_core.state.StateGaussianPinNaive64.n_threads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_threads</span></code></a></p></td>
 <td><p>Number of threads.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.newton_max_iters" title="adelie.adelie_core.state.StateGaussianPinNaive64.newton_max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_max_iters</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.newton_max_iters" title="adelie.adelie_core.state.StateGaussianPinNaive64.newton_max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_max_iters</span></code></a></p></td>
 <td><p>Maximum number of iterations for the BCD update.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.newton_tol" title="adelie.adelie_core.state.StateGaussianPinNaive64.newton_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_tol</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.newton_tol" title="adelie.adelie_core.state.StateGaussianPinNaive64.newton_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_tol</span></code></a></p></td>
 <td><p>Convergence tolerance for the BCD update.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.penalty" title="adelie.adelie_core.state.StateGaussianPinNaive64.penalty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">penalty</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.penalty" title="adelie.adelie_core.state.StateGaussianPinNaive64.penalty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">penalty</span></code></a></p></td>
 <td><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.resid" title="adelie.adelie_core.state.StateGaussianPinNaive64.resid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resid</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.resid" title="adelie.adelie_core.state.StateGaussianPinNaive64.resid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resid</span></code></a></p></td>
 <td><p>Residual <span class="math notranslate nohighlight">\(y_c - X \beta\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.resid_sum" title="adelie.adelie_core.state.StateGaussianPinNaive64.resid_sum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resid_sum</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.resid_sum" title="adelie.adelie_core.state.StateGaussianPinNaive64.resid_sum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resid_sum</span></code></a></p></td>
 <td><p>Weighted (by <span class="math notranslate nohighlight">\(W\)</span>) sum of <code class="docutils literal notranslate"><span class="pre">resid</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.rsq" title="adelie.adelie_core.state.StateGaussianPinNaive64.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.rsq" title="adelie.adelie_core.state.StateGaussianPinNaive64.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></p></td>
 <td><p>The change in unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> given by  <span class="math notranslate nohighlight">\(\|y_c-X_c\beta_{\mathrm{old}}\|_{W}^2 - \|y_c-X_c\beta_{\mathrm{curr}}\|_{W}^2\)</span>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.rsqs" title="adelie.adelie_core.state.StateGaussianPinNaive64.rsqs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsqs</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.rsqs" title="adelie.adelie_core.state.StateGaussianPinNaive64.rsqs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsqs</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">rsqs[i]</span></code> is the unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_X_means" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_X_means"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_X_means</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_X_means" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_X_means"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_X_means</span></code></a></p></td>
 <td><p>Column means of <span class="math notranslate nohighlight">\(X\)</span> for screen groups (weighted by <span class="math notranslate nohighlight">\(W\)</span>).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_begins" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_begins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_begins</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_begins" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_begins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_begins</span></code></a></p></td>
 <td><p>List of indices that index a corresponding list of values for each screen group.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_beta" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_beta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_beta</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_beta" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_beta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_beta</span></code></a></p></td>
 <td><p>Coefficient vector on the screen set.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_g1" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_g1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_g1</span></code></a></p></td>
-<td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">screen_set</span></code> that correspond to groups of size <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_g2" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_g2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_g2</span></code></a></p></td>
-<td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">screen_set</span></code> that correspond to groups more than size <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_is_active" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_is_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_is_active</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_is_active" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_is_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_is_active</span></code></a></p></td>
 <td><p>Boolean vector that indicates whether each screen group in <code class="docutils literal notranslate"><span class="pre">groups</span></code> is active or not.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_set" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_set</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_set" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_set</span></code></a></p></td>
 <td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">groups</span></code> that correspond to the screen groups.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_transforms" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_transforms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_transforms</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_transforms" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_transforms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_transforms</span></code></a></p></td>
 <td><p>List of <span class="math notranslate nohighlight">\(V_k\)</span> where <span class="math notranslate nohighlight">\(V_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span> along the screen groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_vars" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_vars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_vars</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_vars" title="adelie.adelie_core.state.StateGaussianPinNaive64.screen_vars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_vars</span></code></a></p></td>
 <td><p>List of <span class="math notranslate nohighlight">\(D_k^2\)</span> where <span class="math notranslate nohighlight">\(D_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span>  along the screen groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.tol" title="adelie.adelie_core.state.StateGaussianPinNaive64.tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tol</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.tol" title="adelie.adelie_core.state.StateGaussianPinNaive64.tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tol</span></code></a></p></td>
 <td><p>Coordinate descent convergence tolerance.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.weights" title="adelie.adelie_core.state.StateGaussianPinNaive64.weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">weights</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.weights" title="adelie.adelie_core.state.StateGaussianPinNaive64.weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">weights</span></code></a></p></td>
 <td><p>Observation weights <span class="math notranslate nohighlight">\(W\)</span>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.y_mean" title="adelie.adelie_core.state.StateGaussianPinNaive64.y_mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_mean</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.y_mean" title="adelie.adelie_core.state.StateGaussianPinNaive64.y_mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_mean</span></code></a></p></td>
 <td><p>Mean of the response vector <span class="math notranslate nohighlight">\(y\)</span> (weighted by <span class="math notranslate nohighlight">\(W\)</span>), i.e. <span class="math notranslate nohighlight">\(\mathbf{1}^\top W y\)</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.y_var" title="adelie.adelie_core.state.StateGaussianPinNaive64.y_var"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_var</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.y_var" title="adelie.adelie_core.state.StateGaussianPinNaive64.y_var"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_var</span></code></a></p></td>
 <td><p>Variance of the response vector <span class="math notranslate nohighlight">\(y\)</span> (weighted by <span class="math notranslate nohighlight">\(W\)</span>),  i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span>.</p></td>
 </tr>
 </tbody>
@@ -608,7 +599,7 @@ document.write(`
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive64.__init__" title="Link to this definition">#</a></dt>
 <dd><p>Overloaded function.</p>
 <ol class="arabic simple">
-<li><p>__init__(self: adelie.adelie_core.state.StateGaussianPinNaive64, X: adelie.adelie_core.matrix.MatrixNaiveBase64, y_mean: float, y_var: float, groups: numpy.ndarray[numpy.int64[1, n]], group_sizes: numpy.ndarray[numpy.int64[1, n]], alpha: float, penalty: numpy.ndarray[numpy.float64[1, n]], weights: numpy.ndarray[numpy.float64[1, n]], screen_set: numpy.ndarray[numpy.int64[1, n]], screen_g1: numpy.ndarray[numpy.int64[1, n]], screen_g2: numpy.ndarray[numpy.int64[1, n]], screen_begins: numpy.ndarray[numpy.int64[1, n]], screen_vars: numpy.ndarray[numpy.float64[1, n]], screen_X_means: numpy.ndarray[numpy.float64[1, n]], screen_transforms: adelie.adelie_core.VectorMatrix64, lmda_path: numpy.ndarray[numpy.float64[1, n]], intercept: bool, max_active_size: int, max_iters: int, tol: float, adev_tol: float, ddev_tol: float, newton_tol: float, newton_max_iters: int, n_threads: int, rsq: float, resid: numpy.ndarray[numpy.float64[1, n], flags.writeable], resid_sum: float, screen_beta: numpy.ndarray[numpy.float64[1, n], flags.writeable], screen_is_active: numpy.ndarray[bool[1, n], flags.writeable]) -&gt; None</p></li>
+<li><p>__init__(self: adelie.adelie_core.state.StateGaussianPinNaive64, X: adelie.adelie_core.matrix.MatrixNaiveBase64, y_mean: float, y_var: float, groups: numpy.ndarray[numpy.int64[1, n]], group_sizes: numpy.ndarray[numpy.int64[1, n]], alpha: float, penalty: numpy.ndarray[numpy.float64[1, n]], weights: numpy.ndarray[numpy.float64[1, n]], screen_set: numpy.ndarray[numpy.int64[1, n]], screen_begins: numpy.ndarray[numpy.int64[1, n]], screen_vars: numpy.ndarray[numpy.float64[1, n]], screen_X_means: numpy.ndarray[numpy.float64[1, n]], screen_transforms: adelie.adelie_core.VectorMatrix64, lmda_path: numpy.ndarray[numpy.float64[1, n]], intercept: bool, max_active_size: int, max_iters: int, tol: float, adev_tol: float, ddev_tol: float, newton_tol: float, newton_max_iters: int, n_threads: int, rsq: float, resid: numpy.ndarray[numpy.float64[1, n], flags.writeable], resid_sum: float, screen_beta: numpy.ndarray[numpy.float64[1, n], flags.writeable], screen_is_active: numpy.ndarray[bool[1, n], flags.writeable], active_set_size: int, active_set: numpy.ndarray[numpy.int64[1, n], flags.writeable]) -&gt; None</p></li>
 <li><p>__init__(self: adelie.adelie_core.state.StateGaussianPinNaive64, arg0: adelie.adelie_core.state.StateGaussianPinNaive64) -&gt; None</p></li>
 </ol>
 </dd></dl>
@@ -624,18 +615,6 @@ document.write(`
 <span class="sig-name descname"><span class="pre">active_begins</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_begins" title="Link to this definition">#</a></dt>
 <dd><p>List of indices that index a corresponding list of values for each active group.
 <code class="docutils literal notranslate"><span class="pre">active_begins[i]</span></code> is the starting index corresponding to the <code class="docutils literal notranslate"><span class="pre">i</span></code> th active group.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive64.active_g1">
-<span class="sig-name descname"><span class="pre">active_g1</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_g1" title="Link to this definition">#</a></dt>
-<dd><p>Subset of <code class="docutils literal notranslate"><span class="pre">active_set</span></code> that correspond to groups of size <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive64.active_g2">
-<span class="sig-name descname"><span class="pre">active_g2</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_g2" title="Link to this definition">#</a></dt>
-<dd><p>Subset of <code class="docutils literal notranslate"><span class="pre">active_set</span></code> that correspond to groups of size more than <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -657,6 +636,14 @@ that is, for every <code class="docutils literal notranslate"><span class="pre">
 <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">screen_set[j]</span></code>,
 <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">screen_begins[j]</span></code>,
 and <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">group_sizes[k]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive64.active_set_size">
+<span class="sig-name descname"><span class="pre">active_set_size</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_set_size" title="Link to this definition">#</a></dt>
+<dd><p>Number of active groups.
+<code class="docutils literal notranslate"><span class="pre">active_set[i]</span></code> is only well-defined
+for <code class="docutils literal notranslate"><span class="pre">i</span></code> in the range <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">active_set_size)</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -835,22 +822,6 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive64.screen_g1">
-<span class="sig-name descname"><span class="pre">screen_g1</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_g1" title="Link to this definition">#</a></dt>
-<dd><p>List of indices into <code class="docutils literal notranslate"><span class="pre">screen_set</span></code> that correspond to groups of size <code class="docutils literal notranslate"><span class="pre">1</span></code>.
-<code class="docutils literal notranslate"><span class="pre">screen_set[screen_g1[i]]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group of size <code class="docutils literal notranslate"><span class="pre">1</span></code>
-such that <code class="docutils literal notranslate"><span class="pre">group_sizes[screen_set[screen_g1[i]]]</span></code> is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive64.screen_g2">
-<span class="sig-name descname"><span class="pre">screen_g2</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_g2" title="Link to this definition">#</a></dt>
-<dd><p>List of indices into <code class="docutils literal notranslate"><span class="pre">screen_set</span></code> that correspond to groups more than size <code class="docutils literal notranslate"><span class="pre">1</span></code>.
-<code class="docutils literal notranslate"><span class="pre">screen_set[screen_g2[i]]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group of size more than <code class="docutils literal notranslate"><span class="pre">1</span></code>
-such that <code class="docutils literal notranslate"><span class="pre">group_sizes[screen_set[screen_g2[i]]]</span></code> is more than <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive64.screen_is_active">
 <span class="sig-name descname"><span class="pre">screen_is_active</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_is_active" title="Link to this definition">#</a></dt>
 <dd><p>Boolean vector that indicates whether each screen group in <code class="docutils literal notranslate"><span class="pre">groups</span></code> is active or not.
@@ -963,10 +934,9 @@ i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span>.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.__init__"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.X"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.X</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_begins"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.active_begins</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_g1"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.active_g1</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_g2"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.active_g2</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_order"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.active_order</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_set"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.active_set</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_set_size"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.active_set_size</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.adev_tol"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.adev_tol</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.alpha"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.alpha</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.benchmark_active"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.benchmark_active</span></code></a></li>
@@ -993,8 +963,6 @@ i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span>.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_X_means"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.screen_X_means</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_begins"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.screen_begins</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_beta"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.screen_beta</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_g1"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.screen_g1</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_g2"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.screen_g2</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_is_active"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.screen_is_active</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_set"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.screen_set</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.screen_transforms"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.screen_transforms</span></code></a></li>

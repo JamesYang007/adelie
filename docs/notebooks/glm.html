@@ -431,7 +431,7 @@ requirements. However, all types of solvers benefit from numerical stability if 
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/jhyang/sandbox/adelie/adelie/glm.py:32: UserWarning: Normalizing weights to sum to 1.
+/Users/jhyang/sandbox/adelie/adelie/glm.py:32: UserWarning: Normalizing weights to sum to 1.
   warnings.warn(&#34;Normalizing weights to sum to 1.&#34;)
 </pre></div></div>
 </div>
@@ -561,7 +561,9 @@ requirements. However, all types of solvers benefit from numerical stability if 
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 44%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 44/100 [00:00:00&lt;00:00:00, 2091.87it/s] [dev:90.7%]
+/Users/jhyang/sandbox/adelie/adelie/matrix.py:259: UserWarning: Detected matrix to be C-contiguous. Performance may improve with F-contiguous matrix.
+  warnings.warn(
+ 44%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 44/100 [00:00:00&lt;00:00:00, 6335.87it/s] [dev:90.7%]
 </pre></div></div>
 </div>
 <p>We can compare solutions with our Gaussian solver. To demonstrate an exact match in coefficients, we pass in a Gaussian GLM object with optimization flag turned off so that the general GLM solver is used rather than our special Gaussian solver.</p>
@@ -581,7 +583,7 @@ requirements. However, all types of solvers benefit from numerical stability if 
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 44%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 44/100 [00:00:00&lt;00:00:00, 2814.88it/s] [dev:90.7%]
+ 44%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 44/100 [00:00:00&lt;00:00:00, 7097.11it/s] [dev:90.7%]
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">

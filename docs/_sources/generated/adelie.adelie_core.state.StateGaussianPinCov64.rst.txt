@@ -23,10 +23,9 @@
    
       ~StateGaussianPinCov64.A
       ~StateGaussianPinCov64.active_begins
-      ~StateGaussianPinCov64.active_g1
-      ~StateGaussianPinCov64.active_g2
       ~StateGaussianPinCov64.active_order
       ~StateGaussianPinCov64.active_set
+      ~StateGaussianPinCov64.active_set_size
       ~StateGaussianPinCov64.adev_tol
       ~StateGaussianPinCov64.alpha
       ~StateGaussianPinCov64.benchmark_active
@@ -51,8 +50,6 @@
       ~StateGaussianPinCov64.rsqs
       ~StateGaussianPinCov64.screen_begins
       ~StateGaussianPinCov64.screen_beta
-      ~StateGaussianPinCov64.screen_g1
-      ~StateGaussianPinCov64.screen_g2
       ~StateGaussianPinCov64.screen_grad
       ~StateGaussianPinCov64.screen_is_active
       ~StateGaussianPinCov64.screen_set
@@ -76,10 +73,9 @@
    
    .. autoattribute:: A
    .. autoattribute:: active_begins
-   .. autoattribute:: active_g1
-   .. autoattribute:: active_g2
    .. autoattribute:: active_order
    .. autoattribute:: active_set
+   .. autoattribute:: active_set_size
    .. autoattribute:: adev_tol
    .. autoattribute:: alpha
    .. autoattribute:: benchmark_active
@@ -104,8 +100,6 @@
    .. autoattribute:: rsqs
    .. autoattribute:: screen_begins
    .. autoattribute:: screen_beta
-   .. autoattribute:: screen_g1
-   .. autoattribute:: screen_g2
    .. autoattribute:: screen_grad
    .. autoattribute:: screen_is_active
    .. autoattribute:: screen_set

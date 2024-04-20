@@ -24,6 +24,8 @@
       ~StateGaussianNaive64.X
       ~StateGaussianNaive64.X_means
       ~StateGaussianNaive64.abs_grad
+      ~StateGaussianNaive64.active_set
+      ~StateGaussianNaive64.active_set_size
       ~StateGaussianNaive64.active_sizes
       ~StateGaussianNaive64.adev_tol
       ~StateGaussianNaive64.alpha
@@ -66,8 +68,6 @@
       ~StateGaussianNaive64.screen_X_means
       ~StateGaussianNaive64.screen_begins
       ~StateGaussianNaive64.screen_beta
-      ~StateGaussianNaive64.screen_g1
-      ~StateGaussianNaive64.screen_g2
       ~StateGaussianNaive64.screen_hashset
       ~StateGaussianNaive64.screen_is_active
       ~StateGaussianNaive64.screen_rule
@@ -97,6 +97,8 @@
    .. autoattribute:: X
    .. autoattribute:: X_means
    .. autoattribute:: abs_grad
+   .. autoattribute:: active_set
+   .. autoattribute:: active_set_size
    .. autoattribute:: active_sizes
    .. autoattribute:: adev_tol
    .. autoattribute:: alpha
@@ -139,8 +141,6 @@
    .. autoattribute:: screen_X_means
    .. autoattribute:: screen_begins
    .. autoattribute:: screen_beta
-   .. autoattribute:: screen_g1
-   .. autoattribute:: screen_g2
    .. autoattribute:: screen_hashset
    .. autoattribute:: screen_is_active
    .. autoattribute:: screen_rule

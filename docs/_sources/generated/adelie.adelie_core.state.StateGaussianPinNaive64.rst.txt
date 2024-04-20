@@ -23,10 +23,9 @@
    
       ~StateGaussianPinNaive64.X
       ~StateGaussianPinNaive64.active_begins
-      ~StateGaussianPinNaive64.active_g1
-      ~StateGaussianPinNaive64.active_g2
       ~StateGaussianPinNaive64.active_order
       ~StateGaussianPinNaive64.active_set
+      ~StateGaussianPinNaive64.active_set_size
       ~StateGaussianPinNaive64.adev_tol
       ~StateGaussianPinNaive64.alpha
       ~StateGaussianPinNaive64.benchmark_active
@@ -53,8 +52,6 @@
       ~StateGaussianPinNaive64.screen_X_means
       ~StateGaussianPinNaive64.screen_begins
       ~StateGaussianPinNaive64.screen_beta
-      ~StateGaussianPinNaive64.screen_g1
-      ~StateGaussianPinNaive64.screen_g2
       ~StateGaussianPinNaive64.screen_is_active
       ~StateGaussianPinNaive64.screen_set
       ~StateGaussianPinNaive64.screen_transforms
@@ -78,10 +75,9 @@
    
    .. autoattribute:: X
    .. autoattribute:: active_begins
-   .. autoattribute:: active_g1
-   .. autoattribute:: active_g2
    .. autoattribute:: active_order
    .. autoattribute:: active_set
+   .. autoattribute:: active_set_size
    .. autoattribute:: adev_tol
    .. autoattribute:: alpha
    .. autoattribute:: benchmark_active
@@ -108,8 +104,6 @@
    .. autoattribute:: screen_X_means
    .. autoattribute:: screen_begins
    .. autoattribute:: screen_beta
-   .. autoattribute:: screen_g1
-   .. autoattribute:: screen_g2
    .. autoattribute:: screen_is_active
    .. autoattribute:: screen_set
    .. autoattribute:: screen_transforms
