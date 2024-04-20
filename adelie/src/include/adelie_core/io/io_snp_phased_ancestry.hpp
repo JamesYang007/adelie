@@ -4,10 +4,11 @@
 namespace adelie_core {
 namespace io {
 
-class IOSNPPhasedAncestry : public IOSNPBase
+template <class MmapPtrType=std::unique_ptr<char, std::function<void(char*)>>>
+class IOSNPPhasedAncestry : public IOSNPBase<MmapPtrType>
 {
 public:
-    using base_t = IOSNPBase;
+    using base_t = IOSNPBase<MmapPtrType>;
     using outer_t = uint64_t;
     using inner_t = uint32_t;
     using value_t = int8_t;
@@ -16,6 +17,7 @@ public:
     using vec_value_t = util::rowvec_type<value_t>;
     using rowarr_value_t = util::rowarr_type<value_t>;
     using colarr_value_t = util::colarr_type<value_t>;
+    using typename base_t::bool_t;
     using typename base_t::buffer_t;
 
 protected:
@@ -24,6 +26,9 @@ protected:
         sizeof(value_t)
     );
     
+    using base_t::throw_no_read;
+    using base_t::fopen_safe;
+    using base_t::is_big_endian;
     using base_t::_buffer;
     using base_t::_filename;
     using base_t::_is_read;
