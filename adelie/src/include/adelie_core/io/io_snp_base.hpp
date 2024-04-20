@@ -152,6 +152,10 @@ public:
                 )
             );
             close(fd);
+            if (addr == MAP_FAILED) {
+                perror("mmap");
+                throw util::adelie_core_error("mmap failed.");
+            }
             _mmap_ptr = addr;
             _mmap_size = total_bytes;
             new (&_buffer) Eigen::Map<buffer_t>(addr, total_bytes);
