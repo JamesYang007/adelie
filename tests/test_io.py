@@ -26,6 +26,7 @@ def test_io_snp_unphased():
         handler = ad.io.snp_unphased(filename, read_mode=read_mode)
         w_bytes = handler.write(calldata)
         r_bytes = handler.read()
+        r_bytes = handler.read() # try double-reading
 
         total_bytes_exp = (
             1 + 2 * 4 + 8 * (p + 1) + 5 * np.sum(calldata != 0)
@@ -88,6 +89,7 @@ def test_io_snp_phased_ancestry():
         handler = ad.io.snp_phased_ancestry(filename, read_mode=read_mode)
         w_bytes = handler.write(calldata, ancestries, A, n_threads=8)
         r_bytes = handler.read()
+        r_bytes = handler.read() # try double-reading
 
         assert w_bytes == r_bytes
         assert handler.rows() == n
