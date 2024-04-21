@@ -10,6 +10,9 @@ def create_calldata(
     calldata = np.zeros((n, p), dtype=np.int8)
     calldata.ravel()[
         np.random.choice(np.arange(n * p), int(0.25 * n * p), replace=False)
+    ] = -9
+    calldata.ravel()[
+        np.random.choice(np.arange(n * p), int(0.25 * n * p), replace=False)
     ] = 1
     calldata.ravel()[
         np.random.choice(np.arange(n * p), int(0.05 * n * p), replace=False)
@@ -19,49 +22,43 @@ def create_calldata(
 
 
 def test_io_snp_unphased():
-    def _test(n, p, read_mode, seed=0):
+    def _test(n, p, impute_method, read_mode, seed=0):
         calldata = create_calldata(n, p, seed)
 
         filename = "/tmp/dummy_snp_unphased.snpdat"
         handler = ad.io.snp_unphased(filename, read_mode=read_mode)
-        w_bytes = handler.write(calldata)
+        w_bytes, _ = handler.write(calldata, impute_method)
         r_bytes = handler.read()
         r_bytes = handler.read() # try double-reading
 
-        total_bytes_exp = (
-            1 + 2 * 4 + 8 * (p + 1) + 5 * np.sum(calldata != 0)
-        )
-        assert w_bytes == total_bytes_exp
+        expected_nnms = np.sum(calldata >= 0, axis=0)
+        assert np.allclose(handler.nnm, expected_nnms)
+        if impute_method == "mean":
+            means = np.mean(calldata, axis=0, where=calldata >= 0)
+            assert np.allclose(handler.impute, means)
+        else:
+            raise NotImplementedError()
+
         assert w_bytes == r_bytes
-        assert handler.rows() == n
-        assert handler.cols() == p
+        assert handler.rows == n
+        assert handler.cols == p
+        assert handler.snps == p
 
-        outer = handler.outer()
-        nnzs = np.array([handler.nnz(j) for j in range(p)])
-        inners = [handler.inner(j) for j in range(p)]
-        values = [handler.value(j) for j in range(p)]
-
-        assert np.allclose((outer[1:] - outer[:-1]) / 5, nnzs)
-        for j in range(p):
-            assert np.allclose(
-                np.arange(n)[calldata[:, j] != 0],
-                inners[j],
-            )
-            assert np.allclose(
-                calldata[:, j][calldata[:, j] != 0],
-                values[j],
-            )
+        expected_nnzs = np.sum(calldata != 0, axis=0)
+        assert np.allclose(handler.nnz, expected_nnzs)
 
         dense = handler.to_dense()
         assert np.allclose(dense, calldata)
         os.remove(filename)
 
+    impute_methods = ["mean"]
     read_modes = ["file", "mmap"]
-    for read_mode in read_modes:
-        _test(1, 1, read_mode)
-        _test(200, 32, read_mode)
-        _test(2000, 3000, read_mode)
-        _test(1421, 927, read_mode)
+    for impute_method in impute_methods:
+        for read_mode in read_modes:
+            _test(1, 1, impute_method, read_mode)
+            _test(200, 32, impute_method, read_mode)
+            _test(2000, 3000, impute_method, read_mode)
+            _test(1421, 927, impute_method, read_mode)
 
 
 def test_io_snp_phased_ancestry():

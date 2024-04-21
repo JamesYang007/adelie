@@ -1,76 +1,11 @@
-import numpy as np
 from .adelie_core import io as core_io
+from typing import Union
+import numpy as np
 
 
 class snp_base:
     def __init__(self, core):
         self._core = core
-    
-    def endian(self):
-        """Endianness used in the file.
-
-        .. note::
-            We recommend that users read/write from the file on the *same* machine.
-            The ``.snpdat`` format may depend on the endianness of the machine.
-            So, unless the endianness is the same across two different machines,
-            it is undefined behavior reading a file that was generated on a different machine.
-
-        Returns
-        -------
-        endian : str
-            ``"big-endian"`` if big-endian and ``"little-endian"`` if little-endian.
-        """
-        return (
-            "big-endian" 
-            if self._core.endian() else
-            "little-endian"
-        )
-
-    def rows(self):
-        """Number of rows of the matrix.
-
-        Returns
-        -------
-        rows : int
-            Number of rows.
-        """
-        return self._core.rows()
-
-    def cols(self):
-        """Number of columns of the matrix.
-
-        Returns
-        -------
-        cols : int
-            Number of columns.
-        """
-        return self._core.cols()
-
-    def read(self):
-        """Read and load the matrix from file.
-
-        Returns
-        -------
-        total_bytes : int
-            Number of bytes read.
-        """
-        return self._core.read()
-
-    def to_dense(self, n_threads: int =1):
-        """Creates a dense matrix.
-
-        Parameters
-        ----------
-        n_threads : int, optional
-            Number of threads.
-            Default is ``1``.
-
-        Returns
-        -------
-        dense : (n, p) np.ndarray
-            Dense matrix.
-        """
-        return self._core.to_dense(n_threads)
 
 
 class snp_phased_ancestry(snp_base):
@@ -197,24 +132,29 @@ class snp_phased_ancestry(snp_base):
         return self._core.write(calldata, ancestries, A, n_threads)
 
 
-class snp_unphased(snp_base):
-    """IO handler for SNP unphased data.
+class snp_unphased(core_io.IOSNPUnphased):
+    """IO handler for SNP unphased matrix.
+
+    A SNP unphased matrix is a matrix that contains values in the set ``{0, 1, 2, NA}``
+    where ``NA`` indicates a missing value.
+    Typically, ``NA`` is encoded as ``-9``, but for more generality
+    we assume *any* negative value is equivalent to ``NA``.
 
     Parameters
     ----------
     filename : str
-        File name containing the SNP data in ``.snpdat`` format.
+        File name to either read or write the SNP unphased matrix in ``.snpdat`` format.
     read_mode : str, optional
-        Reading mode of the SNP data. 
+        Reading mode of the file ``filename``. 
         It must be one of the following:
 
             - ``"file"``: reads the file using standard file IO.
-              This method is the most general and portable,
-              however, with large files, it is the slowest option.
+              This method is the most general and portable method,
+              however, with large files, it is the slowest one.
             - ``"mmap"``: reads the file using mmap.
               This method is only supported on Linux and MacOS.
               It is the most efficient way to read large files.
-            - ``"auto"``: automatic way of choosing one of the options above.
+            - ``"auto"``: automatically choose one of the options above.
               The mode is set to ``"mmap"`` whenever the option is allowed.
               Otherwise, the mode is set to ``"file"``.
 
@@ -225,75 +165,29 @@ class snp_unphased(snp_base):
         filename: str,
         read_mode: str ="auto",
     ):
-        super().__init__(core_io.IOSNPUnphased(filename, read_mode))
-
-    def outer(self):
-        """Outer indexing vector.
-
-        Returns
-        -------
-        outer : (p+1,) np.ndarray
-            Outer indexing vector.
-        """
-        return self._core.outer()
-
-    def nnz(self, j: int):
-        """Number of non-zero entries at a column.
-
-        Parameters
-        ----------
-        j : int
-            Column index.
-
-        Returns
-        -------
-        nnz : int
-            Number of non-zero entries in column ``j``.
-        """
-        return self._core.nnz(j)
-
-    def inner(self, j: int):
-        """Inner indexing vector at a column.
-
-        Parameters
-        ----------
-        j : int
-            Column index.
-
-        Returns
-        -------
-        inner : np.ndarray
-            Inner indexing vector at column ``j``.
-        """
-        return self._core.inner(j)
-
-    def value(self, j: int):
-        """Value vector at a column.
-
-        Parameters
-        ----------
-        j : int
-            Column index.
-
-        Returns
-        -------
-        v : np.ndarray
-            Value vector at column ``j``.
-        """
-        return self._core.value(j)
+        core_io.IOSNPUnphased.__init__(self, filename, read_mode)
 
     def write(
         self, 
         calldata: np.ndarray,
+        impute_method: Union[str, np.ndarray] ="mean",
         n_threads: int =1,
     ):
-        """Write a dense array to the file in ``.snpdat`` format.
+        """Write a dense SNP unphased matrix to the file in ``.snpdat`` format.
 
         Parameters
         ----------
         calldata : (n, p) np.ndarray
-            SNP unphased calldata in dense format.
-            It must only contain values in :math:`\\{0,1,2\\}`.
+            SNP unphased matrix in dense format.
+        impute_method : Union[str, np.ndarray], optional
+            Impute method for missing values. 
+            It must be one of the following:
+
+                - ``"mean"``: mean-imputation. Missing values in column ``j`` of ``calldata`` are replaced with
+                  the mean of column ``j`` where the mean is computed using the non-missing values.
+                - ``np.ndarray``: user-specified vector of imputed values for each column of ``calldata``.
+                
+            Default is ``"mean"``.
         n_threads : int, optional
             Number of threads.
             Default is ``1``.
@@ -303,4 +197,12 @@ class snp_unphased(snp_base):
         total_bytes : int
             Number of bytes written.
         """
-        return self._core.write(calldata, n_threads)
+        if isinstance(impute_method, str):
+            p = calldata.shape[1]
+            impute = np.empty(p)
+        elif isinstance(impute_method, np.ndarray):
+            impute = impute_method
+            impute_method = "user"
+        else:
+            raise ValueError("impute_method must be a valid option.")
+        return core_io.IOSNPUnphased.write(self, calldata, impute_method, impute, n_threads)

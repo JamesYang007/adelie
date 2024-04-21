@@ -59,6 +59,12 @@ enum class read_mode_type
     _auto
 };
 
+enum class impute_method_type
+{
+    _mean,
+    _user
+};
+
 enum class operator_type
 {
     _eq,
@@ -109,6 +115,15 @@ inline read_mode_type convert_read_mode(
     if (read_mode == "mmap") return read_mode_type::_mmap;
     if (read_mode == "auto") return read_mode_type::_auto;
     throw util::adelie_core_error("Invalid read mode type: " + read_mode);
+}
+
+inline impute_method_type convert_impute_method(
+    const std::string& impute_method
+)
+{
+    if (impute_method == "mean") return impute_method_type::_mean;
+    if (impute_method == "user") return impute_method_type::_user;
+    throw util::adelie_core_error("Invalid read mode type: " + impute_method);
 }
 
 } // namespace util
