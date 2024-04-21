@@ -438,3 +438,81 @@ BENCHMARK(BM_dot_2prod)
     -> Args({10000})
     -> Args({100000})
     ;
+
+static void BM_sparse_split(benchmark::State& state) {
+    const auto n = state.range(0);
+    srand(0);
+    ad::util::rowvec_type<int> inner1(n); inner1.setRandom();
+    inner1 = inner1.unaryExpr([&](auto i) -> int { return i % n; });
+    ad::util::rowvec_type<int> inner2(n); inner2.setRandom();
+    inner2 = inner2.unaryExpr([&](auto i) -> int { return i % n + n; });
+    ad::util::rowvec_type<int> inner3(n); inner3.setRandom();
+    inner3 = inner3.unaryExpr([&](auto i) -> int { return i % n + 2 * n; });
+    std::sort(inner1.data(), inner1.data() + n);
+    std::sort(inner2.data(), inner2.data() + n);
+    std::sort(inner3.data(), inner3.data() + n);
+    ad::util::rowvec_type<double> v(3 * n);
+    v.setRandom();
+    double sum = 0;
+
+    for (auto _ : state) {
+        for (int i = 0; i < inner1.size(); ++i) {
+            sum += v[inner1[i]];
+        }
+        for (int i = 0; i < inner2.size(); ++i) {
+            sum += 2 * v[inner2[i]];
+        }
+        for (int i = 0; i < inner3.size(); ++i) {
+            sum += 2.123 * v[inner3[i]];
+        }
+        benchmark::DoNotOptimize(sum);
+    }
+}
+
+BENCHMARK(BM_sparse_split)
+    -> Args({10})
+    -> Args({100})
+    -> Args({1000})
+    -> Args({10000})
+    -> Args({100000})
+    ;
+
+static void BM_sparse_combine(benchmark::State& state) {
+    const auto n = state.range(0);
+    srand(0);
+    ad::util::rowvec_type<int> inner1(n); inner1.setRandom();
+    inner1 = inner1.unaryExpr([&](auto i) -> int { return i % n; });
+    ad::util::rowvec_type<int> inner2(n); inner2.setRandom();
+    inner2 = inner2.unaryExpr([&](auto i) -> int { return i % n + n; });
+    ad::util::rowvec_type<int> inner3(n); inner3.setRandom();
+    inner3 = inner3.unaryExpr([&](auto i) -> int { return i % n + 2 * n; });
+    ad::util::rowvec_type<int> inner(3 * n);
+    inner.segment(0, n) = inner1;
+    inner.segment(n, n) = inner2;
+    inner.segment(2 * n, n) = inner3;
+    std::sort(inner.data(), inner.data() + 3 * n);
+    ad::util::rowvec_type<int8_t> value(3 * n); value.setRandom();
+    value = value.unaryExpr([&](auto i) -> int8_t { return i % 2 + 1; });
+    ad::util::rowvec_type<double> v(3 * n);
+    v.setRandom();
+    double sum = 0;
+
+    for (auto _ : state) {
+        for (int i = 0; i < inner.size(); ++i) {
+            if (value[i] < 0) {
+                sum += 2.134 * v[inner[i]];
+            } else {
+                sum += value[i] * v[inner[i]];
+            }
+        }
+        benchmark::DoNotOptimize(sum);
+    }
+}
+
+BENCHMARK(BM_sparse_combine)
+    -> Args({10})
+    -> Args({100})
+    -> Args({1000})
+    -> Args({10000})
+    -> Args({100000})
+    ;
