@@ -360,8 +360,7 @@ public:
             outer[0] = idx;
 
             // populate outer 
-            sw.start();
-            for (inner_t j = 0; j < p; ++j) {
+            const auto outer_routine = [&](inner_t j) {
                 const auto col_j = calldata.col(j);
                 size_t col_bytes = sizeof(inner_t);
                 for (inner_t k = 0; k < max_chunks; ++k) {
@@ -390,16 +389,20 @@ public:
                     }
                     col_bytes += is_nonempty * (sizeof(inner_t) + sizeof(chunk_inner_t));
                 } 
-                idx += col_bytes;
-                if (idx > buffer.size()) {
-                    throw util::adelie_core_error(
-                        "Buffer was not initialized with a large enough size. "
-                        "This is likely a bug in the code. Please report it! "
-                    );
-                }
-                outer[j+1] = idx;
+                outer[j+1] = col_bytes;
+            };
+            sw.start();
+            if (n_threads <= 1) {
+                for (inner_t j = 0; j < p; ++j) outer_routine(j);
+            } else {
+                #pragma omp parallel for schedule(auto) num_threads(n_threads)
+                for (inner_t j = 0; j < p; ++j) outer_routine(j);
             }
             outer_time += sw.elapsed();
+
+            for (inner_t j = 0; j < p; ++j) outer[j+1] += outer[j];
+
+            idx = outer[p];
 
             // populate next ctg_outer
             ctg_outer[i+1] = idx;

@@ -545,7 +545,7 @@ def test_solve_gaussian():
 
 
 def test_solve_gaussian_concatenate():
-    def _test(n, ps, G, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=7):
+    def _test(n, ps, G, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=2):
         test_datas = [
             ad.data.dense(n=n, p=p, G=G, sparsity=sparsity, seed=seed)
             for p in ps
@@ -642,7 +642,7 @@ def test_solve_gaussian_concatenate():
 
 
 def test_solve_gaussian_snp_unphased():
-    def _test(n, p, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=7):
+    def _test(n, p, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=3):
         test_data = ad.data.snp_unphased(n=n, p=p, sparsity=sparsity, seed=seed)
         filename = f"/tmp/test_snp_unphased.snpdat"
         handler = ad.io.snp_unphased(filename)
@@ -714,7 +714,7 @@ def test_solve_gaussian_snp_unphased():
 
 
 def test_solve_gaussian_snp_phased_ancestry():
-    def _test(n, p, A=8, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=7):
+    def _test(n, p, A=8, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=2):
         test_data = ad.data.snp_phased_ancestry(n=n, s=p, A=A, sparsity=sparsity, seed=seed)
         filename = "/tmp/test_snp_phased_ancestry.snpdat"
         handler = ad.io.snp_phased_ancestry(filename)
