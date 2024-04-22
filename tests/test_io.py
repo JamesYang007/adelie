@@ -27,7 +27,7 @@ def test_io_snp_unphased():
 
         filename = "/tmp/dummy_snp_unphased.snpdat"
         handler = ad.io.snp_unphased(filename, read_mode=read_mode)
-        w_bytes, _ = handler.write(calldata, impute_method)
+        w_bytes, _ = handler.write(calldata, impute_method, n_threads=2)
         r_bytes = handler.read()
         r_bytes = handler.read() # try double-reading
 
