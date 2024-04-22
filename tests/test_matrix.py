@@ -342,7 +342,7 @@ def test_naive_snp_unphased():
         data = ad.data.snp_unphased(n, p, seed=seed)
         filename = "/tmp/test_snp_unphased.snpdat"
         handler = ad.io.snp_unphased(filename)
-        handler.write(data["X"])
+        handler.write(data["X"], impute_method="mean")
         cX = mod.snp_unphased(
             filename=filename,
             read_mode=read_mode,
@@ -350,7 +350,10 @@ def test_naive_snp_unphased():
             n_threads=7,
         )
 
-        X = data["X"].astype(np.int8)
+        handler.read()
+        impute = handler.impute
+        X = data["X"].astype(float)
+        X = np.where(X == -9, impute[None], X)
         run_naive(X, cX, dtype)
         os.remove(filename)
 

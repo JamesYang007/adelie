@@ -583,12 +583,12 @@ def test_solve_gaussian_concatenate():
         X_c = X - intercept * X_means[None]
         y_c = y - y_mean * intercept
         y_var = np.sum(weights * y_c ** 2)
-        resid = weights * y_c
-        resid_sum = np.sum(resid)
+        resid = y_c
+        resid_sum = np.sum(weights * resid)
         screen_set = np.arange(len(groups))[(penalty <= 0) | (alpha <= 0)]
         screen_beta = np.zeros(np.sum(group_sizes[screen_set]))
         screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
-        grad = X_c.T @ resid
+        grad = X_c.T @ (weights * resid)
 
         test_data = {
             "y": y,
@@ -646,7 +646,9 @@ def test_solve_gaussian_snp_unphased():
         test_data = ad.data.snp_unphased(n=n, p=p, sparsity=sparsity, seed=seed)
         filename = f"/tmp/test_snp_unphased.snpdat"
         handler = ad.io.snp_unphased(filename)
-        handler.write(test_data["X"], n_threads)
+        handler.write(test_data["X"], impute_method="mean", n_threads=n_threads)
+        handler.read()
+        impute = handler.impute
         Xs = [
             ad.matrix.snp_unphased(
                 filename=filename,
@@ -654,9 +656,9 @@ def test_solve_gaussian_snp_unphased():
                 n_threads=n_threads,
             )
         ]
-        os.remove(filename)
 
         X, y = test_data["X"], test_data.pop("glm").y
+        X = np.where(X == -9, impute[None], X)
 
         weights = np.random.uniform(1, 2, n)
         weights /= np.sum(weights)
@@ -670,14 +672,14 @@ def test_solve_gaussian_snp_unphased():
         X_c = X - intercept * test_data["X_means"][None]
         y_c = y - test_data["y_mean"] * intercept
         test_data["y_var"] = np.sum(weights * y_c ** 2)
-        test_data["resid"] = weights * y_c
-        test_data["resid_sum"] = np.sum(test_data["resid"])
+        test_data["resid"] = y_c
+        test_data["resid_sum"] = np.sum(weights * test_data["resid"])
         test_data["screen_set"] = np.arange(p)[(test_data["penalty"] <= 0) | (alpha <= 0)]
         test_data["screen_beta"] = np.zeros(np.sum(test_data["group_sizes"][test_data["screen_set"]]))
         test_data["screen_is_active"] = np.zeros(test_data["screen_set"].shape[0], dtype=bool)
         test_data["active_set_size"] = 0
         test_data["active_set"] = np.empty(p, dtype=int)
-        test_data["grad"] = X_c.T @ test_data["resid"]
+        test_data["grad"] = X_c.T @ (weights * test_data["resid"])
         test_data["rsq"] = 0 
         test_data["lmda"] = np.inf
         test_data["tol"] = 1e-10
@@ -702,6 +704,8 @@ def test_solve_gaussian_snp_unphased():
             assert np.allclose(state_special.intercepts, state_dense.intercepts, atol=1e-3)
             assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray(), atol=1e-3)
 
+        os.remove(filename)
+
     _test(10, 4)
     _test(10, 100)
     _test(100, 23)
@@ -723,7 +727,6 @@ def test_solve_gaussian_snp_phased_ancestry():
             )
         ]
         handler.read() 
-        os.remove(filename)
 
         X, y = handler.to_dense(n_threads), test_data.pop("glm").y
 
@@ -739,14 +742,14 @@ def test_solve_gaussian_snp_phased_ancestry():
         X_c = X - intercept * test_data["X_means"][None]
         y_c = y - test_data["y_mean"] * intercept
         test_data["y_var"] = np.sum(weights * y_c ** 2)
-        test_data["resid"] = weights * y_c
-        test_data["resid_sum"] = np.sum(test_data["resid"])
+        test_data["resid"] = y_c
+        test_data["resid_sum"] = np.sum(weights * test_data["resid"])
         test_data["screen_set"] = np.arange(p)[(test_data["penalty"] <= 0) | (alpha <= 0)]
         test_data["screen_beta"] = np.zeros(np.sum(test_data["group_sizes"][test_data["screen_set"]]))
         test_data["screen_is_active"] = np.zeros(test_data["screen_set"].shape[0], dtype=bool)
         test_data["active_set_size"] = 0
         test_data["active_set"] = np.empty(p, dtype=int)
-        test_data["grad"] = X_c.T @ test_data["resid"]
+        test_data["grad"] = X_c.T @ (weights * test_data["resid"])
         test_data["rsq"] = 0 
         test_data["lmda"] = np.inf
         test_data["tol"] = 1e-7
@@ -772,6 +775,8 @@ def test_solve_gaussian_snp_phased_ancestry():
             assert np.allclose(state_special.devs, state_dense.devs)
             assert np.allclose(state_special.intercepts, state_dense.intercepts)
             assert np.allclose(state_special.betas.toarray(), state_dense.betas.toarray())
+
+        os.remove(filename)
 
     _test(10, 4)
     _test(10, 100)
