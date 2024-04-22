@@ -123,8 +123,9 @@ public:
     using typename base_t::buffer_t;
 
 protected:
+    static constexpr size_t _n_bits_per_byte = 8;
     static constexpr size_t _n_categories = 3;
-    static constexpr size_t _chunk_size = 1 << sizeof(chunk_inner_t);
+    static constexpr size_t _chunk_size = 1 << (_n_bits_per_byte * sizeof(chunk_inner_t));
     static constexpr size_t _multiplier = (
         sizeof(inner_t) + 
         sizeof(value_t)
@@ -303,7 +304,7 @@ public:
             impute.size() * sizeof(impute_t) +  // impute
             (n_ctg + 1) * sizeof(outer_t)       // outer (category)
         );
-        const size_t max_chunks = n / _chunk_size + 1;
+        const size_t max_chunks = (n + _chunk_size - 1) / _chunk_size;
         buffer_t buffer(
             preamble_size +
             n_ctg * (p + 1) * (                 // for each category and column
@@ -390,6 +391,12 @@ public:
                     col_bytes += is_nonempty * (sizeof(inner_t) + sizeof(chunk_inner_t));
                 } 
                 idx += col_bytes;
+                if (idx > buffer.size()) {
+                    throw util::adelie_core_error(
+                        "Buffer was not initialized with a large enough size. "
+                        "This is likely a bug in the code. Please report it! "
+                    );
+                }
                 outer[j+1] = idx;
             }
             outer_time += sw.elapsed();
@@ -411,11 +418,11 @@ public:
                 for (inner_t k = 0; k < max_chunks; ++k) {
                     const inner_t chnk = k * _chunk_size;
                     size_t curr_idx = cidx;
-                    auto& chunk_index = reinterpret_cast<inner_t&>(buffer_j[curr_idx]); curr_idx += sizeof(inner_t);
-                    auto& chunk_nnz = reinterpret_cast<chunk_inner_t&>(buffer_j[curr_idx]); curr_idx += sizeof(chunk_inner_t);
-                    auto* chunk_begin = reinterpret_cast<chunk_inner_t*>(&buffer_j[curr_idx]); 
+                    auto* chunk_index = reinterpret_cast<inner_t*>(buffer_j.data() + curr_idx); curr_idx += sizeof(inner_t);
+                    auto* chunk_nnz = reinterpret_cast<chunk_inner_t*>(buffer_j.data() + curr_idx); curr_idx += sizeof(chunk_inner_t);
+                    auto* chunk_begin = reinterpret_cast<chunk_inner_t*>(buffer_j.data() + curr_idx); 
                     inner_t nnz = 0;
-                    for (chunk_inner_t c = 0; c < _chunk_size; ++c) {
+                    for (inner_t c = 0; c < _chunk_size; ++c) {
                         const inner_t didx = chnk + c;
                         if (didx >= n) break;
                         const bool to_not_skip = (
@@ -428,8 +435,8 @@ public:
                         ++curr_idx;
                     }
                     if (nnz) {
-                        chunk_index = k;
-                        chunk_nnz = nnz - 1;
+                        *chunk_index = k;
+                        *chunk_nnz = nnz - 1;
                         cidx = curr_idx;
                         ++n_chunks;
                     }
@@ -451,6 +458,13 @@ public:
                 for (inner_t j = 0; j < p; ++j) routine(j);
             }
             inner_time += sw.elapsed();
+        }
+
+        if (idx > buffer.size()) {
+            throw util::adelie_core_error(
+                "Buffer was not initialized with a large enough size. "
+                "This is likely a bug in the code. Please report it! "
+            );
         }
 
         benchmark["outer"] = outer_time;
