@@ -24,7 +24,7 @@ void compute_column_mean(
             if (m(k,j) > 0) sum += m(k,j);
             else if (m(k,j) < 0) ++n_miss;
         }
-        out[j] = static_cast<double>(sum) / (n - n_miss);
+        out[j] = static_cast<double>(sum) / std::max<int>(n - n_miss, 1);
     };
 
     if (n_threads <= 1) {

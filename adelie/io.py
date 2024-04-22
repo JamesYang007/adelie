@@ -185,6 +185,7 @@ class snp_unphased(core_io.IOSNPUnphased):
 
                 - ``"mean"``: mean-imputation. Missing values in column ``j`` of ``calldata`` are replaced with
                   the mean of column ``j`` where the mean is computed using the non-missing values.
+                  If every value is missing, we impute with ``0``.
                 - ``np.ndarray``: user-specified vector of imputed values for each column of ``calldata``.
                 
             Default is ``"mean"``.

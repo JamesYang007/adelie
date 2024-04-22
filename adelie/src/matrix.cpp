@@ -733,8 +733,8 @@ void register_matrix(py::module_& m)
     matrix_naive_kronecker_eye_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixNaiveKroneckerEyeDense32C");
     matrix_naive_kronecker_eye_dense<dense_type<float, Eigen::ColMajor>>(m, "MatrixNaiveKroneckerEyeDense32F");
 
-    //matrix_naive_snp_unphased<double>(m, "MatrixNaiveSNPUnphased64");
-    //matrix_naive_snp_unphased<float>(m, "MatrixNaiveSNPUnphased32");
+    matrix_naive_snp_unphased<double>(m, "MatrixNaiveSNPUnphased64");
+    matrix_naive_snp_unphased<float>(m, "MatrixNaiveSNPUnphased32");
     matrix_naive_snp_phased_ancestry<double>(m, "MatrixNaiveSNPPhasedAncestry64");
     matrix_naive_snp_phased_ancestry<float>(m, "MatrixNaiveSNPPhasedAncestry32");
 

@@ -11,6 +11,16 @@ struct IOSNPUnphasedIterator;
 
 template <size_t chunk_size, class InnerType, class ChunkInnerType>
 inline constexpr bool 
+operator==(
+    const IOSNPUnphasedIterator<chunk_size, InnerType, ChunkInnerType>& it1, 
+    const IOSNPUnphasedIterator<chunk_size, InnerType, ChunkInnerType>& it2
+)
+{
+    return it1.chunk_it == it2.chunk_it;
+}
+
+template <size_t chunk_size, class InnerType, class ChunkInnerType>
+inline constexpr bool 
 operator!=(
     const IOSNPUnphasedIterator<chunk_size, InnerType, ChunkInnerType>& it1, 
     const IOSNPUnphasedIterator<chunk_size, InnerType, ChunkInnerType>& it2
@@ -69,6 +79,8 @@ struct IOSNPUnphasedIterator
         return *this; 
     }
     reference operator*() { return dense_index; }
+    friend constexpr bool operator==<>(const IOSNPUnphasedIterator&, 
+                                       const IOSNPUnphasedIterator&);
     friend constexpr bool operator!=<>(const IOSNPUnphasedIterator&, 
                                        const IOSNPUnphasedIterator&);
 
