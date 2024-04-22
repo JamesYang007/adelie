@@ -74,7 +74,7 @@ void io_snp_unphased(py::module_& m)
 
         .. note::
             The missing values are *always* encoded as ``-9``
-            even if they were different values when writing to the file.
+            even if they were different (negative) values when writing to the file.
 
         Parameters
         ----------
