@@ -285,12 +285,14 @@ public:
 
     inner_t rows() const {
         if (!_is_read) throw_no_read();
-        return reinterpret_cast<const inner_t&>(_buffer[sizeof(bool_t)]);
+        constexpr size_t idx = sizeof(bool_t);
+        return reinterpret_cast<const inner_t&>(_buffer[idx]);
     }
 
     inner_t snps() const {
         if (!_is_read) throw_no_read();
-        return reinterpret_cast<const inner_t&>(_buffer[sizeof(bool_t) + sizeof(inner_t)]);
+        constexpr size_t idx = sizeof(bool_t) + sizeof(inner_t);
+        return reinterpret_cast<const inner_t&>(_buffer[idx]);
     }
 
     inner_t cols() const { return snps(); }
@@ -480,7 +482,8 @@ public:
                     sizeof(chunk_inner_t)
                 )
             ) +
-            nnz.sum() * sizeof(chunk_inner_t)   // nnz * char
+            // IMPORTANT: must cast to size_t since the sum may overflow otherwise!
+            nnz.template cast<size_t>().sum() * sizeof(chunk_inner_t)   // nnz * char
         );
 
         // populate buffer
@@ -560,7 +563,9 @@ public:
         if (outer[p] > buffer.size()) {
             throw util::adelie_core_error(
                 "Buffer was not initialized with a large enough size. "
-                "This is likely a bug in the code. Please report it! "
+                "\n\tBuffer size:   " + std::to_string(buffer.size()) +
+                "\n\tExpected size: " + std::to_string(outer[p]) +
+                "\nThis is likely a bug in the code. Please report it! "
             );
         }
         idx = outer[p];
