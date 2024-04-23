@@ -38,7 +38,6 @@ void compute_column_mean(
 ADELIE_CORE_STRONG_INLINE
 void compute_nnm(
     const Eigen::Ref<const util::colarr_type<int8_t>>& m,
-    util::impute_method_type /* not used currently */,
     Eigen::Ref<util::rowvec_type<uint32_t>> out,
     size_t n_threads
 )
@@ -64,7 +63,6 @@ void compute_nnm(
 ADELIE_CORE_STRONG_INLINE
 void compute_nnz(
     const Eigen::Ref<const util::colarr_type<int8_t>>& m,
-    util::impute_method_type impute_method,
     Eigen::Ref<util::rowvec_type<uint32_t>> out,
     size_t n_threads
 )

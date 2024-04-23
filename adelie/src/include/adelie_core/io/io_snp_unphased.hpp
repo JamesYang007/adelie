@@ -42,8 +42,8 @@ struct IOSNPUnphasedIterator
     inner_t chunk_index;
     inner_t chunk_nnz;
     inner_t inner;
-    inner_t dense_chunk_index;
-    inner_t dense_index;
+    size_t dense_chunk_index;
+    size_t dense_index;
 
     IOSNPUnphasedIterator(
         inner_t chunk_it,
@@ -73,7 +73,7 @@ struct IOSNPUnphasedIterator
         return *this; 
     }
     ADELIE_CORE_STRONG_INLINE
-    inner_t& operator*() { return dense_index; }
+    size_t& operator*() { return dense_index; }
     friend constexpr bool operator==<>(const IOSNPUnphasedIterator&, 
                                        const IOSNPUnphasedIterator&);
     friend constexpr bool operator!=<>(const IOSNPUnphasedIterator&, 
@@ -149,7 +149,7 @@ struct IOSNPUnphasedLinearIterator
     const size_t n_chunks;
     inner_t chunk_it;
     u_char ctg_idx;
-    inner_t dense_index;
+    size_t dense_index;
     impute_t dense_value;
 
     IOSNPUnphasedLinearIterator(
@@ -203,7 +203,7 @@ struct IOSNPUnphasedLinearIterator
         return *this;
     }
 
-    inner_t& index() { return dense_index; }
+    size_t& index() { return dense_index; }
     impute_t& value() { return dense_value; }
     friend constexpr bool operator==<>(const IOSNPUnphasedLinearIterator&, 
                                        const IOSNPUnphasedLinearIterator&);
@@ -261,7 +261,10 @@ public:
     static constexpr size_t n_bits_per_byte = 8;
     static constexpr size_t n_categories = 3;
     static constexpr size_t chunk_size = (
-        1 << (n_bits_per_byte * sizeof(chunk_inner_t))
+        1UL << (n_bits_per_byte * sizeof(chunk_inner_t))
+    );
+    static constexpr size_t _max_inner = (
+        1UL << (n_bits_per_byte * sizeof(inner_t))
     );
 
 protected:
@@ -283,36 +286,36 @@ public:
     using base_t::base_t;
     using base_t::read;
 
-    inner_t rows() const {
+    outer_t rows() const {
         if (!_is_read) throw_no_read();
         constexpr size_t idx = sizeof(bool_t);
-        return reinterpret_cast<const inner_t&>(_buffer[idx]);
+        return reinterpret_cast<const outer_t&>(_buffer[idx]);
     }
 
-    inner_t snps() const {
+    outer_t snps() const {
         if (!_is_read) throw_no_read();
-        constexpr size_t idx = sizeof(bool_t) + sizeof(inner_t);
-        return reinterpret_cast<const inner_t&>(_buffer[idx]);
+        constexpr size_t idx = sizeof(bool_t) + sizeof(outer_t);
+        return reinterpret_cast<const outer_t&>(_buffer[idx]);
     }
 
-    inner_t cols() const { return snps(); }
+    outer_t cols() const { return snps(); }
 
-    Eigen::Ref<const vec_inner_t> nnz() const 
+    Eigen::Ref<const vec_outer_t> nnz() const 
     {
         if (!_is_read) throw_no_read();
-        constexpr size_t slice = sizeof(bool_t) + 2 * sizeof(inner_t);
-        return Eigen::Map<const vec_inner_t>(
-            reinterpret_cast<const inner_t*>(&_buffer[slice]),
+        constexpr size_t slice = sizeof(bool_t) + 2 * sizeof(outer_t);
+        return Eigen::Map<const vec_outer_t>(
+            reinterpret_cast<const outer_t*>(&_buffer[slice]),
             cols()
         );
     }
 
-    Eigen::Ref<const vec_inner_t> nnm() const 
+    Eigen::Ref<const vec_outer_t> nnm() const 
     {
         if (!_is_read) throw_no_read();
-        const size_t slice = sizeof(bool_t) + (2 + cols()) * sizeof(inner_t);
-        return Eigen::Map<const vec_inner_t>(
-            reinterpret_cast<const inner_t*>(&_buffer[slice]),
+        const size_t slice = sizeof(bool_t) + (2 + cols()) * sizeof(outer_t);
+        return Eigen::Map<const vec_outer_t>(
+            reinterpret_cast<const outer_t*>(&_buffer[slice]),
             cols()
         );
     }
@@ -320,7 +323,7 @@ public:
     Eigen::Ref<const vec_impute_t> impute() const
     {
         if (!_is_read) throw_no_read();
-        const size_t slice = sizeof(bool_t) + 2 * (1 + cols()) * sizeof(inner_t);
+        const size_t slice = sizeof(bool_t) + 2 * (1 + cols()) * sizeof(outer_t);
         return Eigen::Map<const vec_impute_t>(
             reinterpret_cast<const impute_t*>(&_buffer[slice]),
             cols()
@@ -330,7 +333,7 @@ public:
     Eigen::Ref<const buffer_t> col(int j) const
     {
         if (!_is_read) throw_no_read();
-        const size_t slice = sizeof(bool_t) + 2 * (1 + cols()) * sizeof(inner_t) + cols() * sizeof(impute_t);
+        const size_t slice = sizeof(bool_t) + 2 * (1 + cols()) * sizeof(outer_t) + cols() * sizeof(impute_t);
         Eigen::Map<const vec_outer_t> outer(
             reinterpret_cast<const outer_t*>(&_buffer[slice]),
             cols() + 1
@@ -403,7 +406,7 @@ public:
         const auto p = cols();
         rowarr_value_t dense(n, p);
 
-        const auto routine = [&](inner_t j) {
+        const auto routine = [&](outer_t j) {
             auto dense_j = dense.col(j);
             dense_j.setZero();
             for (int c = 0; c < n_categories; ++c) {
@@ -416,10 +419,10 @@ public:
             }
         };
         if (n_threads <= 1) {
-            for (inner_t j = 0; j < p; ++j) routine(j);
+            for (outer_t j = 0; j < p; ++j) routine(j);
         } else {
             #pragma omp parallel for schedule(auto) num_threads(n_threads)
-            for (inner_t j = 0; j < p; ++j) routine(j);
+            for (outer_t j = 0; j < p; ++j) routine(j);
         }
 
         return dense;
@@ -438,8 +441,8 @@ public:
         std::unordered_map<std::string, double> benchmark;
 
         const bool_t endian = is_big_endian();
-        const inner_t n = calldata.rows();
-        const inner_t p = calldata.cols();
+        const outer_t n = calldata.rows();
+        const outer_t p = calldata.cols();
 
         // handle impute_method
         const auto impute_method = util::convert_impute_method(impute_method_str);
@@ -450,24 +453,24 @@ public:
         benchmark["impute"] = sw.elapsed();
 
         // compute number of non-missing values
-        vec_inner_t nnm(p);
+        vec_outer_t nnm(p);
         sw.start();
-        compute_nnm(calldata, impute_method, nnm, n_threads);
+        compute_nnm(calldata, nnm, n_threads);
         benchmark["nnm"] = sw.elapsed();
 
         // compute number of non-zero values
-        vec_inner_t nnz(p);
+        vec_outer_t nnz(p);
         sw.start();
-        compute_nnz(calldata, impute_method, nnz, n_threads);
+        compute_nnz(calldata, nnz, n_threads);
         benchmark["nnz"] = sw.elapsed();
 
         // allocate sufficient memory (upper bound on size)
         constexpr size_t n_ctg = n_categories;
         const size_t preamble_size = (
             sizeof(bool_t) +                    // endian
-            2 * sizeof(inner_t) +               // n, p
-            nnz.size() * sizeof(inner_t) +      // nnz
-            nnm.size() * sizeof(inner_t) +      // nnm
+            2 * sizeof(outer_t) +               // n, p
+            nnz.size() * sizeof(outer_t) +      // nnz
+            nnm.size() * sizeof(outer_t) +      // nnm
             impute.size() * sizeof(impute_t) +  // impute
             (p + 1) * sizeof(outer_t)           // outer (columns)
         );
@@ -482,23 +485,28 @@ public:
                     sizeof(chunk_inner_t)
                 )
             ) +
-            // IMPORTANT: must cast to size_t since the sum may overflow otherwise!
-            nnz.template cast<size_t>().sum() * sizeof(chunk_inner_t)   // nnz * char
+            nnz.sum() * sizeof(chunk_inner_t)   // nnz * char
         );
+
+        if (max_chunks >= _max_inner) {
+            throw util::adelie_core_error(
+                "calldata dimensions are too large! "
+            );
+        } 
 
         // populate buffer
         size_t idx = 0;
         reinterpret_cast<bool_t&>(buffer[idx]) = endian; idx += sizeof(bool_t);
-        reinterpret_cast<inner_t&>(buffer[idx]) = n; idx += sizeof(inner_t);
-        reinterpret_cast<inner_t&>(buffer[idx]) = p; idx += sizeof(inner_t);
-        Eigen::Map<vec_inner_t>(
-            reinterpret_cast<inner_t*>(&buffer[idx]),
+        reinterpret_cast<outer_t&>(buffer[idx]) = n; idx += sizeof(outer_t);
+        reinterpret_cast<outer_t&>(buffer[idx]) = p; idx += sizeof(outer_t);
+        Eigen::Map<vec_outer_t>(
+            reinterpret_cast<outer_t*>(&buffer[idx]),
             nnz.size()
-        ) = nnz; idx += sizeof(inner_t) * nnz.size();
-        Eigen::Map<vec_inner_t>(
-            reinterpret_cast<inner_t*>(&buffer[idx]),
+        ) = nnz; idx += sizeof(outer_t) * nnz.size();
+        Eigen::Map<vec_outer_t>(
+            reinterpret_cast<outer_t*>(&buffer[idx]),
             nnm.size()
-        ) = nnm; idx += sizeof(inner_t) * nnm.size();
+        ) = nnm; idx += sizeof(outer_t) * nnm.size();
         Eigen::Map<vec_impute_t>(
             reinterpret_cast<impute_t*>(&buffer[idx]),
             impute.size()
@@ -514,16 +522,16 @@ public:
         outer[0] = idx;
 
         // populate outer 
-        const auto outer_routine = [&](inner_t j) {
+        const auto outer_routine = [&](outer_t j) {
             const auto col_j = calldata.col(j);
             size_t col_bytes = 0;
             for (int i = 0; i < n_ctg; ++i) {
                 col_bytes += sizeof(outer_t) + sizeof(inner_t);
                 for (inner_t k = 0; k < max_chunks; ++k) {
-                    const inner_t chnk = k * chunk_size;
+                    const outer_t chnk = k * chunk_size;
                     bool is_nonempty = false;
                     for (inner_t c = 0; c < chunk_size; ++c) {
-                        const inner_t cidx = chnk + c;
+                        const outer_t cidx = chnk + c;
                         if (cidx >= n) break;
                         if (col_j[cidx] >= static_cast<int8_t>(n_ctg)) {
                             const auto n_ctg_str = std::to_string(n_ctg-1);
@@ -550,15 +558,15 @@ public:
         };
         sw.start();
         if (n_threads <= 1) {
-            for (inner_t j = 0; j < p; ++j) outer_routine(j);
+            for (outer_t j = 0; j < p; ++j) outer_routine(j);
         } else {
             #pragma omp parallel for schedule(auto) num_threads(n_threads)
-            for (inner_t j = 0; j < p; ++j) outer_routine(j);
+            for (outer_t j = 0; j < p; ++j) outer_routine(j);
         }
         benchmark["outer_time"] = sw.elapsed();
 
         // cumsum outer
-        for (inner_t j = 0; j < p; ++j) outer[j+1] += outer[j];
+        for (outer_t j = 0; j < p; ++j) outer[j+1] += outer[j];
 
         if (outer[p] > buffer.size()) {
             throw util::adelie_core_error(
@@ -571,7 +579,7 @@ public:
         idx = outer[p];
 
         // populate (column) inner buffers
-        const auto inner_routine = [&](inner_t j) {
+        const auto inner_routine = [&](outer_t j) {
             const auto col_j = calldata.col(j);
             Eigen::Map<buffer_t> buffer_j(
                 reinterpret_cast<char*>(&buffer[outer[j]]),
@@ -588,7 +596,7 @@ public:
                 n_chunks = 0;
 
                 for (inner_t k = 0; k < max_chunks; ++k) {
-                    const inner_t chnk = k * chunk_size;
+                    const outer_t chnk = k * chunk_size;
                     size_t curr_idx = cidx;
                     auto* chunk_index = reinterpret_cast<inner_t*>(buffer_j.data() + curr_idx); 
                     curr_idx += sizeof(inner_t);
@@ -597,7 +605,7 @@ public:
                     auto* chunk_begin = reinterpret_cast<chunk_inner_t*>(buffer_j.data() + curr_idx); 
                     inner_t nnz = 0;
                     for (inner_t c = 0; c < chunk_size; ++c) {
-                        const inner_t didx = chnk + c;
+                        const outer_t didx = chnk + c;
                         if (didx >= n) break;
                         const bool to_not_skip = (
                             ((i == 0) && (col_j[didx] < 0)) ||
@@ -628,10 +636,10 @@ public:
         };
         sw.start();
         if (n_threads <= 1) {
-            for (inner_t j = 0; j < p; ++j) inner_routine(j);
+            for (outer_t j = 0; j < p; ++j) inner_routine(j);
         } else {
             #pragma omp parallel for schedule(auto) num_threads(n_threads)
-            for (inner_t j = 0; j < p; ++j) inner_routine(j);
+            for (outer_t j = 0; j < p; ++j) inner_routine(j);
         }
         benchmark["inner"] = sw.elapsed();
         
