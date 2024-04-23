@@ -119,6 +119,176 @@ protected:
         return sum * v1 * v2;
     }
 
+    template <class IterType, class WeightsType>
+    value_t _svsvwdot(
+        IterType it1,
+        IterType end1,
+        IterType it2,
+        IterType end2,
+        const WeightsType& weights
+    )
+    {
+        value_t sum = 0;
+        while (
+            (it1 != end1) &&
+            (it2 != end2)
+        ) {
+            const auto idx2 = it2.index();
+            while ((it1 != end1) && (it1.index() < idx2)) ++it1;
+            if (it1 == end1) break;
+            const auto idx1 = it1.index();
+            while ((it2 != end2) && (it2.index() < idx1)) ++it2;
+            if (it2 == end2) break;
+            while (
+                (it1 != end1) &&
+                (it2 != end2) &&
+                (it1.index() == it2.index())
+            ) {
+                sum += weights[it1.index()] * it1.value() * it2.value();
+                ++it1;
+                ++it2;
+            }
+        }
+        return sum;
+    }
+
+    template <class WeightsType>
+    value_t _svsvwdot(
+        int j1,
+        int j2,
+        const WeightsType& weights
+    )
+    {
+        using outer_t = typename io_t::outer_t;
+        using inner_t = typename io_t::inner_t;
+        using chunk_inner_t = typename io_t::chunk_inner_t;
+        const auto col1 = _io.col(j1);
+        const auto col2 = _io.col(j2);
+        const auto imp1 = _io.impute()[j1];
+        const auto imp2 = _io.impute()[j2];
+
+        const auto routine = [&](
+            const char* bf1, 
+            value_t v1,
+            const char* bf2,
+            value_t v2
+        ) -> value_t
+        {
+            const auto n_chunks1 = *reinterpret_cast<const inner_t*>(bf1);
+            const auto n_chunks2 = *reinterpret_cast<const inner_t*>(bf2);
+            size_t i1 = sizeof(inner_t);
+            size_t i2 = sizeof(inner_t);
+            if (!n_chunks1 || !n_chunks2) return 0;
+
+            inner_t chunk_it1 = 0;
+            inner_t chunk_idx1 = *reinterpret_cast<const inner_t*>(bf1+i1);
+            i1 += sizeof(inner_t);
+            inner_t chunk_nnz1 = (
+                static_cast<inner_t>(*reinterpret_cast<const chunk_inner_t*>(bf1+i1))
+                + 1
+            );
+            i1 += sizeof(chunk_inner_t);
+            inner_t dense_chunk_index1 = chunk_idx1 * io_t::chunk_size;
+            inner_t dense_index1 = (
+                dense_chunk_index1 +
+                *reinterpret_cast<const chunk_inner_t*>(bf1+i1)
+            );
+            inner_t inner1 = 0;
+
+            inner_t chunk_it2 = 0;
+            inner_t chunk_idx2 = *reinterpret_cast<const inner_t*>(bf2+i2);
+            i2 += sizeof(inner_t);
+            inner_t chunk_nnz2 = (
+                static_cast<inner_t>(*reinterpret_cast<const chunk_inner_t*>(bf2+i2))
+                + 1
+            );
+            i2 += sizeof(chunk_inner_t);
+            inner_t dense_chunk_index2 = chunk_idx2 * io_t::chunk_size;
+            inner_t dense_index2 = (
+                dense_chunk_index2 +
+                *reinterpret_cast<const chunk_inner_t*>(bf2+i2)
+            );
+            inner_t inner2 = 0;
+
+            value_t sum = 0;
+
+            while (
+                (chunk_it1 != n_chunks1) &&
+                (chunk_it2 != n_chunks2)
+            )
+            {
+                if (dense_index1 < dense_index2) {
+                    ++inner1;
+                } else if (dense_index1 > dense_index2) {
+                    ++inner2;
+                } else {
+                    sum += weights[dense_index1];
+                    ++inner1;
+                    ++inner2;
+                }
+
+                if (inner1 == chunk_nnz1) {
+                    ++chunk_it1;
+                    if (chunk_it1 == n_chunks1) break;
+
+                    i1 += chunk_nnz1;
+                    inner1 = 0;
+                    chunk_idx1 = *reinterpret_cast<const inner_t*>(bf1+i1);
+                    i1 += sizeof(inner_t);
+                    chunk_nnz1 = (
+                        static_cast<inner_t>(*reinterpret_cast<const chunk_inner_t*>(bf1+i1))
+                        + 1
+                    );
+                    i1 += sizeof(chunk_inner_t);
+                    dense_chunk_index1 = chunk_idx1 * io_t::chunk_size;
+                } 
+                dense_index1 = (
+                    dense_chunk_index1 +
+                    *reinterpret_cast<const chunk_inner_t*>(bf1+i1+inner1)
+                );
+
+                if (inner2 == chunk_nnz2) {
+                    ++chunk_it2;
+                    if (chunk_it2 == n_chunks2) break;
+
+                    i2 += chunk_nnz2;
+                    inner2 = 0;
+                    chunk_idx2 = *reinterpret_cast<const inner_t*>(bf2+i2);
+                    i2 += sizeof(inner_t);
+                    chunk_nnz2 = (
+                        static_cast<inner_t>(*reinterpret_cast<const chunk_inner_t*>(bf2+i2))
+                        + 1
+                    );
+                    i2 += sizeof(chunk_inner_t);
+                    dense_chunk_index2 = chunk_idx2 * io_t::chunk_size;
+                } 
+                dense_index2 = (
+                    dense_chunk_index2 +
+                    *reinterpret_cast<const chunk_inner_t*>(bf2+i2+inner2)
+                );
+            }
+            return sum * v1 * v2;
+        };
+
+        value_t sum = 0;
+        for (int c1 = 0; c1 < 3; ++c1) {
+            const char* bf1 = (
+                col1.data() + 
+                reinterpret_cast<const outer_t*>(col1.data())[c1]
+            );
+            const value_t v1 = (c1 == 0) ? imp1 : c1;
+            for (int c2 = 0; c2 < 3; ++c2) {
+                const char* bf2 = (
+                    col2.data() + 
+                    reinterpret_cast<const outer_t*>(col2.data())[c2]
+                );
+                const value_t v2 = (c2 == 0) ? imp2 : c2;
+                sum += routine(bf1, v1, bf2, v2);
+            }
+        }
+        return sum;
+    }
+
 public:
     explicit MatrixNaiveSNPUnphased(
         const string_t& filename,
@@ -211,6 +381,37 @@ public:
             for (int i2 = 0; i2 <= i1; ++i2) {
                 const auto index_1 = j+i1;
                 const auto index_2 = j+i2;
+
+                if (i1 == i2) {
+                    util::rowvec_type<value_t, 3> fills;
+                    fills[0] = _io.impute()[index_1];
+                    fills[0] *= fills[0];
+                    fills[1] = 1;
+                    fills[2] = 4;
+                    value_t sum = 0;
+                    for (int c = 0; c < 3; ++c) {
+                        auto it = _io.begin(c, index_1);
+                        const auto end = _io.end(c, index_1);
+                        value_t curr_sum = 0;
+                        for (; it != end; ++it) {
+                            const auto idx = *it;
+                            const auto val = sqrt_weights[idx];
+                            curr_sum += val * val;
+                        }
+                        sum += curr_sum * fills[c]; 
+                    }
+                    out(i1, i2) = sum;
+                    continue;
+                }
+
+                // TODO: performance is 3x slower than normal sparse-sparse dot.
+                // Not sure why, but maybe too many invariance quantities?
+                // All implementations below have the same runtime.
+                // For now, keep the naive implementation.
+                // This only matters in the rare case that the user needs
+                // to run group lasso with this matrix, 
+                // but this matrix is intended for lasso case.
+
                 util::rowvec_type<value_t, 3> fills_1;
                 util::rowvec_type<value_t, 3> fills_2;
                 fills_1[0] = _io.impute()[index_1];
@@ -222,16 +423,26 @@ public:
                 value_t sum = 0;
                 for (int c1 = 0; c1 < 3; ++c1) {
                     auto it1 = _io.begin(c1, index_1);
-                    auto end1 = _io.end(c1, index_1);
-                    auto v1 = fills_1[c1];
+                    const auto end1 = _io.end(c1, index_1);
+                    const auto v1 = fills_1[c1];
                     for (int c2 = 0; c2 < 3; ++c2) {
                         auto it2 = _io.begin(c2, index_2);
-                        auto end2 = _io.end(c2, index_2);
-                        auto v2 = fills_2[c2];
+                        const auto end2 = _io.end(c2, index_2);
+                        const auto v2 = fills_2[c2];
                         sum += _svsvwdot(it1, end1, v1, it2, end2, v2, sqrt_weights.square());
                     }
                 }
                 out(i1, i2) = sum;
+
+                //out(i1, i2) = _svsvwdot(
+                //    _io.linear_begin(index_1),
+                //    _io.linear_end(index_1),
+                //    _io.linear_begin(index_2),
+                //    _io.linear_end(index_2),
+                //    sqrt_weights.square()
+                //);
+
+                //out(i1, i2) = _svsvwdot(index_1, index_2, sqrt_weights.square());
             }
         };
         if (_n_threads <= 1) {
