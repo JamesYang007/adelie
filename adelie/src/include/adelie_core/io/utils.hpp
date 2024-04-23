@@ -18,34 +18,34 @@ void compute_column_mean(
     const auto p = m.cols();
 
     const auto routine = [&](auto j) {
-        uint32_t sum = 0;
-        uint32_t n_miss = 0;
+        uint64_t sum = 0;
+        uint64_t n_miss = 0;
         for (int k = 0; k < n; ++k) {
             if (m(k,j) > 0) sum += m(k,j);
             else if (m(k,j) < 0) ++n_miss;
         }
-        out[j] = static_cast<double>(sum) / std::max<int>(n - n_miss, 1);
+        out[j] = static_cast<double>(sum) / std::max<uint64_t>(n - n_miss, 1);
     };
 
     if (n_threads <= 1) {
-        for (int j = 0; j < p; ++j) routine(j);
+        for (size_t j = 0; j < p; ++j) routine(j);
     } else {
         #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int j = 0; j < p; ++j) routine(j);
+        for (size_t j = 0; j < p; ++j) routine(j);
     }
 }
 
 ADELIE_CORE_STRONG_INLINE
 void compute_nnm(
     const Eigen::Ref<const util::colarr_type<int8_t>>& m,
-    Eigen::Ref<util::rowvec_type<uint32_t>> out,
+    Eigen::Ref<util::rowvec_type<uint64_t>> out,
     size_t n_threads
 )
 {
     const auto n = m.rows();
     const auto p = m.cols();
     const auto routine = [&](auto j) {
-        uint32_t n_miss = 0;
+        uint64_t n_miss = 0;
         for (int k = 0; k < n; ++k) {
             if (m(k,j) < 0) ++n_miss;
         }
@@ -53,33 +53,33 @@ void compute_nnm(
     };
 
     if (n_threads <= 1) {
-        for (int j = 0; j < p; ++j) routine(j);
+        for (size_t j = 0; j < p; ++j) routine(j);
     } else {
         #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int j = 0; j < p; ++j) routine(j);
+        for (size_t j = 0; j < p; ++j) routine(j);
     }
 }
 
 ADELIE_CORE_STRONG_INLINE
 void compute_nnz(
     const Eigen::Ref<const util::colarr_type<int8_t>>& m,
-    Eigen::Ref<util::rowvec_type<uint32_t>> out,
+    Eigen::Ref<util::rowvec_type<uint64_t>> out,
     size_t n_threads
 )
 {
     const auto n = m.rows();
     const auto p = m.cols();
     const auto routine = [&](auto j) {
-        uint32_t nnz = 0;
+        uint64_t nnz = 0;
         for (int k = 0; k < n; ++k) if (m(k,j) != 0) ++nnz;
         out[j] = nnz;
     };
 
     if (n_threads <= 1) {
-        for (int j = 0; j < p; ++j) routine(j);
+        for (size_t j = 0; j < p; ++j) routine(j);
     } else {
         #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int j = 0; j < p; ++j) routine(j);
+        for (size_t j = 0; j < p; ++j) routine(j);
     }
 }
 
