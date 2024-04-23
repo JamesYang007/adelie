@@ -201,23 +201,14 @@ static void BM_spdot(benchmark::State& state) {
     ad::util::rowvec_type<double> v(n);
     v.setRandom();
     double sum = 0;
-    double sum2 = 0;
-    double na_sum = 0;
+    ad::util::rowvec_type<double, 3> cache;
+    cache.setZero();
 
     for (auto _ : state) {
         for (int i = 0; i < inner.size(); ++i) {
-            if (value[i] < 0) {
-                na_sum += v[inner[i]];
-            } else {
-                //if (value[i] == 1) {
-                //    sum += v[inner[i]];
-                //} else {
-                //    sum2 += v[inner[i]];
-                //}
-                sum += value[i] * v[inner[i]];
-            }
+            cache[value[i]] += v[inner[i]];
         } 
-        sum += 2.3 * na_sum + 2 * sum2;
+        sum += cache.sum();
         benchmark::DoNotOptimize(sum);
     }
 }
@@ -245,20 +236,6 @@ static void BM_spdot_cached(benchmark::State& state) {
     for (auto _ : state) {
         cache.setZero();
         for (int i = 0; i < inner.size(); ++i) {
-            //switch (value[i]) {
-            //    case 1: {
-            //        cache[0] += v[inner[i]];
-            //        break;
-            //    }
-            //    case 2: {
-            //        cache[1] += v[inner[i]];
-            //        break;
-            //    }
-            //    case 3: {
-            //        cache[2] += v[inner[i]];
-            //        break;
-            //    }
-            //}
             if (value[i] < 0) {
                 cache[0] += v[inner[i]];
             } else if (value[i] == 1) {
@@ -441,17 +418,18 @@ BENCHMARK(BM_dot_2prod)
 
 static void BM_sparse_split(benchmark::State& state) {
     const auto n = state.range(0);
+    const auto k = n / 100;
     srand(0);
-    ad::util::rowvec_type<int> inner1(n); inner1.setRandom();
-    inner1 = inner1.unaryExpr([&](auto i) -> int { return i % n; });
-    ad::util::rowvec_type<int> inner2(n); inner2.setRandom();
-    inner2 = inner2.unaryExpr([&](auto i) -> int { return i % n + n; });
-    ad::util::rowvec_type<int> inner3(n); inner3.setRandom();
-    inner3 = inner3.unaryExpr([&](auto i) -> int { return i % n + 2 * n; });
-    std::sort(inner1.data(), inner1.data() + n);
-    std::sort(inner2.data(), inner2.data() + n);
-    std::sort(inner3.data(), inner3.data() + n);
-    ad::util::rowvec_type<double> v(3 * n);
+    ad::util::rowvec_type<uint32_t> inner1(k); inner1.setRandom();
+    inner1 = inner1.unaryExpr([&](auto i) -> uint32_t { return i % n; });
+    ad::util::rowvec_type<uint32_t> inner2(k); inner2.setRandom();
+    inner2 = inner2.unaryExpr([&](auto i) -> uint32_t { return i % n; });
+    ad::util::rowvec_type<uint32_t> inner3(k); inner3.setRandom();
+    inner3 = inner3.unaryExpr([&](auto i) -> uint32_t { return i % n; });
+    std::sort(inner1.data(), inner1.data() + k);
+    std::sort(inner2.data(), inner2.data() + k);
+    std::sort(inner3.data(), inner3.data() + k);
+    ad::util::rowvec_type<double> v(n);
     v.setRandom();
     double sum = 0;
 
@@ -470,7 +448,6 @@ static void BM_sparse_split(benchmark::State& state) {
 }
 
 BENCHMARK(BM_sparse_split)
-    -> Args({10})
     -> Args({100})
     -> Args({1000})
     -> Args({10000})
@@ -479,38 +456,34 @@ BENCHMARK(BM_sparse_split)
 
 static void BM_sparse_combine(benchmark::State& state) {
     const auto n = state.range(0);
+    const auto k = n / 100;
     srand(0);
-    ad::util::rowvec_type<int> inner1(n); inner1.setRandom();
-    inner1 = inner1.unaryExpr([&](auto i) -> int { return i % n; });
-    ad::util::rowvec_type<int> inner2(n); inner2.setRandom();
-    inner2 = inner2.unaryExpr([&](auto i) -> int { return i % n + n; });
-    ad::util::rowvec_type<int> inner3(n); inner3.setRandom();
-    inner3 = inner3.unaryExpr([&](auto i) -> int { return i % n + 2 * n; });
-    ad::util::rowvec_type<int> inner(3 * n);
-    inner.segment(0, n) = inner1;
-    inner.segment(n, n) = inner2;
-    inner.segment(2 * n, n) = inner3;
-    std::sort(inner.data(), inner.data() + 3 * n);
-    ad::util::rowvec_type<int8_t> value(3 * n); value.setRandom();
+    ad::util::rowvec_type<uint32_t> inner1(k); inner1.setRandom();
+    inner1 = inner1.unaryExpr([&](auto i) -> uint32_t { return i % n; });
+    ad::util::rowvec_type<uint32_t> inner2(k); inner2.setRandom();
+    inner2 = inner2.unaryExpr([&](auto i) -> uint32_t { return i % n; });
+    ad::util::rowvec_type<uint32_t> inner3(k); inner3.setRandom();
+    inner3 = inner3.unaryExpr([&](auto i) -> uint32_t { return i % n; });
+    ad::util::rowvec_type<uint32_t> inner(3 * k);
+    inner.segment(0, k) = inner1;
+    inner.segment(k, k) = inner2;
+    inner.segment(2 * k, k) = inner3;
+    std::sort(inner.data(), inner.data() + 3 * k);
+    ad::util::rowvec_type<int8_t> value(3 * k); value.setRandom();
     value = value.unaryExpr([&](auto i) -> int8_t { return i % 2 + 1; });
-    ad::util::rowvec_type<double> v(3 * n);
+    ad::util::rowvec_type<double> v(n);
     v.setRandom();
     double sum = 0;
 
     for (auto _ : state) {
         for (int i = 0; i < inner.size(); ++i) {
-            if (value[i] < 0) {
-                sum += 2.134 * v[inner[i]];
-            } else {
-                sum += value[i] * v[inner[i]];
-            }
+            sum += value[i] * v[inner[i]];
         }
         benchmark::DoNotOptimize(sum);
     }
 }
 
 BENCHMARK(BM_sparse_combine)
-    -> Args({10})
     -> Args({100})
     -> Args({1000})
     -> Args({10000})
