@@ -55,16 +55,13 @@ class snp_phased_ancestry(core_io.IOSNPPhasedAncestry):
             - ``"mmap"``: reads the file using mmap.
               This method is only supported on Linux and MacOS.
               It is the most efficient way to read large files.
-            - ``"auto"``: automatic way of choosing one of the options above.
-              The mode is set to ``"mmap"`` whenever the option is allowed.
-              Otherwise, the mode is set to ``"file"``.
 
-        Default is ``"auto"``.
+        Default is ``"file"``.
     """
     def __init__(
         self,
         filename: str,
-        read_mode: str ="auto",
+        read_mode: str ="file",
     ):
         core_io.IOSNPPhasedAncestry.__init__(self, filename, read_mode)
 
@@ -136,16 +133,13 @@ class snp_unphased(core_io.IOSNPUnphased):
             - ``"mmap"``: reads the file using mmap.
               This method is only supported on Linux and MacOS.
               It is the most efficient way to read large files.
-            - ``"auto"``: automatically choose one of the options above.
-              The mode is set to ``"mmap"`` whenever the option is allowed.
-              Otherwise, the mode is set to ``"file"``.
 
-        Default is ``"auto"``.
+        Default is ``"file"``.
     """
     def __init__(
         self,
         filename: str,
-        read_mode: str ="auto",
+        read_mode: str ="file",
     ):
         core_io.IOSNPUnphased.__init__(self, filename, read_mode)
 
