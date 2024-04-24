@@ -7,13 +7,13 @@ namespace adelie_core {
 namespace io {
 
 template <size_t chunk_size, class InnerType, class ChunkInnerType>
-struct IOSNPUnphasedIterator;
+struct IOSNPChunkIterator;
 
 template <size_t chunk_size, class InnerType, class ChunkInnerType>
 inline constexpr bool 
 operator==(
-    const IOSNPUnphasedIterator<chunk_size, InnerType, ChunkInnerType>& it1, 
-    const IOSNPUnphasedIterator<chunk_size, InnerType, ChunkInnerType>& it2
+    const IOSNPChunkIterator<chunk_size, InnerType, ChunkInnerType>& it1, 
+    const IOSNPChunkIterator<chunk_size, InnerType, ChunkInnerType>& it2
 )
 {
     return it1.chunk_it == it2.chunk_it;
@@ -22,15 +22,15 @@ operator==(
 template <size_t chunk_size, class InnerType, class ChunkInnerType>
 inline constexpr bool 
 operator!=(
-    const IOSNPUnphasedIterator<chunk_size, InnerType, ChunkInnerType>& it1, 
-    const IOSNPUnphasedIterator<chunk_size, InnerType, ChunkInnerType>& it2
+    const IOSNPChunkIterator<chunk_size, InnerType, ChunkInnerType>& it1, 
+    const IOSNPChunkIterator<chunk_size, InnerType, ChunkInnerType>& it2
 )
 {
     return it1.chunk_it != it2.chunk_it;
 }
 
 template <size_t chunk_size, class InnerType, class ChunkInnerType>
-struct IOSNPUnphasedIterator
+struct IOSNPChunkIterator
 {
     using inner_t = InnerType;
     using chunk_inner_t = ChunkInnerType;
@@ -45,7 +45,7 @@ struct IOSNPUnphasedIterator
     size_t dense_chunk_index;
     size_t dense_index;
 
-    IOSNPUnphasedIterator(
+    IOSNPChunkIterator(
         inner_t chunk_it,
         const char* ctg_buffer
     ):
@@ -58,7 +58,7 @@ struct IOSNPUnphasedIterator
     }
 
     ADELIE_CORE_STRONG_INLINE
-    IOSNPUnphasedIterator& operator++() { 
+    IOSNPChunkIterator& operator++() { 
         buffer_idx += sizeof(char);
         ++inner;
         if (inner >= chunk_nnz) {
@@ -74,10 +74,10 @@ struct IOSNPUnphasedIterator
     }
     ADELIE_CORE_STRONG_INLINE
     size_t& operator*() { return dense_index; }
-    friend constexpr bool operator==<>(const IOSNPUnphasedIterator&, 
-                                       const IOSNPUnphasedIterator&);
-    friend constexpr bool operator!=<>(const IOSNPUnphasedIterator&, 
-                                       const IOSNPUnphasedIterator&);
+    friend constexpr bool operator==<>(const IOSNPChunkIterator&, 
+                                       const IOSNPChunkIterator&);
+    friend constexpr bool operator!=<>(const IOSNPChunkIterator&, 
+                                       const IOSNPChunkIterator&);
 
     ADELIE_CORE_STRONG_INLINE
     void update()
@@ -95,147 +95,6 @@ struct IOSNPUnphasedIterator
             dense_chunk_index +
             *reinterpret_cast<const chunk_inner_t*>(ctg_buffer + buffer_idx)
         );
-    }
-};
-
-template <size_t chunk_size, class OuterType, class InnerType, class ChunkInnerType, class ImputeType>
-struct IOSNPUnphasedLinearIterator;
-
-template <size_t chunk_size, class OuterType, class InnerType, class ChunkInnerType, class ImputeType>
-inline constexpr bool 
-operator==(
-    const IOSNPUnphasedLinearIterator<chunk_size, OuterType, InnerType, ChunkInnerType, ImputeType>& it1, 
-    const IOSNPUnphasedLinearIterator<chunk_size, OuterType, InnerType, ChunkInnerType, ImputeType>& it2
-)
-{
-    return it1.chunk_it == it2.chunk_it;
-}
-
-template <size_t chunk_size, class OuterType, class InnerType, class ChunkInnerType, class ImputeType>
-inline constexpr bool 
-operator!=(
-    const IOSNPUnphasedLinearIterator<chunk_size, OuterType, InnerType, ChunkInnerType, ImputeType>& it1, 
-    const IOSNPUnphasedLinearIterator<chunk_size, OuterType, InnerType, ChunkInnerType, ImputeType>& it2
-)
-{
-    return it1.chunk_it != it2.chunk_it;
-}
-
-template <size_t chunk_size, 
-          class OuterType,
-          class InnerType, 
-          class ChunkInnerType,
-          class ImputeType
-          >
-struct IOSNPUnphasedLinearIterator
-{
-    static constexpr size_t n_ctgs = 3;
-    using outer_t = OuterType;
-    using inner_t = InnerType;
-    using chunk_inner_t = ChunkInnerType;
-    using impute_t = ImputeType;
-    using iterator = IOSNPUnphasedIterator<chunk_size, inner_t, chunk_inner_t>;
-
-    const impute_t ctg_fill_0;
-    static constexpr impute_t ctg_fill_1 = 1;
-    static constexpr impute_t ctg_fill_2 = 2;
-    const std::array<outer_t, n_ctgs> ctg_outer;
-    iterator begin_0;
-    iterator begin_1;
-    iterator begin_2;
-    const iterator end_0;
-    const iterator end_1;
-    const iterator end_2;
-    const size_t n_chunks;
-    inner_t chunk_it;
-    u_char ctg_idx;
-    size_t dense_index;
-    impute_t dense_value;
-
-    IOSNPUnphasedLinearIterator(
-        inner_t chunk_it,
-        const char* col,
-        impute_t impute
-    ):
-        ctg_fill_0(impute),
-        ctg_outer({
-            reinterpret_cast<const outer_t*>(col)[0],
-            reinterpret_cast<const outer_t*>(col)[1],
-            reinterpret_cast<const outer_t*>(col)[2]
-        }),
-        begin_0(0, col + ctg_outer[0]),
-        begin_1(0, col + ctg_outer[1]),
-        begin_2(0, col + ctg_outer[2]),
-        end_0(*reinterpret_cast<const inner_t*>(col + ctg_outer[0]), col + ctg_outer[0]),
-        end_1(*reinterpret_cast<const inner_t*>(col + ctg_outer[1]), col + ctg_outer[1]),
-        end_2(*reinterpret_cast<const inner_t*>(col + ctg_outer[2]), col + ctg_outer[2]),
-        n_chunks(
-            end_0.n_chunks + 
-            end_1.n_chunks +
-            end_2.n_chunks
-        ),
-        chunk_it(chunk_it)
-    {
-        update();
-    }
-
-    IOSNPUnphasedLinearIterator& operator++() { 
-        switch (ctg_idx) {
-            case 0: {
-                ++begin_0;
-                break;
-            }
-            case 1: {
-                ++begin_1;
-                break;
-            }
-            case 2: {
-                ++begin_2;
-                break;
-            }
-        }
-        update(); 
-        chunk_it = (
-            begin_0.chunk_it +
-            begin_1.chunk_it +
-            begin_2.chunk_it
-        );
-        return *this;
-    }
-
-    size_t& index() { return dense_index; }
-    impute_t& value() { return dense_value; }
-    friend constexpr bool operator==<>(const IOSNPUnphasedLinearIterator&, 
-                                       const IOSNPUnphasedLinearIterator&);
-    friend constexpr bool operator!=<>(const IOSNPUnphasedLinearIterator&, 
-                                       const IOSNPUnphasedLinearIterator&);
-
-    ADELIE_CORE_STRONG_INLINE
-    void update()
-    {
-        size_t idx_0 = (begin_0 != end_0) ? *begin_0 : -1;
-        size_t idx_1 = (begin_1 != end_1) ? *begin_1 : -1;
-        size_t idx_2 = (begin_2 != end_2) ? *begin_2 : -1;
-        bool curr_ctg_idx = idx_0 > idx_1;
-        size_t curr_index = curr_ctg_idx ? idx_1 : idx_0;
-        ctg_idx = (curr_index < idx_2) ? curr_ctg_idx : 2;
-        switch (ctg_idx) {
-            case 0: {
-                dense_index = idx_0;
-                dense_value = ctg_fill_0;
-                break;
-            }
-            case 1: {
-                dense_index = idx_1;
-                dense_value = ctg_fill_1;
-                break;
-            }
-            case 2: {
-                dense_index = idx_2;
-                dense_value = ctg_fill_2;
-                break;
-            }
-        }
     }
 };
 
@@ -263,11 +122,12 @@ public:
     static constexpr size_t chunk_size = (
         1UL << (n_bits_per_byte * sizeof(chunk_inner_t))
     );
+
+protected:
     static constexpr size_t _max_inner = (
         1UL << (n_bits_per_byte * sizeof(inner_t))
     );
 
-protected:
     using base_t::throw_no_read;
     using base_t::fopen_safe;
     using base_t::is_big_endian;
@@ -276,11 +136,8 @@ protected:
     using base_t::_is_read;
 
 public:
-    using iterator = IOSNPUnphasedIterator<
+    using iterator = IOSNPChunkIterator<
         chunk_size, inner_t, chunk_inner_t
-    >;
-    using linear_iterator = IOSNPUnphasedLinearIterator<
-        chunk_size, outer_t, inner_t, chunk_inner_t, impute_t
     >;
 
     using base_t::base_t;
@@ -330,78 +187,50 @@ public:
         );
     }
 
-    Eigen::Ref<const buffer_t> col(int j) const
+    Eigen::Ref<const vec_outer_t> outer() const
     {
         if (!_is_read) throw_no_read();
         const size_t slice = sizeof(bool_t) + 2 * (1 + cols()) * sizeof(outer_t) + cols() * sizeof(impute_t);
-        Eigen::Map<const vec_outer_t> outer(
+        return Eigen::Map<const vec_outer_t>(
             reinterpret_cast<const outer_t*>(&_buffer[slice]),
             cols() + 1
         );
-        Eigen::Map<const buffer_t> buffer_j(
-            reinterpret_cast<const char*>(&_buffer[outer[j]]),
-            outer[j+1] - outer[j]
-        );
-        return buffer_j;
     }
 
-    iterator begin(size_t ctg, int j) const
+    Eigen::Ref<const buffer_t> col(int j) const
+    {
+        const auto _outer = outer();
+        return Eigen::Map<const buffer_t>(
+            _buffer.data() + _outer[j],
+            _outer[j+1] - _outer[j]
+        );
+    }
+
+    const char* col_ctg(int j, size_t ctg) const
     {
         const auto _col = col(j);
-        const auto* _col_ctg = (
+        return (
             _col.data() +
             reinterpret_cast<const outer_t*>(_col.data())[ctg]
         );
-        return iterator(0, _col_ctg);
     }
 
-    iterator end(size_t ctg, int j) const
+    iterator begin(int j, size_t ctg) const
     {
-        const auto _col = col(j);
-        const auto* _col_ctg = (
-            _col.data() +
-            reinterpret_cast<const outer_t*>(_col.data())[ctg]
-        );
+        return iterator(0, col_ctg(j, ctg));
+    }
+
+    iterator end(int j, size_t ctg) const
+    {
+        const auto* _col_ctg = col_ctg(j, ctg);
         const auto n_chunks = *reinterpret_cast<const inner_t*>(_col_ctg);
         return iterator(n_chunks, _col_ctg);
-    }
-
-    linear_iterator linear_begin(int j) const
-    {
-        return linear_begin(j, impute()[j]);
-    }
-
-    linear_iterator linear_begin(int j, impute_t imp) const
-    {
-        return linear_iterator(0, col(j).data(), imp);
-    }
-
-    linear_iterator linear_end(int j) const
-    {
-        return linear_end(j, impute()[j]);
-    }
-
-    linear_iterator linear_end(int j, impute_t imp) const
-    {
-        const auto _col = col(j);
-        size_t n_chunks = 0;
-        n_chunks += *reinterpret_cast<const inner_t*>(
-            _col.data() + reinterpret_cast<const outer_t*>(_col.data())[0]
-        );
-        n_chunks += *reinterpret_cast<const inner_t*>(
-            _col.data() + reinterpret_cast<const outer_t*>(_col.data())[1]
-        );
-        n_chunks += *reinterpret_cast<const inner_t*>(
-            _col.data() + reinterpret_cast<const outer_t*>(_col.data())[2]
-        );
-        return linear_iterator(n_chunks, _col.data(), imp);
     }
 
     rowarr_value_t to_dense(
         size_t n_threads
     ) const
     {
-        if (!_is_read) throw_no_read();
         const auto n = rows();
         const auto p = cols();
         rowarr_value_t dense(n, p);
@@ -410,8 +239,8 @@ public:
             auto dense_j = dense.col(j);
             dense_j.setZero();
             for (int c = 0; c < n_categories; ++c) {
-                auto it = this->begin(c, j);
-                const auto end = this->end(c, j);
+                auto it = this->begin(j, c);
+                const auto end = this->end(j, c);
                 const auto val = (c == 0) ? -9 : c;
                 for (; it != end; ++it) {
                     dense_j[*it] = val;
@@ -433,7 +262,7 @@ public:
         const std::string& impute_method_str,
         Eigen::Ref<vec_impute_t> impute,
         size_t n_threads
-    )
+    ) const
     {
         using sw_t = util::Stopwatch;
 
@@ -443,6 +272,13 @@ public:
         const bool_t endian = is_big_endian();
         const outer_t n = calldata.rows();
         const outer_t p = calldata.cols();
+
+        const size_t max_chunks = (n + chunk_size - 1) / chunk_size;
+        if (max_chunks >= _max_inner) {
+            throw util::adelie_core_error(
+                "calldata dimensions are too large! "
+            );
+        } 
 
         // handle impute_method
         const auto impute_method = util::convert_impute_method(impute_method_str);
@@ -465,7 +301,7 @@ public:
         benchmark["nnz"] = sw.elapsed();
 
         // allocate sufficient memory (upper bound on size)
-        constexpr size_t n_ctg = n_categories;
+        constexpr size_t n_ctg = n_categories; // alias
         const size_t preamble_size = (
             sizeof(bool_t) +                    // endian
             2 * sizeof(outer_t) +               // n, p
@@ -474,25 +310,18 @@ public:
             impute.size() * sizeof(impute_t) +  // impute
             (p + 1) * sizeof(outer_t)           // outer (columns)
         );
-        const size_t max_chunks = (n + chunk_size - 1) / chunk_size;
         buffer_t buffer(
             preamble_size +
-            p * n_ctg * (                 // for each column and category
-                sizeof(outer_t) +         // outer (category)
-                sizeof(inner_t) +         // n_chunks
-                max_chunks * (            // max_chunks * (chunk-outer + chunk-inner)
-                    sizeof(inner_t) + 
-                    sizeof(chunk_inner_t)
+            p * n_ctg * (           // for each snp, category
+                sizeof(outer_t) +       // outer (category)
+                sizeof(inner_t) +       // n_chunks
+                max_chunks * (            // for each chunk
+                    sizeof(inner_t) +       // chunk index
+                    sizeof(chunk_inner_t)   // chunk nnz - 1
                 )
             ) +
             nnz.sum() * sizeof(chunk_inner_t)   // nnz * char
         );
-
-        if (max_chunks >= _max_inner) {
-            throw util::adelie_core_error(
-                "calldata dimensions are too large! "
-            );
-        } 
 
         // populate buffer
         size_t idx = 0;
@@ -514,7 +343,7 @@ public:
 
         // outer[i] = number of bytes to jump from beginning of file 
         // to start reading column i.
-        // outer[i+1] - outer[i] = total number of bytes for category i. 
+        // outer[i+1] - outer[i] = total number of bytes for column i. 
         Eigen::Map<vec_outer_t> outer(
             reinterpret_cast<outer_t*>(&buffer[idx]),
             p + 1
@@ -536,9 +365,11 @@ public:
                         if (col_j[cidx] >= static_cast<int8_t>(n_ctg)) {
                             const auto n_ctg_str = std::to_string(n_ctg-1);
                             throw util::adelie_core_error(
-                                "Detected a value greater than > " +
-                                n_ctg_str +
-                                "! Make sure the matrix only contains values <= " +
+                                "Detected a value greater than > " + n_ctg_str + ":"
+                                "\n\tcalldata[" + std::to_string(cidx) +
+                                ", " + std::to_string(j) +
+                                "] = " + std::to_string(col_j[cidx]) +
+                                "\nMake sure calldata only contains values <= " +
                                 n_ctg_str +
                                 "."
                             );
@@ -627,7 +458,7 @@ public:
 
             if (cidx != buffer_j.size()) {
                 throw util::adelie_core_error(
-                    "Column index certificate does not match expected size."
+                    "Column index certificate does not match expected size:"
                     "\n\tCertificate:   " + std::to_string(cidx) +
                     "\n\tExpected size: " + std::to_string(buffer_j.size()) +
                     "\nThis is likely a bug in the code. Please report it! "

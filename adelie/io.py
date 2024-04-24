@@ -3,14 +3,44 @@ from typing import Union
 import numpy as np
 
 
-class snp_base:
-    def __init__(self, core):
-        self._core = core
+class snp_phased_ancestry(core_io.IOSNPPhasedAncestry):
+    """IO handler for SNP phased, ancestry matrix.
 
+    A SNP phased, ancestry matrix is a matrix 
+    that combines a (phased) calldata and local ancestry information.
 
-class snp_phased_ancestry(snp_base):
-    """IO handler for SNP phased, ancestry data.
+    Let :math:`X \\in \\mathbb{R}^{n \\times sA}` denote such a matrix
+    where
+    :math:`n` is the number of samples,
+    :math:`s` is the number of SNPs,
+    and :math:`A` is the number of ancestries.
+    Every :math:`A` (contiguous) columns is called an
+    *ancestry block* corresponding to a single SNP
+    with the same structure described next.
+    Let :math:`H \\in \\mathbb{R}^{n \\times A}` denote any such ancestry block for some SNP.
+    Then, :math:`H = H_0 + H_1` where :math:`H_k \\in \\mathbb{R}^{n \\times A}`
+    represents the phased calldata marked by the ancestry indicator
+    for each of the two haplotypes of a SNP, that is,
 
+    .. math::
+        \\begin{align*}
+            H_k
+            =
+            \\begin{bmatrix}
+                \\unicode{x2014} & \\delta^k_1 \\cdot e_{a^k_1} & \\unicode{x2014} \\\\
+                \\unicode{x2014} & \\delta^k_2 \\cdot e_{a^k_2} & \\unicode{x2014} \\\\
+                \\vdots & \\vdots & \\vdots \\\\
+                \\unicode{x2014} & \\delta^k_n \\cdot e_{a^k_n} & \\unicode{x2014} \\\\
+            \\end{bmatrix}
+        \\end{align*}
+
+    where for each individual :math:`i` and haplotype :math:`k`,
+    :math:`\\delta^k_i \\in \\{0,1\\}` is :math:`1` 
+    if and only if there is a mutation 
+    and :math:`a^k_i \\in \\{1,\\ldots,A\\}` is 
+    the ancestry labeling.
+    Here, :math:`e_j \\in \\mathbb{R}^A` is the :math:`j` th standard basis vector.
+         
     Parameters
     ----------
     filename : str
@@ -36,68 +66,7 @@ class snp_phased_ancestry(snp_base):
         filename: str,
         read_mode: str ="auto",
     ):
-        super().__init__(core_io.IOSNPPhasedAncestry(filename, read_mode))
-
-    def outer(self):
-        """Outer indexing vector.
-
-        Returns
-        -------
-        outer : (2*s+1,) np.ndarray
-            Outer indexing vector.
-        """
-        return self._core.outer()
-
-    def nnz(self, j: int, hap: int):
-        """Number of non-zero entries at a SNP/haplotype.
-
-        Parameters
-        ----------
-        j : int
-            SNP index.
-        hap : int
-            Haplotype for SNP ``j``.
-
-        Returns
-        -------
-        nnz : int
-            Number of non-zero entries at SNP ``j`` and haplotype ``hap``.
-        """
-        return self._core.nnz(j, hap)
-
-    def inner(self, j: int, hap: int):
-        """Inner indexing vector at a SNP/haplotype.
-
-        Parameters
-        ----------
-        j : int
-            SNP index.
-        hap : int
-            Haplotype for SNP ``j``.
-
-        Returns
-        -------
-        inner : np.ndarray
-            Inner indexing vector at SNP ``j`` and haplotype ``hap``.
-        """
-        return self._core.inner(j, hap)
-
-    def ancestry(self, j: int, hap: int):
-        """Ancestry vector at a SNP/haplotype.
-
-        Parameters
-        ----------
-        j : int
-            SNP index.
-        hap : int
-            Haplotype for SNP ``j``.
-
-        Returns
-        -------
-        v : np.ndarray
-            Ancestry vector at SNP ``j`` and haplotype ``hap``.
-        """
-        return self._core.ancestry(j, hap)
+        core_io.IOSNPPhasedAncestry.__init__(self, filename, read_mode)
 
     def write(
         self, 
@@ -106,7 +75,11 @@ class snp_phased_ancestry(snp_base):
         A: int,
         n_threads: int =1,
     ):
-        """Write a dense array of calldata and ancestry information to the file in ``.snpdat`` format.
+        """Writes a dense SNP phased, ancestry matrix to the file in ``.snpdat`` format.
+
+        .. note::
+            The calldata and ancestries matrices must not contain
+            any missing values.
 
         Parameters
         ----------
@@ -115,7 +88,7 @@ class snp_phased_ancestry(snp_base):
             ``calldata[i, 2*j+k]`` is the data for individual ``i``, SNP ``j``, and haplotype ``k``.
             It must only contain values in :math:`\\{0,1\\}`.
         ancestries : (n, 2*s) np.ndarray
-            Ancestry information in dense format.
+            Local ancestry information in dense format.
             ``ancestries[i, 2*j+k]`` is the ancestry for individual ``i``, SNP ``j``, and haplotype ``k``.
             It must only contain values in :math:`\\{0,\\ldots, A-1\\}`.
         A : int
@@ -128,8 +101,10 @@ class snp_phased_ancestry(snp_base):
         -------
         total_bytes : int
             Number of bytes written.
+        benchmark : dict
+            Dictionary of benchmark timings for each step of the serializer.
         """
-        return self._core.write(calldata, ancestries, A, n_threads)
+        return core_io.IOSNPPhasedAncestry.write(self, calldata, ancestries, A, n_threads)
 
 
 class snp_unphased(core_io.IOSNPUnphased):
@@ -173,7 +148,7 @@ class snp_unphased(core_io.IOSNPUnphased):
         impute_method: Union[str, np.ndarray] ="mean",
         n_threads: int =1,
     ):
-        """Write a dense SNP unphased matrix to the file in ``.snpdat`` format.
+        """Writes a dense SNP unphased matrix to the file in ``.snpdat`` format.
 
         Parameters
         ----------
@@ -197,6 +172,8 @@ class snp_unphased(core_io.IOSNPUnphased):
         -------
         total_bytes : int
             Number of bytes written.
+        benchmark : dict
+            Dictionary of benchmark timings for each step of the serializer.
         """
         if isinstance(impute_method, str):
             p = calldata.shape[1]
