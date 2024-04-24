@@ -181,7 +181,13 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        bmul(0, cols(), v, weights, out);
+        int n_processed = 0;
+        for (int i = 0; i < _mat_list.size(); ++i) {
+            auto& mat = *_mat_list[i];
+            const auto p = mat.cols();
+            mat.mul(v, weights, out.segment(n_processed, p));
+            n_processed += p;
+        }
     }
 
     int rows() const override

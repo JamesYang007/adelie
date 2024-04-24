@@ -409,9 +409,9 @@ def snp_phased_ancestry(
     n_threads: int =1,
     dtype: Union[np.float32, np.float64] =np.float64,
 ):
-    """Creates a SNP phased ancestry matrix.
+    """Creates a SNP phased, ancestry matrix.
 
-    The SNP phased ancestry matrix is represented by a file with name ``filename``.
+    The SNP phased, ancestry matrix is represented by a file with name ``filename``.
     It must be in the same format as described in ``adelie.io.snp_phased_ancestry``.
     Typically, the user first writes into the file ``filename`` 
     using ``adelie.io.snp_phased_ancestry`` and then loads the matrix using this function.
@@ -422,7 +422,7 @@ def snp_phased_ancestry(
     Parameters
     ----------
     filename : str
-        File name that contains phased calldata with ancestry information in ``.snpdat`` format.
+        File name that contains the SNP phased, ancestry matrix in ``.snpdat`` format.
     read_mode : str, optional
         See the corresponding parameter in ``adelie.io.snp_phased_ancestry``.
         Default is ``"auto"``.

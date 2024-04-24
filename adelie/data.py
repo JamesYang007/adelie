@@ -226,6 +226,7 @@ def snp_unphased(
     K: int =1,
     glm: str ="gaussian",
     sparsity: float =0.95,
+    missing_ratio: float =0.1,
     one_ratio: float =0.25,
     two_ratio: float =0.05,
     zero_penalty: float =0,
@@ -239,6 +240,8 @@ def snp_unphased(
     - The calldata matrix ``X`` has sparsity ratio ``1 - one_ratio - two_ratio``
       where ``one_ratio`` of the entries are randomly set to ``1``
       and ``two_ratio`` are randomly set to ``2``.
+      The user only sees a masked version of ``X`` where
+      ``missing_ratio`` of the entries are set to ``-9``.
     - The true coefficients :math:`\\beta` are such that ``sparsity`` proportion
       of the entries are set to :math:`0`.
     - The response ``y`` is generated from the GLM specified by ``glm``.
@@ -270,6 +273,9 @@ def snp_unphased(
     sparsity : float, optional
         Proportion of :math:`\\beta` entries to be zeroed out.
         Default is ``0.95``.
+    missing_ratio : float, optional
+        Proportion of the entries of ``X`` that is set to ``-9`` (missing).
+        Default is ``0.1``.
     one_ratio : float, optional
         Proportion of the entries of ``X`` that is set to ``1``.
         Default is ``0.25``.
@@ -300,6 +306,7 @@ def snp_unphased(
     assert n >= 1
     assert p >= 1
     assert sparsity >= 0 and sparsity <= 1
+    assert missing_ratio >= 0 and missing_ratio <= 1
     assert one_ratio >= 0 and one_ratio <= 1
     assert two_ratio >= 0 and two_ratio <= 1
     assert zero_penalty >= 0 and zero_penalty <= 1
@@ -339,6 +346,9 @@ def snp_unphased(
         beta=beta_sub,
         snr=snr,
     )
+
+    n_missing = int(missing_ratio * n * p)
+    X.ravel()[np.random.choice(n * p, n_missing, replace=False)] = -9
 
     return {
         "X": np.asfortranarray(X), 

@@ -22,6 +22,7 @@
 namespace adelie_core {
 namespace io {
 
+template <class MmapPtrType=std::unique_ptr<char, std::function<void(char*)>>>
 class IOSNPBase
 {
 public:
@@ -30,10 +31,7 @@ public:
         std::FILE, 
         std::function<void(std::FILE*)>
     >;
-    using mmap_unique_ptr_t = std::unique_ptr<
-        char,
-        std::function<void(char*)>
-    >;
+    using mmap_ptr_t = MmapPtrType;
     using bool_t = bool;
     using buffer_t = util::rowvec_type<char>;
 
@@ -41,7 +39,7 @@ protected:
     const string_t _filename;
     const util::read_mode_type _read_mode;
     buffer_t _buffer_w;             // only used when _read_mode == _file
-    mmap_unique_ptr_t _mmap_ptr;    // only used when _read_mode == _mmap
+    mmap_ptr_t _mmap_ptr;           // only used when _read_mode == _mmap 
     Eigen::Map<buffer_t> _buffer;
     bool_t _is_read;
 
@@ -102,7 +100,7 @@ public:
     ):
         _filename(filename),
         _read_mode(convert_read_mode(read_mode)),
-        _mmap_ptr(nullptr, [](char*) {}),
+        _mmap_ptr(nullptr),
         _buffer(nullptr, 0),
         _is_read(false)
     {}
@@ -127,6 +125,10 @@ public:
         if (_read_mode == util::read_mode_type::_mmap) {
 #if defined(__linux__) || defined(__APPLE__)
             int fd = open(_filename.c_str(), O_RDONLY);
+            if (fd == -1) {
+                perror("open");
+                throw util::adelie_core_error("open failed.");
+            }
             char* addr = static_cast<char*>(
                 mmap(
                     nullptr, 
@@ -138,10 +140,11 @@ public:
                 )
             );
             close(fd);
-            _mmap_ptr = mmap_unique_ptr_t(
-                addr, 
-                [=](char* ptr) { if (ptr) munmap(ptr, total_bytes); }
-            );
+            if (addr == MAP_FAILED) {
+                perror("mmap");
+                throw util::adelie_core_error("mmap failed.");
+            }
+            _mmap_ptr = mmap_ptr_t(addr, [=](char* ptr) { munmap(ptr, total_bytes); } );
             new (&_buffer) Eigen::Map<buffer_t>(addr, total_bytes);
 #else
             throw util::adelie_core_error("Only Linux and MacOS support the mmap feature.");
