@@ -109,15 +109,27 @@ void io_snp_phased_ancestry(py::module_& m)
             py::arg("filename"),
             py::arg("read_mode")
         )
-        .def("rows", &io_t::rows)
-        .def("snps", &io_t::snps)
-        .def("ancestries", &io_t::ancestries)
-        .def("cols", &io_t::cols)
-        .def("outer", &io_t::outer)
-        .def("nnz", &io_t::nnz)
-        .def("inner", &io_t::inner)
-        .def("ancestry", &io_t::ancestry)
-        .def("to_dense", &io_t::to_dense)
+        .def_property_readonly("rows", &io_t::rows, "Number of rows.")
+        .def_property_readonly("snps", &io_t::snps, "Number of SNPs.")
+        .def_property_readonly("cols", &io_t::cols, "Number of columns.")
+        .def_property_readonly("ancestries", &io_t::ancestries, "Number of ancestries.")
+        .def_property_readonly("nnz", &io_t::nnz, "Number of non-zero entries for each column.")
+        .def("to_dense", &io_t::to_dense, 
+            py::arg("n_threads")=1,
+        R"delimiter(
+        Creates a dense SNP phased, ancestry matrix from the file.
+
+        Parameters
+        ----------
+        n_threads : int, optional
+            Number of threads.
+            Default is ``1``.
+
+        Returns
+        -------
+        dense : (n, s*A) np.ndarray
+            Dense SNP phased, ancestry matrix.
+        )delimiter")
         .def("write", &io_t::write,
             py::arg("calldata").noconvert(),
             py::arg("ancestries").noconvert(),

@@ -25,6 +25,42 @@ public:
 private:
     const Eigen::Map<const sparse_t> _mat;  // underlying sparse matrix
     const size_t _n_threads;                // number of threads
+
+    ADELIE_CORE_STRONG_INLINE
+    value_t _cmul(
+        int j, 
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& weights
+    ) const
+    {
+        const auto outer = _mat.outerIndexPtr()[j];
+        const auto size = _mat.outerIndexPtr()[j+1] - outer;
+        const Eigen::Map<const vec_sp_index_t> inner(
+            _mat.innerIndexPtr() + outer, size
+        );
+        const Eigen::Map<const vec_sp_value_t> value(
+            _mat.valuePtr() + outer, size
+        );
+        return spddot(inner, value, v * weights);
+    }
+
+    ADELIE_CORE_STRONG_INLINE
+    void _ctmul(
+        int j, 
+        value_t v, 
+        Eigen::Ref<vec_value_t> out
+    ) const
+    {
+        const auto outer = _mat.outerIndexPtr()[j];
+        const auto size = _mat.outerIndexPtr()[j+1] - outer;
+        const Eigen::Map<const vec_sp_index_t> inner(
+            _mat.innerIndexPtr() + outer, size
+        );
+        const Eigen::Map<const vec_sp_value_t> value(
+            _mat.valuePtr() + outer, size
+        );
+        spaxi(inner, value, v, out);
+    }
     
 public:
     explicit MatrixNaiveSparse(
@@ -51,15 +87,7 @@ public:
     ) override
     {
         base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-        const auto outer = _mat.outerIndexPtr()[j];
-        const auto size = _mat.outerIndexPtr()[j+1] - outer;
-        const Eigen::Map<const vec_sp_index_t> inner(
-            _mat.innerIndexPtr() + outer, size
-        );
-        const Eigen::Map<const vec_sp_value_t> value(
-            _mat.valuePtr() + outer, size
-        );
-        return spddot(inner, value, v * weights);
+        return _cmul(j, v, weights);
     }
 
     void ctmul(
@@ -69,15 +97,7 @@ public:
     ) override
     {
         base_t::check_ctmul(j, out.size(), rows(), cols());
-        const auto outer = _mat.outerIndexPtr()[j];
-        const auto size = _mat.outerIndexPtr()[j+1] - outer;
-        const Eigen::Map<const vec_sp_index_t> inner(
-            _mat.innerIndexPtr() + outer, size
-        );
-        const Eigen::Map<const vec_sp_value_t> value(
-            _mat.valuePtr() + outer, size
-        );
-        spaxi(inner, value, v, out);
+        _ctmul(j, v, out);
     }
 
     void bmul(
@@ -89,15 +109,7 @@ public:
     {
         base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
         for (int k = 0; k < q; ++k) {
-            const auto outer = _mat.outerIndexPtr()[j+k];
-            const auto size = _mat.outerIndexPtr()[j+k+1] - outer;
-            const Eigen::Map<const vec_sp_index_t> inner(
-                _mat.innerIndexPtr() + outer, size
-            );
-            const Eigen::Map<const vec_sp_value_t> value(
-                _mat.valuePtr() + outer, size
-            );
-            out[k] = spddot(inner, value, v * weights);
+            out[k] = _cmul(j+k, v, weights);
         }
     }
 
@@ -109,15 +121,7 @@ public:
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         for (int k = 0; k < q; ++k) {
-            const auto outer = _mat.outerIndexPtr()[j+k];
-            const auto size = _mat.outerIndexPtr()[j+k+1] - outer;
-            const Eigen::Map<const vec_sp_index_t> inner(
-                _mat.innerIndexPtr() + outer, size
-            );
-            const Eigen::Map<const vec_sp_value_t> value(
-                _mat.valuePtr() + outer, size
-            );
-            spaxi(inner, value, v[k], out);
+            _ctmul(j+k, v[k], out);
         }
     }
 
@@ -128,15 +132,7 @@ public:
     ) override
     {
         const auto routine = [&](int k) {
-            const auto outer = _mat.outerIndexPtr()[k];
-            const auto size = _mat.outerIndexPtr()[k+1] - outer;
-            const Eigen::Map<const vec_sp_index_t> inner(
-                _mat.innerIndexPtr() + outer, size
-            );
-            const Eigen::Map<const vec_sp_value_t> value(
-                _mat.valuePtr() + outer, size
-            );
-            out[k] = spddot(inner, value, v * weights);
+            out[k] = _cmul(k, v, weights);
         };
         if (_n_threads <= 1) {
             for (int k = 0; k < out.size(); ++k) routine(k);

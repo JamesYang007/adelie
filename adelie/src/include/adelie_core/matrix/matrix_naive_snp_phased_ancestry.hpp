@@ -24,11 +24,10 @@ public:
     using io_t = io::IOSNPPhasedAncestry<MmapPtrType>;
     
 protected:
-    const string_t _filename;   // filename because why not? :)
     const io_t _io;             // IO handler
     const size_t _n_threads;    // number of threads
-    vec_value_t _vbuff;         // vector buffer
-    util::rowarr_type<value_t> _buff;           // buffer
+    util::rowvec_type<char> _bbuff;
+    vec_index_t _ibuff;
 
     static auto init_io(
         const string_t& filename,
@@ -40,21 +39,51 @@ protected:
         return io;
     }
 
-    static void throw_bad_start_index(int j, int A)
+    ADELIE_CORE_STRONG_INLINE
+    value_t _cmul(
+        int j,
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& weights
+    ) const
     {
-        throw util::adelie_core_error(
-            "Bad starting index " + std::to_string(j) +
-            " with ancestries " + std::to_string(A)
-        );
+        const auto A = ancestries();
+        const auto snp = j / A;
+        const auto anc = j % A;
+
+        value_t sum = 0;
+        for (int hap = 0; hap < io_t::n_haps; ++hap) {
+            auto it = _io.begin(snp, anc, hap);
+            const auto end = _io.end(snp, anc, hap);
+            for (; it != end; ++it) {
+                const auto idx = *it;
+                sum += v[idx] * weights[idx];
+            }
+        }
+
+        return sum;
     }
 
-    static void throw_bad_size(int q, int A)
+    ADELIE_CORE_STRONG_INLINE
+    void _ctmul(
+        int j,
+        value_t v,
+        Eigen::Ref<vec_value_t> out
+    )
     {
-        throw util::adelie_core_error(
-            "Bad size " + std::to_string(q) +
-            " with ancestries " + std::to_string(A)
-        );
+        const auto A = ancestries();
+        const auto snp = j / A;
+        const auto anc = j % A;
+
+        for (int hap = 0; hap < io_t::n_haps; ++hap) {
+            auto it = _io.begin(snp, anc, hap);
+            const auto end = _io.end(snp, anc, hap);
+            for (; it != end; ++it) {
+                out[*it] += v;
+            }
+        }
     }
+
+    auto ancestries() const { return _io.ancestries(); }
 
 public:
     explicit MatrixNaiveSNPPhasedAncestry(
@@ -62,18 +91,16 @@ public:
         const string_t& read_mode,
         size_t n_threads
     ): 
-        _filename(filename),
         _io(init_io(filename, read_mode)),
         _n_threads(n_threads),
-        _vbuff(n_threads),
-        _buff(n_threads, _io.ancestries())
+        _bbuff(_io.rows()),
+        _ibuff(_io.rows())
     {
         if (n_threads < 1) {
             throw util::adelie_core_error("n_threads must be >= 1.");
         }
+        _bbuff.setZero();
     }
-
-    auto ancestries() const { return _io.ancestries(); }
 
     value_t cmul(
         int j, 
@@ -82,23 +109,7 @@ public:
     ) override
     {
         base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-
-        const auto A = ancestries();
-        const auto snp = j / A;
-        const auto anc = j % A;
-
-        value_t sum = 0;
-        for (int hap = 0; hap < 2; ++hap) {
-            const auto inner = _io.inner(snp, hap);
-            const auto ancestry = _io.ancestry(snp, hap);
-
-            for (int i = 0; i < inner.size(); ++i) {
-                if (ancestry[i] != anc) continue;
-                sum += v[inner[i]] * weights[inner[i]];
-            }
-        }
-
-        return sum;
+        return _cmul(j, v, weights);
     }
 
     void ctmul(
@@ -108,19 +119,7 @@ public:
     ) override
     {
         base_t::check_ctmul(j, out.size(), rows(), cols());
-
-        const auto A = ancestries();
-        const auto snp = j / A;
-        const auto anc = j % A;
-
-        for (int hap = 0; hap < 2; ++hap) {
-            const auto inner = _io.inner(snp, hap);
-            const auto ancestry = _io.ancestry(snp, hap);
-            for (int i = 0; i < inner.size(); ++i) {
-                if (ancestry[i] != anc) continue;
-                out[inner[i]] += v;
-            }
-        }
+        _ctmul(j, v, out);
     }
 
     void bmul(
@@ -131,51 +130,8 @@ public:
     ) override
     {
         base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-
-        const int A = ancestries();
-
-        out.setZero(); // don't parallelize! q is usually small
-
-        int n_batches = (
-            (j + q - A * (j / A) + A - 1) / A
-        );
-
-        const auto routine = [&](int b) {
-            const auto n_solved =  (b > 0) * (A * ((j / A) + 1) - j + (b-1) * A);
-            const auto begin = j + n_solved;
-            const auto snp = begin / A;
-            const auto ancestry_lower = begin % A;
-            const auto ancestry_upper = std::min<int>(ancestry_lower + q - n_solved, A);
-
-            const auto _common_routine = [&](const auto func) {
-                for (int hap = 0; hap < 2; ++hap) {
-                    const auto inner = _io.inner(snp, hap);
-                    const auto ancestry = _io.ancestry(snp, hap);
-                    func(inner, ancestry);
-                }
-            };
-
-            // optimized routine when additional check is not required
-            if (ancestry_lower == 0 && ancestry_upper == A) {
-                _common_routine([&](const auto& inner, const auto& ancestry) {
-                    for (int i = 0; i < inner.size(); ++i) {
-                        out[n_solved+ancestry[i]] += v[inner[i]] * weights[inner[i]];
-                    }
-                });
-            } else {
-                _common_routine([&](const auto& inner, const auto& ancestry) {
-                    for (int i = 0; i < inner.size(); ++i) {
-                        if (ancestry[i] < ancestry_lower || ancestry[i] >= ancestry_upper) continue;
-                        out[n_solved+ancestry[i]-ancestry_lower] += v[inner[i]] * weights[inner[i]];
-                    }
-                });
-            }
-        };
-        if (_n_threads <= 1) {
-            for (int b = 0; b < n_batches; ++b) routine(b);
-        } else {
-            #pragma omp parallel for schedule(static) num_threads(_n_threads)
-            for (int b = 0; b < n_batches; ++b) routine(b);
+        for (int t = 0; t < q; ++t) {
+            out[t] = _cmul(j + t, v, weights);
         }
     }
 
@@ -186,41 +142,8 @@ public:
     ) override
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
-
-        const int A = ancestries();
-
-        int n_solved = 0;
-        while (n_solved < q) 
-        {
-            const auto begin = j + n_solved;
-            const auto snp = begin / A;
-            const auto ancestry_lower = begin % A;
-            const auto ancestry_upper = std::min<int>(ancestry_lower + q - n_solved, A);
-
-            const auto _common_routine = [&](const auto func) {
-                for (int hap = 0; hap < 2; ++hap) {
-                    const auto inner = _io.inner(snp, hap);
-                    const auto ancestry = _io.ancestry(snp, hap);
-                    func(inner, ancestry);
-                }
-            };
-
-            if (ancestry_lower == 0 && ancestry_upper == A) {
-                _common_routine([&](const auto& inner, const auto& ancestry) {
-                    for (int i = 0; i < inner.size(); ++i) {
-                        out[inner[i]] += v[n_solved + ancestry[i]];
-                    }
-                });
-            } else {
-                _common_routine([&](const auto& inner, const auto& ancestry) {
-                    for (int i = 0; i < inner.size(); ++i) {
-                        if (ancestry[i] < ancestry_lower || ancestry[i] >= ancestry_upper) continue;
-                        out[inner[i]] += v[n_solved + ancestry[i] - ancestry_lower];
-                    }
-                });
-            }
-
-            n_solved += ancestry_upper - ancestry_lower;
+        for (int t = 0; t < q; ++t) {
+            _ctmul(j + t, v[t], out);
         }
     }
 
@@ -230,7 +153,15 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        bmul(0, out.size(), v, weights, out);
+        const auto routine = [&](int t) {
+            out[t] = _cmul(t, v, weights);
+        };
+        if (_n_threads <= 1) {
+            for (int t = 0; t < cols(); ++t) routine(t);
+        } else {
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int t = 0; t < cols(); ++t) routine(t);
+        }
     }
 
     void cov(
@@ -245,7 +176,7 @@ public:
             out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
             rows(), cols()
         );
-
+        
         const auto A = ancestries();
 
         out.setZero(); // don't parallelize! q is usually small
@@ -264,47 +195,112 @@ public:
                 const auto ancestry_lower1 = begin1 % A;
                 const auto ancestry_upper1 = std::min<int>(ancestry_lower1 + q - n_solved1, A);
 
-                for (int hap0 = 0; hap0 < 2; ++hap0) {
-                    for (int hap1 = 0; hap1 < 2; ++hap1) {
-                        const auto inner0 = _io.inner(snp0, hap0);
-                        const auto ancestry0 = _io.ancestry(snp0, hap0);
-                        const auto inner1 = _io.inner(snp1, hap1);
-                        const auto ancestry1 = _io.ancestry(snp1, hap1);
+                if (n_solved0 == n_solved1) {
+                    const auto begin = begin0;
+                    const auto snp = snp0;
+                    const auto a_low = ancestry_lower0;
+                    const auto a_high = ancestry_upper0;
+                    const auto a_size = a_high - a_low;
 
-                        int i0 = 0;
-                        int i1 = 0;
-                        while (
-                            (i0 < inner0.size()) &&
-                            (i1 < inner1.size())
-                        ) {
-                            while ((i0 < inner0.size()) && (inner0[i0] < inner1[i1])) ++i0;
-                            if (i0 == inner0.size()) break;
-                            while ((i1 < inner1.size()) && (inner1[i1] < inner0[i0])) ++i1;
-                            if (i1 == inner1.size()) break;
-                            while (
-                                (i0 < inner0.size()) &&
-                                (i1 < inner1.size()) &&
-                                (inner0[i0] == inner1[i1])
-                            ) {
-                                if (
-                                    ((n_solved0 == n_solved1) && (ancestry0[i0] < ancestry1[i1])) ||
-                                    (ancestry0[i0] < ancestry_lower0) ||
-                                    (ancestry0[i0] >= ancestry_upper0) ||
-                                    (ancestry1[i1] < ancestry_lower1) ||
-                                    (ancestry1[i1] >= ancestry_upper1)
-                                ) {
-                                    ++i0;
-                                    ++i1;
-                                    continue;
-                                }
-                                const auto k0 = n_solved0 + ancestry0[i0] - ancestry_lower0;
-                                const auto k1 = n_solved1 + ancestry1[i1] - ancestry_lower1;
-                                const auto sw = sqrt_weights[inner1[i1]];
-                                out(k0, k1) += sw * sw;
-                                ++i0;
-                                ++i1;
+                    // compute quadratic diagonal part
+                    for (int k = 0; k < a_size; ++k) {
+                        value_t sum = 0;
+                        for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
+                            const auto anc = a_low + k;
+                            auto it = _io.begin(snp, anc, hap);
+                            const auto end = _io.end(snp, anc, hap);
+                            for (; it != end; ++it) {
+                                const auto idx = *it;
+                                const auto sqrt_w = sqrt_weights[idx];
+                                sum += sqrt_w * sqrt_w;
                             }
                         }
+                        const auto kk = n_solved0 + k;
+                        out(kk, kk) = sum;
+                    }
+
+                    // compute cross-terms
+                    for (int k0 = 0; k0 < a_size; ++k0) {
+                        // cache hap0 information
+                        size_t nnz = 0;
+                        auto it0 = _io.begin(snp, a_low + k0, 0);
+                        const auto end0 = _io.end(snp, a_low + k0, 0);
+                        for (; it0 != end0; ++it0) {
+                            const auto idx = *it0;
+                            _bbuff[idx] = true;
+                            _ibuff[nnz] = idx;
+                            ++nnz;
+                        }
+
+                        // loop through hap1's ancestries
+                        for (int k1 = 0; k1 < a_size; ++k1) {
+                            auto it1 = _io.begin(snp, a_low + k1, 1);
+                            const auto end1 = _io.end(snp, a_low + k1, 1);
+                            value_t sum = 0;
+                            for (; it1 != end1; ++it1) {
+                                const auto idx = *it1;
+                                if (!_bbuff[idx]) continue;
+                                const auto sqrt_w = sqrt_weights[idx];
+                                sum += sqrt_w * sqrt_w;
+                            }
+
+                            const auto kk0 = n_solved0 + k0;
+                            const auto kk1 = n_solved0 + k1;
+                            out(kk0, kk1) += sum;
+                            out(kk1, kk0) += sum;
+                        }
+
+                        // keep invariance by populating with false
+                        for (size_t i = 0; i < nnz; ++i) {
+                            _bbuff[_ibuff[i]] = false;
+                        }
+                    }
+
+                    n_solved1 += ancestry_upper1 - ancestry_lower1;
+                    continue;
+                }
+
+                /* general routine */
+
+                const auto ancestry_size0 = ancestry_upper0-ancestry_lower0;
+                const auto ancestry_size1 = ancestry_upper1-ancestry_lower1;
+                for (int a0 = 0; a0 < ancestry_size0; ++a0) {
+                    size_t nnz = 0;
+                    for (int hap0 = 0; hap0 < io_t::n_haps; ++hap0) {
+                        auto it = _io.begin(snp0, ancestry_lower0+a0, hap0);
+                        const auto end = _io.end(snp0, ancestry_lower0+a0, hap0);
+                        for (; it != end; ++it) {
+                            const auto idx = *it;
+                            if (!_bbuff[idx]) {
+                                _ibuff[nnz] = idx;
+                                ++nnz;
+                            }
+                            _bbuff[idx] += 1;
+                        }
+                    }
+
+                    for (int a1 = 0; a1 < ancestry_size1; ++a1) {
+                        value_t sum = 0;
+                        for (int hap1 = 0; hap1 < io_t::n_haps; ++hap1) {
+                            auto it = _io.begin(snp1, ancestry_lower1+a1, hap1);
+                            const auto end = _io.end(snp1, ancestry_lower1+a1, hap1);
+                            for (; it != end; ++it) {
+                                const auto idx = *it;
+                                const auto v0 = _bbuff[idx];
+                                if (!v0) continue;
+                                const auto sqrt_w = sqrt_weights[idx];
+                                sum += sqrt_w * sqrt_w * v0;
+                            }
+                        }
+                        const auto kk0 = n_solved0 + a0;
+                        const auto kk1 = n_solved1 + a1;
+                        out(kk0, kk1) = sum;
+                        // populate the mirror side
+                        out(kk1, kk0) = sum;
+                    }
+
+                    for (size_t i = 0; i < nnz; ++i) {
+                        _bbuff[_ibuff[i]] = 0;
                     }
                 }
 
@@ -312,12 +308,6 @@ public:
             }
             n_solved0 += ancestry_upper0 - ancestry_lower0;
         }     
-
-        for (int i1 = 0; i1 < q; ++i1) {
-            for (int i2 = i1+1; i2 < q; ++i2) {
-                out(i1, i2) = out(i2, i1);
-            }
-        }
     }
 
     int rows() const override { return _io.rows(); }
@@ -336,20 +326,8 @@ public:
             typename sp_mat_value_t::InnerIterator it(v, k);
             auto out_k = out.row(k);
             out_k.setZero();
-            for (; it; ++it) 
-            {
-                const auto t = it.index();
-                const auto snp = t / A;
-                const auto anc = t % A;
-
-                for (int hap = 0; hap < 2; ++hap) {
-                    const auto inner = _io.inner(snp, hap);
-                    const auto ancestry = _io.ancestry(snp, hap);
-                    for (int i = 0; i < inner.size(); ++i) {
-                        if (ancestry[i] != anc) continue;
-                        out_k[inner[i]] += it.value();
-                    }
-                }
+            for (; it; ++it) {
+                _ctmul(it.index(), it.value(), out_k);
             }
         };
         if (_n_threads <= 1) {

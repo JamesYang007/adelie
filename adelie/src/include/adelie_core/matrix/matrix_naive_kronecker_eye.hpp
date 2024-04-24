@@ -144,6 +144,7 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
+        // TODO: this can maybe be parallelized?
         bmul(0, cols(), v, weights, out);
     }
 
@@ -420,10 +421,17 @@ public:
                 _n_threads
             );
             for (int i1 = 0; i1 < i_q; ++i1) {
-                for (int i2 = 0; i2 < i_q; ++i2) {
+                for (int i2 = 0; i2 <= i1; ++i2) {
                     out((i1+i_begin)*_K+l-j, (i2+i_begin)*_K+l-j) = (
                         buff.col(i1).dot(buff.col(i2))
                     );
+                }
+            }
+            for (int i1 = 0; i1 < i_q; ++i1) {
+                for (int i2 = i1 + 1; i2 < i_q; ++i2) {
+                    const auto fi1 = (i1+i_begin)*_K+l-j;
+                    const auto fi2 = (i2+i_begin)*_K+l-j;
+                    out(fi1, fi2) = out(fi2, fi1);
                 }
             }
         }
