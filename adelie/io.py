@@ -27,10 +27,10 @@ class snp_phased_ancestry(core_io.IOSNPPhasedAncestry):
             H_k
             =
             \\begin{bmatrix}
-                \\unicode{x2014} & \\delta^k_1 \\cdot e_{a^k_1} & \\unicode{x2014} \\\\
-                \\unicode{x2014} & \\delta^k_2 \\cdot e_{a^k_2} & \\unicode{x2014} \\\\
+                \\unicode{x2014} & \\delta^k_1 \\cdot e_{a^k_1}^\\top & \\unicode{x2014} \\\\
+                \\unicode{x2014} & \\delta^k_2 \\cdot e_{a^k_2}^\\top & \\unicode{x2014} \\\\
                 \\vdots & \\vdots & \\vdots \\\\
-                \\unicode{x2014} & \\delta^k_n \\cdot e_{a^k_n} & \\unicode{x2014} \\\\
+                \\unicode{x2014} & \\delta^k_n \\cdot e_{a^k_n}^\\top & \\unicode{x2014} \\\\
             \\end{bmatrix}
         \\end{align*}
 
