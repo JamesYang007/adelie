@@ -46,6 +46,8 @@ void io_snp_unphased(py::module_& m)
     using io_t = ad::io::IOSNPUnphased<>;
     using base_t = typename io_t::base_t;
     using string_t = typename io_t::string_t;
+    using vec_impute_t = typename io_t::vec_impute_t;
+    using colarr_value_t = typename io_t::colarr_value_t;
     py::class_<io_t, base_t>(m, "IOSNPUnphased")
         .def(py::init<
             const string_t&,
@@ -87,7 +89,26 @@ void io_snp_unphased(py::module_& m)
         dense : (n, p) np.ndarray
             Dense SNP unphased matrix.
         )delimiter")
-        .def("write", &io_t::write,
+        .def("write", [](
+            const io_t& io, 
+            const Eigen::Ref<const colarr_value_t>& calldata,
+            const std::string& impute_method_str,
+            Eigen::Ref<vec_impute_t> impute,
+            size_t n_threads
+        ) {
+            std::tuple<size_t, std::unordered_map<std::string, double>> out;
+            std::string error;
+            try {
+                out = io.write(calldata, impute_method_str, impute, n_threads);
+            } catch (const std::exception& e) {
+                error = e.what();
+            }
+            return std::make_tuple(
+                std::get<0>(out),
+                std::get<1>(out),
+                error
+            );
+        },
             py::arg("calldata").noconvert(),
             py::arg("impute_method"),
             py::arg("impute").noconvert(),
@@ -101,6 +122,7 @@ void io_snp_phased_ancestry(py::module_& m)
     using io_t = ad::io::IOSNPPhasedAncestry<>;
     using base_t = typename io_t::base_t;
     using string_t = typename io_t::string_t;
+    using colarr_value_t = typename io_t::colarr_value_t;
     py::class_<io_t, base_t>(m, "IOSNPPhasedAncestry")
         .def(py::init<
             const string_t&,
@@ -130,7 +152,26 @@ void io_snp_phased_ancestry(py::module_& m)
         dense : (n, s*A) np.ndarray
             Dense SNP phased, ancestry matrix.
         )delimiter")
-        .def("write", &io_t::write,
+        .def("write", [](
+            const io_t& io,
+            const Eigen::Ref<const colarr_value_t>& calldata,
+            const Eigen::Ref<const colarr_value_t>& ancestries,
+            size_t A,
+            size_t n_threads
+        ) {
+            std::tuple<size_t, std::unordered_map<std::string, double>> out;
+            std::string error;
+            try {
+                out = io.write(calldata, ancestries, A, n_threads);
+            } catch (const std::exception& e) {
+                error = e.what();
+            }
+            return std::make_tuple(
+                std::get<0>(out),
+                std::get<1>(out),
+                error
+            );
+        },
             py::arg("calldata").noconvert(),
             py::arg("ancestries").noconvert(),
             py::arg("A"),
