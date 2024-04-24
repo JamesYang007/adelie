@@ -104,7 +104,14 @@ class snp_phased_ancestry(core_io.IOSNPPhasedAncestry):
         benchmark : dict
             Dictionary of benchmark timings for each step of the serializer.
         """
-        return core_io.IOSNPPhasedAncestry.write(self, calldata, ancestries, A, n_threads)
+        (
+            total_bytes, 
+            benchmark, 
+            error,
+        ) = core_io.IOSNPPhasedAncestry.write(self, calldata, ancestries, A, n_threads)
+        if error != "":
+            raise RuntimeError(error)
+        return total_bytes, benchmark
 
 
 class snp_unphased(core_io.IOSNPUnphased):
@@ -183,4 +190,11 @@ class snp_unphased(core_io.IOSNPUnphased):
             impute_method = "user"
         else:
             raise ValueError("impute_method must be a valid option.")
-        return core_io.IOSNPUnphased.write(self, calldata, impute_method, impute, n_threads)
+        (
+            total_bytes, 
+            benchmark, 
+            error,
+        ) = core_io.IOSNPUnphased.write(self, calldata, impute_method, impute, n_threads)
+        if error != "":
+            raise RuntimeError(error)
+        return total_bytes, benchmark
