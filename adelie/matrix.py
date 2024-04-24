@@ -405,7 +405,7 @@ def lazy_cov(
 def snp_phased_ancestry(
     filename: str,
     *,
-    read_mode: str ="auto",
+    read_mode: str ="file",
     n_threads: int =1,
     dtype: Union[np.float32, np.float64] =np.float64,
 ):
@@ -425,7 +425,7 @@ def snp_phased_ancestry(
         File name that contains the SNP phased, ancestry matrix in ``.snpdat`` format.
     read_mode : str, optional
         See the corresponding parameter in ``adelie.io.snp_phased_ancestry``.
-        Default is ``"auto"``.
+        Default is ``"file"``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -459,7 +459,7 @@ def snp_phased_ancestry(
 def snp_unphased(
     filename: str,
     *,
-    read_mode: str ="auto",
+    read_mode: str ="file",
     n_threads: int =1,
     dtype: Union[np.float32, np.float64] =np.float64,
 ):
@@ -479,7 +479,7 @@ def snp_unphased(
         File name that contains unphased calldata in ``.snpdat`` format.
     read_mode : str, optional
         See the corresponding parameter in ``adelie.io.snp_unphased``.
-        Default is ``"auto"``.
+        Default is ``"file"``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
