@@ -12,20 +12,25 @@
    .. autosummary::
    
       ~snp_unphased.__init__
-      ~snp_unphased.cols
-      ~snp_unphased.endian
-      ~snp_unphased.inner
-      ~snp_unphased.nnz
-      ~snp_unphased.outer
       ~snp_unphased.read
-      ~snp_unphased.rows
       ~snp_unphased.to_dense
-      ~snp_unphased.value
       ~snp_unphased.write
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~snp_unphased.cols
+      ~snp_unphased.endian
+      ~snp_unphased.impute
+      ~snp_unphased.nnm
+      ~snp_unphased.nnz
+      ~snp_unphased.rows
+      ~snp_unphased.snps
    
    
 
@@ -33,19 +38,21 @@
    
    
    .. automethod:: __init__
-   .. automethod:: cols
-   .. automethod:: endian
-   .. automethod:: inner
-   .. automethod:: nnz
-   .. automethod:: outer
    .. automethod:: read
-   .. automethod:: rows
    .. automethod:: to_dense
-   .. automethod:: value
    .. automethod:: write
    
    
 
    
+   
+   
+   .. autoattribute:: cols
+   .. autoattribute:: endian
+   .. autoattribute:: impute
+   .. autoattribute:: nnm
+   .. autoattribute:: nnz
+   .. autoattribute:: rows
+   .. autoattribute:: snps
    
    

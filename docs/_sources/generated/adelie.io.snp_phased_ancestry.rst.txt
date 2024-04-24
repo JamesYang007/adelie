@@ -12,14 +12,7 @@
    .. autosummary::
    
       ~snp_phased_ancestry.__init__
-      ~snp_phased_ancestry.ancestry
-      ~snp_phased_ancestry.cols
-      ~snp_phased_ancestry.endian
-      ~snp_phased_ancestry.inner
-      ~snp_phased_ancestry.nnz
-      ~snp_phased_ancestry.outer
       ~snp_phased_ancestry.read
-      ~snp_phased_ancestry.rows
       ~snp_phased_ancestry.to_dense
       ~snp_phased_ancestry.write
    
@@ -27,25 +20,37 @@
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~snp_phased_ancestry.ancestries
+      ~snp_phased_ancestry.cols
+      ~snp_phased_ancestry.endian
+      ~snp_phased_ancestry.nnz
+      ~snp_phased_ancestry.rows
+      ~snp_phased_ancestry.snps
+   
    
 
    
    
    
    .. automethod:: __init__
-   .. automethod:: ancestry
-   .. automethod:: cols
-   .. automethod:: endian
-   .. automethod:: inner
-   .. automethod:: nnz
-   .. automethod:: outer
    .. automethod:: read
-   .. automethod:: rows
    .. automethod:: to_dense
    .. automethod:: write
    
    
 
    
+   
+   
+   .. autoattribute:: ancestries
+   .. autoattribute:: cols
+   .. autoattribute:: endian
+   .. autoattribute:: nnz
+   .. autoattribute:: rows
+   .. autoattribute:: snps
    
    
