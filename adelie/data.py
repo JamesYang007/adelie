@@ -240,6 +240,8 @@ def snp_unphased(
     - The calldata matrix ``X`` has sparsity ratio ``1 - one_ratio - two_ratio``
       where ``one_ratio`` of the entries are randomly set to ``1``
       and ``two_ratio`` are randomly set to ``2``.
+      The user only sees a masked version of ``X`` where
+      ``missing_ratio`` of the entries are set to ``-9``.
     - The true coefficients :math:`\\beta` are such that ``sparsity`` proportion
       of the entries are set to :math:`0`.
     - The response ``y`` is generated from the GLM specified by ``glm``.
