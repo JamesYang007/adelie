@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.io.snp_phased_ancestry &#8212; adelie 1.1.29 documentation</title>
+    <title>adelie.io.snp_phased_ancestry &#8212; adelie 1.1.30 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=0f038d70"></script>
+    <script src="../_static/documentation_options.js?v=ec27ea22"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -124,8 +124,8 @@
     
     
     
-    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.29 documentation - Home"/>
-    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.29 documentation - Home"/>`);</script>
+    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.30 documentation - Home"/>
+    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.30 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -374,6 +374,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.sparse.html">adelie.matrix.sparse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.subset.html">adelie.matrix.subset</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
@@ -462,7 +463,7 @@ document.write(`
 <h1>adelie.io.snp_phased_ancestry<a class="headerlink" href="#adelie-io-snp-phased-ancestry" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.io.</span></span><span class="sig-name descname"><span class="pre">snp_phased_ancestry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/io.py#L6-L114"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.io.snp_phased_ancestry" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.io.</span></span><span class="sig-name descname"><span class="pre">snp_phased_ancestry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'file'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/io.py#L6-L111"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.io.snp_phased_ancestry" title="Link to this definition">#</a></dt>
 <dd><p>IO handler for SNP phased, ancestry matrix.</p>
 <p>A SNP phased, ancestry matrix is a matrix 
 that combines a (phased) calldata and local ancestry information.</p>
@@ -510,12 +511,9 @@ however, with large files, it is the slowest option.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;mmap&quot;</span></code>: reads the file using mmap.
 This method is only supported on Linux and MacOS.
 It is the most efficient way to read large files.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>: automatic way of choosing one of the options above.
-The mode is set to <code class="docutils literal notranslate"><span class="pre">&quot;mmap&quot;</span></code> whenever the option is allowed.
-Otherwise, the mode is set to <code class="docutils literal notranslate"><span class="pre">&quot;file&quot;</span></code>.</p></li>
 </ul>
 </div></blockquote>
-<p>Default is <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>.</p>
+<p>Default is <code class="docutils literal notranslate"><span class="pre">&quot;file&quot;</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -562,7 +560,7 @@ Otherwise, the mode is set to <code class="docutils literal notranslate"><span c
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">adelie.adelie_core.io.IOSNPPhasedAncestry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/io.py#L64-L69"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.io.snp_phased_ancestry.__init__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">adelie.adelie_core.io.IOSNPPhasedAncestry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/io.py#L61-L66"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.io.snp_phased_ancestry.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -602,7 +600,7 @@ Default is <code class="docutils literal notranslate"><span class="pre">1</span>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.io.snp_phased_ancestry.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calldata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ancestries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/io.py#L71-L114"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.io.snp_phased_ancestry.write" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calldata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ancestries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/io.py#L68-L111"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.io.snp_phased_ancestry.write" title="Link to this definition">#</a></dt>
 <dd><p>Writes a dense SNP phased, ancestry matrix to the file in <code class="docutils literal notranslate"><span class="pre">.snpdat</span></code> format.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>

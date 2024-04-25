@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.glm.cox &#8212; adelie 1.1.30 documentation</title>
+    <title>adelie.matrix.subset &#8212; adelie 1.1.30 documentation</title>
   
   
   
@@ -42,13 +42,11 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.glm.cox';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.matrix.subset';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.glm.gaussian" href="adelie.glm.gaussian.html" />
-    <link rel="prev" title="adelie.glm.binomial" href="adelie.glm.binomial.html" />
+    <link rel="next" title="adelie.solver.gaussian_cov" href="adelie.solver.gaussian_cov.html" />
+    <link rel="prev" title="adelie.matrix.sparse" href="adelie.matrix.sparse.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -353,9 +351,9 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.predict.html">adelie.diagnostic.predict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.glm.cox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.cox.html">adelie.glm.cox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.multigaussian.html">adelie.glm.multigaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.multinomial.html">adelie.glm.multinomial</a></li>
@@ -365,7 +363,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.block_diag.html">adelie.matrix.block_diag</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.concatenate.html">adelie.matrix.concatenate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
@@ -374,7 +372,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.sparse.html">adelie.matrix.sparse</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.subset.html">adelie.matrix.subset</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.matrix.subset</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
@@ -442,7 +440,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.glm.cox</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.matrix.subset</li>
   </ul>
 </nav>
 </div>
@@ -459,86 +457,52 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-glm-cox">
-<h1>adelie.glm.cox<a class="headerlink" href="#adelie-glm-cox" title="Link to this heading">#</a></h1>
+  <section id="adelie-matrix-subset">
+<h1>adelie.matrix.subset<a class="headerlink" href="#adelie-matrix-subset" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="adelie.glm.cox">
-<span class="sig-prename descclassname"><span class="pre">adelie.glm.</span></span><span class="sig-name descname"><span class="pre">cox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights:</span> <span class="pre">~numpy.ndarray</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tie_method:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'efron'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">~numpy.float32</span> <span class="pre">|</span> <span class="pre">~numpy.float64</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/glm.py#L156-L282"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.glm.cox" title="Link to this definition">#</a></dt>
-<dd><p>Creates a Cox GLM family object.</p>
-<p>The Cox GLM family specifies the loss function as:</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}\begin{align*}
-    \ell(\eta)
-    &amp;=
-    -\sum\limits_{i=1}^n w_i \delta_i \eta_i
-    +\sum\limits_{i=1}^n \overline{w}_i \delta_i A_i(\eta)
-    \\
-    A_i(\eta)
-    &amp;=
-    \log\left(
-        \sum\limits_{k \in R(t_i)} w_k e^{\eta_k}
-        -
-        \sigma_i \sum\limits_{k \in H(t_i)} w_k e^{\eta_k}
-    \right)
-\end{align*}\end{split}\]</div>
-<p>where</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}\begin{align*}
-    R(u)
-    &amp;=
-    \{i : u \in (s_i, t_i]\}
-    \\
-    H(u)
-    &amp;=
-    \{i : t_i = u, \delta_i = 1\}
-    \\
-    \overline{w}_i 
-    &amp;= 
-    \frac{\sum_{k \in H(t_i)} w_k}{\sum_{k \in H(t_i)} 1_{w_k &gt; 0}} 
-    1_{\delta_i = 1, w_i &gt; 0}
-\end{align*}\end{split}\]</div>
-<p>Here,
-<span class="math notranslate nohighlight">\(\delta\)</span> is the status (<code class="docutils literal notranslate"><span class="pre">1</span></code> for event, <code class="docutils literal notranslate"><span class="pre">0</span></code> for censored) vector,
-<span class="math notranslate nohighlight">\(s\)</span> is the vector of start times,
-<span class="math notranslate nohighlight">\(t\)</span> is the vector of stop times,
-<span class="math notranslate nohighlight">\(R(u)\)</span> is the at-risk set at time <span class="math notranslate nohighlight">\(u\)</span>,
-<span class="math notranslate nohighlight">\(H(u)\)</span> is the set of ties at event time <span class="math notranslate nohighlight">\(u\)</span>,
-<span class="math notranslate nohighlight">\(\overline{w}\)</span> is the vector of average weights within ties with positive weights,
-<span class="math notranslate nohighlight">\(\sigma\)</span> is the correction scale for tie-breaks, 
-which is determined by the type of correction method (Breslow or Efron).
-Note that <span class="math notranslate nohighlight">\(\overline{w}_i\)</span> and <span class="math notranslate nohighlight">\(A_i(\eta)\)</span> are only well-defined 
-whenever <span class="math notranslate nohighlight">\(\delta_i=1\)</span>, which is not an issue in the computation of <span class="math notranslate nohighlight">\(\ell(\eta)\)</span>.</p>
-<dl class="field-list">
+<dt class="sig sig-object py" id="adelie.matrix.subset">
+<span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">subset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">MatrixNaiveBase32</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html#adelie.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">MatrixNaiveBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/matrix.py#L772-L862"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.matrix.subset" title="Link to this definition">#</a></dt>
+<dd><p>Creates a subset of the matrix along an axis.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">axis=0</span></code>, then <code class="docutils literal notranslate"><span class="pre">mat</span></code> is subsetted 
+along the rows as if we had done <code class="docutils literal notranslate"><span class="pre">X[indices]</span></code> for numpy arrays.
+If <code class="docutils literal notranslate"><span class="pre">axis=1</span></code>, then it is subsetted
+along the columns as if we had done <code class="docutils literal notranslate"><span class="pre">X[:,</span> <span class="pre">indices]</span></code> for numpy arrays.</p>
+<p>For syntactic sugar, the above numpy syntax works for all naive matrix classes.
+That is, if <code class="docutils literal notranslate"><span class="pre">mat</span></code> is a <code class="docutils literal notranslate"><span class="pre">MatrixNaiveBaseXX</span></code>,
+then <code class="docutils literal notranslate"><span class="pre">mat[indices]</span></code> and <code class="docutils literal notranslate"><span class="pre">mat[:,</span> <span class="pre">indices]</span></code> yield the same return values as 
+<code class="docutils literal notranslate"><span class="pre">subset(mat,</span> <span class="pre">indices,</span> <span class="pre">axis=0,</span> <span class="pre">n_threads=n_threads)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">subset(mat,</span> <span class="pre">indices,</span> <span class="pre">axis=1,</span> <span class="pre">n_threads=n_threads)</span></code>, respectively,
+where <code class="docutils literal notranslate"><span class="pre">n_threads</span></code> is deduced from <code class="docutils literal notranslate"><span class="pre">mat</span></code>.
+This function allows the user to further specify the number of threads.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This matrix only works for naive method!</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>For users intending to subset rows of <code class="docutils literal notranslate"><span class="pre">mat</span></code>
+and pass the subsetted matrix to our group elastic net solver,
+it is much more efficient to rather set observation weights 
+along <code class="docutils literal notranslate"><span class="pre">indices</span></code> to <code class="docutils literal notranslate"><span class="pre">0</span></code> when supplying the GLM object.
+For example, suppose the user wishes to run 
+<code class="docutils literal notranslate"><span class="pre">adelie.solver.grpnet</span></code> with <code class="docutils literal notranslate"><span class="pre">mat</span></code> and <code class="docutils literal notranslate"><span class="pre">ad.glm.gaussian(y)</span></code>
+but subsetting the samples along <code class="docutils literal notranslate"><span class="pre">indices</span></code>.
+Then, instead of supplying <code class="docutils literal notranslate"><span class="pre">mat[indices]</span></code> and <code class="docutils literal notranslate"><span class="pre">ad.glm.gaussian(y[indices])</span></code>,
+we recommend creating a weight vector <code class="docutils literal notranslate"><span class="pre">w</span></code> where it is <code class="docutils literal notranslate"><span class="pre">0</span></code> outside <code class="docutils literal notranslate"><span class="pre">indices</span></code>
+and supply <code class="docutils literal notranslate"><span class="pre">mat</span></code> and <code class="docutils literal notranslate"><span class="pre">ad.glm.gaussian(y,</span> <span class="pre">weights=w)</span></code>.</p>
+</div>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>start</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Start time vector <span class="math notranslate nohighlight">\(s\)</span>.</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>mat</strong><span class="classifier">Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64]</span></dt><dd><p>The matrix to subset.</p>
 </dd>
-<dt><strong>stop</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Stop time vector <span class="math notranslate nohighlight">\(t\)</span>.</p>
+<dt><strong>indices</strong><span class="classifier">np.ndarray</span></dt><dd><p>Array of indices to subset the matrix.</p>
 </dd>
-<dt><strong>status</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Status vector <span class="math notranslate nohighlight">\(\delta\)</span>.</p>
+<dt><strong>axis</strong><span class="classifier">int, optional</span></dt><dd><p>The axis along which to subset.
+Default is <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
 </dd>
-<dt><strong>weights</strong><span class="classifier">(n,) np.ndarray, optional</span></dt><dd><p>Observation weights <span class="math notranslate nohighlight">\(W\)</span>.
-Weights are normalized such that they sum to <code class="docutils literal notranslate"><span class="pre">1</span></code>.
-Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to <code class="docutils literal notranslate"><span class="pre">np.full(n,</span> <span class="pre">1/n)</span></code>.</p>
-</dd>
-<dt><strong>tie_method</strong><span class="classifier">str, optional</span></dt><dd><p>The tie-breaking method that determines the scales <span class="math notranslate nohighlight">\(\sigma\)</span>.
-It must be one of the following:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;efron&quot;</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;breslow&quot;</span></code></p></li>
-</ul>
-</div></blockquote>
-<p>Default is <code class="docutils literal notranslate"><span class="pre">&quot;efron&quot;</span></code>.</p>
-</dd>
-<dt><strong>dtype</strong><span class="classifier">Union[np.float32, np.float64], optional</span></dt><dd><p>The underlying data type.
-Default is <code class="docutils literal notranslate"><span class="pre">np.float64</span></code>.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>glm</dt><dd><p>Cox GLM object.</p>
+<dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
+Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -546,7 +510,7 @@ Default is <code class="docutils literal notranslate"><span class="pre">np.float
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="adelie.glm.GlmBase64.html#adelie.glm.GlmBase64" title="adelie.glm.GlmBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.glm.GlmBase64</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html#adelie.matrix.MatrixNaiveBase64" title="adelie.matrix.MatrixNaiveBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.matrix.MatrixNaiveBase64</span></code></a></dt><dd></dd>
 </dl>
 </div>
 </dd></dl>
@@ -564,20 +528,20 @@ Default is <code class="docutils literal notranslate"><span class="pre">np.float
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.glm.binomial.html"
+       href="adelie.matrix.sparse.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.glm.binomial</p>
+        <p class="prev-next-title">adelie.matrix.sparse</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.glm.gaussian.html"
+       href="adelie.solver.gaussian_cov.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.glm.gaussian</p>
+        <p class="prev-next-title">adelie.solver.gaussian_cov</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -597,14 +561,14 @@ Default is <code class="docutils literal notranslate"><span class="pre">np.float
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.cox"><code class="docutils literal notranslate"><span class="pre">cox()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.subset"><code class="docutils literal notranslate"><span class="pre">subset()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.glm.cox.rst.txt">
+    <a href="../_sources/generated/adelie.matrix.subset.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>
