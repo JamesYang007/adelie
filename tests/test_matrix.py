@@ -200,12 +200,18 @@ def run_naive(
         cX.btmul(i, q, v, out)
         expected = out_old + v.T @ X[:, i:i+q].T
         assert np.allclose(expected, out, atol=atol)
+    v = np.random.normal(0, 1, p).astype(dtype)
+    out = cX @ v
+    expected = X @ v
+    assert np.allclose(expected, out, atol=atol)
 
     # test mul
     v = np.random.normal(0, 1, n).astype(dtype)
     out = np.empty(p, dtype=dtype)
     cX.mul(v, w, out)
     expected = (v * w).T @ X
+    assert np.allclose(expected, out, atol=atol)
+    out = cX.T @ (v * w)
     assert np.allclose(expected, out, atol=atol)
 
     # test cov
@@ -221,6 +227,8 @@ def run_naive(
         except RuntimeError as err:
             err_msg = str(err)
             if "MatrixNaiveCConcatenate::cov() only allows the block to be fully contained in one of the matrices in the list." in err_msg:
+                pass
+            elif "MatrixNaiveCSubset: cov() is not implemented when " in err_msg:
                 pass
             else:
                 raise err
@@ -429,3 +437,57 @@ def test_naive_sparse():
             _test(2, 2, dtype, order)
             _test(100, 20, dtype, order)
             _test(20, 100, dtype, order)
+
+
+def test_naive_csubset():
+    def _test(n, p, subset_prop, dtype, seed=0):
+        np.random.seed(seed)
+        X = np.asfortranarray(np.random.normal(0, 1, (n, p)).astype(dtype))
+        indices = np.random.choice(p, size=max(int(subset_prop * p), 1), replace=False)
+        dX = mod.dense(X, method="naive")
+        cX = mod.subset(dX, indices, axis=1, n_threads=2)
+        X = X[:, indices]
+        run_naive(X, cX, dtype)
+        # test operator[] works properly
+        cX = dX[:, indices]
+        run_naive(X, cX, dtype)
+
+    dtypes = [np.float32, np.float64]
+    subset_props = [0, 0.5, 1]
+    for dtype in dtypes:
+        for subset_prop in subset_props:
+            _test(1, 1, subset_prop, dtype)
+            _test(1, 2, subset_prop, dtype)
+            _test(2, 1, subset_prop, dtype)
+            _test(10, 7, subset_prop, dtype)
+            _test(100, 20, subset_prop, dtype)
+            _test(20, 100, subset_prop, dtype)
+
+
+def test_naive_rsubset():
+    def _test(n, p, subset_prop, dtype, seed=0):
+        np.random.seed(seed)
+        X = np.asfortranarray(np.random.normal(0, 1, (n, p)).astype(dtype))
+        indices = np.random.choice(n, size=max(int(subset_prop * n), 1), replace=False)
+        dX = mod.dense(X, method="naive")
+        cX = mod.subset(dX, indices, axis=0, n_threads=2)
+        X = X[indices]
+        run_naive(X, cX, dtype)
+        # test operator[] works properly
+        cX = dX[indices]
+        run_naive(X, cX, dtype)
+        col_indices = np.random.choice(p, size=max(p//2, 1), replace=False)
+        cX = dX[:, col_indices][indices]
+        X = X[:, col_indices]
+        run_naive(X, cX, dtype)
+
+    dtypes = [np.float32, np.float64]
+    subset_props = [0, 0.5, 1]
+    for dtype in dtypes:
+        for subset_prop in subset_props:
+            _test(1, 1, subset_prop, dtype)
+            _test(1, 2, subset_prop, dtype)
+            _test(2, 1, subset_prop, dtype)
+            _test(10, 7, subset_prop, dtype)
+            _test(100, 20, subset_prop, dtype)
+            _test(20, 100, subset_prop, dtype)

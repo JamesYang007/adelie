@@ -113,7 +113,6 @@ inline read_mode_type convert_read_mode(
 {
     if (read_mode == "file") return read_mode_type::_file;
     if (read_mode == "mmap") return read_mode_type::_mmap;
-    if (read_mode == "auto") return read_mode_type::_auto;
     throw util::adelie_core_error("Invalid read mode type: " + read_mode);
 }
 

@@ -988,12 +988,17 @@ def _render_multi_inputs(
     offsets,
     intercept,
     n_threads,
+    dtype,
 ):
-    offsets = np.array(offsets, order="C", copy=False)
+    offsets = np.array(offsets, order="C", copy=False, dtype=dtype)
     n, n_classes = offsets.shape
     X = matrix.kronecker_eye(X, n_classes, n_threads=n_threads)
     if intercept:
-        ones_kron = matrix.kronecker_eye(np.ones((n, 1)), n_classes, n_threads=n_threads)
+        ones_kron = matrix.kronecker_eye(
+            np.ones((n, 1), dtype=dtype), 
+            n_classes, 
+            n_threads=n_threads,
+        )
         X = matrix.concatenate(
             [ones_kron, X], 
             axis=1,
@@ -1802,7 +1807,7 @@ def gaussian_naive(
             ## save inputs due to lifetime issues
             # static inputs require a reference to input
             # or copy if it must be made
-            self._glm = glm.gaussian(y=y, weights=weights)
+            self._glm = glm.gaussian(y=y, weights=weights, dtype=dtype)
             self._X = X
             self._X_means = np.array(X_means, copy=False, dtype=dtype)
             self._groups = np.array(groups, copy=False, dtype=int)
@@ -2138,6 +2143,7 @@ def multigaussian_naive(
         offsets=offsets,
         intercept=intercept,
         n_threads=n_threads,
+        dtype=dtype,
     )
     assert X_means.shape[0] == X.cols(), "X_means must have the same length as the number of columns of X after reshaping."
 
@@ -2147,7 +2153,7 @@ def multigaussian_naive(
             ## save inputs due to lifetime issues
             # static inputs require a reference to input
             # or copy if it must be made
-            self._glm = glm.multigaussian(y=y, weights=weights)
+            self._glm = glm.multigaussian(y=y, weights=weights, dtype=dtype)
             self._X = X_raw
             self._X_expanded = X
             self._X_means = np.array(X_means, copy=False, dtype=dtype)
@@ -2844,6 +2850,7 @@ def multiglm_naive(
         offsets=offsets,
         intercept=intercept,
         n_threads=n_threads,
+        dtype=dtype,
     )
 
     class _multiglm_naive(base, core_base):
