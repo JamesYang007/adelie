@@ -152,12 +152,18 @@ class PyMatrixNaiveBase:
 
     def __matmul__(self, v):
         dtype = _to_dtype(self)
+        n, p = self.shape
+
+        if isinstance(v, (csr_matrix, csc_matrix)):
+            v = v.tocsr().transpose()
+            out = np.empty((v.shape[0], n), dtype=dtype)
+            self.sp_btmul(v, out)
+            return out.T
+
         v = np.asarray(v, dtype=dtype)
 
         if (len(v.shape) <= 0) or (len(v.shape) > 2):
             raise ValueError("Right argument must be either 1 or 2-dimensional.")
-
-        n, p = self.shape
 
         if len(v.shape) == 1:
             out = np.zeros(n, dtype=dtype)

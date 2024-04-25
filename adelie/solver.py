@@ -678,7 +678,7 @@ def grpnet(
 
     if not (lmda_path is None):
         # MUST evaluate the flip to be able to pass into C++ backend.
-        lmda_path = np.array(np.flip(np.sort(lmda_path)))
+        lmda_path = np.array(np.flip(np.sort(lmda_path)), dtype=dtype)
 
     solver_args = {
         "X": X_raw,
@@ -739,12 +739,12 @@ def grpnet(
         group_sizes = group_sizes[1:] - group_sizes[:-1]
 
         if penalty is None:
-            penalty = np.sqrt(group_sizes)
+            penalty = np.sqrt(group_sizes).astype(dtype)
             if intercept:
                 penalty[:K] = 0
         else:
             if intercept:
-                penalty = np.concatenate([np.zeros(K), penalty])
+                penalty = np.concatenate([np.zeros(K), penalty], dtype=dtype)
 
         if warm_start is None:
             lmda = np.inf
@@ -781,7 +781,9 @@ def grpnet(
             X_aug = matrix.concatenate(
                 [
                     matrix.kronecker_eye(
-                        np.ones((n, 1)), K, n_threads=n_threads
+                        np.ones((n, 1), dtype=dtype), 
+                        K, 
+                        n_threads=n_threads,
                     ),
                     X_aug,
                 ], 
@@ -803,7 +805,7 @@ def grpnet(
                     X_means = np.concatenate([
                         np.full(K, 1/K),
                         X_means,
-                    ])
+                    ], dtype=dtype)
                 y_off = y - offsets
                 # variance of y that gaussian solver expects
                 y_var = np.sum(weights_mscaled[:, None] * y_off ** 2)
@@ -880,7 +882,7 @@ def grpnet(
         G = len(groups)
 
         if penalty is None:
-            penalty = np.sqrt(group_sizes)
+            penalty = np.sqrt(group_sizes).astype(dtype)
 
         if warm_start is None:
             lmda = np.inf
