@@ -2,6 +2,7 @@
 #include <adelie_core/util/types.hpp>
 #include <omp.h>
 #include <iostream>
+#include <numeric>
 
 namespace ad = adelie_core;
 
@@ -484,6 +485,61 @@ static void BM_sparse_combine(benchmark::State& state) {
 }
 
 BENCHMARK(BM_sparse_combine)
+    -> Args({100})
+    -> Args({1000})
+    -> Args({10000})
+    -> Args({100000})
+    ;
+
+static void BM_assign_eigen(benchmark::State& state) {
+    const auto n = state.range(0);
+    ad::util::rowvec_type<double> x(n);
+    x.setRandom();
+    ad::util::rowvec_type<double> y(n);
+
+    for (auto _ : state) {
+        y = x;
+        benchmark::DoNotOptimize(y);
+    }
+}
+
+BENCHMARK(BM_assign_eigen)
+    -> Args({100})
+    -> Args({1000})
+    -> Args({10000})
+    -> Args({100000})
+    ;
+
+static void BM_assign_manual(benchmark::State& state) {
+    const auto n = state.range(0);
+    ad::util::rowvec_type<double> x(n);
+    x.setRandom();
+    ad::util::rowvec_type<int> indices(n);
+    std::iota(indices.data(), indices.data()+n, 0);
+    ad::util::rowvec_type<double> y(n);
+
+    for (auto _ : state) {
+        for (int i = 0; i < n; ++i) y[indices[i]] = x[indices[i]];
+        benchmark::DoNotOptimize(y);
+    }
+}
+
+static void BM_mask(benchmark::State& state) {
+    const auto n = state.range(0);
+    ad::util::rowvec_type<double> x(n);
+    x.setRandom();
+    ad::util::rowvec_type<double> y(n);
+    y.setRandom();
+    y = y.unaryExpr([&](auto i) -> double { return i > 0; });
+    ad::util::rowvec_type<double> z(n);
+
+    for (auto _ : state) {
+        z = x * y;
+        benchmark::DoNotOptimize(z);
+    }
+}
+
+BENCHMARK(BM_mask)
     -> Args({100})
     -> Args({1000})
     -> Args({10000})

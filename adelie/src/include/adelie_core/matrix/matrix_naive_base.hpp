@@ -16,7 +16,7 @@ protected:
     )
     {
         if (
-            (j < 0 || j > c) ||
+            (j < 0 || j >= c) ||
             (v != r) ||
             (w != r)
         ) {
@@ -35,7 +35,7 @@ protected:
     )
     {
         if (
-            (j < 0 || j > c) ||
+            (j < 0 || j >= c) ||
             (o != r)
         ) {
             throw util::adelie_core_error(
