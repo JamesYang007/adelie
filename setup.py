@@ -87,7 +87,10 @@ if (system_name == "Darwin"):
     libraries = ['omp']
     
 if (system_name == "Linux"):
-    extra_compile_args += ["-fopenmp", "-march=native"]
+    extra_compile_args += [
+        "-fopenmp", 
+        "-march=native",
+    ]
     libraries = ['gomp']
 
 ext_modules = [

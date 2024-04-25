@@ -11,6 +11,7 @@
 #include <adelie_core/matrix/matrix_naive_snp_unphased.hpp>
 #include <adelie_core/matrix/matrix_naive_snp_phased_ancestry.hpp>
 #include <adelie_core/matrix/matrix_naive_sparse.hpp>
+#include <adelie_core/matrix/matrix_naive_subset.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -363,6 +364,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         .def("cols", &internal_t::cols, R"delimiter(
         Number of columns.
         )delimiter")
+        /* Augmented API for Python */
         .def_property_readonly("shape", [](const internal_t& m) {
             return std::make_tuple(m.rows(), m.cols());
         }, R"delimiter(
@@ -682,6 +684,46 @@ void matrix_naive_sparse(py::module_& m, const char* name)
         ;
 }
 
+template <class ValueType>
+void matrix_naive_csubset(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveCSubset<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using vec_index_t = typename internal_t::vec_index_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(
+            py::init<
+                base_t*,
+                const Eigen::Ref<const vec_index_t>&,
+                size_t
+            >(),
+            py::arg("mat"),
+            py::arg("subset"),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+template <class ValueType>
+void matrix_naive_rsubset(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveRSubset<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using vec_index_t = typename internal_t::vec_index_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(
+            py::init<
+                base_t*,
+                const Eigen::Ref<const vec_index_t>&,
+                size_t
+            >(),
+            py::arg("mat"),
+            py::arg("subset"),
+            py::arg("n_threads")
+        )
+        ;
+}
+
 template <class T, int Storage>
 using dense_type = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Storage>;
 template <class T, int Storage>
@@ -740,4 +782,9 @@ void register_matrix(py::module_& m)
 
     matrix_naive_sparse<sparse_type<double, Eigen::ColMajor>>(m, "MatrixNaiveSparse64F");
     matrix_naive_sparse<sparse_type<float, Eigen::ColMajor>>(m, "MatrixNaiveSparse32F");
+
+    matrix_naive_csubset<double>(m, "MatrixNaiveCSubset64");
+    matrix_naive_csubset<float>(m, "MatrixNaiveCSubset32");
+    matrix_naive_rsubset<double>(m, "MatrixNaiveRSubset64");
+    matrix_naive_rsubset<float>(m, "MatrixNaiveRSubset32");
 }

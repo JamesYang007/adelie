@@ -14,6 +14,11 @@ import numpy as np
 import warnings
 
 
+# ------------------------------------------------------------------------
+# Extra Python API
+# ------------------------------------------------------------------------
+
+
 def _to_dtype(mat):
     if (
         isinstance(mat, MatrixNaiveBase32) or
@@ -26,6 +31,149 @@ def _to_dtype(mat):
     ): 
         return np.float64
     return None
+
+
+class PyMatrixCovBase:
+    # TODO?
+    def __init__(self, n_threads=1):
+        self._n_threads = n_threads
+
+
+class PyMatrixNaiveTranspose:
+    def __init__(self, mat):
+        self._mat = mat
+        self.T = mat
+
+    def __matmul__(self, v):
+        dtype = _to_dtype(self._mat)
+        v = np.asarray(v, dtype=dtype)
+
+        if (len(v.shape) <= 0) or (len(v.shape) > 2):
+            raise ValueError("Right argument must be either 1 or 2-dimensional.")
+
+        n, p = self._mat.shape
+        ones = np.ones(n, dtype=dtype)
+
+        if len(v.shape) == 1:
+            out = np.empty(p, dtype=dtype)
+            self._mat.mul(v, ones, out)
+            return out
+
+        v = np.asfortranarray(v)
+        out = np.empty((v.shape[1], p), dtype=dtype)
+        for i in range(out.shape[0]):
+            self._mat.mul(v[:, i], ones, out[i])
+        return out.T
+
+
+class PyMatrixNaiveBase:
+    def __init__(self, n_threads=1):
+        self._n_threads = n_threads
+        self.T = PyMatrixNaiveTranspose(self)
+
+    def __getitem__(self, key):
+        valid_one_type = (int, np.integer, slice)
+        valid_some_type = valid_one_type + (list, np.ndarray)
+        if isinstance(key, tuple):
+            if len(key) == 0:
+                return self
+
+            if len(key) > 2:
+                raise ValueError(
+                    "Key must be of length 1 or 2 if it is a tuple."
+                )
+            
+            if (
+                (len(key) == 2) and
+                (not isinstance(key[0], valid_one_type)) and 
+                (not isinstance(key[1], valid_one_type))
+            ):
+                raise ValueError(
+                    "If row and column subsets are provided, "
+                    "at least one must be an integer or a slice. "
+                )
+        elif isinstance(key, valid_some_type):
+            key = (key,)
+        else:
+            raise ValueError(
+                "Subsets must be integer, slice, list, or np.ndarray objects."
+            )
+
+        def _convert_subset(s, size):
+            if isinstance(s, (int, np.integer)):
+                return np.array([s])
+            elif isinstance(s, (list, np.ndarray)):
+                s = np.array(s, dtype=int)
+                if np.unique(s).shape[0] != s.shape[0]:
+                    raise ValueError(
+                        "Subset does not contain unique elements."
+                    )
+                return s
+            elif isinstance(s, slice):
+                start = 0 if s.start is None else s.start
+                stop = size if s.stop is None else s.stop
+                step = 1 if s.step is None else s.step
+                if (
+                    (start != 0) or 
+                    (stop != size) or
+                    (step != 1)
+                ):
+                    return np.arange(start, stop, step=step)
+                return None
+            else:
+                raise ValueError(
+                    "Subsets must be integer, slice, list, or np.ndarray objects."
+                )
+
+        n, p = self.shape
+
+        # process row subset
+        row_subset = _convert_subset(key[0], n)
+        this = self
+        if len(key) == 2:
+            # process column subset
+            column_subset = _convert_subset(key[1], p)
+            if not (column_subset is None):
+                this = subset(
+                    this, 
+                    column_subset, 
+                    axis=1, 
+                    n_threads=self._n_threads,
+                )
+
+        if row_subset is None:
+            return this
+        return subset(
+            this, 
+            row_subset, 
+            axis=0, 
+            n_threads=self._n_threads,
+        )
+
+    def __matmul__(self, v):
+        dtype = _to_dtype(self)
+        v = np.asarray(v, dtype=dtype)
+
+        if (len(v.shape) <= 0) or (len(v.shape) > 2):
+            raise ValueError("Right argument must be either 1 or 2-dimensional.")
+
+        n, p = self.shape
+
+        if len(v.shape) == 1:
+            out = np.zeros(n, dtype=dtype)
+            self.btmul(0, p, v, out)
+            return out
+
+        v = np.asfortranarray(v)
+        out = np.zeros((v.shape[1], n), dtype=dtype)
+        for i in range(out.shape[0]):
+            self.btmul(0, p, v[:, i], out[i])
+        return out.T
+
+
+# ------------------------------------------------------------------------
+# Matrix Classes
+# ------------------------------------------------------------------------
 
 
 def block_diag(
@@ -86,11 +234,13 @@ def block_diag(
     }
 
     core_base = dispatcher[dtype]
+    py_base = PyMatrixCovBase
 
-    class _block_diag(core_base):
+    class _block_diag(core_base, py_base):
         def __init__(self):
             self.mats = mats
             core_base.__init__(self, self.mats, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
 
     return _block_diag()
 
@@ -179,11 +329,13 @@ def concatenate(
     }
 
     core_base = dispatcher[axis][dtype]
+    py_base = PyMatrixNaiveBase
 
-    class _concatenate(core_base):
+    class _concatenate(core_base, py_base):
         def __init__(self):
             self.mats = mats
             core_base.__init__(self, self.mats, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
 
     return _concatenate()
 
@@ -262,10 +414,16 @@ def dense(
         )
     core_base = dispatcher[method][dtype][order]
 
-    class _dense(core_base):
+    py_base = {
+        "naive" : PyMatrixNaiveBase,
+        "cov" : PyMatrixCovBase,
+    }[method]
+
+    class _dense(core_base, py_base):
         def __init__(self):
             self.mat = mat
             core_base.__init__(self, self.mat, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
 
     return _dense()
 
@@ -331,10 +489,12 @@ def kronecker_eye(
         dtype = _to_dtype(mat)
         core_base = dispatcher[dtype]
 
-    class _kronecker_eye(core_base):
+    py_base = PyMatrixNaiveBase
+    class _kronecker_eye(core_base, py_base):
         def __init__(self):
             self.mat = mat
             core_base.__init__(self, self.mat, K, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
 
     return _kronecker_eye()
 
@@ -393,11 +553,13 @@ def lazy_cov(
         "F"
     )
     core_base = dispatcher[dtype][order]
+    py_base = PyMatrixCovBase
 
-    class _lazy_cov(core_base):
+    class _lazy_cov(core_base, py_base):
         def __init__(self):
             self.mat = mat
             core_base.__init__(self, self.mat, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
 
     return _lazy_cov()
 
@@ -448,10 +610,12 @@ def snp_phased_ancestry(
         np.float32: core.matrix.MatrixNaiveSNPPhasedAncestry32,
     }
     core_base = dispatcher[dtype]
+    py_base = PyMatrixNaiveBase
 
-    class _snp_phased_ancestry(core_base):
+    class _snp_phased_ancestry(core_base, py_base):
         def __init__(self):
             core_base.__init__(self, filename, read_mode, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
 
     return _snp_phased_ancestry()
 
@@ -502,10 +666,12 @@ def snp_unphased(
         np.float32: core.matrix.MatrixNaiveSNPUnphased32,
     }
     core_base = dispatcher[dtype]
+    py_base = PyMatrixNaiveBase
 
-    class _snp_unphased(core_base):
+    class _snp_unphased(core_base, py_base):
         def __init__(self):
             core_base.__init__(self, filename, read_mode, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
 
     return _snp_unphased()
 
@@ -574,8 +740,12 @@ def sparse(
 
     dtype = mat.dtype
     core_base = dispatcher[method][dtype]
+    py_base = {
+        "naive" : PyMatrixNaiveBase,
+        "cov" : PyMatrixCovBase,
+    }[method]
 
-    class _sparse(core_base):
+    class _sparse(core_base, py_base):
         def __init__(self):
             self.mat = mat
             core_base.__init__(
@@ -588,5 +758,99 @@ def sparse(
                 self.mat.data,
                 n_threads,
             )
+            py_base.__init__(self, n_threads=n_threads)
 
     return _sparse()
+
+
+def subset(
+    mat: Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64],
+    indices: np.ndarray,
+    *,
+    axis: int=0,
+    n_threads: int =1,
+):
+    """Creates a subset of the matrix along an axis.
+
+    If ``axis=0``, then ``mat`` is subsetted 
+    along the rows as if we had done ``X[indices]`` for numpy arrays.
+    If ``axis=1``, then it is subsetted
+    along the columns as if we had done ``X[:, indices]`` for numpy arrays.
+
+    For syntactic sugar, the above numpy syntax works for all naive matrix classes.
+    That is, if ``mat`` is a ``MatrixNaiveBaseXX``,
+    then ``mat[indices]`` and ``mat[:, indices]`` yield the same return values as 
+    ``subset(mat, indices, axis=0, n_threads=n_threads)`` and
+    ``subset(mat, indices, axis=1, n_threads=n_threads)``, respectively,
+    where ``n_threads`` is deduced from ``mat``.
+    This function allows the user to further specify the number of threads.
+
+    .. note::
+        This matrix only works for naive method!
+
+    .. warning::
+        For users intending to subset rows of ``mat``
+        and pass the subsetted matrix to our group elastic net solver,
+        it is much more efficient to rather set observation weights 
+        along ``indices`` to ``0`` when supplying the GLM object.
+        For example, suppose the user wishes to run 
+        ``adelie.solver.grpnet`` with ``mat`` and ``ad.glm.gaussian(y)``
+        but subsetting the samples along ``indices``.
+        Then, instead of supplying ``mat[indices]`` and ``ad.glm.gaussian(y[indices])``,
+        we recommend creating a weight vector ``w`` where it is ``0`` outside ``indices``
+        and supply ``mat`` and ``ad.glm.gaussian(y, weights=w)``.
+
+    Parameters
+    ----------
+    mat : Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
+        The matrix to subset.
+    indices : np.ndarray
+        Array of indices to subset the matrix.
+    axis : int, optional
+        The axis along which to subset.
+        Default is ``0``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns:
+    --------
+    wrap
+        Wrapper matrix object.
+        If ``mat`` is ``np.ndarray`` then the usual numpy subsetted matrix is returned.
+
+    See Also
+    --------
+    adelie.matrix.MatrixNaiveBase64
+    """
+    if isinstance(mat, np.ndarray):
+        if axis == 0:
+            return mat[indices]
+        else:
+            return mat[:, indices]
+
+    dtype = _to_dtype(mat)
+
+    cdispatcher = {
+        np.float64: core.matrix.MatrixNaiveCSubset64,
+        np.float32: core.matrix.MatrixNaiveCSubset32,
+    }
+    rdispatcher = {
+        np.float64: core.matrix.MatrixNaiveRSubset64,
+        np.float32: core.matrix.MatrixNaiveRSubset32,
+    }
+    dispatcher = {
+        0: rdispatcher,
+        1: cdispatcher,
+    }
+
+    core_base = dispatcher[axis][dtype]
+    py_base = PyMatrixNaiveBase
+
+    class _subset(core_base, py_base):
+        def __init__(self):
+            self.mat = mat
+            core_base.__init__(self, mat, indices, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
+        
+    return _subset()
