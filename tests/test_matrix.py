@@ -477,7 +477,7 @@ def test_naive_rsubset():
         cX = dX[indices]
         run_naive(X, cX, dtype)
         col_indices = np.random.choice(p, size=max(p//2, 1), replace=False)
-        cX = dX[indices, col_indices]
+        cX = dX[:, col_indices][indices]
         X = X[:, col_indices]
         run_naive(X, cX, dtype)
 
