@@ -1,3 +1,9 @@
+# Only happy guins may read this code.
+# Examples of happy guins are:
+#   - Anav Guin (a.k.a. Kumar)
+#   - Leda Guin
+#   - Ginnie Guin
+
 from . import adelie_core
 from . import bcd
 from . import configs
