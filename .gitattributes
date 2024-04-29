@@ -1,3 +1,4 @@
 data/EUR_subset.bed filter=lfs diff=lfs merge=lfs -text
 data/EUR_subset.bim filter=lfs diff=lfs merge=lfs -text
 data/EUR_subset.fam filter=lfs diff=lfs merge=lfs -text
+data/master_phe.csv filter=lfs diff=lfs merge=lfs -text
