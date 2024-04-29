@@ -188,7 +188,7 @@ def solve(
     tol: float =1e-12,
     max_iters: int =1000,
     solver: str ="newton_abs",
-    **kwargs,
+    smart_init: bool =True,
 ):
     """Solves the BCD update.
 
@@ -237,22 +237,26 @@ def solve(
                 - ``"fista"``
                 - ``"fista_adares"``
 
-    smart_init : bool
+    smart_init : bool, optional
         If ``True``, the ABS method is invoked to find a smart initial point before starting Newton's method.
         It is only used when ``solver`` is ``"newton_abs_debug"``.
+        Default is ``True``.
 
     Returns
     -------
     result : Dict[str, Any]
         - ``result["beta"]``: solution vector.
         - ``result["iters"]``: number of iterations taken.
+        - ``result["time_elapsed"]``: time elapsed to run the solver.
 
     See Also
     --------
     adelie.bcd.objective
     adelie.bcd.root
     """
-    return _solver_dict[solver](quad, linear, l1, l2, tol, max_iters, **kwargs)
+    if solver == "newton_abs_debug":
+        return _solver_dict[solver](quad, linear, l1, l2, tol, max_iters, smart_init)
+    return _solver_dict[solver](quad, linear, l1, l2, tol, max_iters)
 
 
 def root(
