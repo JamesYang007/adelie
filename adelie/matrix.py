@@ -819,8 +819,8 @@ def subset(
         Number of threads.
         Default is ``1``.
 
-    Returns:
-    --------
+    Returns
+    -------
     wrap
         Wrapper matrix object.
         If ``mat`` is ``np.ndarray`` then the usual numpy subsetted matrix is returned.
