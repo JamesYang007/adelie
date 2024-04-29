@@ -58,10 +58,14 @@ py::dict unconstrained_ista_solver(
     size_t max_iters
 )
 {
+    using sw_t = ad::util::Stopwatch;
     ad::util::rowvec_type<double> x(L.size());
     size_t iters = 0;
+    sw_t sw;
+    sw.start();
     ad::bcd::unconstrained::ista_solver(L, v, l1, l2, tol, max_iters, x, iters);
-    py::dict d("beta"_a=x, "iters"_a=iters);
+    double time = sw.elapsed();
+    py::dict d("beta"_a=x, "iters"_a=iters, "time_elapsed"_a=time);
     return d;
 }
 
@@ -74,10 +78,14 @@ py::dict unconstrained_fista_solver(
     size_t max_iters
 )
 {
+    using sw_t = ad::util::Stopwatch;
     ad::util::rowvec_type<double> x(L.size());
     size_t iters = 0;
+    sw_t sw;
+    sw.start();
     ad::bcd::unconstrained::fista_solver(L, v, l1, l2, tol, max_iters, x, iters);
-    py::dict d("beta"_a=x, "iters"_a=iters);
+    double time = sw.elapsed();
+    py::dict d("beta"_a=x, "iters"_a=iters, "time_elapsed"_a=time);
     return d;
 }
 
@@ -90,10 +98,14 @@ py::dict unconstrained_fista_adares_solver(
     size_t max_iters
 )
 {
+    using sw_t = ad::util::Stopwatch;
     ad::util::rowvec_type<double> x(L.size());
     size_t iters = 0;
+    sw_t sw;
+    sw.start();
     ad::bcd::unconstrained::fista_adares_solver(L, v, l1, l2, tol, max_iters, x, iters);
-    py::dict d("beta"_a=x, "iters"_a=iters);
+    double time = sw.elapsed();
+    py::dict d("beta"_a=x, "iters"_a=iters, "time_elapsed"_a=time);
     return d;
 }
 
@@ -106,13 +118,16 @@ py::dict unconstrained_newton_solver(
     size_t max_iters
 )
 {
+    using sw_t = ad::util::Stopwatch;
     ad::util::rowvec_type<double> x(L.size());
     ad::util::rowvec_type<double> buffer1(L.size());
     ad::util::rowvec_type<double> buffer2(L.size());
     size_t iters = 0;
+    sw_t sw;
+    sw.start();
     ad::bcd::unconstrained::newton_solver(L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2);
-
-    py::dict d("beta"_a=x, "iters"_a=iters);
+    double time = sw.elapsed();
+    py::dict d("beta"_a=x, "iters"_a=iters, "time_elapsed"_a=time);
     return d;
 }
 
@@ -125,13 +140,16 @@ py::dict unconstrained_newton_brent_solver(
     size_t max_iters
 )
 {
+    using sw_t = ad::util::Stopwatch;
     ad::util::rowvec_type<double> x(L.size());
     ad::util::rowvec_type<double> buffer1(L.size());
     ad::util::rowvec_type<double> buffer2(L.size());
     size_t iters = 0;
+    sw_t sw;
+    sw.start();
     ad::bcd::unconstrained::newton_brent_solver(L, v, l1, l2, tol, tol, max_iters, x, iters, buffer1, buffer2);
-
-    py::dict d("beta"_a=x, "iters"_a=iters);
+    double time = sw.elapsed();
+    py::dict d("beta"_a=x, "iters"_a=iters, "time_elapsed"_a=time);
     return d;
 }
 
@@ -144,13 +162,16 @@ py::dict unconstrained_newton_abs_solver(
     size_t max_iters
 )
 {
+    using sw_t = ad::util::Stopwatch;
     ad::util::rowvec_type<double> x(L.size());
     ad::util::rowvec_type<double> buffer1(L.size());
     ad::util::rowvec_type<double> buffer2(L.size());
     size_t iters = 0;
+    sw_t sw;
+    sw.start();
     ad::bcd::unconstrained::newton_abs_solver(L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2);
-
-    py::dict d("beta"_a=x, "iters"_a=iters);
+    double time = sw.elapsed();
+    py::dict d("beta"_a=x, "iters"_a=iters, "time_elapsed"_a=time);
     return d;
 }
 
@@ -196,10 +217,14 @@ py::dict unconstrained_brent_solver(
     size_t max_iters
 )
 {
+    using sw_t = ad::util::Stopwatch;
     ad::util::rowvec_type<double> x(v.size());
     size_t iters = 0;
+    sw_t sw;
+    sw.start();
     ad::bcd::unconstrained::brent_solver(L, v, l1, l2, tol, max_iters, x, iters);
-    py::dict d("beta"_a=x, "iters"_a=iters);
+    double time = sw.elapsed();
+    py::dict d("beta"_a=x, "iters"_a=iters, "time_elapsed"_a=time);
     return d;
 }
 
