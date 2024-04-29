@@ -67,6 +67,7 @@ pydata-sphinx-theme = "^0.14.1"
 numpydoc = "^1.6.0"
 nbsphinx = "^0.9.3"
 sphinx-design = "^0.5.0"
+pgenlib = "^0.90.2"
 
 [tool.poetry.group.dev.dependencies]
 cibuildwheel = "^2.17.0"
