@@ -327,7 +327,7 @@ document.write(`
 <li class="toctree-l1 current active"><a class="current reference internal" href="#"><strong>Matrix</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="glm.html"><strong>Generalized Linear Model</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="parallelism.html"><strong>Parallelism</strong></a></li>
-<li class="toctree-l1"><a class="reference internal" href="snp_analysis.html"><strong>SNP Data Analysis</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html"><strong>Examples</strong></a></li>
 </ul>
 </div>
 </nav></div>
@@ -388,7 +388,7 @@ document.write(`
   <section id="Matrix">
 <h1><strong>Matrix</strong><a class="headerlink" href="#Matrix" title="Link to this heading">#</a></h1>
 <p>In group elastic net problems, the matrix object plays a crucial role in the performance of the solver. It becomes apparent in our optimization algorithm (and our benchmark analysis) that most of the runtime lies in interacting with the matrix object, e.g. computing inner-products. Hence, a highly performant matrix object implementing a select set of methods that the solver requires will yield tremendous speed gains overall. In addition, we have found numerous examples where a matrix class
-admits some special structure that can be exploited for further speed and memory gains. One simple example is a large sparse matrix, which cannot fit in memory as a dense matrix. Another example is genomics datasets which are not only sparse, but only take on 3 possible integer values (see <a class="reference internal" href="snp_analysis.html"><span class="doc">SNP Analysis</span></a>), and generally have over 160 billion entries with 30% non-zero entries.</p>
+admits some special structure that can be exploited for further speed and memory gains. One simple example is a large sparse matrix, which cannot fit in memory as a dense matrix. Another example is genomics datasets which are not only sparse, but only take on 3 possible integer values (see <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a>), and generally have over 160 billion entries with 30% non-zero entries.</p>
 <p>For these reasons, we found it fruitful to abstract out the matrix class. <code class="docutils literal notranslate"><span class="pre">adelie</span></code> provides a few matrix classes in the <code class="docutils literal notranslate"><span class="pre">ad.matrix</span></code> submodule. We discuss below some ways a user may interact with these classes as well as define a class of their own to plug into our solver.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
