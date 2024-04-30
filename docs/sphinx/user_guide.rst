@@ -3,7 +3,7 @@ User Guide
 
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
 
     notebooks/installation
@@ -12,4 +12,4 @@ User Guide
     notebooks/matrix
     notebooks/glm
     notebooks/parallelism
-    notebooks/snp_analysis
+    notebooks/examples
