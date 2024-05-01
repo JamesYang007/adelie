@@ -68,6 +68,7 @@ numpydoc = "^1.6.0"
 nbsphinx = "^0.9.3"
 sphinx-design = "^0.5.0"
 pgenlib = "^0.90.2"
+knockpy = "^1.3.1"
 
 [tool.poetry.group.dev.dependencies]
 cibuildwheel = "^2.17.0"
