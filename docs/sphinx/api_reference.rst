@@ -127,6 +127,7 @@ adelie.matrix
     block_diag
     concatenate
     dense
+    interaction
     kronecker_eye
     lazy_cov
     snp_phased_ancestry

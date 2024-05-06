@@ -204,7 +204,7 @@ public:
         const auto& _subset_csize = std::get<0>(_subset_cinfo);
         if (_subset_csize[j] < q) {
             throw util::adelie_core_error(
-                "MatrixNaiveCSubset: cov() is not implemented when "
+                "MatrixNaiveCSubset::cov() is not implemented when "
                 "subset[j:j+q] is not contiguous. "
             );
         }

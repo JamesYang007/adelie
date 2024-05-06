@@ -215,7 +215,7 @@ def run_naive(
     assert np.allclose(expected, out, atol=atol)
 
     # test cov
-    q = min(5, p)
+    q = min(100, p)
     sqrt_weights = np.sqrt(w)
     buffer = np.empty((n, q), dtype=dtype, order="F")
     out = np.empty((q, q), dtype=dtype, order="F")
@@ -228,13 +228,35 @@ def run_naive(
             err_msg = str(err)
             if "MatrixNaiveCConcatenate::cov() only allows the block to be fully contained in one of the matrices in the list." in err_msg:
                 pass
-            elif "MatrixNaiveCSubset: cov() is not implemented when " in err_msg:
+            elif "MatrixNaiveCSubset::cov() is not implemented when " in err_msg:
+                pass
+            elif "MatrixNaiveInteractionDense::cov() not implemented for " in err_msg:
                 pass
             else:
                 raise err
 
+    # test cov (special for MatrixNaiveInteractionDenseXXX)
+    if isinstance(
+        cX,
+        (
+            ad.adelie_core.matrix.MatrixNaiveInteractionDense64C,
+            ad.adelie_core.matrix.MatrixNaiveInteractionDense64F,
+            ad.adelie_core.matrix.MatrixNaiveInteractionDense32C,
+            ad.adelie_core.matrix.MatrixNaiveInteractionDense32F,
+        )
+    ):
+        groups = cX.groups
+        group_sizes = cX.group_sizes
+        for g, gs in zip(groups, group_sizes):
+            out = np.empty((gs, gs), dtype=dtype, order="F")
+            buffer = np.empty((n, gs), dtype=dtype, order="F")
+            cX.cov(g, gs, sqrt_weights, out, buffer)
+            expected = X[:, g:g+gs].T @ (w[:, None] * X[:, g:g+gs])
+            assert np.allclose(expected, out, atol=atol)
+
     assert cX.rows() == n
     assert cX.cols() == p
+    assert cX.shape == (n, p)
 
     # test sp_btmul
     out = np.empty((2, n), dtype=dtype)
@@ -303,6 +325,56 @@ def test_naive_dense():
             _test(2, 2, dtype, order)
             _test(100, 20, dtype, order)
             _test(20, 100, dtype, order)
+
+    
+def test_naive_interaction_dense():
+    def _expand(x, level):
+        n = x.shape[0]
+        if level <= 0:
+            return np.array([np.ones(n), x]).T
+        return np.array([x == k for k in range(level)]).T
+
+    def _create_dense(X, pairs, levels):
+        col_lst = []
+        for pair in pairs:
+            i0, i1 = pair[0], pair[1]
+            l0, l1 = levels[i0], levels[i1]
+            Y0 = _expand(X[:, i0], l0)
+            Y1 = _expand(X[:, i1], l1)
+            for j1 in range(Y1.shape[1]):
+                for j0 in range(Y0.shape[1]):
+                    col_lst.append(Y0[:, j0] * Y1[:, j1])
+        return np.array(col_lst, dtype=dtype, order=order).T
+
+    def _test(n, d, dtype, order, seed=0):
+        np.random.seed(seed)
+        X = np.random.normal(0, 1, (n, d))
+        X = np.array(X, dtype=dtype, order=order)
+        c_subset = np.random.choice(d, size=d//2, replace=False)
+        c_levels = 1 + np.random.choice(10, size=d//2, replace=True)
+        for j, level in zip(c_subset, c_levels):
+            X[:, j] = np.random.choice(level, size=n, replace=True)
+        levels = np.zeros(d, dtype=int)
+        levels[c_subset] = c_levels
+        intr_map = {}
+        for j in range(min(10, d)):
+            if np.random.binomial(1, 0.5, 1):
+                intr_map[j] = None
+            else:
+                intr_map[j] = np.random.choice(d, size=d//2, replace=False)
+        cX = mod.interaction(X, intr_map, levels=levels)
+        X = _create_dense(X, cX.pairs, levels)
+        run_naive(X, cX, dtype)
+
+    dtypes = [np.float64]
+    orders = ["C", "F"]
+    for dtype in dtypes:
+        for order in orders:
+            _test(1, 2, dtype, order)
+            _test(10, 2, dtype, order)
+            _test(1, 10, dtype, order)
+            _test(20, 30, dtype, order)
+            _test(100, 20, dtype, order)
 
 
 def test_naive_kronecker_eye():
