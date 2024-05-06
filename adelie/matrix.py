@@ -434,6 +434,195 @@ def dense(
     return _dense()
 
 
+def interaction(
+    mat: np.ndarray,
+    intr_map: dict,
+    *,
+    levels: np.ndarray =None,
+    n_threads: int =1,
+):
+    """Creates a viewer of a matrix with pairwise interactions.
+
+    This matrix :math:`X \\in \\mathbb{R}^{n\\times p}` represents pairwise interaction terms
+    within a given base matrix :math:`Z \\in \\mathbb{R}^{n\\times d}` 
+    where the interaction structure is defined as follows.
+    We assume :math:`Z` contains, in general, a combination of
+    continuous and discrete features (as columns).
+    Denote :math:`L : \\{1,\\ldots, d\\} \\to \\mathbb{N}` as
+    the mapping that maps each feature index of :math:`Z` to the number of levels of that feature,
+    where a value of :math:`0` means the feature is continuous
+    and otherwise means it is discrete with that many levels (or categories).
+    Let :math:`S \\subseteq \\{1,\\ldots, d\\}^2` denote the set of
+    valid and unique pairs of feature indices of :math:`Z`.
+    A pair is *valid* if the two values are not equal.
+    We define uniqueness up to ordering so that :math:`(x,y)` and :math:`(y,x)` are considered the same pairs.
+    Finally, for each pair :math:`(i, j) \\in S`,
+    define the interaction term :math:`X_{i:j}` as
+
+    .. math::
+        \\begin{align*}
+            X_{i:j}
+            &:=
+            \\begin{cases}
+                \\begin{bmatrix}
+                    \\mathbf{1} & Z_{i}
+                \\end{bmatrix}
+                \\star
+                \\begin{bmatrix}
+                    \\mathbf{1} & Z_{j}
+                \\end{bmatrix}
+                ,& L(i) = 0, L(j) = 0 \\\\
+                \\begin{bmatrix}
+                    \\mathbf{1} & Z_{i}
+                \\end{bmatrix}
+                \\star
+                I_{Z_{j}}
+                ,& L(i) = 0, L(j) > 0 \\\\
+                I_{Z_{i}}
+                \\star
+                \\begin{bmatrix}
+                    \\mathbf{1} & Z_{j}
+                \\end{bmatrix}
+                ,& L(i) > 0, L(j) = 0 \\\\
+                I_{Z_{i}}
+                \\star
+                I_{Z_{j}}
+                ,& L(i) > 0, L(j) > 0
+            \\end{cases}
+        \\end{align*}
+
+    Here, :math:`Z_i` is the :math:`i` th column of :math:`Z`,
+    :math:`I_{v}` is the indicator matrix, or one-hot encoding, of :math:`v`,
+    and for any two matrices :math:`A \\in \\mathbb{R}^{n\\times d_A}`, :math:`B \\in \\mathbb{R}^{n\\times d_B}`,
+
+    .. math::
+        \\begin{align*}
+            A \\star B
+            &=
+            \\begin{bmatrix}
+                A_{1} \\odot B_{1} &
+                \\cdots &
+                A_{d_A} \\odot B_{1} & 
+                A_{1} \\odot B_{2} &
+                \\cdots &
+                A_{d_A} \\odot B_{2} &
+                \\cdots
+            \\end{bmatrix}
+        \\end{align*}
+
+    Then, :math:`X` is defined as the column-wise concatenation of :math:`X_{i:j}`.
+
+    .. note::
+        Every discrete feature of `Z` *must* take on values in the range :math:`[0, \\ell)`
+        where :math:`\\ell` is the number of levels for that feature.
+
+    .. note::
+        This matrix only works for naive method!
+
+    Parameters
+    ----------
+    mat : (n, d) np.ndarray
+        The dense matrix :math:`Z` from which to construct interaction terms.
+    intr_map : dict
+        Dictionary mapping a column index of ``mat``
+        to a list of (column) indices to pair with.
+        If the value of a key-value pair is ``None``,
+        then every column is paired with the key.
+        Internally, only valid and unique (as defined above) pairs are registered.
+        Moreover, the pairs are stored in lexicographical order of ``(key, val)``
+        for each ``val`` in ``intr_map[key]`` and for each ``key``.
+    levels : (d,) np.ndarray, optional
+        Number of levels for each column in ``mat``.
+        A non-positive value indicates that the column is a continuous variable
+        whereas a positive value indicates that it is a discrete variable with
+        that many levels (or categories).
+        If ``None``, it is initialized to be ``np.zeros(d)``
+        so that every column is a continuous variable.
+        Default is ``None``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.matrix.MatrixNaiveBase64
+    """
+    dispatcher = {
+        np.dtype("float64"): {
+            "C": core.matrix.MatrixNaiveInteractionDense64C,
+            "F": core.matrix.MatrixNaiveInteractionDense64F,
+        },
+        np.dtype("float32"): {
+            "C": core.matrix.MatrixNaiveInteractionDense32C,
+            "F": core.matrix.MatrixNaiveInteractionDense32F,
+        },
+    }
+    dtype = mat.dtype
+    order = (
+        "F"
+        # prioritize choosing Fortran contiguity
+        if mat.flags.f_contiguous else
+        "C"
+    )
+    if order == "C":
+        warnings.warn(
+            "Detected matrix to be C-contiguous. "
+            "Performance may improve with F-contiguous matrix."
+        )
+    core_base = dispatcher[dtype][order]
+    py_base = PyMatrixNaiveBase
+
+    _, d = mat.shape
+
+    if levels is None:
+        levels = np.zeros(d, dtype=int)
+
+    if len(intr_map) <= 0:
+        raise ValueError("intr_map must be non-empty.")
+    arange_d = np.arange(d)
+    keys = np.sort(list(intr_map.keys()))
+    pairs_seen = set()
+    pairs = []
+    for key in keys:
+        if (key < 0) or (key >= d):
+            warnings.warn(f"key not in range [0,{d}): {key}.")
+        value_lst = intr_map[key]
+        if value_lst is None: 
+            value_lst = arange_d
+        else:
+            value_lst = np.sort(np.unique(value_lst))
+
+        for val in value_lst:
+            if (
+                ((key, val) in pairs_seen) or
+                ((val, key) in pairs_seen) or
+                (key == val)
+            ): 
+                continue
+            if (val < 0) or (val >= d):
+                warnings.warn(f"value not in range [0,{d}): {val}.")
+            pairs.append((key, val))
+            pairs_seen.add((key, val))
+    if len(pairs) <= 0:
+        raise ValueError("No valid pairs exist. There must be at least one valid pair.")
+    pairs = np.array(pairs, dtype=np.int32)
+
+    class _interaction(core_base, py_base):
+        def __init__(self):
+            self.mat = mat
+            self.pairs = pairs
+            self.levels = np.array(levels, copy=False, dtype=np.int32)
+            core_base.__init__(self, self.mat, self.pairs, self.levels, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
+        
+    return _interaction()
+
+
 def kronecker_eye(
     mat: Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64],
     K: int,
