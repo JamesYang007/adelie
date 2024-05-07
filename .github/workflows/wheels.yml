@@ -92,7 +92,7 @@ jobs:
         path: dist/
         merge-multiple: true
     - name: Sign the dists with Sigstore
-      uses: sigstore/gh-action-sigstore-python@v1.2.3
+      uses: sigstore/gh-action-sigstore-python@v2
       with:
         inputs: >-
           ./dist/*.tar.gz
