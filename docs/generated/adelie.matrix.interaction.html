@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.diagnostic.plot_set_sizes &#8212; adelie 1.1.31 documentation</title>
+    <title>adelie.matrix.interaction &#8212; adelie 1.1.31 documentation</title>
   
   
   
@@ -44,11 +44,11 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.diagnostic.plot_set_sizes';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.matrix.interaction';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.diagnostic.predict" href="adelie.diagnostic.predict.html" />
-    <link rel="prev" title="adelie.diagnostic.plot_kkt" href="adelie.diagnostic.plot_kkt.html" />
+    <link rel="next" title="adelie.matrix.kronecker_eye" href="adelie.matrix.kronecker_eye.html" />
+    <link rel="prev" title="adelie.matrix.dense" href="adelie.matrix.dense.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -336,7 +336,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_phased_ancestry.html">adelie.data.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_unphased.html">adelie.data.snp_unphased</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.DiagnosticCov.html">adelie.diagnostic.DiagnosticCov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.DiagnosticNaive.html">adelie.diagnostic.DiagnosticNaive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
@@ -349,7 +349,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_devs.html">adelie.diagnostic.plot_devs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_kkt.html">adelie.diagnostic.plot_kkt</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.diagnostic.plot_set_sizes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.predict.html">adelie.diagnostic.predict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
 </ul>
@@ -365,11 +365,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.block_diag.html">adelie.matrix.block_diag</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.concatenate.html">adelie.matrix.concatenate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.interaction.html">adelie.matrix.interaction</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.matrix.interaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.kronecker_eye.html">adelie.matrix.kronecker_eye</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.lazy_cov.html">adelie.matrix.lazy_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
@@ -443,7 +443,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.diagn...</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.matri...</li>
   </ul>
 </nav>
 </div>
@@ -460,51 +460,124 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-diagnostic-plot-set-sizes">
-<h1>adelie.diagnostic.plot_set_sizes<a class="headerlink" href="#adelie-diagnostic-plot-set-sizes" title="Link to this heading">#</a></h1>
+  <section id="adelie-matrix-interaction">
+<h1>adelie.matrix.interaction<a class="headerlink" href="#adelie-matrix-interaction" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="adelie.diagnostic.plot_set_sizes">
-<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">plot_set_sizes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_sizes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/diagnostic.py#L682-L795"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.diagnostic.plot_set_sizes" title="Link to this definition">#</a></dt>
-<dd><p>Plots the set sizes.</p>
-<dl class="field-list">
+<dt class="sig sig-object py" id="adelie.matrix.interaction">
+<span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">interaction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intr_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/matrix.py#L437-L623"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.matrix.interaction" title="Link to this definition">#</a></dt>
+<dd><p>Creates a viewer of a matrix with pairwise interactions.</p>
+<p>This matrix <span class="math notranslate nohighlight">\(X \in \mathbb{R}^{n\times p}\)</span> represents pairwise interaction terms
+within a given base matrix <span class="math notranslate nohighlight">\(Z \in \mathbb{R}^{n\times d}\)</span> 
+where the interaction structure is defined as follows.
+We assume <span class="math notranslate nohighlight">\(Z\)</span> contains, in general, a combination of
+continuous and discrete features (as columns).
+Denote <span class="math notranslate nohighlight">\(L : \{1,\ldots, d\} \to \mathbb{N}\)</span> as
+the mapping that maps each feature index of <span class="math notranslate nohighlight">\(Z\)</span> to the number of levels of that feature,
+where a value of <span class="math notranslate nohighlight">\(0\)</span> means the feature is continuous
+and otherwise means it is discrete with that many levels (or categories).
+Let <span class="math notranslate nohighlight">\(S \subseteq \{1,\ldots, d\}^2\)</span> denote the set of
+valid and unique pairs of feature indices of <span class="math notranslate nohighlight">\(Z\)</span>.
+A pair is <em>valid</em> if the two values are not equal.
+We define uniqueness up to ordering so that <span class="math notranslate nohighlight">\((x,y)\)</span> and <span class="math notranslate nohighlight">\((y,x)\)</span> are considered the same pairs.
+Finally, for each pair <span class="math notranslate nohighlight">\((i, j) \in S\)</span>,
+define the interaction term <span class="math notranslate nohighlight">\(X_{i:j}\)</span> as</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+    X_{i:j}
+    &amp;:=
+    \begin{cases}
+        \begin{bmatrix}
+            \mathbf{1} &amp; Z_{i}
+        \end{bmatrix}
+        \star
+        \begin{bmatrix}
+            \mathbf{1} &amp; Z_{j}
+        \end{bmatrix}
+        ,&amp; L(i) = 0, L(j) = 0 \\
+        \begin{bmatrix}
+            \mathbf{1} &amp; Z_{i}
+        \end{bmatrix}
+        \star
+        I_{Z_{j}}
+        ,&amp; L(i) = 0, L(j) &gt; 0 \\
+        I_{Z_{i}}
+        \star
+        \begin{bmatrix}
+            \mathbf{1} &amp; Z_{j}
+        \end{bmatrix}
+        ,&amp; L(i) &gt; 0, L(j) = 0 \\
+        I_{Z_{i}}
+        \star
+        I_{Z_{j}}
+        ,&amp; L(i) &gt; 0, L(j) &gt; 0
+    \end{cases}
+\end{align*}\end{split}\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(Z_i\)</span> is the <span class="math notranslate nohighlight">\(i\)</span> th column of <span class="math notranslate nohighlight">\(Z\)</span>,
+<span class="math notranslate nohighlight">\(I_{v}\)</span> is the indicator matrix, or one-hot encoding, of <span class="math notranslate nohighlight">\(v\)</span>,
+and for any two matrices <span class="math notranslate nohighlight">\(A \in \mathbb{R}^{n\times d_A}\)</span>, <span class="math notranslate nohighlight">\(B \in \mathbb{R}^{n\times d_B}\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[\begin{align*}
+    A \star B
+    &amp;=
+    \begin{bmatrix}
+        A_{1} \odot B_{1} &amp;
+        \cdots &amp;
+        A_{d_A} \odot B_{1} &amp; 
+        A_{1} \odot B_{2} &amp;
+        \cdots &amp;
+        A_{d_A} \odot B_{2} &amp;
+        \cdots
+    \end{bmatrix}
+\end{align*}\]</div>
+<p>Then, <span class="math notranslate nohighlight">\(X\)</span> is defined as the column-wise concatenation of <span class="math notranslate nohighlight">\(X_{i:j}\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Every discrete feature of <cite>Z</cite> <em>must</em> take on values in the range <span class="math notranslate nohighlight">\([0, \ell)\)</span>
+where <span class="math notranslate nohighlight">\(\ell\)</span> is the number of levels for that feature.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This matrix only works for naive method!</p>
+</div>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>groups</strong><span class="classifier">(G,) np.ndarray</span></dt><dd><p>List of starting indices to each group where <cite>G</cite> is the number of groups.
-<code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group.</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>mat</strong><span class="classifier">(n, d) np.ndarray</span></dt><dd><p>The dense matrix <span class="math notranslate nohighlight">\(Z\)</span> from which to construct interaction terms.</p>
 </dd>
-<dt><strong>screen_sizes</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Screen set sizes.</p>
+<dt><strong>intr_map</strong><span class="classifier">dict</span></dt><dd><p>Dictionary mapping a column index of <code class="docutils literal notranslate"><span class="pre">mat</span></code>
+to a list of (column) indices to pair with.
+If the value of a key-value pair is <code class="docutils literal notranslate"><span class="pre">None</span></code>,
+then every column is paired with the key.
+Internally, only valid and unique (as defined above) pairs are registered.
+Moreover, the pairs are stored in lexicographical order of <code class="docutils literal notranslate"><span class="pre">(key,</span> <span class="pre">val)</span></code>
+for each <code class="docutils literal notranslate"><span class="pre">val</span></code> in <code class="docutils literal notranslate"><span class="pre">intr_map[key]</span></code> and for each <code class="docutils literal notranslate"><span class="pre">key</span></code>.</p>
 </dd>
-<dt><strong>active_sizes</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Active set sizes.</p>
+<dt><strong>levels</strong><span class="classifier">(d,) np.ndarray, optional</span></dt><dd><p>Number of levels for each column in <code class="docutils literal notranslate"><span class="pre">mat</span></code>.
+A non-positive value indicates that the column is a continuous variable
+whereas a positive value indicates that it is a discrete variable with
+that many levels (or categories).
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, it is initialized to be <code class="docutils literal notranslate"><span class="pre">np.zeros(d)</span></code>
+so that every column is a continuous variable.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </dd>
-<dt><strong>lmdas</strong><span class="classifier">(L,) np.ndarray</span></dt><dd><p>Regularization parameters <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
-</dd>
-<dt><strong>ratio</strong><span class="classifier">bool, optional</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if plot should normalize the set sizes
-by the total number of groups.
-Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
-</dd>
-<dt><strong>exclude</strong><span class="classifier">list, optional</span></dt><dd><p>The sets to exclude from plotting.
-It must be a subset of the following:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;active&quot;</span></code>: active set.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;screen&quot;</span></code>: screen set.</p></li>
-</ul>
-</div></blockquote>
-<p>Default is <code class="docutils literal notranslate"><span class="pre">[]</span></code>.</p>
-</dd>
-<dt><strong>axes</strong></dt><dd><p>Matplotlib axes object.</p>
+<dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
+Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>fig, ax</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">axes</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, both are returned.</p>
-</dd>
-<dt>ax</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">axes</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>, then only <code class="docutils literal notranslate"><span class="pre">ax</span></code> is returned.</p>
+<dt>wrap</dt><dd><p>Wrapper matrix object.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html#adelie.matrix.MatrixNaiveBase64" title="adelie.matrix.MatrixNaiveBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.matrix.MatrixNaiveBase64</span></code></a></dt><dd></dd>
+</dl>
+</div>
 </dd></dl>
 
 </section>
@@ -520,20 +593,20 @@ It must be a subset of the following:</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.diagnostic.plot_kkt.html"
+       href="adelie.matrix.dense.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.diagnostic.plot_kkt</p>
+        <p class="prev-next-title">adelie.matrix.dense</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.diagnostic.predict.html"
+       href="adelie.matrix.kronecker_eye.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.diagnostic.predict</p>
+        <p class="prev-next-title">adelie.matrix.kronecker_eye</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -553,14 +626,14 @@ It must be a subset of the following:</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.diagnostic.plot_set_sizes"><code class="docutils literal notranslate"><span class="pre">plot_set_sizes()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.interaction"><code class="docutils literal notranslate"><span class="pre">interaction()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.diagnostic.plot_set_sizes.rst.txt">
+    <a href="../_sources/generated/adelie.matrix.interaction.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>
