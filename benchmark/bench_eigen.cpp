@@ -545,3 +545,64 @@ BENCHMARK(BM_mask)
     -> Args({10000})
     -> Args({100000})
     ;
+
+static void BM_one_scan(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto k = state.range(1);
+    ad::util::rowvec_type<uint32_t> x(n);
+    x.setRandom();
+    x = x.unaryExpr([&](auto i) -> uint32_t { return i % k; });
+    ad::util::rowvec_type<double> y(n);
+    ad::util::rowvec_type<double> out(k);
+
+    for (auto _ : state) {
+        out.setZero();
+        for (int i = 0; i < x.size(); ++i) {
+            out[x[i]] += y[i];
+        }
+    }
+}
+
+BENCHMARK(BM_one_scan)
+    -> Args({100, 2})
+    -> Args({1000, 2})
+    -> Args({10000, 2})
+    -> Args({100000, 2})
+    -> Args({100, 10})
+    -> Args({1000, 10})
+    -> Args({10000, 10})
+    -> Args({100000, 10})
+    ;
+
+static void BM_many_scan(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto k = state.range(1);
+    ad::util::rowvec_type<uint32_t> x(n);
+    x.setRandom();
+    x = x.unaryExpr([&](auto i) -> uint32_t { return i % k; });
+    ad::util::rowvec_type<double> y(n);
+    ad::util::rowvec_type<double> out(k);
+
+    for (auto _ : state) {
+        for (int j = 0; j < k; ++j) {
+            double sum = 0;
+            for (int i = 0; i < x.size(); ++i) {
+                if (x[i] == j) sum += y[i];
+            }
+            out[j] = sum;
+        }
+    }
+}
+
+BENCHMARK(BM_many_scan)
+    -> Args({100, 2})
+    -> Args({1000, 2})
+    -> Args({10000, 2})
+    -> Args({100000, 2})
+    -> Args({100, 10})
+    -> Args({1000, 10})
+    -> Args({10000, 10})
+    -> Args({100000, 10})
+    ;

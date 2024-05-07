@@ -7,6 +7,7 @@
 #include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/matrix/matrix_naive_concatenate.hpp>
 #include <adelie_core/matrix/matrix_naive_dense.hpp>
+#include <adelie_core/matrix/matrix_naive_interaction.hpp>
 #include <adelie_core/matrix/matrix_naive_kronecker_eye.hpp>
 #include <adelie_core/matrix/matrix_naive_snp_unphased.hpp>
 #include <adelie_core/matrix/matrix_naive_snp_phased_ancestry.hpp>
@@ -583,6 +584,32 @@ void matrix_naive_dense(py::module_& m, const char* name)
         ;
 }
 
+template <class DenseType>
+void matrix_naive_interaction_dense(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveInteractionDense<DenseType>;
+    using base_t = typename internal_t::base_t;
+    using dense_t = typename internal_t::dense_t;
+    using rowarr_index_t = typename internal_t::rowarr_index_t;
+    using vec_index_t = typename internal_t::vec_index_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(
+            py::init<
+                const Eigen::Ref<const dense_t>&,
+                const Eigen::Ref<const rowarr_index_t>&,
+                const Eigen::Ref<const vec_index_t>&,
+                size_t 
+            >(), 
+            py::arg("mat").noconvert(),
+            py::arg("pairs").noconvert(),
+            py::arg("levels").noconvert(),
+            py::arg("n_threads")
+        )
+        .def_property_readonly("groups", &internal_t::groups)
+        .def_property_readonly("group_sizes", &internal_t::group_sizes)
+        ;
+}
+
 template <class ValueType>
 void matrix_naive_kronecker_eye(py::module_& m, const char* name)
 {
@@ -767,6 +794,11 @@ void register_matrix(py::module_& m)
     matrix_naive_dense<dense_type<double, Eigen::ColMajor>>(m, "MatrixNaiveDense64F");
     matrix_naive_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixNaiveDense32C");
     matrix_naive_dense<dense_type<float, Eigen::ColMajor>>(m, "MatrixNaiveDense32F");
+
+    matrix_naive_interaction_dense<dense_type<double, Eigen::RowMajor>>(m, "MatrixNaiveInteractionDense64C");
+    matrix_naive_interaction_dense<dense_type<double, Eigen::ColMajor>>(m, "MatrixNaiveInteractionDense64F");
+    matrix_naive_interaction_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixNaiveInteractionDense32C");
+    matrix_naive_interaction_dense<dense_type<float, Eigen::ColMajor>>(m, "MatrixNaiveInteractionDense32F");
 
     matrix_naive_kronecker_eye<double>(m, "MatrixNaiveKroneckerEye64");
     matrix_naive_kronecker_eye<float>(m, "MatrixNaiveKroneckerEye32");
