@@ -523,6 +523,11 @@ def test_naive_csubset():
         # test operator[] works properly
         cX = dX[:, indices]
         run_naive(X, cX, dtype)
+        bool_indices = np.zeros(p, dtype=bool)
+        bool_indices[indices] = True
+        cX = dX[:, bool_indices]
+        X = X[:, np.argsort(indices)]
+        run_naive(X, cX, dtype)
 
     dtypes = [np.float32, np.float64]
     subset_props = [0, 0.5, 1]
@@ -543,15 +548,20 @@ def test_naive_rsubset():
         indices = np.random.choice(n, size=max(int(subset_prop * n), 1), replace=False)
         dX = mod.dense(X, method="naive")
         cX = mod.subset(dX, indices, axis=0, n_threads=2)
-        X = X[indices]
-        run_naive(X, cX, dtype)
+        sX = X[indices]
+        run_naive(sX, cX, dtype)
         # test operator[] works properly
         cX = dX[indices]
-        run_naive(X, cX, dtype)
+        run_naive(sX, cX, dtype)
         col_indices = np.random.choice(p, size=max(p//2, 1), replace=False)
         cX = dX[:, col_indices][indices]
-        X = X[:, col_indices]
-        run_naive(X, cX, dtype)
+        sX = X[:, col_indices][indices]
+        run_naive(sX, cX, dtype)
+        bool_indices = np.zeros(n, dtype=bool)
+        bool_indices[indices] = True
+        cX = dX[bool_indices]
+        sX = X[np.sort(indices)]
+        run_naive(sX, cX, dtype)
 
     dtypes = [np.float32, np.float64]
     subset_props = [0, 0.5, 1]
