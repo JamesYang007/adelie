@@ -90,7 +90,7 @@ class PyMatrixNaiveBase:
             ):
                 raise ValueError(
                     "If row and column subsets are provided, "
-                    "at least one must be an integer or a slice. "
+                    "at least one must not be a list-like object. "
                 )
         elif isinstance(key, valid_some_type):
             key = (key,)
@@ -103,11 +103,14 @@ class PyMatrixNaiveBase:
             if isinstance(s, (int, np.integer)):
                 return np.array([s])
             elif isinstance(s, (list, np.ndarray)):
-                s = np.array(s, dtype=int)
-                if np.unique(s).shape[0] != s.shape[0]:
-                    raise ValueError(
-                        "Subset does not contain unique elements."
-                    )
+                if s.dtype == np.dtype("bool"):
+                    s = np.where(s)[0]
+                else:
+                    s = np.array(s, dtype=int)
+                    if np.unique(s).shape[0] != s.shape[0]:
+                        raise ValueError(
+                            "Subset does not contain unique elements."
+                        )
                 return s
             elif isinstance(s, slice):
                 start = 0 if s.start is None else s.start
