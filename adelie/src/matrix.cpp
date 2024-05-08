@@ -366,6 +366,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         Number of columns.
         )delimiter")
         /* Augmented API for Python */
+        .def_property_readonly("ndim", [](const internal_t&) { return 2; })
         .def_property_readonly("shape", [](const internal_t& m) {
             return std::make_tuple(m.rows(), m.cols());
         }, R"delimiter(
@@ -438,6 +439,8 @@ void matrix_cov_base(py::module_& m, const char* name)
         .def("cols", &internal_t::cols, R"delimiter(
         Number of columns.
         )delimiter")
+        /* Augmented API for Python */
+        .def_property_readonly("ndim", [](const internal_t&) { return 2; })
         .def_property_readonly("shape", [](const internal_t& m) {
             return std::make_tuple(m.rows(), m.cols());
         }, R"delimiter(
