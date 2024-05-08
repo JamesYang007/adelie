@@ -30,6 +30,7 @@
 
    .. autosummary::
    
+      ~MatrixNaiveBase64.ndim
       ~MatrixNaiveBase64.shape
    
    
@@ -53,6 +54,7 @@
    
    
    
+   .. autoattribute:: ndim
    .. autoattribute:: shape
    
    

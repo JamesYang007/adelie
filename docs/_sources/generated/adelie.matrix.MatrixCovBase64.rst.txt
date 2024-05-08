@@ -26,6 +26,7 @@
 
    .. autosummary::
    
+      ~MatrixCovBase64.ndim
       ~MatrixCovBase64.shape
    
    
@@ -45,6 +46,7 @@
    
    
    
+   .. autoattribute:: ndim
    .. autoattribute:: shape
    
    
