@@ -42,9 +42,10 @@ private:
         for (int i = 0; i < pairs.rows(); ++i) {
             auto l0 = levels[pairs(i, 0)];
             auto l1 = levels[pairs(i, 1)];
+            const auto both_cont = (l0 <= 0) & (l1 <= 0);
             l0 = (l0 <= 0) ? _n_levels_cont : l0;
             l1 = (l1 <= 0) ? _n_levels_cont : l1;
-            outer[i+1] = outer[i] + l0 * l1;     
+            outer[i+1] = outer[i] + (l0 * l1 - both_cont); 
         }
         return outer;
     }
@@ -60,15 +61,14 @@ private:
         for (int i = 0; i < pairs.rows(); ++i) {
             auto l0 = levels[pairs(i, 0)];
             auto l1 = levels[pairs(i, 1)];
+            const auto both_cont = (l0 <= 0) & (l1 <= 0);
             l0 = (l0 <= 0) ? _n_levels_cont : l0;
             l1 = (l1 <= 0) ? _n_levels_cont : l1;
-            for (int i1 = 0; i1 < l1; ++i1) {
-                for (int i0 = 0; i0 < l0; ++i0) {
-                    const auto j = i1 * l0 + i0;
-                    slice_map[begin + j] = i;
-                }
+            const auto block_size = l0 * l1 - both_cont;
+            for (int j = 0; j < block_size; ++j) {
+                slice_map[begin + j] = i;
             }
-            begin += l0 * l1;
+            begin += block_size;
         }
         return slice_map;
     }
@@ -84,15 +84,14 @@ private:
         for (int i = 0; i < pairs.rows(); ++i) {
             auto l0 = levels[pairs(i, 0)];
             auto l1 = levels[pairs(i, 1)];
+            const auto both_cont = (l0 <= 0) & (l1 <= 0);
             l0 = (l0 <= 0) ? _n_levels_cont : l0;
             l1 = (l1 <= 0) ? _n_levels_cont : l1;
-            for (int i1 = 0; i1 < l1; ++i1) {
-                for (int i0 = 0; i0 < l0; ++i0) {
-                    const auto j = i1 * l0 + i0;
-                    index_map[begin + j] = j;
-                }
+            const auto block_size = l0 * l1 - both_cont;
+            for (int j = 0; j < block_size; ++j) {
+                index_map[begin + j] = j;
             }
-            begin += l0 * l1;
+            begin += block_size;
         }
         return index_map;
     }
@@ -117,21 +116,16 @@ private:
         const auto _case = static_cast<int>(l0 > 0) | static_cast<int>(l1 > 0 ? _n_levels_cont : 0);
         switch (_case) {
             case 0: {
-                const auto _case = static_cast<int>(k0 > 0) | static_cast<int>(k1 > 0 ? _n_levels_cont : 0);
-                switch (_case) {
+                switch (index) {
                     case 0: {
-                        return (v * w).sum(); 
-                        break;
-                    }
-                    case 1: {
                         return (v * w * _mat.col(i0).transpose().array()).sum();
                         break;
                     }
-                    case 2: {
+                    case 1: {
                         return (v * w * _mat.col(i1).transpose().array()).sum();
                         break;
                     }
-                    case 3: {
+                    case 2: {
                         return (v * w * _mat.col(i0).transpose().array() * _mat.col(i1).transpose().array()).sum();
                         break;
                     }
@@ -205,21 +199,16 @@ private:
         const auto _case = static_cast<int>(l0 > 0) | static_cast<int>(l1 > 0 ? _n_levels_cont : 0);
         switch (_case) {
             case 0: {
-                const auto _case = static_cast<int>(k0 > 0) | static_cast<int>(k1 > 0 ? _n_levels_cont : 0);
-                switch (_case) {
+                switch (index) {
                     case 0: {
-                        out += v; 
-                        break;
-                    }
-                    case 1: {
                         out += v * _mat.col(i0).transpose().array();
                         break;
                     }
-                    case 2: {
+                    case 1: {
                         out += v * _mat.col(i1).transpose().array();
                         break;
                     }
-                    case 3: {
+                    case 2: {
                         out += v * _mat.col(i0).transpose().array() * _mat.col(i1).transpose().array();
                         break;
                     }
@@ -275,10 +264,12 @@ private:
     )
     {
         const auto size = out.size();
+        const auto both_cont = (l0 <= 0) & (l1 <= 0);
         const auto l0_exp = l0 <= 0 ? _n_levels_cont : l0;
         const auto l1_exp = l1 <= 0 ? _n_levels_cont : l1;
+        const auto full_size = l0_exp * l1_exp - both_cont;
         // not a full-block
-        if (index != 0 || size != l0_exp * l1_exp) {
+        if (index != 0 || size != full_size) {
             for (int l = 0; l < size; ++l) {
                 out[l] = _cmul(begin+l, v, weights);
             }
@@ -288,10 +279,9 @@ private:
         const auto _case = static_cast<int>(l0 > 0) | static_cast<int>(l1 > 0 ? _n_levels_cont : 0);
         switch (_case) {
             case 0: {
-                out[0] = (v * w).sum();
-                out[1] = (v * w * _mat.col(i0).transpose().array()).sum();
-                out[2] = (v * w * _mat.col(i1).transpose().array()).sum();
-                out[3] = (v * w * _mat.col(i0).transpose().array() * _mat.col(i1).transpose().array()).sum();
+                out[0] = (v * w * _mat.col(i0).transpose().array()).sum();
+                out[1] = (v * w * _mat.col(i1).transpose().array()).sum();
+                out[2] = (v * w * _mat.col(i0).transpose().array() * _mat.col(i1).transpose().array()).sum();
                 break;
             }
             case 1: {
@@ -337,10 +327,12 @@ private:
         Eigen::Ref<vec_value_t> out
     )
     {
+        const auto both_cont = (l0 <= 0) & (l1 <= 0);
         const auto l0_exp = l0 <= 0 ? _n_levels_cont : l0;
         const auto l1_exp = l1 <= 0 ? _n_levels_cont : l1;
+        const auto full_size = l0_exp * l1_exp - both_cont;
         // not a full-block
-        if (index != 0 || size != l0_exp * l1_exp) {
+        if (index != 0 || size != full_size) {
             for (int l = 0; l < size; ++l) {
                 _ctmul(begin+l, v[l], out);
             }
@@ -352,9 +344,8 @@ private:
                 const auto mi0 = _mat.col(i0).transpose().array();
                 const auto mi1 = _mat.col(i1).transpose().array();
                 out += (
-                    v[0] +
-                    v[1] * mi0 +
-                    mi1 * (v[2] + v[3] * mi0)
+                    v[0] * mi0 +
+                    mi1 * (v[1] + v[2] * mi0)
                 );
                 break;
             }
@@ -462,9 +453,11 @@ public:
             const auto i1 = pair[1];
             const auto l0 = _levels[i0];
             const auto l1 = _levels[i1];
+            const auto both_cont = (l0 <= 0) & (l1 <= 0);
             const auto l0_exp = (l0 <= 0) ? _n_levels_cont : l0;
             const auto l1_exp = (l1 <= 0) ? _n_levels_cont : l1;
-            const auto size = std::min<size_t>(l0_exp * l1_exp - index, q - n_processed);
+            const auto full_size = l0_exp * l1_exp - both_cont;
+            const auto size = std::min<size_t>(full_size - index, q - n_processed);
             auto out_curr = out.segment(n_processed, size);
             _bmul(jj, i0, i1, l0, l1, index, v, weights, out_curr);
             n_processed += size;
@@ -488,9 +481,11 @@ public:
             const auto i1 = pair[1];
             const auto l0 = _levels[i0];
             const auto l1 = _levels[i1];
+            const auto both_cont = (l0 <= 0) & (l1 <= 0);
             const auto l0_exp = (l0 <= 0) ? _n_levels_cont : l0;
             const auto l1_exp = (l1 <= 0) ? _n_levels_cont : l1;
-            const auto size = std::min<size_t>(l0_exp * l1_exp - index, q - n_processed);
+            const auto full_size = l0_exp * l1_exp - both_cont;
+            const auto size = std::min<size_t>(full_size - index, q - n_processed);
             const auto v_curr = v.segment(n_processed, size);
             _btmul(jj, i0, i1, l0, l1, index, size, v_curr, out);
             n_processed += size;
@@ -510,9 +505,11 @@ public:
             const auto i1 = pair[1];
             const auto l0 = _levels[i0];
             const auto l1 = _levels[i1];
+            const auto both_cont = (l0 <= 0) & (l1 <= 0);
             const auto l0_exp = (l0 <= 0) ? _n_levels_cont : l0;
             const auto l1_exp = (l1 <= 0) ? _n_levels_cont : l1;
-            auto out_curr = out.segment(j, l0_exp * l1_exp);
+            const auto full_size = l0_exp * l1_exp - both_cont;
+            auto out_curr = out.segment(j, full_size);
             _bmul(j, i0, i1, l0, l1, 0, v, weights, out_curr);
         };
         if (_n_threads <= 1) {
@@ -572,16 +569,12 @@ public:
                 const auto mi1 = _mat.col(i1).array();
                 auto w = buffer.col(0).array();
                 w = sqrt_w.square();
-                out(0, 0) = w.sum();
-                out(1, 0) = (w * mi0).sum();
-                out(1, 1) = (w * mi0.square()).sum();
-                out(2, 0) = (w * mi1).sum();
-                out(2, 1) = (w * mi0 * mi1).sum();
-                out(2, 2) = (w * mi1.square()).sum();
-                out(3, 0) = out(2, 1);
-                out(3, 1) = (w * mi0.square() * mi1).sum();
-                out(3, 2) = (w * mi1.square() * mi0).sum();
-                out(3, 3) = (w * (mi0 * mi1).square()).sum();
+                out(0, 0) = (w * mi0.square()).sum();
+                out(1, 0) = (w * mi0 * mi1).sum();
+                out(1, 1) = (w * mi1.square()).sum();
+                out(2, 0) = (w * mi0.square() * mi1).sum();
+                out(2, 1) = (w * mi1.square() * mi0).sum();
+                out(2, 2) = (w * (mi0 * mi1).square()).sum();
                 for (int i0 = 0; i0 < q; ++i0) {
                     for (int i1 = i0+1; i1 < q; ++i1) {
                         out(i0, i1) = out(i1, i0);
