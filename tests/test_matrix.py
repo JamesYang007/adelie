@@ -341,9 +341,14 @@ def test_naive_interaction_dense():
             l0, l1 = levels[i0], levels[i1]
             Y0 = _expand(X[:, i0], l0)
             Y1 = _expand(X[:, i1], l1)
-            for j1 in range(Y1.shape[1]):
-                for j0 in range(Y0.shape[1]):
-                    col_lst.append(Y0[:, j0] * Y1[:, j1])
+            if (l0 <= 0) and (l1 <= 0):
+                col_lst.append(Y0[:, 1])
+                col_lst.append(Y1[:, 1])
+                col_lst.append(Y0[:, 1] * Y1[:, 1])
+            else:
+                for j1 in range(Y1.shape[1]):
+                    for j0 in range(Y0.shape[1]):
+                        col_lst.append(Y0[:, j0] * Y1[:, j1])
         return np.array(col_lst, dtype=dtype, order=order).T
 
     def _test(n, d, dtype, order, seed=0):
