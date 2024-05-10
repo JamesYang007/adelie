@@ -1,6 +1,6 @@
 #include "decl.hpp"
 #include <adelie_core/optimization/nnls.hpp>
-#include <adelie_core/optimization/nnqp.hpp>
+#include <adelie_core/optimization/nnqp_full.hpp>
 #include <adelie_core/optimization/search_pivot.hpp>
 #include <adelie_core/optimization/symmetric_penalty.hpp>
 #include <adelie_core/util/stopwatch.hpp>
@@ -27,74 +27,155 @@ double symmetric_penalty(
     return ad::optimization::symmetric_penalty(x, alpha);
 }
 
-py::dict nnls_cov_full(
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& x0,
-    const Eigen::Ref<const ad::util::rowmat_type<double>>& quad,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& linear,
-    size_t max_iters,
-    double tol,
-    double dtol
-)
+template <class MatrixType>
+void nnqp_full(py::module_& m, const char* name)
 {
-    using sw_t = ad::util::Stopwatch;
-    const auto d = quad.cols();
-    size_t iters;
-    ad::util::rowvec_type<double> x = x0;
-    ad::util::rowvec_type<double> grad = (
-        linear.matrix() - x.matrix() * quad.transpose()
-    );
-    double loss = 0.5 * (x.matrix() * quad).dot(x.matrix()) - (linear * x).sum();
-    sw_t sw;
-    sw.start();
-    ad::optimization::nnls_cov_full(
-        quad, max_iters, tol, dtol, 
-        iters, x, grad, loss, [](){return false;}
-    );
-    const auto time_elapsed = sw.elapsed();
-    return py::dict(
-        "x"_a=x, 
-        "grad"_a=grad, 
-        "loss"_a=loss,
-        "iters"_a=iters, 
-        "time_elapsed"_a=time_elapsed
-    );
+    using state_t = ad::optimization::StateNNQPFull<MatrixType>;
+    using matrix_t = typename state_t::matrix_t;
+    using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    py::class_<state_t>(m, name, R"delimiter(
+    Solves the non-negative quadratic program (NNQP).
+
+    The non-negative quadratic program is given by
+
+    .. math::
+        \begin{align*}
+            \mathrm{minimize}_{x \geq 0} 
+            \frac{1}{2} x^\top Q x - v^\top x
+        \end{align*}
+
+    where :math:`Q` is a dense positive semi-definite matrix.
+
+    Parameters
+    ----------
+    quad : (n, n) np.ndarray
+        Full positive semi-definite dense matrix :math:`Q`.
+    max_iters : int
+        Maximum number of coordinate descent iterations.
+    tol : float
+        Convergence tolerance.
+    dtol : float
+        Difference tolerance at each coordinate update.
+        If the absolute difference is below this value,
+        then the update does not take place, which saves computation.
+    x : (n,) np.ndarray
+        Solution vector.
+    grad : (n,) np.ndarray
+        Gradient vector :math:`v - Q x`.
+    )delimiter")
+        .def(py::init<
+            const Eigen::Ref<const matrix_t>&,
+            size_t,
+            value_t,
+            value_t,
+            Eigen::Ref<vec_value_t>,
+            Eigen::Ref<vec_value_t> 
+        >(),
+            py::arg("quad").noconvert(),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("dtol"),
+            py::arg("x"),
+            py::arg("grad")
+        )
+        .def_readonly("quad", &state_t::quad)
+        .def_readonly("max_iters", &state_t::max_iters)
+        .def_readonly("tol", &state_t::tol)
+        .def_readonly("dtol", &state_t::dtol)
+        .def_readonly("iters", &state_t::iters)
+        .def_readonly("x", &state_t::x)
+        .def_readonly("grad", &state_t::grad)
+        .def_readonly("time_elapsed", &state_t::time_elapsed)
+        .def("solve", [](state_t& state) {
+            using sw_t = ad::util::Stopwatch;
+            sw_t sw;
+            sw.start();
+            ad::optimization::nnqp_full(state);
+            state.time_elapsed = sw.elapsed();
+        })
+        ;
 }
 
-py::dict nnls_naive(
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& beta0,
-    const Eigen::Ref<const ad::util::colmat_type<double>>& X,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& y,
-    size_t max_iters,
-    double tol,
-    double dtol
-)
+template <class MatrixType>
+void nnls(py::module_& m, const char* name)
 {
-    using sw_t = ad::util::Stopwatch;
-    const auto d = X.cols();
-    size_t iters;
-    ad::util::rowvec_type<double> X_vars = (
-        X.array().square().colwise().sum()
-    );
-    ad::util::rowvec_type<double> beta = beta0;
-    ad::util::rowvec_type<double> resid = (
-        y.matrix() - beta0.matrix() * X.transpose()
-    );
-    double loss = 0.5 * resid.square().sum();
-    sw_t sw;
-    sw.start();
-    ad::optimization::nnls_naive(
-        X, X_vars, max_iters, tol, dtol, 
-        iters, beta, resid, loss, 
-        [](){return false;}, [](auto) {return false;}
-    );
-    const auto time_elapsed = sw.elapsed();
-    return py::dict(
-        "x"_a=beta, 
-        "resid"_a=resid, 
-        "loss"_a=loss,
-        "iters"_a=iters, 
-        "time_elapsed"_a=time_elapsed
-    );
+    using state_t = ad::optimization::StateNNLS<MatrixType>;
+    using matrix_t = typename state_t::matrix_t;
+    using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    py::class_<state_t>(m, name, R"delimiter(
+    Solves the non-negative least squares (NNLS) problem.
+
+    The non-negative least squares problem is given by
+
+    .. math::
+        \begin{align*}
+            \mathrm{minimize}_{\beta \geq 0} 
+            \frac{1}{2} \|y - X\beta\|_2^2
+        \end{align*}
+
+    Parameters
+    ----------
+    X : (n, d) np.ndarray
+        Feature matrix.
+    X_vars : (d,) np.ndarray
+        :math:`\ell_2`-norm squared of the columns of ``X``.
+    max_iters : int
+        Maximum number of coordinate descent iterations.
+    tol : float
+        Convergence tolerance.
+    dtol : float
+        Difference tolerance at each coordinate update.
+        If the absolute difference is below this value,
+        then the update does not take place, which saves computation.
+    beta : (d,) np.ndarray
+        Solution vector.
+    resid : (n,) np.ndarray
+        Residual vector :math:`y - X \beta`.
+    loss : float
+        Loss :math:`1/2 \|y-X\beta\|_2^2`.
+    )delimiter")
+        .def(py::init<
+            const Eigen::Ref<const matrix_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            size_t,
+            value_t,
+            value_t, 
+            Eigen::Ref<vec_value_t>,
+            Eigen::Ref<vec_value_t>,
+            value_t 
+        >(),
+            py::arg("X").noconvert(),
+            py::arg("X_vars").noconvert(),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("dtol"),
+            py::arg("beta"),
+            py::arg("resid"),
+            py::arg("loss")
+        )
+        .def_readonly("X", &state_t::X)
+        .def_readonly("X_vars", &state_t::X_vars)
+        .def_readonly("max_iters", &state_t::max_iters)
+        .def_readonly("tol", &state_t::tol)
+        .def_readonly("dtol", &state_t::dtol)
+        .def_readonly("beta", &state_t::beta)
+        .def_readonly("resid", &state_t::resid)
+        .def_readonly("loss", &state_t::loss)
+        .def_readonly("time_elapsed", &state_t::time_elapsed)
+        .def("solve", [](state_t& state) {
+            using sw_t = ad::util::Stopwatch;
+            sw_t sw;
+            sw.start();
+            ad::optimization::nnls(
+                state, 
+                [](){return false;}, 
+                [](auto) {return false;}
+            );
+            state.time_elapsed = sw.elapsed();
+        })
+        ;
 }
 
 struct MatrixConstraintDense
@@ -112,13 +193,12 @@ struct MatrixConstraintDense
         dense(dense.data(), dense.rows(), dense.cols()) 
     {}
 
-    void rmul(
+    value_t rmul(
         int i, 
-        const Eigen::Ref<const colmat_value_t>& S, 
-        Eigen::Ref<vec_value_t> out
+        const Eigen::Ref<const vec_value_t>& v
     )
     {
-        out.matrix().noalias() = dense.row(i).matrix() * S.transpose();
+        return (dense.row(i) * v).sum();
     }
 
     void rtmul(
@@ -128,14 +208,6 @@ struct MatrixConstraintDense
     )
     {
         out += s * dense.row(i);
-    }
-
-    void mul(
-        const Eigen::Ref<const vec_value_t>& v, 
-        Eigen::Ref<vec_value_t> out
-    )
-    {
-        out.matrix().noalias() = v.matrix() * dense.matrix().transpose(); 
     }
 
     int rows() const { return dense.rows(); }
@@ -154,83 +226,125 @@ void matrix_constraint_dense(py::module_& m)
         )
         .def("rmul", &matrix_t::rmul)
         .def("rtmul", &matrix_t::rtmul)
-        .def("mul", &matrix_t::mul)
         .def("rows", &matrix_t::rows)
         .def("cols", &matrix_t::cols)
         ;
 }
 
-template <class MatrixType>
-void nnqp(py::module_& m)
-{
-    using state_t = ad::optimization::StateNNQP<MatrixType>;
-    using matrix_t = typename state_t::matrix_t;
-    using value_t = typename state_t::value_t;
-    using vec_value_t = typename state_t::vec_value_t;
-    using colmat_value_t = typename state_t::colmat_value_t;
-    using rowarr_value_t = typename state_t::rowarr_value_t;
-    py::class_<state_t>(m, "StateNNQP")
-        .def(py::init<
-            matrix_t&,
-            value_t,
-            value_t,
-            const Eigen::Ref<const vec_value_t>&,
-            const Eigen::Ref<const colmat_value_t>&,
-            const Eigen::Ref<const vec_value_t>&,
-            size_t,
-            value_t,
-            const std::string& 
-        >(),
-            py::arg("A"),
-            py::arg("quad_c"),
-            py::arg("quad_d"),
-            py::arg("quad_alpha"),
-            py::arg("quad_Sigma"),
-            py::arg("linear_v"),
-            py::arg("max_iters"),
-            py::arg("tol"),
-            py::arg("screen_rule")
-        )
-        .def_readonly("quad_c", &state_t::quad_c)
-        .def_readonly("quad_d", &state_t::quad_d)
-        .def_readonly("quad_alpha", &state_t::quad_alpha)
-        .def_readonly("quad_Sigma", &state_t::quad_Sigma)
-        .def_readonly("linear_v", &state_t::linear_v)
-        .def_readonly("max_iters", &state_t::max_iters)
-        .def_readonly("tol", &state_t::tol)
-        .def_readonly("iters", &state_t::iters)
-        .def_readonly("A", &state_t::A)
-        .def_readonly("screen_hashset", &state_t::screen_hashset)
-        .def_readonly("screen_set", &state_t::screen_set)
-        .def_readonly("screen_beta", &state_t::screen_beta)
-        .def_readonly("screen_is_active", &state_t::screen_is_active)
-        .def_readonly("screen_vars", &state_t::screen_vars)
-        .def_property_readonly("screen_ASigma", [](const state_t& state) {
-            return Eigen::Map<const rowarr_value_t>(
-                state.screen_ASigma.data(),
-                state.screen_set.size(),
-                state.quad_Sigma.cols()
-            );
-        })
-        .def_readonly("active_set", &state_t::active_set)
-        .def_readonly("resid_A", &state_t::resid_A)
-        .def_readonly("resid_alpha", &state_t::resid_alpha)
-        .def_readonly("grad", &state_t::grad)
-        .def_readonly("benchmark_screen", &state_t::benchmark_screen)
-        .def_readonly("benchmark_invariance", &state_t::benchmark_invariance)
-        .def_readonly("benchmark_fit_screen", &state_t::benchmark_fit_screen)
-        .def_readonly("benchmark_fit_active", &state_t::benchmark_fit_active)
-        .def_readonly("benchmark_kkt", &state_t::benchmark_kkt)
-        .def("solve", [](state_t& state) {
-            const auto check_user_interrupt = [&]() {
-                if (PyErr_CheckSignals() != 0) {
-                    throw py::error_already_set();
-                }
-            };
-            ad::optimization::nnqp::solve(state, check_user_interrupt);
-        })
-        ;
-}
+//template <class MatrixType>
+//void nnqp_basic(py::module_& m)
+//{
+//    using state_t = ad::optimization::StateNNQPBasic<MatrixType>;
+//    using matrix_t = typename state_t::matrix_t;
+//    using value_t = typename state_t::value_t;
+//    using vec_value_t = typename state_t::vec_value_t;
+//    using colmat_value_t = typename state_t::colmat_value_t;
+//    py::class_<state_t>(m, "StateNNQPBasic")
+//        .def(py::init<
+//            matrix_t&,
+//            value_t,
+//            const Eigen::Ref<const colmat_value_t>&,
+//            const Eigen::Ref<const vec_value_t>&,
+//            const Eigen::Ref<const vec_value_t>&,
+//            size_t,
+//            value_t,
+//            Eigen::Ref<vec_value_t>,
+//            Eigen::Ref<vec_value_t> 
+//        >(),
+//            py::arg("A"),
+//            py::arg("rho"),
+//            py::arg("Sigma"),
+//            py::arg("quad_diag"),
+//            py::arg("v"),
+//            py::arg("max_iters"),
+//            py::arg("tol"),
+//            py::arg("x"),
+//            py::arg("resid")
+//        )
+//        .def_readonly("time_elapsed", &state_t::time_elapsed)
+//        .def("solve", [](state_t& state) {
+//            using sw_t = ad::util::Stopwatch;
+//            auto& time_elapsed = state.time_elapsed;
+//            vec_value_t buff(state.Sigma.rows());
+//            sw_t sw;
+//            sw.start();
+//            ad::optimization::nnqp_basic(state, buff);
+//            time_elapsed = sw.elapsed();
+//        })
+//        ;
+//}
+//
+//template <class MatrixType>
+//void nnqp(py::module_& m)
+//{
+//    using state_t = ad::optimization::StateNNQP<MatrixType>;
+//    using matrix_t = typename state_t::matrix_t;
+//    using value_t = typename state_t::value_t;
+//    using vec_value_t = typename state_t::vec_value_t;
+//    using colmat_value_t = typename state_t::colmat_value_t;
+//    using rowarr_value_t = typename state_t::rowarr_value_t;
+//    py::class_<state_t>(m, "StateNNQP")
+//        .def(py::init<
+//            matrix_t&,
+//            value_t,
+//            value_t,
+//            const Eigen::Ref<const vec_value_t>&,
+//            const Eigen::Ref<const colmat_value_t>&,
+//            const Eigen::Ref<const vec_value_t>&,
+//            size_t,
+//            value_t,
+//            const std::string& 
+//        >(),
+//            py::arg("A"),
+//            py::arg("quad_c"),
+//            py::arg("quad_d"),
+//            py::arg("quad_alpha"),
+//            py::arg("quad_Sigma"),
+//            py::arg("linear_v"),
+//            py::arg("max_iters"),
+//            py::arg("tol"),
+//            py::arg("screen_rule")
+//        )
+//        .def_readonly("quad_c", &state_t::quad_c)
+//        .def_readonly("quad_d", &state_t::quad_d)
+//        .def_readonly("quad_alpha", &state_t::quad_alpha)
+//        .def_readonly("quad_Sigma", &state_t::quad_Sigma)
+//        .def_readonly("linear_v", &state_t::linear_v)
+//        .def_readonly("max_iters", &state_t::max_iters)
+//        .def_readonly("tol", &state_t::tol)
+//        .def_readonly("iters", &state_t::iters)
+//        .def_readonly("A", &state_t::A)
+//        .def_readonly("screen_hashset", &state_t::screen_hashset)
+//        .def_readonly("screen_set", &state_t::screen_set)
+//        .def_readonly("screen_beta", &state_t::screen_beta)
+//        .def_readonly("screen_is_active", &state_t::screen_is_active)
+//        .def_readonly("screen_vars", &state_t::screen_vars)
+//        .def_property_readonly("screen_ASigma", [](const state_t& state) {
+//            return Eigen::Map<const rowarr_value_t>(
+//                state.screen_ASigma.data(),
+//                state.screen_set.size(),
+//                state.quad_Sigma.cols()
+//            );
+//        })
+//        .def_readonly("active_set", &state_t::active_set)
+//        .def_readonly("resid_A", &state_t::resid_A)
+//        .def_readonly("resid_alpha", &state_t::resid_alpha)
+//        .def_readonly("grad", &state_t::grad)
+//        .def_readonly("benchmark_screen", &state_t::benchmark_screen)
+//        .def_readonly("benchmark_invariance", &state_t::benchmark_invariance)
+//        .def_readonly("benchmark_fit_screen", &state_t::benchmark_fit_screen)
+//        .def_readonly("benchmark_fit_active", &state_t::benchmark_fit_active)
+//        .def_readonly("benchmark_kkt", &state_t::benchmark_kkt)
+//        .def("solve", [](state_t& state) {
+//            const auto check_user_interrupt = [&]() {
+//                if (PyErr_CheckSignals() != 0) {
+//                    throw py::error_already_set();
+//                }
+//            };
+//            ad::optimization::nnqp::solve(state, check_user_interrupt);
+//        })
+//        ;
+//}
 
 void register_optimization(py::module_& m)
 {
@@ -282,67 +396,11 @@ void register_optimization(py::module_& m)
     t_star : float
         The argmin of the minimization problem.
     )delimiter");
-    m.def("nnls_cov_full", &nnls_cov_full, R"delimiter(
-    Solves the non-negative least squares (NNLS) problem
-    with a full quadratic component.
 
-    The non-negative least squares problem is given by
+    nnqp_full<ad::util::colmat_type<double>>(m, "StateNNQPFull");
+    nnls<ad::util::colmat_type<double>>(m, "StateNNLS");
 
-    .. math::
-        \begin{align*}
-            \mathrm{minimize}_{x \geq 0} 
-            \frac{1}{2} x^\top Q x - v^\top x
-        \end{align*}
-
-    where :math:`Q` is a dense positive semi-definite matrix.
-
-    Parameters
-    ----------
-    x : (d,) np.ndarray
-        Initial starting value.
-    quad : (d, d) np.ndarray
-        Full positive semi-definite dense matrix :math:`Q`.
-    linear : (d,) np.ndarray 
-        Linear component :math:`v`.
-    max_iters : int
-        Maximum number of coordinate descent iterations.
-    tol : float
-        Convergence tolerance.
-    dtol : float
-        Difference tolerance at each coordinate update.
-        If the absolute difference is below this value,
-        then the update does not take place, which saves computation.
-    )delimiter");
-    m.def("nnls_naive", &nnls_naive, R"delimiter(
-    Solves the non-negative least squares (NNLS) problem
-    in the regression form.
-
-    The non-negative least squares problem in the regression form is given by
-
-    .. math::
-        \begin{align*}
-            \mathrm{minimize}_{\beta \geq 0} 
-            \frac{1}{2} \|y - X\beta\|_2^2
-        \end{align*}
-
-    Parameters
-    ----------
-    beta0 : (d,) np.ndarray
-        Initial starting value.
-    X : (n, d) np.ndarray
-        Feature matrix.
-    y : (n,) np.ndarray
-        Response vector.
-    max_iters : int
-        Maximum number of coordinate descent iterations.
-    tol : float
-        Convergence tolerance.
-    dtol : float
-        Difference tolerance at each coordinate update.
-        If the absolute difference is below this value,
-        then the update does not take place, which saves computation.
-    )delimiter");
-
-    matrix_constraint_dense(m);
-    nnqp<MatrixConstraintDense>(m);
+    //matrix_constraint_dense(m);
+    //nnqp<MatrixConstraintDense>(m);
+    //nnqp_basic<MatrixConstraintDense>(m);
 }

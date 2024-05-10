@@ -64,7 +64,7 @@ def test_symmetric_penalty():
             test(n, seed)
 
 
-def test_nnls_cov_full():
+def test_nnqp_full():
     def run_cvxpy(quad, linear):
         d = quad.shape[0]
         x = cp.Variable(d)
@@ -84,26 +84,23 @@ def test_nnls_cov_full():
         y = np.random.normal(0, 1, n)
         X /= np.sqrt(n)
         y /= np.sqrt(n)
-        quad = X.T @ X
+        quad = np.asfortranarray(X.T @ X)
         linear = X.T @ y
 
         x_cvxpy = run_cvxpy(quad, linear)
 
-        x0 = np.zeros(d)
-        out = opt.nnls_cov_full(
-            x0, quad, linear, 1000000, 1e-24, 0,
-        )
-        x = out["x"]
+        x = np.zeros(d)
+        grad = linear.copy()
+        state = opt.StateNNQPFull(quad, 1000000, 1e-24, 0, x, grad)
+        state.solve()
 
         # test loss against truth
         loss_actual = objective(x, quad, linear)
         loss_expected = objective(x_cvxpy, quad, linear)
         assert np.allclose(loss_actual, loss_expected)
-        loss_actual = out["loss"]
-        assert np.allclose(loss_actual, loss_expected)
 
         # test gradient
-        grad_actual = out["grad"]
+        grad_actual = state.grad
         grad_expected = linear - quad @ x
         assert np.allclose(grad_actual, grad_expected)
 
@@ -114,7 +111,7 @@ def test_nnls_cov_full():
             test(d, seed)
 
 
-def test_nnls_naive():
+def test_nnls():
     def run_cvxpy(X, y):
         d = X.shape[1]
         x = cp.Variable(d)
@@ -131,27 +128,29 @@ def test_nnls_naive():
         np.random.seed(seed)
         n = 10
         X = np.random.normal(0, 1, (n, d))
+        X = np.asfortranarray(X)
         y = np.random.normal(0, 1, n)
         X /= np.sqrt(n)
         y /= np.sqrt(n)
 
         x_cvxpy = run_cvxpy(X, y)
 
-        x0 = np.zeros(d)
-        out = opt.nnls_naive(
-            x0, X, y, 1000000, 1e-24, 0,
-        )
-        x = out["x"]
+        x = np.zeros(d)
+        X_vars = np.sum(X ** 2, axis=0)
+        resid = y.copy()
+        loss = 0.5 * np.sum(resid ** 2)
+        state = opt.StateNNLS(X, X_vars, 1000000, 1e-24, 0, x, resid, loss)
+        state.solve()
 
         # test loss against truth
         loss_actual = objective(x, X, y)
         loss_expected = objective(x_cvxpy, X, y)
         assert np.allclose(loss_actual, loss_expected)
-        loss_actual = out["loss"]
+        loss_actual = state.loss
         assert np.allclose(loss_actual, loss_expected)
 
         # test residual
-        resid_actual = out["resid"]
+        resid_actual = resid
         resid_expected = y - X @ x
         assert np.allclose(resid_actual, resid_expected)
 
