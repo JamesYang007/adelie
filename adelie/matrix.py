@@ -440,8 +440,10 @@ def dense(
 def interaction(
     mat: np.ndarray,
     intr_map: dict,
-    *,
     levels: np.ndarray =None,
+    *,
+    centers: np.ndarray =None,
+    scales: np.ndarray =None,
     n_threads: int =1,
 ):
     """Creates a viewer of a matrix with pairwise interactions.
@@ -452,7 +454,7 @@ def interaction(
     We assume :math:`Z` contains, in general, a combination of
     continuous and discrete features (as columns).
     Denote :math:`L : \\{1,\\ldots, d\\} \\to \\mathbb{N}` as
-    the mapping that maps each feature index of :math:`Z` to the number of levels of that feature,
+    the mapping that maps each feature index of :math:`Z` to the number of levels of that feature
     where a value of :math:`0` means the feature is continuous
     and otherwise means it is discrete with that many levels (or categories).
     Let :math:`S \\subseteq \\{1,\\ldots, d\\}^2` denote the set of
@@ -460,19 +462,15 @@ def interaction(
     A pair is *valid* if the two values are not equal.
     We define uniqueness up to ordering so that :math:`(x,y)` and :math:`(y,x)` are considered the same pairs.
     Finally, for each pair :math:`(i, j) \\in S`,
-    define the interaction term :math:`X_{i:j}` as
+    define the interaction term :math:`Z_{i:j}` as
 
     .. math::
         \\begin{align*}
-            X_{i:j}
+            Z_{i:j}
             &:=
             \\begin{cases}
                 \\begin{bmatrix}
-                    \\mathbf{1} & Z_{i}
-                \\end{bmatrix}
-                \\star
-                \\begin{bmatrix}
-                    \\mathbf{1} & Z_{j}
+                    Z_{i} & Z_{j} & Z_i \odot Z_j
                 \\end{bmatrix}
                 ,& L(i) = 0, L(j) = 0 \\\\
                 \\begin{bmatrix}
@@ -513,10 +511,14 @@ def interaction(
             \\end{bmatrix}
         \\end{align*}
 
-    Then, :math:`X` is defined as the column-wise concatenation of :math:`X_{i:j}`.
+    Then, if :math:`\\tilde{X}` is defined as the column-wise concatenation of :math:`Z_{i:j}`
+    in lexicographical order of :math:`(i,j) \\in S`,
+    :math:`X` is the column-wise centered and scaled version of :math:`\\tilde{X}` 
+    using ``centers`` and ``scales``, respectively.
 
     .. note::
-        Every discrete feature of `Z` *must* take on values in the range :math:`[0, \\ell)`
+        Every discrete feature of `Z` *must* take on values in the set 
+        :math:`\\{0, \ldots, \\ell-1\\}`
         where :math:`\\ell` is the number of levels for that feature.
 
     .. note::
@@ -531,7 +533,8 @@ def interaction(
         to a list of (column) indices to pair with.
         If the value of a key-value pair is ``None``,
         then every column is paired with the key.
-        Internally, only valid and unique (as defined above) pairs are registered.
+        Internally, only valid and unique (as defined above) pairs are registered
+        to construct :math:`S`.
         Moreover, the pairs are stored in lexicographical order of ``(key, val)``
         for each ``val`` in ``intr_map[key]`` and for each ``key``.
     levels : (d,) np.ndarray, optional
@@ -541,6 +544,18 @@ def interaction(
         that many levels (or categories).
         If ``None``, it is initialized to be ``np.zeros(d)``
         so that every column is a continuous variable.
+        Default is ``None``.
+    centers : (p,) np.ndarray, optional
+        The centers for each column used to construct :math:`X`.
+        If ``None``, they are computed as the column-wise mean of :math:`\\tilde{X}`
+        for columns of the form :math:`Z_i \odot Z_j` between two continuous features 
+        and otherwise zero.
+        Default is ``None``.
+    scales : (p,) np.ndarray, optional
+        The scales for each column used to construct :math:`X`.
+        If ``None``, they are computed as the column-wise :math:`\\ell_2` norm of :math:`\\tilde{X}`
+        for columns of the form :math:`Z_i \odot Z_j` between two continuous features *after centering by* ``centers``
+        and otherwise one.
         Default is ``None``.
     n_threads : int, optional
         Number of threads.
@@ -615,12 +630,17 @@ def interaction(
         raise ValueError("No valid pairs exist. There must be at least one valid pair.")
     pairs = np.array(pairs, dtype=np.int32)
 
+    if centers is None:
+        centers = np.empty(0)
+    if scales is None:
+        scales = np.empty(0)
+
     class _interaction(core_base, py_base):
         def __init__(self):
             self.mat = mat
             self.pairs = pairs
             self.levels = np.array(levels, copy=False, dtype=np.int32)
-            core_base.__init__(self, self.mat, self.pairs, self.levels, n_threads)
+            core_base.__init__(self, self.mat, self.pairs, self.levels, centers, scales, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         
     return _interaction()
