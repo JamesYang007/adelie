@@ -65,7 +65,9 @@ void update_screen_derived(
         X.cov(g, gs, weights_sqrt, XiTXi, Xi);
 
         if (intercept) {
-            XiTXi.noalias() -= Xi_means.matrix().transpose() * Xi_means.matrix();
+            auto XiTXi_lower = XiTXi.template selfadjointView<Eigen::Lower>();
+            XiTXi_lower.rankUpdate(Xi_means.matrix().transpose(), -1);
+            XiTXi.template triangularView<Eigen::Upper>() = XiTXi.transpose();
         }
 
         if (gs == 1) {

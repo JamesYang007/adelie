@@ -10,6 +10,27 @@ import numpy as np
 import warnings
 
 
+def _coerce_dtype(y, dtype):
+    dtype_map = {
+        np.dtype("float32"): np.float32,
+        np.dtype("float64"): np.float64,
+    }
+    valid_dtypes = list(dtype_map.keys())
+    y = np.array(y, order="C")
+    if dtype is None:
+        if not (y.dtype in valid_dtypes):
+            raise RuntimeError(
+                "y must have an underlying type of np.float32 or np.float64, "
+                "or dtype must be explicitly specified."
+            )
+        dtype = dtype_map[y.dtype]
+    else:
+        if not (dtype in valid_dtypes):
+            raise RuntimeError("dtype must be either np.float32 or np.float64.")
+    y = y.astype(dtype)
+    return y, dtype
+
+
 class glm_base:
     """Base wrapper GLM class.
 
@@ -19,8 +40,8 @@ class glm_base:
     """
     def __init__(self, y, weights, core_base, dtype):
         self.core_base = core_base
+        self.y = y
         self.dtype = dtype
-        self.y = np.array(y, order="C", dtype=dtype)
         if len(y.shape) != 1:
             raise RuntimeError("y must be 1-dimensional.")
         n = y.shape[0]
@@ -45,8 +66,8 @@ class multiglm_base:
     """
     def __init__(self, y, weights, core_base, dtype):
         self.core_base = core_base
+        self.y = y
         self.dtype = dtype
-        self.y = np.array(y, order="C", dtype=dtype)
         if len(y.shape) != 2:
             raise RuntimeError("y must be 2-dimensional.")
         n = y.shape[0]
@@ -67,7 +88,7 @@ def binomial(
     *,
     weights: np.ndarray =None,
     link: str ="logit",
-    dtype: Union[np.float32, np.float64] =np.float64,
+    dtype: Union[np.float32, np.float64] =None,
 ):
     """Creates a Binomial GLM family object.
 
@@ -117,7 +138,10 @@ def binomial(
         Default is ``"logit"``.
     dtype : Union[np.float32, np.float64], optional
         The underlying data type.
-        Default is ``np.float64``.
+        If ``None``, it is inferred from ``y``,
+        in which case ``y`` must have an underlying data type of
+        ``np.float32`` or ``np.float64``.
+        Default is ``None``.
 
     Returns
     -------
@@ -138,6 +162,8 @@ def binomial(
             np.float32: core.glm.GlmBinomialProbit32,
         },
     }
+
+    y, dtype = _coerce_dtype(y, dtype)
 
     core_base = dispatcher[link][dtype]
 
@@ -160,7 +186,7 @@ def cox(
     *,
     weights: np.ndarray =None,
     tie_method: str ="efron",
-    dtype: Union[np.float32, np.float64] =np.float64,
+    dtype: Union[np.float32, np.float64] =None,
 ):
     """Creates a Cox GLM family object.
 
@@ -234,7 +260,10 @@ def cox(
         Default is ``"efron"``.
     dtype : Union[np.float32, np.float64], optional
         The underlying data type.
-        Default is ``np.float64``.
+        If ``None``, it is inferred from ``status``,
+        in which case ``status`` must have an underlying data type of
+        ``np.float32`` or ``np.float64``.
+        Default is ``None``.
 
     Returns
     -------
@@ -249,6 +278,8 @@ def cox(
         np.float64: core.glm.GlmCox64,
         np.float32: core.glm.GlmCox32,
     }
+
+    status, dtype = _coerce_dtype(status, dtype)
 
     core_base = dispatcher[dtype]
 
@@ -286,7 +317,7 @@ def gaussian(
     y: np.ndarray,
     *,
     weights: np.ndarray =None,
-    dtype: Union[np.float32, np.float64] =np.float64,
+    dtype: Union[np.float32, np.float64] =None,
     opt: bool =True,
 ):
     """Creates a Gaussian GLM family object.
@@ -312,7 +343,10 @@ def gaussian(
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
     dtype : Union[np.float32, np.float64], optional
         The underlying data type.
-        Default is ``np.float64``.
+        If ``None``, it is inferred from ``y``,
+        in which case ``y`` must have an underlying data type of
+        ``np.float32`` or ``np.float64``.
+        Default is ``None``.
     opt : bool, optional
         If ``True``, an optimized routine is used when passed into ``adelie.grpnet``.
         Otherwise, a general routine with IRLS is used.
@@ -334,6 +368,8 @@ def gaussian(
         np.float32: core.glm.GlmGaussian32,
     }
 
+    y, dtype = _coerce_dtype(y, dtype)
+
     core_base = dispatcher[dtype]
 
     class _gaussian(glm_base, core_base):
@@ -353,7 +389,7 @@ def multigaussian(
     y: np.ndarray,
     *,
     weights: np.ndarray =None,
-    dtype: Union[np.float32, np.float64] =np.float64,
+    dtype: Union[np.float32, np.float64] =None,
     opt: bool =True,
 ):
     """Creates a Multi-response Gaussian GLM family object.
@@ -382,7 +418,10 @@ def multigaussian(
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
     dtype : Union[np.float32, np.float64], optional
         The underlying data type.
-        Default is ``np.float64``.
+        If ``None``, it is inferred from ``y``,
+        in which case ``y`` must have an underlying data type of
+        ``np.float32`` or ``np.float64``.
+        Default is ``None``.
     opt : bool, optional
         If ``True``, an optimized routine is used when passed into ``adelie.grpnet``.
         Otherwise, a general routine with IRLS is used.
@@ -404,6 +443,8 @@ def multigaussian(
         np.float32: core.glm.GlmMultiGaussian32,
     }
 
+    y, dtype = _coerce_dtype(y, dtype)
+
     core_base = dispatcher[dtype]
 
     class _multigaussian(multiglm_base, core_base):
@@ -423,7 +464,7 @@ def multinomial(
     y: np.ndarray,
     *,
     weights: np.ndarray =None,
-    dtype: Union[np.float32, np.float64] =np.float64,
+    dtype: Union[np.float32, np.float64] =None,
 ):
     """Creates a Multinomial GLM family object.
 
@@ -461,7 +502,10 @@ def multinomial(
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
     dtype : Union[np.float32, np.float64], optional
         The underlying data type.
-        Default is ``np.float64``.
+        If ``None``, it is inferred from ``y``,
+        in which case ``y`` must have an underlying data type of
+        ``np.float32`` or ``np.float64``.
+        Default is ``None``.
 
     Returns
     -------
@@ -476,6 +520,8 @@ def multinomial(
         np.float64: core.glm.GlmMultinomial64,
         np.float32: core.glm.GlmMultinomial32,
     }
+
+    y, dtype = _coerce_dtype(y, dtype)
 
     core_base = dispatcher[dtype]
 
@@ -495,7 +541,7 @@ def poisson(
     y: np.ndarray,
     *,
     weights: np.ndarray =None,
-    dtype: Union[np.float32, np.float64] =np.float64,
+    dtype: Union[np.float32, np.float64] =None,
 ):
     """Creates a Poisson GLM family object.
 
@@ -522,7 +568,10 @@ def poisson(
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
     dtype : Union[np.float32, np.float64], optional
         The underlying data type.
-        Default is ``np.float64``.
+        If ``None``, it is inferred from ``y``,
+        in which case ``y`` must have an underlying data type of
+        ``np.float32`` or ``np.float64``.
+        Default is ``None``.
 
     Returns
     -------
@@ -537,6 +586,8 @@ def poisson(
         np.float64: core.glm.GlmPoisson64,
         np.float32: core.glm.GlmPoisson32,
     }
+
+    y, dtype = _coerce_dtype(y, dtype)
 
     core_base = dispatcher[dtype]
 
