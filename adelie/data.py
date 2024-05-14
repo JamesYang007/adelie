@@ -54,7 +54,7 @@ def _sample_y(
         s = np.round(np.random.exponential(1, n))
         t = 1 + s + np.round(np.exp(eta / noise_scale + np.random.normal(0, 1, n)))
         C = 1 + s + np.round(np.exp(np.random.normal(0, 1, n)))
-        d = t < C
+        d = (t < C).astype(eta.dtype)
         t = np.minimum(t, C)
         return cox(
             start=s,
