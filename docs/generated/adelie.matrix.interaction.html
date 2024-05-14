@@ -464,7 +464,7 @@ document.write(`
 <h1>adelie.matrix.interaction<a class="headerlink" href="#adelie-matrix-interaction" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.matrix.interaction">
-<span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">interaction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intr_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/matrix.py#L440-L626"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.matrix.interaction" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">interaction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intr_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/matrix.py#L440-L646"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.matrix.interaction" title="Link to this definition">#</a></dt>
 <dd><p>Creates a viewer of a matrix with pairwise interactions.</p>
 <p>This matrix <span class="math notranslate nohighlight">\(X \in \mathbb{R}^{n\times p}\)</span> represents pairwise interaction terms
 within a given base matrix <span class="math notranslate nohighlight">\(Z \in \mathbb{R}^{n\times d}\)</span> 
@@ -472,7 +472,7 @@ where the interaction structure is defined as follows.
 We assume <span class="math notranslate nohighlight">\(Z\)</span> contains, in general, a combination of
 continuous and discrete features (as columns).
 Denote <span class="math notranslate nohighlight">\(L : \{1,\ldots, d\} \to \mathbb{N}\)</span> as
-the mapping that maps each feature index of <span class="math notranslate nohighlight">\(Z\)</span> to the number of levels of that feature,
+the mapping that maps each feature index of <span class="math notranslate nohighlight">\(Z\)</span> to the number of levels of that feature
 where a value of <span class="math notranslate nohighlight">\(0\)</span> means the feature is continuous
 and otherwise means it is discrete with that many levels (or categories).
 Let <span class="math notranslate nohighlight">\(S \subseteq \{1,\ldots, d\}^2\)</span> denote the set of
@@ -480,18 +480,14 @@ valid and unique pairs of feature indices of <span class="math notranslate nohig
 A pair is <em>valid</em> if the two values are not equal.
 We define uniqueness up to ordering so that <span class="math notranslate nohighlight">\((x,y)\)</span> and <span class="math notranslate nohighlight">\((y,x)\)</span> are considered the same pairs.
 Finally, for each pair <span class="math notranslate nohighlight">\((i, j) \in S\)</span>,
-define the interaction term <span class="math notranslate nohighlight">\(X_{i:j}\)</span> as</p>
+define the interaction term <span class="math notranslate nohighlight">\(Z_{i:j}\)</span> as</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{align*}
-    X_{i:j}
+    Z_{i:j}
     &amp;:=
     \begin{cases}
         \begin{bmatrix}
-            \mathbf{1} &amp; Z_{i}
-        \end{bmatrix}
-        \star
-        \begin{bmatrix}
-            \mathbf{1} &amp; Z_{j}
+            Z_{i} &amp; Z_{j} &amp; Z_i \odot Z_j
         \end{bmatrix}
         ,&amp; L(i) = 0, L(j) = 0 \\
         \begin{bmatrix}
@@ -529,10 +525,14 @@ and for any two matrices <span class="math notranslate nohighlight">\(A \in \mat
         \cdots
     \end{bmatrix}
 \end{align*}\]</div>
-<p>Then, <span class="math notranslate nohighlight">\(X\)</span> is defined as the column-wise concatenation of <span class="math notranslate nohighlight">\(X_{i:j}\)</span>.</p>
+<p>Then, if <span class="math notranslate nohighlight">\(\tilde{X}\)</span> is defined as the column-wise concatenation of <span class="math notranslate nohighlight">\(Z_{i:j}\)</span>
+in lexicographical order of <span class="math notranslate nohighlight">\((i,j) \in S\)</span>,
+<span class="math notranslate nohighlight">\(X\)</span> is the column-wise centered and scaled version of <span class="math notranslate nohighlight">\(\tilde{X}\)</span> 
+using <code class="docutils literal notranslate"><span class="pre">centers</span></code> and <code class="docutils literal notranslate"><span class="pre">scales</span></code>, respectively.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Every discrete feature of <cite>Z</cite> <em>must</em> take on values in the range <span class="math notranslate nohighlight">\([0, \ell)\)</span>
+<p>Every discrete feature of <cite>Z</cite> <em>must</em> take on values in the set 
+<span class="math notranslate nohighlight">\(\{0, \ldots, \ell-1\}\)</span>
 where <span class="math notranslate nohighlight">\(\ell\)</span> is the number of levels for that feature.</p>
 </div>
 <div class="admonition note">
@@ -548,7 +548,8 @@ where <span class="math notranslate nohighlight">\(\ell\)</span> is the number o
 to a list of (column) indices to pair with.
 If the value of a key-value pair is <code class="docutils literal notranslate"><span class="pre">None</span></code>,
 then every column is paired with the key.
-Internally, only valid and unique (as defined above) pairs are registered.
+Internally, only valid and unique (as defined above) pairs are registered
+to construct <span class="math notranslate nohighlight">\(S\)</span>.
 Moreover, the pairs are stored in lexicographical order of <code class="docutils literal notranslate"><span class="pre">(key,</span> <span class="pre">val)</span></code>
 for each <code class="docutils literal notranslate"><span class="pre">val</span></code> in <code class="docutils literal notranslate"><span class="pre">intr_map[key]</span></code> and for each <code class="docutils literal notranslate"><span class="pre">key</span></code>.</p>
 </dd>
@@ -558,6 +559,18 @@ whereas a positive value indicates that it is a discrete variable with
 that many levels (or categories).
 If <code class="docutils literal notranslate"><span class="pre">None</span></code>, it is initialized to be <code class="docutils literal notranslate"><span class="pre">np.zeros(d)</span></code>
 so that every column is a continuous variable.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+<dt><strong>centers</strong><span class="classifier">(p,) np.ndarray, optional</span></dt><dd><p>The centers for each column used to construct <span class="math notranslate nohighlight">\(X\)</span>.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, they are computed as the column-wise mean of <span class="math notranslate nohighlight">\(\tilde{X}\)</span>
+for columns of the form <span class="math notranslate nohighlight">\(Z_i \odot Z_j\)</span> between two continuous features 
+and otherwise zero.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+<dt><strong>scales</strong><span class="classifier">(p,) np.ndarray, optional</span></dt><dd><p>The scales for each column used to construct <span class="math notranslate nohighlight">\(X\)</span>.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, they are computed as the column-wise <span class="math notranslate nohighlight">\(\ell_2\)</span> norm of <span class="math notranslate nohighlight">\(\tilde{X}\)</span>
+for columns of the form <span class="math notranslate nohighlight">\(Z_i \odot Z_j\)</span> between two continuous features <em>after centering by</em> <code class="docutils literal notranslate"><span class="pre">centers</span></code>
+and otherwise one.
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </dd>
 <dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
