@@ -595,21 +595,28 @@ void matrix_naive_interaction_dense(py::module_& m, const char* name)
     using dense_t = typename internal_t::dense_t;
     using rowarr_index_t = typename internal_t::rowarr_index_t;
     using vec_index_t = typename internal_t::vec_index_t;
+    using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, base_t>(m, name)
         .def(
             py::init<
                 const Eigen::Ref<const dense_t>&,
                 const Eigen::Ref<const rowarr_index_t>&,
                 const Eigen::Ref<const vec_index_t>&,
+                const Eigen::Ref<const vec_value_t>&,
+                const Eigen::Ref<const vec_value_t>&,
                 size_t 
             >(), 
             py::arg("mat").noconvert(),
             py::arg("pairs").noconvert(),
             py::arg("levels").noconvert(),
+            py::arg("centers").noconvert(),
+            py::arg("scales").noconvert(),
             py::arg("n_threads")
         )
         .def_property_readonly("groups", &internal_t::groups)
         .def_property_readonly("group_sizes", &internal_t::group_sizes)
+        .def_property_readonly("centers", &internal_t::centers)
+        .def_property_readonly("scales", &internal_t::scales)
         ;
 }
 

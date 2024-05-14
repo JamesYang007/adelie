@@ -334,7 +334,7 @@ def test_naive_interaction_dense():
             return np.array([np.ones(n), x]).T
         return np.array([x == k for k in range(level)]).T
 
-    def _create_dense(X, pairs, levels):
+    def _create_dense(X, pairs, levels, centers, scales):
         col_lst = []
         for pair in pairs:
             i0, i1 = pair[0], pair[1]
@@ -349,7 +349,8 @@ def test_naive_interaction_dense():
                 for j1 in range(Y1.shape[1]):
                     for j0 in range(Y0.shape[1]):
                         col_lst.append(Y0[:, j0] * Y1[:, j1])
-        return np.array(col_lst, dtype=dtype, order=order).T
+        X = np.array(col_lst, dtype=dtype, order=order).T
+        return (X - centers[None]) / scales[None]
 
     def _test(n, d, dtype, order, seed=0):
         np.random.seed(seed)
@@ -368,7 +369,12 @@ def test_naive_interaction_dense():
             else:
                 intr_map[j] = np.random.choice(d, size=d//2, replace=False)
         cX = mod.interaction(X, intr_map, levels=levels)
-        X = _create_dense(X, cX.pairs, levels)
+        centers = np.random.normal(0, 1, cX.shape[1])
+        scales = np.random.uniform(0, 1, cX.shape[1])
+        cX = mod.interaction(X, intr_map, levels=levels, centers=centers, scales=scales)
+        assert np.allclose(centers, cX.centers)
+        assert np.allclose(scales, cX.scales)
+        X = _create_dense(X, cX.pairs, levels, centers, scales)
         run_naive(X, cX, dtype)
 
     dtypes = [np.float64]
