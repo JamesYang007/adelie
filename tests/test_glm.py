@@ -211,7 +211,7 @@ def test_binomial():
         w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
         w[0] = 1
         w /= np.sum(w)
-        model = glm.binomial(y=y, weights=w, link=link)
+        model = glm.binomial(y=y, weights=w, link=link, dtype=np.float64)
         test_glm = {
             "logit": GlmTestBinomialLogit,
             "probit": GlmTestBinomialProbit,
@@ -221,7 +221,7 @@ def test_binomial():
 
         subset = w != 0
         y, w = y[subset], w[subset]
-        model_exp = glm.binomial(y=y, weights=w, link=link)
+        model_exp = glm.binomial(y=y, weights=w, link=link, dtype=np.float64)
         run_subset_test(model, model_exp, subset)
 
     links = ["logit", "probit"]
@@ -265,13 +265,13 @@ def test_poisson():
         w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
         w[0] = 1
         w /= np.sum(w)
-        model = glm.poisson(y=y, weights=w)
+        model = glm.poisson(y=y, weights=w, dtype=np.float64)
         model_exp = GlmTestPoisson(y=y, weights=w)
         run_common_test(model, model_exp)
 
         subset = w != 0
         y, w = y[subset], w[subset]
-        model_exp = glm.poisson(y=y, weights=w)
+        model_exp = glm.poisson(y=y, weights=w, dtype=np.float64)
         run_subset_test(model, model_exp, subset)
 
     ns = [1, 2, 5, 10, 20, 100]
@@ -622,6 +622,7 @@ def test_cox():
             stop=t,
             status=d,
             weights=w,
+            dtype=np.float64,
         )
         model_exp = GlmTestCox(
             start=s,
@@ -638,6 +639,7 @@ def test_cox():
             stop=t,
             status=d,
             weights=w,
+            dtype=np.float64,
         )
         run_subset_test(model, model_exp, subset)
 
@@ -740,13 +742,13 @@ def test_multinomial():
         w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
         w[0] = 1
         w /= np.sum(w)
-        model = glm.multinomial(y=y, weights=w)
+        model = glm.multinomial(y=y, weights=w, dtype=np.float64)
         model_exp = GlmTestMultinomial(y=y, weights=w)
         run_common_test(model, model_exp)
 
         subset = w != 0
         y, w = y[subset], w[subset]
-        model_exp = glm.multinomial(y=y, weights=w)
+        model_exp = glm.multinomial(y=y, weights=w, dtype=np.float64)
         run_subset_test(model, model_exp, subset)
 
     ns = [1, 2, 5, 10, 20, 100]
