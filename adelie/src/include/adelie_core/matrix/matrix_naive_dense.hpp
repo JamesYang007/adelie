@@ -151,7 +151,10 @@ public:
         );
 
         Eigen::setNbThreads(_n_threads);
-        out.noalias() = Xj.transpose() * Xj;
+        out.setZero();
+        auto out_lower = out.template selfadjointView<Eigen::Lower>();
+        out_lower.rankUpdate(Xj.transpose());
+        out.template triangularView<Eigen::Upper>() = out.transpose();
         Eigen::setNbThreads(1);
     }
 
