@@ -344,7 +344,7 @@ def concatenate(
     class _concatenate(core_base, py_base):
         def __init__(self):
             self.mats = mats
-            core_base.__init__(self, self.mats, n_threads)
+            core_base.__init__(self, self.mats)
             py_base.__init__(self, n_threads=n_threads)
 
     return _concatenate()
@@ -1285,7 +1285,8 @@ def subset(
     class _subset(core_base, py_base):
         def __init__(self):
             self.mat = mat
-            core_base.__init__(self, mat, indices, n_threads)
+            self.indices = np.array(indices, dtype=np.int32, copy=True)
+            core_base.__init__(self, mat, self.indices, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         
     return _subset()

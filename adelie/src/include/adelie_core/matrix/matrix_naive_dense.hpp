@@ -46,8 +46,9 @@ public:
     ) override
     {
         base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-        Eigen::Map<vec_value_t> vbuff(_buff.data(), _n_threads);
-        return ddot(_mat.col(j), (v * weights).matrix(), _n_threads, vbuff);
+        const size_t n_threads = 1; // DO NOT parallelize. Task too small usually.
+        Eigen::Map<vec_value_t> vbuff(_buff.data(), n_threads);
+        return ddot(_mat.col(j), (v * weights).matrix(), n_threads, vbuff);
     }
 
     void ctmul(
@@ -57,7 +58,8 @@ public:
     ) override
     {
         base_t::check_ctmul(j, out.size(), rows(), cols());
-        dvaddi(out, v * _mat.col(j).transpose().array(), _n_threads);
+        const size_t n_threads = 1; // DO NOT parallelize. Task too small usually.
+        dvaddi(out, v * _mat.col(j).transpose().array(), n_threads);
     }
 
     void bmul(
@@ -69,11 +71,12 @@ public:
     {
         base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
         auto outm = out.matrix();
-        dvveq(_vbuff, v * weights, _n_threads);
+        const size_t n_threads = 1; // DO NOT parallelize. Task too small usually.
+        _vbuff = v * weights;
         dgemv(
             _mat.middleCols(j, q),
             _vbuff.matrix(),
-            _n_threads,
+            n_threads,
             _buff,
             outm
         );
@@ -87,10 +90,11 @@ public:
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         auto outm = out.matrix();
+        const size_t n_threads = 1; // DO NOT parallelize. Task too small usually.
         dgemv<util::operator_type::_add>(
             _mat.middleCols(j, q).transpose(),
             v.matrix(),
-            _n_threads,
+            n_threads,
             _buff,
             outm
         );
@@ -103,7 +107,7 @@ public:
     ) override
     {
         auto outm = out.matrix();
-        dvveq(_vbuff, v * weights, _n_threads);
+        _vbuff = v * weights;
         dgemv(
             _mat,
             _vbuff.matrix(),
@@ -144,18 +148,12 @@ public:
         auto& Xj = buffer;
         
         auto Xj_array = Xj.array();
-        dmmeq(
-            Xj_array,
-            _mat.middleCols(j, q).array().colwise() * sqrt_weights.matrix().transpose().array(),
-            _n_threads
-        );
+        Xj_array = _mat.middleCols(j, q).array().colwise() * sqrt_weights.matrix().transpose().array();
 
-        Eigen::setNbThreads(_n_threads);
         out.setZero();
         auto out_lower = out.template selfadjointView<Eigen::Lower>();
         out_lower.rankUpdate(Xj.transpose());
         out.template triangularView<Eigen::Upper>() = out.transpose();
-        Eigen::setNbThreads(1);
     }
 
     void sp_btmul(
@@ -166,7 +164,33 @@ public:
         base_t::check_sp_btmul(
             v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
-        out.noalias() = v * _mat.transpose();
+        if (_n_threads <= 1) {
+            out.noalias() = v * _mat.transpose();
+            return;
+        }
+        sp_mat_value_t vc;
+        if (!v.isCompressed()) {
+            vc = v;
+            if (!vc.isCompressed()) vc.makeCompressed();
+        }
+        const sp_mat_value_t& v_ref = (vc.size() != 0) ? vc : v;
+
+        const auto outer = v_ref.outerIndexPtr();
+        const auto inner = v_ref.innerIndexPtr();
+        const auto value = v_ref.valuePtr();
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
+        for (int k = 0; k < v_ref.outerSize(); ++k) {
+            const Eigen::Map<const sp_mat_value_t> vk(
+                1,
+                v_ref.cols(),
+                outer[k+1] - outer[k],
+                outer + k,
+                inner,
+                value
+            );
+            auto out_k = out.row(k);
+            out_k.noalias() = vk * _mat.transpose();
+        };
     }
 };
 

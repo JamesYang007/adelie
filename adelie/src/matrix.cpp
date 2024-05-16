@@ -552,16 +552,15 @@ void matrix_naive_cconcatenate(py::module_& m, const char* name)
         "Core matrix class for naive column-wise concatenated matrix."
         )
         .def(
-            py::init([](py::list mat_list_py, size_t n_threads) {
+            py::init([](py::list mat_list_py) {
                 std::vector<base_t*> mat_list;
                 mat_list.reserve(mat_list_py.size());
                 for (auto obj : mat_list_py) {
                     mat_list.push_back(py::cast<base_t*>(obj));
                 }
-                return new internal_t(mat_list, n_threads);
+                return new internal_t(mat_list);
             }), 
-            py::arg("mat_list").noconvert(),
-            py::arg("n_threads")
+            py::arg("mat_list").noconvert()
         )
         ;
 }
@@ -575,16 +574,15 @@ void matrix_naive_rconcatenate(py::module_& m, const char* name)
         "Core matrix class for naive row-wise concatenated matrix."
         )
         .def(
-            py::init([](py::list mat_list_py, size_t n_threads) {
+            py::init([](py::list mat_list_py) {
                 std::vector<base_t*> mat_list;
                 mat_list.reserve(mat_list_py.size());
                 for (auto obj : mat_list_py) {
                     mat_list.push_back(py::cast<base_t*>(obj));
                 }
-                return new internal_t(mat_list, n_threads);
+                return new internal_t(mat_list);
             }), 
-            py::arg("mat_list").noconvert(),
-            py::arg("n_threads")
+            py::arg("mat_list").noconvert()
         )
         ;
 }

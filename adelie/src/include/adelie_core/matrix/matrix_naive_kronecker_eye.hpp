@@ -72,7 +72,8 @@ public:
         int i = j / _K;
         int l = j - _K * i;
         Eigen::Map<vec_value_t> _out(_buff.data(), Out.rows());
-        dvzero(_out, _n_threads);
+        const size_t n_threads = 1; // DO NOT parallelize. Task too small usually.
+        dvzero(_out, n_threads);
         _mat->ctmul(i, v, _out);
         Out.col(l).array() += _out;
     }
@@ -144,8 +145,23 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        // TODO: this can maybe be parallelized?
-        bmul(0, cols(), v, weights, out);
+        Eigen::Map<const rowmat_value_t> V(v.data(), rows() / _K, _K);
+        Eigen::Map<const rowmat_value_t> W(weights.data(), V.rows(), V.cols());
+        Eigen::Map<vec_value_t> _v(_buff.data(), V.rows());
+        Eigen::Map<vec_value_t> _w(_buff.data() + V.rows(), V.rows());
+        const auto p = _mat->cols();
+        for (int l = 0; l < _K; ++l) {
+            _v = V.col(l);
+            _w = W.col(l);
+            Eigen::Map<vec_value_t> _out(
+                _buff.data() + 2 * V.rows(),
+                p
+            );
+            _mat->mul(_v, _w, _out);
+            for (int i = 0; i < p; ++i){
+                out[i*_K+l] = _out[i];
+            }
+        }
     }
 
     void cov(
@@ -309,8 +325,9 @@ public:
         Eigen::Map<const rowmat_value_t> W(weights.data(), V.rows(), V.cols());
         const int i = j / _K;
         const int l = j - _K * i;
-        Eigen::Map<vec_value_t> vbuff(_buff.data(), _n_threads);
-        return ddot(V.col(l).cwiseProduct(W.col(l)), _mat.col(i), _n_threads, vbuff);
+        const size_t n_threads = 1; // DO NOT parallelize. Task too small usually.
+        Eigen::Map<vec_value_t> vbuff(_buff.data(), n_threads);
+        return ddot(V.col(l).cwiseProduct(W.col(l)), _mat.col(i), n_threads, vbuff);
     }
 
     void ctmul(
@@ -324,7 +341,8 @@ public:
         const int i = j / _K;
         const int l = j - _K * i;
         auto _out = Out.col(l);
-        dvaddi(_out, v * _mat.col(i), _n_threads);
+        const size_t n_threads = 1; // DO NOT parallelize. Task too small usually.
+        dvaddi(_out, v * _mat.col(i), n_threads);
     }
 
     void bmul(
@@ -335,7 +353,8 @@ public:
     ) override
     {
         base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-        dvveq(_vbuff, v * weights, _n_threads);
+        const size_t n_threads = 1; // DO NOT parallelize. Task too small usually.
+        dvveq(_vbuff, v * weights, n_threads);
         Eigen::Map<const rowmat_value_t> VW(_vbuff.data(), rows() / _K, _K);
         int n_processed = 0;
         while (n_processed < q) {
@@ -346,7 +365,7 @@ public:
             dgemv(
                 VW.middleCols(l, size), 
                 _mat.col(i).transpose(), 
-                _n_threads, 
+                n_threads, 
                 _buff, 
                 _out
             );
@@ -368,10 +387,7 @@ public:
             const int l = (j + n_processed) - _K * i;
             const int size = std::min<int>(_K-l, q-n_processed);
             Eigen::Map<const vec_value_t> _v(v.data() + n_processed, size);
-            for (int k = 0; k < size; ++k) {
-                auto _out = Out.col(l+k);
-                dvaddi(_out, _v[k] * _mat.col(i), _n_threads);
-            }
+            Out.middleCols(l, size) += _mat.col(i) * _v.matrix();
             n_processed += size;
         }
     }
@@ -383,7 +399,7 @@ public:
     ) override
     {
         base_t::check_bmul(0, cols(), v.size(), weights.size(), out.size(), rows(), cols());
-        dvveq(_vbuff, v * weights, _n_threads);
+        dvveq(_vbuff, v * weights, 1);
         Eigen::Map<const rowmat_value_t> VW(_vbuff.data(), rows() / _K, _K);
         Eigen::Map<rowmat_value_t> Out(out.data(), cols() / _K, _K);
         Eigen::setNbThreads(_n_threads);
@@ -403,6 +419,7 @@ public:
             out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
             rows(), cols()
         );
+        const size_t n_threads = 1; // DO NOT parallelize. Task too small usually.
         Eigen::Map<const rowmat_value_t> sqrt_W(sqrt_weights.data(), rows() / _K, _K);
         out.setZero(); // do NOT parallelize!
         for (int l = 0; l < _K; ++l) {
@@ -413,25 +430,25 @@ public:
             const auto i_q = i_end - i_begin;
             if (i_q <= 0) continue;
 
-            auto buff = buffer.topLeftCorner(_mat.rows(), i_q);
-            auto buff_array = buff.array();
+            Eigen::Map<colmat_value_t> sqrt_WX(buffer.data(), _mat.rows(), i_q);
+            auto sqrt_WX_array = sqrt_WX.array();
             dmmeq(
-                buff_array,
+                sqrt_WX_array,
                 _mat.middleCols(i_begin, i_q).array().colwise() * sqrt_W.col(l).array(),
-                _n_threads
+                n_threads
             );
+
+            if (_vbuff.size() < i_q * i_q) _vbuff.resize(i_q * i_q);
+            Eigen::Map<colmat_value_t> XTWX(_vbuff.data(), i_q, i_q);
+            XTWX.setZero();
+            XTWX.template selfadjointView<Eigen::Lower>().rankUpdate(sqrt_WX.transpose());
             for (int i1 = 0; i1 < i_q; ++i1) {
                 for (int i2 = 0; i2 <= i1; ++i2) {
-                    out((i1+i_begin)*_K+l-j, (i2+i_begin)*_K+l-j) = (
-                        buff.col(i1).dot(buff.col(i2))
-                    );
-                }
-            }
-            for (int i1 = 0; i1 < i_q; ++i1) {
-                for (int i2 = i1 + 1; i2 < i_q; ++i2) {
                     const auto fi1 = (i1+i_begin)*_K+l-j;
                     const auto fi2 = (i2+i_begin)*_K+l-j;
-                    out(fi1, fi2) = out(fi2, fi1);
+                    const auto val = XTWX(i1, i2);
+                    out(fi1, fi2) = val;
+                    out(fi2, fi1) = val;
                 }
             }
         }
@@ -483,20 +500,36 @@ public:
                 values.data()
             );
 
-            _out.noalias() = _v * _mat.transpose();
-
             const auto routine = [&](int k) {
                 Eigen::Map<rowmat_value_t> out_k(
                     out.row(k).data(), _out.cols(), _K                
                 );
                 out_k.col(l) = _out.row(k);
             };
+
             if (_n_threads <= 1) {
-                for (int k = 0; k < out.rows(); ++k) routine(k);
-            } else {
-                #pragma omp parallel for schedule(static) num_threads(_n_threads)
-                for (int k = 0; k < out.rows(); ++k) routine(k);
+                _out.noalias() = _v * _mat.transpose();
+                for (int k = 0; k < _v.outerSize(); ++k) routine(k);
+                continue;
             }
+
+            const auto outer = _v.outerIndexPtr();
+            const auto inner = _v.innerIndexPtr();
+            const auto value = _v.valuePtr();
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int k = 0; k < _v.outerSize(); ++k) {
+                const Eigen::Map<const sp_mat_value_t> vk(
+                    1,
+                    _v.cols(),
+                    outer[k+1] - outer[k],
+                    outer + k,
+                    inner,
+                    value
+                );
+                auto out_k = _out.row(k);
+                out_k.noalias() = vk * _mat.transpose();
+                routine(k);
+            };
         }
     }
 };
