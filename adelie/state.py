@@ -370,7 +370,7 @@ def gaussian_pin_naive(
     newton_max_iters: int =1000,
     n_threads: int =1,
 ):
-    """Creates a gaussian, pin, naive method state object.
+    """Creates a Gaussian, pin, naive method state object.
 
     Define the following quantities:
 
@@ -663,7 +663,7 @@ def gaussian_pin_cov(
     newton_max_iters: int =1000,
     n_threads: int =1,
 ):
-    """Creates a gaussian pin covariance method state object.
+    """Creates a Gaussian, pin, covariance method state object.
 
     Define the following quantities:
 
@@ -1052,7 +1052,7 @@ def gaussian_cov(
     pivot_subset_min: int =1,
     pivot_slack_ratio: float =1.25,
 ):
-    """Creates a gaussian, covariance method state object.
+    """Creates a Gaussian, covariance method state object.
 
     Parameters
     ----------
@@ -1586,7 +1586,7 @@ def gaussian_naive(
     pivot_subset_min: int =1,
     pivot_slack_ratio: float =1.25,
 ):
-    """Creates a gaussian, naive method state object.
+    """Creates a Gaussian, naive method state object.
 
     Define the following quantities:
 
@@ -1920,7 +1920,7 @@ def multigaussian_naive(
     pivot_subset_min: int =1,
     pivot_slack_ratio: float =1.25,
 ):
-    """Creates a multi-gaussian, naive method state object.
+    """Creates a MultiGaussian, naive method state object.
 
     Define the following quantities: 
 

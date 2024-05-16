@@ -119,24 +119,24 @@ void glm_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&
         >(),
             py::arg("name"),
-            py::arg("y"),
-            py::arg("weights")
+            py::arg("y").noconvert(),
+            py::arg("weights").noconvert()
         )
         .def_readonly("name", &internal_t::name, R"delimiter(
-            Name of the GLM family.
+        Name of the GLM family.
         )delimiter")
         .def_readonly("is_multi", &internal_t::is_multi, R"delimiter(
-            See ``adelie.glm.GlmMultiBase64``.
-            It is always ``False`` for this base class.
+        See ``adelie.adelie_core.glm.GlmMultiBase64``.
+        It is always ``False`` for this base class.
         )delimiter")
         .def_readonly("is_symmetric", &internal_t::is_symmetric, R"delimiter(
-            See ``adelie.glm.GlmMultiBase64``.
-            It is always ``False`` for this base class.
+        See ``adelie.adelie_core.glm.GlmMultiBase64``.
+        It is always ``False`` for this base class.
         )delimiter")
         .def("gradient", &internal_t::gradient, R"delimiter(
-        Gradient of the negative loss function.
+        Computes the gradient of the negative loss function.
 
-        Computes :math:`-\nabla \ell(\eta)`.
+        Computes the (negative) gradient :math:`-\nabla \ell(\eta)`.
 
         Parameters
         ----------
@@ -146,7 +146,7 @@ void glm_base(py::module_& m, const char* name)
             The gradient to store.
         )delimiter")
         .def("hessian", &internal_t::hessian, R"delimiter(
-        Diagonal hessian majorization of the loss function.
+        Computes a diagonal hessian majorization of the loss function.
 
         Computes a diagonal majorization of the hessian :math:`\nabla^2 \ell(\eta)`.
 
@@ -168,7 +168,7 @@ void glm_base(py::module_& m, const char* name)
             The hessian to store.
         )delimiter")
         .def("inv_hessian_gradient", &internal_t::inv_hessian_gradient, R"delimiter(
-        Inverse hessian of the (negative) gradient of the loss function.
+        Computes the inverse hessian of the (negative) gradient of the loss function.
 
         Computes :math:`-(\nabla^2 \ell(\eta))^{-1} \nabla \ell(\eta)`.
 
@@ -191,7 +191,7 @@ void glm_base(py::module_& m, const char* name)
             The inverse hessian gradient to store.
         )delimiter")
         .def("loss", &internal_t::loss, R"delimiter(
-        Loss function.
+        Computes the loss function.
 
         Computes :math:`\ell(\eta)`.
 
@@ -206,7 +206,7 @@ void glm_base(py::module_& m, const char* name)
             Loss.
         )delimiter")
         .def("loss_full", &internal_t::loss_full, R"delimiter(
-        Loss function at the saturated model.
+        Computes the loss function at the saturated model.
 
         Computes :math:`\ell(\eta^\star)` where :math:`\eta^\star` is the minimizer.
 
@@ -224,7 +224,9 @@ void glm_binomial_logit(py::module_& m, const char* name)
     using internal_t = ad::glm::GlmBinomialLogit<T>;
     using base_t = typename internal_t::base_t;
     using vec_value_t = typename internal_t::vec_value_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name, 
+        "Core GLM class for Binomial logit family."
+        )
         .def(py::init<
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&
@@ -238,7 +240,9 @@ void glm_binomial_probit(py::module_& m, const char* name)
     using internal_t = ad::glm::GlmBinomialProbit<T>;
     using base_t = typename internal_t::base_t;
     using vec_value_t = typename internal_t::vec_value_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name, 
+        "Core GLM class for Binomial probit family."
+        )
         .def(py::init<
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&
@@ -252,7 +256,9 @@ void glm_cox(py::module_& m, const char* name)
     using internal_t = ad::glm::GlmCox<T>;
     using base_t = typename internal_t::base_t;
     using vec_value_t = typename internal_t::vec_value_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core GLM class for Cox family."
+        )
         .def(py::init<
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
@@ -260,10 +266,10 @@ void glm_cox(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>& ,
             const std::string&
         >(),
-            py::arg("start"),
-            py::arg("stop"),
-            py::arg("status"),
-            py::arg("weights"),
+            py::arg("start").noconvert(),
+            py::arg("stop").noconvert(),
+            py::arg("status").noconvert(),
+            py::arg("weights").noconvert(),
             py::arg("tie_method")
         )
         .def_readonly("start_order", &internal_t::start_order)
@@ -322,7 +328,9 @@ void glm_gaussian(py::module_& m, const char* name)
     using internal_t = ad::glm::GlmGaussian<T>;
     using base_t = typename internal_t::base_t;
     using vec_value_t = typename internal_t::vec_value_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core GLM class for Gaussian family."
+        )
         .def(py::init<
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&
@@ -336,7 +344,9 @@ void glm_poisson(py::module_& m, const char* name)
     using internal_t = ad::glm::GlmPoisson<T>;
     using base_t = typename internal_t::base_t;
     using vec_value_t = typename internal_t::vec_value_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core GLM class for Poisson family."
+        )
         .def(py::init<
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&
@@ -427,7 +437,7 @@ void glm_multibase(py::module_& m, const char* name)
     using rowarr_value_t = typename internal_t::rowarr_value_t;
     using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
-        Base Multi-response GLM class.
+        Base multi-response GLM class.
 
         The generalized multi-response linear model is given by the (weighted) negative likelihood
         
@@ -455,12 +465,12 @@ void glm_multibase(py::module_& m, const char* name)
             bool
         >(),
             py::arg("name"),
-            py::arg("y"),
-            py::arg("weights"),
+            py::arg("y").noconvert(),
+            py::arg("weights").noconvert(),
             py::arg("is_symmetric")
         )
         .def_readonly("name", &internal_t::name, R"delimiter(
-            Name of the GLM family.
+        Name of the GLM family.
         )delimiter")
         .def_readonly("is_multi", &internal_t::is_multi, R"delimiter(
         ``True`` if it defines a multi-response GLM family.
@@ -471,9 +481,9 @@ void glm_multibase(py::module_& m, const char* name)
         for each :math:`i`.
         )delimiter")
         .def("gradient", &internal_t::gradient, R"delimiter(
-        Gradient of the negative loss function.
+        Computes the gradient of the negative loss function.
 
-        Computes :math:`-\nabla \ell(\eta)`.
+        Computes the (negative) gradient :math:`-\nabla \ell(\eta)`.
 
         Parameters
         ----------
@@ -483,7 +493,7 @@ void glm_multibase(py::module_& m, const char* name)
             The gradient to store.
         )delimiter")
         .def("hessian", &internal_t::hessian, R"delimiter(
-        Diagonal hessian majorization of the loss function.
+        Computes a diagonal hessian majorization of the loss function.
 
         Computes a diagonal majorization of the hessian :math:`\nabla^2 \ell(\eta)`.
 
@@ -505,7 +515,7 @@ void glm_multibase(py::module_& m, const char* name)
             The hessian to store.
         )delimiter")
         .def("inv_hessian_gradient", &internal_t::inv_hessian_gradient, R"delimiter(
-        Inverse hessian of the (negative) gradient of the loss function.
+        Computes the inverse hessian of the (negative) gradient of the loss function.
 
         Computes :math:`-(\nabla^2 \ell(\eta))^{-1} \nabla \ell(\eta)`.
 
@@ -528,7 +538,7 @@ void glm_multibase(py::module_& m, const char* name)
             The inverse hessian gradient to store.
         )delimiter")
         .def("loss", &internal_t::loss, R"delimiter(
-        Loss function.
+        Computes the loss function.
 
         Computes :math:`\ell(\eta)`.
 
@@ -543,7 +553,7 @@ void glm_multibase(py::module_& m, const char* name)
             Loss.
         )delimiter")
         .def("loss_full", &internal_t::loss_full, R"delimiter(
-        Loss function at the saturated model.
+        Computes the loss function at the saturated model.
 
         Computes :math:`\ell(\eta^\star)` where :math:`\eta^\star` is the minimizer.
 
@@ -562,7 +572,9 @@ void glm_multigaussian(py::module_& m, const char* name)
     using base_t = typename internal_t::base_t;
     using rowarr_value_t = typename internal_t::rowarr_value_t;
     using vec_value_t = typename internal_t::vec_value_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core GLM class for MultiGaussian family."
+        )
         .def(py::init<
             const Eigen::Ref<const rowarr_value_t>&,
             const Eigen::Ref<const vec_value_t>& 
@@ -577,7 +589,9 @@ void glm_multinomial(py::module_& m, const char* name)
     using base_t = typename internal_t::base_t;
     using rowarr_value_t = typename internal_t::rowarr_value_t;
     using vec_value_t = typename internal_t::vec_value_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core GLM class for Multinomial family."
+        )
         .def(py::init<
             const Eigen::Ref<const rowarr_value_t>&,
             const Eigen::Ref<const vec_value_t>&

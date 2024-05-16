@@ -9,6 +9,7 @@
 #include <adelie_core/matrix/matrix_naive_dense.hpp>
 #include <adelie_core/matrix/matrix_naive_interaction.hpp>
 #include <adelie_core/matrix/matrix_naive_kronecker_eye.hpp>
+#include <adelie_core/matrix/matrix_naive_one_hot.hpp>
 #include <adelie_core/matrix/matrix_naive_snp_unphased.hpp>
 #include <adelie_core/matrix/matrix_naive_snp_phased_ancestry.hpp>
 #include <adelie_core/matrix/matrix_naive_sparse.hpp>
@@ -367,7 +368,9 @@ void matrix_naive_base(py::module_& m, const char* name)
         Number of columns.
         )delimiter")
         /* Augmented API for Python */
-        .def_property_readonly("ndim", [](const internal_t&) { return 2; })
+        .def_property_readonly("ndim", [](const internal_t&) { return 2; }, R"delimiter(
+        Number of dimensions. It is always ``2``.
+        )delimiter")
         .def_property_readonly("shape", [](const internal_t& m) {
             return std::make_tuple(m.rows(), m.cols());
         }, R"delimiter(
@@ -441,7 +444,9 @@ void matrix_cov_base(py::module_& m, const char* name)
         Number of columns.
         )delimiter")
         /* Augmented API for Python */
-        .def_property_readonly("ndim", [](const internal_t&) { return 2; })
+        .def_property_readonly("ndim", [](const internal_t&) { return 2; }, R"delimiter(
+        Number of dimensions. It is always ``2``.
+        )delimiter")
         .def_property_readonly("shape", [](const internal_t& m) {
             return std::make_tuple(m.rows(), m.cols());
         }, R"delimiter(
@@ -455,7 +460,9 @@ void matrix_cov_block_diag(py::module_& m, const char* name)
 {
     using internal_t = ad::matrix::MatrixCovBlockDiag<ValueType>;
     using base_t = typename internal_t::base_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name, 
+        "Core matrix class for covariance block-diagonal matrix."
+        )
         .def(
             py::init([](py::list mat_list_py, size_t n_threads) {
                 std::vector<base_t*> mat_list;
@@ -477,7 +484,9 @@ void matrix_cov_dense(py::module_& m, const char* name)
     using internal_t = ad::matrix::MatrixCovDense<DenseType>;
     using base_t = typename internal_t::base_t;
     using dense_t = typename internal_t::dense_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for covariance dense matrix."
+        )
         .def(
             py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
             py::arg("mat").noconvert(),
@@ -492,7 +501,8 @@ void matrix_cov_lazy_cov(py::module_& m, const char* name)
     using internal_t = ad::matrix::MatrixCovLazyCov<DenseType>;
     using base_t = typename internal_t::base_t;
     using dense_t = typename internal_t::dense_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for covariance lazy-covariance matrix.")
         .def(
             py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
             py::arg("mat").noconvert(),
@@ -509,7 +519,9 @@ void matrix_cov_sparse(py::module_& m, const char* name)
     using sparse_t = typename internal_t::sparse_t; 
     using vec_sp_value_t = typename internal_t::vec_sp_value_t;
     using vec_sp_index_t = typename internal_t::vec_sp_index_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for covariance sparse matrix."
+        )
         .def(
             py::init<
                 size_t,
@@ -536,7 +548,9 @@ void matrix_naive_cconcatenate(py::module_& m, const char* name)
 {
     using internal_t = ad::matrix::MatrixNaiveCConcatenate<ValueType>;
     using base_t = typename internal_t::base_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive column-wise concatenated matrix."
+        )
         .def(
             py::init([](py::list mat_list_py, size_t n_threads) {
                 std::vector<base_t*> mat_list;
@@ -557,7 +571,9 @@ void matrix_naive_rconcatenate(py::module_& m, const char* name)
 {
     using internal_t = ad::matrix::MatrixNaiveRConcatenate<ValueType>;
     using base_t = typename internal_t::base_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive row-wise concatenated matrix."
+        )
         .def(
             py::init([](py::list mat_list_py, size_t n_threads) {
                 std::vector<base_t*> mat_list;
@@ -579,7 +595,9 @@ void matrix_naive_dense(py::module_& m, const char* name)
     using internal_t = ad::matrix::MatrixNaiveDense<DenseType>;
     using base_t = typename internal_t::base_t;
     using dense_t = typename internal_t::dense_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive dense matrix."
+        )
         .def(
             py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
             py::arg("mat").noconvert(),
@@ -596,7 +614,9 @@ void matrix_naive_interaction_dense(py::module_& m, const char* name)
     using dense_t = typename internal_t::dense_t;
     using rowarr_index_t = typename internal_t::rowarr_index_t;
     using vec_index_t = typename internal_t::vec_index_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive interaction matrix."
+        )
         .def(
             py::init<
                 const Eigen::Ref<const dense_t>&,
@@ -609,8 +629,18 @@ void matrix_naive_interaction_dense(py::module_& m, const char* name)
             py::arg("levels").noconvert(),
             py::arg("n_threads")
         )
-        .def_property_readonly("groups", &internal_t::groups)
-        .def_property_readonly("group_sizes", &internal_t::group_sizes)
+        .def_property_readonly("groups", &internal_t::groups, R"delimiter(
+        List of starting indices to each group where `G` is the number of groups.
+        ``groups[i]`` is the starting index of the ``i`` th group. 
+        The groups are naturally defined by ``pairs``.
+        In the order of the rows of ``pairs``,
+        we group all columns of the current matrix
+        corresponding to each row of ``pairs``.
+        )delimiter")
+        .def_property_readonly("group_sizes", &internal_t::group_sizes, R"delimiter(
+        List of group sizes corresponding to each element in ``groups``.
+        ``group_sizes[i]`` is the group size of the ``i`` th group. 
+        )delimiter")
         ;
 }
 
@@ -619,7 +649,9 @@ void matrix_naive_kronecker_eye(py::module_& m, const char* name)
 {
     using internal_t = ad::matrix::MatrixNaiveKroneckerEye<ValueType>;
     using base_t = typename internal_t::base_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive Kronecker product with identity matrix."
+        )
         .def(
             py::init<base_t&, size_t, size_t>(), 
             py::arg("mat"),
@@ -635,7 +667,9 @@ void matrix_naive_kronecker_eye_dense(py::module_& m, const char* name)
     using internal_t = ad::matrix::MatrixNaiveKroneckerEyeDense<DenseType>;
     using base_t = typename internal_t::base_t;
     using dense_t = typename internal_t::dense_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive Kronecker product (dense) with identity matrix."
+        )
         .def(
             py::init<const Eigen::Ref<const dense_t>&, size_t, size_t>(), 
             py::arg("mat").noconvert(),
@@ -645,13 +679,52 @@ void matrix_naive_kronecker_eye_dense(py::module_& m, const char* name)
         ;
 }
 
+template <class DenseType>
+void matrix_naive_one_hot_dense(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveOneHotDense<DenseType>;
+    using base_t = typename internal_t::base_t;
+    using dense_t = typename internal_t::dense_t;
+    using vec_index_t = typename internal_t::vec_index_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive (dense) one-hot encoded matrix."
+        )
+        .def(
+            py::init<
+                const Eigen::Ref<const dense_t>&,
+                const Eigen::Ref<const vec_index_t>&,
+                size_t 
+            >(), 
+            py::arg("mat").noconvert(),
+            py::arg("levels").noconvert(),
+            py::arg("n_threads")
+        )
+        .def_property_readonly("groups", &internal_t::groups, R"delimiter(
+        List of starting indices to each group where `G` is the number of groups.
+        ``groups[i]`` is the starting index of the ``i`` th group. 
+        The groups are naturally defined by the columns of ``mat``.
+        In the order of the columns of ``mat``,
+        we group all columns of the current matrix 
+        corresponding to each column of ``mat``.
+        This way, the continuous features each form a group of size one
+        and the discrete features form a group across their one-hot encodings.
+        )delimiter")
+        .def_property_readonly("group_sizes", &internal_t::group_sizes, R"delimiter(
+        List of group sizes corresponding to each element in ``groups``.
+        ``group_sizes[i]`` is the group size of the ``i`` th group. 
+        )delimiter")
+        ;
+}
+
 template <class ValueType>
 void matrix_naive_snp_unphased(py::module_& m, const char* name)
 {
     using internal_t = ad::matrix::MatrixNaiveSNPUnphased<ValueType>;
     using base_t = typename internal_t::base_t;
     using string_t = typename internal_t::string_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive SNP unphased matrix."
+        )
         .def(
             py::init<
                 const string_t&,
@@ -671,7 +744,9 @@ void matrix_naive_snp_phased_ancestry(py::module_& m, const char* name)
     using internal_t = ad::matrix::MatrixNaiveSNPPhasedAncestry<ValueType>;
     using base_t = typename internal_t::base_t;
     using string_t = typename internal_t::string_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive SNP phased, ancestry matrix."
+        )
         .def(
             py::init<
                 const string_t&,
@@ -693,7 +768,9 @@ void matrix_naive_sparse(py::module_& m, const char* name)
     using sparse_t = typename internal_t::sparse_t; 
     using vec_sp_value_t = typename internal_t::vec_sp_value_t;
     using vec_sp_index_t = typename internal_t::vec_sp_index_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive sparse matrix."
+        )
         .def(
             py::init<
                 size_t,
@@ -721,7 +798,9 @@ void matrix_naive_standardize(py::module_& m, const char* name)
     using internal_t = ad::matrix::MatrixNaiveStandardize<ValueType>;
     using base_t = typename internal_t::base_t;
     using vec_value_t = typename internal_t::vec_value_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive standardized matrix."
+        )
         .def(py::init<
             base_t&,
             const Eigen::Ref<const vec_value_t>&,
@@ -742,7 +821,9 @@ void matrix_naive_csubset(py::module_& m, const char* name)
     using internal_t = ad::matrix::MatrixNaiveCSubset<ValueType>;
     using base_t = typename internal_t::base_t;
     using vec_index_t = typename internal_t::vec_index_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive column-subsetted matrix."
+        )
         .def(
             py::init<
                 base_t*,
@@ -762,7 +843,9 @@ void matrix_naive_rsubset(py::module_& m, const char* name)
     using internal_t = ad::matrix::MatrixNaiveRSubset<ValueType>;
     using base_t = typename internal_t::base_t;
     using vec_index_t = typename internal_t::vec_index_t;
-    py::class_<internal_t, base_t>(m, name)
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive row-subsetted matrix."
+        )
         .def(
             py::init<
                 base_t*,
@@ -831,6 +914,11 @@ void register_matrix(py::module_& m)
     matrix_naive_kronecker_eye_dense<dense_type<double, Eigen::ColMajor>>(m, "MatrixNaiveKroneckerEyeDense64F");
     matrix_naive_kronecker_eye_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixNaiveKroneckerEyeDense32C");
     matrix_naive_kronecker_eye_dense<dense_type<float, Eigen::ColMajor>>(m, "MatrixNaiveKroneckerEyeDense32F");
+
+    matrix_naive_one_hot_dense<dense_type<double, Eigen::RowMajor>>(m, "MatrixNaiveOneHotDense64C");
+    matrix_naive_one_hot_dense<dense_type<double, Eigen::ColMajor>>(m, "MatrixNaiveOneHotDense64F");
+    matrix_naive_one_hot_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixNaiveOneHotDense32C");
+    matrix_naive_one_hot_dense<dense_type<float, Eigen::ColMajor>>(m, "MatrixNaiveOneHotDense32F");
 
     matrix_naive_snp_unphased<double>(m, "MatrixNaiveSNPUnphased64");
     matrix_naive_snp_unphased<float>(m, "MatrixNaiveSNPUnphased32");

@@ -58,7 +58,7 @@ class glm_base:
 
 
 class multiglm_base:
-    """Base wrapper Multi-response GLM class.
+    """Base wrapper multi-response GLM class.
 
     All Python wrapper classes for core multi-response GLM classes must inherit from this class.
     The purpose of this class is to expose extra member interface
@@ -150,7 +150,8 @@ def binomial(
 
     See Also
     --------
-    adelie.glm.GlmBase64
+    adelie.adelie_core.glm.GlmBinomialLogit64
+    adelie.adelie_core.glm.GlmBinomialProbit64
     """
     dispatcher = {
         "logit": {
@@ -272,7 +273,7 @@ def cox(
 
     See Also
     --------
-    adelie.glm.GlmBase64
+    adelie.adelie_core.glm.GlmCox64
     """
     dispatcher = {
         np.float64: core.glm.GlmCox64,
@@ -361,7 +362,7 @@ def gaussian(
 
     See Also
     --------
-    adelie.glm.GlmBase64
+    adelie.adelie_core.glm.GlmGaussian64
     """
     dispatcher = {
         np.float64: core.glm.GlmGaussian64,
@@ -392,9 +393,9 @@ def multigaussian(
     dtype: Union[np.float32, np.float64] =None,
     opt: bool =True,
 ):
-    """Creates a Multi-response Gaussian GLM family object.
+    """Creates a MultiGaussian GLM family object.
 
-    The Multi-Response Gaussian GLM family specifies the loss function as:
+    The MultiGaussian GLM family specifies the loss function as:
 
     .. math::
         \\begin{align*}
@@ -432,11 +433,11 @@ def multigaussian(
     Returns
     -------
     glm
-        Multi-response Gaussian GLM object.
+        MultiGaussian GLM object.
 
     See Also
     --------
-    adelie.glm.GlmBase64
+    adelie.adelie_core.glm.GlmMultiGaussian64
     """
     dispatcher = {
         np.float64: core.glm.GlmMultiGaussian64,
@@ -514,7 +515,7 @@ def multinomial(
 
     See Also
     --------
-    adelie.glm.GlmMultiBase64
+    adelie.adelie_core.glm.GlmMultinomial64
     """
     dispatcher = {
         np.float64: core.glm.GlmMultinomial64,
@@ -580,7 +581,7 @@ def poisson(
 
     See Also
     --------
-    adelie.glm.GlmBase64
+    adelie.adelie_core.glm.GlmPoisson64
     """
     dispatcher = {
         np.float64: core.glm.GlmPoisson64,

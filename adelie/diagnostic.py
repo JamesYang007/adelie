@@ -76,8 +76,8 @@ def predict(
 
     See Also
     --------
-    adelie.glm.GlmBase64
-    adelie.glm.GlmMultiBase64
+    adelie.adelie_core.glm.GlmBase64
+    adelie.adelie_core.glm.GlmMultiBase64
     """
     is_multi = len(intercepts.shape) == 2
     if is_multi:

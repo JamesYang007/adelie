@@ -17,7 +17,6 @@ public:
     using typename base_t::colmat_value_t;
     using typename base_t::rowmat_value_t;
     using typename base_t::sp_mat_value_t;
-    using rowarr_index_t = util::rowarr_type<index_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
 
 private:

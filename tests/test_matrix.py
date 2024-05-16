@@ -421,6 +421,41 @@ def test_naive_kronecker_eye_dense():
             _test(100, 20, 2, dtype, order)
 
 
+def test_naive_one_hot_dense():
+    def _expand(x, level):
+        if level <= 0:
+            return x.reshape((-1, 1))
+        return np.array([x == k for k in range(level)]).T
+
+    def _create_dense(X, levels):
+        return np.concatenate([
+            _expand(X[:, i], level)
+            for i, level in enumerate(levels)
+        ], axis=1, dtype=dtype)
+
+    def _test(n, d, dtype, order, seed=0):
+        np.random.seed(seed)
+        X = np.random.normal(0, 1, (n, d))
+        X = np.array(X, dtype=dtype, order=order)
+        c_subset = np.random.choice(d, size=d//2, replace=False)
+        c_levels = 1 + np.random.choice(10, size=d//2, replace=True)
+        for j, level in zip(c_subset, c_levels):
+            X[:, j] = np.random.choice(level, size=n, replace=True)
+        levels = np.zeros(d, dtype=int)
+        levels[c_subset] = c_levels
+        cX = mod.one_hot(X, levels)
+        X = _create_dense(X, levels)
+        run_naive(X, cX, dtype)
+
+    dtypes = [np.float32, np.float64]
+    orders = ["C", "F"]
+    for dtype in dtypes:
+        for order in orders:
+            _test(1, 10, dtype, order)
+            _test(10, 1, dtype, order)
+            _test(100, 20, dtype, order)
+
+
 def test_naive_snp_unphased():
     def _test(n, p, read_mode, dtype, seed=0):
         np.random.seed(seed)

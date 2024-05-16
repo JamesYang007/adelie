@@ -223,7 +223,7 @@ def block_diag(
 
     See Also
     --------
-    adelie.matrix.MatrixCovBase64
+    adelie.adelie_core.matrix.MatrixCovBlockDiag64
     """
     mats = [
         dense(mat, method="cov", n_threads=1)
@@ -310,7 +310,8 @@ def concatenate(
 
     See Also
     --------
-    adelie.matrix.MatrixNaiveBase64
+    adelie.adelie_core.matrix.MatrixNaiveCConcatenate64
+    adelie.adelie_core.matrix.MatrixNaiveRConcatenate64
     """
     mats = [
         dense(mat, method="naive", n_threads=n_threads)
@@ -379,8 +380,8 @@ def dense(
 
     See Also
     --------
-    adelie.matrix.MatrixCovBase64
-    adelie.matrix.MatrixNaiveBase64
+    adelie.adelie_core.matrix.MatrixCovDense64F
+    adelie.adelie_core.matrix.MatrixNaiveDense64F
     """
     naive_dispatcher = {
         np.dtype("float64"): {
@@ -444,7 +445,7 @@ def interaction(
     *,
     n_threads: int =1,
 ):
-    """Creates a viewer of a matrix with pairwise interactions.
+    """Creates a matrix with pairwise interactions.
 
     This matrix :math:`X \\in \\mathbb{R}^{n\\times p}` represents pairwise interaction terms
     within a given base matrix :math:`Z \\in \\mathbb{R}^{n\\times d}` 
@@ -552,7 +553,7 @@ def interaction(
 
     See Also
     --------
-    adelie.matrix.MatrixNaiveBase64
+    adelie.adelie_core.matrix.MatrixNaiveInteractionDense64F
     """
     dispatcher = {
         np.dtype("float64"): {
@@ -631,7 +632,7 @@ def kronecker_eye(
     *,
     n_threads: int =1,
 ):
-    """Creates a viewer of a matrix Kronecker product identity matrix.
+    """Creates a Kronecker product with identity matrix.
 
     The matrix is represented as :math:`X \\otimes I_K`
     where :math:`X` is the underlying dense matrix and 
@@ -658,7 +659,8 @@ def kronecker_eye(
 
     See Also
     --------
-    adelie.matrix.MatrixNaiveBase64
+    adelie.adelie_core.matrix.MatrixNaiveKroneckerEye64
+    adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F
     """
     if isinstance(mat, np.ndarray):
         dispatcher = {
@@ -696,12 +698,120 @@ def kronecker_eye(
     return _kronecker_eye()
 
 
+def one_hot(
+    mat: np.ndarray,
+    levels: np.ndarray =None,
+    *,
+    n_threads: int =1,
+):
+    """Creates a one-hot encoded matrix.
+
+    This matrix :math:`X \\in \\mathbb{R}^{n \\times p}`
+    represents a one-hot encoding of a given base matrix
+    :math:`Z \\in \\mathbb{R}^{n \\times d}`.
+    We assume :math:`Z` contains, in general, a combination of
+    continuous and discrete features (as columns).
+    Denote :math:`L : \\{1, \\ldots, d\\} \\to \\mathbb{N}` as
+    the mapping that maps each feature index of :math:`Z` to the number of levels of that feature
+    where a value of :math:`0` means the feature is continuous
+    and otherwise means it is discrete with that many levels (or categories).
+    For every :math:`j` th column of :math:`Z`,
+    define the possibly one-hot encoded version :math:`\\tilde{Z}_j` as
+
+    .. math::
+        \\begin{align*}
+            \\tilde{Z}_j
+            &:=
+            \\begin{cases}
+                Z_j ,& L(j) = 0 \\\\
+                I_{Z_j} ,& L(j) > 0
+            \\end{cases}
+        \\end{align*}
+
+    Here, :math:`I_{v}` is the indicator matrix, or one-hot encoding, of :math:`v`.
+
+    Then, :math:`X` is defined as the column-wise concatenation of :math:`\\tilde{Z}_j`
+    in order of :math:`j`.
+
+    .. note::
+        Every discrete feature of `Z` *must* take on values in the set 
+        :math:`\\{0, \\ldots, \\ell-1\\}`
+        where :math:`\\ell` is the number of levels for that feature.
+
+    .. note::
+        This matrix only works for naive method!
+    
+    Parameters
+    ----------
+    mat : (n, d) np.ndarray
+        The dense matrix :math:`Z` from which to construct one-hot encodings.
+    levels : (d,) np.ndarray, optional
+        Number of levels for each column in ``mat``.
+        A non-positive value indicates that the column is a continuous variable
+        whereas a positive value indicates that it is a discrete variable with
+        that many levels (or categories).
+        If ``None``, it is initialized to be ``np.zeros(d)``
+        so that every column is a continuous variable.
+        Default is ``None``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F
+    """
+    dispatcher = {
+        np.dtype("float64"): {
+            "C": core.matrix.MatrixNaiveOneHotDense64C,
+            "F": core.matrix.MatrixNaiveOneHotDense64F,
+        },
+        np.dtype("float32"): {
+            "C": core.matrix.MatrixNaiveOneHotDense32C,
+            "F": core.matrix.MatrixNaiveOneHotDense32F,
+        },
+    }
+    dtype = mat.dtype
+    order = (
+        "F"
+        # prioritize choosing Fortran contiguity
+        if mat.flags.f_contiguous else
+        "C"
+    )
+    if order == "C":
+        warnings.warn(
+            "Detected matrix to be C-contiguous. "
+            "Performance may improve with F-contiguous matrix."
+        )
+    core_base = dispatcher[dtype][order]
+    py_base = PyMatrixNaiveBase
+
+    _, d = mat.shape
+
+    if levels is None:
+        levels = np.zeros(d, dtype=int)
+
+    class _one_hot(core_base, py_base):
+        def __init__(self):
+            self.mat = mat
+            self.levels = np.array(levels, copy=True, dtype=np.int32)
+            core_base.__init__(self, self.mat, self.levels, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
+        
+    return _one_hot()
+
+
 def lazy_cov(
     mat: np.ndarray,
     *,
     n_threads: int =1,
 ):
-    """Creates a viewer of a lazy covariance matrix.
+    """Creates a lazy covariance matrix.
 
     The lazy covariance matrix :math:`A` uses 
     the underlying matrix :math:`X` given by ``mat``
@@ -730,7 +840,7 @@ def lazy_cov(
 
     See Also
     --------
-    adelie.matrix.MatrixCovBase64
+    adelie.adelie_core.matrix.MatrixCovLazyCov64F
     """
     dispatcher = {
         np.dtype("float64"): {
@@ -800,7 +910,7 @@ def snp_phased_ancestry(
     See Also
     --------
     adelie.io.snp_phased_ancestry
-    adelie.matrix.MatrixNaiveBase64
+    adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64
     """
     dispatcher = {
         np.float64: core.matrix.MatrixNaiveSNPPhasedAncestry64,
@@ -856,7 +966,7 @@ def snp_unphased(
     See Also
     --------
     adelie.io.snp_unphased
-    adelie.matrix.MatrixNaiveBase64
+    adelie.adelie_core.matrix.MatrixNaiveSNPUnphased64
     """
     dispatcher = {
         np.float64: core.matrix.MatrixNaiveSNPUnphased64,
@@ -907,8 +1017,8 @@ def sparse(
 
     See Also
     --------
-    adelie.matrix.MatrixCovBase64
-    adelie.matrix.MatrixNaiveBase64
+    adelie.adelie_core.matrix.MatrixCovSparse64F
+    adelie.adelie_core.matrix.MatrixNaiveSparse64F
     """
     if not (isinstance(mat, csr_matrix) or isinstance(mat, csc_matrix)):
         raise TypeError("mat must be scipy.sparse.csr_matrix or scipy.sparse.csc_matrix.")
@@ -968,7 +1078,7 @@ def standardize(
     *,
     n_threads: int =1,
 ):
-    """Creates a viewer of a standardized matrix.
+    """Creates a standardized matrix.
 
     Given a matrix :math:`Z \\in \\mathbb{R}^{n \\times p}`,
     the standardized matrix :math:`X \\in \\mathbb{R}^{n \\times p}`
@@ -1030,7 +1140,7 @@ def standardize(
 
     See Also
     --------
-    adelie.matrix.MatrixNaiveBase64
+    adelie.adelie_core.matrix.MatrixNaiveStandardize64
     """
     if isinstance(mat, (list, np.ndarray)):
         mat = np.ndarray(mat, order="F", copy=True)
@@ -1145,7 +1255,8 @@ def subset(
 
     See Also
     --------
-    adelie.matrix.MatrixNaiveBase64
+    adelie.adelie_core.matrix.MatrixNaiveCSubset64
+    adelie.adelie_core.matrix.MatrixNaiveRSubset64
     """
     if isinstance(mat, np.ndarray):
         if axis == 0:
