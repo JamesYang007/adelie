@@ -442,8 +442,6 @@ def interaction(
     intr_map: dict,
     levels: np.ndarray =None,
     *,
-    centers: np.ndarray =None,
-    scales: np.ndarray =None,
     n_threads: int =1,
 ):
     """Creates a viewer of a matrix with pairwise interactions.
@@ -470,7 +468,7 @@ def interaction(
             &:=
             \\begin{cases}
                 \\begin{bmatrix}
-                    Z_{i} & Z_{j} & Z_i \odot Z_j
+                    Z_{i} & Z_{j} & Z_i \\odot Z_j
                 \\end{bmatrix}
                 ,& L(i) = 0, L(j) = 0 \\\\
                 \\begin{bmatrix}
@@ -511,14 +509,12 @@ def interaction(
             \\end{bmatrix}
         \\end{align*}
 
-    Then, if :math:`\\tilde{X}` is defined as the column-wise concatenation of :math:`Z_{i:j}`
-    in lexicographical order of :math:`(i,j) \\in S`,
-    :math:`X` is the column-wise centered and scaled version of :math:`\\tilde{X}` 
-    using ``centers`` and ``scales``, respectively.
+    Then, :math:`X` is defined as the column-wise concatenation of :math:`Z_{i:j}`
+    in lexicographical order of :math:`(i,j) \\in S`.
 
     .. note::
         Every discrete feature of `Z` *must* take on values in the set 
-        :math:`\\{0, \ldots, \\ell-1\\}`
+        :math:`\\{0, \\ldots, \\ell-1\\}`
         where :math:`\\ell` is the number of levels for that feature.
 
     .. note::
@@ -544,18 +540,6 @@ def interaction(
         that many levels (or categories).
         If ``None``, it is initialized to be ``np.zeros(d)``
         so that every column is a continuous variable.
-        Default is ``None``.
-    centers : (p,) np.ndarray, optional
-        The centers for each column used to construct :math:`X`.
-        If ``None``, they are computed as the column-wise mean of :math:`\\tilde{X}`
-        for columns of the form :math:`Z_i \odot Z_j` between two continuous features 
-        and otherwise zero.
-        Default is ``None``.
-    scales : (p,) np.ndarray, optional
-        The scales for each column used to construct :math:`X`.
-        If ``None``, they are computed as the column-wise :math:`\\ell_2` norm of :math:`\\tilde{X}`
-        for columns of the form :math:`Z_i \odot Z_j` between two continuous features *after centering by* ``centers``
-        and otherwise one.
         Default is ``None``.
     n_threads : int, optional
         Number of threads.
@@ -630,17 +614,12 @@ def interaction(
         raise ValueError("No valid pairs exist. There must be at least one valid pair.")
     pairs = np.array(pairs, dtype=np.int32)
 
-    if centers is None:
-        centers = np.empty(0)
-    if scales is None:
-        scales = np.empty(0)
-
     class _interaction(core_base, py_base):
         def __init__(self):
             self.mat = mat
             self.pairs = pairs
             self.levels = np.array(levels, copy=False, dtype=np.int32)
-            core_base.__init__(self, self.mat, self.pairs, self.levels, centers, scales, n_threads)
+            core_base.__init__(self, self.mat, self.pairs, self.levels, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         
     return _interaction()
@@ -979,6 +958,133 @@ def sparse(
             py_base.__init__(self, n_threads=n_threads)
 
     return _sparse()
+
+
+def standardize(
+    mat: Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64],
+    centers: np.ndarray =None,
+    scales: np.ndarray =None,
+    ddof: int =0,
+    *,
+    n_threads: int =1,
+):
+    """Creates a viewer of a standardized matrix.
+
+    Given a matrix :math:`Z \\in \\mathbb{R}^{n \\times p}`,
+    the standardized matrix :math:`X \\in \\mathbb{R}^{n \\times p}`
+    of :math:`Z` centered by :math:`c \\in \\mathbb{R}^{p}` and scaled by :math:`s \\in \\mathbb{R}^p`
+    is defined by 
+    
+    .. math::
+        \\begin{align*}
+            X = (Z - \\mathbf{1} c^\\top) \\mathrm{diag}(s)^{-1}
+        \\end{align*}
+
+    We define the column means :math:`\\overline{Z} \\in \\mathbb{R}^p` to be
+
+    .. math::
+        \\begin{align*}
+            \\overline{Z}
+            =
+            \\frac{1}{n} Z^\\top \\mathbf{1}
+        \\end{align*}
+
+    Lastly, we define the column standard deviations :math:`\\hat{\\sigma} \\in \\mathbb{R}^p` to be
+
+    .. math::
+        \\begin{align*}
+            \\hat{\\sigma}_j
+            =
+            \\frac{1}{\\sqrt{n - \\mathrm{df}}} \\|Z_{\\cdot j} - c_j \\mathbf{1} \\|_2
+        \\end{align*}
+
+    where :math:`\\mathrm{df}` is the degrees of freedom given by ``ddof``.
+
+    .. note::
+        This matrix only works for naive method!
+    
+    Parameters
+    ----------
+    mat : Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
+        The underlying matrix :math:`Z` to standardize.
+    centers : np.ndarray, optional
+        The center values :math:`c` for each column of ``mat``.
+        If ``None``, the column means :math:`\\overline{Z}` are used as centers.
+        Default is ``None``.
+    scales : np.ndarray, optional
+        The scale values :math:`s` for each column of ``mat``.
+        If ``None``, the column standard deviations :math:`\\hat{\\sigma}` are used as scales.
+        Default is ``None``.
+    ddof : int, optional
+        The degrees of freedom used to compute ``scales``.
+        This is only used if ``scales`` is ``None``.
+        Default is ``0``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.matrix.MatrixNaiveBase64
+    """
+    if isinstance(mat, (list, np.ndarray)):
+        mat = np.ndarray(mat, order="F", copy=True)
+        if centers is None:
+            centers = np.mean(mat, axis=0)
+        mat -= centers[None]
+        if scales is None:
+            n = mat.shape[0]
+            scales = np.sqrt(
+                np.sum(mat ** 2, axis=0) / (n - ddof)
+            )
+        mat /= scales[None]
+        return mat
+
+    dtype = _to_dtype(mat)
+    dispatcher = {
+        np.float32: core.matrix.MatrixNaiveStandardize32,
+        np.float64: core.matrix.MatrixNaiveStandardize64,
+    }
+    core_base = dispatcher[dtype]
+    py_base = PyMatrixNaiveBase
+
+    n, p = mat.shape
+    sqrt_weights = np.full(n, 1/np.sqrt(n), dtype=dtype) 
+    is_centers_none = centers is None
+
+    if is_centers_none:
+        centers = np.empty(p, dtype=dtype) 
+        mat.mul(sqrt_weights, sqrt_weights, centers)
+
+    if scales is None:
+        if is_centers_none:
+            means = centers
+        else:
+            means = np.empty(p, dtype=dtype) 
+            mat.mul(sqrt_weights, sqrt_weights, means)
+
+        vars = np.empty((p, 1, 1), dtype=dtype, order="F")
+        buffer = np.empty((n, 1), dtype=dtype, order="F")
+        for j in range(p):
+            mat.cov(j, 1, sqrt_weights, vars[j], buffer) 
+        vars = vars.reshape(p)
+        vars += centers * (centers - 2 * means)
+        scales = np.sqrt((n / (n - ddof)) * vars)
+
+    class _standardize(core_base, py_base):
+        def __init__(self):
+            self.mat = mat
+            self.centers = np.array(centers, copy=True, dtype=dtype)
+            self.scales = np.array(scales, copy=True, dtype=dtype)
+            core_base.__init__(self, mat, self.centers, self.scales, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
+        
+    return _standardize()
 
 
 def subset(

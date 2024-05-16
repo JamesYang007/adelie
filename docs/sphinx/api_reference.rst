@@ -133,6 +133,7 @@ adelie.matrix
     snp_phased_ancestry
     snp_unphased
     sparse
+    standardize
     subset
 
 

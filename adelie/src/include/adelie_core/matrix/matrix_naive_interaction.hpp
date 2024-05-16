@@ -28,8 +28,6 @@ private:
     const Eigen::Map<const vec_index_t> _levels;  // (d,) number of levels
     const vec_index_t _outer;               // (G+1,) outer vector
     const size_t _cols;                     // number of columns (p)
-    const vec_value_t _centers;             // (p,) centers
-    const vec_value_t _scales;              // (p,) scales
     const vec_index_t _slice_map;           // (p,) array mapping to matrix slice
     const vec_index_t _index_map;           // (p,) array mapping to (relative) index of the slice
     const size_t _n_threads;                // number of threads
@@ -50,91 +48,6 @@ private:
             outer[i+1] = outer[i] + (l0 * l1 - both_cont); 
         }
         return outer;
-    }
-
-    static inline vec_value_t init_centers(
-        const Eigen::Ref<const dense_t> mat,
-        const Eigen::Ref<const rowarr_index_t> pairs,
-        const Eigen::Ref<const vec_index_t> levels,
-        const Eigen::Ref<const vec_value_t>& centers_map,
-        size_t cols 
-    )
-    {
-        if (centers_map.size()) {
-            if (centers_map.size() != cols) {
-                throw util::adelie_core_error(
-                    "If centers is provided by the user, it must be of length p."
-                );
-            }
-            return centers_map;
-        }
-
-        vec_value_t centers(cols);
-        size_t pos = 0;
-        for (int i = 0; i < pairs.rows(); ++i) {
-            const auto i0 = pairs(i, 0);
-            const auto i1 = pairs(i, 1);
-            auto l0 = levels[i0];
-            auto l1 = levels[i1];
-            const auto both_cont = (l0 <= 0) & (l1 <= 0);
-            l0 = (l0 <= 0) ? _n_levels_cont : l0;
-            l1 = (l1 <= 0) ? _n_levels_cont : l1;
-            const auto size = l0 * l1 - both_cont;
-            if (both_cont) {
-                centers.segment(pos, size-1).setZero();
-                centers[pos+size-1] = (mat.col(i0).array() * mat.col(i1).array()).mean();
-            } else {
-                centers.segment(pos, size).setZero();
-            }
-            pos += size;
-        }
-        return centers;
-    }
-
-    static inline vec_value_t init_scales(
-        const Eigen::Ref<const dense_t> mat,
-        const Eigen::Ref<const rowarr_index_t> pairs,
-        const Eigen::Ref<const vec_index_t> levels,
-        const Eigen::Ref<const vec_value_t>& centers,
-        const Eigen::Ref<const vec_value_t>& scales_map,
-        size_t cols 
-    )
-    {
-        if (scales_map.size()) {
-            if (scales_map.size() != cols) {
-                throw util::adelie_core_error(
-                    "If scales is provided by the user, it must be of length p."
-                );
-            }
-            return scales_map;
-        }
-
-        vec_value_t scales(cols);
-        size_t pos = 0;
-        for (int i = 0; i < pairs.rows(); ++i) {
-            const auto i0 = pairs(i, 0);
-            const auto i1 = pairs(i, 1);
-            auto l0 = levels[i0];
-            auto l1 = levels[i1];
-            const auto both_cont = (l0 <= 0) & (l1 <= 0);
-            l0 = (l0 <= 0) ? _n_levels_cont : l0;
-            l1 = (l1 <= 0) ? _n_levels_cont : l1;
-            const auto size = l0 * l1 - both_cont;
-            if (both_cont) {
-                scales.segment(pos, size-1).setOnes();
-                const auto c = centers[pos+size-1];
-                const auto x = mat.col(i0).array() * mat.col(i1).array();
-                const auto m = x.mean();
-                const auto n = mat.rows();
-                scales[pos+size-1] = std::sqrt(
-                    x.square().mean() - c * (2 * m - c)
-                );
-            } else {
-                scales.segment(pos, size).setOnes();
-            }
-            pos += size;
-        }
-        return scales;
     }
 
     static inline auto init_slice_map(
@@ -201,20 +114,19 @@ private:
         const auto k1 = index / l0_exp;
         const auto k0 = index - l0_exp * k1;
         const auto _case = static_cast<int>(l0 > 0) | static_cast<int>(l1 > 0 ? _n_levels_cont : 0);
-        value_t dot = 0;
         switch (_case) {
             case 0: {
                 switch (index) {
                     case 0: {
-                        dot = (v * w * _mat.col(i0).transpose().array()).sum();
+                        return (v * w * _mat.col(i0).transpose().array()).sum();
                         break;
                     }
                     case 1: {
-                        dot = (v * w * _mat.col(i1).transpose().array()).sum();
+                        return (v * w * _mat.col(i1).transpose().array()).sum();
                         break;
                     }
                     case 2: {
-                        dot = (v * w * _mat.col(i0).transpose().array() * _mat.col(i1).transpose().array()).sum();
+                        return (v * w * _mat.col(i0).transpose().array() * _mat.col(i1).transpose().array()).sum();
                         break;
                     }
                 }
@@ -227,14 +139,14 @@ private:
                         if (_mat(i, i0) != k0) continue;
                         sum += v[i] * w[i];
                     }
-                    dot = sum;
+                    return sum;
                 } else {
                     value_t sum = 0;
                     for (int i = 0; i < _mat.rows(); ++i) {
                         if (_mat(i, i0) != k0) continue;
                         sum += v[i] * w[i] * _mat(i, i1);
                     }
-                    dot = sum;
+                    return sum;
                 }
                 break;
             }
@@ -245,14 +157,14 @@ private:
                         if (_mat(i, i1) != k1) continue;
                         sum += v[i] * w[i];
                     }
-                    dot = sum;
+                    return sum;
                 } else {
                     value_t sum = 0;
                     for (int i = 0; i < _mat.rows(); ++i) {
                         if (_mat(i, i1) != k1) continue;
                         sum += v[i] * w[i] * _mat(i, i0);
                     }
-                    dot = sum;
+                    return sum;
                 }
                 break;
             }
@@ -262,13 +174,10 @@ private:
                     if (_mat(i, i0) != k0 || _mat(i, i1) != k1) continue;
                     sum += v[i] * w[i];
                 }
-                dot = sum;
+                return sum;
                 break;
             }
         }
-        const auto center_term = (_centers[j] == 0) ? 0 : (_centers[j] * (v * w).sum());
-        const auto scale = _scales[j];
-        return (dot - center_term) / scale;
     }
 
     void _ctmul(
@@ -288,22 +197,19 @@ private:
         const auto k1 = index / l0_exp;
         const auto k0 = index - l0_exp * k1;
         const auto _case = static_cast<int>(l0 > 0) | static_cast<int>(l1 > 0 ? _n_levels_cont : 0);
-        const auto center = _centers[j];
-        const auto scale = _scales[j];
-        const auto vs = v / scale;
         switch (_case) {
             case 0: {
                 switch (index) {
                     case 0: {
-                        out += vs * (_mat.col(i0).transpose().array() - center);
+                        out += v * _mat.col(i0).transpose().array();
                         break;
                     }
                     case 1: {
-                        out += vs * (_mat.col(i1).transpose().array() - center);
+                        out += v * _mat.col(i1).transpose().array();
                         break;
                     }
                     case 2: {
-                        out += vs * (_mat.col(i0).transpose().array() * _mat.col(i1).transpose().array() - center);
+                        out += v * _mat.col(i0).transpose().array() * _mat.col(i1).transpose().array();
                         break;
                     }
                 }
@@ -313,47 +219,40 @@ private:
                 if (k1 == 0) {
                     for (int i = 0; i < _mat.rows(); ++i) {
                         if (_mat(i, i0) != k0) continue;
-                        out[i] += vs;
+                        out[i] += v;
                     }
                 } else {
                     for (int i = 0; i < _mat.rows(); ++i) {
                         if (_mat(i, i0) != k0) continue;
-                        out[i] += vs * _mat(i, i1);
+                        out[i] += v * _mat(i, i1);
                     }
                 }
-                const auto vsc = vs * center;
-                if (vsc) out -= vsc;
                 break;
             }
             case 2: {
                 if (k0 == 0) {
                     for (int i = 0; i < _mat.rows(); ++i) {
                         if (_mat(i, i1) != k1) continue;
-                        out[i] += vs;
+                        out[i] += v;
                     }
                 } else {
                     for (int i = 0; i < _mat.rows(); ++i) {
                         if (_mat(i, i1) != k1) continue;
-                        out[i] += vs * _mat(i, i0);
+                        out[i] += v * _mat(i, i0);
                     }
                 }
-                const auto vsc = vs * center;
-                if (vsc) out -= vsc;
                 break;
             }
             case 3: {
                 for (int i = 0; i < _mat.rows(); ++i) {
                     if (_mat(i, i0) != k0 || _mat(i, i1) != k1) continue;
-                    out[i] += vs;
+                    out[i] += v;
                 }
-                const auto vsc = vs * center;
-                if (vsc) out -= vsc;
                 break;
             }
         }
     }
 
-    template <bool do_standardize>
     void _bmul(
         int begin,
         int i0, int i1,
@@ -416,13 +315,6 @@ private:
                 break;
             }
         }
-
-        if constexpr (do_standardize) {
-            const auto centers = _centers.segment(begin, size);
-            const auto scales = _scales.segment(begin, size);
-            const auto vwsum = (centers == 0).all() ? 0 : (v * w).sum();
-            out = (out - vwsum * centers) / scales;
-        }
     }
 
     void _btmul(
@@ -447,50 +339,37 @@ private:
             return;
         }
         const auto _case = static_cast<int>(l0 > 0) | static_cast<int>(l1 > 0 ? _n_levels_cont : 0);
-        const auto centers = _centers.segment(begin, size);
-        const auto scales = _scales.segment(begin, size);
-        const auto vs = v / scales;
         switch (_case) {
             case 0: {
                 const auto mi0 = _mat.col(i0).transpose().array();
                 const auto mi1 = _mat.col(i1).transpose().array();
-                const auto vs0 = v[0] / scales[0];
-                const auto vs1 = v[1] / scales[1];
-                const auto vs2 = v[2] / scales[2];
                 out += (
-                    vs0 * mi0 +
-                    mi1 * (vs1 + vs2 * mi0) - 
-                    (vs0 * centers[0] + vs1 * centers[1] + vs2 * centers[2])
+                    v[0] * mi0 +
+                    mi1 * (v[1] + v[2] * mi0)
                 );
                 break;
             }
             case 1: {
                 for (int i = 0; i < _mat.rows(); ++i) {
                     const int k0 = _mat(i, i0);
-                    out[i] += vs[k0] + vs[l0 + k0] * _mat(i, i1);
+                    out[i] += v[k0] + v[l0 + k0] * _mat(i, i1);
                 }
-                const auto vsc = (vs * centers).sum();
-                if (vsc) out -= vsc;
                 break;
             }
             case 2: {
                 for (int i = 0; i < _mat.rows(); ++i) {
                     const int k1 = _mat(i, i1);
                     const auto b = _n_levels_cont * k1;
-                    out[i] += vs[b] + vs[b+1] * _mat(i, i0);
+                    out[i] += v[b] + v[b+1] * _mat(i, i0);
                 }
-                const auto vsc = (vs * centers).sum();
-                if (vsc) out -= vsc;
                 break;
             }
             case 3: {
                 for (int i = 0; i < _mat.rows(); ++i) {
                     const int k0 = _mat(i, i0);
                     const int k1 = _mat(i, i1);
-                    out[i] += vs[k1 * l0 + k0];
+                    out[i] += v[k1 * l0 + k0];
                 }
-                const auto vsc = (vs * centers).sum();
-                if (vsc) out -= vsc;
                 break;
             }
         }
@@ -501,8 +380,6 @@ public:
         const Eigen::Ref<const dense_t>& mat,
         const Eigen::Ref<const rowarr_index_t>& pairs,
         const Eigen::Ref<const vec_index_t>& levels,
-        const Eigen::Ref<const vec_value_t>& centers,
-        const Eigen::Ref<const vec_value_t>& scales,
         size_t n_threads
     ):
         _mat(mat.data(), mat.rows(), mat.cols()),
@@ -510,8 +387,6 @@ public:
         _levels(levels.data(), levels.size()),
         _outer(init_outer(pairs, levels)),
         _cols(_outer[_outer.size()-1]),
-        _centers(init_centers(mat, pairs, levels, centers, _cols)),
-        _scales(init_scales(mat, pairs, levels, _centers, scales, _cols)),
         _slice_map(init_slice_map(pairs, levels, _cols)),
         _index_map(init_index_map(pairs, levels, _cols)),
         _n_threads(n_threads)
@@ -522,9 +397,6 @@ public:
         }
         if (levels.size() != d) {
             throw util::adelie_core_error("levels must be of shape (d,) where mat is (n, d).");
-        }
-        if ((_scales <= 0).any()) {
-            throw util::adelie_core_error("scales must all be positive.");
         }
         if (n_threads < 1) {
             throw util::adelie_core_error("n_threads must be >= 1.");
@@ -542,9 +414,6 @@ public:
         const size_t G = _outer.size() - 1;
         return _outer.tail(G) - _outer.head(G);
     }
-
-    vec_value_t centers() const { return _centers; }
-    vec_value_t scales() const { return _scales; }
 
     value_t cmul(
         int j, 
@@ -590,7 +459,7 @@ public:
             const auto full_size = l0_exp * l1_exp - both_cont;
             const auto size = std::min<size_t>(full_size - index, q - n_processed);
             auto out_curr = out.segment(n_processed, size);
-            _bmul<true>(jj, i0, i1, l0, l1, index, v, weights, out_curr);
+            _bmul(jj, i0, i1, l0, l1, index, v, weights, out_curr);
             n_processed += size;
         }
     }
@@ -641,7 +510,7 @@ public:
             const auto l1_exp = (l1 <= 0) ? _n_levels_cont : l1;
             const auto full_size = l0_exp * l1_exp - both_cont;
             auto out_curr = out.segment(j, full_size);
-            _bmul<true>(j, i0, i1, l0, l1, 0, v, weights, out_curr);
+            _bmul(j, i0, i1, l0, l1, 0, v, weights, out_curr);
         };
         if (_n_threads <= 1) {
             for (int g = 0; g < _outer.size()-1; ++g) routine(g);
@@ -761,21 +630,6 @@ public:
                 break;
             }
         }
-
-        const auto centers = _centers.segment(j, q);
-        const auto scales = _scales.segment(j, q);
-
-        if ((centers != 0).any()) {
-            auto out_lower = out.template selfadjointView<Eigen::Lower>();
-            vec_value_t x_mean(q);
-            _bmul<false>(j, i0, i1, l0, l1, index, sqrt_w, sqrt_w, x_mean);
-            out_lower.rankUpdate(centers.matrix().transpose(), x_mean.matrix().transpose(), -1);
-            out_lower.rankUpdate(centers.matrix().transpose(), sqrt_w.square().sum());
-            out.template triangularView<Eigen::Upper>() = out.transpose();
-        }
-
-        out.array().rowwise() /= scales;
-        out.array().colwise() /= scales.matrix().transpose().array();
     }
 
     void sp_btmul(

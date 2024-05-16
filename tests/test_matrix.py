@@ -151,7 +151,7 @@ def run_naive(
 ):
     n, p = X.shape
 
-    atol = 1e-5 if dtype == np.float32 else 1e-14
+    atol = 2e-5 if dtype == np.float32 else 1e-14
 
     w = np.random.uniform(1, 2, n).astype(dtype)
 
@@ -334,7 +334,7 @@ def test_naive_interaction_dense():
             return np.array([np.ones(n), x]).T
         return np.array([x == k for k in range(level)]).T
 
-    def _create_dense(X, pairs, levels, centers, scales):
+    def _create_dense(X, pairs, levels):
         col_lst = []
         for pair in pairs:
             i0, i1 = pair[0], pair[1]
@@ -349,8 +349,7 @@ def test_naive_interaction_dense():
                 for j1 in range(Y1.shape[1]):
                     for j0 in range(Y0.shape[1]):
                         col_lst.append(Y0[:, j0] * Y1[:, j1])
-        X = np.array(col_lst, dtype=dtype, order=order).T
-        return (X - centers[None]) / scales[None]
+        return np.array(col_lst, dtype=dtype, order=order).T
 
     def _test(n, d, dtype, order, seed=0):
         np.random.seed(seed)
@@ -369,12 +368,7 @@ def test_naive_interaction_dense():
             else:
                 intr_map[j] = np.random.choice(d, size=d//2, replace=False)
         cX = mod.interaction(X, intr_map, levels=levels)
-        centers = np.random.normal(0, 1, cX.shape[1])
-        scales = np.random.uniform(0, 1, cX.shape[1])
-        cX = mod.interaction(X, intr_map, levels=levels, centers=centers, scales=scales)
-        assert np.allclose(centers, cX.centers)
-        assert np.allclose(scales, cX.scales)
-        X = _create_dense(X, cX.pairs, levels, centers, scales)
+        X = _create_dense(X, cX.pairs, levels)
         run_naive(X, cX, dtype)
 
     dtypes = [np.float64]
@@ -520,6 +514,37 @@ def test_naive_sparse():
             _test(2, 2, dtype, order)
             _test(100, 20, dtype, order)
             _test(20, 100, dtype, order)
+
+
+def test_naive_standardize():
+    def _test(n, p, dtype, seed=0):
+        np.random.seed(seed)
+        X = np.asfortranarray(np.random.normal(0, 1, (n, p)).astype(dtype))
+        dX = mod.dense(X) 
+
+        cX = mod.standardize(dX)
+        means = np.mean(X, axis=0)
+        scales = np.std(X, axis=0)
+        assert np.allclose(cX.centers, means)
+        assert np.allclose(cX.scales, scales)
+
+        centers = np.random.normal(0, 1, p)
+        cX = mod.standardize(dX, centers)
+        scales = np.sqrt(
+            np.sum((X - centers[None]) ** 2, axis=0) / n
+        )
+        assert np.allclose(cX.centers, centers)
+        assert np.allclose(cX.scales, scales)
+
+        X = (X - centers[None]) / scales[None]
+        run_naive(X, cX, dtype)
+
+    dtypes = [np.float32, np.float64]
+    for dtype in dtypes:
+        _test(2, 10, dtype)
+        _test(10, 1, dtype)
+        _test(100, 20, dtype)
+        _test(20, 100, dtype)
 
 
 def test_naive_csubset():

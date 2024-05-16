@@ -12,6 +12,7 @@
 #include <adelie_core/matrix/matrix_naive_snp_unphased.hpp>
 #include <adelie_core/matrix/matrix_naive_snp_phased_ancestry.hpp>
 #include <adelie_core/matrix/matrix_naive_sparse.hpp>
+#include <adelie_core/matrix/matrix_naive_standardize.hpp>
 #include <adelie_core/matrix/matrix_naive_subset.hpp>
 
 namespace py = pybind11;
@@ -522,9 +523,9 @@ void matrix_cov_sparse(py::module_& m, const char* name)
             py::arg("rows"),
             py::arg("cols"),
             py::arg("nnz"),
-            py::arg("outer"),
-            py::arg("inner"),
-            py::arg("value"),
+            py::arg("outer").noconvert(),
+            py::arg("inner").noconvert(),
+            py::arg("value").noconvert(),
             py::arg("n_threads")
         )
         ;
@@ -595,28 +596,21 @@ void matrix_naive_interaction_dense(py::module_& m, const char* name)
     using dense_t = typename internal_t::dense_t;
     using rowarr_index_t = typename internal_t::rowarr_index_t;
     using vec_index_t = typename internal_t::vec_index_t;
-    using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, base_t>(m, name)
         .def(
             py::init<
                 const Eigen::Ref<const dense_t>&,
                 const Eigen::Ref<const rowarr_index_t>&,
                 const Eigen::Ref<const vec_index_t>&,
-                const Eigen::Ref<const vec_value_t>&,
-                const Eigen::Ref<const vec_value_t>&,
                 size_t 
             >(), 
             py::arg("mat").noconvert(),
             py::arg("pairs").noconvert(),
             py::arg("levels").noconvert(),
-            py::arg("centers").noconvert(),
-            py::arg("scales").noconvert(),
             py::arg("n_threads")
         )
         .def_property_readonly("groups", &internal_t::groups)
         .def_property_readonly("group_sizes", &internal_t::group_sizes)
-        .def_property_readonly("centers", &internal_t::centers)
-        .def_property_readonly("scales", &internal_t::scales)
         ;
 }
 
@@ -644,7 +638,7 @@ void matrix_naive_kronecker_eye_dense(py::module_& m, const char* name)
     py::class_<internal_t, base_t>(m, name)
         .def(
             py::init<const Eigen::Ref<const dense_t>&, size_t, size_t>(), 
-            py::arg("mat"),
+            py::arg("mat").noconvert(),
             py::arg("K"),
             py::arg("n_threads")
         )
@@ -713,9 +707,30 @@ void matrix_naive_sparse(py::module_& m, const char* name)
             py::arg("rows"),
             py::arg("cols"),
             py::arg("nnz"),
-            py::arg("outer"),
-            py::arg("inner"),
-            py::arg("value"),
+            py::arg("outer").noconvert(),
+            py::arg("inner").noconvert(),
+            py::arg("value").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+template <class ValueType>
+void matrix_naive_standardize(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveStandardize<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using vec_value_t = typename internal_t::vec_value_t;
+    py::class_<internal_t, base_t>(m, name)
+        .def(py::init<
+            base_t&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            size_t
+        >(),
+            py::arg("mat"),
+            py::arg("centers").noconvert(),
+            py::arg("scales").noconvert(),
             py::arg("n_threads")
         )
         ;
@@ -735,7 +750,7 @@ void matrix_naive_csubset(py::module_& m, const char* name)
                 size_t
             >(),
             py::arg("mat"),
-            py::arg("subset"),
+            py::arg("subset").noconvert(),
             py::arg("n_threads")
         )
         ;
@@ -755,7 +770,7 @@ void matrix_naive_rsubset(py::module_& m, const char* name)
                 size_t
             >(),
             py::arg("mat"),
-            py::arg("subset"),
+            py::arg("subset").noconvert(),
             py::arg("n_threads")
         )
         ;
@@ -824,6 +839,9 @@ void register_matrix(py::module_& m)
 
     matrix_naive_sparse<sparse_type<double, Eigen::ColMajor>>(m, "MatrixNaiveSparse64F");
     matrix_naive_sparse<sparse_type<float, Eigen::ColMajor>>(m, "MatrixNaiveSparse32F");
+
+    matrix_naive_standardize<double>(m, "MatrixNaiveStandardize64");
+    matrix_naive_standardize<float>(m, "MatrixNaiveStandardize32");
 
     matrix_naive_csubset<double>(m, "MatrixNaiveCSubset64");
     matrix_naive_csubset<float>(m, "MatrixNaiveCSubset32");
