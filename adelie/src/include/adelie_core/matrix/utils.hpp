@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <adelie_core/util/macros.hpp>
+#include <adelie_core/configs.hpp>
 
 namespace adelie_core {
 namespace matrix {
@@ -13,11 +14,13 @@ void dvaddi(
     size_t n_threads
 )
 {
-    assert(n_threads > 0);
-    if (n_threads <= 1) { x1 += x2; return; }
     const size_t n = x1.size();
     const int n_blocks = std::min(n_threads, n);
     const int block_size = n / n_blocks;
+    if (n_threads <= 1 || block_size <= Configs::min_flops_per_thread) { 
+        x1 += x2; 
+        return; 
+    }
     const int remainder = n % n_blocks;
 
     #pragma omp parallel for schedule(static) num_threads(n_threads)

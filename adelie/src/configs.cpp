@@ -10,9 +10,11 @@ void configs(py::module_& m)
         .def_readonly_static("hessian_min_def", &configs_t::hessian_min_def)
         .def_readonly_static("pb_symbol_def", &configs_t::pb_symbol_def)
         .def_readonly_static("dbeta_tol_def", &configs_t::dbeta_tol_def)
+        .def_readonly_static("min_flops_per_thread_def", &configs_t::min_flops_per_thread_def)
         .def_readwrite_static("hessian_min", &configs_t::hessian_min)
         .def_readwrite_static("pb_symbol", &configs_t::pb_symbol)
         .def_readwrite_static("dbeta_tol", &configs_t::dbeta_tol)
+        .def_readwrite_static("min_flops_per_thread", &configs_t::min_flops_per_thread)
         ;
 }
 

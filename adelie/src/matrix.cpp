@@ -31,6 +31,7 @@ void utils(py::module_& m)
     using cref_rowarr_value_t = Eigen::Ref<const ad::util::rowarr_type<value_t>>;
     using cref_colmat_value_t = Eigen::Ref<const ad::util::colmat_type<value_t>>;
     using cref_mvec_value_t = Eigen::Ref<const Eigen::Matrix<value_t, 1, Eigen::Dynamic, Eigen::RowMajor>>;
+    using sw_t = ad::util::Stopwatch;
 
     m.def("dvaddi", ad::matrix::dvaddi<ref_vec_value_t, cref_vec_value_t>);
     m.def("dmmeq", ad::matrix::dmmeq<ref_rowarr_value_t, cref_rowarr_value_t>);
@@ -38,6 +39,22 @@ void utils(py::module_& m)
     m.def("ddot", ad::matrix::ddot<cref_mvec_value_t, cref_mvec_value_t, ref_vec_value_t>);
     m.def("dax", ad::matrix::dax<value_t, cref_vec_value_t, ref_vec_value_t>);
     m.def("dgemv", ad::matrix::dgemv<ad::util::operator_type::_eq, cref_colmat_value_t, cref_mvec_value_t, ref_rowmat_value_t, ref_mvec_value_t>);
+
+    m.def("bench_dvaddi", [](
+        ref_vec_value_t x1,
+        cref_vec_value_t x2,
+        size_t n_threads,
+        size_t n_sims
+    ) {
+        sw_t sw;
+        double time_elapsed;
+        for (size_t i = 0; i < n_sims; ++i) {
+            sw.start();
+            ad::matrix::dvaddi(x1, x2, n_threads);
+            time_elapsed += sw.elapsed();
+        }
+        return time_elapsed / n_sims;
+    });
 }
 
 template <class T>
