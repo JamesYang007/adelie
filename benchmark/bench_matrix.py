@@ -16,10 +16,13 @@ def bench_dvaddi(
     if n_threads_list is None:
         n_threads_list = 2 ** np.arange(0, 4)
     out = np.empty((len(n_threads_list), len(n_list)))
-    for j, n in enumerate(n_list):
-        x = np.random.normal(0, 1, n)
-        y = np.random.normal(0, 1, n)
-        for i, n_threads in enumerate(n_threads_list):
+    n_max = np.max(n_list)
+    x_max = np.random.normal(0, 1, n_max)
+    y_max = np.random.normal(0, 1, n_max)
+    for i, n_threads in enumerate(n_threads_list):
+        for j, n in enumerate(n_list):
+            x = x_max[:n]
+            y = y_max[:n]
             out[i,j] = matrix.bench_dvaddi(x, y, n_threads, n_sims)
 
     flops_per_thread_list = n_list[None] / n_threads_list[:, None]
