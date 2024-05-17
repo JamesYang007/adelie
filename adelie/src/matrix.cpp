@@ -53,7 +53,7 @@ void utils(py::module_& m)
         size_t n_sims
     ) {
         sw_t sw;
-        double time_elapsed;
+        double time_elapsed = 0;
         for (size_t i = 0; i < n_sims; ++i) {
             sw.start();
             ad::matrix::dvaddi(x1, x2, n_threads);
@@ -69,7 +69,7 @@ void utils(py::module_& m)
         size_t n_sims
     ) {
         sw_t sw;
-        double time_elapsed;
+        double time_elapsed = 0;
         for (size_t i = 0; i < n_sims; ++i) {
             sw.start();
             ad::matrix::dvsubi(x1, x2, n_threads);
@@ -85,7 +85,7 @@ void utils(py::module_& m)
         size_t n_sims
     ) {
         sw_t sw;
-        double time_elapsed;
+        double time_elapsed = 0;
         for (size_t i = 0; i < n_sims; ++i) {
             sw.start();
             ad::matrix::dvveq(x1, x2, n_threads);
@@ -101,7 +101,7 @@ void utils(py::module_& m)
         size_t n_sims
     ) {
         sw_t sw;
-        double time_elapsed;
+        double time_elapsed = 0;
         for (size_t i = 0; i < n_sims; ++i) {
             sw.start();
             ad::matrix::dvzero(x1, n_threads);
@@ -117,7 +117,7 @@ void utils(py::module_& m)
         size_t n_sims
     ) {
         sw_t sw;
-        double time_elapsed;
+        double time_elapsed = 0;
         double output = 0;
         vec_value_t buff(n_threads);
         for (size_t i = 0; i < n_sims; ++i) {
@@ -135,7 +135,7 @@ void utils(py::module_& m)
         size_t n_sims
     ) {
         sw_t sw;
-        double time_elapsed;
+        double time_elapsed = 0;
         for (size_t i = 0; i < n_sims; ++i) {
             sw.start();
             ad::matrix::dmmeq(x1, x2, n_threads);
@@ -154,7 +154,7 @@ void utils(py::module_& m)
         mvec_value_t out(x1.cols());
         auto v = x2.col(0).transpose();
         sw_t sw;
-        double time_elapsed;
+        double time_elapsed = 0;
         for (size_t i = 0; i < n_sims; ++i) {
             sw.start();
             ad::matrix::dgemv<ad::util::operator_type::_eq>(x1, v, n_threads, buff, out);
@@ -173,7 +173,7 @@ void utils(py::module_& m)
         mvec_value_t out(x1.cols());
         auto v = x2.col(0).transpose();
         sw_t sw;
-        double time_elapsed;
+        double time_elapsed = 0;
         for (size_t i = 0; i < n_sims; ++i) {
             sw.start();
             ad::matrix::dgemv<ad::util::operator_type::_add>(x1, v, n_threads, buff, out);
@@ -190,7 +190,7 @@ void utils(py::module_& m)
         size_t n_sims
     ) {
         sw_t sw;
-        double time_elapsed;
+        double time_elapsed = 0;
         double output = 0;
         vec_value_t buff(n_threads);
         for (size_t i = 0; i < n_sims; ++i) {
