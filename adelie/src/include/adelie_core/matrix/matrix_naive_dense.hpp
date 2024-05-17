@@ -189,7 +189,7 @@ public:
                 value
             );
             auto out_k = out.row(k);
-            out_k.noalias() = vk * _mat.transpose();
+            out_k = vk * _mat.transpose();
         };
     }
 };

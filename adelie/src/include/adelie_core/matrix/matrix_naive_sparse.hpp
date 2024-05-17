@@ -25,13 +25,14 @@ public:
 private:
     const Eigen::Map<const sparse_t> _mat;  // underlying sparse matrix
     const size_t _n_threads;                // number of threads
+    vec_value_t _buff;
 
     ADELIE_CORE_STRONG_INLINE
     value_t _cmul(
         int j, 
         const Eigen::Ref<const vec_value_t>& v,
         const Eigen::Ref<const vec_value_t>& weights
-    ) const
+    ) 
     {
         const auto outer = _mat.outerIndexPtr()[j];
         const auto size = _mat.outerIndexPtr()[j+1] - outer;
@@ -41,7 +42,7 @@ private:
         const Eigen::Map<const vec_sp_value_t> value(
             _mat.valuePtr() + outer, size
         );
-        return spddot(inner, value, v * weights);
+        return spddot(inner, value, v * weights, _n_threads, _buff);
     }
 
     ADELIE_CORE_STRONG_INLINE
@@ -73,7 +74,8 @@ public:
         size_t n_threads
     ): 
         _mat(rows, cols, nnz, outer.data(), inner.data(), value.data()),
-        _n_threads(n_threads)
+        _n_threads(n_threads),
+        _buff(n_threads)
     {
         if (n_threads < 1) {
             throw util::adelie_core_error("n_threads must be >= 1.");

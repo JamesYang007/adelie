@@ -15,12 +15,12 @@ void dvaddi(
 )
 {
     const size_t n = x1.size();
-    const int n_blocks = std::min(n_threads, n);
-    const int block_size = n / n_blocks;
-    if (n_threads <= 1 || block_size <= Configs::min_flops_per_thread) { 
+    if (n_threads <= 1 || 2 * n <= Configs::min_flops) { 
         x1 += x2; 
         return; 
     }
+    const int n_blocks = std::min(n_threads, n);
+    const int block_size = n / n_blocks;
     const int remainder = n % n_blocks;
 
     #pragma omp parallel for schedule(static) num_threads(n_threads)
@@ -42,9 +42,11 @@ void dvsubi(
     size_t n_threads
 )
 {
-    assert(n_threads > 0);
-    if (n_threads <= 1) { x1 -= x2; return; }
     const size_t n = x1.size();
+    if (n_threads <= 1 || 2 * n <= Configs::min_flops) { 
+        x1 -= x2;
+        return; 
+    }
     const int n_blocks = std::min(n_threads, n);
     const int block_size = n / n_blocks;
     const int remainder = n % n_blocks;
@@ -68,9 +70,11 @@ void dvveq(
     size_t n_threads
 )
 {
-    assert(n_threads > 0);
-    if (n_threads <= 1) { x1 = x2; return; }
     const size_t n = x1.size();
+    if (n_threads <= 1 || n <= Configs::min_flops) { 
+        x1 = x2;
+        return; 
+    }
     const int n_blocks = std::min(n_threads, n);
     const int block_size = n / n_blocks;
     const int remainder = n % n_blocks;
@@ -86,89 +90,6 @@ void dvveq(
     }
 }
 
-template <class X1Type, class X2Type>
-ADELIE_CORE_STRONG_INLINE
-void dmmeq(
-    X1Type& x1,
-    const X2Type& x2,
-    size_t n_threads
-)
-{
-    assert(n_threads > 0);
-    if (n_threads <= 1) { x1 = x2; return; }
-    const size_t n = x1.rows();
-    const int n_blocks = std::min(n_threads, n);
-    const int block_size = n / n_blocks;
-    const int remainder = n % n_blocks;
-
-    #pragma omp parallel for schedule(static) num_threads(n_threads)
-    for (int t = 0; t < n_blocks; ++t) {
-        const auto begin = (
-            std::min<int>(t, remainder) * (block_size + 1) 
-            + std::max<int>(t-remainder, 0) * block_size
-        );
-        const auto size = block_size + (t < remainder);
-        x1.middleRows(begin, size) = x2.middleRows(begin, size);
-    }
-}
-
-template <class X1Type, class X2Type, class BuffType>
-ADELIE_CORE_STRONG_INLINE
-typename std::decay_t<X1Type>::Scalar ddot(
-    const X1Type& x1, 
-    const X2Type& x2, 
-    size_t n_threads,
-    BuffType& buff
-)
-{
-    assert(n_threads > 0);
-    if (n_threads <= 1) { return x1.dot(x2); }
-    const size_t n = x1.size();
-    const int n_blocks = std::min(n_threads, n);
-    const int block_size = n / n_blocks;
-    const int remainder = n % n_blocks;
-
-    #pragma omp parallel for schedule(static) num_threads(n_threads)
-    for (int t = 0; t < n_blocks; ++t)
-    {
-        const auto begin = (
-            std::min<int>(t, remainder) * (block_size + 1) 
-            + std::max<int>(t-remainder, 0) * block_size
-        );
-        const auto size = block_size + (t < remainder);
-        buff[t] = x1.segment(begin, size).dot(x2.segment(begin, size));
-    }
-
-    return buff.head(n_blocks).sum();
-}
-
-template <class ValueType, class XType, class OutType>
-ADELIE_CORE_STRONG_INLINE
-void dax(
-    ValueType a,
-    const XType& x, 
-    size_t n_threads,
-    OutType& out
-)
-{
-    assert(n_threads > 0);
-    if (n_threads <= 1) { out = a * x; return; }
-    const size_t n = x.size();
-    const int n_blocks = std::min(n_threads, n);
-    const int block_size = n / n_blocks;
-    const int remainder = n % n_blocks;
-    #pragma omp parallel for schedule(static) num_threads(n_threads)
-    for (int t = 0; t < n_blocks; ++t)
-    {
-        const auto begin = (
-            std::min<int>(t, remainder) * (block_size + 1) 
-            + std::max<int>(t-remainder, 0) * block_size
-        );
-        const auto size = block_size + (t < remainder);
-        out.segment(begin, size) = a * x.segment(begin, size);
-    }
-}
-
 template <class OutType>
 ADELIE_CORE_STRONG_INLINE
 void dvzero(
@@ -176,9 +97,11 @@ void dvzero(
     size_t n_threads
 )
 {
-    assert(n_threads > 0);
-    if (n_threads <= 1) { out.setZero(); return; }
     const size_t n = out.size();
+    if (n_threads <= 1 || n <= 2 * Configs::min_flops) { 
+        out.setZero(); 
+        return; 
+    }
     const int n_blocks = std::min(n_threads, n);
     const int block_size = n / n_blocks;
     const int remainder = n % n_blocks;
@@ -195,6 +118,65 @@ void dvzero(
     }
 }
 
+template <class X1Type, class X2Type, class BuffType>
+ADELIE_CORE_STRONG_INLINE
+typename std::decay_t<X1Type>::Scalar ddot(
+    const X1Type& x1, 
+    const X2Type& x2, 
+    size_t n_threads,
+    BuffType& buff
+)
+{
+    const size_t n = x1.size();
+    if (n_threads <= 1 || 2 * n <= Configs::min_flops) { 
+        return x1.dot(x2); 
+    }
+    const int n_blocks = std::min(n_threads, n);
+    const int block_size = n / n_blocks;
+    const int remainder = n % n_blocks;
+
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
+    for (int t = 0; t < n_blocks; ++t)
+    {
+        const auto begin = (
+            std::min<int>(t, remainder) * (block_size + 1) 
+            + std::max<int>(t-remainder, 0) * block_size
+        );
+        const auto size = block_size + (t < remainder);
+        buff[t] = x1.segment(begin, size).dot(x2.segment(begin, size));
+    }
+    return buff.head(n_blocks).sum();
+}
+
+template <class X1Type, class X2Type>
+ADELIE_CORE_STRONG_INLINE
+void dmmeq(
+    X1Type& x1,
+    const X2Type& x2,
+    size_t n_threads
+)
+{
+    const size_t n = x1.rows();
+    // NOTE: multiplier of 4 from experimentation
+    if (n_threads <= 1 || 4 * n * x1.cols() <= Configs::min_flops) { 
+        x1 = x2; 
+        return; 
+    }
+    const int n_blocks = std::min(n_threads, n);
+    const int block_size = n / n_blocks;
+    const int remainder = n % n_blocks;
+
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
+    for (int t = 0; t < n_blocks; ++t) {
+        const auto begin = (
+            std::min<int>(t, remainder) * (block_size + 1) 
+            + std::max<int>(t-remainder, 0) * block_size
+        );
+        const auto size = block_size + (t < remainder);
+        x1.middleRows(begin, size) = x2.middleRows(begin, size);
+    }
+}
+
 template <util::operator_type op=util::operator_type::_eq, 
           class MType, class VType, class BuffType, class OutType>
 ADELIE_CORE_STRONG_INLINE
@@ -206,10 +188,12 @@ void dgemv(
     OutType& out
 )
 {
-    assert(n_threads > 0);
-    if (n_threads <= 1) { 
+    const size_t n = m.rows();
+    const size_t p = m.cols();
+    const size_t max_np = std::max(n, p);
+    if (n_threads <= 1 || n * p <= Configs::min_flops) { 
         if constexpr (op == util::operator_type::_eq) {
-            out.noalias() = v * m; 
+            out = v * m; 
         } else if constexpr (op == util::operator_type::_add) {
             out += v * m; 
         } else {
@@ -217,9 +201,6 @@ void dgemv(
         }
         return; 
     }
-    const size_t n = m.rows();
-    const size_t p = m.cols();
-    const size_t max_np = std::max(n, p);
     const int n_blocks = std::min(n_threads, max_np);
     const int block_size = max_np / n_blocks;
     const int remainder = max_np % n_blocks;
@@ -234,9 +215,9 @@ void dgemv(
             );
             const auto size = block_size + (t < remainder);
             if constexpr (op == util::operator_type::_eq) {
-                out.segment(begin, size).noalias() = v * m.middleCols(begin, size);
+                out.segment(begin, size) = v * m.middleCols(begin, size);
             } else if constexpr (op == util::operator_type::_add) {
-                out.segment(begin, size).noalias() += v * m.middleCols(begin, size);
+                out.segment(begin, size) += v * m.middleCols(begin, size);
             } else {
                 static_assert("Bad operator type!");
             }
@@ -252,7 +233,7 @@ void dgemv(
                 + std::max<int>(t-remainder, 0) * block_size
             );
             const auto size = block_size + (t < remainder);
-            buff.row(t).head(p).noalias() = (
+            buff.row(t).head(p) = (
                 v.segment(begin, size) * m.middleRows(begin, size)
             );
         }
@@ -338,21 +319,46 @@ auto svsvdot(
     return sum;
 }
 
-template <class InnerType, class ValueType, class DenseType>
+template <class InnerType, class ValueType, class DenseType, class BuffType>
 ADELIE_CORE_STRONG_INLINE
 auto spddot(
     const InnerType& inner, 
     const ValueType& value,
-    const DenseType& x
+    const DenseType& x,
+    size_t n_threads,
+    BuffType& buff
 )
 {
     using value_t = typename std::decay_t<DenseType>::Scalar;
 
-    value_t sum = 0;
-    for (int i = 0; i < inner.size(); ++i) {
-        sum += x[inner[i]] * value[i];
+    const size_t nnz = inner.size();
+    // NOTE: multiplier of 8 from experimentation
+    if (n_threads <= 1 || 8 * nnz <= Configs::min_flops) {
+        value_t sum = 0;
+        for (int i = 0; i < inner.size(); ++i) {
+            sum += x[inner[i]] * value[i];
+        }
+        return sum;
     }
-    return sum;
+    const int n_blocks = std::min(n_threads, nnz);
+    const int block_size = nnz / n_blocks;
+    const int remainder = nnz % n_blocks;
+
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
+    for (int t = 0; t < n_blocks; ++t)
+    {
+        const auto begin = (
+            std::min<int>(t, remainder) * (block_size + 1) 
+            + std::max<int>(t-remainder, 0) * block_size
+        );
+        const auto size = block_size + (t < remainder);
+        value_t sum = 0;
+        for (int i = begin; i < begin+size; ++i) {
+            sum += x[inner[i]] * value[i];
+        }
+        buff[t] = sum;
+    }
+    return buff.head(n_blocks).sum();
 }
 
 template <class InnerType, class ValueType, class T, class OutType>
