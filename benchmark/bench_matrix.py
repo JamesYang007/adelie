@@ -8,8 +8,9 @@ def bench_dvaddi(
     n_list=None, 
     n_threads_list=None,
     n_sims=10,
+    min_flops_per_thread=0,
 ):
-    ad.configs.set_configs("min_flops_per_thread", 0)
+    ad.configs.set_configs("min_flops_per_thread", min_flops_per_thread)
 
     if n_list is None:
         n_list = 2 ** np.arange(0, 24)
