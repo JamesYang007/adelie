@@ -215,16 +215,26 @@ public:
         );
     }
 
+    inner_t n_chunks(int j, size_t ctg) const
+    {
+        const auto* _col_ctg = col_ctg(j, ctg);
+        const auto _n_chunks = *reinterpret_cast<const inner_t*>(_col_ctg);
+        return _n_chunks;
+    }
+
+    iterator begin(int j, size_t ctg, size_t chnk) const
+    {
+        return iterator(chnk, col_ctg(j, ctg));
+    }
+
     iterator begin(int j, size_t ctg) const
     {
-        return iterator(0, col_ctg(j, ctg));
+        return begin(j, ctg, 0);
     }
 
     iterator end(int j, size_t ctg) const
     {
-        const auto* _col_ctg = col_ctg(j, ctg);
-        const auto n_chunks = *reinterpret_cast<const inner_t*>(_col_ctg);
-        return iterator(n_chunks, _col_ctg);
+        return begin(j, ctg, n_chunks(j, ctg));
     }
 
     rowarr_value_t to_dense(

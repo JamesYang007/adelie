@@ -37,7 +37,7 @@ public:
         _centers(centers.data(), centers.size()),
         _scales(scales.data(), scales.size()),
         _n_threads(n_threads),
-        _buff(mat.cols())
+        _buff(std::max<size_t>(mat.cols(), n_threads))
     {
         const auto p = mat.cols();
 
@@ -64,7 +64,9 @@ public:
     {
         base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
         const auto c = _centers[j];
-        const auto vw_sum = (c == 0) ? 0 : (v * weights).sum();
+        const auto vw_sum = (
+            (c == 0) ? 0 : ddot(v.matrix(), weights.matrix(), _n_threads, _buff)
+        );
         return (_mat->cmul(j, v, weights) - c * vw_sum) / _scales[j];
     }
 
@@ -78,7 +80,14 @@ public:
         const auto vs = v / _scales[j];
         _mat->ctmul(j, vs, out);
         const auto vsc = _centers[j] * vs;
-        if (vsc) out -= vsc;
+        if (!vsc) return;
+        dvsubi(
+            out, 
+            vec_value_t::NullaryExpr(out.size(), [&](auto i) {
+                return vsc;
+            }),
+            _n_threads
+        );
     }
 
     void bmul(
@@ -91,9 +100,11 @@ public:
         base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
         _mat->bmul(j, q, v, weights, out);
         const auto c = _centers.segment(j, q);
-        const auto vw_sum = (c == 0).all() ? 0 : (v * weights).sum();
+        const auto vw_sum = (
+            (c == 0).all() ? 0 : ddot(v.matrix(), weights.matrix(), _n_threads, _buff)
+        );
         const auto s = _scales.segment(j, q);
-        out = (out - vw_sum * c) / s;
+        dvveq(out, (out - vw_sum * c) / s, _n_threads);
     }
 
     void btmul(
@@ -105,10 +116,21 @@ public:
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         auto vs = _buff.segment(0, q);
         const auto s = _scales.segment(j, q);
-        vs = v / s;
+        dvveq(vs, v / s, _n_threads);
         _mat->btmul(j, q, vs, out);
-        const auto vsc = (vs * _centers.segment(j, q)).sum();
-        if (vsc) out -= vsc;
+
+        const auto vsc = ddot(
+            _centers.segment(j, q).matrix(),
+            vs.matrix(),
+            _n_threads,
+            _buff
+        );
+        if (!vsc) return;
+        dvsubi(
+            out, 
+            vec_value_t::NullaryExpr(out.size(), [&](auto) { return vsc; }),
+            _n_threads
+        );
     }
 
     void mul(
@@ -118,8 +140,8 @@ public:
     ) override
     {
         _mat->mul(v, weights, out);
-        const auto vw_sum = (v * weights).sum();
-        out = (out - vw_sum * _centers) / _scales;
+        const auto vw_sum = ddot(v.matrix(), weights.matrix(), _n_threads, _buff);
+        dvveq(out, (out - vw_sum * _centers) / _scales, _n_threads);
     }
 
     int rows() const override

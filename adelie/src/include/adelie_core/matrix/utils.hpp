@@ -1,7 +1,8 @@
 #pragma once
 #include <cstddef>
-#include <adelie_core/util/macros.hpp>
 #include <adelie_core/configs.hpp>
+#include <adelie_core/util/macros.hpp>
+#include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
 namespace matrix {
@@ -14,8 +15,10 @@ void dvaddi(
     size_t n_threads
 )
 {
+    using value_t = typename std::decay_t<X1Type>::Scalar;
     const size_t n = x1.size();
-    if (n_threads <= 1 || 2 * n <= Configs::min_flops) { 
+    const size_t n_bytes = (2 * sizeof(value_t)) * n;
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
         x1 += x2; 
         return; 
     }
@@ -42,8 +45,10 @@ void dvsubi(
     size_t n_threads
 )
 {
+    using value_t = typename std::decay_t<X1Type>::Scalar;
     const size_t n = x1.size();
-    if (n_threads <= 1 || 2 * n <= Configs::min_flops) { 
+    const size_t n_bytes = (2 * sizeof(value_t)) * n;
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
         x1 -= x2;
         return; 
     }
@@ -70,8 +75,10 @@ void dvveq(
     size_t n_threads
 )
 {
+    using value_t = typename std::decay_t<X1Type>::Scalar;
     const size_t n = x1.size();
-    if (n_threads <= 1 || n <= Configs::min_flops) { 
+    const size_t n_bytes = (1.5 * sizeof(value_t)) * n;
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
         x1 = x2;
         return; 
     }
@@ -97,8 +104,10 @@ void dvzero(
     size_t n_threads
 )
 {
+    using value_t = typename std::decay_t<OutType>::Scalar;
     const size_t n = out.size();
-    if (n_threads <= 1 || n <= 2 * Configs::min_flops) { 
+    const size_t n_bytes = sizeof(value_t) * n;
+    if (n_threads <= 1 || n_bytes <= 2 * Configs::min_bytes) { 
         out.setZero(); 
         return; 
     }
@@ -127,8 +136,10 @@ typename std::decay_t<X1Type>::Scalar ddot(
     BuffType& buff
 )
 {
+    using value_t = typename std::decay_t<X1Type>::Scalar;
     const size_t n = x1.size();
-    if (n_threads <= 1 || 2 * n <= Configs::min_flops) { 
+    const size_t n_bytes = (2 * sizeof(value_t)) * n;
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
         return x1.dot(x2); 
     }
     const int n_blocks = std::min(n_threads, n);
@@ -156,9 +167,11 @@ void dmmeq(
     size_t n_threads
 )
 {
+    using value_t = typename std::decay_t<X1Type>::Scalar;
     const size_t n = x1.rows();
-    // NOTE: multiplier of 4 from experimentation
-    if (n_threads <= 1 || 4 * n * x1.cols() <= Configs::min_flops) { 
+    // NOTE: multiplier from experimentation
+    const size_t n_bytes = (4 * sizeof(value_t)) * n * x1.cols();
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
         x1 = x2; 
         return; 
     }
@@ -188,10 +201,12 @@ void dgemv(
     OutType& out
 )
 {
+    using value_t = typename std::decay_t<MType>::Scalar;
     const size_t n = m.rows();
     const size_t p = m.cols();
     const size_t max_np = std::max(n, p);
-    if (n_threads <= 1 || n * p <= Configs::min_flops) { 
+    const size_t n_bytes = sizeof(value_t) * n * (p + 1);
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
         if constexpr (op == util::operator_type::_eq) {
             out = v * m; 
         } else if constexpr (op == util::operator_type::_add) {
@@ -332,8 +347,9 @@ auto spddot(
     using value_t = typename std::decay_t<DenseType>::Scalar;
 
     const size_t nnz = inner.size();
-    // NOTE: multiplier of 8 from experimentation
-    if (n_threads <= 1 || 8 * nnz <= Configs::min_flops) {
+    // NOTE: multiplier from experimentation
+    const size_t n_bytes = (16 * sizeof(value_t)) * nnz;
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
         value_t sum = 0;
         for (int i = 0; i < inner.size(); ++i) {
             sum += x[inner[i]] * value[i];
@@ -367,11 +383,157 @@ void spaxi(
     const InnerType& inner, 
     const ValueType& value,
     T v,
-    OutType& out
+    OutType& out,
+    size_t n_threads
 )
 {
-    for (int i = 0; i < inner.size(); ++i) {
-        out[inner[i]] += v * value[i];
+    using value_t = typename std::decay_t<ValueType>::Scalar;
+    const size_t nnz = inner.size();
+    // NOTE: multiplier from experimentation
+    const size_t n_bytes = (16 * sizeof(value_t)) * nnz;
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+        for (int i = 0; i < nnz; ++i) {
+            out[inner[i]] += v * value[i];
+        }
+        return;
+    }
+    const int n_blocks = std::min(n_threads, nnz);
+    const int block_size = nnz / n_blocks;
+    const int remainder = nnz % n_blocks;
+
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
+    for (int t = 0; t < n_blocks; ++t)
+    {
+        const auto begin = (
+            std::min<int>(t, remainder) * (block_size + 1) 
+            + std::max<int>(t-remainder, 0) * block_size
+        );
+        const auto size = block_size + (t < remainder);
+        for (int i = begin; i < begin+size; ++i) {
+            out[inner[i]] += v * value[i];
+        }
+    }
+}
+
+template <class IOType, class VType, class BuffType>
+auto snp_unphased_dot(
+    const IOType& io,
+    int j, 
+    const VType& v,
+    size_t n_threads,
+    BuffType& buff
+)
+{
+    using io_t = std::decay_t<IOType>;
+    using value_t = typename std::decay_t<VType>::Scalar;
+
+    const auto nnz = io.nnz()[j];
+    const value_t imp = io.impute()[j];
+    // NOTE: multiplier from experimentation
+    const size_t n_bytes = (16 * sizeof(value_t)) * nnz;
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+        value_t sum = 0;
+        for (int c = 0; c < io_t::n_categories; ++c) {
+            auto it = io.begin(j, c);
+            const auto end = io.end(j, c);
+            const value_t val = (c == 0) ? imp : c;
+            value_t curr_sum = 0;
+            for (; it != end; ++it) {
+                const auto idx = *it;
+                curr_sum += v[idx]; 
+            }
+            sum += curr_sum * val;
+        }
+        return sum;
+    }
+
+    auto vbuff = buff.head(n_threads);
+
+    #pragma omp parallel num_threads(n_threads)
+    {
+        for (int c = 0; c < io_t::n_categories; ++c) {
+            const size_t n_chunks = io.n_chunks(j, c);
+            const int n_blocks = std::min(n_threads, n_chunks);
+            const int block_size = n_chunks / n_blocks;
+            const int remainder = n_chunks % n_blocks;
+
+            #pragma omp for schedule(static) nowait
+            for (int t = 0; t < n_blocks; ++t) {
+                const auto begin = (
+                    std::min<int>(t, remainder) * (block_size + 1) 
+                    + std::max<int>(t-remainder, 0) * block_size
+                );
+                const auto size = block_size + (t < remainder);
+                auto it = io.begin(j, c, begin);
+                const auto end = io.begin(j, c, begin + size);
+
+                const value_t val = (c == 0) ? imp : c;
+                value_t sum = 0;
+                for (; it != end; ++it) {
+                    const auto idx = *it;
+                    sum += v[idx]; 
+                }
+                vbuff[t] += sum * val;
+            }
+        }
+    }
+    return vbuff.sum();
+}
+
+template <class IOType, class ValueType, class OutType>
+void snp_unphased_axi(
+    const IOType& io,
+    int j, 
+    ValueType v,
+    OutType& out,
+    size_t n_threads
+)
+{
+    using io_t = std::decay_t<IOType>;
+    using value_t = ValueType;
+
+    const auto nnz = io.nnz()[j];
+    const value_t imp = io.impute()[j];
+    // NOTE: multiplier from experimentation
+    const size_t n_bytes = (16 * sizeof(value_t)) * nnz;
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+        for (int c = 0; c < io_t::n_categories; ++c) {
+            auto it = io.begin(j, c);
+            const auto end = io.end(j, c);
+            const value_t curr_val = v * ((c == 0) ? imp : c);
+            for (; it != end; ++it) {
+                const auto idx = *it;
+                out[idx] += curr_val; 
+            }
+        }
+        return;
+    }
+
+    #pragma omp parallel num_threads(n_threads)
+    {
+        for (int c = 0; c < io_t::n_categories; ++c) {
+            const size_t n_chunks = io.n_chunks(j, c);
+            const int n_blocks = std::min(n_threads, n_chunks);
+            const int block_size = n_chunks / n_blocks;
+            const int remainder = n_chunks % n_blocks;
+
+            #pragma omp for schedule(static) nowait
+            for (int t = 0; t < n_blocks; ++t) {
+                const auto begin = (
+                    std::min<int>(t, remainder) * (block_size + 1) 
+                    + std::max<int>(t-remainder, 0) * block_size
+                );
+                const auto size = block_size + (t < remainder);
+                auto it = io.begin(j, c, begin);
+                const auto end = io.begin(j, c, begin + size);
+
+                const value_t curr_val = v * ((c == 0) ? imp : c);
+                for (; it != end; ++it) {
+                    const auto idx = *it;
+                    out[idx] += curr_val; 
+                }
+            }
+        }
     }
 }
 

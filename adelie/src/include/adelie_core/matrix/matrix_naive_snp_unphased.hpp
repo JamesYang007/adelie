@@ -31,6 +31,7 @@ protected:
     const size_t _n_threads;    // number of threads
     util::rowarr_type<index_t> _ibuff;
     util::rowarr_type<value_t> _vbuff;
+    vec_value_t _buff;
 
     static auto init_io(
         const string_t& filename,
@@ -46,42 +47,22 @@ protected:
     value_t _cmul(
         int j, 
         const Eigen::Ref<const vec_value_t>& v,
-        const Eigen::Ref<const vec_value_t>& weights
-    ) const
+        const Eigen::Ref<const vec_value_t>& weights,
+        size_t n_threads
+    ) 
     {
-        const value_t imp = _io.impute()[j];
-        value_t sum = 0;
-        for (int c = 0; c < io_t::n_categories; ++c) {
-            auto it = _io.begin(j, c);
-            const auto end = _io.end(j, c);
-            const value_t val = (c == 0) ? imp : c;
-            value_t curr_sum = 0;
-            for (; it != end; ++it) {
-                const auto idx = *it;
-                curr_sum += v[idx] * weights[idx]; 
-            }
-            sum += curr_sum * val;
-        }
-        return sum;
+        return snp_unphased_dot(_io, j, v * weights, n_threads, _buff);
     }
 
     ADELIE_CORE_STRONG_INLINE
     void _ctmul(
         int j, 
         value_t v, 
-        Eigen::Ref<vec_value_t> out
+        Eigen::Ref<vec_value_t> out,
+        size_t n_threads
     ) const
     {
-        const value_t imp = _io.impute()[j];
-        for (int c = 0; c < io_t::n_categories; ++c) {
-            auto it = _io.begin(j, c);
-            const auto end = _io.end(j, c);
-            const value_t curr_val = v * ((c == 0) ? imp : c);
-            for (; it != end; ++it) {
-                const auto idx = *it;
-                out[idx] += curr_val; 
-            }
-        }
+        snp_unphased_axi(_io, j, v, out, n_threads);
     }
 
 public:
@@ -93,7 +74,8 @@ public:
         _io(init_io(filename, read_mode)),
         _n_threads(n_threads),
         _ibuff(n_threads, _io.rows()),
-        _vbuff(n_threads, _io.rows())
+        _vbuff(n_threads, _io.rows()),
+        _buff(n_threads)
     {
         if (n_threads < 1) {
             throw util::adelie_core_error("n_threads must be >= 1.");
@@ -108,7 +90,7 @@ public:
     ) override
     {
         base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-        return _cmul(j, v, weights);
+        return _cmul(j, v, weights, _n_threads);
     }
 
     void ctmul(
@@ -118,7 +100,7 @@ public:
     ) override
     {
         base_t::check_ctmul(j, out.size(), rows(), cols());
-        _ctmul(j, v, out);
+        _ctmul(j, v, out, _n_threads);
     }
 
     void bmul(
@@ -130,7 +112,7 @@ public:
     {
         base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
         for (int t = 0; t < q; ++t) {
-            out[t] = _cmul(j + t, v, weights);
+            out[t] = _cmul(j + t, v, weights, _n_threads);
         }
     }
 
@@ -142,7 +124,7 @@ public:
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         for (int t = 0; t < q; ++t) {
-            _ctmul(j + t, v[t], out);
+            _ctmul(j + t, v[t], out, _n_threads);
         }
     }
 
@@ -153,7 +135,7 @@ public:
     ) override
     {
         const auto routine = [&](int t) {
-            out[t] = _cmul(t, v, weights);
+            out[t] = _cmul(t, v, weights, 1);
         };
         if (_n_threads <= 1) {
             for (int t = 0; t < cols(); ++t) routine(t);
@@ -272,7 +254,7 @@ public:
             auto out_k = out.row(k);
             out_k.setZero();
             for (; it; ++it) {
-                _ctmul(it.index(), it.value(), out_k);
+                _ctmul(it.index(), it.value(), out_k, 1);
             }
         };
         if (_n_threads <= 1) {

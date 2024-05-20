@@ -28,6 +28,7 @@ private:
     const vec_index_t _slice_map;           // (p,) array mapping to matrix slice
     const vec_index_t _index_map;           // (p,) array mapping to (relative) index of the slice
     const size_t _n_threads;                // number of threads
+    vec_value_t _buff;
 
     static inline auto init_outer(
         const Eigen::Ref<const vec_index_t>& levels
@@ -82,7 +83,8 @@ private:
     value_t _cmul(
         int j, 
         const Eigen::Ref<const vec_value_t>& v,
-        const Eigen::Ref<const vec_value_t>& weights
+        const Eigen::Ref<const vec_value_t>& weights,
+        size_t n_threads
     )
     {
         const auto& w = weights;
@@ -92,20 +94,21 @@ private:
 
         switch (level) {
             case 0: {
-                return (v * w * _mat.col(slice).transpose().array()).sum();
+                return ddot((v * w).matrix(), _mat.col(slice), n_threads, _buff);
                 break;
             }
             case 1: {
-                return (v * w).sum();
+                return ddot(v.matrix(), w.matrix(), n_threads, _buff);
                 break;
             }
             default: {
-                value_t sum = 0;
-                for (int i = 0; i < _mat.rows(); ++i) {
-                    if (_mat(i, slice) != index) continue;
-                    sum += v[i] * w[i];
-                }
-                return sum;
+                const auto m_slice = _mat.col(slice).transpose().array();
+                return ddot(
+                    (v * w).matrix(),
+                    (m_slice == index).template cast<value_t>().matrix(),
+                    n_threads,
+                    _buff
+                );
                 break;
             }
         }
@@ -114,7 +117,8 @@ private:
     void _ctmul(
         int j, 
         value_t v, 
-        Eigen::Ref<vec_value_t> out
+        Eigen::Ref<vec_value_t> out,
+        size_t n_threads
     ) 
     {
         const auto slice = _slice_map[j];
@@ -123,18 +127,26 @@ private:
 
         switch (level) {
             case 0: {
-                out += v * _mat.col(slice).transpose().array();
+                dvaddi(out, v * _mat.col(slice).transpose().array(), n_threads);
                 break;
             }
             case 1: {
-                out += v;
+                dvaddi(
+                    out, 
+                    vec_value_t::NullaryExpr(_mat.rows(), [=](auto) { 
+                        return v; 
+                    }), 
+                    n_threads
+                );
                 break;
             }
             default: {
-                for (int i = 0; i < _mat.rows(); ++i) {
-                    if (_mat(i, slice) != index) continue;
-                    out[i] += v;
-                }
+                const auto m_slice = _mat.col(slice).transpose().array();
+                dvaddi(
+                    out,
+                    v * (m_slice == index).template cast<value_t>(),
+                    n_threads
+                );
                 break;
             }
         }
@@ -147,14 +159,15 @@ private:
         int level,
         const Eigen::Ref<const vec_value_t>& v, 
         const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
+        Eigen::Ref<vec_value_t> out,
+        size_t n_threads
     )
     {
         const auto size = out.size();
         const auto full_size = std::max<size_t>(level, 1);
         if (index != 0 || size != full_size) {
             for (int l = 0; l < size; ++l) {
-                out[l] = _cmul(begin+l, v, weights);
+                out[l] = _cmul(begin+l, v, weights, n_threads);
             }
             return;
         }
@@ -163,7 +176,7 @@ private:
         switch (level) {
             case 0: 
             case 1: {
-                out[0] = _cmul(begin, v, weights);
+                out[0] = _cmul(begin, v, weights, n_threads);
                 break;
             }
             default: {
@@ -185,31 +198,42 @@ private:
         int level,
         int size,
         const Eigen::Ref<const vec_value_t>& v, 
-        Eigen::Ref<vec_value_t> out
+        Eigen::Ref<vec_value_t> out,
+        size_t n_threads
     )
     {
         const auto full_size = std::max<size_t>(level, 1);
         if (index != 0 || size != full_size) {
             for (int l = 0; l < size; ++l) {
-                _ctmul(begin+l, v[l], out);
+                _ctmul(begin+l, v[l], out, n_threads);
             }
             return;
         }
         level = std::max(level, 0);
         switch (level) {
             case 0: {
-                out += v[0] * _mat.col(slice).transpose().array();
+                dvaddi(out, v[0] * _mat.col(slice).transpose().array(), n_threads);
                 break;
             }
             case 1: {
-                out += v[0];
+                dvaddi(
+                    out, 
+                    vec_value_t::NullaryExpr(_mat.rows(), [&](auto) { 
+                        return v[0];
+                    }), 
+                    n_threads
+                );
                 break;
             }
             default: {
-                for (int i = 0; i < _mat.rows(); ++i) {
-                    const int k = _mat(i, slice);
-                    out[i] += v[k];
-                }
+                dvaddi(
+                    out, 
+                    vec_value_t::NullaryExpr(_mat.rows(), [&](auto i) {
+                        const int k = _mat(i, slice);
+                        return v[k];
+                    }),
+                    n_threads
+                );
                 break;
             }
         }
@@ -227,7 +251,8 @@ public:
         _cols(_outer[_outer.size()-1]),
         _slice_map(init_slice_map(levels, _cols)),
         _index_map(init_index_map(levels, _cols)),
-        _n_threads(n_threads)
+        _n_threads(n_threads),
+        _buff(n_threads)
     {
         const auto d = mat.cols();
 
@@ -258,7 +283,7 @@ public:
     ) override
     {
         base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-        return _cmul(j, v, weights);
+        return _cmul(j, v, weights, _n_threads);
     }
 
     void ctmul(
@@ -268,7 +293,7 @@ public:
     ) override
     {
         base_t::check_ctmul(j, out.size(), rows(), cols());
-        _ctmul(j, v, out);
+        _ctmul(j, v, out, _n_threads);
     }
 
     void bmul(
@@ -288,7 +313,7 @@ public:
             const auto full_size = std::max<size_t>(level, 1);
             const auto size = std::min<size_t>(full_size - index, q - n_processed);
             auto out_curr = out.segment(n_processed, size);
-            _bmul(jj, slice, index, level, v, weights, out_curr);
+            _bmul(jj, slice, index, level, v, weights, out_curr, _n_threads);
             n_processed += size;
         }
     }
@@ -309,7 +334,7 @@ public:
             const auto full_size = std::max<size_t>(level, 1);
             const auto size = std::min<size_t>(full_size - index, q - n_processed);
             const auto v_curr = v.segment(n_processed, size);
-            _btmul(jj, slice, index, level, size, v_curr, out);
+            _btmul(jj, slice, index, level, size, v_curr, out, _n_threads);
             n_processed += size;
         }
     }
@@ -325,7 +350,7 @@ public:
             const auto level = _levels[g];
             const auto full_size = std::max<size_t>(level, 1);
             auto out_curr = out.segment(j, full_size);
-            _bmul(j, g, 0, level, v, weights, out_curr);
+            _bmul(j, g, 0, level, v, weights, out_curr, 1);
         };
         if (_n_threads <= 1) {
             for (int g = 0; g < _mat.cols(); ++g) routine(g);
@@ -357,6 +382,43 @@ public:
             out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
             rows(), cols()
         );
+
+        const auto slice = _slice_map[j];
+        const auto index = _index_map[j];
+        const auto outer = _outer[slice];
+        if ((index != 0) || (_outer[slice+1] - outer != q)) {
+            throw util::adelie_core_error(
+                "MatrixNaiveOneHotDense::cov() not implemented for ranges that contain multiple blocks. "
+                "If triggered from a solver, this error is usually because "
+                "the groups argument is inconsistent with the implicit group structure "
+                "of the matrix. "
+            );
+        }
+
+        const auto& sqrt_w = sqrt_weights;
+        const auto level = std::max<size_t>(_levels[slice], 0);
+
+        switch (level) {
+            case 0: {
+                auto mi = _mat.col(slice).transpose().array();
+                const auto sqrt_w_mi = (sqrt_w * mi).matrix();
+                out(0, 0) = ddot(sqrt_w_mi, sqrt_w_mi, _n_threads, _buff);
+                break;
+            }
+            case 1: {
+                out(0, 0) = ddot(sqrt_w.matrix(), sqrt_w.matrix(), _n_threads, _buff);
+                break;
+            }
+            default: {
+                out.setZero();
+                for (int i = 0; i < _mat.rows(); ++i) {
+                    const auto sqrt_wi = sqrt_w[i];
+                    const int k = _mat(i, slice);
+                    out(k, k) += sqrt_wi * sqrt_wi;
+                }
+                break;
+            }
+        }
     }
 
     void sp_btmul(
@@ -367,6 +429,20 @@ public:
         base_t::check_sp_btmul(
             v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
+        const auto routine = [&](auto k) {
+            typename sp_mat_value_t::InnerIterator it(v, k);
+            auto out_k = out.row(k);
+            out_k.setZero();
+            for (; it; ++it) {
+                _ctmul(it.index(), it.value(), out_k, 1);
+            }
+        };
+        if (_n_threads <= 1) {
+            for (int k = 0; k < v.outerSize(); ++k) routine(k);
+        } else {
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int k = 0; k < v.outerSize(); ++k) routine(k);
+        }
     }
 };
 

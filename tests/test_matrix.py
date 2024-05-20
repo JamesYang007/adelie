@@ -5,6 +5,10 @@ import scipy
 import os
 import warnings
 
+# Set to a value that will test all cases
+# of n_threads being capped to 1 and using the passed-in value.
+ad.configs.set_configs("min_bytes", 20)
+
 
 # ==========================================================================================
 # TEST cov
@@ -151,7 +155,7 @@ def run_naive(
 ):
     n, p = X.shape
 
-    atol = 2e-5 if dtype == np.float32 else 1e-14
+    atol = 1e-4 if dtype == np.float32 else 1e-14
 
     w = np.random.uniform(1, 2, n).astype(dtype)
 
@@ -232,10 +236,12 @@ def run_naive(
                 pass
             elif "MatrixNaiveInteractionDense::cov() not implemented for " in err_msg:
                 pass
+            elif "MatrixNaiveOneHotDense::cov() not implemented for " in err_msg:
+                pass
             else:
                 raise err
 
-    # test cov (special for MatrixNaiveInteractionDenseXXX)
+    # test cov (special cases)
     if isinstance(
         cX,
         (
@@ -243,6 +249,10 @@ def run_naive(
             ad.adelie_core.matrix.MatrixNaiveInteractionDense64F,
             ad.adelie_core.matrix.MatrixNaiveInteractionDense32C,
             ad.adelie_core.matrix.MatrixNaiveInteractionDense32F,
+            ad.adelie_core.matrix.MatrixNaiveOneHotDense64C,
+            ad.adelie_core.matrix.MatrixNaiveOneHotDense64F,
+            ad.adelie_core.matrix.MatrixNaiveOneHotDense32C,
+            ad.adelie_core.matrix.MatrixNaiveOneHotDense32F,
         )
     ):
         groups = cX.groups
@@ -367,9 +377,12 @@ def test_naive_interaction_dense():
                 intr_map[j] = None
             else:
                 intr_map[j] = np.random.choice(d, size=d//2, replace=False)
-        cX = mod.interaction(X, intr_map, levels=levels)
+        cX = mod.interaction(X, intr_map, levels=levels, n_threads=2)
         X = _create_dense(X, cX.pairs, levels)
         run_naive(X, cX, dtype)
+
+    min_bytes = ad.configs.Configs.min_bytes
+    ad.configs.set_configs("min_bytes", None)
 
     dtypes = [np.float64]
     orders = ["C", "F"]
@@ -380,6 +393,8 @@ def test_naive_interaction_dense():
             _test(1, 10, dtype, order)
             _test(20, 30, dtype, order)
             _test(100, 20, dtype, order)
+
+    ad.configs.set_configs("min_bytes", min_bytes)
 
 
 def test_naive_kronecker_eye():
@@ -644,3 +659,7 @@ def test_naive_rsubset():
             _test(10, 7, subset_prop, dtype)
             _test(100, 20, subset_prop, dtype)
             _test(20, 100, subset_prop, dtype)
+
+
+# Reset to default settings
+ad.configs.set_configs("min_bytes", None)

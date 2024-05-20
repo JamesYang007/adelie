@@ -46,9 +46,8 @@ public:
     ) override
     {
         base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-        const size_t n_threads = 1; // DO NOT parallelize. Task too small usually.
-        Eigen::Map<vec_value_t> vbuff(_buff.data(), n_threads);
-        return ddot(_mat.col(j), (v * weights).matrix(), n_threads, vbuff);
+        Eigen::Map<vec_value_t> vbuff(_buff.data(), _n_threads);
+        return ddot(_mat.col(j), (v * weights).matrix(), _n_threads, vbuff);
     }
 
     void ctmul(
@@ -58,8 +57,7 @@ public:
     ) override
     {
         base_t::check_ctmul(j, out.size(), rows(), cols());
-        const size_t n_threads = 1; // DO NOT parallelize. Task too small usually.
-        dvaddi(out, v * _mat.col(j).transpose().array(), n_threads);
+        dvaddi(out, v * _mat.col(j).transpose().array(), _n_threads);
     }
 
     void bmul(
@@ -71,12 +69,11 @@ public:
     {
         base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
         auto outm = out.matrix();
-        const size_t n_threads = 1; // DO NOT parallelize. Task too small usually.
-        _vbuff = v * weights;
+        dvveq(_vbuff, v * weights, _n_threads);
         dgemv(
             _mat.middleCols(j, q),
             _vbuff.matrix(),
-            n_threads,
+            _n_threads,
             _buff,
             outm
         );
@@ -90,11 +87,10 @@ public:
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         auto outm = out.matrix();
-        const size_t n_threads = 1; // DO NOT parallelize. Task too small usually.
         dgemv<util::operator_type::_add>(
             _mat.middleCols(j, q).transpose(),
             v.matrix(),
-            n_threads,
+            _n_threads,
             _buff,
             outm
         );
@@ -107,7 +103,7 @@ public:
     ) override
     {
         auto outm = out.matrix();
-        _vbuff = v * weights;
+        dvveq(_vbuff, v * weights, _n_threads);
         dgemv(
             _mat,
             _vbuff.matrix(),
@@ -141,14 +137,20 @@ public:
         );
         
         if (q == 1) {
-            out(0, 0) = (_mat.col(j).transpose().array() * sqrt_weights).square().sum();
+            const auto sqrt_w_mj = (_mat.col(j).transpose().array() * sqrt_weights).matrix();
+            Eigen::Map<vec_value_t> vbuff(_buff.data(), _n_threads);
+            out(0, 0) = ddot(sqrt_w_mj, sqrt_w_mj, _n_threads, vbuff);
             return;
         }
 
         auto& Xj = buffer;
         
         auto Xj_array = Xj.array();
-        Xj_array = _mat.middleCols(j, q).array().colwise() * sqrt_weights.matrix().transpose().array();
+        dmmeq(
+            Xj_array, 
+            _mat.middleCols(j, q).array().colwise() * sqrt_weights.matrix().transpose().array(),
+            _n_threads
+        );
 
         out.setZero();
         auto out_lower = out.template selfadjointView<Eigen::Lower>();

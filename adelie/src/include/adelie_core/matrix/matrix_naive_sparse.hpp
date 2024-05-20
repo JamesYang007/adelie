@@ -31,7 +31,8 @@ private:
     value_t _cmul(
         int j, 
         const Eigen::Ref<const vec_value_t>& v,
-        const Eigen::Ref<const vec_value_t>& weights
+        const Eigen::Ref<const vec_value_t>& weights,
+        size_t n_threads
     ) 
     {
         const auto outer = _mat.outerIndexPtr()[j];
@@ -42,14 +43,15 @@ private:
         const Eigen::Map<const vec_sp_value_t> value(
             _mat.valuePtr() + outer, size
         );
-        return spddot(inner, value, v * weights, _n_threads, _buff);
+        return spddot(inner, value, v * weights, n_threads, _buff);
     }
 
     ADELIE_CORE_STRONG_INLINE
     void _ctmul(
         int j, 
         value_t v, 
-        Eigen::Ref<vec_value_t> out
+        Eigen::Ref<vec_value_t> out,
+        size_t n_threads
     ) const
     {
         const auto outer = _mat.outerIndexPtr()[j];
@@ -60,7 +62,7 @@ private:
         const Eigen::Map<const vec_sp_value_t> value(
             _mat.valuePtr() + outer, size
         );
-        spaxi(inner, value, v, out);
+        spaxi(inner, value, v, out, n_threads);
     }
     
 public:
@@ -89,7 +91,7 @@ public:
     ) override
     {
         base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-        return _cmul(j, v, weights);
+        return _cmul(j, v, weights, _n_threads);
     }
 
     void ctmul(
@@ -99,7 +101,7 @@ public:
     ) override
     {
         base_t::check_ctmul(j, out.size(), rows(), cols());
-        _ctmul(j, v, out);
+        _ctmul(j, v, out, _n_threads);
     }
 
     void bmul(
@@ -111,7 +113,7 @@ public:
     {
         base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
         for (int k = 0; k < q; ++k) {
-            out[k] = _cmul(j+k, v, weights);
+            out[k] = _cmul(j+k, v, weights, _n_threads);
         }
     }
 
@@ -123,7 +125,7 @@ public:
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         for (int k = 0; k < q; ++k) {
-            _ctmul(j+k, v[k], out);
+            _ctmul(j+k, v[k], out, _n_threads);
         }
     }
 
@@ -134,7 +136,7 @@ public:
     ) override
     {
         const auto routine = [&](int k) {
-            out[k] = _cmul(k, v, weights);
+            out[k] = _cmul(k, v, weights, 1);
         };
         if (_n_threads <= 1) {
             for (int k = 0; k < out.size(); ++k) routine(k);
@@ -215,7 +217,28 @@ public:
         base_t::check_sp_btmul(
             v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
-        out = v * _mat.transpose();
+        const auto outer = v.outerIndexPtr();
+        const auto inner = v.innerIndexPtr();
+        const auto value = v.valuePtr();
+
+        const auto routine = [&](auto k) {
+            const Eigen::Map<const sp_mat_value_t> vk(
+                1,
+                v.cols(),
+                outer[k+1] - outer[k],
+                outer + k,
+                inner,
+                value
+            );
+            auto out_k = out.row(k);
+            out_k = vk * _mat.transpose();
+        };
+        if (_n_threads <= 1) {
+            for (int k = 0; k < v.outerSize(); ++k) routine(k);
+        } else {
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int k = 0; k < v.outerSize(); ++k) routine(k);
+        }
     }
 };
 
