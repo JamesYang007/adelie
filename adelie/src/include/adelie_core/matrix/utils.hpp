@@ -448,6 +448,7 @@ auto snp_unphased_dot(
     }
 
     auto vbuff = buff.head(n_threads);
+    vbuff.setZero();
 
     #pragma omp parallel num_threads(n_threads)
     {
@@ -456,6 +457,7 @@ auto snp_unphased_dot(
             const int n_blocks = std::min(n_threads, n_chunks);
             const int block_size = n_chunks / n_blocks;
             const int remainder = n_chunks % n_blocks;
+            const value_t val = (c == 0) ? imp : c;
 
             #pragma omp for schedule(static) nowait
             for (int t = 0; t < n_blocks; ++t) {
@@ -467,7 +469,6 @@ auto snp_unphased_dot(
                 auto it = io.begin(j, c, begin);
                 const auto end = io.begin(j, c, begin + size);
 
-                const value_t val = (c == 0) ? imp : c;
                 value_t sum = 0;
                 for (; it != end; ++it) {
                     const auto idx = *it;
@@ -516,6 +517,7 @@ void snp_unphased_axi(
             const int n_blocks = std::min(n_threads, n_chunks);
             const int block_size = n_chunks / n_blocks;
             const int remainder = n_chunks % n_blocks;
+            const value_t curr_val = v * ((c == 0) ? imp : c);
 
             #pragma omp for schedule(static) nowait
             for (int t = 0; t < n_blocks; ++t) {
@@ -527,10 +529,8 @@ void snp_unphased_axi(
                 auto it = io.begin(j, c, begin);
                 const auto end = io.begin(j, c, begin + size);
 
-                const value_t curr_val = v * ((c == 0) ? imp : c);
                 for (; it != end; ++it) {
-                    const auto idx = *it;
-                    out[idx] += curr_val; 
+                    out[*it] += curr_val; 
                 }
             }
         }

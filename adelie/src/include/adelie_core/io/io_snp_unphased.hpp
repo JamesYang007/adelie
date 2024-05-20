@@ -53,7 +53,20 @@ struct IOSNPChunkIterator
         ctg_buffer(ctg_buffer),
         n_chunks(*reinterpret_cast<const inner_t*>(ctg_buffer))
     {
-        buffer_idx += sizeof(inner_t);
+        if (chunk_it >= n_chunks) return;
+
+        // increment past n_chunks and chunk_it number of chunks
+        buffer_idx = sizeof(inner_t);
+        for (int i = 0; i < chunk_it; ++i) {
+            buffer_idx += sizeof(inner_t);
+            const size_t nnz = (
+                static_cast<inner_t>(*reinterpret_cast<const chunk_inner_t*>(ctg_buffer + buffer_idx))
+                + 1
+            );
+            buffer_idx += (
+                sizeof(chunk_inner_t) + nnz * sizeof(char)
+            );
+        }
         if (n_chunks) update();
     }
 

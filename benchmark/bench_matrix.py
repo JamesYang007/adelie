@@ -230,7 +230,7 @@ def bench_io(
         for j, n in enumerate(n_list):
             filename = "/tmp/bench_snp_unphased_tmp.snpdat"
             io = ad.io.snp_unphased(filename)
-            data = ad.data.snp_unphased(n, 10, one_ratio=0.35)
+            data = ad.data.snp_unphased(n, 1, one_ratio=0.35, missing_ratio=0.1, two_ratio=0.05)
             io.write(data["X"])
             io.read()
             v = np.ones(n)

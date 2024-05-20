@@ -499,6 +499,7 @@ def test_naive_snp_unphased():
             _test(10, 20, read_mode, dtype)
             _test(1, 13, read_mode, dtype)
             _test(144, 1, read_mode, dtype)
+            _test(10000, 1, read_mode, dtype)
 
 
 def test_naive_snp_phased_ancestry():

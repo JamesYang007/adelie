@@ -176,6 +176,7 @@ void utils(py::module_& m)
     ) {
         rowmat_value_t buff(n_threads, x1.cols());
         mvec_value_t out(x1.cols());
+        out.setZero();
         auto v = x2.col(0).transpose();
         sw_t sw;
         double time_elapsed = 0;
@@ -195,6 +196,7 @@ void utils(py::module_& m)
     ) {
         rowmat_value_t buff(n_threads, x1.cols());
         mvec_value_t out(x1.cols());
+        out.setZero();
         auto v = x2.col(0).transpose();
         sw_t sw;
         double time_elapsed = 0;
@@ -235,6 +237,7 @@ void utils(py::module_& m)
         sw_t sw;
         double time_elapsed = 0;
         vec_value_t out(x.size());
+        out.setZero();
         for (size_t i = 0; i < n_sims; ++i) {
             sw.start();
             ad::matrix::spaxi(inner, value, x[0], out, n_threads);
@@ -273,7 +276,8 @@ void utils(py::module_& m)
     ){
         sw_t sw;
         double time_elapsed = 0;
-        vec_value_t out(v.size());
+        vec_value_t out(v.size()); 
+        out.setZero();
         for (size_t i = 0; i < n_sims; ++i) {
             sw.start();
             ad::matrix::snp_unphased_axi(
