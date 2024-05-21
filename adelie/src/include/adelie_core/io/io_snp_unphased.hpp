@@ -272,7 +272,7 @@ public:
         if (n_threads <= 1) {
             for (outer_t j = 0; j < p; ++j) routine(j);
         } else {
-            #pragma omp parallel for schedule(auto) num_threads(n_threads)
+            #pragma omp parallel for schedule(static) num_threads(n_threads)
             for (outer_t j = 0; j < p; ++j) routine(j);
         }
 
@@ -413,7 +413,7 @@ public:
         if (n_threads <= 1) {
             for (outer_t j = 0; j < p; ++j) outer_routine(j);
         } else {
-            #pragma omp parallel for schedule(auto) num_threads(n_threads)
+            #pragma omp parallel for schedule(static) num_threads(n_threads)
             for (outer_t j = 0; j < p; ++j) outer_routine(j);
         }
         benchmark["outer_time"] = sw.elapsed();
@@ -491,7 +491,7 @@ public:
         if (n_threads <= 1) {
             for (outer_t j = 0; j < p; ++j) inner_routine(j);
         } else {
-            #pragma omp parallel for schedule(auto) num_threads(n_threads)
+            #pragma omp parallel for schedule(static) num_threads(n_threads)
             for (outer_t j = 0; j < p; ++j) inner_routine(j);
         }
         benchmark["inner"] = sw.elapsed();
