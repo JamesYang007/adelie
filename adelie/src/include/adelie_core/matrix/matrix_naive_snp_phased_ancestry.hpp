@@ -188,47 +188,88 @@ public:
                     const auto a_high = ancestry_upper0;
                     const auto a_size = a_high - a_low;
 
-                    // compute quadratic diagonal part
-                    for (int k = 0; k < a_size; ++k) {
-                        const auto kk = n_solved0 + k;
-                        out(kk, kk) = snp_phased_ancestry_dot(
-                            _io, begin0 + k, sqrt_weights.square(), _n_threads, _buff
-                        );
+                    // increase buffer including cross-term computation part as well
+                    if (_buff.size() < a_size * a_size * _n_threads) {
+                        _buff.resize(a_size * a_size * _n_threads);
                     }
 
-                    // compute cross-terms
-                    for (int k0 = 0; k0 < a_size; ++k0) {
-                        // cache hap0 information
-                        size_t nnz = 0;
-                        auto it0 = _io.begin(snp, a_low + k0, 0);
-                        const auto end0 = _io.end(snp, a_low + k0, 0);
-                        for (; it0 != end0; ++it0) {
-                            const auto idx = *it0;
-                            _bbuff[idx] = true;
-                            _ibuff[nnz] = idx;
-                            ++nnz;
-                        }
+                    // compute quadratic diagonal part
+                    auto out_diag = out.diagonal().segment(n_solved0, a_size);
+                    snp_phased_ancestry_block_dot(
+                        _io, begin0, a_size, sqrt_weights.square(), out_diag, _n_threads, _buff
+                    );
 
-                        // loop through hap1's ancestries
+                    // compute cross-terms
+                    //for (int k0 = 0; k0 < a_size; ++k0) {
+                    //    // cache hap0 information
+                    //    size_t nnz = 0;
+                    //    auto it0 = _io.begin(snp, a_low + k0, 0);
+                    //    const auto end0 = _io.end(snp, a_low + k0, 0);
+                    //    for (; it0 != end0; ++it0) {
+                    //        const auto idx = *it0;
+                    //        _bbuff[idx] = true;
+                    //        _ibuff[nnz] = idx;
+                    //        ++nnz;
+                    //    }
+
+                    //    // loop through hap1's ancestries
+                    //    for (int k1 = 0; k1 < a_size; ++k1) {
+                    //        auto it1 = _io.begin(snp, a_low + k1, 1);
+                    //        const auto end1 = _io.end(snp, a_low + k1, 1);
+                    //        value_t sum = 0;
+                    //        for (; it1 != end1; ++it1) {
+                    //            const auto idx = *it1;
+                    //            const auto sqrt_w = sqrt_weights[idx];
+                    //            sum += sqrt_w * sqrt_w * _bbuff[idx];
+                    //        }
+
+                    //        const auto kk0 = n_solved0 + k0;
+                    //        const auto kk1 = n_solved0 + k1;
+                    //        out(kk0, kk1) += sum;
+                    //        out(kk1, kk0) += sum;
+                    //    }
+
+                    //    // keep invariance by populating with false
+                    //    for (size_t i = 0; i < nnz; ++i) {
+                    //        _bbuff[_ibuff[i]] = false;
+                    //    }
+                    //}
+
+                    #pragma omp parallel for schedule(static) num_threads(_n_threads) collapse(2) if(_n_threads > 1)
+                    for (int k0 = 0; k0 < a_size; ++k0) {
                         for (int k1 = 0; k1 < a_size; ++k1) {
+                            auto it0 = _io.begin(snp, a_low + k0, 0);
+                            const auto end0 = _io.end(snp, a_low + k0, 0);
                             auto it1 = _io.begin(snp, a_low + k1, 1);
                             const auto end1 = _io.end(snp, a_low + k1, 1);
+
                             value_t sum = 0;
-                            for (; it1 != end1; ++it1) {
-                                const auto idx = *it1;
-                                const auto sqrt_w = sqrt_weights[idx];
-                                sum += sqrt_w * sqrt_w * _bbuff[idx];
+                            while (
+                                (it0 != end0) &&
+                                (it1 != end1)
+                            ) {
+                                const auto idx0 = *it0;
+                                const auto idx1 = *it1;
+                                if (idx0 < idx1) {
+                                    ++it0; 
+                                    continue;
+                                }
+                                else if (idx0 > idx1) {
+                                    ++it1;
+                                    continue;
+                                } 
+                                else {
+                                    const auto sqrt_w = sqrt_weights[idx0];
+                                    sum += sqrt_w * sqrt_w;
+                                    ++it0;
+                                    ++it1;
+                                }
                             }
 
                             const auto kk0 = n_solved0 + k0;
                             const auto kk1 = n_solved0 + k1;
                             out(kk0, kk1) += sum;
                             out(kk1, kk0) += sum;
-                        }
-
-                        // keep invariance by populating with false
-                        for (size_t i = 0; i < nnz; ++i) {
-                            _bbuff[_ibuff[i]] = false;
                         }
                     }
 
