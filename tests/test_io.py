@@ -61,18 +61,20 @@ def test_io_snp_unphased():
 
 
 def test_io_snp_phased_ancestry():
-    def create_dense(calldata, ancestries, A):
+    def create_dense(calldata, ancestries, A, hap=None):
         n, s = calldata.shape[0], calldata.shape[1] // 2
         dense = np.zeros((n, s * A), dtype=np.int8)
         base_indices = A * np.arange(n * s, dtype=int)[None]
-        dense.ravel()[
-            base_indices +
-            ancestries.reshape(n, s, 2)[:,:,0].ravel()
-        ] += calldata.reshape(n, s, 2)[:,:,0].ravel()
-        dense.ravel()[
-            base_indices +
-            ancestries.reshape(n, s, 2)[:,:,1].ravel()
-        ] += calldata.reshape(n, s, 2)[:,:,1].ravel()
+        if (hap is None) or (hap == 0):
+            dense.ravel()[
+                base_indices +
+                ancestries.reshape(n, s, 2)[:,:,0].ravel()
+            ] += calldata.reshape(n, s, 2)[:,:,0].ravel()
+        if (hap is None) or (hap == 1):
+            dense.ravel()[
+                base_indices +
+                ancestries.reshape(n, s, 2)[:,:,1].ravel()
+            ] += calldata.reshape(n, s, 2)[:,:,1].ravel()
         return dense
 
     def _test(n, s, A, read_mode, seed=0):
@@ -93,8 +95,13 @@ def test_io_snp_phased_ancestry():
         assert handler.ancestries == A
         assert handler.cols == s * A
 
-        expected_nnzs = np.sum(calldata != 0, axis=0)
-        assert np.allclose(handler.nnz, expected_nnzs)
+        dense0 = create_dense(calldata, ancestries, A, hap=0)
+        expected_nnz0s = np.sum(dense0 != 0, axis=0)
+        assert np.allclose(handler.nnz0, expected_nnz0s)
+
+        dense1 = create_dense(calldata, ancestries, A, hap=1)
+        expected_nnz1s = np.sum(dense1 != 0, axis=0)
+        assert np.allclose(handler.nnz1, expected_nnz1s)
 
         my_dense = handler.to_dense()
         assert np.allclose(my_dense, dense)

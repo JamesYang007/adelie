@@ -231,8 +231,7 @@ public:
     inner_t n_chunks(int j, size_t ctg) const
     {
         const auto* _col_ctg = col_ctg(j, ctg);
-        const auto _n_chunks = *reinterpret_cast<const inner_t*>(_col_ctg);
-        return _n_chunks;
+        return *reinterpret_cast<const inner_t*>(_col_ctg);
     }
 
     iterator begin(int j, size_t ctg, size_t chnk) const

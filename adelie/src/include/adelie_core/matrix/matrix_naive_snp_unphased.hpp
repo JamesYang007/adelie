@@ -26,11 +26,11 @@ public:
     using io_t = io::IOSNPUnphased<MmapPtrType>;
     
 protected:
-    static constexpr value_t _inf = std::numeric_limits<value_t>::infinity();
+    static constexpr value_t _max = std::numeric_limits<value_t>::max();
     const io_t _io;             // IO handler
     const size_t _n_threads;    // number of threads
-    util::rowarr_type<index_t> _ibuff;
-    util::rowarr_type<value_t> _vbuff;
+    vec_index_t _ibuff;
+    vec_value_t _vbuff;
     vec_value_t _buff;
 
     static auto init_io(
@@ -51,7 +51,10 @@ protected:
         size_t n_threads
     ) 
     {
-        return snp_unphased_dot(_io, j, v * weights, n_threads, _buff);
+        return snp_unphased_dot(
+            [](auto x) { return x; },
+            _io, j, v * weights, n_threads, _buff
+        );
     }
 
     ADELIE_CORE_STRONG_INLINE
@@ -73,14 +76,14 @@ public:
     ): 
         _io(init_io(filename, read_mode)),
         _n_threads(n_threads),
-        _ibuff(n_threads, _io.rows()),
-        _vbuff(n_threads, _io.rows()),
+        _ibuff(_io.rows()),
+        _vbuff(_io.rows()),
         _buff(n_threads)
     {
         if (n_threads < 1) {
             throw util::adelie_core_error("n_threads must be >= 1.");
         }
-        _vbuff.setConstant(_inf);
+        _vbuff.setConstant(_max);
     }
 
     value_t cmul(
@@ -158,8 +161,8 @@ public:
             rows(), cols()
         );
 
-        const auto routine = [&](int i1) {
-            const auto thr_id = omp_get_thread_num();
+        for (int i1 = 0; i1 < q; ++i1) 
+        {
             const auto index_1 = j+i1;
             const value_t imp_1 = _io.impute()[index_1];
 
@@ -173,64 +176,44 @@ public:
                     const value_t val = (c == 0) ? imp_1 : c;
                     for (; it != end; ++it) {
                         const auto idx = *it;
-                        _vbuff(thr_id, idx) = val;
-                        _ibuff(thr_id, nnz) = idx;
+                        _vbuff[idx] = val;
+                        _ibuff[nnz] = idx;
                         ++nnz;
                     }
                 }
             } 
 
             for (int i2 = 0; i2 <= i1; ++i2) {
-                const auto index_2 = j+i2;
-
                 if (i1 == i2) {
-                    value_t sum = 0;
-                    for (int c = 0; c < io_t::n_categories; ++c) {
-                        auto it = _io.begin(index_1, c);
-                        const auto end = _io.end(index_1, c);
-                        const value_t val = (c == 0) ? imp_1 : c;
-                        value_t curr_sum = 0;
-                        for (; it != end; ++it) {
-                            const auto idx = *it;
-                            const auto val = sqrt_weights[idx];
-                            curr_sum += val * val;
-                        }
-                        sum += curr_sum * val *val; 
-                    }
-                    out(i1, i2) = sum;
+                    out(i1, i1) = snp_unphased_dot(
+                        [](auto x) { return x * x; },
+                        _io, 
+                        index_1, 
+                        sqrt_weights.square(), 
+                        _n_threads, 
+                        _buff
+                    );
                     continue;
                 }
-
-                value_t sum = 0;
-                const value_t imp_2 = _io.impute()[index_2];
-                for (int c = 0; c < io_t::n_categories; ++c) {
-                    auto it = _io.begin(index_2, c);
-                    const auto end = _io.end(index_2, c);
-                    const value_t val = (c == 0) ? imp_2 : c;
-                    value_t curr_sum = 0;
-                    for (; it != end; ++it) {
-                        const auto idx = *it;
-                        const auto v1 = _vbuff(thr_id, idx);
-                        if (std::isinf(v1)) continue;
-                        const auto sqrt_w = sqrt_weights[idx];
-                        curr_sum += sqrt_w * sqrt_w * v1;
-                    }
-                    sum += curr_sum * val;
-                }
-                out(i1, i2) = sum;
+                const auto index_2 = j+i2;
+                out(i1, i2) = snp_unphased_dot(
+                    [](auto x) { return x; },
+                    _io, 
+                    index_2,
+                    sqrt_weights.square() * (
+                        (_vbuff != _max).template cast<value_t>() * _vbuff
+                    ),
+                    _n_threads,
+                    _buff
+                );
             }
 
             // keep invariance by populating with inf
             for (size_t i = 0; i < nnz; ++i) {
-                _vbuff(thr_id, _ibuff(thr_id, i)) = _inf;
+                _vbuff[_ibuff[i]] = _max;
             }
-        };
-        if ((_n_threads <= 1) || (q == 1)) {
-            for (int i1 = 0; i1 < q; ++i1) routine(i1);
-        } else {
-            #pragma omp parallel for schedule(static) num_threads(_n_threads)
-            for (int i1 = 0; i1 < q; ++i1) routine(i1);
         }
+
         for (int i1 = 0; i1 < q; ++i1) {
             for (int i2 = i1+1; i2 < q; ++i2) {
                 out(i1, i2) = out(i2, i1);

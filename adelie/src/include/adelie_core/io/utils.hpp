@@ -60,9 +60,10 @@ void compute_nnm(
     }
 }
 
+template <class MType>
 ADELIE_CORE_STRONG_INLINE
 void compute_nnz(
-    const Eigen::Ref<const util::colarr_type<int8_t>>& m,
+    const MType& m,
     Eigen::Ref<util::rowvec_type<uint64_t>> out,
     size_t n_threads
 )

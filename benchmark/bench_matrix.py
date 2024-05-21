@@ -3,6 +3,7 @@ from time import time
 import adelie as ad
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 import pandas as pd
 import scipy
 
@@ -218,6 +219,8 @@ def bench_io(
     fun = {
         "snp_unphased_dot": utils.bench_snp_unphased_dot,
         "snp_unphased_axi": utils.bench_snp_unphased_axi,
+        "snp_phased_ancestry_dot": utils.bench_snp_phased_ancestry_dot,
+        "snp_phased_ancestry_axi": utils.bench_snp_phased_ancestry_axi,
     }[method]
 
     ad.configs.set_configs("min_bytes", min_bytes)
@@ -228,13 +231,21 @@ def bench_io(
     out = np.empty((len(n_threads_list), len(n_list)))
     for i, n_threads in enumerate(n_threads_list):
         for j, n in enumerate(n_list):
-            filename = "/tmp/bench_snp_unphased_tmp.snpdat"
-            io = ad.io.snp_unphased(filename)
-            data = ad.data.snp_unphased(n, 1, one_ratio=0.35, missing_ratio=0.1, two_ratio=0.05)
-            io.write(data["X"])
-            io.read()
+            filename = "/tmp/bench_snp_tmp.snpdat"
+            if "_unphased_" in method:
+                io = ad.io.snp_unphased(filename)
+                data = ad.data.snp_unphased(n, 1, one_ratio=0.35, missing_ratio=0.1, two_ratio=0.05)
+                io.write(data["X"])
+                io.read()
+            elif "_phased_" in method:
+                io = ad.io.snp_phased_ancestry(filename)
+                A = 8
+                data = ad.data.snp_phased_ancestry(n, 1, A, one_ratio=0.45, two_ratio=0.05)
+                io.write(data["X"], data["ancestries"], A)
+                io.read()
             v = np.ones(n)
             out[i,j] = fun(io, 0, v, n_threads, n_sims)
+            os.remove(filename)
 
     fig, ax = plt.subplots(1, 1, layout="constrained")
     for i, n_threads in enumerate(n_threads_list):

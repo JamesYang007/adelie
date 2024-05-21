@@ -415,8 +415,10 @@ void spaxi(
     }
 }
 
-template <class IOType, class VType, class BuffType>
+template <class UnaryType, class IOType, class VType, class BuffType>
+ADELIE_CORE_STRONG_INLINE
 auto snp_unphased_dot(
+    const UnaryType& unary,
     const IOType& io,
     int j, 
     const VType& v,
@@ -442,7 +444,7 @@ auto snp_unphased_dot(
                 const auto idx = *it;
                 curr_sum += v[idx]; 
             }
-            sum += curr_sum * val;
+            sum += curr_sum * unary(val);
         }
         return sum;
     }
@@ -474,7 +476,7 @@ auto snp_unphased_dot(
                     const auto idx = *it;
                     sum += v[idx]; 
                 }
-                vbuff[t] += sum * val;
+                vbuff[t] += sum * unary(val);
             }
         }
     }
@@ -482,6 +484,7 @@ auto snp_unphased_dot(
 }
 
 template <class IOType, class ValueType, class OutType>
+ADELIE_CORE_STRONG_INLINE
 void snp_unphased_axi(
     const IOType& io,
     int j, 
@@ -532,6 +535,120 @@ void snp_unphased_axi(
                 for (; it != end; ++it) {
                     out[*it] += curr_val; 
                 }
+            }
+        }
+    }
+}
+
+template <class IOType, class VType, class BuffType>
+auto snp_phased_ancestry_dot(
+    const IOType& io,
+    int j, 
+    const VType& v,
+    size_t n_threads,
+    BuffType& buff
+)
+{
+    using io_t = std::decay_t<IOType>;
+    using value_t = typename std::decay_t<VType>::Scalar;
+
+    const auto A = io.ancestries();
+    const auto snp = j / A;
+    const auto anc = j % A;
+    const auto nnz = io.nnz0()[j] + io.nnz1()[j];
+    // NOTE: multiplier from experimentation
+    const size_t n_bytes = (16 * sizeof(value_t)) * nnz;
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+        value_t sum = 0;
+        for (int hap = 0; hap < io_t::n_haps; ++hap) {
+            auto it = io.begin(snp, anc, hap);
+            const auto end = io.end(snp, anc, hap);
+            for (; it != end; ++it) {
+                sum += v[*it];
+            }
+        }
+        return sum;
+    }
+
+    auto vbuff = buff.head(n_threads);
+    vbuff.setZero();
+
+    #pragma omp parallel num_threads(n_threads)
+    {
+        for (int hap = 0; hap < io_t::n_haps; ++hap) {
+            const size_t n_chunks = io.n_chunks(snp, anc, hap);
+            const int n_blocks = std::min(n_threads, n_chunks);
+            const int block_size = n_chunks / n_blocks;
+            const int remainder = n_chunks % n_blocks;
+
+            #pragma omp for schedule(static) nowait
+            for (int t = 0; t < n_blocks; ++t) {
+                const auto begin = (
+                    std::min<int>(t, remainder) * (block_size + 1) 
+                    + std::max<int>(t-remainder, 0) * block_size
+                );
+                const auto size = block_size + (t < remainder);
+                auto it = io.begin(snp, anc, hap, begin);
+                const auto end = io.begin(snp, anc, hap, begin + size);
+
+                value_t sum = 0;
+                for (; it != end; ++it) {
+                    sum += v[*it];
+                }
+                vbuff[t] += sum;
+            }
+        }
+    }
+    return vbuff.sum();
+}
+
+template <class IOType, class ValueType, class OutType>
+auto snp_phased_ancestry_axi(
+    const IOType& io,
+    int j, 
+    ValueType v,
+    OutType& out,
+    size_t n_threads
+)
+{
+    using io_t = std::decay_t<IOType>;
+    using value_t = ValueType;
+
+    const auto A = io.ancestries();
+    const auto snp = j / A;
+    const auto anc = j % A;
+    const auto nnz = io.nnz0()[j] + io.nnz1()[j];
+    // NOTE: multiplier from experimentation
+    const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+        for (int hap = 0; hap < io_t::n_haps; ++hap) {
+            auto it = io.begin(snp, anc, hap);
+            const auto end = io.end(snp, anc, hap);
+            for (; it != end; ++it) {
+                out[*it] += v;
+            }
+        }
+        return;
+    }
+
+    for (int hap = 0; hap < io_t::n_haps; ++hap) {
+        const size_t n_chunks = io.n_chunks(snp, anc, hap);
+        const int n_blocks = std::min(n_threads, n_chunks);
+        const int block_size = n_chunks / n_blocks;
+        const int remainder = n_chunks % n_blocks;
+
+        #pragma omp parallel for schedule(static) num_threads(n_threads)
+        for (int t = 0; t < n_blocks; ++t) {
+            const auto begin = (
+                std::min<int>(t, remainder) * (block_size + 1) 
+                + std::max<int>(t-remainder, 0) * block_size
+            );
+            const auto size = block_size + (t < remainder);
+            auto it = io.begin(snp, anc, hap, begin);
+            const auto end = io.begin(snp, anc, hap, begin + size);
+
+            for (; it != end; ++it) {
+                out[*it] += v;
             }
         }
     }

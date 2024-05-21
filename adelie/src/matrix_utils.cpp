@@ -1,6 +1,7 @@
 #include "decl.hpp"
 #include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/io/io_snp_unphased.hpp>
+#include <adelie_core/io/io_snp_phased_ancestry.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -25,6 +26,7 @@ void utils(py::module_& m)
     using cref_colmat_value_t = Eigen::Ref<const colmat_value_t>;
     using cref_mvec_value_t = Eigen::Ref<const Eigen::Matrix<value_t, 1, Eigen::Dynamic, Eigen::RowMajor>>;
     using snp_unphased_io_t = ad::io::IOSNPUnphased<>;
+    using snp_phased_ancestry_io_t = ad::io::IOSNPPhasedAncestry<>;
     using sw_t = ad::util::Stopwatch;
 
     m.def("dvaddi", ad::matrix::dvaddi<ref_vec_value_t, cref_vec_value_t>);
@@ -260,7 +262,7 @@ void utils(py::module_& m)
         for (size_t i = 0; i < n_sims; ++i) {
             sw.start();
             out += ad::matrix::snp_unphased_dot(
-                io, j, v, n_threads, buff
+                [](auto x) { return x; }, io, j, v, n_threads, buff
             );
             time_elapsed += sw.elapsed();
         }
@@ -281,6 +283,47 @@ void utils(py::module_& m)
         for (size_t i = 0; i < n_sims; ++i) {
             sw.start();
             ad::matrix::snp_unphased_axi(
+                io, j, v[0], out, n_threads
+            );
+            time_elapsed += sw.elapsed();
+        }
+        return time_elapsed / n_sims;
+    });
+
+    m.def("bench_snp_phased_ancestry_dot", [](
+        const snp_phased_ancestry_io_t& io,
+        int j, 
+        cref_vec_value_t& v,
+        size_t n_threads,
+        size_t n_sims
+    ){
+        sw_t sw;
+        double time_elapsed = 0;
+        volatile double out = 0;
+        vec_value_t buff(n_threads);
+        for (size_t i = 0; i < n_sims; ++i) {
+            sw.start();
+            out += ad::matrix::snp_phased_ancestry_dot(
+                io, j, v, n_threads, buff
+            );
+            time_elapsed += sw.elapsed();
+        }
+        return time_elapsed / n_sims;
+    });
+
+    m.def("bench_snp_phased_ancestry_axi", [](
+        const snp_phased_ancestry_io_t& io,
+        int j, 
+        cref_vec_value_t& v,
+        size_t n_threads,
+        size_t n_sims
+    ){
+        sw_t sw;
+        double time_elapsed = 0;
+        vec_value_t out(v.size());
+        for (size_t i = 0; i < n_sims; ++i) {
+            sw.start();
+            ad::matrix::snp_phased_ancestry_axi(
                 io, j, v[0], out, n_threads
             );
             time_elapsed += sw.elapsed();
