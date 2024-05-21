@@ -17,6 +17,10 @@ if not ("KMP_BLOCKTIME" in os.environ):
 if not ("GOMP_SPINCOUNT" in os.environ):
     os.environ["GOMP_SPINCOUNT"] = "1000000"
 
+# Bind each thread to a single core to localize memory.
+if not ("OMP_PROC_BIND" in os.environ):
+    os.environ["OMP_PROC_BIND"] = "TRUE"
+
 from . import adelie_core
 from . import bcd
 from . import configs

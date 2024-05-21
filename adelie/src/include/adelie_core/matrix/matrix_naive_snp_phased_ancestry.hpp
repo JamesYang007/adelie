@@ -78,7 +78,7 @@ public:
         _n_threads(n_threads),
         _bbuff(_io.rows()),
         _ibuff(_io.rows()),
-        _buff(n_threads)
+        _buff(n_threads * _io.ancestries())
     {
         if (n_threads < 1) {
             throw util::adelie_core_error("n_threads must be >= 1.");
@@ -114,9 +114,10 @@ public:
     ) override
     {
         base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-        for (int t = 0; t < q; ++t) {
-            out[t] = _cmul(j + t, v, weights, _n_threads);
-        }
+        if (_buff.size() < q * _n_threads) _buff.resize(q * _n_threads);
+        snp_phased_ancestry_block_dot(
+            _io, j, q, v * weights, out, _n_threads, _buff
+        );
     }
 
     void btmul(
@@ -126,9 +127,10 @@ public:
     ) override
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
-        for (int t = 0; t < q; ++t) {
-            _ctmul(j + t, v[t], out, _n_threads);
-        }
+        if (_buff.size() < q * _n_threads) _buff.resize(q * _n_threads);
+        snp_phased_ancestry_block_axi(
+            _io, j, q, v, out, _n_threads
+        );
     }
 
     void mul(

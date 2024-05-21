@@ -492,6 +492,9 @@ def test_naive_snp_unphased():
         run_naive(X, cX, dtype)
         os.remove(filename)
 
+    min_bytes = ad.configs.Configs.min_bytes
+    ad.configs.set_configs("min_bytes", 0)
+
     read_modes = ["file", "mmap"]
     dtypes = [np.float64, np.float32]
     for read_mode in read_modes:
@@ -500,6 +503,8 @@ def test_naive_snp_unphased():
             _test(1, 13, read_mode, dtype)
             _test(144, 1, read_mode, dtype)
             _test(10000, 1, read_mode, dtype)
+
+    ad.configs.set_configs("min_bytes", min_bytes)
 
 
 def test_naive_snp_phased_ancestry():
@@ -527,13 +532,16 @@ def test_naive_snp_phased_ancestry():
             filename=filename,
             read_mode=read_mode,
             dtype=dtype,
-            n_threads=7,
+            n_threads=2,
         )
         os.remove(filename)
 
         X = create_dense(data["X"], data["ancestries"], A) 
         run_naive(X, cX, dtype)
 
+
+    min_bytes = ad.configs.Configs.min_bytes
+    ad.configs.set_configs("min_bytes", 0)
 
     read_modes = ["file", "mmap"]
     dtypes = [np.float64, np.float32]
@@ -542,6 +550,9 @@ def test_naive_snp_phased_ancestry():
             _test(10, 20, 4, read_mode, dtype)
             _test(1, 13, 3, read_mode, dtype)
             _test(144, 1, 2, read_mode, dtype)
+            _test(10000, 1, 2, read_mode, dtype)
+
+    ad.configs.set_configs("min_bytes", min_bytes)
 
 
 def test_naive_sparse():

@@ -603,7 +603,7 @@ auto snp_phased_ancestry_dot(
 }
 
 template <class IOType, class ValueType, class OutType>
-auto snp_phased_ancestry_axi(
+void snp_phased_ancestry_axi(
     const IOType& io,
     int j, 
     ValueType v,
@@ -651,6 +651,146 @@ auto snp_phased_ancestry_axi(
                 out[*it] += v;
             }
         }
+    }
+}
+
+template <class IOType, class VType, class OutType, class BuffType>
+void snp_phased_ancestry_block_dot(
+    const IOType& io,
+    int j,
+    int q,
+    const VType& v,
+    OutType& out,
+    size_t n_threads,
+    BuffType& buff
+)
+{
+    using io_t = std::decay_t<IOType>;
+    using value_t = typename std::decay_t<VType>::Scalar;
+    using rowarr_value_t = util::rowarr_type<value_t>;
+
+    const auto nnz = (
+        io.nnz0().segment(j, q).sum() + 
+        io.nnz1().segment(j, q).sum()
+    );
+    // NOTE: multiplier from experimentation
+    const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+        for (int k = 0; k < q; ++k) {
+            snp_phased_ancestry_dot(io, j+k, v, n_threads, buff);
+        }
+    }
+
+    Eigen::Map<rowarr_value_t> mbuff(
+        buff.data(), q, n_threads
+    );
+    mbuff.setZero();
+
+    const auto A = io.ancestries();
+
+    #pragma omp parallel num_threads(n_threads)
+    {
+        for (int k = 0; k < q; ++k) {
+            const auto jj = j + k;
+            const auto snp = jj / A;
+            const auto anc = jj % A;
+            for (int hap = 0; hap < io_t::n_haps; ++hap) {
+                const size_t n_chunks = io.n_chunks(snp, anc, hap);
+                const int n_blocks = std::min(n_threads, n_chunks);
+                const int block_size = n_chunks / n_blocks;
+                const int remainder = n_chunks % n_blocks;
+
+                #pragma omp for schedule(static) nowait
+                for (int t = 0; t < n_blocks; ++t) {
+                    const auto begin = (
+                        std::min<int>(t, remainder) * (block_size + 1) 
+                        + std::max<int>(t-remainder, 0) * block_size
+                    );
+                    const auto size = block_size + (t < remainder);
+                    auto it = io.begin(snp, anc, hap, begin);
+                    const auto end = io.begin(snp, anc, hap, begin + size);
+
+                    value_t sum = 0;
+                    for (; it != end; ++it) {
+                        sum += v[*it];
+                    }
+                    mbuff(k, t) += sum;
+                }
+            }
+        }
+    }
+
+    out = mbuff.rowwise().sum();
+}
+
+template <class IOType, class VType, class OutType>
+void snp_phased_ancestry_block_axi(
+    const IOType& io,
+    int j, 
+    int q,
+    const VType& v,
+    OutType& out,
+    size_t n_threads
+)
+{
+    using io_t = std::decay_t<IOType>;
+    using value_t = typename std::decay_t<VType>::Scalar;
+
+    const auto nnz = (
+        io.nnz0().segment(j, q).sum() + 
+        io.nnz1().segment(j, q).sum()
+    );
+    // NOTE: multiplier from experimentation
+    const size_t n_bytes = (4 * sizeof(value_t)) * nnz;
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+        for (int k = 0; k < q; ++k) {
+            snp_phased_ancestry_axi(
+                io, j+k, v[k], out, n_threads
+            );
+        }
+        return;
+    }
+
+    const auto A = io.ancestries();
+
+    int n_processed = 0;
+    while (n_processed < q) {
+        const auto begin = j + n_processed;
+        const auto snp = begin / A;
+        const auto a_lower = begin % A;
+        const auto a_upper = std::min<int>(a_lower + q - n_processed, A);
+        const auto size = a_upper - a_lower;
+
+        for (int hap = 0; hap < io_t::n_haps; ++hap) {
+            #pragma omp parallel num_threads(n_threads)
+            {
+                for (int k = 0; k < size; ++k) {
+                    const auto anc = a_lower + k;
+                    const size_t n_chunks = io.n_chunks(snp, anc, hap);
+                    const int n_blocks = std::min(n_threads, n_chunks);
+                    const int block_size = n_chunks / n_blocks;
+                    const int remainder = n_chunks % n_blocks;
+                    const auto vk = v[n_processed + k];
+
+                    #pragma omp for schedule(static) nowait
+                    for (int t = 0; t < n_blocks; ++t) {
+                        const auto begin = (
+                            std::min<int>(t, remainder) * (block_size + 1) 
+                            + std::max<int>(t-remainder, 0) * block_size
+                        );
+                        const auto size = block_size + (t < remainder);
+                        auto it = io.begin(snp, anc, hap, begin);
+                        const auto end = io.begin(snp, anc, hap, begin + size);
+
+                        for (; it != end; ++it) {
+                            out[*it] += vk;
+                        }
+                    }
+                }
+            }
+        }
+
+        n_processed += size;
     }
 }
 
