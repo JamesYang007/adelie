@@ -268,8 +268,17 @@ public:
 
                             const auto kk0 = n_solved0 + k0;
                             const auto kk1 = n_solved0 + k1;
-                            out(kk0, kk1) += sum;
-                            out(kk1, kk0) += sum;
+                            out(kk0, kk1) += sum * (1 + (kk0 == kk1));
+                        }
+                    }
+
+                    for (int k0 = 0; k0 < a_size; ++k0) {
+                        for (int k1 = 0; k1 < k0; ++k1) {
+                            const auto kk0 = n_solved0 + k0;
+                            const auto kk1 = n_solved0 + k1;
+                            const auto tmp = out(kk0, kk1);
+                            out(kk0, kk1) += out(kk1, kk0);
+                            out(kk1, kk0) += tmp;
                         }
                     }
 
