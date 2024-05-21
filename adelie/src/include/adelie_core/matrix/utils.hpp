@@ -77,7 +77,7 @@ void dvveq(
 {
     using value_t = typename std::decay_t<X1Type>::Scalar;
     const size_t n = x1.size();
-    const size_t n_bytes = (1.5 * sizeof(value_t)) * n;
+    const size_t n_bytes = sizeof(value_t) * n;
     if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
         x1 = x2;
         return; 
@@ -170,7 +170,7 @@ void dmmeq(
     using value_t = typename std::decay_t<X1Type>::Scalar;
     const size_t n = x1.rows();
     // NOTE: multiplier from experimentation
-    const size_t n_bytes = (4 * sizeof(value_t)) * n * x1.cols();
+    const size_t n_bytes = (8 * sizeof(value_t)) * n * x1.cols();
     if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
         x1 = x2; 
         return; 
@@ -390,7 +390,7 @@ void spaxi(
     using value_t = typename std::decay_t<ValueType>::Scalar;
     const size_t nnz = inner.size();
     // NOTE: multiplier from experimentation
-    const size_t n_bytes = (16 * sizeof(value_t)) * nnz;
+    const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
     if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
         for (int i = 0; i < nnz; ++i) {
             out[inner[i]] += v * value[i];
@@ -432,7 +432,7 @@ auto snp_unphased_dot(
     const auto nnz = io.nnz()[j];
     const value_t imp = io.impute()[j];
     // NOTE: multiplier from experimentation
-    const size_t n_bytes = (16 * sizeof(value_t)) * nnz;
+    const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
     if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
         value_t sum = 0;
         for (int c = 0; c < io_t::n_categories; ++c) {
@@ -499,7 +499,7 @@ void snp_unphased_axi(
     const auto nnz = io.nnz()[j];
     const value_t imp = io.impute()[j];
     // NOTE: multiplier from experimentation
-    const size_t n_bytes = (16 * sizeof(value_t)) * nnz;
+    const size_t n_bytes = (4 * sizeof(value_t)) * nnz;
     if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
         for (int c = 0; c < io_t::n_categories; ++c) {
             auto it = io.begin(j, c);
@@ -557,7 +557,7 @@ auto snp_phased_ancestry_dot(
     const auto anc = j % A;
     const auto nnz = io.nnz0()[j] + io.nnz1()[j];
     // NOTE: multiplier from experimentation
-    const size_t n_bytes = (16 * sizeof(value_t)) * nnz;
+    const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
     if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
         value_t sum = 0;
         for (int hap = 0; hap < io_t::n_haps; ++hap) {
@@ -619,7 +619,7 @@ auto snp_phased_ancestry_axi(
     const auto anc = j % A;
     const auto nnz = io.nnz0()[j] + io.nnz1()[j];
     // NOTE: multiplier from experimentation
-    const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
+    const size_t n_bytes = (4 * sizeof(value_t)) * nnz;
     if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
         for (int hap = 0; hap < io_t::n_haps; ++hap) {
             auto it = io.begin(snp, anc, hap);
