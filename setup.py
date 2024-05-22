@@ -29,6 +29,7 @@ __version__ = open("VERSION", "r").read().strip()
 
 extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
 extra_compile_args += [
+    "-g0",
     "-Wall", 
     "-Wextra", 
     "-DNDEBUG", 
