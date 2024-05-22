@@ -48,7 +48,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="adelie.cv.cv_grpnet" href="adelie.cv.cv_grpnet.html" />
-    <link rel="prev" title="adelie.bcd.solve" href="adelie.bcd.solve.html" />
+    <link rel="prev" title="adelie.configs.set_configs" href="adelie.configs.set_configs.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -327,6 +327,9 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.configs.set_configs.html">adelie.configs.set_configs</a></li>
+</ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.cv.CVGrpnetResult</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.cv.cv_grpnet.html">adelie.cv.cv_grpnet</a></li>
@@ -372,9 +375,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.interaction.html">adelie.matrix.interaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.kronecker_eye.html">adelie.matrix.kronecker_eye</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.lazy_cov.html">adelie.matrix.lazy_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.one_hot.html">adelie.matrix.one_hot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.sparse.html">adelie.matrix.sparse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.standardize.html">adelie.matrix.standardize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.subset.html">adelie.matrix.subset</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -391,6 +396,35 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.configs.Configs.html">adelie.adelie_core.configs.Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBase64.html">adelie.adelie_core.glm.GlmBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialLogit64.html">adelie.adelie_core.glm.GlmBinomialLogit64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialProbit64.html">adelie.adelie_core.glm.GlmBinomialProbit64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmCox64.html">adelie.adelie_core.glm.GlmCox64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmGaussian64.html">adelie.adelie_core.glm.GlmGaussian64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiBase64.html">adelie.adelie_core.glm.GlmMultiBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiGaussian64.html">adelie.adelie_core.glm.GlmMultiGaussian64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultinomial64.html">adelie.adelie_core.glm.GlmMultinomial64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmPoisson64.html">adelie.adelie_core.glm.GlmPoisson64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBase64.html">adelie.adelie_core.matrix.MatrixCovBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBlockDiag64.html">adelie.adelie_core.matrix.MatrixCovBlockDiag64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovDense64F.html">adelie.adelie_core.matrix.MatrixCovDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovLazyCov64F.html">adelie.adelie_core.matrix.MatrixCovLazyCov64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovSparse64F.html">adelie.adelie_core.matrix.MatrixCovSparse64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase64.html">adelie.adelie_core.matrix.MatrixNaiveBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveDense64F.html">adelie.adelie_core.matrix.MatrixNaiveDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveInteractionDense64F.html">adelie.adelie_core.matrix.MatrixNaiveInteractionDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEye64.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEye64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F.html">adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64.html">adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPUnphased64.html">adelie.adelie_core.matrix.MatrixNaiveSNPUnphased64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveSparse64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveStandardize64.html">adelie.adelie_core.matrix.MatrixNaiveStandardize64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCSubset64.html">adelie.adelie_core.matrix.MatrixNaiveCSubset64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRSubset64.html">adelie.adelie_core.matrix.MatrixNaiveRSubset64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianCov64.html">adelie.adelie_core.state.StateGaussianCov64</a></li>
@@ -398,11 +432,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive64.html">adelie.adelie_core.state.StateMultiGlmNaive64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmBase64.html">adelie.glm.GlmBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmMultiBase64.html">adelie.glm.GlmMultiBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
 </ul>
 </div>
 </nav></div>
@@ -464,7 +493,7 @@ document.write(`
 <h1>adelie.cv.CVGrpnetResult<a class="headerlink" href="#adelie-cv-cvgrpnetresult" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.cv.</span></span><span class="sig-name descname"><span class="pre">CVGrpnetResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">losses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_losses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/cv.py#L16-L97"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.cv.CVGrpnetResult" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.cv.</span></span><span class="sig-name descname"><span class="pre">CVGrpnetResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">losses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_losses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/cv.py#L16-L110"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.cv.CVGrpnetResult" title="Link to this definition">#</a></dt>
 <dd><p>Result of K-fold CV group elastic net.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
@@ -473,7 +502,7 @@ document.write(`
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.fit" title="adelie.cv.CVGrpnetResult.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(*[, lmda_path_size])</p></td>
-<td><p>Fit group elastic net until the best CV <span class="math notranslate nohighlight">\(\lambda\)</span>.</p></td>
+<td><p>Fits group elastic net until the best CV <span class="math notranslate nohighlight">\(\lambda\)</span>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.plot_loss" title="adelie.cv.CVGrpnetResult.plot_loss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_loss</span></code></a>()</p></td>
 <td><p>Plots the average K-fold CV loss.</p></td>
@@ -484,16 +513,16 @@ document.write(`
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.lmdas" title="adelie.cv.CVGrpnetResult.lmdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></a></p></td>
-<td><p></p></td>
+<td><p>The common regularization path used for all folds.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.losses" title="adelie.cv.CVGrpnetResult.losses"><code class="xref py py-obj docutils literal notranslate"><span class="pre">losses</span></code></a></p></td>
-<td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">losses[k,i]</span></code> is the CV loss when validating on fold <code class="docutils literal notranslate"><span class="pre">k</span></code> at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.avg_losses" title="adelie.cv.CVGrpnetResult.avg_losses"><code class="xref py py-obj docutils literal notranslate"><span class="pre">avg_losses</span></code></a></p></td>
-<td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">avg_losses[i]</span></code> is the average CV loss at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.best_idx" title="adelie.cv.CVGrpnetResult.best_idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">best_idx</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Argmin of <code class="docutils literal notranslate"><span class="pre">avg_losses</span></code>.</p></td>
 </tr>
 </tbody>
 </table>
@@ -504,8 +533,8 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">grpnet_params</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/cv.py#L54-L97"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.cv.CVGrpnetResult.fit" title="Link to this definition">#</a></dt>
-<dd><p>Fit group elastic net until the best CV <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">grpnet_params</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/cv.py#L67-L110"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.cv.CVGrpnetResult.fit" title="Link to this definition">#</a></dt>
+<dd><p>Fits group elastic net until the best CV <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -533,7 +562,7 @@ Default is <code class="docutils literal notranslate"><span class="pre">100</spa
 
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult.plot_loss">
-<span class="sig-name descname"><span class="pre">plot_loss</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/cv.py#L25-L52"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.cv.CVGrpnetResult.plot_loss" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">plot_loss</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/cv.py#L38-L65"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.cv.CVGrpnetResult.plot_loss" title="Link to this definition">#</a></dt>
 <dd><p>Plots the average K-fold CV loss.</p>
 <p>For each fitted <span class="math notranslate nohighlight">\(\lambda\)</span>, the average K-fold CV loss
 as well as an error bar of one standard deviation (above and below) is plotted.</p>
@@ -542,22 +571,26 @@ as well as an error bar of one standard deviation (above and below) is plotted.<
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult.lmdas">
 <span class="sig-name descname"><span class="pre">lmdas</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.cv.CVGrpnetResult.lmdas" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>The common regularization path used for all folds.</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult.losses">
 <span class="sig-name descname"><span class="pre">losses</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.cv.CVGrpnetResult.losses" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p><code class="docutils literal notranslate"><span class="pre">losses[k,i]</span></code> is the CV loss when validating on fold <code class="docutils literal notranslate"><span class="pre">k</span></code> at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult.avg_losses">
 <span class="sig-name descname"><span class="pre">avg_losses</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#adelie.cv.CVGrpnetResult.avg_losses" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p><code class="docutils literal notranslate"><span class="pre">avg_losses[i]</span></code> is the average CV loss at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult.best_idx">
 <span class="sig-name descname"><span class="pre">best_idx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#adelie.cv.CVGrpnetResult.best_idx" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Argmin of <code class="docutils literal notranslate"><span class="pre">avg_losses</span></code>.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -574,12 +607,12 @@ as well as an error bar of one standard deviation (above and below) is plotted.<
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.bcd.solve.html"
+       href="adelie.configs.set_configs.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.bcd.solve</p>
+        <p class="prev-next-title">adelie.configs.set_configs</p>
       </div>
     </a>
     <a class="right-next"

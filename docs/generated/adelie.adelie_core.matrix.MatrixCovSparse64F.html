@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.matrix.MatrixCovBase64 &#8212; adelie 1.1.31 documentation</title>
+    <title>adelie.adelie_core.matrix.MatrixCovSparse64F &#8212; adelie 1.1.31 documentation</title>
   
   
   
@@ -42,11 +42,11 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.matrix.MatrixCovBase64';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.adelie_core.matrix.MatrixCovSparse64F';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.matrix.MatrixNaiveBase64" href="adelie.matrix.MatrixNaiveBase64.html" />
-    <link rel="prev" title="adelie.glm.GlmMultiBase64" href="adelie.glm.GlmMultiBase64.html" />
+    <link rel="next" title="adelie.adelie_core.matrix.MatrixNaiveBase64" href="adelie.adelie_core.matrix.MatrixNaiveBase64.html" />
+    <link rel="prev" title="adelie.adelie_core.matrix.MatrixCovLazyCov64F" href="adelie.adelie_core.matrix.MatrixCovLazyCov64F.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -326,6 +326,9 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.configs.set_configs.html">adelie.configs.set_configs</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.cv.CVGrpnetResult.html">adelie.cv.CVGrpnetResult</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.cv.cv_grpnet.html">adelie.cv.cv_grpnet</a></li>
 </ul>
@@ -370,9 +373,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.interaction.html">adelie.matrix.interaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.kronecker_eye.html">adelie.matrix.kronecker_eye</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.lazy_cov.html">adelie.matrix.lazy_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.one_hot.html">adelie.matrix.one_hot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.sparse.html">adelie.matrix.sparse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.standardize.html">adelie.matrix.standardize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.subset.html">adelie.matrix.subset</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -389,6 +394,35 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.configs.Configs.html">adelie.adelie_core.configs.Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBase64.html">adelie.adelie_core.glm.GlmBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialLogit64.html">adelie.adelie_core.glm.GlmBinomialLogit64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialProbit64.html">adelie.adelie_core.glm.GlmBinomialProbit64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmCox64.html">adelie.adelie_core.glm.GlmCox64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmGaussian64.html">adelie.adelie_core.glm.GlmGaussian64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiBase64.html">adelie.adelie_core.glm.GlmMultiBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiGaussian64.html">adelie.adelie_core.glm.GlmMultiGaussian64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultinomial64.html">adelie.adelie_core.glm.GlmMultinomial64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmPoisson64.html">adelie.adelie_core.glm.GlmPoisson64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBase64.html">adelie.adelie_core.matrix.MatrixCovBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBlockDiag64.html">adelie.adelie_core.matrix.MatrixCovBlockDiag64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovDense64F.html">adelie.adelie_core.matrix.MatrixCovDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovLazyCov64F.html">adelie.adelie_core.matrix.MatrixCovLazyCov64F</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.adelie_core.matrix.MatrixCovSparse64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase64.html">adelie.adelie_core.matrix.MatrixNaiveBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveDense64F.html">adelie.adelie_core.matrix.MatrixNaiveDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveInteractionDense64F.html">adelie.adelie_core.matrix.MatrixNaiveInteractionDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEye64.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEye64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F.html">adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64.html">adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPUnphased64.html">adelie.adelie_core.matrix.MatrixNaiveSNPUnphased64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveSparse64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveStandardize64.html">adelie.adelie_core.matrix.MatrixNaiveStandardize64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCSubset64.html">adelie.adelie_core.matrix.MatrixNaiveCSubset64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRSubset64.html">adelie.adelie_core.matrix.MatrixNaiveRSubset64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianCov64.html">adelie.adelie_core.state.StateGaussianCov64</a></li>
@@ -396,11 +430,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive64.html">adelie.adelie_core.state.StateMultiGlmNaive64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmBase64.html">adelie.glm.GlmBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmMultiBase64.html">adelie.glm.GlmMultiBase64</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.matrix.MatrixCovBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
 </ul>
 </div>
 </nav></div>
@@ -441,7 +470,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.matri...</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.adeli...</li>
   </ul>
 </nav>
 </div>
@@ -458,31 +487,31 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-matrix-matrixcovbase64">
-<h1>adelie.matrix.MatrixCovBase64<a class="headerlink" href="#adelie-matrix-matrixcovbase64" title="Link to this heading">#</a></h1>
+  <section id="adelie-adelie-core-matrix-matrixcovsparse64f">
+<h1>adelie.adelie_core.matrix.MatrixCovSparse64F<a class="headerlink" href="#adelie-adelie-core-matrix-matrixcovsparse64f" title="Link to this heading">#</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="adelie.matrix.MatrixCovBase64">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">MatrixCovBase64</span></span><a class="headerlink" href="#adelie.matrix.MatrixCovBase64" title="Link to this definition">#</a></dt>
-<dd><p>Base matrix class for covariance method.</p>
+<dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixCovSparse64F">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.adelie_core.matrix.</span></span><span class="sig-name descname"><span class="pre">MatrixCovSparse64F</span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixCovSparse64F" title="Link to this definition">#</a></dt>
+<dd><p>Core matrix class for covariance sparse matrix.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.MatrixCovBase64.__init__" title="adelie.matrix.MatrixCovBase64.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(self)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.__init__" title="adelie.adelie_core.matrix.MatrixCovSparse64F.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(self, rows, cols, nnz, outer, ...)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.MatrixCovBase64.bmul" title="adelie.matrix.MatrixCovBase64.bmul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bmul</span></code></a>(self, arg0, arg1, arg2, arg3)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.bmul" title="adelie.adelie_core.matrix.MatrixCovSparse64F.bmul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bmul</span></code></a>(self, arg0, arg1, arg2, arg3)</p></td>
 <td><p>Block matrix-sparse vector multiplication.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.MatrixCovBase64.cols" title="adelie.matrix.MatrixCovBase64.cols"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cols</span></code></a>(self)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.cols" title="adelie.adelie_core.matrix.MatrixCovSparse64F.cols"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cols</span></code></a>(self)</p></td>
 <td><p>Number of columns.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.MatrixCovBase64.mul" title="adelie.matrix.MatrixCovBase64.mul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mul</span></code></a>(self, arg0, arg1, arg2)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.mul" title="adelie.adelie_core.matrix.MatrixCovSparse64F.mul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mul</span></code></a>(self, arg0, arg1, arg2)</p></td>
 <td><p>Matrix-sparse vector multiplication.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.MatrixCovBase64.rows" title="adelie.matrix.MatrixCovBase64.rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rows</span></code></a>(self)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.rows" title="adelie.adelie_core.matrix.MatrixCovSparse64F.rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rows</span></code></a>(self)</p></td>
 <td><p>Number of rows.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.MatrixCovBase64.to_dense" title="adelie.matrix.MatrixCovBase64.to_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dense</span></code></a>(self, arg0, arg1, arg2)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.to_dense" title="adelie.adelie_core.matrix.MatrixCovSparse64F.to_dense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dense</span></code></a>(self, arg0, arg1, arg2)</p></td>
 <td><p>Converts a block to a dense matrix.</p></td>
 </tr>
 </tbody>
@@ -490,22 +519,22 @@ document.write(`
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.matrix.MatrixCovBase64.ndim" title="adelie.matrix.MatrixCovBase64.ndim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim</span></code></a></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.ndim" title="adelie.adelie_core.matrix.MatrixCovSparse64F.ndim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim</span></code></a></p></td>
+<td><p>Number of dimensions.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.matrix.MatrixCovBase64.shape" title="adelie.matrix.MatrixCovBase64.shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.shape" title="adelie.adelie_core.matrix.MatrixCovSparse64F.shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></a></p></td>
 <td><p>Shape of the matrix.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.matrix.MatrixCovBase64.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.matrix.MatrixCovBase64" title="adelie.adelie_core.matrix.MatrixCovBase64"><span class="pre">adelie.adelie_core.matrix.MatrixCovBase64</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.matrix.MatrixCovBase64.__init__" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixCovSparse64F.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixCovSparse64F" title="adelie.adelie_core.matrix.MatrixCovSparse64F"><span class="pre">adelie.adelie_core.matrix.MatrixCovSparse64F</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nnz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.matrix.MatrixCovBase64.bmul">
-<span class="sig-name descname"><span class="pre">bmul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.matrix.MatrixCovBase64" title="adelie.adelie_core.matrix.MatrixCovBase64"><span class="pre">adelie.adelie_core.matrix.MatrixCovBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg3</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.matrix.MatrixCovBase64.bmul" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixCovSparse64F.bmul">
+<span class="sig-name descname"><span class="pre">bmul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBase64.html#adelie.adelie_core.matrix.MatrixCovBase64" title="adelie.adelie_core.matrix.MatrixCovBase64"><span class="pre">adelie.adelie_core.matrix.MatrixCovBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg3</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.bmul" title="Link to this definition">#</a></dt>
 <dd><p>Block matrix-sparse vector multiplication.</p>
 <p>Computes the matrix-sparse vector multiplication
 <code class="docutils literal notranslate"><span class="pre">v.T</span> <span class="pre">&#64;</span> <span class="pre">A[:,</span> <span class="pre">subset]</span></code> where <code class="docutils literal notranslate"><span class="pre">v</span></code> is represented by the sparse-format
@@ -527,14 +556,14 @@ document.write(`
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.matrix.MatrixCovBase64.cols">
-<span class="sig-name descname"><span class="pre">cols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.matrix.MatrixCovBase64" title="adelie.adelie_core.matrix.MatrixCovBase64"><span class="pre">adelie.adelie_core.matrix.MatrixCovBase64</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#adelie.matrix.MatrixCovBase64.cols" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixCovSparse64F.cols">
+<span class="sig-name descname"><span class="pre">cols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBase64.html#adelie.adelie_core.matrix.MatrixCovBase64" title="adelie.adelie_core.matrix.MatrixCovBase64"><span class="pre">adelie.adelie_core.matrix.MatrixCovBase64</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.cols" title="Link to this definition">#</a></dt>
 <dd><p>Number of columns.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.matrix.MatrixCovBase64.mul">
-<span class="sig-name descname"><span class="pre">mul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.matrix.MatrixCovBase64" title="adelie.adelie_core.matrix.MatrixCovBase64"><span class="pre">adelie.adelie_core.matrix.MatrixCovBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.matrix.MatrixCovBase64.mul" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixCovSparse64F.mul">
+<span class="sig-name descname"><span class="pre">mul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBase64.html#adelie.adelie_core.matrix.MatrixCovBase64" title="adelie.adelie_core.matrix.MatrixCovBase64"><span class="pre">adelie.adelie_core.matrix.MatrixCovBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.mul" title="Link to this definition">#</a></dt>
 <dd><p>Matrix-sparse vector multiplication.</p>
 <p>Computes the matrix-sparse vector multiplication
 <code class="docutils literal notranslate"><span class="pre">v.T</span> <span class="pre">&#64;</span> <span class="pre">A</span></code> where <code class="docutils literal notranslate"><span class="pre">v</span></code> is represented by the sparse-format
@@ -555,14 +584,14 @@ The length is the number of columns of <code class="docutils literal notranslate
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.matrix.MatrixCovBase64.rows">
-<span class="sig-name descname"><span class="pre">rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.matrix.MatrixCovBase64" title="adelie.adelie_core.matrix.MatrixCovBase64"><span class="pre">adelie.adelie_core.matrix.MatrixCovBase64</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#adelie.matrix.MatrixCovBase64.rows" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixCovSparse64F.rows">
+<span class="sig-name descname"><span class="pre">rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBase64.html#adelie.adelie_core.matrix.MatrixCovBase64" title="adelie.adelie_core.matrix.MatrixCovBase64"><span class="pre">adelie.adelie_core.matrix.MatrixCovBase64</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.rows" title="Link to this definition">#</a></dt>
 <dd><p>Number of rows.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.matrix.MatrixCovBase64.to_dense">
-<span class="sig-name descname"><span class="pre">to_dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.matrix.MatrixCovBase64" title="adelie.adelie_core.matrix.MatrixCovBase64"><span class="pre">adelie.adelie_core.matrix.MatrixCovBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.f_contiguous</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.matrix.MatrixCovBase64.to_dense" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixCovSparse64F.to_dense">
+<span class="sig-name descname"><span class="pre">to_dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBase64.html#adelie.adelie_core.matrix.MatrixCovBase64" title="adelie.adelie_core.matrix.MatrixCovBase64"><span class="pre">adelie.adelie_core.matrix.MatrixCovBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.f_contiguous</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.to_dense" title="Link to this definition">#</a></dt>
 <dd><p>Converts a block to a dense matrix.</p>
 <p>Converts the block <code class="docutils literal notranslate"><span class="pre">A[i:i+p,</span> <span class="pre">i:i+p]</span></code> into a dense matrix.</p>
 <dl class="field-list simple">
@@ -580,13 +609,14 @@ The length is the number of columns of <code class="docutils literal notranslate
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.matrix.MatrixCovBase64.ndim">
-<span class="sig-name descname"><span class="pre">ndim</span></span><a class="headerlink" href="#adelie.matrix.MatrixCovBase64.ndim" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixCovSparse64F.ndim">
+<span class="sig-name descname"><span class="pre">ndim</span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.ndim" title="Link to this definition">#</a></dt>
+<dd><p>Number of dimensions. It is always <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
+</dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.matrix.MatrixCovBase64.shape">
-<span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#adelie.matrix.MatrixCovBase64.shape" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixCovSparse64F.shape">
+<span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.shape" title="Link to this definition">#</a></dt>
 <dd><p>Shape of the matrix.</p>
 </dd></dl>
 
@@ -605,20 +635,20 @@ The length is the number of columns of <code class="docutils literal notranslate
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.glm.GlmMultiBase64.html"
+       href="adelie.adelie_core.matrix.MatrixCovLazyCov64F.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.glm.GlmMultiBase64</p>
+        <p class="prev-next-title">adelie.adelie_core.matrix.MatrixCovLazyCov64F</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.matrix.MatrixNaiveBase64.html"
+       href="adelie.adelie_core.matrix.MatrixNaiveBase64.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.matrix.MatrixNaiveBase64</p>
+        <p class="prev-next-title">adelie.adelie_core.matrix.MatrixNaiveBase64</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -638,15 +668,15 @@ The length is the number of columns of <code class="docutils literal notranslate
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixCovBase64"><code class="docutils literal notranslate"><span class="pre">MatrixCovBase64</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixCovBase64.__init__"><code class="docutils literal notranslate"><span class="pre">MatrixCovBase64.__init__()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixCovBase64.bmul"><code class="docutils literal notranslate"><span class="pre">MatrixCovBase64.bmul()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixCovBase64.cols"><code class="docutils literal notranslate"><span class="pre">MatrixCovBase64.cols()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixCovBase64.mul"><code class="docutils literal notranslate"><span class="pre">MatrixCovBase64.mul()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixCovBase64.rows"><code class="docutils literal notranslate"><span class="pre">MatrixCovBase64.rows()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixCovBase64.to_dense"><code class="docutils literal notranslate"><span class="pre">MatrixCovBase64.to_dense()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixCovBase64.ndim"><code class="docutils literal notranslate"><span class="pre">MatrixCovBase64.ndim</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.MatrixCovBase64.shape"><code class="docutils literal notranslate"><span class="pre">MatrixCovBase64.shape</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixCovSparse64F"><code class="docutils literal notranslate"><span class="pre">MatrixCovSparse64F</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.__init__"><code class="docutils literal notranslate"><span class="pre">MatrixCovSparse64F.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.bmul"><code class="docutils literal notranslate"><span class="pre">MatrixCovSparse64F.bmul()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.cols"><code class="docutils literal notranslate"><span class="pre">MatrixCovSparse64F.cols()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.mul"><code class="docutils literal notranslate"><span class="pre">MatrixCovSparse64F.mul()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.rows"><code class="docutils literal notranslate"><span class="pre">MatrixCovSparse64F.rows()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.to_dense"><code class="docutils literal notranslate"><span class="pre">MatrixCovSparse64F.to_dense()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.ndim"><code class="docutils literal notranslate"><span class="pre">MatrixCovSparse64F.ndim</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixCovSparse64F.shape"><code class="docutils literal notranslate"><span class="pre">MatrixCovSparse64F.shape</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -655,7 +685,7 @@ The length is the number of columns of <code class="docutils literal notranslate
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.matrix.MatrixCovBase64.rst.txt">
+    <a href="../_sources/generated/adelie.adelie_core.matrix.MatrixCovSparse64F.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

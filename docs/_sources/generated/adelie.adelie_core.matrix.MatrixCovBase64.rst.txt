@@ -1,7 +1,7 @@
-﻿adelie.matrix.MatrixCovBase64
-=============================
+﻿adelie.adelie\_core.matrix.MatrixCovBase64
+==========================================
 
-.. currentmodule:: adelie.matrix
+.. currentmodule:: adelie.adelie_core.matrix
 
 .. autoclass:: MatrixCovBase64
 

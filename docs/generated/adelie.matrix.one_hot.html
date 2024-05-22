@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.state.base &#8212; adelie 1.1.31 documentation</title>
+    <title>adelie.matrix.one_hot &#8212; adelie 1.1.31 documentation</title>
   
   
   
@@ -42,11 +42,13 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.state.base';</script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.matrix.one_hot';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="User Guide" href="../user_guide.html" />
-    <link rel="prev" title="adelie.matrix.MatrixNaiveBase64" href="adelie.matrix.MatrixNaiveBase64.html" />
+    <link rel="next" title="adelie.matrix.snp_phased_ancestry" href="adelie.matrix.snp_phased_ancestry.html" />
+    <link rel="prev" title="adelie.matrix.lazy_cov" href="adelie.matrix.lazy_cov.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -326,6 +328,9 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.configs.set_configs.html">adelie.configs.set_configs</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.cv.CVGrpnetResult.html">adelie.cv.CVGrpnetResult</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.cv.cv_grpnet.html">adelie.cv.cv_grpnet</a></li>
 </ul>
@@ -363,16 +368,18 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.block_diag.html">adelie.matrix.block_diag</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.concatenate.html">adelie.matrix.concatenate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.interaction.html">adelie.matrix.interaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.kronecker_eye.html">adelie.matrix.kronecker_eye</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.lazy_cov.html">adelie.matrix.lazy_cov</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.matrix.one_hot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.sparse.html">adelie.matrix.sparse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.standardize.html">adelie.matrix.standardize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.subset.html">adelie.matrix.subset</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -388,7 +395,36 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.multigaussian_naive.html">adelie.state.multigaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.configs.Configs.html">adelie.adelie_core.configs.Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBase64.html">adelie.adelie_core.glm.GlmBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialLogit64.html">adelie.adelie_core.glm.GlmBinomialLogit64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialProbit64.html">adelie.adelie_core.glm.GlmBinomialProbit64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmCox64.html">adelie.adelie_core.glm.GlmCox64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmGaussian64.html">adelie.adelie_core.glm.GlmGaussian64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiBase64.html">adelie.adelie_core.glm.GlmMultiBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiGaussian64.html">adelie.adelie_core.glm.GlmMultiGaussian64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultinomial64.html">adelie.adelie_core.glm.GlmMultinomial64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmPoisson64.html">adelie.adelie_core.glm.GlmPoisson64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBase64.html">adelie.adelie_core.matrix.MatrixCovBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBlockDiag64.html">adelie.adelie_core.matrix.MatrixCovBlockDiag64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovDense64F.html">adelie.adelie_core.matrix.MatrixCovDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovLazyCov64F.html">adelie.adelie_core.matrix.MatrixCovLazyCov64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovSparse64F.html">adelie.adelie_core.matrix.MatrixCovSparse64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase64.html">adelie.adelie_core.matrix.MatrixNaiveBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveDense64F.html">adelie.adelie_core.matrix.MatrixNaiveDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveInteractionDense64F.html">adelie.adelie_core.matrix.MatrixNaiveInteractionDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEye64.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEye64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F.html">adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64.html">adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPUnphased64.html">adelie.adelie_core.matrix.MatrixNaiveSNPUnphased64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveSparse64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveStandardize64.html">adelie.adelie_core.matrix.MatrixNaiveStandardize64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCSubset64.html">adelie.adelie_core.matrix.MatrixNaiveCSubset64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRSubset64.html">adelie.adelie_core.matrix.MatrixNaiveRSubset64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianCov64.html">adelie.adelie_core.state.StateGaussianCov64</a></li>
@@ -396,11 +432,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive64.html">adelie.adelie_core.state.StateMultiGlmNaive64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmBase64.html">adelie.glm.GlmBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmMultiBase64.html">adelie.glm.GlmMultiBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.state.base</a></li>
 </ul>
 </div>
 </nav></div>
@@ -441,7 +472,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.state.base</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.matri...</li>
   </ul>
 </nav>
 </div>
@@ -458,87 +489,80 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-state-base">
-<h1>adelie.state.base<a class="headerlink" href="#adelie-state-base" title="Link to this heading">#</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="adelie.state.base">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.state.</span></span><span class="sig-name descname"><span class="pre">base</span></span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/state.py#L25-L101"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.state.base" title="Link to this definition">#</a></dt>
-<dd><p>Base wrapper state class.</p>
-<p>All Python wrapper classes for core state classes must inherit from this class.</p>
-<p class="rubric">Methods</p>
-<table class="autosummary longtable table autosummary">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.base.__init__" title="adelie.state.base.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*args, **kwargs)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.state.base.check" title="adelie.state.base.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>([method, logger])</p></td>
-<td><p>Checks consistency of the members.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.state.base.create_from_core" title="adelie.state.base.create_from_core"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_from_core</span></code></a>(cls, state, core_state, ...)</p></td>
-<td><p>Create a new instance of a state using an existing state and new (C++) core state.</p></td>
-</tr>
-</tbody>
-</table>
-<dl class="py method">
-<dt class="sig sig-object py" id="adelie.state.base.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.state.base.__init__" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="adelie.state.base.check">
-<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;RootLogger</span> <span class="pre">root</span> <span class="pre">(WARNING)&gt;</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/state.py#L38-L62"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.state.base.check" title="Link to this definition">#</a></dt>
-<dd><p>Checks consistency of the members.</p>
-<p>All information is logged using the <code class="docutils literal notranslate"><span class="pre">logging</span></code> module.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>method</strong><span class="classifier">str, optional</span></dt><dd><p>Must be one of the following options:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: every check is logged only. 
-The function does not raise exceptions or assert on failed checks.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;assert&quot;</span></code>: every check is logged and asserted.
-The function does not raise exceptions on failed checks.</p></li>
-</ul>
-</div></blockquote>
-<p>Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
-</dd>
-<dt><strong>logger</strong><span class="classifier">optional</span></dt><dd><p>Logger object that behaves like a logger object in <code class="docutils literal notranslate"><span class="pre">logging</span></code>.
-Default is <code class="docutils literal notranslate"><span class="pre">logging.getLogger()</span></code>.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="adelie.state.base.create_from_core">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_from_core</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">core_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pycls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corecls</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/state.py#L64-L101"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.state.base.create_from_core" title="Link to this definition">#</a></dt>
-<dd><p>Create a new instance of a state using an existing state and new (C++) core state.</p>
+  <section id="adelie-matrix-one-hot">
+<h1>adelie.matrix.one_hot<a class="headerlink" href="#adelie-matrix-one-hot" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="adelie.matrix.one_hot">
+<span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">one_hot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/matrix.py#L718-L828"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.matrix.one_hot" title="Link to this definition">#</a></dt>
+<dd><p>Creates a one-hot encoded matrix.</p>
+<p>This matrix <span class="math notranslate nohighlight">\(X \in \mathbb{R}^{n \times p}\)</span>
+represents a one-hot encoding of a given base matrix
+<span class="math notranslate nohighlight">\(Z \in \mathbb{R}^{n \times d}\)</span>.
+We assume <span class="math notranslate nohighlight">\(Z\)</span> contains, in general, a combination of
+continuous and discrete features (as columns).
+Denote <span class="math notranslate nohighlight">\(L : \{1, \ldots, d\} \to \mathbb{N}\)</span> as
+the mapping that maps each feature index of <span class="math notranslate nohighlight">\(Z\)</span> to the number of levels of that feature
+where a value of <span class="math notranslate nohighlight">\(0\)</span> means the feature is continuous
+and otherwise means it is discrete with that many levels (or categories).
+For every <span class="math notranslate nohighlight">\(j\)</span> th column of <span class="math notranslate nohighlight">\(Z\)</span>,
+define the possibly one-hot encoded version <span class="math notranslate nohighlight">\(\tilde{Z}_j\)</span> as</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+    \tilde{Z}_j
+    &amp;:=
+    \begin{cases}
+        Z_j ,&amp; L(j) = 0 \\
+        I_{Z_j} ,&amp; L(j) &gt; 0
+    \end{cases}
+\end{align*}\end{split}\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(I_{v}\)</span> is the indicator matrix, or one-hot encoding, of <span class="math notranslate nohighlight">\(v\)</span>.</p>
+<p>Then, <span class="math notranslate nohighlight">\(X\)</span> is defined as the column-wise concatenation of <span class="math notranslate nohighlight">\(\tilde{Z}_j\)</span>
+in order of <span class="math notranslate nohighlight">\(j\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Every discrete feature of <cite>Z</cite> <em>must</em> take on values in the set 
+<span class="math notranslate nohighlight">\(\{0, \ldots, \ell-1\}\)</span>
+where <span class="math notranslate nohighlight">\(\ell\)</span> is the number of levels for that feature.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This matrix only works for naive method!</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>cls</strong></dt><dd><p>Class to instantiate an object for.</p>
+<dt><strong>mat</strong><span class="classifier">(n, d) np.ndarray</span></dt><dd><p>The dense matrix <span class="math notranslate nohighlight">\(Z\)</span> from which to construct one-hot encodings.</p>
 </dd>
-<dt><strong>state</strong></dt><dd><p>State object to grab static members from.</p>
+<dt><strong>levels</strong><span class="classifier">(d,) np.ndarray, optional</span></dt><dd><p>Number of levels for each column in <code class="docutils literal notranslate"><span class="pre">mat</span></code>.
+A non-positive value indicates that the column is a continuous variable
+whereas a positive value indicates that it is a discrete variable with
+that many levels (or categories).
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, it is initialized to be <code class="docutils literal notranslate"><span class="pre">np.zeros(d)</span></code>
+so that every column is a continuous variable.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </dd>
-<dt><strong>core_state</strong></dt><dd><p>New core state to initialize with.</p>
+<dt><strong>copy</strong><span class="classifier">bool, optional</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, a copy of <code class="docutils literal notranslate"><span class="pre">mat</span></code> is stored internally.
+Otherwise, a reference is stored instead.
+Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
 </dd>
-<dt><strong>pycls</strong></dt><dd><p>Python derived class type.</p>
-</dd>
-<dt><strong>corecls</strong></dt><dd><p>Core state class type.</p>
+<dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
+Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>new_state</strong><span class="classifier">cls</span></dt><dd><p>New state object.</p>
+<dt>wrap</dt><dd><p>Wrapper matrix object.</p>
 </dd>
 </dl>
 </dd>
 </dl>
-</dd></dl>
-
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F.html#adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F" title="adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F</span></code></a></dt><dd></dd>
+</dl>
+</div>
 </dd></dl>
 
 </section>
@@ -554,20 +578,20 @@ Default is <code class="docutils literal notranslate"><span class="pre">logging.
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.matrix.MatrixNaiveBase64.html"
+       href="adelie.matrix.lazy_cov.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.matrix.MatrixNaiveBase64</p>
+        <p class="prev-next-title">adelie.matrix.lazy_cov</p>
       </div>
     </a>
     <a class="right-next"
-       href="../user_guide.html"
+       href="adelie.matrix.snp_phased_ancestry.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">User Guide</p>
+        <p class="prev-next-title">adelie.matrix.snp_phased_ancestry</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -587,19 +611,14 @@ Default is <code class="docutils literal notranslate"><span class="pre">logging.
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base"><code class="docutils literal notranslate"><span class="pre">base</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base.__init__"><code class="docutils literal notranslate"><span class="pre">base.__init__()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base.check"><code class="docutils literal notranslate"><span class="pre">base.check()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.state.base.create_from_core"><code class="docutils literal notranslate"><span class="pre">base.create_from_core()</span></code></a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.matrix.one_hot"><code class="docutils literal notranslate"><span class="pre">one_hot()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.state.base.rst.txt">
+    <a href="../_sources/generated/adelie.matrix.one_hot.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

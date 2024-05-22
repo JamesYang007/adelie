@@ -1,0 +1,54 @@
+﻿adelie.adelie\_core.glm.GlmPoisson64
+====================================
+
+.. currentmodule:: adelie.adelie_core.glm
+
+.. autoclass:: GlmPoisson64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GlmPoisson64.__init__
+      ~GlmPoisson64.gradient
+      ~GlmPoisson64.hessian
+      ~GlmPoisson64.inv_hessian_gradient
+      ~GlmPoisson64.loss
+      ~GlmPoisson64.loss_full
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GlmPoisson64.is_multi
+      ~GlmPoisson64.is_symmetric
+      ~GlmPoisson64.name
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: gradient
+   .. automethod:: hessian
+   .. automethod:: inv_hessian_gradient
+   .. automethod:: loss
+   .. automethod:: loss_full
+   
+   
+
+   
+   
+   
+   .. autoattribute:: is_multi
+   .. autoattribute:: is_symmetric
+   .. autoattribute:: name
+   
+   

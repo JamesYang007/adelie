@@ -1,0 +1,60 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveSNPUnphased64
+===================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveSNPUnphased64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveSNPUnphased64.__init__
+      ~MatrixNaiveSNPUnphased64.bmul
+      ~MatrixNaiveSNPUnphased64.btmul
+      ~MatrixNaiveSNPUnphased64.cmul
+      ~MatrixNaiveSNPUnphased64.cols
+      ~MatrixNaiveSNPUnphased64.cov
+      ~MatrixNaiveSNPUnphased64.ctmul
+      ~MatrixNaiveSNPUnphased64.mul
+      ~MatrixNaiveSNPUnphased64.rows
+      ~MatrixNaiveSNPUnphased64.sp_btmul
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveSNPUnphased64.ndim
+      ~MatrixNaiveSNPUnphased64.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_btmul
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

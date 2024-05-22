@@ -1,0 +1,54 @@
+﻿adelie.adelie\_core.glm.GlmBinomialLogit64
+==========================================
+
+.. currentmodule:: adelie.adelie_core.glm
+
+.. autoclass:: GlmBinomialLogit64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GlmBinomialLogit64.__init__
+      ~GlmBinomialLogit64.gradient
+      ~GlmBinomialLogit64.hessian
+      ~GlmBinomialLogit64.inv_hessian_gradient
+      ~GlmBinomialLogit64.loss
+      ~GlmBinomialLogit64.loss_full
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GlmBinomialLogit64.is_multi
+      ~GlmBinomialLogit64.is_symmetric
+      ~GlmBinomialLogit64.name
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: gradient
+   .. automethod:: hessian
+   .. automethod:: inv_hessian_gradient
+   .. automethod:: loss
+   .. automethod:: loss_full
+   
+   
+
+   
+   
+   
+   .. autoattribute:: is_multi
+   .. autoattribute:: is_symmetric
+   .. autoattribute:: name
+   
+   

@@ -1,7 +1,7 @@
-﻿adelie.matrix.MatrixNaiveBase64
-===============================
+﻿adelie.adelie\_core.matrix.MatrixNaiveBase64
+============================================
 
-.. currentmodule:: adelie.matrix
+.. currentmodule:: adelie.adelie_core.matrix
 
 .. autoclass:: MatrixNaiveBase64
 

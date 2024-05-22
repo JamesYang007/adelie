@@ -1,0 +1,60 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveSNPPhasedAncestry64
+=========================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveSNPPhasedAncestry64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveSNPPhasedAncestry64.__init__
+      ~MatrixNaiveSNPPhasedAncestry64.bmul
+      ~MatrixNaiveSNPPhasedAncestry64.btmul
+      ~MatrixNaiveSNPPhasedAncestry64.cmul
+      ~MatrixNaiveSNPPhasedAncestry64.cols
+      ~MatrixNaiveSNPPhasedAncestry64.cov
+      ~MatrixNaiveSNPPhasedAncestry64.ctmul
+      ~MatrixNaiveSNPPhasedAncestry64.mul
+      ~MatrixNaiveSNPPhasedAncestry64.rows
+      ~MatrixNaiveSNPPhasedAncestry64.sp_btmul
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveSNPPhasedAncestry64.ndim
+      ~MatrixNaiveSNPPhasedAncestry64.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_btmul
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

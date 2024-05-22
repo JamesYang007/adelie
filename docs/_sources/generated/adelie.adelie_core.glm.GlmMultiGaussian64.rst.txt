@@ -1,0 +1,54 @@
+﻿adelie.adelie\_core.glm.GlmMultiGaussian64
+==========================================
+
+.. currentmodule:: adelie.adelie_core.glm
+
+.. autoclass:: GlmMultiGaussian64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GlmMultiGaussian64.__init__
+      ~GlmMultiGaussian64.gradient
+      ~GlmMultiGaussian64.hessian
+      ~GlmMultiGaussian64.inv_hessian_gradient
+      ~GlmMultiGaussian64.loss
+      ~GlmMultiGaussian64.loss_full
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GlmMultiGaussian64.is_multi
+      ~GlmMultiGaussian64.is_symmetric
+      ~GlmMultiGaussian64.name
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: gradient
+   .. automethod:: hessian
+   .. automethod:: inv_hessian_gradient
+   .. automethod:: loss
+   .. automethod:: loss_full
+   
+   
+
+   
+   
+   
+   .. autoattribute:: is_multi
+   .. autoattribute:: is_symmetric
+   .. autoattribute:: name
+   
+   

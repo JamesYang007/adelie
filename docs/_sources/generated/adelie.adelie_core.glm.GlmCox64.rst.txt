@@ -1,0 +1,72 @@
+﻿adelie.adelie\_core.glm.GlmCox64
+================================
+
+.. currentmodule:: adelie.adelie_core.glm
+
+.. autoclass:: GlmCox64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GlmCox64.__init__
+      ~GlmCox64.gradient
+      ~GlmCox64.hessian
+      ~GlmCox64.inv_hessian_gradient
+      ~GlmCox64.loss
+      ~GlmCox64.loss_full
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GlmCox64.is_multi
+      ~GlmCox64.is_symmetric
+      ~GlmCox64.name
+      ~GlmCox64.scale_to
+      ~GlmCox64.start_order
+      ~GlmCox64.start_so
+      ~GlmCox64.status_to
+      ~GlmCox64.stop_order
+      ~GlmCox64.stop_to
+      ~GlmCox64.weights_mean_to
+      ~GlmCox64.weights_size_to
+      ~GlmCox64.weights_to
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: gradient
+   .. automethod:: hessian
+   .. automethod:: inv_hessian_gradient
+   .. automethod:: loss
+   .. automethod:: loss_full
+   
+   
+
+   
+   
+   
+   .. autoattribute:: is_multi
+   .. autoattribute:: is_symmetric
+   .. autoattribute:: name
+   .. autoattribute:: scale_to
+   .. autoattribute:: start_order
+   .. autoattribute:: start_so
+   .. autoattribute:: status_to
+   .. autoattribute:: stop_order
+   .. autoattribute:: stop_to
+   .. autoattribute:: weights_mean_to
+   .. autoattribute:: weights_size_to
+   .. autoattribute:: weights_to
+   
+   

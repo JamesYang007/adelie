@@ -1,9 +1,9 @@
-﻿adelie.glm.GlmBase64
-====================
+﻿adelie.adelie\_core.glm.GlmGaussian64
+=====================================
 
-.. currentmodule:: adelie.glm
+.. currentmodule:: adelie.adelie_core.glm
 
-.. autoclass:: GlmBase64
+.. autoclass:: GlmGaussian64
 
    
    
@@ -11,12 +11,12 @@
 
    .. autosummary::
    
-      ~GlmBase64.__init__
-      ~GlmBase64.gradient
-      ~GlmBase64.hessian
-      ~GlmBase64.inv_hessian_gradient
-      ~GlmBase64.loss
-      ~GlmBase64.loss_full
+      ~GlmGaussian64.__init__
+      ~GlmGaussian64.gradient
+      ~GlmGaussian64.hessian
+      ~GlmGaussian64.inv_hessian_gradient
+      ~GlmGaussian64.loss
+      ~GlmGaussian64.loss_full
    
    
 
@@ -26,9 +26,9 @@
 
    .. autosummary::
    
-      ~GlmBase64.is_multi
-      ~GlmBase64.is_symmetric
-      ~GlmBase64.name
+      ~GlmGaussian64.is_multi
+      ~GlmGaussian64.is_symmetric
+      ~GlmGaussian64.name
    
    
 

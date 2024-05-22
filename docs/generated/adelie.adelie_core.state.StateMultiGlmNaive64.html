@@ -47,7 +47,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.adelie_core.state.StateMultiGlmNaive64';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.glm.GlmBase64" href="adelie.glm.GlmBase64.html" />
+    <link rel="next" title="User Guide" href="../user_guide.html" />
     <link rel="prev" title="adelie.adelie_core.state.StateMultiGaussianNaive64" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -328,6 +328,9 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.configs.set_configs.html">adelie.configs.set_configs</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.cv.CVGrpnetResult.html">adelie.cv.CVGrpnetResult</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.cv.cv_grpnet.html">adelie.cv.cv_grpnet</a></li>
 </ul>
@@ -372,9 +375,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.interaction.html">adelie.matrix.interaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.kronecker_eye.html">adelie.matrix.kronecker_eye</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.lazy_cov.html">adelie.matrix.lazy_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.one_hot.html">adelie.matrix.one_hot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.sparse.html">adelie.matrix.sparse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.standardize.html">adelie.matrix.standardize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.subset.html">adelie.matrix.subset</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -391,6 +396,35 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.configs.Configs.html">adelie.adelie_core.configs.Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBase64.html">adelie.adelie_core.glm.GlmBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialLogit64.html">adelie.adelie_core.glm.GlmBinomialLogit64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialProbit64.html">adelie.adelie_core.glm.GlmBinomialProbit64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmCox64.html">adelie.adelie_core.glm.GlmCox64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmGaussian64.html">adelie.adelie_core.glm.GlmGaussian64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiBase64.html">adelie.adelie_core.glm.GlmMultiBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiGaussian64.html">adelie.adelie_core.glm.GlmMultiGaussian64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultinomial64.html">adelie.adelie_core.glm.GlmMultinomial64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmPoisson64.html">adelie.adelie_core.glm.GlmPoisson64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBase64.html">adelie.adelie_core.matrix.MatrixCovBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBlockDiag64.html">adelie.adelie_core.matrix.MatrixCovBlockDiag64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovDense64F.html">adelie.adelie_core.matrix.MatrixCovDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovLazyCov64F.html">adelie.adelie_core.matrix.MatrixCovLazyCov64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovSparse64F.html">adelie.adelie_core.matrix.MatrixCovSparse64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase64.html">adelie.adelie_core.matrix.MatrixNaiveBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveDense64F.html">adelie.adelie_core.matrix.MatrixNaiveDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveInteractionDense64F.html">adelie.adelie_core.matrix.MatrixNaiveInteractionDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEye64.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEye64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F.html">adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64.html">adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPUnphased64.html">adelie.adelie_core.matrix.MatrixNaiveSNPUnphased64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveSparse64F</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveStandardize64.html">adelie.adelie_core.matrix.MatrixNaiveStandardize64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCSubset64.html">adelie.adelie_core.matrix.MatrixNaiveCSubset64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRSubset64.html">adelie.adelie_core.matrix.MatrixNaiveRSubset64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianCov64.html">adelie.adelie_core.state.StateGaussianCov64</a></li>
@@ -398,11 +432,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.adelie_core.state.StateMultiGlmNaive64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmBase64.html">adelie.glm.GlmBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.glm.GlmMultiBase64.html">adelie.glm.GlmMultiBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixCovBase64.html">adelie.matrix.MatrixCovBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.MatrixNaiveBase64.html">adelie.matrix.MatrixNaiveBase64</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.state.base.html">adelie.state.base</a></li>
 </ul>
 </div>
 </nav></div>
@@ -465,7 +494,7 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateMultiGlmNaive64">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.adelie_core.state.</span></span><span class="sig-name descname"><span class="pre">StateMultiGlmNaive64</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateMultiGlmNaive64" title="Link to this definition">#</a></dt>
-<dd><p>Core state class for multiglm, naive method.</p>
+<dd><p>Core state class for multi-response GLM, naive method.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
@@ -1085,11 +1114,11 @@ and <code class="docutils literal notranslate"><span class="pre">p</span> <span 
       </div>
     </a>
     <a class="right-next"
-       href="adelie.glm.GlmBase64.html"
+       href="../user_guide.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.glm.GlmBase64</p>
+        <p class="prev-next-title">User Guide</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

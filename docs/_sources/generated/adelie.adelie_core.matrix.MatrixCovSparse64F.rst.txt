@@ -1,0 +1,52 @@
+﻿adelie.adelie\_core.matrix.MatrixCovSparse64F
+=============================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixCovSparse64F
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixCovSparse64F.__init__
+      ~MatrixCovSparse64F.bmul
+      ~MatrixCovSparse64F.cols
+      ~MatrixCovSparse64F.mul
+      ~MatrixCovSparse64F.rows
+      ~MatrixCovSparse64F.to_dense
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixCovSparse64F.ndim
+      ~MatrixCovSparse64F.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: cols
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: to_dense
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

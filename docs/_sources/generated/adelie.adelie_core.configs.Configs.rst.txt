@@ -1,0 +1,54 @@
+﻿adelie.adelie\_core.configs.Configs
+===================================
+
+.. currentmodule:: adelie.adelie_core.configs
+
+.. autoclass:: Configs
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Configs.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Configs.dbeta_tol
+      ~Configs.dbeta_tol_def
+      ~Configs.hessian_min
+      ~Configs.hessian_min_def
+      ~Configs.min_bytes
+      ~Configs.min_bytes_def
+      ~Configs.pb_symbol
+      ~Configs.pb_symbol_def
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   
+   
+
+   
+   
+   
+   .. autoattribute:: dbeta_tol
+   .. autoattribute:: dbeta_tol_def
+   .. autoattribute:: hessian_min
+   .. autoattribute:: hessian_min_def
+   .. autoattribute:: min_bytes
+   .. autoattribute:: min_bytes_def
+   .. autoattribute:: pb_symbol
+   .. autoattribute:: pb_symbol_def
+   
+   

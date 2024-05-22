@@ -1,7 +1,7 @@
-﻿adelie.glm.GlmMultiBase64
-=========================
+﻿adelie.adelie\_core.glm.GlmMultiBase64
+======================================
 
-.. currentmodule:: adelie.glm
+.. currentmodule:: adelie.adelie_core.glm
 
 .. autoclass:: GlmMultiBase64
 

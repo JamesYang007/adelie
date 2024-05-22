@@ -1,0 +1,54 @@
+﻿adelie.adelie\_core.glm.GlmBase64
+=================================
+
+.. currentmodule:: adelie.adelie_core.glm
+
+.. autoclass:: GlmBase64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GlmBase64.__init__
+      ~GlmBase64.gradient
+      ~GlmBase64.hessian
+      ~GlmBase64.inv_hessian_gradient
+      ~GlmBase64.loss
+      ~GlmBase64.loss_full
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GlmBase64.is_multi
+      ~GlmBase64.is_symmetric
+      ~GlmBase64.name
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: gradient
+   .. automethod:: hessian
+   .. automethod:: inv_hessian_gradient
+   .. automethod:: loss
+   .. automethod:: loss_full
+   
+   
+
+   
+   
+   
+   .. autoattribute:: is_multi
+   .. autoattribute:: is_symmetric
+   .. autoattribute:: name
+   
+   

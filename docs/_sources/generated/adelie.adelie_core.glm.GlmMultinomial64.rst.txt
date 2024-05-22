@@ -1,0 +1,54 @@
+﻿adelie.adelie\_core.glm.GlmMultinomial64
+========================================
+
+.. currentmodule:: adelie.adelie_core.glm
+
+.. autoclass:: GlmMultinomial64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GlmMultinomial64.__init__
+      ~GlmMultinomial64.gradient
+      ~GlmMultinomial64.hessian
+      ~GlmMultinomial64.inv_hessian_gradient
+      ~GlmMultinomial64.loss
+      ~GlmMultinomial64.loss_full
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GlmMultinomial64.is_multi
+      ~GlmMultinomial64.is_symmetric
+      ~GlmMultinomial64.name
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: gradient
+   .. automethod:: hessian
+   .. automethod:: inv_hessian_gradient
+   .. automethod:: loss
+   .. automethod:: loss_full
+   
+   
+
+   
+   
+   
+   .. autoattribute:: is_multi
+   .. autoattribute:: is_symmetric
+   .. autoattribute:: name
+   
+   
