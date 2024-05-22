@@ -40,7 +40,7 @@ class glm_base:
     """
     def __init__(self, y, weights, core_base, dtype):
         self.core_base = core_base
-        self.y = y
+        self.y = np.array(y, copy=True, dtype=dtype)
         self.dtype = dtype
         if len(y.shape) != 1:
             raise RuntimeError("y must be 1-dimensional.")
@@ -54,11 +54,11 @@ class glm_base:
                 weights = weights / weights_sum
         else:
             weights = np.full(n, 1/n, dtype=dtype)
-        self.weights = np.array(weights, order="C", dtype=dtype)
+        self.weights = np.array(weights, copy=True, dtype=dtype)
 
 
 class multiglm_base:
-    """Base wrapper Multi-response GLM class.
+    """Base wrapper multi-response GLM class.
 
     All Python wrapper classes for core multi-response GLM classes must inherit from this class.
     The purpose of this class is to expose extra member interface
@@ -66,7 +66,7 @@ class multiglm_base:
     """
     def __init__(self, y, weights, core_base, dtype):
         self.core_base = core_base
-        self.y = y
+        self.y = np.array(y, copy=True, dtype=dtype)
         self.dtype = dtype
         if len(y.shape) != 2:
             raise RuntimeError("y must be 2-dimensional.")
@@ -80,7 +80,7 @@ class multiglm_base:
                 weights = weights / np.sum(weights)
         else:
             weights = np.full(n, 1/n, dtype=dtype)
-        self.weights = np.array(weights, order="C", dtype=dtype)
+        self.weights = np.array(weights, copy=True, dtype=dtype)
 
 
 def binomial(
@@ -150,7 +150,8 @@ def binomial(
 
     See Also
     --------
-    adelie.glm.GlmBase64
+    adelie.adelie_core.glm.GlmBinomialLogit64
+    adelie.adelie_core.glm.GlmBinomialProbit64
     """
     dispatcher = {
         "logit": {
@@ -272,7 +273,7 @@ def cox(
 
     See Also
     --------
-    adelie.glm.GlmBase64
+    adelie.adelie_core.glm.GlmCox64
     """
     dispatcher = {
         np.float64: core.glm.GlmCox64,
@@ -285,8 +286,8 @@ def cox(
 
     class _cox(glm_base, core_base):
         def __init__(self):
-            self.start = start.astype(dtype)
-            self.stop = stop.astype(dtype)
+            self.start = np.array(start, copy=True, dtype=dtype)
+            self.stop = np.array(stop, copy=True, dtype=dtype)
             glm_base.__init__(self, status, weights, core_base, dtype)
             self.status = self.y
             self.tie_method = tie_method
@@ -361,7 +362,7 @@ def gaussian(
 
     See Also
     --------
-    adelie.glm.GlmBase64
+    adelie.adelie_core.glm.GlmGaussian64
     """
     dispatcher = {
         np.float64: core.glm.GlmGaussian64,
@@ -392,9 +393,9 @@ def multigaussian(
     dtype: Union[np.float32, np.float64] =None,
     opt: bool =True,
 ):
-    """Creates a Multi-response Gaussian GLM family object.
+    """Creates a MultiGaussian GLM family object.
 
-    The Multi-Response Gaussian GLM family specifies the loss function as:
+    The MultiGaussian GLM family specifies the loss function as:
 
     .. math::
         \\begin{align*}
@@ -432,11 +433,11 @@ def multigaussian(
     Returns
     -------
     glm
-        Multi-response Gaussian GLM object.
+        MultiGaussian GLM object.
 
     See Also
     --------
-    adelie.glm.GlmBase64
+    adelie.adelie_core.glm.GlmMultiGaussian64
     """
     dispatcher = {
         np.float64: core.glm.GlmMultiGaussian64,
@@ -514,7 +515,7 @@ def multinomial(
 
     See Also
     --------
-    adelie.glm.GlmMultiBase64
+    adelie.adelie_core.glm.GlmMultinomial64
     """
     dispatcher = {
         np.float64: core.glm.GlmMultinomial64,
@@ -580,7 +581,7 @@ def poisson(
 
     See Also
     --------
-    adelie.glm.GlmBase64
+    adelie.adelie_core.glm.GlmPoisson64
     """
     dispatcher = {
         np.float64: core.glm.GlmPoisson64,

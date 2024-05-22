@@ -60,7 +60,7 @@ void coordinate_descent_solver(
             quad, linear, l1, l2, newton_tol, newton_max_iters, 
             x_uncnstr, x_iters, x_buffer1, x_buffer2
         );
-        x_buffer1.matrix().noalias() = x_uncnstr.matrix() * A.transpose();
+        x_buffer1.matrix() = x_uncnstr.matrix() * A.transpose();
         // if unconstrained solution is feasible
         if ((x_buffer1 <= b).all()) {
             x = x_uncnstr;

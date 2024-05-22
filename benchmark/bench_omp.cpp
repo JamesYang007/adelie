@@ -20,10 +20,14 @@ static void BM_cmul_seq(benchmark::State& state) {
     }
 }
 
+BENCHMARK(BM_cmul_seq)
+    -> Args({100000})
+    ;
 
 inline double cmul_par(
     const Eigen::Ref<const ad::util::rowvec_type<double>>& v1,
     const Eigen::Ref<const ad::util::rowvec_type<double>>& v2,
+    Eigen::Ref<ad::util::rowvec_type<double>> buff,
     size_t nt
 )
 {
@@ -32,8 +36,7 @@ inline double cmul_par(
     const int n_blocks = std::max<int>(n_threads_cap, 1);
     const int block_size = n / n_blocks;
     const int remainder = n % n_blocks;
-    ad::util::rowvec_type<double> buff(n_blocks);
-    #pragma omp parallel for schedule(static) num_threads(n_threads_cap)
+    #pragma omp parallel for schedule(static) num_threads(n_blocks)
     for (int t = 0; t < n_blocks; ++t)
     {
         const auto begin = (
@@ -43,7 +46,7 @@ inline double cmul_par(
         const auto size = block_size + (t < remainder);
         buff[t] = v1.matrix().segment(begin, size).dot(v2.matrix().segment(begin, size));
     }
-    return buff.sum();
+    return buff.head(n_blocks).sum();
 }
 
 static void BM_cmul_par(benchmark::State& state) {
@@ -52,15 +55,23 @@ static void BM_cmul_par(benchmark::State& state) {
 
     ad::util::rowvec_type<double> v1(n); v1.setRandom();
     ad::util::rowvec_type<double> v2(n); v2.setRandom();
+    ad::util::rowvec_type<double> buff(nt);
     double out;
 
     for (auto _ : state) {
         out = cmul_par(
-            v1, v2, nt 
+            v1, v2, buff, nt
         );
         benchmark::DoNotOptimize(out);
     }
 }
+
+BENCHMARK(BM_cmul_par)
+    -> Args({100000, 1})
+    -> Args({100000, 2})
+    -> Args({100000, 4})
+    -> Args({100000, 8})
+    ;
 
 static void BM_ctmul_seq(benchmark::State& state) {
     const auto n = state.range(0);
@@ -318,16 +329,6 @@ static void BM_change_n_iters(benchmark::State& state)
     }
 }
 
-BENCHMARK(BM_cmul_seq)
-    -> Args({10000000})
-    ;
-BENCHMARK(BM_cmul_par)
-    -> Args({10000000, 1})
-    -> Args({10000000, 2})
-    -> Args({10000000, 4})
-    -> Args({10000000, 8})
-    -> Args({10000000, 16})
-    ;
 BENCHMARK(BM_ctmul_seq)
     -> Args({1000000})
     ;
@@ -385,4 +386,65 @@ BENCHMARK(BM_change_pool)
     ;
 BENCHMARK(BM_change_n_iters)
     -> Args({1000})
+    ;
+
+static void BM_amortize_cost(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    ad::util::rowvec_type<double> x(n);
+    x.setRandom();
+    ad::util::rowvec_type<double> y(n);
+    y.setRandom();
+    const auto n_sims = std::min<int>(100 * n, 100);
+
+    for (auto _ : state) {
+        for (int i = 0; i < n_sims; ++i) {
+            #pragma omp parallel for schedule(static) num_threads(4)
+            for (int i = 0; i < n; ++i) {
+                x[i] += y[i];
+            }
+        }
+        benchmark::DoNotOptimize(x);
+    }
+}
+
+BENCHMARK(BM_amortize_cost)
+    -> Args({1})
+    -> Args({10})
+    -> Args({100})
+    -> Args({1000})
+    -> Args({10000})
+    -> Args({100000})
+    ;
+
+static void BM_no_amortize_cost(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    ad::util::rowvec_type<double> x(n);
+    x.setRandom();
+    ad::util::rowvec_type<double> y(n);
+    y.setRandom();
+    const auto n_sims = std::min<int>(100 * n, 100);
+
+    for (auto _ : state) {
+        #pragma omp parallel num_threads(4)
+        {
+            for (int i = 0; i < n_sims; ++i) {
+                #pragma omp for schedule(static) 
+                for (int i = 0; i < n; ++i) {
+                    x[i] += y[i];
+                }
+            }
+        }
+        benchmark::DoNotOptimize(x);
+    }
+}
+
+BENCHMARK(BM_no_amortize_cost)
+    -> Args({1})
+    -> Args({10})
+    -> Args({100})
+    -> Args({1000})
+    -> Args({10000})
+    -> Args({100000})
     ;

@@ -11,7 +11,8 @@ PYBIND11_MODULE(adelie_core, m) {
     auto m_bcd = m.def_submodule("bcd", "BCD submodule.");
     register_bcd(m_bcd);
 
-    register_configs(m);
+    auto m_configs = m.def_submodule("configs", "Configurations submodule.");
+    register_configs(m_configs);
 
     auto m_glm = m.def_submodule("glm", "GLM submodule.");
     register_glm(m_glm);
@@ -21,6 +22,9 @@ PYBIND11_MODULE(adelie_core, m) {
 
     auto m_matrix = m.def_submodule("matrix", "Matrix submodule.");
     register_matrix(m_matrix);
+
+    auto m_matrix_utils = m_matrix.def_submodule("utils", "Matrix utility submodule.");
+    register_matrix_utils(m_matrix_utils);
 
     auto m_optimization = m.def_submodule("optimization", "Optimization submodule.");
     register_optimization(m_optimization);
