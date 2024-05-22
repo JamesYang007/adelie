@@ -521,17 +521,17 @@ def gaussian_pin_naive(
             # static inputs require a reference to input
             # or copy if it must be made
             self._X = X
-            self._groups = np.array(groups, copy=False, dtype=int)
-            self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
-            self._penalty = np.array(penalty, copy=False, dtype=dtype)
-            self._weights = np.array(weights, copy=False, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=False, dtype=int)
-            self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
+            self._groups = np.array(groups, copy=True, dtype=int)
+            self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._penalty = np.array(penalty, copy=True, dtype=dtype)
+            self._weights = np.array(weights, copy=True, dtype=dtype)
+            self._screen_set = np.array(screen_set, copy=True, dtype=int)
+            self._lmda_path = np.array(lmda_path, copy=True, dtype=dtype)
             # dynamic inputs require a copy to not modify user's inputs
-            self._resid = np.copy(resid).astype(dtype)
-            self._screen_beta = np.copy(screen_beta).astype(dtype)
-            self._screen_is_active = np.copy(screen_is_active).astype(bool)
-            self._active_set = np.copy(active_set).astype(int)
+            self._resid = np.array(resid, copy=True, dtype=dtype)
+            self._screen_beta = np.array(screen_beta, copy=True, dtype=dtype)
+            self._screen_is_active = np.array(screen_is_active, copy=True, dtype=bool)
+            self._active_set = np.array(active_set, copy=True, dtype=int)
 
             (
                 self._screen_begins,
@@ -800,16 +800,16 @@ def gaussian_pin_cov(
             # static inputs require a reference to input
             # or copy if it must be made
             self._A = A
-            self._groups = np.array(groups, copy=False, dtype=int)
-            self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
-            self._penalty = np.array(penalty, copy=False, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=False, dtype=int)
-            self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
+            self._groups = np.array(groups, copy=True, dtype=int)
+            self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._penalty = np.array(penalty, copy=True, dtype=dtype)
+            self._screen_set = np.array(screen_set, copy=True, dtype=int)
+            self._lmda_path = np.array(lmda_path, copy=True, dtype=dtype)
             # dynamic inputs require a copy to not modify user's inputs
-            self._screen_beta = np.copy(screen_beta).astype(dtype)
-            self._screen_grad = np.copy(screen_grad).astype(dtype)
-            self._screen_is_active = np.copy(screen_is_active).astype(bool)
-            self._active_set = np.copy(active_set).astype(int)
+            self._screen_beta = np.array(screen_beta, copy=True, dtype=dtype)
+            self._screen_grad = np.array(screen_grad, copy=True, dtype=dtype)
+            self._screen_is_active = np.array(screen_is_active, copy=True, dtype=bool)
+            self._active_set = np.array(active_set, copy=True, dtype=int)
 
             (
                 self._screen_begins,
@@ -1237,10 +1237,10 @@ def gaussian_cov(
             # static inputs require a reference to input
             # or copy if it must be made
             self._A = A
-            self._v = np.array(v, copy=False, dtype=dtype)
-            self._groups = np.array(groups, copy=False, dtype=int)
-            self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
-            self._penalty = np.array(penalty, copy=False, dtype=dtype)
+            self._v = np.array(v, copy=True, dtype=dtype)
+            self._groups = np.array(groups, copy=True, dtype=int)
+            self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
@@ -1809,17 +1809,18 @@ def gaussian_naive(
             # or copy if it must be made
             self._glm = glm.gaussian(y=y, weights=weights, dtype=dtype)
             self._X = X
-            self._X_means = np.array(X_means, copy=False, dtype=dtype)
-            self._groups = np.array(groups, copy=False, dtype=int)
-            self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
-            self._penalty = np.array(penalty, copy=False, dtype=dtype)
-            self._offsets = np.array(offsets, copy=False, dtype=dtype)
+            self._X_means = np.array(X_means, copy=True, dtype=dtype)
+            self._groups = np.array(groups, copy=True, dtype=int)
+            self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._penalty = np.array(penalty, copy=True, dtype=dtype)
+            self._offsets = np.array(offsets, copy=True, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
             self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
+            self._resid = np.array(resid, copy=False, dtype=dtype)
 
             # MUST call constructor directly and not use super()!
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
@@ -1829,7 +1830,7 @@ def gaussian_naive(
                 X_means=self._X_means,
                 y_mean=y_mean,
                 y_var=y_var,
-                resid=resid,
+                resid=self._resid,
                 resid_sum=resid_sum,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
@@ -2156,18 +2157,19 @@ def multigaussian_naive(
             self._glm = glm.multigaussian(y=y, weights=weights, dtype=dtype)
             self._X = X_raw
             self._X_expanded = X
-            self._X_means = np.array(X_means, copy=False, dtype=dtype)
-            self._groups = np.array(groups, copy=False, dtype=int)
-            self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
-            self._penalty = np.array(penalty, copy=False, dtype=dtype)
+            self._X_means = np.array(X_means, copy=True, dtype=dtype)
+            self._groups = np.array(groups, copy=True, dtype=int)
+            self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._weights_expanded = np.repeat(self._glm.weights, repeats=n_classes) / n_classes
-            self._offsets = np.array(offsets, copy=False, dtype=dtype)
+            self._offsets = np.array(offsets, copy=True, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
             self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
+            self._resid = np.array(resid, copy=False, dtype=dtype)
 
             # MUST call constructor directly and not use super()!
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
@@ -2184,7 +2186,7 @@ def multigaussian_naive(
                 # calculation of loss_null and loss_full.
                 y_mean=np.linalg.norm(np.sum(weights[:, None] * (y - offsets), axis=-1) / n_classes),
                 y_var=y_var,
-                resid=resid,
+                resid=self._resid,
                 resid_sum=resid_sum,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
@@ -2510,16 +2512,18 @@ def glm_naive(
             # or copy if it must be made
             self._glm = glm
             self._X = X
-            self._groups = np.array(groups, copy=False, dtype=int)
-            self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
-            self._penalty = np.array(penalty, copy=False, dtype=dtype)
-            self._offsets = np.array(offsets, copy=False, dtype=dtype)
+            self._groups = np.array(groups, copy=True, dtype=int)
+            self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._penalty = np.array(penalty, copy=True, dtype=dtype)
+            self._offsets = np.array(offsets, copy=True, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
             self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
+            self._eta = np.array(eta, copy=False, dtype=dtype)
+            self._resid = np.array(resid, copy=False, dtype=dtype)
 
             # MUST call constructor directly and not use super()!
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
@@ -2565,8 +2569,8 @@ def glm_naive(
                 beta0=beta0,
                 lmda=lmda,
                 grad=self._grad,
-                eta=eta,
-                resid=resid,
+                eta=self._eta,
+                resid=self._resid,
             )
 
         @classmethod
@@ -2862,16 +2866,18 @@ def multiglm_naive(
             self._glm = glm
             self._X = X_raw
             self._X_expanded = X
-            self._groups = np.array(groups, copy=False, dtype=int)
-            self._group_sizes = np.array(group_sizes, copy=False, dtype=int)
-            self._penalty = np.array(penalty, copy=False, dtype=dtype)
-            self._offsets = np.array(offsets, copy=False, dtype=dtype)
+            self._groups = np.array(groups, copy=True, dtype=int)
+            self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._penalty = np.array(penalty, copy=True, dtype=dtype)
+            self._offsets = np.array(offsets, copy=True, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
             self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
+            self._eta = np.array(eta, copy=False, dtype=dtype)
+            self._resid = np.array(resid, copy=False, dtype=dtype)
 
             # MUST call constructor directly and not use super()!
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
@@ -2920,8 +2926,8 @@ def multiglm_naive(
                 beta0=0,
                 lmda=lmda,
                 grad=self._grad,
-                eta=eta,
-                resid=resid,
+                eta=self._eta,
+                resid=self._resid,
             )
 
         @classmethod

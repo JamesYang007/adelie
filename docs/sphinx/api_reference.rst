@@ -21,6 +21,20 @@ adelie.bcd
     solve
 
 
+adelie.configs
+--------------
+
+
+.. currentmodule:: adelie.configs
+
+
+.. autosummary::
+    :toctree: generated/
+
+
+    set_configs
+
+
 adelie.cv
 ---------
 
@@ -184,6 +198,7 @@ Internal
     :toctree: generated/
     
 
+    adelie_core.configs.Configs
     adelie_core.glm.GlmBase64
     adelie_core.glm.GlmBinomialLogit64
     adelie_core.glm.GlmBinomialProbit64

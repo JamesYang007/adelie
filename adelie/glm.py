@@ -40,7 +40,7 @@ class glm_base:
     """
     def __init__(self, y, weights, core_base, dtype):
         self.core_base = core_base
-        self.y = y
+        self.y = np.array(y, copy=True, dtype=dtype)
         self.dtype = dtype
         if len(y.shape) != 1:
             raise RuntimeError("y must be 1-dimensional.")
@@ -54,7 +54,7 @@ class glm_base:
                 weights = weights / weights_sum
         else:
             weights = np.full(n, 1/n, dtype=dtype)
-        self.weights = np.array(weights, order="C", dtype=dtype)
+        self.weights = np.array(weights, copy=True, dtype=dtype)
 
 
 class multiglm_base:
@@ -66,7 +66,7 @@ class multiglm_base:
     """
     def __init__(self, y, weights, core_base, dtype):
         self.core_base = core_base
-        self.y = y
+        self.y = np.array(y, copy=True, dtype=dtype)
         self.dtype = dtype
         if len(y.shape) != 2:
             raise RuntimeError("y must be 2-dimensional.")
@@ -80,7 +80,7 @@ class multiglm_base:
                 weights = weights / np.sum(weights)
         else:
             weights = np.full(n, 1/n, dtype=dtype)
-        self.weights = np.array(weights, order="C", dtype=dtype)
+        self.weights = np.array(weights, copy=True, dtype=dtype)
 
 
 def binomial(
@@ -286,8 +286,8 @@ def cox(
 
     class _cox(glm_base, core_base):
         def __init__(self):
-            self.start = start.astype(dtype)
-            self.stop = stop.astype(dtype)
+            self.start = np.array(start, copy=True, dtype=dtype)
+            self.stop = np.array(stop, copy=True, dtype=dtype)
             glm_base.__init__(self, status, weights, core_base, dtype)
             self.status = self.y
             self.tie_method = tie_method

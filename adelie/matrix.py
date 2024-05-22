@@ -354,6 +354,7 @@ def dense(
     mat: np.ndarray,
     *,
     method: str ="naive",
+    copy: bool =False,
     n_threads: int =1,
 ):
     """Creates a viewer of a dense matrix.
@@ -369,6 +370,10 @@ def dense(
             - ``"cov"``: covariance method.
 
         Default is ``"naive"``.
+    copy : bool, optional
+        If ``True``, a copy of ``mat`` is stored internally.
+        Otherwise, a reference is stored instead.
+        Default is ``False``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -431,7 +436,7 @@ def dense(
 
     class _dense(core_base, py_base):
         def __init__(self):
-            self.mat = mat
+            self.mat = np.array(mat, copy=copy)
             core_base.__init__(self, self.mat, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
@@ -443,6 +448,7 @@ def interaction(
     intr_map: dict,
     levels: np.ndarray =None,
     *,
+    copy: bool =False,
     n_threads: int =1,
 ):
     """Creates a matrix with pairwise interactions.
@@ -542,6 +548,10 @@ def interaction(
         If ``None``, it is initialized to be ``np.zeros(d)``
         so that every column is a continuous variable.
         Default is ``None``.
+    copy : bool, optional
+        If ``True``, a copy of ``mat`` is stored internally.
+        Otherwise, a reference is stored instead.
+        Default is ``False``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -617,9 +627,9 @@ def interaction(
 
     class _interaction(core_base, py_base):
         def __init__(self):
-            self.mat = mat
+            self.mat = np.array(mat, copy=copy)
             self.pairs = pairs
-            self.levels = np.array(levels, copy=False, dtype=np.int32)
+            self.levels = np.array(levels, copy=True, dtype=np.int32)
             core_base.__init__(self, self.mat, self.pairs, self.levels, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         
@@ -630,6 +640,7 @@ def kronecker_eye(
     mat: Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64],
     K: int,
     *,
+    copy: bool =False,
     n_threads: int =1,
 ):
     """Creates a Kronecker product with identity matrix.
@@ -648,6 +659,11 @@ def kronecker_eye(
         If ``np.ndarray``, a specialized class is created with more optimized routines.
     K : int
         Dimension of the identity matrix.
+    copy : bool, optional
+        This argument is only used if ``mat`` is a ``np.ndarray``.
+        If ``True``, a copy of ``mat`` is stored internally.
+        Otherwise, a reference is stored instead.
+        Default is ``False``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -680,6 +696,7 @@ def kronecker_eye(
             "F"
         )
         core_base = dispatcher[dtype][order]
+        mat = np.array(mat, copy=copy)
     else:
         dispatcher = {
             np.float64: core.matrix.MatrixNaiveKroneckerEye64,
@@ -702,6 +719,7 @@ def one_hot(
     mat: np.ndarray,
     levels: np.ndarray =None,
     *,
+    copy: bool =False,
     n_threads: int =1,
 ):
     """Creates a one-hot encoded matrix.
@@ -753,6 +771,10 @@ def one_hot(
         If ``None``, it is initialized to be ``np.zeros(d)``
         so that every column is a continuous variable.
         Default is ``None``.
+    copy : bool, optional
+        If ``True``, a copy of ``mat`` is stored internally.
+        Otherwise, a reference is stored instead.
+        Default is ``False``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -798,7 +820,7 @@ def one_hot(
 
     class _one_hot(core_base, py_base):
         def __init__(self):
-            self.mat = mat
+            self.mat = np.array(mat, copy=copy)
             self.levels = np.array(levels, copy=True, dtype=np.int32)
             core_base.__init__(self, self.mat, self.levels, n_threads)
             py_base.__init__(self, n_threads=n_threads)
@@ -809,6 +831,7 @@ def one_hot(
 def lazy_cov(
     mat: np.ndarray,
     *,
+    copy: bool =False,
     n_threads: int =1,
 ):
     """Creates a lazy covariance matrix.
@@ -829,6 +852,10 @@ def lazy_cov(
     ----------
     mat : (n, p) np.ndarray
         The data matrix from which to lazily compute the covariance.
+    copy : bool, optional
+        If ``True``, a copy of ``mat`` is stored internally.
+        Otherwise, a reference is stored instead.
+        Default is ``False``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -864,7 +891,7 @@ def lazy_cov(
 
     class _lazy_cov(core_base, py_base):
         def __init__(self):
-            self.mat = mat
+            self.mat = np.array(mat, copy=copy)
             core_base.__init__(self, self.mat, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
@@ -987,6 +1014,7 @@ def sparse(
     mat: Union[csc_matrix, csr_matrix],
     *,
     method: str ="naive",
+    copy: bool =False,
     n_threads: int =1,
 ):
     """Creates a viewer of a sparse matrix.
@@ -1006,6 +1034,10 @@ def sparse(
             - ``"cov"``: covariance method.
 
         Default is ``"naive"``.
+    copy : bool, optional
+        If ``True``, a copy of ``mat`` is stored internally.
+        Otherwise, a reference is stored instead.
+        Default is ``False``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -1023,12 +1055,14 @@ def sparse(
     if not (isinstance(mat, csr_matrix) or isinstance(mat, csc_matrix)):
         raise TypeError("mat must be scipy.sparse.csr_matrix or scipy.sparse.csc_matrix.")
 
-    mat.prune()
-    mat.sort_indices()
-
     if isinstance(mat, csr_matrix):
         warnings.warn("Converting to CSC format.")
         mat = mat.tocsc(copy=True)
+    elif copy:
+        mat = mat.copy()
+
+    mat.prune()
+    mat.sort_indices()
 
     naive_dispatcher = {
         np.dtype("float64"): core.matrix.MatrixNaiveSparse64F,
@@ -1285,7 +1319,7 @@ def subset(
     class _subset(core_base, py_base):
         def __init__(self):
             self.mat = mat
-            self.indices = np.array(indices, dtype=np.int32, copy=True)
+            self.indices = np.array(indices, copy=True, dtype=np.int32)
             core_base.__init__(self, mat, self.indices, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         
