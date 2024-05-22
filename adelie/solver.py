@@ -118,7 +118,7 @@ def gaussian_cov(
     warm_start =None,
     exit_cond: Callable =None,
 ):
-    """Gaussian elastic net solver via covariance method.
+    """Solves Gaussian group elastic net via covariance method.
 
     The Gaussian elastic net problem via covariance method minimizes the following:
 
@@ -424,7 +424,7 @@ def grpnet(
     warm_start =None,
     exit_cond: Callable =None,
 ):
-    """Group elastic net solver.
+    """Solves group elastic net via naive method.
 
     The group elastic net problem minimizes the following:
 

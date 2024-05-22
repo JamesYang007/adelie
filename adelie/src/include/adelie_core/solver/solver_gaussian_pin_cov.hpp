@@ -263,7 +263,7 @@ void coordinate_descent(
             const auto pk = penalty[k];
 
             auto gk_transformed = buffer3.head(ak.size());
-            gk_transformed.matrix().noalias() = (
+            gk_transformed.matrix() = (
                 gk.matrix() * Vk
             );
 
@@ -271,7 +271,7 @@ void coordinate_descent(
             auto ak_old = buffer4.head(ak.size());
             ak_old = ak;
             auto ak_old_transformed = buffer4.segment(ak.size(), ak.size());
-            ak_old_transformed.matrix().noalias() = ak_old.matrix() * Vk; 
+            ak_old_transformed.matrix() = ak_old.matrix() * Vk; 
             auto ak_transformed = buffer4.segment(2 * ak.size(), ak.size());
 
             // update group coefficients
@@ -295,7 +295,7 @@ void coordinate_descent(
             update_rsq(rsq, del_transformed, A_kk, gk_transformed);
 
             // update new coefficient
-            ak.matrix().noalias() = ak_transformed.matrix() * Vk.transpose();
+            ak.matrix() = ak_transformed.matrix() * Vk.transpose();
 
             // update gradient
             auto del = buffer2.head(ak.size());

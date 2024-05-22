@@ -75,7 +75,7 @@ void proximal_newton_solver(
 
         // compute v - A^T mu
         if (recompute_mu_resid) {
-            mu_resid.matrix().noalias() = mu.matrix() * A;
+            mu_resid.matrix() = mu.matrix() * A;
             mu_resid = v - mu_resid;
         }
 
@@ -132,7 +132,7 @@ void proximal_newton_solver(
         }
 
         // compute (negative) gradient
-        grad.matrix().noalias() = x.matrix() * A.transpose();
+        grad.matrix() = x.matrix() * A.transpose();
         grad -= b;
 
         // check convergence
@@ -162,7 +162,7 @@ void proximal_newton_solver(
         hess = (1 - l1 * x_buffer2).maxCoeff() * hess_buff;
 
         alpha_tmp = (x * x_buffer2) / x_norm;
-        alpha.matrix().noalias() = alpha_tmp.matrix() * A.transpose();
+        alpha.matrix() = alpha_tmp.matrix() * A.transpose();
         const auto l1_kappa_norm = l1 * x_norm / (x * x_buffer1 * alpha_tmp).sum();
         hess.noalias() += l1_kappa_norm * alpha.matrix().transpose() * alpha.matrix();
 
@@ -183,7 +183,7 @@ void proximal_newton_solver(
 
     // compute v - A^T mu
     if (recompute_mu_resid) {
-        mu_resid.matrix().noalias() = mu.matrix() * A;
+        mu_resid.matrix() = mu.matrix() * A;
         mu_resid = v - mu_resid;
     }
     size_t x_iters;

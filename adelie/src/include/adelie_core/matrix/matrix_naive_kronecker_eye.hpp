@@ -56,8 +56,8 @@ public:
         int l = j - _K * i;
         Eigen::Map<vec_value_t> _v(_buff.data(), V.rows());
         Eigen::Map<vec_value_t> _w(_buff.data() + V.rows(), V.rows());
-        _v = V.col(l);
-        _w = W.col(l);
+        dvveq(_v, V.col(l), _n_threads);
+        dvveq(_w, W.col(l), _n_threads);
         return _mat->cmul(i, _v, _w);
     }
 
@@ -74,7 +74,8 @@ public:
         Eigen::Map<vec_value_t> _out(_buff.data(), Out.rows());
         dvzero(_out, _n_threads);
         _mat->ctmul(i, v, _out);
-        Out.col(l).array() += _out;
+        auto Out_l = Out.col(l).array();
+        dvaddi(Out_l, _out, _n_threads);
     }
 
     void bmul(
@@ -96,16 +97,13 @@ public:
             const auto i_end = (j-l+q-1) / static_cast<int>(_K) + 1;
             const auto i_q = i_end - i_begin;
             if (i_q <= 0) continue;
-            _v = V.col(l);
-            _w = W.col(l);
-            Eigen::Map<vec_value_t> _out(
-                _buff.data() + 2 * V.rows(),
-                i_q
-            );
+            dvveq(_v, V.col(l), _n_threads);
+            dvveq(_w, W.col(l), _n_threads);
+            Eigen::Map<vec_value_t> _out(_buff.data() + 2 * V.rows(), i_q);
             _mat->bmul(i_begin, i_q, _v, _w, _out);
-            for (int i = i_begin; i < i_end; ++i){
-                out[i*_K+l-j] = _out[i-i_begin];
-            }
+            Eigen::Map<rowmat_value_t> Out(out.data(), out.size() / _K, _K);
+            auto Out_curr = Out.col(l-j).segment(i_begin, i_q);
+            dvveq(Out_curr, _out, _n_threads);
         }
     }
 
@@ -125,16 +123,13 @@ public:
             const auto i_q = i_end - i_begin;
             if (i_q <= 0) continue;
             Eigen::Map<vec_value_t> _v(_buff.data(), i_q);
-            for (int i = i_begin; i < i_end; ++i) {
-                _v[i-i_begin] = v[i*_K+l-j];
-            }
-            Eigen::Map<vec_value_t> _out(
-                _buff.data() + i_q,
-                Out.rows()
-            );
-            _out.setZero();
+            Eigen::Map<const rowmat_value_t> V(v.data(), v.size() / _K, _K);
+            dvveq(_v, V.col(l-j).segment(i_begin, i_q), _n_threads);
+            Eigen::Map<vec_value_t> _out(_buff.data() + i_q, Out.rows());
+            dvzero(_out, _n_threads);
             _mat->btmul(i_begin, i_q, _v, _out);
-            Out.col(l).array() += _out;
+            auto Out_l = Out.col(l).array();
+            dvaddi(Out_l, _out, _n_threads);
         }
     }
 
@@ -144,8 +139,20 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        // TODO: this can maybe be parallelized?
-        bmul(0, cols(), v, weights, out);
+        Eigen::Map<const rowmat_value_t> V(v.data(), rows() / _K, _K);
+        Eigen::Map<const rowmat_value_t> W(weights.data(), V.rows(), V.cols());
+        Eigen::Map<vec_value_t> _v(_buff.data(), V.rows());
+        Eigen::Map<vec_value_t> _w(_buff.data() + V.rows(), V.rows());
+        const auto p = _mat->cols();
+        for (int l = 0; l < _K; ++l) {
+            dvveq(_v, V.col(l), _n_threads);
+            dvveq(_w, W.col(l), _n_threads);
+            Eigen::Map<vec_value_t> _out(_buff.data() + 2 * V.rows(), p);
+            _mat->mul(_v, _w, _out);
+            Eigen::Map<rowmat_value_t> Out(out.data(), out.size() / _K, _K);
+            auto Out_l = Out.col(l).array();
+            dvveq(Out_l, _out, _n_threads);
+        }
     }
 
     void cov(
@@ -161,7 +168,7 @@ public:
             rows(), cols()
         );
         Eigen::Map<const rowmat_value_t> sqrt_W(sqrt_weights.data(), rows() / _K, _K);
-        out.setZero(); // do NOT parallelize!
+        out.setZero();
         for (int l = 0; l < _K; ++l) {
             const auto j_l = std::max(j-l, 0);
             const auto i_begin = j_l / static_cast<int>(_K) + ((j_l % _K) != 0);
@@ -173,7 +180,7 @@ public:
                 _buff.resize(_buff.size() + i_q * i_q);
             }
             Eigen::Map<vec_value_t> _sqrt_weights(_buff.data(), sqrt_W.rows());
-            _sqrt_weights = sqrt_W.col(l);
+            dvveq(_sqrt_weights, sqrt_W.col(l), _n_threads);
             Eigen::Map<colmat_value_t> _out(
                 _buff.data() + _sqrt_weights.size(),
                 i_q, i_q
@@ -368,9 +375,9 @@ public:
             const int l = (j + n_processed) - _K * i;
             const int size = std::min<int>(_K-l, q-n_processed);
             Eigen::Map<const vec_value_t> _v(v.data() + n_processed, size);
-            for (int k = 0; k < size; ++k) {
-                auto _out = Out.col(l+k);
-                dvaddi(_out, _v[k] * _mat.col(i), _n_threads);
+            for (int j = 0; j < _v.size(); ++j) {
+                auto Out_curr = Out.col(l+j);
+                dvaddi(Out_curr, _v[j] * _mat.col(i), _n_threads);
             }
             n_processed += size;
         }
@@ -388,7 +395,6 @@ public:
         Eigen::Map<rowmat_value_t> Out(out.data(), cols() / _K, _K);
         Eigen::setNbThreads(_n_threads);
         Out.noalias() = _mat.transpose() * VW;
-        Eigen::setNbThreads(1);
     }
 
     void cov(
@@ -413,25 +419,25 @@ public:
             const auto i_q = i_end - i_begin;
             if (i_q <= 0) continue;
 
-            auto buff = buffer.topLeftCorner(_mat.rows(), i_q);
-            auto buff_array = buff.array();
+            Eigen::Map<colmat_value_t> sqrt_WX(buffer.data(), _mat.rows(), i_q);
+            auto sqrt_WX_array = sqrt_WX.array();
             dmmeq(
-                buff_array,
+                sqrt_WX_array,
                 _mat.middleCols(i_begin, i_q).array().colwise() * sqrt_W.col(l).array(),
                 _n_threads
             );
+
+            if (_vbuff.size() < i_q * i_q) _vbuff.resize(i_q * i_q);
+            Eigen::Map<colmat_value_t> XTWX(_vbuff.data(), i_q, i_q);
+            XTWX.setZero(); // do NOT parallelize!
+            XTWX.template selfadjointView<Eigen::Lower>().rankUpdate(sqrt_WX.transpose());
             for (int i1 = 0; i1 < i_q; ++i1) {
                 for (int i2 = 0; i2 <= i1; ++i2) {
-                    out((i1+i_begin)*_K+l-j, (i2+i_begin)*_K+l-j) = (
-                        buff.col(i1).dot(buff.col(i2))
-                    );
-                }
-            }
-            for (int i1 = 0; i1 < i_q; ++i1) {
-                for (int i2 = i1 + 1; i2 < i_q; ++i2) {
                     const auto fi1 = (i1+i_begin)*_K+l-j;
                     const auto fi2 = (i2+i_begin)*_K+l-j;
-                    out(fi1, fi2) = out(fi2, fi1);
+                    const auto val = XTWX(i1, i2);
+                    out(fi1, fi2) = val;
+                    out(fi2, fi1) = val;
                 }
             }
         }
@@ -483,20 +489,36 @@ public:
                 values.data()
             );
 
-            _out.noalias() = _v * _mat.transpose();
-
             const auto routine = [&](int k) {
                 Eigen::Map<rowmat_value_t> out_k(
                     out.row(k).data(), _out.cols(), _K                
                 );
                 out_k.col(l) = _out.row(k);
             };
+
             if (_n_threads <= 1) {
-                for (int k = 0; k < out.rows(); ++k) routine(k);
-            } else {
-                #pragma omp parallel for schedule(static) num_threads(_n_threads)
-                for (int k = 0; k < out.rows(); ++k) routine(k);
+                _out.noalias() = _v * _mat.transpose();
+                for (int k = 0; k < _v.outerSize(); ++k) routine(k);
+                continue;
             }
+
+            const auto outer = _v.outerIndexPtr();
+            const auto inner = _v.innerIndexPtr();
+            const auto value = _v.valuePtr();
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int k = 0; k < _v.outerSize(); ++k) {
+                const Eigen::Map<const sp_mat_value_t> vk(
+                    1,
+                    _v.cols(),
+                    outer[k+1] - outer[k],
+                    outer + k,
+                    inner,
+                    value
+                );
+                auto out_k = _out.row(k);
+                out_k = vk * _mat.transpose();
+                routine(k);
+            };
         }
     }
 };

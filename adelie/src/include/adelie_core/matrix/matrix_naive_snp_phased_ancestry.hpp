@@ -28,6 +28,7 @@ protected:
     const size_t _n_threads;    // number of threads
     util::rowvec_type<char> _bbuff;
     vec_index_t _ibuff;
+    vec_value_t _buff;
 
     static auto init_io(
         const string_t& filename,
@@ -43,44 +44,26 @@ protected:
     value_t _cmul(
         int j,
         const Eigen::Ref<const vec_value_t>& v,
-        const Eigen::Ref<const vec_value_t>& weights
-    ) const
+        const Eigen::Ref<const vec_value_t>& weights,
+        size_t n_threads
+    ) 
     {
-        const auto A = ancestries();
-        const auto snp = j / A;
-        const auto anc = j % A;
-
-        value_t sum = 0;
-        for (int hap = 0; hap < io_t::n_haps; ++hap) {
-            auto it = _io.begin(snp, anc, hap);
-            const auto end = _io.end(snp, anc, hap);
-            for (; it != end; ++it) {
-                const auto idx = *it;
-                sum += v[idx] * weights[idx];
-            }
-        }
-
-        return sum;
+        return snp_phased_ancestry_dot(
+            _io, j, v * weights, n_threads, _buff
+        );
     }
 
     ADELIE_CORE_STRONG_INLINE
     void _ctmul(
         int j,
         value_t v,
-        Eigen::Ref<vec_value_t> out
+        Eigen::Ref<vec_value_t> out,
+        size_t n_threads
     )
     {
-        const auto A = ancestries();
-        const auto snp = j / A;
-        const auto anc = j % A;
-
-        for (int hap = 0; hap < io_t::n_haps; ++hap) {
-            auto it = _io.begin(snp, anc, hap);
-            const auto end = _io.end(snp, anc, hap);
-            for (; it != end; ++it) {
-                out[*it] += v;
-            }
-        }
+        return snp_phased_ancestry_axi(
+            _io, j, v, out, n_threads
+        );
     }
 
     auto ancestries() const { return _io.ancestries(); }
@@ -94,7 +77,8 @@ public:
         _io(init_io(filename, read_mode)),
         _n_threads(n_threads),
         _bbuff(_io.rows()),
-        _ibuff(_io.rows())
+        _ibuff(_io.rows()),
+        _buff(n_threads * _io.ancestries())
     {
         if (n_threads < 1) {
             throw util::adelie_core_error("n_threads must be >= 1.");
@@ -109,7 +93,7 @@ public:
     ) override
     {
         base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-        return _cmul(j, v, weights);
+        return _cmul(j, v, weights, _n_threads);
     }
 
     void ctmul(
@@ -119,7 +103,7 @@ public:
     ) override
     {
         base_t::check_ctmul(j, out.size(), rows(), cols());
-        _ctmul(j, v, out);
+        _ctmul(j, v, out, _n_threads);
     }
 
     void bmul(
@@ -130,9 +114,10 @@ public:
     ) override
     {
         base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-        for (int t = 0; t < q; ++t) {
-            out[t] = _cmul(j + t, v, weights);
-        }
+        if (_buff.size() < q * _n_threads) _buff.resize(q * _n_threads);
+        snp_phased_ancestry_block_dot(
+            _io, j, q, v * weights, out, _n_threads, _buff
+        );
     }
 
     void btmul(
@@ -142,9 +127,10 @@ public:
     ) override
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
-        for (int t = 0; t < q; ++t) {
-            _ctmul(j + t, v[t], out);
-        }
+        if (_buff.size() < q * _n_threads) _buff.resize(q * _n_threads);
+        snp_phased_ancestry_block_axi(
+            _io, j, q, v, out, _n_threads
+        );
     }
 
     void mul(
@@ -154,7 +140,7 @@ public:
     ) override
     {
         const auto routine = [&](int t) {
-            out[t] = _cmul(t, v, weights);
+            out[t] = _cmul(t, v, weights, 1);
         };
         if (_n_threads <= 1) {
             for (int t = 0; t < cols(); ++t) routine(t);
@@ -202,57 +188,97 @@ public:
                     const auto a_high = ancestry_upper0;
                     const auto a_size = a_high - a_low;
 
-                    // compute quadratic diagonal part
-                    for (int k = 0; k < a_size; ++k) {
-                        value_t sum = 0;
-                        for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
-                            const auto anc = a_low + k;
-                            auto it = _io.begin(snp, anc, hap);
-                            const auto end = _io.end(snp, anc, hap);
-                            for (; it != end; ++it) {
-                                const auto idx = *it;
-                                const auto sqrt_w = sqrt_weights[idx];
-                                sum += sqrt_w * sqrt_w;
-                            }
-                        }
-                        const auto kk = n_solved0 + k;
-                        out(kk, kk) = sum;
+                    // increase buffer including cross-term computation part as well
+                    if (_buff.size() < a_size * a_size * _n_threads) {
+                        _buff.resize(a_size * a_size * _n_threads);
                     }
 
-                    // compute cross-terms
-                    for (int k0 = 0; k0 < a_size; ++k0) {
-                        // cache hap0 information
-                        size_t nnz = 0;
-                        auto it0 = _io.begin(snp, a_low + k0, 0);
-                        const auto end0 = _io.end(snp, a_low + k0, 0);
-                        for (; it0 != end0; ++it0) {
-                            const auto idx = *it0;
-                            _bbuff[idx] = true;
-                            _ibuff[nnz] = idx;
-                            ++nnz;
-                        }
+                    // compute quadratic diagonal part
+                    auto out_diag = out.diagonal().segment(n_solved0, a_size);
+                    snp_phased_ancestry_block_dot(
+                        _io, begin0, a_size, sqrt_weights.square(), out_diag, _n_threads, _buff
+                    );
 
-                        // loop through hap1's ancestries
+                    // compute cross-terms
+                    //for (int k0 = 0; k0 < a_size; ++k0) {
+                    //    // cache hap0 information
+                    //    size_t nnz = 0;
+                    //    auto it0 = _io.begin(snp, a_low + k0, 0);
+                    //    const auto end0 = _io.end(snp, a_low + k0, 0);
+                    //    for (; it0 != end0; ++it0) {
+                    //        const auto idx = *it0;
+                    //        _bbuff[idx] = true;
+                    //        _ibuff[nnz] = idx;
+                    //        ++nnz;
+                    //    }
+
+                    //    // loop through hap1's ancestries
+                    //    for (int k1 = 0; k1 < a_size; ++k1) {
+                    //        auto it1 = _io.begin(snp, a_low + k1, 1);
+                    //        const auto end1 = _io.end(snp, a_low + k1, 1);
+                    //        value_t sum = 0;
+                    //        for (; it1 != end1; ++it1) {
+                    //            const auto idx = *it1;
+                    //            const auto sqrt_w = sqrt_weights[idx];
+                    //            sum += sqrt_w * sqrt_w * _bbuff[idx];
+                    //        }
+
+                    //        const auto kk0 = n_solved0 + k0;
+                    //        const auto kk1 = n_solved0 + k1;
+                    //        out(kk0, kk1) += sum;
+                    //        out(kk1, kk0) += sum;
+                    //    }
+
+                    //    // keep invariance by populating with false
+                    //    for (size_t i = 0; i < nnz; ++i) {
+                    //        _bbuff[_ibuff[i]] = false;
+                    //    }
+                    //}
+
+                    #pragma omp parallel for schedule(static) num_threads(_n_threads) collapse(2) if(_n_threads > 1)
+                    for (int k0 = 0; k0 < a_size; ++k0) {
                         for (int k1 = 0; k1 < a_size; ++k1) {
+                            auto it0 = _io.begin(snp, a_low + k0, 0);
+                            const auto end0 = _io.end(snp, a_low + k0, 0);
                             auto it1 = _io.begin(snp, a_low + k1, 1);
                             const auto end1 = _io.end(snp, a_low + k1, 1);
+
                             value_t sum = 0;
-                            for (; it1 != end1; ++it1) {
-                                const auto idx = *it1;
-                                if (!_bbuff[idx]) continue;
-                                const auto sqrt_w = sqrt_weights[idx];
-                                sum += sqrt_w * sqrt_w;
+                            while (
+                                (it0 != end0) &&
+                                (it1 != end1)
+                            ) {
+                                const auto idx0 = *it0;
+                                const auto idx1 = *it1;
+                                if (idx0 < idx1) {
+                                    ++it0; 
+                                    continue;
+                                }
+                                else if (idx0 > idx1) {
+                                    ++it1;
+                                    continue;
+                                } 
+                                else {
+                                    const auto sqrt_w = sqrt_weights[idx0];
+                                    sum += sqrt_w * sqrt_w;
+                                    ++it0;
+                                    ++it1;
+                                }
                             }
 
                             const auto kk0 = n_solved0 + k0;
                             const auto kk1 = n_solved0 + k1;
-                            out(kk0, kk1) += sum;
-                            out(kk1, kk0) += sum;
+                            out(kk0, kk1) += sum * (1 + (kk0 == kk1));
                         }
+                    }
 
-                        // keep invariance by populating with false
-                        for (size_t i = 0; i < nnz; ++i) {
-                            _bbuff[_ibuff[i]] = false;
+                    for (int k0 = 0; k0 < a_size; ++k0) {
+                        for (int k1 = 0; k1 < k0; ++k1) {
+                            const auto kk0 = n_solved0 + k0;
+                            const auto kk1 = n_solved0 + k1;
+                            const auto tmp = out(kk0, kk1);
+                            out(kk0, kk1) += out(kk1, kk0);
+                            out(kk1, kk0) += tmp;
                         }
                     }
 
@@ -280,22 +306,18 @@ public:
                     }
 
                     for (int a1 = 0; a1 < ancestry_size1; ++a1) {
-                        value_t sum = 0;
-                        for (int hap1 = 0; hap1 < io_t::n_haps; ++hap1) {
-                            auto it = _io.begin(snp1, ancestry_lower1+a1, hap1);
-                            const auto end = _io.end(snp1, ancestry_lower1+a1, hap1);
-                            for (; it != end; ++it) {
-                                const auto idx = *it;
-                                const auto v0 = _bbuff[idx];
-                                if (!v0) continue;
-                                const auto sqrt_w = sqrt_weights[idx];
-                                sum += sqrt_w * sqrt_w * v0;
-                            }
-                        }
+                        const auto sum = snp_phased_ancestry_dot(
+                            _io, begin1 + a1, 
+                            vec_value_t::NullaryExpr(sqrt_weights.size(), [&](auto i) {
+                                const auto sqrt_wi = sqrt_weights[i];
+                                return sqrt_wi * sqrt_wi * _bbuff[i];
+                            }),
+                            _n_threads,
+                            _buff
+                        );
                         const auto kk0 = n_solved0 + a0;
                         const auto kk1 = n_solved1 + a1;
                         out(kk0, kk1) = sum;
-                        // populate the mirror side
                         out(kk1, kk0) = sum;
                     }
 
@@ -327,7 +349,7 @@ public:
             auto out_k = out.row(k);
             out_k.setZero();
             for (; it; ++it) {
-                _ctmul(it.index(), it.value(), out_k);
+                _ctmul(it.index(), it.value(), out_k, 1);
             }
         };
         if (_n_threads <= 1) {

@@ -56,7 +56,9 @@ void update_screen_derived(
         Xi_means = X_means.segment(g, gs);
 
         // resize output and buffer 
-        auto Xi = buffer1.leftCols(gs);
+        Eigen::Map<util::colmat_type<value_t>> Xi(
+            buffer1.data(), n, gs
+        );
         Eigen::Map<util::colmat_type<value_t>> XiTXi(
             buffer2.data(), gs, gs
         );
