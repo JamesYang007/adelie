@@ -457,6 +457,7 @@ auto snp_unphased_dot(
         for (int c = 0; c < io_t::n_categories; ++c) {
             const size_t n_chunks = io.n_chunks(j, c);
             const int n_blocks = std::min(n_threads, n_chunks);
+            if (n_blocks <= 0) continue;
             const int block_size = n_chunks / n_blocks;
             const int remainder = n_chunks % n_blocks;
             const value_t val = (c == 0) ? imp : c;
@@ -518,6 +519,7 @@ void snp_unphased_axi(
         for (int c = 0; c < io_t::n_categories; ++c) {
             const size_t n_chunks = io.n_chunks(j, c);
             const int n_blocks = std::min(n_threads, n_chunks);
+            if (n_blocks <= 0) continue;
             const int block_size = n_chunks / n_blocks;
             const int remainder = n_chunks % n_blocks;
             const value_t curr_val = v * ((c == 0) ? imp : c);
@@ -578,6 +580,7 @@ auto snp_phased_ancestry_dot(
         for (int hap = 0; hap < io_t::n_haps; ++hap) {
             const size_t n_chunks = io.n_chunks(snp, anc, hap);
             const int n_blocks = std::min(n_threads, n_chunks);
+            if (n_blocks <= 0) continue;
             const int block_size = n_chunks / n_blocks;
             const int remainder = n_chunks % n_blocks;
 
@@ -634,6 +637,7 @@ void snp_phased_ancestry_axi(
     for (int hap = 0; hap < io_t::n_haps; ++hap) {
         const size_t n_chunks = io.n_chunks(snp, anc, hap);
         const int n_blocks = std::min(n_threads, n_chunks);
+        if (n_blocks <= 0) continue;
         const int block_size = n_chunks / n_blocks;
         const int remainder = n_chunks % n_blocks;
 
@@ -697,6 +701,7 @@ void snp_phased_ancestry_block_dot(
             for (int hap = 0; hap < io_t::n_haps; ++hap) {
                 const size_t n_chunks = io.n_chunks(snp, anc, hap);
                 const int n_blocks = std::min(n_threads, n_chunks);
+                if (n_blocks <= 0) continue;
                 const int block_size = n_chunks / n_blocks;
                 const int remainder = n_chunks % n_blocks;
 
@@ -768,6 +773,7 @@ void snp_phased_ancestry_block_axi(
                     const auto anc = a_lower + k;
                     const size_t n_chunks = io.n_chunks(snp, anc, hap);
                     const int n_blocks = std::min(n_threads, n_chunks);
+                    if (n_blocks <= 0) continue;
                     const int block_size = n_chunks / n_blocks;
                     const int remainder = n_chunks % n_blocks;
                     const auto vk = v[n_processed + k];
