@@ -78,7 +78,7 @@ public:
         _n_threads(n_threads),
         _bbuff(_io.rows()),
         _ibuff(_io.rows()),
-        _buff(n_threads * _io.ancestries())
+        _buff(n_threads * std::max<size_t>(1, _io.ancestries()))
     {
         if (n_threads < 1) {
             throw util::adelie_core_error("n_threads must be >= 1.");
