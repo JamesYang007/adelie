@@ -17,10 +17,11 @@ public:
     using typename base_t::rowmat_value_t;
     using typename base_t::sp_mat_value_t;
     using dyn_vec_index_t = std::vector<index_t>;
+    using map_cvec_index_t = Eigen::Map<const vec_index_t>;
     
 private:
     base_t* _mat;               // underlying matrix
-    const vec_index_t _subset;  // column subset
+    const map_cvec_index_t _subset;  // column subset
     const std::tuple<
         vec_index_t,
         dyn_vec_index_t
@@ -75,7 +76,7 @@ public:
         size_t n_threads
     ): 
         _mat(mat),
-        _subset(subset),
+        _subset(subset.data(), subset.size()),
         _subset_cinfo(init_subset_cinfo(subset)),
         _n_threads(n_threads)
     {
@@ -249,10 +250,11 @@ public:
     using typename base_t::rowmat_value_t;
     using typename base_t::sp_mat_value_t;
     using vec_bool_t = util::rowvec_type<bool>;
+    using map_cvec_index_t = Eigen::Map<const vec_index_t>;
     
 private:
     base_t* _mat;               // underlying matrix
-    const vec_index_t _subset;
+    const map_cvec_index_t _subset;
     const vec_value_t _mask;  
     const size_t _n_threads;
     vec_value_t _buffer;
@@ -284,7 +286,7 @@ public:
         size_t n_threads
     ): 
         _mat(mat),
-        _subset(subset),
+        _subset(subset.data(), subset.size()),
         _mask(init_mask(mat->rows(), subset)),
         _n_threads(n_threads),
         _buffer(mat->rows())

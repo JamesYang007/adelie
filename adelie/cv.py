@@ -17,10 +17,23 @@ import scipy.sparse
 class CVGrpnetResult:
     """Result of K-fold CV group elastic net.
     """
+
     lmdas: np.ndarray
+    """
+    The common regularization path used for all folds.
+    """
     losses: np.ndarray
+    """
+    ``losses[k,i]`` is the CV loss when validating on fold ``k`` at ``lmdas[i]``.
+    """
     avg_losses: np.ndarray
+    """
+    ``avg_losses[i]`` is the average CV loss at ``lmdas[i]``.
+    """
     best_idx: int
+    """
+    Argmin of ``avg_losses``.
+    """
     
     def plot_loss(self):
         """Plots the average K-fold CV loss.
@@ -57,7 +70,7 @@ class CVGrpnetResult:
         lmda_path_size: int =100,
         **grpnet_params,
     ):
-        """Fit group elastic net until the best CV :math:`\\lambda`.
+        """Fits group elastic net until the best CV :math:`\\lambda`.
 
         Parameters
         ----------
@@ -109,7 +122,7 @@ def cv_grpnet(
     seed: int =None,
     **grpnet_params,
 ):
-    """Cross-validation group elastic net solver.
+    """Solves cross-validated group elastic net via naive method.
 
     This function was written with the intent that ``glm``
     is to be one of the GLMs defined in ``adelie.glm``.

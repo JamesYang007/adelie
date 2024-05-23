@@ -21,6 +21,20 @@ adelie.bcd
     solve
 
 
+adelie.configs
+--------------
+
+
+.. currentmodule:: adelie.configs
+
+
+.. autosummary::
+    :toctree: generated/
+
+
+    set_configs
+
+
 adelie.cv
 ---------
 
@@ -130,9 +144,11 @@ adelie.matrix
     interaction
     kronecker_eye
     lazy_cov
+    one_hot
     snp_phased_ancestry
     snp_unphased
     sparse
+    standardize
     subset
 
 
@@ -182,6 +198,35 @@ Internal
     :toctree: generated/
     
 
+    adelie_core.configs.Configs
+    adelie_core.glm.GlmBase64
+    adelie_core.glm.GlmBinomialLogit64
+    adelie_core.glm.GlmBinomialProbit64
+    adelie_core.glm.GlmCox64
+    adelie_core.glm.GlmGaussian64
+    adelie_core.glm.GlmMultiBase64
+    adelie_core.glm.GlmMultiGaussian64
+    adelie_core.glm.GlmMultinomial64
+    adelie_core.glm.GlmPoisson64
+    adelie_core.matrix.MatrixCovBase64
+    adelie_core.matrix.MatrixCovBlockDiag64
+    adelie_core.matrix.MatrixCovDense64F
+    adelie_core.matrix.MatrixCovLazyCov64F
+    adelie_core.matrix.MatrixCovSparse64F
+    adelie_core.matrix.MatrixNaiveBase64
+    adelie_core.matrix.MatrixNaiveCConcatenate64
+    adelie_core.matrix.MatrixNaiveRConcatenate64
+    adelie_core.matrix.MatrixNaiveDense64F
+    adelie_core.matrix.MatrixNaiveInteractionDense64F
+    adelie_core.matrix.MatrixNaiveKroneckerEye64
+    adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F
+    adelie_core.matrix.MatrixNaiveOneHotDense64F
+    adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64
+    adelie_core.matrix.MatrixNaiveSNPUnphased64
+    adelie_core.matrix.MatrixNaiveSparse64F
+    adelie_core.matrix.MatrixNaiveStandardize64
+    adelie_core.matrix.MatrixNaiveCSubset64
+    adelie_core.matrix.MatrixNaiveRSubset64
     adelie_core.state.StateGaussianPinCov64
     adelie_core.state.StateGaussianPinNaive64
     adelie_core.state.StateGaussianCov64
@@ -189,8 +234,3 @@ Internal
     adelie_core.state.StateGlmNaive64
     adelie_core.state.StateMultiGaussianNaive64
     adelie_core.state.StateMultiGlmNaive64
-    glm.GlmBase64
-    glm.GlmMultiBase64
-    matrix.MatrixCovBase64
-    matrix.MatrixNaiveBase64
-    state.base

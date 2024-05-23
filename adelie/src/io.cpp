@@ -135,7 +135,8 @@ void io_snp_phased_ancestry(py::module_& m)
         .def_property_readonly("snps", &io_t::snps, "Number of SNPs.")
         .def_property_readonly("cols", &io_t::cols, "Number of columns.")
         .def_property_readonly("ancestries", &io_t::ancestries, "Number of ancestries.")
-        .def_property_readonly("nnz", &io_t::nnz, "Number of non-zero entries for each column.")
+        .def_property_readonly("nnz0", &io_t::nnz0, "Number of non-zero entries for each column for haplotype 0.")
+        .def_property_readonly("nnz1", &io_t::nnz1, "Number of non-zero entries for each column for haplotype 1.")
         .def("to_dense", &io_t::to_dense, 
             py::arg("n_threads")=1,
         R"delimiter(

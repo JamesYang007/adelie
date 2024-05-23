@@ -53,7 +53,20 @@ struct IOSNPChunkIterator
         ctg_buffer(ctg_buffer),
         n_chunks(*reinterpret_cast<const inner_t*>(ctg_buffer))
     {
-        buffer_idx += sizeof(inner_t);
+        if (chunk_it >= n_chunks) return;
+
+        // increment past n_chunks and chunk_it number of chunks
+        buffer_idx = sizeof(inner_t);
+        for (int i = 0; i < chunk_it; ++i) {
+            buffer_idx += sizeof(inner_t);
+            const size_t nnz = (
+                static_cast<inner_t>(*reinterpret_cast<const chunk_inner_t*>(ctg_buffer + buffer_idx))
+                + 1
+            );
+            buffer_idx += (
+                sizeof(chunk_inner_t) + nnz * sizeof(char)
+            );
+        }
         if (n_chunks) update();
     }
 
@@ -215,16 +228,25 @@ public:
         );
     }
 
+    inner_t n_chunks(int j, size_t ctg) const
+    {
+        const auto* _col_ctg = col_ctg(j, ctg);
+        return *reinterpret_cast<const inner_t*>(_col_ctg);
+    }
+
+    iterator begin(int j, size_t ctg, size_t chnk) const
+    {
+        return iterator(chnk, col_ctg(j, ctg));
+    }
+
     iterator begin(int j, size_t ctg) const
     {
-        return iterator(0, col_ctg(j, ctg));
+        return begin(j, ctg, 0);
     }
 
     iterator end(int j, size_t ctg) const
     {
-        const auto* _col_ctg = col_ctg(j, ctg);
-        const auto n_chunks = *reinterpret_cast<const inner_t*>(_col_ctg);
-        return iterator(n_chunks, _col_ctg);
+        return begin(j, ctg, n_chunks(j, ctg));
     }
 
     rowarr_value_t to_dense(
@@ -250,7 +272,7 @@ public:
         if (n_threads <= 1) {
             for (outer_t j = 0; j < p; ++j) routine(j);
         } else {
-            #pragma omp parallel for schedule(auto) num_threads(n_threads)
+            #pragma omp parallel for schedule(static) num_threads(n_threads)
             for (outer_t j = 0; j < p; ++j) routine(j);
         }
 
@@ -391,7 +413,7 @@ public:
         if (n_threads <= 1) {
             for (outer_t j = 0; j < p; ++j) outer_routine(j);
         } else {
-            #pragma omp parallel for schedule(auto) num_threads(n_threads)
+            #pragma omp parallel for schedule(static) num_threads(n_threads)
             for (outer_t j = 0; j < p; ++j) outer_routine(j);
         }
         benchmark["outer_time"] = sw.elapsed();
@@ -469,7 +491,7 @@ public:
         if (n_threads <= 1) {
             for (outer_t j = 0; j < p; ++j) inner_routine(j);
         } else {
-            #pragma omp parallel for schedule(auto) num_threads(n_threads)
+            #pragma omp parallel for schedule(static) num_threads(n_threads)
             for (outer_t j = 0; j < p; ++j) inner_routine(j);
         }
         benchmark["inner"] = sw.elapsed();

@@ -82,7 +82,7 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
     using dyn_vec_mat_value_t = typename state_t::dyn_vec_mat_value_t;
 
     py::class_<state_t>(m, name, R"delimiter(
-        Base core state class for all gaussian pin methods.
+        Base state class for Gaussian, pin classes.
         )delimiter")
         .def(py::init<
             const Eigen::Ref<const vec_index_t>&, 
@@ -304,7 +304,7 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
     using dyn_vec_mat_value_t = typename state_t::dyn_vec_mat_value_t;
 
     py::class_<state_t, base_t, PyStateGaussianPinNaive<matrix_t>>(m, name, R"delimiter(
-        Core state class for gaussian, pin, naive method.
+        Core state class for Gaussian, pin, naive method.
         )delimiter")
         .def(py::init<
             matrix_t&,
@@ -452,7 +452,7 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
     using dyn_vec_mat_value_t = typename state_t::dyn_vec_mat_value_t;
 
     py::class_<state_t, base_t, PyStateGaussianPinCov<matrix_t>>(m, name, R"delimiter(
-        Core state class for gaussian, pin, covariance method.
+        Core state class for Gaussian, pin, covariance method.
         )delimiter")
         .def(py::init<
             matrix_t&,
@@ -581,7 +581,7 @@ void state_base(py::module_& m, const char* name)
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
     py::class_<state_t>(m, name, R"delimiter(
-        Base core state class for all non-pin methods.
+        Base state class for non-pin classes.
         )delimiter") 
         .def(py::init<
             const Eigen::Ref<const vec_index_t>&, 
@@ -924,7 +924,7 @@ void state_gaussian_naive(py::module_& m, const char* name)
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
     py::class_<state_t, base_t, PyStateGaussianNaive<matrix_t>>(m, name, R"delimiter(
-        Core state class for gaussian, naive method.
+        Core state class for Gaussian, naive method.
         )delimiter")
         .def(py::init<
             matrix_t&,
@@ -1095,7 +1095,7 @@ void state_multigaussian_naive(py::module_& m, const char* name)
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
     py::class_<state_t, base_t, PyStateMultiGaussianNaive<matrix_t>>(m, name, R"delimiter(
-        Core state class for multigaussian, naive method.
+        Core state class for MultiGaussian, naive method.
         )delimiter")
         .def(py::init<
             const std::string&,
@@ -1246,7 +1246,7 @@ void state_gaussian_cov(py::module_& m, const char* name)
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
     py::class_<state_t, base_t, PyStateGaussianCov<matrix_t>>(m, name, R"delimiter(
-        Core state class for gaussian, covariance method.
+        Core state class for Gaussian, covariance method.
         )delimiter")
         .def(py::init<
             matrix_t&,
@@ -1395,7 +1395,7 @@ void state_glm_naive(py::module_& m, const char* name)
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
     py::class_<state_t, base_t, PyStateGlmNaive<matrix_t>>(m, name, R"delimiter(
-        Core state class for glm, naive method.
+        Core state class for GLM, naive method.
         )delimiter")
         .def(py::init<
             matrix_t&,
@@ -1553,7 +1553,7 @@ void state_multiglm_naive(py::module_& m, const char* name)
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
     py::class_<state_t, base_t, PyStateMultiGlmNaive<matrix_t>>(m, name, R"delimiter(
-        Core state class for multiglm, naive method.
+        Core state class for multi-response GLM, naive method.
         )delimiter")
         .def(py::init<
             const std::string&,

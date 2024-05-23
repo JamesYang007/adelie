@@ -28,11 +28,10 @@ private:
     const Eigen::Map<const vec_index_t> _levels;  // (d,) number of levels
     const vec_index_t _outer;               // (G+1,) outer vector
     const size_t _cols;                     // number of columns (p)
-    const vec_value_t _centers;             // (p,) centers
-    const vec_value_t _scales;              // (p,) scales
     const vec_index_t _slice_map;           // (p,) array mapping to matrix slice
     const vec_index_t _index_map;           // (p,) array mapping to (relative) index of the slice
     const size_t _n_threads;                // number of threads
+    vec_value_t _buff;
 
     static inline auto init_outer(
         const Eigen::Ref<const rowarr_index_t>& pairs,
@@ -50,91 +49,6 @@ private:
             outer[i+1] = outer[i] + (l0 * l1 - both_cont); 
         }
         return outer;
-    }
-
-    static inline vec_value_t init_centers(
-        const Eigen::Ref<const dense_t> mat,
-        const Eigen::Ref<const rowarr_index_t> pairs,
-        const Eigen::Ref<const vec_index_t> levels,
-        const Eigen::Ref<const vec_value_t>& centers_map,
-        size_t cols 
-    )
-    {
-        if (centers_map.size()) {
-            if (centers_map.size() != cols) {
-                throw util::adelie_core_error(
-                    "If centers is provided by the user, it must be of length p."
-                );
-            }
-            return centers_map;
-        }
-
-        vec_value_t centers(cols);
-        size_t pos = 0;
-        for (int i = 0; i < pairs.rows(); ++i) {
-            const auto i0 = pairs(i, 0);
-            const auto i1 = pairs(i, 1);
-            auto l0 = levels[i0];
-            auto l1 = levels[i1];
-            const auto both_cont = (l0 <= 0) & (l1 <= 0);
-            l0 = (l0 <= 0) ? _n_levels_cont : l0;
-            l1 = (l1 <= 0) ? _n_levels_cont : l1;
-            const auto size = l0 * l1 - both_cont;
-            if (both_cont) {
-                centers.segment(pos, size-1).setZero();
-                centers[pos+size-1] = (mat.col(i0).array() * mat.col(i1).array()).mean();
-            } else {
-                centers.segment(pos, size).setZero();
-            }
-            pos += size;
-        }
-        return centers;
-    }
-
-    static inline vec_value_t init_scales(
-        const Eigen::Ref<const dense_t> mat,
-        const Eigen::Ref<const rowarr_index_t> pairs,
-        const Eigen::Ref<const vec_index_t> levels,
-        const Eigen::Ref<const vec_value_t>& centers,
-        const Eigen::Ref<const vec_value_t>& scales_map,
-        size_t cols 
-    )
-    {
-        if (scales_map.size()) {
-            if (scales_map.size() != cols) {
-                throw util::adelie_core_error(
-                    "If scales is provided by the user, it must be of length p."
-                );
-            }
-            return scales_map;
-        }
-
-        vec_value_t scales(cols);
-        size_t pos = 0;
-        for (int i = 0; i < pairs.rows(); ++i) {
-            const auto i0 = pairs(i, 0);
-            const auto i1 = pairs(i, 1);
-            auto l0 = levels[i0];
-            auto l1 = levels[i1];
-            const auto both_cont = (l0 <= 0) & (l1 <= 0);
-            l0 = (l0 <= 0) ? _n_levels_cont : l0;
-            l1 = (l1 <= 0) ? _n_levels_cont : l1;
-            const auto size = l0 * l1 - both_cont;
-            if (both_cont) {
-                scales.segment(pos, size-1).setOnes();
-                const auto c = centers[pos+size-1];
-                const auto x = mat.col(i0).array() * mat.col(i1).array();
-                const auto m = x.mean();
-                const auto n = mat.rows();
-                scales[pos+size-1] = std::sqrt(
-                    x.square().mean() - c * (2 * m - c)
-                );
-            } else {
-                scales.segment(pos, size).setOnes();
-            }
-            pos += size;
-        }
-        return scales;
     }
 
     static inline auto init_slice_map(
@@ -186,7 +100,8 @@ private:
     value_t _cmul(
         int j, 
         const Eigen::Ref<const vec_value_t>& v,
-        const Eigen::Ref<const vec_value_t>& weights
+        const Eigen::Ref<const vec_value_t>& weights,
+        size_t n_threads
     )
     {
         const auto& w = weights;
@@ -201,20 +116,19 @@ private:
         const auto k1 = index / l0_exp;
         const auto k0 = index - l0_exp * k1;
         const auto _case = static_cast<int>(l0 > 0) | static_cast<int>(l1 > 0 ? _n_levels_cont : 0);
-        value_t dot = 0;
         switch (_case) {
             case 0: {
                 switch (index) {
                     case 0: {
-                        dot = (v * w * _mat.col(i0).transpose().array()).sum();
+                        return ddot((v * w).matrix(), _mat.col(i0).transpose(), n_threads, _buff);
                         break;
                     }
                     case 1: {
-                        dot = (v * w * _mat.col(i1).transpose().array()).sum();
+                        return ddot((v * w).matrix(), _mat.col(i1).transpose(), n_threads, _buff);
                         break;
                     }
                     case 2: {
-                        dot = (v * w * _mat.col(i0).transpose().array() * _mat.col(i1).transpose().array()).sum();
+                        return ddot((v * w).matrix(), _mat.col(i0).cwiseProduct(_mat.col(i1)).transpose(), n_threads, _buff);
                         break;
                     }
                 }
@@ -222,59 +136,65 @@ private:
             }
             case 1: {
                 if (k1 == 0) {
-                    value_t sum = 0;
-                    for (int i = 0; i < _mat.rows(); ++i) {
-                        if (_mat(i, i0) != k0) continue;
-                        sum += v[i] * w[i];
-                    }
-                    dot = sum;
+                    const auto mi0 = _mat.col(i0).transpose().array();
+                    return ddot(
+                        (v * w).matrix(), 
+                        (mi0 == k0).template cast<value_t>().matrix(), 
+                        n_threads, 
+                        _buff
+                    );
                 } else {
-                    value_t sum = 0;
-                    for (int i = 0; i < _mat.rows(); ++i) {
-                        if (_mat(i, i0) != k0) continue;
-                        sum += v[i] * w[i] * _mat(i, i1);
-                    }
-                    dot = sum;
+                    const auto mi0 = _mat.col(i0).transpose().array();
+                    const auto mi1 = _mat.col(i1).transpose().array();
+                    return ddot(
+                        (v * w).matrix(), 
+                        (mi1 * (mi0 == k0).template cast<value_t>()).matrix(), 
+                        n_threads, 
+                        _buff
+                    );
                 }
                 break;
             }
             case 2: {
                 if (k0 == 0) {
-                    value_t sum = 0;
-                    for (int i = 0; i < _mat.rows(); ++i) {
-                        if (_mat(i, i1) != k1) continue;
-                        sum += v[i] * w[i];
-                    }
-                    dot = sum;
+                    const auto mi1 = _mat.col(i1).transpose().array();
+                    return ddot(
+                        (v * w).matrix(), 
+                        (mi1 == k1).template cast<value_t>().matrix(), 
+                        n_threads, 
+                        _buff
+                    );
                 } else {
-                    value_t sum = 0;
-                    for (int i = 0; i < _mat.rows(); ++i) {
-                        if (_mat(i, i1) != k1) continue;
-                        sum += v[i] * w[i] * _mat(i, i0);
-                    }
-                    dot = sum;
+                    const auto mi0 = _mat.col(i0).transpose().array();
+                    const auto mi1 = _mat.col(i1).transpose().array();
+                    return ddot(
+                        (v * w).matrix(), 
+                        (mi0 * (mi1 == k1).template cast<value_t>()).matrix(), 
+                        n_threads, 
+                        _buff
+                    );
                 }
                 break;
             }
             case 3: {
-                value_t sum = 0;
-                for (int i = 0; i < _mat.rows(); ++i) {
-                    if (_mat(i, i0) != k0 || _mat(i, i1) != k1) continue;
-                    sum += v[i] * w[i];
-                }
-                dot = sum;
+                const auto mi0 = _mat.col(i0).transpose().array();
+                const auto mi1 = _mat.col(i1).transpose().array();
+                return ddot(
+                    (v * w).matrix(), 
+                    ((mi0 == k0) && (mi1 == k1)).template cast<value_t>().matrix(), 
+                    n_threads, 
+                    _buff
+                );
                 break;
             }
         }
-        const auto center_term = (_centers[j] == 0) ? 0 : (_centers[j] * (v * w).sum());
-        const auto scale = _scales[j];
-        return (dot - center_term) / scale;
     }
 
     void _ctmul(
         int j, 
         value_t v, 
-        Eigen::Ref<vec_value_t> out
+        Eigen::Ref<vec_value_t> out,
+        size_t n_threads
     )
     {
         const auto slice = _slice_map[j];
@@ -288,22 +208,19 @@ private:
         const auto k1 = index / l0_exp;
         const auto k0 = index - l0_exp * k1;
         const auto _case = static_cast<int>(l0 > 0) | static_cast<int>(l1 > 0 ? _n_levels_cont : 0);
-        const auto center = _centers[j];
-        const auto scale = _scales[j];
-        const auto vs = v / scale;
         switch (_case) {
             case 0: {
                 switch (index) {
                     case 0: {
-                        out += vs * (_mat.col(i0).transpose().array() - center);
+                        dvaddi(out, v * _mat.col(i0).transpose().array(), n_threads);
                         break;
                     }
                     case 1: {
-                        out += vs * (_mat.col(i1).transpose().array() - center);
+                        dvaddi(out, v * _mat.col(i1).transpose().array(), n_threads);
                         break;
                     }
                     case 2: {
-                        out += vs * (_mat.col(i0).transpose().array() * _mat.col(i1).transpose().array() - center);
+                        dvaddi(out, v * _mat.col(i0).transpose().array() * _mat.col(i1).transpose().array(), n_threads);
                         break;
                     }
                 }
@@ -311,49 +228,55 @@ private:
             }
             case 1: {
                 if (k1 == 0) {
-                    for (int i = 0; i < _mat.rows(); ++i) {
-                        if (_mat(i, i0) != k0) continue;
-                        out[i] += vs;
-                    }
+                    const auto mi0 = _mat.col(i0).transpose().array();
+                    dvaddi(
+                        out,
+                        v * (mi0 == k0).template cast<value_t>(),
+                        n_threads
+                    );
                 } else {
-                    for (int i = 0; i < _mat.rows(); ++i) {
-                        if (_mat(i, i0) != k0) continue;
-                        out[i] += vs * _mat(i, i1);
-                    }
+                    const auto mi0 = _mat.col(i0).transpose().array();
+                    const auto mi1 = _mat.col(i1).transpose().array();
+                    dvaddi(
+                        out,
+                        v * mi1 * (mi0 == k0).template cast<value_t>(),
+                        n_threads
+                    );
                 }
-                const auto vsc = vs * center;
-                if (vsc) out -= vsc;
                 break;
             }
             case 2: {
                 if (k0 == 0) {
-                    for (int i = 0; i < _mat.rows(); ++i) {
-                        if (_mat(i, i1) != k1) continue;
-                        out[i] += vs;
-                    }
+                    const auto mi1 = _mat.col(i1).transpose().array();
+                    dvaddi(
+                        out,
+                        v * (mi1 == k1).template cast<value_t>(),
+                        n_threads
+                    );
                 } else {
-                    for (int i = 0; i < _mat.rows(); ++i) {
-                        if (_mat(i, i1) != k1) continue;
-                        out[i] += vs * _mat(i, i0);
-                    }
+                    const auto mi0 = _mat.col(i0).transpose().array();
+                    const auto mi1 = _mat.col(i1).transpose().array();
+                    dvaddi(
+                        out,
+                        v * mi0 * (mi1 == k1).template cast<value_t>(),
+                        n_threads
+                    );
                 }
-                const auto vsc = vs * center;
-                if (vsc) out -= vsc;
                 break;
             }
             case 3: {
-                for (int i = 0; i < _mat.rows(); ++i) {
-                    if (_mat(i, i0) != k0 || _mat(i, i1) != k1) continue;
-                    out[i] += vs;
-                }
-                const auto vsc = vs * center;
-                if (vsc) out -= vsc;
+                const auto mi0 = _mat.col(i0).transpose().array();
+                const auto mi1 = _mat.col(i1).transpose().array();
+                dvaddi(
+                    out,
+                    v * ((mi0 == k0) && (mi1 == k1)).template cast<value_t>(),
+                    n_threads
+                );
                 break;
             }
         }
     }
 
-    template <bool do_standardize>
     void _bmul(
         int begin,
         int i0, int i1,
@@ -361,7 +284,8 @@ private:
         int index,
         const Eigen::Ref<const vec_value_t>& v, 
         const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
+        Eigen::Ref<vec_value_t> out,
+        size_t n_threads
     )
     {
         const auto size = out.size();
@@ -372,7 +296,7 @@ private:
         // not a full-block
         if (index != 0 || size != full_size) {
             for (int l = 0; l < size; ++l) {
-                out[l] = _cmul(begin+l, v, weights);
+                out[l] = _cmul(begin+l, v, weights, n_threads);
             }
             return;
         }
@@ -380,9 +304,9 @@ private:
         const auto _case = static_cast<int>(l0 > 0) | static_cast<int>(l1 > 0 ? _n_levels_cont : 0);
         switch (_case) {
             case 0: {
-                out[0] = (v * w * _mat.col(i0).transpose().array()).sum();
-                out[1] = (v * w * _mat.col(i1).transpose().array()).sum();
-                out[2] = (v * w * _mat.col(i0).transpose().array() * _mat.col(i1).transpose().array()).sum();
+                out[0] = ddot(_mat.col(i0), (v * w).matrix(), n_threads, _buff);
+                out[1] = ddot(_mat.col(i1), (v * w).matrix(), n_threads, _buff);
+                out[2] = ddot(_mat.col(i0).cwiseProduct(_mat.col(i1)), (v * w).matrix(), n_threads, _buff);
                 break;
             }
             case 1: {
@@ -416,13 +340,6 @@ private:
                 break;
             }
         }
-
-        if constexpr (do_standardize) {
-            const auto centers = _centers.segment(begin, size);
-            const auto scales = _scales.segment(begin, size);
-            const auto vwsum = (centers == 0).all() ? 0 : (v * w).sum();
-            out = (out - vwsum * centers) / scales;
-        }
     }
 
     void _btmul(
@@ -432,7 +349,8 @@ private:
         int index,
         int size,
         const Eigen::Ref<const vec_value_t>& v, 
-        Eigen::Ref<vec_value_t> out
+        Eigen::Ref<vec_value_t> out,
+        size_t n_threads
     )
     {
         const auto both_cont = (l0 <= 0) & (l1 <= 0);
@@ -442,55 +360,57 @@ private:
         // not a full-block
         if (index != 0 || size != full_size) {
             for (int l = 0; l < size; ++l) {
-                _ctmul(begin+l, v[l], out);
+                _ctmul(begin+l, v[l], out, n_threads);
             }
             return;
         }
         const auto _case = static_cast<int>(l0 > 0) | static_cast<int>(l1 > 0 ? _n_levels_cont : 0);
-        const auto centers = _centers.segment(begin, size);
-        const auto scales = _scales.segment(begin, size);
-        const auto vs = v / scales;
         switch (_case) {
             case 0: {
                 const auto mi0 = _mat.col(i0).transpose().array();
                 const auto mi1 = _mat.col(i1).transpose().array();
-                const auto vs0 = v[0] / scales[0];
-                const auto vs1 = v[1] / scales[1];
-                const auto vs2 = v[2] / scales[2];
-                out += (
-                    vs0 * mi0 +
-                    mi1 * (vs1 + vs2 * mi0) - 
-                    (vs0 * centers[0] + vs1 * centers[1] + vs2 * centers[2])
-                );
+                dvaddi(out, v[0] * mi0 + mi1 * (v[1] + v[2] * mi0), n_threads);
                 break;
             }
             case 1: {
-                for (int i = 0; i < _mat.rows(); ++i) {
-                    const int k0 = _mat(i, i0);
-                    out[i] += vs[k0] + vs[l0 + k0] * _mat(i, i1);
-                }
-                const auto vsc = (vs * centers).sum();
-                if (vsc) out -= vsc;
+                dvaddi(
+                    out, 
+                    vec_value_t::NullaryExpr(_mat.rows(), 
+                        [&](auto i) { 
+                            const int k0 = _mat(i, i0);
+                            return v[k0] + v[l0 + k0] * _mat(i, i1);
+                        }
+                    ),
+                    n_threads
+                );
                 break;
             }
             case 2: {
-                for (int i = 0; i < _mat.rows(); ++i) {
-                    const int k1 = _mat(i, i1);
-                    const auto b = _n_levels_cont * k1;
-                    out[i] += vs[b] + vs[b+1] * _mat(i, i0);
-                }
-                const auto vsc = (vs * centers).sum();
-                if (vsc) out -= vsc;
+                dvaddi(
+                    out,
+                    vec_value_t::NullaryExpr(_mat.rows(),
+                        [&](auto i) {
+                            const int k1 = _mat(i, i1);
+                            const auto b = _n_levels_cont * k1;
+                            return v[b] + v[b+1] * _mat(i, i0);
+                        }
+                    ),
+                    n_threads
+                );
                 break;
             }
             case 3: {
-                for (int i = 0; i < _mat.rows(); ++i) {
-                    const int k0 = _mat(i, i0);
-                    const int k1 = _mat(i, i1);
-                    out[i] += vs[k1 * l0 + k0];
-                }
-                const auto vsc = (vs * centers).sum();
-                if (vsc) out -= vsc;
+                dvaddi(
+                    out,
+                    vec_value_t::NullaryExpr(_mat.rows(),
+                        [&](auto i) {
+                            const int k0 = _mat(i, i0);
+                            const int k1 = _mat(i, i1);
+                            return v[k1 * l0 + k0];
+                        }
+                    ),
+                    n_threads
+                );
                 break;
             }
         }
@@ -501,8 +421,6 @@ public:
         const Eigen::Ref<const dense_t>& mat,
         const Eigen::Ref<const rowarr_index_t>& pairs,
         const Eigen::Ref<const vec_index_t>& levels,
-        const Eigen::Ref<const vec_value_t>& centers,
-        const Eigen::Ref<const vec_value_t>& scales,
         size_t n_threads
     ):
         _mat(mat.data(), mat.rows(), mat.cols()),
@@ -510,11 +428,10 @@ public:
         _levels(levels.data(), levels.size()),
         _outer(init_outer(pairs, levels)),
         _cols(_outer[_outer.size()-1]),
-        _centers(init_centers(mat, pairs, levels, centers, _cols)),
-        _scales(init_scales(mat, pairs, levels, _centers, scales, _cols)),
         _slice_map(init_slice_map(pairs, levels, _cols)),
         _index_map(init_index_map(pairs, levels, _cols)),
-        _n_threads(n_threads)
+        _n_threads(n_threads),
+        _buff(_n_threads)
     {
         const auto d = _mat.cols();
         if (pairs.cols() != 2) {
@@ -522,9 +439,6 @@ public:
         }
         if (levels.size() != d) {
             throw util::adelie_core_error("levels must be of shape (d,) where mat is (n, d).");
-        }
-        if ((_scales <= 0).any()) {
-            throw util::adelie_core_error("scales must all be positive.");
         }
         if (n_threads < 1) {
             throw util::adelie_core_error("n_threads must be >= 1.");
@@ -543,9 +457,6 @@ public:
         return _outer.tail(G) - _outer.head(G);
     }
 
-    vec_value_t centers() const { return _centers; }
-    vec_value_t scales() const { return _scales; }
-
     value_t cmul(
         int j, 
         const Eigen::Ref<const vec_value_t>& v,
@@ -553,7 +464,7 @@ public:
     ) override
     {
         base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-        return _cmul(j, v, weights);
+        return _cmul(j, v, weights, _n_threads);
     }
 
     void ctmul(
@@ -563,7 +474,7 @@ public:
     ) override
     {
         base_t::check_ctmul(j, out.size(), rows(), cols());
-        _ctmul(j, v, out);
+        _ctmul(j, v, out, _n_threads);
     }
 
     void bmul(
@@ -590,7 +501,7 @@ public:
             const auto full_size = l0_exp * l1_exp - both_cont;
             const auto size = std::min<size_t>(full_size - index, q - n_processed);
             auto out_curr = out.segment(n_processed, size);
-            _bmul<true>(jj, i0, i1, l0, l1, index, v, weights, out_curr);
+            _bmul(jj, i0, i1, l0, l1, index, v, weights, out_curr, _n_threads);
             n_processed += size;
         }
     }
@@ -618,7 +529,7 @@ public:
             const auto full_size = l0_exp * l1_exp - both_cont;
             const auto size = std::min<size_t>(full_size - index, q - n_processed);
             const auto v_curr = v.segment(n_processed, size);
-            _btmul(jj, i0, i1, l0, l1, index, size, v_curr, out);
+            _btmul(jj, i0, i1, l0, l1, index, size, v_curr, out, _n_threads);
             n_processed += size;
         }
     }
@@ -641,7 +552,7 @@ public:
             const auto l1_exp = (l1 <= 0) ? _n_levels_cont : l1;
             const auto full_size = l0_exp * l1_exp - both_cont;
             auto out_curr = out.segment(j, full_size);
-            _bmul<true>(j, i0, i1, l0, l1, 0, v, weights, out_curr);
+            _bmul(j, i0, i1, l0, l1, 0, v, weights, out_curr, 1);
         };
         if (_n_threads <= 1) {
             for (int g = 0; g < _outer.size()-1; ++g) routine(g);
@@ -699,13 +610,13 @@ public:
                 const auto mi0 = _mat.col(i0).array();
                 const auto mi1 = _mat.col(i1).array();
                 auto w = buffer.col(0).array();
-                w = sqrt_w.square();
-                out(0, 0) = (w * mi0.square()).sum();
-                out(1, 0) = (w * mi0 * mi1).sum();
-                out(1, 1) = (w * mi1.square()).sum();
-                out(2, 0) = (w * mi0.square() * mi1).sum();
-                out(2, 1) = (w * mi1.square() * mi0).sum();
-                out(2, 2) = (w * (mi0 * mi1).square()).sum();
+                dvveq(w, sqrt_w.square(), _n_threads);
+                out(0, 0) = ddot(w.matrix(), mi0.square().matrix(), _n_threads, _buff);
+                out(1, 0) = ddot(w.matrix(), (mi0 * mi1).matrix(), _n_threads, _buff);
+                out(1, 1) = ddot(w.matrix(), mi1.square().matrix(), _n_threads, _buff);
+                out(2, 0) = ddot(w.matrix(), (mi0.square() * mi1).matrix(), _n_threads, _buff);
+                out(2, 1) = ddot(w.matrix(), (mi1.square() * mi0).matrix(), _n_threads, _buff);
+                out(2, 2) = ddot(w.matrix(), (mi0 * mi1).square().matrix(), _n_threads, _buff);
                 for (int i0 = 0; i0 < q; ++i0) {
                     for (int i1 = i0+1; i1 < q; ++i1) {
                         out(i0, i1) = out(i1, i0);
@@ -761,21 +672,6 @@ public:
                 break;
             }
         }
-
-        const auto centers = _centers.segment(j, q);
-        const auto scales = _scales.segment(j, q);
-
-        if ((centers != 0).any()) {
-            auto out_lower = out.template selfadjointView<Eigen::Lower>();
-            vec_value_t x_mean(q);
-            _bmul<false>(j, i0, i1, l0, l1, index, sqrt_w, sqrt_w, x_mean);
-            out_lower.rankUpdate(centers.matrix().transpose(), x_mean.matrix().transpose(), -1);
-            out_lower.rankUpdate(centers.matrix().transpose(), sqrt_w.square().sum());
-            out.template triangularView<Eigen::Upper>() = out.transpose();
-        }
-
-        out.array().rowwise() /= scales;
-        out.array().colwise() /= scales.matrix().transpose().array();
     }
 
     void sp_btmul(
@@ -791,7 +687,7 @@ public:
             auto out_k = out.row(k);
             out_k.setZero();
             for (; it; ++it) {
-                _ctmul(it.index(), it.value(), out_k);
+                _ctmul(it.index(), it.value(), out_k, 1);
             }
         };
         if (_n_threads <= 1) {

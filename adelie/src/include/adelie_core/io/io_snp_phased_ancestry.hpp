@@ -72,20 +72,30 @@ public:
         return snps() * ancestries();
     }
 
-    Eigen::Ref<const vec_outer_t> nnz() const 
+    Eigen::Ref<const vec_outer_t> nnz0() const 
     {
         if (!_is_read) throw_no_read();
         constexpr size_t slice = sizeof(bool_t) + 2 * sizeof(outer_t) + sizeof(chunk_inner_t);
         return Eigen::Map<const vec_outer_t>(
             reinterpret_cast<const outer_t*>(&_buffer[slice]),
-            n_haps * snps()
+            cols()
+        );
+    }
+
+    Eigen::Ref<const vec_outer_t> nnz1() const 
+    {
+        if (!_is_read) throw_no_read();
+        const size_t slice = sizeof(bool_t) + (2 + cols()) * sizeof(outer_t) + sizeof(chunk_inner_t);
+        return Eigen::Map<const vec_outer_t>(
+            reinterpret_cast<const outer_t*>(&_buffer[slice]),
+            cols()
         );
     }
 
     Eigen::Ref<const vec_outer_t> outer() const
     {
         if (!_is_read) throw_no_read();
-        const size_t slice = sizeof(bool_t) + (2 + n_haps * snps()) * sizeof(outer_t) + sizeof(chunk_inner_t);
+        const size_t slice = sizeof(bool_t) + 2 * (1 + cols()) * sizeof(outer_t) + sizeof(chunk_inner_t);
         return Eigen::Map<const vec_outer_t>(
             reinterpret_cast<const outer_t*>(&_buffer[slice]),
             snps() + 1
@@ -114,16 +124,25 @@ public:
         );
     }
 
+    inner_t n_chunks(int j, int anc, int hap) const
+    {
+        const auto* _col_anc_hap = col_anc_hap(j, anc, hap);
+        return *reinterpret_cast<const inner_t*>(_col_anc_hap);
+    }
+
+    iterator begin(int j, int anc, int hap, int chunk) const
+    {
+        return iterator(chunk, col_anc_hap(j, anc, hap));
+    }
+
     iterator begin(int j, int anc, int hap) const
     {
-        return iterator(0, col_anc_hap(j, anc, hap));
+        return begin(j, anc, hap, 0);
     }
 
     iterator end(int j, int anc, int hap) const
     {
-        const auto* _col_anc_hap = col_anc_hap(j, anc, hap);
-        const auto n_chunks = *reinterpret_cast<const inner_t*>(_col_anc_hap);
-        return iterator(n_chunks, _col_anc_hap);
+        return begin(j, anc, hap, n_chunks(j, anc, hap));
     }
 
     rowarr_value_t to_dense(
@@ -151,7 +170,7 @@ public:
         if (n_threads <= 1) {
             for (outer_t j = 0; j < s; ++j) routine(j);
         } else {
-            #pragma omp parallel for schedule(auto) num_threads(n_threads)
+            #pragma omp parallel for schedule(static) num_threads(n_threads)
             for (outer_t j = 0; j < s; ++j) routine(j);
         }
 
@@ -200,9 +219,29 @@ public:
         } 
 
         // compute number of non-zero values
-        vec_outer_t nnz(calldata.cols());
+        vec_outer_t nnz0(s * A);
+        vec_outer_t nnz1(s * A);
         sw.start();
-        compute_nnz(calldata, nnz, n_threads);
+        compute_nnz(
+            colarr_value_t::NullaryExpr(n, s * A, [&](auto i, auto j) {
+                const auto snp = j / A;
+                const auto anc = j % A;
+                const auto k = 2 * snp;
+                return calldata(i, k) && (ancestries(i, k) == anc);
+            }),
+            nnz0, 
+            n_threads
+        );
+        compute_nnz(
+            colarr_value_t::NullaryExpr(n, s * A, [&](auto i, auto j) {
+                const auto snp = j / A;
+                const auto anc = j % A;
+                const auto k = 2 * snp + 1;
+                return calldata(i, k) && (ancestries(i, k) == anc);
+            }),
+            nnz1, 
+            n_threads
+        );
         benchmark["nnz"] = sw.elapsed();
 
         // allocate sufficient memory (upper bound on size)
@@ -210,7 +249,7 @@ public:
             sizeof(bool_t) +                    // endian
             2 * sizeof(outer_t) +               // n, s
             sizeof(chunk_inner_t) +             // A
-            nnz.size() * sizeof(outer_t) +      // nnz
+            (nnz0.size() + nnz1.size()) * sizeof(outer_t) + // nnz0, nnz1
             (s + 1) * sizeof(outer_t)           // outer (snps)
         );
         buffer_t buffer(
@@ -226,7 +265,7 @@ public:
                     )
                 )
             ) +
-            nnz.sum() * sizeof(chunk_inner_t)   // nnz * char
+            (nnz0.sum() + nnz1.sum()) * sizeof(chunk_inner_t)   // nnz * char
         );
 
         // populate buffer
@@ -237,8 +276,12 @@ public:
         reinterpret_cast<chunk_inner_t&>(buffer[idx]) = A; idx += sizeof(chunk_inner_t);
         Eigen::Map<vec_outer_t>(
             reinterpret_cast<outer_t*>(&buffer[idx]),
-            nnz.size()
-        ) = nnz; idx += sizeof(outer_t) * nnz.size();
+            nnz0.size()
+        ) = nnz0; idx += sizeof(outer_t) * nnz0.size();
+        Eigen::Map<vec_outer_t>(
+            reinterpret_cast<outer_t*>(&buffer[idx]),
+            nnz1.size()
+        ) = nnz1; idx += sizeof(outer_t) * nnz1.size();
 
         // outer[i] = number of bytes to jump from beginning of file 
         // to start reading snp i.
@@ -303,7 +346,7 @@ public:
         if (n_threads <= 1) {
             for (outer_t j = 0; j < s; ++j) outer_routine(j);
         } else {
-            #pragma omp parallel for schedule(auto) num_threads(n_threads)
+            #pragma omp parallel for schedule(static) num_threads(n_threads)
             for (outer_t j = 0; j < s; ++j) outer_routine(j);
         }
         benchmark["outer_time"] = sw.elapsed();
@@ -395,7 +438,7 @@ public:
         if (n_threads <= 1) {
             for (outer_t j = 0; j < s; ++j) inner_routine(j);
         } else {
-            #pragma omp parallel for schedule(auto) num_threads(n_threads)
+            #pragma omp parallel for schedule(static) num_threads(n_threads)
             for (outer_t j = 0; j < s; ++j) inner_routine(j);
         }
         benchmark["inner"] = sw.elapsed();

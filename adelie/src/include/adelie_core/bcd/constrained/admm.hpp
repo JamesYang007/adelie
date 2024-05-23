@@ -47,7 +47,7 @@ void admm_solver(
         Eigen::Map<vec_value_t> x_buffer1(buff.data() + m+2*d, d);
         Eigen::Map<vec_value_t> x_buffer2(buff.data() + m+3*d, d);
         zmu = z - u;
-        linear_curr.matrix().noalias() = zmu.matrix() * AQ_c;
+        linear_curr.matrix() = zmu.matrix() * AQ_c;
         linear_curr = QTv_c + rho * linear_curr;
         size_t x_iters;
         unconstrained::newton_abs_solver(
@@ -62,12 +62,12 @@ void admm_solver(
             x_buffer1,
             x_buffer2
         );
-        x.matrix().noalias() = QTx.matrix() * Q_c.transpose();
+        x.matrix() = QTx.matrix() * Q_c.transpose();
 
         // z-update
         Eigen::Map<vec_value_t> Ax(buff.data(), m);
         Eigen::Map<vec_value_t> z_prev(buff.data()+m, m);
-        Ax.matrix().noalias() = x.matrix() * A.transpose();
+        Ax.matrix() = x.matrix() * A.transpose();
         z_prev = z;
         z = (u + Ax).min(b);
 
@@ -78,12 +78,12 @@ void admm_solver(
 
         // check convergence
         Eigen::Map<vec_value_t> s(buff.data()+3*m, d);
-        s.matrix().noalias() = (z - z_prev).matrix() * A;
+        s.matrix() = (z - z_prev).matrix() * A;
         const auto eps_pri = std::sqrt(m) * tol_abs + tol_rel * std::max<value_t>(
             Ax.matrix().norm(), z.matrix().norm()
         );
         Eigen::Map<vec_value_t> ATu(buff.data()+3*m+d, d);
-        ATu.matrix().noalias() = u.matrix() * A;
+        ATu.matrix() = u.matrix() * A;
         const auto eps_dual = std::sqrt(d) * tol_abs + tol_rel * rho * ATu.matrix().norm();
         if (
             (r.square().sum() <= eps_pri * eps_pri) &&

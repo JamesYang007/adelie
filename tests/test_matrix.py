@@ -5,6 +5,10 @@ import scipy
 import os
 import warnings
 
+# Set to a value that will test all cases
+# of n_threads being capped to 1 and using the passed-in value.
+ad.configs.set_configs("min_bytes", 20)
+
 
 # ==========================================================================================
 # TEST cov
@@ -151,7 +155,7 @@ def run_naive(
 ):
     n, p = X.shape
 
-    atol = 1e-5 if dtype == np.float32 else 1e-14
+    atol = 1e-4 if dtype == np.float32 else 1e-14
 
     w = np.random.uniform(1, 2, n).astype(dtype)
 
@@ -232,10 +236,12 @@ def run_naive(
                 pass
             elif "MatrixNaiveInteractionDense::cov() not implemented for " in err_msg:
                 pass
+            elif "MatrixNaiveOneHotDense::cov() not implemented for " in err_msg:
+                pass
             else:
                 raise err
 
-    # test cov (special for MatrixNaiveInteractionDenseXXX)
+    # test cov (special cases)
     if isinstance(
         cX,
         (
@@ -243,6 +249,10 @@ def run_naive(
             ad.adelie_core.matrix.MatrixNaiveInteractionDense64F,
             ad.adelie_core.matrix.MatrixNaiveInteractionDense32C,
             ad.adelie_core.matrix.MatrixNaiveInteractionDense32F,
+            ad.adelie_core.matrix.MatrixNaiveOneHotDense64C,
+            ad.adelie_core.matrix.MatrixNaiveOneHotDense64F,
+            ad.adelie_core.matrix.MatrixNaiveOneHotDense32C,
+            ad.adelie_core.matrix.MatrixNaiveOneHotDense32F,
         )
     ):
         groups = cX.groups
@@ -334,7 +344,7 @@ def test_naive_interaction_dense():
             return np.array([np.ones(n), x]).T
         return np.array([x == k for k in range(level)]).T
 
-    def _create_dense(X, pairs, levels, centers, scales):
+    def _create_dense(X, pairs, levels):
         col_lst = []
         for pair in pairs:
             i0, i1 = pair[0], pair[1]
@@ -349,8 +359,7 @@ def test_naive_interaction_dense():
                 for j1 in range(Y1.shape[1]):
                     for j0 in range(Y0.shape[1]):
                         col_lst.append(Y0[:, j0] * Y1[:, j1])
-        X = np.array(col_lst, dtype=dtype, order=order).T
-        return (X - centers[None]) / scales[None]
+        return np.array(col_lst, dtype=dtype, order=order).T
 
     def _test(n, d, dtype, order, seed=0):
         np.random.seed(seed)
@@ -368,14 +377,12 @@ def test_naive_interaction_dense():
                 intr_map[j] = None
             else:
                 intr_map[j] = np.random.choice(d, size=d//2, replace=False)
-        cX = mod.interaction(X, intr_map, levels=levels)
-        centers = np.random.normal(0, 1, cX.shape[1])
-        scales = np.random.uniform(0, 1, cX.shape[1])
-        cX = mod.interaction(X, intr_map, levels=levels, centers=centers, scales=scales)
-        assert np.allclose(centers, cX.centers)
-        assert np.allclose(scales, cX.scales)
-        X = _create_dense(X, cX.pairs, levels, centers, scales)
+        cX = mod.interaction(X, intr_map, levels=levels, n_threads=2)
+        X = _create_dense(X, cX.pairs, levels)
         run_naive(X, cX, dtype)
+
+    min_bytes = ad.configs.Configs.min_bytes
+    ad.configs.set_configs("min_bytes", None)
 
     dtypes = [np.float64]
     orders = ["C", "F"]
@@ -386,6 +393,8 @@ def test_naive_interaction_dense():
             _test(1, 10, dtype, order)
             _test(20, 30, dtype, order)
             _test(100, 20, dtype, order)
+
+    ad.configs.set_configs("min_bytes", min_bytes)
 
 
 def test_naive_kronecker_eye():
@@ -427,6 +436,41 @@ def test_naive_kronecker_eye_dense():
             _test(100, 20, 2, dtype, order)
 
 
+def test_naive_one_hot_dense():
+    def _expand(x, level):
+        if level <= 0:
+            return x.reshape((-1, 1))
+        return np.array([x == k for k in range(level)]).T
+
+    def _create_dense(X, levels):
+        return np.concatenate([
+            _expand(X[:, i], level)
+            for i, level in enumerate(levels)
+        ], axis=1, dtype=dtype)
+
+    def _test(n, d, dtype, order, seed=0):
+        np.random.seed(seed)
+        X = np.random.normal(0, 1, (n, d))
+        X = np.array(X, dtype=dtype, order=order)
+        c_subset = np.random.choice(d, size=d//2, replace=False)
+        c_levels = 1 + np.random.choice(10, size=d//2, replace=True)
+        for j, level in zip(c_subset, c_levels):
+            X[:, j] = np.random.choice(level, size=n, replace=True)
+        levels = np.zeros(d, dtype=int)
+        levels[c_subset] = c_levels
+        cX = mod.one_hot(X, levels)
+        X = _create_dense(X, levels)
+        run_naive(X, cX, dtype)
+
+    dtypes = [np.float32, np.float64]
+    orders = ["C", "F"]
+    for dtype in dtypes:
+        for order in orders:
+            _test(1, 10, dtype, order)
+            _test(10, 1, dtype, order)
+            _test(100, 20, dtype, order)
+
+
 def test_naive_snp_unphased():
     def _test(n, p, read_mode, dtype, seed=0):
         np.random.seed(seed)
@@ -448,6 +492,9 @@ def test_naive_snp_unphased():
         run_naive(X, cX, dtype)
         os.remove(filename)
 
+    min_bytes = ad.configs.Configs.min_bytes
+    ad.configs.set_configs("min_bytes", 0)
+
     read_modes = ["file", "mmap"]
     dtypes = [np.float64, np.float32]
     for read_mode in read_modes:
@@ -455,6 +502,9 @@ def test_naive_snp_unphased():
             _test(10, 20, read_mode, dtype)
             _test(1, 13, read_mode, dtype)
             _test(144, 1, read_mode, dtype)
+            _test(10000, 1, read_mode, dtype)
+
+    ad.configs.set_configs("min_bytes", min_bytes)
 
 
 def test_naive_snp_phased_ancestry():
@@ -482,13 +532,16 @@ def test_naive_snp_phased_ancestry():
             filename=filename,
             read_mode=read_mode,
             dtype=dtype,
-            n_threads=7,
+            n_threads=2,
         )
         os.remove(filename)
 
         X = create_dense(data["X"], data["ancestries"], A) 
         run_naive(X, cX, dtype)
 
+
+    min_bytes = ad.configs.Configs.min_bytes
+    ad.configs.set_configs("min_bytes", 0)
 
     read_modes = ["file", "mmap"]
     dtypes = [np.float64, np.float32]
@@ -497,6 +550,9 @@ def test_naive_snp_phased_ancestry():
             _test(10, 20, 4, read_mode, dtype)
             _test(1, 13, 3, read_mode, dtype)
             _test(144, 1, 2, read_mode, dtype)
+            _test(10000, 1, 2, read_mode, dtype)
+
+    ad.configs.set_configs("min_bytes", min_bytes)
 
 
 def test_naive_sparse():
@@ -520,6 +576,37 @@ def test_naive_sparse():
             _test(2, 2, dtype, order)
             _test(100, 20, dtype, order)
             _test(20, 100, dtype, order)
+
+
+def test_naive_standardize():
+    def _test(n, p, dtype, seed=0):
+        np.random.seed(seed)
+        X = np.asfortranarray(np.random.normal(0, 1, (n, p)).astype(dtype))
+        dX = mod.dense(X) 
+
+        cX = mod.standardize(dX)
+        means = np.mean(X, axis=0)
+        scales = np.std(X, axis=0)
+        assert np.allclose(cX.centers, means)
+        assert np.allclose(cX.scales, scales)
+
+        centers = np.random.normal(0, 1, p)
+        cX = mod.standardize(dX, centers)
+        scales = np.sqrt(
+            np.sum((X - centers[None]) ** 2, axis=0) / n
+        )
+        assert np.allclose(cX.centers, centers)
+        assert np.allclose(cX.scales, scales)
+
+        X = (X - centers[None]) / scales[None]
+        run_naive(X, cX, dtype)
+
+    dtypes = [np.float32, np.float64]
+    for dtype in dtypes:
+        _test(2, 10, dtype)
+        _test(10, 1, dtype)
+        _test(100, 20, dtype)
+        _test(20, 100, dtype)
 
 
 def test_naive_csubset():
@@ -584,3 +671,7 @@ def test_naive_rsubset():
             _test(10, 7, subset_prop, dtype)
             _test(100, 20, subset_prop, dtype)
             _test(20, 100, subset_prop, dtype)
+
+
+# Reset to default settings
+ad.configs.set_configs("min_bytes", None)

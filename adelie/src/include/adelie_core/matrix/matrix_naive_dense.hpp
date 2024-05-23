@@ -137,7 +137,9 @@ public:
         );
         
         if (q == 1) {
-            out(0, 0) = (_mat.col(j).transpose().array() * sqrt_weights).square().sum();
+            const auto sqrt_w_mj = (_mat.col(j).transpose().array() * sqrt_weights).matrix();
+            Eigen::Map<vec_value_t> vbuff(_buff.data(), _n_threads);
+            out(0, 0) = ddot(sqrt_w_mj, sqrt_w_mj, _n_threads, vbuff);
             return;
         }
 
@@ -145,17 +147,15 @@ public:
         
         auto Xj_array = Xj.array();
         dmmeq(
-            Xj_array,
+            Xj_array, 
             _mat.middleCols(j, q).array().colwise() * sqrt_weights.matrix().transpose().array(),
             _n_threads
         );
 
-        Eigen::setNbThreads(_n_threads);
         out.setZero();
         auto out_lower = out.template selfadjointView<Eigen::Lower>();
         out_lower.rankUpdate(Xj.transpose());
         out.template triangularView<Eigen::Upper>() = out.transpose();
-        Eigen::setNbThreads(1);
     }
 
     void sp_btmul(
@@ -166,7 +166,33 @@ public:
         base_t::check_sp_btmul(
             v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
-        out.noalias() = v * _mat.transpose();
+        if (_n_threads <= 1) {
+            out.noalias() = v * _mat.transpose();
+            return;
+        }
+        sp_mat_value_t vc;
+        if (!v.isCompressed()) {
+            vc = v;
+            if (!vc.isCompressed()) vc.makeCompressed();
+        }
+        const sp_mat_value_t& v_ref = (vc.size() != 0) ? vc : v;
+
+        const auto outer = v_ref.outerIndexPtr();
+        const auto inner = v_ref.innerIndexPtr();
+        const auto value = v_ref.valuePtr();
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
+        for (int k = 0; k < v_ref.outerSize(); ++k) {
+            const Eigen::Map<const sp_mat_value_t> vk(
+                1,
+                v_ref.cols(),
+                outer[k+1] - outer[k],
+                outer + k,
+                inner,
+                value
+            );
+            auto out_k = out.row(k);
+            out_k = vk * _mat.transpose();
+        };
     }
 };
 

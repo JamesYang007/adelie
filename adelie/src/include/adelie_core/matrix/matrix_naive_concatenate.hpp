@@ -23,7 +23,6 @@ private:
     const size_t _cols;                     // number of columns
     const vec_index_t _slice_map;           // (p,) array mapping to matrix slice
     const vec_index_t _index_map;           // (p,) array mapping to (relative) index of the slice
-    const size_t _n_threads;                // number of threads
     vec_value_t _buff;                      // (n,) buffer
 
     static inline auto init_rows(
@@ -91,22 +90,17 @@ private:
 
 public:
     explicit MatrixNaiveCConcatenate(
-        const std::vector<base_t*>& mat_list,
-        size_t n_threads
+        const std::vector<base_t*>& mat_list
     ): 
         _mat_list(mat_list),
         _rows(init_rows(mat_list)),
         _cols(init_cols(mat_list)),
         _slice_map(init_slice_map(mat_list, _cols)),
         _index_map(init_index_map(mat_list, _cols)),
-        _n_threads(n_threads),
         _buff(_rows)
     {
         if (mat_list.size() <= 0) {
             throw util::adelie_core_error("mat_list must be non-empty.");
-        }
-        if (n_threads < 1) {
-            throw util::adelie_core_error("n_threads must be >= 1.");
         }
     }
 
@@ -264,7 +258,6 @@ private:
     const std::vector<base_t*> _mat_list;   // (L,) list of naive matrices
     const size_t _rows;                     // number of rows
     const size_t _cols;                     // number of columns
-    const size_t _n_threads;                // number of threads (currently not used)
     vec_value_t _buff;                      // (p,) buffer
 
     static inline auto init_rows(
@@ -296,20 +289,15 @@ private:
 
 public:
     explicit MatrixNaiveRConcatenate(
-        const std::vector<base_t*>& mat_list,
-        size_t n_threads
+        const std::vector<base_t*>& mat_list
     ): 
         _mat_list(mat_list),
         _rows(init_rows(mat_list)),
         _cols(init_cols(mat_list)),
-        _n_threads(n_threads),
         _buff(_cols)
     {
         if (mat_list.size() <= 0) {
             throw util::adelie_core_error("mat_list must be non-empty.");
-        }
-        if (n_threads < 1) {
-            throw util::adelie_core_error("n_threads must be >= 1.");
         }
     }
 

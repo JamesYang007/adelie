@@ -153,7 +153,7 @@ void proximal_newton_general_solver(
 
         // lower(hess) += x_norm * lmda * kappa * alpha alpha^T
         alpha_tmp = (x * x_buffer2) / x_norm;
-        alpha.matrix().noalias() = alpha_tmp.matrix() * A.transpose();
+        alpha.matrix() = alpha_tmp.matrix() * A.transpose();
         const auto l1_kappa_norm = l1 * x_norm / (x * x_buffer1 * alpha_tmp).sum();
         hess_lower.rankUpdate(alpha.matrix().transpose(), l1_kappa_norm);
 
