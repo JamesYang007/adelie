@@ -157,6 +157,38 @@ class CvxpyGlmMultinomial():
         return ad.glm.multinomial(self.y, weights=self.weights)
 
 
+def zero_constraint(
+    size,
+    dtype
+):
+    core_base = {
+        np.float32: ad.constraint.ConstraintBase32,
+        np.float64: ad.constraint.ConstraintBase64,
+    }[dtype]
+
+    class _zero_constraint(core_base):
+        def __init__(self):
+            core_base.__init__(self)
+            self.size = size
+
+        def update_coordinate(self, x, mu, quad, linear, l1, l2):
+            x[...] = 0
+            mu[...] = linear
+
+        def update_lagrangian(self, x, mu, out):
+            out[...] = mu
+
+        def duals(self):
+            return self.size
+
+    return _zero_constraint()
+
+
+# ========================================================================
+# TEST Gaussian
+# ========================================================================
+
+
 def create_data_gaussian(
     n, p, G, S, 
     alpha=1,
@@ -168,6 +200,7 @@ def create_data_gaussian(
     pin=False,
     method="naive",
     constraint: bool=False,
+    dtype =np.float64,
 ):
     np.random.seed(seed)
 
@@ -203,7 +236,14 @@ def create_data_gaussian(
     grad = X_c.T @ (weights * resid)
 
     if constraint:
-        raise NotImplementedError("TODO: constraint test.")
+        constraints = [None] * G
+        c_order = np.random.choice(G, G // 2, replace=False)
+        screen_dual_size = 0
+        for i in c_order:
+            size = group_sizes[i]
+            constraints[i] = zero_constraint(size, dtype)
+            screen_dual_size += constraints[i].dual_size
+        screen_dual = np.zeros(screen_dual_size)
     else:
         constraints = None
         screen_dual = np.zeros(0)
@@ -286,15 +326,14 @@ def solve_cvxpy(
     screen_set: np.ndarray =None,
     constraints: list =None,
 ):
-    if constraints is None:
-        constraints = []
-    else:
-        raise NotImplementedError("TODO: constraint test.")
-
     _, p = X.shape
     if cvxpy_glm.is_multi:
         assert groups == "grouped"
         K = cvxpy_glm.y.shape[-1]
+
+        if constraints is None:
+            constraints = [None] * K
+
         penalty = penalty[K:] if intercept else penalty
         beta = cp.Variable((p, K))
         beta0 = cp.Variable(K)
@@ -304,7 +343,17 @@ def solve_cvxpy(
             alpha * cp.norm(beta, axis=1) 
             + 0.5 * (1-alpha) * cp.sum(cp.square(beta), axis=1)
         )
+
+        constraints = [
+            beta[i] == 0
+            for i, c in enumerate(constraints)
+            if not (c is None)
+        ]
+
     else:
+        if constraints is None:
+            constraints = [None] * groups.shape[0]
+
         group_sizes = np.concatenate([groups, [p]], dtype=int)
         group_sizes = group_sizes[1:] - group_sizes[:-1]
 
@@ -317,12 +366,20 @@ def solve_cvxpy(
                 alpha * cp.norm(beta[g:g+gs]) 
                 + 0.5 * (1-alpha) * cp.sum_squares(beta[g:g+gs])
             )
+
+        constraints = [
+            beta[g:g+gs] == 0
+            for c, g, gs in zip(constraints, groups, group_sizes)
+            if not (c is None)
+        ]
+
         if pin:
-            constraints = [
+            constraints += [
                 beta[groups[i] : groups[i] + group_sizes[i]] == 0
                 for i in range(len(groups))
                 if not (i in screen_set)
             ]
+
     if not intercept:
         constraints += [ beta0 == 0 ]
     prob = cp.Problem(cp.Minimize(expr), constraints)
@@ -450,11 +507,13 @@ def test_solve_gaussian_pin_naive():
             )
             run_solve_gaussian(state, args, pin=True)
 
-    _test(10, 4, 2, 2)
-    _test(10, 100, 10, 2)
-    _test(10, 100, 20, 13)
-    _test(100, 23, 4, 3)
-    _test(100, 100, 50, 20)
+    do_constraints = [False, True]
+    for do_c in do_constraints:
+        _test(10, 4, 2, 2, do_c)
+        _test(10, 100, 10, 2, do_c)
+        _test(10, 100, 20, 13, do_c)
+        _test(100, 23, 4, 3, do_c)
+        _test(100, 100, 50, 20, do_c)
 
 
 def test_solve_gaussian_pin_cov():
@@ -507,11 +566,13 @@ def test_solve_gaussian_pin_cov():
             )
             run_solve_gaussian(state, args, pin=True)
 
-    _test(10, 4, 2, 2)
-    _test(10, 100, 10, 2)
-    _test(10, 100, 20, 13)
-    _test(100, 23, 4, 3)
-    _test(100, 100, 50, 20)
+    do_constraints = [False, True]
+    for do_c in do_constraints:
+        _test(10, 4, 2, 2, do_c)
+        _test(10, 100, 10, 2, do_c)
+        _test(10, 100, 20, 13, do_c)
+        _test(100, 23, 4, 3, do_c)
+        _test(100, 100, 50, 20, do_c)
 
 
 def test_solve_gaussian():
@@ -559,11 +620,13 @@ def test_solve_gaussian():
             )
             run_solve_gaussian(state, args, pin=False)
 
-    _test(10, 4, 2)
-    _test(10, 100, 10)
-    _test(10, 100, 20)
-    _test(100, 23, 4)
-    _test(100, 100, 50)
+    do_constraints = [False, True]
+    for do_c in do_constraints:
+        _test(10, 4, 2, do_c)
+        _test(10, 100, 10, do_c)
+        _test(10, 100, 20, do_c)
+        _test(100, 23, 4, do_c)
+        _test(100, 100, 50, do_c)
 
 
 def test_solve_gaussian_concatenate():
@@ -820,7 +883,7 @@ def test_solve_gaussian_snp_phased_ancestry():
 # ==========================================================================================
 
 
-def run_test_grpnet(n, p, G, glm_type, intercept=True, adev_tol=0.4):
+def run_test_grpnet(n, p, G, glm_type, constraint=False, intercept=True, adev_tol=0.4):
     K = 3 if "multi" in glm_type else 1
     data = ad.data.dense(n, p, p, K=K, glm=glm_type)
     X, glm = data["X"], data["glm"]
@@ -830,12 +893,15 @@ def run_test_grpnet(n, p, G, glm_type, intercept=True, adev_tol=0.4):
             "multigaussian": CvxpyGlmMultiGaussian,
             "multinomial": CvxpyGlmMultinomial,
         }[glm_type](glm.y, glm.weights)
+        group_sizes = np.full(X.shape[1], glm.y.shape[1], dtype=int)
     else:
         groups = np.concatenate([
             [0],
             np.random.choice(np.arange(1, p), size=G-1, replace=False)
         ])
         groups = np.sort(groups).astype(int)
+        group_sizes = np.concatenate([groups, [p]], dtype=int)
+        group_sizes = group_sizes[1:] - group_sizes[:-1]
 
         if glm_type == "cox":
             cvxpy_glm = CvxpyGlmCox(
@@ -852,11 +918,21 @@ def run_test_grpnet(n, p, G, glm_type, intercept=True, adev_tol=0.4):
                 "poisson": CvxpyGlmPoisson,
             }[glm_type](glm.y, glm.weights)
 
+    if constraint:
+        G = group_sizes.shape[0]
+        constraints = [None] * G
+        c_order = np.random.choice(G, G // 2, replace=False)
+        for i in c_order:
+            size = group_sizes[i]
+            constraints[i] = zero_constraint(size, dtype=np.float64)
+    else:
+        constraints = None
+
     args = {
         "X": X,
         "intercept": intercept,
         "groups": groups,
-        "constraints": None,
+        "constraints": constraints,
     }
     state = ad.grpnet(
         X=X, 
@@ -873,36 +949,48 @@ def run_test_grpnet(n, p, G, glm_type, intercept=True, adev_tol=0.4):
 
 def test_grpnet_gaussian():
     glm_type = "gaussian"
-    run_test_grpnet(10, 50, 10, glm_type)
-    run_test_grpnet(40, 13, 7, glm_type)
+    do_constraints = [False, True]
+    for do_c in do_constraints:
+        run_test_grpnet(10, 50, 10, glm_type, do_c)
+        run_test_grpnet(40, 13, 7, glm_type, do_c)
 
 
 def test_grpnet_binomial():
     glm_type = "binomial"
-    run_test_grpnet(10, 50, 10, glm_type)
-    run_test_grpnet(40, 13, 7, glm_type)
+    do_constraints = [False, True]
+    for do_c in do_constraints:
+        run_test_grpnet(10, 50, 10, glm_type, do_c)
+        run_test_grpnet(40, 13, 7, glm_type, do_c)
 
 
 def test_grpnet_poisson():
     glm_type = "poisson"
-    run_test_grpnet(10, 50, 10, glm_type)
-    run_test_grpnet(40, 13, 7, glm_type)
+    do_constraints = [False, True]
+    for do_c in do_constraints:
+        run_test_grpnet(10, 50, 10, glm_type, do_c)
+        run_test_grpnet(40, 13, 7, glm_type, do_c)
 
 
 def test_grpnet_cox():
     glm_type = "cox"
-    # lower adev_tol to make the test run faster
-    run_test_grpnet(10, 50, 10, glm_type, adev_tol=0.2)
-    run_test_grpnet(40, 13, 7, glm_type, adev_tol=0.2)
+    do_constraints = [False, True]
+    for do_c in do_constraints:
+        # lower adev_tol to make the test run faster
+        run_test_grpnet(10, 50, 10, glm_type, do_c, adev_tol=0.2)
+        run_test_grpnet(40, 13, 7, glm_type, do_c, adev_tol=0.2)
 
 
 def test_grpnet_multigaussian():
     glm_type = "multigaussian"
-    run_test_grpnet(10, 50, 10, glm_type)
-    run_test_grpnet(40, 13, 7, glm_type)
+    do_constraints = [False, True]
+    for do_c in do_constraints:
+        run_test_grpnet(10, 50, 10, glm_type, do_c)
+        run_test_grpnet(40, 13, 7, glm_type, do_c)
 
 
 def test_grpnet_multinomial():
     glm_type = "multinomial"
-    run_test_grpnet(10, 50, 10, glm_type)
-    run_test_grpnet(40, 13, 7, glm_type)
+    do_constraints = [False, True]
+    for do_c in do_constraints:
+        run_test_grpnet(10, 50, 10, glm_type, do_c)
+        run_test_grpnet(40, 13, 7, glm_type, do_c)

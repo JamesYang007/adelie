@@ -69,7 +69,7 @@ public:
         Eigen::Ref<vec_value_t> out
     ) =0;
 
-    virtual int dual_size() =0;
+    virtual int duals() =0;
 };
 
 } // namespace constraint

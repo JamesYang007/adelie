@@ -44,12 +44,12 @@ public:
         );
     }
 
-    int dual_size() override
+    int duals() override
     {
         PYBIND11_OVERRIDE_PURE(
             int,
             base_t,
-            dual_size,
+            duals,
         );
     }
 };
@@ -70,8 +70,9 @@ void constraint_base(py::module_& m, const char* name)
         Every constraint-like class must inherit from this class and override the methods
         before passing into the solver.
     )delimiter")
-        .def_property_readonly("dual_size", &internal_t::dual_size, R"delimiter(
-        Dual size.
+        .def(py::init<>())
+        .def_property_readonly("dual_size", &internal_t::duals, R"delimiter(
+        Number of duals.
         )delimiter")
         .def("update_coordinate", &internal_t::update_coordinate, R"delimiter(
         Computes the block-coordinate update.
@@ -129,11 +130,22 @@ void constraint_base(py::module_& m, const char* name)
         out : (d,) np.ndarray
             The output vector to store the Lagrangian update.
         )delimiter")
+        .def("duals", &internal_t::duals, R"delimiter(
+        Number of duals.
+
+        Returns
+        -------
+        size : int
+            Number of duals.
+        )delimiter")
         ;
 }
 
 void register_constraint(py::module_& m)
 {
+    py::bind_vector<std::vector<ad::constraint::ConstraintBase<double>*>>(m, "VectorConstraintBase64");
+    py::bind_vector<std::vector<ad::constraint::ConstraintBase<float>*>>(m, "VectorConstraintBase32");
+
     constraint_base<double>(m, "ConstraintBase64");
     constraint_base<float>(m, "ConstraintBase32");
 }

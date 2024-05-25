@@ -15,8 +15,8 @@ def render_constraints(
     if constraints is None:
         constraints = [None] * n_groups
     return {
-        np.float32: core.VectorConstraintBase32,
-        np.float64: core.VectorConstraintBase64,
+        np.float32: core.constraint.VectorConstraintBase32,
+        np.float64: core.constraint.VectorConstraintBase64,
     }[dtype](constraints)
 
 
@@ -1572,14 +1572,24 @@ class gaussian_naive_base(base):
 
         # ================ abs_grad check ====================
         grad_corr = np.copy(grad)
-        for i, b, g, gs in zip(
+        for i, b, db, g, gs in zip(
             self.screen_set,
             self.screen_begins,
+            self.screen_dual_begins,
             self.groups[self.screen_set],
             self.group_sizes[self.screen_set],
         ):
             lmda = 1e35 if np.isinf(self.lmda) else self.lmda
-            grad_corr[g:g+gs] -= lmda * (1-self.alpha) * self.penalty[i] * self.screen_beta[b:b+gs]
+            lagr = 0
+            if not (self.constraints[i] is None):
+                ds = self.constraints[i].dual_size
+                lagr = np.empty(ds)
+                self.constraints[i].update_lagrangian(
+                    self.screen_beta[b:b+gs],
+                    self.screen_dual[db:db+ds],
+                    lagr,
+                )
+            grad_corr[g:g+gs] -= lmda * (1-self.alpha) * self.penalty[i] * self.screen_beta[b:b+gs] + lagr
         abs_grad = np.array([
             np.linalg.norm(grad_corr[g:g+gs])
             for g, gs in zip(self.groups, self.group_sizes)

@@ -67,7 +67,7 @@ void update_abs_grad(
 
             const Eigen::Map<const vec_value_t> mu(
                 screen_dual.data() + screen_dual_begins[ss_idx],
-                constraint->dual_size()
+                constraint->duals()
             );
             constraint->update_lagrangian(sbeta, mu, vbuff);
             abs_grad[i] = (common_expr - vbuff).matrix().norm();
@@ -173,12 +173,12 @@ void update_screen_derived_base(
     size_t screen_dual_value_size = (
         (old_screen_size == 0) ? 
         0 : (screen_dual_begins.back() + (
-            (last_constraint == nullptr) ? 0 : last_constraint->dual_size()
+            (last_constraint == nullptr) ? 0 : last_constraint->duals()
         ))
     );
     for (size_t i = old_screen_size; i < screen_set.size(); ++i) {
         const auto constraint = constraints[screen_set[i]];
-        const auto curr_size = (constraint == nullptr) ? 0 : constraint->dual_size();
+        const auto curr_size = (constraint == nullptr) ? 0 : constraint->duals();
         screen_dual_begins.push_back(screen_dual_value_size);
         screen_dual_value_size += curr_size;
     }

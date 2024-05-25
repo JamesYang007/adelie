@@ -410,7 +410,7 @@ inline void solve(
         // constrained case
         } else {
             const auto sdb = screen_dual_begins[ss_idx];
-            const auto ds = constraint->dual_size(); 
+            const auto ds = constraint->duals(); 
             auto mu = screen_dual.segment(sdb, ds);
             util::rowvec_type<value_t, 1> ak_view;
             util::rowvec_type<value_t, 1> A_kk_view;
@@ -441,7 +441,7 @@ inline void solve(
         // constrained case
         } else {
             const auto sdb = screen_dual_begins[ss_idx];
-            const auto ds = constraint->dual_size(); 
+            const auto ds = constraint->duals(); 
             auto mu = screen_dual.segment(sdb, ds);
             constraint->update_coordinate(ak, mu, A_kk, gk, l1, l2);
         }
