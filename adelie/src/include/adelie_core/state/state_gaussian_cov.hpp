@@ -129,19 +129,20 @@ void update_screen_derived(
     for (int i = 0; i < screen_subset_order.size(); ++i) {
         screen_subset_ordered[i] = screen_subset[screen_subset_order[i]];
     }
-
 }
 
 } // namespace cov
 } // namespace gaussian
 
-template <class MatrixType,
+template <class ConstraintType,
+          class MatrixType,
           class ValueType=typename std::decay_t<MatrixType>::value_t,
           class IndexType=Eigen::Index,
           class BoolType=bool,
           class SafeBoolType=int8_t
         >
 struct StateGaussianCov: public StateBase<
+        ConstraintType,
         ValueType,
         IndexType,
         BoolType,
@@ -149,6 +150,7 @@ struct StateGaussianCov: public StateBase<
     >
 {
     using base_t = StateBase<
+        ConstraintType,
         ValueType,
         IndexType,
         BoolType,
@@ -159,6 +161,7 @@ struct StateGaussianCov: public StateBase<
     using typename base_t::vec_index_t;
     using typename base_t::vec_bool_t;
     using typename base_t::map_cvec_value_t;
+    using typename base_t::dyn_vec_constraint_t;
     using typename base_t::dyn_vec_value_t;
     using typename base_t::dyn_vec_index_t;
     using matrix_t = MatrixType;
@@ -181,6 +184,7 @@ struct StateGaussianCov: public StateBase<
     explicit StateGaussianCov(
         matrix_t& A,
         const Eigen::Ref<const vec_value_t>& v,
+        const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
@@ -207,6 +211,7 @@ struct StateGaussianCov: public StateBase<
         const Eigen::Ref<const vec_index_t>& screen_set,
         const Eigen::Ref<const vec_value_t>& screen_beta,
         const Eigen::Ref<const vec_bool_t>& screen_is_active,
+        const Eigen::Ref<const vec_value_t>& screen_dual,
         size_t active_set_size,
         const Eigen::Ref<const vec_index_t>& active_set,
         value_t rsq,
@@ -214,12 +219,12 @@ struct StateGaussianCov: public StateBase<
         const Eigen::Ref<const vec_value_t>& grad
     ):
         base_t(
-            groups, group_sizes, alpha, penalty, lmda_path, lmda_max, min_ratio, lmda_path_size,
+            constraints, groups, group_sizes, alpha, penalty, lmda_path, lmda_max, min_ratio, lmda_path_size,
             max_screen_size, max_active_size,
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             max_iters, tol, 0, 0, newton_tol, newton_max_iters, early_exit, 
             setup_lmda_max, setup_lmda_path, false, n_threads,
-            screen_set, screen_beta, screen_is_active, active_set_size, active_set, lmda, grad
+            screen_set, screen_beta, screen_is_active, screen_dual, active_set_size, active_set, lmda, grad
         ),
         v(v.data(), v.size()),
         rdev_tol(rdev_tol),

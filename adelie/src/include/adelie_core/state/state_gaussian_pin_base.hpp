@@ -6,12 +6,14 @@
 namespace adelie_core {
 namespace state {
 
-template <class ValueType,
+template <class ConstraintType,
+          class ValueType=typename std::decay_t<ConstraintType>::value_t,
           class IndexType=Eigen::Index,
           class BoolType=bool
         >
 struct StateGaussianPinBase
 {
+    using constraint_t = ConstraintType;
     using value_t = ValueType;
     using index_t = IndexType;
     using bool_t = BoolType;
@@ -24,6 +26,7 @@ struct StateGaussianPinBase
     using map_vec_bool_t = Eigen::Map<vec_bool_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
     using map_cvec_index_t = Eigen::Map<const vec_index_t>;
+    using dyn_vec_constraint_t = std::vector<constraint_t*>;
     using dyn_vec_value_t = std::vector<value_t>;
     using dyn_vec_index_t = std::vector<index_t>;
     using dyn_vec_sp_vec_t = std::vector<sp_vec_value_t>;
@@ -32,6 +35,7 @@ struct StateGaussianPinBase
     using dyn_vec_mat_value_t = std::vector<util::rowmat_type<value_t>>;
 
     /* static states */
+    const dyn_vec_constraint_t* constraints;
     const map_cvec_index_t groups;
     const map_cvec_index_t group_sizes;
     const value_t alpha;
@@ -40,6 +44,7 @@ struct StateGaussianPinBase
     const map_cvec_index_t screen_begins;
     const map_cvec_value_t screen_vars;
     const dyn_vec_mat_value_t* screen_transforms;
+    const map_cvec_index_t screen_dual_begins;
     const map_cvec_value_t lmda_path;
 
     /* configurations */
@@ -57,6 +62,7 @@ struct StateGaussianPinBase
     value_t rsq;
     map_vec_value_t screen_beta;
     map_vec_bool_t screen_is_active;
+    map_vec_value_t screen_dual;
     size_t active_set_size;
     map_vec_index_t active_set;
     dyn_vec_index_t active_begins;
@@ -74,6 +80,7 @@ struct StateGaussianPinBase
     virtual ~StateGaussianPinBase() =default;
     
     explicit StateGaussianPinBase(
+        const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
@@ -82,6 +89,7 @@ struct StateGaussianPinBase
         const Eigen::Ref<const vec_index_t>& screen_begins, 
         const Eigen::Ref<const vec_value_t>& screen_vars,
         const dyn_vec_mat_value_t& screen_transforms,
+        const Eigen::Ref<const vec_index_t>& screen_dual_begins, 
         const Eigen::Ref<const vec_value_t>& lmda_path, 
         bool intercept,
         size_t max_active_size,
@@ -95,9 +103,11 @@ struct StateGaussianPinBase
         value_t rsq,
         Eigen::Ref<vec_value_t> screen_beta, 
         Eigen::Ref<vec_bool_t> screen_is_active,
+        Eigen::Ref<vec_value_t> screen_dual,
         size_t active_set_size,
         Eigen::Ref<vec_index_t> active_set
     ): 
+        constraints(&constraints),
         groups(groups.data(), groups.size()),
         group_sizes(group_sizes.data(), group_sizes.size()),
         alpha(alpha),
@@ -106,6 +116,7 @@ struct StateGaussianPinBase
         screen_begins(screen_begins.data(), screen_begins.size()),
         screen_vars(screen_vars.data(), screen_vars.size()),
         screen_transforms(&screen_transforms),
+        screen_dual_begins(screen_dual_begins.data(), screen_dual_begins.size()),
         lmda_path(lmda_path.data(), lmda_path.size()),
         intercept(intercept),
         max_active_size(max_active_size),
@@ -119,6 +130,7 @@ struct StateGaussianPinBase
         rsq(rsq),
         screen_beta(screen_beta.data(), screen_beta.size()),
         screen_is_active(screen_is_active.data(), screen_is_active.size()),
+        screen_dual(screen_dual.data(), screen_dual.size()),
         active_set_size(active_set_size),
         active_set(active_set.data(), active_set.size())
     {

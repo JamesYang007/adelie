@@ -1,4 +1,5 @@
 #include "decl.hpp"
+#include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/glm/glm_base.hpp>
 #include <adelie_core/glm/glm_multibase.hpp>
 #include <adelie_core/matrix/matrix_cov_base.hpp>
@@ -117,23 +118,6 @@ py::dict _solve(
 {
     using sw_t = ad::util::Stopwatch;
 
-    const auto update_coefficients_f = [](
-        const auto& L,
-        const auto& v,
-        auto l1,
-        auto l2,
-        auto tol,
-        size_t max_iters,
-        auto& x,
-        auto& iters,
-        auto& buffer1,
-        auto& buffer2
-    ){
-        ad::solver::gaussian::pin::update_coefficients(
-            L, v, l1, l2, tol, max_iters, x, iters, buffer1, buffer2
-        );
-    };
-
     const auto check_user_interrupt = [&]() {
         if (PyErr_CheckSignals() != 0) {
             throw py::error_already_set();
@@ -148,7 +132,7 @@ py::dict _solve(
     sw_t sw;
     sw.start();
     try {
-        solve_f(state, update_coefficients_f, check_user_interrupt);
+        solve_f(state, check_user_interrupt);
     } catch(const std::exception& e) {
         error = e.what(); 
     }
@@ -166,8 +150,8 @@ py::dict solve_gaussian_pin_cov(StateType state)
 {
     return _solve(
         state, 
-        [](auto& state, auto u, auto c) {
-            ad::solver::gaussian::pin::cov::solve(state, u, c);
+        [](auto& state, auto c) {
+            ad::solver::gaussian::pin::cov::solve(state, c);
         }
     );
 } 
@@ -177,8 +161,8 @@ py::dict solve_gaussian_pin_naive(StateType state)
 {
     return _solve(
         state,
-        [](auto& state, auto u, auto c) {
-            ad::solver::gaussian::pin::naive::solve(state, u, c);
+        [](auto& state, auto c) {
+            ad::solver::gaussian::pin::naive::solve(state, c);
         }
     );
 } 
@@ -196,12 +180,12 @@ py::dict solve_gaussian_cov(
 {
     return _solve(
         state,
-        [&](auto& state, auto u, auto c) {
+        [&](auto& state, auto c) {
             const auto exit_cond_f = [&]() {
                 return exit_cond && exit_cond(state);
             };
             ad::solver::gaussian::cov::solve(
-                state, display_progress_bar, exit_cond_f, u, c
+                state, display_progress_bar, exit_cond_f, c
             );
         }
     );
@@ -216,12 +200,12 @@ py::dict solve_gaussian_naive(
 {
     return _solve(
         state,
-        [&](auto& state, auto u, auto c) {
+        [&](auto& state, auto c) {
             const auto exit_cond_f = [&]() {
                 return exit_cond && exit_cond(state);
             };
             return ad::solver::gaussian::naive::solve(
-                state, display_progress_bar, exit_cond_f, u, c
+                state, display_progress_bar, exit_cond_f, c
             );
         }
     );
@@ -236,12 +220,12 @@ py::dict solve_multigaussian_naive(
 {
     return _solve(
         state,
-        [&](auto& state, auto u, auto c) {
+        [&](auto& state, auto c) {
             const auto exit_cond_f = [&]() {
                 return exit_cond && exit_cond(state);
             };
             ad::solver::multigaussian::naive::solve(
-                state, display_progress_bar, exit_cond_f, u, c
+                state, display_progress_bar, exit_cond_f, c
             );
         }
     );
@@ -261,12 +245,12 @@ py::dict solve_glm_naive(
 {
     return _solve(
         state,
-        [&](auto& state, auto u, auto c) {
+        [&](auto& state, auto c) {
             const auto exit_cond_f = [&]() {
                 return exit_cond && exit_cond(state);
             };
             ad::solver::glm::naive::solve(
-                state, glm, display_progress_bar, exit_cond_f, u, c
+                state, glm, display_progress_bar, exit_cond_f, c
             );
         }
     );
@@ -282,31 +266,52 @@ py::dict solve_multiglm_naive(
 {
     return _solve(
         state,
-        [&](auto& state, auto u, auto c) {
+        [&](auto& state, auto c) {
             const auto exit_cond_f = [&]() {
                 return exit_cond && exit_cond(state);
             };
             ad::solver::multiglm::naive::solve(
-                state, glm, display_progress_bar, exit_cond_f, u, c
+                state, glm, display_progress_bar, exit_cond_f, c
             );
         }
     );
 } 
 
 template <class T> 
-using state_gaussian_pin_naive_t = ad::state::StateGaussianPinNaive<ad::matrix::MatrixNaiveBase<T>>;
+using state_gaussian_pin_naive_t = ad::state::StateGaussianPinNaive<
+    ad::constraint::ConstraintBase<T>,
+    ad::matrix::MatrixNaiveBase<T>
+>;
 template <class T> 
-using state_gaussian_pin_cov_t = ad::state::StateGaussianPinCov<ad::matrix::MatrixCovBase<T>>;
+using state_gaussian_pin_cov_t = ad::state::StateGaussianPinCov<
+    ad::constraint::ConstraintBase<T>,
+    ad::matrix::MatrixCovBase<T>
+>;
 template <class T> 
-using state_gaussian_cov_t = ad::state::StateGaussianCov<ad::matrix::MatrixCovBase<T>>;
+using state_gaussian_cov_t = ad::state::StateGaussianCov<
+    ad::constraint::ConstraintBase<T>,
+    ad::matrix::MatrixCovBase<T>
+>;
 template <class T> 
-using state_gaussian_naive_t = ad::state::StateGaussianNaive<ad::matrix::MatrixNaiveBase<T>>;
+using state_gaussian_naive_t = ad::state::StateGaussianNaive<
+    ad::constraint::ConstraintBase<T>,
+    ad::matrix::MatrixNaiveBase<T>
+>;
 template <class T> 
-using state_multigaussian_naive_t = ad::state::StateMultiGaussianNaive<ad::matrix::MatrixNaiveBase<T>>;
+using state_multigaussian_naive_t = ad::state::StateMultiGaussianNaive<
+    ad::constraint::ConstraintBase<T>,
+    ad::matrix::MatrixNaiveBase<T>
+>;
 template <class T> 
-using state_glm_naive_t = ad::state::StateGlmNaive<ad::matrix::MatrixNaiveBase<T>>;
+using state_glm_naive_t = ad::state::StateGlmNaive<
+    ad::constraint::ConstraintBase<T>,
+    ad::matrix::MatrixNaiveBase<T>
+>;
 template <class T> 
-using state_multiglm_naive_t = ad::state::StateMultiGlmNaive<ad::matrix::MatrixNaiveBase<T>>;
+using state_multiglm_naive_t = ad::state::StateMultiGlmNaive<
+    ad::constraint::ConstraintBase<T>,
+    ad::matrix::MatrixNaiveBase<T>
+>;
 template <class T>
 using glm_t = ad::glm::GlmBase<T>;
 template <class T>

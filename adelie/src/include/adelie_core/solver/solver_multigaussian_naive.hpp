@@ -12,13 +12,11 @@ namespace naive {
 
 template <class StateType,
           class ExitCondType,
-          class UpdateCoefficientsType,
           class CUIType=util::no_op>
 inline void solve(
     StateType&& state,
     bool display,
     ExitCondType exit_cond_f,
-    UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
 {
@@ -49,7 +47,6 @@ inline void solve(
         static_cast<state_gaussian_naive_t&>(state),
         display,
         exit_cond_f,
-        update_coefficients_f,
         tidy,
         check_user_interrupt
     );

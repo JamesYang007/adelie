@@ -177,7 +177,8 @@ void sparsify_active_beta_diff(
 
 template <class StateType, class Iter,
           class ValueType, class BufferPackType,
-          class UpdateCoefficientsType,
+          class UpdateCoefficientG0Type,
+          class UpdateCoefficientG1Type,
           class UpdateScreenGradType,
           class AdditionalStepType=util::no_op>
 ADELIE_CORE_STRONG_INLINE
@@ -188,7 +189,8 @@ void coordinate_descent(
     size_t lmda_idx,
     ValueType& convg_measure,
     BufferPackType& buffer_pack,
-    UpdateCoefficientsType update_coefficients_f,
+    UpdateCoefficientG0Type update_coordinate_g0_f,
+    UpdateCoefficientG1Type update_coordinate_g1_f,
     UpdateScreenGradType update_screen_grad_f,
     AdditionalStepType additional_step=AdditionalStepType()
 )
@@ -206,8 +208,6 @@ void coordinate_descent(
     const auto& group_sizes = state.group_sizes;
     const auto alpha = state.alpha;
     const auto lmda = state.lmda_path[lmda_idx];
-    const auto newton_tol = state.newton_tol;
-    const auto newton_max_iters = state.newton_max_iters;
     auto& screen_beta = state.screen_beta;
     auto& screen_grad = state.screen_grad;
     auto& rsq = state.rsq;
@@ -236,8 +236,8 @@ void coordinate_descent(
 
             const auto ak_old = ak;
 
-            update_coefficient(
-                ak, A_kk, l1, l2, pk, gk
+            update_coordinate_g0_f(
+                ss_idx, ak, A_kk, gk, l1 * pk, l2 * pk
             );
 
             if (ak_old == ak) continue;
@@ -275,12 +275,9 @@ void coordinate_descent(
             auto ak_transformed = buffer4.segment(2 * ak.size(), ak.size());
 
             // update group coefficients
-            size_t iters;
             gk_transformed += A_kk * ak_old_transformed; 
-            update_coefficients_f(
-                A_kk, gk_transformed, l1 * pk, l2 * pk, 
-                newton_tol, newton_max_iters,
-                ak_transformed, iters, buffer1, buffer2
+            update_coordinate_g1_f(
+                ss_idx, ak_transformed, A_kk, gk_transformed, l1 * pk, l2 * pk
             );
             gk_transformed -= A_kk * ak_old_transformed; 
 
@@ -318,14 +315,16 @@ void coordinate_descent(
  */
 template <class StateType, 
           class BufferPackType, 
-          class UpdateCoefficientsType,
+          class UpdateCoefficientG0Type,
+          class UpdateCoefficientG1Type,
           class CUIType>
 ADELIE_CORE_STRONG_INLINE
 void solve_active(
     StateType&& state,
     size_t lmda_idx,
     BufferPackType& buffer_pack,
-    UpdateCoefficientsType update_coefficients_f,
+    UpdateCoefficientG0Type update_coordinate_g0_f,
+    UpdateCoefficientG1Type update_coordinate_g1_f,
     CUIType check_user_interrupt
 )
 {
@@ -388,7 +387,8 @@ void solve_active(
             lmda_idx, 
             convg_measure, 
             buffer_pack,
-            update_coefficients_f,
+            update_coordinate_g0_f,
+            update_coordinate_g1_f,
             [](auto& state, auto& buffer_pack, const auto& indices, const auto& values) { 
                 update_screen_grad_active(state, buffer_pack, indices, values); 
             }
@@ -441,11 +441,13 @@ void solve_active(
 }
 
 template <class StateType,
-          class UpdateCoefficientsType,
+          class UpdateCoefficientG0Type,
+          class UpdateCoefficientG1Type,
           class CUIType = util::no_op>
 inline void solve(
     StateType&& state,
-    UpdateCoefficientsType update_coefficients_f,
+    UpdateCoefficientG0Type update_coordinate_g0_f,
+    UpdateCoefficientG1Type update_coordinate_g1_f,
     CUIType check_user_interrupt = CUIType()
 )
 {
@@ -524,7 +526,8 @@ inline void solve(
             state, 
             l, 
             buffer_pack,
-            update_coefficients_f,
+            update_coordinate_g0_f,
+            update_coordinate_g1_f,
             check_user_interrupt
         );
     };
@@ -550,7 +553,8 @@ inline void solve(
                 l, 
                 convg_measure,
                 buffer_pack,
-                update_coefficients_f,
+                update_coordinate_g0_f,
+                update_coordinate_g1_f,
                 [](auto& state, auto& buffer_pack, const auto& indices, const auto& values) { 
                     update_screen_grad_screen(state, buffer_pack, indices, values); 
                 },
@@ -615,6 +619,84 @@ inline void solve(
 
         if ((l >= 1) && (rsqs[l]-rsqs[l-1] <= rdev_tol * rsqs[l])) break;
     }
+}
+
+template <class StateType,
+          class CUIType = util::no_op>
+inline void solve(
+    StateType&& state,
+    CUIType check_user_interrupt = CUIType()
+)
+{
+    using state_t = std::decay_t<StateType>;
+    using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
+
+    const auto& constraints = *state.constraints;
+    const auto& group_sizes = state.group_sizes;
+    const auto& screen_set = state.screen_set;
+    const auto& screen_dual_begins = state.screen_dual_begins;
+    auto& screen_dual = state.screen_dual;
+
+    const auto max_group_size = group_sizes.maxCoeff();
+    vec_value_t buff(max_group_size * 2);
+
+    const auto update_coordinate_g0_f = [&](
+        auto ss_idx, auto& ak, auto A_kk, auto gk, auto l1, auto l2
+    ) {
+        const auto k = screen_set[ss_idx];
+        const auto constraint = constraints[k];
+
+        // unconstrained case
+        if (constraint == nullptr) {
+            pin::update_coordinate(ak, A_kk, gk, l1, l2);
+
+        // constrained case
+        } else {
+            const auto sdb = screen_dual_begins[ss_idx];
+            const auto ds = constraint->dual_size(); 
+            auto mu = screen_dual.segment(sdb, ds);
+            util::rowvec_type<value_t, 1> ak_view;
+            util::rowvec_type<value_t, 1> A_kk_view;
+            util::rowvec_type<value_t, 1> gk_view;
+            ak_view[0] = ak;
+            A_kk_view[0] = A_kk;
+            gk_view[0] = gk;
+            constraint->update_coordinate(ak_view, mu, A_kk_view, gk_view, l1, l2);
+        }
+    };
+    const auto update_coordinate_g1_f = [&](
+        auto ss_idx, auto& ak, const auto& A_kk, const auto& gk, auto l1, auto l2
+    ) {
+        const auto k = screen_set[ss_idx];
+        const auto constraint = constraints[k];
+
+        // unconstrained case
+        if (constraint == nullptr) {
+            const auto size = ak.size();
+            Eigen::Map<vec_value_t> buffer1(buff.data(), size);
+            Eigen::Map<vec_value_t> buffer2(buff.data() + max_group_size, size);
+            pin::update_coordinate(
+                ak, A_kk, gk, l1, l2,
+                state.newton_tol, state.newton_max_iters,
+                buffer1, buffer2
+            );
+
+        // constrained case
+        } else {
+            const auto sdb = screen_dual_begins[ss_idx];
+            const auto ds = constraint->dual_size(); 
+            auto mu = screen_dual.segment(sdb, ds);
+            constraint->update_coordinate(ak, mu, A_kk, gk, l1, l2);
+        }
+    };
+
+    solve(
+        state,
+        update_coordinate_g0_f,
+        update_coordinate_g1_f,
+        check_user_interrupt
+    );
 }
 
 } // namespace cov    

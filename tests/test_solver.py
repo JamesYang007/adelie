@@ -167,6 +167,7 @@ def create_data_gaussian(
     intercept=True,
     pin=False,
     method="naive",
+    constraint: bool=False,
 ):
     np.random.seed(seed)
 
@@ -201,15 +202,23 @@ def create_data_gaussian(
     resid = y_c
     grad = X_c.T @ (weights * resid)
 
+    if constraint:
+        raise NotImplementedError("TODO: constraint test.")
+    else:
+        constraints = None
+        screen_dual = np.zeros(0)
+
     args = {
         "X": X, 
         "y": y,
+        "constraints": constraints,
         "groups": groups,
         "alpha": alpha,
         "penalty": penalty,
         "weights": weights,
         "rsq": 0,
         "intercept": intercept,
+        "screen_dual": screen_dual,
         "active_set_size": 0,
         "active_set": np.empty(G, dtype=int),
     }
@@ -275,9 +284,14 @@ def solve_cvxpy(
     intercept: bool,
     pin: bool =False,
     screen_set: np.ndarray =None,
+    constraints: list =None,
 ):
+    if constraints is None:
+        constraints = []
+    else:
+        raise NotImplementedError("TODO: constraint test.")
+
     _, p = X.shape
-    constraints = [] 
     if cvxpy_glm.is_multi:
         assert groups == "grouped"
         K = cvxpy_glm.y.shape[-1]
@@ -333,6 +347,7 @@ def check_solutions(
     X = args["X"]
     intercept = args["intercept"]
     groups = args["groups"]
+    constraints = args["constraints"]
     cvxpy_res = [
         solve_cvxpy(
             X=X,
@@ -343,6 +358,7 @@ def check_solutions(
             penalty=state.penalty,
             intercept=intercept,
             pin=pin,
+            constraints=constraints,
             screen_set=state.screen_set,
         )
         for lmda in lmdas
@@ -394,7 +410,7 @@ def run_solve_gaussian(state, args, pin):
 
 
 def test_solve_gaussian_pin_naive():
-    def _test(n, p, G, S, intercept=True, alpha=1, sparsity=0.95, seed=0):
+    def _test(n, p, G, S, constraint=False, intercept=True, alpha=1, sparsity=0.95, seed=0):
         args = create_data_gaussian(
             n=n, 
             p=p, 
@@ -405,6 +421,7 @@ def test_solve_gaussian_pin_naive():
             sparsity=sparsity, 
             seed=seed,
             pin=True,
+            constraint=constraint,
             method="naive",
         )
         Xs = [
@@ -424,6 +441,7 @@ def test_solve_gaussian_pin_naive():
             args_c["resid"] = state.resid
             args_c["screen_beta"] = state.screen_beta
             args_c["screen_is_active"] = state.screen_is_active
+            args_c["screen_dual"] = state.screen_dual
             args_c["active_set_size"] = state.active_set_size
             args_c["active_set"] = state.active_set
             state = ad.state.gaussian_pin_naive(
@@ -440,7 +458,7 @@ def test_solve_gaussian_pin_naive():
 
 
 def test_solve_gaussian_pin_cov():
-    def _test(n, p, G, S, alpha=1, sparsity=0.95, seed=0):
+    def _test(n, p, G, S, constraint=False, alpha=1, sparsity=0.95, seed=0):
         # for simplicity of testing routine, should only work for intercept=False
         args = create_data_gaussian(
             n=n, 
@@ -452,6 +470,7 @@ def test_solve_gaussian_pin_cov():
             sparsity=sparsity, 
             seed=seed,
             pin=True,
+            constraint=constraint,
             method="cov",
         )
 
@@ -479,6 +498,7 @@ def test_solve_gaussian_pin_cov():
             args_c["screen_beta"] = state.screen_beta
             args_c["screen_grad"] = state.screen_grad
             args_c["screen_is_active"] = state.screen_is_active
+            args_c["screen_dual"] = state.screen_dual
             args_c["active_set_size"] = state.active_set_size
             args_c["active_set"] = state.active_set
             state = ad.state.gaussian_pin_cov(
@@ -495,7 +515,7 @@ def test_solve_gaussian_pin_cov():
 
 
 def test_solve_gaussian():
-    def _test(n, p, G, intercept=True, alpha=1, sparsity=0.95, seed=0):
+    def _test(n, p, G, constraint=False, intercept=True, alpha=1, sparsity=0.95, seed=0):
         args = create_data_gaussian(
             n=n, 
             p=p, 
@@ -504,6 +524,7 @@ def test_solve_gaussian():
             intercept=intercept, 
             alpha=alpha, 
             sparsity=sparsity, 
+            constraint=constraint,
             seed=seed,
         )
         Xs = [
@@ -524,6 +545,7 @@ def test_solve_gaussian():
             args_c["screen_set"] = state.screen_set
             args_c["screen_beta"] = state.screen_beta
             args_c["screen_is_active"] = state.screen_is_active
+            args_c["screen_dual"] = state.screen_dual
             args_c["active_set_size"] = state.active_set_size
             args_c["active_set"] = state.active_set
             args_c["rsq"] = state.rsq
@@ -565,6 +587,7 @@ def test_solve_gaussian_concatenate():
         ], axis=-1)
         y = np.mean([data["glm"].y for data in test_datas], axis=0)
 
+        constraints = None
         groups = np.concatenate([
             begin + data["groups"]
             for begin, data in zip(
@@ -588,6 +611,7 @@ def test_solve_gaussian_concatenate():
         screen_set = np.arange(len(groups))[(penalty <= 0) | (alpha <= 0)]
         screen_beta = np.zeros(np.sum(group_sizes[screen_set]))
         screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
+        screen_dual = np.zeros(0)
         grad = X_c.T @ (weights * resid)
 
         test_data = {
@@ -597,6 +621,7 @@ def test_solve_gaussian_concatenate():
             "y_var": y_var,
             "resid": resid,
             "resid_sum": resid_sum,
+            "constraints": constraints,
             "groups": groups,
             "group_sizes": group_sizes,
             "alpha": alpha,
@@ -606,6 +631,7 @@ def test_solve_gaussian_concatenate():
             "screen_set": screen_set,
             "screen_beta": screen_beta,
             "screen_is_active": screen_is_active,
+            "screen_dual": screen_dual,
             "active_set_size": 0,
             "active_set": np.empty(groups.shape[0], dtype=int),
             "rsq": 0,
@@ -663,6 +689,7 @@ def test_solve_gaussian_snp_unphased():
         weights = np.random.uniform(1, 2, n)
         weights /= np.sum(weights)
 
+        test_data["constraints"] = None
         test_data["y"] = y
         test_data["weights"] = weights
         test_data["offsets"] = np.zeros(n)
@@ -677,6 +704,7 @@ def test_solve_gaussian_snp_unphased():
         test_data["screen_set"] = np.arange(p)[(test_data["penalty"] <= 0) | (alpha <= 0)]
         test_data["screen_beta"] = np.zeros(np.sum(test_data["group_sizes"][test_data["screen_set"]]))
         test_data["screen_is_active"] = np.zeros(test_data["screen_set"].shape[0], dtype=bool)
+        test_data["screen_dual"] = np.zeros(0)
         test_data["active_set_size"] = 0
         test_data["active_set"] = np.empty(p, dtype=int)
         test_data["grad"] = X_c.T @ (weights * test_data["resid"])
@@ -733,6 +761,7 @@ def test_solve_gaussian_snp_phased_ancestry():
         weights = np.random.uniform(1, 2, n)
         weights /= np.sum(weights)
 
+        test_data["constraints"] = None
         test_data["y"] = y
         test_data["weights"] = weights
         test_data["offsets"] = np.zeros(n)
@@ -747,6 +776,7 @@ def test_solve_gaussian_snp_phased_ancestry():
         test_data["screen_set"] = np.arange(p)[(test_data["penalty"] <= 0) | (alpha <= 0)]
         test_data["screen_beta"] = np.zeros(np.sum(test_data["group_sizes"][test_data["screen_set"]]))
         test_data["screen_is_active"] = np.zeros(test_data["screen_set"].shape[0], dtype=bool)
+        test_data["screen_dual"] = np.zeros(0)
         test_data["active_set_size"] = 0
         test_data["active_set"] = np.empty(p, dtype=int)
         test_data["grad"] = X_c.T @ (weights * test_data["resid"])
@@ -826,6 +856,7 @@ def run_test_grpnet(n, p, G, glm_type, intercept=True, adev_tol=0.4):
         "X": X,
         "intercept": intercept,
         "groups": groups,
+        "constraints": None,
     }
     state = ad.grpnet(
         X=X, 

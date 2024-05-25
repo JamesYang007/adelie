@@ -8,12 +8,15 @@
 namespace adelie_core {
 namespace state {
 
-template <class GroupsType, class GroupSizesType,
+template <class ConstraintsType,
+          class GroupsType, class GroupSizesType,
           class PenaltyType, class GradType, 
           class ScreenSetType, class ScreenHashsetType,
           class ScreenBeginsType, class ScreenBetaType,
+          class ScreenDualBeginsType, class ScreenDualType,
           class ValueType, class AbsGradType>
 void update_abs_grad(
+    const ConstraintsType& constraints,
     const GroupsType& groups,
     const GroupSizesType& group_sizes,
     const PenaltyType& penalty,
@@ -22,15 +25,22 @@ void update_abs_grad(
     const ScreenHashsetType& screen_hashset,
     const ScreenBeginsType& screen_begins,
     const ScreenBetaType& screen_beta,
+    const ScreenDualBeginsType& screen_dual_begins,
+    const ScreenDualType& screen_dual,
     ValueType lmda,
     ValueType alpha,
     AbsGradType& abs_grad,
     size_t n_threads
 )
 {
+    using value_t = ValueType;
+    using vec_value_t = util::rowvec_type<value_t>;
+
     const auto is_screen = [&](auto i) {
         return screen_hashset.find(i) != screen_hashset.end();
     };
+
+    vec_value_t buff;
 
     // do not parallelize since it may result in large false sharing 
     // (access to abs_grad[i] is random order)
@@ -42,13 +52,26 @@ void update_abs_grad(
         const auto size_k = group_sizes[i];
         const auto pk = penalty[i];
         const auto regul = ((1-alpha) * lmda) * pk;
-        abs_grad[i] = (
-            grad.segment(k, size_k) - 
-            regul * Eigen::Map<const util::rowvec_type<ValueType>>(
-                screen_beta.data() + b,
-                size_k
-            )
-        ).matrix().norm();
+        const auto constraint = constraints[i];
+        const Eigen::Map<const vec_value_t> sbeta(
+            screen_beta.data() + b,
+            size_k
+        );
+        const auto common_expr = grad.segment(k, size_k) - regul * sbeta;
+
+        if (constraint == nullptr) {
+            abs_grad[i] = common_expr.matrix().norm();
+        } else {
+            if (buff.size() < size_k) buff.resize(size_k);
+            auto vbuff = buff.head(size_k);
+
+            const Eigen::Map<const vec_value_t> mu(
+                screen_dual.data() + screen_dual_begins[ss_idx],
+                constraint->dual_size()
+            );
+            constraint->update_lagrangian(sbeta, mu, vbuff);
+            abs_grad[i] = (common_expr - vbuff).matrix().norm();
+        }
     }
 
     // can be parallelized since access is in linear order.
@@ -81,6 +104,7 @@ void update_abs_grad(
 )
 {
     update_abs_grad(
+        *state.constraints,
         state.groups,
         state.group_sizes,
         state.penalty,
@@ -89,6 +113,8 @@ void update_abs_grad(
         state.screen_hashset,
         state.screen_begins,
         state.screen_beta,
+        state.screen_dual_begins,
+        state.screen_dual,
         lmda,
         state.alpha,
         state.abs_grad,
@@ -110,12 +136,15 @@ void update_screen_derived_base(
     StateType& state
 )
 {
+    const auto& constraints = *state.constraints;
     const auto& group_sizes = state.group_sizes;
     const auto& screen_set = state.screen_set;
     auto& screen_hashset = state.screen_hashset;
     auto& screen_begins = state.screen_begins;
     auto& screen_beta = state.screen_beta;
     auto& screen_is_active = state.screen_is_active;
+    auto& screen_dual_begins = state.screen_dual_begins;
+    auto& screen_dual = state.screen_dual;
 
     /* update screen_hashset */
     const auto old_screen_size = screen_begins.size();
@@ -138,15 +167,35 @@ void update_screen_derived_base(
 
     /* update screen_is_active */
     screen_is_active.resize(screen_set.size(), false);
+
+    /* update screen_dual-begins */
+    const auto last_constraint = constraints[screen_set[old_screen_size-1]];
+    size_t screen_dual_value_size = (
+        (old_screen_size == 0) ? 
+        0 : (screen_dual_begins.back() + (
+            (last_constraint == nullptr) ? 0 : last_constraint->dual_size()
+        ))
+    );
+    for (size_t i = old_screen_size; i < screen_set.size(); ++i) {
+        const auto constraint = constraints[screen_set[i]];
+        const auto curr_size = (constraint == nullptr) ? 0 : constraint->dual_size();
+        screen_dual_begins.push_back(screen_dual_value_size);
+        screen_dual_value_size += curr_size;
+    }
+
+    /* update screen_dual */
+    screen_dual.resize(screen_dual_value_size, 0);
 }
 
-template <class ValueType,
+template <class ConstraintType,
+          class ValueType=typename std::decay_t<ConstraintType>::value_t,
           class IndexType=Eigen::Index,
           class BoolType=bool,
           class SafeBoolType=int8_t
         >
 struct StateBase
 {
+    using constraint_t = ConstraintType;
     using value_t = ValueType;
     using index_t = IndexType;
     using bool_t = BoolType;
@@ -159,12 +208,14 @@ struct StateBase
     using sp_vec_value_t = util::sp_vec_type<value_t, Eigen::RowMajor, index_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
     using map_cvec_index_t = Eigen::Map<const vec_index_t>;
+    using dyn_vec_constraint_t = std::vector<constraint_t*>;
     using dyn_vec_value_t = std::vector<value_t>;
     using dyn_vec_index_t = std::vector<index_t>;
     using dyn_vec_bool_t = std::vector<safe_bool_t>;
     using dyn_vec_sp_vec_t = std::vector<sp_vec_value_t>;
 
     /* static states */
+    const dyn_vec_constraint_t* constraints;
     const map_cvec_index_t groups;
     const map_cvec_index_t group_sizes;
     const value_t alpha;
@@ -208,6 +259,8 @@ struct StateBase
     dyn_vec_index_t screen_begins;
     dyn_vec_value_t screen_beta;
     dyn_vec_bool_t screen_is_active;
+    dyn_vec_index_t screen_dual_begins;
+    dyn_vec_value_t screen_dual;
     size_t active_set_size;
     vec_index_t active_set;
     value_t lmda;
@@ -233,6 +286,7 @@ struct StateBase
     virtual ~StateBase() =default;
 
     explicit StateBase(
+        const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
@@ -261,11 +315,13 @@ struct StateBase
         const Eigen::Ref<const vec_index_t>& screen_set,
         const Eigen::Ref<const vec_value_t>& screen_beta,
         const Eigen::Ref<const vec_bool_t>& screen_is_active,
+        const Eigen::Ref<const vec_value_t>& screen_dual,
         size_t active_set_size,
         const Eigen::Ref<const vec_index_t>& active_set,
         value_t lmda,
         const Eigen::Ref<const vec_value_t>& grad
     ):
+        constraints(&constraints),
         groups(groups.data(), groups.size()),
         group_sizes(group_sizes.data(), group_sizes.size()),
         alpha(alpha),
@@ -294,6 +350,7 @@ struct StateBase
         screen_set(screen_set.data(), screen_set.data() + screen_set.size()),
         screen_beta(screen_beta.data(), screen_beta.data() + screen_beta.size()),
         screen_is_active(screen_is_active.data(), screen_is_active.data() + screen_is_active.size()),
+        screen_dual(screen_dual.data(), screen_dual.data() + screen_dual.size()),
         active_set_size(active_set_size),
         active_set(active_set),
         lmda(lmda),
@@ -302,6 +359,9 @@ struct StateBase
     {
         // sanity checks
         const auto G = groups.size();
+        if (constraints.size() != G) {
+            throw util::adelie_core_error("constraints must have the same length as groups.");
+        }
         if (group_sizes.size() != G) {
             throw util::adelie_core_error("group_sizes must have the same length as groups.");
         }

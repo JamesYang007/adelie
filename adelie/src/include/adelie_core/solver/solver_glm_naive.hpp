@@ -50,6 +50,7 @@ struct GlmNaiveBufferPack
 
     dyn_vec_value_t screen_beta_prev;
     dyn_vec_bool_t screen_is_active_prev;
+    dyn_vec_value_t screen_dual_prev;
 
     vec_value_t ones;       // (n,) vector of ones
     vec_value_t buffer_n;   // (n,) extra buffer
@@ -162,7 +163,6 @@ template <class StateType,
           class GlmType,
           class BufferPackType,
           class ValueType,
-          class UpdateCoefficientsType,
           class CUIType=util::no_op>
 ADELIE_CORE_STRONG_INLINE
 auto fit(
@@ -170,7 +170,6 @@ auto fit(
     GlmType& glm,
     BufferPackType& buffer_pack,
     ValueType lmda,
-    UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
 {
@@ -181,8 +180,10 @@ auto fit(
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_safe_bool_t = util::rowvec_type<safe_bool_t>;
+    using constraint_t = typename state_t::constraint_t;
     using matrix_naive_t = typename state_t::matrix_t;
     using state_gaussian_pin_naive_t = state::StateGaussianPinNaive<
+        constraint_t,
         matrix_naive_t,
         typename std::decay_t<matrix_naive_t>::value_t,
         index_t,
@@ -190,6 +191,7 @@ auto fit(
     >;
 
     auto& X = *state.X;
+    const auto& constraints = *state.constraints;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto alpha = state.alpha;
@@ -197,6 +199,7 @@ auto fit(
     const auto& offsets = state.offsets;
     const auto& screen_set = state.screen_set;
     const auto& screen_begins = state.screen_begins;
+    const auto& screen_dual_begins = state.screen_dual_begins;
     const auto intercept = state.intercept;
     const auto max_active_size = state.max_active_size;
     const auto irls_max_iters = state.irls_max_iters;
@@ -210,6 +213,7 @@ auto fit(
     const auto loss_full = state.loss_full;
     auto& screen_beta = state.screen_beta;
     auto& screen_is_active = state.screen_is_active;
+    auto& screen_dual = state.screen_dual;
     auto& active_set_size = state.active_set_size;
     auto& active_set = state.active_set;
     auto& beta0 = state.beta0;
@@ -230,6 +234,7 @@ auto fit(
     auto& hess = buffer_pack.hess;
     auto& screen_beta_prev = buffer_pack.screen_beta_prev;
     auto& screen_is_active_prev = buffer_pack.screen_is_active_prev;
+    auto& screen_dual_prev = buffer_pack.screen_dual_prev;
 
     util::rowvec_type<value_t, 1> lmda_path_adjusted;
 
@@ -239,10 +244,12 @@ auto fit(
     const auto save_prev_valid = [&]() {
         screen_beta_prev = screen_beta;
         screen_is_active_prev = screen_is_active;
+        screen_dual_prev = screen_dual;
     };
     const auto load_prev_valid = [&]() {
         screen_beta.swap(screen_beta_prev);
         screen_is_active.swap(screen_is_active_prev);
+        screen_dual.swap(screen_dual_prev);
     };
 
     value_t screen_time = 0;
@@ -311,6 +318,7 @@ auto fit(
             X,
             y_mean,
             y_var,
+            constraints,
             groups, 
             group_sizes,
             alpha, 
@@ -321,6 +329,7 @@ auto fit(
             Eigen::Map<const vec_value_t>(screen_vars.data(), screen_vars.size()), 
             Eigen::Map<const vec_value_t>(screen_X_means.data(), screen_X_means.size()), 
             screen_transforms,
+            Eigen::Map<const vec_index_t>(screen_dual_begins.data(), screen_dual_begins.size()),
             lmda_path_adjusted,
             intercept, max_active_size, max_iters, 
             // TODO: still unclear whether we should be max'ing or not.
@@ -333,13 +342,13 @@ auto fit(
             resid_sum,
             Eigen::Map<vec_value_t>(screen_beta.data(), screen_beta.size()), 
             Eigen::Map<vec_safe_bool_t>(screen_is_active.data(), screen_is_active.size()),
+            Eigen::Map<vec_value_t>(screen_dual.data(), screen_dual.size()),
             active_set_size,
             active_set
         );
         try { 
             gaussian::pin::naive::solve(
                 state_gaussian_pin_naive, 
-                update_coefficients_f, 
                 check_user_interrupt
             );
         } catch(...) {
@@ -396,7 +405,6 @@ template <class StateType,
           class GlmType,
           class ExitCondType,
           class UpdateLossNullType,
-          class UpdateCoefficientsType,
           class TidyType,
           class CUIType>
 inline void solve(
@@ -405,7 +413,6 @@ inline void solve(
     bool display,
     ExitCondType exit_cond_f,
     UpdateLossNullType update_loss_null_f,
-    UpdateCoefficientsType update_coefficients_f,
     TidyType tidy_f,
     CUIType check_user_interrupt
 )
@@ -461,7 +468,6 @@ inline void solve(
             glm,
             buffer_pack,
             lmda,
-            update_coefficients_f,
             check_user_interrupt
         );
     };
@@ -482,14 +488,12 @@ inline void solve(
 template <class StateType,
           class GlmType,
           class ExitCondType,
-          class UpdateCoefficientsType,
           class CUIType=util::no_op>
 inline void solve(
     StateType&& state,
     GlmType&& glm,
     bool display,
     ExitCondType exit_cond_f,
-    UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
 {
@@ -501,7 +505,6 @@ inline void solve(
         [](auto& state, auto& glm, auto& buffer_pack) {
             update_loss_null(state, glm, buffer_pack);
         },
-        update_coefficients_f, 
         [](){},
         check_user_interrupt
     );

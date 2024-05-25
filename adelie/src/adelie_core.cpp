@@ -7,12 +7,17 @@ PYBIND11_MODULE(adelie_core, m) {
 
     py::bind_vector<std::vector<ad::util::rowmat_type<double>>>(m, "VectorMatrix64");
     py::bind_vector<std::vector<ad::util::rowmat_type<float>>>(m, "VectorMatrix32");
+    py::bind_vector<std::vector<ad::constraint::ConstraintBase<double>*>>(m, "VectorConstraintBase64");
+    py::bind_vector<std::vector<ad::constraint::ConstraintBase<float>*>>(m, "VectorConstraintBase32");
 
     auto m_bcd = m.def_submodule("bcd", "BCD submodule.");
     register_bcd(m_bcd);
 
     auto m_configs = m.def_submodule("configs", "Configurations submodule.");
     register_configs(m_configs);
+
+    auto m_constraint = m.def_submodule("constraint", "Constraint submodule.");
+    register_constraint(m_constraint);
 
     auto m_glm = m.def_submodule("glm", "GLM submodule.");
     register_glm(m_glm);

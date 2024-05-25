@@ -199,6 +199,7 @@ Internal
     
 
     adelie_core.configs.Configs
+    adelie_core.constraint.ConstraintBase64
     adelie_core.glm.GlmBase64
     adelie_core.glm.GlmBinomialLogit64
     adelie_core.glm.GlmBinomialProbit64

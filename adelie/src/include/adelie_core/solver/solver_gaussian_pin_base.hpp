@@ -142,19 +142,19 @@ void update_rsq(
 template <class LType, class VType, class ValueType, 
           class XType, class BufferType>
 ADELIE_CORE_STRONG_INLINE
-void update_coefficients(
+void update_coordinate(
+    XType& x,
     const LType& L,
     const VType& v,
     ValueType l1,
     ValueType l2,
     ValueType tol,
     size_t max_iters,
-    XType& x,
-    size_t& iters,
     BufferType& buffer1,
     BufferType& buffer2
 )
 {
+    size_t iters;
     bcd::unconstrained::newton_abs_solver(
         L, v, l1, l2, tol, max_iters,
         x, iters, buffer1, buffer2
@@ -169,18 +169,17 @@ void update_coefficients(
 
 template <class ValueType>
 ADELIE_CORE_STRONG_INLINE
-void update_coefficient(
+void update_coordinate(
     ValueType& coeff,
     ValueType x_var,
+    ValueType grad,
     ValueType l1,
-    ValueType l2,
-    ValueType penalty,
-    ValueType grad
+    ValueType l2
 )
 {
-    const auto denom = x_var + l2 * penalty;
+    const auto denom = x_var + l2;
     const auto u = grad + coeff * x_var;
-    const auto v = std::abs(u) - l1 * penalty;
+    const auto v = std::abs(u) - l1;
     coeff = (v > 0.0) ? std::copysign(v,u)/denom : 0;
 }
 

@@ -5,15 +5,19 @@
 #include <pybind11/stl_bind.h>
 #include <pybind11/functional.h>
 #include <pybind11/iostream.h>
+#include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/util/types.hpp>
 
 PYBIND11_MAKE_OPAQUE(std::vector<adelie_core::util::rowmat_type<double>>);
 PYBIND11_MAKE_OPAQUE(std::vector<adelie_core::util::rowmat_type<float>>);
+PYBIND11_MAKE_OPAQUE(std::vector<adelie_core::constraint::ConstraintBase<double>*>);
+PYBIND11_MAKE_OPAQUE(std::vector<adelie_core::constraint::ConstraintBase<float>*>);
 
 namespace py = pybind11;
 
 void register_bcd(py::module_&);
 void register_configs(py::module_&);
+void register_constraint(py::module_&);
 void register_matrix(py::module_&);
 void register_matrix_utils(py::module_&);
 void register_optimization(py::module_&);
