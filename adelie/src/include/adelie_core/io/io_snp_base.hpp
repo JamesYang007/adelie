@@ -105,6 +105,8 @@ public:
         _is_read(false)
     {}
 
+    bool_t is_read() const { return _is_read; }
+
     bool_t endian() const { 
         if (!_is_read) throw_no_read();
         return reinterpret_cast<const bool_t&>(_buffer[0]); 

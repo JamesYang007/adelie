@@ -1,4 +1,5 @@
 from . import adelie_core as core
+from . import io
 from .adelie_core.matrix import (
     MatrixNaiveBase64,
     MatrixNaiveBase32,
@@ -247,8 +248,8 @@ def block_diag(
 
     class _block_diag(core_base, py_base):
         def __init__(self):
-            self.mats = mats
-            core_base.__init__(self, self.mats, n_threads)
+            self._mats = mats
+            core_base.__init__(self, self._mats, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
     return _block_diag()
@@ -343,8 +344,8 @@ def concatenate(
 
     class _concatenate(core_base, py_base):
         def __init__(self):
-            self.mats = mats
-            core_base.__init__(self, self.mats)
+            self._mats = mats
+            core_base.__init__(self, self._mats)
             py_base.__init__(self, n_threads=n_threads)
 
     return _concatenate()
@@ -436,8 +437,8 @@ def dense(
 
     class _dense(core_base, py_base):
         def __init__(self):
-            self.mat = np.array(mat, copy=copy)
-            core_base.__init__(self, self.mat, n_threads)
+            self._mat = np.array(mat, copy=copy)
+            core_base.__init__(self, self._mat, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
     return _dense()
@@ -627,10 +628,10 @@ def interaction(
 
     class _interaction(core_base, py_base):
         def __init__(self):
-            self.mat = np.array(mat, copy=copy)
-            self.pairs = pairs
-            self.levels = np.array(levels, copy=True, dtype=np.int32)
-            core_base.__init__(self, self.mat, self.pairs, self.levels, n_threads)
+            self._mat = np.array(mat, copy=copy)
+            self._pairs = pairs
+            self._levels = np.array(levels, copy=True, dtype=np.int32)
+            core_base.__init__(self, self._mat, self._pairs, self._levels, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         
     return _interaction()
@@ -708,8 +709,8 @@ def kronecker_eye(
     py_base = PyMatrixNaiveBase
     class _kronecker_eye(core_base, py_base):
         def __init__(self):
-            self.mat = mat
-            core_base.__init__(self, self.mat, K, n_threads)
+            self._mat = mat
+            core_base.__init__(self, self._mat, K, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
     return _kronecker_eye()
@@ -820,9 +821,9 @@ def one_hot(
 
     class _one_hot(core_base, py_base):
         def __init__(self):
-            self.mat = np.array(mat, copy=copy)
-            self.levels = np.array(levels, copy=True, dtype=np.int32)
-            core_base.__init__(self, self.mat, self.levels, n_threads)
+            self._mat = np.array(mat, copy=copy)
+            self._levels = np.array(levels, copy=True, dtype=np.int32)
+            core_base.__init__(self, self._mat, self._levels, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         
     return _one_hot()
@@ -891,37 +892,32 @@ def lazy_cov(
 
     class _lazy_cov(core_base, py_base):
         def __init__(self):
-            self.mat = np.array(mat, copy=copy)
-            core_base.__init__(self, self.mat, n_threads)
+            self._mat = np.array(mat, copy=copy)
+            core_base.__init__(self, self._mat, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
     return _lazy_cov()
 
 
 def snp_phased_ancestry(
-    filename: str,
+    io: io.snp_phased_ancestry,
     *,
-    read_mode: str ="file",
     n_threads: int =1,
     dtype: Union[np.float32, np.float64] =np.float64,
 ):
     """Creates a SNP phased, ancestry matrix.
 
-    The SNP phased, ancestry matrix is represented by a file with name ``filename``.
-    It must be in the same format as described in ``adelie.io.snp_phased_ancestry``.
-    Typically, the user first writes into the file ``filename`` 
-    using ``adelie.io.snp_phased_ancestry`` and then loads the matrix using this function.
+    The SNP phased, ancestry matrix is a wrapper around 
+    the corresponding IO handler ``adelie.io.snp_phased_ancestry``
+    exposing some matrix operations.
 
     .. note::
         This matrix only works for naive method!
     
     Parameters
     ----------
-    filename : str
-        File name that contains the SNP phased, ancestry matrix in ``.snpdat`` format.
-    read_mode : str, optional
-        See the corresponding parameter in ``adelie.io.snp_phased_ancestry``.
-        Default is ``"file"``.
+    io : adelie.io.snp_phased_ancestry
+        IO handler for SNP phased, ancestry data.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -946,38 +942,37 @@ def snp_phased_ancestry(
     core_base = dispatcher[dtype]
     py_base = PyMatrixNaiveBase
 
+    if not io.is_read:
+        io.read() 
+
     class _snp_phased_ancestry(core_base, py_base):
         def __init__(self):
-            core_base.__init__(self, filename, read_mode, n_threads)
+            self._io = io
+            core_base.__init__(self, self._io, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
     return _snp_phased_ancestry()
 
 
 def snp_unphased(
-    filename: str,
+    io: io.snp_unphased,
     *,
-    read_mode: str ="file",
     n_threads: int =1,
     dtype: Union[np.float32, np.float64] =np.float64,
 ):
     """Creates a SNP unphased matrix.
 
-    The SNP unphased matrix is represented by a file with name ``filename``.
-    It must be in the same format as described in ``adelie.io.snp_unphased``.
-    Typically, the user first writes into the file ``filename`` 
-    using ``adelie.io.snp_unphased`` and then loads the matrix using this function.
+    The SNP unphased matrix is a wrapper around    
+    the corresponding IO handler ``adelie.io.snp_unphased``
+    exposing some matrix operations.
 
     .. note::
         This matrix only works for naive method!
     
     Parameters
     ----------
-    filename : str
-        File name that contains unphased calldata in ``.snpdat`` format.
-    read_mode : str, optional
-        See the corresponding parameter in ``adelie.io.snp_unphased``.
-        Default is ``"file"``.
+    io : adelie.io.snp_unphased
+        IO handler for SNP unphased data.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -1002,9 +997,13 @@ def snp_unphased(
     core_base = dispatcher[dtype]
     py_base = PyMatrixNaiveBase
 
+    if not io.is_read:
+        io.read()
+
     class _snp_unphased(core_base, py_base):
         def __init__(self):
-            core_base.__init__(self, filename, read_mode, n_threads)
+            self._io = io
+            core_base.__init__(self, self._io, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
     return _snp_unphased()
@@ -1088,15 +1087,15 @@ def sparse(
 
     class _sparse(core_base, py_base):
         def __init__(self):
-            self.mat = mat
+            self._mat = mat
             core_base.__init__(
                 self, 
-                self.mat.shape[0], 
-                self.mat.shape[1], 
-                self.mat.nnz,
-                self.mat.indptr,
-                self.mat.indices,
-                self.mat.data,
+                self._mat.shape[0], 
+                self._mat.shape[1], 
+                self._mat.nnz,
+                self._mat.indptr,
+                self._mat.indices,
+                self._mat.data,
                 n_threads,
             )
             py_base.__init__(self, n_threads=n_threads)
@@ -1222,10 +1221,10 @@ def standardize(
 
     class _standardize(core_base, py_base):
         def __init__(self):
-            self.mat = mat
-            self.centers = np.array(centers, copy=True, dtype=dtype)
-            self.scales = np.array(scales, copy=True, dtype=dtype)
-            core_base.__init__(self, mat, self.centers, self.scales, n_threads)
+            self._mat = mat
+            self._centers = np.array(centers, copy=True, dtype=dtype)
+            self._scales = np.array(scales, copy=True, dtype=dtype)
+            core_base.__init__(self, self._mat, self._centers, self._scales, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         
     return _standardize()
@@ -1318,9 +1317,9 @@ def subset(
 
     class _subset(core_base, py_base):
         def __init__(self):
-            self.mat = mat
-            self.indices = np.array(indices, copy=True, dtype=np.int32)
-            core_base.__init__(self, mat, self.indices, n_threads)
+            self._mat = mat
+            self._indices = np.array(indices, copy=True, dtype=np.int32)
+            core_base.__init__(self, self._mat, self._indices, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         
     return _subset()

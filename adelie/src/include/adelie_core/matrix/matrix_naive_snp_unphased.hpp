@@ -27,21 +27,11 @@ public:
     
 protected:
     static constexpr value_t _max = std::numeric_limits<value_t>::max();
-    const io_t _io;             // IO handler
+    const io_t& _io;             // IO handler
     const size_t _n_threads;    // number of threads
     vec_index_t _ibuff;
     vec_value_t _vbuff;
     vec_value_t _buff;
-
-    static auto init_io(
-        const string_t& filename,
-        const string_t& read_mode
-    )
-    {
-        io_t io(filename, read_mode);
-        io.read();
-        return io;
-    }
 
     ADELIE_CORE_STRONG_INLINE
     value_t _cmul(
@@ -70,11 +60,10 @@ protected:
 
 public:
     explicit MatrixNaiveSNPUnphased(
-        const string_t& filename,
-        const string_t& read_mode,
+        const io_t& io,
         size_t n_threads
     ): 
-        _io(init_io(filename, read_mode)),
+        _io(io),
         _n_threads(n_threads),
         _ibuff(_io.rows()),
         _vbuff(_io.rows()),

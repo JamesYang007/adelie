@@ -651,7 +651,7 @@ def test_solve_gaussian_snp_unphased():
         impute = handler.impute
         Xs = [
             ad.matrix.snp_unphased(
-                filename=filename,
+                io=handler,
                 dtype=np.float64,
                 n_threads=n_threads,
             )
@@ -721,7 +721,7 @@ def test_solve_gaussian_snp_phased_ancestry():
         handler.write(test_data["X"], test_data["ancestries"], A, n_threads)
         Xs = [
             ad.matrix.snp_phased_ancestry(
-                filename=filename,
+                io=handler,
                 dtype=np.float64,
                 n_threads=n_threads,
             )
