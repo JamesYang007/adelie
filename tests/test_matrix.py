@@ -371,7 +371,7 @@ def test_naive_interaction_dense(n, d, dtype, order, seed=0):
         else:
             intr_map[j] = np.random.choice(d, size=d//2, replace=False)
     cX = mod.interaction(X, intr_map, levels=levels, n_threads=2)
-    X = _create_dense(X, cX.pairs, levels)
+    X = _create_dense(X, cX._pairs, levels)
     run_naive(X, cX, dtype)
 
     ad.configs.set_configs("min_bytes", min_bytes)
