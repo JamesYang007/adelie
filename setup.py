@@ -59,23 +59,23 @@ if (system_name == "Darwin"):
     omp_include = os.path.join(omp_prefix, "include")
     omp_lib = os.path.join(omp_prefix, "lib")
 
-    # copy libomp.dylib to lib
-    adelie_lib = "adelie/lib"
-    pathlib.Path(adelie_lib).mkdir(parents=False, exist_ok=True)
-    omp_name = "libomp.dylib"
-    source_path = os.path.join(omp_lib, omp_name)
-    target_path = os.path.join(adelie_lib, omp_name)
-    shutil.copyfile(source_path, target_path)
+    ## copy libomp.dylib to lib
+    #adelie_lib = "adelie/lib"
+    #pathlib.Path(adelie_lib).mkdir(parents=False, exist_ok=True)
+    #omp_name = "libomp.dylib"
+    #source_path = os.path.join(omp_lib, omp_name)
+    #target_path = os.path.join(adelie_lib, omp_name)
+    #shutil.copyfile(source_path, target_path)
 
-    # change rpath of libomp.dylib
-    run_cmd(
-        "install_name_tool -id "
-        f"@rpath/lib/{omp_name} "
-        f"{adelie_lib}/{omp_name}"
-    )
-    # as of Big Sur, we must codesign after the change.
-    # https://stackoverflow.com/questions/71744856/install-name-tool-errors-on-arm64
-    run_cmd(f"codesign --force -s - {adelie_lib}/{omp_name}")
+    ## change rpath of libomp.dylib
+    #run_cmd(
+    #    "install_name_tool -id "
+    #    f"@rpath/lib/{omp_name} "
+    #    f"{adelie_lib}/{omp_name}"
+    #)
+    ## as of Big Sur, we must codesign after the change.
+    ## https://stackoverflow.com/questions/71744856/install-name-tool-errors-on-arm64
+    #run_cmd(f"codesign --force -s - {adelie_lib}/{omp_name}")
 
     # augment arguments
     extra_compile_args += [
@@ -83,8 +83,9 @@ if (system_name == "Darwin"):
         "-Xclang",
         "-fopenmp",
     ]
-    extra_link_args += [f'-L{adelie_lib}']
-    runtime_library_dirs = ["@loader_path"]
+    #extra_link_args += [f'-L{adelie_lib}']
+    #runtime_library_dirs = ["@loader_path"]
+    extra_link_args += [f"-L{omp_lib}"]
     libraries = ['omp']
     
 if (system_name == "Linux"):
@@ -126,7 +127,7 @@ setup(
             "src/**/*.hpp", 
             "src/third_party/**/*",
             "adelie_core.cpython*",
-            "lib/*.dylib",
+            #"lib/*.dylib",
         ],
     },
     ext_modules=ext_modules,
