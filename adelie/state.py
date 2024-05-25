@@ -1580,16 +1580,19 @@ class gaussian_naive_base(base):
             self.group_sizes[self.screen_set],
         ):
             lmda = 1e35 if np.isinf(self.lmda) else self.lmda
-            lagr = 0
+            constraint_grad = 0
             if not (self.constraints[i] is None):
                 ds = self.constraints[i].dual_size
-                lagr = np.empty(ds)
-                self.constraints[i].update_lagrangian(
+                constraint_grad = np.empty(ds)
+                self.constraints[i].gradient(
                     self.screen_beta[b:b+gs],
                     self.screen_dual[db:db+ds],
-                    lagr,
+                    constraint_grad,
                 )
-            grad_corr[g:g+gs] -= lmda * (1-self.alpha) * self.penalty[i] * self.screen_beta[b:b+gs] + lagr
+            grad_corr[g:g+gs] -= (
+                lmda * (1-self.alpha) * self.penalty[i] * self.screen_beta[b:b+gs] + 
+                constraint_grad
+            )
         abs_grad = np.array([
             np.linalg.norm(grad_corr[g:g+gs])
             for g, gs in zip(self.groups, self.group_sizes)

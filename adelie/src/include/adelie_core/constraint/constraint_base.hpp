@@ -11,7 +11,7 @@ template <class ValueType>
 class ConstraintBase
 {
 protected:
-    static void check_update_coordinate(
+    static void check_solve(
         int x, int mu, int q, int l, int m, int d
     ) {
         if (
@@ -22,15 +22,15 @@ protected:
         ) {
             throw util::adelie_core_error(
                 util::format(
-                    "update_coordinate() is given inconsistent inputs! "
-                    "Invoked update_coordinate(x=%d, mu=%d, q=%d, l=%d, m=%d, d=%d)",
+                    "solve() is given inconsistent inputs! "
+                    "Invoked solve(x=%d, mu=%d, q=%d, l=%d, m=%d, d=%d)",
                     x, mu, q, l, m, d
                 )
             );
         }
     }
 
-    static void check_update_lagrangian(
+    static void check_gradient(
         int x, int mu, int o, int m, int d
     ) {
         if (
@@ -40,8 +40,8 @@ protected:
         ) {
             throw util::adelie_core_error(
                 util::format(
-                    "update_lagrangian() is given inconsistent inputs! "
-                    "Invoked update_lagrangian(x=%d, mu=%d, o=%d, m=%d, d=%d)",
+                    "gradient() is given inconsistent inputs! "
+                    "Invoked gradient(x=%d, mu=%d, o=%d, m=%d, d=%d)",
                     x, mu, o, m, d
                 )
             );
@@ -54,7 +54,7 @@ public:
 
     virtual ~ConstraintBase() {}
 
-    virtual void update_coordinate(
+    virtual void solve(
         Eigen::Ref<vec_value_t> x,
         Eigen::Ref<vec_value_t> mu,
         const Eigen::Ref<const vec_value_t>& quad,
@@ -63,7 +63,7 @@ public:
         value_t l2
     ) =0;
 
-    virtual void update_lagrangian(
+    virtual void gradient(
         const Eigen::Ref<const vec_value_t>& x,
         const Eigen::Ref<const vec_value_t>& mu,
         Eigen::Ref<vec_value_t> out

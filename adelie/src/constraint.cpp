@@ -13,7 +13,7 @@ public:
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
 
-    void update_coordinate(
+    void solve(
         Eigen::Ref<vec_value_t> x,
         Eigen::Ref<vec_value_t> mu,
         const Eigen::Ref<const vec_value_t>& quad,
@@ -25,12 +25,12 @@ public:
         PYBIND11_OVERRIDE_PURE(
             void,
             base_t,
-            update_coordinate,
+            solve,
             x, mu, quad, linear, l1, l2
         );
     }
 
-    void update_lagrangian(
+    void gradient(
         const Eigen::Ref<const vec_value_t>& x,
         const Eigen::Ref<const vec_value_t>& mu,
         Eigen::Ref<vec_value_t> out
@@ -39,7 +39,7 @@ public:
         PYBIND11_OVERRIDE_PURE(
             void,
             base_t,
-            update_lagrangian,
+            gradient,
             x, mu, out
         );
     }
@@ -74,7 +74,7 @@ void constraint_base(py::module_& m, const char* name)
         .def_property_readonly("dual_size", &internal_t::duals, R"delimiter(
         Number of duals.
         )delimiter")
-        .def("update_coordinate", &internal_t::update_coordinate, R"delimiter(
+        .def("solve", &internal_t::solve, R"delimiter(
         Computes the block-coordinate update.
 
         The block-coordinate update is given by solving
@@ -93,11 +93,11 @@ void constraint_base(py::module_& m, const char* name)
         Parameters
         ----------
         x : (d,) np.ndarray 
-            The coordinate :math:`x` to update.
+            The primal :math:`x`.
             The passed-in values may be used as a warm-start for the internal solver.
             The output is stored back in this argument.
         mu : (m,) np.ndarray
-            The dual variable :math:`\mu`.
+            The dual :math:`\mu`.
             The passed-in values may be used as a warm-start for the internal solver.
             The output is stored back in this argument.
         quad : (d,) np.ndarray
@@ -109,14 +109,14 @@ void constraint_base(py::module_& m, const char* name)
         l2 : float
             The second regularization :math:`\lambda_2`.
         )delimiter")
-        .def("update_lagrangian", &internal_t::update_lagrangian, R"delimiter(
-        Computes the Lagrangian update.
+        .def("gradient", &internal_t::gradient, R"delimiter(
+        Computes the gradient of the Lagrangian.
 
-        The Lagrangian update is given by
+        The gradient of the Lagrangian (with respect to the primal) is given by
 
         .. math::
             \begin{align*}
-                \phi'(x)^\top \mu
+                \mu^\top \phi'(x)
             \end{align*}
 
         where :math:`\phi'(x)` is the Jacobian of :math:`\phi` at :math:`x`.
@@ -124,19 +124,19 @@ void constraint_base(py::module_& m, const char* name)
         Parameters
         ----------
         x : (d,) np.ndarray
-            The coordinate :math:`x` at which to evaluate the Lagrangian update.
+            The primal :math:`x` at which to evaluate the gradient.
         mu : (m,) np.ndarray
-            The dual variable :math:`\mu` at which to evaluate the Lagrangian update.
+            The dual :math:`\mu` at which to evaluate the gradient.
         out : (d,) np.ndarray
-            The output vector to store the Lagrangian update.
+            The output vector to store the gradient.
         )delimiter")
         .def("duals", &internal_t::duals, R"delimiter(
-        Number of duals.
+        Number of dual variables.
 
         Returns
         -------
         size : int
-            Number of duals.
+            Number of dual variables.
         )delimiter")
         ;
 }

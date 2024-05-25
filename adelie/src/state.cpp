@@ -877,7 +877,7 @@ void state_base(py::module_& m, const char* name)
         where ``g = groups[i]``,
         ``gs = group_sizes[i]``,
         ``beta`` is the full solution vector represented by ``screen_beta``,
-        and ``correction`` is the output from calling ``constraints[i].update_lagrangian()``.
+        and ``correction`` is the output from calling ``constraints[i].gradient()``.
         )delimiter")
         .def_property_readonly("devs", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<value_t>>(

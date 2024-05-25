@@ -662,7 +662,7 @@ inline void solve(
             ak_view[0] = ak;
             A_kk_view[0] = A_kk;
             gk_view[0] = gk;
-            constraint->update_coordinate(ak_view, mu, A_kk_view, gk_view, l1, l2);
+            constraint->solve(ak_view, mu, A_kk_view, gk_view, l1, l2);
         }
     };
     const auto update_coordinate_g1_f = [&](
@@ -687,7 +687,7 @@ inline void solve(
             const auto sdb = screen_dual_begins[ss_idx];
             const auto ds = constraint->duals(); 
             auto mu = screen_dual.segment(sdb, ds);
-            constraint->update_coordinate(ak, mu, A_kk, gk, l1, l2);
+            constraint->solve(ak, mu, A_kk, gk, l1, l2);
         }
     };
 

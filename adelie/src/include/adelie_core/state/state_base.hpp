@@ -69,7 +69,7 @@ void update_abs_grad(
                 screen_dual.data() + screen_dual_begins[ss_idx],
                 constraint->duals()
             );
-            constraint->update_lagrangian(sbeta, mu, vbuff);
+            constraint->gradient(sbeta, mu, vbuff);
             abs_grad[i] = (common_expr - vbuff).matrix().norm();
         }
     }
