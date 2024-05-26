@@ -46,21 +46,27 @@ runtime_library_dirs = []
 
 system_name = platform.system()
 if (system_name == "Darwin"):
-    # check if OpenMP is installed
-    no_omp_msg = (
-        "OpenMP is not detected. "
-        "MacOS users should install Homebrew and run 'brew install libomp' "
-        "to install OpenMP. "
-    )
-    try:
-        libomp_info = run_cmd("brew info libomp")
-    except:
-        raise RuntimeError(no_omp_msg)
-    if "Not installed" in libomp_info:
-        raise RuntimeError(no_omp_msg)
+    # if user provides OpenMP install prefix (containing lib/ and include/)
+    if "OPENMP_PREFIX" in os.environ and os.environ["OPENMP_PREFIX"] != "":
+        omp_prefix = os.environ["OPENMP_PREFIX"]
+    # otherwise check brew installation
+    else:
+        # check if OpenMP is installed
+        no_omp_msg = (
+            "OpenMP is not detected. "
+            "MacOS users should install Homebrew and run 'brew install libomp' "
+            "to install OpenMP. "
+        )
+        try:
+            libomp_info = run_cmd("brew info libomp")
+        except:
+            raise RuntimeError(no_omp_msg)
+        if "Not installed" in libomp_info:
+            raise RuntimeError(no_omp_msg)
 
-    # grab include and lib directory
-    omp_prefix = run_cmd("brew --prefix libomp")
+        # grab include and lib directory
+        omp_prefix = run_cmd("brew --prefix libomp")
+
     omp_include = os.path.join(omp_prefix, "include")
     omp_lib = os.path.join(omp_prefix, "lib")
 
