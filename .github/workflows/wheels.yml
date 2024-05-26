@@ -27,12 +27,14 @@ jobs:
     - name: Install micromamba
       uses: mamba-org/setup-micromamba@v1
       with:
-        environment-file: environment.yml
+        environment-name: build
         init-shell: bash
         generate-run-shell: true
+        create-args: >-
+          llvm-openmp==17.0.6
     - name: Setup OpenMP prefix
       run: |
-        echo "OPENMP_PREFIX=$MAMBA_ROOT_PREFIX/envs/adelie" >> $GITHUB_ENV
+        echo "OPENMP_PREFIX=$MAMBA_ROOT_PREFIX/envs/build" >> $GITHUB_ENV
       shell: micromamba-shell {0}
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.18.1
