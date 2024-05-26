@@ -5,9 +5,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     # See https://cibuildwheel.pypa.io/en/stable/faq/#macos-library-dependencies-do-not-satisfy-target-macos
     # We need to explicitly set the deployment target to the version of the intended machine.
     if [[ "$CIBW_BUILD" == *-macosx_arm64 ]]; then
-        export MACOSX_DEPLOYMENT_TARGET=13.0
+        export MACOSX_DEPLOYMENT_TARGET=12.0
     else
-        export MACOSX_DEPLOYMENT_TARGET=10.13
+        export MACOSX_DEPLOYMENT_TARGET=10.9
     fi
 
     echo $OPENMP_PREFIX
