@@ -46,8 +46,11 @@ runtime_library_dirs = []
 
 system_name = platform.system()
 if (system_name == "Darwin"):
-    conda_path = run_cmd("conda info --base")
-    conda_env_path = os.path.join(conda_path, "envs/adelie")
+    try:
+        conda_path = run_cmd("conda info --base")
+        conda_env_path = os.path.join(conda_path, "envs/adelie")
+    except:
+        conda_env_path = ""
 
     # if user provides OpenMP install prefix (containing lib/ and include/)
     if "OPENMP_PREFIX" in os.environ and os.environ["OPENMP_PREFIX"] != "":
