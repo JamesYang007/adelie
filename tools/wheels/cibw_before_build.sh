@@ -5,8 +5,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 
     # See https://cibuildwheel.pypa.io/en/stable/faq/#macos-library-dependencies-do-not-satisfy-target-macos
     if [[ "$CIBW_BUILD" == *-macosx_arm64 ]]; then
+        echo "yay"
         export MACOSX_DEPLOYMENT_TARGET=14.0
     else
+        echo "no yay"
         export MACOSX_DEPLOYMENT_TARGET=13
     fi
 fi
