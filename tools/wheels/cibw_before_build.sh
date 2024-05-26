@@ -20,10 +20,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         # Install miniforge
         MINIFORGE_PATH=$HOME/miniforge
         bash ./miniforge.sh -b -p $MINIFORGE_PATH
-        echo "$MINIFORGE_PATH/bin" >> $GITHUB_PATH
-        echo "CONDA_HOME=$MINIFORGE_PATH" >> $GITHUB_ENV
-         
         PATH="$PATH:$MINIFORGE_PATH/bin"
+        CONDA_HOME=$MINIFORGE_PATH
 
         export MACOSX_DEPLOYMENT_TARGET=12.0
         OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/11.1.0/download/osx-arm64/llvm-openmp-11.1.0-hf3c4609_1.tar.bz2"
@@ -36,5 +34,5 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     fi
 
     sudo conda create -n build $OPENMP_URL
-    OPENMP_PREFIX="$CONDA_HOME/envs/build"
+    export OPENMP_PREFIX="$CONDA_HOME/envs/build"
 fi
