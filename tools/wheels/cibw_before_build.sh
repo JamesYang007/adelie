@@ -7,7 +7,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     if [[ "$CIBW_BUILD" == *-macosx_arm64 ]]; then
         export MACOSX_DEPLOYMENT_TARGET=13.0
     else
-        export MACOSX_DEPLOYMENT_TARGET=10.9
+        export MACOSX_DEPLOYMENT_TARGET=10.13
     fi
 
     echo $OPENMP_PREFIX
