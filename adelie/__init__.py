@@ -13,7 +13,7 @@ import os
 # Set thread block time (polling) to be sufficiently large.
 # It is very costly when OMP puts threads to sleep.
 if not ("KMP_BLOCKTIME" in os.environ):
-    os.environ["KMP_BLOCKTIME"] = "1ms"
+    os.environ["KMP_BLOCKTIME"] = "1" # in ms
 if not ("GOMP_SPINCOUNT" in os.environ):
     os.environ["GOMP_SPINCOUNT"] = "1000000"
 
