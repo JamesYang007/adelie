@@ -35,8 +35,13 @@ extra_compile_args += [
     "-DNDEBUG", 
     "-O3",
 ]
+include_dirs = [
+    "adelie/src",
+    "adelie/src/include",
+    "adelie/src/third_party/eigen3",
+]
 libraries = []
-extra_link_args = []
+library_dirs = []
 runtime_library_dirs = []
 
 system_name = platform.system()
@@ -59,55 +64,32 @@ if (system_name == "Darwin"):
     omp_include = os.path.join(omp_prefix, "include")
     omp_lib = os.path.join(omp_prefix, "lib")
 
-    ## copy libomp.dylib to lib
-    #adelie_lib = "adelie/lib"
-    #pathlib.Path(adelie_lib).mkdir(parents=False, exist_ok=True)
-    #omp_name = "libomp.dylib"
-    #source_path = os.path.join(omp_lib, omp_name)
-    #target_path = os.path.join(adelie_lib, omp_name)
-    #shutil.copyfile(source_path, target_path)
-
-    ## change rpath of libomp.dylib
-    #run_cmd(
-    #    "install_name_tool -id "
-    #    f"@rpath/lib/{omp_name} "
-    #    f"{adelie_lib}/{omp_name}"
-    #)
-    ## as of Big Sur, we must codesign after the change.
-    ## https://stackoverflow.com/questions/71744856/install-name-tool-errors-on-arm64
-    #run_cmd(f"codesign --force -s - {adelie_lib}/{omp_name}")
-
     # augment arguments
+    include_dirs += [f"{omp_include}"]
     extra_compile_args += [
-        f"-I{omp_include}",
-        "-Xclang",
+        "-Xpreprocessor",
         "-fopenmp",
     ]
-    #extra_link_args += [f'-L{adelie_lib}']
-    #runtime_library_dirs = ["@loader_path"]
-    extra_link_args += [f"-L{omp_lib}"]
-    libraries = ['omp']
+    runtime_library_dirs += [f"{omp_lib}"]
+    library_dirs += [f"{omp_lib}"]
+    libraries += ['omp']
     
 if (system_name == "Linux"):
     extra_compile_args += [
         "-fopenmp", 
         "-march=native",
     ]
-    libraries = ['gomp']
+    libraries += ['gomp']
 
 ext_modules = [
     Pybind11Extension(
         "adelie.adelie_core",
         sorted(glob("adelie/src/*.cpp")),  # Sort source files for reproducibility
-        include_dirs=[
-            "adelie/src",
-            "adelie/src/include",
-            "adelie/src/third_party/eigen3",
-        ],
+        include_dirs=include_dirs,
         extra_compile_args=extra_compile_args,
-        extra_link_args=extra_link_args,
         runtime_library_dirs=runtime_library_dirs,
         libraries=libraries,
+        library_dirs=library_dirs,
         cxx_std=17,
     ),
 ]
@@ -127,7 +109,6 @@ setup(
             "src/**/*.hpp", 
             "src/third_party/**/*",
             "adelie_core.cpython*",
-            #"lib/*.dylib",
         ],
     },
     ext_modules=ext_modules,
