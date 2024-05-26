@@ -24,6 +24,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v3
+    - name: Install conda
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        environment-name: build
+        init-shell: bash
+        generate-run-shell: true
+        create-args: >-
+          llvm-openmp==11.1.0
+    - name: Setup OpenMP prefix
+      run: |
+        echo "OPENMP_PREFIX=$(conda info --base)/envs/build" >> $GITHUB_ENV
+      shell: micromamba-shell {0}
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.18.1
       env:
