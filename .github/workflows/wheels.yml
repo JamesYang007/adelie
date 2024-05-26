@@ -31,7 +31,6 @@ jobs:
         init-shell: bash
         generate-run-shell: true
         create-args: >-
-          # See https://github.com/scikit-learn/scikit-learn/blob/main/build_tools/wheels/build_wheels.sh#L18
           llvm-openmp==11.1.0
     - name: Setup OpenMP prefix
       run: |
