@@ -9,6 +9,4 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     else
         export MACOSX_DEPLOYMENT_TARGET=10.9
     fi
-
-    echo $OPENMP_PREFIX
 fi

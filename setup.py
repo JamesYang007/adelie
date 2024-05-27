@@ -38,35 +38,47 @@ extra_compile_args += [
 include_dirs = [
     "adelie/src",
     "adelie/src/include",
-    "adelie/src/third_party/eigen3",
 ]
 libraries = []
 library_dirs = []
 runtime_library_dirs = []
 
-system_name = platform.system()
-if (system_name == "Darwin"):
-    try:
-        conda_path = run_cmd("conda info --base")
-        conda_env_path = os.path.join(conda_path, "envs/adelie")
-    except:
-        conda_env_path = ""
+# check if conda environment activated
+if "CONDA_PREFIX" in os.environ:
+    conda_prefix = os.environ["CONDA_PREFIX"]
+# check if micromamba environment activated (CI)
+elif "MAMBA_ROOT_PREFIX" in os.environ:
+    conda_prefix = os.path.join(os.environ["MAMBA_ROOT_PREFIX"], "envs/adelie")
+else:
+    conda_prefix = None
 
-    # if user provides OpenMP install prefix (containing lib/ and include/)
+# add include and include/eigen3
+if not (conda_prefix is None):
+    conda_include_path = os.path.join(conda_prefix, "include")
+    eigen_include_path = os.path.join(conda_include_path, "eigen3")
+    include_dirs += [
+        conda_include_path,
+        eigen_include_path,
+    ]
+
+system_name = platform.system()
+if system_name == "Darwin":
+    # if user provides OpenMP install prefix (containing include/ and lib/)
     if "OPENMP_PREFIX" in os.environ and os.environ["OPENMP_PREFIX"] != "":
         omp_prefix = os.environ["OPENMP_PREFIX"]
 
     # else if conda environment is activated
-    elif os.path.isdir(conda_env_path):
-        omp_prefix = conda_env_path
+    elif not (conda_prefix is None):
+        omp_prefix = conda_prefix
     
     # otherwise check brew installation
     else:
         # check if OpenMP is installed
         no_omp_msg = (
             "OpenMP is not detected. "
-            "MacOS users should install Homebrew and run 'brew install libomp' "
-            "to install OpenMP. "
+            "MacOS users should either provide the OpenMP path via the environment variable OPENMP_PREFIX, "
+            "create a conda environment containing llvm-openmp, "
+            "or install Homebrew and run 'brew install libomp'. "
         )
         try:
             libomp_info = run_cmd("brew info libomp")
@@ -82,16 +94,16 @@ if (system_name == "Darwin"):
     omp_lib = os.path.join(omp_prefix, "lib")
 
     # augment arguments
-    include_dirs += [f"{omp_include}"]
+    include_dirs += [omp_include]
     extra_compile_args += [
         "-Xpreprocessor",
         "-fopenmp",
     ]
-    runtime_library_dirs += [f"{omp_lib}"]
-    library_dirs += [f"{omp_lib}"]
+    runtime_library_dirs += [omp_lib]
+    library_dirs += [omp_lib]
     libraries += ['omp']
     
-if (system_name == "Linux"):
+elif system_name == "Linux":
     extra_compile_args += [
         "-fopenmp", 
         "-march=native",
@@ -124,7 +136,7 @@ setup(
     package_data={
         "adelie": [
             "src/**/*.hpp", 
-            "src/third_party/**/*",
+            "src/**/*.cpp", 
             "adelie_core.cpython*",
         ],
     },
