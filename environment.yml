@@ -5,5 +5,7 @@ dependencies:
   - python
   - pip
   - ffmpeg
+  - llvm-openmp==11.1.0
+  - eigen==3.4.0
   - pip:
     - poetry

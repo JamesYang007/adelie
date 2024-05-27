@@ -24,8 +24,20 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v3
+    - name: Install micromamba
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        environment-name: build
+        init-shell: bash
+        generate-run-shell: true
+        create-args: >-
+          llvm-openmp==11.1.0
+    - name: Setup OpenMP prefix
+      run: |
+        echo "OPENMP_PREFIX=$MAMBA_ROOT_PREFIX/envs/build" >> $GITHUB_ENV
+      shell: micromamba-shell {0}
     - name: Build wheels
-      uses: pypa/cibuildwheel@v2.17.0
+      uses: pypa/cibuildwheel@v2.18.1
       env:
         CIBW_BEFORE_BUILD: bash tools/wheels/cibw_before_build.sh
         CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}

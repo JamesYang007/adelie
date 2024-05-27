@@ -17,6 +17,9 @@ void io_snp_base(py::module_& m)
             py::arg("filename"),
             py::arg("read_mode")
         )
+        .def_property_readonly("is_read", &io_t::is_read, R"delimiter(
+        ``True`` if the IO handler has read the file content and otherwise ``False``.
+        )delimiter")
         .def_property_readonly("endian", [](const io_t& io) -> string_t { 
             return io.endian() ? "big" : "little";
         }, R"delimiter(

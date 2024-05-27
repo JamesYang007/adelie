@@ -35,78 +35,90 @@ extra_compile_args += [
     "-DNDEBUG", 
     "-O3",
 ]
+include_dirs = [
+    "adelie/src",
+    "adelie/src/include",
+]
 libraries = []
-extra_link_args = []
+library_dirs = []
 runtime_library_dirs = []
 
-system_name = platform.system()
-if (system_name == "Darwin"):
-    # check if OpenMP is installed
-    no_omp_msg = (
-        "OpenMP is not detected. "
-        "MacOS users should install Homebrew and run 'brew install libomp' "
-        "to install OpenMP. "
-    )
-    try:
-        libomp_info = run_cmd("brew info libomp")
-    except:
-        raise RuntimeError(no_omp_msg)
-    if "Not installed" in libomp_info:
-        raise RuntimeError(no_omp_msg)
+# check if conda environment activated
+if "CONDA_PREFIX" in os.environ:
+    conda_prefix = os.environ["CONDA_PREFIX"]
+# check if micromamba environment activated (CI)
+elif "MAMBA_ROOT_PREFIX" in os.environ:
+    conda_prefix = os.path.join(os.environ["MAMBA_ROOT_PREFIX"], "envs/adelie")
+else:
+    conda_prefix = None
 
-    # grab include and lib directory
-    omp_prefix = run_cmd("brew --prefix libomp")
+# add include and include/eigen3
+if not (conda_prefix is None):
+    conda_include_path = os.path.join(conda_prefix, "include")
+    eigen_include_path = os.path.join(conda_include_path, "eigen3")
+    include_dirs += [
+        conda_include_path,
+        eigen_include_path,
+    ]
+
+system_name = platform.system()
+if system_name == "Darwin":
+    # if user provides OpenMP install prefix (containing include/ and lib/)
+    if "OPENMP_PREFIX" in os.environ and os.environ["OPENMP_PREFIX"] != "":
+        omp_prefix = os.environ["OPENMP_PREFIX"]
+
+    # else if conda environment is activated
+    elif not (conda_prefix is None):
+        omp_prefix = conda_prefix
+    
+    # otherwise check brew installation
+    else:
+        # check if OpenMP is installed
+        no_omp_msg = (
+            "OpenMP is not detected. "
+            "MacOS users should either provide the OpenMP path via the environment variable OPENMP_PREFIX, "
+            "create a conda environment containing llvm-openmp, "
+            "or install Homebrew and run 'brew install libomp'. "
+        )
+        try:
+            libomp_info = run_cmd("brew info libomp")
+        except:
+            raise RuntimeError(no_omp_msg)
+        if "Not installed" in libomp_info:
+            raise RuntimeError(no_omp_msg)
+
+        # grab include and lib directory
+        omp_prefix = run_cmd("brew --prefix libomp")
+
     omp_include = os.path.join(omp_prefix, "include")
     omp_lib = os.path.join(omp_prefix, "lib")
 
-    # copy libomp.dylib to lib
-    adelie_lib = "adelie/lib"
-    pathlib.Path(adelie_lib).mkdir(parents=False, exist_ok=True)
-    omp_name = "libomp.dylib"
-    source_path = os.path.join(omp_lib, omp_name)
-    target_path = os.path.join(adelie_lib, omp_name)
-    shutil.copyfile(source_path, target_path)
-
-    # change rpath of libomp.dylib
-    run_cmd(
-        "install_name_tool -id "
-        f"@rpath/lib/{omp_name} "
-        f"{adelie_lib}/{omp_name}"
-    )
-    # as of Big Sur, we must codesign after the change.
-    # https://stackoverflow.com/questions/71744856/install-name-tool-errors-on-arm64
-    run_cmd(f"codesign --force -s - {adelie_lib}/{omp_name}")
-
     # augment arguments
+    include_dirs += [omp_include]
     extra_compile_args += [
-        f"-I{omp_include}",
-        "-Xclang",
+        "-Xpreprocessor",
         "-fopenmp",
     ]
-    extra_link_args += [f'-L{adelie_lib}']
-    runtime_library_dirs = ["@loader_path"]
-    libraries = ['omp']
+    runtime_library_dirs += [omp_lib]
+    library_dirs += [omp_lib]
+    libraries += ['omp']
     
-if (system_name == "Linux"):
+elif system_name == "Linux":
     extra_compile_args += [
         "-fopenmp", 
         "-march=native",
     ]
-    libraries = ['gomp']
+    libraries += ['gomp']
 
 ext_modules = [
     Pybind11Extension(
         "adelie.adelie_core",
         sorted(glob("adelie/src/*.cpp")),  # Sort source files for reproducibility
-        include_dirs=[
-            "adelie/src",
-            "adelie/src/include",
-            "adelie/src/third_party/eigen3",
-        ],
+        include_dirs=include_dirs,
         extra_compile_args=extra_compile_args,
-        extra_link_args=extra_link_args,
         runtime_library_dirs=runtime_library_dirs,
         libraries=libraries,
+        library_dirs=library_dirs,
         cxx_std=17,
     ),
 ]
@@ -124,9 +136,8 @@ setup(
     package_data={
         "adelie": [
             "src/**/*.hpp", 
-            "src/third_party/**/*",
+            "src/**/*.cpp", 
             "adelie_core.cpython*",
-            "lib/*.dylib",
         ],
     },
     ext_modules=ext_modules,

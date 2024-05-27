@@ -378,7 +378,7 @@ def test_naive_interaction_dense():
             else:
                 intr_map[j] = np.random.choice(d, size=d//2, replace=False)
         cX = mod.interaction(X, intr_map, levels=levels, n_threads=2)
-        X = _create_dense(X, cX.pairs, levels)
+        X = _create_dense(X, cX._pairs, levels)
         run_naive(X, cX, dtype)
 
     min_bytes = ad.configs.Configs.min_bytes
@@ -476,11 +476,10 @@ def test_naive_snp_unphased():
         np.random.seed(seed)
         data = ad.data.snp_unphased(n, p, seed=seed)
         filename = "/tmp/test_snp_unphased.snpdat"
-        handler = ad.io.snp_unphased(filename)
+        handler = ad.io.snp_unphased(filename, read_mode)
         handler.write(data["X"], impute_method="mean")
         cX = mod.snp_unphased(
-            filename=filename,
-            read_mode=read_mode,
+            io=handler,
             dtype=dtype,
             n_threads=7,
         )
@@ -526,11 +525,10 @@ def test_naive_snp_phased_ancestry():
         np.random.seed(seed)
         data = ad.data.snp_phased_ancestry(n, s, A, seed=seed)
         filename = "/tmp/test_snp_phased_ancestry.snpdat"
-        handler = ad.io.snp_phased_ancestry(filename)
+        handler = ad.io.snp_phased_ancestry(filename, read_mode)
         handler.write(data["X"], data["ancestries"], A)
         cX = mod.snp_phased_ancestry(
-            filename=filename,
-            read_mode=read_mode,
+            io=handler,
             dtype=dtype,
             n_threads=2,
         )
@@ -587,16 +585,16 @@ def test_naive_standardize():
         cX = mod.standardize(dX)
         means = np.mean(X, axis=0)
         scales = np.std(X, axis=0)
-        assert np.allclose(cX.centers, means)
-        assert np.allclose(cX.scales, scales)
+        assert np.allclose(cX._centers, means)
+        assert np.allclose(cX._scales, scales)
 
         centers = np.random.normal(0, 1, p)
         cX = mod.standardize(dX, centers)
         scales = np.sqrt(
             np.sum((X - centers[None]) ** 2, axis=0) / n
         )
-        assert np.allclose(cX.centers, centers)
-        assert np.allclose(cX.scales, scales)
+        assert np.allclose(cX._centers, centers)
+        assert np.allclose(cX._scales, scales)
 
         X = (X - centers[None]) / scales[None]
         run_naive(X, cX, dtype)
