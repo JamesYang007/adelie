@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.io.snp_unphased &#8212; adelie 1.1.32 documentation</title>
+    <title>adelie.io.snp_unphased &#8212; adelie 1.1.34 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=7fa7e451"></script>
+    <script src="../_static/documentation_options.js?v=1056f085"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -122,8 +122,8 @@
     
     
     
-    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.32 documentation - Home"/>
-    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.32 documentation - Home"/>`);</script>
+    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.34 documentation - Home"/>
+    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.34 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -548,16 +548,19 @@ It is the most efficient way to read large files.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.impute" title="adelie.io.snp_unphased.impute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">impute</span></code></a></p></td>
 <td><p>Imputed value for each column.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.nnm" title="adelie.io.snp_unphased.nnm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nnm</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.is_read" title="adelie.io.snp_unphased.is_read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_read</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the IO handler has read the file content and otherwise <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.nnm" title="adelie.io.snp_unphased.nnm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nnm</span></code></a></p></td>
 <td><p>Number of non-missing entries for each column.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.nnz" title="adelie.io.snp_unphased.nnz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nnz</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.nnz" title="adelie.io.snp_unphased.nnz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nnz</span></code></a></p></td>
 <td><p>Number of non-zero entries for each column.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.rows" title="adelie.io.snp_unphased.rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rows</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.rows" title="adelie.io.snp_unphased.rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rows</span></code></a></p></td>
 <td><p>Number of rows.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.snps" title="adelie.io.snp_unphased.snps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snps</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.io.snp_unphased.snps" title="adelie.io.snp_unphased.snps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snps</span></code></a></p></td>
 <td><p>Number of SNPs.</p></td>
 </tr>
 </tbody>
@@ -671,6 +674,12 @@ it is undefined behavior reading a file that was generated on a different machin
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.io.snp_unphased.is_read">
+<span class="sig-name descname"><span class="pre">is_read</span></span><a class="headerlink" href="#adelie.io.snp_unphased.is_read" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the IO handler has read the file content and otherwise <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.io.snp_unphased.nnm">
 <span class="sig-name descname"><span class="pre">nnm</span></span><a class="headerlink" href="#adelie.io.snp_unphased.nnm" title="Link to this definition">#</a></dt>
 <dd><p>Number of non-missing entries for each column.</p>
@@ -755,6 +764,7 @@ with imputation method as <code class="docutils literal notranslate"><span class
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.cols"><code class="docutils literal notranslate"><span class="pre">snp_unphased.cols</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.endian"><code class="docutils literal notranslate"><span class="pre">snp_unphased.endian</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.impute"><code class="docutils literal notranslate"><span class="pre">snp_unphased.impute</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.is_read"><code class="docutils literal notranslate"><span class="pre">snp_unphased.is_read</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.nnm"><code class="docutils literal notranslate"><span class="pre">snp_unphased.nnm</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.nnz"><code class="docutils literal notranslate"><span class="pre">snp_unphased.nnz</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.io.snp_unphased.rows"><code class="docutils literal notranslate"><span class="pre">snp_unphased.rows</span></code></a></li>

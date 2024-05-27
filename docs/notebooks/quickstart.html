@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Quickstart &#8212; adelie 1.1.32 documentation</title>
+    <title>Quickstart &#8212; adelie 1.1.34 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=7fa7e451"></script>
+    <script src="../_static/documentation_options.js?v=1056f085"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -125,8 +125,8 @@
     
     
     
-    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.32 documentation - Home"/>
-    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.32 documentation - Home"/>`);</script>
+    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.34 documentation - Home"/>
+    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.34 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -435,9 +435,9 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/jhyang/sandbox/adelie/adelie/matrix.py:259: UserWarning: Detected matrix to be C-contiguous. Performance may improve with F-contiguous matrix.
+/Users/jhyang/sandbox/adelie/adelie/matrix.py:427: UserWarning: Detected matrix to be C-contiguous. Performance may improve with F-contiguous matrix.
   warnings.warn(
- 46%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 46/100 [00:00:00&lt;00:00:00, 7400.66it/s] [dev:90.6%]
+ 46%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 46/100 [00:00:00&lt;00:00:00, 7341.55it/s] [dev:90.5%]
 </pre></div></div>
 </div>
 <p>Note that the solver finished early in this example. We display a progress bar that indicates the number of <span class="math notranslate nohighlight">\(\lambda\)</span>’s processed, time elapsed, time remaining, and the percent deviance explained. By default, the solver terminates if the latter reaches <span class="math notranslate nohighlight">\(90\%\)</span> as a simple heuristic to avoid overfitting. This threshold can be controlled via the argument <code class="docutils literal notranslate"><span class="pre">adev_tol</span></code>.</p>
@@ -526,7 +526,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 38%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 38/100 [00:00:00&lt;00:00:00, 7810.09it/s] [dev:90.2%]
+ 38%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 38/100 [00:00:00&lt;00:00:00, 6806.88it/s] [dev:90.2%]
 </pre></div></div>
 </div>
 <p>As before, we may inspect the same elements of <code class="docutils literal notranslate"><span class="pre">state</span></code> and diagnostics.</p>
@@ -612,7 +612,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 63%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 63/100 [00:00:00&lt;00:00:00, 776.81it/s] [rdev:0.1%]
+ 63%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 63/100 [00:00:00&lt;00:00:00, 1718.76it/s] [rdev:0.1%]
 </pre></div></div>
 </div>
 <p>Note that the progress bar displays a different measurement of deviance explained. For the covariance method, since it is usually infeasible to compute the loss at the saturated model, we only display the relative change in percent deviance explained (which can be computed without knowledge of the saturated loss):</p>
@@ -670,7 +670,7 @@ document.write(`
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
     <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
-    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">),</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -680,7 +680,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 57%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 57/100 [00:00:00&lt;00:00:00, 5445.34it/s] [dev:90.2%]
+ 57%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 57/100 [00:00:00&lt;00:00:00, 5582.60it/s] [dev:90.2%]
 </pre></div></div>
 </div>
 <p>As before, the user may inspect diagnostic elements of the state in the same fashion.</p>
@@ -720,7 +720,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 61%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 61/100 [00:00:00&lt;00:00:00, 2930.58it/s] [dev:90.2%]
+ 61%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 61/100 [00:00:00&lt;00:00:00, 3082.20it/s] [dev:90.2%]
 </pre></div></div>
 </div>
 <p>Another important difference from the single-response case is that the user must be aware of the shape of the returned coefficients. For multi-response GLMs, the intercept (if <code class="docutils literal notranslate"><span class="pre">intercept=True</span></code>) is added for each response. Hence, <code class="docutils literal notranslate"><span class="pre">state.intercepts</span></code> will be a <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">K)</span></code> matrix. Moreover, <code class="docutils literal notranslate"><span class="pre">state.betas</span></code> will be a <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">pK)</span></code> sparse matrix where every <code class="docutils literal notranslate"><span class="pre">K</span></code> columns correspond to the coefficients associated with a feature and across all responses. So, <code class="docutils literal notranslate"><span class="pre">state.betas[i,</span> <span class="pre">:K]</span></code> are the coefficients
@@ -769,7 +769,7 @@ for the <code class="docutils literal notranslate"><span class="pre">i</span></c
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
     <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
-    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">),</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -779,7 +779,7 @@ for the <code class="docutils literal notranslate"><span class="pre">i</span></c
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 52%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 52/100 [00:00:00&lt;00:00:00, 1163.11it/s] [dev:90.2%]
+ 52%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>     | 52/100 [00:00:00&lt;00:00:00, 952.41it/s] [dev:90.2%]
 </pre></div></div>
 </div>
 </section>
@@ -802,7 +802,7 @@ for the <code class="docutils literal notranslate"><span class="pre">i</span></c
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
     <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
-    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">),</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -812,7 +812,7 @@ for the <code class="docutils literal notranslate"><span class="pre">i</span></c
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 52%|🐧🐧🐧🐧🐧     | 52/100 [00:00:00&lt;00:00:00, 1183.10it/s] [dev:90.2%]
+ 52%|🐧🐧🐧🐧🐧     | 52/100 [00:00:00&lt;00:00:00, 943.59it/s] [dev:90.2%]
 </pre></div></div>
 </div>
 </section>

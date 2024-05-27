@@ -27,6 +27,7 @@
       ~snp_unphased.cols
       ~snp_unphased.endian
       ~snp_unphased.impute
+      ~snp_unphased.is_read
       ~snp_unphased.nnm
       ~snp_unphased.nnz
       ~snp_unphased.rows
@@ -50,6 +51,7 @@
    .. autoattribute:: cols
    .. autoattribute:: endian
    .. autoattribute:: impute
+   .. autoattribute:: is_read
    .. autoattribute:: nnm
    .. autoattribute:: nnz
    .. autoattribute:: rows

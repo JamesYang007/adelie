@@ -27,6 +27,7 @@
       ~snp_phased_ancestry.ancestries
       ~snp_phased_ancestry.cols
       ~snp_phased_ancestry.endian
+      ~snp_phased_ancestry.is_read
       ~snp_phased_ancestry.nnz0
       ~snp_phased_ancestry.nnz1
       ~snp_phased_ancestry.rows
@@ -50,6 +51,7 @@
    .. autoattribute:: ancestries
    .. autoattribute:: cols
    .. autoattribute:: endian
+   .. autoattribute:: is_read
    .. autoattribute:: nnz0
    .. autoattribute:: nnz1
    .. autoattribute:: rows
