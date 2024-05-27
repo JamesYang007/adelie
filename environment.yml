@@ -2,7 +2,7 @@ name: adelie
 channels:
   - conda-forge
 dependencies:
-  - python==3.9
+  - python==3.10
   - pip
   - ffmpeg
   - llvm-openmp==11.1.0
