@@ -27,14 +27,18 @@ ParallelCompile("NPY_NUM_BUILD_JOBS").install()
 
 __version__ = open("VERSION", "r").read().strip()
 
-extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
-extra_compile_args += [
-    "-g0",
-    "-Wall", 
-    "-Wextra", 
-    "-DNDEBUG", 
-    "-O3",
-]
+if os.name == "posix":
+    extra_compile_args = [
+        "-g0",
+        "-Wall", 
+        "-Wextra", 
+        "-DNDEBUG", 
+        "-O3",
+    ]
+else:
+    extra_compile_args = [
+        "/O3",
+    ]
 include_dirs = [
     "adelie/src",
     "adelie/src/include",
@@ -109,6 +113,11 @@ elif system_name == "Linux":
         "-march=native",
     ]
     libraries += ['gomp']
+
+else:
+    extra_compile_args += [
+        "/openmp",
+    ]
 
 ext_modules = [
     Pybind11Extension(
