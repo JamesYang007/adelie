@@ -51,6 +51,7 @@ protected:
 public:
     using value_t = ValueType;
     using vec_value_t = util::rowvec_type<value_t>;
+    using colmat_value_t = util::colmat_type<value_t>;
 
     virtual ~ConstraintBase() {}
 
@@ -60,7 +61,8 @@ public:
         const Eigen::Ref<const vec_value_t>& quad,
         const Eigen::Ref<const vec_value_t>& linear,
         value_t l1,
-        value_t l2
+        value_t l2,
+        const Eigen::Ref<const colmat_value_t>& Q
     ) =0;
 
     virtual void gradient(
@@ -69,7 +71,13 @@ public:
         Eigen::Ref<vec_value_t> out
     ) =0;
 
+    virtual void project(
+        Eigen::Ref<vec_value_t> x
+    )
+    {}
+
     virtual int duals() =0;
+    virtual int primals() =0;
 };
 
 } // namespace constraint

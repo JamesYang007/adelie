@@ -117,14 +117,14 @@ void proximal_newton_general_solver(
             );
             optimization::nnls(
                 state_nnls, 
-                [&]() { return state_nnls.loss <= 0.5 * l1; },
+                [&]() { return state_nnls.loss <= 0.5 * l1 * l1; },
                 [&](auto i) { return b[i] > 0; }
             );
 
-            // If loss is smaller than or close to 0.5 * l1, 
+            // If loss is smaller than or close to 0.5 * l1 ** 2, 
             // then check passed and 0 is a valid primal solution.
             // TODO: generalize this constant.
-            if (state_nnls.loss <= l1 * (0.5+5e-5)) return;
+            if (state_nnls.loss <= l1 * l1 * (0.5+5e-5)) return;
             continue;
         }
 

@@ -830,13 +830,23 @@ void state_base(py::module_& m, const char* name)
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
         )delimiter")
-        .def_readonly("screen_dual_begins", &state_t::screen_dual_begins, R"delimiter(
+        .def_property_readonly("screen_dual_begins", [](const state_t& state) {
+            return Eigen::Map<const vec_index_t>(
+                state.screen_dual_begins.data(),
+                state.screen_dual_begins.size()
+            );
+        }, R"delimiter(
         List of indices that index a corresponding list of dual values for each screen group.
         ``screen_dual_begins[i]`` is the starting dual index corresponding to the ``i`` th screen group.
         From this index, reading ``constraints[screen_set[i]].dual_size`` number of elements
         will grab values corresponding to the full ``i`` th screen group dual block.
         )delimiter")
-        .def_readonly("screen_dual", &state_t::screen_dual, R"delimiter(
+        .def_property_readonly("screen_dual", [](const state_t& state) {
+            return Eigen::Map<const vec_value_t>(
+                state.screen_dual.data(),
+                state.screen_dual.size()
+            );
+        }, R"delimiter(
         Dual vector on the screen set.
         ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
         where

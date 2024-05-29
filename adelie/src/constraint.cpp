@@ -1,5 +1,6 @@
 #include "decl.hpp"
 #include <adelie_core/constraint/constraint_base.hpp>
+#include <adelie_core/constraint/constraint_lower_upper.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -12,6 +13,7 @@ public:
     using base_t::base_t;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
+    using typename base_t::colmat_value_t;
 
     void solve(
         Eigen::Ref<vec_value_t> x,
@@ -19,14 +21,15 @@ public:
         const Eigen::Ref<const vec_value_t>& quad,
         const Eigen::Ref<const vec_value_t>& linear,
         value_t l1,
-        value_t l2
+        value_t l2,
+        const Eigen::Ref<const colmat_value_t>& Q
     ) override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
             base_t,
             solve,
-            x, mu, quad, linear, l1, l2
+            x, mu, quad, linear, l1, l2, Q
         );
     }
 
@@ -44,12 +47,33 @@ public:
         );
     }
 
+    void project(
+        Eigen::Ref<vec_value_t> x
+    ) override
+    {
+        PYBIND11_OVERRIDE(
+            void,
+            base_t,
+            project,
+            x
+        );
+    }
+
     int duals() override
     {
         PYBIND11_OVERRIDE_PURE(
             int,
             base_t,
             duals,
+        );
+    }
+
+    int primals() override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            int,
+            base_t,
+            primals,
         );
     }
 };
@@ -74,6 +98,9 @@ void constraint_base(py::module_& m, const char* name)
         .def_property_readonly("dual_size", &internal_t::duals, R"delimiter(
         Number of duals.
         )delimiter")
+        .def_property_readonly("primal_size", &internal_t::primals, R"delimiter(
+        Number of primals.
+        )delimiter")
         .def("solve", &internal_t::solve, R"delimiter(
         Computes the block-coordinate update.
 
@@ -85,7 +112,7 @@ void constraint_base(py::module_& m, const char* name)
                 \frac{1}{2} x^\top \Sigma x - v^\top x + \lambda_1 \|x\|_2 + \frac{\lambda_2}{2} \|x\|_2^2
                 \\
                 \text{subject to} \quad&
-                \phi(x) \leq 0
+                \phi(Q x) \leq 0
             \end{align*}
 
         where :math:`\phi` defines the current constraint.
@@ -108,7 +135,17 @@ void constraint_base(py::module_& m, const char* name)
             The first regularization :math:`\lambda_1`.
         l2 : float
             The second regularization :math:`\lambda_2`.
-        )delimiter")
+        Q : (d, d) np.ndarray
+            Orthogonal matrix :math:`Q`.
+        )delimiter",
+            py::arg("x").noconvert(),
+            py::arg("mu").noconvert(),
+            py::arg("quad").noconvert(),
+            py::arg("linear").noconvert(),
+            py::arg("l1"),
+            py::arg("l2"),
+            py::arg("Q").noconvert()
+        )
         .def("gradient", &internal_t::gradient, R"delimiter(
         Computes the gradient of the Lagrangian.
 
@@ -129,7 +166,36 @@ void constraint_base(py::module_& m, const char* name)
             The dual :math:`\mu` at which to evaluate the gradient.
         out : (d,) np.ndarray
             The output vector to store the gradient.
-        )delimiter")
+        )delimiter",
+            py::arg("x").noconvert(),
+            py::arg("mu").noconvert(),
+            py::arg("out").noconvert()
+        )
+        .def("project", &internal_t::project, R"delimiter(
+        Computes a projection onto the feasible set.
+
+        The feasible set is defined by :math:`\{x : \phi(x) \leq 0 \}`.
+        A projection can be user-defined, that is, the user may define any
+        norm :math:`\|\cdot\|` such that the function returns a solution to
+
+        .. math::
+            \begin{align*}
+                \mathrm{minimize}_z \quad& \|x - z\| \\
+                \text{subject to} \quad& \phi(z) \leq 0
+            \end{align*}
+
+        This function is only used by the solver after convergence
+        to attempt to bring the coordinates into the feasible set.
+        If not overriden, it will perform a no-op, assuming :math:`x` is already feasible.
+
+        Parameters
+        ----------
+        x : (d,) np.ndarray
+            The primal :math:`x` to project onto the feasible set.
+            The output is stored back in this argument.
+        )delimiter",
+            py::arg("x").noconvert()
+        )
         .def("duals", &internal_t::duals, R"delimiter(
         Number of dual variables.
 
@@ -138,6 +204,42 @@ void constraint_base(py::module_& m, const char* name)
         size : int
             Number of dual variables.
         )delimiter")
+        .def("primals", &internal_t::primals, R"delimiter(
+        Number of primal variables.
+
+        Returns
+        -------
+        size : int
+            Number of primal variables.
+        )delimiter")
+        ;
+}
+
+template <class ValueType>
+void constraint_lower_upper(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintLowerUpper<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using value_t = typename internal_t::value_t;
+    using vec_value_t = typename internal_t::vec_value_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint class for lower and upper constraints."
+        )
+        .def(py::init<
+            value_t,
+            const Eigen::Ref<const vec_value_t>,
+            size_t,
+            value_t,
+            size_t,
+            value_t 
+        >(), 
+            py::arg("sgn"),
+            py::arg("b"),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("nnls_max_iters"),
+            py::arg("nnls_tol")
+        )
         ;
 }
 
@@ -148,4 +250,7 @@ void register_constraint(py::module_& m)
 
     constraint_base<double>(m, "ConstraintBase64");
     constraint_base<float>(m, "ConstraintBase32");
+
+    constraint_lower_upper<double>(m, "ConstraintLowerUpper64");
+    constraint_lower_upper<float>(m, "ConstraintLowerUpper32");
 }

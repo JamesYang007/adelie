@@ -331,7 +331,7 @@ def gaussian_cov(
             screen_dual_size = np.sum([
                 0 if constraints[k] is None else constraints[k].dual_size
                 for k in screen_set
-            ])
+            ], dtype=int)
         screen_dual = np.zeros(screen_dual_size, dtype=dtype)
         active_set_size = screen_set.shape[0]
         active_set = np.empty(G, dtype=int)
@@ -782,7 +782,7 @@ def grpnet(
                 screen_dual_size = np.sum([
                     0 if constraints[k] is None else constraints[k].dual_size
                     for k in screen_set
-                ])
+                ], dtype=int)
             screen_dual = np.zeros(screen_dual_size, dtype=dtype)
             active_set_size = screen_set.shape[0]
             active_set = np.empty(groups.shape[0], dtype=int)
@@ -929,7 +929,7 @@ def grpnet(
                 screen_dual_size = np.sum([
                     0 if constraints[k] is None else constraints[k].dual_size
                     for k in screen_set
-                ])
+                ], dtype=int)
             screen_dual = np.zeros(screen_dual_size, dtype=dtype)
             active_set_size = screen_set.shape[0]
             active_set = np.empty(groups.shape[0], dtype=int)

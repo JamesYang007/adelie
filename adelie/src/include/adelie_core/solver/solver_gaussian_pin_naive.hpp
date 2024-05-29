@@ -77,11 +77,17 @@ void coordinate_descent(
             const auto ak_old = ak;
 
             // compute gradient
-            gk = X.cmul(groups[k], resid, weights) - Xk_mean * resid_sum * intercept;
+            gk = (
+                X.cmul(groups[k], resid, weights) 
+                - Xk_mean * resid_sum * intercept
+                + ak_old * A_kk
+            );
 
             update_coordinate_g0_f(
-                ss_idx, ak, A_kk, gk, l1 * pk, l2 * pk
+                ss_idx, ak, A_kk, gk, l1 * pk, l2 * pk, 1
             );
+
+            gk -= ak_old * A_kk;
 
             if (ak_old == ak) continue;
 
@@ -125,7 +131,7 @@ void coordinate_descent(
             size_t iters;
             gk_transformed += A_kk * ak_old_transformed; 
             update_coordinate_g1_f(
-                ss_idx, ak_transformed, A_kk, gk_transformed, l1 * pk, l2 * pk
+                ss_idx, ak_transformed, A_kk, gk_transformed, l1 * pk, l2 * pk, Vk
             );
             gk_transformed -= A_kk * ak_old_transformed; 
             
@@ -398,7 +404,7 @@ inline void solve(
     vec_value_t buff(max_group_size * 2);
 
     const auto update_coordinate_g0_f = [&](
-        auto ss_idx, auto& ak, auto A_kk, auto gk, auto l1, auto l2
+        auto ss_idx, value_t& ak, value_t A_kk, value_t gk, value_t l1, value_t l2, value_t Q
     ) {
         const auto k = screen_set[ss_idx];
         const auto constraint = constraints[k];
@@ -412,17 +418,15 @@ inline void solve(
             const auto sdb = screen_dual_begins[ss_idx];
             const auto ds = constraint->duals(); 
             auto mu = screen_dual.segment(sdb, ds);
-            util::rowvec_type<value_t, 1> ak_view;
-            util::rowvec_type<value_t, 1> A_kk_view;
-            util::rowvec_type<value_t, 1> gk_view;
-            ak_view[0] = ak;
-            A_kk_view[0] = A_kk;
-            gk_view[0] = gk;
-            constraint->solve(ak_view, mu, A_kk_view, gk_view, l1, l2);
+            Eigen::Map<util::rowvec_type<value_t, 1>> ak_view(&ak);
+            const Eigen::Map<const util::rowvec_type<value_t, 1>> A_kk_view(&A_kk);
+            const Eigen::Map<const util::rowvec_type<value_t, 1>> gk_view(&gk);
+            const Eigen::Map<const util::colmat_type<value_t, 1, 1>> Q_view(&Q);
+            constraint->solve(ak_view, mu, A_kk_view, gk_view, l1, l2, Q_view);
         }
     };
     const auto update_coordinate_g1_f = [&](
-        auto ss_idx, auto& ak, const auto& A_kk, const auto& gk, auto l1, auto l2
+        auto ss_idx, auto& ak, const auto& A_kk, const auto& gk, auto l1, auto l2, const auto& Q
     ) {
         const auto k = screen_set[ss_idx];
         const auto constraint = constraints[k];
@@ -443,7 +447,7 @@ inline void solve(
             const auto sdb = screen_dual_begins[ss_idx];
             const auto ds = constraint->duals(); 
             auto mu = screen_dual.segment(sdb, ds);
-            constraint->solve(ak, mu, A_kk, gk, l1, l2);
+            constraint->solve(ak, mu, A_kk, gk, l1, l2, Q);
         }
     };
 

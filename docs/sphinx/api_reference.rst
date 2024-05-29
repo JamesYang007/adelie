@@ -35,6 +35,20 @@ adelie.configs
     set_configs
 
 
+adelie.constraint
+-----------------
+
+
+.. currentmodule:: adelie.constraint
+
+
+.. autosummary::
+    :toctree: generated/
+
+
+    lower
+
+
 adelie.cv
 ---------
 
@@ -51,7 +65,7 @@ adelie.cv
 
 
 adelie.data
------------------
+-----------
 
 
 .. currentmodule:: adelie.data
@@ -200,6 +214,7 @@ Internal
 
     adelie_core.configs.Configs
     adelie_core.constraint.ConstraintBase64
+    adelie_core.constraint.ConstraintLowerUpper64
     adelie_core.glm.GlmBase64
     adelie_core.glm.GlmBinomialLogit64
     adelie_core.glm.GlmBinomialProbit64
