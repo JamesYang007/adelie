@@ -1,14 +1,17 @@
 from glob import glob
 from setuptools import setup, find_packages
-from distutils.dir_util import copy_tree
 from pybind11.setup_helpers import Pybind11Extension 
 from pybind11.setup_helpers import ParallelCompile
 import os
-import pathlib
 import platform
-import shutil
 import subprocess
 import sysconfig
+
+
+# Partial import of adelie
+import builtins
+builtins.__ADELIE_SETUP__ = True
+from adelie import __version__
 
 
 def run_cmd(cmd):
@@ -24,8 +27,6 @@ def run_cmd(cmd):
 
 # Optional multithreaded build
 ParallelCompile("NPY_NUM_BUILD_JOBS").install()
-
-__version__ = open("VERSION", "r").read().strip()
 
 extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
 extra_compile_args += [

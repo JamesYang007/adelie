@@ -13,7 +13,7 @@ where the `...` is replaced with the API token given [here](https://github.com/J
 
 ## Versioning
 
-Specify the version in [VERSION](../../VERSION).
+Specify the version in [__init__.py](../../adelie/__init__.py).
 Make sure to update this file before a release!
 
 ## Git Tag
