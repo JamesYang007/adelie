@@ -82,7 +82,7 @@ def test_nnqp_full(d, seed):
 
     x = np.zeros(d)
     grad = linear.copy()
-    state = opt.StateNNQPFull(quad, 1000000, 1e-24, 0, x, grad)
+    state = opt.StateNNQPFull(quad, 1000000, 1e-24, x, grad)
     state.solve()
 
     # test loss against truth
@@ -125,7 +125,7 @@ def test_nnls(d, seed):
     X_vars = np.sum(X ** 2, axis=0)
     resid = y.copy()
     loss = 0.5 * np.sum(resid ** 2)
-    state = opt.StateNNLS(X, X_vars, 1000000, 1e-24, 0, x, resid, loss)
+    state = opt.StateNNLS(X, X_vars, 1000000, 1e-24, x, resid, loss)
     state.solve()
 
     # test loss against truth

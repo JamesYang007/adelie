@@ -20,7 +20,6 @@ struct StateNNLS
 
     const size_t max_iters;
     const value_t tol;
-    const value_t dtol;
 
     size_t iters = 0;
     map_vec_value_t beta;      
@@ -34,7 +33,6 @@ struct StateNNLS
         const Eigen::Ref<const vec_value_t>& X_vars,
         size_t max_iters,
         value_t tol,
-        value_t dtol,
         Eigen::Ref<vec_value_t> beta,
         Eigen::Ref<vec_value_t> resid,
         value_t loss
@@ -43,7 +41,6 @@ struct StateNNLS
         X_vars(X_vars.data(), X_vars.size()),
         max_iters(max_iters),
         tol(tol),
-        dtol(dtol),
         beta(beta.data(), beta.size()),
         resid(resid.data(), resid.size()),
         loss(loss)
@@ -64,7 +61,6 @@ void nnls(
     const auto& X_vars = state.X_vars;
     const auto max_iters = state.max_iters;
     const auto tol = state.tol;
-    const auto dtol = state.dtol;
     auto& iters = state.iters;
     auto& beta = state.beta;
     auto& resid = state.resid;
@@ -82,15 +78,11 @@ void nnls(
             if (skip_f(i)) continue;
             const auto X_vars_i = X_vars[i];
             auto& bi = beta[i];
-            if (X_vars_i <= 0) { 
-                bi = std::max<value_t>(bi, 0); 
-                continue;
-            }
             const auto gi = X.col(i).dot(resid.matrix());
             const auto bi_old = bi;
             bi = std::max<value_t>(bi + gi / X_vars_i, 0.0);
             const auto del = bi - bi_old;
-            if (std::abs(del) <= dtol) continue;
+            if (del == 0) continue;
             const auto scaled_del_sq = X_vars_i * del * del; 
             convg_measure = std::max<value_t>(convg_measure, scaled_del_sq);
             loss -= del * gi - 0.5 * scaled_del_sq;

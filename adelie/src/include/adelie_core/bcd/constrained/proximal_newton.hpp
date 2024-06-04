@@ -26,7 +26,6 @@ void proximal_newton_general_solver(
     ValueType newton_tol,
     size_t nnls_max_iters,
     ValueType nnls_tol,
-    ValueType nnls_dtol,
     size_t& iters,
     OutType& x,
     OutType& mu,
@@ -112,7 +111,7 @@ void proximal_newton_general_solver(
             );
             const value_t mu_loss = 0.5 * mu_resid.square().sum();
             optimization::StateNNLS<colmat_value_t> state_nnls(
-                AT, AT_vars, nnls_max_iters, nnls_tol, nnls_dtol,
+                AT, AT_vars, nnls_max_iters, nnls_tol,
                 mu, mu_resid, mu_loss
             );
             optimization::nnls(
@@ -167,7 +166,7 @@ void proximal_newton_general_solver(
 
         // solve NNQP for new mu
         optimization::StateNNQPFull<colmat_value_t> state_nnqp(
-            hess, nnls_max_iters, nnls_tol, nnls_dtol, mu, grad
+            hess, nnls_max_iters, nnls_tol, mu, grad
         );
         optimization::nnqp_full(state_nnqp); 
         recompute_mu_resid = true;

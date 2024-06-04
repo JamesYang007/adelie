@@ -414,7 +414,7 @@ public:
 
             // solve NNQP for new mu
             optimization::StateNNQPFull<colmat_value_t, true> state_nnqp(
-                _sgn, hess, _nnls_max_iters, _nnls_tol, 0, mu, grad
+                _sgn, hess, _nnls_max_iters, _nnls_tol, mu, grad
             );
             optimization::nnqp_full(state_nnqp); 
 

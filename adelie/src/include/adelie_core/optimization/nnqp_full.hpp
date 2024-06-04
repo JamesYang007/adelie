@@ -21,7 +21,6 @@ struct StateNNQPFull
 
     const size_t max_iters;
     const value_t tol;
-    const value_t dtol;
 
     size_t iters = 0;
     map_vec_value_t x;      
@@ -33,14 +32,12 @@ struct StateNNQPFull
         const Eigen::Ref<const matrix_t>& quad,
         size_t max_iters,
         value_t tol,
-        value_t dtol,
         Eigen::Ref<vec_value_t> x,
         Eigen::Ref<vec_value_t> grad
     ):
         quad(quad.data(), quad.rows(), quad.cols()),
         max_iters(max_iters),
         tol(tol),
-        dtol(dtol),
         x(x.data(), x.size()),
         grad(grad.data(), grad.size())
     {}
@@ -63,7 +60,6 @@ struct StateNNQPFull<MatrixType, true>
 
     const size_t max_iters;
     const value_t tol;
-    const value_t dtol;
 
     size_t iters = 0;
     map_vec_value_t x;      
@@ -76,7 +72,6 @@ struct StateNNQPFull<MatrixType, true>
         const Eigen::Ref<const matrix_t>& quad,
         size_t max_iters,
         value_t tol,
-        value_t dtol,
         Eigen::Ref<vec_value_t> x,
         Eigen::Ref<vec_value_t> grad
     ):
@@ -84,7 +79,6 @@ struct StateNNQPFull<MatrixType, true>
         quad(quad.data(), quad.rows(), quad.cols()),
         max_iters(max_iters),
         tol(tol),
-        dtol(dtol),
         x(x.data(), x.size()),
         grad(grad.data(), grad.size())
     {}
@@ -102,7 +96,6 @@ void nnqp_full(
     const auto& quad = state.quad;
     const auto max_iters = state.max_iters;
     const auto tol = state.tol;
-    const auto dtol = state.dtol;
     auto& iters = state.iters;
     auto& x = state.x;
     auto& grad = state.grad;
@@ -120,16 +113,12 @@ void nnqp_full(
             for (int i = 0; i < n; ++i) {
                 const auto si = sgn[i];
                 const auto qii = quad(i,i);
-                auto& xi = x[i];
-                if (qii <= 0) { 
-                    xi = (si > 0) ? std::max<value_t>(xi, 0): std::min<value_t>(xi, 0);
-                    continue;
-                }
                 const auto gi = grad[i];
+                auto& xi = x[i];
                 const auto xi_old = xi;
                 xi = (si > 0) ? std::max<value_t>(xi + gi / qii, 0) : std::min<value_t>(xi + gi / qii, 0);
                 const auto del = xi - xi_old;
-                if (std::abs(del) <= dtol) continue;
+                if (del == 0) continue;
                 const auto scaled_del_sq = qii * del * del; 
                 convg_measure = std::max<value_t>(convg_measure, scaled_del_sq);
                 if constexpr (matrix_t::IsRowMajor) {
@@ -146,16 +135,12 @@ void nnqp_full(
             ++iters;
             for (int i = 0; i < n; ++i) {
                 const auto qii = quad(i,i);
-                auto& xi = x[i];
-                if (qii <= 0) { 
-                    xi = std::max<value_t>(xi, 0);
-                    continue;
-                }
                 const auto gi = grad[i];
+                auto& xi = x[i];
                 const auto xi_old = xi;
                 xi = std::max<value_t>(xi + gi / qii, 0);
                 const auto del = xi - xi_old;
-                if (std::abs(del) <= dtol) continue;
+                if (del == 0) continue;
                 const auto scaled_del_sq = qii * del * del; 
                 convg_measure = std::max<value_t>(convg_measure, scaled_del_sq);
                 if constexpr (matrix_t::IsRowMajor) {

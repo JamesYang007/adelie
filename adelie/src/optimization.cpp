@@ -55,10 +55,6 @@ void nnqp_full(py::module_& m, const char* name)
         Maximum number of coordinate descent iterations.
     tol : float
         Convergence tolerance.
-    dtol : float
-        Difference tolerance at each coordinate update.
-        If the absolute difference is below this value,
-        then the update does not take place, which saves computation.
     x : (n,) ndarray
         Solution vector.
     grad : (n,) ndarray
@@ -68,21 +64,18 @@ void nnqp_full(py::module_& m, const char* name)
             const Eigen::Ref<const matrix_t>&,
             size_t,
             value_t,
-            value_t,
             Eigen::Ref<vec_value_t>,
             Eigen::Ref<vec_value_t> 
         >(),
             py::arg("quad").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("dtol"),
             py::arg("x"),
             py::arg("grad")
         )
         .def_readonly("quad", &state_t::quad)
         .def_readonly("max_iters", &state_t::max_iters)
         .def_readonly("tol", &state_t::tol)
-        .def_readonly("dtol", &state_t::dtol)
         .def_readonly("iters", &state_t::iters)
         .def_readonly("x", &state_t::x)
         .def_readonly("grad", &state_t::grad)
@@ -125,10 +118,6 @@ void nnls(py::module_& m, const char* name)
         Maximum number of coordinate descent iterations.
     tol : float
         Convergence tolerance.
-    dtol : float
-        Difference tolerance at each coordinate update.
-        If the absolute difference is below this value,
-        then the update does not take place, which saves computation.
     beta : (d,) ndarray
         Solution vector.
     resid : (n,) ndarray
@@ -141,7 +130,6 @@ void nnls(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             size_t,
             value_t,
-            value_t, 
             Eigen::Ref<vec_value_t>,
             Eigen::Ref<vec_value_t>,
             value_t 
@@ -150,7 +138,6 @@ void nnls(py::module_& m, const char* name)
             py::arg("X_vars").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("dtol"),
             py::arg("beta"),
             py::arg("resid"),
             py::arg("loss")
@@ -159,7 +146,6 @@ void nnls(py::module_& m, const char* name)
         .def_readonly("X_vars", &state_t::X_vars)
         .def_readonly("max_iters", &state_t::max_iters)
         .def_readonly("tol", &state_t::tol)
-        .def_readonly("dtol", &state_t::dtol)
         .def_readonly("beta", &state_t::beta)
         .def_readonly("resid", &state_t::resid)
         .def_readonly("loss", &state_t::loss)
