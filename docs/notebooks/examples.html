@@ -386,6 +386,210 @@ document.write(`
                   
   <section id="Examples">
 <h1><strong>Examples</strong><a class="headerlink" href="#Examples" title="Link to this heading">#</a></h1>
+<section id="Group-Lasso-with-Interaction-Terms">
+<h2><strong>Group Lasso with Interaction Terms</strong><a class="headerlink" href="#Group-Lasso-with-Interaction-Terms" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">adelie</span> <span class="k">as</span> <span class="nn">ad</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+</div>
+<p>In regression settings, we typically want to include pairwise interaction terms amongst a subset of features to capture some non-linearity. Moreover, we would like to perform feature selection on the interaction terms as well. However, to achieve an interpretable model, we would like to also impose a hierarchy such that interaction terms are only included in the model if the main effects are included. Michael Lim and Trevor Hastie provide a formalization of this problem using group lasso where
+the group structure imposes the hierarchy and the group lasso penalty allows for feature selection. For further details, we provide the following reference:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://hastie.su.domains/Papers/glinternet_jcgs.pdf">Learning interactions via hierarchical group-lasso regularization</a></p></li>
+</ul>
+<p>We will work under a simulation setting. We draw <span class="math notranslate nohighlight">\(n\)</span> independent samples <span class="math notranslate nohighlight">\(Z_i \in \mathbb{R}^d\)</span> where the continuous features are sampled from a standard normal and the discrete features are sampled uniformly.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">1000</span>        <span class="c1"># number of samples</span>
+<span class="n">d_cont</span> <span class="o">=</span> <span class="mi">10</span>     <span class="c1"># number of continuous features</span>
+<span class="n">d_disc</span> <span class="o">=</span> <span class="mi">10</span>     <span class="c1"># number of discrete features</span>
+<span class="n">seed</span> <span class="o">=</span> <span class="mi">1</span>        <span class="c1"># random seed</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+<span class="n">Z_cont</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">d_cont</span><span class="p">))</span>
+<span class="n">levels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">d_disc</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="n">Z_disc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">lvl</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">lvl</span> <span class="ow">in</span> <span class="n">levels</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+</pre></div>
+</div>
+</div>
+<p>It is customary to first center and scale the continuous features so that they have mean <span class="math notranslate nohighlight">\(0\)</span> and standard deviation <span class="math notranslate nohighlight">\(1\)</span>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Z_cont_means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Z_cont</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">Z_cont_stds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">Z_cont</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">Z_cont</span> <span class="o">=</span> <span class="p">(</span><span class="n">Z_cont</span> <span class="o">-</span> <span class="n">Z_cont_means</span><span class="p">)</span> <span class="o">/</span> <span class="n">Z_cont_stds</span>
+</pre></div>
+</div>
+</div>
+<p>This gives us a combined data matrix <span class="math notranslate nohighlight">\(Z\)</span> with the appropriate levels information. By convention, a <span class="math notranslate nohighlight">\(0\)</span>-level feature is a continuous feature and otherwise it is a discrete feature with that many levels.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfortranarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">Z_cont</span><span class="p">,</span> <span class="n">Z_disc</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">levels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">d_cont</span><span class="p">),</span> <span class="n">levels</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>We generate the response vector <span class="math notranslate nohighlight">\(y\)</span> from a linear model where one continuous and discrete main effects as well as their interaction term are included.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Z_one_hot_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">levels</span><span class="p">[</span><span class="n">d_cont</span><span class="p">])))</span>
+<span class="n">Z_one_hot_0</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">Z_disc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">Z_cont_0</span> <span class="o">=</span> <span class="n">Z_cont</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">Z_sub</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+    <span class="n">Z_cont_0</span><span class="p">,</span>
+    <span class="n">Z_one_hot_0</span><span class="p">,</span>
+    <span class="n">Z_cont_0</span> <span class="o">*</span> <span class="n">Z_one_hot_0</span><span class="p">,</span>
+<span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">Z_sub</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">Z_sub</span> <span class="o">@</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We are now in position to construct the full feature matrix to fit a group lasso model. As a demonstration, suppose we (correctly) believe that there is a true interaction term containing the first continuous feature, but we do not know the other feature. We, therefore, wish to construct an interaction between the first continuous feature against all other features. It is easy to specify this pairing, as shown below via <code class="docutils literal notranslate"><span class="pre">intr_map</span></code>. The following code constructs the interaction matrix
+<code class="docutils literal notranslate"><span class="pre">X_intr</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">intr_map</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">X_intr</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">interaction</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">intr_map</span><span class="p">,</span> <span class="n">levels</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>To put all groups of features on the same relative “scale”, we must further center and scale all interaction terms between two continuous features. Then, it can be shown that interactions between two discrete features induce a (Frobenius) norm of <span class="math notranslate nohighlight">\(1\)</span>, a discrete and continuous feature induce a norm of <span class="math notranslate nohighlight">\(\sqrt{2}\)</span>, and two continuous features induce a norm of <span class="math notranslate nohighlight">\(\sqrt{3}\)</span>. These values will be used as penalty factors later when we call the group lasso solver. We first compute the
+necessary centers and scales.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pairs</span> <span class="o">=</span> <span class="n">X_intr</span><span class="o">.</span><span class="n">_pairs</span>
+<span class="n">pair_levels</span> <span class="o">=</span> <span class="n">levels</span><span class="p">[</span><span class="n">pairs</span><span class="p">]</span>
+<span class="n">is_cont_cont</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">pair_levels</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+<span class="n">cont_cont_pairs</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">[</span><span class="n">is_cont_cont</span><span class="p">]</span>
+<span class="n">cont_cont</span> <span class="o">=</span> <span class="n">Z</span><span class="p">[:,</span> <span class="n">cont_cont_pairs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]</span> <span class="o">*</span> <span class="n">Z</span><span class="p">[:,</span> <span class="n">cont_cont_pairs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span>
+<span class="n">centers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">X_intr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">scales</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">X_intr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">cont_cont_indices</span> <span class="o">=</span> <span class="n">X_intr</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">is_cont_cont</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span>
+<span class="n">centers</span><span class="p">[</span><span class="n">cont_cont_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cont_cont</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">scales</span><span class="p">[</span><span class="n">cont_cont_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">cont_cont</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Now, we construct the full feature matrix <span class="math notranslate nohighlight">\(X\)</span> including the one-hot encoded main effects as well as the standardized version of the interaction terms using the centers and scales defined above.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X_one_hot</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">levels</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+    <span class="n">X_one_hot</span><span class="p">,</span>
+    <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span>
+        <span class="n">X_intr</span><span class="p">,</span>
+        <span class="n">centers</span><span class="o">=</span><span class="n">centers</span><span class="p">,</span>
+        <span class="n">scales</span><span class="o">=</span><span class="n">scales</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Before calling the group lasso solver, we must prepare the grouping and penalty factor information.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">groups</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+    <span class="n">X_one_hot</span><span class="o">.</span><span class="n">groups</span><span class="p">,</span>
+    <span class="n">X_one_hot</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">X_intr</span><span class="o">.</span><span class="n">groups</span><span class="p">,</span>
+<span class="p">])</span>
+
+<span class="n">is_cont_disc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">pair_levels</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pair_levels</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">penalty</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">X_intr</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">penalty</span><span class="p">[</span><span class="n">is_cont_cont</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">penalty</span><span class="p">[</span><span class="n">is_cont_disc</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">penalty</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">X_one_hot</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+    <span class="n">penalty</span><span class="p">,</span>
+<span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>Finally, we call the group lasso solver with our prepared inputs.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
+    <span class="n">groups</span><span class="o">=</span><span class="n">groups</span><span class="p">,</span>
+    <span class="n">penalty</span><span class="o">=</span><span class="n">penalty</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+100%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>| 100/100 [00:00:00&lt;00:00:00, 4657.95it/s] [dev:71.1%]
+</pre></div></div>
+</div>
+<p>First, observe that the first two groups of features that enter the model are precisely the first continuous and discrete main effects.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span><span class="o">.</span><span class="n">betas</span><span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="p">:</span><span class="n">X_one_hot</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">indices</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([ 0, 10, 11, 12, 13, 14], dtype=int32)
+</pre></div></div>
+</div>
+<p>Next, we see that the first interaction terms to be included corresponds to the interaction between the first continuous and discrete features in <code class="docutils literal notranslate"><span class="pre">Z</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">first_intr_index</span> <span class="o">=</span> <span class="n">X_one_hot</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">betas</span><span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="n">X_one_hot</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:]</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">relative_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">groups</span> <span class="o">==</span> <span class="n">first_intr_index</span><span class="p">)</span> <span class="o">-</span> <span class="n">X_one_hot</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">pairs</span><span class="p">[</span><span class="n">relative_index</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([ 0, 10], dtype=int32)
+</pre></div></div>
+</div>
+<p>We conclude that the group lasso correctly finds the causal effects of <span class="math notranslate nohighlight">\(y\)</span> early in the path.</p>
+</section>
 <section id="Model-X-Knockoffs-with-Lasso-Feature-Importance-Scores">
 <h2><strong>Model-X Knockoffs with Lasso Feature Importance Scores</strong><a class="headerlink" href="#Model-X-Knockoffs-with-Lasso-Feature-Importance-Scores" title="Link to this heading">#</a></h2>
 <div class="nbinput nblast docutils container">
@@ -528,7 +732,7 @@ concatenated dense matrix.</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_examples_16_0.png" src="../_images/notebooks_examples_16_0.png" />
+<img alt="../_images/notebooks_examples_41_0.png" src="../_images/notebooks_examples_41_0.png" />
 </div>
 </div>
 <p>The plot suggests that the best model is somewhere in the middle of the path as the CV loss dips then flattens as we move down the regularization path. We now refit lasso along a regularization path which stops at the best chosen <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
@@ -1364,7 +1568,7 @@ array([17, 18, 19, 20, 21, 22])
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_examples_59_0.png" src="../_images/notebooks_examples_59_0.png" />
+<img alt="../_images/notebooks_examples_84_0.png" src="../_images/notebooks_examples_84_0.png" />
 </div>
 </div>
 </section>
@@ -1410,7 +1614,7 @@ array([17, 18, 19, 20, 21, 22])
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_examples_64_0.png" src="../_images/notebooks_examples_64_0.png" />
+<img alt="../_images/notebooks_examples_89_0.png" src="../_images/notebooks_examples_89_0.png" />
 </div>
 </div>
 <p>In this example, the best model chosen by 5-fold CV is at index <code class="docutils literal notranslate"><span class="pre">48</span></code> of the <span class="math notranslate nohighlight">\(\lambda\)</span> sequence.</p>
@@ -1573,7 +1777,7 @@ group lasso by grouping every <code class="docutils literal notranslate"><span c
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_examples_85_0.png" src="../_images/notebooks_examples_85_0.png" />
+<img alt="../_images/notebooks_examples_110_0.png" src="../_images/notebooks_examples_110_0.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -1623,6 +1827,7 @@ group lasso by grouping every <code class="docutils literal notranslate"><span c
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Group-Lasso-with-Interaction-Terms"><strong>Group Lasso with Interaction Terms</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Model-X-Knockoffs-with-Lasso-Feature-Importance-Scores"><strong>Model-X Knockoffs with Lasso Feature Importance Scores</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Lasso-on-GWAS-Datasets"><strong>Lasso on GWAS Datasets</strong></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-the-Dense-SNP-Matrix"><strong>Load the Dense SNP Matrix</strong></a></li>
