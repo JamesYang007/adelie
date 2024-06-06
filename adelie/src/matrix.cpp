@@ -799,7 +799,7 @@ void matrix_naive_csubset(py::module_& m, const char* name)
         )
         .def(
             py::init<
-                base_t*,
+                base_t&,
                 const Eigen::Ref<const vec_index_t>&,
                 size_t
             >(),
@@ -821,7 +821,7 @@ void matrix_naive_rsubset(py::module_& m, const char* name)
         )
         .def(
             py::init<
-                base_t*,
+                base_t&,
                 const Eigen::Ref<const vec_index_t>&,
                 size_t
             >(),
