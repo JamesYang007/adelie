@@ -222,6 +222,7 @@ bool kkt(
 }
 
 template <class StateType,
+          class PBType,
           class PBAddSuffixType,
           class UpdateLossNullType,
           class UpdateInvarianceType,
@@ -231,7 +232,7 @@ template <class StateType,
           class FitType>
 inline void solve_core(
     StateType&& state,
-    bool display,
+    PBType&& pb,
     PBAddSuffixType pb_add_suffix_f,
     UpdateLossNullType update_loss_null_f,
     UpdateInvarianceType update_invariance_f,
@@ -320,8 +321,10 @@ inline void solve_core(
     // All solutions to lambda > lambda_max are saved.
 
     // initialize progress bar
-    auto pb = util::tq::trange(lmda_path.size());
-    pb.set_display(display);
+    pb.set_range(
+        util::tq::int_iterator<int>(0),
+        util::tq::int_iterator<int>(lmda_path.size())
+    );
     auto pb_it = pb.begin();
 
     // slice lambda_path up to lmda_max
