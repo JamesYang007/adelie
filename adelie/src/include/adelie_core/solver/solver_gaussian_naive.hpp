@@ -195,13 +195,14 @@ auto fit(
 }
 
 template <class StateType,
+          class PBType,
           class ExitCondType,
           class UpdateCoefficientsType,
           class TidyType,
           class CUIType>
 inline void solve(
     StateType&& state,
-    bool display,
+    PBType&& pb,
     ExitCondType exit_cond_f,
     UpdateCoefficientsType update_coefficients_f,
     TidyType tidy_f,
@@ -216,7 +217,7 @@ inline void solve(
     GaussianNaiveBufferPack<value_t, safe_bool_t> buffer_pack(n);
 
     const auto pb_add_suffix_f = [&](const auto& state, auto& pb) {
-        if (display) solver::pb_add_suffix(state, pb);
+        solver::pb_add_suffix(state, pb);
     };
     const auto update_loss_null_f = [](const auto&) {};
     const auto update_invariance_f = [&](auto& state, const auto&, auto lmda) {
@@ -268,7 +269,7 @@ inline void solve(
 
     solver::solve_core(
         state,
-        display,
+        pb,
         pb_add_suffix_f,
         update_loss_null_f,
         update_invariance_f,
@@ -280,12 +281,13 @@ inline void solve(
 }
 
 template <class StateType,
+          class PBType,
           class ExitCondType,
           class UpdateCoefficientsType,
           class CUIType=util::no_op>
 inline void solve(
     StateType&& state,
-    bool display,
+    PBType&& pb,
     ExitCondType exit_cond_f,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
@@ -293,7 +295,7 @@ inline void solve(
 {
     solve(
         state,
-        display,
+        pb,
         exit_cond_f,
         update_coefficients_f,
         [](){},

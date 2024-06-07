@@ -218,7 +218,7 @@ private:
     double min_time_per_update_{1e-1}; // found experimentally
     bool display_{true};
 
-    std::ostream* os_{&std::cerr};
+    std::ostream* os_ = nullptr;
 
     index bar_size_{10};
     index max_chars_{0};
@@ -329,6 +329,14 @@ public:
         ++iters_done_;
     }
 
+    // NOTE: possibly invalidates other members.
+    // Safe usage is to call .begin(), .end() afterwards to reset everything.
+    void set_range(ForwardIter begin, EndIter end)
+    {
+        first_ = iterator(begin, this);
+        last_ = end;
+        num_iters_ = std::distance(begin, end);
+    }
     void set_ostream(std::ostream& os) { bar_.set_ostream(os); }
     void set_prefix(std::string s) { bar_.set_prefix(std::move(s)); }
     void set_bar_size(int size) { bar_.set_bar_size(size); }
@@ -384,6 +392,7 @@ public:
 
     void update() { return tqdm_.update(); }
 
+    void set_range(iterator begin, iterator end) { tqdm_.set_range(begin, end); }
     void set_ostream(std::ostream& os) { tqdm_.set_ostream(os); }
     void set_prefix(std::string s) { tqdm_.set_prefix(std::move(s)); }
     void set_bar_size(int size) { tqdm_.set_bar_size(size); }
