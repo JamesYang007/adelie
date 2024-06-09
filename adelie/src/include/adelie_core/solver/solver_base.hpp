@@ -270,6 +270,11 @@ inline void solve_core(
     auto& active_sizes = state.active_sizes;
     auto& screen_sizes = state.screen_sizes;
 
+    // Manually set progress bar to iters_done_ == 1.
+    // This ensures that until pb is properly initialized to the range of [0, lmda_path.size()),
+    // if the function finishes earlier then pb will print "... 0/0 ..." instead of "... -1/0 ...".
+    pb.manually_set_progress(1); 
+
     if (screen_set.size() > max_screen_size) throw util::max_screen_set_error();
 
     update_loss_null_f(state);

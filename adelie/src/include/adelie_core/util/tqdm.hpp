@@ -352,8 +352,6 @@ public:
 
     void manually_set_progress(int to)
     {
-        if (to > num_iters_) to = num_iters_;
-        if (to < 0) to = 0;
         iters_done_ = to;
     }
 
