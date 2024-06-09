@@ -13,3 +13,4 @@ User Guide
     notebooks/glm
     notebooks/parallelism
     notebooks/examples
+    notebooks/faq
