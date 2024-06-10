@@ -144,7 +144,7 @@ public:
             const auto slice = _slice_map[j_curr];
             auto& mat = *_mat_list[slice];
             const auto index = _index_map[j_curr];
-            const int q_curr = std::min(mat.cols()-index, q-n_processed);
+            const int q_curr = std::min<int>(mat.cols()-index, q-n_processed);
             mat.bmul(index, q_curr, v, weights, out.segment(n_processed, q_curr));
             n_processed += q_curr;
         }
@@ -163,7 +163,7 @@ public:
             const auto slice = _slice_map[j_curr];
             auto& mat = *_mat_list[slice];
             const auto index = _index_map[j_curr];
-            const int q_curr = std::min(mat.cols()-index, q-n_processed);
+            const int q_curr = std::min<int>(mat.cols()-index, q-n_processed);
             mat.btmul(index, q_curr, v.segment(n_processed, q_curr), out);
             n_processed += q_curr;
         }
