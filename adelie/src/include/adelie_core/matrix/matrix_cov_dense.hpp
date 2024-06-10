@@ -5,11 +5,11 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class DenseType>
-class MatrixCovDense: public MatrixCovBase<typename DenseType::Scalar>
+template <class DenseType, class IndexType=Eigen::Index>
+class MatrixCovDense: public MatrixCovBase<typename DenseType::Scalar, IndexType>
 {
 public:
-    using base_t = MatrixCovBase<typename DenseType::Scalar>;
+    using base_t = MatrixCovBase<typename DenseType::Scalar, IndexType>;
     using dense_t = DenseType;
     using typename base_t::value_t;
     using typename base_t::vec_index_t;

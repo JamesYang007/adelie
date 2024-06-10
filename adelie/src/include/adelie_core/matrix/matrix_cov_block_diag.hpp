@@ -6,11 +6,11 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType>
-class MatrixCovBlockDiag: public MatrixCovBase<ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
+class MatrixCovBlockDiag: public MatrixCovBase<ValueType, IndexType>
 {
 public:
-    using base_t = MatrixCovBase<ValueType>;
+    using base_t = MatrixCovBase<ValueType, IndexType>;
     using typename base_t::value_t;
     using typename base_t::vec_index_t;
     using typename base_t::vec_value_t;

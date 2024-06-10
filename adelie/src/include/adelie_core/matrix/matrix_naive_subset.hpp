@@ -4,11 +4,11 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType>
-class MatrixNaiveCSubset: public MatrixNaiveBase<ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
+class MatrixNaiveCSubset: public MatrixNaiveBase<ValueType, IndexType>
 {
 public:
-    using base_t = MatrixNaiveBase<ValueType>;
+    using base_t = MatrixNaiveBase<ValueType, IndexType>;
     using typename base_t::value_t;
     using typename base_t::index_t;
     using typename base_t::vec_value_t;
@@ -238,11 +238,11 @@ public:
     }
 };
 
-template <class ValueType>
-class MatrixNaiveRSubset: public MatrixNaiveBase<ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
+class MatrixNaiveRSubset: public MatrixNaiveBase<ValueType, IndexType>
 {
 public:
-    using base_t = MatrixNaiveBase<ValueType>;
+    using base_t = MatrixNaiveBase<ValueType, IndexType>;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_index_t;

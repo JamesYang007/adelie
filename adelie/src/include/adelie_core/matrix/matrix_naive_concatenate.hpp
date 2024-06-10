@@ -5,11 +5,11 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType>
-class MatrixNaiveCConcatenate: public MatrixNaiveBase<ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
+class MatrixNaiveCConcatenate: public MatrixNaiveBase<ValueType, IndexType>
 {
 public:
-    using base_t = MatrixNaiveBase<ValueType>;
+    using base_t = MatrixNaiveBase<ValueType, IndexType>;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_index_t;
@@ -242,11 +242,11 @@ public:
     }
 };
 
-template <class ValueType>
-class MatrixNaiveRConcatenate: public MatrixNaiveBase<ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
+class MatrixNaiveRConcatenate: public MatrixNaiveBase<ValueType, IndexType>
 {
 public:
-    using base_t = MatrixNaiveBase<ValueType>;
+    using base_t = MatrixNaiveBase<ValueType, IndexType>;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_index_t;

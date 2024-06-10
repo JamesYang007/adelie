@@ -7,11 +7,11 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class DenseType>
-class MatrixCovLazyCov: public MatrixCovBase<typename std::decay_t<DenseType>::Scalar>
+template <class DenseType, class IndexType=Eigen::Index>
+class MatrixCovLazyCov: public MatrixCovBase<typename std::decay_t<DenseType>::Scalar, IndexType>
 {
 public: 
-    using base_t = MatrixCovBase<typename std::decay_t<DenseType>::Scalar>;
+    using base_t = MatrixCovBase<typename std::decay_t<DenseType>::Scalar, IndexType>;
     using typename base_t::value_t;
     using typename base_t::index_t;
     using typename base_t::vec_index_t;
