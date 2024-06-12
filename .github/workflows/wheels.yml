@@ -39,9 +39,7 @@ jobs:
       if: ${{ matrix.buildplat[1] != 'win_amd64' }}
       run: |
         set -ex
-        echo "MAMBA_ROOT_PREFIX=$MAMBA_ROOT_PREFIX" >> $GITHUB_ENV
         echo $MAMBA_ROOT_PREFIX
-      shell: micromamba-shell {0}
     - name: Setup conda (Windows)
       if: ${{ matrix.buildplat[1] == 'win_amd64' }}
       run: |
