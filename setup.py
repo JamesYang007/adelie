@@ -109,6 +109,7 @@ if system_name == "Darwin":
         "-Xpreprocessor",
         "-fopenmp",
     ]
+    runtime_library_dirs += [omp_lib]
     library_dirs += [omp_lib]
     libraries += ['omp']
     

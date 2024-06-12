@@ -31,7 +31,10 @@ jobs:
         environment-name: adelie
         init-shell: bash
         generate-run-shell: true
+        # Install with no dependencies to avoid installing libcxx.
+        # libcxx seems to mess with delocator.
         create-args: >-
+          --no-deps
           llvm-openmp==11.1.0
           eigen==3.4.0
     - name: Build wheels
