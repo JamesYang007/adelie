@@ -34,6 +34,10 @@ jobs:
         create-args: >-
           llvm-openmp==11.1.0
           eigen==3.4.0
+    - name: Add micromamba path
+      run: |
+        echo "MAMBA_ROOT_PREFIX=$MAMBA_ROOT_PREFIX" >> $GITHUB_ENV
+      shell: micromamba-shell {0}
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.18.1
       env:
