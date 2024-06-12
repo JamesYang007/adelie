@@ -7,9 +7,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     if [[ "$CIBW_BUILD" == *-macosx_arm64 ]]; then
         export MACOSX_DEPLOYMENT_TARGET=12.0
     else
-        export MACOSX_DEPLOYMENT_TARGET=10.9
+        export MACOSX_DEPLOYMENT_TARGET=10.13
     fi
 fi
-
-echo $MAMBA_ROOT_PREFIX
-find $MAMBA_ROOT_PREFIX/envs/adelie -name "*eigen3*"

@@ -1,7 +1,7 @@
 #pragma once
 // Ignore all warnings for pybind + Eigen
 #if defined(_MSC_VER)
-#pragma warning( push, 1 )
+#pragma warning( push, 0 )
 #elif defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall" 
