@@ -40,6 +40,7 @@ jobs:
       run: |
         set -ex
         echo $MAMBA_ROOT_PREFIX
+      shell: bash
     - name: Setup conda (Windows)
       if: ${{ matrix.buildplat[1] == 'win_amd64' }}
       run: |
@@ -49,7 +50,7 @@ jobs:
         #echo $CONDA_PREFIX
       shell: bash
     - name: Build wheels
-      uses: pypa/cibuildwheel@v2.18.1
+      uses: pypa/cibuildwheel@v2.19.0
       env:
         CIBW_BEFORE_BUILD: bash tools/wheels/cibw_before_build.sh
         CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}
