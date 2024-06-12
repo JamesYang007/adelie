@@ -40,7 +40,7 @@ else:
     extra_compile_args = [
         "/Wall",
         "/WX",
-        "/O3",
+        "/O2",
     ]
 include_dirs = [
     "adelie/src",
