@@ -1,6 +1,11 @@
 #pragma once
 #include <pybind11/pybind11.h>
+// Ignore all warnings for Eigen on GCC and Clang
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall" 
+#pragma GCC diagnostic ignored "-Wextra" 
 #include <pybind11/eigen.h>
+#pragma GCC diagnostic pop
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 #include <pybind11/functional.h>
