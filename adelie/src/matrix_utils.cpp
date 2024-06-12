@@ -85,7 +85,7 @@ void utils(py::module_& m)
 
     m.def("bench_dvzero", [](
         ref_vec_value_t x1,
-        cref_vec_value_t x2,
+        cref_vec_value_t,
         size_t n_threads,
         size_t n_sims
     ) {
@@ -125,7 +125,6 @@ void utils(py::module_& m)
     ) {
         sw_t sw;
         double time_elapsed = 0;
-        volatile double output = 0;
         vec_value_t buff(n_threads);
         sw.start();
         #pragma omp parallel num_threads(n_threads)
@@ -149,7 +148,6 @@ void utils(py::module_& m)
                 }
             }
         }
-        output = buff.sum(); // don't optimize out output
         time_elapsed += sw.elapsed();
         return time_elapsed / n_sims;
     });

@@ -1,5 +1,5 @@
 from glob import glob
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 from distutils.dir_util import copy_tree
 from pybind11.setup_helpers import Pybind11Extension 
 from pybind11.setup_helpers import ParallelCompile
@@ -32,6 +32,7 @@ if os.name == "posix":
         "-g0",
         "-Wall", 
         "-Wextra", 
+        "-Werror",
         "-DNDEBUG", 
         "-O3",
     ]
@@ -141,11 +142,9 @@ setup(
     author_email='jamesyang916@gmail.com',
     maintainer='James Yang',
     maintainer_email='jamesyang916@gmail.com',
-    packages=find_packages(include=["adelie", "adelie.*"]), 
+    packages=find_namespace_packages(include=["adelie.*"]),
     package_data={
         "adelie": [
-            "src/**/*.hpp", 
-            "src/**/*.cpp", 
             "adelie_core.cpython*",
         ],
     },

@@ -4,17 +4,17 @@
 #include <vector>
 #include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/io/io_snp_unphased.hpp>
-#include <omp.h>
 
 namespace adelie_core {
 namespace matrix {
 
 template <class ValueType,
-          class MmapPtrType=std::unique_ptr<char, std::function<void(char*)>>>
-class MatrixNaiveSNPUnphased: public MatrixNaiveBase<ValueType>
+          class MmapPtrType=std::unique_ptr<char, std::function<void(char*)>>,
+          class IndexType=Eigen::Index>
+class MatrixNaiveSNPUnphased: public MatrixNaiveBase<ValueType, IndexType>
 {
 public:
-    using base_t = MatrixNaiveBase<ValueType>;
+    using base_t = MatrixNaiveBase<ValueType, IndexType>;
     using typename base_t::value_t;
     using typename base_t::index_t;
     using typename base_t::vec_value_t;
@@ -159,7 +159,7 @@ public:
             // cache index_1 information. 
             size_t nnz = 0;
             if (i1) {
-                for (int c = 0; c < io_t::n_categories; ++c) {
+                for (size_t c = 0; c < io_t::n_categories; ++c) {
                     auto it = _io.begin(index_1, c);
                     const auto end = _io.end(index_1, c);
                     const value_t val = (c == 0) ? imp_1 : c;

@@ -202,7 +202,7 @@ void coordinate_descent_solver(
             const auto project_f = [&](auto h) { 
                 return std::max<value_t>(std::min<value_t>(h, l_star), 0); 
             };
-            const auto tup = optimization::newton_root_find(
+            optimization::newton_root_find(
                 initial_f,
                 step_f,
                 project_f,

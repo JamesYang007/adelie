@@ -4,11 +4,11 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType>
-class MatrixNaiveCSubset: public MatrixNaiveBase<ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
+class MatrixNaiveCSubset: public MatrixNaiveBase<ValueType, IndexType>
 {
 public:
-    using base_t = MatrixNaiveBase<ValueType>;
+    using base_t = MatrixNaiveBase<ValueType, IndexType>;
     using typename base_t::value_t;
     using typename base_t::index_t;
     using typename base_t::vec_value_t;
@@ -48,7 +48,7 @@ private:
 
         size_t count = 1;
         size_t begin = 0;
-        for (size_t i = 1; i < subset.size(); ++i) {
+        for (size_t i = 1; i < static_cast<size_t>(subset.size()); ++i) {
             if (subset[i] == subset[i-1] + 1) {
                 ++count;
                 continue;
@@ -60,7 +60,7 @@ private:
             begin += count;
             count = 1;
         }
-        if (begin != subset.size()) {
+        if (begin != static_cast<size_t>(subset.size())) {
             for (size_t j = 0; j < count; ++j) {
                 subset_csize[begin+j] = count - j;
             }
@@ -120,7 +120,7 @@ public:
     {
         base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
         const auto& _subset_csize = std::get<0>(_subset_cinfo);
-        size_t n_processed = 0;
+        int n_processed = 0;
         while (n_processed < q) {
             const auto k = j + n_processed;
             const auto size = std::min<size_t>(_subset_csize[k], q-n_processed);
@@ -142,7 +142,7 @@ public:
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         const auto& _subset_csize = std::get<0>(_subset_cinfo);
-        size_t n_processed = 0;
+        int n_processed = 0;
         while (n_processed < q) {
             const auto k = j + n_processed;
             const auto size = std::min<size_t>(_subset_csize[k], q-n_processed);
@@ -173,10 +173,10 @@ public:
             _mat->bmul(j, q, v, weights, curr_out);
         };
         if (_n_threads <= 1) {
-            for (int t = 0; t < _subset_cbegin.size(); ++t) routine(t);
+            for (size_t t = 0; t < _subset_cbegin.size(); ++t) routine(t);
         } else {
             #pragma omp parallel for schedule(static) num_threads(_n_threads)
-            for (int t = 0; t < _subset_cbegin.size(); ++t) routine(t);
+            for (size_t t = 0; t < _subset_cbegin.size(); ++t) routine(t);
         }
     }
 
@@ -238,11 +238,11 @@ public:
     }
 };
 
-template <class ValueType>
-class MatrixNaiveRSubset: public MatrixNaiveBase<ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
+class MatrixNaiveRSubset: public MatrixNaiveBase<ValueType, IndexType>
 {
 public:
-    using base_t = MatrixNaiveBase<ValueType>;
+    using base_t = MatrixNaiveBase<ValueType, IndexType>;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_index_t;
