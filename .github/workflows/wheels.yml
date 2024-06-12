@@ -46,7 +46,7 @@ jobs:
       if: ${{ matrix.buildplat[1] == 'win_amd64' }}
       run: |
         set -ex
-        find / -name "*conda*"
+        find $CONDA -name "*conda*"
         #conda create -n adelie eigen==3.4.0
         #echo $CONDA_PREFIX
       shell: bash
