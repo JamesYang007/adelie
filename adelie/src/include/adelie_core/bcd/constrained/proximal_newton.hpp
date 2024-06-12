@@ -18,7 +18,7 @@ void proximal_newton_solver(
     const AType& A,
     const BType& b,
     const ATVarsType& AT_vars,
-    const AATType& AAT,
+    const AATType&,
     size_t max_iters,
     ValueType tol,
     size_t newton_max_iters,

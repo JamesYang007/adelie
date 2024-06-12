@@ -54,7 +54,7 @@ private:
         for (int i = 0; i < levels.size(); ++i) {
             const auto li = levels[i];
             const auto block_size = std::max<size_t>(li, 1);
-            for (int j = 0; j < block_size; ++j) {
+            for (size_t j = 0; j < block_size; ++j) {
                 slice_map[begin + j] = i;
             }
             begin += block_size;
@@ -72,7 +72,7 @@ private:
         for (int i = 0; i < levels.size(); ++i) {
             const auto li = levels[i];
             const auto block_size = std::max<size_t>(li, 1);
-            for (int j = 0; j < block_size; ++j) {
+            for (size_t j = 0; j < block_size; ++j) {
                 index_map[begin + j] = j;
             }
             begin += block_size;
@@ -163,10 +163,10 @@ private:
         size_t n_threads
     )
     {
-        const auto size = out.size();
-        const auto full_size = std::max<size_t>(level, 1);
+        const size_t size = out.size();
+        const size_t full_size = std::max<size_t>(level, 1);
         if (index != 0 || size != full_size) {
-            for (int l = 0; l < size; ++l) {
+            for (size_t l = 0; l < size; ++l) {
                 out[l] = _cmul(begin+l, v, weights, n_threads);
             }
             return;
@@ -196,7 +196,7 @@ private:
         int slice,
         int index,
         int level,
-        int size,
+        size_t size,
         const Eigen::Ref<const vec_value_t>& v, 
         Eigen::Ref<vec_value_t> out,
         size_t n_threads
@@ -204,7 +204,7 @@ private:
     {
         const auto full_size = std::max<size_t>(level, 1);
         if (index != 0 || size != full_size) {
-            for (int l = 0; l < size; ++l) {
+            for (size_t l = 0; l < size; ++l) {
                 _ctmul(begin+l, v[l], out, n_threads);
             }
             return;

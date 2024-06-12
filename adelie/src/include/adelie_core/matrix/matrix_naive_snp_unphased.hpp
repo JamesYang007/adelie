@@ -159,7 +159,7 @@ public:
             // cache index_1 information. 
             size_t nnz = 0;
             if (i1) {
-                for (int c = 0; c < io_t::n_categories; ++c) {
+                for (size_t c = 0; c < io_t::n_categories; ++c) {
                     auto it = _io.begin(index_1, c);
                     const auto end = _io.end(index_1, c);
                     const value_t val = (c == 0) ? imp_1 : c;

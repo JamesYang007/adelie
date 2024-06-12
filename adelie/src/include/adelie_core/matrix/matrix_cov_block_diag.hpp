@@ -31,7 +31,7 @@ private:
     {
         vec_index_t mat_size_cumsum(mat_list.size() + 1);
         mat_size_cumsum[0] = 0;
-        for (int i = 0; i < mat_list.size(); ++i) {
+        for (size_t i = 0; i < mat_list.size(); ++i) {
             mat_size_cumsum[i+1] = mat_size_cumsum[i] + mat_list[i]->cols();
         }
         return mat_size_cumsum;
@@ -178,10 +178,10 @@ public:
             mat.mul(new_indices, new_values, new_out);
         };
         if (_n_threads <= 1) {
-            for (int i = 0; i < _mat_list.size(); ++i) routine(i);
+            for (size_t i = 0; i < _mat_list.size(); ++i) routine(i);
         } else {
             #pragma omp parallel for schedule(static) num_threads(_n_threads)
-            for (int i = 0; i < _mat_list.size(); ++i) routine(i);
+            for (size_t i = 0; i < _mat_list.size(); ++i) routine(i);
         }
     } 
 
@@ -200,7 +200,7 @@ public:
             const auto new_i = j - mat_pos;
             const auto new_p = std::min<size_t>(mat.cols()-new_i, p-n_processed);
             const auto new_p_sq = new_p * new_p;
-            if (_vbuff.size() < new_p_sq) {
+            if (static_cast<size_t>(_vbuff.size()) < new_p_sq) {
                 _vbuff.resize(new_p_sq);
             }
             Eigen::Map<colmat_value_t> new_out(

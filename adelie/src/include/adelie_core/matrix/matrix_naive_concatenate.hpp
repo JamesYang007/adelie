@@ -176,7 +176,7 @@ public:
     ) override
     {
         int n_processed = 0;
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto p = mat.cols();
             mat.mul(v, weights, out.segment(n_processed, p));
@@ -310,7 +310,7 @@ public:
         base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
         size_t begin = 0;
         value_t sum = 0;
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto rows_curr = mat.rows();
             const Eigen::Map<const vec_value_t> v_curr(
@@ -333,7 +333,7 @@ public:
     {
         base_t::check_ctmul(j, out.size(), rows(), cols());
         size_t begin = 0;
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto rows_curr = mat.rows();
             Eigen::Map<vec_value_t> out_curr(
@@ -355,7 +355,7 @@ public:
         size_t begin = 0;
         out.setZero();
         Eigen::Map<vec_value_t> buff(_buff.data(), q);
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto rows_curr = mat.rows();
             const Eigen::Map<const vec_value_t> v_curr(
@@ -378,7 +378,7 @@ public:
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         size_t begin = 0;
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto rows_curr = mat.rows();
             Eigen::Map<vec_value_t> out_curr(
@@ -398,7 +398,7 @@ public:
         size_t begin = 0;
         out.setZero();
         Eigen::Map<vec_value_t> buff(_buff.data(), out.size());
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto rows_curr = mat.rows();
             const Eigen::Map<const vec_value_t> v_curr(
@@ -440,7 +440,7 @@ public:
 
         size_t begin = 0;
         out.setZero();
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto rows_curr = mat.rows();
             const Eigen::Map<const vec_value_t> sqrt_weights_curr(
@@ -470,7 +470,7 @@ public:
 
         const auto L = v.rows();
         size_t begin = 0;
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto rows_curr = mat.rows();
             if (buff.size() < L * rows_curr) buff.resize(L * rows_curr);

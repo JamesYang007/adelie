@@ -57,7 +57,7 @@ struct IOSNPChunkIterator
 
         // increment past n_chunks and chunk_it number of chunks
         buffer_idx = sizeof(inner_t);
-        for (int i = 0; i < chunk_it; ++i) {
+        for (inner_t i = 0; i < chunk_it; ++i) {
             buffer_idx += sizeof(inner_t);
             const size_t nnz = (
                 static_cast<inner_t>(*reinterpret_cast<const chunk_inner_t*>(ctg_buffer + buffer_idx))
@@ -260,10 +260,10 @@ public:
         const auto routine = [&](outer_t j) {
             auto dense_j = dense.col(j);
             dense_j.setZero();
-            for (int c = 0; c < n_categories; ++c) {
+            for (size_t c = 0; c < n_categories; ++c) {
                 auto it = this->begin(j, c);
                 const auto end = this->end(j, c);
-                const auto val = (c == 0) ? -9 : c;
+                const int val = (c == 0) ? -9 : c;
                 for (; it != end; ++it) {
                     dense_j[*it] = val;
                 }
@@ -376,7 +376,7 @@ public:
         const auto outer_routine = [&](outer_t j) {
             const auto col_j = calldata.col(j);
             size_t col_bytes = 0;
-            for (int i = 0; i < n_ctg; ++i) {
+            for (size_t i = 0; i < n_ctg; ++i) {
                 col_bytes += sizeof(outer_t) + sizeof(inner_t);
                 for (inner_t k = 0; k < max_chunks; ++k) {
                     const outer_t chnk = k * chunk_size;
@@ -398,7 +398,7 @@ public:
                         }
                         const bool to_not_skip = (
                             ((i == 0) && (col_j[cidx] < 0)) ||
-                            ((i > 0) && (col_j[cidx] == i))
+                            ((i > 0) && (col_j[cidx] == static_cast<char>(i)))
                         );
                         if (!to_not_skip) continue;
                         is_nonempty = true;
@@ -421,7 +421,7 @@ public:
         // cumsum outer
         for (outer_t j = 0; j < p; ++j) outer[j+1] += outer[j];
 
-        if (outer[p] > buffer.size()) {
+        if (outer[p] > static_cast<size_t>(buffer.size())) {
             throw util::adelie_core_error(
                 "Buffer was not initialized with a large enough size. "
                 "\n\tBuffer size:   " + std::to_string(buffer.size()) +
@@ -441,7 +441,7 @@ public:
 
             size_t cidx = 3 * sizeof(outer_t);
 
-            for (int i = 0; i < n_ctg; ++i) {
+            for (size_t i = 0; i < n_ctg; ++i) {
                 auto& outer_i = reinterpret_cast<outer_t*>(buffer_j.data())[i];
                 outer_i = cidx; // IMPORTANT: relative to buffer_j not buffer!!
                 auto& n_chunks = reinterpret_cast<inner_t&>(buffer_j[cidx]); 
@@ -462,7 +462,7 @@ public:
                         if (didx >= n) break;
                         const bool to_not_skip = (
                             ((i == 0) && (col_j[didx] < 0)) ||
-                            ((i > 0) && (col_j[didx] == i))
+                            ((i > 0) && (col_j[didx] == static_cast<char>(i)))
                         );
                         if (!to_not_skip) continue;
                         chunk_begin[nnz] = c;
@@ -478,7 +478,7 @@ public:
                 }
             }
 
-            if (cidx != buffer_j.size()) {
+            if (cidx != static_cast<size_t>(buffer_j.size())) {
                 throw util::adelie_core_error(
                     "Column index certificate does not match expected size:"
                     "\n\tCertificate:   " + std::to_string(cidx) +
