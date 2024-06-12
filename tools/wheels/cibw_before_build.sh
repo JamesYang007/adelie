@@ -12,6 +12,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 elif [[ "$OSTYPE" == "linux"* ]]; then
     # Conda is already installed.
     # Linux build is fully self-contained, so we must do a conda install inside.
+    export PATH=$PATH:$CONDA/bin
     conda create -n adelie eigen==3.4.0
     conda activate adelie
 fi
