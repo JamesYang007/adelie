@@ -173,10 +173,10 @@ public:
             _mat->bmul(j, q, v, weights, curr_out);
         };
         if (_n_threads <= 1) {
-            for (size_t t = 0; t < _subset_cbegin.size(); ++t) routine(t);
+            for (int t = 0; t < static_cast<int>(_subset_cbegin.size()); ++t) routine(t);
         } else {
             #pragma omp parallel for schedule(static) num_threads(_n_threads)
-            for (size_t t = 0; t < _subset_cbegin.size(); ++t) routine(t);
+            for (int t = 0; t < static_cast<int>(_subset_cbegin.size()); ++t) routine(t);
         }
     }
 

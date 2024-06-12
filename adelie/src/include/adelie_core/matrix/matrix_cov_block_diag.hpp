@@ -178,10 +178,10 @@ public:
             mat.mul(new_indices, new_values, new_out);
         };
         if (_n_threads <= 1) {
-            for (size_t i = 0; i < _mat_list.size(); ++i) routine(i);
+            for (int i = 0; i < static_cast<int>(_mat_list.size()); ++i) routine(i);
         } else {
             #pragma omp parallel for schedule(static) num_threads(_n_threads)
-            for (size_t i = 0; i < _mat_list.size(); ++i) routine(i);
+            for (int i = 0; i < static_cast<int>(_mat_list.size()); ++i) routine(i);
         }
     } 
 
