@@ -9,7 +9,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     else
         export MACOSX_DEPLOYMENT_TARGET=10.9
     fi
+elif [[ "$OSTYPE" == "linux"* ]]; then
+    # Conda is already installed.
+    # Linux build is fully self-contained, so we must do a conda install inside.
+    conda create -n adelie eigen==3.4.0
+    conda activate adelie
 fi
-
-echo $MAMBA_ROOT_PREFIX
-find $MAMBA_ROOT_PREFIX -name '*eigen3'
