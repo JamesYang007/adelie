@@ -35,12 +35,6 @@ jobs:
         create-args: >-
           llvm-openmp==11.1.0
           eigen==3.4.0
-    - name: Add micromamba path (Linux + MacOS)
-      if: ${{ matrix.buildplat[1] != 'win_amd64' }}
-      run: |
-        set -ex
-        echo $MAMBA_ROOT_PREFIX
-      shell: bash
     - name: Setup conda (Windows)
       if: ${{ matrix.buildplat[1] == 'win_amd64' }}
       run: |
@@ -53,6 +47,7 @@ jobs:
       uses: pypa/cibuildwheel@v2.19.0
       env:
         CIBW_BEFORE_BUILD: bash tools/wheels/cibw_before_build.sh
+        CIBW_ENVIRONMENT: MAMBA_ROOT_PREFIX=$MAMBA_ROOT_PREFIX
         CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}
         CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: bash tools/github/repair_windows_wheels.sh {wheel} {dest_dir}
     - name: Store the distribution packages
