@@ -42,6 +42,7 @@ elif os.name == "nt":
     extra_compile_args = [
         "/W3",
         "/WX",
+        "/wdC4566", # unicode not representable
         "/O2",
     ]
 include_dirs = [
