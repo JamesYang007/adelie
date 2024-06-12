@@ -38,6 +38,8 @@ if os.name == "posix":
     ]
 else:
     extra_compile_args = [
+        "/Wall",
+        "/WX",
         "/O3",
     ]
 include_dirs = [
