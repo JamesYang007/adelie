@@ -59,16 +59,20 @@ elif "MAMBA_ROOT_PREFIX" in os.environ:
 else:
     conda_prefix = None
 
+system_name = platform.system()
+
 # add include and include/eigen3
 if not (conda_prefix is None):
-    conda_include_path = os.path.join(conda_prefix, "include")
+    if system_name in ["Darwin", "Linux"]:
+        conda_include_path = os.path.join(conda_prefix, "include")
+    else:
+        conda_include_path = os.path.join(conda_prefix, "Library", "include")
     eigen_include_path = os.path.join(conda_include_path, "eigen3")
     include_dirs += [
         conda_include_path,
         eigen_include_path,
     ]
 
-system_name = platform.system()
 if system_name == "Darwin":
     # if user provides OpenMP install prefix (containing include/ and lib/)
     if "OPENMP_PREFIX" in os.environ and os.environ["OPENMP_PREFIX"] != "":
