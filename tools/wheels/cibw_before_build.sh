@@ -10,9 +10,16 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         export MACOSX_DEPLOYMENT_TARGET=10.9
     fi
 elif [[ "$OSTYPE" == "linux"* ]]; then
-    # Conda is already installed.
-    # Linux build is fully self-contained, so we must do a conda install inside.
-    export PATH=$PATH:$CONDA/bin
+    # Linux build is fully self-contained, so we must setup everything from scratch.
+    # Install miniconda
+    mkdir -p ~/miniconda3
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
+    bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+    rm -rf ~/miniconda3/miniconda.sh
+    export PATH=$PATH:~/miniconda3/bin
+    conda init bash
+
+    # Create adelie environment
     conda create -n adelie eigen==3.4.0
     conda activate adelie
 fi
