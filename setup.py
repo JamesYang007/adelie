@@ -28,6 +28,7 @@ ParallelCompile("NPY_NUM_BUILD_JOBS").install()
 __version__ = open("VERSION", "r").read().strip()
 
 if os.name == "posix":
+    # GCC + Clang options to be extra stringent with warnings.
     extra_compile_args = [
         "-g0",
         "-Wall", 
@@ -36,9 +37,11 @@ if os.name == "posix":
         "-DNDEBUG", 
         "-O3",
     ]
-else:
+elif os.name == "nt":
+    # MSVC defauls to /W3 and /O2, but we make them explicit anyways.
     extra_compile_args = [
-        "/Wall",
+        "/W3",
+        "/WX",
         "/O2",
     ]
 include_dirs = [
