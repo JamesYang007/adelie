@@ -394,6 +394,7 @@ auto fit(
 
 template <class StateType,
           class GlmType,
+          class PBType,
           class ExitCondType,
           class UpdateLossNullType,
           class UpdateCoefficientsType,
@@ -402,7 +403,7 @@ template <class StateType,
 inline void solve(
     StateType&& state,
     GlmType&& glm,
-    bool display,
+    PBType&& pb,
     ExitCondType exit_cond_f,
     UpdateLossNullType update_loss_null_f,
     UpdateCoefficientsType update_coefficients_f,
@@ -419,7 +420,7 @@ inline void solve(
     GlmNaiveBufferPack<value_t, safe_bool_t> buffer_pack(n, p);
 
     const auto pb_add_suffix_f = [&](const auto& state, auto& pb) {
-        if (display) solver::pb_add_suffix(state, pb);
+        solver::pb_add_suffix(state, pb);
     };
     const auto update_loss_null_wrap_f = [&](auto& state) {
         const auto setup_loss_null = state.setup_loss_null;
@@ -468,7 +469,7 @@ inline void solve(
 
     solver::solve_core(
         state,
-        display,
+        pb,
         pb_add_suffix_f,
         update_loss_null_wrap_f,
         update_invariance_f,
@@ -481,13 +482,14 @@ inline void solve(
 
 template <class StateType,
           class GlmType,
+          class PBType,
           class ExitCondType,
           class UpdateCoefficientsType,
           class CUIType=util::no_op>
 inline void solve(
     StateType&& state,
     GlmType&& glm,
-    bool display,
+    PBType&& pb,
     ExitCondType exit_cond_f,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
@@ -496,7 +498,7 @@ inline void solve(
     solve(
         std::forward<StateType>(state), 
         std::forward<GlmType>(glm), 
-        display, 
+        std::forward<PBType>(pb),
         exit_cond_f,
         [](auto& state, auto& glm, auto& buffer_pack) {
             update_loss_null(state, glm, buffer_pack);

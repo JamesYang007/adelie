@@ -222,6 +222,7 @@ bool kkt(
 }
 
 template <class StateType,
+          class PBType,
           class PBAddSuffixType,
           class UpdateLossNullType,
           class UpdateInvarianceType,
@@ -231,7 +232,7 @@ template <class StateType,
           class FitType>
 inline void solve_core(
     StateType&& state,
-    bool display,
+    PBType&& pb,
     PBAddSuffixType pb_add_suffix_f,
     UpdateLossNullType update_loss_null_f,
     UpdateInvarianceType update_invariance_f,
@@ -268,6 +269,11 @@ inline void solve_core(
     auto& n_valid_solutions = state.n_valid_solutions;
     auto& active_sizes = state.active_sizes;
     auto& screen_sizes = state.screen_sizes;
+
+    // Manually set progress bar to iters_done_ == 1.
+    // This ensures that until pb is properly initialized to the range of [0, lmda_path.size()),
+    // if the function finishes earlier then pb will print "... 0/0 ..." instead of "... -1/0 ...".
+    pb.manually_set_progress(1); 
 
     if (screen_set.size() > max_screen_size) throw util::max_screen_set_error();
 
@@ -320,8 +326,10 @@ inline void solve_core(
     // All solutions to lambda > lambda_max are saved.
 
     // initialize progress bar
-    auto pb = util::tq::trange(lmda_path.size());
-    pb.set_display(display);
+    pb.set_range(
+        util::tq::int_iterator<int>(0),
+        util::tq::int_iterator<int>(lmda_path.size())
+    );
     auto pb_it = pb.begin();
 
     // slice lambda_path up to lmda_max

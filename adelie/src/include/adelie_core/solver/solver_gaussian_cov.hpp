@@ -226,12 +226,13 @@ auto fit(
 }
 
 template <class StateType,
+          class PBType,
           class ExitCondType,
           class UpdateCoefficientsType,
           class CUIType=util::no_op>
 inline void solve(
     StateType&& state,
-    bool display,
+    PBType&& pb,
     ExitCondType exit_cond_f,
     UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
@@ -247,7 +248,7 @@ inline void solve(
     GaussianCovBufferPack<value_t, safe_bool_t> buffer_pack(p);
 
     const auto pb_add_suffix_f = [&](const auto& state, auto& pb) {
-        if (display) cov::pb_add_suffix(state, pb);
+        cov::pb_add_suffix(state, pb);
     };
     const auto update_loss_null_f = [](const auto&) {};
     const auto update_invariance_f = [&](
@@ -314,7 +315,7 @@ inline void solve(
 
     solver::solve_core(
         state,
-        display,
+        pb,
         pb_add_suffix_f,
         update_loss_null_f,
         update_invariance_f,

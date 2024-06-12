@@ -71,16 +71,16 @@ private:
 
 public:
     explicit MatrixNaiveCSubset(
-        base_t* mat,
+        base_t& mat,
         const Eigen::Ref<const vec_index_t>& subset,
         size_t n_threads
     ): 
-        _mat(mat),
+        _mat(&mat),
         _subset(subset.data(), subset.size()),
         _subset_cinfo(init_subset_cinfo(subset)),
         _n_threads(n_threads)
     {
-        if ((subset.minCoeff() < 0) || (subset.maxCoeff() >= mat->cols())) {
+        if ((subset.minCoeff() < 0) || (subset.maxCoeff() >= mat.cols())) {
             throw util::adelie_core_error(
                 "subset must contain unique values in the range [0, p) "
                 "where p is the number of columns."
@@ -281,17 +281,17 @@ private:
     
 public:
     explicit MatrixNaiveRSubset(
-        base_t* mat,
+        base_t& mat,
         const Eigen::Ref<const vec_index_t>& subset,
         size_t n_threads
     ): 
-        _mat(mat),
+        _mat(&mat),
         _subset(subset.data(), subset.size()),
-        _mask(init_mask(mat->rows(), subset)),
+        _mask(init_mask(mat.rows(), subset)),
         _n_threads(n_threads),
-        _buffer(mat->rows())
+        _buffer(mat.rows())
     {
-        if ((subset.minCoeff() < 0) || (subset.maxCoeff() >= mat->rows())) {
+        if ((subset.minCoeff() < 0) || (subset.maxCoeff() >= mat.rows())) {
             throw util::adelie_core_error(
                 "subset must contain unique values in the range [0, n) "
                 "where n is the number of rows."
