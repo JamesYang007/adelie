@@ -10,3 +10,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         export MACOSX_DEPLOYMENT_TARGET=10.9
     fi
 fi
+
+echo $MAMBA_ROOT_PREFIX
+ls $MAMBA_ROOT_PREFIX/envs/adelie
