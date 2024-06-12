@@ -36,7 +36,6 @@ py::dict nnls_cov_full(
 )
 {
     using sw_t = ad::util::Stopwatch;
-    const auto d = quad.cols();
     size_t iters;
     ad::util::rowvec_type<double> x = x0;
     ad::util::rowvec_type<double> grad = (
@@ -69,7 +68,6 @@ py::dict nnls_naive(
 )
 {
     using sw_t = ad::util::Stopwatch;
-    const auto d = X.cols();
     size_t iters;
     ad::util::rowvec_type<double> X_vars = (
         X.array().square().colwise().sum()

@@ -83,7 +83,7 @@ public:
         if (!vsc) return;
         dvsubi(
             out, 
-            vec_value_t::NullaryExpr(out.size(), [&](auto i) {
+            vec_value_t::NullaryExpr(out.size(), [&](auto) {
                 return vsc;
             }),
             _n_threads

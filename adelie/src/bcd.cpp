@@ -285,7 +285,6 @@ py::dict constrained_coordinate_descent_solver(
 {
     using sw_t = ad::util::Stopwatch;
 
-    const auto m = A.rows();
     const auto d = A.cols();
     ad::util::rowvec_type<double> A_vars = A.array().square().rowwise().sum();
     ad::util::rowvec_type<double> buff(4*d);

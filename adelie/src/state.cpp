@@ -1216,7 +1216,7 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             ad::util::rowarr_type<value_t> intercepts(
                 s.intercepts.size(), s.n_classes
             );
-            for (int i = 0; i < s.intercepts.size(); ++i) {
+            for (size_t i = 0; i < s.intercepts.size(); ++i) {
                 intercepts.row(i) = s.intercepts[i];
             }
             return intercepts;
@@ -1675,7 +1675,7 @@ void state_multiglm_naive(py::module_& m, const char* name)
             ad::util::rowarr_type<value_t> intercepts(
                 s.intercepts.size(), s.n_classes
             );
-            for (int i = 0; i < s.intercepts.size(); ++i) {
+            for (size_t i = 0; i < s.intercepts.size(); ++i) {
                 intercepts.row(i) = s.intercepts[i];
             }
             return intercepts;

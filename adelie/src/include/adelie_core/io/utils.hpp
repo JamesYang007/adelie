@@ -15,7 +15,7 @@ void compute_column_mean(
 )
 {
     const auto n = m.rows();
-    const auto p = m.cols();
+    const size_t p = m.cols();
 
     const auto routine = [&](auto j) {
         uint64_t sum = 0;
@@ -43,7 +43,7 @@ void compute_nnm(
 )
 {
     const auto n = m.rows();
-    const auto p = m.cols();
+    const size_t p = m.cols();
     const auto routine = [&](auto j) {
         uint64_t n_miss = 0;
         for (int k = 0; k < n; ++k) {
@@ -69,7 +69,7 @@ void compute_nnz(
 )
 {
     const auto n = m.rows();
-    const auto p = m.cols();
+    const size_t p = m.cols();
     const auto routine = [&](auto j) {
         uint64_t nnz = 0;
         for (int k = 0; k < n; ++k) if (m(k,j) != 0) ++nnz;

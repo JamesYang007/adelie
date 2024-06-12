@@ -46,7 +46,6 @@ void coordinate_descent(
     const auto lmda = state.lmda_path[lmda_idx];
     const auto newton_tol = state.newton_tol;
     const auto newton_max_iters = state.newton_max_iters;
-    const auto n_threads = state.n_threads;
     auto& screen_beta = state.screen_beta;
     auto& screen_grad = state.screen_grad;
     auto& resid = state.resid;

@@ -245,7 +245,6 @@ inline void solve_core(
     using state_t = std::decay_t<StateType>;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
-    using vec_safe_bool_t = typename state_t::vec_safe_bool_t;
     using sw_t = util::Stopwatch;
 
     const auto alpha = state.alpha;
@@ -256,7 +255,6 @@ inline void solve_core(
     const auto setup_lmda_path = state.setup_lmda_path;
     const auto lmda_path_size = state.lmda_path_size;
     const auto min_ratio = state.min_ratio;
-    const auto& screen_is_active = state.screen_is_active;
     const auto& active_set_size = state.active_set_size;
     const auto& abs_grad = state.abs_grad;
     auto& lmda_max = state.lmda_max;

@@ -347,7 +347,7 @@ struct StateBase
                 "It is likely screen_beta has been initialized incorrectly."
             );
         }
-        if (active_set_size > G) {
+        if (active_set_size > static_cast<size_t>(G)) {
             throw util::adelie_core_error(
                 "active_set_size must be <= active_set.size()."
             );

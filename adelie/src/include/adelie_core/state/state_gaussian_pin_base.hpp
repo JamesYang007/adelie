@@ -124,7 +124,7 @@ struct StateGaussianPinBase
     {
         active_begins.reserve(screen_set.size());
         int active_begin = 0;
-        for (int i = 0; i < active_set_size; ++i) {
+        for (size_t i = 0; i < active_set_size; ++i) {
             const auto ia = active_set[i];
             const auto curr_size = group_sizes[screen_set[ia]];
             active_begins.push_back(active_begin);
