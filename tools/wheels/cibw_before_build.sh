@@ -10,21 +10,24 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         export MACOSX_DEPLOYMENT_TARGET=10.9
     fi
 elif [[ "$OSTYPE" == "linux"* ]]; then
-    # Linux build is fully self-contained, so we must setup everything from scratch.
-    # Install wget
-    apt-get update
-    apt-get upgrade
-    apt-get install wget
+    # Linux build is fully self-contained, so extra care is needed.
+    # The host file system is mounted as /host (https://cibuildwheel.pypa.io/en/stable/faq/).
+    # We can access MAMBA_ROOT_PREFIX of host for the conda environment.
+    export MAMBA_ROOT_PREFIX="/host/home/runner/micromamba"
+    ls $MAMBA_ROOT_PREFIX
 
-    # Install miniconda
-    mkdir -p ~/miniconda3
-    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
-    bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
-    rm -rf ~/miniconda3/miniconda.sh
-    export PATH=$PATH:~/miniconda3/bin
-    conda init bash
+    ## Install wget
+    #yum install wget
 
-    # Create adelie environment
-    conda create -n adelie eigen==3.4.0
-    conda activate adelie
+    ## Install miniconda
+    #mkdir -p ~/miniconda3
+    #wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
+    #bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+    #rm -rf ~/miniconda3/miniconda.sh
+    #export PATH=$PATH:~/miniconda3/bin
+    #conda init bash
+
+    ## Create adelie environment
+    #conda create -n adelie eigen==3.4.0
+    #conda activate adelie
 fi
