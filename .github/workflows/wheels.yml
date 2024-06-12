@@ -41,7 +41,6 @@ jobs:
         # The host file system is mounted as /host (https://cibuildwheel.pypa.io/en/stable/faq/).
         # We can access MAMBA_ROOT_PREFIX of host for the conda environment.
         CIBW_ENVIRONMENT_LINUX: MAMBA_ROOT_PREFIX="/host/home/runner/micromamba"
-        CIBW_BEFORE_BUILD: bash tools/wheels/cibw_before_build.sh
         CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}
         CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: bash tools/github/repair_windows_wheels.sh {wheel} {dest_dir}
     - name: Store the distribution packages
