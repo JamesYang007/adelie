@@ -4,7 +4,6 @@
 #include <vector>
 #include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/io/io_snp_unphased.hpp>
-#include <omp.h>
 
 namespace adelie_core {
 namespace matrix {
