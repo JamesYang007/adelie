@@ -12,4 +12,4 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 echo $MAMBA_ROOT_PREFIX
-ls $MAMBA_ROOT_PREFIX/envs/adelie/include/eigen3
+find $MAMBA_ROOT_PREFIX -name '*eigen3'
