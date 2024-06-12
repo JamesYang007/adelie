@@ -43,8 +43,8 @@ else:
         "/O2",
     ]
 include_dirs = [
-    "adelie/src",
-    "adelie/src/include",
+    os.path.join("adelie", "src"),
+    os.path.join("adelie", "src", "include"),
 ]
 libraries = []
 library_dirs = []
@@ -55,7 +55,7 @@ if "CONDA_PREFIX" in os.environ:
     conda_prefix = os.environ["CONDA_PREFIX"]
 # check if micromamba environment activated (CI)
 elif "MAMBA_ROOT_PREFIX" in os.environ:
-    conda_prefix = os.path.join(os.environ["MAMBA_ROOT_PREFIX"], "envs/adelie")
+    conda_prefix = os.path.join(os.environ["MAMBA_ROOT_PREFIX"], "envs", "adelie")
 else:
     conda_prefix = None
 
