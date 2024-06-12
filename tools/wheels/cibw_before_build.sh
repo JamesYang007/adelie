@@ -11,6 +11,11 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     fi
 elif [[ "$OSTYPE" == "linux"* ]]; then
     # Linux build is fully self-contained, so we must setup everything from scratch.
+    # Install wget
+    apt update
+    apt upgrade
+    apt install wget
+
     # Install miniconda
     mkdir -p ~/miniconda3
     wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
