@@ -12,7 +12,7 @@ public:
     using base_t = IOSNPBase<MmapPtrType>;
     using outer_t = uint64_t;
     using inner_t = uint32_t;
-    using chunk_inner_t = u_char;
+    using chunk_inner_t = uint8_t;
     using value_t = int8_t;
     using vec_outer_t = util::rowvec_type<outer_t>;
     using vec_inner_t = util::rowvec_type<inner_t>;
