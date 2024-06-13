@@ -168,8 +168,11 @@ void update_screen_derived_base(
     /* update screen_is_active */
     screen_is_active.resize(screen_set.size(), false);
 
-    /* update screen_dual-begins */
-    const auto last_constraint = constraints[screen_set[old_screen_size-1]];
+    /* update screen_dual_begins */
+    const auto last_constraint = (
+        (old_screen_size == 0) ?
+        nullptr : constraints[screen_set[old_screen_size-1]]
+    );
     size_t screen_dual_value_size = (
         (old_screen_size == 0) ? 
         0 : (screen_dual_begins.back() + (
