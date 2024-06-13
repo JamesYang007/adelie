@@ -1,0 +1,52 @@
+﻿adelie.adelie\_core.constraint.ConstraintBase64
+===============================================
+
+.. currentmodule:: adelie.adelie_core.constraint
+
+.. autoclass:: ConstraintBase64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ConstraintBase64.__init__
+      ~ConstraintBase64.duals
+      ~ConstraintBase64.gradient
+      ~ConstraintBase64.primals
+      ~ConstraintBase64.project
+      ~ConstraintBase64.solve
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ConstraintBase64.dual_size
+      ~ConstraintBase64.primal_size
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: duals
+   .. automethod:: gradient
+   .. automethod:: primals
+   .. automethod:: project
+   .. automethod:: solve
+   
+   
+
+   
+   
+   
+   .. autoattribute:: dual_size
+   .. autoattribute:: primal_size
+   
+   

@@ -31,6 +31,7 @@
       ~StateGaussianPinCov64.benchmark_active
       ~StateGaussianPinCov64.benchmark_screen
       ~StateGaussianPinCov64.betas
+      ~StateGaussianPinCov64.constraints
       ~StateGaussianPinCov64.ddev_tol
       ~StateGaussianPinCov64.group_sizes
       ~StateGaussianPinCov64.groups
@@ -50,6 +51,8 @@
       ~StateGaussianPinCov64.rsqs
       ~StateGaussianPinCov64.screen_begins
       ~StateGaussianPinCov64.screen_beta
+      ~StateGaussianPinCov64.screen_dual
+      ~StateGaussianPinCov64.screen_dual_begins
       ~StateGaussianPinCov64.screen_grad
       ~StateGaussianPinCov64.screen_is_active
       ~StateGaussianPinCov64.screen_set
@@ -81,6 +84,7 @@
    .. autoattribute:: benchmark_active
    .. autoattribute:: benchmark_screen
    .. autoattribute:: betas
+   .. autoattribute:: constraints
    .. autoattribute:: ddev_tol
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
@@ -100,6 +104,8 @@
    .. autoattribute:: rsqs
    .. autoattribute:: screen_begins
    .. autoattribute:: screen_beta
+   .. autoattribute:: screen_dual
+   .. autoattribute:: screen_dual_begins
    .. autoattribute:: screen_grad
    .. autoattribute:: screen_is_active
    .. autoattribute:: screen_set

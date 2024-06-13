@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.diagnostic.plot_benchmark &#8212; adelie 1.1.34 documentation</title>
+    <title>adelie.diagnostic.plot_benchmark &#8212; adelie 1.1.35 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=1056f085"></script>
+    <script src="../_static/documentation_options.js?v=b42e749c"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -124,8 +124,8 @@
     
     
     
-    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.34 documentation - Home"/>
-    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.34 documentation - Home"/>`);</script>
+    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.35 documentation - Home"/>
+    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.35 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -331,6 +331,9 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.configs.set_configs.html">adelie.configs.set_configs</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.constraint.lower.html">adelie.constraint.lower</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.cv.CVGrpnetResult.html">adelie.cv.CVGrpnetResult</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.cv.cv_grpnet.html">adelie.cv.cv_grpnet</a></li>
 </ul>
@@ -397,6 +400,8 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.configs.Configs.html">adelie.adelie_core.configs.Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBase64.html">adelie.adelie_core.constraint.ConstraintBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintLowerUpper64.html">adelie.adelie_core.constraint.ConstraintLowerUpper64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBase64.html">adelie.adelie_core.glm.GlmBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialLogit64.html">adelie.adelie_core.glm.GlmBinomialLogit64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialProbit64.html">adelie.adelie_core.glm.GlmBinomialProbit64</a></li>
@@ -493,7 +498,7 @@ document.write(`
 <h1>adelie.diagnostic.plot_benchmark<a class="headerlink" href="#adelie-diagnostic-plot-benchmark" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.diagnostic.plot_benchmark">
-<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">plot_benchmark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmark_screen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmark_fit_screen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmark_fit_active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmark_kkt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmark_invariance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_valid_solutions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/diagnostic.py#L798-L925"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.diagnostic.plot_benchmark" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">plot_benchmark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmark_screen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmark_fit_screen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmark_fit_active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmark_kkt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmark_invariance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_valid_solutions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/diagnostic.py#L807-L934"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.diagnostic.plot_benchmark" title="Link to this definition">#</a></dt>
 <dd><p>Plots benchmark times.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

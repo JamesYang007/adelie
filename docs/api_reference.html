@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>API Reference &#8212; adelie 1.1.34 documentation</title>
+    <title>API Reference &#8212; adelie 1.1.35 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="_static/documentation_options.js?v=1056f085"></script>
+    <script src="_static/documentation_options.js?v=b42e749c"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/design-tabs.js?v=36754332"></script>
@@ -124,8 +124,8 @@
     
     
     
-    <img src="_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.34 documentation - Home"/>
-    <script>document.write(`<img src="_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.34 documentation - Home"/>`);</script>
+    <img src="_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.35 documentation - Home"/>
+    <script>document.write(`<img src="_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.35 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -331,6 +331,9 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.configs.set_configs.html">adelie.configs.set_configs</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.constraint.lower.html">adelie.constraint.lower</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.cv.CVGrpnetResult.html">adelie.cv.CVGrpnetResult</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.cv.cv_grpnet.html">adelie.cv.cv_grpnet</a></li>
 </ul>
@@ -397,6 +400,8 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.configs.Configs.html">adelie.adelie_core.configs.Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintBase64.html">adelie.adelie_core.constraint.ConstraintBase64</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintLowerUpper64.html">adelie.adelie_core.constraint.ConstraintLowerUpper64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.glm.GlmBase64.html">adelie.adelie_core.glm.GlmBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.glm.GlmBinomialLogit64.html">adelie.adelie_core.glm.GlmBinomialLogit64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.adelie_core.glm.GlmBinomialProbit64.html">adelie.adelie_core.glm.GlmBinomialProbit64</a></li>
@@ -519,6 +524,16 @@ document.write(`
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.configs.set_configs.html#adelie.configs.set_configs" title="adelie.configs.set_configs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_configs</span></code></a>(name[, value])</p></td>
 <td><p>Sets global configurations.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="adelie-constraint">
+<h2>adelie.constraint<a class="headerlink" href="#adelie-constraint" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.constraint.lower.html#adelie.constraint.lower" title="adelie.constraint.lower"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lower</span></code></a>(b, *[, max_iters, tol, ...])</p></td>
+<td><p>Creates a lower bound constraint.</p></td>
 </tr>
 </tbody>
 </table>
@@ -689,10 +704,10 @@ document.write(`
 <h2>adelie.solver<a class="headerlink" href="#adelie-solver" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.gaussian_cov.html#adelie.solver.gaussian_cov" title="adelie.solver.gaussian_cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_cov</span></code></a>(A, v, *[, groups, alpha, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.solver.gaussian_cov.html#adelie.solver.gaussian_cov" title="adelie.solver.gaussian_cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_cov</span></code></a>(A, v, *[, constraints, groups, ...])</p></td>
 <td><p>Solves Gaussian group elastic net via covariance method.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.solver.grpnet.html#adelie.solver.grpnet" title="adelie.solver.grpnet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grpnet</span></code></a>(X, glm, *[, groups, alpha, penalty, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.solver.grpnet.html#adelie.solver.grpnet" title="adelie.solver.grpnet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grpnet</span></code></a>(X, glm, *[, constraints, groups, ...])</p></td>
 <td><p>Solves group elastic net via naive method.</p></td>
 </tr>
 </tbody>
@@ -702,25 +717,25 @@ document.write(`
 <h2>adelie.state<a class="headerlink" href="#adelie-state" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.gaussian_cov.html#adelie.state.gaussian_cov" title="adelie.state.gaussian_cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_cov</span></code></a>(*, A, v, groups, group_sizes, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.gaussian_cov.html#adelie.state.gaussian_cov" title="adelie.state.gaussian_cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_cov</span></code></a>(*, A, v, constraints, groups, ...)</p></td>
 <td><p>Creates a Gaussian, covariance method state object.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.gaussian_naive.html#adelie.state.gaussian_naive" title="adelie.state.gaussian_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_naive</span></code></a>(*, X, y, X_means, y_mean, ...)</p></td>
 <td><p>Creates a Gaussian, naive method state object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.gaussian_pin_cov.html#adelie.state.gaussian_pin_cov" title="adelie.state.gaussian_pin_cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_pin_cov</span></code></a>(*, A, groups, alpha, ...[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.gaussian_pin_cov.html#adelie.state.gaussian_pin_cov" title="adelie.state.gaussian_pin_cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_pin_cov</span></code></a>(*, A, constraints, groups, ...)</p></td>
 <td><p>Creates a Gaussian, pin, covariance method state object.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.gaussian_pin_naive.html#adelie.state.gaussian_pin_naive" title="adelie.state.gaussian_pin_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_pin_naive</span></code></a>(*, X, y_mean, y_var, ...)</p></td>
 <td><p>Creates a Gaussian, pin, naive method state object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.glm_naive.html#adelie.state.glm_naive" title="adelie.state.glm_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">glm_naive</span></code></a>(*, X, glm, groups, group_sizes, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.glm_naive.html#adelie.state.glm_naive" title="adelie.state.glm_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">glm_naive</span></code></a>(*, X, glm, constraints, groups, ...)</p></td>
 <td><p>Creates a GLM, naive method state object.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.state.multigaussian_naive.html#adelie.state.multigaussian_naive" title="adelie.state.multigaussian_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multigaussian_naive</span></code></a>(*, X, y, X_means, y_var, ...)</p></td>
 <td><p>Creates a MultiGaussian, naive method state object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.multiglm_naive.html#adelie.state.multiglm_naive" title="adelie.state.multiglm_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multiglm_naive</span></code></a>(*, X, glm, groups, ...[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.state.multiglm_naive.html#adelie.state.multiglm_naive" title="adelie.state.multiglm_naive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multiglm_naive</span></code></a>(*, X, glm, constraints, ...)</p></td>
 <td><p>Creates a multi-response GLM, naive method state object.</p></td>
 </tr>
 </tbody>
@@ -732,6 +747,12 @@ document.write(`
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.configs.Configs.html#adelie.adelie_core.configs.Configs" title="adelie.adelie_core.configs.Configs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.configs.Configs</span></code></a></p></td>
 <td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintBase64.html#adelie.adelie_core.constraint.ConstraintBase64" title="adelie.adelie_core.constraint.ConstraintBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintBase64</span></code></a></p></td>
+<td><p>Base constraint class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintLowerUpper64.html#adelie.adelie_core.constraint.ConstraintLowerUpper64" title="adelie.adelie_core.constraint.ConstraintLowerUpper64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintLowerUpper64</span></code></a></p></td>
+<td><p>Core constraint class for lower and upper constraints.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.glm.GlmBase64.html#adelie.adelie_core.glm.GlmBase64" title="adelie.adelie_core.glm.GlmBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.glm.GlmBase64</span></code></a></p></td>
 <td><p>Base GLM class.</p></td>
@@ -889,6 +910,7 @@ document.write(`
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-bcd">adelie.bcd</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-configs">adelie.configs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-constraint">adelie.constraint</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-cv">adelie.cv</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-data">adelie.data</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie-diagnostic">adelie.diagnostic</a></li>

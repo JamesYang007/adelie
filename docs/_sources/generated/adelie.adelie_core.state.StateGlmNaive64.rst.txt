@@ -35,6 +35,7 @@
       ~StateGlmNaive64.benchmark_screen
       ~StateGlmNaive64.beta0
       ~StateGlmNaive64.betas
+      ~StateGlmNaive64.constraints
       ~StateGlmNaive64.ddev_tol
       ~StateGlmNaive64.devs
       ~StateGlmNaive64.early_exit
@@ -69,6 +70,8 @@
       ~StateGlmNaive64.resid
       ~StateGlmNaive64.screen_begins
       ~StateGlmNaive64.screen_beta
+      ~StateGlmNaive64.screen_dual
+      ~StateGlmNaive64.screen_dual_begins
       ~StateGlmNaive64.screen_hashset
       ~StateGlmNaive64.screen_is_active
       ~StateGlmNaive64.screen_rule
@@ -105,6 +108,7 @@
    .. autoattribute:: benchmark_screen
    .. autoattribute:: beta0
    .. autoattribute:: betas
+   .. autoattribute:: constraints
    .. autoattribute:: ddev_tol
    .. autoattribute:: devs
    .. autoattribute:: early_exit
@@ -139,6 +143,8 @@
    .. autoattribute:: resid
    .. autoattribute:: screen_begins
    .. autoattribute:: screen_beta
+   .. autoattribute:: screen_dual
+   .. autoattribute:: screen_dual_begins
    .. autoattribute:: screen_hashset
    .. autoattribute:: screen_is_active
    .. autoattribute:: screen_rule

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.glm.binomial &#8212; adelie 1.1.35 documentation</title>
+    <title>adelie.adelie_core.constraint.ConstraintBase64 &#8212; adelie 1.1.35 documentation</title>
   
   
   
@@ -44,11 +44,11 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.glm.binomial';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/adelie.adelie_core.constraint.ConstraintBase64';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="adelie.glm.cox" href="adelie.glm.cox.html" />
-    <link rel="prev" title="adelie.diagnostic.residuals" href="adelie.diagnostic.residuals.html" />
+    <link rel="next" title="adelie.adelie_core.constraint.ConstraintLowerUpper64" href="adelie.adelie_core.constraint.ConstraintLowerUpper64.html" />
+    <link rel="prev" title="adelie.adelie_core.configs.Configs" href="adelie.adelie_core.configs.Configs.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -359,8 +359,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.predict.html">adelie.diagnostic.predict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.glm.binomial</a></li>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.cox.html">adelie.glm.cox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.glm.multigaussian.html">adelie.glm.multigaussian</a></li>
@@ -398,9 +398,9 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.multigaussian_naive.html">adelie.state.multigaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.configs.Configs.html">adelie.adelie_core.configs.Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBase64.html">adelie.adelie_core.constraint.ConstraintBase64</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.adelie_core.constraint.ConstraintBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintLowerUpper64.html">adelie.adelie_core.constraint.ConstraintLowerUpper64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBase64.html">adelie.adelie_core.glm.GlmBase64</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialLogit64.html">adelie.adelie_core.glm.GlmBinomialLogit64</a></li>
@@ -477,7 +477,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">adelie.glm.binomial</li>
+    <li class="breadcrumb-item active" aria-current="page">adelie.adeli...</li>
   </ul>
 </nav>
 </div>
@@ -494,75 +494,185 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="adelie-glm-binomial">
-<h1>adelie.glm.binomial<a class="headerlink" href="#adelie-glm-binomial" title="Link to this heading">#</a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="adelie.glm.binomial">
-<span class="sig-prename descclassname"><span class="pre">adelie.glm.</span></span><span class="sig-name descname"><span class="pre">binomial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">link</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'logit'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float32</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float64</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/glm.py#L86-L180"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.glm.binomial" title="Link to this definition">#</a></dt>
-<dd><p>Creates a Binomial GLM family object.</p>
-<p>The Binomial GLM family with the logit link function 
-specifies the loss function as:</p>
+  <section id="adelie-adelie-core-constraint-constraintbase64">
+<h1>adelie.adelie_core.constraint.ConstraintBase64<a class="headerlink" href="#adelie-adelie-core-constraint-constraintbase64" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="adelie.adelie_core.constraint.ConstraintBase64">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.adelie_core.constraint.</span></span><span class="sig-name descname"><span class="pre">ConstraintBase64</span></span><a class="headerlink" href="#adelie.adelie_core.constraint.ConstraintBase64" title="Link to this definition">#</a></dt>
+<dd><p>Base constraint class.</p>
+<p>The purpose of a constraint class is to define methods that 
+update certain quantities that are required for solving the constrained group lasso problem.</p>
+<p>Every constraint-like class must inherit from this class and override the methods
+before passing into the solver.</p>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64.__init__" title="adelie.adelie_core.constraint.ConstraintBase64.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64.duals" title="adelie.adelie_core.constraint.ConstraintBase64.duals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">duals</span></code></a>(self)</p></td>
+<td><p>Number of dual variables.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64.gradient" title="adelie.adelie_core.constraint.ConstraintBase64.gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient</span></code></a>(self, x, mu, out)</p></td>
+<td><p>Computes the gradient of the Lagrangian.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64.primals" title="adelie.adelie_core.constraint.ConstraintBase64.primals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">primals</span></code></a>(self)</p></td>
+<td><p>Number of primal variables.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64.project" title="adelie.adelie_core.constraint.ConstraintBase64.project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project</span></code></a>(self, x)</p></td>
+<td><p>Computes a projection onto the feasible set.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64.solve" title="adelie.adelie_core.constraint.ConstraintBase64.solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve</span></code></a>(self, x, mu, quad, linear, l1, l2, Q)</p></td>
+<td><p>Computes the block-coordinate update.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64.dual_size" title="adelie.adelie_core.constraint.ConstraintBase64.dual_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dual_size</span></code></a></p></td>
+<td><p>Number of duals.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64.primal_size" title="adelie.adelie_core.constraint.ConstraintBase64.primal_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">primal_size</span></code></a></p></td>
+<td><p>Number of primals.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.adelie_core.constraint.ConstraintBase64.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64" title="adelie.adelie_core.constraint.ConstraintBase64"><span class="pre">adelie.adelie_core.constraint.ConstraintBase64</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.constraint.ConstraintBase64.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.adelie_core.constraint.ConstraintBase64.duals">
+<span class="sig-name descname"><span class="pre">duals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64" title="adelie.adelie_core.constraint.ConstraintBase64"><span class="pre">adelie.adelie_core.constraint.ConstraintBase64</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#adelie.adelie_core.constraint.ConstraintBase64.duals" title="Link to this definition">#</a></dt>
+<dd><p>Number of dual variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>size</strong><span class="classifier">int</span></dt><dd><p>Number of dual variables.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.adelie_core.constraint.ConstraintBase64.gradient">
+<span class="sig-name descname"><span class="pre">gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64" title="adelie.adelie_core.constraint.ConstraintBase64"><span class="pre">adelie.adelie_core.constraint.ConstraintBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.constraint.ConstraintBase64.gradient" title="Link to this definition">#</a></dt>
+<dd><p>Computes the gradient of the Lagrangian.</p>
+<p>The gradient of the Lagrangian (with respect to the primal) is given by</p>
 <div class="math notranslate nohighlight">
 \[\begin{align*}
-    \ell(\eta)
-    =
-    \sum\limits_{i=1}^n w_i \left(
-        -y_i \eta_i + \log(1 + e^{\eta_i})
-    \right)
+    \mu^\top \phi'(x)
 \end{align*}\]</div>
-<p>The Binomial GLM family with the probit link function 
-specifies the loss function as:</p>
-<div class="math notranslate nohighlight">
-\[\begin{align*}
-    \ell(\eta)
-    =
-    -\sum\limits_{i=1}^n w_i \left(
-        y_i \log(\Phi(\eta_i)) + (1-y_i) \log(1-\Phi(\eta_i))
-    \right)
-\end{align*}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\Phi\)</span> is the standard normal CDF.</p>
-<p>We assume that <span class="math notranslate nohighlight">\(y_i \in [0,1]\)</span>.</p>
-<dl class="field-list">
+<p>where <span class="math notranslate nohighlight">\(\phi'(x)\)</span> is the Jacobian of <span class="math notranslate nohighlight">\(\phi\)</span> at <span class="math notranslate nohighlight">\(x\)</span>.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>y</strong><span class="classifier">(n,) np.ndarray</span></dt><dd><p>Response vector <span class="math notranslate nohighlight">\(y\)</span>.</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">(d,) np.ndarray</span></dt><dd><p>The primal <span class="math notranslate nohighlight">\(x\)</span> at which to evaluate the gradient.</p>
 </dd>
-<dt><strong>weights</strong><span class="classifier">(n,) np.ndarray, optional</span></dt><dd><p>Observation weights <span class="math notranslate nohighlight">\(W\)</span>.
-Weights are normalized such that they sum to <code class="docutils literal notranslate"><span class="pre">1</span></code>.
-Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to <code class="docutils literal notranslate"><span class="pre">np.full(n,</span> <span class="pre">1/n)</span></code>.</p>
+<dt><strong>mu</strong><span class="classifier">(m,) np.ndarray</span></dt><dd><p>The dual <span class="math notranslate nohighlight">\(\mu\)</span> at which to evaluate the gradient.</p>
 </dd>
-<dt><strong>link</strong><span class="classifier">str, optional</span></dt><dd><p>The link function type.
-It must be one of the following:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;logit&quot;</span></code>: the logit link function.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;probit&quot;</span></code>: the probit link function.</p></li>
-</ul>
-</div></blockquote>
-<p>Default is <code class="docutils literal notranslate"><span class="pre">&quot;logit&quot;</span></code>.</p>
-</dd>
-<dt><strong>dtype</strong><span class="classifier">Union[np.float32, np.float64], optional</span></dt><dd><p>The underlying data type.
-If <code class="docutils literal notranslate"><span class="pre">None</span></code>, it is inferred from <code class="docutils literal notranslate"><span class="pre">y</span></code>,
-in which case <code class="docutils literal notranslate"><span class="pre">y</span></code> must have an underlying data type of
-<code class="docutils literal notranslate"><span class="pre">np.float32</span></code> or <code class="docutils literal notranslate"><span class="pre">np.float64</span></code>.
-Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>glm</dt><dd><p>Binomial GLM object.</p>
+<dt><strong>out</strong><span class="classifier">(d,) np.ndarray</span></dt><dd><p>The output vector to store the gradient.</p>
 </dd>
 </dl>
 </dd>
 </dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialLogit64.html#adelie.adelie_core.glm.GlmBinomialLogit64" title="adelie.adelie_core.glm.GlmBinomialLogit64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.glm.GlmBinomialLogit64</span></code></a></dt><dd></dd>
-<dt><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialProbit64.html#adelie.adelie_core.glm.GlmBinomialProbit64" title="adelie.adelie_core.glm.GlmBinomialProbit64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.glm.GlmBinomialProbit64</span></code></a></dt><dd></dd>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.adelie_core.constraint.ConstraintBase64.primals">
+<span class="sig-name descname"><span class="pre">primals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64" title="adelie.adelie_core.constraint.ConstraintBase64"><span class="pre">adelie.adelie_core.constraint.ConstraintBase64</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#adelie.adelie_core.constraint.ConstraintBase64.primals" title="Link to this definition">#</a></dt>
+<dd><p>Number of primal variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>size</strong><span class="classifier">int</span></dt><dd><p>Number of primal variables.</p>
+</dd>
 </dl>
-</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.adelie_core.constraint.ConstraintBase64.project">
+<span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64" title="adelie.adelie_core.constraint.ConstraintBase64"><span class="pre">adelie.adelie_core.constraint.ConstraintBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.constraint.ConstraintBase64.project" title="Link to this definition">#</a></dt>
+<dd><p>Computes a projection onto the feasible set.</p>
+<p>The feasible set is defined by <span class="math notranslate nohighlight">\(\{x : \phi(x) \leq 0 \}\)</span>.
+A projection can be user-defined, that is, the user may define any
+norm <span class="math notranslate nohighlight">\(\|\cdot\|\)</span> such that the function returns a solution to</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+    \mathrm{minimize}_z \quad&amp; \|x - z\| \\
+    \text{subject to} \quad&amp; \phi(z) \leq 0
+\end{align*}\end{split}\]</div>
+<p>This function is only used by the solver after convergence
+to attempt to bring the coordinates into the feasible set.
+If not overriden, it will perform a no-op, assuming <span class="math notranslate nohighlight">\(x\)</span> is already feasible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">(d,) np.ndarray</span></dt><dd><p>The primal <span class="math notranslate nohighlight">\(x\)</span> to project onto the feasible set.
+The output is stored back in this argument.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.adelie_core.constraint.ConstraintBase64.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64" title="adelie.adelie_core.constraint.ConstraintBase64"><span class="pre">adelie.adelie_core.constraint.ConstraintBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.f_contiguous</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.constraint.ConstraintBase64.solve" title="Link to this definition">#</a></dt>
+<dd><p>Computes the block-coordinate update.</p>
+<p>The block-coordinate update is given by solving</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+    \mathrm{minimize}_x \quad&amp;
+    \frac{1}{2} x^\top \Sigma x - v^\top x + \lambda_1 \|x\|_2 + \frac{\lambda_2}{2} \|x\|_2^2
+    \\
+    \text{subject to} \quad&amp;
+    \phi(Q x) \leq 0
+\end{align*}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\phi\)</span> defines the current constraint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">(d,) np.ndarray</span></dt><dd><p>The primal <span class="math notranslate nohighlight">\(x\)</span>.
+The passed-in values may be used as a warm-start for the internal solver.
+The output is stored back in this argument.</p>
+</dd>
+<dt><strong>mu</strong><span class="classifier">(m,) np.ndarray</span></dt><dd><p>The dual <span class="math notranslate nohighlight">\(\mu\)</span>.
+The passed-in values may be used as a warm-start for the internal solver.
+The output is stored back in this argument.</p>
+</dd>
+<dt><strong>quad</strong><span class="classifier">(d,) np.ndarray</span></dt><dd><p>The quadratic component <span class="math notranslate nohighlight">\(\Sigma\)</span>.</p>
+</dd>
+<dt><strong>linear</strong><span class="classifier">(d,) np.ndarray</span></dt><dd><p>The linear component <span class="math notranslate nohighlight">\(v\)</span>.</p>
+</dd>
+<dt><strong>l1</strong><span class="classifier">float</span></dt><dd><p>The first regularization <span class="math notranslate nohighlight">\(\lambda_1\)</span>.</p>
+</dd>
+<dt><strong>l2</strong><span class="classifier">float</span></dt><dd><p>The second regularization <span class="math notranslate nohighlight">\(\lambda_2\)</span>.</p>
+</dd>
+<dt><strong>Q</strong><span class="classifier">(d, d) np.ndarray</span></dt><dd><p>Orthogonal matrix <span class="math notranslate nohighlight">\(Q\)</span>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.constraint.ConstraintBase64.dual_size">
+<span class="sig-name descname"><span class="pre">dual_size</span></span><a class="headerlink" href="#adelie.adelie_core.constraint.ConstraintBase64.dual_size" title="Link to this definition">#</a></dt>
+<dd><p>Number of duals.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.constraint.ConstraintBase64.primal_size">
+<span class="sig-name descname"><span class="pre">primal_size</span></span><a class="headerlink" href="#adelie.adelie_core.constraint.ConstraintBase64.primal_size" title="Link to this definition">#</a></dt>
+<dd><p>Number of primals.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -578,20 +688,20 @@ Default is <code class="docutils literal notranslate"><span class="pre">None</sp
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.diagnostic.residuals.html"
+       href="adelie.adelie_core.configs.Configs.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.diagnostic.residuals</p>
+        <p class="prev-next-title">adelie.adelie_core.configs.Configs</p>
       </div>
     </a>
     <a class="right-next"
-       href="adelie.glm.cox.html"
+       href="adelie.adelie_core.constraint.ConstraintLowerUpper64.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">adelie.glm.cox</p>
+        <p class="prev-next-title">adelie.adelie_core.constraint.ConstraintLowerUpper64</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -611,14 +721,24 @@ Default is <code class="docutils literal notranslate"><span class="pre">None</sp
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.glm.binomial"><code class="docutils literal notranslate"><span class="pre">binomial()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.constraint.ConstraintBase64"><code class="docutils literal notranslate"><span class="pre">ConstraintBase64</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.constraint.ConstraintBase64.__init__"><code class="docutils literal notranslate"><span class="pre">ConstraintBase64.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.constraint.ConstraintBase64.duals"><code class="docutils literal notranslate"><span class="pre">ConstraintBase64.duals()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.constraint.ConstraintBase64.gradient"><code class="docutils literal notranslate"><span class="pre">ConstraintBase64.gradient()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.constraint.ConstraintBase64.primals"><code class="docutils literal notranslate"><span class="pre">ConstraintBase64.primals()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.constraint.ConstraintBase64.project"><code class="docutils literal notranslate"><span class="pre">ConstraintBase64.project()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.constraint.ConstraintBase64.solve"><code class="docutils literal notranslate"><span class="pre">ConstraintBase64.solve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.constraint.ConstraintBase64.dual_size"><code class="docutils literal notranslate"><span class="pre">ConstraintBase64.dual_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.constraint.ConstraintBase64.primal_size"><code class="docutils literal notranslate"><span class="pre">ConstraintBase64.primal_size</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/generated/adelie.glm.binomial.rst.txt">
+    <a href="../_sources/generated/adelie.adelie_core.constraint.ConstraintBase64.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

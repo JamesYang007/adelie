@@ -31,6 +31,7 @@
       ~StateGaussianPinNaive64.benchmark_active
       ~StateGaussianPinNaive64.benchmark_screen
       ~StateGaussianPinNaive64.betas
+      ~StateGaussianPinNaive64.constraints
       ~StateGaussianPinNaive64.ddev_tol
       ~StateGaussianPinNaive64.group_sizes
       ~StateGaussianPinNaive64.groups
@@ -52,6 +53,8 @@
       ~StateGaussianPinNaive64.screen_X_means
       ~StateGaussianPinNaive64.screen_begins
       ~StateGaussianPinNaive64.screen_beta
+      ~StateGaussianPinNaive64.screen_dual
+      ~StateGaussianPinNaive64.screen_dual_begins
       ~StateGaussianPinNaive64.screen_is_active
       ~StateGaussianPinNaive64.screen_set
       ~StateGaussianPinNaive64.screen_transforms
@@ -83,6 +86,7 @@
    .. autoattribute:: benchmark_active
    .. autoattribute:: benchmark_screen
    .. autoattribute:: betas
+   .. autoattribute:: constraints
    .. autoattribute:: ddev_tol
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
@@ -104,6 +108,8 @@
    .. autoattribute:: screen_X_means
    .. autoattribute:: screen_begins
    .. autoattribute:: screen_beta
+   .. autoattribute:: screen_dual
+   .. autoattribute:: screen_dual_begins
    .. autoattribute:: screen_is_active
    .. autoattribute:: screen_set
    .. autoattribute:: screen_transforms

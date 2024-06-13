@@ -1,0 +1,52 @@
+﻿adelie.adelie\_core.constraint.ConstraintLowerUpper64
+=====================================================
+
+.. currentmodule:: adelie.adelie_core.constraint
+
+.. autoclass:: ConstraintLowerUpper64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ConstraintLowerUpper64.__init__
+      ~ConstraintLowerUpper64.duals
+      ~ConstraintLowerUpper64.gradient
+      ~ConstraintLowerUpper64.primals
+      ~ConstraintLowerUpper64.project
+      ~ConstraintLowerUpper64.solve
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ConstraintLowerUpper64.dual_size
+      ~ConstraintLowerUpper64.primal_size
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: duals
+   .. automethod:: gradient
+   .. automethod:: primals
+   .. automethod:: project
+   .. automethod:: solve
+   
+   
+
+   
+   
+   
+   .. autoattribute:: dual_size
+   .. autoattribute:: primal_size
+   
+   

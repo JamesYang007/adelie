@@ -34,6 +34,7 @@
       ~StateGaussianCov64.benchmark_kkt
       ~StateGaussianCov64.benchmark_screen
       ~StateGaussianCov64.betas
+      ~StateGaussianCov64.constraints
       ~StateGaussianCov64.ddev_tol
       ~StateGaussianCov64.devs
       ~StateGaussianCov64.early_exit
@@ -63,6 +64,8 @@
       ~StateGaussianCov64.rsq
       ~StateGaussianCov64.screen_begins
       ~StateGaussianCov64.screen_beta
+      ~StateGaussianCov64.screen_dual
+      ~StateGaussianCov64.screen_dual_begins
       ~StateGaussianCov64.screen_grad
       ~StateGaussianCov64.screen_hashset
       ~StateGaussianCov64.screen_is_active
@@ -101,6 +104,7 @@
    .. autoattribute:: benchmark_kkt
    .. autoattribute:: benchmark_screen
    .. autoattribute:: betas
+   .. autoattribute:: constraints
    .. autoattribute:: ddev_tol
    .. autoattribute:: devs
    .. autoattribute:: early_exit
@@ -130,6 +134,8 @@
    .. autoattribute:: rsq
    .. autoattribute:: screen_begins
    .. autoattribute:: screen_beta
+   .. autoattribute:: screen_dual
+   .. autoattribute:: screen_dual_begins
    .. autoattribute:: screen_grad
    .. autoattribute:: screen_hashset
    .. autoattribute:: screen_is_active

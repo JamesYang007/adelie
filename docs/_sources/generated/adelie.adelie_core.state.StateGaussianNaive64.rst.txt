@@ -35,6 +35,7 @@
       ~StateGaussianNaive64.benchmark_kkt
       ~StateGaussianNaive64.benchmark_screen
       ~StateGaussianNaive64.betas
+      ~StateGaussianNaive64.constraints
       ~StateGaussianNaive64.ddev_tol
       ~StateGaussianNaive64.devs
       ~StateGaussianNaive64.early_exit
@@ -68,6 +69,8 @@
       ~StateGaussianNaive64.screen_X_means
       ~StateGaussianNaive64.screen_begins
       ~StateGaussianNaive64.screen_beta
+      ~StateGaussianNaive64.screen_dual
+      ~StateGaussianNaive64.screen_dual_begins
       ~StateGaussianNaive64.screen_hashset
       ~StateGaussianNaive64.screen_is_active
       ~StateGaussianNaive64.screen_rule
@@ -108,6 +111,7 @@
    .. autoattribute:: benchmark_kkt
    .. autoattribute:: benchmark_screen
    .. autoattribute:: betas
+   .. autoattribute:: constraints
    .. autoattribute:: ddev_tol
    .. autoattribute:: devs
    .. autoattribute:: early_exit
@@ -141,6 +145,8 @@
    .. autoattribute:: screen_X_means
    .. autoattribute:: screen_begins
    .. autoattribute:: screen_beta
+   .. autoattribute:: screen_dual
+   .. autoattribute:: screen_dual_begins
    .. autoattribute:: screen_hashset
    .. autoattribute:: screen_is_active
    .. autoattribute:: screen_rule
