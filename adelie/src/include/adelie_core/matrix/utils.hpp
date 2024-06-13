@@ -392,7 +392,7 @@ void spaxi(
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
     if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
-        for (int i = 0; i < nnz; ++i) {
+        for (size_t i = 0; i < nnz; ++i) {
             out[inner[i]] += v * value[i];
         }
         return;
@@ -435,7 +435,7 @@ auto snp_unphased_dot(
     const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
     if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
         value_t sum = 0;
-        for (int c = 0; c < io_t::n_categories; ++c) {
+        for (size_t c = 0; c < io_t::n_categories; ++c) {
             auto it = io.begin(j, c);
             const auto end = io.end(j, c);
             const value_t val = (c == 0) ? imp : c;
@@ -454,7 +454,7 @@ auto snp_unphased_dot(
 
     #pragma omp parallel num_threads(n_threads)
     {
-        for (int c = 0; c < io_t::n_categories; ++c) {
+        for (size_t c = 0; c < io_t::n_categories; ++c) {
             const size_t n_chunks = io.n_chunks(j, c);
             const int n_blocks = std::min(n_threads, n_chunks);
             if (n_blocks <= 0) continue;
@@ -502,7 +502,7 @@ void snp_unphased_axi(
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (4 * sizeof(value_t)) * nnz;
     if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
-        for (int c = 0; c < io_t::n_categories; ++c) {
+        for (size_t c = 0; c < io_t::n_categories; ++c) {
             auto it = io.begin(j, c);
             const auto end = io.end(j, c);
             const value_t curr_val = v * ((c == 0) ? imp : c);
@@ -516,7 +516,7 @@ void snp_unphased_axi(
 
     #pragma omp parallel num_threads(n_threads)
     {
-        for (int c = 0; c < io_t::n_categories; ++c) {
+        for (size_t c = 0; c < io_t::n_categories; ++c) {
             const size_t n_chunks = io.n_chunks(j, c);
             const int n_blocks = std::min(n_threads, n_chunks);
             if (n_blocks <= 0) continue;
@@ -562,7 +562,7 @@ auto snp_phased_ancestry_dot(
     const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
     if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
         value_t sum = 0;
-        for (int hap = 0; hap < io_t::n_haps; ++hap) {
+        for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
             auto it = io.begin(snp, anc, hap);
             const auto end = io.end(snp, anc, hap);
             for (; it != end; ++it) {
@@ -577,7 +577,7 @@ auto snp_phased_ancestry_dot(
 
     #pragma omp parallel num_threads(n_threads)
     {
-        for (int hap = 0; hap < io_t::n_haps; ++hap) {
+        for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
             const size_t n_chunks = io.n_chunks(snp, anc, hap);
             const int n_blocks = std::min(n_threads, n_chunks);
             if (n_blocks <= 0) continue;
@@ -624,7 +624,7 @@ void snp_phased_ancestry_axi(
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (4 * sizeof(value_t)) * nnz;
     if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
-        for (int hap = 0; hap < io_t::n_haps; ++hap) {
+        for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
             auto it = io.begin(snp, anc, hap);
             const auto end = io.end(snp, anc, hap);
             for (; it != end; ++it) {
@@ -634,7 +634,7 @@ void snp_phased_ancestry_axi(
         return;
     }
 
-    for (int hap = 0; hap < io_t::n_haps; ++hap) {
+    for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
         const size_t n_chunks = io.n_chunks(snp, anc, hap);
         const int n_blocks = std::min(n_threads, n_chunks);
         if (n_blocks <= 0) continue;
@@ -698,7 +698,7 @@ void snp_phased_ancestry_block_dot(
             const auto jj = j + k;
             const auto snp = jj / A;
             const auto anc = jj % A;
-            for (int hap = 0; hap < io_t::n_haps; ++hap) {
+            for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
                 const size_t n_chunks = io.n_chunks(snp, anc, hap);
                 const int n_blocks = std::min(n_threads, n_chunks);
                 if (n_blocks <= 0) continue;
@@ -766,10 +766,10 @@ void snp_phased_ancestry_block_axi(
         const auto a_upper = std::min<int>(a_lower + q - n_processed, A);
         const auto size = a_upper - a_lower;
 
-        for (int hap = 0; hap < io_t::n_haps; ++hap) {
+        for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
             #pragma omp parallel num_threads(n_threads)
             {
-                for (int k = 0; k < size; ++k) {
+                for (size_t k = 0; k < size; ++k) {
                     const auto anc = a_lower + k;
                     const size_t n_chunks = io.n_chunks(snp, anc, hap);
                     const int n_blocks = std::min(n_threads, n_chunks);

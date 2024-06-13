@@ -18,7 +18,7 @@ void proximal_newton_solver(
     const AType& A,
     const BType& b,
     const ATVarsType& AT_vars,
-    const AATType& AAT,
+    const AATType&,
     size_t max_iters,
     ValueType tol,
     size_t newton_max_iters,
@@ -115,7 +115,7 @@ void proximal_newton_solver(
             }
             recompute_mu_resid = false;
 
-            size_t nnls_iters;
+            size_t nnls_iters = 0;
             value_t mu_loss = 0.5 * mu_resid.square().sum();
             optimization::nnls_naive(
                 A.transpose(), AT_vars, nnls_iters, nnls_tol, nnls_dtol,

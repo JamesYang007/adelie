@@ -5,11 +5,11 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType>
-class MatrixNaiveCConcatenate: public MatrixNaiveBase<ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
+class MatrixNaiveCConcatenate: public MatrixNaiveBase<ValueType, IndexType>
 {
 public:
-    using base_t = MatrixNaiveBase<ValueType>;
+    using base_t = MatrixNaiveBase<ValueType, IndexType>;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_index_t;
@@ -144,7 +144,7 @@ public:
             const auto slice = _slice_map[j_curr];
             auto& mat = *_mat_list[slice];
             const auto index = _index_map[j_curr];
-            const int q_curr = std::min(mat.cols()-index, q-n_processed);
+            const int q_curr = std::min<int>(mat.cols()-index, q-n_processed);
             mat.bmul(index, q_curr, v, weights, out.segment(n_processed, q_curr));
             n_processed += q_curr;
         }
@@ -163,7 +163,7 @@ public:
             const auto slice = _slice_map[j_curr];
             auto& mat = *_mat_list[slice];
             const auto index = _index_map[j_curr];
-            const int q_curr = std::min(mat.cols()-index, q-n_processed);
+            const int q_curr = std::min<int>(mat.cols()-index, q-n_processed);
             mat.btmul(index, q_curr, v.segment(n_processed, q_curr), out);
             n_processed += q_curr;
         }
@@ -176,7 +176,7 @@ public:
     ) override
     {
         int n_processed = 0;
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto p = mat.cols();
             mat.mul(v, weights, out.segment(n_processed, p));
@@ -242,11 +242,11 @@ public:
     }
 };
 
-template <class ValueType>
-class MatrixNaiveRConcatenate: public MatrixNaiveBase<ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
+class MatrixNaiveRConcatenate: public MatrixNaiveBase<ValueType, IndexType>
 {
 public:
-    using base_t = MatrixNaiveBase<ValueType>;
+    using base_t = MatrixNaiveBase<ValueType, IndexType>;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_index_t;
@@ -310,7 +310,7 @@ public:
         base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
         size_t begin = 0;
         value_t sum = 0;
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto rows_curr = mat.rows();
             const Eigen::Map<const vec_value_t> v_curr(
@@ -333,7 +333,7 @@ public:
     {
         base_t::check_ctmul(j, out.size(), rows(), cols());
         size_t begin = 0;
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto rows_curr = mat.rows();
             Eigen::Map<vec_value_t> out_curr(
@@ -355,7 +355,7 @@ public:
         size_t begin = 0;
         out.setZero();
         Eigen::Map<vec_value_t> buff(_buff.data(), q);
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto rows_curr = mat.rows();
             const Eigen::Map<const vec_value_t> v_curr(
@@ -378,7 +378,7 @@ public:
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         size_t begin = 0;
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto rows_curr = mat.rows();
             Eigen::Map<vec_value_t> out_curr(
@@ -398,7 +398,7 @@ public:
         size_t begin = 0;
         out.setZero();
         Eigen::Map<vec_value_t> buff(_buff.data(), out.size());
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto rows_curr = mat.rows();
             const Eigen::Map<const vec_value_t> v_curr(
@@ -440,7 +440,7 @@ public:
 
         size_t begin = 0;
         out.setZero();
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto rows_curr = mat.rows();
             const Eigen::Map<const vec_value_t> sqrt_weights_curr(
@@ -470,7 +470,7 @@ public:
 
         const auto L = v.rows();
         size_t begin = 0;
-        for (int i = 0; i < _mat_list.size(); ++i) {
+        for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto rows_curr = mat.rows();
             if (buff.size() < L * rows_curr) buff.resize(L * rows_curr);

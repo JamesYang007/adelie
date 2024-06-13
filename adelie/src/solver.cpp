@@ -200,8 +200,11 @@ py::dict solve_gaussian_cov(
             const auto exit_cond_f = [&]() {
                 return exit_cond && exit_cond(state);
             };
+            auto pb = ad::util::tq::trange(0);
+            pb.set_display(display_progress_bar);
+            pb.set_ostream(std::cerr);
             ad::solver::gaussian::cov::solve(
-                state, display_progress_bar, exit_cond_f, u, c
+                state, pb, exit_cond_f, u, c
             );
         }
     );
@@ -220,8 +223,11 @@ py::dict solve_gaussian_naive(
             const auto exit_cond_f = [&]() {
                 return exit_cond && exit_cond(state);
             };
+            auto pb = ad::util::tq::trange(0);
+            pb.set_display(display_progress_bar);
+            pb.set_ostream(std::cerr);
             return ad::solver::gaussian::naive::solve(
-                state, display_progress_bar, exit_cond_f, u, c
+                state, pb, exit_cond_f, u, c
             );
         }
     );
@@ -240,8 +246,11 @@ py::dict solve_multigaussian_naive(
             const auto exit_cond_f = [&]() {
                 return exit_cond && exit_cond(state);
             };
+            auto pb = ad::util::tq::trange(0);
+            pb.set_display(display_progress_bar);
+            pb.set_ostream(std::cerr);
             ad::solver::multigaussian::naive::solve(
-                state, display_progress_bar, exit_cond_f, u, c
+                state, pb, exit_cond_f, u, c
             );
         }
     );
@@ -265,8 +274,11 @@ py::dict solve_glm_naive(
             const auto exit_cond_f = [&]() {
                 return exit_cond && exit_cond(state);
             };
+            auto pb = ad::util::tq::trange(0);
+            pb.set_display(display_progress_bar);
+            pb.set_ostream(std::cerr);
             ad::solver::glm::naive::solve(
-                state, glm, display_progress_bar, exit_cond_f, u, c
+                state, glm, pb, exit_cond_f, u, c
             );
         }
     );
@@ -286,8 +298,11 @@ py::dict solve_multiglm_naive(
             const auto exit_cond_f = [&]() {
                 return exit_cond && exit_cond(state);
             };
+            auto pb = ad::util::tq::trange(0);
+            pb.set_display(display_progress_bar);
+            pb.set_ostream(std::cerr);
             ad::solver::multiglm::naive::solve(
-                state, glm, display_progress_bar, exit_cond_f, u, c
+                state, glm, pb, exit_cond_f, u, c
             );
         }
     );

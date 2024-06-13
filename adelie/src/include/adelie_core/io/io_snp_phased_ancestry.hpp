@@ -12,7 +12,7 @@ public:
     using base_t = IOSNPBase<MmapPtrType>;
     using outer_t = uint64_t;
     using inner_t = uint32_t;
-    using chunk_inner_t = u_char;
+    using chunk_inner_t = uint8_t;
     using value_t = int8_t;
     using vec_outer_t = util::rowvec_type<outer_t>;
     using vec_inner_t = util::rowvec_type<inner_t>;
@@ -168,10 +168,10 @@ public:
             }
         };
         if (n_threads <= 1) {
-            for (outer_t j = 0; j < s; ++j) routine(j);
+            for (int j = 0; j < static_cast<int>(s); ++j) routine(j);
         } else {
             #pragma omp parallel for schedule(static) num_threads(n_threads)
-            for (outer_t j = 0; j < s; ++j) routine(j);
+            for (int j = 0; j < static_cast<int>(s); ++j) routine(j);
         }
 
         return dense;
@@ -227,7 +227,7 @@ public:
                 const auto snp = j / A;
                 const auto anc = j % A;
                 const auto k = 2 * snp;
-                return calldata(i, k) && (ancestries(i, k) == anc);
+                return calldata(i, k) && (ancestries(i, k) == static_cast<char>(anc));
             }),
             nnz0, 
             n_threads
@@ -237,7 +237,7 @@ public:
                 const auto snp = j / A;
                 const auto anc = j % A;
                 const auto k = 2 * snp + 1;
-                return calldata(i, k) && (ancestries(i, k) == anc);
+                return calldata(i, k) && (ancestries(i, k) == static_cast<char>(anc));
             }),
             nnz1, 
             n_threads
@@ -309,7 +309,7 @@ public:
                         for (inner_t c = 0; c < chunk_size; ++c) {
                             const outer_t cidx = chnk + c;
                             if (cidx >= n) break;
-                            if ((anc_jh[cidx] < 0) || (anc_jh[cidx] >= A)) {
+                            if ((anc_jh[cidx] < 0) || (anc_jh[cidx] >= static_cast<char>(A))) {
                                 throw util::adelie_core_error(
                                     "Detected an ancestry not in the range [0,A):"
                                     "\n\tancestries[" + std::to_string(cidx) +
@@ -329,8 +329,8 @@ public:
                             }
                             // always error check (above) before proceeding
                             const bool to_not_skip = (
-                                (anc_jh[cidx] == a) && 
-                                (cal_jh[cidx] == 1)
+                                (anc_jh[cidx] == static_cast<char>(a)) && 
+                                (cal_jh[cidx] == static_cast<char>(1))
                             );
                             if (!to_not_skip) continue;
                             is_nonempty = true;
@@ -344,17 +344,17 @@ public:
         };
         sw.start();
         if (n_threads <= 1) {
-            for (outer_t j = 0; j < s; ++j) outer_routine(j);
+            for (int j = 0; j < static_cast<int>(s); ++j) outer_routine(j);
         } else {
             #pragma omp parallel for schedule(static) num_threads(n_threads)
-            for (outer_t j = 0; j < s; ++j) outer_routine(j);
+            for (int j = 0; j < static_cast<int>(s); ++j) outer_routine(j);
         }
         benchmark["outer_time"] = sw.elapsed();
 
         // cumsum outer
         for (outer_t j = 0; j < s; ++j) outer[j+1] += outer[j];
 
-        if (outer[s] > buffer.size()) {
+        if (outer[s] > static_cast<size_t>(buffer.size())) {
             throw util::adelie_core_error(
                 "Buffer was not initialized with a large enough size. "
                 "\n\tBuffer size:   " + std::to_string(buffer.size()) +
@@ -406,8 +406,8 @@ public:
                             const outer_t didx = chnk + c;
                             if (didx >= n) break;
                             const bool to_not_skip = (
-                                (anc_jh[didx] == a) && 
-                                (cal_jh[didx] == 1)
+                                (anc_jh[didx] == static_cast<char>(a)) && 
+                                (cal_jh[didx] == static_cast<char>(1))
                             );
                             if (!to_not_skip) continue;
                             chunk_begin[nnz] = c;
@@ -425,7 +425,7 @@ public:
                 cidx += hcidx;
             }
 
-            if (cidx != buffer_j.size()) {
+            if (cidx != static_cast<size_t>(buffer_j.size())) {
                 throw util::adelie_core_error(
                     "Column index certificate does not match expected size:"
                     "\n\tCertificate:   " + std::to_string(cidx) +
@@ -436,10 +436,10 @@ public:
         };
         sw.start();
         if (n_threads <= 1) {
-            for (outer_t j = 0; j < s; ++j) inner_routine(j);
+            for (int j = 0; j < static_cast<int>(s); ++j) inner_routine(j);
         } else {
             #pragma omp parallel for schedule(static) num_threads(n_threads)
-            for (outer_t j = 0; j < s; ++j) inner_routine(j);
+            for (int j = 0; j < static_cast<int>(s); ++j) inner_routine(j);
         }
         benchmark["inner"] = sw.elapsed();
 

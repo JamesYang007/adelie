@@ -24,7 +24,18 @@ class CustomFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
+
 logger = logging.getLogger()
 ch = logging.StreamHandler()
 ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
+
+
+class logger_level():
+    def __init__(self, level):
+        self.level = level
+        self.level_orig = logger.level
+    def __enter__(self):
+        logger.setLevel(self.level)
+    def __exit__(self, exit_type, exit_value, exit_traceback):
+        logger.setLevel(self.level_orig)

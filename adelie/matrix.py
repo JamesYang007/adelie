@@ -624,13 +624,13 @@ def interaction(
             pairs_seen.add((key, val))
     if len(pairs) <= 0:
         raise ValueError("No valid pairs exist. There must be at least one valid pair.")
-    pairs = np.array(pairs, dtype=np.int32)
+    pairs = np.array(pairs, dtype=int)
 
     class _interaction(core_base, py_base):
         def __init__(self):
             self._mat = np.array(mat, copy=copy)
             self._pairs = pairs
-            self._levels = np.array(levels, copy=True, dtype=np.int32)
+            self._levels = np.array(levels, copy=True, dtype=int)
             core_base.__init__(self, self._mat, self._pairs, self._levels, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         
@@ -822,7 +822,7 @@ def one_hot(
     class _one_hot(core_base, py_base):
         def __init__(self):
             self._mat = np.array(mat, copy=copy)
-            self._levels = np.array(levels, copy=True, dtype=np.int32)
+            self._levels = np.array(levels, copy=True, dtype=int)
             core_base.__init__(self, self._mat, self._levels, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         
@@ -1318,7 +1318,7 @@ def subset(
     class _subset(core_base, py_base):
         def __init__(self):
             self._mat = mat
-            self._indices = np.array(indices, copy=True, dtype=np.int32)
+            self._indices = np.array(indices, copy=True, dtype=int)
             core_base.__init__(self, self._mat, self._indices, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         

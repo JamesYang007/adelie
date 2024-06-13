@@ -326,11 +326,11 @@ struct StateBase
         if (n_threads < 1) {
             throw util::adelie_core_error("n_threads must be >= 1.");
         }
-        if (min_ratio <= 0) {
-            throw util::adelie_core_error("min_ratio must be > 0.");
+        if (min_ratio < 0 || min_ratio > 1) {
+            throw util::adelie_core_error("min_ratio must be in [0,1].");
         }
         if (pivot_subset_ratio <= 0 || pivot_subset_ratio > 1) {
-            throw util::adelie_core_error("pivot_subset_ratio must be in (0, 1].");
+            throw util::adelie_core_error("pivot_subset_ratio must be in (0,1].");
         }
         if (pivot_subset_min < 1) {
             throw util::adelie_core_error("pivot_subset_min must be >= 1.");
@@ -347,7 +347,7 @@ struct StateBase
                 "It is likely screen_beta has been initialized incorrectly."
             );
         }
-        if (active_set_size > G) {
+        if (active_set_size > static_cast<size_t>(G)) {
             throw util::adelie_core_error(
                 "active_set_size must be <= active_set.size()."
             );

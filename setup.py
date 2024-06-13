@@ -1,5 +1,5 @@
 from glob import glob
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 from pybind11.setup_helpers import Pybind11Extension 
 from pybind11.setup_helpers import ParallelCompile
 import os
@@ -28,17 +28,23 @@ def run_cmd(cmd):
 # Optional multithreaded build
 ParallelCompile("NPY_NUM_BUILD_JOBS").install()
 
-extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
-extra_compile_args += [
-    "-g0",
-    "-Wall", 
-    "-Wextra", 
-    "-DNDEBUG", 
-    "-O3",
-]
+if os.name == "posix":
+    extra_compile_args = [
+        "-g0",
+        "-Wall", 
+        "-Wextra", 
+        "-Werror",
+        "-DNDEBUG", 
+        "-O3",
+    ]
+else:
+    extra_compile_args = [
+        "/Wall",
+        "/O2",
+    ]
 include_dirs = [
-    "adelie/src",
-    "adelie/src/include",
+    os.path.join("adelie", "src"),
+    os.path.join("adelie", "src", "include"),
 ]
 libraries = []
 library_dirs = []
@@ -49,20 +55,24 @@ if "CONDA_PREFIX" in os.environ:
     conda_prefix = os.environ["CONDA_PREFIX"]
 # check if micromamba environment activated (CI)
 elif "MAMBA_ROOT_PREFIX" in os.environ:
-    conda_prefix = os.path.join(os.environ["MAMBA_ROOT_PREFIX"], "envs/adelie")
+    conda_prefix = os.path.join(os.environ["MAMBA_ROOT_PREFIX"], "envs", "adelie")
 else:
     conda_prefix = None
 
+system_name = platform.system()
+
 # add include and include/eigen3
 if not (conda_prefix is None):
-    conda_include_path = os.path.join(conda_prefix, "include")
+    if system_name in ["Darwin", "Linux"]:
+        conda_include_path = os.path.join(conda_prefix, "include")
+    else:
+        conda_include_path = os.path.join(conda_prefix, "Library", "include")
     eigen_include_path = os.path.join(conda_include_path, "eigen3")
     include_dirs += [
         conda_include_path,
         eigen_include_path,
     ]
 
-system_name = platform.system()
 if system_name == "Darwin":
     # if user provides OpenMP install prefix (containing include/ and lib/)
     if "OPENMP_PREFIX" in os.environ and os.environ["OPENMP_PREFIX"] != "":
@@ -111,6 +121,11 @@ elif system_name == "Linux":
     ]
     libraries += ['gomp']
 
+else:
+    extra_compile_args += [
+        "/openmp",
+    ]
+
 ext_modules = [
     Pybind11Extension(
         "adelie.adelie_core",
@@ -133,11 +148,9 @@ setup(
     author_email='jamesyang916@gmail.com',
     maintainer='James Yang',
     maintainer_email='jamesyang916@gmail.com',
-    packages=find_packages(include=["adelie", "adelie.*"]), 
+    packages=find_namespace_packages(include=["adelie.*"]),
     package_data={
         "adelie": [
-            "src/**/*.hpp", 
-            "src/**/*.cpp", 
             "adelie_core.cpython*",
         ],
     },

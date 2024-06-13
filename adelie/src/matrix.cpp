@@ -495,7 +495,6 @@ void matrix_cov_sparse(py::module_& m, const char* name)
 {
     using internal_t = ad::matrix::MatrixCovSparse<SparseType>;
     using base_t = typename internal_t::base_t;
-    using sparse_t = typename internal_t::sparse_t; 
     using vec_sp_value_t = typename internal_t::vec_sp_value_t;
     using vec_sp_index_t = typename internal_t::vec_sp_index_t;
     py::class_<internal_t, base_t>(m, name,
@@ -738,7 +737,6 @@ void matrix_naive_sparse(py::module_& m, const char* name)
 {
     using internal_t = ad::matrix::MatrixNaiveSparse<SparseType>;
     using base_t = typename internal_t::base_t;
-    using sparse_t = typename internal_t::sparse_t; 
     using vec_sp_value_t = typename internal_t::vec_sp_value_t;
     using vec_sp_index_t = typename internal_t::vec_sp_index_t;
     py::class_<internal_t, base_t>(m, name,
@@ -799,7 +797,7 @@ void matrix_naive_csubset(py::module_& m, const char* name)
         )
         .def(
             py::init<
-                base_t*,
+                base_t&,
                 const Eigen::Ref<const vec_index_t>&,
                 size_t
             >(),
@@ -821,7 +819,7 @@ void matrix_naive_rsubset(py::module_& m, const char* name)
         )
         .def(
             py::init<
-                base_t*,
+                base_t&,
                 const Eigen::Ref<const vec_index_t>&,
                 size_t
             >(),
