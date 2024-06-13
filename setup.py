@@ -43,6 +43,8 @@ elif os.name == "nt":
         "/W3",
         "/WX",
         "/wd4566", # unicode not representable
+        "/wd4244", # 'return': conversion possible loss of data
+        "/wd4305", # 'initializing': truncation
         "/O2",
     ]
 include_dirs = [
