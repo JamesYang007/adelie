@@ -4,6 +4,8 @@
 #   - Leda Guin
 #   - Ginnie Guin
 
+__version__ = "1.1.35"
+
 # Set environment flags before loading adelie_core
 import os
 
@@ -25,6 +27,7 @@ os.environ.setdefault("OMP_PROC_BIND", "TRUE")
 from . import adelie_core
 from . import bcd
 from . import configs
+from . import constraint
 from . import cv
 from . import data
 from . import diagnostic

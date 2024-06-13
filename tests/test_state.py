@@ -13,6 +13,7 @@ def test_state_gaussian_pin_naive():
     G = 2
 
     X = matrix.dense(np.random.normal(0, 1, (n, p)), method="naive", n_threads=4)
+    constraints = None
     groups = np.array([0, 1])
     alpha = 1.0
     penalty = np.random.uniform(0, 1, G)
@@ -26,6 +27,7 @@ def test_state_gaussian_pin_naive():
     weights /= np.sum(weights)
     screen_beta = np.zeros(p)
     screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
+    screen_dual = np.zeros(0)
     active_set_size = 0
     active_set = np.empty(G, dtype=int)
 
@@ -33,6 +35,7 @@ def test_state_gaussian_pin_naive():
         X=X,
         y_mean=y_mean,
         y_var=y_var,
+        constraints=constraints,
         groups=groups,
         alpha=alpha,
         penalty=penalty,
@@ -43,6 +46,7 @@ def test_state_gaussian_pin_naive():
         resid=resid,
         screen_beta=screen_beta,
         screen_is_active=screen_is_active,
+        screen_dual=screen_dual,
         active_set_size=active_set_size,
         active_set=active_set,
     )
@@ -68,6 +72,7 @@ def test_state_gaussian_pin_cov():
 
     X = np.random.normal(0, 1, (n, p))
     A = matrix.dense(X.T @ X / n, method="cov", n_threads=4)
+    constraints = None
     groups = np.array([0, 1])
     alpha = 1.0
     penalty = np.random.uniform(0, 1, G)
@@ -77,11 +82,13 @@ def test_state_gaussian_pin_cov():
     screen_beta = np.zeros(p)
     screen_grad = X.T @ np.random.normal(0, 1, n)
     screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
+    screen_dual = np.zeros(0)
     active_set_size = 0
     active_set = np.empty(G, dtype=int)
 
     state = mod.gaussian_pin_cov(
         A=A,
+        constraints=constraints,
         groups=groups,
         alpha=alpha,
         penalty=penalty,
@@ -91,6 +98,7 @@ def test_state_gaussian_pin_cov():
         screen_beta=screen_beta,
         screen_grad=screen_grad,
         screen_is_active=screen_is_active,
+        screen_dual=screen_dual,
         active_set_size=active_set_size,
         active_set=active_set,
     )
@@ -119,6 +127,7 @@ def test_state_gaussian_naive():
     X = matrix.dense(_X, method="naive", n_threads=4)
     y = np.random.normal(0, 1, n)
     X_means = np.mean(_X, axis=0)
+    constraints = None
     groups = np.array([0, 1])
     group_sizes = np.array([1, 99])
     y_mean = 0.0
@@ -138,6 +147,7 @@ def test_state_gaussian_naive():
     resid_sum = np.sum(resid)
     screen_beta = np.zeros(p)
     screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
+    screen_dual = np.zeros(0)
     active_set_size = 0
     active_set = np.empty(G, dtype=int)
 
@@ -149,6 +159,7 @@ def test_state_gaussian_naive():
         y_var=y_var,
         resid=resid,
         resid_sum=resid_sum,
+        constraints=constraints,
         groups=groups,
         group_sizes=group_sizes,
         alpha=alpha,
@@ -160,6 +171,7 @@ def test_state_gaussian_naive():
         screen_set=screen_set,
         screen_beta=screen_beta,
         screen_is_active=screen_is_active,
+        screen_dual=screen_dual,
         active_set_size=active_set_size,
         active_set=active_set,
         rsq=rsq,

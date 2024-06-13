@@ -1,14 +1,17 @@
 from glob import glob
 from setuptools import setup, find_namespace_packages
-from distutils.dir_util import copy_tree
 from pybind11.setup_helpers import Pybind11Extension 
 from pybind11.setup_helpers import ParallelCompile
 import os
-import pathlib
 import platform
-import shutil
 import subprocess
-import sysconfig
+
+
+# Hack to get __version__ from adelie/__init__.py
+with open("adelie/__init__.py") as f:
+    for line in f:
+        if line.startswith("__version__ = "):
+            __version__ = line.split('"')[1]
 
 
 def run_cmd(cmd):
@@ -25,20 +28,31 @@ def run_cmd(cmd):
 # Optional multithreaded build
 ParallelCompile("NPY_NUM_BUILD_JOBS").install()
 
-__version__ = open("VERSION", "r").read().strip()
-
-extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
-extra_compile_args += [
-    "-g0",
-    "-Wall", 
-    "-Wextra", 
-    "-Werror",
-    "-DNDEBUG", 
-    "-O3",
-]
+if os.name == "posix":
+    # GCC + Clang options to be extra stringent with warnings.
+    extra_compile_args = [
+        "-g0",
+        "-Wall", 
+        "-Wextra", 
+        "-Werror",
+        "-DNDEBUG", 
+        "-O3",
+    ]
+elif os.name == "nt":
+    # MSVC defauls to /W3 and /O2, but we make them explicit anyways.
+    extra_compile_args = [
+        "/W3",
+        "/WX",
+        "/wd4566", # unicode not representable
+        "/wd4244", # 'conversion' conversion from 'type1' to 'type2', possible loss of data
+        "/wd4305", # 'conversion': truncation from 'type1' to 'type2'
+        "/wd4267", # 'var' : conversion from 'size_t' to 'type', possible loss of data
+        "/wd4849", # OpenMP 'clause' clause ignored in 'directive' directive
+        "/O2",
+    ]
 include_dirs = [
-    "adelie/src",
-    "adelie/src/include",
+    os.path.join("adelie", "src"),
+    os.path.join("adelie", "src", "include"),
 ]
 libraries = []
 library_dirs = []
@@ -49,20 +63,24 @@ if "CONDA_PREFIX" in os.environ:
     conda_prefix = os.environ["CONDA_PREFIX"]
 # check if micromamba environment activated (CI)
 elif "MAMBA_ROOT_PREFIX" in os.environ:
-    conda_prefix = os.path.join(os.environ["MAMBA_ROOT_PREFIX"], "envs/adelie")
+    conda_prefix = os.path.join(os.environ["MAMBA_ROOT_PREFIX"], "envs", "adelie")
 else:
     conda_prefix = None
 
+system_name = platform.system()
+
 # add include and include/eigen3
 if not (conda_prefix is None):
-    conda_include_path = os.path.join(conda_prefix, "include")
+    if system_name in ["Darwin", "Linux"]:
+        conda_include_path = os.path.join(conda_prefix, "include")
+    else:
+        conda_include_path = os.path.join(conda_prefix, "Library", "include")
     eigen_include_path = os.path.join(conda_include_path, "eigen3")
     include_dirs += [
         conda_include_path,
         eigen_include_path,
     ]
 
-system_name = platform.system()
 if system_name == "Darwin":
     # if user provides OpenMP install prefix (containing include/ and lib/)
     if "OPENMP_PREFIX" in os.environ and os.environ["OPENMP_PREFIX"] != "":
@@ -110,6 +128,11 @@ elif system_name == "Linux":
         "-march=native",
     ]
     libraries += ['gomp']
+
+else:
+    extra_compile_args += [
+        "/openmp",
+    ]
 
 ext_modules = [
     Pybind11Extension(

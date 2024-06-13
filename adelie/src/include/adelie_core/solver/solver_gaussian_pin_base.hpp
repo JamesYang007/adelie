@@ -67,8 +67,9 @@ void sparsify_active_beta(
     const auto& active_set = state.active_set;
     const auto& active_order = state.active_order;
     const auto& screen_set = state.screen_set;
-    const auto& group_sizes = state.group_sizes;
+    const auto& constraints = *state.constraints;
     const auto& groups = state.groups;
+    const auto& group_sizes = state.group_sizes;
     const auto& screen_beta = state.screen_beta;
     const auto& screen_begins = state.screen_begins;
 
@@ -78,12 +79,14 @@ void sparsify_active_beta(
         const auto ss_idx = active_set[active_order[i]];
         const auto group = screen_set[ss_idx];
         const auto group_size = group_sizes[group];
+        const auto constraint = constraints[group];
         Eigen::Map<vec_index_t> idxs_seg(idxs_begin, group_size);
         Eigen::Map<vec_value_t> vals_seg(vals_begin, group_size);
         idxs_seg = vec_index_t::LinSpaced(
             group_size, groups[group], groups[group] + group_size - 1
         );
         vals_seg = screen_beta.segment(screen_begins[ss_idx], group_size);
+        if (constraint) constraint->project(vals_seg);
         idxs_begin += group_size;
         vals_begin += group_size;
     }        
@@ -142,19 +145,19 @@ void update_rsq(
 template <class LType, class VType, class ValueType, 
           class XType, class BufferType>
 ADELIE_CORE_STRONG_INLINE
-void update_coefficients(
+void update_coordinate(
+    XType& x,
     const LType& L,
     const VType& v,
     ValueType l1,
     ValueType l2,
     ValueType tol,
     size_t max_iters,
-    XType& x,
-    size_t& iters,
     BufferType& buffer1,
     BufferType& buffer2
 )
 {
+    size_t iters;
     bcd::unconstrained::newton_abs_solver(
         L, v, l1, l2, tol, max_iters,
         x, iters, buffer1, buffer2
@@ -169,18 +172,17 @@ void update_coefficients(
 
 template <class ValueType>
 ADELIE_CORE_STRONG_INLINE
-void update_coefficient(
+void update_coordinate(
     ValueType& coeff,
     ValueType x_var,
+    ValueType grad,
     ValueType l1,
-    ValueType l2,
-    ValueType penalty,
-    ValueType grad
+    ValueType l2
 )
 {
-    const auto denom = x_var + l2 * penalty;
-    const auto u = grad + coeff * x_var;
-    const auto v = std::abs(u) - l1 * penalty;
+    const auto denom = x_var + l2;
+    const auto u = grad;
+    const auto v = std::abs(u) - l1;
     coeff = (v > 0.0) ? std::copysign(v,u)/denom : 0;
 }
 

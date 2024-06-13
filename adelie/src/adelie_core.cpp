@@ -14,6 +14,9 @@ PYBIND11_MODULE(adelie_core, m) {
     auto m_configs = m.def_submodule("configs", "Configurations submodule.");
     register_configs(m_configs);
 
+    auto m_constraint = m.def_submodule("constraint", "Constraint submodule.");
+    register_constraint(m_constraint);
+
     auto m_glm = m.def_submodule("glm", "GLM submodule.");
     register_glm(m_glm);
 

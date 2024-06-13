@@ -1,4 +1,3 @@
-include VERSION
 graft adelie
 
 global-exclude *.so
