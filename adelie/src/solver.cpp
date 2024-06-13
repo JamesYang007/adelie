@@ -188,7 +188,7 @@ py::dict solve_gaussian_cov(
             pb.set_display(display_progress_bar);
             pb.set_ostream(std::cerr);
             ad::solver::gaussian::cov::solve(
-                state, pb, exit_cond_f, u, c
+                state, pb, exit_cond_f, c
             );
         }
     );
@@ -211,7 +211,7 @@ py::dict solve_gaussian_naive(
             pb.set_display(display_progress_bar);
             pb.set_ostream(std::cerr);
             return ad::solver::gaussian::naive::solve(
-                state, pb, exit_cond_f, u, c
+                state, pb, exit_cond_f, c
             );
         }
     );
@@ -234,7 +234,7 @@ py::dict solve_multigaussian_naive(
             pb.set_display(display_progress_bar);
             pb.set_ostream(std::cerr);
             ad::solver::multigaussian::naive::solve(
-                state, pb, exit_cond_f, u, c
+                state, pb, exit_cond_f, c
             );
         }
     );
@@ -262,7 +262,7 @@ py::dict solve_glm_naive(
             pb.set_display(display_progress_bar);
             pb.set_ostream(std::cerr);
             ad::solver::glm::naive::solve(
-                state, glm, pb, exit_cond_f, u, c
+                state, glm, pb, exit_cond_f, c
             );
         }
     );
@@ -286,7 +286,7 @@ py::dict solve_multiglm_naive(
             pb.set_display(display_progress_bar);
             pb.set_ostream(std::cerr);
             ad::solver::multiglm::naive::solve(
-                state, glm, pb, exit_cond_f, u, c
+                state, glm, pb, exit_cond_f, c
             );
         }
     );

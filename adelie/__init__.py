@@ -4,7 +4,7 @@
 #   - Leda Guin
 #   - Ginnie Guin
 
-__version__ = "1.1.34"
+__version__ = "1.1.35"
 
 try:
     # See setup.py where it is injected into __builtins__.
