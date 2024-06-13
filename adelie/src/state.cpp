@@ -616,7 +616,6 @@ template <class ConstraintType>
 void state_base(py::module_& m, const char* name)
 {
     using state_t = ad::state::StateBase<ConstraintType>;
-    using constraint_t = typename state_t::constraint_t;
     using value_t = typename state_t::value_t;
     using index_t = typename state_t::index_t;
     using safe_bool_t = typename state_t::safe_bool_t;

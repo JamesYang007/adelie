@@ -359,7 +359,7 @@ struct StateBase
     {
         // sanity checks
         const auto G = groups.size();
-        if (constraints.size() != G) {
+        if (constraints.size() != static_cast<size_t>(G)) {
             throw util::adelie_core_error("constraints must have the same length as groups.");
         }
         if (group_sizes.size() != G) {

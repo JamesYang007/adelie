@@ -53,7 +53,6 @@ void coordinate_descent(
     auto& rsq = state.rsq;
 
     auto& buffer1 = buffer_pack.buffer1;
-    auto& buffer2 = buffer_pack.buffer2;
     auto& buffer3 = buffer_pack.buffer3;
     auto& buffer4 = buffer_pack.buffer4;
 
@@ -128,7 +127,6 @@ void coordinate_descent(
             auto ak_transformed = buffer4.segment(2 * ak.size(), ak.size());
 
             // update group coefficients
-            size_t iters;
             gk_transformed += A_kk * ak_old_transformed; 
             update_coordinate_g1_f(
                 ss_idx, ak_transformed, A_kk, gk_transformed, l1 * pk, l2 * pk, Vk
