@@ -35,6 +35,7 @@ if os.name == "posix":
         "-Wall", 
         "-Wextra", 
         "-Werror",
+        "-pedantic",
         "-DNDEBUG", 
         "-O3",
     ]
