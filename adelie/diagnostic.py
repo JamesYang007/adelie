@@ -376,14 +376,23 @@ def gradient_norms(
 
     .. math::
         \\begin{align*}
-            \\hat{h}_g = \\|\\hat{\\gamma}_g - \\lambda (1-\\alpha) \\omega_g \\beta_g\\|_2  \\quad g=1,\\ldots, G
+            \\hat{h}_g = \\|
+                \\hat{\\gamma}_g - 
+                \\lambda (1-\\alpha) \\omega_g \\beta_g
+            \\|_2  \\quad g=1,\\ldots, G
         \\end{align*}
 
     where
     :math:`\\hat{\\gamma}_g` is the gradient as in ``adelie.diagnostic.gradients``,
     :math:`\\omega_g` is the penalty factor,
     :math:`\\lambda` is the regularization,
+    :math:`\\alpha` is the elastic net proportion,
     and :math:`\\beta_g` is the coefficient block for group :math:`g`.
+
+    .. warning::
+        The group-wise gradient norm is primarily used to check the KKT conditions.
+        We *do not* correct for the case of non-trivial constraints 
+        since it may be too time consuming.
 
     Parameters
     ----------

@@ -428,7 +428,7 @@ def gaussian_pin_naive(
         i.e. :math:`\\|y_c\\|_{W}^2`.
         This is only used to check convergence as a relative measure,
         i.e. this quantity is the "null" model MSE.
-    constraints : list 
+    constraints : (G,) list 
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
@@ -734,7 +734,7 @@ def gaussian_pin_cov(
     A : Union[adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]
         Covariance matrix :math:`X_c^\\top W X_c`.
         It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    constraints : list 
+    constraints : (G,) list 
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
@@ -1140,7 +1140,7 @@ def gaussian_cov(
         It is typically one of the matrices defined in ``adelie.matrix`` submodule.
     v : (p,) np.ndarray
         Linear term.
-    constraints : list 
+    constraints : (G,) list 
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
@@ -1730,7 +1730,7 @@ def gaussian_naive(
         Residual :math:`y_c - X \\beta` where :math:`\\beta` is given by ``screen_beta``.
     resid_sum : float
         Weighted (by :math:`W`) sum of ``resid``.
-    constraints : list 
+    constraints : (G,) list 
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
@@ -2082,7 +2082,7 @@ def multigaussian_naive(
         where :math:`\\beta` is given by ``screen_beta``.
     resid_sum : float
         Weighted (by :math:`\\tilde{W}`) sum of ``resid``.
-    constraints : list 
+    constraints : (G,) list 
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
@@ -2447,7 +2447,7 @@ def glm_naive(
     glm : Union[adelie.glm.GlmBase64, adelie.glm.GlmBase32]
         GLM object.
         It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
-    constraints : list 
+    constraints : (G,) list 
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
@@ -2808,7 +2808,7 @@ def multiglm_naive(
     glm : Union[adelie.glm.GlmMultiBase64, adelie.glm.GlmMultiBase32]
         Multi-response GLM object.
         It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
-    constraints : list 
+    constraints : (G,) list 
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.

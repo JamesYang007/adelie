@@ -149,7 +149,7 @@ def gaussian_cov(
         It is typically one of the matrices defined in ``adelie.matrix`` submodule.
     v : (p,) np.ndarray
         Linear term.
-    constraints : list, optional
+    constraints : (G,) list, optional
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
@@ -502,7 +502,7 @@ def grpnet(
     glm : Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64, adelie.glm.GlmMultiBase32, adelie.glm.GlmMultiBase64]
         GLM object.
         It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
-    constraints : list, optional
+    constraints : (G,) list, optional
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
