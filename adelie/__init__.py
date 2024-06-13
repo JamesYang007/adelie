@@ -40,6 +40,7 @@ else:
     from . import adelie_core
     from . import bcd
     from . import configs
+    from . import constraint
     from . import cv
     from . import data
     from . import diagnostic

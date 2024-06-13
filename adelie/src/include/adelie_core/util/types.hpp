@@ -34,6 +34,11 @@ enum class screen_rule_type
     _pivot
 };
 
+enum class nnqp_screen_rule_type
+{
+    _greedy
+};
+
 enum class multi_group_type
 {
     _grouped,
@@ -77,6 +82,14 @@ inline screen_rule_type convert_screen_rule(
 {
     if (rule == "strong") return screen_rule_type::_strong;
     if (rule == "pivot") return screen_rule_type::_pivot;
+    throw util::adelie_core_error("Invalid screen rule type: " + rule);
+}
+
+inline nnqp_screen_rule_type convert_nnqp_screen_rule(
+    const std::string& rule
+)
+{
+    if (rule == "greedy") return nnqp_screen_rule_type::_greedy;
     throw util::adelie_core_error("Invalid screen rule type: " + rule);
 }
 

@@ -7,18 +7,51 @@ import numpy as np
 import scipy
 
 
+def render_constraints(
+    n_groups: int,
+    constraints: list,
+    dtype,
+):
+    if constraints is None:
+        constraints = [None] * n_groups
+    return {
+        np.float32: core.constraint.VectorConstraintBase32,
+        np.float64: core.constraint.VectorConstraintBase64,
+    }[dtype](constraints)
+
+
 def deduce_states(
     *,
+    constraints: list,
     group_sizes: np.ndarray,
     screen_set: np.ndarray,
+    dtype,
 ):
-    S = screen_set.shape[0]
+    constraints = render_constraints(
+        group_sizes.shape[0],
+        constraints,
+        dtype,
+    )
     screen_begins = np.cumsum(
         np.concatenate([[0], group_sizes[screen_set]]),
         dtype=int,
     )[:-1]
+    screen_dual_begins = np.cumsum(
+        np.concatenate([
+            [0], 
+            [
+                0
+                if constraints[k] is None else
+                constraints[k].dual_size 
+                for k in screen_set
+            ],
+        ]),
+        dtype=int,
+    )[:-1]
     return (
+        constraints,
         screen_begins,
+        screen_dual_begins,
     )
 
 
@@ -348,6 +381,7 @@ def gaussian_pin_naive(
     X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
     y_mean: float,
     y_var: float,
+    constraints: list,
     groups: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
@@ -358,6 +392,7 @@ def gaussian_pin_naive(
     resid: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
+    screen_dual: np.ndarray,
     active_set_size: int,
     active_set: np.ndarray,
     intercept: bool =True,
@@ -393,6 +428,11 @@ def gaussian_pin_naive(
         i.e. :math:`\\|y_c\\|_{W}^2`.
         This is only used to check convergence as a relative measure,
         i.e. this quantity is the "null" model MSE.
+    constraints : list 
+        List of constraints for each group.
+        ``constraints[i]`` is the constraint object corresponding to group ``i``.
+        If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
+        If ``None``, every group is unconstrained.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -431,6 +471,13 @@ def gaussian_pin_naive(
     screen_is_active : (s,) np.ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    screen_dual : (ds,) np.ndarray
+        Dual vector on the screen set.
+        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
+        where
+        ``k = screen_set[i]``,
+        ``b = screen_dual_begins[i]``,
+        and ``p = constraints[k].dual_size``.
     active_set_size : int
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -531,13 +578,18 @@ def gaussian_pin_naive(
             self._resid = np.array(resid, copy=True, dtype=dtype)
             self._screen_beta = np.array(screen_beta, copy=True, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=True, dtype=bool)
+            self._screen_dual = np.array(screen_dual, copy=True, dtype=dtype)
             self._active_set = np.array(active_set, copy=True, dtype=int)
 
             (
+                self._constraints,
                 self._screen_begins,
+                self._screen_dual_begins,
             ) = deduce_states(
+                constraints=constraints,
                 group_sizes=group_sizes,
                 screen_set=screen_set,
+                dtype=dtype,
             )
 
             self._max_active_size = (
@@ -585,6 +637,7 @@ def gaussian_pin_naive(
                 X=X,
                 y_mean=y_mean,
                 y_var=y_var,
+                constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
                 alpha=alpha,
@@ -595,6 +648,7 @@ def gaussian_pin_naive(
                 screen_vars=self._screen_vars,
                 screen_X_means=self._screen_X_means,
                 screen_transforms=self._screen_transforms,
+                screen_dual_begins=self._screen_dual_begins,
                 lmda_path=self._lmda_path,
                 intercept=intercept,
                 max_active_size=self._max_active_size,
@@ -610,6 +664,7 @@ def gaussian_pin_naive(
                 resid_sum=resid_sum,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
+                screen_dual=self._screen_dual,
                 active_set_size=active_set_size,
                 active_set=self._active_set,
             )
@@ -644,6 +699,7 @@ class gaussian_pin_cov_base(gaussian_pin_base):
 def gaussian_pin_cov(
     *,
     A: Union[matrix.MatrixCovBase64, matrix.MatrixCovBase32],
+    constraints: list,
     groups: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
@@ -653,6 +709,7 @@ def gaussian_pin_cov(
     screen_beta: np.ndarray,
     screen_grad: np.ndarray,
     screen_is_active: np.ndarray,
+    screen_dual: np.ndarray,
     active_set_size: int,
     active_set: np.ndarray,
     max_active_size: int =None,
@@ -677,6 +734,11 @@ def gaussian_pin_cov(
     A : Union[adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]
         Covariance matrix :math:`X_c^\\top W X_c`.
         It is typically one of the matrices defined in ``adelie.matrix`` submodule.
+    constraints : list 
+        List of constraints for each group.
+        ``constraints[i]`` is the constraint object corresponding to group ``i``.
+        If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
+        If ``None``, every group is unconstrained.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -717,6 +779,13 @@ def gaussian_pin_cov(
     screen_is_active : (s,) np.ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    screen_dual : (ds,) np.ndarray
+        Dual vector on the screen set.
+        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
+        where
+        ``k = screen_set[i]``,
+        ``b = screen_dual_begins[i]``,
+        and ``p = constraints[k].dual_size``.
     active_set_size : int
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -809,13 +878,18 @@ def gaussian_pin_cov(
             self._screen_beta = np.array(screen_beta, copy=True, dtype=dtype)
             self._screen_grad = np.array(screen_grad, copy=True, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=True, dtype=bool)
+            self._screen_dual = np.array(screen_dual, copy=True, dtype=dtype)
             self._active_set = np.array(active_set, copy=True, dtype=int)
 
             (
+                self._constraints,
                 self._screen_begins,
+                self._screen_dual_begins,
             ) = deduce_states(
+                constraints=constraints,
                 group_sizes=group_sizes,
                 screen_set=screen_set,
+                dtype=dtype,
             )
 
             self._max_active_size = (
@@ -851,6 +925,7 @@ def gaussian_pin_cov(
             core_base.__init__(
                 self,
                 A=A,
+                constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
                 alpha=alpha,
@@ -859,6 +934,7 @@ def gaussian_pin_cov(
                 screen_begins=self._screen_begins,
                 screen_vars=self._screen_vars,
                 screen_transforms=self._screen_transforms,
+                screen_dual_begins=self._screen_dual_begins,
                 screen_subset_order=self._screen_subset_order,
                 screen_subset_ordered=self._screen_subset_ordered,
                 lmda_path=self._lmda_path,
@@ -873,6 +949,7 @@ def gaussian_pin_cov(
                 screen_beta=self._screen_beta,
                 screen_grad=self._screen_grad,
                 screen_is_active=self._screen_is_active,
+                screen_dual=self._screen_dual,
                 active_set_size=active_set_size,
                 active_set=self._active_set,
             )
@@ -1022,6 +1099,7 @@ def gaussian_cov(
     *,
     A: Union[matrix.MatrixCovBase64, matrix.MatrixCovBase32],
     v: np.ndarray,
+    constraints: list,
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -1029,6 +1107,7 @@ def gaussian_cov(
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
+    screen_dual: np.ndarray,
     active_set_size: int,
     active_set: np.ndarray,
     rsq: float,
@@ -1061,6 +1140,11 @@ def gaussian_cov(
         It is typically one of the matrices defined in ``adelie.matrix`` submodule.
     v : (p,) np.ndarray
         Linear term.
+    constraints : list 
+        List of constraints for each group.
+        ``constraints[i]`` is the constraint object corresponding to group ``i``.
+        If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
+        If ``None``, every group is unconstrained.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -1089,6 +1173,13 @@ def gaussian_cov(
     screen_is_active : (s,) np.ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    screen_dual : (ds,) np.ndarray
+        Dual vector on the screen set.
+        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
+        where
+        ``k = screen_set[i]``,
+        ``b = screen_dual_begins[i]``,
+        and ``p = constraints[k].dual_size``.
     active_set_size : int
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -1119,7 +1210,7 @@ def gaussian_cov(
         It is recommended that the path is sorted in decreasing order.
         If ``None``, the path will be generated.
         Default is ``None``.
-    lmda_max : float
+    lmda_max : float, optional
         The smallest :math:`\\lambda` such that the true solution is zero
         for all coefficients that have a non-vanishing group lasso penalty (:math:`\\ell_2`-norm).
         If ``None``, it will be computed.
@@ -1238,6 +1329,7 @@ def gaussian_cov(
             # or copy if it must be made
             self._A = A
             self._v = np.array(v, copy=True, dtype=dtype)
+            self._constraints = render_constraints(groups.shape[0], constraints, dtype)
             self._groups = np.array(groups, copy=True, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
@@ -1245,6 +1337,7 @@ def gaussian_cov(
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
+            self._screen_dual = np.array(screen_dual, copy=False, dtype=dtype)
             self._grad = np.array(grad, copy=False, dtype=dtype)
             self._active_set = np.array(active_set, copy=False, dtype=int)
 
@@ -1254,6 +1347,7 @@ def gaussian_cov(
                 self,
                 A=self._A,
                 v=self._v,
+                constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
                 alpha=alpha,
@@ -1280,6 +1374,7 @@ def gaussian_cov(
                 screen_set=self._screen_set,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
+                screen_dual=self._screen_dual,
                 active_set_size=active_set_size,
                 active_set=self._active_set,
                 rsq=rsq,
@@ -1477,14 +1572,27 @@ class gaussian_naive_base(base):
 
         # ================ abs_grad check ====================
         grad_corr = np.copy(grad)
-        for i, b, g, gs in zip(
+        for i, b, db, g, gs in zip(
             self.screen_set,
             self.screen_begins,
+            self.screen_dual_begins,
             self.groups[self.screen_set],
             self.group_sizes[self.screen_set],
         ):
             lmda = 1e35 if np.isinf(self.lmda) else self.lmda
-            grad_corr[g:g+gs] -= lmda * (1-self.alpha) * self.penalty[i] * self.screen_beta[b:b+gs]
+            constraint_grad = 0
+            if not (self.constraints[i] is None):
+                ds = self.constraints[i].dual_size
+                constraint_grad = np.empty(ds)
+                self.constraints[i].gradient(
+                    self.screen_beta[b:b+gs],
+                    self.screen_dual[db:db+ds],
+                    constraint_grad,
+                )
+            grad_corr[g:g+gs] -= (
+                lmda * (1-self.alpha) * self.penalty[i] * self.screen_beta[b:b+gs] + 
+                constraint_grad
+            )
         abs_grad = np.array([
             np.linalg.norm(grad_corr[g:g+gs])
             for g, gs in zip(self.groups, self.group_sizes)
@@ -1552,6 +1660,7 @@ def gaussian_naive(
     y_var: float,
     resid: np.ndarray,
     resid_sum: float,
+    constraints: list,
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -1561,6 +1670,7 @@ def gaussian_naive(
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
+    screen_dual: np.ndarray,
     active_set_size: int,
     active_set: np.ndarray,
     rsq: float,
@@ -1620,6 +1730,11 @@ def gaussian_naive(
         Residual :math:`y_c - X \\beta` where :math:`\\beta` is given by ``screen_beta``.
     resid_sum : float
         Weighted (by :math:`W`) sum of ``resid``.
+    constraints : list 
+        List of constraints for each group.
+        ``constraints[i]`` is the constraint object corresponding to group ``i``.
+        If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
+        If ``None``, every group is unconstrained.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -1653,6 +1768,13 @@ def gaussian_naive(
     screen_is_active : (s,) np.ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    screen_dual : (ds,) np.ndarray
+        Dual vector on the screen set.
+        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
+        where
+        ``k = screen_set[i]``,
+        ``b = screen_dual_begins[i]``,
+        and ``p = constraints[k].dual_size``.
     active_set_size : int
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -1683,7 +1805,7 @@ def gaussian_naive(
         It is recommended that the path is sorted in decreasing order.
         If ``None``, the path will be generated.
         Default is ``None``.
-    lmda_max : float
+    lmda_max : float, optional
         The smallest :math:`\\lambda` such that the true solution is zero
         for all coefficients that have a non-vanishing group lasso penalty (:math:`\\ell_2`-norm).
         If ``None``, it will be computed.
@@ -1810,6 +1932,7 @@ def gaussian_naive(
             self._glm = glm.gaussian(y=y, weights=weights, dtype=dtype)
             self._X = X
             self._X_means = np.array(X_means, copy=True, dtype=dtype)
+            self._constraints = render_constraints(groups.shape[0], constraints, dtype)
             self._groups = np.array(groups, copy=True, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
@@ -1818,6 +1941,7 @@ def gaussian_naive(
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
+            self._screen_dual = np.array(screen_dual, copy=False, dtype=dtype)
             self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
             self._resid = np.array(resid, copy=False, dtype=dtype)
@@ -1832,6 +1956,7 @@ def gaussian_naive(
                 y_var=y_var,
                 resid=self._resid,
                 resid_sum=resid_sum,
+                constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
                 alpha=alpha,
@@ -1861,6 +1986,7 @@ def gaussian_naive(
                 screen_set=self._screen_set,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
+                screen_dual=self._screen_dual,
                 active_set_size=active_set_size,
                 active_set=self._active_set,
                 rsq=rsq,
@@ -1887,6 +2013,7 @@ def multigaussian_naive(
     y_var: float,
     resid: np.ndarray,
     resid_sum: float,
+    constraints: list,
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -1896,6 +2023,7 @@ def multigaussian_naive(
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
+    screen_dual: np.ndarray,
     active_set_size: int,
     active_set: np.ndarray,
     rsq: float,
@@ -1954,6 +2082,11 @@ def multigaussian_naive(
         where :math:`\\beta` is given by ``screen_beta``.
     resid_sum : float
         Weighted (by :math:`\\tilde{W}`) sum of ``resid``.
+    constraints : list 
+        List of constraints for each group.
+        ``constraints[i]`` is the constraint object corresponding to group ``i``.
+        If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
+        If ``None``, every group is unconstrained.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -1987,6 +2120,13 @@ def multigaussian_naive(
     screen_is_active : (s,) np.ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    screen_dual : (ds,) np.ndarray
+        Dual vector on the screen set.
+        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
+        where
+        ``k = screen_set[i]``,
+        ``b = screen_dual_begins[i]``,
+        and ``p = constraints[k].dual_size``.
     active_set_size : int
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -2017,7 +2157,7 @@ def multigaussian_naive(
         It is recommended that the path is sorted in decreasing order.
         If ``None``, the path will be generated.
         Default is ``None``.
-    lmda_max : float
+    lmda_max : float, optional
         The smallest :math:`\\lambda` such that the true solution is zero
         for all coefficients that have a non-vanishing group lasso penalty (:math:`\\ell_2`-norm).
         If ``None``, it will be computed.
@@ -2158,6 +2298,7 @@ def multigaussian_naive(
             self._X = X_raw
             self._X_expanded = X
             self._X_means = np.array(X_means, copy=True, dtype=dtype)
+            self._constraints = render_constraints(groups.shape[0], constraints, dtype)
             self._groups = np.array(groups, copy=True, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
@@ -2167,6 +2308,7 @@ def multigaussian_naive(
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
+            self._screen_dual = np.array(screen_dual, copy=False, dtype=dtype)
             self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
             self._resid = np.array(resid, copy=False, dtype=dtype)
@@ -2188,6 +2330,7 @@ def multigaussian_naive(
                 y_var=y_var,
                 resid=self._resid,
                 resid_sum=resid_sum,
+                constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
                 alpha=alpha,
@@ -2217,6 +2360,7 @@ def multigaussian_naive(
                 screen_set=self._screen_set,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
+                screen_dual=self._screen_dual,
                 active_set_size=active_set_size,
                 active_set=self._active_set,
                 rsq=rsq,
@@ -2252,6 +2396,7 @@ def glm_naive(
     *,
     X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
     glm: Union[glm.GlmBase64, glm.GlmBase32],
+    constraints: list,
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -2260,6 +2405,7 @@ def glm_naive(
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
+    screen_dual: np.ndarray,
     active_set_size: int,
     active_set: np.ndarray,
     beta0: float,
@@ -2301,6 +2447,11 @@ def glm_naive(
     glm : Union[adelie.glm.GlmBase64, adelie.glm.GlmBase32]
         GLM object.
         It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
+    constraints : list 
+        List of constraints for each group.
+        ``constraints[i]`` is the constraint object corresponding to group ``i``.
+        If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
+        If ``None``, every group is unconstrained.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -2331,6 +2482,13 @@ def glm_naive(
     screen_is_active : (s,) np.ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    screen_dual : (ds,) np.ndarray
+        Dual vector on the screen set.
+        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
+        where
+        ``k = screen_set[i]``,
+        ``b = screen_dual_begins[i]``,
+        and ``p = constraints[k].dual_size``.
     active_set_size : int
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -2512,6 +2670,7 @@ def glm_naive(
             # or copy if it must be made
             self._glm = glm
             self._X = X
+            self._constraints = render_constraints(groups.shape[0], constraints, dtype)
             self._groups = np.array(groups, copy=True, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
@@ -2520,6 +2679,7 @@ def glm_naive(
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
+            self._screen_dual = np.array(screen_dual, copy=False, dtype=dtype)
             self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
             self._eta = np.array(eta, copy=False, dtype=dtype)
@@ -2530,6 +2690,7 @@ def glm_naive(
             core_base.__init__(
                 self,
                 X=self._X,
+                constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
                 alpha=alpha,
@@ -2564,6 +2725,7 @@ def glm_naive(
                 screen_set=self._screen_set,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
+                screen_dual=self._screen_dual,
                 active_set_size=active_set_size,
                 active_set=self._active_set,
                 beta0=beta0,
@@ -2587,6 +2749,7 @@ def multiglm_naive(
     *,
     X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
     glm: Union[glm.GlmMultiBase64, glm.GlmMultiBase32],
+    constraints: list,
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -2595,6 +2758,7 @@ def multiglm_naive(
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
+    screen_dual: np.ndarray,
     active_set_size: int,
     active_set: np.ndarray,
     lmda: float,
@@ -2644,6 +2808,11 @@ def multiglm_naive(
     glm : Union[adelie.glm.GlmMultiBase64, adelie.glm.GlmMultiBase32]
         Multi-response GLM object.
         It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
+    constraints : list 
+        List of constraints for each group.
+        ``constraints[i]`` is the constraint object corresponding to group ``i``.
+        If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
+        If ``None``, every group is unconstrained.
     groups : (G,) np.ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -2674,6 +2843,13 @@ def multiglm_naive(
     screen_is_active : (s,) np.ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
+    screen_dual : (ds,) np.ndarray
+        Dual vector on the screen set.
+        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
+        where
+        ``k = screen_set[i]``,
+        ``b = screen_dual_begins[i]``,
+        and ``p = constraints[k].dual_size``.
     active_set_size : int
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -2866,6 +3042,7 @@ def multiglm_naive(
             self._glm = glm
             self._X = X_raw
             self._X_expanded = X
+            self._constraints = render_constraints(groups.shape[0], constraints, dtype)
             self._groups = np.array(groups, copy=True, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
@@ -2874,6 +3051,7 @@ def multiglm_naive(
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
+            self._screen_dual = np.array(screen_dual, copy=False, dtype=dtype)
             self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
             self._eta = np.array(eta, copy=False, dtype=dtype)
@@ -2887,6 +3065,7 @@ def multiglm_naive(
                 n_classes=n_classes,
                 multi_intercept=intercept,
                 X=self._X_expanded,
+                constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
                 alpha=alpha,
@@ -2921,6 +3100,7 @@ def multiglm_naive(
                 screen_set=self._screen_set,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
+                screen_dual=self._screen_dual,
                 active_set_size=active_set_size,
                 active_set=self._active_set,
                 beta0=0,

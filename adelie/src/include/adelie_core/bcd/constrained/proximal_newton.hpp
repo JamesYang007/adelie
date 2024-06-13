@@ -1,16 +1,18 @@
 #pragma once
 #include <adelie_core/bcd/unconstrained/newton.hpp>
 #include <adelie_core/optimization/nnls.hpp>
+#include <adelie_core/optimization/nnqp_full.hpp>
 #include <adelie_core/util/types.hpp>
+#include <adelie_core/util/macros.hpp>
 
 namespace adelie_core {
 namespace bcd {
 namespace constrained {
 
 template <class QuadType, class LinearType, class ValueType,
-          class AType, class BType, class ATVarsType, class AATType,
+          class AType, class BType, class ATVarsType, 
           class OutType, class BuffType>
-void proximal_newton_solver(
+void proximal_newton_general_solver(
     const QuadType& quad,
     const LinearType& linear,
     ValueType l1,
@@ -18,7 +20,6 @@ void proximal_newton_solver(
     const AType& A,
     const BType& b,
     const ATVarsType& AT_vars,
-    const AATType&,
     size_t max_iters,
     ValueType tol,
     size_t newton_max_iters,
@@ -44,7 +45,6 @@ void proximal_newton_solver(
 
     const auto m = A.rows();
     const auto d = A.cols();
-    const auto& S = quad;
     const auto& v = linear;
 
     iters = 0;
@@ -62,21 +62,12 @@ void proximal_newton_solver(
     bool is_prev_valid = false;
     bool recompute_mu_resid = true;
 
-    // TODO: move this out and check performance.
-    // cache AS^{-1}A^T
-    {
-        // must add some regularization
-        hess.array() = A.array().rowwise() / (S + l2);
-        hess_buff.noalias() = hess * A.transpose();
-    }
-
     while (iters < max_iters) {
         ++iters;
 
         // compute v - A^T mu
         if (recompute_mu_resid) {
-            mu_resid.matrix() = mu.matrix() * A;
-            mu_resid = v - mu_resid;
+            mu_resid.matrix().noalias() = v.matrix() - mu.matrix() * A;
         }
 
         // compute x^star(mu)
@@ -115,25 +106,30 @@ void proximal_newton_solver(
             }
             recompute_mu_resid = false;
 
-            size_t nnls_iters = 0;
-            value_t mu_loss = 0.5 * mu_resid.square().sum();
-            optimization::nnls_naive(
-                A.transpose(), AT_vars, nnls_iters, nnls_tol, nnls_dtol,
-                nnls_iters, mu, mu_resid, mu_loss,
-                [&]() { return mu_loss <= 0.5 * l1; },
+            static_assert(std::decay_t<AType>::IsRowMajor, "A must be row-major!");
+            const Eigen::Map<const colmat_value_t> AT(
+                A.data(), A.cols(), A.rows()
+            );
+            const value_t mu_loss = 0.5 * mu_resid.square().sum();
+            optimization::StateNNLS<colmat_value_t> state_nnls(
+                AT, AT_vars, nnls_max_iters, nnls_tol, nnls_dtol,
+                mu, mu_resid, mu_loss
+            );
+            optimization::nnls(
+                state_nnls, 
+                [&]() { return state_nnls.loss <= 0.5 * l1 * l1; },
                 [&](auto i) { return b[i] > 0; }
             );
 
-            // If mu_loss is smaller than or close to l1, 
+            // If loss is smaller than or close to 0.5 * l1 ** 2, 
             // then check passed and 0 is a valid primal solution.
             // TODO: generalize this constant.
-            if (mu_loss <= l1 * (0.5+5e-5)) return;
+            if (state_nnls.loss <= l1 * l1 * (0.5+5e-5)) return;
             continue;
         }
 
         // compute (negative) gradient
-        grad.matrix() = x.matrix() * A.transpose();
-        grad -= b;
+        grad.matrix().noalias() = x.matrix() * A.transpose() - b.matrix();
 
         // check convergence
         if (is_prev_valid) {
@@ -143,48 +139,43 @@ void proximal_newton_solver(
             if (convg_meas <= tol) return;
         }
 
-        // compute hessian
-        // x_buffer1 = quad + l2
-        // x_buffer2 = 1 / (x_buffer1 * x_norm + lmda)
+        // Compute hessian
+        // NOTE:
+        //  - x_buffer1 = quad + l2
+        //  - x_buffer2 = 1 / (x_buffer1 * x_norm + lmda)
 
-        // TODO: generalize constant
-        // If x_norm is sufficiently small compared to l1,
-        // then x_norm * A ((S+l2) x_norm + l1)^{-1} A^T is negligible,
-        // so just approximate by setting it to 0.
-        //alpha_tmp = x_norm * x_buffer2;
-        //hess_buff.array() = A.array().rowwise() * alpha_tmp;
-        //hess.noalias() = hess_buff * A.transpose();
+        hess.setZero();
+        auto hess_lower = hess.template selfadjointView<Eigen::Lower>();
 
-        // Method 2: poor approximation
-        //hess = (x_norm * x_buffer2.maxCoeff()) * AAT;
+        // lower(hess) += x_norm * A diag(x_buffer2) A^T 
+        hess_buff.array() = A.array().rowwise() * x_buffer2.sqrt();
+        hess_lower.rankUpdate(hess_buff, x_norm);
 
-        // Method 3: cache ASA^T
-        hess = (1 - l1 * x_buffer2).maxCoeff() * hess_buff;
-
+        // lower(hess) += x_norm * lmda * kappa * alpha alpha^T
         alpha_tmp = (x * x_buffer2) / x_norm;
         alpha.matrix() = alpha_tmp.matrix() * A.transpose();
         const auto l1_kappa_norm = l1 * x_norm / (x * x_buffer1 * alpha_tmp).sum();
-        hess.noalias() += l1_kappa_norm * alpha.matrix().transpose() * alpha.matrix();
+        hess_lower.rankUpdate(alpha.matrix().transpose(), l1_kappa_norm);
+
+        // full hessian update
+        hess.template triangularView<Eigen::Upper>() = hess.transpose();
 
         // save old values
         mu_prev = mu;
         grad_prev = grad;
         is_prev_valid = true;
 
-        // solve NNLS for new mu
-        size_t nnls_iters = 0;
-        value_t loss = 0;
-        optimization::nnls_cov_full(
-            hess, nnls_max_iters, nnls_tol, nnls_dtol,
-            nnls_iters, mu, grad, loss, [](){return false;}
-        ); 
+        // solve NNQP for new mu
+        optimization::StateNNQPFull<colmat_value_t> state_nnqp(
+            hess, nnls_max_iters, nnls_tol, nnls_dtol, mu, grad
+        );
+        optimization::nnqp_full(state_nnqp); 
         recompute_mu_resid = true;
     }
 
     // compute v - A^T mu
     if (recompute_mu_resid) {
-        mu_resid.matrix() = mu.matrix() * A;
-        mu_resid = v - mu_resid;
+        mu_resid.matrix().noalias() = v.matrix() - mu.matrix() * A;
     }
     size_t x_iters;
     unconstrained::newton_abs_solver(
