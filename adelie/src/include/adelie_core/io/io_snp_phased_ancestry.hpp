@@ -12,7 +12,7 @@ public:
     using base_t = IOSNPBase<MmapPtrType>;
     using outer_t = uint64_t;
     using inner_t = uint32_t;
-    using chunk_inner_t = u_char;
+    using chunk_inner_t = uint8_t;
     using value_t = int8_t;
     using vec_outer_t = util::rowvec_type<outer_t>;
     using vec_inner_t = util::rowvec_type<inner_t>;
@@ -24,13 +24,15 @@ public:
 
     static constexpr size_t n_bits_per_byte = 8;
     static constexpr size_t chunk_size = (
-        1UL << (n_bits_per_byte * sizeof(chunk_inner_t))
+        // casting helps MSVC with warning C4293
+        static_cast<size_t>(1UL) << (n_bits_per_byte * sizeof(chunk_inner_t))
     );
     static constexpr size_t n_haps = 2;
 
 protected:
     static constexpr size_t _max_inner = (
-        1UL << (n_bits_per_byte * sizeof(inner_t))
+        // casting helps MSVC with warning C4293
+        static_cast<size_t>(1UL) << (n_bits_per_byte * sizeof(inner_t))
     );
 
     using base_t::throw_no_read;
@@ -168,10 +170,10 @@ public:
             }
         };
         if (n_threads <= 1) {
-            for (outer_t j = 0; j < s; ++j) routine(j);
+            for (int j = 0; j < static_cast<int>(s); ++j) routine(j);
         } else {
             #pragma omp parallel for schedule(static) num_threads(n_threads)
-            for (outer_t j = 0; j < s; ++j) routine(j);
+            for (int j = 0; j < static_cast<int>(s); ++j) routine(j);
         }
 
         return dense;
@@ -344,10 +346,10 @@ public:
         };
         sw.start();
         if (n_threads <= 1) {
-            for (outer_t j = 0; j < s; ++j) outer_routine(j);
+            for (int j = 0; j < static_cast<int>(s); ++j) outer_routine(j);
         } else {
             #pragma omp parallel for schedule(static) num_threads(n_threads)
-            for (outer_t j = 0; j < s; ++j) outer_routine(j);
+            for (int j = 0; j < static_cast<int>(s); ++j) outer_routine(j);
         }
         benchmark["outer_time"] = sw.elapsed();
 
@@ -436,10 +438,10 @@ public:
         };
         sw.start();
         if (n_threads <= 1) {
-            for (outer_t j = 0; j < s; ++j) inner_routine(j);
+            for (int j = 0; j < static_cast<int>(s); ++j) inner_routine(j);
         } else {
             #pragma omp parallel for schedule(static) num_threads(n_threads)
-            for (outer_t j = 0; j < s; ++j) inner_routine(j);
+            for (int j = 0; j < static_cast<int>(s); ++j) inner_routine(j);
         }
         benchmark["inner"] = sw.elapsed();
 

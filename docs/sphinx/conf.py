@@ -5,6 +5,7 @@
 
 import os
 import sys
+import adelie as ad
 
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
@@ -16,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'adelie'
 copyright = '2023, James Yang'
 author = 'James Yang'
-release = open("../../VERSION", "r").read().strip()
+release = ad.__version__
 version = release
 
 # -- General configuration ---------------------------------------------------

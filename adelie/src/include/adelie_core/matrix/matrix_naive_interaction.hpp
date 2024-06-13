@@ -188,7 +188,7 @@ private:
                 break;
             }
         }
-        return 0.0/0.0;
+        return std::numeric_limits<value_t>::infinity() + 1; // lol
     }
 
     void _ctmul(

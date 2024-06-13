@@ -224,8 +224,8 @@ public:
                     //}
 
                     #pragma omp parallel for schedule(static) num_threads(_n_threads) collapse(2) if(_n_threads > 1)
-                    for (size_t k0 = 0; k0 < a_size; ++k0) {
-                        for (size_t k1 = 0; k1 < a_size; ++k1) {
+                    for (int k0 = 0; k0 < static_cast<int>(a_size); ++k0) {
+                        for (int k1 = 0; k1 < static_cast<int>(a_size); ++k1) {
                             auto it0 = _io.begin(snp, a_low + k0, 0);
                             const auto end0 = _io.end(snp, a_low + k0, 0);
                             auto it1 = _io.begin(snp, a_low + k1, 1);

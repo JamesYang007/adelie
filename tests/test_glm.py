@@ -4,6 +4,7 @@ import adelie.glm as glm
 import adelie.configs as configs
 import adelie.adelie_core as core
 import numpy as np
+import pytest
 
 
 def run_common_test(
@@ -117,26 +118,22 @@ class GlmTestGaussian(GlmTest):
         return -np.sum(self.weights * self.y ** 2 / 2)
 
 
-def test_gaussian():
-    def _test(n, seed=0):
-        np.random.seed(seed)
-        y = np.random.normal(0, 1, n)
-        w = np.random.uniform(0, 1, n)
-        w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
-        w[0] = 1
-        w /= np.sum(w)
-        model = glm.gaussian(y=y, weights=w)
-        model_exp = GlmTestGaussian(y=y, weights=w)
-        run_common_test(model, model_exp)
+@pytest.mark.parametrize("n", [1, 2, 5, 10, 20, 100])
+def test_gaussian(n, seed=0):
+    np.random.seed(seed)
+    y = np.random.normal(0, 1, n)
+    w = np.random.uniform(0, 1, n)
+    w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
+    w[0] = 1
+    w /= np.sum(w)
+    model = glm.gaussian(y=y, weights=w)
+    model_exp = GlmTestGaussian(y=y, weights=w)
+    run_common_test(model, model_exp)
 
-        subset = w != 0
-        y, w = y[subset], w[subset]
-        model_exp = glm.gaussian(y=y, weights=w)
-        run_subset_test(model, model_exp, subset)
-
-    ns = [1, 2, 5, 10, 20, 100]
-    for n in ns:
-        _test(n)
+    subset = w != 0
+    y, w = y[subset], w[subset]
+    model_exp = glm.gaussian(y=y, weights=w)
+    run_subset_test(model, model_exp, subset)
 
 
 # =====================================================================================
@@ -200,36 +197,31 @@ class GlmTestBinomialProbit(GlmTest):
         )
 
 
-def test_binomial():
-    def _test(n, link, binary, seed=0):
-        np.random.seed(seed)
-        if binary:
-            y = np.random.binomial(1, 0.5, n)
-        else:
-            y = np.random.uniform(0, 1, n)
-        w = np.random.uniform(0, 1, n)
-        w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
-        w[0] = 1
-        w /= np.sum(w)
-        model = glm.binomial(y=y, weights=w, link=link, dtype=np.float64)
-        test_glm = {
-            "logit": GlmTestBinomialLogit,
-            "probit": GlmTestBinomialProbit,
-        }[link]
-        model_exp = test_glm(y=y, weights=w)
-        run_common_test(model, model_exp)
+@pytest.mark.parametrize("n", [1, 2, 5, 10, 20, 100])
+@pytest.mark.parametrize("link", ["logit", "probit"])
+@pytest.mark.parametrize("binary", [False, True])
+def test_binomial(n, link, binary, seed=0):
+    np.random.seed(seed)
+    if binary:
+        y = np.random.binomial(1, 0.5, n)
+    else:
+        y = np.random.uniform(0, 1, n)
+    w = np.random.uniform(0, 1, n)
+    w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
+    w[0] = 1
+    w /= np.sum(w)
+    model = glm.binomial(y=y, weights=w, link=link, dtype=np.float64)
+    test_glm = {
+        "logit": GlmTestBinomialLogit,
+        "probit": GlmTestBinomialProbit,
+    }[link]
+    model_exp = test_glm(y=y, weights=w)
+    run_common_test(model, model_exp)
 
-        subset = w != 0
-        y, w = y[subset], w[subset]
-        model_exp = glm.binomial(y=y, weights=w, link=link, dtype=np.float64)
-        run_subset_test(model, model_exp, subset)
-
-    links = ["logit", "probit"]
-    ns = [1, 2, 5, 10, 20, 100]
-    for link in links:
-        for n in ns:
-            _test(n, link, True)
-            _test(n, link, False)
+    subset = w != 0
+    y, w = y[subset], w[subset]
+    model_exp = glm.binomial(y=y, weights=w, link=link, dtype=np.float64)
+    run_subset_test(model, model_exp, subset)
 
 
 # =====================================================================================
@@ -257,26 +249,22 @@ class GlmTestPoisson(GlmTest):
         return np.sum(self.weights * (-xlogy(self.y, self.y) + self.y))
 
 
-def test_poisson():
-    def _test(n, seed=0):
-        np.random.seed(seed)
-        y = np.random.poisson(1, n)
-        w = np.random.uniform(0, 1, n)
-        w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
-        w[0] = 1
-        w /= np.sum(w)
-        model = glm.poisson(y=y, weights=w, dtype=np.float64)
-        model_exp = GlmTestPoisson(y=y, weights=w)
-        run_common_test(model, model_exp)
+@pytest.mark.parametrize("n",  [1, 2, 5, 10, 20, 100])
+def test_poisson(n, seed=0):
+    np.random.seed(seed)
+    y = np.random.poisson(1, n)
+    w = np.random.uniform(0, 1, n)
+    w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
+    w[0] = 1
+    w /= np.sum(w)
+    model = glm.poisson(y=y, weights=w, dtype=np.float64)
+    model_exp = GlmTestPoisson(y=y, weights=w)
+    run_common_test(model, model_exp)
 
-        subset = w != 0
-        y, w = y[subset], w[subset]
-        model_exp = glm.poisson(y=y, weights=w, dtype=np.float64)
-        run_subset_test(model, model_exp, subset)
-
-    ns = [1, 2, 5, 10, 20, 100]
-    for n in ns:
-        _test(n)
+    subset = w != 0
+    y, w = y[subset], w[subset]
+    model_exp = glm.poisson(y=y, weights=w, dtype=np.float64)
+    run_subset_test(model, model_exp, subset)
 
 
 # =====================================================================================
@@ -284,187 +272,164 @@ def test_poisson():
 # =====================================================================================
 
 
-def test_cox_partial_sum_fwd():
-    def _test(n, m, seed=0):
-        np.random.seed(seed)
+@pytest.mark.parametrize("n", [0, 2, 5, 10, 20, 100])
+@pytest.mark.parametrize("m", [0, 4, 5, 30, 50, 150])
+def test_cox_partial_sum_fwd(n, m, seed=0):
+    np.random.seed(seed)
 
-        # continuous time (unique times a.s.)
-        v = np.random.uniform(0, 1, n)
-        s = np.sort(np.random.uniform(0, 1, n))
-        t = np.sort(np.random.uniform(0, 1, m))
+    # continuous time (unique times a.s.)
+    v = np.random.uniform(0, 1, n)
+    s = np.sort(np.random.uniform(0, 1, n))
+    t = np.sort(np.random.uniform(0, 1, m))
 
-        out = np.empty(m+1)
-        core.glm.GlmCox64._partial_sum_fwd(v, s, t, out)
-        expected = np.sum((s[None] <= t[:, None]) * v[None], axis=-1)
-        assert np.allclose(out[1:], expected)
+    out = np.empty(m+1)
+    core.glm.GlmCox64._partial_sum_fwd(v, s, t, out)
+    expected = np.sum((s[None] <= t[:, None]) * v[None], axis=-1)
+    assert np.allclose(out[1:], expected)
 
-        # discrete time (create ties)
-        s = np.sort(np.random.choice(20, n))
-        t = np.sort(np.random.choice(20, m))
-        out = np.empty(m+1)
-        core.glm.GlmCox64._partial_sum_fwd(v, s, t, out)
-        expected = np.sum((s[None] <= t[:, None]) * v[None], axis=-1)
-        assert np.allclose(out[1:], expected)
-
-    ns = [0, 2, 5, 10, 20, 100]
-    ms = [0, 4, 5, 30, 50, 150]
-    for n in ns:
-        for m in ms:
-            _test(n, m)
+    # discrete time (create ties)
+    s = np.sort(np.random.choice(20, n))
+    t = np.sort(np.random.choice(20, m))
+    out = np.empty(m+1)
+    core.glm.GlmCox64._partial_sum_fwd(v, s, t, out)
+    expected = np.sum((s[None] <= t[:, None]) * v[None], axis=-1)
+    assert np.allclose(out[1:], expected)
 
 
-def test_cox_partial_sum_bwd():
-    def _test(n, m, seed=0):
-        np.random.seed(seed)
+@pytest.mark.parametrize("n", [0, 2, 5, 10, 20, 100])
+@pytest.mark.parametrize("m", [0, 4, 5, 30, 50, 150])
+def test_cox_partial_sum_bwd(n, m, seed=0):
+    np.random.seed(seed)
 
-        # continuous time (unique times a.s.)
-        v = np.random.uniform(0, 1, n)
-        s = np.sort(np.random.uniform(0, 1, n))
-        t = np.sort(np.random.uniform(0, 1, m))
+    # continuous time (unique times a.s.)
+    v = np.random.uniform(0, 1, n)
+    s = np.sort(np.random.uniform(0, 1, n))
+    t = np.sort(np.random.uniform(0, 1, m))
 
-        out = np.empty(m+1)
-        core.glm.GlmCox64._partial_sum_bwd(v, s, t, out)
-        expected = np.sum((s[None] >= t[:, None]) * v[None], axis=-1)
-        assert np.allclose(out[:-1], expected)
+    out = np.empty(m+1)
+    core.glm.GlmCox64._partial_sum_bwd(v, s, t, out)
+    expected = np.sum((s[None] >= t[:, None]) * v[None], axis=-1)
+    assert np.allclose(out[:-1], expected)
 
-        # discrete time (create ties)
-        s = np.sort(np.random.choice(20, n))
-        t = np.sort(np.random.choice(20, m))
-        out = np.empty(m+1)
-        core.glm.GlmCox64._partial_sum_bwd(v, s, t, out)
-        expected = np.sum((s[None] >= t[:, None]) * v[None], axis=-1)
-        assert np.allclose(out[:-1], expected)
-
-    ns = [0, 2, 5, 10, 20, 100]
-    ms = [0, 4, 5, 30, 50, 150]
-    for n in ns:
-        for m in ms:
-            _test(n, m)
+    # discrete time (create ties)
+    s = np.sort(np.random.choice(20, n))
+    t = np.sort(np.random.choice(20, m))
+    out = np.empty(m+1)
+    core.glm.GlmCox64._partial_sum_bwd(v, s, t, out)
+    expected = np.sum((s[None] >= t[:, None]) * v[None], axis=-1)
+    assert np.allclose(out[:-1], expected)
 
 
-def test_cox_at_risk_sum():
-    def _test(n, m, seed=0):
-        np.random.seed(seed)
+@pytest.mark.parametrize("n", [0, 2, 5, 10, 20, 100])
+@pytest.mark.parametrize("m", [0, 4, 5, 30, 50, 150])
+def test_cox_at_risk_sum(n, m, seed=0):
+    np.random.seed(seed)
 
-        # continuous time (unique times a.s.)
-        a = np.random.uniform(0, 1, n)
-        s = np.random.uniform(0, 1, n)
-        t = np.random.uniform(s, 1, n)
-        u = np.random.uniform(0, 1, m)
-        s_sorted = np.sort(s)
-        t_sorted = np.sort(t)
-        u_sorted = np.sort(u)
-        a_s = a[np.argsort(s)]
-        a_t = a[np.argsort(t)]
-        out = np.empty(m)
-        out1 = np.empty(m+1)
-        out2 = np.empty(m+1)
+    # continuous time (unique times a.s.)
+    a = np.random.uniform(0, 1, n)
+    s = np.random.uniform(0, 1, n)
+    t = np.random.uniform(s, 1, n)
+    u = np.random.uniform(0, 1, m)
+    s_sorted = np.sort(s)
+    t_sorted = np.sort(t)
+    u_sorted = np.sort(u)
+    a_s = a[np.argsort(s)]
+    a_t = a[np.argsort(t)]
+    out = np.empty(m)
+    out1 = np.empty(m+1)
+    out2 = np.empty(m+1)
 
-        core.glm.GlmCox64._at_risk_sum(
-            a_s, a_t, s_sorted, t_sorted, u_sorted, out, out1, out2,
-        )
-        expected = np.sum(
-            (s[None] < u[:, None]) * (u[:, None] <= t[None]) * a[None], 
-            axis=-1,
-        )[np.argsort(u)]
-        assert np.allclose(out, expected)
+    core.glm.GlmCox64._at_risk_sum(
+        a_s, a_t, s_sorted, t_sorted, u_sorted, out, out1, out2,
+    )
+    expected = np.sum(
+        (s[None] < u[:, None]) * (u[:, None] <= t[None]) * a[None], 
+        axis=-1,
+    )[np.argsort(u)]
+    assert np.allclose(out, expected)
 
-        # discrete time (create ties)
-        s = np.random.choice(5, n)
-        t = 1 + s + np.random.choice(5, n)
-        u = np.random.choice(10, m)
-        s_sorted = np.sort(s)
-        t_sorted = np.sort(t)
-        u_sorted = np.sort(u)
-        a_s = a[np.argsort(s)]
-        a_t = a[np.argsort(t)]
-        core.glm.GlmCox64._at_risk_sum(
-            a_s, a_t, s_sorted, t_sorted, u_sorted, out, out1, out2,
-        )
-        expected = np.sum(
-            (s[None] < u[:, None]) * (u[:, None] <= t[None]) * a[None], 
-            axis=-1,
-        )[np.argsort(u)]
-        assert np.allclose(out, expected)
-
-    ns = [0, 2, 5, 10, 20, 100]
-    ms = [0, 4, 5, 30, 50, 150]
-    for n in ns:
-        for m in ms:
-            _test(n, m)
+    # discrete time (create ties)
+    s = np.random.choice(5, n)
+    t = 1 + s + np.random.choice(5, n)
+    u = np.random.choice(10, m)
+    s_sorted = np.sort(s)
+    t_sorted = np.sort(t)
+    u_sorted = np.sort(u)
+    a_s = a[np.argsort(s)]
+    a_t = a[np.argsort(t)]
+    core.glm.GlmCox64._at_risk_sum(
+        a_s, a_t, s_sorted, t_sorted, u_sorted, out, out1, out2,
+    )
+    expected = np.sum(
+        (s[None] < u[:, None]) * (u[:, None] <= t[None]) * a[None], 
+        axis=-1,
+    )[np.argsort(u)]
+    assert np.allclose(out, expected)
 
 
-def test_cox_nnz_event_ties_sum():
-    def _test(n, seed=0):
-        np.random.seed(seed)
+@pytest.mark.parametrize("n", [0, 2, 5, 10, 20, 100])
+def test_cox_nnz_event_ties_sum(n, seed=0):
+    np.random.seed(seed)
 
-        # continuous time (unique times a.s.)
-        t = np.sort(np.random.uniform(0, 1, n))
-        status = np.random.binomial(1, 0.5, n)
-        w = np.random.uniform(0, 1, n)
-        w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
-        a = np.random.normal(0, 1, n)
+    # continuous time (unique times a.s.)
+    t = np.sort(np.random.uniform(0, 1, n))
+    status = np.random.binomial(1, 0.5, n)
+    w = np.random.uniform(0, 1, n)
+    w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
+    a = np.random.normal(0, 1, n)
 
-        out = np.empty(n)
-        core.glm.GlmCox64._nnz_event_ties_sum(a, t, status, w, out)
-        expected = (
-            np.sum((t[None] == t[:, None]) * ((w != 0) * status * a)[None], axis=-1)
-        )
-        expected[(status == 0) | (w == 0)] = 0
-        assert np.allclose(out, expected)
+    out = np.empty(n)
+    core.glm.GlmCox64._nnz_event_ties_sum(a, t, status, w, out)
+    expected = (
+        np.sum((t[None] == t[:, None]) * ((w != 0) * status * a)[None], axis=-1)
+    )
+    expected[(status == 0) | (w == 0)] = 0
+    assert np.allclose(out, expected)
 
-        # discrete time (create ties)
-        t = np.sort(np.random.choice(20, n))
-        out = np.empty(n)
-        core.glm.GlmCox64._nnz_event_ties_sum(a, t, status, w, out)
-        expected = (
-            np.sum((t[None] == t[:, None]) * ((w != 0) * status * a)[None], axis=-1)
-        )
-        expected[(status == 0) | (w == 0)] = 0
-        assert np.allclose(out, expected)
-
-    ns = [0, 2, 5, 10, 20, 100]
-    for n in ns:
-        _test(n)
+    # discrete time (create ties)
+    t = np.sort(np.random.choice(20, n))
+    out = np.empty(n)
+    core.glm.GlmCox64._nnz_event_ties_sum(a, t, status, w, out)
+    expected = (
+        np.sum((t[None] == t[:, None]) * ((w != 0) * status * a)[None], axis=-1)
+    )
+    expected[(status == 0) | (w == 0)] = 0
+    assert np.allclose(out, expected)
 
 
-def test_cox_scale():
-    def _test(n, seed=0):
-        np.random.seed(seed)
+@pytest.mark.parametrize("n", [1, 2, 5, 10, 20, 100])
+def test_cox_scale(n, seed=0):
+    np.random.seed(seed)
 
-        # continuous time (unique times a.s.)
-        t = np.sort(np.random.uniform(0, 1, n))
-        status = np.random.binomial(1, 0.5, n)
-        w = np.random.uniform(0, 1, n)
-        w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
+    # continuous time (unique times a.s.)
+    t = np.sort(np.random.uniform(0, 1, n))
+    status = np.random.binomial(1, 0.5, n)
+    w = np.random.uniform(0, 1, n)
+    w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
 
-        out = np.empty(n)
-        core.glm.GlmCox64._scale(t, status, w, "efron", out)
-        ta = t[(status != 0) & (w != 0)]
-        _,  unique_counts = np.unique(ta, return_counts=True)
-        expected = np.zeros(n)
-        expected[(status != 0) & (w != 0)] = np.concatenate([
-            np.arange(c, dtype=float) / c
-            for c in unique_counts
-        ])
-        assert np.allclose(out, expected)
+    out = np.empty(n)
+    core.glm.GlmCox64._scale(t, status, w, "efron", out)
+    ta = t[(status != 0) & (w != 0)]
+    _,  unique_counts = np.unique(ta, return_counts=True)
+    expected = np.zeros(n)
+    expected[(status != 0) & (w != 0)] = np.concatenate([
+        np.arange(c, dtype=float) / c
+        for c in unique_counts
+    ])
+    assert np.allclose(out, expected)
 
-        # discrete time (create ties)
-        t = np.sort(np.random.choice(20, n))
-        out = np.empty(n)
-        core.glm.GlmCox64._scale(t, status, w, "efron", out)
-        ta = t[(status != 0) & (w != 0)]
-        _, unique_counts = np.unique(ta, return_counts=True)
-        expected = np.zeros(n)
-        expected[(status != 0) & (w != 0)] = np.concatenate([
-            np.arange(c, dtype=float) / c
-            for c in unique_counts
-        ])
-        assert np.allclose(out, expected)
-
-    ns = [1, 2, 5, 10, 20, 100]
-    for n in ns:
-        _test(n)
+    # discrete time (create ties)
+    t = np.sort(np.random.choice(20, n))
+    out = np.empty(n)
+    core.glm.GlmCox64._scale(t, status, w, "efron", out)
+    ta = t[(status != 0) & (w != 0)]
+    _, unique_counts = np.unique(ta, return_counts=True)
+    expected = np.zeros(n)
+    expected[(status != 0) & (w != 0)] = np.concatenate([
+        np.arange(c, dtype=float) / c
+        for c in unique_counts
+    ])
+    assert np.allclose(out, expected)
 
 
 class GlmTestCox(GlmTest):
@@ -605,47 +570,43 @@ class GlmTestCox(GlmTest):
         return np.sum(d * w_mean * np.log(w_sum * (1 - sigma) + (w_sum <= 0)))
 
 
-def test_cox():
-    def _test(n, seed=0):
-        np.random.seed(seed)
+@pytest.mark.parametrize("n", [1, 2, 5, 10, 20, 100])
+def test_cox(n, seed=0):
+    np.random.seed(seed)
 
-        # discrete time (create ties)
-        s = np.random.choice(20, n)
-        t = 1 + s + np.random.choice(20, n)
-        d = np.random.binomial(1, 0.5, n)
-        w = np.random.uniform(0, 1, n)
-        w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
-        w[0] = 1
-        w /= np.sum(w)
-        model = glm.cox(
-            start=s,
-            stop=t,
-            status=d,
-            weights=w,
-            dtype=np.float64,
-        )
-        model_exp = GlmTestCox(
-            start=s,
-            stop=t,
-            status=d,
-            weights=w,
-        )
-        run_common_test(model, model_exp)
+    # discrete time (create ties)
+    s = np.random.choice(20, n)
+    t = 1 + s + np.random.choice(20, n)
+    d = np.random.binomial(1, 0.5, n)
+    w = np.random.uniform(0, 1, n)
+    w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
+    w[0] = 1
+    w /= np.sum(w)
+    model = glm.cox(
+        start=s,
+        stop=t,
+        status=d,
+        weights=w,
+        dtype=np.float64,
+    )
+    model_exp = GlmTestCox(
+        start=s,
+        stop=t,
+        status=d,
+        weights=w,
+    )
+    run_common_test(model, model_exp)
 
-        subset = w != 0
-        s, t, d, w = s[subset], t[subset], d[subset], w[subset]
-        model_exp = glm.cox(
-            start=s, 
-            stop=t,
-            status=d,
-            weights=w,
-            dtype=np.float64,
-        )
-        run_subset_test(model, model_exp, subset)
-
-    ns = [1, 2, 5, 10, 20, 100]
-    for n in ns:
-        _test(n)
+    subset = w != 0
+    s, t, d, w = s[subset], t[subset], d[subset], w[subset]
+    model_exp = glm.cox(
+        start=s, 
+        stop=t,
+        status=d,
+        weights=w,
+        dtype=np.float64,
+    )
+    run_subset_test(model, model_exp, subset)
 
 
 # =====================================================================================
@@ -675,28 +636,23 @@ class GlmTestMultiGaussian(GlmTest):
         return -np.sum(self.weights[:, None] * self.y ** 2 / 2) / K
 
 
-def test_multigaussian():
-    def _test(n, K, seed=0):
-        np.random.seed(seed)
-        y = np.random.normal(0, 1, (n, K))
-        w = np.random.uniform(0, 1, n)
-        w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
-        w[0] = 1
-        w /= np.sum(w)
-        model = glm.multigaussian(y=y, weights=w)
-        model_exp = GlmTestMultiGaussian(y=y, weights=w)
-        run_common_test(model, model_exp)
+@pytest.mark.parametrize("n", [1, 2, 5, 10, 20, 100])
+@pytest.mark.parametrize("K", [1, 2, 3, 4])
+def test_multigaussian(n, K, seed=0):
+    np.random.seed(seed)
+    y = np.random.normal(0, 1, (n, K))
+    w = np.random.uniform(0, 1, n)
+    w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
+    w[0] = 1
+    w /= np.sum(w)
+    model = glm.multigaussian(y=y, weights=w)
+    model_exp = GlmTestMultiGaussian(y=y, weights=w)
+    run_common_test(model, model_exp)
 
-        subset = w != 0
-        y, w = y[subset], w[subset]
-        model_exp = glm.multigaussian(y=y, weights=w)
-        run_subset_test(model, model_exp, subset)
-
-    ns = [1, 2, 5, 10, 20, 100]
-    Ks = [1, 2, 3, 4]
-    for n in ns:
-        for K in Ks:
-            _test(n, K)
+    subset = w != 0
+    y, w = y[subset], w[subset]
+    model_exp = glm.multigaussian(y=y, weights=w)
+    run_subset_test(model, model_exp, subset)
 
 
 # =====================================================================================
@@ -731,29 +687,24 @@ class GlmTestMultinomial(GlmTest):
         return -np.sum(self.weights * np.sum(xlogy(self.y, self.y), axis=-1)) / K
 
 
-def test_multinomial():
-    def _test(n, K, binary=True, seed=0):
-        np.random.seed(seed)
-        if binary:
-            y = np.random.multinomial(1, np.full(K, 1/K), n)
-        else:
-            y = np.random.dirichlet(np.ones(K), n)
-        w = np.random.uniform(0, 1, n)
-        w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
-        w[0] = 1
-        w /= np.sum(w)
-        model = glm.multinomial(y=y, weights=w, dtype=np.float64)
-        model_exp = GlmTestMultinomial(y=y, weights=w)
-        run_common_test(model, model_exp)
+@pytest.mark.parametrize("n", [1, 2, 5, 10, 20, 100])
+@pytest.mark.parametrize("K", [2, 3, 4])
+@pytest.mark.parametrize("binary", [False, True])
+def test_multinomial(n, K, binary, seed=0):
+    np.random.seed(seed)
+    if binary:
+        y = np.random.multinomial(1, np.full(K, 1/K), n)
+    else:
+        y = np.random.dirichlet(np.ones(K), n)
+    w = np.random.uniform(0, 1, n)
+    w[np.random.binomial(1, 0.2, n).astype(bool)] = 0
+    w[0] = 1
+    w /= np.sum(w)
+    model = glm.multinomial(y=y, weights=w, dtype=np.float64)
+    model_exp = GlmTestMultinomial(y=y, weights=w)
+    run_common_test(model, model_exp)
 
-        subset = w != 0
-        y, w = y[subset], w[subset]
-        model_exp = glm.multinomial(y=y, weights=w, dtype=np.float64)
-        run_subset_test(model, model_exp, subset)
-
-    ns = [1, 2, 5, 10, 20, 100]
-    Ks = [2, 3, 4]
-    for n in ns:
-        for K in Ks:
-            _test(n, K, True)
-            _test(n, K, False)
+    subset = w != 0
+    y, w = y[subset], w[subset]
+    model_exp = glm.multinomial(y=y, weights=w, dtype=np.float64)
+    run_subset_test(model, model_exp, subset)

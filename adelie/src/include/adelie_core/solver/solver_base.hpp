@@ -348,7 +348,7 @@ inline void solve_core(
         for (int i = 0; i < large_lmda_path.size(); ++i) {
             if (i < large_lmda_path.size()-1) {
                 // update progress bar
-                pb_it != pb.end();
+                static_cast<void>(pb_it != pb.end());
 
                 // Do not check for early-stopping.
                 // This choice is deliberate for these reasons:

@@ -1,4 +1,5 @@
 #include "decl.hpp"
+#include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/glm/glm_base.hpp>
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
@@ -70,21 +71,23 @@ static auto convert_betas(
 // Pin State 
 // ========================================================================
 
-template <class ValueType>
+template <class ConstraintType>
 void state_gaussian_pin_base(py::module_& m, const char* name)
 {
-    using state_t = ad::state::StateGaussianPinBase<ValueType>;
+    using state_t = ad::state::StateGaussianPinBase<ConstraintType>;
     using index_t = typename state_t::index_t;
     using value_t = typename state_t::value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_bool_t = typename state_t::vec_bool_t;
     using dyn_vec_mat_value_t = typename state_t::dyn_vec_mat_value_t;
+    using dyn_vec_constraint_t = typename state_t::dyn_vec_constraint_t;
 
     py::class_<state_t>(m, name, R"delimiter(
         Base state class for Gaussian, pin classes.
         )delimiter")
         .def(py::init<
+            const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
@@ -93,6 +96,7 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&,
             const dyn_vec_mat_value_t&,
+            const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&, 
             bool,
             size_t,
@@ -106,9 +110,11 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             value_t,
             Eigen::Ref<vec_value_t>,
             Eigen::Ref<vec_bool_t>,
+            Eigen::Ref<vec_value_t>, 
             size_t,
             Eigen::Ref<vec_index_t>
         >(),
+            py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
@@ -117,6 +123,7 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             py::arg("screen_begins").noconvert(),
             py::arg("screen_vars").noconvert(),
             py::arg("screen_transforms").noconvert(),
+            py::arg("screen_dual_begins").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("intercept"),
             py::arg("max_active_size"),
@@ -130,9 +137,14 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             py::arg("rsq"),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
+            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert()
         )
+        .def_readonly("constraints", &state_t::constraints, R"delimiter(
+        List of constraints for each group.
+        ``constraints[i]`` is the constraint object corresponding to group ``i``.
+        )delimiter")
         .def_readonly("groups", &state_t::groups, R"delimiter(
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -156,6 +168,12 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         ``screen_begins[i]`` is the starting index corresponding to the ``i`` th screen group.
         From this index, reading ``group_sizes[screen_set[i]]`` number of elements
         will grab values corresponding to the full ``i`` th screen group block.
+        )delimiter")
+        .def_readonly("screen_dual_begins", &state_t::screen_dual_begins, R"delimiter(
+        List of indices that index a corresponding list of dual values for each screen group.
+        ``screen_dual_begins[i]`` is the starting dual index corresponding to the ``i`` th screen group.
+        From this index, reading ``constraints[screen_set[i]].dual_size`` number of elements
+        will grab values corresponding to the full ``i`` th screen group dual block.
         )delimiter")
         .def_readonly("lmda_path", &state_t::lmda_path, R"delimiter(
         The regularization path to solve for.
@@ -194,6 +212,14 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
+        )delimiter")
+        .def_readonly("screen_dual", &state_t::screen_dual, R"delimiter(
+        Dual vector on the screen set.
+        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
+        where
+        ``k = screen_set[i]``,
+        ``b = screen_dual_begins[i]``,
+        and ``p = constraints[k].dual_size``.
         )delimiter")
         .def_readonly("screen_is_active", &state_t::screen_is_active, R"delimiter(
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
@@ -282,34 +308,37 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         ;
 }
 
-template <class MatrixType>
-class PyStateGaussianPinNaive: public ad::state::StateGaussianPinNaive<MatrixType>
+template <class ConstraintType, class MatrixType>
+class PyStateGaussianPinNaive: public ad::state::StateGaussianPinNaive<ConstraintType, MatrixType>
 {
-    using base_t = ad::state::StateGaussianPinNaive<MatrixType>;
+    using base_t = ad::state::StateGaussianPinNaive<ConstraintType, MatrixType>;
 public:
     using base_t::base_t;
     PyStateGaussianPinNaive(base_t&& base) : base_t(std::move(base)) {}
 };
 
-template <class MatrixType>
+template <class ConstraintType, class MatrixType>
 void state_gaussian_pin_naive(py::module_& m, const char* name)
 {
+    using constraint_t = ConstraintType;
     using matrix_t = MatrixType;
-    using state_t = ad::state::StateGaussianPinNaive<matrix_t>;
+    using state_t = ad::state::StateGaussianPinNaive<constraint_t, matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_bool_t = typename state_t::vec_bool_t;
     using dyn_vec_mat_value_t = typename state_t::dyn_vec_mat_value_t;
+    using dyn_vec_constraint_t = typename state_t::dyn_vec_constraint_t;
 
-    py::class_<state_t, base_t, PyStateGaussianPinNaive<matrix_t>>(m, name, R"delimiter(
+    py::class_<state_t, base_t, PyStateGaussianPinNaive<constraint_t, matrix_t>>(m, name, R"delimiter(
         Core state class for Gaussian, pin, naive method.
         )delimiter")
         .def(py::init<
             matrix_t&,
             value_t,
             value_t,
+            const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
@@ -320,6 +349,7 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const dyn_vec_mat_value_t&,
+            const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&, 
             bool,
             size_t,
@@ -335,12 +365,14 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             value_t,
             Eigen::Ref<vec_value_t>, 
             Eigen::Ref<vec_bool_t>,
+            Eigen::Ref<vec_value_t>, 
             size_t,
             Eigen::Ref<vec_index_t>
         >(),
             py::arg("X"),
             py::arg("y_mean"),
             py::arg("y_var"),
+            py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
@@ -351,6 +383,7 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             py::arg("screen_vars").noconvert(),
             py::arg("screen_X_means").noconvert(),
             py::arg("screen_transforms").noconvert(),
+            py::arg("screen_dual_begins").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("intercept"),
             py::arg("max_active_size"),
@@ -366,6 +399,7 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             py::arg("resid_sum"),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
+            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert()
         )
@@ -430,32 +464,35 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
         ;
 }
 
-template <class MatrixType>
-class PyStateGaussianPinCov : public ad::state::StateGaussianPinCov<MatrixType>
+template <class ConstraintType, class MatrixType>
+class PyStateGaussianPinCov : public ad::state::StateGaussianPinCov<ConstraintType, MatrixType>
 {
-    using base_t = ad::state::StateGaussianPinCov<MatrixType>;
+    using base_t = ad::state::StateGaussianPinCov<ConstraintType, MatrixType>;
 public:
     using base_t::base_t;
     PyStateGaussianPinCov(base_t&& base) : base_t(std::move(base)) {}
 };
 
-template <class MatrixType>
+template <class ConstraintType, class MatrixType>
 void state_gaussian_pin_cov(py::module_& m, const char* name)
 {
+    using constraint_t = ConstraintType;
     using matrix_t = MatrixType;
-    using state_t = ad::state::StateGaussianPinCov<matrix_t>;
+    using state_t = ad::state::StateGaussianPinCov<constraint_t, matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_bool_t = typename state_t::vec_bool_t;
     using dyn_vec_mat_value_t = typename state_t::dyn_vec_mat_value_t;
+    using dyn_vec_constraint_t = typename state_t::dyn_vec_constraint_t;
 
-    py::class_<state_t, base_t, PyStateGaussianPinCov<matrix_t>>(m, name, R"delimiter(
+    py::class_<state_t, base_t, PyStateGaussianPinCov<constraint_t, matrix_t>>(m, name, R"delimiter(
         Core state class for Gaussian, pin, covariance method.
         )delimiter")
         .def(py::init<
             matrix_t&,
+            const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
@@ -464,6 +501,7 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&,
             const dyn_vec_mat_value_t&,
+            const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&, 
@@ -478,10 +516,12 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             Eigen::Ref<vec_value_t>, 
             Eigen::Ref<vec_value_t>,
             Eigen::Ref<vec_bool_t>,
+            Eigen::Ref<vec_value_t>, 
             size_t,
             Eigen::Ref<vec_index_t>
         >(),
             py::arg("A"),
+            py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
@@ -490,6 +530,7 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("screen_begins").noconvert(),
             py::arg("screen_vars").noconvert(),
             py::arg("screen_transforms").noconvert(),
+            py::arg("screen_dual_begins").noconvert(),
             py::arg("screen_subset_order").noconvert(),
             py::arg("screen_subset_ordered").noconvert(),
             py::arg("lmda_path").noconvert(),
@@ -504,6 +545,7 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("screen_beta").noconvert(),
             py::arg("screen_grad").noconvert(),
             py::arg("screen_is_active").noconvert(),
+            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert()
         )
@@ -570,20 +612,22 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
 // State Base
 // ========================================================================
 
-template <class ValueType>
+template <class ConstraintType>
 void state_base(py::module_& m, const char* name)
 {
-    using state_t = ad::state::StateBase<ValueType>;
+    using state_t = ad::state::StateBase<ConstraintType>;
     using value_t = typename state_t::value_t;
     using index_t = typename state_t::index_t;
     using safe_bool_t = typename state_t::safe_bool_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
+    using dyn_vec_constraint_t = typename state_t::dyn_vec_constraint_t;
     py::class_<state_t>(m, name, R"delimiter(
         Base state class for non-pin classes.
         )delimiter") 
         .def(py::init<
+            const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
@@ -612,11 +656,13 @@ void state_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
+            const Eigen::Ref<const vec_value_t>&, 
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             value_t,
             const Eigen::Ref<const vec_value_t>& 
         >(),
+            py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
@@ -645,11 +691,16 @@ void state_base(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
+            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert(),
             py::arg("lmda"),
             py::arg("grad").noconvert()
         )
+        .def_readonly("constraints", &state_t::constraints, R"delimiter(
+        List of constraints for each group.
+        ``constraints[i]`` is the constraint object corresponding to group ``i``.
+        )delimiter")
         .def_readonly("groups", &state_t::groups, R"delimiter(
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -778,6 +829,30 @@ void state_base(py::module_& m, const char* name)
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
         )delimiter")
+        .def_property_readonly("screen_dual_begins", [](const state_t& state) {
+            return Eigen::Map<const vec_index_t>(
+                state.screen_dual_begins.data(),
+                state.screen_dual_begins.size()
+            );
+        }, R"delimiter(
+        List of indices that index a corresponding list of dual values for each screen group.
+        ``screen_dual_begins[i]`` is the starting dual index corresponding to the ``i`` th screen group.
+        From this index, reading ``constraints[screen_set[i]].dual_size`` number of elements
+        will grab values corresponding to the full ``i`` th screen group dual block.
+        )delimiter")
+        .def_property_readonly("screen_dual", [](const state_t& state) {
+            return Eigen::Map<const vec_value_t>(
+                state.screen_dual.data(),
+                state.screen_dual.size()
+            );
+        }, R"delimiter(
+        Dual vector on the screen set.
+        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
+        where
+        ``k = screen_set[i]``,
+        ``b = screen_dual_begins[i]``,
+        and ``p = constraints[k].dual_size``.
+        )delimiter")
         .def_readonly("active_set_size", &state_t::active_set_size, R"delimiter(
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -806,11 +881,12 @@ void state_base(py::module_& m, const char* name)
         The full gradient :math:`-X^\top \nabla \ell(\eta)`.
         )delimiter")
         .def_readonly("abs_grad", &state_t::abs_grad, R"delimiter(
-        The :math:`\ell_2` norms of ``grad`` across each group.
-        ``abs_grad[i]`` is given by ``np.linalg.norm(grad[g:g+gs] - lmda * penalty[i] * (1-alpha) * beta[g:g+gs])``
+        The :math:`\ell_2` norms of (corrected) ``grad`` across each group.
+        ``abs_grad[i]`` is given by ``np.linalg.norm(grad[g:g+gs] - lmda * penalty[i] * (1-alpha) * beta[g:g+gs] - correction)``
         where ``g = groups[i]``,
         ``gs = group_sizes[i]``,
-        and ``beta`` is the full solution vector represented by ``screen_beta``.
+        ``beta`` is the full solution vector represented by ``screen_beta``,
+        and ``correction`` is the output from calling ``constraints[i].gradient()``.
         )delimiter")
         .def_property_readonly("devs", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<value_t>>(
@@ -904,26 +980,28 @@ void state_base(py::module_& m, const char* name)
         ;
 }
 
-template <class MatrixType>
-class PyStateGaussianNaive : public ad::state::StateGaussianNaive<MatrixType>
+template <class ConstraintType, class MatrixType>
+class PyStateGaussianNaive : public ad::state::StateGaussianNaive<ConstraintType, MatrixType>
 {
-    using base_t = ad::state::StateGaussianNaive<MatrixType>;
+    using base_t = ad::state::StateGaussianNaive<ConstraintType, MatrixType>;
 public:
     using base_t::base_t;
     PyStateGaussianNaive(base_t&& base) : base_t(std::move(base)) {}
 };
 
-template <class MatrixType>
+template <class ConstraintType, class MatrixType>
 void state_gaussian_naive(py::module_& m, const char* name)
 {
+    using constraint_t = ConstraintType;
     using matrix_t = MatrixType;
-    using state_t = ad::state::StateGaussianNaive<matrix_t>;
+    using state_t = ad::state::StateGaussianNaive<constraint_t, matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
-    py::class_<state_t, base_t, PyStateGaussianNaive<matrix_t>>(m, name, R"delimiter(
+    using dyn_vec_constraint_t = typename state_t::dyn_vec_constraint_t;
+    py::class_<state_t, base_t, PyStateGaussianNaive<constraint_t, matrix_t>>(m, name, R"delimiter(
         Core state class for Gaussian, naive method.
         )delimiter")
         .def(py::init<
@@ -933,6 +1011,7 @@ void state_gaussian_naive(py::module_& m, const char* name)
             value_t,
             const Eigen::Ref<const vec_value_t>&,
             value_t,
+            const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
@@ -962,6 +1041,7 @@ void state_gaussian_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
+            const Eigen::Ref<const vec_value_t>&, 
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             value_t,
@@ -974,6 +1054,7 @@ void state_gaussian_naive(py::module_& m, const char* name)
             py::arg("y_var"),
             py::arg("resid").noconvert(),
             py::arg("resid_sum"),
+            py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
@@ -1003,6 +1084,7 @@ void state_gaussian_naive(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
+            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert(),
             py::arg("rsq"),
@@ -1075,26 +1157,28 @@ void state_gaussian_naive(py::module_& m, const char* name)
         ;
 }
 
-template <class MatrixType>
-class PyStateMultiGaussianNaive : public ad::state::StateMultiGaussianNaive<MatrixType>
+template <class ConstraintType, class MatrixType>
+class PyStateMultiGaussianNaive : public ad::state::StateMultiGaussianNaive<ConstraintType, MatrixType>
 {
-    using base_t = ad::state::StateMultiGaussianNaive<MatrixType>;
+    using base_t = ad::state::StateMultiGaussianNaive<ConstraintType, MatrixType>;
 public:
     using base_t::base_t;
     PyStateMultiGaussianNaive(base_t&& base) : base_t(std::move(base)) {}
 };
 
-template <class MatrixType>
+template <class ConstraintType, class MatrixType>
 void state_multigaussian_naive(py::module_& m, const char* name)
 {
+    using constraint_t = ConstraintType;
     using matrix_t = MatrixType;
-    using state_t = ad::state::StateMultiGaussianNaive<matrix_t>;
+    using state_t = ad::state::StateMultiGaussianNaive<constraint_t, matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
-    py::class_<state_t, base_t, PyStateMultiGaussianNaive<matrix_t>>(m, name, R"delimiter(
+    using dyn_vec_constraint_t = typename state_t::dyn_vec_constraint_t;
+    py::class_<state_t, base_t, PyStateMultiGaussianNaive<constraint_t, matrix_t>>(m, name, R"delimiter(
         Core state class for MultiGaussian, naive method.
         )delimiter")
         .def(py::init<
@@ -1107,6 +1191,7 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             value_t,
             const Eigen::Ref<const vec_value_t>&,
             value_t,
+            const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
@@ -1136,6 +1221,7 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
+            const Eigen::Ref<const vec_value_t>&, 
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             value_t,
@@ -1151,6 +1237,7 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             py::arg("y_var"),
             py::arg("resid").noconvert(),
             py::arg("resid_sum"),
+            py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
@@ -1180,6 +1267,7 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
+            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert(),
             py::arg("rsq"),
@@ -1226,31 +1314,34 @@ void state_multigaussian_naive(py::module_& m, const char* name)
         ;
 }
 
-template <class MatrixType>
-class PyStateGaussianCov : public ad::state::StateGaussianCov<MatrixType>
+template <class ConstraintType, class MatrixType>
+class PyStateGaussianCov : public ad::state::StateGaussianCov<ConstraintType, MatrixType>
 {
-    using base_t = ad::state::StateGaussianCov<MatrixType>;
+    using base_t = ad::state::StateGaussianCov<ConstraintType, MatrixType>;
 public:
     using base_t::base_t;
     PyStateGaussianCov(base_t&& base) : base_t(std::move(base)) {}
 };
 
-template <class MatrixType>
+template <class ConstraintType, class MatrixType>
 void state_gaussian_cov(py::module_& m, const char* name)
 {
+    using constraint_t = ConstraintType;
     using matrix_t = MatrixType;
-    using state_t = ad::state::StateGaussianCov<matrix_t>;
+    using state_t = ad::state::StateGaussianCov<constraint_t, matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
-    py::class_<state_t, base_t, PyStateGaussianCov<matrix_t>>(m, name, R"delimiter(
+    using dyn_vec_constraint_t = typename state_t::dyn_vec_constraint_t;
+    py::class_<state_t, base_t, PyStateGaussianCov<constraint_t, matrix_t>>(m, name, R"delimiter(
         Core state class for Gaussian, covariance method.
         )delimiter")
         .def(py::init<
             matrix_t&,
             const Eigen::Ref<const vec_value_t>&,
+            const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
@@ -1277,6 +1368,7 @@ void state_gaussian_cov(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
+            const Eigen::Ref<const vec_value_t>&, 
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             value_t,
@@ -1285,6 +1377,7 @@ void state_gaussian_cov(py::module_& m, const char* name)
         >(),
             py::arg("A"),
             py::arg("v").noconvert(),
+            py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
@@ -1311,6 +1404,7 @@ void state_gaussian_cov(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
+            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert(),
             py::arg("rsq"),
@@ -1375,32 +1469,35 @@ void state_gaussian_cov(py::module_& m, const char* name)
 // GLM State 
 // ========================================================================
 
-template <class MatrixType>
-class PyStateGlmNaive : public ad::state::StateGlmNaive<MatrixType>
+template <class ConstraintType, class MatrixType>
+class PyStateGlmNaive : public ad::state::StateGlmNaive<ConstraintType, MatrixType>
 {
-    using base_t = ad::state::StateGlmNaive<MatrixType>;
+    using base_t = ad::state::StateGlmNaive<ConstraintType, MatrixType>;
 public:
     using base_t::base_t;
     PyStateGlmNaive(base_t&& base) : base_t(std::move(base)) {}
 };
 
-template <class MatrixType>
+template <class ConstraintType, class MatrixType>
 void state_glm_naive(py::module_& m, const char* name)
 {
+    using constraint_t = ConstraintType;
     using matrix_t = MatrixType;
-    using state_t = ad::state::StateGlmNaive<matrix_t>;
+    using state_t = ad::state::StateGlmNaive<constraint_t, matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
-    py::class_<state_t, base_t, PyStateGlmNaive<matrix_t>>(m, name, R"delimiter(
+    using dyn_vec_constraint_t = typename state_t::dyn_vec_constraint_t;
+    py::class_<state_t, base_t, PyStateGlmNaive<constraint_t, matrix_t>>(m, name, R"delimiter(
         Core state class for GLM, naive method.
         )delimiter")
         .def(py::init<
             matrix_t&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
+            const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
@@ -1435,6 +1532,7 @@ void state_glm_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
+            const Eigen::Ref<const vec_value_t>&, 
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             value_t,
@@ -1444,6 +1542,7 @@ void state_glm_naive(py::module_& m, const char* name)
             py::arg("X"),
             py::arg("eta").noconvert(),
             py::arg("resid").noconvert(),
+            py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
@@ -1478,6 +1577,7 @@ void state_glm_naive(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
+            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert(),
             py::arg("beta0"),
@@ -1533,26 +1633,28 @@ void state_glm_naive(py::module_& m, const char* name)
         ;
 }
 
-template <class MatrixType>
-class PyStateMultiGlmNaive : public ad::state::StateMultiGlmNaive<MatrixType>
+template <class ConstraintType, class MatrixType>
+class PyStateMultiGlmNaive : public ad::state::StateMultiGlmNaive<ConstraintType, MatrixType>
 {
-    using base_t = ad::state::StateMultiGlmNaive<MatrixType>;
+    using base_t = ad::state::StateMultiGlmNaive<ConstraintType, MatrixType>;
 public:
     using base_t::base_t;
     PyStateMultiGlmNaive(base_t&& base) : base_t(std::move(base)) {}
 };
 
-template <class MatrixType>
+template <class ConstraintType, class MatrixType>
 void state_multiglm_naive(py::module_& m, const char* name)
 {
+    using constraint_t = ConstraintType;
     using matrix_t = MatrixType;
-    using state_t = ad::state::StateMultiGlmNaive<matrix_t>;
+    using state_t = ad::state::StateMultiGlmNaive<constraint_t, matrix_t>;
     using base_t = typename state_t::base_t;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
-    py::class_<state_t, base_t, PyStateMultiGlmNaive<matrix_t>>(m, name, R"delimiter(
+    using dyn_vec_constraint_t = typename state_t::dyn_vec_constraint_t;
+    py::class_<state_t, base_t, PyStateMultiGlmNaive<constraint_t, matrix_t>>(m, name, R"delimiter(
         Core state class for multi-response GLM, naive method.
         )delimiter")
         .def(py::init<
@@ -1562,6 +1664,7 @@ void state_multiglm_naive(py::module_& m, const char* name)
             matrix_t&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
+            const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
@@ -1596,6 +1699,7 @@ void state_multiglm_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
+            const Eigen::Ref<const vec_value_t>&, 
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             value_t,
@@ -1608,6 +1712,7 @@ void state_multiglm_naive(py::module_& m, const char* name)
             py::arg("X"),
             py::arg("eta").noconvert(),
             py::arg("resid").noconvert(),
+            py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
             py::arg("alpha"),
@@ -1642,6 +1747,7 @@ void state_multiglm_naive(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
+            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert(),
             py::arg("beta0"),
@@ -1687,23 +1793,73 @@ void state_multiglm_naive(py::module_& m, const char* name)
 
 void register_state(py::module_& m)
 {
-    state_gaussian_pin_base<double>(m, "StateGaussianPinBase64");
-    state_gaussian_pin_base<float>(m, "StateGaussianPinBase32");
-    state_gaussian_pin_cov<ad::matrix::MatrixCovBase<double>>(m, "StateGaussianPinCov64");
-    state_gaussian_pin_cov<ad::matrix::MatrixCovBase<float>>(m, "StateGaussianPinCov32");
-    state_gaussian_pin_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateGaussianPinNaive64");
-    state_gaussian_pin_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateGaussianPinNaive32");
+    state_gaussian_pin_base<
+        ad::constraint::ConstraintBase<double>
+    >(m, "StateGaussianPinBase64");
+    state_gaussian_pin_base<
+        ad::constraint::ConstraintBase<float>
+    >(m, "StateGaussianPinBase32");
+    state_gaussian_pin_cov<
+        ad::constraint::ConstraintBase<double>,
+        ad::matrix::MatrixCovBase<double>
+    >(m, "StateGaussianPinCov64");
+    state_gaussian_pin_cov<
+        ad::constraint::ConstraintBase<float>,
+        ad::matrix::MatrixCovBase<float>
+    >(m, "StateGaussianPinCov32");
+    state_gaussian_pin_naive<
+        ad::constraint::ConstraintBase<double>,
+        ad::matrix::MatrixNaiveBase<double>
+    >(m, "StateGaussianPinNaive64");
+    state_gaussian_pin_naive<
+        ad::constraint::ConstraintBase<float>,
+        ad::matrix::MatrixNaiveBase<float>
+    >(m, "StateGaussianPinNaive32");
 
-    state_base<double>(m, "StateBase64");
-    state_base<float>(m, "StateBase32");
-    state_gaussian_cov<ad::matrix::MatrixCovBase<double>>(m, "StateGaussianCov64");
-    state_gaussian_cov<ad::matrix::MatrixCovBase<float>>(m, "StateGaussianCov32");
-    state_gaussian_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateGaussianNaive64");
-    state_gaussian_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateGaussianNaive32");
-    state_multigaussian_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateMultiGaussianNaive64");
-    state_multigaussian_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateMultiGaussianNaive32");
-    state_glm_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateGlmNaive64");
-    state_glm_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateGlmNaive32");
-    state_multiglm_naive<ad::matrix::MatrixNaiveBase<double>>(m, "StateMultiGlmNaive64");
-    state_multiglm_naive<ad::matrix::MatrixNaiveBase<float>>(m, "StateMultiGlmNaive32");
+    state_base<
+        ad::constraint::ConstraintBase<double>
+    >(m, "StateBase64");
+    state_base<
+        ad::constraint::ConstraintBase<float>
+    >(m, "StateBase32");
+    state_gaussian_cov<
+        ad::constraint::ConstraintBase<double>,
+        ad::matrix::MatrixCovBase<double>
+    >(m, "StateGaussianCov64");
+    state_gaussian_cov<
+        ad::constraint::ConstraintBase<float>,
+        ad::matrix::MatrixCovBase<float>
+    >(m, "StateGaussianCov32");
+    state_gaussian_naive<
+        ad::constraint::ConstraintBase<double>,
+        ad::matrix::MatrixNaiveBase<double>
+    >(m, "StateGaussianNaive64");
+    state_gaussian_naive<
+        ad::constraint::ConstraintBase<float>,
+        ad::matrix::MatrixNaiveBase<float>
+    >(m, "StateGaussianNaive32");
+    state_multigaussian_naive<
+        ad::constraint::ConstraintBase<double>,
+        ad::matrix::MatrixNaiveBase<double>
+    >(m, "StateMultiGaussianNaive64");
+    state_multigaussian_naive<
+        ad::constraint::ConstraintBase<float>,
+        ad::matrix::MatrixNaiveBase<float>
+    >(m, "StateMultiGaussianNaive32");
+    state_glm_naive<
+        ad::constraint::ConstraintBase<double>,
+        ad::matrix::MatrixNaiveBase<double>
+    >(m, "StateGlmNaive64");
+    state_glm_naive<
+        ad::constraint::ConstraintBase<float>,
+        ad::matrix::MatrixNaiveBase<float>
+    >(m, "StateGlmNaive32");
+    state_multiglm_naive<
+        ad::constraint::ConstraintBase<double>,
+        ad::matrix::MatrixNaiveBase<double>
+    >(m, "StateMultiGlmNaive64");
+    state_multiglm_naive<
+        ad::constraint::ConstraintBase<float>,
+        ad::matrix::MatrixNaiveBase<float>
+    >(m, "StateMultiGlmNaive32");
 }

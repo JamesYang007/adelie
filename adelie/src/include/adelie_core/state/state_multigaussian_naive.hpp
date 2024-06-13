@@ -6,13 +6,15 @@
 namespace adelie_core {
 namespace state {
 
-template <class MatrixType, 
+template <class ConstraintType,
+          class MatrixType, 
           class ValueType=typename std::decay_t<MatrixType>::value_t,
           class IndexType=Eigen::Index,
           class BoolType=bool,
           class SafeBoolType=int8_t
         >
 struct StateMultiGaussianNaive : StateGaussianNaive<
+        ConstraintType,
         MatrixType,
         ValueType,
         IndexType,
@@ -21,6 +23,7 @@ struct StateMultiGaussianNaive : StateGaussianNaive<
     >
 {
     using base_t = StateGaussianNaive<
+        ConstraintType,
         MatrixType,
         ValueType,
         IndexType,
@@ -34,6 +37,7 @@ struct StateMultiGaussianNaive : StateGaussianNaive<
     using typename base_t::vec_index_t;
     using typename base_t::vec_bool_t;
     using typename base_t::map_cvec_value_t;
+    using typename base_t::dyn_vec_constraint_t;
     using typename base_t::dyn_vec_value_t;
     using typename base_t::dyn_vec_index_t;
     using typename base_t::dyn_vec_bool_t;
@@ -57,6 +61,7 @@ struct StateMultiGaussianNaive : StateGaussianNaive<
         value_t y_var,
         const Eigen::Ref<const vec_value_t>& resid,
         value_t resid_sum,
+        const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
         value_t alpha, 
@@ -86,6 +91,7 @@ struct StateMultiGaussianNaive : StateGaussianNaive<
         const Eigen::Ref<const vec_index_t>& screen_set,
         const Eigen::Ref<const vec_value_t>& screen_beta,
         const Eigen::Ref<const vec_bool_t>& screen_is_active,
+        const Eigen::Ref<const vec_value_t>& screen_dual,
         size_t active_set_size,
         const Eigen::Ref<const vec_index_t>& active_set,
         value_t rsq,
@@ -94,12 +100,12 @@ struct StateMultiGaussianNaive : StateGaussianNaive<
     ):
         base_t(
             X, X_means, y_mean, y_var, resid, resid_sum,
-            groups, group_sizes, alpha, penalty, weights, lmda_path, lmda_max, min_ratio, lmda_path_size,
+            constraints, groups, group_sizes, alpha, penalty, weights, lmda_path, lmda_max, min_ratio, lmda_path_size,
             max_screen_size, max_active_size,
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             max_iters, tol, adev_tol, ddev_tol, 
             newton_tol, newton_max_iters, early_exit, setup_lmda_max, setup_lmda_path, intercept, n_threads,
-            screen_set, screen_beta, screen_is_active, active_set_size, active_set, rsq, lmda, grad
+            screen_set, screen_beta, screen_is_active, screen_dual, active_set_size, active_set, rsq, lmda, grad
         ),
         group_type(util::convert_multi_group(group_type)),
         n_classes(n_classes),

@@ -196,14 +196,12 @@ template <class StateType,
           class GlmType,
           class PBType,
           class ExitCondType,
-          class UpdateCoefficientsType,
           class CUIType=util::no_op>
 inline void solve(
     StateType&& state,
     GlmType&& glm,
     PBType&& pb,
     ExitCondType exit_cond_f,
-    UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
 {
@@ -242,7 +240,6 @@ inline void solve(
             // ignore casted down state and use derived state
             multiglm::naive::update_loss_null(state, glm, buffer_pack);
         },
-        update_coefficients_f,
         tidy,
         check_user_interrupt
     );
