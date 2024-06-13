@@ -133,12 +133,14 @@ public:
     static constexpr size_t n_bits_per_byte = 8;
     static constexpr size_t n_categories = 3;
     static constexpr size_t chunk_size = (
-        1UL << (n_bits_per_byte * sizeof(chunk_inner_t))
+        // casting helps MSVC with warning C4293
+        static_cast<size_t>(1UL) << (n_bits_per_byte * sizeof(chunk_inner_t))
     );
 
 protected:
     static constexpr size_t _max_inner = (
-        1UL << (n_bits_per_byte * sizeof(inner_t))
+        // casting helps MSVC with warning C4293
+        static_cast<size_t>(1UL) << (n_bits_per_byte * sizeof(inner_t))
     );
 
     using base_t::throw_no_read;
