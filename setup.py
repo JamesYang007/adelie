@@ -5,13 +5,13 @@ from pybind11.setup_helpers import ParallelCompile
 import os
 import platform
 import subprocess
-import sysconfig
 
 
-# Partial import of adelie
-import builtins
-builtins.__ADELIE_SETUP__ = True
-from adelie import __version__
+# Hack to get __version__ from adelie/__init__.py
+with open("adelie/__init__.py") as f:
+    for line in f:
+        if line.startswith("__version__ = "):
+            __version__ = line.split('"')[1]
 
 
 def run_cmd(cmd):
