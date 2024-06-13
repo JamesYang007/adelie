@@ -17,6 +17,7 @@
 #pragma warning( pop )
 #elif defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 #endif
 #include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/util/types.hpp>
