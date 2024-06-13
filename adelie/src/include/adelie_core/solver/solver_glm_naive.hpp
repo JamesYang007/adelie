@@ -191,7 +191,7 @@ auto fit(
     >;
 
     auto& X = *state.X;
-    const auto& constraints = *state.constraints;
+    const auto& constraints = state.constraints;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto alpha = state.alpha;

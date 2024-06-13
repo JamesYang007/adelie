@@ -104,7 +104,7 @@ void update_abs_grad(
 )
 {
     update_abs_grad(
-        *state.constraints,
+        state.constraints,
         state.groups,
         state.group_sizes,
         state.penalty,
@@ -136,7 +136,7 @@ void update_screen_derived_base(
     StateType& state
 )
 {
-    const auto& constraints = *state.constraints;
+    const auto& constraints = state.constraints;
     const auto& group_sizes = state.group_sizes;
     const auto& screen_set = state.screen_set;
     auto& screen_hashset = state.screen_hashset;
@@ -218,7 +218,7 @@ struct StateBase
     using dyn_vec_sp_vec_t = std::vector<sp_vec_value_t>;
 
     /* static states */
-    const dyn_vec_constraint_t* constraints;
+    const dyn_vec_constraint_t constraints;
     const map_cvec_index_t groups;
     const map_cvec_index_t group_sizes;
     const value_t alpha;
@@ -324,7 +324,7 @@ struct StateBase
         value_t lmda,
         const Eigen::Ref<const vec_value_t>& grad
     ):
-        constraints(&constraints),
+        constraints(constraints),
         groups(groups.data(), groups.size()),
         group_sizes(group_sizes.data(), group_sizes.size()),
         alpha(alpha),
