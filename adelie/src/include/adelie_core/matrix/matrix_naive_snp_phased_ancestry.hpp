@@ -9,11 +9,12 @@ namespace adelie_core {
 namespace matrix {
 
 template <class ValueType,
-          class MmapPtrType=std::unique_ptr<char, std::function<void(char*)>>>
-class MatrixNaiveSNPPhasedAncestry: public MatrixNaiveBase<ValueType>
+          class MmapPtrType=std::unique_ptr<char, std::function<void(char*)>>,
+          class IndexType=Eigen::Index>
+class MatrixNaiveSNPPhasedAncestry: public MatrixNaiveBase<ValueType, IndexType>
 {
 public:
-    using base_t = MatrixNaiveBase<ValueType>;
+    using base_t = MatrixNaiveBase<ValueType, IndexType>;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_index_t;
@@ -103,7 +104,7 @@ public:
     ) override
     {
         base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-        if (_buff.size() < q * _n_threads) _buff.resize(q * _n_threads);
+        if (static_cast<size_t>(_buff.size()) < q * _n_threads) _buff.resize(q * _n_threads);
         snp_phased_ancestry_block_dot(
             _io, j, q, v * weights, out, _n_threads, _buff
         );
@@ -116,7 +117,7 @@ public:
     ) override
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
-        if (_buff.size() < q * _n_threads) _buff.resize(q * _n_threads);
+        if (static_cast<size_t>(_buff.size()) < q * _n_threads) _buff.resize(q * _n_threads);
         snp_phased_ancestry_block_axi(
             _io, j, q, v, out, _n_threads
         );
@@ -166,19 +167,17 @@ public:
             int n_solved1 = 0;
             while (n_solved1 <= n_solved0) {
                 const auto begin1 = j + n_solved1;
-                const auto snp1 = begin1 / A;
                 const auto ancestry_lower1 = begin1 % A;
                 const auto ancestry_upper1 = std::min<int>(ancestry_lower1 + q - n_solved1, A);
 
                 if (n_solved0 == n_solved1) {
-                    const auto begin = begin0;
                     const auto snp = snp0;
                     const auto a_low = ancestry_lower0;
                     const auto a_high = ancestry_upper0;
                     const auto a_size = a_high - a_low;
 
                     // increase buffer including cross-term computation part as well
-                    if (_buff.size() < a_size * a_size * _n_threads) {
+                    if (static_cast<size_t>(_buff.size()) < a_size * a_size * _n_threads) {
                         _buff.resize(a_size * a_size * _n_threads);
                     }
 
@@ -225,8 +224,8 @@ public:
                     //}
 
                     #pragma omp parallel for schedule(static) num_threads(_n_threads) collapse(2) if(_n_threads > 1)
-                    for (int k0 = 0; k0 < a_size; ++k0) {
-                        for (int k1 = 0; k1 < a_size; ++k1) {
+                    for (int k0 = 0; k0 < static_cast<int>(a_size); ++k0) {
+                        for (int k1 = 0; k1 < static_cast<int>(a_size); ++k1) {
                             auto it0 = _io.begin(snp, a_low + k0, 0);
                             const auto end0 = _io.end(snp, a_low + k0, 0);
                             auto it1 = _io.begin(snp, a_low + k1, 1);
@@ -261,8 +260,8 @@ public:
                         }
                     }
 
-                    for (int k0 = 0; k0 < a_size; ++k0) {
-                        for (int k1 = 0; k1 < k0; ++k1) {
+                    for (size_t k0 = 0; k0 < a_size; ++k0) {
+                        for (size_t k1 = 0; k1 < k0; ++k1) {
                             const auto kk0 = n_solved0 + k0;
                             const auto kk1 = n_solved0 + k1;
                             const auto tmp = out(kk0, kk1);
@@ -279,9 +278,9 @@ public:
 
                 const auto ancestry_size0 = ancestry_upper0-ancestry_lower0;
                 const auto ancestry_size1 = ancestry_upper1-ancestry_lower1;
-                for (int a0 = 0; a0 < ancestry_size0; ++a0) {
+                for (size_t a0 = 0; a0 < ancestry_size0; ++a0) {
                     size_t nnz = 0;
-                    for (int hap0 = 0; hap0 < io_t::n_haps; ++hap0) {
+                    for (size_t hap0 = 0; hap0 < io_t::n_haps; ++hap0) {
                         auto it = _io.begin(snp0, ancestry_lower0+a0, hap0);
                         const auto end = _io.end(snp0, ancestry_lower0+a0, hap0);
                         for (; it != end; ++it) {
@@ -294,7 +293,7 @@ public:
                         }
                     }
 
-                    for (int a1 = 0; a1 < ancestry_size1; ++a1) {
+                    for (size_t a1 = 0; a1 < ancestry_size1; ++a1) {
                         const auto sum = snp_phased_ancestry_dot(
                             _io, begin1 + a1, 
                             vec_value_t::NullaryExpr(sqrt_weights.size(), [&](auto i) {
@@ -332,7 +331,6 @@ public:
         base_t::check_sp_btmul(
             v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
-        const auto A = ancestries();
         const auto routine = [&](int k) {
             typename sp_mat_value_t::InnerIterator it(v, k);
             auto out_k = out.row(k);

@@ -5,11 +5,11 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class SparseType>
-class MatrixNaiveSparse: public MatrixNaiveBase<typename SparseType::Scalar>
+template <class SparseType, class IndexType=Eigen::Index>
+class MatrixNaiveSparse: public MatrixNaiveBase<typename SparseType::Scalar, IndexType>
 {
 public:
-    using base_t = MatrixNaiveBase<typename SparseType::Scalar>;
+    using base_t = MatrixNaiveBase<typename SparseType::Scalar, IndexType>;
     using sparse_t = SparseType;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;

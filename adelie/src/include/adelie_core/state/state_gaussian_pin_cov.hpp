@@ -14,7 +14,6 @@ void update_active_inactive_subset(StateType& state)
     using state_t = std::decay_t<StateType>;
     using vec_bool_t = typename state_t::vec_bool_t;
 
-    const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto& screen_set = state.screen_set;
     const auto& screen_subset_order = state.screen_subset_order;

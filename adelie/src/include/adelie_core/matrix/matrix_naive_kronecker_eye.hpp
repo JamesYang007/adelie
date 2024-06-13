@@ -6,11 +6,11 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType> 
-class MatrixNaiveKroneckerEye: public MatrixNaiveBase<ValueType>
+template <class ValueType, class IndexType=Eigen::Index> 
+class MatrixNaiveKroneckerEye: public MatrixNaiveBase<ValueType, IndexType>
 {
 public:
-    using base_t = MatrixNaiveBase<ValueType>;
+    using base_t = MatrixNaiveBase<ValueType, IndexType>;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_index_t;
@@ -90,7 +90,7 @@ public:
         Eigen::Map<const rowmat_value_t> W(weights.data(), V.rows(), V.cols());
         Eigen::Map<vec_value_t> _v(_buff.data(), V.rows());
         Eigen::Map<vec_value_t> _w(_buff.data() + V.rows(), V.rows());
-        for (int l = 0; l < _K; ++l) {
+        for (int l = 0; l < static_cast<int>(_K); ++l) {
             const auto j_l = std::max(j-l, 0);
             const auto i_begin = j_l / static_cast<int>(_K) + ((j_l % _K) != 0);
             if (j-l+q <= 0) continue;
@@ -115,7 +115,7 @@ public:
     {
         base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
         Eigen::Map<rowmat_value_t> Out(out.data(), rows() / _K, _K);
-        for (int l = 0; l < _K; ++l) {
+        for (int l = 0; l < static_cast<int>(_K); ++l) {
             const auto j_l = std::max(j-l, 0);
             const auto i_begin = j_l / static_cast<int>(_K) + ((j_l % _K) != 0);
             if (j-l+q <= 0) continue;
@@ -144,7 +144,7 @@ public:
         Eigen::Map<vec_value_t> _v(_buff.data(), V.rows());
         Eigen::Map<vec_value_t> _w(_buff.data() + V.rows(), V.rows());
         const auto p = _mat->cols();
-        for (int l = 0; l < _K; ++l) {
+        for (int l = 0; l < static_cast<int>(_K); ++l) {
             dvveq(_v, V.col(l), _n_threads);
             dvveq(_w, W.col(l), _n_threads);
             Eigen::Map<vec_value_t> _out(_buff.data() + 2 * V.rows(), p);
@@ -169,7 +169,7 @@ public:
         );
         Eigen::Map<const rowmat_value_t> sqrt_W(sqrt_weights.data(), rows() / _K, _K);
         out.setZero();
-        for (int l = 0; l < _K; ++l) {
+        for (int l = 0; l < static_cast<int>(_K); ++l) {
             const auto j_l = std::max(j-l, 0);
             const auto i_begin = j_l / static_cast<int>(_K) + ((j_l % _K) != 0);
             if (j-l+q <= 0) continue;
@@ -222,7 +222,7 @@ public:
 
         rowmat_value_t _out(out.rows(), rows() / _K);
 
-        for (int l = 0; l < _K; ++l) {
+        for (int l = 0; l < static_cast<int>(_K); ++l) {
             inners.clear();
             values.clear();
 
@@ -231,7 +231,7 @@ public:
                 typename sp_mat_value_t::InnerIterator it(v, k);
                 int n_read = 0;
                 for (; it; ++it) {
-                    if (it.index() % _K != l) continue;
+                    if (it.index() % _K != static_cast<size_t>(l)) continue;
                     inners.push_back(it.index() / _K);
                     values.push_back(it.value());
                     ++n_read;
@@ -265,11 +265,11 @@ public:
     }
 };
 
-template <class DenseType> 
-class MatrixNaiveKroneckerEyeDense: public MatrixNaiveBase<typename DenseType::Scalar>
+template <class DenseType, class IndexType=Eigen::Index> 
+class MatrixNaiveKroneckerEyeDense: public MatrixNaiveBase<typename DenseType::Scalar, IndexType>
 {
 public:
-    using base_t = MatrixNaiveBase<typename DenseType::Scalar>;
+    using base_t = MatrixNaiveBase<typename DenseType::Scalar, IndexType>;
     using dense_t = DenseType;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
@@ -411,7 +411,7 @@ public:
         );
         Eigen::Map<const rowmat_value_t> sqrt_W(sqrt_weights.data(), rows() / _K, _K);
         out.setZero(); // do NOT parallelize!
-        for (int l = 0; l < _K; ++l) {
+        for (int l = 0; l < static_cast<int>(_K); ++l) {
             const auto j_l = std::max(j-l, 0);
             const auto i_begin = j_l / static_cast<int>(_K) + ((j_l % _K) != 0);
             if (j-l+q <= 0) continue;
@@ -464,7 +464,7 @@ public:
 
         rowmat_value_t _out(out.rows(), rows() / _K);
 
-        for (int l = 0; l < _K; ++l) {
+        for (int l = 0; l < static_cast<int>(_K); ++l) {
             inners.clear();
             values.clear();
 
@@ -473,7 +473,7 @@ public:
                 typename sp_mat_value_t::InnerIterator it(v, k);
                 int n_read = 0;
                 for (; it; ++it) {
-                    if (it.index() % _K != l) continue;
+                    if (it.index() % _K != static_cast<size_t>(l)) continue;
                     inners.push_back(it.index() / _K);
                     values.push_back(it.value());
                     ++n_read;

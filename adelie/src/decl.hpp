@@ -1,10 +1,23 @@
 #pragma once
+// Ignore all warnings for pybind + Eigen
+#if defined(_MSC_VER)
+#pragma warning( push, 0 )
+#elif defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall" 
+#pragma GCC diagnostic ignored "-Wextra" 
+#endif
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 #include <pybind11/functional.h>
 #include <pybind11/iostream.h>
+#if defined(_MSC_VER)
+#pragma warning( pop )
+#elif defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 #include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/util/types.hpp>
 

@@ -126,7 +126,7 @@ void update_screen_derived(
 
     /* update screen_subset_ordered */
     screen_subset_ordered.resize(new_screen_value_size);
-    for (int i = 0; i < screen_subset_order.size(); ++i) {
+    for (size_t i = 0; i < screen_subset_order.size(); ++i) {
         screen_subset_ordered[i] = screen_subset[screen_subset_order[i]];
     }
 }

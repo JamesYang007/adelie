@@ -7,7 +7,7 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType, class IndexType=int> 
+template <class ValueType, class IndexType=Eigen::Index> 
 class MatrixNaiveBase
 {
 protected:

@@ -11,11 +11,12 @@ namespace multigaussian {
 namespace naive {
 
 template <class StateType,
+          class PBType,
           class ExitCondType,
           class CUIType=util::no_op>
 inline void solve(
     StateType&& state,
-    bool display,
+    PBType&& pb,
     ExitCondType exit_cond_f,
     CUIType check_user_interrupt = CUIType()
 )
@@ -45,7 +46,7 @@ inline void solve(
 
     gaussian::naive::solve(
         static_cast<state_gaussian_naive_t&>(state),
-        display,
+        pb,
         exit_cond_f,
         tidy,
         check_user_interrupt

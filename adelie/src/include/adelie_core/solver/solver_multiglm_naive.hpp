@@ -194,12 +194,13 @@ void update_loss_null(
 
 template <class StateType,
           class GlmType,
+          class PBType,
           class ExitCondType,
           class CUIType=util::no_op>
 inline void solve(
     StateType&& state,
     GlmType&& glm,
-    bool display,
+    PBType&& pb,
     ExitCondType exit_cond_f,
     CUIType check_user_interrupt = CUIType()
 )
@@ -233,7 +234,7 @@ inline void solve(
     glm::naive::solve(
         static_cast<state_glm_naive_t&>(state),
         glm_wrap,
-        display,
+        pb,
         exit_cond_f,
         [&](auto&, auto& glm, auto& buffer_pack) {
             // ignore casted down state and use derived state

@@ -102,7 +102,7 @@ void update_screen_grad_active(
     );
     A.bmul(active_subset_ordered_view, indices, values, buffer_sg);
 
-    for (int i = 0; i < active_subset_order.size(); ++i) {
+    for (size_t i = 0; i < active_subset_order.size(); ++i) {
         screen_grad[screen_subset_order[active_subset_order[i]]] -= buffer_sg[i];
     }
 }
@@ -134,7 +134,7 @@ void update_screen_grad_inactive(
 
     A.bmul(inactive_subset_ordered_view, indices, values, buffer_sg);
 
-    for (int i = 0; i < inactive_subset_order.size(); ++i) {
+    for (size_t i = 0; i < inactive_subset_order.size(); ++i) {
         screen_grad[screen_subset_order[inactive_subset_order[i]]] -= buffer_sg[i];
     }
 }
