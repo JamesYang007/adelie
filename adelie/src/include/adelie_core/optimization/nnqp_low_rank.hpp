@@ -13,7 +13,7 @@ template <class MatrixType,
           class IndexType=Eigen::Index,
           class SafeBoolType=int8_t
         >
-struct StateNNQP
+struct StateNNQPLowRank
 {
     using matrix_t = MatrixType;
     using value_t = ValueType;
@@ -64,7 +64,7 @@ struct StateNNQP
     double benchmark_fit_active = 0;
     double benchmark_kkt = 0;
 
-    StateNNQP(
+    StateNNQPLowRank(
         matrix_t& A,
         value_t quad_c,
         value_t quad_d,
@@ -93,7 +93,7 @@ struct StateNNQP
         // we're going to potentially need many of these objects.
     }
 
-    void warm_start(StateNNQP&& state)
+    void warm_start(StateNNQPLowRank&& state)
     {
         if (state.A != this->A) {
             throw util::adelie_core_error(
@@ -119,7 +119,7 @@ struct StateNNQP
     }
 };
 
-namespace nnqp {
+namespace nnqp_low_rank {
 namespace pin {
 
 template <class StateType, class IterType, class ValueType,
@@ -487,6 +487,6 @@ inline void solve(
     } // end while(1)
 }
 
-} // namespace nnqp
+} // namespace nnqp_low_rank
 } // namespace optimization
 } // namespace adelie_core

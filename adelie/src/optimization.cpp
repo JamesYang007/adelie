@@ -231,49 +231,7 @@ void matrix_constraint_dense(py::module_& m)
         ;
 }
 
-//template <class MatrixType>
-//void nnqp_basic(py::module_& m)
-//{
-//    using state_t = ad::optimization::StateNNQPBasic<MatrixType>;
-//    using matrix_t = typename state_t::matrix_t;
-//    using value_t = typename state_t::value_t;
-//    using vec_value_t = typename state_t::vec_value_t;
-//    using colmat_value_t = typename state_t::colmat_value_t;
-//    py::class_<state_t>(m, "StateNNQPBasic")
-//        .def(py::init<
-//            matrix_t&,
-//            value_t,
-//            const Eigen::Ref<const colmat_value_t>&,
-//            const Eigen::Ref<const vec_value_t>&,
-//            const Eigen::Ref<const vec_value_t>&,
-//            size_t,
-//            value_t,
-//            Eigen::Ref<vec_value_t>,
-//            Eigen::Ref<vec_value_t> 
-//        >(),
-//            py::arg("A"),
-//            py::arg("rho"),
-//            py::arg("Sigma"),
-//            py::arg("quad_diag"),
-//            py::arg("v"),
-//            py::arg("max_iters"),
-//            py::arg("tol"),
-//            py::arg("x"),
-//            py::arg("resid")
-//        )
-//        .def_readonly("time_elapsed", &state_t::time_elapsed)
-//        .def("solve", [](state_t& state) {
-//            using sw_t = ad::util::Stopwatch;
-//            auto& time_elapsed = state.time_elapsed;
-//            vec_value_t buff(state.Sigma.rows());
-//            sw_t sw;
-//            sw.start();
-//            ad::optimization::nnqp_basic(state, buff);
-//            time_elapsed = sw.elapsed();
-//        })
-//        ;
-//}
-//
+// TODO: revive?
 //template <class MatrixType>
 //void nnqp(py::module_& m)
 //{

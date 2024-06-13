@@ -3,7 +3,4 @@ from .adelie_core.optimization import (
     symmetric_penalty,
     StateNNLS,
     StateNNQPFull,
-    #MatrixConstraintDense64C,
-    #StateNNQP,
-    #StateNNQPBasic,
 )
