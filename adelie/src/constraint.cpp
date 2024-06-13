@@ -83,8 +83,6 @@ void constraint_base(py::module_& m, const char* name)
 {
     using trampoline_t = PyConstraintBase<T>;
     using internal_t = ad::constraint::ConstraintBase<T>;
-    using value_t = typename internal_t::value_t;
-    using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
         Base constraint class.
         

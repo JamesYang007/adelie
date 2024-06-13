@@ -231,7 +231,7 @@ public:
     }
 
     void gradient(
-        const Eigen::Ref<const vec_value_t>& x,
+        const Eigen::Ref<const vec_value_t>&,
         const Eigen::Ref<const vec_value_t>& mu,
         Eigen::Ref<vec_value_t> out
     ) override

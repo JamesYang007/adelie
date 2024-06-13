@@ -72,7 +72,7 @@ public:
     ) =0;
 
     virtual void project(
-        Eigen::Ref<vec_value_t> x
+        Eigen::Ref<vec_value_t>
     )
     {}
 
