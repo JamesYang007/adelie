@@ -22,10 +22,10 @@
 #include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/util/types.hpp>
 
-PYBIND11_MAKE_OPAQUE(std::vector<adelie_core::util::rowmat_type<double>>);
-PYBIND11_MAKE_OPAQUE(std::vector<adelie_core::util::rowmat_type<float>>);
-PYBIND11_MAKE_OPAQUE(std::vector<adelie_core::constraint::ConstraintBase<double>*>);
-PYBIND11_MAKE_OPAQUE(std::vector<adelie_core::constraint::ConstraintBase<float>*>);
+PYBIND11_MAKE_OPAQUE(std::vector<adelie_core::util::rowmat_type<double>>)
+PYBIND11_MAKE_OPAQUE(std::vector<adelie_core::util::rowmat_type<float>>)
+PYBIND11_MAKE_OPAQUE(std::vector<adelie_core::constraint::ConstraintBase<double>*>)
+PYBIND11_MAKE_OPAQUE(std::vector<adelie_core::constraint::ConstraintBase<float>*>)
 
 namespace py = pybind11;
 
