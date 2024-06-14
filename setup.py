@@ -148,6 +148,13 @@ ext_modules = [
     ),
 ]
 
+# Include adelie and all submodules.
+# This removes setuptools warning about missing namespace packages.
+packages = ["adelie"] + [
+    f"adelie.{submod}"
+    for submod in find_namespace_packages("adelie")
+]
+
 setup(
     name='adelie', 
     version=__version__,
@@ -157,12 +164,7 @@ setup(
     author_email='jamesyang916@gmail.com',
     maintainer='James Yang',
     maintainer_email='jamesyang916@gmail.com',
-    packages=find_namespace_packages(include=["adelie.*"]),
-    package_data={
-        "adelie": [
-            "adelie_core.cpython*",
-        ],
-    },
+    packages=packages,
     ext_modules=ext_modules,
     zip_safe=False,
 )
