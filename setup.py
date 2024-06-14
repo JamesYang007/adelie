@@ -165,6 +165,12 @@ setup(
     maintainer='James Yang',
     maintainer_email='jamesyang916@gmail.com',
     packages=packages,
+    package_data={
+        "adelie": [
+            "src/**/*.hpp",
+            "src/**/*.cpp",
+        ],
+    },
     ext_modules=ext_modules,
     zip_safe=False,
 )
