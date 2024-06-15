@@ -469,6 +469,7 @@ def run_solve_gaussian(state, args, pin):
     return state
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("constraint", [False, True])
 @pytest.mark.parametrize("n, p, G, S", [
     [10, 4, 2, 2],
@@ -521,6 +522,7 @@ def test_solve_gaussian_pin_naive(
         run_solve_gaussian(state, args, pin=True)
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("constraint", [False, True])
 @pytest.mark.parametrize("n, p, G, S", [
     [10, 4, 2, 2],
@@ -582,6 +584,7 @@ def test_solve_gaussian_pin_cov(
         run_solve_gaussian(state, args, pin=True)
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("constraint", [False, True])
 @pytest.mark.parametrize("n, p, G", [
     [10, 4, 2],
@@ -818,6 +821,7 @@ def test_solve_gaussian_snp_unphased(
     os.remove(filename)
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("n, p", [
     [10, 4],
     [10, 100],

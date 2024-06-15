@@ -56,6 +56,7 @@ def run_cov(
     assert cA.cols() == p
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("ps", [[1, 5, 8, 2]])
 @pytest.mark.parametrize("n", [2, 100, 20])
@@ -73,6 +74,7 @@ def test_cov_block_diag(n, ps, dtype, seed=0):
     run_cov(A, cA, dtype)
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("order", ["C", "F"])
 @pytest.mark.parametrize("n, p", [
@@ -107,6 +109,7 @@ def test_cov_lazy_cov(n, p, dtype, order, seed=0):
     run_cov(A, cA, dtype)
 
 
+@pytest.mark.filterwarnings("ignore: Converting to CSC format.")
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("order", ["C", "F"])
 @pytest.mark.parametrize("n, p", [
@@ -127,9 +130,7 @@ def test_cov_sparse(n, p, dtype, order, seed=0):
         "C": scipy.sparse.csr_matrix,
         "F": scipy.sparse.csc_matrix,
     }[order](A)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        cA = mod.sparse(A_sp, method="cov", n_threads=3)
+    cA = mod.sparse(A_sp, method="cov", n_threads=3)
     run_cov(A, cA, dtype)
 
 
@@ -268,6 +269,7 @@ def run_naive(
     assert np.allclose(expected, out, atol=atol)
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("ps", [[1, 7, 41, 13, 113]])
 @pytest.mark.parametrize("n", [10, 20, 30])
@@ -286,6 +288,7 @@ def test_naive_cconcatenate(n, ps, dtype, n_threads=2, seed=0):
     run_naive(X, cX, dtype)
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("ns", [[1, 7, 41, 13, 113]])
 @pytest.mark.parametrize("p", [10, 20, 30])
@@ -304,6 +307,7 @@ def test_naive_rconcatenate(ns, p, dtype, n_threads=2, seed=0):
     run_naive(X, cX, dtype)
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("order", ["C", "F"])
 @pytest.mark.parametrize("n, p", [
@@ -319,6 +323,7 @@ def test_naive_dense(n, p, dtype, order, seed=0):
     run_naive(X, cX, dtype)
 
     
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("order", ["C", "F"])
 @pytest.mark.parametrize("n, d", [
@@ -377,6 +382,7 @@ def test_naive_interaction_dense(n, d, dtype, order, seed=0):
     ad.configs.set_configs("min_bytes", min_bytes)
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("order", ["C", "F"])
 @pytest.mark.parametrize("n, p, K", [
@@ -413,6 +419,7 @@ def test_naive_kronecker_eye_dense(n, p, K, dtype, order, seed=0):
     run_naive(X, cX, dtype)
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("order", ["C", "F"])
 @pytest.mark.parametrize("n, d", [
@@ -523,6 +530,7 @@ def test_naive_snp_phased_ancestry(n, s, A, read_mode, dtype, seed=0):
     ad.configs.set_configs("min_bytes", min_bytes)
 
 
+@pytest.mark.filterwarnings("ignore: Converting to CSC format.")
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("order", ["C", "F"])
 @pytest.mark.parametrize("n, p", [
@@ -538,9 +546,7 @@ def test_naive_sparse(n, p, dtype, order, seed=0):
         "C": scipy.sparse.csr_matrix,
         "F": scipy.sparse.csc_matrix,
     }[order](X)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        cX = mod.sparse(X_sp, method="naive", n_threads=3)
+    cX = mod.sparse(X_sp, method="naive", n_threads=3)
     run_naive(X, cX, dtype)
 
 
