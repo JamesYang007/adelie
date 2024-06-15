@@ -1,12 +1,13 @@
 from adelie.logger import logger
 import logging
 logger.setLevel(logging.DEBUG)
-
 import adelie.state as mod
 import adelie.matrix as matrix
 import numpy as np
+import pytest
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 def test_state_gaussian_pin_naive():
     n = 1000
     p = 100
@@ -65,6 +66,7 @@ def test_state_gaussian_pin_naive():
     assert state.iters == 0
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 def test_state_gaussian_pin_cov():
     n = 1000
     p = 100
@@ -118,6 +120,7 @@ def test_state_gaussian_pin_cov():
     assert state.iters == 0
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 def test_state_gaussian_naive():
     n = 3
     p = 100
