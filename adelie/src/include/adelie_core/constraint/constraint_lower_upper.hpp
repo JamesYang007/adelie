@@ -27,6 +27,11 @@ private:
     const value_t _nnls_tol;
     vec_value_t _buff;
 
+#ifdef ADELIE_CORE_DEBUG
+    std::vector<vec_value_t> _primals;
+    std::vector<vec_value_t> _duals;
+#endif
+
 public:
     explicit ConstraintLowerUpper(
         value_t sgn,
@@ -56,6 +61,20 @@ public:
         if (nnls_tol < 0) {
             throw util::adelie_core_error("nnls_tol must be >= 0.");
         }
+    }
+
+    auto debug_info() const 
+    {
+        #ifdef ADELIE_CORE_DEBUG
+        util::rowmat_type<value_t> pr(_primals.size(), _b.size());
+        util::rowmat_type<value_t> du(_duals.size(), _b.size());
+        for (size_t i = 0; i < _primals.size(); ++i) 
+        {
+            pr.row(i) = _primals[i];
+            du.row(i) = _duals[i];
+        }
+        return std::make_tuple(pr, du); 
+        #endif
     }
 
     void solve(
@@ -118,6 +137,7 @@ public:
 
         bool is_prev_valid = false;
         bool recompute_mu_resid = true;
+        bool zero_primal_checked = false;
 
         while (iters < _max_iters) {
             ++iters;
@@ -137,6 +157,11 @@ public:
             }
             const auto x_norm = x.matrix().norm();
 
+            #ifdef ADELIE_CORE_DEBUG
+            _primals.push_back(x);
+            _duals.push_back(mu);
+            #endif
+
             if (x_norm <= 0) {
                 if (is_prev_valid) {
                     const auto convg_meas = std::abs(
@@ -145,28 +170,27 @@ public:
                     if (convg_meas <= _tol) return;
                 }
 
+                // check if there is a primal-dual optimal pair where primal = 0
+                if (!zero_primal_checked) {
+                    auto& Qv = alpha_tmp;
+                    Qv.matrix() = v.matrix() * Q.transpose();
+                    mu = (_sgn * Qv).max(0) * (_b <= 0).template cast<value_t>();
+                    mu_resid = v.matrix() - _sgn * mu.matrix() * Q;
+                    recompute_mu_resid = false;
+
+                    const value_t nnls_loss = mu_resid.square().sum();
+                    if (nnls_loss <= l1 * l1) {
+                        #ifdef ADELIE_CORE_DEBUG
+                        _primals.push_back(vec_value_t::Zero(x.size()));
+                        _duals.push_back(mu);
+                        #endif
+                        return;
+                    }
+                }
+
                 mu_prev = mu;
                 grad_prev = -_b;
                 is_prev_valid = true;
-
-                auto& Qv = alpha_tmp;
-                Qv.matrix() = v.matrix() * Q.transpose();
-
-                for (int i = 0; i < m; ++i) {
-                    if (_b[i] <= 0) {
-                        const auto mu_old = mu[i];
-                        mu[i] = std::max<value_t>(_sgn * Qv[i], 0);
-                        mu_resid[i] -= (mu[i] - mu_old) * _sgn;
-                        continue;
-                    }
-                    mu_resid[i] += mu[i] * _sgn;
-                    mu[i] = 0;
-                }
-                recompute_mu_resid = false;
-
-                value_t nnls_loss = (Qv - _sgn * mu).square().sum();
-                if (nnls_loss <= l1 * l1) return;
-                continue;
             }
 
             grad.matrix() = _sgn * x.matrix() * Q.transpose() - _b.matrix();
@@ -221,6 +245,10 @@ public:
             quad, mu_resid, l1, l2, _newton_tol, _newton_max_iters, 
             x, x_iters, x_buffer1, x_buffer2
         );
+        #ifdef ADELIE_CORE_DEBUG
+        _primals.push_back(x);
+        _duals.push_back(mu);
+        #endif
     }
 
     void project(

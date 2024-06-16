@@ -238,6 +238,13 @@ void constraint_lower_upper(py::module_& m, const char* name)
             py::arg("nnls_max_iters"),
             py::arg("nnls_tol")
         )
+        .def("debug_info", &internal_t::debug_info, R"delimiter(
+        Returns debug information.
+
+        This method is only intended for developers for debugging purposes.
+        The package must be compiled with the compiler flag `-DADELIE_CORE_DEBUG`
+        to see the debug information.
+        )delimiter")
         ;
 }
 
