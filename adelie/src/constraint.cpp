@@ -229,6 +229,7 @@ void constraint_lower_upper(py::module_& m, const char* name)
             size_t,
             value_t,
             size_t,
+            value_t,
             value_t 
         >(), 
             py::arg("sgn"),
@@ -236,7 +237,8 @@ void constraint_lower_upper(py::module_& m, const char* name)
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("nnls_max_iters"),
-            py::arg("nnls_tol")
+            py::arg("nnls_tol"),
+            py::arg("slack")
         )
         .def("debug_info", &internal_t::debug_info, R"delimiter(
         Returns debug information.

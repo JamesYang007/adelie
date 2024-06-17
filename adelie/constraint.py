@@ -15,6 +15,7 @@ def lower(
     tol: float =1e-7,
     nnls_max_iters: int =10000,
     nnls_tol: float =1e-7,
+    slack: float =1e-7,
     dtype: Union[np.float32, np.float64] =None,
 ):
     """Creates a lower bound constraint.
@@ -25,17 +26,27 @@ def lower(
     ----------
     b : (d,) np.ndarray
         Lower bound.
-    max_iters: int, optional
+    max_iters : int, optional
         Maximum number of proximal Newton iterations.
         Default is ``100``.
     tol : float, optional
         Convergence tolerance for proximal Newton.
         Default is ``1e-7``.
-    nnls_max_iters: int, optional
+    nnls_max_iters : int, optional
         Maximum number of non-negative least squares iterations.
         Default is ``10000``.
-    nnls_tol: float, optional
+    nnls_tol : float, optional
         Maximum number of non-negative least squares iterations.
+        Default is ``1e-7``.
+    slack : float, optional
+        Slackness for backtracking when proximal Newton overshoots
+        the boundary where primal is zero.
+        The smaller the value, the less slack so that the
+        backtrack takes the iterates closer to (but outside) the boundary.
+
+        .. warning::
+            If this value is too small, ``solve()`` may not converge!
+
         Default is ``1e-7``.
     dtype : Union[np.float32, np.float64], optional
         The underlying data type.
@@ -63,6 +74,6 @@ def lower(
     class _lower(core_base):
         def __init__(self):
             self._b = np.array(b, copy=True, dtype=dtype)
-            core_base.__init__(self, -1, self._b, max_iters, tol, nnls_max_iters, nnls_tol)
+            core_base.__init__(self, -1, self._b, max_iters, tol, nnls_max_iters, nnls_tol, slack)
         
     return _lower()

@@ -32,11 +32,14 @@ def run_test(
     np.random.seed(seed)
     quad = np.random.uniform(0, 1, d).astype(dtype)
     linear = np.sqrt(quad) * np.random.normal(0, 1, d).astype(dtype)
-    l1 = np.random.uniform(0, 1) * np.linalg.norm(linear).astype(dtype)
+    l1 = 0.5 * np.linalg.norm(linear)
     l2 = 0
-    Q = np.random.normal(0, 1, (d, d))
-    Q = np.linalg.eigh(Q.T @ Q).eigenvectors.astype(dtype)
-    Q = np.asfortranarray(Q)
+    if d == 1: 
+        Q = np.array([[1]], order="F", dtype=dtype)
+    else:
+        Q = np.random.normal(0, 1, (d, d))
+        Q, _, _ = np.linalg.svd(Q)
+        Q = np.asfortranarray(Q, dtype=dtype)
 
     # test solve
     x = np.zeros(d, dtype=dtype)
@@ -67,7 +70,7 @@ def run_test(
     assert np.allclose(np.maximum(np.max(eval), 0), 0, atol=atol)
 
 
-@pytest.mark.parametrize("d", [1, 5, 10, 20, 50])
+@pytest.mark.parametrize("d", [1, 2, 5, 10, 20, 50])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("seed", np.arange(10))
 def test_lower(d, dtype, seed):

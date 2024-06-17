@@ -2,6 +2,7 @@
 #include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/bcd/unconstrained/newton.hpp>
 #include <adelie_core/optimization/nnqp_full.hpp>
+#include <adelie_core/util/macros.hpp>
 
 namespace adelie_core {
 namespace constraint {
@@ -25,6 +26,7 @@ private:
     const value_t _newton_tol = 1e-12;
     const size_t _nnls_max_iters;
     const value_t _nnls_tol;
+    const value_t _slack;
     vec_value_t _buff;
 
 #ifdef ADELIE_CORE_DEBUG
@@ -39,7 +41,8 @@ public:
         size_t max_iters,
         value_t tol,
         size_t nnls_max_iters,
-        value_t nnls_tol
+        value_t nnls_tol,
+        value_t slack
     ):
         _sgn(sgn),
         _b(b.data(), b.size()),
@@ -47,7 +50,8 @@ public:
         _tol(tol),
         _nnls_max_iters(nnls_max_iters),
         _nnls_tol(nnls_tol),
-        _buff((b.size() <= 1) ? 0 : (b.size() * (8 + 2 * b.size())))
+        _slack(slack),
+        _buff((b.size() <= 1) ? 0 : (b.size() * (9 + 2 * b.size())))
     {
         if (std::abs(sgn) != 1) {
             throw util::adelie_core_error("sgn must be +/-1.");
@@ -60,6 +64,9 @@ public:
         }
         if (nnls_tol < 0) {
             throw util::adelie_core_error("nnls_tol must be >= 0.");
+        }
+        if (slack <= 0 || slack >= 1) {
+            throw util::adelie_core_error("slack must be in (0,1).");
         }
     }
 
@@ -88,6 +95,11 @@ public:
     ) override
     {
         using rowmat_value_t = util::rowmat_type<value_t>;
+
+        #ifdef ADELIE_CORE_DEBUG
+        _primals.clear();
+        _duals.clear();
+        #endif
         
         const auto m = _b.size();
         const auto d = m;
@@ -126,7 +138,7 @@ public:
         auto buff_ptr = _buff.data();
         Eigen::Map<vec_value_t> x_buffer1(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> x_buffer2(buff_ptr, d); buff_ptr += d;
-        Eigen::Map<vec_value_t> mu_resid(buff_ptr, m); buff_ptr += m;
+        Eigen::Map<vec_value_t> mu_resid(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> mu_prev(buff_ptr, m); buff_ptr += m;
         Eigen::Map<vec_value_t> grad_prev(buff_ptr, m); buff_ptr += m;
         Eigen::Map<vec_value_t> grad(buff_ptr, m); buff_ptr += m;
@@ -134,64 +146,85 @@ public:
         Eigen::Map<colmat_value_t> hess(buff_ptr, m, m); buff_ptr += m * m;
         Eigen::Map<vec_value_t> alpha_tmp(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> alpha(buff_ptr, m); buff_ptr += m;
+        Eigen::Map<vec_value_t> Qv(buff_ptr, d); buff_ptr += d;
+
+        const auto compute_mu_resid = [&]() {
+            mu_resid.matrix() = v.matrix() - _sgn * mu.matrix() * Q;
+        };
+        const auto compute_primal = [&]() {
+            size_t x_iters;
+            bcd::unconstrained::newton_abs_solver(
+                quad, mu_resid, l1, l2, _newton_tol, _newton_max_iters, 
+                x, x_iters, x_buffer1, x_buffer2
+            );
+        };
 
         bool is_prev_valid = false;
-        bool recompute_mu_resid = true;
         bool zero_primal_checked = false;
+        value_t mu_resid_norm_sq_prev = -1;
 
         while (iters < _max_iters) {
             ++iters;
 
-            // compute v - A^T mu
-            if (recompute_mu_resid) {
-                mu_resid.matrix() = v.matrix() - _sgn * mu.matrix() * Q;
+            compute_mu_resid();
+            const value_t mu_resid_norm_sq = mu_resid.square().sum();
+
+            // if x^star(mu) == 0
+            if (mu_resid_norm_sq <= l1 * l1) {
+                // Check if there is a primal-dual optimal pair where primal = 0.
+                // To be optimal, they must satisfy the 4 KKT conditions.
+                if (!zero_primal_checked) {
+                    zero_primal_checked = true;
+
+                    Qv.matrix() = v.matrix() * Q.transpose();
+                    auto& mu_curr = alpha;
+                    if (is_prev_valid) mu_curr = mu; // optimization
+                    mu = (_sgn * Qv).max(0) * (_b <= 0).template cast<value_t>();
+
+                    // if (0, mu) is optimal
+                    const value_t nnls_loss = (Qv - _sgn * mu).square().sum();
+                    if (nnls_loss <= l1 * l1) {
+                        x.setZero();
+                        #ifdef ADELIE_CORE_DEBUG
+                        _primals.push_back(x);
+                        _duals.push_back(mu);
+                        if (Eigen::isnan(mu).any()) {
+                            throw util::adelie_core_error("Found nan! 196");
+                        }
+                        #endif
+                        return;
+                    }
+
+                    if (is_prev_valid) mu = mu_curr; // optimization
+                }
+
+                // If we ever enter this region of code, it means that
+                // there is no primal-dual optimal pair where primal = 0.
+                // This must mean that if there is no previous mu,
+                // we must have come from the if-block above, in which case nnls_loss > l1 * l1
+                // so the next iteration with the current mu will give a non-zero primal (start proximal Newton from here);
+                // otherwise, the proximal newton step overshot so we must backtrack.
+                if (is_prev_valid) {
+                    const value_t lmda_target = (1-_slack) * l1 + _slack * mu_resid_norm_sq_prev;
+                    const value_t a = (mu - mu_prev).square().sum();
+                    const value_t b = _sgn * ((Qv - _sgn * mu) * (mu - mu_prev)).sum();
+                    const value_t c = mu_resid_norm_sq - lmda_target * lmda_target;
+                    const value_t t_star = (-b + std::sqrt(std::max<value_t>(b * b - a * c, 0.0))) / a;
+                    const value_t step_size = std::max<value_t>(1-t_star, 0.0);
+                    mu = mu_prev + step_size * (mu - mu_prev);
+                }
+                continue;
             }
 
-            // compute x^star(mu)
-            {
-                size_t x_iters;
-                bcd::unconstrained::newton_abs_solver(
-                    quad, mu_resid, l1, l2, _newton_tol, _newton_max_iters, 
-                    x, x_iters, x_buffer1, x_buffer2
-                );
-            }
-            const auto x_norm = x.matrix().norm();
+            compute_primal();
 
             #ifdef ADELIE_CORE_DEBUG
             _primals.push_back(x);
             _duals.push_back(mu);
-            #endif
-
-            if (x_norm <= 0) {
-                if (is_prev_valid) {
-                    const auto convg_meas = std::abs(
-                        ((mu-mu_prev) * (grad_prev+_b)).sum()
-                    ) / m;
-                    if (convg_meas <= _tol) return;
-                }
-
-                // check if there is a primal-dual optimal pair where primal = 0
-                if (!zero_primal_checked) {
-                    auto& Qv = alpha_tmp;
-                    Qv.matrix() = v.matrix() * Q.transpose();
-                    mu = (_sgn * Qv).max(0) * (_b <= 0).template cast<value_t>();
-                    mu_resid = v.matrix() - _sgn * mu.matrix() * Q;
-                    recompute_mu_resid = false;
-
-                    const value_t nnls_loss = mu_resid.square().sum();
-                    if (nnls_loss <= l1 * l1) {
-                        #ifdef ADELIE_CORE_DEBUG
-                        _primals.push_back(vec_value_t::Zero(x.size()));
-                        _duals.push_back(mu);
-                        #endif
-                        return;
-                    }
-                }
-
-                mu_prev = mu;
-                grad_prev = -_b;
-                is_prev_valid = true;
+            if (Eigen::isnan(mu).any()) {
+                throw util::adelie_core_error("Found nan! 225");
             }
+            #endif
 
             grad.matrix() = _sgn * x.matrix() * Q.transpose() - _b.matrix();
 
@@ -212,6 +245,7 @@ public:
 
             // lower(hess) += x_norm * Q diag(x_buffer2) Q^T 
             hess_buff.array() = Q.array().rowwise() * x_buffer2.sqrt();
+            const auto x_norm = x.matrix().norm();
             hess_lower.rankUpdate(hess_buff, x_norm);
 
             // lower(hess) += x_norm * lmda * kappa * alpha alpha^T
@@ -224,6 +258,7 @@ public:
             hess.template triangularView<Eigen::Upper>() = hess.transpose();
 
             // save old values
+            mu_resid_norm_sq_prev = mu_resid_norm_sq;
             mu_prev = mu;
             grad_prev = grad;
             is_prev_valid = true;
@@ -233,21 +268,16 @@ public:
                 hess, _nnls_max_iters, _nnls_tol, 0, mu, grad
             );
             optimization::nnqp_full(state_nnqp); 
-            recompute_mu_resid = true;
         }
 
-        // compute v - A^T mu
-        if (recompute_mu_resid) {
-            mu_resid.matrix() = v.matrix() - _sgn * mu.matrix() * Q;
-        }
-        size_t x_iters;
-        bcd::unconstrained::newton_abs_solver(
-            quad, mu_resid, l1, l2, _newton_tol, _newton_max_iters, 
-            x, x_iters, x_buffer1, x_buffer2
-        );
+        compute_mu_resid();
+        compute_primal();
         #ifdef ADELIE_CORE_DEBUG
         _primals.push_back(x);
         _duals.push_back(mu);
+        if (Eigen::isnan(mu).any()) {
+            throw util::adelie_core_error("Found nan! 279");
+        }
         #endif
     }
 
