@@ -50,7 +50,6 @@ class glm_base:
                 raise RuntimeError("y and weights must have same length.")
             weights_sum = np.sum(weights)
             if not np.allclose(weights_sum, 1):
-                warnings.warn("Normalizing weights to sum to 1.")
                 weights = weights / weights_sum
         else:
             weights = np.full(n, 1/n, dtype=dtype)
@@ -76,7 +75,6 @@ class multiglm_base:
                 raise RuntimeError("y rows and weights must have same length.")
             weights_sum = np.sum(weights)
             if not np.allclose(weights_sum, 1):
-                warnings.warn("Normalizing weights to sum to 1.")
                 weights = weights / np.sum(weights)
         else:
             weights = np.full(n, 1/n, dtype=dtype)
