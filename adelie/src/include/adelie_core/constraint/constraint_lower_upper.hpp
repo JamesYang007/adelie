@@ -161,16 +161,21 @@ public:
 
         bool is_prev_valid = false;
         bool zero_primal_checked = false;
-        value_t mu_resid_norm_sq_prev = -1;
+        value_t mu_resid_norm_prev = -1;
 
         while (iters < _max_iters) {
             ++iters;
 
             compute_mu_resid();
-            const value_t mu_resid_norm_sq = mu_resid.square().sum();
+            const value_t mu_resid_norm = mu_resid.matrix().norm();
+            const value_t mu_resid_norm_sq = mu_resid_norm * mu_resid_norm;
 
-            // if x^star(mu) == 0
-            if (mu_resid_norm_sq <= l1 * l1) {
+            // Check if x^star(mu) == 0.
+            // NOTE: VERY IMPORTANT TO CHECK THIS CONDITION THIS WAY!
+            // This check MUST be the same as the check in newton_abs_solver.
+            // Otherwise, due to numerical precision, this check may fail but
+            // newton_abs_solver may return x = 0, which results in undefined behavior afterwards.
+            if (mu_resid_norm <= l1) {
                 // Check if there is a primal-dual optimal pair where primal = 0.
                 // To be optimal, they must satisfy the 4 KKT conditions.
                 if (!zero_primal_checked) {
@@ -188,8 +193,10 @@ public:
                         #ifdef ADELIE_CORE_DEBUG
                         _primals.push_back(x);
                         _duals.push_back(mu);
-                        if (Eigen::isnan(mu).any()) {
-                            throw util::adelie_core_error("Found nan! 196");
+                        if (Eigen::isnan(x).any() || Eigen::isnan(mu).any()) {
+                            PRINT(x);
+                            PRINT(mu);
+                            throw util::adelie_core_error("Found nan! 225");
                         }
                         #endif
                         return;
@@ -205,13 +212,25 @@ public:
                 // so the next iteration with the current mu will give a non-zero primal (start proximal Newton from here);
                 // otherwise, the proximal newton step overshot so we must backtrack.
                 if (is_prev_valid) {
-                    const value_t lmda_target = (1-_slack) * l1 + _slack * mu_resid_norm_sq_prev;
+                    const value_t lmda_target = (1-_slack) * l1 + _slack * mu_resid_norm_prev;
                     const value_t a = (mu - mu_prev).square().sum();
                     const value_t b = _sgn * ((Qv - _sgn * mu) * (mu - mu_prev)).sum();
                     const value_t c = mu_resid_norm_sq - lmda_target * lmda_target;
                     const value_t t_star = (-b + std::sqrt(std::max<value_t>(b * b - a * c, 0.0))) / a;
                     const value_t step_size = std::max<value_t>(1-t_star, 0.0);
                     mu = mu_prev + step_size * (mu - mu_prev);
+                    #ifdef ADELIE_CORE_DEBUG
+                    PRINT(l1);
+                    PRINT(mu_resid_norm_prev);
+                    PRINT(a);
+                    PRINT(b);
+                    PRINT(c);
+                    PRINT(t_star);
+                    PRINT(step_size);
+                    PRINT(lmda_target);
+                    PRINT(mu_prev);
+                    PRINT(mu);
+                    #endif
                 }
                 continue;
             }
@@ -221,7 +240,9 @@ public:
             #ifdef ADELIE_CORE_DEBUG
             _primals.push_back(x);
             _duals.push_back(mu);
-            if (Eigen::isnan(mu).any()) {
+            if (Eigen::isnan(x).any() || Eigen::isnan(mu).any()) {
+                PRINT(x);
+                PRINT(mu);
                 throw util::adelie_core_error("Found nan! 225");
             }
             #endif
@@ -258,7 +279,7 @@ public:
             hess.template triangularView<Eigen::Upper>() = hess.transpose();
 
             // save old values
-            mu_resid_norm_sq_prev = mu_resid_norm_sq;
+            mu_resid_norm_prev = mu_resid_norm;
             mu_prev = mu;
             grad_prev = grad;
             is_prev_valid = true;
@@ -275,8 +296,10 @@ public:
         #ifdef ADELIE_CORE_DEBUG
         _primals.push_back(x);
         _duals.push_back(mu);
-        if (Eigen::isnan(mu).any()) {
-            throw util::adelie_core_error("Found nan! 279");
+        if (Eigen::isnan(x).any() || Eigen::isnan(mu).any()) {
+            PRINT(x);
+            PRINT(mu);
+            throw util::adelie_core_error("Found nan! 225");
         }
         #endif
     }
