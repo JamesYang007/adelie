@@ -423,7 +423,7 @@ def grpnet(
     max_iters: int =int(1e5),
     tol: float =1e-7,
     adev_tol: float =0.9,
-    ddev_tol: float =1e-4,
+    ddev_tol: float =0,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -557,7 +557,7 @@ def grpnet(
         Default is ``0.9``.
     ddev_tol : float, optional
         Difference in percent deviance explained tolerance.
-        Default is ``1e-4``.
+        Default is ``0``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
