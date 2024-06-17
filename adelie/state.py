@@ -400,7 +400,7 @@ def gaussian_pin_naive(
     max_iters: int =int(1e5),
     tol: float =1e-7,
     adev_tol: float =0.9,
-    ddev_tol: float =1e-4,
+    ddev_tol: float =0,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -516,7 +516,7 @@ def gaussian_pin_naive(
         Difference in percent deviance explained tolerance.
         If the difference of the last two training percent deviance explained exceeds this quantity, 
         then the solver terminates.
-        Default is ``1e-4``.
+        Default is ``0``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
@@ -1681,7 +1681,7 @@ def gaussian_naive(
     max_iters: int =int(1e5),
     tol: float =1e-7,
     adev_tol: float =0.9,
-    ddev_tol: float =1e-4,
+    ddev_tol: float =0,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -1825,7 +1825,7 @@ def gaussian_naive(
         Difference in percent deviance explained tolerance.
         If the difference of the last two training percent deviance explained exceeds this quantity
         and ``early_exit`` is ``True``, then the solver terminates.
-        Default is ``1e-4``.
+        Default is ``0``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
@@ -2034,7 +2034,7 @@ def multigaussian_naive(
     max_iters: int =int(1e5),
     tol: float =1e-7,
     adev_tol: float =0.9,
-    ddev_tol: float =1e-4,
+    ddev_tol: float =0,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -2177,7 +2177,7 @@ def multigaussian_naive(
         Difference in percent deviance explained tolerance.
         If the difference of the last two training percent deviance explained exceeds this quantity
         and ``early_exit`` is ``True``, then the solver terminates.
-        Default is ``1e-4``.
+        Default is ``0``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
@@ -2422,7 +2422,7 @@ def glm_naive(
     max_iters: int =int(1e5),
     tol: float =1e-7,
     adev_tol: float =0.9,
-    ddev_tol: float =1e-4,
+    ddev_tol: float =0,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -2561,7 +2561,7 @@ def glm_naive(
         Difference in percent deviance explained tolerance.
         If the difference of the last two training percent deviance explained exceeds this quantity
         and ``early_exit`` is ``True``, then the solver terminates.
-        Default is ``1e-4``.
+        Default is ``0``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
@@ -2774,7 +2774,7 @@ def multiglm_naive(
     max_iters: int =int(1e5),
     tol: float =1e-7,
     adev_tol: float =0.9,
-    ddev_tol: float =1e-4,
+    ddev_tol: float =0,
     newton_tol: float =1e-12,
     newton_max_iters: int =1000,
     n_threads: int =1,
@@ -2920,7 +2920,7 @@ def multiglm_naive(
         Difference in percent deviance explained tolerance.
         If the difference of the last two training percent deviance explained exceeds this quantity
         and ``early_exit`` is ``True``, then the solver terminates.
-        Default is ``1e-4``.
+        Default is ``0``.
     newton_tol : float, optional
         Convergence tolerance for the BCD update.
         Default is ``1e-12``.
