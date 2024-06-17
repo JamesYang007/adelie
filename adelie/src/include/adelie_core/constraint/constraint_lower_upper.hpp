@@ -148,6 +148,10 @@ public:
         Eigen::Map<vec_value_t> alpha(buff_ptr, m); buff_ptr += m;
         Eigen::Map<vec_value_t> Qv(buff_ptr, d); buff_ptr += d;
 
+        bool is_prev_valid = false;
+        bool zero_primal_checked = false;
+        value_t mu_resid_norm_prev = -1;
+
         const auto compute_mu_resid = [&]() {
             mu_resid.matrix() = v.matrix() - _sgn * mu.matrix() * Q;
         };
@@ -158,10 +162,17 @@ public:
                 x, x_iters, x_buffer1, x_buffer2
             );
         };
-
-        bool is_prev_valid = false;
-        bool zero_primal_checked = false;
-        value_t mu_resid_norm_prev = -1;
+        #ifdef ADELIE_CORE_DEBUG
+        const auto save_iterate = [&]() {
+            _primals.push_back(x);
+            _duals.push_back(mu);
+            if (Eigen::isnan(x).any() || Eigen::isnan(mu).any()) {
+                PRINT(x);
+                PRINT(mu);
+                throw util::adelie_core_error("Found nan!");
+            }
+        };
+        #endif
 
         while (iters < _max_iters) {
             ++iters;
@@ -170,20 +181,59 @@ public:
             const value_t mu_resid_norm = mu_resid.matrix().norm();
             const value_t mu_resid_norm_sq = mu_resid_norm * mu_resid_norm;
 
+            // Only used if first is_in_ellipse check fails.
+            value_t x_norm = -1;
+
+            // Check if x^star(mu) = 0 (i.e. in the ellipse).
+            // The first check is a quick way to check the condition.
+            // Sometimes, is_in_ellipse may be `true` but the compute_primal() may still return x=0.
+            // We do a second check if the first condition fails to be consistent with the primal.
+            bool is_in_ellipse = mu_resid_norm <= l1;
+            if (!is_in_ellipse) {
+                compute_primal();
+                x_norm = x.matrix().norm();
+                is_in_ellipse = x_norm <= 0;
+            }
+
             // Check if x^star(mu) == 0.
-            // NOTE: VERY IMPORTANT TO CHECK THIS CONDITION THIS WAY!
-            // This check MUST be the same as the check in newton_abs_solver.
-            // Otherwise, due to numerical precision, this check may fail but
-            // newton_abs_solver may return x = 0, which results in undefined behavior afterwards.
-            if (mu_resid_norm <= l1) {
+            if (is_in_ellipse) {
+                // NOTE: this check is important since numerical precision issues
+                // may make us enter this loop infinitely.
+                if (is_prev_valid) {
+                    const auto convg_meas = std::abs(
+                        ((mu-mu_prev) * (grad_prev+_b)).sum()
+                    ) / m;
+                    if (convg_meas <= _tol) {
+                        x.setZero();
+                        #ifdef ADELIE_CORE_DEBUG
+                        save_iterate();
+                        #endif
+                        return;
+                    }
+                }
+
                 // Check if there is a primal-dual optimal pair where primal = 0.
                 // To be optimal, they must satisfy the 4 KKT conditions.
+                // NOTE: the if-block below is only entered at most once. After it has been entered once,
+                // it guarantees that after the next iteration is_prev_valid == true.
+                // So subsequent access to the current block guarantees backtracking.
                 if (!zero_primal_checked) {
                     zero_primal_checked = true;
 
+                    // one-time population
                     Qv.matrix() = v.matrix() * Q.transpose();
+
+                    // If previous is valid, we have to repopulate mu with the current value.
+                    // Otherwise, mu will be used for the next iteration, so we must save the previous values.
                     auto& mu_curr = alpha;
-                    if (is_prev_valid) mu_curr = mu; // optimization
+                    if (is_prev_valid) {
+                        mu_curr = mu; // optimization
+                    } else {
+                        mu_resid_norm_prev = mu_resid_norm;
+                        mu_prev = mu;
+                        grad_prev = -_b;
+                        is_prev_valid = true;
+                    }
                     mu = (_sgn * Qv).max(0) * (_b <= 0).template cast<value_t>();
 
                     // if (0, mu) is optimal
@@ -191,18 +241,13 @@ public:
                     if (nnls_loss <= l1 * l1) {
                         x.setZero();
                         #ifdef ADELIE_CORE_DEBUG
-                        _primals.push_back(x);
-                        _duals.push_back(mu);
-                        if (Eigen::isnan(x).any() || Eigen::isnan(mu).any()) {
-                            PRINT(x);
-                            PRINT(mu);
-                            throw util::adelie_core_error("Found nan! 225");
-                        }
+                        save_iterate();
                         #endif
                         return;
                     }
 
                     if (is_prev_valid) mu = mu_curr; // optimization
+                    else continue;
                 }
 
                 // If we ever enter this region of code, it means that
@@ -211,40 +256,25 @@ public:
                 // we must have come from the if-block above, in which case nnls_loss > l1 * l1
                 // so the next iteration with the current mu will give a non-zero primal (start proximal Newton from here);
                 // otherwise, the proximal newton step overshot so we must backtrack.
-                if (is_prev_valid) {
-                    const value_t lmda_target = (1-_slack) * l1 + _slack * mu_resid_norm_prev;
-                    const value_t a = (mu - mu_prev).square().sum();
-                    const value_t b = _sgn * ((Qv - _sgn * mu) * (mu - mu_prev)).sum();
-                    const value_t c = mu_resid_norm_sq - lmda_target * lmda_target;
-                    const value_t t_star = (-b + std::sqrt(std::max<value_t>(b * b - a * c, 0.0))) / a;
-                    const value_t step_size = std::max<value_t>(1-t_star, 0.0);
-                    mu = mu_prev + step_size * (mu - mu_prev);
-                    #ifdef ADELIE_CORE_DEBUG
-                    PRINT(l1);
-                    PRINT(mu_resid_norm_prev);
-                    PRINT(a);
-                    PRINT(b);
-                    PRINT(c);
-                    PRINT(t_star);
-                    PRINT(step_size);
-                    PRINT(lmda_target);
-                    PRINT(mu_prev);
-                    PRINT(mu);
-                    #endif
+                if (!is_prev_valid) {
+                    throw util::adelie_core_error(
+                        "Unexpected error! "
+                        "Previous iterate should have been initialized prior to entering this block. "
+                        "Please report this bug! "
+                    );
                 }
+                const value_t lmda_target = (1-_slack) * l1 + _slack * mu_resid_norm_prev;
+                const value_t a = (mu - mu_prev).square().sum();
+                const value_t b = _sgn * ((Qv - _sgn * mu) * (mu - mu_prev)).sum();
+                const value_t c = mu_resid_norm_sq - lmda_target * lmda_target;
+                const value_t t_star = (-b + std::sqrt(std::max<value_t>(b * b - a * c, 0.0))) / a;
+                const value_t step_size = std::max<value_t>(1-t_star, 0.0);
+                mu = mu_prev + step_size * (mu - mu_prev);
                 continue;
             }
 
-            compute_primal();
-
             #ifdef ADELIE_CORE_DEBUG
-            _primals.push_back(x);
-            _duals.push_back(mu);
-            if (Eigen::isnan(x).any() || Eigen::isnan(mu).any()) {
-                PRINT(x);
-                PRINT(mu);
-                throw util::adelie_core_error("Found nan! 225");
-            }
+            save_iterate();
             #endif
 
             grad.matrix() = _sgn * x.matrix() * Q.transpose() - _b.matrix();
@@ -256,6 +286,12 @@ public:
                 if (convg_meas <= _tol) return;
             }
 
+            // save old values
+            mu_resid_norm_prev = mu_resid_norm;
+            mu_prev = mu;
+            grad_prev = grad;
+            is_prev_valid = true;
+
             // Compute hessian
             // NOTE:
             //  - x_buffer1 = quad + l2
@@ -266,7 +302,6 @@ public:
 
             // lower(hess) += x_norm * Q diag(x_buffer2) Q^T 
             hess_buff.array() = Q.array().rowwise() * x_buffer2.sqrt();
-            const auto x_norm = x.matrix().norm();
             hess_lower.rankUpdate(hess_buff, x_norm);
 
             // lower(hess) += x_norm * lmda * kappa * alpha alpha^T
@@ -278,12 +313,6 @@ public:
             // full hessian update
             hess.template triangularView<Eigen::Upper>() = hess.transpose();
 
-            // save old values
-            mu_resid_norm_prev = mu_resid_norm;
-            mu_prev = mu;
-            grad_prev = grad;
-            is_prev_valid = true;
-
             // solve NNQP for new mu
             optimization::StateNNQPFull<colmat_value_t> state_nnqp(
                 hess, _nnls_max_iters, _nnls_tol, 0, mu, grad
@@ -294,13 +323,7 @@ public:
         compute_mu_resid();
         compute_primal();
         #ifdef ADELIE_CORE_DEBUG
-        _primals.push_back(x);
-        _duals.push_back(mu);
-        if (Eigen::isnan(x).any() || Eigen::isnan(mu).any()) {
-            PRINT(x);
-            PRINT(mu);
-            throw util::adelie_core_error("Found nan! 225");
-        }
+        save_iterate();
         #endif
     }
 

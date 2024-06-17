@@ -1,7 +1,8 @@
 #pragma once
+#include <adelie_core/configs.hpp>
+#include <adelie_core/bcd/unconstrained/newton.hpp>
 #include <adelie_core/util/types.hpp>
 #include <adelie_core/util/macros.hpp>
-#include <adelie_core/bcd/unconstrained/newton.hpp>
 
 namespace adelie_core {
 namespace solver {
@@ -86,7 +87,7 @@ void sparsify_active_beta(
             group_size, groups[group], groups[group] + group_size - 1
         );
         vals_seg = screen_beta.segment(screen_begins[ss_idx], group_size);
-        if (constraint) constraint->project(vals_seg);
+        if (Configs::project && constraint) constraint->project(vals_seg);
         idxs_begin += group_size;
         vals_begin += group_size;
     }        

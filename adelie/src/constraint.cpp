@@ -230,7 +230,7 @@ void constraint_lower_upper(py::module_& m, const char* name)
             value_t,
             size_t,
             value_t,
-            value_t 
+            value_t
         >(), 
             py::arg("sgn"),
             py::arg("b"),

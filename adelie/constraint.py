@@ -2,6 +2,7 @@ from .adelie_core.constraint import (
     ConstraintBase32,
     ConstraintBase64,
 )
+from .configs import Configs
 from .glm import _coerce_dtype
 from . import adelie_core as core
 from typing import Union
@@ -65,6 +66,7 @@ def lower(
     adelie.adelie_core.constraint.ConstraintLowerUpper64
     """
     b, dtype = _coerce_dtype(b, dtype)
+    b = np.minimum(b, Configs.max_solver_value)
 
     core_base = {
         np.float32: core.constraint.ConstraintLowerUpper32,
@@ -74,6 +76,15 @@ def lower(
     class _lower(core_base):
         def __init__(self):
             self._b = np.array(b, copy=True, dtype=dtype)
-            core_base.__init__(self, -1, self._b, max_iters, tol, nnls_max_iters, nnls_tol, slack)
+            core_base.__init__(
+                self, 
+                sgn=-1, 
+                b=self._b, 
+                max_iters=max_iters, 
+                tol=tol, 
+                nnls_max_iters=nnls_max_iters, 
+                nnls_tol=nnls_tol, 
+                slack=slack,
+            )
         
     return _lower()
