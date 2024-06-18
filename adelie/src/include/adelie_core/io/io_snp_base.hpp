@@ -105,6 +105,8 @@ public:
         _is_read(false)
     {}
 
+    virtual ~IOSNPBase() {}
+
     bool_t is_read() const { return _is_read; }
 
     bool_t endian() const { 
@@ -112,7 +114,7 @@ public:
         return reinterpret_cast<const bool_t&>(_buffer[0]); 
     }
 
-    size_t read()
+    virtual size_t read()
     {
         _is_read = true;
 

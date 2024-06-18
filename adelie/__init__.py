@@ -4,7 +4,7 @@
 #   - Leda Guin
 #   - Ginnie Guin
 
-__version__ = "1.1.39"
+__version__ = "1.1.40"
 
 # Set environment flags before loading adelie_core
 import os
