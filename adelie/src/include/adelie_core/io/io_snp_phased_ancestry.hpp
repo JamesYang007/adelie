@@ -42,71 +42,95 @@ protected:
     using base_t::_filename;
     using base_t::_is_read;
 
+    outer_t _rows;
+    outer_t _snps;
+    outer_t _ancestries;
+    outer_t _cols;
+    vec_outer_t _nnz0;
+    vec_outer_t _nnz1;
+    vec_outer_t _outer;
+
 public:
     using iterator = IOSNPChunkIterator<
         chunk_size, inner_t, chunk_inner_t
     >;
 
     using base_t::base_t;
-    using base_t::read;
+
+    size_t read() override
+    {
+        const size_t total_bytes = base_t::read();
+
+        size_t idx = sizeof(bool_t);
+
+        _rows = internal::read_as<outer_t>(_buffer.data() + idx);
+        idx += sizeof(outer_t);
+
+        _snps = internal::read_as<outer_t>(_buffer.data() + idx);
+        idx += sizeof(outer_t);
+
+        _ancestries = internal::read_as<chunk_inner_t>(_buffer.data() + idx);
+        idx += sizeof(chunk_inner_t);
+
+        _cols = _snps * _ancestries;
+
+        _nnz0.resize(_cols);
+        std::memcpy(_nnz0.data(), _buffer.data() + idx, sizeof(outer_t) * _cols);
+        idx += sizeof(outer_t) * _cols;
+
+        _nnz1.resize(_cols);
+        std::memcpy(_nnz1.data(), _buffer.data() + idx, sizeof(outer_t) * _cols);
+        idx += sizeof(outer_t) * _cols;
+
+        _outer.resize(_snps + 1);
+        std::memcpy(_outer.data(), _buffer.data() + idx, sizeof(outer_t) * (_snps + 1));
+        idx += sizeof(outer_t) * (_snps + 1);
+
+        return total_bytes;
+    }
 
     outer_t rows() const {
         if (!_is_read) throw_no_read();
-        constexpr size_t idx = sizeof(bool_t);
-        return reinterpret_cast<const outer_t&>(_buffer[idx]);
+        return _rows;
     }
 
     outer_t snps() const {
         if (!_is_read) throw_no_read();
-        constexpr size_t idx = sizeof(bool_t) + sizeof(outer_t);
-        return reinterpret_cast<const outer_t&>(_buffer[idx]);
+        return _snps;
     }
 
     outer_t ancestries() const 
     {
         if (!_is_read) throw_no_read();
-        constexpr size_t idx = sizeof(bool_t) + 2 * sizeof(outer_t);
-        return reinterpret_cast<const chunk_inner_t&>(_buffer[idx]);
+        return _ancestries;
     }
 
     outer_t cols() const
     {
-        return snps() * ancestries();
+        if (!_is_read) throw_no_read();
+        return _cols;
     }
 
     Eigen::Ref<const vec_outer_t> nnz0() const 
     {
         if (!_is_read) throw_no_read();
-        constexpr size_t slice = sizeof(bool_t) + 2 * sizeof(outer_t) + sizeof(chunk_inner_t);
-        return Eigen::Map<const vec_outer_t>(
-            reinterpret_cast<const outer_t*>(&_buffer[slice]),
-            cols()
-        );
+        return _nnz0;
     }
 
     Eigen::Ref<const vec_outer_t> nnz1() const 
     {
         if (!_is_read) throw_no_read();
-        const size_t slice = sizeof(bool_t) + (2 + cols()) * sizeof(outer_t) + sizeof(chunk_inner_t);
-        return Eigen::Map<const vec_outer_t>(
-            reinterpret_cast<const outer_t*>(&_buffer[slice]),
-            cols()
-        );
+        return _nnz1;
     }
 
     Eigen::Ref<const vec_outer_t> outer() const
     {
         if (!_is_read) throw_no_read();
-        const size_t slice = sizeof(bool_t) + 2 * (1 + cols()) * sizeof(outer_t) + sizeof(chunk_inner_t);
-        return Eigen::Map<const vec_outer_t>(
-            reinterpret_cast<const outer_t*>(&_buffer[slice]),
-            snps() + 1
-        );
+        return _outer;
     }
 
     Eigen::Ref<const buffer_t> col(int j) const
     {
-        const auto _outer = outer();
         return Eigen::Map<const buffer_t>(
             _buffer.data() + _outer[j],
             _outer[j+1] - _outer[j]
@@ -118,18 +142,18 @@ public:
         const auto _col = col(j);
         const auto* _col_anc = (
             _col.data() + 
-            reinterpret_cast<const outer_t*>(_col.data())[anc]
+            internal::read_as<outer_t>(_col.data() + sizeof(outer_t) * anc)
         );
         return (
             _col_anc + 
-            reinterpret_cast<const outer_t*>(_col_anc)[hap]
+            internal::read_as<outer_t>(_col_anc + sizeof(outer_t) * hap)
         );
     }
 
     inner_t n_chunks(int j, int anc, int hap) const
     {
         const auto* _col_anc_hap = col_anc_hap(j, anc, hap);
-        return *reinterpret_cast<const inner_t*>(_col_anc_hap);
+        return internal::read_as<inner_t>(_col_anc_hap);
     }
 
     iterator begin(int j, int anc, int hap, int chunk) const
@@ -271,32 +295,27 @@ public:
         );
 
         // populate buffer
-        size_t idx = 0;
-        reinterpret_cast<bool_t&>(buffer[idx]) = endian; idx += sizeof(bool_t);
-        reinterpret_cast<outer_t&>(buffer[idx]) = n; idx += sizeof(outer_t);
-        reinterpret_cast<outer_t&>(buffer[idx]) = s; idx += sizeof(outer_t);
-        reinterpret_cast<chunk_inner_t&>(buffer[idx]) = A; idx += sizeof(chunk_inner_t);
-        Eigen::Map<vec_outer_t>(
-            reinterpret_cast<outer_t*>(&buffer[idx]),
-            nnz0.size()
-        ) = nnz0; idx += sizeof(outer_t) * nnz0.size();
-        Eigen::Map<vec_outer_t>(
-            reinterpret_cast<outer_t*>(&buffer[idx]),
-            nnz1.size()
-        ) = nnz1; idx += sizeof(outer_t) * nnz1.size();
+        outer_t idx = 0;
+        std::memcpy(buffer.data()+idx, &endian, sizeof(bool_t)); idx += sizeof(bool_t);
+        std::memcpy(buffer.data()+idx, &n, sizeof(outer_t)); idx += sizeof(outer_t);
+        std::memcpy(buffer.data()+idx, &s, sizeof(outer_t)); idx += sizeof(outer_t);
+        std::memcpy(buffer.data()+idx, &A, sizeof(chunk_inner_t)); idx += sizeof(chunk_inner_t);
+        std::memcpy(buffer.data()+idx, nnz0.data(), sizeof(outer_t) * nnz0.size());
+        idx += sizeof(outer_t) * nnz0.size();
+        std::memcpy(buffer.data()+idx, nnz1.data(), sizeof(outer_t) * nnz1.size());
+        idx += sizeof(outer_t) * nnz1.size();
 
         // outer[i] = number of bytes to jump from beginning of file 
         // to start reading snp i.
         // outer[i+1] - outer[i] = total number of bytes for snp i. 
-        Eigen::Map<vec_outer_t> outer(
-            reinterpret_cast<outer_t*>(&buffer[idx]),
-            s + 1
-        ); idx += sizeof(outer_t) * outer.size();
-        outer[0] = idx;
+        char* const outer_ptr = buffer.data() + idx;
+        const size_t outer_size = s + 1;
+        idx += sizeof(outer_t) * outer_size;
+        std::memcpy(outer_ptr, &idx, sizeof(outer_t));
 
         // populate outer 
         const auto outer_routine = [&](outer_t j) {
-            size_t snp_bytes = 0;
+            outer_t snp_bytes = 0;
             for (size_t a = 0; a < A; ++a) {
                 snp_bytes += sizeof(outer_t);
                 for (size_t hap = 0; hap < n_haps; ++hap) {
@@ -342,7 +361,7 @@ public:
                     }
                 }
             }
-            outer[j+1] = snp_bytes;
+            std::memcpy(outer_ptr + sizeof(outer_t) * (j+1), &snp_bytes, sizeof(outer_t));
         };
         sw.start();
         if (n_threads <= 1) {
@@ -354,51 +373,56 @@ public:
         benchmark["outer_time"] = sw.elapsed();
 
         // cumsum outer
-        for (outer_t j = 0; j < s; ++j) outer[j+1] += outer[j];
+        for (outer_t j = 0; j < s; ++j) {
+            const outer_t outer_curr = internal::read_as<outer_t>(outer_ptr + sizeof(outer_t) * (j+1));
+            const outer_t outer_prev = internal::read_as<outer_t>(outer_ptr + sizeof(outer_t) * j);
+            const outer_t sum = outer_curr + outer_prev; 
+            std::memcpy(outer_ptr + sizeof(outer_t) * (j+1), &sum, sizeof(outer_t));
+        }
 
-        if (outer[s] > static_cast<size_t>(buffer.size())) {
+        const outer_t outer_last = internal::read_as<outer_t>(outer_ptr + sizeof(outer_t) * s);
+        if (outer_last > static_cast<size_t>(buffer.size())) {
             throw util::adelie_core_error(
                 "Buffer was not initialized with a large enough size. "
                 "\n\tBuffer size:   " + std::to_string(buffer.size()) +
-                "\n\tExpected size: " + std::to_string(outer[s]) +
+                "\n\tExpected size: " + std::to_string(outer_last) +
                 "\nThis is likely a bug in the code. Please report it! "
             );
         }
-        idx = outer[s];
+        idx = outer_last;
 
         // populate (column) inner buffers
         const auto inner_routine = [&](outer_t j) {
+            const outer_t outer_curr = internal::read_as<outer_t>(outer_ptr + sizeof(outer_t) * (j+1));
+            const outer_t outer_prev = internal::read_as<outer_t>(outer_ptr + sizeof(outer_t) * j);
             Eigen::Map<buffer_t> buffer_j(
-                reinterpret_cast<char*>(&buffer[outer[j]]),
-                outer[j+1] - outer[j]
+                buffer.data() + outer_prev,
+                outer_curr - outer_prev
             );
-            size_t cidx = A * sizeof(outer_t);
+
+            outer_t cidx = A * sizeof(outer_t);
 
             for (size_t a = 0; a < A; ++a) {
-                auto& outer_anc = reinterpret_cast<outer_t*>(buffer_j.data())[a];
-                outer_anc = cidx;
-
+                std::memcpy(buffer_j.data() + sizeof(outer_t) * a, &cidx, sizeof(outer_t));
                 Eigen::Map<buffer_t> buffer_jh(
                     buffer_j.data() + cidx,
                     buffer_j.size() - cidx
                 );
-                size_t hcidx = n_haps * sizeof(outer_t);
+                outer_t hcidx = n_haps * sizeof(outer_t);
 
                 for (size_t hap = 0; hap < n_haps; ++hap) {
                     const auto k = n_haps * j + hap;
                     const auto cal_jh = calldata.col(k);
                     const auto anc_jh = ancestries.col(k);
-                    auto& outer_hap = reinterpret_cast<outer_t*>(buffer_jh.data())[hap];
-                    outer_hap = hcidx;
-
-                    auto& n_chunks = reinterpret_cast<inner_t&>(buffer_jh[hcidx]);
+                    std::memcpy(buffer_jh.data() + sizeof(outer_t) * hap, &hcidx, sizeof(outer_t));
+                    auto* n_chunks_ptr = buffer_jh.data() + hcidx;
                     hcidx += sizeof(inner_t);
-                    n_chunks = 0;
+                    inner_t n_chunks = 0;
 
                     for (inner_t k = 0; k < max_chunks; ++k) {
                         const outer_t chnk = k * chunk_size;
                         size_t curr_idx = hcidx;
-                        auto* chunk_index = reinterpret_cast<inner_t*>(buffer_jh.data() + curr_idx); 
+                        auto* chunk_index = buffer_jh.data() + curr_idx; 
                         curr_idx += sizeof(inner_t);
                         auto* chunk_nnz = reinterpret_cast<chunk_inner_t*>(buffer_jh.data() + curr_idx); 
                         curr_idx += sizeof(chunk_inner_t);
@@ -417,12 +441,13 @@ public:
                             curr_idx += sizeof(chunk_inner_t);
                         }
                         if (nnz) {
-                            *chunk_index = k;
+                            std::memcpy(chunk_index, &k, sizeof(inner_t));
                             *chunk_nnz = nnz - 1;
                             hcidx = curr_idx;
                             ++n_chunks;
                         }
                     }
+                    std::memcpy(n_chunks_ptr, &n_chunks, sizeof(inner_t));
                 }
                 cidx += hcidx;
             }
