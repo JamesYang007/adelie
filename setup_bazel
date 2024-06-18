@@ -27,15 +27,16 @@ def main():
             """
 build --cxxopt="-std=c++14"
 build --cxxopt="-Wall"
-# ASAN build
-# TODO: add ubsan + msan builds also
-build:asan --strip=never
-build:asan --copt -fsanitize=address
-build:asan --copt -DADDRESS_SANITIZER
-build:asan --copt -O1
-build:asan --copt -g
-build:asan --copt -fno-omit-frame-pointer
-build:asan --linkopt -fsanitize=address
+
+build:san --strip=never
+build:san --copt -fsanitize=address
+build:san --copt -fsanitize=undefined
+build:san --copt -DADDRESS_SANITIZER
+build:san --copt -O2
+build:san --copt -g
+build:san --copt -fno-omit-frame-pointer
+build:san --linkopt -fsanitize=address
+build:san --linkopt -fsanitize=alignment
 """
         )
 
