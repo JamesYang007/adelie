@@ -230,6 +230,7 @@ void constraint_one_sided(py::module_& m, const char* name)
             value_t,
             size_t,
             value_t,
+            value_t,
             value_t
         >(), 
             py::arg("sgn"),
@@ -238,6 +239,7 @@ void constraint_one_sided(py::module_& m, const char* name)
             py::arg("tol"),
             py::arg("nnls_max_iters"),
             py::arg("nnls_tol"),
+            py::arg("cs_tol"),
             py::arg("slack")
         )
         .def("debug_info", &internal_t::debug_info, R"delimiter(

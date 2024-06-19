@@ -26,6 +26,7 @@ private:
     const value_t _newton_tol = 1e-12;
     const size_t _nnls_max_iters;
     const value_t _nnls_tol;
+    const value_t _cs_tol;
     const value_t _slack;
     vec_value_t _buff;
 
@@ -42,6 +43,7 @@ public:
         value_t tol,
         size_t nnls_max_iters,
         value_t nnls_tol,
+        value_t cs_tol,
         value_t slack
     ):
         _sgn(sgn.data(), sgn.size()),
@@ -50,6 +52,7 @@ public:
         _tol(tol),
         _nnls_max_iters(nnls_max_iters),
         _nnls_tol(nnls_tol),
+        _cs_tol(cs_tol),
         _slack(slack),
         _buff((b.size() <= 1) ? 0 : (b.size() * (9 + 2 * b.size())))
     {
@@ -67,6 +70,9 @@ public:
         }
         if (nnls_tol < 0) {
             throw util::adelie_core_error("nnls_tol must be >= 0.");
+        }
+        if (cs_tol < 0) {
+            throw util::adelie_core_error("cs_tol must be >= 0.");
         }
         if (slack <= 0 || slack >= 1) {
             throw util::adelie_core_error("slack must be in (0,1).");
@@ -238,10 +244,32 @@ public:
                         grad_prev = -_b;
                         is_prev_valid = true;
                     }
-                    mu = (_sgn * Qv).max(0) * (_b <= 0).template cast<value_t>();
+                    mu = (_sgn * Qv).max(0);
 
-                    // if (0, mu) is optimal
-                    const value_t nnls_loss = (Qv - _sgn * mu).square().sum();
+                    // Technically, we must find mu such that:
+                    // 1) KKT first-order condition: ||v - Q.T @ (_sgn * mu)||_2 <= l1.
+                    // 2) Primal feasibility: _sgn * Q @ x <= b (satisfied with x = 0).
+                    // 3) Dual feasibility: mu >= 0.
+                    // 4) Complementary slackness: mu * _b = 0.
+                    // Perform 2 checks:
+                    // a) Relax 4) by setting mu = (_sgn * Q @ v) to minimize the norm in 1)
+                    //    and checking whether mean(mu * _b) is small.
+                    // b) Mathematically, mu = (_sgn * Q @ v) * (_b <= 0) satisfies 2)-4)
+                    //    and minimizes the norm in 1). If the norm is <= l1, done.   
+                    value_t nnls_loss = (Qv - _sgn * mu).square().sum();
+                    if (
+                        (nnls_loss <= l1 * l1) &&
+                        ((mu * _b).square().mean() <= _cs_tol)
+                     ) {
+                        x.setZero();
+                        #ifdef ADELIE_CORE_DEBUG
+                        save_iterate();
+                        #endif
+                        return;
+                    }
+
+                    mu *= (_b <= 0).template cast<value_t>();
+                    nnls_loss = (Qv - _sgn * mu).square().sum();
                     if (nnls_loss <= l1 * l1) {
                         x.setZero();
                         #ifdef ADELIE_CORE_DEBUG
@@ -289,8 +317,8 @@ public:
             // 3) mu >= 0 is already feasible (guaranteed by NNQP).
             // 4) complementary slackness iff mu^T grad = 0.
             if (
-                (grad <= _tol).all() &&
-                ((mu * grad).abs() <= _tol).all()
+                (grad.max(0).square().mean() <= _cs_tol) &&
+                ((mu * grad).square().mean() <= _cs_tol)
             ) return;
 
             // Check if mu is not changing much w.r.t. hessian scaling.
