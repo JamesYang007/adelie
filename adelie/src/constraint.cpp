@@ -221,7 +221,7 @@ void constraint_one_sided(py::module_& m, const char* name)
     using value_t = typename internal_t::value_t;
     using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, base_t>(m, name, 
-        "Core constraint class for lower and upper constraints."
+        "Core constraint class for one-sided bound constraint."
         )
         .def(py::init<
             const Eigen::Ref<const vec_value_t>,

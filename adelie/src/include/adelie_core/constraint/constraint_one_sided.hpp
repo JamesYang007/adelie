@@ -298,6 +298,10 @@ public:
             grad_prev = grad;
             is_prev_valid = true;
 
+            // reparametrize
+            grad *= _sgn;
+            mu *= _sgn;
+
             // Compute hessian
             // NOTE:
             //  - x_buffer1 = quad + l2
@@ -306,14 +310,13 @@ public:
             hess.setZero();
             auto hess_lower = hess.template selfadjointView<Eigen::Lower>();
 
-            // lower(hess) += x_norm * D Q diag(x_buffer2) Q^T D
+            // lower(hess) += x_norm * Q diag(x_buffer2) Q^T
             hess_buff.array() = Q.array().rowwise() * x_buffer2.sqrt();
-            hess_buff.transpose().array().rowwise() *= _sgn;
             hess_lower.rankUpdate(hess_buff, x_norm);
 
             // lower(hess) += x_norm * lmda * kappa * alpha alpha^T
             alpha_tmp = (x * x_buffer2) / x_norm;
-            alpha = (alpha_tmp.matrix() * Q.transpose()).array() * _sgn;
+            alpha.matrix() = alpha_tmp.matrix() * Q.transpose();
             const auto l1_kappa_norm = l1 * x_norm / (x * x_buffer1 * alpha_tmp).sum();
             hess_lower.rankUpdate(alpha.matrix().transpose(), l1_kappa_norm);
 
@@ -321,10 +324,13 @@ public:
             hess.template triangularView<Eigen::Upper>() = hess.transpose();
 
             // solve NNQP for new mu
-            optimization::StateNNQPFull<colmat_value_t> state_nnqp(
-                hess, _nnls_max_iters, _nnls_tol, 0, mu, grad
+            optimization::StateNNQPFull<colmat_value_t, true> state_nnqp(
+                _sgn, hess, _nnls_max_iters, _nnls_tol, 0, mu, grad
             );
             optimization::nnqp_full(state_nnqp); 
+
+            // reparametrize
+            mu *= _sgn;
         }
 
         throw util::adelie_core_solver_error("ConstraintOneSided: max iterations reached!");
