@@ -34,12 +34,9 @@ def run_test(
     linear = np.sqrt(quad) * np.random.normal(0, 1, d).astype(dtype)
     l1 = 0.5 * np.linalg.norm(linear)
     l2 = 0
-    if d == 1: 
-        Q = np.array([[1]], order="F", dtype=dtype)
-    else:
-        Q = np.random.normal(0, 1, (d, d))
-        Q, _, _ = np.linalg.svd(Q)
-        Q = np.asfortranarray(Q, dtype=dtype)
+    Q = np.random.normal(0, 1, (d, d))
+    Q, _, _ = np.linalg.svd(Q)
+    Q = np.asfortranarray(Q, dtype=dtype)
 
     # test solve
     x = np.zeros(d, dtype=dtype)
@@ -76,7 +73,7 @@ def run_test(
 def test_lower(d, dtype, seed):
     np.random.seed(seed)
     b = np.random.uniform(0, 1, d)
-    cnstr = constraint.lower(b, dtype=dtype, tol=1e-16, nnls_tol=1e-16)
+    cnstr = constraint.lower(b, dtype=dtype, max_iters=1000, tol=1e-14, nnls_tol=1e-14)
 
     class Lower:
         def __init__(self):

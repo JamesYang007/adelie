@@ -1,6 +1,6 @@
 #include "decl.hpp"
 #include <adelie_core/constraint/constraint_base.hpp>
-#include <adelie_core/constraint/constraint_lower_upper.hpp>
+#include <adelie_core/constraint/constraint_one_sided.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -214,9 +214,9 @@ void constraint_base(py::module_& m, const char* name)
 }
 
 template <class ValueType>
-void constraint_lower_upper(py::module_& m, const char* name)
+void constraint_one_sided(py::module_& m, const char* name)
 {
-    using internal_t = ad::constraint::ConstraintLowerUpper<ValueType>;
+    using internal_t = ad::constraint::ConstraintOneSided<ValueType>;
     using base_t = typename internal_t::base_t;
     using value_t = typename internal_t::value_t;
     using vec_value_t = typename internal_t::vec_value_t;
@@ -224,7 +224,7 @@ void constraint_lower_upper(py::module_& m, const char* name)
         "Core constraint class for lower and upper constraints."
         )
         .def(py::init<
-            value_t,
+            const Eigen::Ref<const vec_value_t>,
             const Eigen::Ref<const vec_value_t>,
             size_t,
             value_t,
@@ -258,6 +258,6 @@ void register_constraint(py::module_& m)
     constraint_base<double>(m, "ConstraintBase64");
     constraint_base<float>(m, "ConstraintBase32");
 
-    constraint_lower_upper<double>(m, "ConstraintLowerUpper64");
-    constraint_lower_upper<float>(m, "ConstraintLowerUpper32");
+    constraint_one_sided<double>(m, "ConstraintOneSided64");
+    constraint_one_sided<float>(m, "ConstraintOneSided32");
 }

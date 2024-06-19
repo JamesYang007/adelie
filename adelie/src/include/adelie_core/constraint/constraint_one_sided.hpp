@@ -8,7 +8,7 @@ namespace adelie_core {
 namespace constraint {
 
 template <class ValueType>
-class ConstraintLowerUpper: public ConstraintBase<ValueType>
+class ConstraintOneSided: public ConstraintBase<ValueType>
 {
 public:
     using base_t = ConstraintBase<ValueType>;
@@ -18,7 +18,7 @@ public:
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
 
 private:
-    const value_t _sgn;
+    const map_cvec_value_t _sgn;
     const map_cvec_value_t _b;
     const size_t _max_iters;
     const value_t _tol;
@@ -35,8 +35,8 @@ private:
 #endif
 
 public:
-    explicit ConstraintLowerUpper(
-        value_t sgn,
+    explicit ConstraintOneSided(
+        const Eigen::Ref<const vec_value_t> sgn,
         const Eigen::Ref<const vec_value_t> b,
         size_t max_iters,
         value_t tol,
@@ -44,7 +44,7 @@ public:
         value_t nnls_tol,
         value_t slack
     ):
-        _sgn(sgn),
+        _sgn(sgn.data(), sgn.size()),
         _b(b.data(), b.size()),
         _max_iters(max_iters),
         _tol(tol),
@@ -53,11 +53,14 @@ public:
         _slack(slack),
         _buff((b.size() <= 1) ? 0 : (b.size() * (9 + 2 * b.size())))
     {
-        if (std::abs(sgn) != 1) {
-            throw util::adelie_core_error("sgn must be +/-1.");
+        if ((_sgn.abs() != 1).any()) {
+            throw util::adelie_core_error("sgn must be a vector of +/-1.");
         }
         if ((b < 0).any()) {
             throw util::adelie_core_error("b must be >= 0.");
+        }
+        if (_sgn.size() != _b.size()) {
+            throw util::adelie_core_error("sgn and b must have the same length.");
         }
         if (tol < 0) {
             throw util::adelie_core_error("tol must be >= 0.");
@@ -105,23 +108,24 @@ public:
         const auto d = m;
 
         if (d == 1) {
+            const auto A = _sgn[0] * Q(0,0);
             const auto b = _b[0];
             const auto q = quad[0];
             const auto v = linear[0];
 
             // check if x == 0 is optimal
-            auto mu0 = (b > 0) ? 0 : std::max<value_t>(_sgn * v, 0.0);
-            const auto is_zero_opt = std::abs(v - _sgn * mu0) <= l1;
+            auto mu0 = (b > 0) ? 0 : std::max<value_t>(A * v, 0.0);
+            const auto is_zero_opt = std::abs(v - A * mu0) <= l1;
 
             // if optimal, take previous solution, else compute general solution
             const auto x0 = is_zero_opt ? 0 : (
-                _sgn * std::min(
-                    _sgn * std::copysign(std::abs(v) - l1, v) / (q + l2), 
+                A * std::min(
+                    A * std::copysign(std::abs(v) - l1, v) / (q + l2), 
                     b
                 )
             );
             mu0 = is_zero_opt ? mu0 : (
-                (_sgn * x0 < b) ? 0 : (_sgn * (v - ((q + l2) * x0 + std::copysign(l1, x0))))
+                (A * x0 < b) ? 0 : (A * (v - ((q + l2) * x0 + std::copysign(l1, x0))))
             );
 
             // store output
@@ -153,7 +157,7 @@ public:
         value_t mu_resid_norm_prev = -1;
 
         const auto compute_mu_resid = [&]() {
-            mu_resid.matrix() = v.matrix() - _sgn * mu.matrix() * Q;
+            mu_resid.matrix() = v.matrix() - (_sgn * mu).matrix() * Q;
         };
         const auto compute_primal = [&]() {
             size_t x_iters;
@@ -265,7 +269,7 @@ public:
                 }
                 const value_t lmda_target = (1-_slack) * l1 + _slack * mu_resid_norm_prev;
                 const value_t a = (mu - mu_prev).square().sum();
-                const value_t b = _sgn * ((Qv - _sgn * mu) * (mu - mu_prev)).sum();
+                const value_t b = ((_sgn * Qv - mu) * (mu - mu_prev)).sum();
                 const value_t c = mu_resid_norm_sq - lmda_target * lmda_target;
                 const value_t t_star = (-b + std::sqrt(std::max<value_t>(b * b - a * c, 0.0))) / a;
                 const value_t step_size = std::max<value_t>(1-t_star, 0.0);
@@ -277,11 +281,13 @@ public:
             save_iterate();
             #endif
 
-            grad.matrix() = _sgn * x.matrix() * Q.transpose() - _b.matrix();
+            grad.matrix() = (x.matrix() * Q.transpose()).cwiseProduct(_sgn.matrix()) - _b.matrix();
+
+            // TODO: optimization: easy to check complementary slackness for potentially early exiting.
 
             if (is_prev_valid) {
                 const auto convg_meas = std::abs(
-                    ((mu-mu_prev) * (grad_prev-grad)).sum()
+                    ((mu-mu_prev) * (grad-grad_prev)).sum()
                 ) / m;
                 if (convg_meas <= _tol) return;
             }
@@ -300,13 +306,14 @@ public:
             hess.setZero();
             auto hess_lower = hess.template selfadjointView<Eigen::Lower>();
 
-            // lower(hess) += x_norm * Q diag(x_buffer2) Q^T 
+            // lower(hess) += x_norm * D Q diag(x_buffer2) Q^T D
             hess_buff.array() = Q.array().rowwise() * x_buffer2.sqrt();
+            hess_buff.transpose().array().rowwise() *= _sgn;
             hess_lower.rankUpdate(hess_buff, x_norm);
 
             // lower(hess) += x_norm * lmda * kappa * alpha alpha^T
             alpha_tmp = (x * x_buffer2) / x_norm;
-            alpha.matrix() = alpha_tmp.matrix() * Q.transpose();
+            alpha = (alpha_tmp.matrix() * Q.transpose()).array() * _sgn;
             const auto l1_kappa_norm = l1 * x_norm / (x * x_buffer1 * alpha_tmp).sum();
             hess_lower.rankUpdate(alpha.matrix().transpose(), l1_kappa_norm);
 
@@ -320,11 +327,7 @@ public:
             optimization::nnqp_full(state_nnqp); 
         }
 
-        compute_mu_resid();
-        compute_primal();
-        #ifdef ADELIE_CORE_DEBUG
-        save_iterate();
-        #endif
+        throw util::adelie_core_solver_error("ConstraintOneSided: max iterations reached!");
     }
 
     void project(
