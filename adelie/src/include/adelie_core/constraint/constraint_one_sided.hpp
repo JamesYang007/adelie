@@ -311,16 +311,6 @@ public:
 
             grad.matrix() = (x.matrix() * Q.transpose()).cwiseProduct(_sgn.matrix()) - _b.matrix();
 
-            // Optimization: we can perform a quick check to see if we converged.
-            // 1) (x, mu) already satisfies the KKT first-order optimality condition.
-            // 2) x is feasible iff grad <= 0.
-            // 3) mu >= 0 is already feasible (guaranteed by NNQP).
-            // 4) complementary slackness iff mu^T grad = 0.
-            if (
-                (grad.max(0).square().mean() <= _cs_tol) &&
-                ((mu * grad).square().mean() <= _cs_tol)
-            ) return;
-
             // Check if mu is not changing much w.r.t. hessian scaling.
             if (is_prev_valid) {
                 const auto convg_meas = std::abs(
