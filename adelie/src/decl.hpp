@@ -34,6 +34,7 @@ void register_configs(py::module_&);
 void register_constraint(py::module_&);
 void register_matrix(py::module_&);
 void register_matrix_utils(py::module_&);
+void register_matrix_utils_blas(py::module_&);
 void register_optimization(py::module_&);
 void register_state(py::module_&);
 void register_solver(py::module_&);

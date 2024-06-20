@@ -117,7 +117,6 @@ if system_name == "Darwin":
     # augment arguments
     include_dirs += [omp_include]
     extra_compile_args += [
-        "-DEIGEN_USE_BLAS",
         "-Xpreprocessor",
         "-fopenmp",
     ]
