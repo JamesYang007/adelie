@@ -155,6 +155,7 @@ adelie.matrix
     block_diag
     concatenate
     dense
+    eager_cov
     interaction
     kronecker_eye
     lazy_cov
