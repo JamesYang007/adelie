@@ -606,3 +606,57 @@ BENCHMARK(BM_many_scan)
     -> Args({10000, 10})
     -> Args({100000, 10})
     ;
+
+static void BM_xtx_sym(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto d = 100;
+    ad::util::colmat_type<double> X;
+    X.setRandom(n, d);
+    ad::util::colmat_type<double> XTX;
+    XTX.resize(d, d);
+
+    for (auto _ : state) {
+        XTX.setZero();
+        XTX.template selfadjointView<Eigen::Lower>().rankUpdate(X.transpose());
+        XTX.template triangularView<Eigen::Upper>() = XTX.transpose();
+    }
+}
+
+BENCHMARK(BM_xtx_sym)
+    -> Args({10000})
+    -> Args({100000})
+    -> Args({1000000})
+    ;
+
+static void BM_xtx_naive(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto n_threads = state.range(1);
+    const auto d = 100;
+    ad::util::colmat_type<double> X;
+    X.setRandom(n, d);
+    ad::util::colmat_type<double> XTX;
+    XTX.resize(d, d);
+
+    Eigen::setNbThreads(n_threads);
+
+    for (auto _ : state) {
+        XTX.noalias() = X.transpose() * X;
+    }
+}
+
+BENCHMARK(BM_xtx_naive)
+    -> Args({10000, 1})
+    -> Args({100000, 1})
+    -> Args({1000000, 1})
+    -> Args({10000, 4})
+    -> Args({100000, 4})
+    -> Args({1000000, 4})
+    -> Args({10000, 8})
+    -> Args({100000, 8})
+    -> Args({1000000, 8})
+    -> Args({10000, 16})
+    -> Args({100000, 16})
+    -> Args({1000000, 16})
+    ;

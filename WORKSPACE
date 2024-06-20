@@ -28,3 +28,24 @@ cc_library(
 )
 """
 )
+
+EIGEN_VERSION = "3.4.0"
+
+http_archive(
+    name = "eigen",
+    build_file_content =
+        """
+# TODO(keir): Replace this with a better version, like from TensorFlow.
+# See https://github.com/ceres-solver/ceres-solver/issues/337.
+cc_library(
+    name = 'eigen',
+    srcs = [],
+    includes = ['.'],
+    hdrs = glob(['Eigen/**', 'unsupported/Eigen/**']),
+    visibility = ['//visibility:public'],
+)
+""",
+    sha256 = "8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72",
+    strip_prefix = "eigen-{}".format(EIGEN_VERSION),
+    urls = ["https://gitlab.com/libeigen/eigen/-/archive/{0}/eigen-{0}.tar.gz".format(EIGEN_VERSION)],
+)
