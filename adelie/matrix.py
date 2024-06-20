@@ -444,6 +444,42 @@ def dense(
     return _dense()
 
 
+def eager_cov(
+    mat: np.ndarray,
+    n_threads: int =1,
+):
+    """Creates an eager covariance matrix.
+
+    The eager covariance matrix :math:`A` uses 
+    the underlying matrix :math:`X` given by ``mat``
+    to compute the values of :math:`A = X^\\top X` *eagerly*.
+    In other words, it computes the entire :math:`A` matrix.
+    This is useful in ``adelie.solver.gaussian_cov`` where
+    the dimensions of :math:`A` are small enough that
+    that it is faster to construct the entire matrix upfront.
+    
+    .. note::
+        This matrix only works for covariance method!
+
+    Parameters
+    ----------
+    mat : (n, p) np.ndarray
+        The data matrix from which to eagerly compute the covariance.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    cov : np.ndarray
+        The dense covariance matrix.
+    """
+    p = mat.shape[1]
+    out = np.empty((p, p), order="F", dtype=mat.dtype)
+    core.matrix.utils.dgemtm(mat, out, n_threads)
+    return out
+
+
 def interaction(
     mat: np.ndarray,
     intr_map: dict,
@@ -839,12 +875,12 @@ def lazy_cov(
 
     The lazy covariance matrix :math:`A` uses 
     the underlying matrix :math:`X` given by ``mat``
-    to compute the values of :math:`A` dynamically.
+    to compute the values of :math:`A = X^\\top X` *dynamically*.
     It only computes rows of :math:`A`
     on-the-fly that are needed when calling its member functions.
     This is useful in ``adelie.solver.gaussian_cov`` where
     the covariance method must be used but the dimensions of :math:`A`
-    is too large to construct the entire matrix as a dense matrix.
+    are too large to construct the entire matrix as a dense matrix.
     
     .. note::
         This matrix only works for covariance method!

@@ -18,6 +18,7 @@ void utils(py::module_& m)
     using colmat_value_t = ad::util::colmat_type<value_t>;
     using ref_rowarr_value_t = Eigen::Ref<ad::util::rowarr_type<value_t>>;
     using ref_rowmat_value_t = Eigen::Ref<rowmat_value_t>;
+    using ref_colmat_value_t = Eigen::Ref<colmat_value_t>;
     using ref_vec_value_t = Eigen::Ref<vec_value_t>;
     using ref_mvec_value_t = Eigen::Ref<mvec_value_t>;
     using cref_vec_index_t = Eigen::Ref<const vec_index_t>;
@@ -34,6 +35,7 @@ void utils(py::module_& m)
     m.def("dvzero", ad::matrix::dvzero<ref_vec_value_t>);
     m.def("ddot", ad::matrix::ddot<cref_mvec_value_t, cref_mvec_value_t, ref_vec_value_t>);
     m.def("dgemv", ad::matrix::dgemv<ad::util::operator_type::_eq, cref_colmat_value_t, cref_mvec_value_t, ref_rowmat_value_t, ref_mvec_value_t>);
+    m.def("dgemtm", ad::matrix::dgemtm<cref_colmat_value_t, ref_colmat_value_t>);
 
     m.def("bench_dvaddi", [](
         ref_vec_value_t x1,
