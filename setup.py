@@ -55,6 +55,7 @@ include_dirs = [
     os.path.join("adelie", "src"),
     os.path.join("adelie", "src", "include"),
 ]
+extra_link_args = []
 libraries = []
 library_dirs = []
 runtime_library_dirs = []
@@ -116,8 +117,13 @@ if system_name == "Darwin":
     # augment arguments
     include_dirs += [omp_include]
     extra_compile_args += [
+        "-DEIGEN_USE_BLAS",
         "-Xpreprocessor",
         "-fopenmp",
+    ]
+    extra_link_args += [
+        "-framework",
+        "Accelerate",
     ]
     runtime_library_dirs += [omp_lib]
     library_dirs += [omp_lib]
@@ -128,7 +134,9 @@ elif system_name == "Linux":
         "-fopenmp", 
         "-march=native",
     ]
-    libraries += ['gomp']
+    libraries += [
+        "gomp",
+    ]
 
 else:
     extra_compile_args += [
@@ -141,6 +149,7 @@ ext_modules = [
         sorted(glob("adelie/src/*.cpp")),  # Sort source files for reproducibility
         include_dirs=include_dirs,
         extra_compile_args=extra_compile_args,
+        extra_link_args=extra_link_args,
         runtime_library_dirs=runtime_library_dirs,
         libraries=libraries,
         library_dirs=library_dirs,

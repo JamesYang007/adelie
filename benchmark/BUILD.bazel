@@ -1,7 +1,10 @@
 [cc_binary(
     name = type_,
     srcs = ["{}.cpp".format(type_)],
-    copts = ["-Iexternal/omp", "-std=c++17"],
+    copts = [
+        "-Iexternal/omp", 
+        "-std=c++17", 
+    ],
     deps = [
         "//:adelie_core",
         "@com_github_google_benchmark//:benchmark_main",

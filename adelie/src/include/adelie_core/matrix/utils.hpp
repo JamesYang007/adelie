@@ -800,5 +800,32 @@ void snp_phased_ancestry_block_axi(
     }
 }
 
+template <class MType, class OutType>
+void dgemtm(
+    const MType& m,
+    OutType& out,
+    size_t n_threads
+)
+{
+    using value_t = typename std::decay_t<MType>::Scalar;
+    using out_t = std::decay_t<OutType>;
+
+    static_assert(!out_t::IsRowMajor, "out must be column-major!");
+
+    const size_t n = m.rows();
+    const size_t p = m.cols();
+    const size_t n_bytes = sizeof(value_t) * n * p * p;
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+        out.setZero();
+        out.template selfadjointView<Eigen::Lower>().rankUpdate(m.transpose());
+        out.template triangularView<Eigen::Upper>() = out.transpose();
+        return; 
+    }
+
+    Eigen::setNbThreads(n_threads);
+    out.noalias() = m.transpose() * m;
+    Eigen::setNbThreads(1);
+}
+
 } // namespace matrix
 } // namespace adelie_core
