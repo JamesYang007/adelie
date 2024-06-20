@@ -28,6 +28,7 @@ PYBIND11_MODULE(adelie_core, m) {
 
     auto m_matrix_utils = m_matrix.def_submodule("utils", "Matrix utility submodule.");
     register_matrix_utils(m_matrix_utils);
+    register_matrix_utils_blas(m_matrix_utils);
 
     auto m_optimization = m.def_submodule("optimization", "Optimization submodule.");
     register_optimization(m_optimization);
