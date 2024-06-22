@@ -16,7 +16,7 @@ def lower(
     tol: float =1e-7,
     nnls_max_iters: int =10000,
     nnls_tol: float =1e-7,
-    cs_tol: float =1e-4,
+    cs_tol: float =1e-7,
     slack: float =1e-7,
     dtype: Union[np.float32, np.float64] =None,
 ):
@@ -42,7 +42,7 @@ def lower(
         Default is ``1e-7``.
     cs_tol : float, optional
         Complementary slackness tolerance.
-        Default is ``1e-4``.
+        Default is ``1e-7``.
     slack : float, optional
         Slackness for backtracking when proximal Newton overshoots
         the boundary where primal is zero.
@@ -91,7 +91,7 @@ def one_sided(
     tol: float =1e-7,
     nnls_max_iters: int =10000,
     nnls_tol: float =1e-7,
-    cs_tol: float =1e-4,
+    cs_tol: float =1e-7,
     slack: float =1e-7,
     dtype: Union[np.float32, np.float64] =None,
 ):
@@ -122,7 +122,7 @@ def one_sided(
         Default is ``1e-7``.
     cs_tol : float, optional
         Complementary slackness tolerance.
-        Default is ``1e-4``.
+        Default is ``1e-7``.
     slack : float, optional
         Slackness for backtracking when proximal Newton overshoots
         the boundary where primal is zero.
