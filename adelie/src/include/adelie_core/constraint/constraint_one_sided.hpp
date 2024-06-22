@@ -232,11 +232,12 @@ public:
 
                     // one-time population
                     Qv.matrix() = v.matrix() * Q.transpose();
-
-                    // If previous is valid, we have to repopulate mu with the current value.
-                    // Otherwise, mu will be used for the next iteration, so we must save the previous values.
+                    
+                    // If previous is valid, we will use mu_prev and mu_curr to backtrack.
+                    // Otherwise, mu is the next iterate.
                     auto& mu_curr = alpha;
-                    if (is_prev_valid) {
+                    const bool is_prev_valid_old = is_prev_valid;
+                    if (is_prev_valid_old) {
                         mu_curr = mu; // optimization
                     } else {
                         mu_resid_norm_prev = mu_resid_norm;
@@ -248,12 +249,12 @@ public:
 
                     // Technically, we must find mu such that:
                     // 1) KKT first-order condition: ||v - Q.T @ (_sgn * mu)||_2 <= l1.
-                    // 2) Primal feasibility: _sgn * Q @ x <= b (satisfied with x = 0).
+                    // 2) Primal feasibility: _sgn * Q @ x <= b (already satisfied with x = 0).
                     // 3) Dual feasibility: mu >= 0.
                     // 4) Complementary slackness: mu * _b = 0.
                     // Perform 2 checks:
                     // a) Relax 4) by setting mu = (_sgn * Q @ v) to minimize the norm in 1)
-                    //    and checking whether mean(mu * _b) is small.
+                    //    and checking whether mean((mu * _b) ** 2) is small.
                     // b) Mathematically, mu = (_sgn * Q @ v) * (_b <= 0) satisfies 2)-4)
                     //    and minimizes the norm in 1). If the norm is <= l1, done.   
                     value_t nnls_loss = (Qv - _sgn * mu).square().sum();
@@ -278,7 +279,7 @@ public:
                         return;
                     }
 
-                    if (is_prev_valid) mu = mu_curr; // optimization
+                    if (is_prev_valid_old) mu = mu_curr; // optimization
                     else continue;
                 }
 
@@ -288,10 +289,10 @@ public:
                 // we must have come from the if-block above, in which case nnls_loss > l1 * l1
                 // so the next iteration with the current mu will give a non-zero primal (start proximal Newton from here);
                 // otherwise, the proximal newton step overshot so we must backtrack.
-                if (!is_prev_valid) {
+                if (!is_prev_valid || (mu_resid_norm_prev <= l1)) {
                     throw util::adelie_core_error(
                         "Unexpected error! "
-                        "Previous iterate should have been initialized prior to entering this block. "
+                        "Previous iterate should be properly initialized. "
                         "Please report this bug! "
                     );
                 }
@@ -300,7 +301,7 @@ public:
                 const value_t b = ((_sgn * Qv - mu) * (mu - mu_prev)).sum();
                 const value_t c = mu_resid_norm_sq - lmda_target * lmda_target;
                 const value_t t_star = (-b + std::sqrt(std::max<value_t>(b * b - a * c, 0.0))) / a;
-                const value_t step_size = std::max<value_t>(1-t_star, 0.0);
+                const value_t step_size = std::min<value_t>(std::max<value_t>(1-t_star, 0.0), 1.0);
                 mu = mu_prev + step_size * (mu - mu_prev);
                 continue;
             }
@@ -314,7 +315,7 @@ public:
             // Check if mu is not changing much w.r.t. hessian scaling.
             if (is_prev_valid) {
                 const auto convg_meas = std::abs(
-                    ((mu-mu_prev) * (grad-grad_prev)).sum()
+                    ((mu-mu_prev) * (grad_prev-grad)).sum()
                 ) / m;
                 if (convg_meas <= _tol) return;
             }
