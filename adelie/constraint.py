@@ -13,11 +13,11 @@ def lower(
     b: np.ndarray,
     *,
     max_iters: int =100,
-    tol: float =1e-7,
+    tol: float =1e-8,
     nnls_max_iters: int =10000,
-    nnls_tol: float =1e-7,
-    cs_tol: float =1e-7,
-    slack: float =1e-7,
+    nnls_tol: float =1e-8,
+    cs_tol: float =1e-8,
+    slack: float =1e-4,
     dtype: Union[np.float32, np.float64] =None,
 ):
     """Creates a lower bound constraint.
@@ -33,16 +33,16 @@ def lower(
         Default is ``100``.
     tol : float, optional
         Convergence tolerance for proximal Newton.
-        Default is ``1e-7``.
+        Default is ``1e-8``.
     nnls_max_iters : int, optional
         Maximum number of non-negative least squares iterations.
         Default is ``10000``.
     nnls_tol : float, optional
         Maximum number of non-negative least squares iterations.
-        Default is ``1e-7``.
+        Default is ``1e-8``.
     cs_tol : float, optional
         Complementary slackness tolerance.
-        Default is ``1e-7``.
+        Default is ``1e-8``.
     slack : float, optional
         Slackness for backtracking when proximal Newton overshoots
         the boundary where primal is zero.
@@ -52,7 +52,7 @@ def lower(
         .. warning::
             If this value is too small, ``solve()`` may not converge!
 
-        Default is ``1e-7``.
+        Default is ``1e-4``.
     dtype : Union[np.float32, np.float64], optional
         The underlying data type.
         If ``None``, it is inferred from ``b``,
@@ -88,11 +88,11 @@ def one_sided(
     b: np.ndarray,
     *,
     max_iters: int =100,
-    tol: float =1e-7,
+    tol: float =1e-8,
     nnls_max_iters: int =10000,
-    nnls_tol: float =1e-7,
-    cs_tol: float =1e-7,
-    slack: float =1e-7,
+    nnls_tol: float =1e-8,
+    cs_tol: float =1e-8,
+    slack: float =1e-4,
     dtype: Union[np.float32, np.float64] =None,
 ):
     """Creates a one-sided bound constraint.
@@ -113,16 +113,16 @@ def one_sided(
         Default is ``100``.
     tol : float, optional
         Convergence tolerance for proximal Newton.
-        Default is ``1e-7``.
+        Default is ``1e-8``.
     nnls_max_iters : int, optional
         Maximum number of non-negative least squares iterations.
         Default is ``10000``.
     nnls_tol : float, optional
         Maximum number of non-negative least squares iterations.
-        Default is ``1e-7``.
+        Default is ``1e-8``.
     cs_tol : float, optional
         Complementary slackness tolerance.
-        Default is ``1e-7``.
+        Default is ``1e-8``.
     slack : float, optional
         Slackness for backtracking when proximal Newton overshoots
         the boundary where primal is zero.
@@ -132,7 +132,7 @@ def one_sided(
         .. warning::
             If this value is too small, ``solve()`` may not converge!
 
-        Default is ``1e-7``.
+        Default is ``1e-4``.
     dtype : Union[np.float32, np.float64], optional
         The underlying data type.
         If ``None``, it is inferred from ``b``,
