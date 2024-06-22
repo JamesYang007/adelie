@@ -14,10 +14,26 @@ def render_constraints(
 ):
     if constraints is None:
         constraints = [None] * n_groups
+    if len(constraints) > n_groups:
+        raise RuntimeError("constraints is unexpectedly larger than the number of groups!")
+    elif len(constraints) < n_groups:
+        # Assume this is because we are in multi-response state.
+        # Must prepend with None since the missing constraints are for the intercept columns.
+        constraints = [None] * (n_groups - len(constraints)) + constraints
+
     return {
         np.float32: core.constraint.VectorConstraintBase32,
         np.float64: core.constraint.VectorConstraintBase64,
     }[dtype](constraints)
+
+
+def render_dual_groups(
+    constraints: list,
+):
+    return np.cumsum(np.concatenate(
+        [[0] + [0 if c is None else c.dual_size for c in constraints]], 
+        dtype=int,
+    ))[:-1]
 
 
 def deduce_states(
@@ -32,6 +48,7 @@ def deduce_states(
         constraints,
         dtype,
     )
+    dual_groups = render_dual_groups(constraints)
     screen_begins = np.cumsum(
         np.concatenate([[0], group_sizes[screen_set]]),
         dtype=int,
@@ -50,6 +67,7 @@ def deduce_states(
     )[:-1]
     return (
         constraints,
+        dual_groups,
         screen_begins,
         screen_dual_begins,
     )
@@ -583,6 +601,7 @@ def gaussian_pin_naive(
 
             (
                 self._constraints,
+                self._dual_groups,
                 self._screen_begins,
                 self._screen_dual_begins,
             ) = deduce_states(
@@ -640,6 +659,7 @@ def gaussian_pin_naive(
                 constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
+                dual_groups=self._dual_groups,
                 alpha=alpha,
                 penalty=self._penalty,
                 weights=self._weights,
@@ -883,6 +903,7 @@ def gaussian_pin_cov(
 
             (
                 self._constraints,
+                self._dual_groups,
                 self._screen_begins,
                 self._screen_dual_begins,
             ) = deduce_states(
@@ -928,6 +949,7 @@ def gaussian_pin_cov(
                 constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
+                dual_groups=self._dual_groups,
                 alpha=alpha,
                 penalty=self._penalty,
                 screen_set=self._screen_set,
@@ -1332,6 +1354,7 @@ def gaussian_cov(
             self._constraints = render_constraints(groups.shape[0], constraints, dtype)
             self._groups = np.array(groups, copy=True, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._dual_groups = render_dual_groups(self._constraints)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
@@ -1350,6 +1373,7 @@ def gaussian_cov(
                 constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
+                dual_groups=self._dual_groups,
                 alpha=alpha,
                 penalty=self._penalty,
                 lmda_path=self._lmda_path,
@@ -1935,6 +1959,7 @@ def gaussian_naive(
             self._constraints = render_constraints(groups.shape[0], constraints, dtype)
             self._groups = np.array(groups, copy=True, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._dual_groups = render_dual_groups(self._constraints)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._offsets = np.array(offsets, copy=True, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
@@ -1959,6 +1984,7 @@ def gaussian_naive(
                 constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
+                dual_groups=self._dual_groups,
                 alpha=alpha,
                 penalty=self._penalty,
                 weights=self._glm.weights,
@@ -2301,6 +2327,7 @@ def multigaussian_naive(
             self._constraints = render_constraints(groups.shape[0], constraints, dtype)
             self._groups = np.array(groups, copy=True, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._dual_groups = render_dual_groups(self._constraints)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._weights_expanded = np.repeat(self._glm.weights, repeats=n_classes) / n_classes
             self._offsets = np.array(offsets, copy=True, dtype=dtype)
@@ -2333,6 +2360,7 @@ def multigaussian_naive(
                 constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
+                dual_groups=self._dual_groups,
                 alpha=alpha,
                 penalty=self._penalty,
                 weights=self._weights_expanded,
@@ -2673,6 +2701,7 @@ def glm_naive(
             self._constraints = render_constraints(groups.shape[0], constraints, dtype)
             self._groups = np.array(groups, copy=True, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._dual_groups = render_dual_groups(self._constraints)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._offsets = np.array(offsets, copy=True, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
@@ -2693,6 +2722,7 @@ def glm_naive(
                 constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
+                dual_groups=self._dual_groups,
                 alpha=alpha,
                 penalty=self._penalty,
                 offsets=self._offsets,
@@ -3045,6 +3075,7 @@ def multiglm_naive(
             self._constraints = render_constraints(groups.shape[0], constraints, dtype)
             self._groups = np.array(groups, copy=True, dtype=int)
             self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._dual_groups = render_dual_groups(self._constraints)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._offsets = np.array(offsets, copy=True, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
@@ -3068,6 +3099,7 @@ def multiglm_naive(
                 constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
+                dual_groups=self._dual_groups,
                 alpha=alpha,
                 penalty=self._penalty,
                 offsets=self._offsets.ravel(),

@@ -15,7 +15,7 @@ namespace py = pybind11;
 namespace ad = adelie_core;
 
 template <class BetasType>
-static auto convert_betas(
+static auto convert_sparse_to_dense(
     size_t p,
     const BetasType& betas
 )
@@ -90,6 +90,7 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_index_t>&, 
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_index_t>&, 
@@ -117,6 +118,7 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
+            py::arg("dual_groups").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("screen_set").noconvert(),
@@ -152,6 +154,10 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         .def_readonly("group_sizes", &state_t::group_sizes, R"delimiter(
         List of group sizes corresponding to each element in ``groups``.
         ``group_sizes[i]`` is the group size of the ``i`` th group. 
+        )delimiter")
+        .def_readonly("dual_groups", &state_t::dual_groups, R"delimiter(
+        List of starting indices to each dual group where `G` is the number of groups.
+        ``dual_groups[i]`` is the starting index of the ``i`` th dual group. 
         )delimiter")
         .def_readonly("alpha", &state_t::alpha, R"delimiter(
         Elastic net parameter.
@@ -264,6 +270,32 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         Ordering such that ``groups`` is sorted in ascending order for the active groups.
         ``groups[screen_set[active_set[active_order[i]]]]`` is the ``i`` th active group in ascending order.
         )delimiter")
+        .def_property_readonly("betas", [](const state_t& s) {
+            const auto& groups = s.groups;
+            const auto& group_sizes = s.group_sizes;
+            const auto G = groups.size();
+            const auto p = G ? (groups[G-1] + group_sizes[G-1]) : 0;
+            return convert_sparse_to_dense(
+                p,
+                s.betas
+            );
+        }, R"delimiter(
+        ``betas[i]`` is the solution at ``lmdas[i]``.
+        )delimiter")
+        .def_property_readonly("duals", [](const state_t& s) {
+            const auto& constraints = *s.constraints;
+            const auto& dual_groups = s.dual_groups;
+            const auto G = dual_groups.size();
+            const auto constraint = constraints[G-1];
+            const auto group_size = constraint ? constraint->duals() : 0;
+            const auto n_duals = G ? (dual_groups[G-1] + group_size) : 0;
+            return convert_sparse_to_dense(
+                n_duals,
+                s.duals
+            );
+        }, R"delimiter(
+        ``duals[i]`` is the dual at ``lmdas[i]``.
+        )delimiter")
         .def_property_readonly("intercepts", [](const state_t& s) {
             return Eigen::Map<const vec_value_t>(s.intercepts.data(), s.intercepts.size());
         }, R"delimiter(
@@ -341,6 +373,7 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_index_t>&, 
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
@@ -375,6 +408,7 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
+            py::arg("dual_groups").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("weights").noconvert(),
@@ -453,14 +487,6 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
         .def_readonly("resid_sum", &state_t::resid_sum, R"delimiter(
         Weighted (by :math:`W`) sum of ``resid``.
         )delimiter")
-        .def_property_readonly("betas", [](const state_t& s) {
-            return convert_betas(
-                s.X->cols(),
-                s.betas
-            );
-        }, R"delimiter(
-        ``betas[i]`` is the solution at ``lmdas[i]``.
-        )delimiter")
         ;
 }
 
@@ -495,6 +521,7 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_index_t>&, 
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_index_t>&, 
@@ -524,6 +551,7 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
+            py::arg("dual_groups").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("screen_set").noconvert(),
@@ -597,14 +625,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         )delimiter")
-        .def_property_readonly("betas", [](const state_t& s) {
-            return convert_betas(
-                s.A->cols(),
-                s.betas
-            );
-        }, R"delimiter(
-        ``betas[i]`` is the solution at ``lmdas[i]``.
-        )delimiter")
         ;
 }
 
@@ -629,6 +649,7 @@ void state_base(py::module_& m, const char* name)
         .def(py::init<
             const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&, 
+            const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
@@ -665,6 +686,7 @@ void state_base(py::module_& m, const char* name)
             py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
+            py::arg("dual_groups").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("lmda_path").noconvert(),
@@ -708,6 +730,10 @@ void state_base(py::module_& m, const char* name)
         .def_readonly("group_sizes", &state_t::group_sizes, R"delimiter(
         List of group sizes corresponding to each element in ``groups``.
         ``group_sizes[i]`` is the group size of the ``i`` th group. 
+        )delimiter")
+        .def_readonly("dual_groups", &state_t::dual_groups, R"delimiter(
+        List of starting indices to each dual group where `G` is the number of groups.
+        ``dual_groups[i]`` is the starting index of the ``i`` th dual group. 
         )delimiter")
         .def_readonly("alpha", &state_t::alpha, R"delimiter(
         Elastic net parameter.
@@ -888,6 +914,20 @@ void state_base(py::module_& m, const char* name)
         ``beta`` is the full solution vector represented by ``screen_beta``,
         and ``correction`` is the output from calling ``constraints[i].gradient()``.
         )delimiter")
+        .def_property_readonly("duals", [](const state_t& s) {
+            const auto& constraints = s.constraints;
+            const auto& dual_groups = s.dual_groups;
+            const auto G = dual_groups.size();
+            const auto constraint = constraints[G-1];
+            const auto group_size = constraint ? constraint->duals() : 0;
+            const auto n_duals = G ? (dual_groups[G-1] + group_size) : 0;
+            return convert_sparse_to_dense(
+                n_duals,
+                s.duals
+            );
+        }, R"delimiter(
+        ``duals[i]`` is the dual at ``lmdas[i]``.
+        )delimiter")
         .def_property_readonly("devs", [](const state_t& s) {
             return Eigen::Map<const ad::util::rowvec_type<value_t>>(
                 s.devs.data(),
@@ -1014,6 +1054,7 @@ void state_gaussian_naive(py::module_& m, const char* name)
             const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_index_t>&,
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
@@ -1057,6 +1098,7 @@ void state_gaussian_naive(py::module_& m, const char* name)
             py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
+            py::arg("dual_groups").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("weights").noconvert(),
@@ -1147,7 +1189,7 @@ void state_gaussian_naive(py::module_& m, const char* name)
         and ``p = group_sizes[k]``.
         )delimiter")
         .def_property_readonly("betas", [](const state_t& s) {
-            return convert_betas(
+            return convert_sparse_to_dense(
                 s.X->cols(),
                 s.betas
             );
@@ -1192,6 +1234,7 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             value_t,
             const dyn_vec_constraint_t&,
+            const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
             value_t, 
@@ -1240,6 +1283,7 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
+            py::arg("dual_groups").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("weights").noconvert(),
@@ -1293,7 +1337,7 @@ void state_multigaussian_naive(py::module_& m, const char* name)
         ``True`` if an intercept is added for each response.
         )delimiter")
         .def_property_readonly("betas", [](const state_t& s) {
-            return convert_betas(
+            return convert_sparse_to_dense(
                 s.X->cols() -  s.multi_intercept * s.n_classes,
                 s.betas
             );
@@ -1344,6 +1388,7 @@ void state_gaussian_cov(py::module_& m, const char* name)
             const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_index_t>&, 
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
@@ -1380,6 +1425,7 @@ void state_gaussian_cov(py::module_& m, const char* name)
             py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
+            py::arg("dual_groups").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("lmda_path").noconvert(),
@@ -1455,7 +1501,7 @@ void state_gaussian_cov(py::module_& m, const char* name)
         The full gradient :math:`v - A\beta`.
         )delimiter")
         .def_property_readonly("betas", [](const state_t& s) {
-            return convert_betas(
+            return convert_sparse_to_dense(
                 s.A->cols(),
                 s.betas
             );
@@ -1500,6 +1546,7 @@ void state_glm_naive(py::module_& m, const char* name)
             const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_index_t>&, 
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
@@ -1545,6 +1592,7 @@ void state_glm_naive(py::module_& m, const char* name)
             py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
+            py::arg("dual_groups").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("offsets").noconvert(),
@@ -1623,7 +1671,7 @@ void state_glm_naive(py::module_& m, const char* name)
         where :math:`\eta` is given by ``eta``.
         )delimiter")
         .def_property_readonly("betas", [](const state_t& s) {
-            return convert_betas(
+            return convert_sparse_to_dense(
                 s.X->cols(),
                 s.betas
             );
@@ -1667,6 +1715,7 @@ void state_multiglm_naive(py::module_& m, const char* name)
             const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_index_t>&, 
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
@@ -1715,6 +1764,7 @@ void state_multiglm_naive(py::module_& m, const char* name)
             py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
+            py::arg("dual_groups").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("offsets").noconvert(),
@@ -1770,7 +1820,7 @@ void state_multiglm_naive(py::module_& m, const char* name)
         ``True`` if an intercept is added for each response.
         )delimiter")
         .def_property_readonly("betas", [](const state_t& s) {
-            return convert_betas(
+            return convert_sparse_to_dense(
                 s.X->cols() -  s.multi_intercept * s.n_classes,
                 s.betas
             );

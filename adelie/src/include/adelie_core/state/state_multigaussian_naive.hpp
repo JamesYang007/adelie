@@ -64,6 +64,7 @@ struct StateMultiGaussianNaive : StateGaussianNaive<
         const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
+        const Eigen::Ref<const vec_index_t>& dual_groups, 
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_value_t>& weights,
@@ -100,7 +101,7 @@ struct StateMultiGaussianNaive : StateGaussianNaive<
     ):
         base_t(
             X, X_means, y_mean, y_var, resid, resid_sum,
-            constraints, groups, group_sizes, alpha, penalty, weights, lmda_path, lmda_max, min_ratio, lmda_path_size,
+            constraints, groups, group_sizes, dual_groups, alpha, penalty, weights, lmda_path, lmda_max, min_ratio, lmda_path_size,
             max_screen_size, max_active_size,
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             max_iters, tol, adev_tol, ddev_tol, 

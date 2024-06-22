@@ -40,11 +40,13 @@ void update_solutions(
 {
     const auto y_var = state.y_var;
     auto& betas = state.betas;
+    auto& duals = state.duals;
     auto& devs = state.devs;
     auto& lmdas = state.lmdas;
     auto& intercepts = state.intercepts;
 
     betas.emplace_back(std::move(state_gaussian_pin_naive.betas.back()));
+    duals.emplace_back(std::move(state_gaussian_pin_naive.duals.back()));
     intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
     lmdas.emplace_back(lmda);
 
@@ -87,6 +89,7 @@ auto fit(
     const auto& constraints = state.constraints;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
+    const auto& dual_groups = state.dual_groups;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
     const auto& weights = state.weights;
@@ -147,6 +150,7 @@ auto fit(
         constraints,
         groups, 
         group_sizes,
+        dual_groups,
         alpha, 
         penalty,
         weights,

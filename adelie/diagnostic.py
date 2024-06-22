@@ -1,4 +1,7 @@
 from . import adelie_core as core
+from .constraint import (
+    ConstraintBase32,
+)
 from .glm import (
     GlmBase32,
     GlmBase64,
@@ -10,6 +13,9 @@ from . import matrix
 from .matrix import (
     MatrixNaiveBase32,
     MatrixNaiveBase64,
+)
+from .state import (
+    render_dual_groups,
 )
 from IPython.display import HTML
 from itertools import cycle
@@ -364,8 +370,10 @@ def gradients(
 def gradient_norms(
     grads: np.ndarray,
     betas: csr_matrix,
+    duals: csr_matrix,
     lmdas: np.ndarray,
     *, 
+    constraints: list =None,
     groups: np.ndarray =None,
     alpha: float =1,
     penalty: np.ndarray =None,
@@ -378,21 +386,19 @@ def gradient_norms(
         \\begin{align*}
             \\hat{h}_g = \\|
                 \\hat{\\gamma}_g - 
-                \\lambda (1-\\alpha) \\omega_g \\beta_g
+                \\lambda (1-\\alpha) \\omega_g \\beta_g -
+                \\phi_g'(\\beta_g)^\\top \\mu_g
             \\|_2  \\quad g=1,\\ldots, G
         \\end{align*}
 
     where
     :math:`\\hat{\\gamma}_g` is the gradient as in ``adelie.diagnostic.gradients``,
-    :math:`\\omega_g` is the penalty factor,
     :math:`\\lambda` is the regularization,
     :math:`\\alpha` is the elastic net proportion,
-    and :math:`\\beta_g` is the coefficient block for group :math:`g`.
-
-    .. warning::
-        The group-wise gradient norm is primarily used to check the KKT conditions.
-        We *do not* correct for the case of non-trivial constraints 
-        since it may be too time consuming.
+    :math:`\\omega_g` is the penalty factor,
+    :math:`\\beta_g` is the coefficient block for group :math:`g`,
+    :math:`\\phi_g` is the constraint function for group :math:`g`,
+    and :math:`\\mu_g` is the dual block for group :math:`g`.
 
     Parameters
     ----------
@@ -400,8 +406,16 @@ def gradient_norms(
         Gradients.
     betas : (L, p) or (L, p*K) scipy.sparse.csr_matrix
         Coefficient vectors :math:`\\beta`.
+    duals : (L, d) scipy.sparse.csr_matrix
+        Dual vectors :math:`\\mu`.
     lmdas : (L,) np.ndarray
         Regularization parameters :math:`\\lambda`.
+    constraints : (G,) list, optional
+        List of constraints for each group.
+        ``constraints[i]`` is the constraint object corresponding to group ``i``.
+        If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
+        If ``None``, every group is unconstrained.
+        Default is ``None``.
     groups : (G,) np.ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -460,6 +474,39 @@ def gradient_norms(
 
     L = grads.shape[0]
     grads = grads.reshape((L, -1)) - betas.multiply(lmdas[:, None] * (1 - alpha) * penalty[None])
+
+    if not (constraints is None):
+        assert len(constraints) == len(groups)
+        dtype = None
+        for constraint in constraints:
+            if constraint is None: continue
+            dtype = (
+                np.float32
+                if isinstance(constraint, ConstraintBase32) else
+                np.float64
+            )
+            break
+        if not (dtype is None):
+            dual_groups = render_dual_groups(constraints)
+            mu_grads = np.zeros(grads.shape, dtype=dtype)
+            for k in range(L):
+                beta_curr = betas[k].toarray()[0]
+                mu_curr = duals[k].toarray()[0]
+                mu_grads_curr = mu_grads[k]
+                for constraint, g, gs, dg in zip(
+                    constraints,
+                    groups,
+                    group_sizes,
+                    dual_groups,
+                ):
+                    if constraint is None: continue
+                    constraint.gradient(
+                        beta_curr[g:g+gs],
+                        mu_curr[dg:dg+constraint.dual_size],
+                        mu_grads_curr[g:g+gs],
+                    ) 
+            grads -= mu_grads
+
     return np.array([
         np.linalg.norm(grads[:, g:g+gs], axis=-1)
         for g, gs in zip(groups, group_sizes)
@@ -1084,9 +1131,14 @@ class DiagnosticCov:
     def __init__(self, state):
         self.state = state
         self.betas = state.betas
+        self.duals = state.duals
 
         # keep same format as DiagnosticNaive for consistency
         self._args = {}
+        constraints = state.constraints
+        if np.all([c is None for c in constraints]):
+            constraints = None
+        self._args["constraints"] = constraints
         self._args["groups"] = state.groups
         self._args["penalty"] = state.penalty
 
@@ -1100,7 +1152,9 @@ class DiagnosticCov:
         self.gradient_norms = gradient_norms(
             grads=self.gradients,
             betas=self.betas,
+            duals=self.duals,
             lmdas=self.state.lmdas,
+            constraints=self._args["constraints"],
             groups=self._args["groups"],
             alpha=self.state.alpha,
             penalty=self._args["penalty"],
@@ -1199,14 +1253,23 @@ class DiagnosticNaive:
     def __init__(self, state):
         self.state = state
         self.betas = state.betas
+        self.duals = state.duals
         self._n_classes = self.state._glm.y.shape[-1]
         self._is_multi = state._glm.is_multi
         self._args = {}
         if self._is_multi:
             self._args["groups"] = state.group_type
             p_begin = self.state.multi_intercept * self._n_classes
+            constraints = state.constraints[p_begin:]
+            if np.all([c is None for c in constraints]):
+                constraints = None
+            self._args["constraints"] = constraints
             self._args["penalty"] = state.penalty[p_begin:]
         else:
+            constraints = state.constraints
+            if np.all([c is None for c in constraints]):
+                constraints = None
+            self._args["constraints"] = constraints
             self._args["groups"] = state.groups
             self._args["penalty"] = state.penalty
 
@@ -1229,7 +1292,9 @@ class DiagnosticNaive:
         self.gradient_norms = gradient_norms(
             grads=self.gradients,
             betas=self.betas,
+            duals=self.duals,
             lmdas=self.state.lmdas,
+            constraints=self._args["constraints"],
             groups=self._args["groups"],
             alpha=self.state.alpha,
             penalty=self._args["penalty"],

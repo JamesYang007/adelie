@@ -61,6 +61,7 @@ struct StateMultiGlmNaive: StateGlmNaive<
         const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
+        const Eigen::Ref<const vec_index_t>& dual_groups, 
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_value_t>& offsets,
@@ -101,7 +102,7 @@ struct StateMultiGlmNaive: StateGlmNaive<
         const Eigen::Ref<const vec_value_t>& grad
     ):
         base_t(
-            X, eta, resid, constraints, groups, group_sizes, alpha, penalty, offsets, lmda_path, 
+            X, eta, resid, constraints, groups, group_sizes, dual_groups, alpha, penalty, offsets, lmda_path, 
             loss_null, loss_full, lmda_max, min_ratio, lmda_path_size, max_screen_size, max_active_size,
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             irls_max_iters, irls_tol, max_iters, tol, adev_tol, ddev_tol,

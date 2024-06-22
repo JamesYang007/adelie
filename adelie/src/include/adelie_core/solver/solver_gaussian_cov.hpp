@@ -82,11 +82,13 @@ void update_solutions(
 )
 {
     auto& betas = state.betas;
+    auto& duals = state.duals;
     auto& intercepts = state.intercepts;
     auto& devs = state.devs;
     auto& lmdas = state.lmdas;
 
     betas.emplace_back(std::move(state_gaussian_pin_cov.betas.back()));
+    duals.emplace_back(std::move(state_gaussian_pin_cov.duals.back()));
     intercepts.emplace_back(0);
     lmdas.emplace_back(lmda);
 
@@ -127,6 +129,7 @@ auto fit(
     const auto& constraints = state.constraints;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
+    const auto& dual_groups = state.dual_groups;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
     const auto& screen_set = state.screen_set;
@@ -182,6 +185,7 @@ auto fit(
         constraints,
         groups, 
         group_sizes,
+        dual_groups,
         alpha, 
         penalty,
         Eigen::Map<const vec_index_t>(screen_set.data(), screen_set.size()), 

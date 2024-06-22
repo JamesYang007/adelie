@@ -176,12 +176,12 @@ void update_screen_derived_base(
     size_t screen_dual_value_size = (
         (old_screen_size == 0) ? 
         0 : (screen_dual_begins.back() + (
-            (last_constraint == nullptr) ? 0 : last_constraint->duals()
+            last_constraint ? last_constraint->duals() : 0
         ))
     );
     for (size_t i = old_screen_size; i < screen_set.size(); ++i) {
         const auto constraint = constraints[screen_set[i]];
-        const auto curr_size = (constraint == nullptr) ? 0 : constraint->duals();
+        const auto curr_size = constraint ? constraint->duals() : 0;
         screen_dual_begins.push_back(screen_dual_value_size);
         screen_dual_value_size += curr_size;
     }
@@ -221,6 +221,7 @@ struct StateBase
     const dyn_vec_constraint_t constraints;
     const map_cvec_index_t groups;
     const map_cvec_index_t group_sizes;
+    const map_cvec_index_t dual_groups;
     const value_t alpha;
     const map_cvec_value_t penalty;
 
@@ -272,6 +273,7 @@ struct StateBase
 
     // final results
     dyn_vec_sp_vec_t betas;
+    dyn_vec_sp_vec_t duals;
     dyn_vec_value_t intercepts;
     dyn_vec_value_t devs;
     dyn_vec_value_t lmdas;
@@ -292,6 +294,7 @@ struct StateBase
         const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
+        const Eigen::Ref<const vec_index_t>& dual_groups, 
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_value_t>& lmda_path,
@@ -327,6 +330,7 @@ struct StateBase
         constraints(constraints),
         groups(groups.data(), groups.size()),
         group_sizes(group_sizes.data(), group_sizes.size()),
+        dual_groups(dual_groups.data(), dual_groups.size()),
         alpha(alpha),
         penalty(penalty.data(), penalty.size()),
         min_ratio(min_ratio),
@@ -367,6 +371,9 @@ struct StateBase
         }
         if (group_sizes.size() != G) {
             throw util::adelie_core_error("group_sizes must have the same length as groups.");
+        }
+        if (dual_groups.size() != G) {
+            throw util::adelie_core_error("dual_groups must have the same length as groups.");
         }
         if (penalty.size() != G) {
             throw util::adelie_core_error("penalty must have the same length as groups.");
@@ -438,6 +445,7 @@ struct StateBase
         /* optimize for output storage size */
         const auto n_lmdas = std::max<size_t>(lmda_path.size(), lmda_path_size);
         betas.reserve(n_lmdas);
+        duals.reserve(n_lmdas);
         intercepts.reserve(n_lmdas);
         devs.reserve(n_lmdas);
         lmdas.reserve(n_lmdas);
