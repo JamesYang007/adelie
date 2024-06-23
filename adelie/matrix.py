@@ -6,6 +6,7 @@ from .adelie_core.matrix import (
     MatrixCovBase64,
     MatrixCovBase32,
 )
+from sys import platform
 from scipy.sparse import (
     csc_matrix,
     csr_matrix,
@@ -483,6 +484,8 @@ def eager_cov(
     cov : ndarray
         The dense covariance matrix.
     """
+    if platform == "linux":
+        return mat.T @ mat
     p = mat.shape[1]
     out = np.empty((p, p), order="F", dtype=mat.dtype)
     core.matrix.utils.dgemtm(mat, out, n_threads)
