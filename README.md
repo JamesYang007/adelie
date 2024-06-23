@@ -8,7 +8,7 @@
 ![PyPI - Version](https://img.shields.io/pypi/v/adelie)
 ![GitHub Release](https://img.shields.io/github/v/release/JamesYang007/adelie)
 
-Adelie is a fast and flexible Python package for solving group elastic net problems. 
+Adelie is a fast and flexible Python package for solving group lasso and elastic net problems. 
 
 - **Installation**: [https://jamesyang007.github.io/adelie/notebooks/installation.html](https://jamesyang007.github.io/adelie/notebooks/installation.html)
 - **Documentation**: [https://jamesyang007.github.io/adelie](https://jamesyang007.github.io/adelie/)
