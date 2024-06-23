@@ -218,7 +218,6 @@ void constraint_one_sided_base(py::module_& m, const char* name)
 {
     using internal_t = ad::constraint::ConstraintOneSidedBase<ValueType>;
     using base_t = typename internal_t::base_t;
-    using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, base_t>(m, name, 
         "Core constraint base class for one-sided bound constraint."
         )

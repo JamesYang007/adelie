@@ -109,9 +109,6 @@ void sparsify_active_dual(
 )
 {
     using index_t = typename StateType::index_t;
-    using value_t = typename StateType::value_t;
-    using vec_index_t = util::rowvec_type<index_t>;
-    using vec_value_t = util::rowvec_type<value_t>;
 
     const auto& screen_set = state.screen_set;
     const auto& constraints = *state.constraints;

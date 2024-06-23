@@ -198,8 +198,9 @@ void coordinate_descent(
 )
 {
     using state_t = std::decay_t<StateType>;
-    using value_t = typename state_t::value_t;
     using index_t = typename state_t::index_t;
+    using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
 
     const auto& penalty = state.penalty;
     const auto& screen_set = state.screen_set;
@@ -277,7 +278,10 @@ void coordinate_descent(
             auto ak_old_transformed = buffer4.segment(ak.size(), ak.size());
             ak_old_transformed.matrix() = ak_old.matrix() * Vk; 
             auto ak_transformed = buffer4.segment(2 * ak.size(), ak.size());
-            ak_transformed = ak_old_transformed;
+            Eigen::Map<vec_value_t>(
+                ak_transformed.data(),
+                ak_transformed.size()
+             ) = ak_old_transformed;
 
             // update group coefficients
             gk_transformed += A_kk * ak_old_transformed; 

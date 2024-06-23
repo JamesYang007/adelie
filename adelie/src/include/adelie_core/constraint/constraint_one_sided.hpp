@@ -506,8 +506,6 @@ public:
         const Eigen::Ref<const colmat_value_t>& Q
     ) override
     {
-        using rowmat_value_t = util::rowmat_type<value_t>;
-
         #ifdef ADELIE_CORE_DEBUG
         _primals1.clear();
         _primals2.clear();
