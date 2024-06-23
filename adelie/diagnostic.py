@@ -80,11 +80,6 @@ def predict(
     -------
     linear_preds : (L, n) or (L, n, K) ndarray
         Linear predictions.
-
-    See Also
-    --------
-    adelie.adelie_core.glm.GlmBase64
-    adelie.adelie_core.glm.GlmMultiBase64
     """
     is_multi = len(intercepts.shape) == 2
     if is_multi:
