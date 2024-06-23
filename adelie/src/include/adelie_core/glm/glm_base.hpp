@@ -22,7 +22,6 @@ public:
     map_cvec_value_t y;
     map_cvec_value_t weights;
     const bool is_multi = false;
-    const bool is_symmetric = false;
 
 protected:
     void check_gradient(

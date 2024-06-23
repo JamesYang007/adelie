@@ -49,7 +49,7 @@ void nnqp_full(py::module_& m, const char* name)
 
     Parameters
     ----------
-    quad : (n, n) np.ndarray
+    quad : (n, n) ndarray
         Full positive semi-definite dense matrix :math:`Q`.
     max_iters : int
         Maximum number of coordinate descent iterations.
@@ -59,9 +59,9 @@ void nnqp_full(py::module_& m, const char* name)
         Difference tolerance at each coordinate update.
         If the absolute difference is below this value,
         then the update does not take place, which saves computation.
-    x : (n,) np.ndarray
+    x : (n,) ndarray
         Solution vector.
-    grad : (n,) np.ndarray
+    grad : (n,) ndarray
         Gradient vector :math:`v - Q x`.
     )delimiter")
         .def(py::init<
@@ -117,9 +117,9 @@ void nnls(py::module_& m, const char* name)
 
     Parameters
     ----------
-    X : (n, d) np.ndarray
+    X : (n, d) ndarray
         Feature matrix.
-    X_vars : (d,) np.ndarray
+    X_vars : (d,) ndarray
         :math:`\ell_2`-norm squared of the columns of ``X``.
     max_iters : int
         Maximum number of coordinate descent iterations.
@@ -129,9 +129,9 @@ void nnls(py::module_& m, const char* name)
         Difference tolerance at each coordinate update.
         If the absolute difference is below this value,
         then the update does not take place, which saves computation.
-    beta : (d,) np.ndarray
+    beta : (d,) ndarray
         Solution vector.
-    resid : (n,) np.ndarray
+    resid : (n,) ndarray
         Residual vector :math:`y - X \beta`.
     loss : float
         Loss :math:`1/2 \|y-X\beta\|_2^2`.
@@ -315,9 +315,9 @@ void register_optimization(py::module_& m)
 
     Parameters
     ----------
-    x : (n,) np.ndarray
+    x : (n,) ndarray
         Sorted in increasing order of the independent variable.
-    y : (n,) np.ndarray
+    y : (n,) ndarray
         Corresponding response vector.
     
     Returns
@@ -344,7 +344,7 @@ void register_optimization(py::module_& m)
 
     Parameters
     ----------
-    x : (K,) np.ndarray
+    x : (K,) ndarray
         Increasing sequence of values. 
     alpha : float
         Elastic net penalty.

@@ -117,23 +117,23 @@ void constraint_base(py::module_& m, const char* name)
 
         Parameters
         ----------
-        x : (d,) np.ndarray 
+        x : (d,) ndarray 
             The primal :math:`x`.
             The passed-in values may be used as a warm-start for the internal solver.
             The output is stored back in this argument.
-        mu : (m,) np.ndarray
+        mu : (m,) ndarray
             The dual :math:`\mu`.
             The passed-in values may be used as a warm-start for the internal solver.
             The output is stored back in this argument.
-        quad : (d,) np.ndarray
+        quad : (d,) ndarray
             The quadratic component :math:`\Sigma`. 
-        linear : (d,) np.ndarray
+        linear : (d,) ndarray
             The linear component :math:`v`.
         l1 : float
             The first regularization :math:`\lambda_1`.
         l2 : float
             The second regularization :math:`\lambda_2`.
-        Q : (d, d) np.ndarray
+        Q : (d, d) ndarray
             Orthogonal matrix :math:`Q`.
         )delimiter",
             py::arg("x").noconvert(),
@@ -158,11 +158,11 @@ void constraint_base(py::module_& m, const char* name)
 
         Parameters
         ----------
-        x : (d,) np.ndarray
+        x : (d,) ndarray
             The primal :math:`x` at which to evaluate the gradient.
-        mu : (m,) np.ndarray
+        mu : (m,) ndarray
             The dual :math:`\mu` at which to evaluate the gradient.
-        out : (d,) np.ndarray
+        out : (d,) ndarray
             The output vector to store the gradient.
         )delimiter",
             py::arg("x").noconvert(),
@@ -188,14 +188,14 @@ void constraint_base(py::module_& m, const char* name)
 
         Parameters
         ----------
-        x : (d,) np.ndarray
+        x : (d,) ndarray
             The primal :math:`x` to project onto the feasible set.
             The output is stored back in this argument.
         )delimiter",
             py::arg("x").noconvert()
         )
         .def("duals", &internal_t::duals, R"delimiter(
-        Number of dual variables.
+        Returns the number of dual variables.
 
         Returns
         -------
@@ -203,7 +203,7 @@ void constraint_base(py::module_& m, const char* name)
             Number of dual variables.
         )delimiter")
         .def("primals", &internal_t::primals, R"delimiter(
-        Number of primal variables.
+        Returns the number of primal variables.
 
         Returns
         -------
@@ -214,14 +214,26 @@ void constraint_base(py::module_& m, const char* name)
 }
 
 template <class ValueType>
-void constraint_one_sided(py::module_& m, const char* name)
+void constraint_one_sided_base(py::module_& m, const char* name)
 {
-    using internal_t = ad::constraint::ConstraintOneSided<ValueType>;
+    using internal_t = ad::constraint::ConstraintOneSidedBase<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using vec_value_t = typename internal_t::vec_value_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint base class for one-sided bound constraint."
+        )
+        ;
+}
+
+template <class ValueType>
+void constraint_one_sided_proximal_newton(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintOneSidedProximalNewton<ValueType>;
     using base_t = typename internal_t::base_t;
     using value_t = typename internal_t::value_t;
     using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, base_t>(m, name, 
-        "Core constraint class for one-sided bound constraint."
+        "Core constraint class for one-sided bound constraint with proximal Newton solver."
         )
         .def(py::init<
             const Eigen::Ref<const vec_value_t>,
@@ -252,6 +264,41 @@ void constraint_one_sided(py::module_& m, const char* name)
         ;
 }
 
+template <class ValueType>
+void constraint_one_sided_admm(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintOneSidedADMM<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using value_t = typename internal_t::value_t;
+    using vec_value_t = typename internal_t::vec_value_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint class for one-sided bound constraint with ADMM solver."
+        )
+        .def(py::init<
+            const Eigen::Ref<const vec_value_t>,
+            const Eigen::Ref<const vec_value_t>,
+            size_t,
+            value_t,
+            value_t,
+            value_t
+        >(), 
+            py::arg("sgn"),
+            py::arg("b"),
+            py::arg("max_iters"),
+            py::arg("tol_abs"),
+            py::arg("tol_rel"),
+            py::arg("rho")
+        )
+        .def("debug_info", &internal_t::debug_info, R"delimiter(
+        Returns debug information.
+
+        This method is only intended for developers for debugging purposes.
+        The package must be compiled with the compiler flag `-DADELIE_CORE_DEBUG`
+        to see the debug information.
+        )delimiter")
+        ;
+}
+
 void register_constraint(py::module_& m)
 {
     py::bind_vector<std::vector<ad::constraint::ConstraintBase<double>*>>(m, "VectorConstraintBase64");
@@ -260,6 +307,10 @@ void register_constraint(py::module_& m)
     constraint_base<double>(m, "ConstraintBase64");
     constraint_base<float>(m, "ConstraintBase32");
 
-    constraint_one_sided<double>(m, "ConstraintOneSided64");
-    constraint_one_sided<float>(m, "ConstraintOneSided32");
+    constraint_one_sided_base<double>(m, "ConstraintOneSidedBase64");
+    constraint_one_sided_base<float>(m, "ConstraintOneSidedBase32");
+    constraint_one_sided_proximal_newton<double>(m, "ConstraintOneSidedProximalNewton64");
+    constraint_one_sided_proximal_newton<float>(m, "ConstraintOneSidedProximalNewton32");
+    constraint_one_sided_admm<double>(m, "ConstraintOneSidedADMM64");
+    constraint_one_sided_admm<float>(m, "ConstraintOneSidedADMM32");
 }

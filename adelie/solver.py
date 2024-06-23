@@ -2,6 +2,22 @@ from . import adelie_core as core
 from . import glm
 from . import logger
 from . import matrix
+from .constraint import (
+    ConstraintBase32,
+    ConstraintBase64,
+)
+from .glm import (
+    GlmBase32,
+    GlmBase64,
+    GlmMultiBase32,
+    GlmMultiBase64,
+)
+from .matrix import (
+    MatrixCovBase32,
+    MatrixCovBase64,
+    MatrixNaiveBase32,
+    MatrixNaiveBase64,
+)
 from .state import (
     gaussian_cov as state_gaussian_cov,
     gaussian_naive as state_gaussian_naive,
@@ -91,10 +107,10 @@ def _solve(
 
 
 def gaussian_cov(
-    A: np.ndarray,
+    A: Union[np.ndarray, MatrixCovBase32, MatrixCovBase64],
     v: np.ndarray,
     *,
-    constraints: list =None,
+    constraints: list[Union[ConstraintBase32, ConstraintBase64]] =None,
     groups: np.ndarray =None,
     alpha: float =1,
     penalty: np.ndarray =None,
@@ -144,18 +160,18 @@ def gaussian_cov(
 
     Parameters
     ----------
-    A : (p, p) Union[adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]
+    A : (p, p) Union[ndarray, MatrixCovBase64, MatrixCovBase32]
         Positive semi-definite matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    v : (p,) np.ndarray
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule or :class:`numpy.ndarray`.
+    v : (p,) ndarray
         Linear term.
-    constraints : (G,) list, optional
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
         If ``None``, every group is unconstrained.
         Default is ``None``.
-    groups : (G,) np.ndarray, optional
+    groups : (G,) ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
         Default is ``None``, in which case it is set to ``np.arange(p)``.
@@ -163,11 +179,11 @@ def gaussian_cov(
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
         Default is ``1``.
-    penalty : (G,) np.ndarray, optional
+    penalty : (G,) ndarray, optional
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
         Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
-    lmda_path : (L,) np.ndarray, optional
+    lmda_path : (L,) ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
@@ -288,6 +304,7 @@ def gaussian_cov(
 
     See Also
     --------
+    adelie.adelie_core.state.StateGaussianCov32
     adelie.adelie_core.state.StateGaussianCov64
     """
     if isinstance(A, np.ndarray):
@@ -409,10 +426,10 @@ def gaussian_cov(
 
 
 def grpnet(
-    X: np.ndarray,
-    glm: Union[glm.GlmBase32, glm.GlmBase64],
+    X: Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64],
+    glm: Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64],
     *,
-    constraints: list =None,
+    constraints: list[Union[ConstraintBase32, ConstraintBase64]] =None,
     groups: np.ndarray =None,
     alpha: float =1,
     penalty: np.ndarray =None,
@@ -496,19 +513,19 @@ def grpnet(
 
     Parameters
     ----------
-    X : (n, p) matrix-like
+    X : (n, p) Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
         Feature matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule or ``np.ndarray``.
-    glm : Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64, adelie.glm.GlmMultiBase32, adelie.glm.GlmMultiBase64]
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule or :class:`numpy.ndarray`.
+    glm : Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64]
         GLM object.
-        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
-    constraints : (G,) list, optional
+        It is typically one of the GLM classes defined in :mod:`adelie.glm` submodule.
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
         If ``None``, every group is unconstrained.
         Default is ``None``.
-    groups : (G,) np.ndarray, optional
+    groups : (G,) ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
         If ``glm`` is multi-response type, then we only allow two types of groupings:
@@ -523,16 +540,16 @@ def grpnet(
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
         Default is ``1``.
-    penalty : (G,) np.ndarray, optional
+    penalty : (G,) ndarray, optional
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
         Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
-    offsets : (n,) or (n, K) np.ndarray, optional
+    offsets : (n,) or (n, K) ndarray, optional
         Observation offsets :math:`\\eta^0`.
         Default is ``None``, in which case, it is set to 
         ``np.zeros(n)`` if ``y`` is single-response
         and ``np.zeros((n, K))`` if multi-response.
-    lmda_path : (L,) np.ndarray, optional
+    lmda_path : (L,) ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
@@ -669,9 +686,13 @@ def grpnet(
 
     See Also
     --------
+    adelie.adelie_core.state.StateGaussianNaive32
     adelie.adelie_core.state.StateGaussianNaive64
+    adelie.adelie_core.state.StateGlmNaive32
     adelie.adelie_core.state.StateGlmNaive64
+    adelie.adelie_core.state.StateMultiGaussianNaive32
     adelie.adelie_core.state.StateMultiGaussianNaive64
+    adelie.adelie_core.state.StateMultiGlmNaive32
     adelie.adelie_core.state.StateMultiGlmNaive64
     """
     X_raw = X

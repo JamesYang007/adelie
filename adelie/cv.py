@@ -3,8 +3,17 @@ from .diagnostic import (
     coefficient,
     predict,
 )
+from .glm import (
+    GlmBase32,
+    GlmBase64,
+    GlmMultiBase32,
+    GlmMultiBase64,
+)
+from .matrix import (
+    MatrixNaiveBase32,
+    MatrixNaiveBase64,
+)
 from .solver import grpnet
-from . import glm
 from . import logger
 from . import matrix
 from dataclasses import dataclass
@@ -77,13 +86,13 @@ class CVGrpnetResult:
         lmda_path_size : int, optional
             Number of regularizations in the path.
             Default is ``100``.
-        **grpnet_params
-            Parameters to ``adelie.solver.grpnet``.
+        **grpnet_params : optional
+            Parameters to :func:`adelie.solver.grpnet`.
 
         Returns
         -------
         state
-            Result of calling ``adelie.solver.grpnet``.
+            Result of calling :func:`adelie.solver.grpnet`.
 
         See Also
         --------
@@ -111,8 +120,8 @@ class CVGrpnetResult:
 
 
 def cv_grpnet(
-    X: np.ndarray,
-    glm: Union[glm.GlmBase32, glm.GlmBase64],
+    X: Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64],
+    glm: Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64],
     *,
     n_threads: int =1,
     early_exit: bool =False,
@@ -125,29 +134,29 @@ def cv_grpnet(
     """Solves cross-validated group elastic net via naive method.
 
     This function was written with the intent that ``glm``
-    is to be one of the GLMs defined in ``adelie.glm``.
+    is to be one of the GLMs defined in :mod:`adelie.glm`.
     In particular, we assume the observation weights ``w`` associated with ``glm``
     has the property that if ``w[i] == 0``,
     then the ``i`` th prediction :math:`\\eta_i` is ignored in the computation of the loss.
 
     Parameters
     ----------
-    X : (n, p) matrix-like
+    X : (n, p) Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
         Feature matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule or ``np.ndarray``.
-    glm : Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64, adelie.glm.GlmMultiBase32, adelie.glm.GlmMultiBase64]
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule or :class:`numpy.ndarray`.
+    glm : Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64]
         GLM object.
-        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
+        It is typically one of the GLM classes defined in :mod:`adelie.glm` submodule.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
     early_exit : bool, optional
         ``True`` if the function should early exit based on training deviance explained.
-        Unlike in ``adelie.solver.grpnet``, the default value is ``False``.
+        Unlike in :func:`adelie.solver.grpnet`, the default value is ``False``.
         This is because internally, we construct a *common* regularization path that
         roughly contains every generated path using each training fold.
         If ``early_exit`` is ``True``, then some training folds may not fit some smaller :math:`\\lambda`'s,
-        in which case, an extrapolation method is used based on ``adelie.diagnostic.coefficient``.
+        in which case, an extrapolation method is used based on :func:`adelie.diagnostic.coefficient`.
         To avoid misinterpretation of the CV loss curve for the general user,
         we disable early exiting and fit on the entire (common) path for every training fold.
         If ``early_exit`` is ``True``, the user may see a flat component to the *right* of the loss curve.
@@ -155,7 +164,7 @@ def cv_grpnet(
         Default is ``False``.
     min_ratio : float, optional
         The ratio between the largest and smallest :math:`\\lambda` in the regularization sequence.
-        Unlike in ``adelie.solver.grpnet``, the default value is *increased*.
+        Unlike in :func:`adelie.solver.grpnet`, the default value is *increased*.
         This is because CV tends to pick a :math:`\\lambda` early in the path.
         If the loss curve does not look bowl-shaped, the user may decrease this value
         to fit further down the regularization path.
@@ -170,8 +179,8 @@ def cv_grpnet(
         Seed for random number generation.
         If ``None``, the seed is not explicitly set.
         Default is ``None``.
-    **grpnet_params
-        Parameters to ``adelie.solver.grpnet``.
+    **grpnet_params : optional
+        Parameters to :func:`adelie.solver.grpnet`.
         The following cannot be specified:
 
             - ``ddev_tol``: internally enforced to be ``0``.

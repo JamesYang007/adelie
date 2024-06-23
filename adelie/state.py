@@ -2,6 +2,22 @@ from . import adelie_core as core
 from . import matrix
 from . import logger
 from . import glm
+from .constraint import (
+    ConstraintBase32,
+    ConstraintBase64,
+)
+from .matrix import (
+    MatrixCovBase32,
+    MatrixCovBase64,
+    MatrixNaiveBase32,
+    MatrixNaiveBase64,
+)
+from .glm import (
+    GlmBase32,
+    GlmBase64,
+    GlmMultiBase32,
+    GlmMultiBase64,
+)
 from typing import Union
 import numpy as np
 import scipy
@@ -93,7 +109,7 @@ class base:
     ):
         """Checks consistency of the members.
 
-        All information is logged using the ``logging`` module.
+        All information is logged using the :mod:`logging` module.
 
         Parameters
         ----------
@@ -107,7 +123,7 @@ class base:
 
             Default is ``None``.
         logger : optional
-            Logger object that behaves like a logger object in ``logging``.
+            Logger object that behaves like a logger object in :mod:`logging`.
             Default is ``logging.getLogger()``.
         """
         return
@@ -396,10 +412,10 @@ class gaussian_pin_naive_base(gaussian_pin_base):
 
 def gaussian_pin_naive(
     *,
-    X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
+    X: Union[MatrixNaiveBase32, MatrixNaiveBase64],
     y_mean: float,
     y_var: float,
-    constraints: list,
+    constraints: list[Union[ConstraintBase32, ConstraintBase64]],
     groups: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
@@ -434,9 +450,9 @@ def gaussian_pin_naive(
 
     Parameters
     ----------
-    X : Union[adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
+    X : Union[MatrixNaiveBase32, MatrixNaiveBase64]
         Feature matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
     y_mean : float
         Mean of the response vector :math:`y` (weighted by :math:`W`),
         i.e. :math:`\\mathbf{1}^\\top W y`.
@@ -446,29 +462,29 @@ def gaussian_pin_naive(
         i.e. :math:`\\|y_c\\|_{W}^2`.
         This is only used to check convergence as a relative measure,
         i.e. this quantity is the "null" model MSE.
-    constraints : (G,) list 
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
         If ``None``, every group is unconstrained.
-    groups : (G,) np.ndarray
+    groups : (G,) ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
     alpha : float
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
-    penalty : (G,) np.ndarray
+    penalty : (G,) ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
-    weights : (n,) np.ndarray
+    weights : (n,) ndarray
         Observation weights :math:`W`.
         The weights must sum to 1.
-    screen_set : (s,) np.ndarray
+    screen_set : (s,) ndarray
         List of indices into ``groups`` that correspond to the screen groups.
         ``screen_set[i]`` is ``i`` th screen group.
         ``screen_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
-    lmda_path : (L,) np.ndarray
+    lmda_path : (L,) ndarray
         The regularization path to solve for.
         It is recommended that the path is sorted in decreasing order.
     rsq : float
@@ -476,9 +492,9 @@ def gaussian_pin_naive(
         :math:`\\|y_c-X_c\\beta_{\\mathrm{old}}\\|_{W}^2 - \\|y_c-X_c\\beta_{\\mathrm{curr}}\\|_{W}^2`.
         Usually, :math:`\\beta_{\\mathrm{old}} = 0` 
         and :math:`\\beta_{\\mathrm{curr}}` is given by ``screen_beta``.
-    resid : (n,) np.ndarray
+    resid : (n,) ndarray
         Residual :math:`y_c - X \\beta` where :math:`\\beta` is given by ``screen_beta``.
-    screen_beta : (ws,) np.ndarray
+    screen_beta : (ws,) ndarray
         Coefficient vector on the screen set.
         ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
         where
@@ -486,10 +502,10 @@ def gaussian_pin_naive(
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
-    screen_is_active : (s,) np.ndarray
+    screen_is_active : (s,) ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-    screen_dual : (ds,) np.ndarray
+    screen_dual : (ds,) ndarray
         Dual vector on the screen set.
         ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
         where
@@ -500,7 +516,7 @@ def gaussian_pin_naive(
         Number of active groups.
         ``active_set[i]`` is only well-defined
         for ``i`` in the range ``[0, active_set_size)``.
-    active_set : (G,) np.ndarray
+    active_set : (G,) ndarray
         List of indices into ``screen_set`` that correspond to active groups.
         ``screen_set[active_set[i]]`` is the ``i`` th active group.
         An active group is one with non-zero coefficient block,
@@ -552,6 +568,7 @@ def gaussian_pin_naive(
 
     See Also
     --------
+    adelie.adelie_core.state.StateGaussianPinNaive32
     adelie.adelie_core.state.StateGaussianPinNaive64
     """
     if not (
@@ -559,7 +576,7 @@ def gaussian_pin_naive(
         isinstance(X, matrix.MatrixNaiveBase32)
     ):
         raise ValueError(
-            "X must be an instance of matrix.MatrixNaiveBase32 or matrix.MatrixNaiveBase64."
+            "X must be an instance of MatrixNaiveBase32 or MatrixNaiveBase64."
         )
 
     p = X.cols()
@@ -718,8 +735,8 @@ class gaussian_pin_cov_base(gaussian_pin_base):
 
 def gaussian_pin_cov(
     *,
-    A: Union[matrix.MatrixCovBase64, matrix.MatrixCovBase32],
-    constraints: list,
+    A: Union[MatrixCovBase32, MatrixCovBase64],
+    constraints: list[Union[ConstraintBase32, ConstraintBase64]],
     groups: np.ndarray,
     alpha: float,
     penalty: np.ndarray,
@@ -751,29 +768,29 @@ def gaussian_pin_cov(
 
     Parameters
     ----------
-    A : Union[adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]
+    A : Union[MatrixCovBase32, MatrixCovBase64]
         Covariance matrix :math:`X_c^\\top W X_c`.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    constraints : (G,) list 
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
         If ``None``, every group is unconstrained.
-    groups : (G,) np.ndarray
+    groups : (G,) ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
     alpha : float
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
-    penalty : (G,) np.ndarray
+    penalty : (G,) ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
-    screen_set : (s,) np.ndarray
+    screen_set : (s,) ndarray
         List of indices into ``groups`` that correspond to the screen groups.
         ``screen_set[i]`` is ``i`` th screen group.
         ``screen_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
-    lmda_path : (L,) np.ndarray
+    lmda_path : (L,) ndarray
         The regularization path to solve for.
         It is recommended that the path is sorted in decreasing order.
     rsq : float
@@ -781,7 +798,7 @@ def gaussian_pin_cov(
         :math:`\\|y_c-X_c\\beta_{\\mathrm{old}}\\|_{W}^2 - \\|y_c-X_c\\beta_{\\mathrm{curr}}\\|_{W}^2`.
         Usually, :math:`\\beta_{\\mathrm{old}} = 0` 
         and :math:`\\beta_{\\mathrm{curr}}` is given by ``screen_beta``.
-    screen_beta : (ws,) np.ndarray
+    screen_beta : (ws,) ndarray
         Coefficient vector on the screen set.
         ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
         where
@@ -789,17 +806,17 @@ def gaussian_pin_cov(
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
-    screen_grad : (ws,) np.ndarray
+    screen_grad : (ws,) ndarray
         Gradient :math:`X_{c,k}^\\top W (y_c-X_c\\beta)` on the screen groups :math:`k` where :math:`\\beta` is given by ``screen_beta``.
         ``screen_grad[b:b+p]`` is the gradient for the ``i`` th screen group
         where 
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
-    screen_is_active : (s,) np.ndarray
+    screen_is_active : (s,) ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-    screen_dual : (ds,) np.ndarray
+    screen_dual : (ds,) ndarray
         Dual vector on the screen set.
         ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
         where
@@ -810,7 +827,7 @@ def gaussian_pin_cov(
         Number of active groups.
         ``active_set[i]`` is only well-defined
         for ``i`` in the range ``[0, active_set_size)``.
-    active_set : (G,) np.ndarray
+    active_set : (G,) ndarray
         List of indices into ``screen_set`` that correspond to active groups.
         ``screen_set[active_set[i]]`` is the ``i`` th active group.
         An active group is one with non-zero coefficient block,
@@ -855,6 +872,7 @@ def gaussian_pin_cov(
 
     See Also
     --------
+    adelie.adelie_core.state.StateGaussianPinCov32
     adelie.adelie_core.state.StateGaussianPinCov64
     """
     if not (
@@ -862,7 +880,7 @@ def gaussian_pin_cov(
         isinstance(A, matrix.MatrixCovBase32)
     ):
         raise ValueError(
-            "A must be an instance of matrix.MatrixCovBase32 or matrix.MatrixCovBase64."
+            "A must be an instance of MatrixCovBase32 or MatrixCovBase64."
         )
 
     p = A.cols()
@@ -1039,7 +1057,7 @@ def _render_gaussian_cov_inputs(
         isinstance(A, np.ndarray)
     ):
         raise ValueError(
-            "A must be an instance of matrix.MatrixCovBase32, matrix.MatrixCovBase64, or np.ndarray."
+            "A must be an instance of MatrixCovBase32, MatrixCovBase64, or np.ndarray."
         )
 
     dtype = (
@@ -1065,7 +1083,7 @@ def _render_gaussian_naive_inputs(
         isinstance(X, np.ndarray)
     ):
         raise ValueError(
-            "X must be an instance of matrix.MatrixNaiveBase32, matrix.MatrixNaiveBase64, or np.ndarray."
+            "X must be an instance of MatrixNaiveBase32, MatrixNaiveBase64, or np.ndarray."
         )
 
     dtype = (
@@ -1119,9 +1137,9 @@ def _render_multi_inputs(
 
 def gaussian_cov(
     *,
-    A: Union[matrix.MatrixCovBase64, matrix.MatrixCovBase32],
+    A: Union[MatrixCovBase32, matrix.MatrixCovBase64],
     v: np.ndarray,
-    constraints: list,
+    constraints: list[Union[ConstraintBase32, ConstraintBase64]],
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -1157,34 +1175,34 @@ def gaussian_cov(
 
     Parameters
     ----------
-    A : (p, p) Union[adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]
+    A : (p, p) Union[MatrixCovBase32, MatrixCovBase64]
         Positive semi-definite matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    v : (p,) np.ndarray
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
+    v : (p,) ndarray
         Linear term.
-    constraints : (G,) list 
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
         If ``None``, every group is unconstrained.
-    groups : (G,) np.ndarray
+    groups : (G,) ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-    group_sizes : (G,) np.ndarray
+    group_sizes : (G,) ndarray
         List of group sizes corresponding to each element of ``groups``.
         ``group_sizes[i]`` is the size of the ``i`` th group.
     alpha : float
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
-    penalty : (G,) np.ndarray
+    penalty : (G,) ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
-    screen_set : (s,) np.ndarray
+    screen_set : (s,) ndarray
         List of indices into ``groups`` that correspond to the screen groups.
         ``screen_set[i]`` is ``i`` th screen group.
         ``screen_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
-    screen_beta : (ws,) np.ndarray
+    screen_beta : (ws,) ndarray
         Coefficient vector on the screen set.
         ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
         where
@@ -1192,10 +1210,10 @@ def gaussian_cov(
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
-    screen_is_active : (s,) np.ndarray
+    screen_is_active : (s,) ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-    screen_dual : (ds,) np.ndarray
+    screen_dual : (ds,) ndarray
         Dual vector on the screen set.
         ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
         where
@@ -1206,7 +1224,7 @@ def gaussian_cov(
         Number of active groups.
         ``active_set[i]`` is only well-defined
         for ``i`` in the range ``[0, active_set_size)``.
-    active_set : (G,) np.ndarray
+    active_set : (G,) ndarray
         List of indices into ``screen_set`` that correspond to active groups.
         ``screen_set[active_set[i]]`` is the ``i`` th active group.
         An active group is one with non-zero coefficient block,
@@ -1223,10 +1241,10 @@ def gaussian_cov(
         and :math:`\\beta_{\\mathrm{curr}}` is given by ``screen_beta``.
     lmda : float
         The last regularization parameter that was attempted to be solved.
-    grad : (p,) np.ndarray
+    grad : (p,) ndarray
         The full gradient :math:`v - A \\beta` where
         :math:`\\beta` is given by ``screen_beta``.
-    lmda_path : (L,) np.ndarray, optional
+    lmda_path : (L,) ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
@@ -1312,8 +1330,8 @@ def gaussian_cov(
 
     See Also
     --------
+    adelie.adelie_core.state.StateGaussianCov32
     adelie.adelie_core.state.StateGaussianCov64
-    adelie.solver.gaussian_cov
     """
     (
         max_screen_size,
@@ -1677,14 +1695,14 @@ class gaussian_naive_base(base):
 
 def gaussian_naive(
     *,
-    X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
+    X: Union[MatrixNaiveBase32, MatrixNaiveBase64],
     y: np.ndarray,
     X_means: np.ndarray,
     y_mean: float,
     y_var: float,
     resid: np.ndarray,
     resid_sum: float,
-    constraints: list,
+    constraints: list[Union[ConstraintBase32, ConstraintBase64]],
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -1731,16 +1749,16 @@ def gaussian_naive(
 
     Parameters
     ----------
-    X : (n, p) Union[adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
+    X : (n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64]
         Feature matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    y : (n,) np.ndarray
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
+    y : (n,) ndarray
         Response vector.
         
         .. note::
             This is the original response vector not offsetted!
 
-    X_means : (p,) np.ndarray
+    X_means : (p,) ndarray
         Column means of ``X`` (weighted by :math:`W`).
     y_mean : float
         Mean of the offsetted response vector :math:`y-\\eta^0` (weighted by :math:`W`),
@@ -1750,38 +1768,38 @@ def gaussian_naive(
         i.e. :math:`\\|y_c\\|_{W}^2`.
         This is only used for outputting the training :math:`R^2` relative to this value,
         i.e. this quantity is the "null" model MSE.
-    resid : (n,) np.ndarray
+    resid : (n,) ndarray
         Residual :math:`y_c - X \\beta` where :math:`\\beta` is given by ``screen_beta``.
     resid_sum : float
         Weighted (by :math:`W`) sum of ``resid``.
-    constraints : (G,) list 
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
         If ``None``, every group is unconstrained.
-    groups : (G,) np.ndarray
+    groups : (G,) ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-    group_sizes : (G,) np.ndarray
+    group_sizes : (G,) ndarray
         List of group sizes corresponding to each element of ``groups``.
         ``group_sizes[i]`` is the size of the ``i`` th group.
     alpha : float
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
-    penalty : (G,) np.ndarray
+    penalty : (G,) ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
-    weights : (n,) np.ndarray
+    weights : (n,) ndarray
         Observation weights :math:`W`.
         The weights must sum to 1.
-    offsets : (n,) np.ndarray
+    offsets : (n,) ndarray
         Observation offsets :math:`\\eta^0`.
-    screen_set : (s,) np.ndarray
+    screen_set : (s,) ndarray
         List of indices into ``groups`` that correspond to the screen groups.
         ``screen_set[i]`` is ``i`` th screen group.
         ``screen_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
-    screen_beta : (ws,) np.ndarray
+    screen_beta : (ws,) ndarray
         Coefficient vector on the screen set.
         ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
         where
@@ -1789,10 +1807,10 @@ def gaussian_naive(
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
-    screen_is_active : (s,) np.ndarray
+    screen_is_active : (s,) ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-    screen_dual : (ds,) np.ndarray
+    screen_dual : (ds,) ndarray
         Dual vector on the screen set.
         ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
         where
@@ -1803,7 +1821,7 @@ def gaussian_naive(
         Number of active groups.
         ``active_set[i]`` is only well-defined
         for ``i`` in the range ``[0, active_set_size)``.
-    active_set : (G,) np.ndarray
+    active_set : (G,) ndarray
         List of indices into ``screen_set`` that correspond to active groups.
         ``screen_set[active_set[i]]`` is the ``i`` th active group.
         An active group is one with non-zero coefficient block,
@@ -1820,10 +1838,10 @@ def gaussian_naive(
         and :math:`\\beta_{\\mathrm{curr}}` is given by ``screen_beta``.
     lmda : float
         The last regularization parameter that was attempted to be solved.
-    grad : (p,) np.ndarray
+    grad : (p,) ndarray
         The full gradient :math:`X_c^\\top W (y_c - X_c\\beta)` where
         :math:`\\beta` is given by ``screen_beta``.
-    lmda_path : (L,) np.ndarray, optional
+    lmda_path : (L,) ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
@@ -1916,8 +1934,8 @@ def gaussian_naive(
 
     See Also
     --------
+    adelie.adelie_core.state.StateGaussianNaive32
     adelie.adelie_core.state.StateGaussianNaive64
-    adelie.solver.grpnet
     """
     (
         max_screen_size,
@@ -2033,13 +2051,13 @@ def gaussian_naive(
 
 def multigaussian_naive(
     *,
-    X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
+    X: Union[MatrixNaiveBase32, MatrixNaiveBase64],
     y: np.ndarray,
     X_means: np.ndarray,
     y_var: float,
     resid: np.ndarray,
     resid_sum: float,
-    constraints: list,
+    constraints: list[Union[ConstraintBase32, ConstraintBase64]],
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -2086,16 +2104,16 @@ def multigaussian_naive(
 
     Parameters
     ----------
-    X : (n, p) Union[adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
+    X : (n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64]
         Feature matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    y : (n, K) np.ndarray
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
+    y : (n, K) ndarray
         Response matrix.
         
         .. note::
             This is the original response vector not offsetted!
 
-    X_means : ((p+intercept)*K,) np.ndarray
+    X_means : ((p+intercept)*K,) ndarray
         Column means (weighted by :math:`\\tilde{W}`) of :math:`\\tilde{X}`.
     y_var : float
         The average of the variance for each response vector
@@ -2103,39 +2121,39 @@ def multigaussian_naive(
         :math:`z_{k,c}` is the ``k`` th column of :math:`z`, centered if ``intercept`` is ``True``.
         This is only used for outputting the training :math:`R^2` relative to this value,
         i.e. this quantity is the "null" model MSE.
-    resid : (n*K,) np.ndarray
+    resid : (n*K,) ndarray
         Residual :math:`\\tilde{y} - \\tilde{X} \\beta` 
         where :math:`\\beta` is given by ``screen_beta``.
     resid_sum : float
         Weighted (by :math:`\\tilde{W}`) sum of ``resid``.
-    constraints : (G,) list 
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
         If ``None``, every group is unconstrained.
-    groups : (G,) np.ndarray
+    groups : (G,) ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-    group_sizes : (G,) np.ndarray
+    group_sizes : (G,) ndarray
         List of group sizes corresponding to each element of ``groups``.
         ``group_sizes[i]`` is the size of the ``i`` th group.
     alpha : float
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
-    penalty : (G,) np.ndarray
+    penalty : (G,) ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
-    weights : (n,) np.ndarray
+    weights : (n,) ndarray
         Observation weights :math:`W`.
         The weights must sum to 1.
-    offsets : (n, K) np.ndarray
+    offsets : (n, K) ndarray
         Observation offsets :math:`\\eta^0`.
-    screen_set : (s,) np.ndarray
+    screen_set : (s,) ndarray
         List of indices into ``groups`` that correspond to the screen groups.
         ``screen_set[i]`` is ``i`` th screen group.
         ``screen_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
-    screen_beta : (ws,) np.ndarray
+    screen_beta : (ws,) ndarray
         Coefficient vector on the screen set.
         ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
         where
@@ -2143,10 +2161,10 @@ def multigaussian_naive(
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
-    screen_is_active : (s,) np.ndarray
+    screen_is_active : (s,) ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-    screen_dual : (ds,) np.ndarray
+    screen_dual : (ds,) ndarray
         Dual vector on the screen set.
         ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
         where
@@ -2157,7 +2175,7 @@ def multigaussian_naive(
         Number of active groups.
         ``active_set[i]`` is only well-defined
         for ``i`` in the range ``[0, active_set_size)``.
-    active_set : (G,) np.ndarray
+    active_set : (G,) ndarray
         List of indices into ``screen_set`` that correspond to active groups.
         ``screen_set[active_set[i]]`` is the ``i`` th active group.
         An active group is one with non-zero coefficient block,
@@ -2174,10 +2192,10 @@ def multigaussian_naive(
         and :math:`\\beta_{\\mathrm{curr}}` is given by ``screen_beta``.
     lmda : float
         The last regularization parameter that was attempted to be solved.
-    grad : ((p+intercept)*K,) np.ndarray
+    grad : ((p+intercept)*K,) ndarray
         The full gradient :math:`\\tilde{X}^\\top \\tilde{W} (\\tilde{y} - \\tilde{X}\\beta)` where
         :math:`\\beta` is given by ``screen_beta``.
-    lmda_path : (L,) np.ndarray, optional
+    lmda_path : (L,) ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
@@ -2270,8 +2288,8 @@ def multigaussian_naive(
 
     See Also
     --------
+    adelie.adelie_core.state.StateMultiGaussianNaive32
     adelie.adelie_core.state.StateMultiGaussianNaive64
-    adelie.solver.grpnet
     """
     (
         max_screen_size,
@@ -2422,9 +2440,9 @@ def _render_glm_naive_inputs(
 
 def glm_naive(
     *,
-    X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
-    glm: Union[glm.GlmBase64, glm.GlmBase32],
-    constraints: list,
+    X: Union[MatrixNaiveBase32, MatrixNaiveBase64],
+    glm: Union[GlmBase32, GlmBase64],
+    constraints: list[Union[ConstraintBase32, ConstraintBase64]],
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -2469,37 +2487,37 @@ def glm_naive(
 
     Parameters
     ----------
-    X : (n, p) Union[adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
+    X : (n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64]
         Feature matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    glm : Union[adelie.glm.GlmBase64, adelie.glm.GlmBase32]
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
+    glm : Union[GlmBase32, GlmBase64]
         GLM object.
-        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
-    constraints : (G,) list 
+        It is typically one of the GLM classes defined in :mod:`adelie.glm` submodule.
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
         If ``None``, every group is unconstrained.
-    groups : (G,) np.ndarray
+    groups : (G,) ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-    group_sizes : (G,) np.ndarray
+    group_sizes : (G,) ndarray
         List of group sizes corresponding to each element of ``groups``.
         ``group_sizes[i]`` is the size of the ``i`` th group.
     alpha : float
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
-    penalty : (G,) np.ndarray
+    penalty : (G,) ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
-    offsets : (n,) np.ndarray
+    offsets : (n,) ndarray
         Observation offsets :math:`\\eta^0`.
-    screen_set : (s,) np.ndarray
+    screen_set : (s,) ndarray
         List of indices into ``groups`` that correspond to the screen groups.
         ``screen_set[i]`` is ``i`` th screen group.
         ``screen_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
-    screen_beta : (ws,) np.ndarray
+    screen_beta : (ws,) ndarray
         Coefficient vector on the screen set.
         ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
         where
@@ -2507,10 +2525,10 @@ def glm_naive(
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
-    screen_is_active : (s,) np.ndarray
+    screen_is_active : (s,) ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-    screen_dual : (ds,) np.ndarray
+    screen_dual : (ds,) ndarray
         Dual vector on the screen set.
         ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
         where
@@ -2521,7 +2539,7 @@ def glm_naive(
         Number of active groups.
         ``active_set[i]`` is only well-defined
         for ``i`` in the range ``[0, active_set_size)``.
-    active_set : (G,) np.ndarray
+    active_set : (G,) ndarray
         List of indices into ``screen_set`` that correspond to active groups.
         ``screen_set[active_set[i]]`` is the ``i`` th active group.
         An active group is one with non-zero coefficient block,
@@ -2536,16 +2554,16 @@ def glm_naive(
         The value can be arbitrary but it is recommended to be close to the solution at ``lmda``.
     lmda : float
         The last regularization parameter that was attempted to be solved.
-    grad : (p,) np.ndarray
+    grad : (p,) ndarray
         The full gradient :math:`-X^\\top \\nabla \\ell(\\eta)` where
         :math:`\\eta` is given by ``eta``.
-    eta : (n,) np.ndarray
+    eta : (n,) ndarray
         The natural parameter :math:`\\eta = X\\beta + \\beta_0 \\mathbf{1} + \\eta^0`
         where 
         :math:`\\beta`
         and :math:`\\beta_0` are given by
         ``screen_beta`` and ``beta0``.
-    resid : (n,) np.ndarray
+    resid : (n,) ndarray
         Residual :math:`-\\nabla \\ell(\\eta)`
         where :math:`\\eta` is given by ``eta``.
     loss_full : float
@@ -2557,7 +2575,7 @@ def glm_naive(
         and otherwise :math:`\\ell(\\eta^0)`.
         If ``None``, it will be computed.
         Default is ``None``. 
-    lmda_path : (L,) np.ndarray, optional
+    lmda_path : (L,) ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
@@ -2656,8 +2674,8 @@ def glm_naive(
 
     See Also
     --------
+    adelie.adelie_core.state.StateGlmNaive32
     adelie.adelie_core.state.StateGlmNaive64
-    adelie.solver.grpnet
     """
     (
         max_screen_size,
@@ -2777,9 +2795,9 @@ def glm_naive(
 
 def multiglm_naive(
     *,
-    X: Union[matrix.MatrixNaiveBase64, matrix.MatrixNaiveBase32],
-    glm: Union[glm.GlmMultiBase64, glm.GlmMultiBase32],
-    constraints: list,
+    X: Union[MatrixNaiveBase32, MatrixNaiveBase64],
+    glm: Union[GlmMultiBase32, GlmMultiBase64],
+    constraints: list[Union[ConstraintBase32, ConstraintBase64]],
     groups: np.ndarray,
     group_sizes: np.ndarray,
     alpha: float,
@@ -2832,37 +2850,37 @@ def multiglm_naive(
 
     Parameters
     ----------
-    X : (n, p) Union[adelie.matrix.MatrixNaiveBase64, adelie.matrix.MatrixNaiveBase32]
+    X : (n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64]
         Feature matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    glm : Union[adelie.glm.GlmMultiBase64, adelie.glm.GlmMultiBase32]
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
+    glm : Union[GlmMultiBase32, GlmMultiBase64]
         Multi-response GLM object.
-        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
-    constraints : (G,) list 
+        It is typically one of the GLM classes defined in :mod:`adelie.glm` submodule.
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
         If ``None``, every group is unconstrained.
-    groups : (G,) np.ndarray
+    groups : (G,) ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-    group_sizes : (G,) np.ndarray
+    group_sizes : (G,) ndarray
         List of group sizes corresponding to each element of ``groups``.
         ``group_sizes[i]`` is the size of the ``i`` th group.
     alpha : float
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
-    penalty : (G,) np.ndarray
+    penalty : (G,) ndarray
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
-    offsets : (n, K) np.ndarray
+    offsets : (n, K) ndarray
         Observation offsets :math:`\\eta^0`.
-    screen_set : (s,) np.ndarray
+    screen_set : (s,) ndarray
         List of indices into ``groups`` that correspond to the screen groups.
         ``screen_set[i]`` is ``i`` th screen group.
         ``screen_set`` must contain at least the true (optimal) active groups
         when the regularization is given by ``lmda``.
-    screen_beta : (ws,) np.ndarray
+    screen_beta : (ws,) ndarray
         Coefficient vector on the screen set.
         ``screen_beta[b:b+p]`` is the coefficient for the ``i`` th screen group 
         where
@@ -2870,10 +2888,10 @@ def multiglm_naive(
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         The values can be arbitrary but it is recommended to be close to the solution at ``lmda``.
-    screen_is_active : (s,) np.ndarray
+    screen_is_active : (s,) ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-    screen_dual : (ds,) np.ndarray
+    screen_dual : (ds,) ndarray
         Dual vector on the screen set.
         ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
         where
@@ -2884,7 +2902,7 @@ def multiglm_naive(
         Number of active groups.
         ``active_set[i]`` is only well-defined
         for ``i`` in the range ``[0, active_set_size)``.
-    active_set : (G,) np.ndarray
+    active_set : (G,) ndarray
         List of indices into ``screen_set`` that correspond to active groups.
         ``screen_set[active_set[i]]`` is the ``i`` th active group.
         An active group is one with non-zero coefficient block,
@@ -2896,16 +2914,16 @@ def multiglm_naive(
         and ``p = group_sizes[k]``.
     lmda : float
         The last regularization parameter that was attempted to be solved.
-    grad : ((p+intercept)*K,) np.ndarray
+    grad : ((p+intercept)*K,) ndarray
         The full gradient :math:`-\\tilde{X}^\\top \\nabla \\ell(\\tilde{\\eta})` where
         :math:`\\tilde{\\eta}` is given by ``eta``.
-    eta : (n*K,) np.ndarray
+    eta : (n*K,) ndarray
         The natural parameter :math:`\\tilde{\\eta} = \\tilde{X}\\beta + \\tilde{\\eta}^0`
         where 
         :math:`\\beta`,
         and :math:`\\tilde{\\eta}^0` are given by
         ``screen_beta`` and ``offsets``.
-    resid : (n*K,) np.ndarray
+    resid : (n*K,) ndarray
         Residual :math:`-\\nabla \\ell(\\tilde{\\eta})`
         where :math:`\\tilde{\\eta}` is given by ``eta``.
     loss_full : float
@@ -2918,7 +2936,7 @@ def multiglm_naive(
         and otherwise :math:`\\ell(\\eta^0)`.
         If ``None``, it will be computed.
         Default is ``None``. 
-    lmda_path : (L,) np.ndarray, optional
+    lmda_path : (L,) ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
@@ -3017,8 +3035,8 @@ def multiglm_naive(
 
     See Also
     --------
+    adelie.adelie_core.state.StateMultiGlmNaive32
     adelie.adelie_core.state.StateMultiGlmNaive64
-    adelie.solver.grpnet
     """
     (
         max_screen_size,

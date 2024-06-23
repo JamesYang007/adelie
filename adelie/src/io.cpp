@@ -89,7 +89,7 @@ void io_snp_unphased(py::module_& m)
 
         Returns
         -------
-        dense : (n, p) np.ndarray
+        dense : (n, p) ndarray
             Dense SNP unphased matrix.
         )delimiter")
         .def("write", [](
@@ -153,7 +153,7 @@ void io_snp_phased_ancestry(py::module_& m)
 
         Returns
         -------
-        dense : (n, s*A) np.ndarray
+        dense : (n, s*A) ndarray
             Dense SNP phased, ancestry matrix.
         )delimiter")
         .def("write", [](

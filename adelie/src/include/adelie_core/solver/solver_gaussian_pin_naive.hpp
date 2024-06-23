@@ -125,6 +125,7 @@ void coordinate_descent(
             auto ak_old_transformed = buffer4.segment(ak.size(), ak.size());
             ak_old_transformed.matrix() = ak_old.matrix() * Vk; 
             auto ak_transformed = buffer4.segment(2 * ak.size(), ak.size());
+            ak_transformed = ak_old_transformed;
 
             // update group coefficients
             gk_transformed += A_kk * ak_old_transformed; 

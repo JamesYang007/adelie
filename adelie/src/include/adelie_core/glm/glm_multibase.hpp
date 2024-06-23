@@ -23,7 +23,6 @@ public:
     map_carr_value_t y;
     map_cvec_value_t weights;
     const bool is_multi = true;
-    const bool is_symmetric = false;
 
 protected:
     void check_gradient(
@@ -127,13 +126,11 @@ public:
     explicit GlmMultiBase(
         const string_t& name,
         const Eigen::Ref<const rowarr_value_t>& y,
-        const Eigen::Ref<const vec_value_t>& weights,
-        bool is_symmetric
+        const Eigen::Ref<const vec_value_t>& weights
     ):
         name(name),
         y(y.data(), y.rows(), y.cols()),
-        weights(weights.data(), weights.size()),
-        is_symmetric(is_symmetric)
+        weights(weights.data(), weights.size())
     {
         if (y.rows() != weights.size()) {
             throw util::adelie_core_error("y must have same number of rows as weights length.");

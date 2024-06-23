@@ -1,6 +1,7 @@
 from . import adelie_core as core
 from .constraint import (
     ConstraintBase32,
+    ConstraintBase64,
 )
 from .glm import (
     GlmBase32,
@@ -27,7 +28,7 @@ import matplotlib.animation as animation
 
 
 def predict(
-    X: Union[MatrixNaiveBase32, MatrixNaiveBase64, np.ndarray],
+    X: Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64],
     betas: Union[np.ndarray, csr_matrix],
     intercepts: np.ndarray,
     *,
@@ -59,14 +60,14 @@ def predict(
 
     Parameters
     ----------
-    X : (n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64, np.ndarray]
+    X : (n, p) Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
         Feature matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    betas : (L, p) or (L, p*K) Union[np.ndarray, scipy.sparse.csr_matrix]
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule or :class:`numpy.ndarray`.
+    betas : (L, p) or (L, p*K) Union[ndarray, csr_matrix]
         Coefficient vectors :math:`\\beta`.
-    intercepts : (L,) or (L, K) np.ndarray
+    intercepts : (L,) or (L, K) ndarray
         Intercepts :math:`\\beta_0`.
-    offsets : (n,) or (n, K) np.ndarray, optional
+    offsets : (n,) or (n, K) ndarray, optional
         Observation offsets :math:`\\eta^0`.
         Default is ``None``, in which case, it is set to 
         ``np.zeros(n)`` if ``y`` is single-response
@@ -77,7 +78,7 @@ def predict(
 
     Returns
     -------
-    linear_preds : (L, n) or (L, n, K) np.ndarray
+    linear_preds : (L, n) or (L, n, K) ndarray
         Linear predictions.
 
     See Also
@@ -116,7 +117,7 @@ def predict(
 
 
 def objective(
-    X: Union[matrix.MatrixNaiveBase32, matrix.MatrixNaiveBase64, np.ndarray], 
+    X: Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64], 
     glm: Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64],
     betas: Union[np.ndarray, csr_matrix], 
     intercepts: np.ndarray,
@@ -132,25 +133,25 @@ def objective(
 ):
     """Computes the group elastic net objective.
 
-    See ``adelie.solver.grpnet`` for details.
+    See :func:`adelie.solver.grpnet` for details.
 
     Parameters
     ----------
-    X : (n, p) Union[adelie.matrix.MatrixNaiveBase32, adelie.matrix.MatrixNaiveBase64]
+    X : (n, p) Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
         Feature matrix :math:`X`.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule or ``np.ndarray``.
-    glm : Union[glm.GlmBase32, glm.GlmBase64, glm.GlmMultiBase32, glm.GlmMultiBase64] 
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule or :class:`numpy.ndarray`.
+    glm : Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64] 
         GLM object.
-        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
-    betas : (L, p) or (L, p*K) Union[np.ndarray, scipy.sparse.csr_matrix]
+        It is typically one of the GLM classes defined in :mod:`adelie.glm` submodule.
+    betas : (L, p) or (L, p*K) Union[ndarray, csr_matrix]
         Coefficient vectors :math:`\\beta`.
-    intercepts : (L,) or (L, K) np.ndarray
+    intercepts : (L,) or (L, K) ndarray
         Intercepts :math:`\\beta_0`.
-    lmdas : (L,) np.ndarray 
+    lmdas : (L,) ndarray 
         Regularization parameters :math:`\\lambda`.
         It is only used when ``add_penalty=True``.
         Otherwise, the user may pass ``None``.
-    groups : (G,) np.ndarray, optional
+    groups : (G,) ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
         If ``glm`` is multi-response type, then we only allow two types of groupings:
@@ -168,12 +169,12 @@ def objective(
         It is only used when ``add_penalty=True``.
         Otherwise, the user may pass ``None``.
         Default is ``1``.
-    penalty : (G,) np.ndarray, optional
+    penalty : (G,) ndarray, optional
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
         It is only used when ``add_penalty=True``.
         Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
-    offsets : (n,) or (n, K) np.ndarray, optional
+    offsets : (n,) or (n, K) ndarray, optional
         Observation offsets :math:`\\eta^0`.
         Default is ``None``, in which case, it is set to 
         ``np.zeros(n)`` if ``y`` is single-response
@@ -194,7 +195,7 @@ def objective(
     
     Returns
     -------
-    obj : (L,) np.ndarray
+    obj : (L,) ndarray
         Group elastic net objectives.
 
     See Also
@@ -283,15 +284,15 @@ def residuals(
 
     Parameters
     ----------
-    glm : Union[glm.GlmBase32, glm.GlmBase64, glm.GlmMultiBase32, glm.GlmMultiBase64] 
+    glm : Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64] 
         GLM object.
-        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
-    etas : (L, n) or (L, n, K) np.ndarray
+        It is typically one of the GLM classes defined in :mod:`adelie.glm` submodule.
+    etas : (L, n) or (L, n, K) ndarray
         Linear predictions.
 
     Returns
     -------
-    resids : (L, n) or (L, n, K) np.ndarray
+    resids : (L, n) or (L, n, K) ndarray
         Residuals.
 
     See Also
@@ -305,7 +306,7 @@ def residuals(
 
 
 def gradients(
-    X: Union[MatrixNaiveBase32, MatrixNaiveBase64],
+    X: Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64],
     resids: np.ndarray,
     *, 
     n_threads: int =1,
@@ -327,14 +328,14 @@ def gradients(
         \\end{align*}
 
     In both cases, :math:`\\hat{r}` is the residual as in
-    ``adelie.diagnostic.residuals``.
+    :func:`adelie.diagnostic.residuals`.
 
     Parameters
     ----------
-    X : (n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64, np.ndarray]
+    X : (n, p) Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
         Feature matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    resids : (L, n) or (L, n, K) np.ndarray
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule or :class:`numpy.ndarray`.
+    resids : (L, n) or (L, n, K) ndarray
         Residuals.
     n_threads : int, optional
         Number of threads.
@@ -342,7 +343,7 @@ def gradients(
 
     Returns
     -------
-    grads : (L, p) or (L, p, K) np.ndarray
+    grads : (L, p) or (L, p, K) ndarray
         Gradients.
 
     See Also
@@ -373,7 +374,7 @@ def gradient_norms(
     duals: csr_matrix,
     lmdas: np.ndarray,
     *, 
-    constraints: list =None,
+    constraints: list[Union[ConstraintBase32, ConstraintBase64]] =None,
     groups: np.ndarray =None,
     alpha: float =1,
     penalty: np.ndarray =None,
@@ -392,7 +393,7 @@ def gradient_norms(
         \\end{align*}
 
     where
-    :math:`\\hat{\\gamma}_g` is the gradient as in ``adelie.diagnostic.gradients``,
+    :math:`\\hat{\\gamma}_g` is the gradient as in :func:`adelie.diagnostic.gradients`,
     :math:`\\lambda` is the regularization,
     :math:`\\alpha` is the elastic net proportion,
     :math:`\\omega_g` is the penalty factor,
@@ -402,21 +403,21 @@ def gradient_norms(
 
     Parameters
     ----------
-    grads : (L, p) or (L, p, K) np.ndarray
+    grads : (L, p) or (L, p, K) ndarray
         Gradients.
-    betas : (L, p) or (L, p*K) scipy.sparse.csr_matrix
+    betas : (L, p) or (L, p*K) csr_matrix
         Coefficient vectors :math:`\\beta`.
-    duals : (L, d) scipy.sparse.csr_matrix
+    duals : (L, d) csr_matrix
         Dual vectors :math:`\\mu`.
-    lmdas : (L,) np.ndarray
+    lmdas : (L,) ndarray
         Regularization parameters :math:`\\lambda`.
-    constraints : (G,) list, optional
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
         If ``None``, every group is unconstrained.
         Default is ``None``.
-    groups : (G,) np.ndarray, optional
+    groups : (G,) ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
         If the gradient is of multi-response type, then we only allow two types of groupings:
@@ -431,14 +432,14 @@ def gradient_norms(
         Elastic net parameter :math:`\\alpha`.
         It must be in the range :math:`[0,1]`.
         Default is ``1``.
-    penalty : (G,) np.ndarray, optional
+    penalty : (G,) ndarray, optional
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
         Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
 
     Returns
     -------
-    norms : (L, G) np.ndarray
+    norms : (L, G) ndarray
         Gradient norms.
 
     See Also
@@ -536,15 +537,15 @@ def gradient_scores(
         \\end{align*}
 
     where :math:`\\hat{h}` is the gradient norm as in
-    ``adelie.diagnostic.gradient_norms``.
+    :func:`adelie.diagnostic.gradient_norms`.
 
     Parameters
     ----------
-    grad_norms : (L, G) np.ndarray
+    grad_norms : (L, G) ndarray
         Gradient norms.
-    lmdas : (L,) np.ndarray
+    lmdas : (L,) ndarray
         Regularization parameters :math:`\\lambda`.
-    penalty : (G,) np.ndarray 
+    penalty : (G,) ndarray 
         Penalty factor for each group.
         It must be a non-negative vector.
     alpha : float, optional
@@ -554,7 +555,7 @@ def gradient_scores(
 
     Returns
     -------
-    scores : (L, G) np.ndarray
+    scores : (L, G) ndarray
         Gradient scores.  
 
     See Also
@@ -597,16 +598,16 @@ def coefficient(
     ----------
     lmda : float
         New regularization parameter at which to find the solution.
-    betas : (L, p) scipy.sparse.csr_matrix
+    betas : (L, p) csr_matrix
         Coefficient vectors :math:`\\beta`.
-    intercepts : (L,) np.ndarray
+    intercepts : (L,) ndarray
         Intercepts.
-    lmdas : (L,) np.ndarray
+    lmdas : (L,) ndarray
         Regularization parameters :math:`\\lambda`.
 
     Returns
     -------
-    beta : (1, p) scipy.sparse.csr_matrix
+    beta : (1, p) csr_matrix
         Linearly interpolated coefficient vector at :math:`\\lambda`.
     intercept : float
         Linearly interpolated intercept at :math:`\\lambda`.
@@ -651,14 +652,14 @@ def plot_coefficients(
 
     Parameters
     ----------
-    betas : (L, p) scipy.sparse.csr_matrix
+    betas : (L, p) csr_matrix
         Coefficient vectors :math:`\\beta`.
-    lmdas : (L,) np.ndarray
+    lmdas : (L,) ndarray
         Regularization parameters :math:`\\lambda`.
-    groups : (G,) np.ndarray
+    groups : (G,) ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-    group_sizes : (G,) np.ndarray
+    group_sizes : (G,) ndarray
         List of group sizes corresponding to each element of ``groups``.
         ``group_sizes[i]`` is the size of the ``i`` th group.
     l2_norm : bool, optional
@@ -715,9 +716,9 @@ def plot_devs(
 
     Parameters
     ----------
-    lmdas : (L,) np.ndarray
+    lmdas : (L,) ndarray
         Regularization parameters :math:`\\lambda`.
-    devs : (L,) np.ndarray
+    devs : (L,) ndarray
         Deviances.
 
     Returns
@@ -750,14 +751,14 @@ def plot_set_sizes(
 
     Parameters
     ----------
-    groups : (G,) np.ndarray
+    groups : (G,) ndarray
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-    screen_sizes : (L,) np.ndarray
+    screen_sizes : (L,) ndarray
         Screen set sizes.
-    active_sizes : (L,) np.ndarray
+    active_sizes : (L,) ndarray
         Active set sizes.
-    lmdas : (L,) np.ndarray
+    lmdas : (L,) ndarray
         Regularization parameters :math:`\\lambda`.
     ratio : bool, optional
         ``True`` if plot should normalize the set sizes
@@ -869,19 +870,19 @@ def plot_benchmark(
     ----------
     total_time : float
         Total time taken for the core routine.
-    benchmark_screen : (B,) np.ndarray
+    benchmark_screen : (B,) ndarray
         Benchmark timings for screening.
-    benchmark_fit_screen : (B,) np.ndarray
+    benchmark_fit_screen : (B,) ndarray
         Benchmark timings for fitting on screen set.
-    benchmark_fit_active : (B,) np.ndarray
+    benchmark_fit_active : (B,) ndarray
         Benchmark timings for fitting on active set.
-    benchmark_kkt : (B,) np.ndarray
+    benchmark_kkt : (B,) ndarray
         Benchmark timings for KKT checks.
-    benchmark_invariance : (B,) np.ndarray
+    benchmark_invariance : (B,) ndarray
         Benchmark timings for invariance step.
-    n_valid_solutions : (B,) np.ndarray
+    n_valid_solutions : (B,) ndarray
         Flags that indicate whether each iteration resulted in a valid solution.
-    lmdas : (L,) np.ndarray
+    lmdas : (L,) ndarray
         Regularization parameters :math:`\\lambda`.
     relative : bool, optional
         If ``True``, the time breakdown plot is relative to the total time,
@@ -1000,9 +1001,9 @@ def plot_kkt(
 
     Parameters
     ----------
-    lmdas : (L,) np.ndarray
+    lmdas : (L,) ndarray
         Regularization parameters :math:`\\lambda`.
-    scores : (L, G) np.ndarray
+    scores : (L, G) ndarray
         Gradient scores.
     idx : int, optional
         Index of ``lmdas`` and ``scores`` at which to plot the KKT failures.
@@ -1118,10 +1119,6 @@ def plot_kkt(
 
 class DiagnosticCov:
     """Diagnostic class for covariance states.
-
-    .. note::
-        Currently, the only supported covariance state
-        is the Gaussian covariance state from calling ``adelie.gaussian_cov``.
 
     Parameters
     ----------

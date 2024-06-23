@@ -9,6 +9,10 @@ adelie.bcd
 .. currentmodule:: adelie.bcd
 
 
+.. automodule:: adelie.bcd
+    :no-index:
+
+
 .. autosummary::
     :toctree: generated/
 
@@ -28,6 +32,9 @@ adelie.configs
 .. currentmodule:: adelie.configs
 
 
+.. automodule:: adelie.configs
+
+
 .. autosummary::
     :toctree: generated/
 
@@ -42,12 +49,16 @@ adelie.constraint
 .. currentmodule:: adelie.constraint
 
 
+.. automodule:: adelie.constraint
+
+
 .. autosummary::
     :toctree: generated/
 
 
     lower
     one_sided
+    upper
 
 
 adelie.cv
@@ -55,6 +66,9 @@ adelie.cv
 
 
 .. currentmodule:: adelie.cv
+
+
+.. automodule:: adelie.cv
 
 
 .. autosummary::
@@ -72,6 +86,9 @@ adelie.data
 .. currentmodule:: adelie.data
 
 
+.. automodule:: adelie.data
+
+
 .. autosummary::
     :toctree: generated/
 
@@ -86,6 +103,9 @@ adelie.diagnostic
 
 
 .. currentmodule:: adelie.diagnostic
+
+
+.. automodule:: adelie.diagnostic
 
 
 .. autosummary::
@@ -115,6 +135,9 @@ adelie.glm
 .. currentmodule:: adelie.glm
 
 
+.. automodule:: adelie.glm
+
+
 .. autosummary::
     :toctree: generated/
 
@@ -134,6 +157,9 @@ adelie.io
 .. currentmodule:: adelie.io
 
 
+.. automodule:: adelie.io
+
+
 .. autosummary::
     :toctree: generated/
 
@@ -147,6 +173,9 @@ adelie.matrix
 
 
 .. currentmodule:: adelie.matrix
+
+
+.. automodule:: adelie.matrix
 
 
 .. autosummary::
@@ -175,6 +204,9 @@ adelie.solver
 .. currentmodule:: adelie.solver
 
 
+.. automodule:: adelie.solver
+    
+
 .. autosummary::
     :toctree: generated/
 
@@ -190,6 +222,9 @@ adelie.state
 .. currentmodule:: adelie.state
 
 
+.. automodule:: adelie.state
+
+
 .. autosummary::
     :toctree: generated/
 
@@ -203,52 +238,9 @@ adelie.state
     multiglm_naive
 
 
-Internal
---------
+.. toctree::
+    :maxdepth: 1
+    :hidden:
 
 
-.. currentmodule:: adelie
-
-
-.. autosummary::
-    :toctree: generated/
-    
-
-    adelie_core.configs.Configs
-    adelie_core.constraint.ConstraintBase64
-    adelie_core.constraint.ConstraintOneSided64
-    adelie_core.glm.GlmBase64
-    adelie_core.glm.GlmBinomialLogit64
-    adelie_core.glm.GlmBinomialProbit64
-    adelie_core.glm.GlmCox64
-    adelie_core.glm.GlmGaussian64
-    adelie_core.glm.GlmMultiBase64
-    adelie_core.glm.GlmMultiGaussian64
-    adelie_core.glm.GlmMultinomial64
-    adelie_core.glm.GlmPoisson64
-    adelie_core.matrix.MatrixCovBase64
-    adelie_core.matrix.MatrixCovBlockDiag64
-    adelie_core.matrix.MatrixCovDense64F
-    adelie_core.matrix.MatrixCovLazyCov64F
-    adelie_core.matrix.MatrixCovSparse64F
-    adelie_core.matrix.MatrixNaiveBase64
-    adelie_core.matrix.MatrixNaiveCConcatenate64
-    adelie_core.matrix.MatrixNaiveRConcatenate64
-    adelie_core.matrix.MatrixNaiveDense64F
-    adelie_core.matrix.MatrixNaiveInteractionDense64F
-    adelie_core.matrix.MatrixNaiveKroneckerEye64
-    adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F
-    adelie_core.matrix.MatrixNaiveOneHotDense64F
-    adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64
-    adelie_core.matrix.MatrixNaiveSNPUnphased64
-    adelie_core.matrix.MatrixNaiveSparse64F
-    adelie_core.matrix.MatrixNaiveStandardize64
-    adelie_core.matrix.MatrixNaiveCSubset64
-    adelie_core.matrix.MatrixNaiveRSubset64
-    adelie_core.state.StateGaussianPinCov64
-    adelie_core.state.StateGaussianPinNaive64
-    adelie_core.state.StateGaussianCov64
-    adelie_core.state.StateGaussianNaive64
-    adelie_core.state.StateGlmNaive64
-    adelie_core.state.StateMultiGaussianNaive64
-    adelie_core.state.StateMultiGlmNaive64
+    internal

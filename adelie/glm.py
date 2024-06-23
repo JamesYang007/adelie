@@ -7,7 +7,6 @@ from .adelie_core.glm import (
 )
 from typing import Union
 import numpy as np
-import warnings
 
 
 def _coerce_dtype(y, dtype):
@@ -120,9 +119,9 @@ def binomial(
 
     Parameters
     ----------
-    y : (n,) np.ndarray 
+    y : (n,) ndarray 
         Response vector :math:`y`.
-    weights : (n,) np.ndarray, optional
+    weights : (n,) ndarray, optional
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
@@ -134,11 +133,11 @@ def binomial(
             - ``"probit"``: the probit link function.
 
         Default is ``"logit"``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         The underlying data type.
         If ``None``, it is inferred from ``y``,
         in which case ``y`` must have an underlying data type of
-        ``np.float32`` or ``np.float64``.
+        :class:`numpy.float32` or :class:`numpy.float64`.
         Default is ``None``.
 
     Returns
@@ -148,7 +147,9 @@ def binomial(
 
     See Also
     --------
+    adelie.adelie_core.glm.GlmBinomialLogit32
     adelie.adelie_core.glm.GlmBinomialLogit64
+    adelie.adelie_core.glm.GlmBinomialProbit32
     adelie.adelie_core.glm.GlmBinomialProbit64
     """
     dispatcher = {
@@ -239,13 +240,13 @@ def cox(
 
     Parameters
     ----------
-    start : (n,) np.ndarray
+    start : (n,) ndarray
         Start time vector :math:`s`.
-    stop : (n,) np.ndarray
+    stop : (n,) ndarray
         Stop time vector :math:`t`.
-    status : (n,) np.ndarray 
+    status : (n,) ndarray 
         Status vector :math:`\\delta`.
-    weights : (n,) np.ndarray, optional
+    weights : (n,) ndarray, optional
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
@@ -257,11 +258,11 @@ def cox(
             - ``"breslow"``
 
         Default is ``"efron"``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         The underlying data type.
         If ``None``, it is inferred from ``status``,
         in which case ``status`` must have an underlying data type of
-        ``np.float32`` or ``np.float64``.
+        :class:`numpy.float32` or :class:`numpy.float64`.
         Default is ``None``.
 
     Returns
@@ -271,6 +272,7 @@ def cox(
 
     See Also
     --------
+    adelie.adelie_core.glm.GlmCox32
     adelie.adelie_core.glm.GlmCox64
     """
     dispatcher = {
@@ -334,20 +336,20 @@ def gaussian(
 
     Parameters
     ----------
-    y : (n,) np.ndarray 
+    y : (n,) ndarray 
         Response vector :math:`y`.
-    weights : (n,) np.ndarray, optional
+    weights : (n,) ndarray, optional
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         The underlying data type.
         If ``None``, it is inferred from ``y``,
         in which case ``y`` must have an underlying data type of
-        ``np.float32`` or ``np.float64``.
+        :class:`numpy.float32` or :class:`numpy.float64`.
         Default is ``None``.
     opt : bool, optional
-        If ``True``, an optimized routine is used when passed into ``adelie.grpnet``.
+        If ``True``, an optimized routine is used when passed into :func:`adelie.solver.grpnet`.
         Otherwise, a general routine with IRLS is used.
         This flag is mainly for developers for testing purposes.
         We advise users to use the default value.
@@ -360,6 +362,7 @@ def gaussian(
 
     See Also
     --------
+    adelie.adelie_core.glm.GlmGaussian32
     adelie.adelie_core.glm.GlmGaussian64
     """
     dispatcher = {
@@ -409,20 +412,20 @@ def multigaussian(
 
     Parameters
     ----------
-    y : (n, K) np.ndarray 
+    y : (n, K) ndarray 
         Response matrix :math:`y`.
-    weights : (n,) np.ndarray, optional
+    weights : (n,) ndarray, optional
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         The underlying data type.
         If ``None``, it is inferred from ``y``,
         in which case ``y`` must have an underlying data type of
-        ``np.float32`` or ``np.float64``.
+        :class:`numpy.float32` or :class:`numpy.float64`.
         Default is ``None``.
     opt : bool, optional
-        If ``True``, an optimized routine is used when passed into ``adelie.grpnet``.
+        If ``True``, an optimized routine is used when passed into :func:`adelie.solver.grpnet`.
         Otherwise, a general routine with IRLS is used.
         This flag is mainly for developers for testing purposes.
         We advise users to use the default value.
@@ -435,6 +438,7 @@ def multigaussian(
 
     See Also
     --------
+    adelie.adelie_core.glm.GlmMultiGaussian32
     adelie.adelie_core.glm.GlmMultiGaussian64
     """
     dispatcher = {
@@ -488,22 +492,23 @@ def multinomial(
     for each fixed :math:`i`, :math:`\\sum_{k=1}^K y_{ik} = 1`.
 
     .. note::
-        The ``hessian`` method computes :math:`2 \\mathrm{diag}(\\nabla^2 \\ell(\\eta))`
+        The :func:`~adelie.adelie_core.glm.GlmMultiBase64.hessian` method computes 
+        :math:`2 \\mathrm{diag}(\\nabla^2 \\ell(\\eta))`
         as the diagonal majorization.
 
     Parameters
     ----------
-    y : (n, K) np.ndarray 
+    y : (n, K) ndarray 
         Response matrix :math:`y`.
-    weights : (n,) np.ndarray, optional
+    weights : (n,) ndarray, optional
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         The underlying data type.
         If ``None``, it is inferred from ``y``,
         in which case ``y`` must have an underlying data type of
-        ``np.float32`` or ``np.float64``.
+        :class:`numpy.float32` or :class:`numpy.float64`.
         Default is ``None``.
 
     Returns
@@ -513,6 +518,7 @@ def multinomial(
 
     See Also
     --------
+    adelie.adelie_core.glm.GlmMultinomial32
     adelie.adelie_core.glm.GlmMultinomial64
     """
     dispatcher = {
@@ -559,17 +565,17 @@ def poisson(
 
     Parameters
     ----------
-    y : (n,) np.ndarray 
+    y : (n,) ndarray 
         Response vector :math:`y`.
-    weights : (n,) np.ndarray, optional
+    weights : (n,) ndarray, optional
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         The underlying data type.
         If ``None``, it is inferred from ``y``,
         in which case ``y`` must have an underlying data type of
-        ``np.float32`` or ``np.float64``.
+        :class:`numpy.float32` or :class:`numpy.float64`.
         Default is ``None``.
 
     Returns
@@ -579,6 +585,7 @@ def poisson(
 
     See Also
     --------
+    adelie.adelie_core.glm.GlmPoisson32
     adelie.adelie_core.glm.GlmPoisson64
     """
     dispatcher = {

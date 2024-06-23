@@ -224,6 +224,7 @@ def block_diag(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixCovBlockDiag32
     adelie.adelie_core.matrix.MatrixCovBlockDiag64
     """
     mats = [
@@ -311,7 +312,9 @@ def concatenate(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixNaiveCConcatenate32
     adelie.adelie_core.matrix.MatrixNaiveCConcatenate64
+    adelie.adelie_core.matrix.MatrixNaiveRConcatenate32
     adelie.adelie_core.matrix.MatrixNaiveRConcatenate64
     """
     mats = [
@@ -362,7 +365,7 @@ def dense(
     
     Parameters
     ----------
-    mat : np.ndarray
+    mat : ndarray
         The dense matrix to view.
     method : str, optional
         Method type. It must be one of the following:
@@ -386,7 +389,13 @@ def dense(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixCovDense32C
+    adelie.adelie_core.matrix.MatrixCovDense32F
+    adelie.adelie_core.matrix.MatrixCovDense64C
     adelie.adelie_core.matrix.MatrixCovDense64F
+    adelie.adelie_core.matrix.MatrixNaiveDense32C
+    adelie.adelie_core.matrix.MatrixNaiveDense32F
+    adelie.adelie_core.matrix.MatrixNaiveDense64C
     adelie.adelie_core.matrix.MatrixNaiveDense64F
     """
     naive_dispatcher = {
@@ -454,7 +463,7 @@ def eager_cov(
     the underlying matrix :math:`X` given by ``mat``
     to compute the values of :math:`A = X^\\top X` *eagerly*.
     In other words, it computes the entire :math:`A` matrix.
-    This is useful in ``adelie.solver.gaussian_cov`` where
+    This is useful in :func:`adelie.solver.gaussian_cov` where
     the dimensions of :math:`A` are small enough that
     that it is faster to construct the entire matrix upfront.
     
@@ -463,7 +472,7 @@ def eager_cov(
 
     Parameters
     ----------
-    mat : (n, p) np.ndarray
+    mat : (n, p) ndarray
         The data matrix from which to eagerly compute the covariance.
     n_threads : int, optional
         Number of threads.
@@ -471,7 +480,7 @@ def eager_cov(
 
     Returns
     -------
-    cov : np.ndarray
+    cov : ndarray
         The dense covariance matrix.
     """
     p = mat.shape[1]
@@ -566,7 +575,7 @@ def interaction(
 
     Parameters
     ----------
-    mat : (n, d) np.ndarray
+    mat : (n, d) ndarray
         The dense matrix :math:`Z` from which to construct interaction terms.
     intr_map : dict
         Dictionary mapping a column index of ``mat``
@@ -577,7 +586,7 @@ def interaction(
         to construct :math:`S`.
         Moreover, the pairs are stored in lexicographical order of ``(key, val)``
         for each ``val`` in ``intr_map[key]`` and for each ``key``.
-    levels : (d,) np.ndarray, optional
+    levels : (d,) ndarray, optional
         Number of levels for each column in ``mat``.
         A non-positive value indicates that the column is a continuous variable
         whereas a positive value indicates that it is a discrete variable with
@@ -600,6 +609,9 @@ def interaction(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixNaiveInteractionDense32C
+    adelie.adelie_core.matrix.MatrixNaiveInteractionDense32F
+    adelie.adelie_core.matrix.MatrixNaiveInteractionDense64C
     adelie.adelie_core.matrix.MatrixNaiveInteractionDense64F
     """
     dispatcher = {
@@ -691,13 +703,13 @@ def kronecker_eye(
     
     Parameters
     ----------
-    mat : Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
+    mat : Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
         The matrix to view as a Kronecker product with identity matrix.
-        If ``np.ndarray``, a specialized class is created with more optimized routines.
+        If :class:`numpy.ndarray`, a specialized class is created with more optimized routines.
     K : int
         Dimension of the identity matrix.
     copy : bool, optional
-        This argument is only used if ``mat`` is a ``np.ndarray``.
+        This argument is only used if ``mat`` is a :class:`numpy.ndarray`.
         If ``True``, a copy of ``mat`` is stored internally.
         Otherwise, a reference is stored instead.
         Default is ``False``.
@@ -712,7 +724,11 @@ def kronecker_eye(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixNaiveKroneckerEye32
     adelie.adelie_core.matrix.MatrixNaiveKroneckerEye64
+    adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense32C
+    adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense32F
+    adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64C
     adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F
     """
     if isinstance(mat, np.ndarray):
@@ -750,6 +766,79 @@ def kronecker_eye(
             py_base.__init__(self, n_threads=n_threads)
 
     return _kronecker_eye()
+
+
+def lazy_cov(
+    mat: np.ndarray,
+    *,
+    copy: bool =False,
+    n_threads: int =1,
+):
+    """Creates a lazy covariance matrix.
+
+    The lazy covariance matrix :math:`A` uses 
+    the underlying matrix :math:`X` given by ``mat``
+    to compute the values of :math:`A = X^\\top X` *dynamically*.
+    It only computes rows of :math:`A`
+    on-the-fly that are needed when calling its member functions.
+    This is useful in :func:`adelie.solver.gaussian_cov` where
+    the covariance method must be used but the dimensions of :math:`A`
+    are too large to construct the entire matrix as a dense matrix.
+    
+    .. note::
+        This matrix only works for covariance method!
+
+    Parameters
+    ----------
+    mat : (n, p) ndarray
+        The data matrix from which to lazily compute the covariance.
+    copy : bool, optional
+        If ``True``, a copy of ``mat`` is stored internally.
+        Otherwise, a reference is stored instead.
+        Default is ``False``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.adelie_core.matrix.MatrixCovLazyCov32C
+    adelie.adelie_core.matrix.MatrixCovLazyCov32F
+    adelie.adelie_core.matrix.MatrixCovLazyCov64C
+    adelie.adelie_core.matrix.MatrixCovLazyCov64F
+    """
+    dispatcher = {
+        np.dtype("float64"): {
+            "C": core.matrix.MatrixCovLazyCov64C,
+            "F": core.matrix.MatrixCovLazyCov64F,
+        },
+        np.dtype("float32"): {
+            "C": core.matrix.MatrixCovLazyCov32C,
+            "F": core.matrix.MatrixCovLazyCov32F,
+        },
+    }
+
+    dtype = mat.dtype
+    order = (
+        "C"
+        if mat.flags.c_contiguous else
+        "F"
+    )
+    core_base = dispatcher[dtype][order]
+    py_base = PyMatrixCovBase
+
+    class _lazy_cov(core_base, py_base):
+        def __init__(self):
+            self._mat = np.array(mat, copy=copy)
+            core_base.__init__(self, self._mat, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
+
+    return _lazy_cov()
 
 
 def one_hot(
@@ -798,9 +887,9 @@ def one_hot(
     
     Parameters
     ----------
-    mat : (n, d) np.ndarray
+    mat : (n, d) ndarray
         The dense matrix :math:`Z` from which to construct one-hot encodings.
-    levels : (d,) np.ndarray, optional
+    levels : (d,) ndarray, optional
         Number of levels for each column in ``mat``.
         A non-positive value indicates that the column is a continuous variable
         whereas a positive value indicates that it is a discrete variable with
@@ -823,6 +912,9 @@ def one_hot(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixNaiveOneHotDense32C
+    adelie.adelie_core.matrix.MatrixNaiveOneHotDense32F
+    adelie.adelie_core.matrix.MatrixNaiveOneHotDense64C
     adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F
     """
     dispatcher = {
@@ -865,76 +957,6 @@ def one_hot(
     return _one_hot()
 
 
-def lazy_cov(
-    mat: np.ndarray,
-    *,
-    copy: bool =False,
-    n_threads: int =1,
-):
-    """Creates a lazy covariance matrix.
-
-    The lazy covariance matrix :math:`A` uses 
-    the underlying matrix :math:`X` given by ``mat``
-    to compute the values of :math:`A = X^\\top X` *dynamically*.
-    It only computes rows of :math:`A`
-    on-the-fly that are needed when calling its member functions.
-    This is useful in ``adelie.solver.gaussian_cov`` where
-    the covariance method must be used but the dimensions of :math:`A`
-    are too large to construct the entire matrix as a dense matrix.
-    
-    .. note::
-        This matrix only works for covariance method!
-
-    Parameters
-    ----------
-    mat : (n, p) np.ndarray
-        The data matrix from which to lazily compute the covariance.
-    copy : bool, optional
-        If ``True``, a copy of ``mat`` is stored internally.
-        Otherwise, a reference is stored instead.
-        Default is ``False``.
-    n_threads : int, optional
-        Number of threads.
-        Default is ``1``.
-
-    Returns
-    -------
-    wrap
-        Wrapper matrix object.
-
-    See Also
-    --------
-    adelie.adelie_core.matrix.MatrixCovLazyCov64F
-    """
-    dispatcher = {
-        np.dtype("float64"): {
-            "C": core.matrix.MatrixCovLazyCov64C,
-            "F": core.matrix.MatrixCovLazyCov64F,
-        },
-        np.dtype("float32"): {
-            "C": core.matrix.MatrixCovLazyCov32C,
-            "F": core.matrix.MatrixCovLazyCov32F,
-        },
-    }
-
-    dtype = mat.dtype
-    order = (
-        "C"
-        if mat.flags.c_contiguous else
-        "F"
-    )
-    core_base = dispatcher[dtype][order]
-    py_base = PyMatrixCovBase
-
-    class _lazy_cov(core_base, py_base):
-        def __init__(self):
-            self._mat = np.array(mat, copy=copy)
-            core_base.__init__(self, self._mat, n_threads)
-            py_base.__init__(self, n_threads=n_threads)
-
-    return _lazy_cov()
-
-
 def snp_phased_ancestry(
     io: io.snp_phased_ancestry,
     *,
@@ -944,7 +966,7 @@ def snp_phased_ancestry(
     """Creates a SNP phased, ancestry matrix.
 
     The SNP phased, ancestry matrix is a wrapper around 
-    the corresponding IO handler ``adelie.io.snp_phased_ancestry``
+    the corresponding IO handler :class:`adelie.io.snp_phased_ancestry`
     exposing some matrix operations.
 
     .. note::
@@ -952,12 +974,12 @@ def snp_phased_ancestry(
     
     Parameters
     ----------
-    io : adelie.io.snp_phased_ancestry
+    io : snp_phased_ancestry
         IO handler for SNP phased, ancestry data.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         Underlying value type.
         Default is ``np.float64``.
 
@@ -969,6 +991,7 @@ def snp_phased_ancestry(
     See Also
     --------
     adelie.io.snp_phased_ancestry
+    adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry32
     adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64
     """
     dispatcher = {
@@ -999,7 +1022,7 @@ def snp_unphased(
     """Creates a SNP unphased matrix.
 
     The SNP unphased matrix is a wrapper around    
-    the corresponding IO handler ``adelie.io.snp_unphased``
+    the corresponding IO handler :class:`adelie.io.snp_unphased`
     exposing some matrix operations.
 
     .. note::
@@ -1007,12 +1030,12 @@ def snp_unphased(
     
     Parameters
     ----------
-    io : adelie.io.snp_unphased
+    io : snp_unphased
         IO handler for SNP unphased data.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         Underlying value type.
         Default is ``np.float64``.
 
@@ -1024,6 +1047,7 @@ def snp_unphased(
     See Also
     --------
     adelie.io.snp_unphased
+    adelie.adelie_core.matrix.MatrixNaiveSNPUnphased32
     adelie.adelie_core.matrix.MatrixNaiveSNPUnphased64
     """
     dispatcher = {
@@ -1060,7 +1084,7 @@ def sparse(
     
     Parameters
     ----------
-    mat : Union[scipy.sparse.csc_matrix, scipy.sparse.csr_matrix]
+    mat : Union[csc_matrix, csr_matrix]
         The sparse matrix to view.
     method : str, optional
         Method type. It must be one of the following:
@@ -1084,7 +1108,9 @@ def sparse(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixCovSparse32F
     adelie.adelie_core.matrix.MatrixCovSparse64F
+    adelie.adelie_core.matrix.MatrixNaiveSparse32F
     adelie.adelie_core.matrix.MatrixNaiveSparse64F
     """
     if not (isinstance(mat, csr_matrix) or isinstance(mat, csc_matrix)):
@@ -1184,13 +1210,13 @@ def standardize(
     
     Parameters
     ----------
-    mat : Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
+    mat : Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
         The underlying matrix :math:`Z` to standardize.
-    centers : np.ndarray, optional
+    centers : ndarray, optional
         The center values :math:`c` for each column of ``mat``.
         If ``None``, the column means :math:`\\overline{Z}` are used as centers.
         Default is ``None``.
-    scales : np.ndarray, optional
+    scales : ndarray, optional
         The scale values :math:`s` for each column of ``mat``.
         If ``None``, the column standard deviations :math:`\\hat{\\sigma}` are used as scales.
         Default is ``None``.
@@ -1209,6 +1235,7 @@ def standardize(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixNaiveStandardize32
     adelie.adelie_core.matrix.MatrixNaiveStandardize64
     """
     if isinstance(mat, (list, np.ndarray)):
@@ -1297,7 +1324,7 @@ def subset(
         it is much more efficient to rather set observation weights 
         along ``indices`` to ``0`` when supplying the GLM object.
         For example, suppose the user wishes to run 
-        ``adelie.solver.grpnet`` with ``mat`` and ``ad.glm.gaussian(y)``
+        :func:`adelie.solver.grpnet` with ``mat`` and ``ad.glm.gaussian(y)``
         but subsetting the samples along ``indices``.
         Then, instead of supplying ``mat[indices]`` and ``ad.glm.gaussian(y[indices])``,
         we recommend creating a weight vector ``w`` where it is ``0`` outside ``indices``
@@ -1305,9 +1332,9 @@ def subset(
 
     Parameters
     ----------
-    mat : Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
+    mat : Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
         The matrix to subset.
-    indices : np.ndarray
+    indices : ndarray
         Array of indices to subset the matrix.
     axis : int, optional
         The axis along which to subset.
@@ -1320,11 +1347,13 @@ def subset(
     -------
     wrap
         Wrapper matrix object.
-        If ``mat`` is ``np.ndarray`` then the usual numpy subsetted matrix is returned.
+        If ``mat`` is :class:`numpy.ndarray` then the usual numpy subsetted matrix is returned.
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixNaiveCSubset32
     adelie.adelie_core.matrix.MatrixNaiveCSubset64
+    adelie.adelie_core.matrix.MatrixNaiveRSubset32
     adelie.adelie_core.matrix.MatrixNaiveRSubset64
     """
     if isinstance(mat, np.ndarray):

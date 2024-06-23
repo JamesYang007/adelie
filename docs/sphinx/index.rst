@@ -5,8 +5,8 @@ Adelie documentation
    :maxdepth: 1
    :hidden:
 
-   api_reference
-   user_guide
+   api_reference/index
+   user_guide/index
 
 
 **Version**: |release|
@@ -41,7 +41,7 @@ and the proximal Newton method have been carefully tuned for convergence and num
 
         +++
 
-        .. button-ref:: user_guide
+        .. button-ref:: user_guide/index
             :expand:
             :color: secondary
             :click-parent:
@@ -59,7 +59,7 @@ and the proximal Newton method have been carefully tuned for convergence and num
 
         +++
 
-        .. button-ref:: api_reference
+        .. button-ref:: api_reference/index
             :expand:
             :color: secondary
             :click-parent:

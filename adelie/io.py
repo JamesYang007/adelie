@@ -80,11 +80,11 @@ class snp_phased_ancestry(core_io.IOSNPPhasedAncestry):
 
         Parameters
         ----------
-        calldata : (n, 2*s) np.ndarray
+        calldata : (n, 2*s) ndarray
             SNP phased calldata in dense format.
             ``calldata[i, 2*j+k]`` is the data for individual ``i``, SNP ``j``, and haplotype ``k``.
             It must only contain values in :math:`\\{0,1\\}`.
-        ancestries : (n, 2*s) np.ndarray
+        ancestries : (n, 2*s) ndarray
             Local ancestry information in dense format.
             ``ancestries[i, 2*j+k]`` is the ancestry for individual ``i``, SNP ``j``, and haplotype ``k``.
             It must only contain values in :math:`\\{0,\\ldots, A-1\\}`.
@@ -153,16 +153,16 @@ class snp_unphased(core_io.IOSNPUnphased):
 
         Parameters
         ----------
-        calldata : (n, p) np.ndarray
+        calldata : (n, p) ndarray
             SNP unphased matrix in dense format.
-        impute_method : Union[str, np.ndarray], optional
+        impute_method : Union[str, ndarray], optional
             Impute method for missing values. 
             It must be one of the following:
 
                 - ``"mean"``: mean-imputation. Missing values in column ``j`` of ``calldata`` are replaced with
                   the mean of column ``j`` where the mean is computed using the non-missing values.
                   If every value is missing, we impute with ``0``.
-                - ``np.ndarray``: user-specified vector of imputed values for each column of ``calldata``.
+                - :class:`numpy.ndarray`: user-specified vector of imputed values for each column of ``calldata``.
                 
             Default is ``"mean"``.
         n_threads : int, optional
