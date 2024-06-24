@@ -120,8 +120,6 @@ public:
 private:
     const size_t _max_iters;
     const value_t _tol;
-    const size_t _newton_max_iters = 100000;
-    const value_t _newton_tol = 1e-12;
     const size_t _nnls_max_iters;
     const value_t _nnls_tol;
     const value_t _cs_tol;
@@ -206,6 +204,7 @@ public:
         const auto compute_mu_resid = [&]() {
             mu_resid.matrix() = v.matrix() - mu.matrix() * Q;
         };
+
         const auto compute_primal = [&]() {
             size_t x_iters;
             bcd::unconstrained::newton_abs_solver(
@@ -240,10 +239,7 @@ public:
                 // NOTE: this check is important since numerical precision issues
                 // may make us enter this loop infinitely.
                 if (is_prev_valid) {
-                    const auto convg_meas = std::abs(
-                        ((mu-mu_prev) * grad_prev).sum()
-                    ) / m;
-                    if (convg_meas <= _tol) {
+                    if (compute_convergence_measure(mu-mu_prev, grad_prev) <= _tol) {
                         x.setZero();
                         return;
                     }
@@ -331,10 +327,7 @@ public:
 
             // Check if mu is not changing much w.r.t. hessian scaling.
             if (is_prev_valid) {
-                const auto convg_meas = std::abs(
-                    ((mu-mu_prev) * (grad_prev-grad)).sum()
-                ) / m;
-                if (convg_meas <= _tol) return;
+                if (compute_convergence_measure(mu-mu_prev, grad_prev-grad) <= _tol) return;
             }
 
             // save old values
