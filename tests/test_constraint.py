@@ -100,7 +100,7 @@ def test_box(d, method, dtype, seed):
 @pytest.mark.parametrize("seed", np.arange(10))
 def test_lower(d, method, dtype, seed):
     np.random.seed(seed)
-    b = np.random.uniform(0, 1, d)
+    b = -np.random.uniform(0, 1, d)
     configs = {
         "proximal-newton": {
             "max_iters": 1000,
@@ -115,7 +115,7 @@ def test_lower(d, method, dtype, seed):
             self.dual_size = d
             self.primal_size = d
         def evaluate(self, x):
-            return -x-b
+            return b-x
         def gradient(self, x, mu, out):
             out[...] = -mu
         def duals(self):

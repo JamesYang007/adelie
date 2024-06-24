@@ -3,6 +3,7 @@
 #include <adelie_core/bcd/unconstrained/newton.hpp>
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/format.hpp>
+#include <adelie_core/util/macros.hpp>
 #include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
@@ -170,7 +171,7 @@ protected:
                 // NOTE: this check is important since numerical precision issues
                 // may make us enter this loop infinitely.
                 if (is_prev_valid) {
-                    if (compute_convergence_measure(mu_prev, mu) <= tol) {
+                    if (compute_convergence_measure(mu_prev, mu, true) <= tol) {
                         x.setZero();
                         #ifdef ADELIE_CORE_DEBUG
                         save_iterate();
@@ -200,7 +201,7 @@ protected:
                         mu_resid_norm_prev = mu_resid_norm;
                         mu_prev = mu;
                         is_prev_valid = true;
-                        save_additional_prev();
+                        save_additional_prev(true);
                     }
 
                     // Technically, we must find mu such that:
@@ -270,14 +271,14 @@ protected:
 
             // Check if mu is not changing much w.r.t. hessian scaling.
             if (is_prev_valid) {
-                if (compute_convergence_measure(mu_prev, mu) <= tol) return;
+                if (compute_convergence_measure(mu_prev, mu, false) <= tol) return;
             }
 
             // save old values
             mu_resid_norm_prev = mu_resid_norm;
             mu_prev = mu;
             is_prev_valid = true;
-            save_additional_prev();
+            save_additional_prev(false);
 
             // Compute hessian
             // NOTE:

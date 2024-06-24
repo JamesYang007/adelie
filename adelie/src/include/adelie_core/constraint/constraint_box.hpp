@@ -1,8 +1,6 @@
 #pragma once
 #include <adelie_core/constraint/constraint_base.hpp>
-#include <adelie_core/bcd/unconstrained/newton.hpp>
 #include <adelie_core/optimization/hinge_full.hpp>
-#include <adelie_core/util/macros.hpp>
 
 namespace adelie_core {
 namespace constraint {
@@ -170,8 +168,6 @@ public:
         const Eigen::Ref<const colmat_value_t>& Q
     ) override
     {
-        using rowmat_value_t = util::rowmat_type<value_t>;
-
         const auto m = _u.size();
         const auto d = m;
 
@@ -180,191 +176,111 @@ public:
             return;
         }
 
-        const auto& v = linear;
-
-        size_t iters = 0;
-
         auto buff_ptr = _buff.data();
-        Eigen::Map<vec_value_t> x_buffer1(buff_ptr, d); buff_ptr += d;
-        Eigen::Map<vec_value_t> x_buffer2(buff_ptr, d); buff_ptr += d;
-        Eigen::Map<vec_value_t> mu_resid(buff_ptr, d); buff_ptr += d;
-        Eigen::Map<vec_value_t> mu_prev(buff_ptr, m); buff_ptr += m;
         Eigen::Map<vec_value_t> grad_prev(buff_ptr, m); buff_ptr += m;
         Eigen::Map<vec_value_t> grad(buff_ptr, m); buff_ptr += m;
-        Eigen::Map<rowmat_value_t> hess_buff(buff_ptr, m, d); buff_ptr += m * d;
-        Eigen::Map<colmat_value_t> hess(buff_ptr, m, m); buff_ptr += m * m;
-        Eigen::Map<vec_value_t> alpha_tmp(buff_ptr, d); buff_ptr += d;
-        Eigen::Map<vec_value_t> alpha(buff_ptr, m); buff_ptr += m;
-        Eigen::Map<vec_value_t> Qv(buff_ptr, d); buff_ptr += d;
+        Eigen::Map<vec_value_t> next_buff(buff_ptr, _buff.size() - std::distance(_buff.data(), buff_ptr));
 
-        bool is_prev_valid = false;
-        bool zero_primal_checked = false;
-        value_t mu_resid_norm_prev = -1;
-
-        const auto compute_mu_resid = [&]() {
-            mu_resid.matrix() = v.matrix() - mu.matrix() * Q;
+        const auto compute_mu_resid = [&](
+            const auto& mu,
+            const auto& linear,
+            const auto& Q,
+            auto& mu_resid
+        ) {
+            mu_resid.matrix() = linear.matrix() - mu.matrix() * Q;
         };
-
-        const auto compute_primal = [&]() {
-            size_t x_iters;
-            bcd::unconstrained::newton_abs_solver(
-                quad, mu_resid, l1, l2, _newton_tol, _newton_max_iters, 
-                x, x_iters, x_buffer1, x_buffer2
+        const auto compute_hard_min_mu_resid = [&](
+            auto& mu,
+            const auto& Qv
+        ) {
+            mu = Qv;
+            return 0;
+        };
+        const auto compute_soft_min_mu_resid = [&](
+            auto& mu,
+            const auto& Qv
+        ) {
+            mu = (
+                mu.max(0) * (_u <= 0).template cast<value_t>()
+                + mu.min(0) * (_l <= 0).template cast<value_t>()
+            );
+            return (Qv - mu).square().sum();
+        };
+        const auto compute_relaxed_slackness = [&](
+            const auto& mu
+        ) {
+            return std::max(
+                (mu.max(0) * _u).square().mean(),
+                (mu.min(0) * _l).square().mean()
             );
         };
-
-        while (iters < _max_iters) {
-            ++iters;
-
-            compute_mu_resid();
-            const value_t mu_resid_norm = mu_resid.matrix().norm();
-            const value_t mu_resid_norm_sq = mu_resid_norm * mu_resid_norm;
-
-            // Only used if first is_in_ellipse check fails.
-            value_t x_norm = -1;
-
-            // Check if x^star(mu) = 0 (i.e. in the ellipse).
-            // The first check is a quick way to check the condition.
-            // Sometimes, is_in_ellipse may be `true` but the compute_primal() may still return x=0.
-            // We do a second check if the first condition fails to be consistent with the primal.
-            bool is_in_ellipse = mu_resid_norm <= l1;
-            if (!is_in_ellipse) {
-                compute_primal();
-                x_norm = x.matrix().norm();
-                is_in_ellipse = x_norm <= 0;
-            }
-
-            // Check if x^star(mu) == 0.
-            if (is_in_ellipse) {
-                // NOTE: this check is important since numerical precision issues
-                // may make us enter this loop infinitely.
-                if (is_prev_valid) {
-                    if (compute_convergence_measure(mu-mu_prev, grad_prev) <= _tol) {
-                        x.setZero();
-                        return;
-                    }
-                }
-
-                // Check if there is a primal-dual optimal pair where primal = 0.
-                // To be optimal, they must satisfy the 4 KKT conditions.
-                // NOTE: the if-block below is only entered at most once. After it has been entered once,
-                // it guarantees that after the next iteration is_prev_valid == true.
-                // So subsequent access to the current block guarantees backtracking.
-                if (!zero_primal_checked) {
-                    zero_primal_checked = true;
-
-                    // one-time population
-                    Qv.matrix() = v.matrix() * Q.transpose();
-                    
-                    // If previous is valid, we will use mu_prev and mu_curr to backtrack.
-                    // Otherwise, mu is the next iterate.
-                    auto& mu_curr = alpha;
-                    const bool is_prev_valid_old = is_prev_valid;
-                    if (is_prev_valid_old) {
-                        mu_curr = mu; // optimization
-                    } else {
-                        mu_resid_norm_prev = mu_resid_norm;
-                        mu_prev = mu;
-                        grad_prev.setZero();
-                        is_prev_valid = true;
-                    }
-
-                    if (
-                        ((Qv.max(0) * _u).square().mean() <= _cs_tol) &&
-                        ((Qv.min(0) * _l).square().mean() <= _cs_tol)
-                     ) {
-                        x.setZero();
-                        return;
-                    }
-
-                    mu = (
-                        Qv.max(0) * (_u <= 0).template cast<value_t>()
-                        + Qv.min(0) * (_l <= 0).template cast<value_t>()
-                    );
-                    value_t nnls_loss = (Qv - mu).square().sum();
-                    if (nnls_loss <= l1 * l1) {
-                        x.setZero();
-                        return;
-                    }
-
-                    if (is_prev_valid_old) mu = mu_curr; // optimization
-                    else continue;
-                }
-
-                // If we ever enter this region of code, it means that
-                // there is no primal-dual optimal pair where primal = 0.
-                // This must mean that if there is no previous mu,
-                // we must have come from the if-block above, in which case nnls_loss > l1 * l1
-                // so the next iteration with the current mu will give a non-zero primal (start proximal Newton from here);
-                // otherwise, the proximal newton step overshot so we must backtrack.
-                if (!is_prev_valid || (mu_resid_norm_prev <= l1) || (mu_resid_norm_sq > l1 * l1)) {
-                    throw util::adelie_core_error(
-                        "Possibly an unexpected error! "
-                        "Previous iterate should have been properly initialized. "
-                        "This may occur if cs_tol is too small. "
-                        "If increasing cs_tol does not fix the issue, "
-                        "please report this as a bug! "
-                    );
-                }
-                const value_t lmda_target = (1-_slack) * l1 + _slack * mu_resid_norm_prev;
-                const value_t a = (mu - mu_prev).square().sum();
-                const value_t b = ((Qv - mu) * (mu - mu_prev)).sum();
-                const value_t c = mu_resid_norm_sq - lmda_target * lmda_target;
-                const value_t t_star = (-b + std::sqrt(std::max<value_t>(b * b - a * c, 0.0))) / a;
-                const value_t step_size = std::min<value_t>(std::max<value_t>(1-t_star, 0.0), 1.0);
-                mu = mu_prev + step_size * (mu - mu_prev);
-                continue;
-            }
-
+        const auto compute_backtrack_a = [&](
+            const auto& mu_prev,
+            const auto& mu
+        ) {
+            return (mu - mu_prev).square().sum();
+        };
+        const auto compute_backtrack_b = [&](
+            const auto& mu_prev,
+            const auto& mu,
+            const auto& Qv,
+            const auto& 
+        ) {
+            return ((Qv - mu) * (mu - mu_prev)).sum();
+        };
+        const auto compute_gradient = [&](
+            const auto& x,
+            const auto& Q
+        ) {
             grad.matrix() = x.matrix() * Q.transpose();
-
-            // optimization: if optimality hard-check is satisfied, finish early.
-            if (
+        };
+        const auto compute_hard_optimality = [&](
+            const auto& mu
+        ) {
+            return (
                 ((grad <= _u) && (grad >= -_l)).all() && 
                 (mu.max(0) * (grad - _u) == 0).all() &&
                 (mu.min(0) * (grad + _l) == 0).all()
-            ) return;
-
-            // Check if mu is not changing much w.r.t. hessian scaling.
-            if (is_prev_valid) {
-                if (compute_convergence_measure(mu-mu_prev, grad_prev-grad) <= _tol) return;
-            }
-
-            // save old values
-            mu_resid_norm_prev = mu_resid_norm;
-            mu_prev = mu;
-            grad_prev = grad;
-            is_prev_valid = true;
-
-            // Compute hessian
-            // NOTE:
-            //  - x_buffer1 = quad + l2
-            //  - x_buffer2 = 1 / (x_buffer1 * x_norm + lmda)
-
-            hess.setZero();
-            auto hess_lower = hess.template selfadjointView<Eigen::Lower>();
-
-            // lower(hess) += x_norm * Q diag(x_buffer2) Q^T
-            hess_buff.array() = Q.array().rowwise() * x_buffer2.sqrt();
-            hess_lower.rankUpdate(hess_buff, x_norm);
-
-            // lower(hess) += x_norm * lmda * kappa * alpha alpha^T
-            alpha_tmp = (x * x_buffer2) / x_norm;
-            alpha.matrix() = alpha_tmp.matrix() * Q.transpose();
-            const auto l1_kappa_norm = l1 * x_norm / (x * x_buffer1 * alpha_tmp).sum();
-            hess_lower.rankUpdate(alpha.matrix().transpose(), l1_kappa_norm);
-
-            // full hessian update
-            hess.template triangularView<Eigen::Upper>() = hess.transpose();
-
-            // solve hinge problem for new mu
+            );
+        };
+        const auto compute_convergence_measure = [&](
+            const auto& mu_prev,
+            const auto& mu,
+            bool is_in_ellipse
+        ) {
+            return is_in_ellipse ? (
+                std::abs(((mu-mu_prev) * grad_prev).mean())
+            ) : (
+                std::abs(((mu-mu_prev) * (grad_prev-grad)).mean())
+            );
+        };
+        const auto compute_proximal_newton_step = [&](
+            const auto& hess,
+            auto& mu
+        ) {
             optimization::StateHingeFull<colmat_value_t> state_hinge(
                 hess, _u, _l, _nnls_max_iters, _nnls_tol, mu, grad 
             );
             optimization::hinge_full(state_hinge);
-        }
-
-        throw util::adelie_core_solver_error("ConstraintBoxProximalNewton: max iterations reached!");
+        };
+        const auto save_additional_prev = [&](bool is_in_ellipse) {
+            if (is_in_ellipse) grad_prev.setZero();
+            else grad_prev = grad;
+        };
+        base_t::_solve_proximal_newton(
+            x, mu, quad, linear, l1, l2, Q, _max_iters, _tol, _cs_tol, _slack, next_buff,
+            compute_mu_resid,
+            compute_hard_min_mu_resid,
+            compute_soft_min_mu_resid,
+            compute_relaxed_slackness,
+            compute_backtrack_a,
+            compute_backtrack_b,
+            compute_gradient,
+            compute_hard_optimality,
+            compute_convergence_measure,
+            compute_proximal_newton_step,
+            save_additional_prev
+        );
     }
 };
 
