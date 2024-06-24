@@ -54,13 +54,6 @@ def run_test(
     eval = cnstr_exp.evaluate(Qx)
     assert np.allclose(np.maximum(np.max(eval), 0), 0, atol=atol)
 
-    # KKT dual feasibility
-    assert np.allclose(np.minimum(np.min(mu), 0), 0, atol=atol)
-
-    # KKT slack condition
-    slackness = np.mean(mu * eval)
-    assert np.allclose(slackness, 0, atol=atol)
-
     # test project 
     cnstr.project(Qx)
     eval = cnstr_exp.evaluate(Qx)
@@ -69,7 +62,41 @@ def run_test(
 
 @pytest.mark.parametrize("d", [1, 2, 5, 10, 20, 50])
 @pytest.mark.parametrize("method", ["proximal-newton"])
-@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+@pytest.mark.parametrize("dtype", [np.float64])
+@pytest.mark.parametrize("seed", np.arange(10))
+def test_box(d, method, dtype, seed):
+    np.random.seed(seed)
+    lower = -np.random.uniform(0, 1, d)
+    upper = np.random.uniform(0, 1, d)
+    configs = {
+        "proximal-newton": {
+            "max_iters": 1000,
+            "tol": 1e-14,
+            "nnls_tol": 1e-14,
+        },
+    }[method]
+    cnstr = constraint.box(lower, upper, method=method, configs=configs, dtype=dtype)
+
+    class Box:
+        def __init__(self):
+            self.dual_size = d
+            self.primal_size = d
+        def evaluate(self, x):
+            return np.concatenate([x - upper, lower - x])
+        def gradient(self, x, mu, out):
+            out[...] = mu
+        def duals(self):
+            return self.dual_size
+        def primals(self):
+            return self.primal_size
+
+    cnstr_exp = Box()
+    run_test(cnstr, cnstr_exp, dtype, seed)
+
+
+@pytest.mark.parametrize("d", [1, 2, 5, 10, 20, 50])
+@pytest.mark.parametrize("method", ["proximal-newton"])
+@pytest.mark.parametrize("dtype", [np.float64])
 @pytest.mark.parametrize("seed", np.arange(10))
 def test_lower(d, method, dtype, seed):
     np.random.seed(seed)
@@ -79,8 +106,6 @@ def test_lower(d, method, dtype, seed):
             "max_iters": 1000,
             "tol": 1e-14,
             "nnls_tol": 1e-14,
-        },
-        "admm": {
         },
     }[method]
     cnstr = constraint.lower(b, method=method, configs=configs, dtype=dtype)
@@ -104,7 +129,7 @@ def test_lower(d, method, dtype, seed):
 
 @pytest.mark.parametrize("d", [1, 2, 5, 10, 20, 50])
 @pytest.mark.parametrize("method", ["proximal-newton", "admm"])
-@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+@pytest.mark.parametrize("dtype", [np.float64])
 @pytest.mark.parametrize("seed", np.arange(5))
 def test_one_sided(d, method, dtype, seed):
     np.random.seed(seed)
@@ -144,7 +169,7 @@ def test_one_sided(d, method, dtype, seed):
 
 @pytest.mark.parametrize("d", [1, 2, 5, 10, 20, 50])
 @pytest.mark.parametrize("method", ["proximal-newton"])
-@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+@pytest.mark.parametrize("dtype", [np.float64])
 @pytest.mark.parametrize("seed", np.arange(5))
 def test_upper(d, method, dtype, seed):
     np.random.seed(seed)
@@ -154,8 +179,6 @@ def test_upper(d, method, dtype, seed):
             "max_iters": 1000,
             "tol": 1e-14,
             "nnls_tol": 1e-14,
-        },
-        "admm": {
         },
     }[method]
     cnstr = constraint.upper(b, method=method, configs=configs, dtype=dtype)

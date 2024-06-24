@@ -1,6 +1,7 @@
 #pragma once
 #include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/bcd/unconstrained/newton.hpp>
+#include <adelie_core/optimization/lasso_full.hpp>
 #include <adelie_core/util/macros.hpp>
 
 namespace adelie_core {
@@ -66,7 +67,7 @@ public:
         const auto x0 = is_zero_opt ? 0 : (
             A * std::max(std::min(
                 A * std::copysign(std::abs(v) - l1, v) / (q + l2), 
-                u, 
+                u 
             ), -l)
         );
         const auto mu0_full = A * (v - ((q + l2) * x0 + std::copysign(l1, x0)));
@@ -87,7 +88,7 @@ public:
         Eigen::Ref<vec_value_t> x
     ) override
     {
-        x = (x).min(_u).max(_l);
+        x = (x).min(_u).max(-_l);
     }
 
     void gradient(
@@ -124,6 +125,7 @@ private:
     const value_t _nnls_tol;
     const value_t _cs_tol;
     const value_t _slack;
+    const vec_value_t _penalty;
     vec_value_t _buff;
 
 public:
@@ -144,7 +146,8 @@ public:
         _nnls_tol(nnls_tol),
         _cs_tol(cs_tol),
         _slack(slack),
-        _buff((b.size() <= 1) ? 0 : (0))
+        _penalty(0.5 * (l + u)),
+        _buff((l.size() <= 1) ? 0 : (l.size() * (9 + 2 * l.size())))
     {
         if (tol < 0) {
             throw util::adelie_core_error("tol must be >= 0.");
@@ -239,13 +242,10 @@ public:
                 // may make us enter this loop infinitely.
                 if (is_prev_valid) {
                     const auto convg_meas = std::abs(
-                        ((mu-mu_prev) * (grad_prev+_b)).sum()
+                        ((mu-mu_prev) * grad_prev).sum()
                     ) / m;
                     if (convg_meas <= _tol) {
                         x.setZero();
-                        #ifdef ADELIE_CORE_DEBUG
-                        save_iterate();
-                        #endif
                         return;
                     }
                 }
@@ -270,40 +270,25 @@ public:
                     } else {
                         mu_resid_norm_prev = mu_resid_norm;
                         mu_prev = mu;
-                        grad_prev = -_b;
+                        grad_prev.setZero();
                         is_prev_valid = true;
                     }
-                    mu = (_sgn * Qv).max(0);
 
-                    // Technically, we must find mu such that:
-                    // 1) KKT first-order condition: ||v - Q.T @ (_sgn * mu)||_2 <= l1.
-                    // 2) Primal feasibility: _sgn * Q @ x <= b (already satisfied with x = 0).
-                    // 3) Dual feasibility: mu >= 0.
-                    // 4) Complementary slackness: mu * _b = 0.
-                    // Perform 2 checks:
-                    // a) Relax 4) by setting mu = (_sgn * Q @ v) to minimize the norm in 1)
-                    //    and checking whether mean((mu * _b) ** 2) is small.
-                    // b) Mathematically, mu = (_sgn * Q @ v) * (_b <= 0) satisfies 2)-4)
-                    //    and minimizes the norm in 1). If the norm is <= l1, done.   
-                    value_t nnls_loss = (Qv - _sgn * mu).square().sum();
                     if (
-                        (nnls_loss <= l1 * l1) &&
-                        ((mu * _b).square().mean() <= _cs_tol)
+                        ((Qv * _u).square().mean() <= _cs_tol) &&
+                        ((Qv * _l).square().mean() <= _cs_tol)
                      ) {
                         x.setZero();
-                        #ifdef ADELIE_CORE_DEBUG
-                        save_iterate();
-                        #endif
                         return;
                     }
 
-                    mu *= (_b <= 0).template cast<value_t>();
-                    nnls_loss = (Qv - _sgn * mu).square().sum();
+                    mu = (
+                        Qv.max(0) * (_u <= 0).template cast<value_t>()
+                        + Qv.min(0) * (_l <= 0).template cast<value_t>()
+                    );
+                    value_t nnls_loss = (Qv - mu).square().sum();
                     if (nnls_loss <= l1 * l1) {
                         x.setZero();
-                        #ifdef ADELIE_CORE_DEBUG
-                        save_iterate();
-                        #endif
                         return;
                     }
 
@@ -328,7 +313,7 @@ public:
                 }
                 const value_t lmda_target = (1-_slack) * l1 + _slack * mu_resid_norm_prev;
                 const value_t a = (mu - mu_prev).square().sum();
-                const value_t b = ((_sgn * Qv - mu) * (mu - mu_prev)).sum();
+                const value_t b = ((Qv - mu) * (mu - mu_prev)).sum();
                 const value_t c = mu_resid_norm_sq - lmda_target * lmda_target;
                 const value_t t_star = (-b + std::sqrt(std::max<value_t>(b * b - a * c, 0.0))) / a;
                 const value_t step_size = std::min<value_t>(std::max<value_t>(1-t_star, 0.0), 1.0);
@@ -336,17 +321,13 @@ public:
                 continue;
             }
 
-            #ifdef ADELIE_CORE_DEBUG
-            save_iterate();
-            #endif
-
             grad.matrix() = x.matrix() * Q.transpose();
 
             // optimization: if optimality hard-check is satisfied, finish early.
             if (
                 ((grad <= _u) && (grad >= -_l)).all() && 
                 (mu.max(0) * (grad - _u) == 0).all() &&
-                (mu.min(0) * (grad - _l) == 0).all()
+                (mu.min(0) * (grad + _l) == 0).all()
             ) return;
 
             // Check if mu is not changing much w.r.t. hessian scaling.
@@ -362,6 +343,9 @@ public:
             mu_prev = mu;
             grad_prev = grad;
             is_prev_valid = true;
+
+            // adjust for lasso solver
+            grad -= 0.5 * (_u - _l);
 
             // Compute hessian
             // NOTE:
@@ -384,17 +368,14 @@ public:
             // full hessian update
             hess.template triangularView<Eigen::Upper>() = hess.transpose();
 
-            // solve NNQP for new mu
-            optimization::StateNNQPFull<colmat_value_t, true> state_nnqp(
-                _sgn, hess, _nnls_max_iters, _nnls_tol, 0, mu, grad
+            // solve lasso for new mu
+            optimization::StateLassoFull<colmat_value_t> state_lasso(
+                hess, _penalty, _nnls_max_iters, _nnls_tol, mu, grad
             );
-            optimization::nnqp_full(state_nnqp); 
-
-            // reparametrize
-            mu *= _sgn;
+            optimization::lasso_full(state_lasso); 
         }
 
-        throw util::adelie_core_solver_error("ConstraintOneSidedProximalNewton: max iterations reached!");
+        throw util::adelie_core_solver_error("ConstraintBoxProximalNewton: max iterations reached!");
     }
 };
 

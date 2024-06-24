@@ -116,7 +116,8 @@ void nnqp_full(
                 const auto gi = grad[i];
                 auto& xi = x[i];
                 const auto xi_old = xi;
-                xi = (si > 0) ? std::max<value_t>(xi + gi / qii, 0) : std::min<value_t>(xi + gi / qii, 0);
+                const auto step = (qii <= 0) ? 0 : (gi / qii);
+                xi = (si > 0) ? std::max<value_t>(xi + step, 0) : std::min<value_t>(xi + step, 0);
                 const auto del = xi - xi_old;
                 if (del == 0) continue;
                 const auto scaled_del_sq = qii * del * del; 
@@ -138,7 +139,8 @@ void nnqp_full(
                 const auto gi = grad[i];
                 auto& xi = x[i];
                 const auto xi_old = xi;
-                xi = std::max<value_t>(xi + gi / qii, 0);
+                const auto step = (qii <= 0) ? 0 : (gi / qii);
+                xi = std::max<value_t>(xi + step, 0);
                 const auto del = xi - xi_old;
                 if (del == 0) continue;
                 const auto scaled_del_sq = qii * del * del; 

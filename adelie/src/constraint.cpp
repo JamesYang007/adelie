@@ -1,6 +1,7 @@
 #include "decl.hpp"
 #include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/constraint/constraint_one_sided.hpp>
+#include <adelie_core/constraint/constraint_box.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -298,6 +299,49 @@ void constraint_one_sided_admm(py::module_& m, const char* name)
         ;
 }
 
+template <class ValueType>
+void constraint_box_base(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintBoxBase<ValueType>;
+    using base_t = typename internal_t::base_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint base class for box constraint."
+        )
+        ;
+}
+
+template <class ValueType>
+void constraint_box_proximal_newton(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintBoxProximalNewton<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using value_t = typename internal_t::value_t;
+    using vec_value_t = typename internal_t::vec_value_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint class for box constraint with proximal Newton solver."
+        )
+        .def(py::init<
+            const Eigen::Ref<const vec_value_t>,
+            const Eigen::Ref<const vec_value_t>,
+            size_t,
+            value_t,
+            size_t,
+            value_t,
+            value_t,
+            value_t
+        >(), 
+            py::arg("lower"),
+            py::arg("upper"),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("nnls_max_iters"),
+            py::arg("nnls_tol"),
+            py::arg("cs_tol"),
+            py::arg("slack")
+        )
+        ;
+}
+
 void register_constraint(py::module_& m)
 {
     py::bind_vector<std::vector<ad::constraint::ConstraintBase<double>*>>(m, "VectorConstraintBase64");
@@ -312,4 +356,9 @@ void register_constraint(py::module_& m)
     constraint_one_sided_proximal_newton<float>(m, "ConstraintOneSidedProximalNewton32");
     constraint_one_sided_admm<double>(m, "ConstraintOneSidedADMM64");
     constraint_one_sided_admm<float>(m, "ConstraintOneSidedADMM32");
+
+    constraint_box_base<double>(m, "ConstraintBoxBase64");
+    constraint_box_base<float>(m, "ConstraintBoxBase32");
+    constraint_box_proximal_newton<double>(m, "ConstraintBoxProximalNewton64");
+    constraint_box_proximal_newton<float>(m, "ConstraintBoxProximalNewton32");
 }

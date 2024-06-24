@@ -80,7 +80,8 @@ void nnls(
             auto& bi = beta[i];
             const auto gi = X.col(i).dot(resid.matrix());
             const auto bi_old = bi;
-            bi = std::max<value_t>(bi + gi / X_vars_i, 0.0);
+            const auto step = (X_vars_i <= 0) ? 0 : (gi / X_vars_i);
+            bi = std::max<value_t>(bi + step, 0.0);
             const auto del = bi - bi_old;
             if (del == 0) continue;
             const auto scaled_del_sq = X_vars_i * del * del; 

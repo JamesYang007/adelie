@@ -139,3 +139,90 @@ def test_nnls(d, seed):
     resid_actual = resid
     resid_expected = y - X @ x
     assert np.allclose(resid_actual, resid_expected)
+
+
+@pytest.mark.parametrize("d", [3, 5, 10, 20])
+@pytest.mark.parametrize("seed", np.arange(20))
+def test_lasso_full(d, seed):
+    def run_cvxpy(quad, linear, penalty):
+        d = quad.shape[0]
+        x = cp.Variable(d)
+        expr = 0.5 * cp.quad_form(x, quad) - linear @ x + penalty @ cp.abs(x)
+        constraints = []
+        prob = cp.Problem(cp.Minimize(expr), constraints)
+        prob.solve()
+        return x.value
+
+    def objective(x, quad, linear, penalty):
+        return 0.5 * (x.T @ quad @ x) - linear @ x + penalty @ np.abs(x)
+
+    np.random.seed(seed)
+    n = 10
+    X = np.random.normal(0, 1, (n, d))
+    y = np.random.normal(0, 1, n)
+    penalty = np.random.uniform(0, 1, d)
+    X /= np.sqrt(n)
+    y /= np.sqrt(n)
+    quad = np.asfortranarray(X.T @ X)
+    linear = X.T @ y
+
+    x_cvxpy = run_cvxpy(quad, linear, penalty)
+
+    x = np.zeros(d)
+    grad = linear.copy()
+    state = opt.StateLassoFull(quad, penalty, 1000000, 1e-24, x, grad)
+    state.solve()
+
+    # test loss against truth
+    loss_actual = objective(x, quad, linear, penalty)
+    loss_expected = objective(x_cvxpy, quad, linear, penalty)
+    assert np.allclose(loss_actual, loss_expected)
+
+    # test gradient
+    grad_actual = state.grad
+    grad_expected = linear - quad @ x
+    assert np.allclose(grad_actual, grad_expected)
+
+
+@pytest.mark.parametrize("d", [3, 5, 10, 20])
+@pytest.mark.parametrize("seed", np.arange(20))
+def test_hinge_full(d, seed):
+    def run_cvxpy(quad, linear, penalty_pos, penalty_neg):
+        d = quad.shape[0]
+        x = cp.Variable(d)
+        expr = 0.5 * cp.quad_form(x, quad) - linear @ x + penalty_pos @ cp.pos(x) + penalty_neg @ cp.neg(x)
+        constraints = []
+        prob = cp.Problem(cp.Minimize(expr), constraints)
+        prob.solve()
+        return x.value
+
+    def objective(x, quad, linear, penalty_pos, penalty_neg):
+        return 0.5 * (x.T @ quad @ x) - linear @ x + penalty_pos @ np.maximum(x, 0) + penalty_neg @ np.maximum(-x, 0)
+
+    np.random.seed(seed)
+    n = 10
+    X = np.random.normal(0, 1, (n, d))
+    y = np.random.normal(0, 1, n)
+    penalty_pos = np.random.uniform(0, 1, d)
+    penalty_neg = 1e30 + np.random.uniform(0, 1, d)
+    X /= np.sqrt(n)
+    y /= np.sqrt(n)
+    quad = np.asfortranarray(X.T @ X)
+    linear = X.T @ y
+
+    x_cvxpy = run_cvxpy(quad, linear, penalty_pos, penalty_neg)
+
+    x = np.zeros(d)
+    grad = linear.copy()
+    state = opt.StateHingeFull(quad, penalty_pos, penalty_neg, 100000, 1e-24, x, grad)
+    state.solve()
+
+    # test loss against truth
+    loss_actual = objective(x, quad, linear, penalty_pos, penalty_neg)
+    loss_expected = objective(x_cvxpy, quad, linear, penalty_pos, penalty_neg)
+    assert np.allclose(loss_actual, loss_expected, atol=1e-7)
+
+    # test gradient
+    grad_actual = state.grad
+    grad_expected = linear - quad @ x
+    assert np.allclose(grad_actual, grad_expected, atol=1e-7)
