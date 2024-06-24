@@ -1,6 +1,5 @@
 #pragma once
 #include <adelie_core/constraint/constraint_base.hpp>
-#include <adelie_core/bcd/unconstrained/newton.hpp>
 #include <adelie_core/optimization/nnqp_full.hpp>
 #include <adelie_core/util/macros.hpp>
 
@@ -119,11 +118,6 @@ private:
     const value_t _slack;
     vec_value_t _buff;
 
-#ifdef ADELIE_CORE_DEBUG
-    std::vector<vec_value_t> _primals;
-    std::vector<vec_value_t> _duals;
-#endif
-
 public:
     explicit ConstraintOneSidedProximalNewton(
         const Eigen::Ref<const vec_value_t> sgn,
@@ -158,20 +152,6 @@ public:
         }
     }
 
-    auto debug_info() const 
-    {
-        #ifdef ADELIE_CORE_DEBUG
-        util::rowmat_type<value_t> pr(_primals.size(), _b.size());
-        util::rowmat_type<value_t> du(_duals.size(), _b.size());
-        for (size_t i = 0; i < _primals.size(); ++i) 
-        {
-            pr.row(i) = _primals[i];
-            du.row(i) = _duals[i];
-        }
-        return std::make_tuple(pr, du); 
-        #endif
-    }
-
     void solve(
         Eigen::Ref<vec_value_t> x,
         Eigen::Ref<vec_value_t> mu,
@@ -184,11 +164,6 @@ public:
     {
         using rowmat_value_t = util::rowmat_type<value_t>;
 
-        #ifdef ADELIE_CORE_DEBUG
-        _primals.clear();
-        _duals.clear();
-        #endif
-        
         const auto m = _b.size();
         const auto d = m;
 
@@ -228,17 +203,6 @@ public:
                 x, x_iters, x_buffer1, x_buffer2
             );
         };
-        #ifdef ADELIE_CORE_DEBUG
-        const auto save_iterate = [&]() {
-            _primals.push_back(x);
-            _duals.push_back(mu);
-            if (Eigen::isnan(x).any() || Eigen::isnan(mu).any()) {
-                PRINT(x);
-                PRINT(mu);
-                throw util::adelie_core_error("Found nan!");
-            }
-        };
-        #endif
 
         while (iters < _max_iters) {
             ++iters;
@@ -271,9 +235,6 @@ public:
                     ) / m;
                     if (convg_meas <= _tol) {
                         x.setZero();
-                        #ifdef ADELIE_CORE_DEBUG
-                        save_iterate();
-                        #endif
                         return;
                     }
                 }
