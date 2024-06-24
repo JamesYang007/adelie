@@ -21,7 +21,7 @@ def box(
 
     The box constraint is given by 
     :math:`\\ell \\leq x \\leq u` where 
-    and :math:`\\ell \\leq 0 \\leq u`.
+    :math:`\\ell \\leq 0 \\leq u`.
 
     Parameters
     ----------
@@ -138,7 +138,7 @@ def lower(
 ):
     """Creates a lower bound constraint.
 
-    The lower bound constraint is given by :math:`x \\geq -b` where :math:`b \\geq 0`.
+    The lower bound constraint is given by :math:`x \\geq b` where :math:`b \\leq 0`.
 
     Parameters
     ----------
@@ -159,7 +159,7 @@ def lower(
     D = np.full(b.shape[0], -1.0)
     return one_sided(
         D=D, 
-        b=b, 
+        b=-b, 
         **kwargs,
     )
 
@@ -176,7 +176,7 @@ def one_sided(
 
     The one-sided bound constraint is given by 
     :math:`D x \\leq b` where 
-    :math:`D` is a diagonal matrix with :math:`\\pm 1` along the diagonal,
+    :math:`D` is a diagonal matrix with :math:`\\pm 1` along the diagonal
     and :math:`b \\geq 0`.
 
     Parameters

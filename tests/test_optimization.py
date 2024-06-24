@@ -204,7 +204,7 @@ def test_hinge_full(d, seed):
     X = np.random.normal(0, 1, (n, d))
     y = np.random.normal(0, 1, n)
     penalty_pos = np.random.uniform(0, 1, d)
-    penalty_neg = 1e30 + np.random.uniform(0, 1, d)
+    penalty_neg = np.random.uniform(0, 1, d)
     X /= np.sqrt(n)
     y /= np.sqrt(n)
     quad = np.asfortranarray(X.T @ X)
@@ -220,7 +220,7 @@ def test_hinge_full(d, seed):
     # test loss against truth
     loss_actual = objective(x, quad, linear, penalty_pos, penalty_neg)
     loss_expected = objective(x_cvxpy, quad, linear, penalty_pos, penalty_neg)
-    assert np.allclose(loss_actual, loss_expected, atol=1e-7)
+    assert np.all(loss_actual <= loss_expected * (1 + np.sign(loss_expected) * 1e-7))
 
     # test gradient
     grad_actual = state.grad

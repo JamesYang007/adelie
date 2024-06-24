@@ -1,7 +1,7 @@
 #pragma once
 #include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/bcd/unconstrained/newton.hpp>
-#include <adelie_core/optimization/lasso_full.hpp>
+#include <adelie_core/optimization/hinge_full.hpp>
 #include <adelie_core/util/macros.hpp>
 
 namespace adelie_core {
@@ -30,13 +30,14 @@ public:
         _u(u.data(), u.size())
     {
         if (_u.size() != _l.size()) {
-            throw util::adelie_core_error("u and l must have the same length.");
+            throw util::adelie_core_error("upper and lower must have the same length.");
         }
         if ((_u < 0).any()) {
-            throw util::adelie_core_error("u must be >= 0.");
+            throw util::adelie_core_error("upper must be >= 0.");
         }
-        if ((_l < 0).any()) {
-            throw util::adelie_core_error("l must be >= 0.");
+        // NOTE: user passes in lower == -l
+        if ((_l < 0).any()) { 
+            throw util::adelie_core_error("lower must be <= 0.");
         }
     }
 
@@ -125,7 +126,6 @@ private:
     const value_t _nnls_tol;
     const value_t _cs_tol;
     const value_t _slack;
-    const vec_value_t _penalty;
     vec_value_t _buff;
 
 public:
@@ -146,7 +146,6 @@ public:
         _nnls_tol(nnls_tol),
         _cs_tol(cs_tol),
         _slack(slack),
-        _penalty(0.5 * (l + u)),
         _buff((l.size() <= 1) ? 0 : (l.size() * (9 + 2 * l.size())))
     {
         if (tol < 0) {
@@ -275,8 +274,8 @@ public:
                     }
 
                     if (
-                        ((Qv * _u).square().mean() <= _cs_tol) &&
-                        ((Qv * _l).square().mean() <= _cs_tol)
+                        ((Qv.max(0) * _u).square().mean() <= _cs_tol) &&
+                        ((Qv.min(0) * _l).square().mean() <= _cs_tol)
                      ) {
                         x.setZero();
                         return;
@@ -344,9 +343,6 @@ public:
             grad_prev = grad;
             is_prev_valid = true;
 
-            // adjust for lasso solver
-            grad -= 0.5 * (_u - _l);
-
             // Compute hessian
             // NOTE:
             //  - x_buffer1 = quad + l2
@@ -368,11 +364,11 @@ public:
             // full hessian update
             hess.template triangularView<Eigen::Upper>() = hess.transpose();
 
-            // solve lasso for new mu
-            optimization::StateLassoFull<colmat_value_t> state_lasso(
-                hess, _penalty, _nnls_max_iters, _nnls_tol, mu, grad
+            // solve hinge problem for new mu
+            optimization::StateHingeFull<colmat_value_t> state_hinge(
+                hess, _u, _l, _nnls_max_iters, _nnls_tol, mu, grad 
             );
-            optimization::lasso_full(state_lasso); 
+            optimization::hinge_full(state_hinge);
         }
 
         throw util::adelie_core_solver_error("ConstraintBoxProximalNewton: max iterations reached!");

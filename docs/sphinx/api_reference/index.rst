@@ -56,6 +56,7 @@ adelie.constraint
     :toctree: generated/
 
 
+    box
     lower
     one_sided
     upper
