@@ -1,4 +1,5 @@
 #include "decl.hpp"
+#include <adelie_core/optimization/linqp_full.hpp>
 #include <adelie_core/optimization/nnls.hpp>
 #include <adelie_core/optimization/nnqp_full.hpp>
 #include <adelie_core/optimization/hinge_full.hpp>
@@ -309,6 +310,96 @@ void hinge_full(py::module_& m, const char* name)
         ;
 }
 
+template <class MatrixType>
+void linqp_full(py::module_& m, const char* name)
+{
+    using state_t = ad::optimization::StateLinQPFull<MatrixType>;
+    using matrix_t = typename state_t::matrix_t;
+    using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    py::class_<state_t>(m, name, R"delimiter(
+    Solves the QP problem with linear inequality constraints.
+
+    The QP problem with linear inequality constraints is given by
+
+    .. math::
+        \begin{align*}
+            \mathrm{minimize} \quad&
+            \frac{1}{2} x^\top Q x - v^\top x 
+            \\\text{subject to} \quad&
+            -\ell \leq Ax \leq u
+        \end{align*}
+
+    where :math:`Q` is a dense positive semi-definite matrix.
+
+    Parameters
+    ----------
+    quad : (n, n) ndarray
+        Full positive semi-definite dense matrix :math:`Q`.
+    linear : (n,) ndarray
+        Linear term :math:`v`.
+    A : (m, n) ndarray
+        Constraint matrix :math:`A`.
+    lower : (n,) ndarray
+        Lower bound :math:`\ell`.
+    upper : (n,) ndarray
+        Upper bound :math:`u`.
+    max_iters : int
+        Maximum number of Newton iterations.
+    tol : float
+        Convergence tolerance.
+    slack : float
+        Backtracking slackness to ensure strict feasibility.
+    x : (n,) ndarray
+        Solution vector.
+    )delimiter")
+        .def(py::init<
+            const Eigen::Ref<const matrix_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const matrix_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            size_t,
+            value_t,
+            value_t,
+            Eigen::Ref<vec_value_t> 
+        >(),
+            py::arg("quad").noconvert(),
+            py::arg("linear").noconvert(),
+            py::arg("A").noconvert(),
+            py::arg("lower").noconvert(),
+            py::arg("upper").noconvert(),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("slack"),
+            py::arg("x")
+        )
+        .def_readonly("quad", &state_t::quad)
+        .def_readonly("linear", &state_t::linear)
+        .def_readonly("A", &state_t::A)
+        .def_readonly("lower", &state_t::lower)
+        .def_readonly("upper", &state_t::upper)
+        .def_readonly("max_iters", &state_t::max_iters)
+        .def_readonly("tol", &state_t::tol)
+        .def_readonly("slack", &state_t::slack)
+        .def_readonly("iters", &state_t::iters)
+        .def_readonly("x", &state_t::x)
+        .def_readonly("time_elapsed", &state_t::time_elapsed)
+        .def_property_readonly("buffer_size", &state_t::buffer_size)
+        .def("solve_barrier", [](
+            state_t& state, 
+            value_t t, 
+            Eigen::Ref<vec_value_t> buff
+        ) {
+            using sw_t = ad::util::Stopwatch;
+            sw_t sw;
+            sw.start();
+            state.solve_barrier(t, buff);
+            state.time_elapsed = sw.elapsed();
+        })
+        ;
+}
+
 void register_optimization(py::module_& m)
 {
     m.def("search_pivot", &search_pivot, R"delimiter(
@@ -360,6 +451,7 @@ void register_optimization(py::module_& m)
         The argmin of the minimization problem.
     )delimiter");
 
+    linqp_full<ad::util::colmat_type<double>>(m, "StateLinQPFull");
     nnqp_full<ad::util::colmat_type<double>>(m, "StateNNQPFull");
     nnls<ad::util::colmat_type<double>>(m, "StateNNLS");
     lasso_full<ad::util::colmat_type<double>>(m, "StateLassoFull");

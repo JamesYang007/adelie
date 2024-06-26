@@ -6,6 +6,8 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall" 
 #pragma GCC diagnostic ignored "-Wextra" 
+#pragma GCC diagnostic ignored "-pedantic"
+#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 #endif
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
@@ -16,6 +18,8 @@
 #if defined(_MSC_VER)
 #pragma warning( pop )
 #elif defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 #pragma GCC diagnostic pop
 #pragma GCC diagnostic pop
 #endif
