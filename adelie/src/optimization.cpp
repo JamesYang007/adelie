@@ -364,6 +364,7 @@ void linqp_full(py::module_& m, const char* name)
             value_t,
             value_t,
             value_t,
+            value_t,
             size_t,
             Eigen::Ref<vec_value_t> 
         >(),
@@ -373,6 +374,7 @@ void linqp_full(py::module_& m, const char* name)
             py::arg("lower").noconvert(),
             py::arg("upper").noconvert(),
             py::arg("max_iters"),
+            py::arg("relaxed_tol"),
             py::arg("tol"),
             py::arg("slack"),
             py::arg("lmda_max"),
@@ -386,9 +388,11 @@ void linqp_full(py::module_& m, const char* name)
         .def_readonly("lower", &state_t::lower)
         .def_readonly("upper", &state_t::upper)
         .def_readonly("max_iters", &state_t::max_iters)
+        .def_readonly("relaxed_tol", &state_t::relaxed_tol)
         .def_readonly("tol", &state_t::tol)
         .def_readonly("slack", &state_t::slack)
         .def_readonly("iters", &state_t::iters)
+        .def_readonly("backtrack_iters", &state_t::backtrack_iters)
         .def_readonly("lmda_max", &state_t::lmda_max)
         .def_readonly("lmda_min", &state_t::lmda_min)
         .def_readonly("lmda_path_size", &state_t::lmda_path_size)

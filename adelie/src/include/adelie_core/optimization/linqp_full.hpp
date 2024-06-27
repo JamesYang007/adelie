@@ -23,6 +23,7 @@ struct StateLinQPFull
     const map_cvec_value_t upper;
 
     const size_t max_iters;
+    const value_t relaxed_tol;
     const value_t tol;
     const value_t slack;
     const value_t lmda_max;
@@ -30,6 +31,7 @@ struct StateLinQPFull
     const size_t lmda_path_size;
 
     size_t iters = 0;
+    size_t backtrack_iters = 0;
     map_vec_value_t x;   
 
     double time_elapsed = 0;
@@ -41,6 +43,7 @@ struct StateLinQPFull
         const Eigen::Ref<const vec_value_t>& lower,
         const Eigen::Ref<const vec_value_t>& upper,
         size_t max_iters,
+        value_t relaxed_tol,
         value_t tol,
         value_t slack,
         value_t lmda_max,
@@ -54,6 +57,7 @@ struct StateLinQPFull
         lower(lower.data(), lower.size()),
         upper(upper.data(), upper.size()),
         max_iters(max_iters),
+        relaxed_tol(relaxed_tol),
         tol(tol),
         slack(slack),
         lmda_max(lmda_max),
@@ -92,16 +96,19 @@ struct StateLinQPFull
         value_t lmda = lmda_max;
 
         iters = 0;
+        backtrack_iters = 0;
 
         for (size_t i = 0; i < lmda_path_size; ++i) {
-            const value_t _tol = (i+1 < lmda_path_size) ? 1e-4 : tol;
+            const value_t _tol = (i+1 < lmda_path_size) ? relaxed_tol : tol;
+
+            bool is_prev_valid = false;
 
             while (iters < max_iters) {
                 // compute gradient
                 grad = (1 / (upper - Ax) - 1 / (Ax + lower)).matrix() * A;
                 grad = (x.matrix() * quad).array() - linear + (lmda / m) * grad;
 
-                if (iters) {
+                if (is_prev_valid) {
                     if (std::abs(((x-x_prev) * (grad - grad_prev)).mean()) <= _tol) break;
                 }
 
@@ -109,6 +116,7 @@ struct StateLinQPFull
                 x_prev = x;
                 Ax_prev = Ax;
                 grad_prev = grad;
+                is_prev_valid = true;
 
                 // compute hessian
                 D = (lmda / m) * (1 / (upper - Ax).square() + 1 / (Ax + lower).square());
@@ -129,6 +137,7 @@ struct StateLinQPFull
                         1
                     ), 0);
                     Ax = Ax_prev + step_size * (Ax - Ax_prev);
+                    ++backtrack_iters;
                 } while (
                     (Ax >= upper).any() ||
                     (Ax <= -lower).any()
