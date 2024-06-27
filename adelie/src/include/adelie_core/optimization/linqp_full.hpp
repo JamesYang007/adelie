@@ -25,6 +25,9 @@ struct StateLinQPFull
     const size_t max_iters;
     const value_t tol;
     const value_t slack;
+    const value_t lmda_max;
+    const value_t lmda_min;
+    const size_t lmda_path_size;
 
     size_t iters = 0;
     map_vec_value_t x;   
@@ -40,6 +43,9 @@ struct StateLinQPFull
         size_t max_iters,
         value_t tol,
         value_t slack,
+        value_t lmda_max,
+        value_t lmda_min,
+        size_t lmda_path_size,
         Eigen::Ref<vec_value_t> x
     ):
         quad(quad.data(), quad.rows(), quad.cols()),
@@ -50,6 +56,9 @@ struct StateLinQPFull
         max_iters(max_iters),
         tol(tol),
         slack(slack),
+        lmda_max(lmda_max),
+        lmda_min(lmda_min),
+        lmda_path_size(lmda_path_size),
         x(x.data(), x.size())
     {}
 
@@ -76,50 +85,66 @@ struct StateLinQPFull
         Eigen::Map<vec_value_t> D(buff_ptr, m); buff_ptr += m;
         Eigen::Map<matrix_t> hess(buff_ptr, d, d); buff_ptr += d * d;
 
-        iters = 0;
-
         Ax.matrix() = x.matrix() * A.transpose();
 
-        while (iters < max_iters) {
-            // compute gradient
-            grad = (1 / (upper - Ax) - 1 / (Ax + lower)).matrix() * A;
-            grad += t * ((x.matrix() * quad).array() - linear);
+        const value_t min_ratio = lmda_min / lmda_max;
+        const value_t lmda_factor = std::pow(min_ratio, 1.0 / (lmda_path_size-1));
+        value_t lmda = lmda_max;
 
-            if (iters) {
-                if (std::abs(((x-x_prev) * (grad - grad_prev)).mean()) <= tol) return;
+        iters = 0;
+
+        for (size_t i = 0; i < lmda_path_size; ++i) {
+            const value_t _tol = (i+1 < lmda_path_size) ? 1e-4 : tol;
+
+            while (iters < max_iters) {
+                // compute gradient
+                grad = (1 / (upper - Ax) - 1 / (Ax + lower)).matrix() * A;
+                grad = (x.matrix() * quad).array() - linear + (lmda / m) * grad;
+
+                if (iters) {
+                    if (std::abs(((x-x_prev) * (grad - grad_prev)).mean()) <= _tol) break;
+                }
+
+                // save previous 
+                x_prev = x;
+                Ax_prev = Ax;
+                grad_prev = grad;
+
+                // compute hessian
+                D = (lmda / m) * (1 / (upper - Ax).square() + 1 / (Ax + lower).square());
+                hess.noalias() = A.transpose() * D.matrix().asDiagonal() * A;
+                hess += quad;
+
+                // compute Newton update
+                Eigen::LLT<Eigen::Ref<matrix_t>> hess_chol(hess);
+                x.matrix() -= hess_chol.solve(grad.matrix().transpose());
+
+                Ax.matrix() = x.matrix() * A.transpose();
+
+                // backtrack for feasibility
+                value_t step_size = -1;
+                do {
+                    step_size = (1-slack) * std::max<value_t>(std::min<value_t>(
+                        ((upper - Ax_prev).min(lower + Ax_prev) / (Ax - Ax_prev).abs().max(_tol)).minCoeff(),
+                        1
+                    ), 0);
+                    Ax = Ax_prev + step_size * (Ax - Ax_prev);
+                } while (
+                    (Ax >= upper).any() ||
+                    (Ax <= -lower).any()
+                );
+                x = x_prev + step_size * (x - x_prev);
+
+                ++iters;
             }
 
-            // save previous 
-            x_prev = x;
-            Ax_prev = Ax;
-            grad_prev = grad;
+            if (iters >= max_iters) {
+                throw util::adelie_core_solver_error(
+                    "StateLinQPFull: maximum iterations reached!"
+                );
+            }
 
-            // compute hessian
-            D = 1 / (upper - Ax).square() + 1 / (Ax + lower).square();
-            hess.noalias() = A.transpose() * D.matrix().asDiagonal() * A;
-            hess += t * quad;
-
-            // compute Newton update
-            Eigen::LLT<Eigen::Ref<matrix_t>> hess_chol(hess);
-            x.matrix() -= hess_chol.solve(grad.matrix().transpose());
-
-            Ax.matrix() = x.matrix() * A.transpose();
-
-            // backtrack for feasibility
-            value_t step_size = -1;
-            do {
-                step_size = (1-slack) * std::max<value_t>(std::min<value_t>(
-                    ((upper - Ax_prev).min(lower + Ax_prev) / (Ax - Ax_prev).abs().max(tol)).minCoeff(),
-                    1
-                ), 0);
-                Ax = Ax_prev + step_size * (Ax - Ax_prev);
-            } while (
-                (Ax >= upper).any() ||
-                (Ax <= -lower).any()
-            );
-            x = x_prev + step_size * (x - x_prev);
-
-            ++iters;
+            lmda *= lmda_factor;
         }
     }
 };

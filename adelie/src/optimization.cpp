@@ -362,6 +362,9 @@ void linqp_full(py::module_& m, const char* name)
             size_t,
             value_t,
             value_t,
+            value_t,
+            value_t,
+            size_t,
             Eigen::Ref<vec_value_t> 
         >(),
             py::arg("quad").noconvert(),
@@ -372,6 +375,9 @@ void linqp_full(py::module_& m, const char* name)
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("slack"),
+            py::arg("lmda_max"),
+            py::arg("lmda_min"),
+            py::arg("lmda_path_size"),
             py::arg("x")
         )
         .def_readonly("quad", &state_t::quad)
@@ -383,18 +389,20 @@ void linqp_full(py::module_& m, const char* name)
         .def_readonly("tol", &state_t::tol)
         .def_readonly("slack", &state_t::slack)
         .def_readonly("iters", &state_t::iters)
+        .def_readonly("lmda_max", &state_t::lmda_max)
+        .def_readonly("lmda_min", &state_t::lmda_min)
+        .def_readonly("lmda_path_size", &state_t::lmda_path_size)
         .def_readonly("x", &state_t::x)
         .def_readonly("time_elapsed", &state_t::time_elapsed)
         .def_property_readonly("buffer_size", &state_t::buffer_size)
-        .def("solve_barrier", [](
+        .def("solve", [](
             state_t& state, 
-            value_t t, 
             Eigen::Ref<vec_value_t> buff
         ) {
             using sw_t = ad::util::Stopwatch;
             sw_t sw;
             sw.start();
-            state.solve_barrier(t, buff);
+            state.solve(buff);
             state.time_elapsed = sw.elapsed();
         })
         ;
