@@ -393,12 +393,6 @@ inline void solve_core(
 
     for (; pb_it != pb.end(); ++pb_it)
     {
-        // check early exit
-        if (early_exit_f(state)) {
-            pb_add_suffix_f(state, pb);
-            break;
-        }
-
         // batch the next set of lambdas
         const auto lmda_curr = lmda_path[lmda_path_idx];
 
@@ -468,7 +462,17 @@ inline void solve_core(
         } // end while(1)
 
         pb_add_suffix_f(state, pb);
-    }
+
+        // Early exit condition must be here to ensure that 
+        // it is called after processing each lambda (including the last lambda).
+        if (early_exit_f(state)) {
+            // must add one more bar
+            ++pb_it;
+            if (!(pb_it != pb.end())) break;
+            pb_add_suffix_f(state, pb);
+            break;
+        }
+    } // end for-loop over progress bar
 }
 
 } // namespace solver
