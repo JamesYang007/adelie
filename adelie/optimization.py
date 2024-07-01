@@ -5,5 +5,6 @@ from .adelie_core.optimization import (
     StateNNLS,
     StateNNQPFull,
     StateHingeFull,
+    StateHingeLowRank,
     StateLassoFull,
 )

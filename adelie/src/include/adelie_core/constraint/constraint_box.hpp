@@ -12,6 +12,7 @@ public:
     using base_t = ConstraintBase<ValueType>;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
+    using typename base_t::vec_uint64_t;
     using typename base_t::colmat_value_t;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
 
@@ -110,6 +111,7 @@ public:
     using base_t = ConstraintBoxBase<ValueType>;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
+    using typename base_t::vec_uint64_t;
     using typename base_t::colmat_value_t;
     using typename base_t::map_cvec_value_t;
     using base_t::_l;
@@ -122,7 +124,6 @@ private:
     const value_t _nnls_tol;
     const value_t _cs_tol;
     const value_t _slack;
-    vec_value_t _buff;
 
 public:
     explicit ConstraintBoxProximalNewton(
@@ -141,8 +142,7 @@ public:
         _nnls_max_iters(nnls_max_iters),
         _nnls_tol(nnls_tol),
         _cs_tol(cs_tol),
-        _slack(slack),
-        _buff((l.size() <= 1) ? 0 : (l.size() * (9 + 2 * l.size())))
+        _slack(slack)
     {
         if (tol < 0) {
             throw util::adelie_core_error("tol must be >= 0.");
@@ -158,6 +158,12 @@ public:
         }
     }
 
+    size_t buffer_size() override 
+    {
+        const auto d = _l.size();
+        return (d <= 1) ? 0 : (d * (9 + 2 * d));
+    }
+
     void solve(
         Eigen::Ref<vec_value_t> x,
         Eigen::Ref<vec_value_t> mu,
@@ -165,7 +171,8 @@ public:
         const Eigen::Ref<const vec_value_t>& linear,
         value_t l1,
         value_t l2,
-        const Eigen::Ref<const colmat_value_t>& Q
+        const Eigen::Ref<const colmat_value_t>& Q,
+        Eigen::Ref<vec_uint64_t> buffer
     ) override
     {
         const auto m = _u.size();
@@ -176,10 +183,12 @@ public:
             return;
         }
 
-        auto buff_ptr = _buff.data();
+        auto buff_ptr = reinterpret_cast<value_t*>(buffer.data());
+        const auto buff_begin = buff_ptr;
         Eigen::Map<vec_value_t> grad_prev(buff_ptr, m); buff_ptr += m;
         Eigen::Map<vec_value_t> grad(buff_ptr, m); buff_ptr += m;
-        Eigen::Map<vec_value_t> next_buff(buff_ptr, _buff.size() - std::distance(_buff.data(), buff_ptr));
+        const auto n_read = std::distance(buff_begin, buff_ptr);
+        Eigen::Map<vec_uint64_t> next_buff(buffer.data() + n_read, buffer.size() - n_read);
 
         const auto compute_mu_resid = [&](
             const auto& mu,
@@ -256,10 +265,11 @@ public:
         };
         const auto compute_proximal_newton_step = [&](
             const auto& hess,
+            const auto x_norm,
             auto& mu
         ) {
             optimization::StateHingeFull<colmat_value_t> state_hinge(
-                hess, _u, _l, _nnls_max_iters, _nnls_tol, mu, grad 
+                hess, _u, _l, _nnls_max_iters, _nnls_tol * std::max<value_t>(x_norm, 1), mu, grad 
             );
             optimization::hinge_full(state_hinge);
         };

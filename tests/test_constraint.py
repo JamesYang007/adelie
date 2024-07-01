@@ -37,11 +37,12 @@ def run_test(
     Q = np.random.normal(0, 1, (d, d))
     Q, _, _ = np.linalg.svd(Q)
     Q = np.asfortranarray(Q, dtype=dtype)
+    buffer = np.empty(cnstr.buffer_size, dtype=np.uint64)
 
     # test solve
     x = np.zeros(d, dtype=dtype)
     mu = np.zeros(m, dtype=dtype)
-    cnstr.solve(x, mu, quad, linear, l1, l2, Q)
+    cnstr.solve(x, mu, quad, linear, l1, l2, Q, buffer)
 
     # KKT first-order condition
     Qx = Q @ x

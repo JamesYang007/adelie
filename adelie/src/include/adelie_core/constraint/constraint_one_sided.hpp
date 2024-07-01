@@ -12,6 +12,7 @@ public:
     using base_t = ConstraintBase<ValueType>;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
+    using typename base_t::vec_uint64_t;
     using typename base_t::colmat_value_t;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
 
@@ -101,6 +102,7 @@ public:
     using base_t = ConstraintOneSidedBase<ValueType>;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
+    using typename base_t::vec_uint64_t;
     using typename base_t::colmat_value_t;
     using typename base_t::map_cvec_value_t;
     using base_t::_sgn;
@@ -113,7 +115,6 @@ private:
     const value_t _nnls_tol;
     const value_t _cs_tol;
     const value_t _slack;
-    vec_value_t _buff;
 
 public:
     explicit ConstraintOneSidedProximalNewton(
@@ -132,8 +133,7 @@ public:
         _nnls_max_iters(nnls_max_iters),
         _nnls_tol(nnls_tol),
         _cs_tol(cs_tol),
-        _slack(slack),
-        _buff((b.size() <= 1) ? 0 : (b.size() * (9 + 2 * b.size())))
+        _slack(slack)
     {
         if (tol < 0) {
             throw util::adelie_core_error("tol must be >= 0.");
@@ -149,6 +149,12 @@ public:
         }
     }
 
+    size_t buffer_size() override 
+    {
+        const auto d = _b.size();
+        return (d <= 1) ? 0 : (d * (9 + 2 * d));
+    }
+
     void solve(
         Eigen::Ref<vec_value_t> x,
         Eigen::Ref<vec_value_t> mu,
@@ -156,7 +162,8 @@ public:
         const Eigen::Ref<const vec_value_t>& linear,
         value_t l1,
         value_t l2,
-        const Eigen::Ref<const colmat_value_t>& Q
+        const Eigen::Ref<const colmat_value_t>& Q,
+        Eigen::Ref<vec_uint64_t> buffer
     ) override
     {
         const auto m = _b.size();
@@ -167,10 +174,12 @@ public:
             return;
         }
 
-        auto buff_ptr = _buff.data();
+        auto buff_ptr = reinterpret_cast<value_t*>(buffer.data());
+        const auto buff_begin = buff_ptr;
         Eigen::Map<vec_value_t> grad_prev(buff_ptr, m); buff_ptr += m;
         Eigen::Map<vec_value_t> grad(buff_ptr, m); buff_ptr += m;
-        Eigen::Map<vec_value_t> next_buff(buff_ptr, _buff.size() - std::distance(_buff.data(), buff_ptr));
+        const auto n_read = std::distance(buff_begin, buff_ptr);
+        Eigen::Map<vec_uint64_t> next_buff(buffer.data() + n_read, buffer.size() - n_read);
 
         const auto compute_mu_resid = [&](
             const auto& mu,
@@ -237,6 +246,7 @@ public:
         };
         const auto compute_proximal_newton_step = [&](
             const auto& hess,
+            const auto x_norm,
             auto& mu
         ) {
             // reparametrize
@@ -245,7 +255,7 @@ public:
 
             // solve NNQP for new mu
             optimization::StateNNQPFull<colmat_value_t, true> state_nnqp(
-                _sgn, hess, _nnls_max_iters, _nnls_tol, mu, grad
+                _sgn, hess, _nnls_max_iters, _nnls_tol * std::max<value_t>(x_norm, 1), mu, grad
             );
             optimization::nnqp_full(state_nnqp); 
 
@@ -280,6 +290,7 @@ public:
     using base_t = ConstraintOneSidedBase<ValueType>;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
+    using typename base_t::vec_uint64_t;
     using typename base_t::colmat_value_t;
     using typename base_t::map_cvec_value_t;
     using base_t::_sgn;
@@ -292,13 +303,6 @@ private:
     const size_t _newton_max_iters = 100000;
     const value_t _newton_tol = 1e-12;
     const value_t _rho;
-    vec_value_t _buff;
-
-#ifdef ADELIE_CORE_DEBUG
-    std::vector<vec_value_t> _primals1;
-    std::vector<vec_value_t> _primals2;
-    std::vector<vec_value_t> _duals;
-#endif
 
 public:
     explicit ConstraintOneSidedADMM(
@@ -313,8 +317,7 @@ public:
         _max_iters(max_iters),
         _tol_abs(tol_abs),
         _tol_rel(tol_rel),
-        _rho(rho),
-        _buff((b.size() <= 1) ? 0 : (7 * b.size()))
+        _rho(rho)
     {
         if (tol_abs < 0) {
             throw util::adelie_core_error("tol_abs must be >= 0.");
@@ -327,20 +330,10 @@ public:
         }
     }
 
-    auto debug_info() const 
+    size_t buffer_size() override 
     {
-        #ifdef ADELIE_CORE_DEBUG
-        util::rowmat_type<value_t> pr1(_primals1.size(), _b.size());
-        util::rowmat_type<value_t> pr2(_primals2.size(), _b.size());
-        util::rowmat_type<value_t> du(_duals.size(), _b.size());
-        for (size_t i = 0; i < _primals1.size(); ++i) 
-        {
-            pr1.row(i) = _primals1[i];
-            pr2.row(i) = _primals2[i];
-            du.row(i) = _duals[i];
-        }
-        return std::make_tuple(pr1, pr2, du); 
-        #endif
+        const auto d = _b.size();
+        return (d <= 1) ? 0 : (7 * d);
     }
 
     void solve(
@@ -350,12 +343,12 @@ public:
         const Eigen::Ref<const vec_value_t>& linear,
         value_t l1,
         value_t l2,
-        const Eigen::Ref<const colmat_value_t>& Q
+        const Eigen::Ref<const colmat_value_t>& Q,
+        Eigen::Ref<vec_uint64_t> buffer
     ) override
     {
         #ifdef ADELIE_CORE_DEBUG
-        _primals1.clear();
-        _primals2.clear();
+        _primals.clear();
         _duals.clear();
         #endif
         
@@ -371,7 +364,7 @@ public:
 
         size_t iters = 0;
 
-        auto buff_ptr = _buff.data();
+        auto buff_ptr = reinterpret_cast<value_t*>(buffer.data());
         Eigen::Map<vec_value_t> x_buffer1(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> x_buffer2(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> z(buff_ptr, m); buff_ptr += m;
@@ -410,8 +403,7 @@ public:
 
         #ifdef ADELIE_CORE_DEBUG
         const auto save_iterate = [&]() {
-            _primals1.push_back(x);
-            _primals2.push_back(z);
+            _primals.push_back(x);
             _duals.push_back(mu);
             if (Eigen::isnan(x).any() || Eigen::isnan(z).any() || Eigen::isnan(mu).any()) {
                 PRINT(x);

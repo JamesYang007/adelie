@@ -31,6 +31,7 @@ struct GaussianPinCovBufferPack: public GaussianPinBufferPack<ValueType, IndexTy
         size_t buffer2_size,
         size_t buffer3_size,
         size_t buffer4_size,
+        size_t constraint_buffer_size,
         size_t buffer_index_size,
         size_t buffer_sg_size,
         size_t active_beta_size,
@@ -41,6 +42,7 @@ struct GaussianPinCovBufferPack: public GaussianPinBufferPack<ValueType, IndexTy
             buffer2_size,
             buffer3_size,
             buffer4_size,
+            constraint_buffer_size,
             active_beta_size,
             active_dual_size
         ),
@@ -219,6 +221,7 @@ void coordinate_descent(
     auto& buffer2 = buffer_pack.buffer2;
     auto& buffer3 = buffer_pack.buffer3;
     auto& buffer4 = buffer_pack.buffer4;
+    auto& constraint_buffer = buffer_pack.constraint_buffer;
     auto& buffer_index = buffer_pack.buffer_index;
 
     const auto l1 = lmda * alpha;
@@ -241,7 +244,7 @@ void coordinate_descent(
 
             gk += ak_old * A_kk;
             update_coordinate_g0_f(
-                ss_idx, ak, A_kk, gk, l1 * pk, l2 * pk, 1
+                ss_idx, ak, A_kk, gk, l1 * pk, l2 * pk, 1, constraint_buffer
             );
             gk -= ak_old * A_kk;
 
@@ -286,7 +289,7 @@ void coordinate_descent(
             // update group coefficients
             gk_transformed += A_kk * ak_old_transformed; 
             update_coordinate_g1_f(
-                ss_idx, ak_transformed, A_kk, gk_transformed, l1 * pk, l2 * pk, Vk
+                ss_idx, ak_transformed, A_kk, gk_transformed, l1 * pk, l2 * pk, Vk, constraint_buffer
             );
             gk_transformed -= A_kk * ak_old_transformed; 
 
@@ -500,6 +503,13 @@ inline void solve(
     const auto n_last_dual = constraints[G-1] ? constraints[G-1]->duals() : 0;
     const auto n_duals = G ? (dual_groups[G-1] + n_last_dual) : 0;
 
+    // TODO: move this outside because it takes too much time.
+    // compute largest constraint buffer size
+    const auto constraint_buffer_size = util::rowvec_type<size_t>::NullaryExpr(
+        constraints.size(), 
+        [&](auto i) { return constraints[i] ? constraints[i]->buffer_size() : 0; }
+    ).maxCoeff();
+
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
     GaussianPinCovBufferPack<value_t, index_t> buffer_pack(
@@ -507,6 +517,7 @@ inline void solve(
         max_group_size, 
         max_group_size, 
         3 * max_group_size,
+        constraint_buffer_size,
         max_group_size,
         screen_beta.size(), 
         screen_beta.size(),
@@ -679,7 +690,7 @@ inline void solve(
     vec_value_t buff(max_group_size * 2);
 
     const auto update_coordinate_g0_f = [&](
-        auto ss_idx, value_t& ak, value_t A_kk, value_t gk, value_t l1, value_t l2, value_t Q
+        auto ss_idx, value_t& ak, value_t A_kk, value_t gk, value_t l1, value_t l2, value_t Q, auto& buffer
     ) {
         const auto k = screen_set[ss_idx];
         const auto constraint = constraints[k];
@@ -697,11 +708,11 @@ inline void solve(
             const Eigen::Map<const util::rowvec_type<value_t, 1>> A_kk_view(&A_kk);
             const Eigen::Map<const util::rowvec_type<value_t, 1>> gk_view(&gk);
             const Eigen::Map<const util::colmat_type<value_t, 1, 1>> Q_view(&Q);
-            constraint->solve(ak_view, mu, A_kk_view, gk_view, l1, l2, Q_view);
+            constraint->solve(ak_view, mu, A_kk_view, gk_view, l1, l2, Q_view, buffer);
         }
     };
     const auto update_coordinate_g1_f = [&](
-        auto ss_idx, auto& ak, const auto& A_kk, const auto& gk, auto l1, auto l2, const auto& Q
+        auto ss_idx, auto& ak, const auto& A_kk, const auto& gk, auto l1, auto l2, const auto& Q, auto& buffer
     ) {
         const auto k = screen_set[ss_idx];
         const auto constraint = constraints[k];
@@ -722,7 +733,7 @@ inline void solve(
             const auto sdb = screen_dual_begins[ss_idx];
             const auto ds = constraint->duals(); 
             auto mu = screen_dual.segment(sdb, ds);
-            constraint->solve(ak, mu, A_kk, gk, l1, l2, Q);
+            constraint->solve(ak, mu, A_kk, gk, l1, l2, Q, buffer);
         }
     };
 

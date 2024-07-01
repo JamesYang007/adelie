@@ -174,7 +174,7 @@ def zero_constraint(
             core_base.__init__(self)
             self.size = size
 
-        def solve(self, x, mu, quad, linear, l1, l2, Q):
+        def solve(self, x, mu, quad, linear, l1, l2, Q, buffer):
             x[...] = 0
             mu[...] = linear
 

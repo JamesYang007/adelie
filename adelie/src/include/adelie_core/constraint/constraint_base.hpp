@@ -15,6 +15,7 @@ class ConstraintBase
 public:
     using value_t = ValueType;
     using vec_value_t = util::rowvec_type<value_t>;
+    using vec_uint64_t = util::rowvec_type<uint64_t>;
     using colmat_value_t = util::colmat_type<value_t>;
 
 protected:
@@ -79,7 +80,7 @@ protected:
         value_t tol,
         value_t cs_tol,
         value_t slack,
-        vec_value_t buff,
+        vec_uint64_t buff,
         ComputeMuResidType compute_mu_resid,
         ComputeHardMinMuResidType compute_hard_min_mu_resid,
         ComputeSoftMinMuResidType compute_soft_min_mu_resid,
@@ -108,7 +109,7 @@ protected:
         size_t iters = 0;
 
         // size must be at least d * (6 + 2 * d) + m
-        auto buff_ptr = buff.data();
+        auto buff_ptr = reinterpret_cast<value_t*>(buff.data());
         Eigen::Map<vec_value_t> x_buffer1(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> x_buffer2(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> mu_resid(buff_ptr, d); buff_ptr += d;
@@ -301,7 +302,7 @@ protected:
             // full hessian update
             hess.template triangularView<Eigen::Upper>() = hess.transpose();
 
-            compute_proximal_newton_step(hess, mu);
+            compute_proximal_newton_step(hess, x_norm, mu);
         }
 
         throw util::adelie_core_solver_error("ConstraintBase: proximal newton max iterations reached!");
@@ -336,7 +337,8 @@ public:
         const Eigen::Ref<const vec_value_t>& linear,
         value_t l1,
         value_t l2,
-        const Eigen::Ref<const colmat_value_t>& Q
+        const Eigen::Ref<const colmat_value_t>& Q,
+        Eigen::Ref<vec_uint64_t> buffer
     ) =0;
 
     virtual void gradient(
@@ -352,6 +354,7 @@ public:
 
     virtual int duals() =0;
     virtual int primals() =0;
+    virtual size_t buffer_size() { return 0; };
 };
 
 } // namespace constraint

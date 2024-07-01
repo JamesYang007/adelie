@@ -14,6 +14,7 @@ public:
     using base_t::base_t;
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
+    using typename base_t::vec_uint64_t;
     using typename base_t::colmat_value_t;
 
     void solve(
@@ -23,14 +24,15 @@ public:
         const Eigen::Ref<const vec_value_t>& linear,
         value_t l1,
         value_t l2,
-        const Eigen::Ref<const colmat_value_t>& Q
+        const Eigen::Ref<const colmat_value_t>& Q,
+        Eigen::Ref<vec_uint64_t> buffer
     ) override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
             base_t,
             solve,
-            x, mu, quad, linear, l1, l2, Q
+            x, mu, quad, linear, l1, l2, Q, buffer
         );
     }
 
@@ -77,6 +79,15 @@ public:
             primals,
         );
     }
+
+    size_t buffer_size() override
+    {
+        PYBIND11_OVERRIDE(
+            size_t,
+            base_t,
+            buffer_size,
+        );
+    }
 };
 
 template <class T>
@@ -99,6 +110,9 @@ void constraint_base(py::module_& m, const char* name)
         )delimiter")
         .def_property_readonly("primal_size", &internal_t::primals, R"delimiter(
         Number of primals.
+        )delimiter")
+        .def_property_readonly("buffer_size", &internal_t::buffer_size, R"delimiter(
+        Buffer size (unit of 8 bytes).
         )delimiter")
         .def("solve", &internal_t::solve, R"delimiter(
         Computes the block-coordinate update.
@@ -136,6 +150,9 @@ void constraint_base(py::module_& m, const char* name)
             The second regularization :math:`\lambda_2`.
         Q : (d, d) ndarray
             Orthogonal matrix :math:`Q`.
+        buffer : (b,) ndarray
+            Buffer of type ``uint64_t`` aligned at 8 bytes.
+            The size must be at least as large as :attr:`buffer_size`.
         )delimiter",
             py::arg("x").noconvert(),
             py::arg("mu").noconvert(),
@@ -143,7 +160,8 @@ void constraint_base(py::module_& m, const char* name)
             py::arg("linear").noconvert(),
             py::arg("l1"),
             py::arg("l2"),
-            py::arg("Q").noconvert()
+            py::arg("Q").noconvert(),
+            py::arg("buffer").noconvert()
         )
         .def("gradient", &internal_t::gradient, R"delimiter(
         Computes the gradient of the Lagrangian.
