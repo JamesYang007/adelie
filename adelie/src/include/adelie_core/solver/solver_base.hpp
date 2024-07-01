@@ -349,14 +349,6 @@ inline void solve_core(
             if (i < large_lmda_path.size()-1) {
                 // update progress bar
                 static_cast<void>(pb_it != pb.end());
-
-                // Do not check for early-stopping.
-                // This choice is deliberate for these reasons:
-                // We are in this loop only because the user has supplied their path.
-                // In this case, we should provide what they asked for.
-                // If alpha == 0, this loop is costly but this is also the only time the solutions are actually changing.
-                // If alpha > 0, the solution is the same at every iteration.
-                // Depending on alpha, we have different reasons for not early stopping.
             }
 
             auto tup = fit_f(state, large_lmda_path[i]);
@@ -372,6 +364,12 @@ inline void solve_core(
                 );
                 pb_add_suffix_f(state, pb);
                 ++pb_it;
+
+                if (early_exit_f(state)) {
+                    if (!(pb_it != pb.end())) return;
+                    pb_add_suffix_f(state, pb);
+                    return;
+                }
             // otherwise, put the state at the last fitted lambda (lmda_max)
             } else {
                 update_invariance_f(state, state_gaussian_pin, large_lmda_path[i]);
