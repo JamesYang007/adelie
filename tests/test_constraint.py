@@ -37,7 +37,7 @@ def run_test(
     Q = np.random.normal(0, 1, (d, d))
     Q, _, _ = np.linalg.svd(Q)
     Q = np.asfortranarray(Q, dtype=dtype)
-    buffer = np.empty(cnstr.buffer_size, dtype=np.uint64)
+    buffer = np.empty(cnstr.buffer_size(), dtype=np.uint64)
 
     # test solve
     x = np.zeros(d, dtype=dtype)
