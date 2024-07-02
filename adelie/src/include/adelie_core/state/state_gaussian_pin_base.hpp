@@ -49,6 +49,7 @@ struct StateGaussianPinBase
     const map_cvec_value_t lmda_path;
 
     /* configurations */
+    const size_t constraint_buffer_size;
     const bool intercept;
     const size_t max_active_size;
     const size_t max_iters;
@@ -94,6 +95,7 @@ struct StateGaussianPinBase
         const dyn_vec_mat_value_t& screen_transforms,
         const Eigen::Ref<const vec_index_t>& screen_dual_begins, 
         const Eigen::Ref<const vec_value_t>& lmda_path, 
+        size_t constraint_buffer_size,
         bool intercept,
         size_t max_active_size,
         size_t max_iters,
@@ -122,6 +124,7 @@ struct StateGaussianPinBase
         screen_transforms(&screen_transforms),
         screen_dual_begins(screen_dual_begins.data(), screen_dual_begins.size()),
         lmda_path(lmda_path.data(), lmda_path.size()),
+        constraint_buffer_size(constraint_buffer_size),
         intercept(intercept),
         max_active_size(max_active_size),
         max_iters(max_iters),

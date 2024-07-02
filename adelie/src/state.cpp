@@ -99,6 +99,7 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             const dyn_vec_mat_value_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&, 
+            size_t,
             bool,
             size_t,
             size_t,
@@ -127,6 +128,7 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             py::arg("screen_transforms").noconvert(),
             py::arg("screen_dual_begins").noconvert(),
             py::arg("lmda_path").noconvert(),
+            py::arg("constraint_buffer_size"),
             py::arg("intercept"),
             py::arg("max_active_size"),
             py::arg("max_iters"),
@@ -183,6 +185,10 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("lmda_path", &state_t::lmda_path, R"delimiter(
         The regularization path to solve for.
+        )delimiter")
+        .def_readonly("constraint_buffer_size", &state_t::constraint_buffer_size, R"delimiter(
+        Max constraint buffer size.
+        Equivalent to ``np.max([0 if c is None else c.buffer_size() for c in constraints])``.
         )delimiter")
         .def_readonly("intercept", &state_t::intercept, R"delimiter(
         ``True`` if the function should fit with intercept.
@@ -384,6 +390,7 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             const dyn_vec_mat_value_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&, 
+            size_t,
             bool,
             size_t,
             size_t,
@@ -419,6 +426,7 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             py::arg("screen_transforms").noconvert(),
             py::arg("screen_dual_begins").noconvert(),
             py::arg("lmda_path").noconvert(),
+            py::arg("constraint_buffer_size"),
             py::arg("intercept"),
             py::arg("max_active_size"),
             py::arg("max_iters"),
@@ -534,6 +542,7 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&, 
             size_t,
             size_t,
+            size_t,
             value_t,
             value_t,
             value_t,
@@ -562,6 +571,7 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("screen_subset_order").noconvert(),
             py::arg("screen_subset_ordered").noconvert(),
             py::arg("lmda_path").noconvert(),
+            py::arg("constraint_buffer_size"),
             py::arg("max_active_size"),
             py::arg("max_iters"),
             py::arg("tol"),
@@ -740,6 +750,10 @@ void state_base(py::module_& m, const char* name)
         )delimiter")
         .def_readonly("penalty", &state_t::penalty, R"delimiter(
         Penalty factor for each group in the same order as ``groups``.
+        )delimiter")
+        .def_readonly("constraint_buffer_size", &state_t::constraint_buffer_size, R"delimiter(
+        Max constraint buffer size.
+        Equivalent to ``np.max([0 if c is None else c.buffer_size() for c in constraints])``.
         )delimiter")
         .def_readonly("lmda_max", &state_t::lmda_max, R"delimiter(
         The smallest :math:`\lambda` such that the true solution is zero

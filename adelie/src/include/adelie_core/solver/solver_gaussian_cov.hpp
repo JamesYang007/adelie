@@ -139,6 +139,7 @@ auto fit(
     const auto& screen_vars = state.screen_vars;
     const auto& screen_transforms = state.screen_transforms;
     const auto& screen_dual_begins = state.screen_dual_begins;
+    const auto constraint_buffer_size = state.constraint_buffer_size;
     const auto max_active_size = state.max_active_size;
     const auto max_iters = state.max_iters;
     const auto tol = state.tol;
@@ -196,6 +197,7 @@ auto fit(
         Eigen::Map<const vec_index_t>(screen_subset_order.data(), screen_subset_order.size()),
         Eigen::Map<const vec_index_t>(screen_subset_ordered.data(), screen_subset_ordered.size()),
         lmda_path,
+        constraint_buffer_size,
         max_active_size, max_iters, 
         tol, 
         rdev_tol,

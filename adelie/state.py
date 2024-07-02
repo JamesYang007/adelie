@@ -628,6 +628,11 @@ def gaussian_pin_naive(
                 dtype=dtype,
             )
 
+            self._constraint_buffer_size = np.max([
+                0 if c is None else c.buffer_size() 
+                for c in self._constraints
+            ])
+
             self._max_active_size = (
                 len(self._groups)
                 if max_active_size is None else
@@ -687,6 +692,7 @@ def gaussian_pin_naive(
                 screen_transforms=self._screen_transforms,
                 screen_dual_begins=self._screen_dual_begins,
                 lmda_path=self._lmda_path,
+                constraint_buffer_size=self._constraint_buffer_size,
                 intercept=intercept,
                 max_active_size=self._max_active_size,
                 max_iters=max_iters,
@@ -931,6 +937,11 @@ def gaussian_pin_cov(
                 dtype=dtype,
             )
 
+            self._constraint_buffer_size = np.max([
+                0 if c is None else c.buffer_size() 
+                for c in self._constraints
+            ])
+
             self._max_active_size = (
                 len(self._groups)
                 if max_active_size is None else
@@ -978,6 +989,7 @@ def gaussian_pin_cov(
                 screen_subset_order=self._screen_subset_order,
                 screen_subset_ordered=self._screen_subset_ordered,
                 lmda_path=self._lmda_path,
+                constraint_buffer_size=self._constraint_buffer_size,
                 max_active_size=self._max_active_size,
                 max_iters=max_iters,
                 tol=tol,

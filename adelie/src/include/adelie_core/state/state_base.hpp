@@ -226,6 +226,8 @@ struct StateBase
     const map_cvec_value_t penalty;
 
     /* configurations */
+    const size_t constraint_buffer_size;
+
     // lambda path configs
     const value_t min_ratio;
     const size_t lmda_path_size;
@@ -333,6 +335,12 @@ struct StateBase
         dual_groups(dual_groups.data(), dual_groups.size()),
         alpha(alpha),
         penalty(penalty.data(), penalty.size()),
+        constraint_buffer_size(
+            util::rowvec_type<size_t>::NullaryExpr(
+                constraints.size(), 
+                [&](auto i) { return constraints[i] ? constraints[i]->buffer_size() : 0; }
+            ).maxCoeff()
+        ),
         min_ratio(min_ratio),
         lmda_path_size(lmda_path_size),
         max_screen_size(max_screen_size),

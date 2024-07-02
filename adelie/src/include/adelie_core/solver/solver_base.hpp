@@ -305,7 +305,7 @@ inline void solve_core(
     // Generate lambda path if needed
     // ==================================================================================== 
     if (setup_lmda_path) {
-        if (lmda_path_size <= 0) throw util::adelie_core_solver_error("lmda_path_size must be > 0.");
+        if (lmda_path_size <= 0) return;
 
         lmda_path.resize(lmda_path_size);
 

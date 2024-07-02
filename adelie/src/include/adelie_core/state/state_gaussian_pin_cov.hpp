@@ -130,6 +130,7 @@ struct StateGaussianPinCov: StateGaussianPinBase<
         const Eigen::Ref<const vec_index_t>& screen_subset_order,
         const Eigen::Ref<const vec_index_t>& screen_subset_ordered,
         const Eigen::Ref<const vec_value_t>& lmda_path, 
+        size_t constraint_buffer_size,
         size_t max_active_size,
         size_t max_iters,
         value_t tol,
@@ -148,7 +149,7 @@ struct StateGaussianPinCov: StateGaussianPinBase<
         base_t(
             constraints, groups, group_sizes, dual_groups, alpha, penalty, 
             screen_set, screen_begins, screen_vars, screen_transforms, screen_dual_begins, lmda_path, 
-            false, max_active_size, max_iters, tol, 0, 0, newton_tol, newton_max_iters, n_threads,
+            constraint_buffer_size, false, max_active_size, max_iters, tol, 0, 0, newton_tol, newton_max_iters, n_threads,
             rsq, screen_beta, screen_is_active, screen_dual, active_set_size, active_set
         ),
         screen_subset_order(screen_subset_order.data(), screen_subset_order.size()),

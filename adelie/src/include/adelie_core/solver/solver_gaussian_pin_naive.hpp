@@ -240,6 +240,7 @@ inline void solve(
     const auto& lmda_path = state.lmda_path;
     const auto& rsq = state.rsq;
     const auto& resid_sum = state.resid_sum;
+    const auto constraint_buffer_size = state.constraint_buffer_size;
     const auto intercept = state.intercept;
     const auto tol = state.tol;
     const auto max_active_size = state.max_active_size;
@@ -266,13 +267,6 @@ inline void solve(
     const auto G = groups.size();
     const auto n_last_dual = constraints[G-1] ? constraints[G-1]->duals() : 0;
     const auto n_duals = G ? (dual_groups[G-1] + n_last_dual) : 0;
-
-    // TODO: move this outside because it takes too much time.
-    // compute largest constraint buffer size
-    const auto constraint_buffer_size = util::rowvec_type<size_t>::NullaryExpr(
-        constraints.size(), 
-        [&](auto i) { return constraints[i] ? constraints[i]->buffer_size() : 0; }
-    ).maxCoeff();
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();

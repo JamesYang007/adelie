@@ -220,7 +220,7 @@ void update_coordinate(
     );
     if (iters >= max_iters) {
         throw util::adelie_core_solver_error(
-            "Newton-ABS max iteration reached! "
+            "Newton-ABS max iterations reached! "
             "Try increasing newton_max_iters."
         );
     }

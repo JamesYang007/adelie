@@ -99,6 +99,7 @@ auto fit(
     const auto& screen_X_means = state.screen_X_means;
     const auto& screen_transforms = state.screen_transforms;
     const auto& screen_dual_begins = state.screen_dual_begins;
+    const auto constraint_buffer_size = state.constraint_buffer_size;
     const auto intercept = state.intercept;
     const auto max_active_size = state.max_active_size;
     const auto max_iters = state.max_iters;
@@ -161,6 +162,7 @@ auto fit(
         screen_transforms,
         Eigen::Map<const vec_index_t>(screen_dual_begins.data(), screen_dual_begins.size()),
         lmda_path,
+        constraint_buffer_size,
         intercept, max_active_size, max_iters, 
         // TODO: still unclear whether we should be max'ing or not.
         // tolerance is relative to the scaling of null deviance and current total weight sum (== 1)
