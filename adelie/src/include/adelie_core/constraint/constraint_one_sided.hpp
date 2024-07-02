@@ -257,7 +257,7 @@ public:
             optimization::StateNNQPFull<colmat_value_t, true> state_nnqp(
                 _sgn, hess, _nnls_max_iters, _nnls_tol * std::max<value_t>(x_norm, 1), mu, grad
             );
-            optimization::nnqp_full(state_nnqp); 
+            state_nnqp.solve();
 
             // reparametrize
             mu *= _sgn;

@@ -44,58 +44,46 @@ struct StateHingeFull
         x(x.data(), x.size()),
         grad(grad.data(), grad.size())
     {}
-};
 
-template <class StateType>
-void hinge_full(
-    StateType& state
-)
-{
-    using state_t = std::decay_t<StateType>;
-    using matrix_t = typename state_t::matrix_t;
-    using value_t = typename state_t::value_t;
+    void solve()
+    {
+        const auto n = x.size();
 
-    const auto& quad = state.quad;
-    const auto& penalty_pos = state.penalty_pos;
-    const auto& penalty_neg = state.penalty_neg;
-    const auto max_iters = state.max_iters;
-    const auto tol = state.tol;
-    auto& iters = state.iters;
-    auto& x = state.x;
-    auto& grad = state.grad;
+        iters = 0;
 
-    const auto n = x.size();
-
-    iters = 0;
-
-    while (iters < max_iters) {
-        value_t convg_measure = 0;
-        ++iters;
-        for (int i = 0; i < n; ++i) {
-            const auto qii = quad(i,i);
-            const auto ppi = penalty_pos[i];
-            const auto pni = penalty_neg[i];
-            auto& xi = x[i];
-            const auto gi = grad[i];
-            const auto xi_old = xi;
-            const auto gi0 = gi + qii * xi_old;
-            xi = std::copysign(
-                std::max<value_t>(std::max<value_t>(-pni-gi0, gi0-ppi), 0),
-                gi0 + pni
-            ) / qii;
-            const auto del = xi - xi_old;
-            if (del == 0) continue;
-            const auto scaled_del_sq = qii * del * del; 
-            convg_measure = std::max<value_t>(convg_measure, scaled_del_sq);
-            if constexpr (matrix_t::IsRowMajor) {
-                grad -= del * quad.array().row(i);
-            } else {
-                grad -= del * quad.array().col(i);
+        while (iters < max_iters) {
+            value_t convg_measure = 0;
+            ++iters;
+            for (int i = 0; i < n; ++i) {
+                const auto qii = quad(i,i);
+                const auto ppi = penalty_pos[i];
+                const auto pni = penalty_neg[i];
+                auto& xi = x[i];
+                const auto gi = grad[i];
+                const auto xi_old = xi;
+                const auto gi0 = gi + qii * xi_old;
+                xi = std::copysign(
+                    std::max<value_t>(std::max<value_t>(-pni-gi0, gi0-ppi), 0),
+                    gi0 + pni
+                ) / qii;
+                const auto del = xi - xi_old;
+                if (del == 0) continue;
+                const auto scaled_del_sq = qii * del * del; 
+                convg_measure = std::max<value_t>(convg_measure, scaled_del_sq);
+                if constexpr (matrix_t::IsRowMajor) {
+                    grad -= del * quad.array().row(i);
+                } else {
+                    grad -= del * quad.array().col(i);
+                }
             }
+            if (convg_measure < tol) return;
         }
-        if (convg_measure < tol) break;
+
+        throw util::adelie_core_solver_error(
+            "StateHingeFull: max iterations reached!"
+        );
     }
-}
+};
 
 } // namespace optimization
 } // namespace adelie_core

@@ -168,7 +168,11 @@ struct StateHingeLowRank
                     resid.matrix() -= del * (Ak * quad);
                 }
 
-                if (iters >= max_iters) return;
+                if (iters >= max_iters) {
+                    throw util::adelie_core_solver_error(
+                        "StateHingeLowRank: max iterations reached!"
+                    );
+                }
                 if (convg_measure <= tol) break;
             }
 

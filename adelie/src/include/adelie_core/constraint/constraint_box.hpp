@@ -271,7 +271,7 @@ public:
             optimization::StateHingeFull<colmat_value_t> state_hinge(
                 hess, _u, _l, _nnls_max_iters, _nnls_tol * std::max<value_t>(x_norm, 1), mu, grad 
             );
-            optimization::hinge_full(state_hinge);
+            state_hinge.solve();
         };
         const auto save_additional_prev = [&](bool is_in_ellipse) {
             if (is_in_ellipse) grad_prev.setZero();

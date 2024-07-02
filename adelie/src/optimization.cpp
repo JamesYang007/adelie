@@ -88,7 +88,7 @@ void nnqp_full(py::module_& m, const char* name)
             using sw_t = ad::util::Stopwatch;
             sw_t sw;
             sw.start();
-            ad::optimization::nnqp_full(state);
+            state.solve();
             state.time_elapsed = sw.elapsed();
         })
         ;
@@ -158,8 +158,7 @@ void nnls(py::module_& m, const char* name)
             using sw_t = ad::util::Stopwatch;
             sw_t sw;
             sw.start();
-            ad::optimization::nnls(
-                state, 
+            state.solve(
                 [](){return false;}, 
                 [](auto) {return false;}
             );
@@ -231,7 +230,7 @@ void lasso_full(py::module_& m, const char* name)
             using sw_t = ad::util::Stopwatch;
             sw_t sw;
             sw.start();
-            ad::optimization::lasso_full(state);
+            state.solve();
             state.time_elapsed = sw.elapsed();
         })
         ;
@@ -305,7 +304,7 @@ void hinge_full(py::module_& m, const char* name)
             using sw_t = ad::util::Stopwatch;
             sw_t sw;
             sw.start();
-            ad::optimization::hinge_full(state);
+            state.solve();
             state.time_elapsed = sw.elapsed();
         })
         ;
