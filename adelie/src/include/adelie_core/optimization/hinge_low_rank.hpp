@@ -118,7 +118,7 @@ struct StateHingeLowRank
 
             // measure KKT violation and enforce active coefficients to never violate
             grad = (grad - penalty_pos).max(-penalty_neg-grad);
-            for (Eigen::Index i = 0; i < active_size; ++i) {
+            for (size_t i = 0; i < active_size; ++i) {
                 const auto k = active_set[i];
                 grad[k] = -std::numeric_limits<value_t>::infinity();
             }
@@ -140,7 +140,7 @@ struct StateHingeLowRank
             while (1) {
                 ++iters;
                 value_t convg_measure = 0;
-                for (Eigen::Index i = 0; i < active_size; ++i) {
+                for (size_t i = 0; i < active_size; ++i) {
                     const auto k = active_set[i];
                     const auto vk = active_vars[i];
                     const auto lk = penalty_neg[k];
