@@ -111,9 +111,6 @@ void constraint_base(py::module_& m, const char* name)
         .def_property_readonly("primal_size", &internal_t::primals, R"delimiter(
         Number of primals.
         )delimiter")
-        .def_property_readonly("buffer_size", &internal_t::buffer_size, R"delimiter(
-        Buffer size (unit of 8 bytes).
-        )delimiter")
         .def("solve", &internal_t::solve, R"delimiter(
         Computes the block-coordinate update.
 
@@ -228,6 +225,9 @@ void constraint_base(py::module_& m, const char* name)
         -------
         size : int
             Number of primal variables.
+        )delimiter")
+        .def("buffer_size", &internal_t::buffer_size, R"delimiter(
+        Buffer size (unit of 8 bytes).
         )delimiter")
         ;
 }
