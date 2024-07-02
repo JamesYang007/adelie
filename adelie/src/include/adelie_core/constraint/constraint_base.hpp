@@ -354,7 +354,7 @@ public:
 
     virtual int duals() =0;
     virtual int primals() =0;
-    virtual size_t buffer_size() { return 0; };
+    virtual size_t buffer_size() { return 0; }
 };
 
 } // namespace constraint
