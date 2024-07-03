@@ -22,8 +22,8 @@ protected:
 
 public:
     explicit ConstraintBoxBase(
-        const Eigen::Ref<const vec_value_t> l,
-        const Eigen::Ref<const vec_value_t> u
+        const Eigen::Ref<const vec_value_t>& l,
+        const Eigen::Ref<const vec_value_t>& u
     ):
         _l(l.data(), l.size()),
         _u(u.data(), u.size())
@@ -34,8 +34,8 @@ public:
         if ((_u < 0).any()) {
             throw util::adelie_core_error("upper must be >= 0.");
         }
-        // NOTE: user passes in lower == -l
         if ((_l < 0).any()) { 
+            // NOTE: user passes in lower == -l
             throw util::adelie_core_error("lower must be <= 0.");
         }
     }
@@ -127,8 +127,8 @@ private:
 
 public:
     explicit ConstraintBoxProximalNewton(
-        const Eigen::Ref<const vec_value_t> l,
-        const Eigen::Ref<const vec_value_t> u,
+        const Eigen::Ref<const vec_value_t>& l,
+        const Eigen::Ref<const vec_value_t>& u,
         size_t max_iters,
         value_t tol,
         size_t nnls_max_iters,

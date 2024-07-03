@@ -254,8 +254,8 @@ void constraint_one_sided_proximal_newton(py::module_& m, const char* name)
         "Core constraint class for one-sided bound constraint with proximal Newton solver."
         )
         .def(py::init<
-            const Eigen::Ref<const vec_value_t>,
-            const Eigen::Ref<const vec_value_t>,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
             size_t,
             value_t,
             size_t,
@@ -293,8 +293,8 @@ void constraint_one_sided_admm(py::module_& m, const char* name)
         "Core constraint class for one-sided bound constraint with ADMM solver."
         )
         .def(py::init<
-            const Eigen::Ref<const vec_value_t>,
-            const Eigen::Ref<const vec_value_t>,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
             size_t,
             value_t,
             value_t,
@@ -339,8 +339,8 @@ void constraint_box_proximal_newton(py::module_& m, const char* name)
         "Core constraint class for box constraint with proximal Newton solver."
         )
         .def(py::init<
-            const Eigen::Ref<const vec_value_t>,
-            const Eigen::Ref<const vec_value_t>,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
             size_t,
             value_t,
             size_t,

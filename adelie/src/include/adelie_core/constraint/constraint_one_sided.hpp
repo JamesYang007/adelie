@@ -22,8 +22,8 @@ protected:
 
 public:
     explicit ConstraintOneSidedBase(
-        const Eigen::Ref<const vec_value_t> sgn,
-        const Eigen::Ref<const vec_value_t> b
+        const Eigen::Ref<const vec_value_t>& sgn,
+        const Eigen::Ref<const vec_value_t>& b
     ):
         _sgn(sgn.data(), sgn.size()),
         _b(b.data(), b.size())
@@ -118,8 +118,8 @@ private:
 
 public:
     explicit ConstraintOneSidedProximalNewton(
-        const Eigen::Ref<const vec_value_t> sgn,
-        const Eigen::Ref<const vec_value_t> b,
+        const Eigen::Ref<const vec_value_t>& sgn,
+        const Eigen::Ref<const vec_value_t>& b,
         size_t max_iters,
         value_t tol,
         size_t nnls_max_iters,
@@ -306,8 +306,8 @@ private:
 
 public:
     explicit ConstraintOneSidedADMM(
-        const Eigen::Ref<const vec_value_t> sgn,
-        const Eigen::Ref<const vec_value_t> b,
+        const Eigen::Ref<const vec_value_t>& sgn,
+        const Eigen::Ref<const vec_value_t>& b,
         size_t max_iters,
         value_t tol_abs,
         value_t tol_rel,
