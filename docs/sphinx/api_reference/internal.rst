@@ -14,6 +14,8 @@ Internal
     adelie_core.constraint.ConstraintBase64
     adelie_core.constraint.ConstraintBoxProximalNewton32
     adelie_core.constraint.ConstraintBoxProximalNewton64
+    adelie_core.constraint.ConstraintLinearProximalNewton32
+    adelie_core.constraint.ConstraintLinearProximalNewton64
     adelie_core.constraint.ConstraintOneSidedADMM32
     adelie_core.constraint.ConstraintOneSidedADMM64
     adelie_core.constraint.ConstraintOneSidedProximalNewton32

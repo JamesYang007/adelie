@@ -29,21 +29,53 @@ struct StateHingeFull
 
     explicit StateHingeFull(
         const Eigen::Ref<const matrix_t>& quad,
-        const Eigen::Ref<const vec_value_t>& penalty_pos,
         const Eigen::Ref<const vec_value_t>& penalty_neg,
+        const Eigen::Ref<const vec_value_t>& penalty_pos,
         size_t max_iters,
         value_t tol,
         Eigen::Ref<vec_value_t> x,
         Eigen::Ref<vec_value_t> grad
     ):
         quad(quad.data(), quad.rows(), quad.cols()),
-        penalty_pos(penalty_pos.data(), penalty_pos.size()),
         penalty_neg(penalty_neg.data(), penalty_neg.size()),
+        penalty_pos(penalty_pos.data(), penalty_pos.size()),
         max_iters(max_iters),
         tol(tol),
         x(x.data(), x.size()),
         grad(grad.data(), grad.size())
-    {}
+    {
+        const auto d = quad.rows();
+        if (quad.cols() != d) {
+            throw util::adelie_core_solver_error(
+                "quad must be (d, d). "
+            );
+        }
+        if (penalty_neg.size() != d) {
+            throw util::adelie_core_solver_error(
+                "penalty_neg must be (d,) where quad is (d, d). "
+            );
+        }
+        if (penalty_pos.size() != d) {
+            throw util::adelie_core_solver_error(
+                "penalty_pos must be (d,) where quad is (d, d). "
+            );
+        }
+        if (tol < 0) {
+            throw util::adelie_core_solver_error(
+                "tol must be >= 0."
+            );
+        }
+        if (x.size() != d) {
+            throw util::adelie_core_solver_error(
+                "x must be (d,) where quad is (d, d). "
+            );
+        }
+        if (grad.size() != d) {
+            throw util::adelie_core_solver_error(
+                "grad must be (d,) where quad is (d, d). "
+            );
+        }
+    }
 
     void solve()
     {

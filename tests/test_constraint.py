@@ -95,6 +95,45 @@ def test_box(d, method, dtype, seed):
     run_test(cnstr, cnstr_exp, dtype, seed)
 
 
+@pytest.mark.parametrize("m", [1, 2, 5, 10, 20, 50])
+@pytest.mark.parametrize("d", [10])
+@pytest.mark.parametrize("method", ["proximal-newton"])
+@pytest.mark.parametrize("dtype", [np.float64])
+@pytest.mark.parametrize("seed", np.arange(10))
+def test_linear(m, d, method, dtype, seed):
+    np.random.seed(seed)
+    A = np.random.normal(0, 1, (m, d))
+    A[0,0] = 0
+    lower = np.random.uniform(-1, 0, m)
+    upper = np.random.uniform(0, 1, m)
+    configs = {
+        "proximal-newton": {
+            "max_iters": 1000,
+            "tol": 1e-16,
+            "nnls_max_iters": 100000,
+            "nnls_tol": 1e-16,
+        }
+    }[method]
+    cnstr = constraint.linear(A, lower, upper, method=method, configs=configs)
+
+    class Linear:
+        def __init__(self):
+            self.dual_size = m
+            self.primal_size = d
+        def evaluate(self, x):
+            Ax = A @ x
+            return np.concatenate([Ax - upper, lower - Ax])
+        def gradient(self, x, mu, out):
+            out[...] = A.T @ mu
+        def duals(self):
+            return self.dual_size
+        def primals(self):
+            return self.primal_size
+
+    cnstr_exp = Linear()
+    run_test(cnstr, cnstr_exp, dtype, seed)
+
+
 @pytest.mark.parametrize("d", [1, 2, 5, 10, 20, 50])
 @pytest.mark.parametrize("method", ["proximal-newton"])
 @pytest.mark.parametrize("dtype", [np.float64])

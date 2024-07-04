@@ -57,6 +57,7 @@ adelie.constraint
 
 
     box
+    linear
     lower
     one_sided
     upper

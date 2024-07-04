@@ -179,11 +179,15 @@ struct StateGlmNaive: StateBase<
         eta(eta),
         resid(resid)
     {
-        if (offsets.size() != eta.size()) {
-            throw util::adelie_core_error("offsets must have the same length as eta.");
+        const auto n = X.rows();
+        if (offsets.size() != n) {
+            throw util::adelie_core_error("offsets must be (n,) where X is (n, p).");
         }
-        if (offsets.size() != resid.size()) {
-            throw util::adelie_core_error("offsets must have the same length as resid.");
+        if (eta.size() != n) {
+            throw util::adelie_core_error("eta must be (n,) where X is (n, p).");
+        }
+        if (resid.size() != n) {
+            throw util::adelie_core_error("resid must be (n,) where X is (n, p).");
         }
         if (irls_tol <= 0) {
             throw util::adelie_core_error("irls_tol must be > 0.");

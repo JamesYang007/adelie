@@ -232,6 +232,9 @@ struct StateGaussianCov: public StateBase<
         A(&A),
         rsq(rsq)
     {
+        if (v.size() != A.cols()) {
+            throw util::adelie_core_error("v must be (p,) where A is (p, p).");
+        }
         /* initialize the rest of the screen quantities */
         gaussian::cov::update_screen_derived(*this);
     }

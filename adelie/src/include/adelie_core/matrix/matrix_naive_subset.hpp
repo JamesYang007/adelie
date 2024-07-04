@@ -83,7 +83,7 @@ public:
         if ((subset.minCoeff() < 0) || (subset.maxCoeff() >= mat.cols())) {
             throw util::adelie_core_error(
                 "subset must contain unique values in the range [0, p) "
-                "where p is the number of columns."
+                "where mat is (n, p)."
             ) ;
         }
         if (n_threads < 1) {
@@ -294,7 +294,7 @@ public:
         if ((subset.minCoeff() < 0) || (subset.maxCoeff() >= mat.rows())) {
             throw util::adelie_core_error(
                 "subset must contain unique values in the range [0, n) "
-                "where n is the number of rows."
+                "where mat is (n, p)."
             ) ;
         }
         if (n_threads < 1) {

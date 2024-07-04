@@ -35,7 +35,7 @@ public:
             throw util::adelie_core_error("b must be >= 0.");
         }
         if (_sgn.size() != _b.size()) {
-            throw util::adelie_core_error("sgn and b must have the same length.");
+            throw util::adelie_core_error("sgn be (d,) where b is (d,).");
         }
     }
 
@@ -198,7 +198,8 @@ public:
         };
         const auto compute_soft_min_mu_resid = [&](
             auto& mu,
-            const auto& Qv
+            const auto& Qv,
+            bool
         ) {
             mu *= (_b <= 0).template cast<value_t>();
             return (Qv - _sgn * mu).square().sum();

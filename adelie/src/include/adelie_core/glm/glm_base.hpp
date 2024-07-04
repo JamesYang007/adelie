@@ -119,7 +119,7 @@ public:
         weights(weights.data(), weights.size())
     {
         if (y.size() != weights.size()) {
-            throw util::adelie_core_error("y and weights must have same length.");
+            throw util::adelie_core_error("y must be (n,) where weights is (n,).");
         }
     }
 

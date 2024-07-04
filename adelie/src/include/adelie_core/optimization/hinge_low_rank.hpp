@@ -17,6 +17,7 @@ struct StateHingeLowRank
     using rowmat_value_t = util::rowmat_type<value_t>;
     using map_vec_index_t = Eigen::Map<vec_index_t>;
     using map_vec_value_t = Eigen::Map<vec_value_t>;
+    using map_rowmat_value_t = Eigen::Map<rowmat_value_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
     using map_ccolmat_value_t = Eigen::Map<const colmat_value_t>;
     using map_crowmat_value_t = Eigen::Map<const rowmat_value_t>;
@@ -37,6 +38,7 @@ struct StateHingeLowRank
     map_vec_value_t resid;
     map_vec_index_t active_set;
     map_vec_value_t active_vars;
+    map_rowmat_value_t active_AQ;
     map_vec_value_t grad;
 
     double time_elapsed = 0;
@@ -54,8 +56,8 @@ struct StateHingeLowRank
         Eigen::Ref<vec_value_t> resid,
         Eigen::Ref<vec_index_t> active_set,
         Eigen::Ref<vec_value_t> active_vars,
+        Eigen::Ref<rowmat_value_t> active_AQ,
         Eigen::Ref<vec_value_t> grad
-
     ):
         quad(quad.data(), quad.rows(), quad.cols()),
         A(A.data(), A.rows(), A.cols()),
@@ -69,11 +71,65 @@ struct StateHingeLowRank
         resid(resid.data(), resid.size()),
         active_set(active_set.data(), active_set.size()),
         active_vars(active_vars.data(), active_vars.size()),
+        active_AQ(active_AQ.data(), active_AQ.rows(), active_AQ.cols()),
         grad(grad.data(), grad.size())
     {
-        if (A.rows() < A.cols()) {
+        const auto m = A.rows();
+        const auto d = A.cols();
+
+        if (quad.rows() != d || quad.cols() != d) {
+            throw util::adelie_core_solver_error(
+                "quad must be (d, d) where A is (m, d). "
+            );
+        }
+        if (m < d && n_threads > 1) {
             throw util::adelie_core_error(
-                "Constraint matrix must be tall (number of rows at least as large as number of columns)."
+                "A must be (m, d) where m >= d if n_threads > 1. "
+            );
+        }
+        if (penalty_neg.size() != m) {
+            throw util::adelie_core_solver_error(
+                "penalty_neg must be (m,) where A is (m, d). "
+            );
+        }
+        if (penalty_pos.size() != m) {
+            throw util::adelie_core_solver_error(
+                "penalty_pos must be (m,) where A is (m, d). "
+            );
+        }
+        if (tol < 0) {
+            throw util::adelie_core_solver_error(
+                "tol must be >= 0."
+            );
+        }
+        if (x.size() != m) {
+            throw util::adelie_core_solver_error(
+                "x must be (m,) where A is (m, d). "
+            );
+        }
+        if (resid.size() != d) {
+            throw util::adelie_core_solver_error(
+                "resid must be (d,) where A is (m, d). "
+            );
+        }
+        if (active_set.size() != m) {
+            throw util::adelie_core_solver_error(
+                "active_set must be (m,) where A is (m, d). "
+            );
+        }
+        if (active_vars.size() != m) {
+            throw util::adelie_core_solver_error(
+                "active_vars must be (m,) where A is (m, d). "
+            );
+        }
+        if (active_AQ.rows() != m || active_AQ.cols() != d) {
+            throw util::adelie_core_solver_error(
+                "active_AQ must be (m, d) where A is (m, d). "
+            );
+        }
+        if (grad.size() != m) {
+            throw util::adelie_core_solver_error(
+                "grad must be (m,) where A is (m, d). "
             );
         }
     }
@@ -86,16 +142,24 @@ struct StateHingeLowRank
                 A.transpose(),
                 resid.matrix(),
                 n_threads,
-                grad_m /* unused */,
+                grad_m /* unused because A.rows() >= A.cols() */,
                 grad_m
             );
+
+            // measure KKT violation and enforce active coefficients to never violate
+            grad = (grad - penalty_pos).max(-penalty_neg-grad);
+            for (size_t i = 0; i < active_size; ++i) {
+                const auto k = active_set[i];
+                grad[k] = -std::numeric_limits<value_t>::infinity();
+            }
         };
 
         const auto add_active = [&](int i) {
             active_set[active_size] = i;
             const auto Ai = A.row(i);
+            active_AQ.row(active_size) = Ai * quad;
             active_vars[active_size] = std::max<value_t>(
-                Ai * quad * Ai.transpose(),
+                active_AQ.row(active_size).dot(Ai),
                 1e-14
             );
             ++active_size;
@@ -107,33 +171,27 @@ struct StateHingeLowRank
             if (x[i] == 0) continue;
             add_active(i);
         }
-        compute_grad();
 
         while (1) {
             /* Screening step */
+            if (iters)
+            {
+                const size_t max_n_new_active = std::min<size_t>(batch_size, A.rows()-active_size);
+                if (max_n_new_active <= 0) return;
 
-            // if no new active variables allowed just finish
-            const size_t max_n_new_active = std::min<size_t>(batch_size, A.rows()-active_size);
-            if (max_n_new_active <= 0) return;
+                size_t n_new_active = 0;
 
-            // measure KKT violation and enforce active coefficients to never violate
-            grad = (grad - penalty_pos).max(-penalty_neg-grad);
-            for (size_t i = 0; i < active_size; ++i) {
-                const auto k = active_set[i];
-                grad[k] = -std::numeric_limits<value_t>::infinity();
+                // check if any violations exist and append to active set
+                for (Eigen::Index i = 0; i < grad.size(); ++i) {
+                    if (grad[i] <= 0) continue;
+
+                    add_active(i);
+                    ++n_new_active;
+
+                    if (n_new_active >= max_n_new_active) break;
+                }
+                if (n_new_active <= 0) return;
             }
-
-            // check if any violations exist and append to active set
-            size_t n_new_active = 0;
-            for (Eigen::Index i = 0; i < grad.size(); ++i) {
-                if (grad[i] <= 0) continue;
-
-                add_active(i);
-                ++n_new_active;
-
-                if (n_new_active >= max_n_new_active) break;
-            }
-            if (n_new_active <= 0) return;
 
             /* Fit step */
 
@@ -146,6 +204,7 @@ struct StateHingeLowRank
                     const auto lk = penalty_neg[k];
                     const auto uk = penalty_pos[k];
                     const auto Ak = A.row(k);
+                    const auto QAk = active_AQ.row(i);
                     const auto gk = Ak.dot(resid.matrix());
                     auto& xk = x[k];
 
@@ -165,7 +224,7 @@ struct StateHingeLowRank
                         convg_measure,
                         vk * del * del
                     );
-                    resid.matrix() -= del * (Ak * quad);
+                    resid.matrix() -= del * QAk;
                 }
 
                 if (iters >= max_iters) {
@@ -179,7 +238,6 @@ struct StateHingeLowRank
             /* Invariance step */
 
             compute_grad();
-
         } // end while(1)
     }
 };

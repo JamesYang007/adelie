@@ -213,8 +213,8 @@ protected:
                     // Perform 2 checks:
                     // a) Relax 4) by setting mu to minimize the norm (hard-min) in 1)
                     //    and checking whether mean((mu * _b) ** 2) is small.
-                    // b) Mathematically, mu = (_sgn * Q @ v) * (_b <= 0) satisfies 2)-4)
-                    //    and minimizes the norm in 1) (soft-min)
+                    // b) Mathematically, mu[i] = 0 whenever _b[i] > 0 satisfies 2)-4).
+                    //    It suffices to minimize the norm in 1) (soft-min)
                     //    under the constraint of complementary slackness.
                     if (
                         (compute_hard_min_mu_resid(mu, Qv) <= l1 * l1) &&
@@ -227,7 +227,7 @@ protected:
                         return;
                     }
 
-                    if (compute_soft_min_mu_resid(mu, Qv) <= l1 * l1) {
+                    if (compute_soft_min_mu_resid(mu, Qv, is_prev_valid_old) <= l1 * l1) {
                         x.setZero();
                         #ifdef ADELIE_CORE_DEBUG
                         save_iterate();

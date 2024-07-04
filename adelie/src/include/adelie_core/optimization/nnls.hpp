@@ -4,12 +4,11 @@
 namespace adelie_core {
 namespace optimization {
 
-template <class MatrixType,
-          class ValueType=typename std::decay_t<MatrixType>::Scalar>
+template <class MatrixType>
 struct StateNNLS
 {
     using matrix_t = MatrixType;
-    using value_t = ValueType;
+    using value_t = typename std::decay_t<MatrixType>::Scalar;
     using vec_value_t = util::rowvec_type<value_t>;
     using map_vec_value_t = Eigen::Map<vec_value_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
@@ -44,12 +43,36 @@ struct StateNNLS
         beta(beta.data(), beta.size()),
         resid(resid.data(), resid.size()),
         loss(loss)
-    {}
+    {
+        const auto n = X.rows();
+        const auto p = X.cols();
 
-    template <class EarlyExitType, class SkipType>
+        if (X_vars.size() != p) {
+            throw util::adelie_core_solver_error(
+                "X_vars must be (p,) where X is (n, p). "
+            );
+        }
+        if (tol < 0) {
+            throw util::adelie_core_solver_error(
+                "tol must be >= 0."
+            );
+        }
+        if (beta.size() != p) {
+            throw util::adelie_core_solver_error(
+                "beta must be (p,) where X is (n, p). "
+            );
+        }
+        if (resid.size() != n) {
+            throw util::adelie_core_solver_error(
+                "resid must be (n,) where X is (n, p). "
+            );
+        }
+    }
+
+    template <class EarlyExitType, class SgnType>
     void solve(
         EarlyExitType early_exit_f,
-        SkipType skip_f
+        SgnType sgn_f
     )
     {
         const auto n = beta.size();
@@ -61,13 +84,19 @@ struct StateNNLS
             ++iters;
             for (int i = 0; i < n; ++i) {
                 if (early_exit_f()) return;
-                if (skip_f(i)) continue;
                 const auto X_vars_i = X_vars[i];
                 auto& bi = beta[i];
                 const auto gi = X.col(i).dot(resid.matrix());
                 const auto bi_old = bi;
                 const auto step = (X_vars_i <= 0) ? 0 : (gi / X_vars_i);
-                bi = std::max<value_t>(bi + step, 0.0);
+                const auto bi_cand = bi + step;
+                const auto sgn_i = sgn_f(i);
+                const auto add_pos = sgn_i >= 2;
+                const auto add_neg = sgn_i % 2 == 1;
+                bi = (
+                    std::max<value_t>(bi_cand, 0.0) * add_pos
+                    + std::min<value_t>(bi_cand, 0.0) * add_neg
+                );
                 const auto del = bi - bi_old;
                 if (del == 0) continue;
                 const auto scaled_del_sq = X_vars_i * del * del; 

@@ -116,7 +116,7 @@ void proximal_newton_general_solver(
             );
             state_nnls.solve(
                 [&]() { return state_nnls.loss <= 0.5 * l1 * l1; },
-                [&](auto i) { return b[i] > 0; }
+                [&](auto i) { return (b[i] <= 0) << 1; }
             );
 
             // If loss is smaller than or close to 0.5 * l1 ** 2, 

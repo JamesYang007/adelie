@@ -160,7 +160,7 @@ void nnls(py::module_& m, const char* name)
             sw.start();
             state.solve(
                 [](){return false;}, 
-                [](auto) {return false;}
+                [](auto) {return 2;}
             );
             state.time_elapsed = sw.elapsed();
         })
@@ -261,10 +261,10 @@ void hinge_full(py::module_& m, const char* name)
     ----------
     quad : (n, n) ndarray
         Full positive semi-definite dense matrix :math:`Q`.
+    penalty_neg : (n,) ndarray
+        Penalty factor :math:`\omega_-` on the non-positive values.
     penalty_pos : (n,) ndarray
         Penalty factor :math:`\omega_+` on the non-negative values.
-    penalty_pos : (n,) ndarray
-        Penalty factor :math:`\omega_-` on the non-positive values.
     max_iters : int
         Maximum number of coordinate descent iterations.
     tol : float
@@ -284,16 +284,16 @@ void hinge_full(py::module_& m, const char* name)
             Eigen::Ref<vec_value_t> 
         >(),
             py::arg("quad").noconvert(),
-            py::arg("penalty_pos").noconvert(),
             py::arg("penalty_neg").noconvert(),
+            py::arg("penalty_pos").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("x"),
             py::arg("grad")
         )
         .def_readonly("quad", &state_t::quad)
-        .def_readonly("penalty_pos", &state_t::penalty_pos)
         .def_readonly("penalty_neg", &state_t::penalty_neg)
+        .def_readonly("penalty_pos", &state_t::penalty_pos)
         .def_readonly("max_iters", &state_t::max_iters)
         .def_readonly("tol", &state_t::tol)
         .def_readonly("iters", &state_t::iters)
@@ -359,6 +359,8 @@ void hinge_low_rank(py::module_& m, const char* name)
         Active set indices.
     active_vars : (m,) ndarray
         Active variances.
+    active_AQ : (m, d) ndarray
+        Active scaled rows of ``A``.
     grad : (m,) ndarray
         Gradient vector.
     )delimiter")
@@ -375,6 +377,7 @@ void hinge_low_rank(py::module_& m, const char* name)
             Eigen::Ref<vec_value_t>,
             Eigen::Ref<vec_index_t>,
             Eigen::Ref<vec_value_t>,
+            Eigen::Ref<rowmat_value_t>,
             Eigen::Ref<vec_value_t>
         >(),
             py::arg("quad").noconvert(),
@@ -389,6 +392,7 @@ void hinge_low_rank(py::module_& m, const char* name)
             py::arg("resid"),
             py::arg("active_set"),
             py::arg("active_vars"),
+            py::arg("active_AQ"),
             py::arg("grad")
         )
         .def_readonly("quad", &state_t::quad)
@@ -405,6 +409,7 @@ void hinge_low_rank(py::module_& m, const char* name)
         .def_readonly("resid", &state_t::resid)
         .def_readonly("active_set", &state_t::active_set)
         .def_readonly("active_vars", &state_t::active_vars)
+        .def_readonly("active_AQ", &state_t::active_AQ)
         .def_readonly("grad", &state_t::grad)
         .def_readonly("time_elapsed", &state_t::time_elapsed)
         .def("solve", [](state_t& state) {

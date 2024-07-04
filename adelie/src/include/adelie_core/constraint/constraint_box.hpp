@@ -28,8 +28,9 @@ public:
         _l(l.data(), l.size()),
         _u(u.data(), u.size())
     {
-        if (_u.size() != _l.size()) {
-            throw util::adelie_core_error("upper and lower must have the same length.");
+        const auto d = _u.size();
+        if (_l.size() != d) {
+            throw util::adelie_core_error("lower must be (d,) where upper is (d,).");
         }
         if ((_u < 0).any()) {
             throw util::adelie_core_error("upper must be >= 0.");
@@ -207,7 +208,8 @@ public:
         };
         const auto compute_soft_min_mu_resid = [&](
             auto& mu,
-            const auto& Qv
+            const auto& Qv,
+            bool
         ) {
             mu = (
                 mu.max(0) * (_u <= 0).template cast<value_t>()
@@ -269,7 +271,7 @@ public:
             auto& mu
         ) {
             optimization::StateHingeFull<colmat_value_t> state_hinge(
-                hess, _u, _l, _nnls_max_iters, _nnls_tol * std::max<value_t>(x_norm, 1), mu, grad 
+                hess, _l, _u, _nnls_max_iters, _nnls_tol * std::max<value_t>(x_norm, 1), mu, grad 
             );
             state_hinge.solve();
         };

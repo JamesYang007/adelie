@@ -375,22 +375,22 @@ struct StateBase
         // sanity checks
         const auto G = groups.size();
         if (constraints.size() != static_cast<size_t>(G)) {
-            throw util::adelie_core_error("constraints must have the same length as groups.");
+            throw util::adelie_core_error("constraints must be (G,) where groups is (G,).");
         }
         if (group_sizes.size() != G) {
-            throw util::adelie_core_error("group_sizes must have the same length as groups.");
+            throw util::adelie_core_error("group_sizes must be (G,) where groups is (G,).");
         }
         if (dual_groups.size() != G) {
-            throw util::adelie_core_error("dual_groups must have the same length as groups.");
+            throw util::adelie_core_error("dual_groups must be (G,) where groups is (G,).");
         }
         if (penalty.size() != G) {
-            throw util::adelie_core_error("penalty must have the same length as groups.");
+            throw util::adelie_core_error("penalty must be (G,) where groups is (G,).");
         }
         if (alpha < 0 || alpha > 1) {
             throw util::adelie_core_error("alpha must be in [0,1].");
         }
-        if (tol <= 0) {
-            throw util::adelie_core_error("tol must be > 0.");
+        if (tol < 0) {
+            throw util::adelie_core_error("tol must be >= 0.");
         }
         if (adev_tol < 0 || adev_tol > 1) {
             throw util::adelie_core_error("adev_tol must be in [0,1].");
@@ -417,22 +417,22 @@ struct StateBase
             throw util::adelie_core_error("pivot_slack_ratio must be >= 0.");
         }
         if (screen_set.size() != screen_is_active.size()) {
-            throw util::adelie_core_error("screen_is_active must have the same length as screen_set.");
+            throw util::adelie_core_error("screen_is_active must be (s,) where screen_set is (s,).");
         }
         if (screen_beta.size() < screen_set.size()) {
             throw util::adelie_core_error(
-                "screen_beta has smaller length than screen_set. "
-                "It is likely screen_beta has been initialized incorrectly."
+                "screen_beta must be (bs,) where bs >= s and screen_set is (s,). "
+                "It is likely screen_beta has been initialized incorrectly. "
             );
         }
         if (active_set_size > static_cast<size_t>(G)) {
             throw util::adelie_core_error(
-                "active_set_size must be <= active_set.size()."
+                "active_set_size must be <= G where groups is (G,)."
             );
         }
         if (active_set.size() != G) {
             throw util::adelie_core_error(
-                "active_set must have the same length as groups."
+                "active_set must be (G,) where groups is (G,)."
             );
         }
         if (grad.size() != groups[G-1] + group_sizes[G-1]) {

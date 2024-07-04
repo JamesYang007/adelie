@@ -1,7 +1,8 @@
 #include "decl.hpp"
 #include <adelie_core/constraint/constraint_base.hpp>
-#include <adelie_core/constraint/constraint_one_sided.hpp>
 #include <adelie_core/constraint/constraint_box.hpp>
+#include <adelie_core/constraint/constraint_linear.hpp>
+#include <adelie_core/constraint/constraint_one_sided.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -149,7 +150,7 @@ void constraint_base(py::module_& m, const char* name)
             Orthogonal matrix :math:`Q`.
         buffer : (b,) ndarray
             Buffer of type ``uint64_t`` aligned at 8 bytes.
-            The size must be at least as large as :attr:`buffer_size`.
+            The size must be at least as large as :func:`buffer_size`.
         )delimiter",
             py::arg("x").noconvert(),
             py::arg("mu").noconvert(),
@@ -227,92 +228,12 @@ void constraint_base(py::module_& m, const char* name)
             Number of primal variables.
         )delimiter")
         .def("buffer_size", &internal_t::buffer_size, R"delimiter(
-        Buffer size (unit of 8 bytes).
-        )delimiter")
-        ;
-}
+        Returns the buffer size in unit of 8 bytes.
 
-template <class ValueType>
-void constraint_one_sided_base(py::module_& m, const char* name)
-{
-    using internal_t = ad::constraint::ConstraintOneSidedBase<ValueType>;
-    using base_t = typename internal_t::base_t;
-    py::class_<internal_t, base_t>(m, name, 
-        "Core constraint base class for one-sided bound constraint."
-        )
-        ;
-}
-
-template <class ValueType>
-void constraint_one_sided_proximal_newton(py::module_& m, const char* name)
-{
-    using internal_t = ad::constraint::ConstraintOneSidedProximalNewton<ValueType>;
-    using base_t = typename internal_t::base_t;
-    using value_t = typename internal_t::value_t;
-    using vec_value_t = typename internal_t::vec_value_t;
-    py::class_<internal_t, base_t>(m, name, 
-        "Core constraint class for one-sided bound constraint with proximal Newton solver."
-        )
-        .def(py::init<
-            const Eigen::Ref<const vec_value_t>&,
-            const Eigen::Ref<const vec_value_t>&,
-            size_t,
-            value_t,
-            size_t,
-            value_t,
-            value_t,
-            value_t
-        >(), 
-            py::arg("sgn"),
-            py::arg("b"),
-            py::arg("max_iters"),
-            py::arg("tol"),
-            py::arg("nnls_max_iters"),
-            py::arg("nnls_tol"),
-            py::arg("cs_tol"),
-            py::arg("slack")
-        )
-        .def("debug_info", &internal_t::debug_info, R"delimiter(
-        Returns debug information.
-
-        This method is only intended for developers for debugging purposes.
-        The package must be compiled with the compiler flag `-DADELIE_CORE_DEBUG`
-        to see the debug information.
-        )delimiter")
-        ;
-}
-
-template <class ValueType>
-void constraint_one_sided_admm(py::module_& m, const char* name)
-{
-    using internal_t = ad::constraint::ConstraintOneSidedADMM<ValueType>;
-    using base_t = typename internal_t::base_t;
-    using value_t = typename internal_t::value_t;
-    using vec_value_t = typename internal_t::vec_value_t;
-    py::class_<internal_t, base_t>(m, name, 
-        "Core constraint class for one-sided bound constraint with ADMM solver."
-        )
-        .def(py::init<
-            const Eigen::Ref<const vec_value_t>&,
-            const Eigen::Ref<const vec_value_t>&,
-            size_t,
-            value_t,
-            value_t,
-            value_t
-        >(), 
-            py::arg("sgn"),
-            py::arg("b"),
-            py::arg("max_iters"),
-            py::arg("tol_abs"),
-            py::arg("tol_rel"),
-            py::arg("rho")
-        )
-        .def("debug_info", &internal_t::debug_info, R"delimiter(
-        Returns debug information.
-
-        This method is only intended for developers for debugging purposes.
-        The package must be compiled with the compiler flag `-DADELIE_CORE_DEBUG`
-        to see the debug information.
+        Returns
+        -------
+        size : int
+            Buffer size in unit of 8 bytes.
         )delimiter")
         ;
 }
@@ -348,8 +269,8 @@ void constraint_box_proximal_newton(py::module_& m, const char* name)
             value_t,
             value_t
         >(), 
-            py::arg("lower"),
-            py::arg("upper"),
+            py::arg("lower").noconvert(),
+            py::arg("upper").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("nnls_max_iters"),
@@ -357,6 +278,151 @@ void constraint_box_proximal_newton(py::module_& m, const char* name)
             py::arg("cs_tol"),
             py::arg("slack")
         )
+        ;
+}
+
+template <class ValueType>
+void constraint_linear_base(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintLinearBase<ValueType>;
+    using base_t = typename internal_t::base_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint base class for linear constraint."
+        )
+        ;
+}
+
+template <class ValueType>
+void constraint_linear_proximal_newton(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintLinearProximalNewton<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using value_t = typename internal_t::value_t;
+    using vec_value_t = typename internal_t::vec_value_t;
+    using rowmat_value_t = typename internal_t::rowmat_value_t;
+    using colmat_value_t = typename internal_t::colmat_value_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint class for linear constraint with proximal Newton solver."
+        )
+        .def(py::init<
+            const Eigen::Ref<const rowmat_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const colmat_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const rowmat_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            size_t,
+            value_t,
+            size_t,
+            size_t,
+            value_t,
+            value_t,
+            value_t,
+            size_t
+        >(), 
+            py::arg("A").noconvert(),
+            py::arg("lower").noconvert(),
+            py::arg("upper").noconvert(),
+            py::arg("A_u").noconvert(),
+            py::arg("A_d").noconvert(),
+            py::arg("A_vh").noconvert(),
+            py::arg("A_vars").noconvert(),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("nnls_batch_size"),
+            py::arg("nnls_max_iters"),
+            py::arg("nnls_tol"),
+            py::arg("cs_tol"),
+            py::arg("slack"),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+
+template <class ValueType>
+void constraint_one_sided_base(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintOneSidedBase<ValueType>;
+    using base_t = typename internal_t::base_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint base class for one-sided bound constraint."
+        )
+        ;
+}
+
+template <class ValueType>
+void constraint_one_sided_proximal_newton(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintOneSidedProximalNewton<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using value_t = typename internal_t::value_t;
+    using vec_value_t = typename internal_t::vec_value_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint class for one-sided bound constraint with proximal Newton solver."
+        )
+        .def(py::init<
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            size_t,
+            value_t,
+            size_t,
+            value_t,
+            value_t,
+            value_t
+        >(), 
+            py::arg("sgn").noconvert(),
+            py::arg("b").noconvert(),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("nnls_max_iters"),
+            py::arg("nnls_tol"),
+            py::arg("cs_tol"),
+            py::arg("slack")
+        )
+        .def("debug_info", &internal_t::debug_info, R"delimiter(
+        Returns debug information.
+
+        This method is only intended for developers for debugging purposes.
+        The package must be compiled with the compiler flag `-DADELIE_CORE_DEBUG`
+        to see the debug information.
+        )delimiter")
+        ;
+}
+
+template <class ValueType>
+void constraint_one_sided_admm(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintOneSidedADMM<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using value_t = typename internal_t::value_t;
+    using vec_value_t = typename internal_t::vec_value_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint class for one-sided bound constraint with ADMM solver."
+        )
+        .def(py::init<
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            size_t,
+            value_t,
+            value_t,
+            value_t
+        >(), 
+            py::arg("sgn").noconvert(),
+            py::arg("b").noconvert(),
+            py::arg("max_iters"),
+            py::arg("tol_abs"),
+            py::arg("tol_rel"),
+            py::arg("rho")
+        )
+        .def("debug_info", &internal_t::debug_info, R"delimiter(
+        Returns debug information.
+
+        This method is only intended for developers for debugging purposes.
+        The package must be compiled with the compiler flag `-DADELIE_CORE_DEBUG`
+        to see the debug information.
+        )delimiter")
         ;
 }
 
@@ -368,15 +434,20 @@ void register_constraint(py::module_& m)
     constraint_base<double>(m, "ConstraintBase64");
     constraint_base<float>(m, "ConstraintBase32");
 
+    constraint_box_base<double>(m, "ConstraintBoxBase64");
+    constraint_box_base<float>(m, "ConstraintBoxBase32");
+    constraint_box_proximal_newton<double>(m, "ConstraintBoxProximalNewton64");
+    constraint_box_proximal_newton<float>(m, "ConstraintBoxProximalNewton32");
+
+    constraint_linear_base<double>(m, "ConstraintLinearBase64");
+    constraint_linear_base<float>(m, "ConstraintLinearBase32");
+    constraint_linear_proximal_newton<double>(m, "ConstraintLinearProximalNewton64");
+    constraint_linear_proximal_newton<float>(m, "ConstraintLinearProximalNewton32");
+
     constraint_one_sided_base<double>(m, "ConstraintOneSidedBase64");
     constraint_one_sided_base<float>(m, "ConstraintOneSidedBase32");
     constraint_one_sided_proximal_newton<double>(m, "ConstraintOneSidedProximalNewton64");
     constraint_one_sided_proximal_newton<float>(m, "ConstraintOneSidedProximalNewton32");
     constraint_one_sided_admm<double>(m, "ConstraintOneSidedADMM64");
     constraint_one_sided_admm<float>(m, "ConstraintOneSidedADMM32");
-
-    constraint_box_base<double>(m, "ConstraintBoxBase64");
-    constraint_box_base<float>(m, "ConstraintBoxBase32");
-    constraint_box_proximal_newton<double>(m, "ConstraintBoxProximalNewton64");
-    constraint_box_proximal_newton<float>(m, "ConstraintBoxProximalNewton32");
 }

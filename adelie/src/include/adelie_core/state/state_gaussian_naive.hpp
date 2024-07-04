@@ -261,11 +261,19 @@ struct StateGaussianNaive : StateBase<
         resid_sum(resid_sum),
         rsq(rsq)
     { 
-        if (weights.size() != resid.size()) {
-            throw util::adelie_core_error("weights must have the same length as resid.");
+        const auto n = X.rows();
+        const auto p = X.cols();
+        if (weights.size() != n) {
+            throw util::adelie_core_error("weights must be (n,) where X is (n, p).");
         }
-        if (X_means.size() != this->grad.size()) {
-            throw util::adelie_core_error("X_means must have the same length as grad.");
+        if (X_means.size() != p) {
+            throw util::adelie_core_error("X_means must be (p,) where X is (n, p).");
+        }
+        if (resid.size() != n) {
+            throw util::adelie_core_error("resid must be (n,) where X is (n, p).");
+        }
+        if (this->grad.size() != p) {
+            throw util::adelie_core_error("grad must be (p,) where X is (n, p).");
         }
         /* initialize the rest of the screen quantities */
         gaussian::naive::update_screen_derived(*this); 

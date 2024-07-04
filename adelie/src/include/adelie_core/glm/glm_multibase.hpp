@@ -133,7 +133,7 @@ public:
         weights(weights.data(), weights.size())
     {
         if (y.rows() != weights.size()) {
-            throw util::adelie_core_error("y must have same number of rows as weights length.");
+            throw util::adelie_core_error("y must be (n, K) where weights is (n,).");
         }
     }
 

@@ -40,7 +40,30 @@ struct StateNNQPFull
         tol(tol),
         x(x.data(), x.size()),
         grad(grad.data(), grad.size())
-    {}
+    {
+        const auto d = quad.rows(); 
+
+        if (quad.cols() != d) {
+            throw util::adelie_core_solver_error(
+                "quad must be (d, d). "
+            );
+        }
+        if (tol < 0) {
+            throw util::adelie_core_solver_error(
+                "tol must be >= 0."
+            );
+        }
+        if (x.size() != d) {
+            throw util::adelie_core_solver_error(
+                "x must be (d,) where quad is (d, d). "
+            );
+        }
+        if (grad.size() != d) {
+            throw util::adelie_core_solver_error(
+                "grad must be (d,) where quad is (d, d). "
+            );
+        }
+    }
 
     void solve()
     {
