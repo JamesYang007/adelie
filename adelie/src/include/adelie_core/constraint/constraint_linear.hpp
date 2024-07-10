@@ -96,9 +96,7 @@ private:
     const value_t _slack;
     const size_t _n_threads;
 
-    std::vector<Eigen::Index> _mu_active_prev;
     std::vector<Eigen::Index> _mu_active;
-    std::vector<value_t> _mu_value_prev;
     std::vector<value_t> _mu_value;
 
 public:
@@ -164,14 +162,6 @@ public:
         Eigen::Ref<vec_uint64_t> buffer
     ) override
     {
-        // This ensures that buffer is aligned by the same byte size.
-        using index_t = std::conditional_t<
-            std::is_same_v<value_t, float>,
-            int32_t,
-            int64_t
-        >;
-        using vec_index_t = util::rowvec_type<index_t>;
-
         const auto m = _A.rows();
         const auto d = _A.cols();
 
@@ -181,9 +171,10 @@ public:
         Eigen::Map<vec_value_t> grad(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> ATmu_prev(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> ATmu(buff_ptr, d); buff_ptr += d;
+        Eigen::Map<vec_value_t> mu_prev(buff_ptr, m); buff_ptr += m;
+        Eigen::Map<vec_value_t> mu(buff_ptr, m); buff_ptr += m;
         Eigen::Map<vec_value_t> hinge_grad(buff_ptr, m); buff_ptr += m;
         const auto m_large = (m < d) ? 0 : m;
-        Eigen::Map<vec_index_t> active_set(reinterpret_cast<index_t*>(buff_ptr), m_large); buff_ptr += m_large;
         Eigen::Map<vec_value_t> active_vars(buff_ptr, m_large); buff_ptr += m_large;
         Eigen::Map<rowmat_value_t> active_AQ(buff_ptr, m_large, d); buff_ptr += m_large * d;
         const auto m_small = (m < d) ? m : 0;
@@ -199,6 +190,22 @@ public:
                 out += _mu_value[i] * _A.row(_mu_active[i]).array();
             }
         };
+        const auto mu_to_dense = [&]() {
+            mu.setZero();
+            for (size_t i = 0; i < _mu_active.size(); ++i) {
+                mu[_mu_active[i]] = _mu_value[i]; 
+            }
+        };
+        const auto mu_to_sparse = [&]() {
+            _mu_active.clear();
+            _mu_value.clear();
+            for (Eigen::Index i = 0; i < mu.size(); ++i) {
+                const auto mi = mu[i];
+                if (mi == 0) continue;
+                _mu_active.push_back(i);
+                _mu_value.push_back(mi);
+            }
+        };
 
         // must be initialized prior to calling solver
         compute_ATmu(ATmu);
@@ -212,7 +219,10 @@ public:
             const auto& Qv,
             bool is_prev_valid_old
         ) {
-            if ()
+            // populate dense vector of mu
+            mu_to_dense();
+
+            // compute NNLS solution
             auto Qmu_resid = grad.matrix();
             Qmu_resid = Qv - ATmu;
             const value_t loss = 0.5 * Qmu_resid.squaredNorm();
@@ -226,11 +236,11 @@ public:
             const auto is_u_zero = (_u <= 0).template cast<value_t>();
             const auto is_l_zero = (_l <= 0).template cast<value_t>();
             const auto lower_constraint = (
-                (-cs_tol) * (1 - is_l_zero) / (_l + is_l_zero) +
+                (-_cs_tol) * (1 - is_l_zero) / (_l + is_l_zero) +
                 (-Configs::max_solver_value) * is_l_zero
             );
             const auto upper_constraint = (
-                cs_tol * (1 - is_u_zero) / (_u + is_u_zero) +
+                _cs_tol * (1 - is_u_zero) / (_u + is_u_zero) +
                 Configs::max_solver_value * is_u_zero
             );
             state_nnls.solve(
@@ -238,26 +248,33 @@ public:
                 lower_constraint,
                 upper_constraint
             );
+
+            // extra invariance required if current mu is the next iterate
             if (!is_prev_valid_old) {
                 ATmu = Qv - Qmu_resid.array();
             }
-            return 2 * state_nnls.loss;
+
+            const auto mu_resid_norm_sq = 2 * state_nnls.loss;
+
+            // move mu to internal sparse format
+            if (!is_prev_valid_old || mu_resid_norm_sq <= l1 * l1) {
+                mu_to_sparse();
+            }
+            return mu_resid_norm_sq;
         };
-        const auto compute_backtrack_a = [&](
-            const auto&,
-            const auto& 
-        ) {
+        const auto compute_backtrack_a = [&]() {
             const auto ATdmu = ATmu - ATmu_prev;
             return ATdmu.square().sum();
         };
         const auto compute_backtrack_b = [&](
             const auto&,
-            const auto&,
-            const auto&,
             const auto& mu_resid
         ) {
             const auto ATdmu = ATmu - ATmu_prev;
             return (mu_resid.matrix() * Q.transpose()).dot(ATdmu.matrix());
+        };
+        const auto compute_backtrack = [&](auto step_size) {
+            // TODO: need to know mu_prev representation?
         };
         const auto compute_gradient = [&](
             const auto& x,
@@ -265,17 +282,13 @@ public:
         ) {
             grad.matrix() = x.matrix() * Q.transpose();
         };
-        const auto compute_hard_optimality = [&](
-            const auto& 
-        ) {
+        const auto compute_hard_optimality = [&]() {
             // This is an optional check for optimization purposes.
             // The cost of computing this check may be too much if m >> d
             // so we omit this check.
             return false;
         };
         const auto compute_convergence_measure = [&](
-            const auto&,
-            const auto&,
             bool is_in_ellipse
         ) {
             const auto ATdmu = (ATmu - ATmu_prev);
@@ -286,10 +299,10 @@ public:
             );
         };
         const auto compute_proximal_newton_step = [&](
-            const auto& hess,
-            auto& mu
+            const auto& hess
         ) {
             if (m < d) {
+                mu_to_dense();
                 hess_small = _A * hess * _A.transpose();
                 hinge_grad = grad.matrix() * _A.transpose();
                 optimization::StateHingeFull<colmat_value_t> state_hinge(
@@ -297,6 +310,7 @@ public:
                     mu, hinge_grad
                 );
                 state_hinge.solve();
+                mu_to_sparse();
             } else {
                 optimization::StateHingeLowRank<value_t, index_t> state_hinge(
                     hess, _A, _l, _u, _nnls_batch_size, _nnls_max_iters, _nnls_tol, _n_threads,
@@ -316,16 +330,18 @@ public:
             compute_ATmu(ATmu);
         };
         const auto save_additional_prev = [&](bool is_in_ellipse) {
+            // TODO: need mu_prev representation
             ATmu_prev = ATmu;
             if (is_in_ellipse) grad_prev.setZero();
             else grad_prev = grad;
         };
         base_t::_solve_proximal_newton(
-            x, mu, quad, linear, l1, l2, Q, _max_iters, _tol, _cs_tol, _slack, next_buff,
+            x, quad, linear, l1, l2, Q, _max_iters, _tol, _slack, next_buff,
             compute_mu_resid,
             compute_min_mu_resid,
             compute_backtrack_a,
             compute_backtrack_b,
+            compute_backtrack,
             compute_gradient,
             compute_hard_optimality,
             compute_convergence_measure,
