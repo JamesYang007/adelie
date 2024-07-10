@@ -61,6 +61,7 @@ protected:
               class ComputeMinMuResidType,
               class ComputeBacktrackAType,
               class ComputeBacktrackBType,
+              class ComputeBacktrackType,
               class ComputeGradientType,
               class ComputeHardOptimalityType,
               class ComputeConvergenceMeasureType,
@@ -68,7 +69,6 @@ protected:
               class SaveAdditionalPrevType>
     void _solve_proximal_newton(
         Eigen::Ref<vec_value_t> x,
-        Eigen::Ref<vec_value_t> mu,
         const Eigen::Ref<const vec_value_t>& quad,
         const Eigen::Ref<const vec_value_t>& linear,
         value_t l1,
@@ -76,13 +76,13 @@ protected:
         const Eigen::Ref<const colmat_value_t>& Q,
         size_t max_iters,
         value_t tol,
-        value_t cs_tol,
         value_t slack,
         vec_uint64_t buff,
         ComputeMuResidType compute_mu_resid,
         ComputeMinMuResidType compute_min_mu_resid,
         ComputeBacktrackAType compute_backtrack_a,
         ComputeBacktrackBType compute_backtrack_b,
+        ComputeBacktrackType compute_backtrack,
         ComputeGradientType compute_gradient,
         ComputeHardOptimalityType compute_hard_optimality,
         ComputeConvergenceMeasureType compute_convergence_measure,
@@ -92,24 +92,17 @@ protected:
     {
         using rowmat_value_t = util::rowmat_type<value_t>;
 
-        #ifdef ADELIE_CORE_DEBUG
-        _primals.clear();
-        _duals.clear();
-        #endif
-        
         const auto d = x.size();
-        const auto m = mu.size();
 
         const auto& v = linear;
 
         size_t iters = 0;
 
-        // size must be at least d * (6 + 2 * d) + m
+        // size must be at least d * (6 + 2 * d)
         auto buff_ptr = reinterpret_cast<value_t*>(buff.data());
         Eigen::Map<vec_value_t> x_buffer1(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> x_buffer2(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> mu_resid(buff_ptr, d); buff_ptr += d;
-        Eigen::Map<vec_value_t> mu_prev(buff_ptr, m); buff_ptr += m;
         Eigen::Map<rowmat_value_t> hess_buff(buff_ptr, d, d); buff_ptr += d * d;
         Eigen::Map<colmat_value_t> hess(buff_ptr, d, d); buff_ptr += d * d;
         Eigen::Map<vec_value_t> alpha_tmp(buff_ptr, d); buff_ptr += d;
@@ -130,22 +123,10 @@ protected:
             );
         };
 
-        #ifdef ADELIE_CORE_DEBUG
-        const auto save_iterate = [&]() {
-            _primals.push_back(x);
-            _duals.push_back(mu);
-            if (Eigen::isnan(x).any() || Eigen::isnan(mu).any()) {
-                PRINT(x);
-                PRINT(mu);
-                throw util::adelie_core_error("Found nan!");
-            }
-        };
-        #endif
-
         while (iters < max_iters) {
             ++iters;
 
-            compute_mu_resid(mu, linear, Q, mu_resid);
+            compute_mu_resid(mu_resid);
             const value_t mu_resid_norm = mu_resid.matrix().norm();
             const value_t mu_resid_norm_sq = mu_resid_norm * mu_resid_norm;
 
@@ -168,11 +149,8 @@ protected:
                 // NOTE: this check is important since numerical precision issues
                 // may make us enter this loop infinitely.
                 if (is_prev_valid) {
-                    if (compute_convergence_measure(mu_prev, mu, true) <= tol) {
+                    if (compute_convergence_measure(true) <= tol) {
                         x.setZero();
-                        #ifdef ADELIE_CORE_DEBUG
-                        save_iterate();
-                        #endif
                         return;
                     }
                 }
@@ -188,15 +166,9 @@ protected:
                     // one-time population
                     Qv.matrix() = v.matrix() * Q.transpose();
                     
-                    // If previous is valid, we will use mu_prev and mu_curr to backtrack.
-                    // Otherwise, mu is the next iterate.
-                    auto& mu_curr = alpha;
                     const bool is_prev_valid_old = is_prev_valid;
-                    if (is_prev_valid_old) {
-                        mu_curr = mu; // optimization
-                    } else {
+                    if (!is_prev_valid_old) {
                         mu_resid_norm_prev = mu_resid_norm;
-                        mu_prev = mu;
                         is_prev_valid = true;
                         save_additional_prev(true);
                     }
@@ -210,17 +182,13 @@ protected:
                     // Relax 4) to mu * b <= cs_tol and minimize 1) residual norm.
                     // This effectively puts a box-constraint on mu.
                     if (
-                        compute_min_mu_resid(mu, Qv, is_prev_valid_old, cs_tol) <= l1 * l1
+                        compute_min_mu_resid(Qv, is_prev_valid_old) <= l1 * l1
                      ) {
                         x.setZero();
-                        #ifdef ADELIE_CORE_DEBUG
-                        save_iterate();
-                        #endif
                         return;
                     }
 
-                    if (is_prev_valid_old) mu = mu_curr; // optimization
-                    else continue;
+                    if (!is_prev_valid_old) continue;
                 }
 
                 // If we ever enter this region of code, it means that
@@ -236,32 +204,27 @@ protected:
                     );
                 }
                 const value_t lmda_target = (1-slack) * l1 + slack * mu_resid_norm_prev;
-                const value_t a = compute_backtrack_a(mu_prev, mu); 
-                const value_t b = compute_backtrack_b(mu_prev, mu, Qv, mu_resid);
+                const value_t a = compute_backtrack_a(); 
+                const value_t b = compute_backtrack_b(Qv, mu_resid);
                 const value_t c = mu_resid_norm_sq - lmda_target * lmda_target;
                 const value_t t_star = (-b + std::sqrt(std::max<value_t>(b * b - a * c, 0.0))) / a;
                 const value_t step_size = std::min<value_t>(std::max<value_t>(1-t_star, 0.0), 1.0);
-                mu = mu_prev + step_size * (mu - mu_prev);
+                compute_backtrack(step_size);
                 continue;
             }
 
-            #ifdef ADELIE_CORE_DEBUG
-            save_iterate();
-            #endif
-
-            compute_gradient(x, Q);
+            compute_gradient();
 
             // optimization: if optimality hard-check is satisfied, finish early.
-            if (compute_hard_optimality(mu)) return;
+            if (compute_hard_optimality()) return;
 
             // Check if mu is not changing much w.r.t. hessian scaling.
             if (is_prev_valid) {
-                if (compute_convergence_measure(mu_prev, mu, false) <= tol) return;
+                if (compute_convergence_measure(false) <= tol) return;
             }
 
             // save old values
             mu_resid_norm_prev = mu_resid_norm;
-            mu_prev = mu;
             is_prev_valid = true;
             save_additional_prev(false);
 
@@ -286,37 +249,17 @@ protected:
             // full hessian update
             hess.template triangularView<Eigen::Upper>() = hess.transpose();
 
-            compute_proximal_newton_step(hess, mu);
+            compute_proximal_newton_step(hess);
         }
 
         throw util::adelie_core_solver_error("ConstraintBase: proximal newton max iterations reached!");
     }
 
-#ifdef ADELIE_CORE_DEBUG
-    std::vector<vec_value_t> _primals;
-    std::vector<vec_value_t> _duals;
-#endif
-
 public:
     virtual ~ConstraintBase() {}
 
-    auto debug_info() const 
-    {
-        #ifdef ADELIE_CORE_DEBUG
-        util::rowmat_type<value_t> pr(_primals.size(), primals());
-        util::rowmat_type<value_t> du(_duals.size(), duals());
-        for (size_t i = 0; i < _primals.size(); ++i) 
-        {
-            pr.row(i) = _primals[i];
-            du.row(i) = _duals[i];
-        }
-        return std::make_tuple(pr, du); 
-        #endif
-    }
-
     virtual void solve(
         Eigen::Ref<vec_value_t> x,
-        Eigen::Ref<vec_value_t> mu,
         const Eigen::Ref<const vec_value_t>& quad,
         const Eigen::Ref<const vec_value_t>& linear,
         value_t l1,

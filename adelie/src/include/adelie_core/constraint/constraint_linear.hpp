@@ -86,11 +86,7 @@ public:
     using base_t::_u;
 
 private:
-    const map_ccolmat_value_t _A_u;
-    const map_cvec_value_t _A_d;
-    const map_crowmat_value_t _A_vh;
     const map_cvec_value_t _A_vars;
-    const size_t _A_rank;
     const size_t _max_iters;
     const value_t _tol;
     const size_t _nnls_batch_size;
@@ -100,27 +96,14 @@ private:
     const value_t _slack;
     const size_t _n_threads;
 
-    static size_t init_A_rank(
-        const Eigen::Ref<const vec_value_t>& A_d
-    )
-    {
-        const value_t A_d_sum = A_d.sum();
-        value_t cumsum = 0; 
-        for (Eigen::Index i = 0; i < A_d.size(); ++i) {
-            if (cumsum > 0.99 * A_d_sum) return i;
-            cumsum += A_d[i];
-        }
-        return A_d.size();
-    }
+    std::vector<Eigen::Index> _mu_active;
+    std::vector<value_t> _mu_value;
 
 public:
     explicit ConstraintLinearProximalNewton(
         const Eigen::Ref<const rowmat_value_t>& A,
         const Eigen::Ref<const vec_value_t>& l,
         const Eigen::Ref<const vec_value_t>& u,
-        const Eigen::Ref<const colmat_value_t>& A_u,
-        const Eigen::Ref<const vec_value_t>& A_d,
-        const Eigen::Ref<const rowmat_value_t>& A_vh,
         const Eigen::Ref<const vec_value_t>& A_vars,
         size_t max_iters,
         value_t tol,
@@ -132,11 +115,7 @@ public:
         size_t n_threads
     ):
         base_t(A, l, u),
-        _A_u(A_u.data(), A_u.rows(), A_u.cols()),
-        _A_d(A_d.data(), A_d.size()),
-        _A_vh(A_vh.data(), A_vh.rows(), A_vh.cols()),
         _A_vars(A_vars.data(), A_vars.size()),
-        _A_rank(init_A_rank(A_d)),
         _max_iters(max_iters),
         _tol(tol),
         _nnls_batch_size(nnls_batch_size),
@@ -149,15 +128,6 @@ public:
         const auto m = A.rows();
         const auto d = A.cols();
 
-        if (A_u.rows() != m) {
-            throw util::adelie_core_error("A_u must be (m, r) where A is (m, d).");
-        }
-        if (A_d.size() > std::min(A_u.cols(), A_vh.rows())) {
-            throw util::adelie_core_error("A_d must be (b,) where b <= min(r, s), A_u is (m, r) and A_vh is (s, d).");
-        }
-        if (A_vh.cols() != d) {
-            throw util::adelie_core_error("A_vh must be (s, d) where A is (m, d).");
-        }
         if (A_vars.size() != m) {
             throw util::adelie_core_error("A_vars must be (m,) where A is (m, d).");
         }
@@ -184,7 +154,6 @@ public:
 
     void solve(
         Eigen::Ref<vec_value_t> x,
-        Eigen::Ref<vec_value_t> mu,
         const Eigen::Ref<const vec_value_t>& quad,
         const Eigen::Ref<const vec_value_t>& linear,
         value_t l1,

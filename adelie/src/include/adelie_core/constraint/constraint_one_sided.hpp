@@ -117,6 +117,8 @@ private:
     const value_t _cs_tol;
     const value_t _slack;
 
+    vec_value_t _mu;
+
 public:
     explicit ConstraintOneSidedProximalNewton(
         const Eigen::Ref<const vec_value_t>& sgn,
@@ -134,7 +136,8 @@ public:
         _nnls_max_iters(nnls_max_iters),
         _nnls_tol(nnls_tol),
         _cs_tol(cs_tol),
-        _slack(slack)
+        _slack(slack),
+        _mu(vec_value_t::Zero(sgn.size()))
     {
         if (tol < 0) {
             throw util::adelie_core_error("tol must be >= 0.");
@@ -158,7 +161,6 @@ public:
 
     void solve(
         Eigen::Ref<vec_value_t> x,
-        Eigen::Ref<vec_value_t> mu,
         const Eigen::Ref<const vec_value_t>& quad,
         const Eigen::Ref<const vec_value_t>& linear,
         value_t l1,
@@ -171,7 +173,7 @@ public:
         const auto d = m;
 
         if (d == 1) {
-            base_t::solve_1d(x, mu, quad, linear, l1, l2, Q);
+            base_t::solve_1d(x, _mu, quad, linear, l1, l2, Q);
             return;
         }
 
@@ -179,93 +181,89 @@ public:
         const auto buff_begin = buff_ptr;
         Eigen::Map<vec_value_t> grad_prev(buff_ptr, m); buff_ptr += m;
         Eigen::Map<vec_value_t> grad(buff_ptr, m); buff_ptr += m;
+        Eigen::Map<vec_value_t> mu_prev(buff_ptr, m); buff_ptr += m;
         const auto n_read = std::distance(buff_begin, buff_ptr);
         Eigen::Map<vec_uint64_t> next_buff(buffer.data() + n_read, buffer.size() - n_read);
 
         const auto compute_mu_resid = [&](
-            const auto& mu,
-            const auto& linear,
-            const auto& Q,
             auto& mu_resid
         ) {
-            mu_resid.matrix() = linear.matrix() - (_sgn * mu).matrix() * Q;
+            mu_resid.matrix() = linear.matrix() - (_sgn * _mu).matrix() * Q;
         };
         const auto compute_min_mu_resid = [&](
-            auto& mu,
             const auto& Qv,
-            bool,
-            auto cs_tol
+            bool is_prev_valid_old
         ) {
+            auto& mu_curr = grad;
+            if (is_prev_valid_old) {
+                mu_curr = _mu;
+            }
             const auto is_b_zero = (_b <= 0).template cast<value_t>();
-            mu = (_sgn * Qv).max(0).min(
-                cs_tol * (1 - is_b_zero) / (_b + is_b_zero) +
+            _mu = (_sgn * Qv).max(0).min(
+                _cs_tol * (1 - is_b_zero) / (_b + is_b_zero) +
                 Configs::max_solver_value * is_b_zero
             );
-            return (Qv - _sgn * mu).square().sum();
+            const auto mu_resid_norm_sq = (Qv - _sgn * _mu).square().sum();
+            if (is_prev_valid_old && mu_resid_norm_sq > l1 * l1) {
+                _mu = mu_curr;
+            } 
+            return mu_resid_norm_sq;
         };
-        const auto compute_backtrack_a = [&](
-            const auto& mu_prev,
-            const auto& mu
-        ) {
-            return (mu - mu_prev).square().sum();
+        const auto compute_backtrack_a = [&]() {
+            return (_mu - mu_prev).square().sum();
         };
         const auto compute_backtrack_b = [&](
-            const auto& mu_prev,
-            const auto& mu,
             const auto& Qv,
             const auto& 
         ) {
-            return ((_sgn * Qv - mu) * (mu - mu_prev)).sum();
+            return ((_sgn * Qv - _mu) * (_mu - mu_prev)).sum();
         };
-        const auto compute_gradient = [&](
-            const auto& x,
-            const auto& Q
-        ) {
+        const auto compute_backtrack = [&](auto step_size) {
+            _mu = mu_prev + step_size * (_mu - mu_prev);
+        };
+        const auto compute_gradient = [&]() {
             grad.matrix() = (x.matrix() * Q.transpose()).cwiseProduct(_sgn.matrix()) - _b.matrix();
         };
-        const auto compute_hard_optimality = [&](
-            const auto& mu
-        ) {
-            return (grad <= 0).all() && (mu * grad == 0).all();
+        const auto compute_hard_optimality = [&]() {
+            return (grad <= 0).all() && (_mu * grad == 0).all();
         };
         const auto compute_convergence_measure = [&](
-            const auto& mu_prev,
-            const auto& mu,
             bool is_in_ellipse
         ) {
             return is_in_ellipse ? (
-                std::abs(((mu-mu_prev) * (grad_prev+_b)).mean())
+                std::abs(((_mu-mu_prev) * (grad_prev+_b)).mean())
             ) : (
-                std::abs(((mu-mu_prev) * (grad_prev-grad)).mean())
+                std::abs(((_mu-mu_prev) * (grad_prev-grad)).mean())
             );
         };
         const auto compute_proximal_newton_step = [&](
-            const auto& hess,
-            auto& mu
+            const auto& hess
         ) {
             // reparametrize
             grad *= _sgn;
-            mu *= _sgn;
+            _mu *= _sgn;
 
             // solve NNQP for new mu
             optimization::StateNNQPFull<colmat_value_t, true> state_nnqp(
-                _sgn, hess, _nnls_max_iters, _nnls_tol, mu, grad
+                _sgn, hess, _nnls_max_iters, _nnls_tol, _mu, grad
             );
             state_nnqp.solve();
 
             // reparametrize
-            mu *= _sgn;
+            _mu *= _sgn;
         };
         const auto save_additional_prev = [&](bool is_in_ellipse) {
+            mu_prev = _mu;
             if (is_in_ellipse) grad_prev = -_b;
             else grad_prev = grad;
         };
         base_t::_solve_proximal_newton(
-            x, mu, quad, linear, l1, l2, Q, _max_iters, _tol, _cs_tol, _slack, next_buff,
+            x, quad, linear, l1, l2, Q, _max_iters, _tol, _slack, next_buff,
             compute_mu_resid,
             compute_min_mu_resid,
             compute_backtrack_a,
             compute_backtrack_b,
+            compute_backtrack,
             compute_gradient,
             compute_hard_optimality,
             compute_convergence_measure,
@@ -292,9 +290,9 @@ private:
     const size_t _max_iters;
     const value_t _tol_abs;
     const value_t _tol_rel;
-    const size_t _newton_max_iters = 100000;
-    const value_t _newton_tol = 1e-12;
     const value_t _rho;
+
+    vec_value_t _mu;
 
 public:
     explicit ConstraintOneSidedADMM(
@@ -309,7 +307,8 @@ public:
         _max_iters(max_iters),
         _tol_abs(tol_abs),
         _tol_rel(tol_rel),
-        _rho(rho)
+        _rho(rho),
+        _mu(vec_value_t::Zero(sgn.size()))
     {
         if (tol_abs < 0) {
             throw util::adelie_core_error("tol_abs must be >= 0.");
@@ -330,7 +329,6 @@ public:
 
     void solve(
         Eigen::Ref<vec_value_t> x,
-        Eigen::Ref<vec_value_t> mu,
         const Eigen::Ref<const vec_value_t>& quad,
         const Eigen::Ref<const vec_value_t>& linear,
         value_t l1,
@@ -339,16 +337,11 @@ public:
         Eigen::Ref<vec_uint64_t> buffer
     ) override
     {
-        #ifdef ADELIE_CORE_DEBUG
-        _primals.clear();
-        _duals.clear();
-        #endif
-        
         const auto m = _b.size();
         const auto d = m;
 
         if (d == 1) {
-            base_t::solve_1d(x, mu, quad, linear, l1, l2, Q);
+            base_t::solve_1d(x, _mu, quad, linear, l1, l2, Q);
             return;
         } 
 
@@ -370,6 +363,8 @@ public:
         u.setZero();
 
         const auto compute_primal_x = [&]() {
+            constexpr size_t _newton_max_iters = 100000;
+            constexpr value_t _newton_tol = 1e-12;
             size_t x_iters;
             bcd::unconstrained::newton_abs_solver(
                 quad, linear_shifted, l1, l2+_rho, _newton_tol, _newton_max_iters, 
@@ -384,27 +379,14 @@ public:
         const auto compute_dual = [&]() {
             const auto x_norm = x.matrix().norm();
             if (x_norm <= 0) {
-                mu = (
+                _mu = (
                     ((v.matrix() * Q.transpose()).array() * _sgn).max(0) 
                     * (_b <= 0).template cast<value_t>()
                 );
                 return;
             }
-            mu = (((v - (quad + l2 + l1 / x_norm) * x).matrix() * Q.transpose()).array() * _sgn).max(0);
+            _mu = (((v - (quad + l2 + l1 / x_norm) * x).matrix() * Q.transpose()).array() * _sgn).max(0);
         };
-
-        #ifdef ADELIE_CORE_DEBUG
-        const auto save_iterate = [&]() {
-            _primals.push_back(x);
-            _duals.push_back(mu);
-            if (Eigen::isnan(x).any() || Eigen::isnan(z).any() || Eigen::isnan(mu).any()) {
-                PRINT(x);
-                PRINT(z);
-                PRINT(mu);
-                throw util::adelie_core_error("Found nan!");
-            }
-        };
-        #endif
 
         while (iters < _max_iters) {
             ++iters;
