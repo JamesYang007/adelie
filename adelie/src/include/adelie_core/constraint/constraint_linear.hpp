@@ -96,7 +96,9 @@ private:
     const value_t _slack;
     const size_t _n_threads;
 
+    std::vector<Eigen::Index> _mu_active_prev;
     std::vector<Eigen::Index> _mu_active;
+    std::vector<value_t> _mu_value_prev;
     std::vector<value_t> _mu_value;
 
 public:
@@ -192,35 +194,25 @@ public:
         const auto compute_ATmu = [&](
             auto& out
         ) {
-            if (m < d * d) {
-                out.matrix() = mu.matrix() * _A;
-            } else {
-                // TODO: would be nice to keep track of mu active set to reduce loop size
-                out.setZero();
-                for (Eigen::Index i = 0; i < mu.size(); ++i) {
-                    if (mu[i] == 0) continue;
-                    out += mu[i] * _A.row(i).array();
-                }
-            } 
+            out.setZero();
+            for (size_t i = 0; i < _mu_active.size(); ++i) {
+                out += _mu_value[i] * _A.row(_mu_active[i]).array();
+            }
         };
 
         // must be initialized prior to calling solver
         compute_ATmu(ATmu);
 
         const auto compute_mu_resid = [&](
-            const auto&,
-            const auto& linear,
-            const auto& Q,
             auto& mu_resid
         ) {
             mu_resid.matrix() = linear.matrix() - ATmu.matrix() * Q;
         };
         const auto compute_min_mu_resid = [&](
-            auto& mu,
             const auto& Qv,
-            bool is_prev_valid_old,
-            auto cs_tol
+            bool is_prev_valid_old
         ) {
+            if ()
             auto Qmu_resid = grad.matrix();
             Qmu_resid = Qv - ATmu;
             const value_t loss = 0.5 * Qmu_resid.squaredNorm();
