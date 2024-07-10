@@ -69,10 +69,11 @@ struct StateNNLS
         }
     }
 
-    template <class EarlyExitType, class SgnType>
+    template <class EarlyExitType, class LowerType, class UpperType>
     void solve(
         EarlyExitType early_exit_f,
-        SgnType sgn_f
+        LowerType lower,
+        UpperType upper
     )
     {
         const auto n = beta.size();
@@ -90,13 +91,9 @@ struct StateNNLS
                 const auto bi_old = bi;
                 const auto step = (X_vars_i <= 0) ? 0 : (gi / X_vars_i);
                 const auto bi_cand = bi + step;
-                const auto sgn_i = sgn_f(i);
-                const auto add_pos = sgn_i >= 2;
-                const auto add_neg = sgn_i % 2 == 1;
-                bi = (
-                    std::max<value_t>(bi_cand, 0.0) * add_pos
-                    + std::min<value_t>(bi_cand, 0.0) * add_neg
-                );
+                const auto li = lower(i);
+                const auto ui = upper(i);
+                bi = std::min<value_t>(std::max<value_t>(bi_cand, li), ui);
                 const auto del = bi - bi_old;
                 if (del == 0) continue;
                 const auto scaled_del_sq = X_vars_i * del * del; 

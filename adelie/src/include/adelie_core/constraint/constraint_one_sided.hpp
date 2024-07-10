@@ -1,4 +1,5 @@
 #pragma once
+#include <adelie_core/configs.hpp>
 #include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/optimization/nnqp_full.hpp>
 
@@ -189,25 +190,18 @@ public:
         ) {
             mu_resid.matrix() = linear.matrix() - (_sgn * mu).matrix() * Q;
         };
-        const auto compute_hard_min_mu_resid = [&](
-            auto& mu,
-            const auto& Qv
-        ) {
-            mu = (_sgn * Qv).max(0);
-            return (Qv - _sgn * mu).square().sum();
-        };
-        const auto compute_soft_min_mu_resid = [&](
+        const auto compute_min_mu_resid = [&](
             auto& mu,
             const auto& Qv,
-            bool
+            bool,
+            auto cs_tol
         ) {
-            mu *= (_b <= 0).template cast<value_t>();
+            const auto is_b_zero = (_b <= 0).template cast<value_t>();
+            mu = (_sgn * Qv).max(0).min(
+                cs_tol * (1 - is_b_zero) / (_b + is_b_zero) +
+                Configs::max_solver_value * is_b_zero
+            );
             return (Qv - _sgn * mu).square().sum();
-        };
-        const auto compute_relaxed_slackness = [&](
-            const auto& mu
-        ) {
-            return ((mu * _b).square().mean() <= _cs_tol);
         };
         const auto compute_backtrack_a = [&](
             const auto& mu_prev,
@@ -247,7 +241,6 @@ public:
         };
         const auto compute_proximal_newton_step = [&](
             const auto& hess,
-            const auto x_norm,
             auto& mu
         ) {
             // reparametrize
@@ -256,7 +249,7 @@ public:
 
             // solve NNQP for new mu
             optimization::StateNNQPFull<colmat_value_t, true> state_nnqp(
-                _sgn, hess, _nnls_max_iters, _nnls_tol * std::max<value_t>(x_norm, 1), mu, grad
+                _sgn, hess, _nnls_max_iters, _nnls_tol, mu, grad
             );
             state_nnqp.solve();
 
@@ -270,9 +263,7 @@ public:
         base_t::_solve_proximal_newton(
             x, mu, quad, linear, l1, l2, Q, _max_iters, _tol, _cs_tol, _slack, next_buff,
             compute_mu_resid,
-            compute_hard_min_mu_resid,
-            compute_soft_min_mu_resid,
-            compute_relaxed_slackness,
+            compute_min_mu_resid,
             compute_backtrack_a,
             compute_backtrack_b,
             compute_gradient,

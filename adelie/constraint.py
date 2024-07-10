@@ -55,7 +55,7 @@ def box(
                     Default is ``1e-7``.
                 cs_tol : float, optional
                     Complementary slackness tolerance.
-                    Default is ``1e-16``.
+                    Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
                     the boundary where primal is zero.
@@ -110,7 +110,7 @@ def box(
             "tol": 1e-7,
             "nnls_max_iters": 10000,
             "nnls_tol": 1e-7,
-            "cs_tol": 1e-16,
+            "cs_tol": 1e-7,
             "slack": 1e-4,
         },
     }[method]
@@ -186,7 +186,7 @@ def linear(
                     Default is ``1e-7``.
                 cs_tol : float, optional
                     Complementary slackness tolerance.
-                    Default is ``1e-16``.
+                    Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
                     the boundary where primal is zero.
@@ -255,7 +255,7 @@ def linear(
             "nnls_batch_size": 10,
             "nnls_max_iters": 10000,
             "nnls_tol": 1e-7,
-            "cs_tol": 1e-16,
+            "cs_tol": 1e-7,
             "slack": 1e-4,
             "n_threads": 1,
         },
@@ -366,7 +366,7 @@ def one_sided(
                     Default is ``1e-7``.
                 cs_tol : float, optional
                     Complementary slackness tolerance.
-                    Default is ``1e-16``.
+                    Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
                     the boundary where primal is zero.
@@ -436,7 +436,7 @@ def one_sided(
             "tol": 1e-7,
             "nnls_max_iters": 10000,
             "nnls_tol": 1e-7,
-            "cs_tol": 1e-16,
+            "cs_tol": 1e-7,
             "slack": 1e-4,
         },
         "admm": {

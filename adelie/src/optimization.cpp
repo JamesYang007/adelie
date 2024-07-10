@@ -160,7 +160,8 @@ void nnls(py::module_& m, const char* name)
             sw.start();
             state.solve(
                 [](){return false;}, 
-                [](auto) {return 2;}
+                [](auto) {return -std::numeric_limits<value_t>::infinity();},
+                [](auto) {return std::numeric_limits<value_t>::infinity();}
             );
             state.time_elapsed = sw.elapsed();
         })

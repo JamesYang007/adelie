@@ -58,9 +58,7 @@ protected:
 
     // NOTE: this only works for linear inequality constraint!
     template <class ComputeMuResidType,
-              class ComputeHardMinMuResidType,
-              class ComputeSoftMinMuResidType,
-              class ComputeRelaxedSlacknessType,
+              class ComputeMinMuResidType,
               class ComputeBacktrackAType,
               class ComputeBacktrackBType,
               class ComputeGradientType,
@@ -82,9 +80,7 @@ protected:
         value_t slack,
         vec_uint64_t buff,
         ComputeMuResidType compute_mu_resid,
-        ComputeHardMinMuResidType compute_hard_min_mu_resid,
-        ComputeSoftMinMuResidType compute_soft_min_mu_resid,
-        ComputeRelaxedSlacknessType compute_relaxed_slackness,
+        ComputeMinMuResidType compute_min_mu_resid,
         ComputeBacktrackAType compute_backtrack_a,
         ComputeBacktrackBType compute_backtrack_b,
         ComputeGradientType compute_gradient,
@@ -210,24 +206,12 @@ protected:
                     // 2) Primal feasibility: A @ Q @ x <= b (already satisfied with x = 0).
                     // 3) Dual feasibility: mu >= 0.
                     // 4) Complementary slackness: mu * b = 0.
-                    // Perform 2 checks:
-                    // a) Relax 4) by setting mu to minimize the norm (hard-min) in 1)
-                    //    and checking whether mean((mu * _b) ** 2) is small.
-                    // b) Mathematically, mu[i] = 0 whenever _b[i] > 0 satisfies 2)-4).
-                    //    It suffices to minimize the norm in 1) (soft-min)
-                    //    under the constraint of complementary slackness.
+                    //
+                    // Relax 4) to mu * b <= cs_tol and minimize 1) residual norm.
+                    // This effectively puts a box-constraint on mu.
                     if (
-                        (compute_hard_min_mu_resid(mu, Qv) <= l1 * l1) &&
-                        (compute_relaxed_slackness(mu) <= cs_tol)
+                        compute_min_mu_resid(mu, Qv, is_prev_valid_old, cs_tol) <= l1 * l1
                      ) {
-                        x.setZero();
-                        #ifdef ADELIE_CORE_DEBUG
-                        save_iterate();
-                        #endif
-                        return;
-                    }
-
-                    if (compute_soft_min_mu_resid(mu, Qv, is_prev_valid_old) <= l1 * l1) {
                         x.setZero();
                         #ifdef ADELIE_CORE_DEBUG
                         save_iterate();
@@ -302,7 +286,7 @@ protected:
             // full hessian update
             hess.template triangularView<Eigen::Upper>() = hess.transpose();
 
-            compute_proximal_newton_step(hess, x_norm, mu);
+            compute_proximal_newton_step(hess, mu);
         }
 
         throw util::adelie_core_solver_error("ConstraintBase: proximal newton max iterations reached!");

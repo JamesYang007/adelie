@@ -1,4 +1,5 @@
 #pragma once
+#include <adelie_core/configs.hpp>
 #include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/optimization/hinge_full.hpp>
 #include <adelie_core/optimization/hinge_low_rank.hpp>
@@ -222,8 +223,16 @@ public:
         const auto compute_ATmu = [&](
             auto& out
         ) {
-            // TODO: sparse-dot? 
-            out.matrix() = mu.matrix() * _A;
+            if (m < d * d) {
+                out.matrix() = mu.matrix() * _A;
+            } else {
+                // TODO: would be nice to keep track of mu active set to reduce loop size
+                out.setZero();
+                for (Eigen::Index i = 0; i < mu.size(); ++i) {
+                    if (mu[i] == 0) continue;
+                    out += mu[i] * _A.row(i).array();
+                }
+            } 
         };
 
         // must be initialized prior to calling solver
@@ -237,56 +246,41 @@ public:
         ) {
             mu_resid.matrix() = linear.matrix() - ATmu.matrix() * Q;
         };
-        const auto compute_hard_min_mu_resid = [&](
-            auto& mu,
-            const auto& Qv
-        ) {
-            const auto u0 = _A_u.leftCols(_A_rank);
-            const auto d0 = _A_d.head(_A_rank);
-            const auto vh0 = _A_vh.topRows(_A_rank);
-            auto DinvVTQv = grad.head(_A_rank).matrix();
-            DinvVTQv = (Qv.matrix() * vh0.transpose()).cwiseQuotient(d0.matrix()); 
-            mu.matrix() = DinvVTQv * u0.transpose();
-            return (Qv.matrix() - DinvVTQv.cwiseProduct(d0.matrix()) * vh0).squaredNorm();
-        };
-        const auto compute_soft_min_mu_resid = [&](
+        const auto compute_min_mu_resid = [&](
             auto& mu,
             const auto& Qv,
-            bool is_prev_valid_old
+            bool is_prev_valid_old,
+            auto cs_tol
         ) {
-            // TODO: is this a good warm-start?
-            // NOTE: this may induce better sparsity so mu_resid can potentially be computed cheapily.
-            mu = (
-                mu.max(0) * (_u <= 0).template cast<value_t>()
-                + mu.min(0) * (_l <= 0).template cast<value_t>()
-            );
-            auto mu_resid = grad.matrix();
-            compute_ATmu(mu_resid);
-            mu_resid = Qv.matrix() - mu_resid;
-            const value_t loss = 0.5 * mu_resid.squaredNorm();
+            auto Qmu_resid = grad.matrix();
+            Qmu_resid = Qv - ATmu;
+            const value_t loss = 0.5 * Qmu_resid.squaredNorm();
             const Eigen::Map<const colmat_value_t> AT(
                 _A.data(), _A.cols(), _A.rows()
             );
             optimization::StateNNLS<colmat_value_t> state_nnls(
                 AT, _A_vars, _nnls_max_iters, _nnls_tol,
-                mu, mu_resid, loss
+                mu, Qmu_resid, loss
+            );
+            const auto is_u_zero = (_u <= 0).template cast<value_t>();
+            const auto is_l_zero = (_l <= 0).template cast<value_t>();
+            const auto lower_constraint = (
+                (-cs_tol) * (1 - is_l_zero) / (_l + is_l_zero) +
+                (-Configs::max_solver_value) * is_l_zero
+            );
+            const auto upper_constraint = (
+                cs_tol * (1 - is_u_zero) / (_u + is_u_zero) +
+                Configs::max_solver_value * is_u_zero
             );
             state_nnls.solve(
                 [&]() { return state_nnls.loss <= 0.5 * l1 * l1; },
-                [&](auto i) { return ((_u[i] <= 0) << 1) & (_l[i] <= 0); }
+                lower_constraint,
+                upper_constraint
             );
             if (!is_prev_valid_old) {
-                ATmu = Qv - mu_resid.array();
+                ATmu = Qv - Qmu_resid.array();
             }
             return 2 * state_nnls.loss;
-        };
-        const auto compute_relaxed_slackness = [&](
-            const auto& mu
-        ) {
-            return std::max(
-                (mu.max(0) * _u).square().mean(),
-                (mu.min(0) * _l).square().mean()
-            );
         };
         const auto compute_backtrack_a = [&](
             const auto&,
@@ -313,7 +307,9 @@ public:
         const auto compute_hard_optimality = [&](
             const auto& 
         ) {
-            // TODO: cost of computing this may be too much
+            // This is an optional check for optimization purposes.
+            // The cost of computing this check may be too much if m >> d
+            // so we omit this check.
             return false;
         };
         const auto compute_convergence_measure = [&](
@@ -330,23 +326,31 @@ public:
         };
         const auto compute_proximal_newton_step = [&](
             const auto& hess,
-            const auto x_norm,
             auto& mu
         ) {
             if (m < d) {
                 hess_small = _A * hess * _A.transpose();
                 hinge_grad = grad.matrix() * _A.transpose();
                 optimization::StateHingeFull<colmat_value_t> state_hinge(
-                    hess_small, _l, _u, _nnls_max_iters, _nnls_tol * std::max<value_t>(x_norm, 1),
+                    hess_small, _l, _u, _nnls_max_iters, _nnls_tol,
                     mu, hinge_grad
                 );
                 state_hinge.solve();
             } else {
                 optimization::StateHingeLowRank<value_t, index_t> state_hinge(
-                    hess, _A, _l, _u, _nnls_batch_size, _nnls_max_iters, _nnls_tol * std::max<value_t>(x_norm, 1), _n_threads,
+                    hess, _A, _l, _u, _nnls_batch_size, _nnls_max_iters, _nnls_tol, _n_threads,
                     mu, grad, active_set, active_vars, active_AQ, hinge_grad
                 );
+                //try {
                 state_hinge.solve();
+                //} catch (...) {
+                //    PRINT(this);
+                //    PRINT(hess);
+                //    PRINT(state_hinge.iters);
+                //    PRINT(mu);
+                //    PRINT(hinge_grad);
+                //    throw;
+                //}
             }
             compute_ATmu(ATmu);
         };
@@ -358,9 +362,7 @@ public:
         base_t::_solve_proximal_newton(
             x, mu, quad, linear, l1, l2, Q, _max_iters, _tol, _cs_tol, _slack, next_buff,
             compute_mu_resid,
-            compute_hard_min_mu_resid,
-            compute_soft_min_mu_resid,
-            compute_relaxed_slackness,
+            compute_min_mu_resid,
             compute_backtrack_a,
             compute_backtrack_b,
             compute_gradient,

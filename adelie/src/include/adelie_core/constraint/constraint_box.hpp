@@ -1,4 +1,5 @@
 #pragma once
+#include <adelie_core/configs.hpp>
 #include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/optimization/hinge_full.hpp>
 
@@ -199,31 +200,22 @@ public:
         ) {
             mu_resid.matrix() = linear.matrix() - mu.matrix() * Q;
         };
-        const auto compute_hard_min_mu_resid = [&](
-            auto& mu,
-            const auto& Qv
-        ) {
-            mu = Qv;
-            return 0;
-        };
-        const auto compute_soft_min_mu_resid = [&](
+        const auto compute_min_mu_resid = [&](
             auto& mu,
             const auto& Qv,
-            bool
+            bool,
+            auto cs_tol
         ) {
-            mu = (
-                mu.max(0) * (_u <= 0).template cast<value_t>()
-                + mu.min(0) * (_l <= 0).template cast<value_t>()
+            const auto is_u_zero = (_u <= 0).template cast<value_t>();
+            const auto is_l_zero = (_l <= 0).template cast<value_t>();
+            mu = Qv.max(
+                (-cs_tol) * (1 - is_l_zero) / (_l + is_l_zero) +
+                (-Configs::max_solver_value) * is_l_zero
+            ).min(
+                cs_tol * (1 - is_u_zero) / (_u + is_u_zero) +
+                Configs::max_solver_value * is_u_zero
             );
             return (Qv - mu).square().sum();
-        };
-        const auto compute_relaxed_slackness = [&](
-            const auto& mu
-        ) {
-            return std::max(
-                (mu.max(0) * _u).square().mean(),
-                (mu.min(0) * _l).square().mean()
-            );
         };
         const auto compute_backtrack_a = [&](
             const auto& mu_prev,
@@ -267,11 +259,10 @@ public:
         };
         const auto compute_proximal_newton_step = [&](
             const auto& hess,
-            const auto x_norm,
             auto& mu
         ) {
             optimization::StateHingeFull<colmat_value_t> state_hinge(
-                hess, _l, _u, _nnls_max_iters, _nnls_tol * std::max<value_t>(x_norm, 1), mu, grad 
+                hess, _l, _u, _nnls_max_iters, _nnls_tol, mu, grad 
             );
             state_hinge.solve();
         };
@@ -282,9 +273,7 @@ public:
         base_t::_solve_proximal_newton(
             x, mu, quad, linear, l1, l2, Q, _max_iters, _tol, _cs_tol, _slack, next_buff,
             compute_mu_resid,
-            compute_hard_min_mu_resid,
-            compute_soft_min_mu_resid,
-            compute_relaxed_slackness,
+            compute_min_mu_resid,
             compute_backtrack_a,
             compute_backtrack_b,
             compute_gradient,
