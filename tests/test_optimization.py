@@ -82,17 +82,20 @@ def test_hinge_low_rank(m, d, seed):
 
     x_cvxpy = run_cvxpy(A, quad, linear, penalty_pos, penalty_neg)
 
-    x = np.zeros(m)
-    resid = linear.copy()
-    active_set = np.empty(m, dtype=int)
+    active_set = np.empty(0, dtype=int)
+    active_value = np.zeros(0)
     active_vars = np.empty(m)
     active_AQ = np.empty((m, d))
+    resid = linear.copy()
     grad = np.empty(m)
     state = opt.StateHingeLowRank(
         quad, A, penalty_neg, penalty_pos, 10, 100000, 1e-24, 1, 
-        x, resid, active_set, active_vars, active_AQ, grad,
+        active_set, active_value, active_vars, active_AQ, resid, grad,
     )
     state.solve()
+
+    x = np.zeros(m)
+    x[state.active_set] = state.active_value
 
     # test loss against truth
     loss_actual = objective(x, A, quad, linear, penalty_pos, penalty_neg)
@@ -103,7 +106,6 @@ def test_hinge_low_rank(m, d, seed):
     resid_actual = state.resid
     resid_expected = linear - quad @ A.T @ x
     assert np.allclose(resid_actual, resid_expected, atol=1e-7)
-
 
 
 @pytest.mark.parametrize("d", [3, 5, 10, 20])

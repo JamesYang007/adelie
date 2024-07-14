@@ -112,14 +112,12 @@ void sparsify_active_dual(
 )
 {
     using index_t = typename StateType::index_t;
+    using vec_index_t = typename StateType::vec_index_t;
+    using vec_value_t = typename StateType::vec_value_t;
 
     const auto& screen_set = state.screen_set;
     const auto& constraints = *state.constraints;
     const auto& dual_groups = state.dual_groups;
-    const auto& screen_dual = state.screen_dual;
-    const auto& screen_dual_begins = state.screen_dual_begins;
-
-    if (screen_dual.size() <= 0) return;
 
     const auto S = screen_set.size();
     std::vector<index_t> screen_order(S);
@@ -138,15 +136,21 @@ void sparsify_active_dual(
         const auto ss_idx = screen_order[i];
         const auto group = screen_set[ss_idx];
         const auto constraint = constraints[group];
-        const size_t group_size = constraint ? constraint->duals() : 0;
-        const auto vals_seg = screen_dual.segment(screen_dual_begins[ss_idx], group_size);
-        const auto dg = dual_groups[group];
-        for (size_t j = 0; j < group_size; ++j) {
-            const auto v = vals_seg[j];
-            if (v == 0) continue;
-            indices.push_back(dg + j);
-            values.push_back(v);
-        }
+        const size_t nnz = constraint ? constraint->duals_nnz() : 0;
+        if (nnz <= 0) continue;
+        const size_t old_size = indices.size();
+        indices.resize(old_size + nnz);
+        values.resize(old_size + nnz);
+        Eigen::Map<vec_index_t> indices_v(
+            indices.data() + old_size,
+            nnz
+        );
+        Eigen::Map<vec_value_t> values_v(
+            values.data() + old_size,
+            nnz
+        );
+        constraint->dual(indices_v, values_v);
+        indices_v += dual_groups[group];
     }
 }
 

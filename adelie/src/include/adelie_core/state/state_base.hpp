@@ -13,7 +13,6 @@ template <class ConstraintsType,
           class PenaltyType, class GradType, 
           class ScreenSetType, class ScreenHashsetType,
           class ScreenBeginsType, class ScreenBetaType,
-          class ScreenDualBeginsType, class ScreenDualType,
           class ValueType, class AbsGradType>
 void update_abs_grad(
     const ConstraintsType& constraints,
@@ -25,8 +24,6 @@ void update_abs_grad(
     const ScreenHashsetType& screen_hashset,
     const ScreenBeginsType& screen_begins,
     const ScreenBetaType& screen_beta,
-    const ScreenDualBeginsType& screen_dual_begins,
-    const ScreenDualType& screen_dual,
     ValueType lmda,
     ValueType alpha,
     AbsGradType& abs_grad,
@@ -40,7 +37,7 @@ void update_abs_grad(
         return screen_hashset.find(i) != screen_hashset.end();
     };
 
-    vec_value_t buff;
+    vec_value_t buff(group_sizes.maxCoeff());
 
     // do not parallelize since it may result in large false sharing 
     // (access to abs_grad[i] is random order)
@@ -62,14 +59,8 @@ void update_abs_grad(
         if (constraint == nullptr) {
             abs_grad[i] = common_expr.matrix().norm();
         } else {
-            if (buff.size() < size_k) buff.resize(size_k);
             auto vbuff = buff.head(size_k);
-
-            const Eigen::Map<const vec_value_t> mu(
-                screen_dual.data() + screen_dual_begins[ss_idx],
-                constraint->duals()
-            );
-            constraint->gradient(sbeta, mu, vbuff);
+            constraint->gradient(sbeta, vbuff);
             abs_grad[i] = (common_expr - vbuff).matrix().norm();
         }
     }
@@ -113,8 +104,6 @@ void update_abs_grad(
         state.screen_hashset,
         state.screen_begins,
         state.screen_beta,
-        state.screen_dual_begins,
-        state.screen_dual,
         lmda,
         state.alpha,
         state.abs_grad,
@@ -136,15 +125,12 @@ void update_screen_derived_base(
     StateType& state
 )
 {
-    const auto& constraints = state.constraints;
     const auto& group_sizes = state.group_sizes;
     const auto& screen_set = state.screen_set;
     auto& screen_hashset = state.screen_hashset;
     auto& screen_begins = state.screen_begins;
     auto& screen_beta = state.screen_beta;
     auto& screen_is_active = state.screen_is_active;
-    auto& screen_dual_begins = state.screen_dual_begins;
-    auto& screen_dual = state.screen_dual;
 
     /* update screen_hashset */
     const auto old_screen_size = screen_begins.size();
@@ -167,27 +153,6 @@ void update_screen_derived_base(
 
     /* update screen_is_active */
     screen_is_active.resize(screen_set.size(), false);
-
-    /* update screen_dual_begins */
-    const auto last_constraint = (
-        (old_screen_size == 0) ?
-        nullptr : constraints[screen_set[old_screen_size-1]]
-    );
-    size_t screen_dual_value_size = (
-        (old_screen_size == 0) ? 
-        0 : (screen_dual_begins.back() + (
-            last_constraint ? last_constraint->duals() : 0
-        ))
-    );
-    for (size_t i = old_screen_size; i < screen_set.size(); ++i) {
-        const auto constraint = constraints[screen_set[i]];
-        const auto curr_size = constraint ? constraint->duals() : 0;
-        screen_dual_begins.push_back(screen_dual_value_size);
-        screen_dual_value_size += curr_size;
-    }
-
-    /* update screen_dual */
-    screen_dual.resize(screen_dual_value_size, 0);
 }
 
 template <class ConstraintType,
@@ -265,8 +230,6 @@ struct StateBase
     dyn_vec_index_t screen_begins;
     dyn_vec_value_t screen_beta;
     dyn_vec_bool_t screen_is_active;
-    dyn_vec_index_t screen_dual_begins;
-    dyn_vec_value_t screen_dual;
     size_t active_set_size;
     vec_index_t active_set;
     value_t lmda;
@@ -323,7 +286,6 @@ struct StateBase
         const Eigen::Ref<const vec_index_t>& screen_set,
         const Eigen::Ref<const vec_value_t>& screen_beta,
         const Eigen::Ref<const vec_bool_t>& screen_is_active,
-        const Eigen::Ref<const vec_value_t>& screen_dual,
         size_t active_set_size,
         const Eigen::Ref<const vec_index_t>& active_set,
         value_t lmda,
@@ -365,7 +327,6 @@ struct StateBase
         screen_set(screen_set.data(), screen_set.data() + screen_set.size()),
         screen_beta(screen_beta.data(), screen_beta.data() + screen_beta.size()),
         screen_is_active(screen_is_active.data(), screen_is_active.data() + screen_is_active.size()),
-        screen_dual(screen_dual.data(), screen_dual.data() + screen_dual.size()),
         active_set_size(active_set_size),
         active_set(active_set),
         lmda(lmda),

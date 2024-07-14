@@ -97,7 +97,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&,
             const dyn_vec_mat_value_t&,
-            const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&, 
             size_t,
             bool,
@@ -112,7 +111,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             value_t,
             Eigen::Ref<vec_value_t>,
             Eigen::Ref<vec_bool_t>,
-            Eigen::Ref<vec_value_t>, 
             size_t,
             Eigen::Ref<vec_index_t>
         >(),
@@ -126,7 +124,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             py::arg("screen_begins").noconvert(),
             py::arg("screen_vars").noconvert(),
             py::arg("screen_transforms").noconvert(),
-            py::arg("screen_dual_begins").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("constraint_buffer_size"),
             py::arg("intercept"),
@@ -141,7 +138,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             py::arg("rsq"),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
-            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert()
         )
@@ -176,12 +172,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         ``screen_begins[i]`` is the starting index corresponding to the ``i`` th screen group.
         From this index, reading ``group_sizes[screen_set[i]]`` number of elements
         will grab values corresponding to the full ``i`` th screen group block.
-        )delimiter")
-        .def_readonly("screen_dual_begins", &state_t::screen_dual_begins, R"delimiter(
-        List of indices that index a corresponding list of dual values for each screen group.
-        ``screen_dual_begins[i]`` is the starting dual index corresponding to the ``i`` th screen group.
-        From this index, reading ``constraints[screen_set[i]].dual_size`` number of elements
-        will grab values corresponding to the full ``i`` th screen group dual block.
         )delimiter")
         .def_readonly("lmda_path", &state_t::lmda_path, R"delimiter(
         The regularization path to solve for.
@@ -224,14 +214,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         ``k = screen_set[i]``,
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
-        )delimiter")
-        .def_readonly("screen_dual", &state_t::screen_dual, R"delimiter(
-        Dual vector on the screen set.
-        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
-        where
-        ``k = screen_set[i]``,
-        ``b = screen_dual_begins[i]``,
-        and ``p = constraints[k].dual_size``.
         )delimiter")
         .def_readonly("screen_is_active", &state_t::screen_is_active, R"delimiter(
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
@@ -388,7 +370,6 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const dyn_vec_mat_value_t&,
-            const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&, 
             size_t,
             bool,
@@ -405,7 +386,6 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             value_t,
             Eigen::Ref<vec_value_t>, 
             Eigen::Ref<vec_bool_t>,
-            Eigen::Ref<vec_value_t>, 
             size_t,
             Eigen::Ref<vec_index_t>
         >(),
@@ -424,7 +404,6 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             py::arg("screen_vars").noconvert(),
             py::arg("screen_X_means").noconvert(),
             py::arg("screen_transforms").noconvert(),
-            py::arg("screen_dual_begins").noconvert(),
             py::arg("lmda_path").noconvert(),
             py::arg("constraint_buffer_size"),
             py::arg("intercept"),
@@ -441,7 +420,6 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             py::arg("resid_sum"),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
-            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert()
         )
@@ -538,7 +516,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             const dyn_vec_mat_value_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&, 
-            const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_value_t>&, 
             size_t,
             size_t,
@@ -552,7 +529,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             Eigen::Ref<vec_value_t>, 
             Eigen::Ref<vec_value_t>,
             Eigen::Ref<vec_bool_t>,
-            Eigen::Ref<vec_value_t>, 
             size_t,
             Eigen::Ref<vec_index_t>
         >(),
@@ -567,7 +543,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("screen_begins").noconvert(),
             py::arg("screen_vars").noconvert(),
             py::arg("screen_transforms").noconvert(),
-            py::arg("screen_dual_begins").noconvert(),
             py::arg("screen_subset_order").noconvert(),
             py::arg("screen_subset_ordered").noconvert(),
             py::arg("lmda_path").noconvert(),
@@ -583,7 +558,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("screen_beta").noconvert(),
             py::arg("screen_grad").noconvert(),
             py::arg("screen_is_active").noconvert(),
-            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert()
         )
@@ -687,7 +661,6 @@ void state_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
-            const Eigen::Ref<const vec_value_t>&, 
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             value_t,
@@ -723,7 +696,6 @@ void state_base(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
-            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert(),
             py::arg("lmda"),
@@ -868,30 +840,6 @@ void state_base(py::module_& m, const char* name)
         }, R"delimiter(
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-        )delimiter")
-        .def_property_readonly("screen_dual_begins", [](const state_t& state) {
-            return Eigen::Map<const vec_index_t>(
-                state.screen_dual_begins.data(),
-                state.screen_dual_begins.size()
-            );
-        }, R"delimiter(
-        List of indices that index a corresponding list of dual values for each screen group.
-        ``screen_dual_begins[i]`` is the starting dual index corresponding to the ``i`` th screen group.
-        From this index, reading ``constraints[screen_set[i]].dual_size`` number of elements
-        will grab values corresponding to the full ``i`` th screen group dual block.
-        )delimiter")
-        .def_property_readonly("screen_dual", [](const state_t& state) {
-            return Eigen::Map<const vec_value_t>(
-                state.screen_dual.data(),
-                state.screen_dual.size()
-            );
-        }, R"delimiter(
-        Dual vector on the screen set.
-        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
-        where
-        ``k = screen_set[i]``,
-        ``b = screen_dual_begins[i]``,
-        and ``p = constraints[k].dual_size``.
         )delimiter")
         .def_readonly("active_set_size", &state_t::active_set_size, R"delimiter(
         Number of active groups.
@@ -1096,7 +1044,6 @@ void state_gaussian_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
-            const Eigen::Ref<const vec_value_t>&, 
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             value_t,
@@ -1140,7 +1087,6 @@ void state_gaussian_naive(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
-            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert(),
             py::arg("rsq"),
@@ -1278,7 +1224,6 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
-            const Eigen::Ref<const vec_value_t>&, 
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             value_t,
@@ -1325,7 +1270,6 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
-            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert(),
             py::arg("rsq"),
@@ -1427,7 +1371,6 @@ void state_gaussian_cov(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
-            const Eigen::Ref<const vec_value_t>&, 
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             value_t,
@@ -1464,7 +1407,6 @@ void state_gaussian_cov(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
-            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert(),
             py::arg("rsq"),
@@ -1593,7 +1535,6 @@ void state_glm_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
-            const Eigen::Ref<const vec_value_t>&, 
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             value_t,
@@ -1639,7 +1580,6 @@ void state_glm_naive(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
-            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert(),
             py::arg("beta0"),
@@ -1762,7 +1702,6 @@ void state_multiglm_naive(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const vec_value_t>&, 
             const Eigen::Ref<const vec_bool_t>&,
-            const Eigen::Ref<const vec_value_t>&, 
             size_t,
             const Eigen::Ref<const vec_index_t>&,
             value_t,
@@ -1811,7 +1750,6 @@ void state_multiglm_naive(py::module_& m, const char* name)
             py::arg("screen_set").noconvert(),
             py::arg("screen_beta").noconvert(),
             py::arg("screen_is_active").noconvert(),
-            py::arg("screen_dual").noconvert(),
             py::arg("active_set_size"),
             py::arg("active_set").noconvert(),
             py::arg("beta0"),

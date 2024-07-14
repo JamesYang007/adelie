@@ -9,11 +9,13 @@
 namespace adelie_core {
 namespace constraint {
 
-template <class ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
 class ConstraintBase
 {
 public:
     using value_t = ValueType;
+    using index_t = IndexType;
+    using vec_index_t = util::rowvec_type<index_t>;
     using vec_value_t = util::rowvec_type<value_t>;
     using vec_uint64_t = util::rowvec_type<uint64_t>;
     using colmat_value_t = util::colmat_type<value_t>;
@@ -268,9 +270,10 @@ public:
         Eigen::Ref<vec_uint64_t> buffer
     ) =0;
 
+    // TODO: gradient(x, mu_indices, mu_values, out)
+
     virtual void gradient(
         const Eigen::Ref<const vec_value_t>& x,
-        const Eigen::Ref<const vec_value_t>& mu,
         Eigen::Ref<vec_value_t> out
     ) =0;
 
@@ -279,6 +282,13 @@ public:
     )
     {}
 
+    virtual void clear() =0;
+
+    virtual void dual(
+        Eigen::Ref<vec_index_t> indices,
+        Eigen::Ref<vec_value_t> values
+    ) =0;
+    virtual int duals_nnz() =0;
     virtual int duals() =0;
     virtual int primals() =0;
     virtual size_t buffer_size() { return 0; }

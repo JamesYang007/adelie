@@ -14,13 +14,13 @@ class PyConstraintBase : public ad::constraint::ConstraintBase<T>
 public:
     using base_t::base_t;
     using typename base_t::value_t;
+    using typename base_t::vec_index_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_uint64_t;
     using typename base_t::colmat_value_t;
 
     void solve(
         Eigen::Ref<vec_value_t> x,
-        Eigen::Ref<vec_value_t> mu,
         const Eigen::Ref<const vec_value_t>& quad,
         const Eigen::Ref<const vec_value_t>& linear,
         value_t l1,
@@ -33,13 +33,12 @@ public:
             void,
             base_t,
             solve,
-            x, mu, quad, linear, l1, l2, Q, buffer
+            x, quad, linear, l1, l2, Q, buffer
         );
     }
 
     void gradient(
         const Eigen::Ref<const vec_value_t>& x,
-        const Eigen::Ref<const vec_value_t>& mu,
         Eigen::Ref<vec_value_t> out
     ) override
     {
@@ -47,7 +46,7 @@ public:
             void,
             base_t,
             gradient,
-            x, mu, out
+            x, out
         );
     }
 
@@ -60,6 +59,37 @@ public:
             base_t,
             project,
             x
+        );
+    }
+
+    void clear() override 
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            clear,
+        );
+    }
+
+    void dual(
+        Eigen::Ref<vec_index_t> indices,
+        Eigen::Ref<vec_value_t> values
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t, 
+            dual,
+            indices, values
+        );
+    }
+
+    int duals_nnz() override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            int,
+            base_t,
+            duals_nnz,
         );
     }
 
@@ -134,10 +164,6 @@ void constraint_base(py::module_& m, const char* name)
             The primal :math:`x`.
             The passed-in values may be used as a warm-start for the internal solver.
             The output is stored back in this argument.
-        mu : (m,) ndarray
-            The dual :math:`\mu`.
-            The passed-in values may be used as a warm-start for the internal solver.
-            The output is stored back in this argument.
         quad : (d,) ndarray
             The quadratic component :math:`\Sigma`. 
         linear : (d,) ndarray
@@ -153,7 +179,6 @@ void constraint_base(py::module_& m, const char* name)
             The size must be at least as large as :func:`buffer_size`.
         )delimiter",
             py::arg("x").noconvert(),
-            py::arg("mu").noconvert(),
             py::arg("quad").noconvert(),
             py::arg("linear").noconvert(),
             py::arg("l1"),
@@ -171,19 +196,17 @@ void constraint_base(py::module_& m, const char* name)
                 \mu^\top \phi'(x)
             \end{align*}
 
-        where :math:`\phi'(x)` is the Jacobian of :math:`\phi` at :math:`x`.
+        where :math:`\phi'(x)` is the Jacobian of :math:`\phi` at :math:`x`
+        and :math:`\mu` is the dual solution from the last call to :func:`solve`. 
 
         Parameters
         ----------
         x : (d,) ndarray
             The primal :math:`x` at which to evaluate the gradient.
-        mu : (m,) ndarray
-            The dual :math:`\mu` at which to evaluate the gradient.
         out : (d,) ndarray
             The output vector to store the gradient.
         )delimiter",
             py::arg("x").noconvert(),
-            py::arg("mu").noconvert(),
             py::arg("out").noconvert()
         )
         .def("project", &internal_t::project, R"delimiter(
@@ -211,6 +234,32 @@ void constraint_base(py::module_& m, const char* name)
         )delimiter",
             py::arg("x").noconvert()
         )
+        .def("clear", &internal_t::clear, R"delimiter(
+        Clears internal data.
+
+        The state of the constraint object must return back to
+        that of the initial construction.
+        )delimiter")
+        .def("dual", &internal_t::dual, R"delimiter(
+        Returns the current dual variable in sparse format.
+
+        Parameters
+        ----------
+        indices : (nnz,) ndarray
+            The indices with non-zero dual values.
+            The size must be at least the value returned by :func:`duals_nnz`.
+        values : (nnz,) ndarray
+            The non-zero dual values corresponding to ``indices``.
+            The size must be at least the value returned by :func:`duals_nnz`.
+        )delimiter")
+        .def("duals_nnz", &internal_t::duals_nnz, R"delimiter(
+        Returns the number of non-zero dual values.
+
+        Returns
+        -------
+        nnz : int
+            Number of non-zero dual values.
+        )delimiter")
         .def("duals", &internal_t::duals, R"delimiter(
         Returns the number of dual variables.
 
@@ -308,9 +357,6 @@ void constraint_linear_proximal_newton(py::module_& m, const char* name)
             const Eigen::Ref<const rowmat_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
-            const Eigen::Ref<const colmat_value_t>&,
-            const Eigen::Ref<const vec_value_t>&,
-            const Eigen::Ref<const rowmat_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             size_t,
             value_t,
@@ -324,9 +370,6 @@ void constraint_linear_proximal_newton(py::module_& m, const char* name)
             py::arg("A").noconvert(),
             py::arg("lower").noconvert(),
             py::arg("upper").noconvert(),
-            py::arg("A_u").noconvert(),
-            py::arg("A_d").noconvert(),
-            py::arg("A_vh").noconvert(),
             py::arg("A_vars").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
@@ -381,13 +424,6 @@ void constraint_one_sided_proximal_newton(py::module_& m, const char* name)
             py::arg("cs_tol"),
             py::arg("slack")
         )
-        .def("debug_info", &internal_t::debug_info, R"delimiter(
-        Returns debug information.
-
-        This method is only intended for developers for debugging purposes.
-        The package must be compiled with the compiler flag `-DADELIE_CORE_DEBUG`
-        to see the debug information.
-        )delimiter")
         ;
 }
 
@@ -416,13 +452,6 @@ void constraint_one_sided_admm(py::module_& m, const char* name)
             py::arg("tol_rel"),
             py::arg("rho")
         )
-        .def("debug_info", &internal_t::debug_info, R"delimiter(
-        Returns debug information.
-
-        This method is only intended for developers for debugging purposes.
-        The package must be compiled with the compiler flag `-DADELIE_CORE_DEBUG`
-        to see the debug information.
-        )delimiter")
         ;
 }
 

@@ -45,7 +45,6 @@ struct StateGaussianPinBase
     const map_cvec_index_t screen_begins;
     const map_cvec_value_t screen_vars;
     const dyn_vec_mat_value_t* screen_transforms;
-    const map_cvec_index_t screen_dual_begins;
     const map_cvec_value_t lmda_path;
 
     /* configurations */
@@ -64,7 +63,6 @@ struct StateGaussianPinBase
     value_t rsq;
     map_vec_value_t screen_beta;
     map_vec_bool_t screen_is_active;
-    map_vec_value_t screen_dual;
     size_t active_set_size;
     map_vec_index_t active_set;
     dyn_vec_index_t active_begins;
@@ -93,7 +91,6 @@ struct StateGaussianPinBase
         const Eigen::Ref<const vec_index_t>& screen_begins, 
         const Eigen::Ref<const vec_value_t>& screen_vars,
         const dyn_vec_mat_value_t& screen_transforms,
-        const Eigen::Ref<const vec_index_t>& screen_dual_begins, 
         const Eigen::Ref<const vec_value_t>& lmda_path, 
         size_t constraint_buffer_size,
         bool intercept,
@@ -108,7 +105,6 @@ struct StateGaussianPinBase
         value_t rsq,
         Eigen::Ref<vec_value_t> screen_beta, 
         Eigen::Ref<vec_bool_t> screen_is_active,
-        Eigen::Ref<vec_value_t> screen_dual,
         size_t active_set_size,
         Eigen::Ref<vec_index_t> active_set
     ): 
@@ -122,7 +118,6 @@ struct StateGaussianPinBase
         screen_begins(screen_begins.data(), screen_begins.size()),
         screen_vars(screen_vars.data(), screen_vars.size()),
         screen_transforms(&screen_transforms),
-        screen_dual_begins(screen_dual_begins.data(), screen_dual_begins.size()),
         lmda_path(lmda_path.data(), lmda_path.size()),
         constraint_buffer_size(constraint_buffer_size),
         intercept(intercept),
@@ -137,7 +132,6 @@ struct StateGaussianPinBase
         rsq(rsq),
         screen_beta(screen_beta.data(), screen_beta.size()),
         screen_is_active(screen_is_active.data(), screen_is_active.size()),
-        screen_dual(screen_dual.data(), screen_dual.size()),
         active_set_size(active_set_size),
         active_set(active_set.data(), active_set.size())
     {

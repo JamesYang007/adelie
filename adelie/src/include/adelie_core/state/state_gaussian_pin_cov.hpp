@@ -126,7 +126,6 @@ struct StateGaussianPinCov: StateGaussianPinBase<
         const Eigen::Ref<const vec_index_t>& screen_begins, 
         const Eigen::Ref<const vec_value_t>& screen_vars,
         const dyn_vec_mat_value_t& screen_transforms,
-        const Eigen::Ref<const vec_index_t>& screen_dual_begins, 
         const Eigen::Ref<const vec_index_t>& screen_subset_order,
         const Eigen::Ref<const vec_index_t>& screen_subset_ordered,
         const Eigen::Ref<const vec_value_t>& lmda_path, 
@@ -142,15 +141,14 @@ struct StateGaussianPinCov: StateGaussianPinBase<
         Eigen::Ref<vec_value_t> screen_beta, 
         Eigen::Ref<vec_value_t> screen_grad,
         Eigen::Ref<vec_bool_t> screen_is_active,
-        Eigen::Ref<vec_value_t> screen_dual,
         size_t active_set_size,
         Eigen::Ref<vec_index_t> active_set
     ): 
         base_t(
             constraints, groups, group_sizes, dual_groups, alpha, penalty, 
-            screen_set, screen_begins, screen_vars, screen_transforms, screen_dual_begins, lmda_path, 
+            screen_set, screen_begins, screen_vars, screen_transforms, lmda_path, 
             constraint_buffer_size, false, max_active_size, max_iters, tol, 0, 0, newton_tol, newton_max_iters, n_threads,
-            rsq, screen_beta, screen_is_active, screen_dual, active_set_size, active_set
+            rsq, screen_beta, screen_is_active, active_set_size, active_set
         ),
         screen_subset_order(screen_subset_order.data(), screen_subset_order.size()),
         screen_subset_ordered(screen_subset_ordered.data(), screen_subset_ordered.size()),

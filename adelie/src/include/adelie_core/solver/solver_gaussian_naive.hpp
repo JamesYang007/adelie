@@ -27,7 +27,6 @@ struct GaussianNaiveBufferPack
     vec_value_t resid_prev;
     dyn_vec_value_t screen_beta_prev; 
     dyn_vec_bool_t screen_is_active_prev;
-    dyn_vec_value_t screen_dual_prev; 
 };
 
 template <class StateType, class StateGaussianPinType, class ValueType>
@@ -98,7 +97,6 @@ auto fit(
     const auto& screen_vars = state.screen_vars;
     const auto& screen_X_means = state.screen_X_means;
     const auto& screen_transforms = state.screen_transforms;
-    const auto& screen_dual_begins = state.screen_dual_begins;
     const auto constraint_buffer_size = state.constraint_buffer_size;
     const auto intercept = state.intercept;
     const auto max_active_size = state.max_active_size;
@@ -114,14 +112,12 @@ auto fit(
     auto& resid = state.resid;
     auto& screen_beta = state.screen_beta;
     auto& screen_is_active = state.screen_is_active;
-    auto& screen_dual = state.screen_dual;
     auto& active_set_size = state.active_set_size;
     auto& active_set = state.active_set;
 
     auto& resid_prev = buffer_pack.resid_prev;
     auto& screen_beta_prev = buffer_pack.screen_beta_prev;
     auto& screen_is_active_prev = buffer_pack.screen_is_active_prev;
-    auto& screen_dual_prev = buffer_pack.screen_dual_prev;
 
     util::rowvec_type<value_t, 1> lmda_path;
     lmda_path = lmda;
@@ -133,13 +129,11 @@ auto fit(
         resid_prev = resid;
         screen_beta_prev = screen_beta;
         screen_is_active_prev = screen_is_active;
-        screen_dual_prev = screen_dual;
     };
     const auto load_prev_valid = [&]() {
         resid.swap(resid_prev);
         screen_beta.swap(screen_beta_prev);
         screen_is_active.swap(screen_is_active_prev);
-        screen_dual.swap(screen_dual_prev);
     };
 
     save_prev_valid();
@@ -160,7 +154,6 @@ auto fit(
         Eigen::Map<const vec_value_t>(screen_vars.data(), screen_vars.size()), 
         Eigen::Map<const vec_value_t>(screen_X_means.data(), screen_X_means.size()), 
         screen_transforms,
-        Eigen::Map<const vec_index_t>(screen_dual_begins.data(), screen_dual_begins.size()),
         lmda_path,
         constraint_buffer_size,
         intercept, max_active_size, max_iters, 
@@ -174,7 +167,6 @@ auto fit(
         resid_sum,
         Eigen::Map<vec_value_t>(screen_beta.data(), screen_beta.size()), 
         Eigen::Map<vec_safe_bool_t>(screen_is_active.data(), screen_is_active.size()),
-        Eigen::Map<vec_value_t>(screen_dual.data(), screen_dual.size()),
         active_set_size,
         active_set
     );

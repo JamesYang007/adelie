@@ -19,15 +19,6 @@ def run_test(
 
     d, m = cnstr.primal_size, cnstr.dual_size
 
-    # test gradient
-    x = np.random.normal(0, 1, d).astype(dtype)
-    mu = np.random.normal(0, 1, m).astype(dtype)
-    actual = np.empty(d, dtype=dtype)
-    cnstr.gradient(x, mu, actual)
-    expected = np.empty(d, dtype=dtype)
-    cnstr_exp.gradient(x, mu, expected)
-    assert np.allclose(actual, expected)
-
     # generate data
     np.random.seed(seed)
     quad = np.random.uniform(0, 1, d).astype(dtype)
@@ -41,8 +32,20 @@ def run_test(
 
     # test solve
     x = np.zeros(d, dtype=dtype)
+    cnstr.solve(x, quad, linear, l1, l2, Q, buffer)
+
+    # test gradient
+    actual = np.empty(d, dtype=dtype)
+    cnstr.gradient(x, actual)
     mu = np.zeros(m, dtype=dtype)
-    cnstr.solve(x, mu, quad, linear, l1, l2, Q, buffer)
+    mu_nnz = cnstr.duals_nnz()
+    mu_indices = np.empty(mu_nnz, dtype=int)
+    mu_values = np.empty(mu_nnz, dtype=dtype)
+    cnstr.dual(mu_indices, mu_values)
+    mu[mu_indices] = mu_values
+    expected = np.empty(d, dtype=dtype)
+    cnstr_exp.gradient(x, mu, expected)
+    assert np.allclose(actual, expected)
 
     # KKT first-order condition
     Qx = Q @ x

@@ -343,13 +343,6 @@ def gaussian_cov(
         screen_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
         screen_beta = np.zeros(np.sum(group_sizes[screen_set]), dtype=dtype)
         screen_is_active = np.ones(screen_set.shape[0], dtype=bool)
-        screen_dual_size = 0
-        if not (constraints is None):
-            screen_dual_size = np.sum([
-                0 if constraints[k] is None else constraints[k].dual_size
-                for k in screen_set
-            ], dtype=int)
-        screen_dual = np.zeros(screen_dual_size, dtype=dtype)
         active_set_size = screen_set.shape[0]
         active_set = np.empty(G, dtype=int)
         active_set[:active_set_size] = np.arange(active_set_size)
@@ -373,7 +366,6 @@ def gaussian_cov(
         screen_set = warm_start.screen_set
         screen_beta = warm_start.screen_beta
         screen_is_active = warm_start.screen_is_active
-        screen_dual = warm_start.screen_dual
         active_set_size = warm_start.active_set_size
         active_set = warm_start.active_set
         rsq = warm_start.rsq
@@ -390,7 +382,6 @@ def gaussian_cov(
         screen_set=screen_set,
         screen_beta=screen_beta,
         screen_is_active=screen_is_active,
-        screen_dual=screen_dual,
         active_set_size=active_set_size,
         active_set=active_set,
         rsq=rsq,
@@ -798,13 +789,6 @@ def grpnet(
             screen_set = np.arange(groups.shape[0])[(penalty <= 0) | (alpha <= 0)]
             screen_beta = np.zeros(np.sum(group_sizes[screen_set]), dtype=dtype)
             screen_is_active = np.ones(screen_set.shape[0], dtype=bool)
-            screen_dual_size = 0
-            if not (constraints is None):
-                screen_dual_size = np.sum([
-                    0 if constraints[k] is None else constraints[k].dual_size
-                    for k in screen_set
-                ], dtype=int)
-            screen_dual = np.zeros(screen_dual_size, dtype=dtype)
             active_set_size = screen_set.shape[0]
             active_set = np.empty(groups.shape[0], dtype=int)
             active_set[:active_set_size] = np.arange(active_set_size)
@@ -814,7 +798,6 @@ def grpnet(
             screen_set = warm_start.screen_set
             screen_beta = warm_start.screen_beta
             screen_is_active = warm_start.screen_is_active
-            screen_dual = warm_start.screen_dual
             active_set_size = warm_start.active_set_size
             active_set = warm_start.active_set
 
@@ -826,7 +809,6 @@ def grpnet(
         solver_args["screen_set"] = screen_set
         solver_args["screen_beta"] = screen_beta
         solver_args["screen_is_active"] = screen_is_active
-        solver_args["screen_dual"] = screen_dual
         solver_args["active_set_size"] = active_set_size
         solver_args["active_set"] = active_set
 
@@ -945,13 +927,6 @@ def grpnet(
             screen_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
             screen_beta = np.zeros(np.sum(group_sizes[screen_set]), dtype=dtype)
             screen_is_active = np.ones(screen_set.shape[0], dtype=bool)
-            screen_dual_size = 0
-            if not (constraints is None):
-                screen_dual_size = np.sum([
-                    0 if constraints[k] is None else constraints[k].dual_size
-                    for k in screen_set
-                ], dtype=int)
-            screen_dual = np.zeros(screen_dual_size, dtype=dtype)
             active_set_size = screen_set.shape[0]
             active_set = np.empty(groups.shape[0], dtype=int)
             active_set[:active_set_size] = np.arange(active_set_size)
@@ -962,7 +937,6 @@ def grpnet(
             screen_set = warm_start.screen_set
             screen_beta = warm_start.screen_beta
             screen_is_active = warm_start.screen_is_active
-            screen_dual = warm_start.screen_dual
             active_set_size = warm_start.active_set_size
             active_set = warm_start.active_set
 
@@ -974,7 +948,6 @@ def grpnet(
         solver_args["screen_set"] = screen_set
         solver_args["screen_beta"] = screen_beta
         solver_args["screen_is_active"] = screen_is_active
-        solver_args["screen_dual"] = screen_dual
         solver_args["active_set_size"] = active_set_size
         solver_args["active_set"] = active_set
 

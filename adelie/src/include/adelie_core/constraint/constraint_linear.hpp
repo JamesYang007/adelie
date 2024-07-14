@@ -1,4 +1,6 @@
 #pragma once
+#include <unordered_set>
+#include <vector>
 #include <adelie_core/configs.hpp>
 #include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/optimization/hinge_full.hpp>
@@ -8,12 +10,14 @@
 namespace adelie_core {
 namespace constraint { 
 
-template <class ValueType>
-class ConstraintLinearBase: public ConstraintBase<ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
+class ConstraintLinearBase: public ConstraintBase<ValueType, IndexType>
 {
 public:
-    using base_t = ConstraintBase<ValueType>;
+    using base_t = ConstraintBase<ValueType, IndexType>;
+    using typename base_t::index_t;
     using typename base_t::value_t;
+    using typename base_t::vec_index_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_uint64_t;
     using typename base_t::colmat_value_t;
@@ -55,25 +59,18 @@ public:
 
     using base_t::project;
 
-    void gradient(
-        const Eigen::Ref<const vec_value_t>&,
-        const Eigen::Ref<const vec_value_t>& mu,
-        Eigen::Ref<vec_value_t> out
-    ) override
-    {
-        out.matrix() = mu.matrix() * _A;
-    }
-
     int duals() override { return _A.rows(); }
     int primals() override { return _A.cols(); }
 };
 
-template <class ValueType>
-class ConstraintLinearProximalNewton: public ConstraintLinearBase<ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
+class ConstraintLinearProximalNewton: public ConstraintLinearBase<ValueType, IndexType>
 {
 public:
-    using base_t = ConstraintLinearBase<ValueType>;
+    using base_t = ConstraintLinearBase<ValueType, IndexType>;
+    using typename base_t::index_t;
     using typename base_t::value_t;
+    using typename base_t::vec_index_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_uint64_t;
     using typename base_t::colmat_value_t;
@@ -96,8 +93,22 @@ private:
     const value_t _slack;
     const size_t _n_threads;
 
-    std::vector<Eigen::Index> _mu_active;
+    std::unordered_set<index_t> _mu_active_set;
+    std::unordered_set<index_t> _mu_active_set_prev;
+    std::vector<index_t> _mu_active;
+    std::vector<index_t> _mu_active_prev;
     std::vector<value_t> _mu_value;
+    std::vector<value_t> _mu_value_prev;
+
+    void compute_ATmu(
+        Eigen::Ref<vec_value_t> out
+    ) 
+    {
+        out.setZero();
+        for (size_t i = 0; i < _mu_active.size(); ++i) {
+            out += _mu_value[i] * _A.row(_mu_active[i]).array();
+        }
+    };
 
 public:
     explicit ConstraintLinearProximalNewton(
@@ -149,7 +160,7 @@ public:
     {
         const auto m = _A.rows();
         const auto d = _A.cols();
-        return d * (10 + 2 * d) + 2 * m + ((m < d) ? (m * m) : ((2 + d) * m));
+        return d * (10 + 2 * d) + 2 * m + ((m < d) ? (m * m) : ((1 + d) * m));
     }
 
     void solve(
@@ -171,7 +182,6 @@ public:
         Eigen::Map<vec_value_t> grad(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> ATmu_prev(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> ATmu(buff_ptr, d); buff_ptr += d;
-        Eigen::Map<vec_value_t> mu_prev(buff_ptr, m); buff_ptr += m;
         Eigen::Map<vec_value_t> mu(buff_ptr, m); buff_ptr += m;
         Eigen::Map<vec_value_t> hinge_grad(buff_ptr, m); buff_ptr += m;
         const auto m_large = (m < d) ? 0 : m;
@@ -182,13 +192,27 @@ public:
         const auto n_read = std::distance(buff_begin, buff_ptr);
         Eigen::Map<vec_uint64_t> next_buff(buffer.data() + n_read, buffer.size() - n_read);
 
-        const auto compute_ATmu = [&](
-            auto& out
-        ) {
-            out.setZero();
+        const auto mu_prune = [&]() {
+            size_t n_active = 0;
             for (size_t i = 0; i < _mu_active.size(); ++i) {
-                out += _mu_value[i] * _A.row(_mu_active[i]).array();
+                const auto idx = _mu_active[i];
+                const auto mi = _mu_value[i];
+                if (mi == 0) {
+                    _mu_active_set.erase(idx);
+                    continue;
+                }
+                _mu_active[n_active] = idx;
+                _mu_value[n_active] = mi;
+                ++n_active;
             }
+            _mu_active.erase(
+                std::next(_mu_active.begin(), n_active),
+                _mu_active.end()
+            );
+            _mu_value.erase(
+                std::next(_mu_value.begin(), n_active),
+                _mu_value.end()
+            );
         };
         const auto mu_to_dense = [&]() {
             mu.setZero();
@@ -197,14 +221,17 @@ public:
             }
         };
         const auto mu_to_sparse = [&]() {
-            _mu_active.clear();
-            _mu_value.clear();
+            for (size_t i = 0; i < _mu_active.size(); ++i) {
+                _mu_value[i] = mu[_mu_active[i]];
+            }
             for (Eigen::Index i = 0; i < mu.size(); ++i) {
                 const auto mi = mu[i];
-                if (mi == 0) continue;
+                if (mi == 0 || _mu_active_set.find(i) != _mu_active_set.end()) continue;
+                _mu_active_set.insert(i);
                 _mu_active.push_back(i);
                 _mu_value.push_back(mi);
             }
+            mu_prune();
         };
 
         // must be initialized prior to calling solver
@@ -219,7 +246,6 @@ public:
             const auto& Qv,
             bool is_prev_valid_old
         ) {
-            // populate dense vector of mu
             mu_to_dense();
 
             // compute NNLS solution
@@ -233,16 +259,14 @@ public:
                 AT, _A_vars, _nnls_max_iters, _nnls_tol,
                 mu, Qmu_resid, loss
             );
-            const auto is_u_zero = (_u <= 0).template cast<value_t>();
-            const auto is_l_zero = (_l <= 0).template cast<value_t>();
-            const auto lower_constraint = (
-                (-_cs_tol) * (1 - is_l_zero) / (_l + is_l_zero) +
-                (-Configs::max_solver_value) * is_l_zero
-            );
-            const auto upper_constraint = (
-                _cs_tol * (1 - is_u_zero) / (_u + is_u_zero) +
-                Configs::max_solver_value * is_u_zero
-            );
+            const auto lower_constraint = vec_value_t::NullaryExpr(_l.size(), [&](auto i) {
+                const auto li = _l[i];
+                return (li <= 0) ? (-Configs::max_solver_value) : (-_cs_tol / li);
+            });
+            const auto upper_constraint = vec_value_t::NullaryExpr(_u.size(), [&](auto i) {
+                const auto ui = _u[i];
+                return (ui <= 0) ? Configs::max_solver_value : (-_cs_tol / ui);
+            });
             state_nnls.solve(
                 [&]() { return state_nnls.loss <= 0.5 * l1 * l1; },
                 lower_constraint,
@@ -274,12 +298,27 @@ public:
             return (mu_resid.matrix() * Q.transpose()).dot(ATdmu.matrix());
         };
         const auto compute_backtrack = [&](auto step_size) {
-            // TODO: need to know mu_prev representation?
+            for (size_t i = 0; i < _mu_active_prev.size(); ++i) {
+                mu[_mu_active_prev[i]] = (1-step_size) * _mu_value_prev[i];
+            }
+            for (size_t i = 0; i < _mu_active.size(); ++i) {
+                const auto idx = _mu_active[i];
+                auto& mi = _mu_value[i];
+                mi = step_size * mi + (
+                    (_mu_active_set_prev.find(idx) != _mu_active_set_prev.end()) ?
+                    mu[idx] : 0
+                );
+            }
+            for (size_t i = 0; i < _mu_active_prev.size(); ++i) {
+                const auto idx = _mu_active_prev[i];
+                if (_mu_active_set.find(idx) != _mu_active_set.end()) continue;
+                _mu_active_set.insert(idx);
+                _mu_active.push_back(idx);
+                _mu_value.push_back(mu[idx]);
+            }
+            compute_ATmu(ATmu);
         };
-        const auto compute_gradient = [&](
-            const auto& x,
-            const auto& Q
-        ) {
+        const auto compute_gradient = [&]() {
             grad.matrix() = x.matrix() * Q.transpose();
         };
         const auto compute_hard_optimality = [&]() {
@@ -312,25 +351,33 @@ public:
                 state_hinge.solve();
                 mu_to_sparse();
             } else {
+                const size_t active_size = _mu_active.size();
+                for (Eigen::Index ii = 0; ii < active_size; ++ii) {
+                    const auto i = _mu_active[ii];
+                    const auto Ai = _A.row(i);
+                    active_AQ.row(ii) = Ai * hess;
+                    active_vars[ii] = std::max<value_t>(
+                        active_AQ.row(ii).dot(Ai),
+                        1e-14
+                    );
+                }
                 optimization::StateHingeLowRank<value_t, index_t> state_hinge(
                     hess, _A, _l, _u, _nnls_batch_size, _nnls_max_iters, _nnls_tol, _n_threads,
-                    mu, grad, active_set, active_vars, active_AQ, hinge_grad
+                    _mu_active, _mu_value, active_vars, active_AQ, grad, hinge_grad
                 );
-                //try {
                 state_hinge.solve();
-                //} catch (...) {
-                //    PRINT(this);
-                //    PRINT(hess);
-                //    PRINT(state_hinge.iters);
-                //    PRINT(mu);
-                //    PRINT(hinge_grad);
-                //    throw;
-                //}
+                _mu_active_set.insert(
+                    _mu_active.data() + active_size,
+                    _mu_active.data() + _mu_active.size()
+                );
+                mu_prune();
             }
             compute_ATmu(ATmu);
         };
         const auto save_additional_prev = [&](bool is_in_ellipse) {
-            // TODO: need mu_prev representation
+            _mu_active_set_prev = _mu_active_set;
+            _mu_active_prev = _mu_active;
+            _mu_value_prev = _mu_value;
             ATmu_prev = ATmu;
             if (is_in_ellipse) grad_prev.setZero();
             else grad_prev = grad;
@@ -348,6 +395,42 @@ public:
             compute_proximal_newton_step,
             save_additional_prev
         );
+    }
+
+    void gradient(
+        const Eigen::Ref<const vec_value_t>&,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        compute_ATmu(out);
+    }
+
+    void clear() override 
+    {
+        _mu_active_set.clear();
+        _mu_active.clear();
+        _mu_value.clear();
+    }
+
+    void dual(
+        Eigen::Ref<vec_index_t> indices,
+        Eigen::Ref<vec_value_t> values
+    ) override
+    {
+        const size_t nnz = _mu_active.size();
+        indices.head(nnz) = Eigen::Map<vec_index_t>(
+            _mu_active.data(),
+            nnz
+        );
+        values.head(nnz) = Eigen::Map<vec_value_t>(
+            _mu_value.data(),
+            nnz
+        );
+    }
+
+    int duals_nnz() override 
+    {
+        return _mu_active.size();
     }
 };
 

@@ -6,11 +6,16 @@
 namespace adelie_core {
 namespace optimization {
 
-template <class ValueType, class IndexType=Eigen::Index>
+template <class ValueType, 
+          class IndexType=Eigen::Index,
+          class DynVecIndexType=std::vector<IndexType>&,
+          class DynVecValueType=std::vector<ValueType>&>
 struct StateHingeLowRank
 {
     using value_t = ValueType;
     using index_t = IndexType;
+    using dyn_vec_index_t = DynVecIndexType;
+    using dyn_vec_value_t = DynVecValueType;
     using vec_index_t = util::rowvec_type<index_t>;
     using vec_value_t = util::rowvec_type<value_t>;
     using colmat_value_t = util::colmat_type<value_t>;
@@ -33,12 +38,11 @@ struct StateHingeLowRank
     const size_t n_threads;
 
     size_t iters = 0;
-    size_t active_size = 0;
-    map_vec_value_t x;
-    map_vec_value_t resid;
-    map_vec_index_t active_set;
+    dyn_vec_index_t active_set;
+    dyn_vec_value_t active_value;
     map_vec_value_t active_vars;
     map_rowmat_value_t active_AQ;
+    map_vec_value_t resid;
     map_vec_value_t grad;
 
     double time_elapsed = 0;
@@ -52,11 +56,11 @@ struct StateHingeLowRank
         size_t max_iters,
         value_t tol,
         size_t n_threads,
-        Eigen::Ref<vec_value_t> x,
-        Eigen::Ref<vec_value_t> resid,
-        Eigen::Ref<vec_index_t> active_set,
+        dyn_vec_index_t& active_set,
+        dyn_vec_value_t& active_value,
         Eigen::Ref<vec_value_t> active_vars,
         Eigen::Ref<rowmat_value_t> active_AQ,
+        Eigen::Ref<vec_value_t> resid,
         Eigen::Ref<vec_value_t> grad
     ):
         quad(quad.data(), quad.rows(), quad.cols()),
@@ -67,11 +71,11 @@ struct StateHingeLowRank
         max_iters(max_iters),
         tol(tol),
         n_threads(n_threads),
-        x(x.data(), x.size()),
-        resid(resid.data(), resid.size()),
-        active_set(active_set.data(), active_set.size()),
+        active_set(active_set),
+        active_value(active_value),
         active_vars(active_vars.data(), active_vars.size()),
         active_AQ(active_AQ.data(), active_AQ.rows(), active_AQ.cols()),
+        resid(resid.data(), resid.size()),
         grad(grad.data(), grad.size())
     {
         const auto m = A.rows();
@@ -102,19 +106,9 @@ struct StateHingeLowRank
                 "tol must be >= 0."
             );
         }
-        if (x.size() != m) {
-            throw util::adelie_core_solver_error(
-                "x must be (m,) where A is (m, d). "
-            );
-        }
         if (resid.size() != d) {
             throw util::adelie_core_solver_error(
                 "resid must be (d,) where A is (m, d). "
-            );
-        }
-        if (active_set.size() != m) {
-            throw util::adelie_core_solver_error(
-                "active_set must be (m,) where A is (m, d). "
             );
         }
         if (active_vars.size() != m) {
@@ -148,34 +142,31 @@ struct StateHingeLowRank
 
             // measure KKT violation and enforce active coefficients to never violate
             grad = (grad - penalty_pos).max(-penalty_neg-grad);
-            for (size_t i = 0; i < active_size; ++i) {
+            for (size_t i = 0; i < active_set.size(); ++i) {
                 const auto k = active_set[i];
                 grad[k] = -std::numeric_limits<value_t>::infinity();
             }
         };
 
         const auto add_active = [&](int i) {
-            active_set[active_size] = i;
+            const auto active_size = active_set.size();
+            active_set.push_back(i);
+            active_value.push_back(0);
             const auto Ai = A.row(i);
             active_AQ.row(active_size) = Ai * quad;
             active_vars[active_size] = std::max<value_t>(
                 active_AQ.row(active_size).dot(Ai),
                 1e-14
             );
-            ++active_size;
         };
 
         iters = 0;
-        active_size = 0;
-        for (Eigen::Index i = 0; i < x.size(); ++i) {
-            if (x[i] == 0) continue;
-            add_active(i);
-        }
 
         while (1) {
             /* Screening step */
             if (iters)
             {
+                const auto active_size = active_set.size();
                 const size_t max_n_new_active = std::min<size_t>(batch_size, A.rows()-active_size);
                 if (max_n_new_active <= 0) return;
 
@@ -198,7 +189,7 @@ struct StateHingeLowRank
             while (1) {
                 ++iters;
                 value_t convg_measure = 0;
-                for (size_t i = 0; i < active_size; ++i) {
+                for (size_t i = 0; i < active_set.size(); ++i) {
                     const auto k = active_set[i];
                     const auto vk = active_vars[i];
                     const auto lk = penalty_neg[k];
@@ -206,7 +197,7 @@ struct StateHingeLowRank
                     const auto Ak = A.row(k);
                     const auto QAk = active_AQ.row(i);
                     const auto gk = Ak.dot(resid.matrix());
-                    auto& xk = x[k];
+                    auto& xk = active_value[i];
 
                     const auto xk_old = xk;
                     const auto gk0 = gk + vk * xk_old;

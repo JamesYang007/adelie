@@ -236,7 +236,6 @@ inline void solve(
     const auto& dual_groups = state.dual_groups;
     const auto& screen_set = state.screen_set;
     const auto& screen_beta = state.screen_beta;
-    const auto& screen_dual = state.screen_dual;
     const auto& lmda_path = state.lmda_path;
     const auto& rsq = state.rsq;
     const auto& resid_sum = state.resid_sum;
@@ -277,8 +276,9 @@ inline void solve(
         std::max<size_t>(3 * max_group_size, n),
         constraint_buffer_size,
         screen_beta.size(),
-        screen_dual.size()
+        std::min<size_t>(n_duals, 1 << 20)
     );
+
     // buffer to store final result
     auto& active_beta_indices = buffer_pack.active_beta_indices; 
     auto& active_beta_ordered = buffer_pack.active_beta_ordered;
@@ -433,8 +433,6 @@ inline void solve(
     const auto& constraints = *state.constraints;
     const auto& group_sizes = state.group_sizes;
     const auto& screen_set = state.screen_set;
-    const auto& screen_dual_begins = state.screen_dual_begins;
-    auto& screen_dual = state.screen_dual;
 
     const auto max_group_size = group_sizes.maxCoeff();
     vec_value_t buff(max_group_size * 2);
@@ -451,14 +449,11 @@ inline void solve(
 
         // constrained case
         } else {
-            const auto sdb = screen_dual_begins[ss_idx];
-            const auto ds = constraint->duals(); 
-            auto mu = screen_dual.segment(sdb, ds);
             Eigen::Map<util::rowvec_type<value_t, 1>> ak_view(&ak);
             const Eigen::Map<const util::rowvec_type<value_t, 1>> A_kk_view(&A_kk);
             const Eigen::Map<const util::rowvec_type<value_t, 1>> gk_view(&gk);
             const Eigen::Map<const util::colmat_type<value_t, 1, 1>> Q_view(&Q);
-            constraint->solve(ak_view, mu, A_kk_view, gk_view, l1, l2, Q_view, buffer);
+            constraint->solve(ak_view, A_kk_view, gk_view, l1, l2, Q_view, buffer);
         }
     };
     const auto update_coordinate_g1_f = [&](
@@ -480,10 +475,7 @@ inline void solve(
 
         // constrained case
         } else {
-            const auto sdb = screen_dual_begins[ss_idx];
-            const auto ds = constraint->duals(); 
-            auto mu = screen_dual.segment(sdb, ds);
-            constraint->solve(ak, mu, A_kk, gk, l1, l2, Q, buffer);
+            constraint->solve(ak, A_kk, gk, l1, l2, Q, buffer);
         }
     };
 

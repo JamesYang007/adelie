@@ -69,23 +69,10 @@ def deduce_states(
         np.concatenate([[0], group_sizes[screen_set]]),
         dtype=int,
     )[:-1]
-    screen_dual_begins = np.cumsum(
-        np.concatenate([
-            [0], 
-            [
-                0
-                if constraints[k] is None else
-                constraints[k].dual_size 
-                for k in screen_set
-            ],
-        ]),
-        dtype=int,
-    )[:-1]
     return (
         constraints,
         dual_groups,
         screen_begins,
-        screen_dual_begins,
     )
 
 
@@ -426,7 +413,6 @@ def gaussian_pin_naive(
     resid: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
-    screen_dual: np.ndarray,
     active_set_size: int,
     active_set: np.ndarray,
     intercept: bool =True,
@@ -505,13 +491,6 @@ def gaussian_pin_naive(
     screen_is_active : (s,) ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-    screen_dual : (ds,) ndarray
-        Dual vector on the screen set.
-        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
-        where
-        ``k = screen_set[i]``,
-        ``b = screen_dual_begins[i]``,
-        and ``p = constraints[k].dual_size``.
     active_set_size : int
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -613,14 +592,12 @@ def gaussian_pin_naive(
             self._resid = np.array(resid, copy=True, dtype=dtype)
             self._screen_beta = np.array(screen_beta, copy=True, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=True, dtype=bool)
-            self._screen_dual = np.array(screen_dual, copy=True, dtype=dtype)
             self._active_set = np.array(active_set, copy=True, dtype=int)
 
             (
                 self._constraints,
                 self._dual_groups,
                 self._screen_begins,
-                self._screen_dual_begins,
             ) = deduce_states(
                 constraints=constraints,
                 group_sizes=group_sizes,
@@ -690,7 +667,6 @@ def gaussian_pin_naive(
                 screen_vars=self._screen_vars,
                 screen_X_means=self._screen_X_means,
                 screen_transforms=self._screen_transforms,
-                screen_dual_begins=self._screen_dual_begins,
                 lmda_path=self._lmda_path,
                 constraint_buffer_size=self._constraint_buffer_size,
                 intercept=intercept,
@@ -707,7 +683,6 @@ def gaussian_pin_naive(
                 resid_sum=resid_sum,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
-                screen_dual=self._screen_dual,
                 active_set_size=active_set_size,
                 active_set=self._active_set,
             )
@@ -752,7 +727,6 @@ def gaussian_pin_cov(
     screen_beta: np.ndarray,
     screen_grad: np.ndarray,
     screen_is_active: np.ndarray,
-    screen_dual: np.ndarray,
     active_set_size: int,
     active_set: np.ndarray,
     max_active_size: int =None,
@@ -822,13 +796,6 @@ def gaussian_pin_cov(
     screen_is_active : (s,) ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-    screen_dual : (ds,) ndarray
-        Dual vector on the screen set.
-        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
-        where
-        ``k = screen_set[i]``,
-        ``b = screen_dual_begins[i]``,
-        and ``p = constraints[k].dual_size``.
     active_set_size : int
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -922,14 +889,12 @@ def gaussian_pin_cov(
             self._screen_beta = np.array(screen_beta, copy=True, dtype=dtype)
             self._screen_grad = np.array(screen_grad, copy=True, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=True, dtype=bool)
-            self._screen_dual = np.array(screen_dual, copy=True, dtype=dtype)
             self._active_set = np.array(active_set, copy=True, dtype=int)
 
             (
                 self._constraints,
                 self._dual_groups,
                 self._screen_begins,
-                self._screen_dual_begins,
             ) = deduce_states(
                 constraints=constraints,
                 group_sizes=group_sizes,
@@ -985,7 +950,6 @@ def gaussian_pin_cov(
                 screen_begins=self._screen_begins,
                 screen_vars=self._screen_vars,
                 screen_transforms=self._screen_transforms,
-                screen_dual_begins=self._screen_dual_begins,
                 screen_subset_order=self._screen_subset_order,
                 screen_subset_ordered=self._screen_subset_ordered,
                 lmda_path=self._lmda_path,
@@ -1001,7 +965,6 @@ def gaussian_pin_cov(
                 screen_beta=self._screen_beta,
                 screen_grad=self._screen_grad,
                 screen_is_active=self._screen_is_active,
-                screen_dual=self._screen_dual,
                 active_set_size=active_set_size,
                 active_set=self._active_set,
             )
@@ -1159,7 +1122,6 @@ def gaussian_cov(
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
-    screen_dual: np.ndarray,
     active_set_size: int,
     active_set: np.ndarray,
     rsq: float,
@@ -1225,13 +1187,6 @@ def gaussian_cov(
     screen_is_active : (s,) ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-    screen_dual : (ds,) ndarray
-        Dual vector on the screen set.
-        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
-        where
-        ``k = screen_set[i]``,
-        ``b = screen_dual_begins[i]``,
-        and ``p = constraints[k].dual_size``.
     active_set_size : int
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -1390,7 +1345,6 @@ def gaussian_cov(
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-            self._screen_dual = np.array(screen_dual, copy=False, dtype=dtype)
             self._grad = np.array(grad, copy=False, dtype=dtype)
             self._active_set = np.array(active_set, copy=False, dtype=int)
 
@@ -1428,7 +1382,6 @@ def gaussian_cov(
                 screen_set=self._screen_set,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
-                screen_dual=self._screen_dual,
                 active_set_size=active_set_size,
                 active_set=self._active_set,
                 rsq=rsq,
@@ -1626,10 +1579,9 @@ class gaussian_naive_base(base):
 
         # ================ abs_grad check ====================
         grad_corr = np.copy(grad)
-        for i, b, db, g, gs in zip(
+        for i, b, g, gs in zip(
             self.screen_set,
             self.screen_begins,
-            self.screen_dual_begins,
             self.groups[self.screen_set],
             self.group_sizes[self.screen_set],
         ):
@@ -1640,7 +1592,6 @@ class gaussian_naive_base(base):
                 constraint_grad = np.empty(ds)
                 self.constraints[i].gradient(
                     self.screen_beta[b:b+gs],
-                    self.screen_dual[db:db+ds],
                     constraint_grad,
                 )
             grad_corr[g:g+gs] -= (
@@ -1724,7 +1675,6 @@ def gaussian_naive(
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
-    screen_dual: np.ndarray,
     active_set_size: int,
     active_set: np.ndarray,
     rsq: float,
@@ -1822,13 +1772,6 @@ def gaussian_naive(
     screen_is_active : (s,) ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-    screen_dual : (ds,) ndarray
-        Dual vector on the screen set.
-        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
-        where
-        ``k = screen_set[i]``,
-        ``b = screen_dual_begins[i]``,
-        and ``p = constraints[k].dual_size``.
     active_set_size : int
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -1996,7 +1939,6 @@ def gaussian_naive(
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-            self._screen_dual = np.array(screen_dual, copy=False, dtype=dtype)
             self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
             self._resid = np.array(resid, copy=False, dtype=dtype)
@@ -2042,7 +1984,6 @@ def gaussian_naive(
                 screen_set=self._screen_set,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
-                screen_dual=self._screen_dual,
                 active_set_size=active_set_size,
                 active_set=self._active_set,
                 rsq=rsq,
@@ -2079,7 +2020,6 @@ def multigaussian_naive(
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
-    screen_dual: np.ndarray,
     active_set_size: int,
     active_set: np.ndarray,
     rsq: float,
@@ -2176,13 +2116,6 @@ def multigaussian_naive(
     screen_is_active : (s,) ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-    screen_dual : (ds,) ndarray
-        Dual vector on the screen set.
-        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
-        where
-        ``k = screen_set[i]``,
-        ``b = screen_dual_begins[i]``,
-        and ``p = constraints[k].dual_size``.
     active_set_size : int
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -2365,7 +2298,6 @@ def multigaussian_naive(
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-            self._screen_dual = np.array(screen_dual, copy=False, dtype=dtype)
             self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
             self._resid = np.array(resid, copy=False, dtype=dtype)
@@ -2418,7 +2350,6 @@ def multigaussian_naive(
                 screen_set=self._screen_set,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
-                screen_dual=self._screen_dual,
                 active_set_size=active_set_size,
                 active_set=self._active_set,
                 rsq=rsq,
@@ -2463,7 +2394,6 @@ def glm_naive(
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
-    screen_dual: np.ndarray,
     active_set_size: int,
     active_set: np.ndarray,
     beta0: float,
@@ -2540,13 +2470,6 @@ def glm_naive(
     screen_is_active : (s,) ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-    screen_dual : (ds,) ndarray
-        Dual vector on the screen set.
-        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
-        where
-        ``k = screen_set[i]``,
-        ``b = screen_dual_begins[i]``,
-        and ``p = constraints[k].dual_size``.
     active_set_size : int
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -2738,7 +2661,6 @@ def glm_naive(
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-            self._screen_dual = np.array(screen_dual, copy=False, dtype=dtype)
             self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
             self._eta = np.array(eta, copy=False, dtype=dtype)
@@ -2785,7 +2707,6 @@ def glm_naive(
                 screen_set=self._screen_set,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
-                screen_dual=self._screen_dual,
                 active_set_size=active_set_size,
                 active_set=self._active_set,
                 beta0=beta0,
@@ -2818,7 +2739,6 @@ def multiglm_naive(
     screen_set: np.ndarray,
     screen_beta: np.ndarray,
     screen_is_active: np.ndarray,
-    screen_dual: np.ndarray,
     active_set_size: int,
     active_set: np.ndarray,
     lmda: float,
@@ -2903,13 +2823,6 @@ def multiglm_naive(
     screen_is_active : (s,) ndarray
         Boolean vector that indicates whether each screen group in ``groups`` is active or not.
         ``screen_is_active[i]`` is ``True`` if and only if ``screen_set[i]`` is active.
-    screen_dual : (ds,) ndarray
-        Dual vector on the screen set.
-        ``screen_dual[b:b+p]`` is the dual for the ``i`` th screen group 
-        where
-        ``k = screen_set[i]``,
-        ``b = screen_dual_begins[i]``,
-        and ``p = constraints[k].dual_size``.
     active_set_size : int
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -3112,7 +3025,6 @@ def multiglm_naive(
             self._screen_set = np.array(screen_set, copy=False, dtype=int)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-            self._screen_dual = np.array(screen_dual, copy=False, dtype=dtype)
             self._active_set = np.array(active_set, copy=False, dtype=int)
             self._grad = np.array(grad, copy=False, dtype=dtype)
             self._eta = np.array(eta, copy=False, dtype=dtype)
@@ -3162,7 +3074,6 @@ def multiglm_naive(
                 screen_set=self._screen_set,
                 screen_beta=self._screen_beta,
                 screen_is_active=self._screen_is_active,
-                screen_dual=self._screen_dual,
                 active_set_size=active_set_size,
                 active_set=self._active_set,
                 beta0=0,

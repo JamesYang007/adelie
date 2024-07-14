@@ -160,7 +160,7 @@ void nnls(py::module_& m, const char* name)
             sw.start();
             state.solve(
                 [](){return false;}, 
-                [](auto) {return -std::numeric_limits<value_t>::infinity();},
+                [](auto) {return 0;},
                 [](auto) {return std::numeric_limits<value_t>::infinity();}
             );
             state.time_elapsed = sw.elapsed();
@@ -314,7 +314,14 @@ void hinge_full(py::module_& m, const char* name)
 template <class ValueType>
 void hinge_low_rank(py::module_& m, const char* name)
 {
-    using state_t = ad::optimization::StateHingeLowRank<ValueType>;
+    using dyn_vec_index_t = std::vector<Eigen::Index>;
+    using dyn_vec_value_t = std::vector<ValueType>;
+    using state_t = ad::optimization::StateHingeLowRank<
+        ValueType, 
+        Eigen::Index, 
+        dyn_vec_index_t,
+        dyn_vec_value_t
+    >;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
@@ -352,16 +359,16 @@ void hinge_low_rank(py::module_& m, const char* name)
         Convergence tolerance.
     n_threads : int
         Number of threads.
-    x : (n,) ndarray
-        Solution vector.
-    resid : (n,) ndarray
-        Residual vector.
     active_set : (m,) ndarray
         Active set indices.
+    active_value : (m,) ndarray
+        Active set values.
     active_vars : (m,) ndarray
         Active variances.
     active_AQ : (m, d) ndarray
         Active scaled rows of ``A``.
+    resid : (n,) ndarray
+        Residual vector.
     grad : (m,) ndarray
         Gradient vector.
     )delimiter")
@@ -374,11 +381,11 @@ void hinge_low_rank(py::module_& m, const char* name)
             size_t,
             value_t,
             size_t,
-            Eigen::Ref<vec_value_t>,
-            Eigen::Ref<vec_value_t>,
-            Eigen::Ref<vec_index_t>,
+            dyn_vec_index_t&,
+            dyn_vec_value_t&,
             Eigen::Ref<vec_value_t>,
             Eigen::Ref<rowmat_value_t>,
+            Eigen::Ref<vec_value_t>,
             Eigen::Ref<vec_value_t>
         >(),
             py::arg("quad").noconvert(),
@@ -389,11 +396,11 @@ void hinge_low_rank(py::module_& m, const char* name)
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("n_threads"),
-            py::arg("x"),
-            py::arg("resid"),
             py::arg("active_set"),
+            py::arg("active_value"),
             py::arg("active_vars"),
             py::arg("active_AQ"),
+            py::arg("resid"),
             py::arg("grad")
         )
         .def_readonly("quad", &state_t::quad)
@@ -405,12 +412,11 @@ void hinge_low_rank(py::module_& m, const char* name)
         .def_readonly("tol", &state_t::tol)
         .def_readonly("n_threads", &state_t::n_threads)
         .def_readonly("iters", &state_t::iters)
-        .def_readonly("active_size", &state_t::active_size)
-        .def_readonly("x", &state_t::x)
-        .def_readonly("resid", &state_t::resid)
         .def_readonly("active_set", &state_t::active_set)
+        .def_readonly("active_value", &state_t::active_value)
         .def_readonly("active_vars", &state_t::active_vars)
         .def_readonly("active_AQ", &state_t::active_AQ)
+        .def_readonly("resid", &state_t::resid)
         .def_readonly("grad", &state_t::grad)
         .def_readonly("time_elapsed", &state_t::time_elapsed)
         .def("solve", [](state_t& state) {

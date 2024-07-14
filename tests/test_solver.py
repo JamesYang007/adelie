@@ -241,15 +241,8 @@ def create_data_gaussian(
     if constraint:
         constraints = [None] * G
         c_order = np.random.choice(G, G // 2, replace=False)
-        screen_dual_size = 0
-        for i in c_order:
-            size = group_sizes[i]
-            constraints[i] = zero_constraint(size, dtype)
-            screen_dual_size += constraints[i].dual_size
-        screen_dual = np.zeros(screen_dual_size)
     else:
         constraints = None
-        screen_dual = np.zeros(0)
 
     args = {
         "X": X, 
@@ -261,7 +254,6 @@ def create_data_gaussian(
         "weights": weights,
         "rsq": 0,
         "intercept": intercept,
-        "screen_dual": screen_dual,
         "active_set_size": 0,
         "active_set": np.empty(G, dtype=int),
     }
@@ -512,7 +504,6 @@ def test_solve_gaussian_pin_naive(
         args_c["resid"] = state.resid
         args_c["screen_beta"] = state.screen_beta
         args_c["screen_is_active"] = state.screen_is_active
-        args_c["screen_dual"] = state.screen_dual
         args_c["active_set_size"] = state.active_set_size
         args_c["active_set"] = state.active_set
         state = ad.state.gaussian_pin_naive(
@@ -574,7 +565,6 @@ def test_solve_gaussian_pin_cov(
         args_c["screen_beta"] = state.screen_beta
         args_c["screen_grad"] = state.screen_grad
         args_c["screen_is_active"] = state.screen_is_active
-        args_c["screen_dual"] = state.screen_dual
         args_c["active_set_size"] = state.active_set_size
         args_c["active_set"] = state.active_set
         state = ad.state.gaussian_pin_cov(
@@ -626,7 +616,6 @@ def test_solve_gaussian(
         args_c["screen_set"] = state.screen_set
         args_c["screen_beta"] = state.screen_beta
         args_c["screen_is_active"] = state.screen_is_active
-        args_c["screen_dual"] = state.screen_dual
         args_c["active_set_size"] = state.active_set_size
         args_c["active_set"] = state.active_set
         args_c["rsq"] = state.rsq
@@ -695,7 +684,6 @@ def test_solve_gaussian_concatenate(
     screen_set = np.arange(len(groups))[(penalty <= 0) | (alpha <= 0)]
     screen_beta = np.zeros(np.sum(group_sizes[screen_set]))
     screen_is_active = np.zeros(screen_set.shape[0], dtype=bool)
-    screen_dual = np.zeros(0)
     grad = X_c.T @ (weights * resid)
 
     test_data = {
@@ -715,7 +703,6 @@ def test_solve_gaussian_concatenate(
         "screen_set": screen_set,
         "screen_beta": screen_beta,
         "screen_is_active": screen_is_active,
-        "screen_dual": screen_dual,
         "active_set_size": 0,
         "active_set": np.empty(groups.shape[0], dtype=int),
         "rsq": 0,
@@ -790,7 +777,6 @@ def test_solve_gaussian_snp_unphased(
     test_data["screen_set"] = np.arange(p)[(test_data["penalty"] <= 0) | (alpha <= 0)]
     test_data["screen_beta"] = np.zeros(np.sum(test_data["group_sizes"][test_data["screen_set"]]))
     test_data["screen_is_active"] = np.zeros(test_data["screen_set"].shape[0], dtype=bool)
-    test_data["screen_dual"] = np.zeros(0)
     test_data["active_set_size"] = 0
     test_data["active_set"] = np.empty(p, dtype=int)
     test_data["grad"] = X_c.T @ (weights * test_data["resid"])
@@ -866,7 +852,6 @@ def test_solve_gaussian_snp_phased_ancestry(
     test_data["screen_set"] = np.arange(p)[(test_data["penalty"] <= 0) | (alpha <= 0)]
     test_data["screen_beta"] = np.zeros(np.sum(test_data["group_sizes"][test_data["screen_set"]]))
     test_data["screen_is_active"] = np.zeros(test_data["screen_set"].shape[0], dtype=bool)
-    test_data["screen_dual"] = np.zeros(0)
     test_data["active_set_size"] = 0
     test_data["active_set"] = np.empty(p, dtype=int)
     test_data["grad"] = X_c.T @ (weights * test_data["resid"])

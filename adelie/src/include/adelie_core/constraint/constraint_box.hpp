@@ -6,12 +6,13 @@
 namespace adelie_core {
 namespace constraint {
 
-template <class ValueType>
-class ConstraintBoxBase: public ConstraintBase<ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
+class ConstraintBoxBase: public ConstraintBase<ValueType, IndexType>
 {
 public:
-    using base_t = ConstraintBase<ValueType>;
+    using base_t = ConstraintBase<ValueType, IndexType>;
     using typename base_t::value_t;
+    using typename base_t::vec_index_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_uint64_t;
     using typename base_t::colmat_value_t;
@@ -93,25 +94,17 @@ public:
         x = (x).min(_u).max(-_l);
     }
 
-    void gradient(
-        const Eigen::Ref<const vec_value_t>&,
-        const Eigen::Ref<const vec_value_t>& mu,
-        Eigen::Ref<vec_value_t> out
-    ) override
-    {
-        out = mu;
-    }
-
     int duals() override { return _u.size(); }
     int primals() override { return _u.size(); }
 };
 
-template <class ValueType>
-class ConstraintBoxProximalNewton: public ConstraintBoxBase<ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
+class ConstraintBoxProximalNewton: public ConstraintBoxBase<ValueType, IndexType>
 {
 public:
-    using base_t = ConstraintBoxBase<ValueType>;
+    using base_t = ConstraintBoxBase<ValueType, IndexType>;
     using typename base_t::value_t;
+    using typename base_t::vec_index_t;
     using typename base_t::vec_value_t;
     using typename base_t::vec_uint64_t;
     using typename base_t::colmat_value_t;
@@ -280,6 +273,39 @@ public:
             compute_proximal_newton_step,
             save_additional_prev
         );
+    }
+
+    void gradient(
+        const Eigen::Ref<const vec_value_t>&,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        out = _mu;
+    }
+
+    void clear() override 
+    {
+        _mu.setZero();
+    }
+
+    void dual(
+        Eigen::Ref<vec_index_t> indices,
+        Eigen::Ref<vec_value_t> values
+    ) override
+    {
+        size_t nnz = 0;
+        for (Eigen::Index i = 0; i < _mu.size(); ++i) {
+            const auto mi = _mu[i];
+            if (mi == 0) continue;
+            indices[nnz] = i;
+            values[nnz] = mi;
+            ++nnz;
+        }
+    }
+
+    int duals_nnz() override 
+    {
+        return (_mu != 0).count();
     }
 };
 
