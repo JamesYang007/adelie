@@ -50,7 +50,7 @@ void admm_solver(
         linear_curr.matrix() = zmu.matrix() * AQ_c;
         linear_curr = QTv_c + rho * linear_curr;
         size_t x_iters;
-        unconstrained::newton_abs_solver(
+        unconstrained::newton_solver(
             quad_c,
             linear_curr,
             l1,

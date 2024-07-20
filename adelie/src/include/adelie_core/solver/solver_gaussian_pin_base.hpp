@@ -218,7 +218,7 @@ void update_coordinate(
 )
 {
     size_t iters;
-    bcd::unconstrained::newton_abs_solver(
+    bcd::unconstrained::newton_solver(
         L, v, l1, l2, tol, max_iters,
         x, iters, buffer1, buffer2
     );

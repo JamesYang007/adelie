@@ -180,6 +180,13 @@ public:
             return;
         }
 
+        // check if x = 0, mu = 0 is optimal
+        if (linear.matrix().norm() <= l1) {
+            x.setZero();
+            _mu.setZero();
+            return;
+        }
+
         auto buff_ptr = reinterpret_cast<value_t*>(buffer.data());
         const auto buff_begin = buff_ptr;
         Eigen::Map<vec_value_t> grad_prev(buff_ptr, m); buff_ptr += m;
@@ -195,10 +202,11 @@ public:
         };
         const auto compute_min_mu_resid = [&](
             const auto& Qv,
-            bool is_prev_valid_old
+            bool is_prev_valid_old,
+            bool is_init
         ) {
             auto& mu_curr = grad;
-            if (is_prev_valid_old) {
+            if (is_prev_valid_old || is_init) {
                 mu_curr = _mu;
             }
             const auto is_u_zero = (_u <= 0).template cast<value_t>();
@@ -211,7 +219,7 @@ public:
                 Configs::max_solver_value * is_u_zero
             );
             const auto mu_resid_norm_sq = (Qv - _mu).square().sum();
-            if (is_prev_valid_old && mu_resid_norm_sq > l1 * l1) {
+            if (is_init || (is_prev_valid_old && mu_resid_norm_sq > l1 * l1)) {
                 _mu = mu_curr;
             }
             return mu_resid_norm_sq;
@@ -281,6 +289,15 @@ public:
     ) override
     {
         out = _mu;
+    }
+
+    void gradient(
+        const Eigen::Ref<const vec_value_t>&,
+        const Eigen::Ref<const vec_value_t>& mu,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        out = mu;
     }
 
     void clear() override 

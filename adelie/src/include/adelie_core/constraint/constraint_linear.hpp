@@ -26,6 +26,8 @@ public:
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
 
 protected:
+    using base_t::check_solve;
+
     const map_crowmat_value_t _A;
     const map_cvec_value_t _l;
     const map_cvec_value_t _u;
@@ -100,6 +102,7 @@ private:
     std::vector<value_t> _mu_value;
     std::vector<value_t> _mu_value_prev;
 
+    ADELIE_CORE_STRONG_INLINE
     void compute_ATmu(
         Eigen::Ref<vec_value_t> out
     ) 
@@ -176,6 +179,17 @@ public:
         const auto m = _A.rows();
         const auto d = _A.cols();
 
+        base_t::check_solve(x.size(), quad.cols(), linear.size(), m, d);
+
+        // check if x = 0, mu = 0 is optimal
+        if (linear.matrix().norm() <= l1) {
+            x.setZero();
+            _mu_active_set.clear();
+            _mu_active.clear();
+            _mu_value.clear();
+            return;
+        }
+
         auto buff_ptr = reinterpret_cast<value_t*>(buffer.data());
         const auto buff_begin = buff_ptr;
         Eigen::Map<vec_value_t> grad_prev(buff_ptr, d); buff_ptr += d;
@@ -234,9 +248,6 @@ public:
             mu_prune();
         };
 
-        // must be initialized prior to calling solver
-        compute_ATmu(ATmu);
-
         const auto compute_mu_resid = [&](
             auto& mu_resid
         ) {
@@ -244,7 +255,8 @@ public:
         };
         const auto compute_min_mu_resid = [&](
             const auto& Qv,
-            bool is_prev_valid_old
+            bool is_prev_valid_old,
+            bool is_init
         ) {
             mu_to_dense();
 
@@ -265,7 +277,7 @@ public:
             });
             const auto upper_constraint = vec_value_t::NullaryExpr(_u.size(), [&](auto i) {
                 const auto ui = _u[i];
-                return (ui <= 0) ? Configs::max_solver_value : (-_cs_tol / ui);
+                return (ui <= 0) ? Configs::max_solver_value : (_cs_tol / ui);
             });
             state_nnls.solve(
                 [&]() { return state_nnls.loss <= 0.5 * l1 * l1; },
@@ -274,14 +286,14 @@ public:
             );
 
             // extra invariance required if current mu is the next iterate
-            if (!is_prev_valid_old) {
+            if (!is_prev_valid_old && !is_init) {
                 ATmu = Qv - Qmu_resid.array();
             }
 
             const auto mu_resid_norm_sq = 2 * state_nnls.loss;
 
             // move mu to internal sparse format
-            if (!is_prev_valid_old || mu_resid_norm_sq <= l1 * l1) {
+            if (!is_init && (!is_prev_valid_old || mu_resid_norm_sq <= l1 * l1)) {
                 mu_to_sparse();
             }
             return mu_resid_norm_sq;
@@ -382,6 +394,10 @@ public:
             if (is_in_ellipse) grad_prev.setZero();
             else grad_prev = grad;
         };
+
+        // must be initialized prior to calling solver
+        compute_ATmu(ATmu);
+
         base_t::_solve_proximal_newton(
             x, quad, linear, l1, l2, Q, _max_iters, _tol, _slack, next_buff,
             compute_mu_resid,
@@ -403,6 +419,15 @@ public:
     ) override
     {
         compute_ATmu(out);
+    }
+
+    void gradient(
+        const Eigen::Ref<const vec_value_t>&,
+        const Eigen::Ref<const vec_value_t>& mu,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        out.matrix() = mu.matrix() * _A;
     }
 
     void clear() override 

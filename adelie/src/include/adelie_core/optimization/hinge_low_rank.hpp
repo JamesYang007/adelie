@@ -198,14 +198,14 @@ struct StateHingeLowRank
                     const auto QAk = active_AQ.row(i);
                     const auto gk = Ak.dot(resid.matrix());
                     auto& xk = active_value[i];
-
                     const auto xk_old = xk;
                     const auto gk0 = gk + vk * xk_old;
+                    const auto gk0_lk = gk0 + lk;
                     xk = std::copysign(
                         std::max<value_t>(std::max<value_t>(
-                            -lk-gk0, gk0-uk
+                            -gk0_lk, gk0-uk
                         ), 0),
-                        gk0+lk 
+                        gk0_lk 
                     ) / vk;
 
                     if (xk == xk_old) continue;

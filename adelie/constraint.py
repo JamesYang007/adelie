@@ -46,16 +46,16 @@ def box(
                     Default is ``100``.
                 tol : float, optional
                     Convergence tolerance for proximal Newton.
-                    Default is ``1e-7``.
+                    Default is ``1e-9``.
                 nnls_max_iters : int, optional
                     Maximum number of non-negative least squares iterations.
-                    Default is ``10000``.
+                    Default is ``int(1e5)``.
                 nnls_tol : float, optional
                     Maximum number of non-negative least squares iterations.
-                    Default is ``1e-7``.
+                    Default is ``1e-9``.
                 cs_tol : float, optional
                     Complementary slackness tolerance.
-                    Default is ``1e-7``.
+                    Default is ``1e-9``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
                     the boundary where primal is zero.
@@ -107,10 +107,10 @@ def box(
     configs = {
         "proximal-newton": {
             "max_iters": 100,
-            "tol": 1e-7,
-            "nnls_max_iters": 10000,
-            "nnls_tol": 1e-7,
-            "cs_tol": 1e-7,
+            "tol": 1e-9,
+            "nnls_max_iters": int(1e5),
+            "nnls_tol": 1e-9,
+            "cs_tol": 1e-9,
             "slack": 1e-4,
         },
     }[method]
@@ -173,19 +173,19 @@ def linear(
                     Default is ``100``.
                 tol : float, optional
                     Convergence tolerance for proximal Newton.
-                    Default is ``1e-7``.
+                    Default is ``1e-9``.
                 nnls_batch_size : int, optional
                     Batch size of active dual variables to include at a time.
                     Default is ``10``.
                 nnls_max_iters : int, optional
                     Maximum number of non-negative least squares iterations.
-                    Default is ``10000``.
+                    Default is ``int(1e5)``.
                 nnls_tol : float, optional
                     Maximum number of non-negative least squares iterations.
-                    Default is ``1e-7``.
+                    Default is ``1e-9``.
                 cs_tol : float, optional
                     Complementary slackness tolerance.
-                    Default is ``1e-7``.
+                    Default is ``1e-9``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
                     the boundary where primal is zero.
@@ -245,11 +245,11 @@ def linear(
     configs = {
         "proximal-newton": {
             "max_iters": 100,
-            "tol": 1e-7,
+            "tol": 1e-9,
             "nnls_batch_size": 10,
-            "nnls_max_iters": 10000,
-            "nnls_tol": 1e-7,
-            "cs_tol": 1e-7,
+            "nnls_max_iters": int(1e5),
+            "nnls_tol": 1e-9,
+            "cs_tol": 1e-9,
             "slack": 1e-4,
             "n_threads": 1,
         },
@@ -347,16 +347,16 @@ def one_sided(
                     Default is ``100``.
                 tol : float, optional
                     Convergence tolerance for proximal Newton.
-                    Default is ``1e-7``.
+                    Default is ``1e-9``.
                 nnls_max_iters : int, optional
                     Maximum number of non-negative least squares iterations.
-                    Default is ``10000``.
+                    Default is ``int(1e5)``.
                 nnls_tol : float, optional
                     Maximum number of non-negative least squares iterations.
-                    Default is ``1e-7``.
+                    Default is ``1e-9``.
                 cs_tol : float, optional
                     Complementary slackness tolerance.
-                    Default is ``1e-7``.
+                    Default is ``1e-9``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
                     the boundary where primal is zero.
@@ -373,7 +373,7 @@ def one_sided(
             - ``"admm"``:
                 max_iters : int, optional
                     Maximum number of ADMM iterations.
-                    Default is ``10000``.
+                    Default is ``int(1e5)``.
                 tol_abs : float, optional
                     Absolute convergence tolerance.
                     Default is ``1e-7``.
@@ -423,14 +423,14 @@ def one_sided(
     configs = {
         "proximal-newton": {
             "max_iters": 100,
-            "tol": 1e-7,
-            "nnls_max_iters": 10000,
-            "nnls_tol": 1e-7,
-            "cs_tol": 1e-7,
+            "tol": 1e-9,
+            "nnls_max_iters": int(1e5),
+            "nnls_tol": 1e-9,
+            "cs_tol": 1e-9,
             "slack": 1e-4,
         },
         "admm": {
-            "max_iters": 10000,
+            "max_iters": int(1e5),
             "tol_abs": 1e-7,
             "tol_rel": 1e-7,
             "rho": 1,

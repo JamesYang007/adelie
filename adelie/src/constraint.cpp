@@ -50,6 +50,20 @@ public:
         );
     }
 
+    void gradient(
+        const Eigen::Ref<const vec_value_t>& x,
+        const Eigen::Ref<const vec_value_t>& mu,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            gradient,
+            x, mu, out
+        );
+    }
+
     void project(
         Eigen::Ref<vec_value_t> x
     ) override
@@ -126,6 +140,7 @@ void constraint_base(py::module_& m, const char* name)
 {
     using trampoline_t = PyConstraintBase<T>;
     using internal_t = ad::constraint::ConstraintBase<T>;
+    using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
         Base constraint class.
         
@@ -186,7 +201,10 @@ void constraint_base(py::module_& m, const char* name)
             py::arg("Q").noconvert(),
             py::arg("buffer").noconvert()
         )
-        .def("gradient", &internal_t::gradient, R"delimiter(
+        .def("gradient", py::overload_cast<
+            const Eigen::Ref<const vec_value_t>&,
+            Eigen::Ref<vec_value_t> 
+        >(&internal_t::gradient), R"delimiter(
         Computes the gradient of the Lagrangian.
 
         The gradient of the Lagrangian (with respect to the primal) is given by
@@ -207,6 +225,36 @@ void constraint_base(py::module_& m, const char* name)
             The output vector to store the gradient.
         )delimiter",
             py::arg("x").noconvert(),
+            py::arg("out").noconvert()
+        )
+        .def("gradient", py::overload_cast<
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            Eigen::Ref<vec_value_t> 
+        >(&internal_t::gradient), R"delimiter(
+        Computes the gradient of the Lagrangian.
+
+        The gradient of the Lagrangian (with respect to the primal) is given by
+
+        .. math::
+            \begin{align*}
+                \mu^\top \phi'(x)
+            \end{align*}
+
+        where :math:`\phi'(x)` is the Jacobian of :math:`\phi` at :math:`x`
+        and :math:`\mu` is the dual given by ``mu``. 
+
+        Parameters
+        ----------
+        x : (d,) ndarray
+            The primal :math:`x` at which to evaluate the gradient.
+        mu : (m,) ndarray
+            The dual :math:`\mu` at which to evaluate the gradient.
+        out : (d,) ndarray
+            The output vector to store the gradient.
+        )delimiter",
+            py::arg("x").noconvert(),
+            py::arg("mu").noconvert(),
             py::arg("out").noconvert()
         )
         .def("project", &internal_t::project, R"delimiter(

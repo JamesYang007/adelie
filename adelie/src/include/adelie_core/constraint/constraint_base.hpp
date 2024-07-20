@@ -22,19 +22,18 @@ public:
 
 protected:
     static void check_solve(
-        int x, int mu, int q, int l, int m, int d
+        int x, int q, int l, int m, int d
     ) {
         if (
             (x != q) ||
             (q != l) ||
-            (l != d) ||
-            (mu != m)
+            (l != d)
         ) {
             throw util::adelie_core_error(
                 util::format(
                     "solve() is given inconsistent inputs! "
-                    "Invoked solve(x=%d, mu=%d, q=%d, l=%d, m=%d, d=%d)",
-                    x, mu, q, l, m, d
+                    "Invoked solve(x=%d, q=%d, l=%d, m=%d, d=%d)",
+                    x, q, l, m, d
                 )
             );
         }
@@ -111,15 +110,26 @@ protected:
         Eigen::Map<vec_value_t> alpha(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> Qv(buff_ptr, d); buff_ptr += d;
 
+        Qv.matrix() = v.matrix() * Q.transpose();
+
+        bool is_x_init_zero = (x == 0).all();
         bool is_prev_valid = false;
         bool zero_primal_checked = false;
         value_t mu_resid_norm_prev = -1;
+
+        // If x is initialized to be 0, we assume it is a good warm-start
+        // so that it is likely that the next update is also 0.
+        // In this case, we first check if the dual can be updated such that x remains to be 0.
+        if (is_x_init_zero) {
+            zero_primal_checked = true;
+            if (compute_min_mu_resid(Qv, false, true) <= l1 * l1) return;
+        }
 
         const auto compute_primal = [&]() {
             constexpr size_t _newton_max_iters = 100000;
             constexpr value_t _newton_tol = 1e-12;
             size_t x_iters;
-            bcd::unconstrained::newton_abs_solver(
+            bcd::unconstrained::newton_solver(
                 quad, mu_resid, l1, l2, _newton_tol, _newton_max_iters, 
                 x, x_iters, x_buffer1, x_buffer2
             );
@@ -148,6 +158,13 @@ protected:
 
             // Check if x^star(mu) == 0.
             if (is_in_ellipse) {
+                // If x was initially zero and in the first iteration we ended up with x == 0 again
+                // (likely from numerical precision reasons), just return 0.
+                if (iters == 1 && is_x_init_zero) {
+                    x.setZero(); 
+                    return;
+                }
+
                 // NOTE: this check is important since numerical precision issues
                 // may make us enter this loop infinitely.
                 if (is_prev_valid) {
@@ -165,9 +182,6 @@ protected:
                 if (!zero_primal_checked) {
                     zero_primal_checked = true;
 
-                    // one-time population
-                    Qv.matrix() = v.matrix() * Q.transpose();
-                    
                     const bool is_prev_valid_old = is_prev_valid;
                     if (!is_prev_valid_old) {
                         mu_resid_norm_prev = mu_resid_norm;
@@ -184,7 +198,7 @@ protected:
                     // Relax 4) to mu * b <= cs_tol and minimize 1) residual norm.
                     // This effectively puts a box-constraint on mu.
                     if (
-                        compute_min_mu_resid(Qv, is_prev_valid_old) <= l1 * l1
+                        compute_min_mu_resid(Qv, is_prev_valid_old, false) <= l1 * l1
                      ) {
                         x.setZero();
                         return;
@@ -196,7 +210,7 @@ protected:
                 // If we ever enter this region of code, it means that
                 // there is no primal-dual optimal pair where primal = 0.
                 // The proximal newton step overshot so we must backtrack.
-                if (!is_prev_valid || (mu_resid_norm_prev <= l1) || (mu_resid_norm_sq > l1 * l1)) {
+                if (!is_prev_valid || (mu_resid_norm_prev <= l1 * 0.9999) || (mu_resid_norm > l1 * 1.0001)) {
                     throw util::adelie_core_error(
                         "Possibly an unexpected error! "
                         "Previous iterate should have been properly initialized. "
@@ -274,6 +288,12 @@ public:
 
     virtual void gradient(
         const Eigen::Ref<const vec_value_t>& x,
+        Eigen::Ref<vec_value_t> out
+    ) =0;
+
+    virtual void gradient(
+        const Eigen::Ref<const vec_value_t>& x,
+        const Eigen::Ref<const vec_value_t>& mu,
         Eigen::Ref<vec_value_t> out
     ) =0;
 

@@ -72,7 +72,7 @@ void proximal_newton_general_solver(
         // compute x^star(mu)
         {
             size_t x_iters;
-            unconstrained::newton_abs_solver(
+            unconstrained::newton_solver(
                 quad, mu_resid, l1, l2, newton_tol, newton_max_iters, 
                 x, x_iters, x_buffer1, x_buffer2
             );
@@ -177,7 +177,7 @@ void proximal_newton_general_solver(
         mu_resid.matrix().noalias() = v.matrix() - mu.matrix() * A;
     }
     size_t x_iters;
-    unconstrained::newton_abs_solver(
+    unconstrained::newton_solver(
         quad, mu_resid, l1, l2, newton_tol, newton_max_iters, 
         x, x_iters, x_buffer1, x_buffer2
     );

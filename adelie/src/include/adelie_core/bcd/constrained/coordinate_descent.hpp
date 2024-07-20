@@ -56,7 +56,7 @@ void coordinate_descent_solver(
     {
         Eigen::Map<vec_value_t> x_uncnstr(buff.data()+2*d, d);
         size_t x_iters;
-        unconstrained::newton_abs_solver(
+        unconstrained::newton_solver(
             quad, linear, l1, l2, newton_tol, newton_max_iters, 
             x_uncnstr, x_iters, x_buffer1, x_buffer2
         );
@@ -138,7 +138,7 @@ void coordinate_descent_solver(
 
             // compute x
             size_t x_iters;
-            unconstrained::newton_abs_solver(
+            unconstrained::newton_solver(
                 quad, mu_resid, l1, l2, newton_tol, newton_max_iters, 
                 x, x_iters, x_buffer1, x_buffer2
             );
@@ -165,7 +165,7 @@ void coordinate_descent_solver(
                     is_first_call = false;
                 } else {
                     invariance_f(k, muk, Akr);
-                    unconstrained::newton_abs_solver(
+                    unconstrained::newton_solver(
                         quad, mu_resid, l1, l2, newton_tol, newton_max_iters, 
                         x, x_iters, x_buffer1, x_buffer2
                     );
@@ -218,7 +218,7 @@ void coordinate_descent_solver(
         if (convg_measure <= tol) {
             if (compute_x) {
                 size_t x_iters;
-                unconstrained::newton_abs_solver(
+                unconstrained::newton_solver(
                     quad, mu_resid, l1, l2, newton_tol, newton_max_iters, 
                     x, x_iters, x_buffer1, x_buffer2
                 );

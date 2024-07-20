@@ -77,6 +77,15 @@ public:
         mu[0] = mu0;
     }
 
+    void gradient(
+        const Eigen::Ref<const vec_value_t>&,
+        const Eigen::Ref<const vec_value_t>& mu,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        out = _sgn * mu;
+    }
+
     void project(
         Eigen::Ref<vec_value_t> x
     ) override
@@ -169,6 +178,13 @@ public:
             return;
         }
 
+        // check if x = 0, mu = 0 is optimal
+        if (linear.matrix().norm() <= l1) {
+            x.setZero();
+            _mu.setZero();
+            return;
+        }
+
         auto buff_ptr = reinterpret_cast<value_t*>(buffer.data());
         const auto buff_begin = buff_ptr;
         Eigen::Map<vec_value_t> grad_prev(buff_ptr, m); buff_ptr += m;
@@ -184,10 +200,11 @@ public:
         };
         const auto compute_min_mu_resid = [&](
             const auto& Qv,
-            bool is_prev_valid_old
+            bool is_prev_valid_old,
+            bool is_init
         ) {
             auto& mu_curr = grad;
-            if (is_prev_valid_old) {
+            if (is_prev_valid_old || is_init) {
                 mu_curr = _mu;
             }
             const auto is_b_zero = (_b <= 0).template cast<value_t>();
@@ -196,7 +213,7 @@ public:
                 Configs::max_solver_value * is_b_zero
             );
             const auto mu_resid_norm_sq = (Qv - _sgn * _mu).square().sum();
-            if (is_prev_valid_old && mu_resid_norm_sq > l1 * l1) {
+            if (is_init || (is_prev_valid_old && mu_resid_norm_sq > l1 * l1)) {
                 _mu = mu_curr;
             } 
             return mu_resid_norm_sq;
@@ -392,7 +409,7 @@ public:
             constexpr size_t _newton_max_iters = 100000;
             constexpr value_t _newton_tol = 1e-12;
             size_t x_iters;
-            bcd::unconstrained::newton_abs_solver(
+            bcd::unconstrained::newton_solver(
                 quad, linear_shifted, l1, l2+_rho, _newton_tol, _newton_max_iters, 
                 x, x_iters, x_buffer1, x_buffer2
             );
