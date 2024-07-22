@@ -64,6 +64,7 @@ struct StateMultiGaussianNaive : StateGaussianNaive<
         const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
+        const Eigen::Ref<const vec_index_t>& dual_groups, 
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_value_t>& weights,
@@ -91,7 +92,6 @@ struct StateMultiGaussianNaive : StateGaussianNaive<
         const Eigen::Ref<const vec_index_t>& screen_set,
         const Eigen::Ref<const vec_value_t>& screen_beta,
         const Eigen::Ref<const vec_bool_t>& screen_is_active,
-        const Eigen::Ref<const vec_value_t>& screen_dual,
         size_t active_set_size,
         const Eigen::Ref<const vec_index_t>& active_set,
         value_t rsq,
@@ -100,12 +100,12 @@ struct StateMultiGaussianNaive : StateGaussianNaive<
     ):
         base_t(
             X, X_means, y_mean, y_var, resid, resid_sum,
-            constraints, groups, group_sizes, alpha, penalty, weights, lmda_path, lmda_max, min_ratio, lmda_path_size,
+            constraints, groups, group_sizes, dual_groups, alpha, penalty, weights, lmda_path, lmda_max, min_ratio, lmda_path_size,
             max_screen_size, max_active_size,
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             max_iters, tol, adev_tol, ddev_tol, 
             newton_tol, newton_max_iters, early_exit, setup_lmda_max, setup_lmda_path, intercept, n_threads,
-            screen_set, screen_beta, screen_is_active, screen_dual, active_set_size, active_set, rsq, lmda, grad
+            screen_set, screen_beta, screen_is_active, active_set_size, active_set, rsq, lmda, grad
         ),
         group_type(util::convert_multi_group(group_type)),
         n_classes(n_classes),

@@ -226,7 +226,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         )delimiter")
         .def(py::init<>())
         .def("cmul", &internal_t::cmul, R"delimiter(
-        Column vector-vector multiplication.
+        Computes a column vector-vector multiplication.
 
         Computes the dot-product ``(v * w).T @ X[:,j]`` for a column ``j``.
 
@@ -234,13 +234,13 @@ void matrix_naive_base(py::module_& m, const char* name)
         ----------
         j : int
             Column index.
-        v : (n,) np.ndarray
+        v : (n,) ndarray
             Vector to dot product with the ``j`` th column with.
-        w : (n,) np.ndarray
+        w : (n,) ndarray
             Vector of weights.
         )delimiter")
         .def("ctmul", &internal_t::ctmul, R"delimiter(
-        Column vector-scalar multiplication.
+        Computes a column vector-scalar multiplication increment.
 
         Computes the vector-scalar multiplication ``v * X[:,j]`` for a column ``j``.
         The result is *incremented* into the output vector.
@@ -251,11 +251,11 @@ void matrix_naive_base(py::module_& m, const char* name)
             Column index.
         v : float
             Scalar to multiply with the ``j`` th column.
-        out : (n,) np.ndarray
+        out : (n,) ndarray
             Vector to increment in-place the result.
         )delimiter")
         .def("bmul", &internal_t::bmul, R"delimiter(
-        Column block matrix-vector multiplication.
+        Computes a column block matrix-vector multiplication.
 
         Computes the matrix-vector multiplication ``(v * w).T @ X[:, j:j+q]``.
 
@@ -265,15 +265,15 @@ void matrix_naive_base(py::module_& m, const char* name)
             Column index.
         q : int
             Number of columns.
-        v : (n,) np.ndarray
+        v : (n,) ndarray
             Vector to multiply with the block matrix.
-        w : (n,) np.ndarray
+        w : (n,) ndarray
             Vector of weights.
-        out : (q,) np.ndarray
+        out : (q,) ndarray
             Vector to store in-place the result.
         )delimiter")
         .def("btmul", &internal_t::btmul, R"delimiter(
-        Column block matrix transpose-vector multiplication.
+        Computes a column block matrix transpose-vector multiplication increment.
 
         Computes the matrix-vector multiplication
         ``v.T @ X[:, j:j+q].T``.
@@ -285,41 +285,41 @@ void matrix_naive_base(py::module_& m, const char* name)
             Column index.
         q : int
             Number of columns.
-        v : (q,) np.ndarray
+        v : (q,) ndarray
             Vector to multiply with the block matrix.
-        out : (n,) np.ndarray
+        out : (n,) ndarray
             Vector to increment in-place the result.
         )delimiter")
         .def("mul", &internal_t::mul, R"delimiter(
-        Matrix-vector multiplication.
+        Computes a matrix-vector multiplication.
 
         Computes the matrix-vector multiplication
         ``(v * w).T @ X``.
 
         Parameters
         ----------
-        v : (n,) np.ndarray
+        v : (n,) ndarray
             Vector to multiply with the block matrix.
-        w : (n,) np.ndarray
+        w : (n,) ndarray
             Vector of weights.
-        out : (q,) np.ndarray
+        out : (q,) ndarray
             Vector to store in-place the result.
         )delimiter")
         .def("sp_btmul", &internal_t::sp_btmul, R"delimiter(
-        Matrix transpose-sparse matrix multiplication.
+        Computes a matrix transpose-sparse matrix multiplication.
 
         Computes the matrix transpose-sparse matrix multiplication
         ``v @ X.T``.
 
         Parameters
         ----------
-        v : (L, p) scipy.sparse.csr_matrix
+        v : (L, p) csr_matrix
             Sparse matrix to multiply with the matrix.
-        out : (L, n) np.ndarray
+        out : (L, n) ndarray
             Matrix to store in-place the result.
         )delimiter")
         .def("cov", &internal_t::cov, R"delimiter(
-        Weighted covariance matrix.
+        Computes a weighted covariance matrix.
 
         Computes the weighted covariance matrix
         ``X[:, j:j+q].T @ W @ X[:, j:j+q]``.
@@ -333,18 +333,18 @@ void matrix_naive_base(py::module_& m, const char* name)
             Column index.
         q : int
             Number of columns.
-        sqrt_weights : (n,) np.ndarray
+        sqrt_weights : (n,) ndarray
             Square-root of the weights.
-        out : (q, q) np.ndarray
+        out : (q, q) ndarray
             Matrix to store in-place the result.
-        buffer : (n, q) np.ndarray
+        buffer : (n, q) ndarray
             Extra buffer space if needed.
         )delimiter")
         .def("rows", &internal_t::rows, R"delimiter(
-        Number of rows.
+        Returns the number of rows.
         )delimiter")
         .def("cols", &internal_t::cols, R"delimiter(
-        Number of columns.
+        Returns the number of columns.
         )delimiter")
         /* Augmented API for Python */
         .def_property_readonly("ndim", [](const internal_t&) { return 2; }, R"delimiter(
@@ -368,7 +368,7 @@ void matrix_cov_base(py::module_& m, const char* name)
     )delimiter")
         .def(py::init<>())
         .def("bmul", &internal_t::bmul, R"delimiter(
-        Block matrix-sparse vector multiplication.
+        Computes a block matrix-sparse vector multiplication.
 
         Computes the matrix-sparse vector multiplication
         ``v.T @ A[:, subset]`` where ``v`` is represented by the sparse-format
@@ -376,17 +376,17 @@ void matrix_cov_base(py::module_& m, const char* name)
 
         Parameters
         ----------
-        subset : (s,) np.ndarray
+        subset : (s,) ndarray
             Vector of column indices of ``A`` to subset in increasing order.
-        indices : (nnz,) np.ndarray
+        indices : (nnz,) ndarray
             Vector of indices in increasing order.
-        values : (nnz,) np.ndarray
+        values : (nnz,) ndarray
             Vector of values associated with ``indices``.
-        out : (s,) np.ndarray
+        out : (s,) ndarray
             Vector to store the result.
         )delimiter")
         .def("mul", &internal_t::mul, R"delimiter(
-        Matrix-sparse vector multiplication.
+        Computes a matrix-sparse vector multiplication.
 
         Computes the matrix-sparse vector multiplication
         ``v.T @ A`` where ``v`` is represented by the sparse-format
@@ -394,13 +394,12 @@ void matrix_cov_base(py::module_& m, const char* name)
 
         Parameters
         ----------
-        indices : (nnz,) np.ndarray
+        indices : (nnz,) ndarray
             Vector of indices in increasing order.
-        values : (nnz,) np.ndarray
+        values : (nnz,) ndarray
             Vector of values associated with ``indices``.
-        out : (n,) np.ndarray
+        out : (n,) ndarray
             Vector to store in-place the result.
-            The length is the number of columns of ``A``.
         )delimiter")
         .def("to_dense", &internal_t::to_dense, R"delimiter(
         Converts a block to a dense matrix.
@@ -413,14 +412,14 @@ void matrix_cov_base(py::module_& m, const char* name)
             Row index.
         p : int
             Number of rows.
-        out : (p, p) np.ndarray
+        out : (p, p) ndarray
             Matrix to store the dense result.
         )delimiter")
         .def("rows", &internal_t::rows, R"delimiter(
-        Number of rows.
+        Returns the number of rows.
         )delimiter")
         .def("cols", &internal_t::cols, R"delimiter(
-        Number of columns.
+        Returns the number of columns.
         )delimiter")
         /* Augmented API for Python */
         .def_property_readonly("ndim", [](const internal_t&) { return 2; }, R"delimiter(

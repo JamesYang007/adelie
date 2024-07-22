@@ -23,7 +23,7 @@ public:
         const Eigen::Ref<const rowarr_value_t>& y,
         const Eigen::Ref<const vec_value_t>& weights
     ):
-        base_t("multinomial", y, weights, true),
+        base_t("multinomial", y, weights),
         _buff(y.rows() * (y.cols() + 1))
     {
         if (y.cols() <= 1) {

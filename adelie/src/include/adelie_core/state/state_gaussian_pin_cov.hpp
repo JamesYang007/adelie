@@ -1,5 +1,6 @@
 #pragma once
 #include <adelie_core/state/state_gaussian_pin_base.hpp>
+#include <adelie_core/util/macros.hpp>
 
 namespace adelie_core {
 namespace state {
@@ -118,16 +119,17 @@ struct StateGaussianPinCov: StateGaussianPinBase<
         const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
+        const Eigen::Ref<const vec_index_t>& dual_groups, 
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_index_t>& screen_set, 
         const Eigen::Ref<const vec_index_t>& screen_begins, 
         const Eigen::Ref<const vec_value_t>& screen_vars,
         const dyn_vec_mat_value_t& screen_transforms,
-        const Eigen::Ref<const vec_index_t>& screen_dual_begins, 
         const Eigen::Ref<const vec_index_t>& screen_subset_order,
         const Eigen::Ref<const vec_index_t>& screen_subset_ordered,
         const Eigen::Ref<const vec_value_t>& lmda_path, 
+        size_t constraint_buffer_size,
         size_t max_active_size,
         size_t max_iters,
         value_t tol,
@@ -139,15 +141,14 @@ struct StateGaussianPinCov: StateGaussianPinBase<
         Eigen::Ref<vec_value_t> screen_beta, 
         Eigen::Ref<vec_value_t> screen_grad,
         Eigen::Ref<vec_bool_t> screen_is_active,
-        Eigen::Ref<vec_value_t> screen_dual,
         size_t active_set_size,
         Eigen::Ref<vec_index_t> active_set
     ): 
         base_t(
-            constraints, groups, group_sizes, alpha, penalty, 
-            screen_set, screen_begins, screen_vars, screen_transforms, screen_dual_begins, lmda_path, 
-            false, max_active_size, max_iters, tol, 0, 0, newton_tol, newton_max_iters, n_threads,
-            rsq, screen_beta, screen_is_active, screen_dual, active_set_size, active_set
+            constraints, groups, group_sizes, dual_groups, alpha, penalty, 
+            screen_set, screen_begins, screen_vars, screen_transforms, lmda_path, 
+            constraint_buffer_size, false, max_active_size, max_iters, tol, 0, 0, newton_tol, newton_max_iters, n_threads,
+            rsq, screen_beta, screen_is_active, active_set_size, active_set
         ),
         screen_subset_order(screen_subset_order.data(), screen_subset_order.size()),
         screen_subset_ordered(screen_subset_ordered.data(), screen_subset_ordered.size()),

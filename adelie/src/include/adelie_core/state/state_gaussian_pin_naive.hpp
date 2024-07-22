@@ -63,6 +63,7 @@ struct StateGaussianPinNaive: StateGaussianPinBase<
         const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
+        const Eigen::Ref<const vec_index_t>& dual_groups, 
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_value_t>& weights,
@@ -71,8 +72,8 @@ struct StateGaussianPinNaive: StateGaussianPinBase<
         const Eigen::Ref<const vec_value_t>& screen_vars,
         const Eigen::Ref<const vec_value_t>& screen_X_means,
         const dyn_vec_mat_value_t& screen_transforms,
-        const Eigen::Ref<const vec_index_t>& screen_dual_begins, 
         const Eigen::Ref<const vec_value_t>& lmda_path, 
+        size_t constraint_buffer_size,
         bool intercept,
         size_t max_active_size,
         size_t max_iters,
@@ -87,15 +88,14 @@ struct StateGaussianPinNaive: StateGaussianPinBase<
         value_t resid_sum,
         Eigen::Ref<vec_value_t> screen_beta, 
         Eigen::Ref<vec_bool_t> screen_is_active,
-        Eigen::Ref<vec_value_t> screen_dual,
         size_t active_set_size,
         Eigen::Ref<vec_index_t> active_set
     ): 
         base_t(
-            constraints, groups, group_sizes, alpha, penalty,
-            screen_set, screen_begins, screen_vars, screen_transforms, screen_dual_begins, lmda_path, 
-            intercept, max_active_size, max_iters, tol, adev_tol, ddev_tol, newton_tol, newton_max_iters, n_threads,
-            rsq, screen_beta, screen_is_active, screen_dual, active_set_size, active_set
+            constraints, groups, group_sizes, dual_groups, alpha, penalty,
+            screen_set, screen_begins, screen_vars, screen_transforms, lmda_path, 
+            constraint_buffer_size, intercept, max_active_size, max_iters, tol, adev_tol, ddev_tol, newton_tol, newton_max_iters, n_threads,
+            rsq, screen_beta, screen_is_active, active_set_size, active_set
         ),
         weights(weights.data(), weights.size()),
         y_mean(y_mean),

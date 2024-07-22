@@ -1,6 +1,8 @@
 #include "decl.hpp"
 #include <adelie_core/constraint/constraint_base.hpp>
-#include <adelie_core/constraint/constraint_lower_upper.hpp>
+#include <adelie_core/constraint/constraint_box.hpp>
+#include <adelie_core/constraint/constraint_linear.hpp>
+#include <adelie_core/constraint/constraint_one_sided.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -12,24 +14,39 @@ class PyConstraintBase : public ad::constraint::ConstraintBase<T>
 public:
     using base_t::base_t;
     using typename base_t::value_t;
+    using typename base_t::vec_index_t;
     using typename base_t::vec_value_t;
+    using typename base_t::vec_uint64_t;
     using typename base_t::colmat_value_t;
 
     void solve(
         Eigen::Ref<vec_value_t> x,
-        Eigen::Ref<vec_value_t> mu,
         const Eigen::Ref<const vec_value_t>& quad,
         const Eigen::Ref<const vec_value_t>& linear,
         value_t l1,
         value_t l2,
-        const Eigen::Ref<const colmat_value_t>& Q
+        const Eigen::Ref<const colmat_value_t>& Q,
+        Eigen::Ref<vec_uint64_t> buffer
     ) override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
             base_t,
             solve,
-            x, mu, quad, linear, l1, l2, Q
+            x, quad, linear, l1, l2, Q, buffer
+        );
+    }
+
+    void gradient(
+        const Eigen::Ref<const vec_value_t>& x,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            gradient,
+            x, out
         );
     }
 
@@ -59,6 +76,37 @@ public:
         );
     }
 
+    void clear() override 
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            clear,
+        );
+    }
+
+    void dual(
+        Eigen::Ref<vec_index_t> indices,
+        Eigen::Ref<vec_value_t> values
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t, 
+            dual,
+            indices, values
+        );
+    }
+
+    int duals_nnz() override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            int,
+            base_t,
+            duals_nnz,
+        );
+    }
+
     int duals() override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -76,6 +124,15 @@ public:
             primals,
         );
     }
+
+    size_t buffer_size() override
+    {
+        PYBIND11_OVERRIDE(
+            size_t,
+            base_t,
+            buffer_size,
+        );
+    }
 };
 
 template <class T>
@@ -83,6 +140,7 @@ void constraint_base(py::module_& m, const char* name)
 {
     using trampoline_t = PyConstraintBase<T>;
     using internal_t = ad::constraint::ConstraintBase<T>;
+    using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
         Base constraint class.
         
@@ -117,34 +175,36 @@ void constraint_base(py::module_& m, const char* name)
 
         Parameters
         ----------
-        x : (d,) np.ndarray 
+        x : (d,) ndarray 
             The primal :math:`x`.
             The passed-in values may be used as a warm-start for the internal solver.
             The output is stored back in this argument.
-        mu : (m,) np.ndarray
-            The dual :math:`\mu`.
-            The passed-in values may be used as a warm-start for the internal solver.
-            The output is stored back in this argument.
-        quad : (d,) np.ndarray
+        quad : (d,) ndarray
             The quadratic component :math:`\Sigma`. 
-        linear : (d,) np.ndarray
+        linear : (d,) ndarray
             The linear component :math:`v`.
         l1 : float
             The first regularization :math:`\lambda_1`.
         l2 : float
             The second regularization :math:`\lambda_2`.
-        Q : (d, d) np.ndarray
+        Q : (d, d) ndarray
             Orthogonal matrix :math:`Q`.
+        buffer : (b,) ndarray
+            Buffer of type ``uint64_t`` aligned at 8 bytes.
+            The size must be at least as large as :func:`buffer_size`.
         )delimiter",
             py::arg("x").noconvert(),
-            py::arg("mu").noconvert(),
             py::arg("quad").noconvert(),
             py::arg("linear").noconvert(),
             py::arg("l1"),
             py::arg("l2"),
-            py::arg("Q").noconvert()
+            py::arg("Q").noconvert(),
+            py::arg("buffer").noconvert()
         )
-        .def("gradient", &internal_t::gradient, R"delimiter(
+        .def("gradient", py::overload_cast<
+            const Eigen::Ref<const vec_value_t>&,
+            Eigen::Ref<vec_value_t> 
+        >(&internal_t::gradient), R"delimiter(
         Computes the gradient of the Lagrangian.
 
         The gradient of the Lagrangian (with respect to the primal) is given by
@@ -154,15 +214,43 @@ void constraint_base(py::module_& m, const char* name)
                 \mu^\top \phi'(x)
             \end{align*}
 
-        where :math:`\phi'(x)` is the Jacobian of :math:`\phi` at :math:`x`.
+        where :math:`\phi'(x)` is the Jacobian of :math:`\phi` at :math:`x`
+        and :math:`\mu` is the dual solution from the last call to :func:`solve`. 
 
         Parameters
         ----------
-        x : (d,) np.ndarray
+        x : (d,) ndarray
             The primal :math:`x` at which to evaluate the gradient.
-        mu : (m,) np.ndarray
+        out : (d,) ndarray
+            The output vector to store the gradient.
+        )delimiter",
+            py::arg("x").noconvert(),
+            py::arg("out").noconvert()
+        )
+        .def("gradient_static", py::overload_cast<
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            Eigen::Ref<vec_value_t> 
+        >(&internal_t::gradient), R"delimiter(
+        Computes the gradient of the Lagrangian.
+
+        The gradient of the Lagrangian (with respect to the primal) is given by
+
+        .. math::
+            \begin{align*}
+                \mu^\top \phi'(x)
+            \end{align*}
+
+        where :math:`\phi'(x)` is the Jacobian of :math:`\phi` at :math:`x`
+        and :math:`\mu` is the dual given by ``mu``. 
+
+        Parameters
+        ----------
+        x : (d,) ndarray
+            The primal :math:`x` at which to evaluate the gradient.
+        mu : (m,) ndarray
             The dual :math:`\mu` at which to evaluate the gradient.
-        out : (d,) np.ndarray
+        out : (d,) ndarray
             The output vector to store the gradient.
         )delimiter",
             py::arg("x").noconvert(),
@@ -188,14 +276,40 @@ void constraint_base(py::module_& m, const char* name)
 
         Parameters
         ----------
-        x : (d,) np.ndarray
+        x : (d,) ndarray
             The primal :math:`x` to project onto the feasible set.
             The output is stored back in this argument.
         )delimiter",
             py::arg("x").noconvert()
         )
+        .def("clear", &internal_t::clear, R"delimiter(
+        Clears internal data.
+
+        The state of the constraint object must return back to
+        that of the initial construction.
+        )delimiter")
+        .def("dual", &internal_t::dual, R"delimiter(
+        Returns the current dual variable in sparse format.
+
+        Parameters
+        ----------
+        indices : (nnz,) ndarray
+            The indices with non-zero dual values.
+            The size must be at least the value returned by :func:`duals_nnz`.
+        values : (nnz,) ndarray
+            The non-zero dual values corresponding to ``indices``.
+            The size must be at least the value returned by :func:`duals_nnz`.
+        )delimiter")
+        .def("duals_nnz", &internal_t::duals_nnz, R"delimiter(
+        Returns the number of non-zero dual values.
+
+        Returns
+        -------
+        nnz : int
+            Number of non-zero dual values.
+        )delimiter")
         .def("duals", &internal_t::duals, R"delimiter(
-        Number of dual variables.
+        Returns the number of dual variables.
 
         Returns
         -------
@@ -203,40 +317,194 @@ void constraint_base(py::module_& m, const char* name)
             Number of dual variables.
         )delimiter")
         .def("primals", &internal_t::primals, R"delimiter(
-        Number of primal variables.
+        Returns the number of primal variables.
 
         Returns
         -------
         size : int
             Number of primal variables.
         )delimiter")
+        .def("buffer_size", &internal_t::buffer_size, R"delimiter(
+        Returns the buffer size in unit of 8 bytes.
+
+        Returns
+        -------
+        size : int
+            Buffer size in unit of 8 bytes.
+        )delimiter")
         ;
 }
 
 template <class ValueType>
-void constraint_lower_upper(py::module_& m, const char* name)
+void constraint_box_base(py::module_& m, const char* name)
 {
-    using internal_t = ad::constraint::ConstraintLowerUpper<ValueType>;
+    using internal_t = ad::constraint::ConstraintBoxBase<ValueType>;
+    using base_t = typename internal_t::base_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint base class for box constraint."
+        )
+        ;
+}
+
+template <class ValueType>
+void constraint_box_proximal_newton(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintBoxProximalNewton<ValueType>;
     using base_t = typename internal_t::base_t;
     using value_t = typename internal_t::value_t;
     using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, base_t>(m, name, 
-        "Core constraint class for lower and upper constraints."
+        "Core constraint class for box constraint with proximal Newton solver."
         )
         .def(py::init<
-            value_t,
-            const Eigen::Ref<const vec_value_t>,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
             size_t,
             value_t,
             size_t,
-            value_t 
+            value_t,
+            value_t,
+            value_t
         >(), 
-            py::arg("sgn"),
-            py::arg("b"),
+            py::arg("lower").noconvert(),
+            py::arg("upper").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("nnls_max_iters"),
-            py::arg("nnls_tol")
+            py::arg("nnls_tol"),
+            py::arg("cs_tol"),
+            py::arg("slack")
+        )
+        ;
+}
+
+template <class ValueType>
+void constraint_linear_base(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintLinearBase<ValueType>;
+    using base_t = typename internal_t::base_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint base class for linear constraint."
+        )
+        ;
+}
+
+template <class ValueType>
+void constraint_linear_proximal_newton(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintLinearProximalNewton<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using value_t = typename internal_t::value_t;
+    using vec_value_t = typename internal_t::vec_value_t;
+    using rowmat_value_t = typename internal_t::rowmat_value_t;
+    using colmat_value_t = typename internal_t::colmat_value_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint class for linear constraint with proximal Newton solver."
+        )
+        .def(py::init<
+            const Eigen::Ref<const rowmat_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const colmat_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const rowmat_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            size_t,
+            value_t,
+            size_t,
+            size_t,
+            value_t,
+            value_t,
+            value_t,
+            size_t
+        >(), 
+            py::arg("A").noconvert(),
+            py::arg("lower").noconvert(),
+            py::arg("upper").noconvert(),
+            py::arg("A_u").noconvert(),
+            py::arg("A_d").noconvert(),
+            py::arg("A_vh").noconvert(),
+            py::arg("A_vars").noconvert(),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("nnls_batch_size"),
+            py::arg("nnls_max_iters"),
+            py::arg("nnls_tol"),
+            py::arg("cs_tol"),
+            py::arg("slack"),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+
+template <class ValueType>
+void constraint_one_sided_base(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintOneSidedBase<ValueType>;
+    using base_t = typename internal_t::base_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint base class for one-sided bound constraint."
+        )
+        ;
+}
+
+template <class ValueType>
+void constraint_one_sided_proximal_newton(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintOneSidedProximalNewton<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using value_t = typename internal_t::value_t;
+    using vec_value_t = typename internal_t::vec_value_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint class for one-sided bound constraint with proximal Newton solver."
+        )
+        .def(py::init<
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            size_t,
+            value_t,
+            size_t,
+            value_t,
+            value_t,
+            value_t
+        >(), 
+            py::arg("sgn").noconvert(),
+            py::arg("b").noconvert(),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("nnls_max_iters"),
+            py::arg("nnls_tol"),
+            py::arg("cs_tol"),
+            py::arg("slack")
+        )
+        ;
+}
+
+template <class ValueType>
+void constraint_one_sided_admm(py::module_& m, const char* name)
+{
+    using internal_t = ad::constraint::ConstraintOneSidedADMM<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using value_t = typename internal_t::value_t;
+    using vec_value_t = typename internal_t::vec_value_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core constraint class for one-sided bound constraint with ADMM solver."
+        )
+        .def(py::init<
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            size_t,
+            value_t,
+            value_t,
+            value_t
+        >(), 
+            py::arg("sgn").noconvert(),
+            py::arg("b").noconvert(),
+            py::arg("max_iters"),
+            py::arg("tol_abs"),
+            py::arg("tol_rel"),
+            py::arg("rho")
         )
         ;
 }
@@ -249,6 +517,20 @@ void register_constraint(py::module_& m)
     constraint_base<double>(m, "ConstraintBase64");
     constraint_base<float>(m, "ConstraintBase32");
 
-    constraint_lower_upper<double>(m, "ConstraintLowerUpper64");
-    constraint_lower_upper<float>(m, "ConstraintLowerUpper32");
+    constraint_box_base<double>(m, "ConstraintBoxBase64");
+    constraint_box_base<float>(m, "ConstraintBoxBase32");
+    constraint_box_proximal_newton<double>(m, "ConstraintBoxProximalNewton64");
+    constraint_box_proximal_newton<float>(m, "ConstraintBoxProximalNewton32");
+
+    constraint_linear_base<double>(m, "ConstraintLinearBase64");
+    constraint_linear_base<float>(m, "ConstraintLinearBase32");
+    constraint_linear_proximal_newton<double>(m, "ConstraintLinearProximalNewton64");
+    constraint_linear_proximal_newton<float>(m, "ConstraintLinearProximalNewton32");
+
+    constraint_one_sided_base<double>(m, "ConstraintOneSidedBase64");
+    constraint_one_sided_base<float>(m, "ConstraintOneSidedBase32");
+    constraint_one_sided_proximal_newton<double>(m, "ConstraintOneSidedProximalNewton64");
+    constraint_one_sided_proximal_newton<float>(m, "ConstraintOneSidedProximalNewton32");
+    constraint_one_sided_admm<double>(m, "ConstraintOneSidedADMM64");
+    constraint_one_sided_admm<float>(m, "ConstraintOneSidedADMM32");
 }

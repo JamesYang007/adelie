@@ -1,0 +1,104 @@
+Internal
+--------
+
+
+.. currentmodule:: adelie
+
+
+.. autosummary::
+    :toctree: generated/
+    
+
+    adelie_core.configs.Configs
+    adelie_core.constraint.ConstraintBase32
+    adelie_core.constraint.ConstraintBase64
+    adelie_core.constraint.ConstraintBoxProximalNewton32
+    adelie_core.constraint.ConstraintBoxProximalNewton64
+    adelie_core.constraint.ConstraintLinearProximalNewton32
+    adelie_core.constraint.ConstraintLinearProximalNewton64
+    adelie_core.constraint.ConstraintOneSidedADMM32
+    adelie_core.constraint.ConstraintOneSidedADMM64
+    adelie_core.constraint.ConstraintOneSidedProximalNewton32
+    adelie_core.constraint.ConstraintOneSidedProximalNewton64
+    adelie_core.glm.GlmBase32
+    adelie_core.glm.GlmBase64
+    adelie_core.glm.GlmBinomialLogit32
+    adelie_core.glm.GlmBinomialLogit64
+    adelie_core.glm.GlmBinomialProbit32
+    adelie_core.glm.GlmBinomialProbit64
+    adelie_core.glm.GlmCox32
+    adelie_core.glm.GlmCox64
+    adelie_core.glm.GlmGaussian32
+    adelie_core.glm.GlmGaussian64
+    adelie_core.glm.GlmMultiBase32
+    adelie_core.glm.GlmMultiBase64
+    adelie_core.glm.GlmMultiGaussian32
+    adelie_core.glm.GlmMultiGaussian64
+    adelie_core.glm.GlmMultinomial32
+    adelie_core.glm.GlmMultinomial64
+    adelie_core.glm.GlmPoisson32
+    adelie_core.glm.GlmPoisson64
+    adelie_core.matrix.MatrixCovBase32
+    adelie_core.matrix.MatrixCovBase64
+    adelie_core.matrix.MatrixCovBlockDiag32
+    adelie_core.matrix.MatrixCovBlockDiag64
+    adelie_core.matrix.MatrixCovDense32C
+    adelie_core.matrix.MatrixCovDense32F
+    adelie_core.matrix.MatrixCovDense64C
+    adelie_core.matrix.MatrixCovDense64F
+    adelie_core.matrix.MatrixCovLazyCov32C
+    adelie_core.matrix.MatrixCovLazyCov32F
+    adelie_core.matrix.MatrixCovLazyCov64C
+    adelie_core.matrix.MatrixCovLazyCov64F
+    adelie_core.matrix.MatrixCovSparse32F
+    adelie_core.matrix.MatrixCovSparse64F
+    adelie_core.matrix.MatrixNaiveBase32
+    adelie_core.matrix.MatrixNaiveBase64
+    adelie_core.matrix.MatrixNaiveCConcatenate32
+    adelie_core.matrix.MatrixNaiveCConcatenate64
+    adelie_core.matrix.MatrixNaiveRConcatenate32
+    adelie_core.matrix.MatrixNaiveRConcatenate64
+    adelie_core.matrix.MatrixNaiveDense32C
+    adelie_core.matrix.MatrixNaiveDense32F
+    adelie_core.matrix.MatrixNaiveDense64C
+    adelie_core.matrix.MatrixNaiveDense64F
+    adelie_core.matrix.MatrixNaiveInteractionDense32C
+    adelie_core.matrix.MatrixNaiveInteractionDense32F
+    adelie_core.matrix.MatrixNaiveInteractionDense64C
+    adelie_core.matrix.MatrixNaiveInteractionDense64F
+    adelie_core.matrix.MatrixNaiveKroneckerEye32
+    adelie_core.matrix.MatrixNaiveKroneckerEye64
+    adelie_core.matrix.MatrixNaiveKroneckerEyeDense32C
+    adelie_core.matrix.MatrixNaiveKroneckerEyeDense32F
+    adelie_core.matrix.MatrixNaiveKroneckerEyeDense64C
+    adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F
+    adelie_core.matrix.MatrixNaiveOneHotDense32C
+    adelie_core.matrix.MatrixNaiveOneHotDense32F
+    adelie_core.matrix.MatrixNaiveOneHotDense64C
+    adelie_core.matrix.MatrixNaiveOneHotDense64F
+    adelie_core.matrix.MatrixNaiveSNPPhasedAncestry32
+    adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64
+    adelie_core.matrix.MatrixNaiveSNPUnphased32
+    adelie_core.matrix.MatrixNaiveSNPUnphased64
+    adelie_core.matrix.MatrixNaiveSparse32F
+    adelie_core.matrix.MatrixNaiveSparse64F
+    adelie_core.matrix.MatrixNaiveStandardize32
+    adelie_core.matrix.MatrixNaiveStandardize64
+    adelie_core.matrix.MatrixNaiveCSubset32
+    adelie_core.matrix.MatrixNaiveCSubset64
+    adelie_core.matrix.MatrixNaiveRSubset32
+    adelie_core.matrix.MatrixNaiveRSubset64
+    adelie_core.state.StateGaussianPinCov32
+    adelie_core.state.StateGaussianPinCov64
+    adelie_core.state.StateGaussianPinNaive32
+    adelie_core.state.StateGaussianPinNaive64
+    adelie_core.state.StateGaussianCov32
+    adelie_core.state.StateGaussianCov64
+    adelie_core.state.StateGaussianNaive32
+    adelie_core.state.StateGaussianNaive64
+    adelie_core.state.StateGlmNaive32
+    adelie_core.state.StateGlmNaive64
+    adelie_core.state.StateMultiGaussianNaive32
+    adelie_core.state.StateMultiGaussianNaive64
+    adelie_core.state.StateMultiGlmNaive32
+    adelie_core.state.StateMultiGlmNaive64

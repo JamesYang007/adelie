@@ -2,6 +2,22 @@ from . import adelie_core as core
 from . import glm
 from . import logger
 from . import matrix
+from .constraint import (
+    ConstraintBase32,
+    ConstraintBase64,
+)
+from .glm import (
+    GlmBase32,
+    GlmBase64,
+    GlmMultiBase32,
+    GlmMultiBase64,
+)
+from .matrix import (
+    MatrixCovBase32,
+    MatrixCovBase64,
+    MatrixNaiveBase32,
+    MatrixNaiveBase64,
+)
 from .state import (
     gaussian_cov as state_gaussian_cov,
     gaussian_naive as state_gaussian_naive,
@@ -91,10 +107,10 @@ def _solve(
 
 
 def gaussian_cov(
-    A: np.ndarray,
+    A: Union[np.ndarray, MatrixCovBase32, MatrixCovBase64],
     v: np.ndarray,
     *,
-    constraints: list =None,
+    constraints: list[Union[ConstraintBase32, ConstraintBase64]] =None,
     groups: np.ndarray =None,
     alpha: float =1,
     penalty: np.ndarray =None,
@@ -144,18 +160,18 @@ def gaussian_cov(
 
     Parameters
     ----------
-    A : (p, p) Union[adelie.matrix.MatrixCovBase64, adelie.matrix.MatrixCovBase32]
+    A : (p, p) Union[ndarray, MatrixCovBase64, MatrixCovBase32]
         Positive semi-definite matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule.
-    v : (p,) np.ndarray
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule or :class:`numpy.ndarray`.
+    v : (p,) ndarray
         Linear term.
-    constraints : (G,) list, optional
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
         If ``None``, every group is unconstrained.
         Default is ``None``.
-    groups : (G,) np.ndarray, optional
+    groups : (G,) ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
         Default is ``None``, in which case it is set to ``np.arange(p)``.
@@ -163,11 +179,11 @@ def gaussian_cov(
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
         Default is ``1``.
-    penalty : (G,) np.ndarray, optional
+    penalty : (G,) ndarray, optional
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
         Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
-    lmda_path : (L,) np.ndarray, optional
+    lmda_path : (L,) ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
@@ -288,6 +304,7 @@ def gaussian_cov(
 
     See Also
     --------
+    adelie.adelie_core.state.StateGaussianCov32
     adelie.adelie_core.state.StateGaussianCov64
     """
     if isinstance(A, np.ndarray):
@@ -326,13 +343,6 @@ def gaussian_cov(
         screen_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
         screen_beta = np.zeros(np.sum(group_sizes[screen_set]), dtype=dtype)
         screen_is_active = np.ones(screen_set.shape[0], dtype=bool)
-        screen_dual_size = 0
-        if not (constraints is None):
-            screen_dual_size = np.sum([
-                0 if constraints[k] is None else constraints[k].dual_size
-                for k in screen_set
-            ], dtype=int)
-        screen_dual = np.zeros(screen_dual_size, dtype=dtype)
         active_set_size = screen_set.shape[0]
         active_set = np.empty(G, dtype=int)
         active_set[:active_set_size] = np.arange(active_set_size)
@@ -356,7 +366,6 @@ def gaussian_cov(
         screen_set = warm_start.screen_set
         screen_beta = warm_start.screen_beta
         screen_is_active = warm_start.screen_is_active
-        screen_dual = warm_start.screen_dual
         active_set_size = warm_start.active_set_size
         active_set = warm_start.active_set
         rsq = warm_start.rsq
@@ -373,7 +382,6 @@ def gaussian_cov(
         screen_set=screen_set,
         screen_beta=screen_beta,
         screen_is_active=screen_is_active,
-        screen_dual=screen_dual,
         active_set_size=active_set_size,
         active_set=active_set,
         rsq=rsq,
@@ -409,10 +417,10 @@ def gaussian_cov(
 
 
 def grpnet(
-    X: np.ndarray,
-    glm: Union[glm.GlmBase32, glm.GlmBase64],
+    X: Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64],
+    glm: Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64],
     *,
-    constraints: list =None,
+    constraints: list[Union[ConstraintBase32, ConstraintBase64]] =None,
     groups: np.ndarray =None,
     alpha: float =1,
     penalty: np.ndarray =None,
@@ -496,19 +504,19 @@ def grpnet(
 
     Parameters
     ----------
-    X : (n, p) matrix-like
+    X : (n, p) Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
         Feature matrix.
-        It is typically one of the matrices defined in ``adelie.matrix`` submodule or ``np.ndarray``.
-    glm : Union[adelie.glm.GlmBase32, adelie.glm.GlmBase64, adelie.glm.GlmMultiBase32, adelie.glm.GlmMultiBase64]
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule or :class:`numpy.ndarray`.
+    glm : Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64]
         GLM object.
-        It is typically one of the GLM classes defined in ``adelie.glm`` submodule.
-    constraints : (G,) list, optional
+        It is typically one of the GLM classes defined in :mod:`adelie.glm` submodule.
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
         If ``None``, every group is unconstrained.
         Default is ``None``.
-    groups : (G,) np.ndarray, optional
+    groups : (G,) ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
         If ``glm`` is multi-response type, then we only allow two types of groupings:
@@ -523,16 +531,16 @@ def grpnet(
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
         Default is ``1``.
-    penalty : (G,) np.ndarray, optional
+    penalty : (G,) ndarray, optional
         Penalty factor for each group in the same order as ``groups``.
         It must be a non-negative vector.
         Default is ``None``, in which case, it is set to ``np.sqrt(group_sizes)``.
-    offsets : (n,) or (n, K) np.ndarray, optional
+    offsets : (n,) or (n, K) ndarray, optional
         Observation offsets :math:`\\eta^0`.
         Default is ``None``, in which case, it is set to 
         ``np.zeros(n)`` if ``y`` is single-response
         and ``np.zeros((n, K))`` if multi-response.
-    lmda_path : (L,) np.ndarray, optional
+    lmda_path : (L,) ndarray, optional
         The regularization path to solve for.
         The full path is not considered if ``early_exit`` is ``True``.
         It is recommended that the path is sorted in decreasing order.
@@ -669,9 +677,13 @@ def grpnet(
 
     See Also
     --------
+    adelie.adelie_core.state.StateGaussianNaive32
     adelie.adelie_core.state.StateGaussianNaive64
+    adelie.adelie_core.state.StateGlmNaive32
     adelie.adelie_core.state.StateGlmNaive64
+    adelie.adelie_core.state.StateMultiGaussianNaive32
     adelie.adelie_core.state.StateMultiGaussianNaive64
+    adelie.adelie_core.state.StateMultiGlmNaive32
     adelie.adelie_core.state.StateMultiGlmNaive64
     """
     X_raw = X
@@ -777,13 +789,6 @@ def grpnet(
             screen_set = np.arange(groups.shape[0])[(penalty <= 0) | (alpha <= 0)]
             screen_beta = np.zeros(np.sum(group_sizes[screen_set]), dtype=dtype)
             screen_is_active = np.ones(screen_set.shape[0], dtype=bool)
-            screen_dual_size = 0
-            if not (constraints is None):
-                screen_dual_size = np.sum([
-                    0 if constraints[k] is None else constraints[k].dual_size
-                    for k in screen_set
-                ], dtype=int)
-            screen_dual = np.zeros(screen_dual_size, dtype=dtype)
             active_set_size = screen_set.shape[0]
             active_set = np.empty(groups.shape[0], dtype=int)
             active_set[:active_set_size] = np.arange(active_set_size)
@@ -793,7 +798,6 @@ def grpnet(
             screen_set = warm_start.screen_set
             screen_beta = warm_start.screen_beta
             screen_is_active = warm_start.screen_is_active
-            screen_dual = warm_start.screen_dual
             active_set_size = warm_start.active_set_size
             active_set = warm_start.active_set
 
@@ -805,7 +809,6 @@ def grpnet(
         solver_args["screen_set"] = screen_set
         solver_args["screen_beta"] = screen_beta
         solver_args["screen_is_active"] = screen_is_active
-        solver_args["screen_dual"] = screen_dual
         solver_args["active_set_size"] = active_set_size
         solver_args["active_set"] = active_set
 
@@ -924,13 +927,6 @@ def grpnet(
             screen_set = np.arange(G)[(penalty <= 0) | (alpha <= 0)]
             screen_beta = np.zeros(np.sum(group_sizes[screen_set]), dtype=dtype)
             screen_is_active = np.ones(screen_set.shape[0], dtype=bool)
-            screen_dual_size = 0
-            if not (constraints is None):
-                screen_dual_size = np.sum([
-                    0 if constraints[k] is None else constraints[k].dual_size
-                    for k in screen_set
-                ], dtype=int)
-            screen_dual = np.zeros(screen_dual_size, dtype=dtype)
             active_set_size = screen_set.shape[0]
             active_set = np.empty(groups.shape[0], dtype=int)
             active_set[:active_set_size] = np.arange(active_set_size)
@@ -941,7 +937,6 @@ def grpnet(
             screen_set = warm_start.screen_set
             screen_beta = warm_start.screen_beta
             screen_is_active = warm_start.screen_is_active
-            screen_dual = warm_start.screen_dual
             active_set_size = warm_start.active_set_size
             active_set = warm_start.active_set
 
@@ -953,7 +948,6 @@ def grpnet(
         solver_args["screen_set"] = screen_set
         solver_args["screen_beta"] = screen_beta
         solver_args["screen_is_active"] = screen_is_active
-        solver_args["screen_dual"] = screen_dual
         solver_args["active_set_size"] = active_set_size
         solver_args["active_set"] = active_set
 

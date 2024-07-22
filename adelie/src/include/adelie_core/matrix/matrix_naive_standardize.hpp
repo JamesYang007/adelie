@@ -43,12 +43,12 @@ public:
 
         if (centers.size() != p) {
             throw util::adelie_core_error(
-                "centers must have the same length as the number of columns of mat."
+                "centers must be (p,) where mat is (n, p)."
             );
         }
         if (scales.size() != p) {
             throw util::adelie_core_error(
-                "scales must have the same length as the number of columns of mat."
+                "scales must be (p,) where mat is (n, p)."
             );
         }
         if (n_threads < 1) {
