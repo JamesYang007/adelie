@@ -436,10 +436,10 @@ public:
                 const size_t active_size = _mu_active.size();
                 const size_t n_bytes = sizeof(value_t) * d * (d + 1) * active_size;
                 if (_n_threads <= 1 || n_bytes <= Configs::min_bytes) {
-                    for (size_t ii = 0; ii < active_size; ++ii) active_invariance(ii);
+                    for (Eigen::Index ii = 0; ii < static_cast<Eigen::Index>(active_size); ++ii) active_invariance(ii);
                 } else {
                     #pragma omp parallel for schedule(static) num_threads(_n_threads)
-                    for (size_t ii = 0; ii < active_size; ++ii) active_invariance(ii);
+                    for (Eigen::Index ii = 0; ii < static_cast<Eigen::Index>(active_size); ++ii) active_invariance(ii);
                 }
                 optimization::StateHingeLowRank<value_t, index_t> state_hinge(
                     hess, _A, _l, _u, _nnls_batch_size, _nnls_max_iters, _nnls_tol, _n_threads,
