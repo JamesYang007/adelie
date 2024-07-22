@@ -496,7 +496,7 @@ def gradient_norms(
                     dual_groups,
                 ):
                     if constraint is None: continue
-                    constraint.gradient(
+                    constraint.gradient_static(
                         beta_curr[g:g+gs],
                         mu_curr[dg:dg+constraint.dual_size],
                         mu_grads_curr[g:g+gs],

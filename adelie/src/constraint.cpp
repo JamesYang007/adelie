@@ -227,7 +227,7 @@ void constraint_base(py::module_& m, const char* name)
             py::arg("x").noconvert(),
             py::arg("out").noconvert()
         )
-        .def("gradient", py::overload_cast<
+        .def("gradient_static", py::overload_cast<
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             Eigen::Ref<vec_value_t> 

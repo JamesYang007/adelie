@@ -159,7 +159,7 @@ def linear(
         Upper bound :math:`u`.
     svd : tuple, optional
         A tuple ``(u, d, vh)`` as outputted by :func:`numpy.linalg.svd`.
-        However, ``u`` must have `"F"`-ordering.
+        However, ``u`` must have ``"F"``-ordering.
         If ``None``, it is computed internally.
         Default is ``None``.
     vars : ndarray, optional
