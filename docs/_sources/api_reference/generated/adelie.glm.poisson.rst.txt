@@ -1,0 +1,6 @@
+﻿adelie.glm.poisson
+==================
+
+.. currentmodule:: adelie.glm
+
+.. autofunction:: poisson

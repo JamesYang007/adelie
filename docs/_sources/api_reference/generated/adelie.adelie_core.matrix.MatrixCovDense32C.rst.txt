@@ -1,0 +1,52 @@
+﻿adelie.adelie\_core.matrix.MatrixCovDense32C
+============================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixCovDense32C
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixCovDense32C.__init__
+      ~MatrixCovDense32C.bmul
+      ~MatrixCovDense32C.cols
+      ~MatrixCovDense32C.mul
+      ~MatrixCovDense32C.rows
+      ~MatrixCovDense32C.to_dense
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixCovDense32C.ndim
+      ~MatrixCovDense32C.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: cols
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: to_dense
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

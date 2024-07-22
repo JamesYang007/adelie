@@ -1,0 +1,6 @@
+﻿adelie.state.glm\_naive
+=======================
+
+.. currentmodule:: adelie.state
+
+.. autofunction:: glm_naive

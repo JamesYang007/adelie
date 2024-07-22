@@ -1,0 +1,60 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveSparse32F
+===============================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveSparse32F
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveSparse32F.__init__
+      ~MatrixNaiveSparse32F.bmul
+      ~MatrixNaiveSparse32F.btmul
+      ~MatrixNaiveSparse32F.cmul
+      ~MatrixNaiveSparse32F.cols
+      ~MatrixNaiveSparse32F.cov
+      ~MatrixNaiveSparse32F.ctmul
+      ~MatrixNaiveSparse32F.mul
+      ~MatrixNaiveSparse32F.rows
+      ~MatrixNaiveSparse32F.sp_btmul
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveSparse32F.ndim
+      ~MatrixNaiveSparse32F.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_btmul
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

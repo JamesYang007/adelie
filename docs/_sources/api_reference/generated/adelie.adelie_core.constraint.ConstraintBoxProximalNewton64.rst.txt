@@ -1,0 +1,62 @@
+﻿adelie.adelie\_core.constraint.ConstraintBoxProximalNewton64
+============================================================
+
+.. currentmodule:: adelie.adelie_core.constraint
+
+.. autoclass:: ConstraintBoxProximalNewton64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ConstraintBoxProximalNewton64.__init__
+      ~ConstraintBoxProximalNewton64.buffer_size
+      ~ConstraintBoxProximalNewton64.clear
+      ~ConstraintBoxProximalNewton64.dual
+      ~ConstraintBoxProximalNewton64.duals
+      ~ConstraintBoxProximalNewton64.duals_nnz
+      ~ConstraintBoxProximalNewton64.gradient
+      ~ConstraintBoxProximalNewton64.gradient_static
+      ~ConstraintBoxProximalNewton64.primals
+      ~ConstraintBoxProximalNewton64.project
+      ~ConstraintBoxProximalNewton64.solve
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ConstraintBoxProximalNewton64.dual_size
+      ~ConstraintBoxProximalNewton64.primal_size
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: buffer_size
+   .. automethod:: clear
+   .. automethod:: dual
+   .. automethod:: duals
+   .. automethod:: duals_nnz
+   .. automethod:: gradient
+   .. automethod:: gradient_static
+   .. automethod:: primals
+   .. automethod:: project
+   .. automethod:: solve
+   
+   
+
+   
+   
+   
+   .. autoattribute:: dual_size
+   .. autoattribute:: primal_size
+   
+   

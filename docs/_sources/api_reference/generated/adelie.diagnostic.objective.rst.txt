@@ -1,0 +1,6 @@
+﻿adelie.diagnostic.objective
+===========================
+
+.. currentmodule:: adelie.diagnostic
+
+.. autofunction:: objective

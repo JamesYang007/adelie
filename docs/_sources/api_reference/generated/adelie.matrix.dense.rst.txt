@@ -1,0 +1,6 @@
+﻿adelie.matrix.dense
+===================
+
+.. currentmodule:: adelie.matrix
+
+.. autofunction:: dense

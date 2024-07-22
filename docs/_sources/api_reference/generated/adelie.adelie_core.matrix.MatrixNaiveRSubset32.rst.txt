@@ -1,0 +1,60 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveRSubset32
+===============================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveRSubset32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveRSubset32.__init__
+      ~MatrixNaiveRSubset32.bmul
+      ~MatrixNaiveRSubset32.btmul
+      ~MatrixNaiveRSubset32.cmul
+      ~MatrixNaiveRSubset32.cols
+      ~MatrixNaiveRSubset32.cov
+      ~MatrixNaiveRSubset32.ctmul
+      ~MatrixNaiveRSubset32.mul
+      ~MatrixNaiveRSubset32.rows
+      ~MatrixNaiveRSubset32.sp_btmul
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveRSubset32.ndim
+      ~MatrixNaiveRSubset32.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_btmul
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

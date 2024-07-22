@@ -1,0 +1,62 @@
+﻿adelie.adelie\_core.constraint.ConstraintOneSidedADMM32
+=======================================================
+
+.. currentmodule:: adelie.adelie_core.constraint
+
+.. autoclass:: ConstraintOneSidedADMM32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ConstraintOneSidedADMM32.__init__
+      ~ConstraintOneSidedADMM32.buffer_size
+      ~ConstraintOneSidedADMM32.clear
+      ~ConstraintOneSidedADMM32.dual
+      ~ConstraintOneSidedADMM32.duals
+      ~ConstraintOneSidedADMM32.duals_nnz
+      ~ConstraintOneSidedADMM32.gradient
+      ~ConstraintOneSidedADMM32.gradient_static
+      ~ConstraintOneSidedADMM32.primals
+      ~ConstraintOneSidedADMM32.project
+      ~ConstraintOneSidedADMM32.solve
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ConstraintOneSidedADMM32.dual_size
+      ~ConstraintOneSidedADMM32.primal_size
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: buffer_size
+   .. automethod:: clear
+   .. automethod:: dual
+   .. automethod:: duals
+   .. automethod:: duals_nnz
+   .. automethod:: gradient
+   .. automethod:: gradient_static
+   .. automethod:: primals
+   .. automethod:: project
+   .. automethod:: solve
+   
+   
+
+   
+   
+   
+   .. autoattribute:: dual_size
+   .. autoattribute:: primal_size
+   
+   

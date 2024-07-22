@@ -1,0 +1,6 @@
+﻿adelie.glm.binomial
+===================
+
+.. currentmodule:: adelie.glm
+
+.. autofunction:: binomial

@@ -1,0 +1,168 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# __Introduction to Group Elastic Net__"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "In this notebook, we give a brief overview of the group elastic net problem that `adelie` solves."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## __Single-Response Group Elastic Net__"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The single-response group elastic net problem is given by\n",
+    "$$\n",
+    "\\begin{align*}\n",
+    "    \\mathrm{minimize}_{\\beta, \\beta_0} \\quad&\n",
+    "    \\ell(\\eta) + \\lambda \\sum\\limits_{g=1}^G \\omega_g \\left(\n",
+    "        \\alpha \\|\\beta_g\\|_2 + \\frac{1-\\alpha}{2} \\|\\beta_g\\|_2^2\n",
+    "    \\right)\n",
+    "    \\\\\\text{subject to}\\quad&\n",
+    "    \\eta = X \\beta + \\beta_0 \\mathbf{1} + \\eta^0\n",
+    "\\end{align*}\n",
+    "$$\n",
+    "where \n",
+    "$\\beta_0$ is the intercept,\n",
+    "$\\beta$ is the coefficient vector,\n",
+    "$X$ is the feature matrix,\n",
+    "$\\eta^0$ is a fixed offset vector,\n",
+    "$\\lambda \\geq 0$ is the regularization parameter,\n",
+    "$G$ is the number of groups,\n",
+    "$\\omega \\geq 0$ is the penalty factor,\n",
+    "$\\alpha \\in [0,1]$ is the elastic net parameter,\n",
+    "and $\\beta_g$ are the coefficients for the $g$ th group.\n",
+    "$\\ell(\\cdot)$ is the loss function defined by the GLM.\n",
+    "As an example, the Gaussian GLM \n",
+    "([ad.glm.gaussian](https://jamesyang007.github.io/adelie/generated/adelie.glm.gaussian.html))\n",
+    "defines the loss function as\n",
+    "$$\n",
+    "\\begin{align*}\n",
+    "    \\ell(\\eta)\n",
+    "    &=\n",
+    "    \\sum\\limits_{i=1}^n w_i \\left(\n",
+    "        -y_i \\eta_i + \\frac{\\eta_i^2}{2}\n",
+    "    \\right)\n",
+    "\\end{align*}\n",
+    "$$\n",
+    "where\n",
+    "$w \\geq 0$ is the observation weight vector,\n",
+    "$y$ is the response vector,\n",
+    "and $\\eta$ is the linear prediction vector as in the optimization problem above."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Specifically for the Gaussian GLM, we employ a specialized optimizer based on coordinate descent\n",
+    "to solve the group elastic net problem.\n",
+    "For other general GLMs, we use a proximal Newton method, \n",
+    "which leads to an Iterative Reweighted Least Squares (IRLS) algorithm,\n",
+    "That is, we iteratively perform a quadratic approximation to $\\ell(\\cdot)$, \n",
+    "which yields a sequence of Gaussian GLM group elastic net problems\n",
+    "that we solve using our special solver based on coordinate descent."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The Gaussian GLM also admits a different algorithm, which we call the _the covariance method_,\n",
+    "using summary statistics rather than individual-level data.\n",
+    "The covariance method solves the following problem:\n",
+    "$$\n",
+    "\\begin{align*}\n",
+    "    \\mathrm{minimize}_{\\beta} \\quad&\n",
+    "    \\frac{1}{2} \\beta^\\top A \\beta\n",
+    "    - v^\\top \\beta\n",
+    "    + \n",
+    "    \\lambda \\sum\\limits_{g=1}^G \\omega_g \\left(\n",
+    "        \\alpha \\|\\beta_g\\|_2 + \\frac{1-\\alpha}{2} \\|\\beta_g\\|_2^2\n",
+    "    \\right)\n",
+    "\\end{align*}\n",
+    "$$\n",
+    "This method would be equivalent to the usual single-response Gaussian group elastic net problem\n",
+    "if $A \\equiv X_c^\\top W X_c$ and $v \\equiv X_c^\\top W y_c$\n",
+    "where $X_c$ is column-centered version of $X$ \n",
+    "and $y_c$ is the centered version of $y-\\eta^0$\n",
+    "where the means are computed with weights $W$\n",
+    "(if intercept is to be fit).\n",
+    "\n",
+    "This method only works for the Gaussian case since the proximal Newton method\n",
+    "changes the weights $W$ at every IRLS iteration,\n",
+    "so that without access to $X$, it is not possible to compute the new \"$A$\" and \"$v$\"."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## __Multi-Response Group Elastic Net__"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The multi-response group elastic net problem is given by\n",
+    "$$\n",
+    "\\begin{align*}\n",
+    "    \\mathrm{minimize}_{\\beta, \\beta_0} \\quad&\n",
+    "    \\ell(\\eta) + \\lambda \\sum\\limits_{g=1}^G \\omega_g \\left(\n",
+    "        \\alpha \\|\\beta_g\\|_2 + \\frac{1-\\alpha}{2} \\|\\beta_g\\|_2^2\n",
+    "    \\right)\n",
+    "    \\\\\\text{subject to}\\quad&\n",
+    "    \\mathrm{vec}(\\eta^\\top) = (X \\otimes I_K) \\beta + (\\mathbf{1} \\otimes I_K) \\beta_0 + \\mathrm{vec}(\\eta^{0\\top})\n",
+    "\\end{align*}\n",
+    "$$\n",
+    "where $\\mathrm{vec}(\\cdot)$ is the operator that flattens a column-major matrix into a vector,\n",
+    "and $A \\otimes B$ is the Kronecker product operator.\n",
+    "The more familiar (but equivalent) constraint form is\n",
+    "$$\n",
+    "\\begin{align*}\n",
+    "    \\eta = X B + \\mathbf{1} \\beta_0^\\top + \\eta^0\n",
+    "\\end{align*}\n",
+    "$$\n",
+    "where $\\beta \\equiv \\mathrm{vec}(B^\\top)$.\n",
+    "This way, we have possibly different linear predictions for each response.\n",
+    "Note that if an intercept is included in the model, an intercept is added for each response.\n",
+    "\n",
+    "As indicated above, the multi-response group elastic net problem is technically of the same form\n",
+    "as the single-response group elastic net problem.\n",
+    "In fact, `adelie` reuses the single-response solver for multi-response problems\n",
+    "by modifying the inputs appropriately \n",
+    "(e.g. using [ad.matrix.kronecker_eye](https://jamesyang007.github.io/adelie/generated/adelie.matrix.kronecker_eye.html) to represent $X \\otimes I_K$).\n",
+    "For the MultiGaussian family, we wrap the specialized single-response Gaussian solver\n",
+    "and otherwise for general multi-response GLMs, we wrap the single-response GLM solver."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "adelie",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "name": "python",
+   "version": "3.10.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

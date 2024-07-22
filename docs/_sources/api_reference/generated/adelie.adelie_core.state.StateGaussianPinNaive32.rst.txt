@@ -1,0 +1,124 @@
+﻿adelie.adelie\_core.state.StateGaussianPinNaive32
+=================================================
+
+.. currentmodule:: adelie.adelie_core.state
+
+.. autoclass:: StateGaussianPinNaive32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~StateGaussianPinNaive32.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StateGaussianPinNaive32.X
+      ~StateGaussianPinNaive32.active_begins
+      ~StateGaussianPinNaive32.active_order
+      ~StateGaussianPinNaive32.active_set
+      ~StateGaussianPinNaive32.active_set_size
+      ~StateGaussianPinNaive32.adev_tol
+      ~StateGaussianPinNaive32.alpha
+      ~StateGaussianPinNaive32.benchmark_active
+      ~StateGaussianPinNaive32.benchmark_screen
+      ~StateGaussianPinNaive32.betas
+      ~StateGaussianPinNaive32.constraint_buffer_size
+      ~StateGaussianPinNaive32.constraints
+      ~StateGaussianPinNaive32.ddev_tol
+      ~StateGaussianPinNaive32.dual_groups
+      ~StateGaussianPinNaive32.duals
+      ~StateGaussianPinNaive32.group_sizes
+      ~StateGaussianPinNaive32.groups
+      ~StateGaussianPinNaive32.intercept
+      ~StateGaussianPinNaive32.intercepts
+      ~StateGaussianPinNaive32.iters
+      ~StateGaussianPinNaive32.lmda_path
+      ~StateGaussianPinNaive32.lmdas
+      ~StateGaussianPinNaive32.max_active_size
+      ~StateGaussianPinNaive32.max_iters
+      ~StateGaussianPinNaive32.n_threads
+      ~StateGaussianPinNaive32.newton_max_iters
+      ~StateGaussianPinNaive32.newton_tol
+      ~StateGaussianPinNaive32.penalty
+      ~StateGaussianPinNaive32.resid
+      ~StateGaussianPinNaive32.resid_sum
+      ~StateGaussianPinNaive32.rsq
+      ~StateGaussianPinNaive32.rsqs
+      ~StateGaussianPinNaive32.screen_X_means
+      ~StateGaussianPinNaive32.screen_begins
+      ~StateGaussianPinNaive32.screen_beta
+      ~StateGaussianPinNaive32.screen_is_active
+      ~StateGaussianPinNaive32.screen_set
+      ~StateGaussianPinNaive32.screen_transforms
+      ~StateGaussianPinNaive32.screen_vars
+      ~StateGaussianPinNaive32.tol
+      ~StateGaussianPinNaive32.weights
+      ~StateGaussianPinNaive32.y_mean
+      ~StateGaussianPinNaive32.y_var
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   
+   
+
+   
+   
+   
+   .. autoattribute:: X
+   .. autoattribute:: active_begins
+   .. autoattribute:: active_order
+   .. autoattribute:: active_set
+   .. autoattribute:: active_set_size
+   .. autoattribute:: adev_tol
+   .. autoattribute:: alpha
+   .. autoattribute:: benchmark_active
+   .. autoattribute:: benchmark_screen
+   .. autoattribute:: betas
+   .. autoattribute:: constraint_buffer_size
+   .. autoattribute:: constraints
+   .. autoattribute:: ddev_tol
+   .. autoattribute:: dual_groups
+   .. autoattribute:: duals
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: intercept
+   .. autoattribute:: intercepts
+   .. autoattribute:: iters
+   .. autoattribute:: lmda_path
+   .. autoattribute:: lmdas
+   .. autoattribute:: max_active_size
+   .. autoattribute:: max_iters
+   .. autoattribute:: n_threads
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: newton_tol
+   .. autoattribute:: penalty
+   .. autoattribute:: resid
+   .. autoattribute:: resid_sum
+   .. autoattribute:: rsq
+   .. autoattribute:: rsqs
+   .. autoattribute:: screen_X_means
+   .. autoattribute:: screen_begins
+   .. autoattribute:: screen_beta
+   .. autoattribute:: screen_is_active
+   .. autoattribute:: screen_set
+   .. autoattribute:: screen_transforms
+   .. autoattribute:: screen_vars
+   .. autoattribute:: tol
+   .. autoattribute:: weights
+   .. autoattribute:: y_mean
+   .. autoattribute:: y_var
+   
+   

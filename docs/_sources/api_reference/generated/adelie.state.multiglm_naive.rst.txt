@@ -1,0 +1,6 @@
+﻿adelie.state.multiglm\_naive
+============================
+
+.. currentmodule:: adelie.state
+
+.. autofunction:: multiglm_naive

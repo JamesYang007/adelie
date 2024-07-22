@@ -1,0 +1,52 @@
+﻿adelie.adelie\_core.glm.GlmBinomialLogit32
+==========================================
+
+.. currentmodule:: adelie.adelie_core.glm
+
+.. autoclass:: GlmBinomialLogit32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GlmBinomialLogit32.__init__
+      ~GlmBinomialLogit32.gradient
+      ~GlmBinomialLogit32.hessian
+      ~GlmBinomialLogit32.inv_hessian_gradient
+      ~GlmBinomialLogit32.loss
+      ~GlmBinomialLogit32.loss_full
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GlmBinomialLogit32.is_multi
+      ~GlmBinomialLogit32.name
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: gradient
+   .. automethod:: hessian
+   .. automethod:: inv_hessian_gradient
+   .. automethod:: loss
+   .. automethod:: loss_full
+   
+   
+
+   
+   
+   
+   .. autoattribute:: is_multi
+   .. autoattribute:: name
+   
+   

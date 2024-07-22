@@ -1,0 +1,6 @@
+﻿adelie.bcd.solve
+================
+
+.. currentmodule:: adelie.bcd
+
+.. autofunction:: solve

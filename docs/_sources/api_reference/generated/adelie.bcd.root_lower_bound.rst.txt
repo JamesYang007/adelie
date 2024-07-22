@@ -1,0 +1,6 @@
+﻿adelie.bcd.root\_lower\_bound
+=============================
+
+.. currentmodule:: adelie.bcd
+
+.. autofunction:: root_lower_bound

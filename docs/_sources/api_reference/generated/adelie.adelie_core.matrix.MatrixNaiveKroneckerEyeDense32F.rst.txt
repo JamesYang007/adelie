@@ -1,0 +1,60 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveKroneckerEyeDense32F
+==========================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveKroneckerEyeDense32F
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveKroneckerEyeDense32F.__init__
+      ~MatrixNaiveKroneckerEyeDense32F.bmul
+      ~MatrixNaiveKroneckerEyeDense32F.btmul
+      ~MatrixNaiveKroneckerEyeDense32F.cmul
+      ~MatrixNaiveKroneckerEyeDense32F.cols
+      ~MatrixNaiveKroneckerEyeDense32F.cov
+      ~MatrixNaiveKroneckerEyeDense32F.ctmul
+      ~MatrixNaiveKroneckerEyeDense32F.mul
+      ~MatrixNaiveKroneckerEyeDense32F.rows
+      ~MatrixNaiveKroneckerEyeDense32F.sp_btmul
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveKroneckerEyeDense32F.ndim
+      ~MatrixNaiveKroneckerEyeDense32F.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_btmul
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

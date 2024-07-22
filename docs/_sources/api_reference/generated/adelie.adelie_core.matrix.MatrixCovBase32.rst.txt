@@ -1,0 +1,52 @@
+﻿adelie.adelie\_core.matrix.MatrixCovBase32
+==========================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixCovBase32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixCovBase32.__init__
+      ~MatrixCovBase32.bmul
+      ~MatrixCovBase32.cols
+      ~MatrixCovBase32.mul
+      ~MatrixCovBase32.rows
+      ~MatrixCovBase32.to_dense
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixCovBase32.ndim
+      ~MatrixCovBase32.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: cols
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: to_dense
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

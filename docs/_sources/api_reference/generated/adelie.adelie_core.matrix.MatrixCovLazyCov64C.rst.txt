@@ -1,0 +1,52 @@
+﻿adelie.adelie\_core.matrix.MatrixCovLazyCov64C
+==============================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixCovLazyCov64C
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixCovLazyCov64C.__init__
+      ~MatrixCovLazyCov64C.bmul
+      ~MatrixCovLazyCov64C.cols
+      ~MatrixCovLazyCov64C.mul
+      ~MatrixCovLazyCov64C.rows
+      ~MatrixCovLazyCov64C.to_dense
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixCovLazyCov64C.ndim
+      ~MatrixCovLazyCov64C.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: cols
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: to_dense
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

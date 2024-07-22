@@ -1,0 +1,60 @@
+﻿adelie.io.snp\_phased\_ancestry
+===============================
+
+.. currentmodule:: adelie.io
+
+.. autoclass:: snp_phased_ancestry
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~snp_phased_ancestry.__init__
+      ~snp_phased_ancestry.read
+      ~snp_phased_ancestry.to_dense
+      ~snp_phased_ancestry.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~snp_phased_ancestry.ancestries
+      ~snp_phased_ancestry.cols
+      ~snp_phased_ancestry.endian
+      ~snp_phased_ancestry.is_read
+      ~snp_phased_ancestry.nnz0
+      ~snp_phased_ancestry.nnz1
+      ~snp_phased_ancestry.rows
+      ~snp_phased_ancestry.snps
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: read
+   .. automethod:: to_dense
+   .. automethod:: write
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ancestries
+   .. autoattribute:: cols
+   .. autoattribute:: endian
+   .. autoattribute:: is_read
+   .. autoattribute:: nnz0
+   .. autoattribute:: nnz1
+   .. autoattribute:: rows
+   .. autoattribute:: snps
+   
+   

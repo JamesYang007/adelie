@@ -1,0 +1,60 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveCSubset64
+===============================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveCSubset64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveCSubset64.__init__
+      ~MatrixNaiveCSubset64.bmul
+      ~MatrixNaiveCSubset64.btmul
+      ~MatrixNaiveCSubset64.cmul
+      ~MatrixNaiveCSubset64.cols
+      ~MatrixNaiveCSubset64.cov
+      ~MatrixNaiveCSubset64.ctmul
+      ~MatrixNaiveCSubset64.mul
+      ~MatrixNaiveCSubset64.rows
+      ~MatrixNaiveCSubset64.sp_btmul
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveCSubset64.ndim
+      ~MatrixNaiveCSubset64.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_btmul
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

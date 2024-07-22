@@ -1,0 +1,160 @@
+﻿adelie.adelie\_core.state.StateGlmNaive32
+=========================================
+
+.. currentmodule:: adelie.adelie_core.state
+
+.. autoclass:: StateGlmNaive32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~StateGlmNaive32.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StateGlmNaive32.X
+      ~StateGlmNaive32.abs_grad
+      ~StateGlmNaive32.active_set
+      ~StateGlmNaive32.active_set_size
+      ~StateGlmNaive32.active_sizes
+      ~StateGlmNaive32.adev_tol
+      ~StateGlmNaive32.alpha
+      ~StateGlmNaive32.benchmark_fit_active
+      ~StateGlmNaive32.benchmark_fit_screen
+      ~StateGlmNaive32.benchmark_invariance
+      ~StateGlmNaive32.benchmark_kkt
+      ~StateGlmNaive32.benchmark_screen
+      ~StateGlmNaive32.beta0
+      ~StateGlmNaive32.betas
+      ~StateGlmNaive32.constraint_buffer_size
+      ~StateGlmNaive32.constraints
+      ~StateGlmNaive32.ddev_tol
+      ~StateGlmNaive32.devs
+      ~StateGlmNaive32.dual_groups
+      ~StateGlmNaive32.duals
+      ~StateGlmNaive32.early_exit
+      ~StateGlmNaive32.eta
+      ~StateGlmNaive32.grad
+      ~StateGlmNaive32.group_sizes
+      ~StateGlmNaive32.groups
+      ~StateGlmNaive32.intercept
+      ~StateGlmNaive32.intercepts
+      ~StateGlmNaive32.irls_max_iters
+      ~StateGlmNaive32.irls_tol
+      ~StateGlmNaive32.lmda
+      ~StateGlmNaive32.lmda_max
+      ~StateGlmNaive32.lmda_path
+      ~StateGlmNaive32.lmda_path_size
+      ~StateGlmNaive32.lmdas
+      ~StateGlmNaive32.loss_full
+      ~StateGlmNaive32.loss_null
+      ~StateGlmNaive32.max_active_size
+      ~StateGlmNaive32.max_iters
+      ~StateGlmNaive32.max_screen_size
+      ~StateGlmNaive32.min_ratio
+      ~StateGlmNaive32.n_threads
+      ~StateGlmNaive32.n_valid_solutions
+      ~StateGlmNaive32.newton_max_iters
+      ~StateGlmNaive32.newton_tol
+      ~StateGlmNaive32.offsets
+      ~StateGlmNaive32.penalty
+      ~StateGlmNaive32.pivot_slack_ratio
+      ~StateGlmNaive32.pivot_subset_min
+      ~StateGlmNaive32.pivot_subset_ratio
+      ~StateGlmNaive32.resid
+      ~StateGlmNaive32.screen_begins
+      ~StateGlmNaive32.screen_beta
+      ~StateGlmNaive32.screen_hashset
+      ~StateGlmNaive32.screen_is_active
+      ~StateGlmNaive32.screen_rule
+      ~StateGlmNaive32.screen_set
+      ~StateGlmNaive32.screen_sizes
+      ~StateGlmNaive32.setup_lmda_max
+      ~StateGlmNaive32.setup_lmda_path
+      ~StateGlmNaive32.setup_loss_null
+      ~StateGlmNaive32.tol
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   
+   
+
+   
+   
+   
+   .. autoattribute:: X
+   .. autoattribute:: abs_grad
+   .. autoattribute:: active_set
+   .. autoattribute:: active_set_size
+   .. autoattribute:: active_sizes
+   .. autoattribute:: adev_tol
+   .. autoattribute:: alpha
+   .. autoattribute:: benchmark_fit_active
+   .. autoattribute:: benchmark_fit_screen
+   .. autoattribute:: benchmark_invariance
+   .. autoattribute:: benchmark_kkt
+   .. autoattribute:: benchmark_screen
+   .. autoattribute:: beta0
+   .. autoattribute:: betas
+   .. autoattribute:: constraint_buffer_size
+   .. autoattribute:: constraints
+   .. autoattribute:: ddev_tol
+   .. autoattribute:: devs
+   .. autoattribute:: dual_groups
+   .. autoattribute:: duals
+   .. autoattribute:: early_exit
+   .. autoattribute:: eta
+   .. autoattribute:: grad
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: intercept
+   .. autoattribute:: intercepts
+   .. autoattribute:: irls_max_iters
+   .. autoattribute:: irls_tol
+   .. autoattribute:: lmda
+   .. autoattribute:: lmda_max
+   .. autoattribute:: lmda_path
+   .. autoattribute:: lmda_path_size
+   .. autoattribute:: lmdas
+   .. autoattribute:: loss_full
+   .. autoattribute:: loss_null
+   .. autoattribute:: max_active_size
+   .. autoattribute:: max_iters
+   .. autoattribute:: max_screen_size
+   .. autoattribute:: min_ratio
+   .. autoattribute:: n_threads
+   .. autoattribute:: n_valid_solutions
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: newton_tol
+   .. autoattribute:: offsets
+   .. autoattribute:: penalty
+   .. autoattribute:: pivot_slack_ratio
+   .. autoattribute:: pivot_subset_min
+   .. autoattribute:: pivot_subset_ratio
+   .. autoattribute:: resid
+   .. autoattribute:: screen_begins
+   .. autoattribute:: screen_beta
+   .. autoattribute:: screen_hashset
+   .. autoattribute:: screen_is_active
+   .. autoattribute:: screen_rule
+   .. autoattribute:: screen_set
+   .. autoattribute:: screen_sizes
+   .. autoattribute:: setup_lmda_max
+   .. autoattribute:: setup_lmda_path
+   .. autoattribute:: setup_loss_null
+   .. autoattribute:: tol
+   
+   

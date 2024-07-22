@@ -1,0 +1,60 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveRConcatenate32
+====================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveRConcatenate32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveRConcatenate32.__init__
+      ~MatrixNaiveRConcatenate32.bmul
+      ~MatrixNaiveRConcatenate32.btmul
+      ~MatrixNaiveRConcatenate32.cmul
+      ~MatrixNaiveRConcatenate32.cols
+      ~MatrixNaiveRConcatenate32.cov
+      ~MatrixNaiveRConcatenate32.ctmul
+      ~MatrixNaiveRConcatenate32.mul
+      ~MatrixNaiveRConcatenate32.rows
+      ~MatrixNaiveRConcatenate32.sp_btmul
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveRConcatenate32.ndim
+      ~MatrixNaiveRConcatenate32.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_btmul
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

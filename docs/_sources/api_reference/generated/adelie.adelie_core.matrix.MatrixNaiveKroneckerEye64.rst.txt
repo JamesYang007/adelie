@@ -1,0 +1,60 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveKroneckerEye64
+====================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveKroneckerEye64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveKroneckerEye64.__init__
+      ~MatrixNaiveKroneckerEye64.bmul
+      ~MatrixNaiveKroneckerEye64.btmul
+      ~MatrixNaiveKroneckerEye64.cmul
+      ~MatrixNaiveKroneckerEye64.cols
+      ~MatrixNaiveKroneckerEye64.cov
+      ~MatrixNaiveKroneckerEye64.ctmul
+      ~MatrixNaiveKroneckerEye64.mul
+      ~MatrixNaiveKroneckerEye64.rows
+      ~MatrixNaiveKroneckerEye64.sp_btmul
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveKroneckerEye64.ndim
+      ~MatrixNaiveKroneckerEye64.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_btmul
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

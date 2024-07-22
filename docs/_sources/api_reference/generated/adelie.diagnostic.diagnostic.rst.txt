@@ -1,0 +1,6 @@
+﻿adelie.diagnostic.diagnostic
+============================
+
+.. currentmodule:: adelie.diagnostic
+
+.. autofunction:: diagnostic

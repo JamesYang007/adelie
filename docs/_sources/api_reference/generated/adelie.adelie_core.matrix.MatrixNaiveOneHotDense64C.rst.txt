@@ -1,0 +1,64 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveOneHotDense64C
+====================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveOneHotDense64C
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveOneHotDense64C.__init__
+      ~MatrixNaiveOneHotDense64C.bmul
+      ~MatrixNaiveOneHotDense64C.btmul
+      ~MatrixNaiveOneHotDense64C.cmul
+      ~MatrixNaiveOneHotDense64C.cols
+      ~MatrixNaiveOneHotDense64C.cov
+      ~MatrixNaiveOneHotDense64C.ctmul
+      ~MatrixNaiveOneHotDense64C.mul
+      ~MatrixNaiveOneHotDense64C.rows
+      ~MatrixNaiveOneHotDense64C.sp_btmul
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveOneHotDense64C.group_sizes
+      ~MatrixNaiveOneHotDense64C.groups
+      ~MatrixNaiveOneHotDense64C.ndim
+      ~MatrixNaiveOneHotDense64C.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_btmul
+   
+   
+
+   
+   
+   
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

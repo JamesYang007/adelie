@@ -1,0 +1,70 @@
+﻿adelie.adelie\_core.glm.GlmCox32
+================================
+
+.. currentmodule:: adelie.adelie_core.glm
+
+.. autoclass:: GlmCox32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GlmCox32.__init__
+      ~GlmCox32.gradient
+      ~GlmCox32.hessian
+      ~GlmCox32.inv_hessian_gradient
+      ~GlmCox32.loss
+      ~GlmCox32.loss_full
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GlmCox32.is_multi
+      ~GlmCox32.name
+      ~GlmCox32.scale_to
+      ~GlmCox32.start_order
+      ~GlmCox32.start_so
+      ~GlmCox32.status_to
+      ~GlmCox32.stop_order
+      ~GlmCox32.stop_to
+      ~GlmCox32.weights_mean_to
+      ~GlmCox32.weights_size_to
+      ~GlmCox32.weights_to
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: gradient
+   .. automethod:: hessian
+   .. automethod:: inv_hessian_gradient
+   .. automethod:: loss
+   .. automethod:: loss_full
+   
+   
+
+   
+   
+   
+   .. autoattribute:: is_multi
+   .. autoattribute:: name
+   .. autoattribute:: scale_to
+   .. autoattribute:: start_order
+   .. autoattribute:: start_so
+   .. autoattribute:: status_to
+   .. autoattribute:: stop_order
+   .. autoattribute:: stop_to
+   .. autoattribute:: weights_mean_to
+   .. autoattribute:: weights_size_to
+   .. autoattribute:: weights_to
+   
+   

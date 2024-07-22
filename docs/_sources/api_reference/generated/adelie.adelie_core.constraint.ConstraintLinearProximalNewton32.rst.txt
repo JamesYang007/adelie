@@ -1,0 +1,62 @@
+﻿adelie.adelie\_core.constraint.ConstraintLinearProximalNewton32
+===============================================================
+
+.. currentmodule:: adelie.adelie_core.constraint
+
+.. autoclass:: ConstraintLinearProximalNewton32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ConstraintLinearProximalNewton32.__init__
+      ~ConstraintLinearProximalNewton32.buffer_size
+      ~ConstraintLinearProximalNewton32.clear
+      ~ConstraintLinearProximalNewton32.dual
+      ~ConstraintLinearProximalNewton32.duals
+      ~ConstraintLinearProximalNewton32.duals_nnz
+      ~ConstraintLinearProximalNewton32.gradient
+      ~ConstraintLinearProximalNewton32.gradient_static
+      ~ConstraintLinearProximalNewton32.primals
+      ~ConstraintLinearProximalNewton32.project
+      ~ConstraintLinearProximalNewton32.solve
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ConstraintLinearProximalNewton32.dual_size
+      ~ConstraintLinearProximalNewton32.primal_size
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: buffer_size
+   .. automethod:: clear
+   .. automethod:: dual
+   .. automethod:: duals
+   .. automethod:: duals_nnz
+   .. automethod:: gradient
+   .. automethod:: gradient_static
+   .. automethod:: primals
+   .. automethod:: project
+   .. automethod:: solve
+   
+   
+
+   
+   
+   
+   .. autoattribute:: dual_size
+   .. autoattribute:: primal_size
+   
+   

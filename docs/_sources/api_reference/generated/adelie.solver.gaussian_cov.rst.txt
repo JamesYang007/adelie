@@ -1,0 +1,6 @@
+﻿adelie.solver.gaussian\_cov
+===========================
+
+.. currentmodule:: adelie.solver
+
+.. autofunction:: gaussian_cov

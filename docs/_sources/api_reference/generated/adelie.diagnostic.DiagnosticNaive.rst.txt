@@ -1,0 +1,41 @@
+﻿adelie.diagnostic.DiagnosticNaive
+=================================
+
+.. currentmodule:: adelie.diagnostic
+
+.. autoclass:: DiagnosticNaive
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DiagnosticNaive.__init__
+      ~DiagnosticNaive.plot_benchmark
+      ~DiagnosticNaive.plot_coefficients
+      ~DiagnosticNaive.plot_devs
+      ~DiagnosticNaive.plot_kkt
+      ~DiagnosticNaive.plot_set_sizes
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: plot_benchmark
+   .. automethod:: plot_coefficients
+   .. automethod:: plot_devs
+   .. automethod:: plot_kkt
+   .. automethod:: plot_set_sizes
+   
+   
+
+   
+   
+   
