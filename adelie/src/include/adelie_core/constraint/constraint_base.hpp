@@ -5,6 +5,7 @@
 #include <adelie_core/util/format.hpp>
 #include <adelie_core/util/macros.hpp>
 #include <adelie_core/util/types.hpp>
+#include <adelie_core/util/stopwatch.hpp>
 
 namespace adelie_core {
 namespace constraint {
@@ -122,7 +123,9 @@ protected:
         // In this case, we first check if the dual can be updated such that x remains to be 0.
         if (is_x_init_zero) {
             zero_primal_checked = true;
-            if (compute_min_mu_resid(Qv, false, true) <= l1 * l1) return;
+            if (compute_min_mu_resid(Qv, false, true) <= l1 * l1) {
+                return;
+            }
         }
 
         const auto compute_primal = [&]() {
@@ -232,11 +235,15 @@ protected:
             compute_gradient();
 
             // optimization: if optimality hard-check is satisfied, finish early.
-            if (compute_hard_optimality()) return;
+            if (compute_hard_optimality()) {
+                return;
+            }
 
             // Check if mu is not changing much w.r.t. hessian scaling.
             if (is_prev_valid) {
-                if (compute_convergence_measure(false) <= tol) return;
+                if (compute_convergence_measure(false) <= tol) {
+                    return;
+                }
             }
 
             // save old values
@@ -284,13 +291,12 @@ public:
         Eigen::Ref<vec_uint64_t> buffer
     ) =0;
 
-    // TODO: gradient(x, mu_indices, mu_values, out)
-
     virtual void gradient(
         const Eigen::Ref<const vec_value_t>& x,
         Eigen::Ref<vec_value_t> out
     ) =0;
 
+    // TODO: gradient(x, mu_indices, mu_values, out)
     virtual void gradient(
         const Eigen::Ref<const vec_value_t>& x,
         const Eigen::Ref<const vec_value_t>& mu,

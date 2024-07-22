@@ -173,10 +173,14 @@ def zero_constraint(
         def __init__(self):
             core_base.__init__(self)
             self.size = size
+            self.mu = np.zeros(size)
 
-        def solve(self, x, mu, quad, linear, l1, l2, Q, buffer):
+        def solve(self, x, quad, linear, l1, l2, Q, buffer):
             x[...] = 0
-            mu[...] = linear
+            self.mu[...] = linear
+
+        def gradient(self, x, out):
+            out[...] = self.mu
 
         def gradient(self, x, mu, out):
             out[...] = mu

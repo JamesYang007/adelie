@@ -213,7 +213,7 @@ public:
                 Configs::max_solver_value * is_b_zero
             );
             const auto mu_resid_norm_sq = (Qv - _sgn * _mu).square().sum();
-            if (is_init || (is_prev_valid_old && mu_resid_norm_sq > l1 * l1)) {
+            if ((is_init || is_prev_valid_old) && mu_resid_norm_sq > l1 * l1) {
                 _mu = mu_curr;
             } 
             return mu_resid_norm_sq;

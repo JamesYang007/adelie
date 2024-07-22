@@ -137,6 +137,7 @@ def linear(
     lower: np.ndarray,
     upper: np.ndarray,
     *,
+    svd: tuple =None,
     vars: np.ndarray =None,
     copy: bool =False,
     method: str ="proximal-newton",
@@ -156,6 +157,19 @@ def linear(
         Lower bound :math:`\\ell`.
     upper : (m,) ndarray
         Upper bound :math:`u`.
+    svd : tuple, optional
+        A tuple ``(u, d, vh)`` as outputted by :func:`numpy.linalg.svd`.
+        However, ``u`` must have `"F"`-ordering.
+        If ``None``, it is computed internally.
+        Default is ``None``.
+    vars : ndarray, optional
+        Equivalent to ``np.sum(A ** 2, axis=1)``.
+        If ``None``, it is computed internally.
+        Default is ``None``.
+    copy : bool, optional
+        If ``True``, a copy of the inputs are stored internally.
+        Otherwise, a reference is stored instead.
+        Default is ``False``.
     method : str, optional
         Method for :func:`~adelie.adelie_core.constraint.ConstraintBase64.solve`.
         It must be one of the following:
@@ -228,6 +242,11 @@ def linear(
     assert A_dtype == u_dtype
     dtype = A_dtype
 
+    if svd is None:
+        A_u, A_d, A_vh = np.linalg.svd(A, full_matrices=False, compute_uv=True)
+        A_u = np.asfortranarray(A_u)
+        svd = (A_u, A_d, A_vh)
+
     if vars is None:
         vars = np.sum(A ** 2, axis=1)
 
@@ -263,12 +282,16 @@ def linear(
             self._A = np.array(A, copy=copy, dtype=dtype, order="C")
             self._lower = np.array(lower, dtype=dtype)
             self._upper = np.array(upper, dtype=dtype)
+            self._svd = tuple(np.array(x, copy=copy, dtype=dtype) for x in svd)
             self._vars = np.array(vars, copy=copy, dtype=dtype)
             core_base.__init__(
                 self,
                 A=self._A,
                 lower=self._lower,
                 upper=self._upper,
+                A_u=self._svd[0],
+                A_d=self._svd[1],
+                A_vh=self._svd[2],
                 A_vars=self._vars,
                 **configs,
             )

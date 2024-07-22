@@ -85,7 +85,11 @@ public:
     using base_t::_u;
 
 private:
+    const map_ccolmat_value_t _A_u;
+    const map_cvec_value_t _A_d;
+    const map_crowmat_value_t _A_vh;
     const map_cvec_value_t _A_vars;
+    const size_t _A_rank;
     const size_t _max_iters;
     const value_t _tol;
     const size_t _nnls_batch_size;
@@ -101,6 +105,21 @@ private:
     std::vector<index_t> _mu_active_prev;
     std::vector<value_t> _mu_value;
     std::vector<value_t> _mu_value_prev;
+    vec_value_t _ATmu;
+
+    ADELIE_CORE_STRONG_INLINE
+    static size_t init_A_rank(
+        const Eigen::Ref<const vec_value_t>& A_d
+    )
+    {
+        const value_t A_d_sum = A_d.sum();
+        value_t cumsum = 0; 
+        for (Eigen::Index i = 0; i < A_d.size(); ++i) {
+            if (cumsum > 0.99 * A_d_sum) return i;
+            cumsum += A_d[i];
+        }
+        return A_d.size();
+    }
 
     ADELIE_CORE_STRONG_INLINE
     void compute_ATmu(
@@ -118,6 +137,9 @@ public:
         const Eigen::Ref<const rowmat_value_t>& A,
         const Eigen::Ref<const vec_value_t>& l,
         const Eigen::Ref<const vec_value_t>& u,
+        const Eigen::Ref<const colmat_value_t>& A_u,
+        const Eigen::Ref<const vec_value_t>& A_d,
+        const Eigen::Ref<const rowmat_value_t>& A_vh,
         const Eigen::Ref<const vec_value_t>& A_vars,
         size_t max_iters,
         value_t tol,
@@ -129,7 +151,11 @@ public:
         size_t n_threads
     ):
         base_t(A, l, u),
+        _A_u(A_u.data(), A_u.rows(), A_u.cols()),
+        _A_d(A_d.data(), A_d.size()),
+        _A_vh(A_vh.data(), A_vh.rows(), A_vh.cols()),
         _A_vars(A_vars.data(), A_vars.size()),
+        _A_rank(init_A_rank(A_d)),
         _max_iters(max_iters),
         _tol(tol),
         _nnls_batch_size(nnls_batch_size),
@@ -137,11 +163,21 @@ public:
         _nnls_tol(nnls_tol),
         _cs_tol(cs_tol),
         _slack(slack),
-        _n_threads(n_threads)
+        _n_threads(n_threads),
+        _ATmu(vec_value_t::Zero(A.cols()))
     {
         const auto m = A.rows();
         const auto d = A.cols();
 
+        if (A_u.rows() != m) {
+            throw util::adelie_core_error("A_u must be (m, r) where A is (m, d).");
+        }
+        if (A_d.size() > std::min(A_u.cols(), A_vh.rows())) {
+            throw util::adelie_core_error("A_d must be (b,) where b <= min(r, s), A_u is (m, r) and A_vh is (s, d).");
+        }
+        if (A_vh.cols() != d) {
+            throw util::adelie_core_error("A_vh must be (s, d) where A is (m, d).");
+        }
         if (A_vars.size() != m) {
             throw util::adelie_core_error("A_vars must be (m,) where A is (m, d).");
         }
@@ -187,6 +223,7 @@ public:
             _mu_active_set.clear();
             _mu_active.clear();
             _mu_value.clear();
+            _ATmu.setZero();
             return;
         }
 
@@ -251,19 +288,40 @@ public:
         const auto compute_mu_resid = [&](
             auto& mu_resid
         ) {
-            mu_resid.matrix() = linear.matrix() - ATmu.matrix() * Q;
+            mu_resid.matrix() = linear.matrix() - _ATmu.matrix() * Q;
         };
         const auto compute_min_mu_resid = [&](
             const auto& Qv,
             bool is_prev_valid_old,
             bool is_init
         ) {
-            mu_to_dense();
+            // check if current mu_resid norm is small enough
+            if ((Qv - _ATmu).square().sum() <= l1 * l1) return value_t(0);
 
-            // compute NNLS solution
-            auto Qmu_resid = grad.matrix();
+            // check SVD-based warm-start
+            const auto u0 = _A_u.leftCols(_A_rank);
+            const auto d0 = _A_d.head(_A_rank);
+            const auto vh0 = _A_vh.topRows(_A_rank);
+            auto DinvVTQv = grad.head(_A_rank).matrix();
+            DinvVTQv = (Qv.matrix() * vh0.transpose()).cwiseQuotient(d0.matrix()); 
+            auto mu_m = mu.matrix();
+            if (u0.rows() >= u0.cols()) {
+                matrix::dgemv(
+                    u0.transpose(),
+                    DinvVTQv,
+                    _n_threads,
+                    grad /* unused dummy input */,
+                    mu_m
+                );
+            } else {
+                mu_m = DinvVTQv * u0.transpose();
+            }
+            ATmu.matrix() = DinvVTQv.cwiseProduct(d0.matrix()) * vh0;
+
+            // refine check with NNLS
+            auto& Qmu_resid = grad;
             Qmu_resid = Qv - ATmu;
-            const value_t loss = 0.5 * Qmu_resid.squaredNorm();
+            const value_t loss = 0.5 * Qmu_resid.square().sum();
             const Eigen::Map<const colmat_value_t> AT(
                 _A.data(), _A.cols(), _A.rows()
             );
@@ -280,33 +338,37 @@ public:
                 return (ui <= 0) ? Configs::max_solver_value : (_cs_tol / ui);
             });
             state_nnls.solve(
-                [&]() { return state_nnls.loss <= 0.5 * l1 * l1; },
+                [&]() { return (state_nnls.iters > 1) && (state_nnls.loss <= 0.5 * l1 * l1); },
                 lower_constraint,
                 upper_constraint
             );
 
-            // extra invariance required if current mu is the next iterate
-            if (!is_prev_valid_old && !is_init) {
-                ATmu = Qv - Qmu_resid.array();
-            }
-
             const auto mu_resid_norm_sq = 2 * state_nnls.loss;
 
-            // move mu to internal sparse format
-            if (!is_init && (!is_prev_valid_old || mu_resid_norm_sq <= l1 * l1)) {
+            // Extra invariance required under these conditions
+            if ((!is_init && !is_prev_valid_old) || (mu_resid_norm_sq <= l1 * l1)) {
+                // The relaxed constraint version above was just to check if a zero solution is 
+                // a good approximation to the true solution.
+                // For sparsity, we omit values that are hitting the boundaries (these are the ones that are "relaxed").
+                mu = (
+                    mu.min(0) * (mu.min(0) * _l > -_cs_tol).template cast<value_t>()
+                    + mu.max(0) * (mu.max(0) * _u < _cs_tol).template cast<value_t>()
+                );
                 mu_to_sparse();
-            }
+                compute_ATmu(_ATmu);
+            } 
+
             return mu_resid_norm_sq;
         };
         const auto compute_backtrack_a = [&]() {
-            const auto ATdmu = ATmu - ATmu_prev;
+            const auto ATdmu = _ATmu - ATmu_prev;
             return ATdmu.square().sum();
         };
         const auto compute_backtrack_b = [&](
             const auto&,
             const auto& mu_resid
         ) {
-            const auto ATdmu = ATmu - ATmu_prev;
+            const auto ATdmu = _ATmu - ATmu_prev;
             return (mu_resid.matrix() * Q.transpose()).dot(ATdmu.matrix());
         };
         const auto compute_backtrack = [&](auto step_size) {
@@ -328,7 +390,7 @@ public:
                 _mu_active.push_back(idx);
                 _mu_value.push_back(mu[idx]);
             }
-            compute_ATmu(ATmu);
+            compute_ATmu(_ATmu);
         };
         const auto compute_gradient = [&]() {
             grad.matrix() = x.matrix() * Q.transpose();
@@ -342,7 +404,7 @@ public:
         const auto compute_convergence_measure = [&](
             bool is_in_ellipse
         ) {
-            const auto ATdmu = (ATmu - ATmu_prev);
+            const auto ATdmu = (_ATmu - ATmu_prev);
             return is_in_ellipse ? (
                 std::abs((ATdmu * grad_prev).mean())
             ) : (
@@ -363,8 +425,7 @@ public:
                 state_hinge.solve();
                 mu_to_sparse();
             } else {
-                const size_t active_size = _mu_active.size();
-                for (Eigen::Index ii = 0; ii < active_size; ++ii) {
+                const auto active_invariance = [&](auto ii) {
                     const auto i = _mu_active[ii];
                     const auto Ai = _A.row(i);
                     active_AQ.row(ii) = Ai * hess;
@@ -372,6 +433,14 @@ public:
                         active_AQ.row(ii).dot(Ai),
                         1e-14
                     );
+                };
+                const size_t active_size = _mu_active.size();
+                const size_t n_bytes = sizeof(value_t) * d * (d + 1) * active_size;
+                if (_n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+                    for (Eigen::Index ii = 0; ii < active_size; ++ii) active_invariance(ii);
+                } else {
+                    #pragma omp parallel for schedule(static) num_threads(_n_threads)
+                    for (Eigen::Index ii = 0; ii < active_size; ++ii) active_invariance(ii);
                 }
                 optimization::StateHingeLowRank<value_t, index_t> state_hinge(
                     hess, _A, _l, _u, _nnls_batch_size, _nnls_max_iters, _nnls_tol, _n_threads,
@@ -384,19 +453,16 @@ public:
                 );
                 mu_prune();
             }
-            compute_ATmu(ATmu);
+            compute_ATmu(_ATmu);
         };
         const auto save_additional_prev = [&](bool is_in_ellipse) {
             _mu_active_set_prev = _mu_active_set;
             _mu_active_prev = _mu_active;
             _mu_value_prev = _mu_value;
-            ATmu_prev = ATmu;
+            ATmu_prev = _ATmu;
             if (is_in_ellipse) grad_prev.setZero();
             else grad_prev = grad;
         };
-
-        // must be initialized prior to calling solver
-        compute_ATmu(ATmu);
 
         base_t::_solve_proximal_newton(
             x, quad, linear, l1, l2, Q, _max_iters, _tol, _slack, next_buff,
@@ -418,7 +484,7 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        compute_ATmu(out);
+        out = _ATmu;
     }
 
     void gradient(
@@ -435,6 +501,7 @@ public:
         _mu_active_set.clear();
         _mu_active.clear();
         _mu_value.clear();
+        _ATmu.setZero();
     }
 
     void dual(
