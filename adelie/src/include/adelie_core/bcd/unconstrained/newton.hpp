@@ -77,10 +77,12 @@ void newton_solver_base(
     const auto step_f = [&](auto h) {
         vbuffer2 = 1 / (vbuffer1 * h + l1);
         x = (v * vbuffer2).square();
-        auto fh = x.sum() - 1.0;
-        auto dfh = -2.0 * (
+        const auto t = x.sum();
+        const auto sqrt_t = std::sqrt(t);
+        const auto fh = t - 1.0;
+        const auto dfh = -(
             x * vbuffer1 * vbuffer2
-        ).sum();
+        ).sum() * (1 + sqrt_t) / t;
         return std::make_pair(fh, dfh);
     };
 
@@ -380,8 +382,10 @@ void newton_abs_debug_solver(
     const auto newton_update = [&]() {
         vbuffer2 = vbuffer1 * h + l1;
         x = (v / vbuffer2).square();
-        fh = x.sum() - 1;
-        dfh = -2 * (x * (vbuffer1 / vbuffer2)).sum();
+        const auto t = x.sum();
+        const auto sqrt_t = std::sqrt(t);
+        fh = t - 1;
+        dfh = -(x * (vbuffer1 / vbuffer2)).sum() * (1 + sqrt_t) / t;
     };
     
     newton_update();

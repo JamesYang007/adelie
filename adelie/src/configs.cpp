@@ -15,6 +15,10 @@ void configs(py::module_& m)
         "Default value for ``dbeta_tol``.")
         .def_readonly_static("min_bytes_def", &configs_t::min_bytes_def,
         "Default value for ``min_bytes``.")
+        .def_readonly_static("project_def", &configs_t::project_def,
+        "Default value for ``project``.")
+        .def_readonly_static("max_solver_value", &configs_t::max_solver_value_def,
+        "Default value for ``max_solver_value``.")
         .def_readwrite_static("hessian_min", &configs_t::hessian_min,
         "The value at which the diagonal of the hessian is clipped from below. "
         "This ensures that the proximal Newton step is well-defined. "
@@ -34,6 +38,13 @@ void configs(py::module_& m)
         parallelization is used instead.
         The smaller the value, the sooner parallelization is used.
         )delimiter")
+        .def_readwrite_static("project", &configs_t::project, R"delimiter(
+        If ``True``, the solver will perform a final projection for each group of coefficients 
+        to their respective feasible sets.
+        )delimiter")
+        .def_readwrite_static("max_solver_value", &configs_t::max_solver_value,
+        "Maximum value to be interpreted as ``INF``. "
+        "It is sometimes necessary to clip infinite values to a finite number. ")
         ;
 }
 

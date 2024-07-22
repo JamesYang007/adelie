@@ -30,15 +30,13 @@ struct GlmWrap
     glm_t& glm;
     const map_carr_value_t y;
     const map_cvec_value_t weights;
-    const bool is_symmetric;
 
     explicit GlmWrap(
         glm_t& glm
     ):
         glm(glm),
         y(glm.y.data(), glm.y.rows(), glm.y.cols()),
-        weights(glm.weights.data(), glm.weights.size()),
-        is_symmetric(glm.is_symmetric)
+        weights(glm.weights.data(), glm.weights.size())
     {}
 
     void gradient(

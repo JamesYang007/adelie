@@ -4,12 +4,11 @@
 namespace adelie_core {
 namespace optimization {
 
-template <class MatrixType,
-          class ValueType=typename std::decay_t<MatrixType>::Scalar>
+template <class MatrixType>
 struct StateNNLS
 {
     using matrix_t = MatrixType;
-    using value_t = ValueType;
+    using value_t = typename std::decay_t<MatrixType>::Scalar;
     using vec_value_t = util::rowvec_type<value_t>;
     using map_vec_value_t = Eigen::Map<vec_value_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
@@ -20,7 +19,6 @@ struct StateNNLS
 
     const size_t max_iters;
     const value_t tol;
-    const value_t dtol;
 
     size_t iters = 0;
     map_vec_value_t beta;      
@@ -29,12 +27,11 @@ struct StateNNLS
 
     double time_elapsed = 0;
 
-    StateNNLS(
+    explicit StateNNLS(
         const Eigen::Ref<const matrix_t>& X,
         const Eigen::Ref<const vec_value_t>& X_vars,
         size_t max_iters,
         value_t tol,
-        value_t dtol,
         Eigen::Ref<vec_value_t> beta,
         Eigen::Ref<vec_value_t> resid,
         value_t loss
@@ -43,62 +40,75 @@ struct StateNNLS
         X_vars(X_vars.data(), X_vars.size()),
         max_iters(max_iters),
         tol(tol),
-        dtol(dtol),
         beta(beta.data(), beta.size()),
         resid(resid.data(), resid.size()),
         loss(loss)
-    {}
-};
+    {
+        const auto n = X.rows();
+        const auto p = X.cols();
 
-template <class StateType, class EarlyExitType, class SkipType>
-void nnls(
-    StateType& state,
-    EarlyExitType early_exit_f,
-    SkipType skip_f
-)
-{
-    using state_t = std::decay_t<StateType>;
-    using value_t = typename state_t::value_t;
-
-    const auto& X = state.X;
-    const auto& X_vars = state.X_vars;
-    const auto max_iters = state.max_iters;
-    const auto tol = state.tol;
-    const auto dtol = state.dtol;
-    auto& iters = state.iters;
-    auto& beta = state.beta;
-    auto& resid = state.resid;
-    auto& loss = state.loss;
-
-    const auto n = beta.size();
-
-    iters = 0;
-
-    while (iters < max_iters) {
-        value_t convg_measure = 0;
-        ++iters;
-        for (int i = 0; i < n; ++i) {
-            if (early_exit_f()) return;
-            if (skip_f(i)) continue;
-            const auto X_vars_i = X_vars[i];
-            auto& bi = beta[i];
-            if (X_vars_i <= 0) { 
-                bi = std::max<value_t>(bi, 0); 
-                continue;
-            }
-            const auto gi = X.col(i).dot(resid.matrix());
-            const auto bi_old = bi;
-            bi = std::max<value_t>(bi + gi / X_vars_i, 0.0);
-            const auto del = bi - bi_old;
-            if (std::abs(del) <= dtol) continue;
-            const auto scaled_del_sq = X_vars_i * del * del; 
-            convg_measure = std::max<value_t>(convg_measure, scaled_del_sq);
-            loss -= del * gi - 0.5 * scaled_del_sq;
-            resid -= del * X.col(i).array();
+        if (X_vars.size() != p) {
+            throw util::adelie_core_solver_error(
+                "X_vars must be (p,) where X is (n, p). "
+            );
         }
-        if (convg_measure < tol) break;
+        if (tol < 0) {
+            throw util::adelie_core_solver_error(
+                "tol must be >= 0."
+            );
+        }
+        if (beta.size() != p) {
+            throw util::adelie_core_solver_error(
+                "beta must be (p,) where X is (n, p). "
+            );
+        }
+        if (resid.size() != n) {
+            throw util::adelie_core_solver_error(
+                "resid must be (n,) where X is (n, p). "
+            );
+        }
     }
-}
+
+    template <class EarlyExitType, class LowerType, class UpperType>
+    void solve(
+        EarlyExitType early_exit_f,
+        LowerType lower,
+        UpperType upper
+    )
+    {
+        const auto n = beta.size();
+
+        iters = 0;
+
+        while (iters < max_iters) {
+            value_t convg_measure = 0;
+            ++iters;
+            for (int i = 0; i < n; ++i) {
+                if (early_exit_f()) return;
+                const auto X_vars_i = X_vars[i];
+                auto& bi = beta[i];
+                const auto gi = X.col(i).dot(resid.matrix());
+                const auto bi_old = bi;
+                const auto step = (X_vars_i <= 0) ? 0 : (gi / X_vars_i);
+                const auto bi_cand = bi + step;
+                const auto li = lower(i);
+                const auto ui = upper(i);
+                bi = std::min<value_t>(std::max<value_t>(bi_cand, li), ui);
+                const auto del = bi - bi_old;
+                if (del == 0) continue;
+                const auto scaled_del_sq = X_vars_i * del * del; 
+                convg_measure = std::max<value_t>(convg_measure, scaled_del_sq);
+                loss -= del * gi - 0.5 * scaled_del_sq;
+                resid -= del * X.col(i).array();
+            }
+            if (convg_measure < tol) return;
+        }
+
+        throw util::adelie_core_solver_error(
+            "StateNNLS: max iterations reached!"
+        );
+    }
+};
 
 } // namespace optimization
 } // namespace adelie_core

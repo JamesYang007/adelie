@@ -376,15 +376,12 @@ public:
         )),
         buffer(5 * (start.size() + 1))
     {
-        const auto n = start.size();
+        const auto n = status.size();
+        if (start.size() != n) {
+            throw util::adelie_core_error("start must be (n,) where status is (n,).");
+        }
         if (stop.size() != n) {
-            throw util::adelie_core_error("stop vector must be same length as start.");
-        }
-        if (status.size() != n) {
-            throw util::adelie_core_error("status vector must be same length as start.");
-        }
-        if (weights.size() != n) {
-            throw util::adelie_core_error("weights vector must be same length as start.");
+            throw util::adelie_core_error("stop must be (n,) where status is (n,).");
         }
     }
 

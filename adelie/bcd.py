@@ -12,17 +12,17 @@ def root_lower_bound(
 
     The lower bound :math:`h_\\star` is guaranteed to be non-negative
     and satisfies :math:`\\varphi(h_\\star) \\geq 0` where :math:`\\varphi`
-    is given by ``adelie.bcd.root_function`` whenever :math:`\\|v\\|_2 > \\lambda`.
+    is given by :func:`adelie.bcd.root_function` whenever :math:`\\|v\\|_2 > \\lambda`.
     It is undefined behavior if the condition is not satisfied.
 
     Parameters
     ----------
-    quad : (p,) np.ndarray
-        See ``adelie.bcd.root_function``.
-    linear : (p,) np.ndarray
-        See ``adelie.bcd.root_function``.
+    quad : (p,) ndarray
+        See :func:`adelie.bcd.root_function`.
+    linear : (p,) ndarray
+        See :func:`adelie.bcd.root_function`.
     l1 : float
-        See ``adelie.bcd.root_function``.
+        See :func:`adelie.bcd.root_function`.
     
     See Also
     --------
@@ -48,19 +48,19 @@ def root_upper_bound(
 
     The upper bound :math:`h^\\star` is guaranteed to be non-negative.
     However, it *may not satisfy* :math:`\\varphi(h^\\star) \\leq 0` where :math:`\\varphi`
-    is given by ``adelie.bcd.root_function`` if ``zero_tol`` is too large.
+    is given by :func:`adelie.bcd.root_function` if ``zero_tol`` is too large.
     We assume that :math:`\\|v_S\\|_2 < \\lambda` 
     where :math:`S = \\{i : \\Sigma_{ii} = 0\\}`.
     It is undefined behavior if the condition is not satisfied.
 
     Parameters
     ----------
-    quad : (p,) np.ndarray
-        See ``adelie.bcd.root_function``.
-    linear : (p,) np.ndarray
-        See ``adelie.bcd.root_function``.
+    quad : (p,) ndarray
+        See :func:`adelie.bcd.root_function`.
+    linear : (p,) ndarray
+        See :func:`adelie.bcd.root_function`.
     l1 : float
-        See ``adelie.bcd.root_function``.
+        See :func:`adelie.bcd.root_function`.
     zero_tol : float, optional
         A value is considered zero if its absolute value is less than or equal to ``zero_tol``.
         Default is ``1e-14``.
@@ -105,9 +105,9 @@ def root_function(
     ----------
     h : float
         The value at which to evaluate the BCD root function.
-    quad : (p,) np.ndarray
+    quad : (p,) ndarray
         The quadratic component :math:`\\Sigma`.
-    linear : (p,) np.ndarray
+    linear : (p,) ndarray
         The linear component :math:`v`.
     l1 : float
         The :math:`\\ell_1` component :math:`\\lambda`.
@@ -147,11 +147,11 @@ def objective(
 
     Parameters
     ----------
-    beta : (p,) np.ndarray
-        The input value in which the objective is evaluated.
-    quad : (p,) np.ndarray
+    beta : (p,) ndarray
+        The value :math:`\\beta` at which the objective is computed.
+    quad : (p,) ndarray
         The quadratic component :math:`\\Sigma`.
-    linear : (p,) np.ndarray
+    linear : (p,) ndarray
         The linear component :math:`v`.
     l1 : float
         The :math:`\\ell_1` component :math:`\\lambda_1`.
@@ -193,7 +193,7 @@ def solve(
     """Solves the BCD update.
 
     The BCD update for the group elastic net is obtained by minimizing
-    the BCD objective given in ``adelie.bcd.objective``.
+    the BCD objective given in :func:`adelie.bcd.objective`.
     The solution exists finitely if and only if 
     :math:`\\|v\\|_2 \\leq \\lambda_1`
     or :math:`\\|v_S\\|_2 < \\lambda_1`,
@@ -203,14 +203,14 @@ def solve(
 
     Parameters
     ----------
-    quad : (p,) np.ndarray
-        See ``adelie.bcd.objective``.
-    linear : (p,) np.ndarray
-        See ``adelie.bcd.objective``.
+    quad : (p,) ndarray
+        See :func:`adelie.bcd.objective`.
+    linear : (p,) ndarray
+        See :func:`adelie.bcd.objective`.
     l1 : float
-        See ``adelie.bcd.objective``.
+        See :func:`adelie.bcd.objective`.
     l2 : float
-        See ``adelie.bcd.objective``.
+        See :func:`adelie.bcd.objective`.
     tol : float, optional
         Convergence tolerance. Default is ``1e-12``.
     max_iters : int, optional
@@ -245,9 +245,11 @@ def solve(
     Returns
     -------
     result : Dict[str, Any]
-        - ``result["beta"]``: solution vector.
-        - ``result["iters"]``: number of iterations taken.
-        - ``result["time_elapsed"]``: time elapsed to run the solver.
+        A dictionary containing the output:
+
+            - ``"beta"``: solution vector.
+            - ``"iters"``: number of iterations taken.
+            - ``"time_elapsed"``: time elapsed to run the solver.
 
     See Also
     --------
@@ -270,7 +272,7 @@ def root(
 ):
     """Solves the non-negative root of the BCD root function.
 
-    The BCD root function is given in ``adelie.bcd.root_function``.
+    The BCD root function is given in :func:`adelie.bcd.root_function`.
     The non-negative root only exists when
     :math:`\\|v_S\\|_2 < \\lambda_1 < \\|v\\|_2`
     where :math:`S` is the subset of indices
@@ -278,12 +280,12 @@ def root(
 
     Parameters
     ----------
-    quad : (p,) np.ndarray
-        See ``adelie.bcd.root_function``.
-    linear : (p,) np.ndarray
-        See ``adelie.bcd.root_function``.
+    quad : (p,) ndarray
+        See :func:`adelie.bcd.root_function`.
+    linear : (p,) ndarray
+        See :func:`adelie.bcd.root_function`.
     l1 : float
-        See ``adelie.bcd.root_function``.
+        See :func:`adelie.bcd.root_function`.
     tol : float, optional
         Convergence tolerance. Default is ``1e-12``.
     max_iters : int, optional
@@ -312,8 +314,10 @@ def root(
     Returns
     -------
     result : Dict[str, Any]
-        - ``result["root"]``: the non-negative root.
-        - ``result["iters"]``: number of iterations taken.
+        A dictionary containing the output:
+
+            - ``"root"``: the non-negative root.
+            - ``"iters"``: number of iterations taken.
 
     See Also
     --------

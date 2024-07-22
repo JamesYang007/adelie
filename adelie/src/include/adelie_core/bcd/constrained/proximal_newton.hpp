@@ -26,7 +26,6 @@ void proximal_newton_general_solver(
     ValueType newton_tol,
     size_t nnls_max_iters,
     ValueType nnls_tol,
-    ValueType nnls_dtol,
     size_t& iters,
     OutType& x,
     OutType& mu,
@@ -73,7 +72,7 @@ void proximal_newton_general_solver(
         // compute x^star(mu)
         {
             size_t x_iters;
-            unconstrained::newton_abs_solver(
+            unconstrained::newton_solver(
                 quad, mu_resid, l1, l2, newton_tol, newton_max_iters, 
                 x, x_iters, x_buffer1, x_buffer2
             );
@@ -112,13 +111,13 @@ void proximal_newton_general_solver(
             );
             const value_t mu_loss = 0.5 * mu_resid.square().sum();
             optimization::StateNNLS<colmat_value_t> state_nnls(
-                AT, AT_vars, nnls_max_iters, nnls_tol, nnls_dtol,
+                AT, AT_vars, nnls_max_iters, nnls_tol,
                 mu, mu_resid, mu_loss
             );
-            optimization::nnls(
-                state_nnls, 
+            state_nnls.solve(
                 [&]() { return state_nnls.loss <= 0.5 * l1 * l1; },
-                [&](auto i) { return b[i] > 0; }
+                [&](auto) { return 0; },
+                [&](auto i) { return (b[i] <= 0) ? std::numeric_limits<value_t>::infinity() : 0; }
             );
 
             // If loss is smaller than or close to 0.5 * l1 ** 2, 
@@ -167,9 +166,9 @@ void proximal_newton_general_solver(
 
         // solve NNQP for new mu
         optimization::StateNNQPFull<colmat_value_t> state_nnqp(
-            hess, nnls_max_iters, nnls_tol, nnls_dtol, mu, grad
+            hess, nnls_max_iters, nnls_tol, mu, grad
         );
-        optimization::nnqp_full(state_nnqp); 
+        state_nnqp.solve();
         recompute_mu_resid = true;
     }
 
@@ -178,7 +177,7 @@ void proximal_newton_general_solver(
         mu_resid.matrix().noalias() = v.matrix() - mu.matrix() * A;
     }
     size_t x_iters;
-    unconstrained::newton_abs_solver(
+    unconstrained::newton_solver(
         quad, mu_resid, l1, l2, newton_tol, newton_max_iters, 
         x, x_iters, x_buffer1, x_buffer2
     );

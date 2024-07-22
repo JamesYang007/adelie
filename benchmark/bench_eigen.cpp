@@ -660,3 +660,57 @@ BENCHMARK(BM_xtx_naive)
     -> Args({100000, 16})
     -> Args({1000000, 16})
     ;
+
+static void BM_matrix_vector_dense(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto d = 10;
+    ad::util::colmat_type<double> X(d, n);
+    ad::util::colvec_type<double> v(n);
+    X.setRandom();
+    for (int i = 0; i < n; i += (n / 100)) {
+        v[i] = 1;
+    }
+    ad::util::colvec_type<double> out(d);
+
+    for (auto _ : state) {
+        out.matrix() = X * v.matrix();
+    }
+}
+
+BENCHMARK(BM_matrix_vector_dense)
+    -> Args({1000})
+    -> Args({10000})
+    -> Args({100000})
+    ;
+
+static void BM_matrix_vector_sparse(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto d = 10;
+    ad::util::colmat_type<double> X(d, n);
+    ad::util::colvec_type<double> v(n);
+    X.setRandom();
+    for (int i = 0; i < n; i += (n / 1000)) {
+        v[i] = 1;
+    }
+    ad::util::colvec_type<double> out(d);
+
+    for (auto _ : state) {
+        out.setZero();
+        //for (int i = 0; i < n; i += (n / 1000)) {
+        //    out += v[i] * X.col(i).array();
+        //}
+        for (int i = 0; i < n; ++i) {
+            if (i % (n / 1000)) continue;
+            out += v[i] * X.col(i).array();
+        }
+        benchmark::DoNotOptimize(out);
+    }
+}
+
+BENCHMARK(BM_matrix_vector_sparse)
+    -> Args({1000})
+    -> Args({10000})
+    -> Args({100000})
+    ;

@@ -436,10 +436,10 @@ public:
     {
         const auto d = _mat.cols();
         if (pairs.cols() != 2) {
-            throw util::adelie_core_error("pairs must be of shape (G, 2).");
+            throw util::adelie_core_error("pairs must be (G, 2).");
         }
         if (levels.size() != d) {
-            throw util::adelie_core_error("levels must be of shape (d,) where mat is (n, d).");
+            throw util::adelie_core_error("levels must be (d,) where mat is (n, d).");
         }
         if (n_threads < 1) {
             throw util::adelie_core_error("n_threads must be >= 1.");

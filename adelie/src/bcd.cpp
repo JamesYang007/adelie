@@ -320,8 +320,7 @@ py::dict constrained_proximal_newton_general_solver(
     size_t newton_max_iters,
     double newton_tol,
     size_t nnls_max_iters,
-    double nnls_tol,
-    double nnls_dtol
+    double nnls_tol
 )
 {
     using sw_t = ad::util::Stopwatch;
@@ -344,7 +343,7 @@ py::dict constrained_proximal_newton_general_solver(
     sw.start();
     ad::bcd::constrained::proximal_newton_general_solver(
         quad, linear, l1, l2, A, b, AT_vars,
-        max_iters, tol, newton_max_iters, newton_tol, nnls_max_iters, nnls_tol, nnls_dtol,
+        max_iters, tol, newton_max_iters, newton_tol, nnls_max_iters, nnls_tol,
         iters, x, mu, mu_resid, buff
     );
     const auto time_elapsed = sw.elapsed();

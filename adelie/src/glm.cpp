@@ -126,12 +126,8 @@ void glm_base(py::module_& m, const char* name)
         Name of the GLM family.
         )delimiter")
         .def_readonly("is_multi", &internal_t::is_multi, R"delimiter(
-        See ``adelie.adelie_core.glm.GlmMultiBase64``.
-        It is always ``False`` for this base class.
-        )delimiter")
-        .def_readonly("is_symmetric", &internal_t::is_symmetric, R"delimiter(
-        See ``adelie.adelie_core.glm.GlmMultiBase64``.
-        It is always ``False`` for this base class.
+        ``True`` if it defines a multi-response GLM family.
+        It is always ``False`` for this class.
         )delimiter")
         .def("gradient", &internal_t::gradient, R"delimiter(
         Computes the gradient of the negative loss function.
@@ -140,9 +136,9 @@ void glm_base(py::module_& m, const char* name)
 
         Parameters
         ----------
-        eta : (n,) np.ndarray
+        eta : (n,) ndarray
             Natural parameter.
-        grad : (n,) np.ndarray
+        grad : (n,) ndarray
             The gradient to store.
         )delimiter")
         .def("hessian", &internal_t::hessian, R"delimiter(
@@ -160,11 +156,11 @@ void glm_base(py::module_& m, const char* name)
 
         Parameters
         ----------
-        eta : (n,) np.ndarray
+        eta : (n,) ndarray
             Natural parameter.
-        grad : (n,) np.ndarray
-            Gradient as in ``gradient`` method.
-        hess : (n,) np.ndarray
+        grad : (n,) ndarray
+            Gradient as in :func:`gradient` method.
+        hess : (n,) ndarray
             The hessian to store.
         )delimiter")
         .def("inv_hessian_gradient", &internal_t::inv_hessian_gradient, R"delimiter(
@@ -173,21 +169,22 @@ void glm_base(py::module_& m, const char* name)
         Computes :math:`-(\nabla^2 \ell(\eta))^{-1} \nabla \ell(\eta)`.
 
         .. note::
-            Unlike the ``hessian`` method, this function may use the full hessian matrix.
+            Unlike the :func:`hessian` method, 
+            this function may use the full hessian matrix.
             The diagonal hessian majorization is provided in case it speeds-up computations,
             but it can be ignored.
             The default implementation simply computes ``grad / (hess + eps * (hess <= 0))``
-            where ``eps`` is given by ``adelie.configs.Configs.hessian_min``.
+            where ``eps`` is given by :attr:`~adelie.adelie_core.configs.Configs.hessian_min`.
 
         Parameters
         ----------
-        eta : (n,) np.ndarray
+        eta : (n,) ndarray
             Natural parameter.
-        grad : (n,) np.ndarray
-            Gradient as in ``gradient`` method.
-        hess : (n,) np.ndarray
-            Hessian as in ``hessian`` method.
-        inv_hess_grad : (n,) np.ndarray
+        grad : (n,) ndarray
+            Gradient as in :func:`gradient` method.
+        hess : (n,) ndarray
+            Hessian as in :func:`hessian` method.
+        inv_hess_grad : (n,) ndarray
             The inverse hessian gradient to store.
         )delimiter")
         .def("loss", &internal_t::loss, R"delimiter(
@@ -197,7 +194,7 @@ void glm_base(py::module_& m, const char* name)
 
         Parameters
         ----------
-        eta : (n,) np.ndarray
+        eta : (n,) ndarray
             Natural parameter.
 
         Returns
@@ -461,13 +458,11 @@ void glm_multibase(py::module_& m, const char* name)
         .def(py::init<
             const string_t&,
             const Eigen::Ref<const rowarr_value_t>&,
-            const Eigen::Ref<const vec_value_t>& ,
-            bool
+            const Eigen::Ref<const vec_value_t>&
         >(),
             py::arg("name"),
             py::arg("y").noconvert(),
-            py::arg("weights").noconvert(),
-            py::arg("is_symmetric")
+            py::arg("weights").noconvert()
         )
         .def_readonly("name", &internal_t::name, R"delimiter(
         Name of the GLM family.
@@ -476,10 +471,6 @@ void glm_multibase(py::module_& m, const char* name)
         ``True`` if it defines a multi-response GLM family.
         It is always ``True`` for this base class.
         )delimiter")
-        .def_readonly("is_symmetric", &internal_t::is_symmetric, R"delimiter(
-        ``True`` if the GLM is symmetric in :math:`\eta_{i\cdot}` (along the classes)
-        for each :math:`i`.
-        )delimiter")
         .def("gradient", &internal_t::gradient, R"delimiter(
         Computes the gradient of the negative loss function.
 
@@ -487,9 +478,9 @@ void glm_multibase(py::module_& m, const char* name)
 
         Parameters
         ----------
-        eta : (n, K) np.ndarray
+        eta : (n, K) ndarray
             Natural parameter.
-        grad : (n, K) np.ndarray
+        grad : (n, K) ndarray
             The gradient to store.
         )delimiter")
         .def("hessian", &internal_t::hessian, R"delimiter(
@@ -507,11 +498,11 @@ void glm_multibase(py::module_& m, const char* name)
 
         Parameters
         ----------
-        eta : (n, K) np.ndarray
+        eta : (n, K) ndarray
             Natural parameter.
-        grad : (n, K) np.ndarray
-            Gradient as in ``gradient`` method.
-        hess : (n, K) np.ndarray
+        grad : (n, K) ndarray
+            Gradient as in :func:`gradient` method.
+        hess : (n, K) ndarray
             The hessian to store.
         )delimiter")
         .def("inv_hessian_gradient", &internal_t::inv_hessian_gradient, R"delimiter(
@@ -520,21 +511,21 @@ void glm_multibase(py::module_& m, const char* name)
         Computes :math:`-(\nabla^2 \ell(\eta))^{-1} \nabla \ell(\eta)`.
 
         .. note::
-            Unlike the ``hessian`` method, this function may use the full hessian matrix.
+            Unlike the :func:`hessian` method, this function may use the full hessian matrix.
             The diagonal hessian majorization is provided in case it speeds-up computations,
             but it can be ignored.
             The default implementation simply computes ``grad / (hess + eps * (hess <= 0))``
-            where ``eps`` is given by ``adelie.configs.Configs.hessian_min``.
+            where ``eps`` is given by :attr:`adelie.adelie_core.configs.Configs.hessian_min`.
 
         Parameters
         ----------
-        eta : (n, K) np.ndarray
+        eta : (n, K) ndarray
             Natural parameter.
-        grad : (n, K) np.ndarray
-            Gradient as in ``gradient`` method.
-        hess : (n, K) np.ndarray
-            Hessian as in ``hessian`` method.
-        inv_hess_grad : (n, K) np.ndarray
+        grad : (n, K) ndarray
+            Gradient as in :func:`gradient` method.
+        hess : (n, K) ndarray
+            Hessian as in :func:`hessian` method.
+        inv_hess_grad : (n, K) ndarray
             The inverse hessian gradient to store.
         )delimiter")
         .def("loss", &internal_t::loss, R"delimiter(
@@ -544,7 +535,7 @@ void glm_multibase(py::module_& m, const char* name)
 
         Parameters
         ----------
-        eta : (n, K) np.ndarray
+        eta : (n, K) ndarray
             Natural parameter.
 
         Returns

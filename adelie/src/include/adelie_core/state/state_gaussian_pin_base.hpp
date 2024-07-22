@@ -38,16 +38,17 @@ struct StateGaussianPinBase
     const dyn_vec_constraint_t* constraints;
     const map_cvec_index_t groups;
     const map_cvec_index_t group_sizes;
+    const map_cvec_index_t dual_groups;
     const value_t alpha;
     const map_cvec_value_t penalty;
     const map_cvec_index_t screen_set;
     const map_cvec_index_t screen_begins;
     const map_cvec_value_t screen_vars;
     const dyn_vec_mat_value_t* screen_transforms;
-    const map_cvec_index_t screen_dual_begins;
     const map_cvec_value_t lmda_path;
 
     /* configurations */
+    const size_t constraint_buffer_size;
     const bool intercept;
     const size_t max_active_size;
     const size_t max_iters;
@@ -62,12 +63,12 @@ struct StateGaussianPinBase
     value_t rsq;
     map_vec_value_t screen_beta;
     map_vec_bool_t screen_is_active;
-    map_vec_value_t screen_dual;
     size_t active_set_size;
     map_vec_index_t active_set;
     dyn_vec_index_t active_begins;
     dyn_vec_index_t active_order;
     dyn_vec_sp_vec_t betas;
+    dyn_vec_sp_vec_t duals;
     dyn_vec_value_t intercepts;
     dyn_vec_value_t rsqs;
     dyn_vec_value_t lmdas;
@@ -83,14 +84,15 @@ struct StateGaussianPinBase
         const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
+        const Eigen::Ref<const vec_index_t>& dual_groups, 
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_index_t>& screen_set, 
         const Eigen::Ref<const vec_index_t>& screen_begins, 
         const Eigen::Ref<const vec_value_t>& screen_vars,
         const dyn_vec_mat_value_t& screen_transforms,
-        const Eigen::Ref<const vec_index_t>& screen_dual_begins, 
         const Eigen::Ref<const vec_value_t>& lmda_path, 
+        size_t constraint_buffer_size,
         bool intercept,
         size_t max_active_size,
         size_t max_iters,
@@ -103,21 +105,21 @@ struct StateGaussianPinBase
         value_t rsq,
         Eigen::Ref<vec_value_t> screen_beta, 
         Eigen::Ref<vec_bool_t> screen_is_active,
-        Eigen::Ref<vec_value_t> screen_dual,
         size_t active_set_size,
         Eigen::Ref<vec_index_t> active_set
     ): 
         constraints(&constraints),
         groups(groups.data(), groups.size()),
         group_sizes(group_sizes.data(), group_sizes.size()),
+        dual_groups(dual_groups.data(), dual_groups.size()),
         alpha(alpha),
         penalty(penalty.data(), penalty.size()),
         screen_set(screen_set.data(), screen_set.size()),
         screen_begins(screen_begins.data(), screen_begins.size()),
         screen_vars(screen_vars.data(), screen_vars.size()),
         screen_transforms(&screen_transforms),
-        screen_dual_begins(screen_dual_begins.data(), screen_dual_begins.size()),
         lmda_path(lmda_path.data(), lmda_path.size()),
+        constraint_buffer_size(constraint_buffer_size),
         intercept(intercept),
         max_active_size(max_active_size),
         max_iters(max_iters),
@@ -130,7 +132,6 @@ struct StateGaussianPinBase
         rsq(rsq),
         screen_beta(screen_beta.data(), screen_beta.size()),
         screen_is_active(screen_is_active.data(), screen_is_active.size()),
-        screen_dual(screen_dual.data(), screen_dual.size()),
         active_set_size(active_set_size),
         active_set(active_set.data(), active_set.size())
     {

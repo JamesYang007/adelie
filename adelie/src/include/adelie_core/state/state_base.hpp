@@ -13,7 +13,6 @@ template <class ConstraintsType,
           class PenaltyType, class GradType, 
           class ScreenSetType, class ScreenHashsetType,
           class ScreenBeginsType, class ScreenBetaType,
-          class ScreenDualBeginsType, class ScreenDualType,
           class ValueType, class AbsGradType>
 void update_abs_grad(
     const ConstraintsType& constraints,
@@ -25,8 +24,6 @@ void update_abs_grad(
     const ScreenHashsetType& screen_hashset,
     const ScreenBeginsType& screen_begins,
     const ScreenBetaType& screen_beta,
-    const ScreenDualBeginsType& screen_dual_begins,
-    const ScreenDualType& screen_dual,
     ValueType lmda,
     ValueType alpha,
     AbsGradType& abs_grad,
@@ -40,7 +37,7 @@ void update_abs_grad(
         return screen_hashset.find(i) != screen_hashset.end();
     };
 
-    vec_value_t buff;
+    vec_value_t buff(group_sizes.maxCoeff());
 
     // do not parallelize since it may result in large false sharing 
     // (access to abs_grad[i] is random order)
@@ -62,14 +59,8 @@ void update_abs_grad(
         if (constraint == nullptr) {
             abs_grad[i] = common_expr.matrix().norm();
         } else {
-            if (buff.size() < size_k) buff.resize(size_k);
             auto vbuff = buff.head(size_k);
-
-            const Eigen::Map<const vec_value_t> mu(
-                screen_dual.data() + screen_dual_begins[ss_idx],
-                constraint->duals()
-            );
-            constraint->gradient(sbeta, mu, vbuff);
+            constraint->gradient(sbeta, vbuff);
             abs_grad[i] = (common_expr - vbuff).matrix().norm();
         }
     }
@@ -113,8 +104,6 @@ void update_abs_grad(
         state.screen_hashset,
         state.screen_begins,
         state.screen_beta,
-        state.screen_dual_begins,
-        state.screen_dual,
         lmda,
         state.alpha,
         state.abs_grad,
@@ -136,15 +125,12 @@ void update_screen_derived_base(
     StateType& state
 )
 {
-    const auto& constraints = state.constraints;
     const auto& group_sizes = state.group_sizes;
     const auto& screen_set = state.screen_set;
     auto& screen_hashset = state.screen_hashset;
     auto& screen_begins = state.screen_begins;
     auto& screen_beta = state.screen_beta;
     auto& screen_is_active = state.screen_is_active;
-    auto& screen_dual_begins = state.screen_dual_begins;
-    auto& screen_dual = state.screen_dual;
 
     /* update screen_hashset */
     const auto old_screen_size = screen_begins.size();
@@ -167,27 +153,6 @@ void update_screen_derived_base(
 
     /* update screen_is_active */
     screen_is_active.resize(screen_set.size(), false);
-
-    /* update screen_dual_begins */
-    const auto last_constraint = (
-        (old_screen_size == 0) ?
-        nullptr : constraints[screen_set[old_screen_size-1]]
-    );
-    size_t screen_dual_value_size = (
-        (old_screen_size == 0) ? 
-        0 : (screen_dual_begins.back() + (
-            (last_constraint == nullptr) ? 0 : last_constraint->duals()
-        ))
-    );
-    for (size_t i = old_screen_size; i < screen_set.size(); ++i) {
-        const auto constraint = constraints[screen_set[i]];
-        const auto curr_size = (constraint == nullptr) ? 0 : constraint->duals();
-        screen_dual_begins.push_back(screen_dual_value_size);
-        screen_dual_value_size += curr_size;
-    }
-
-    /* update screen_dual */
-    screen_dual.resize(screen_dual_value_size, 0);
 }
 
 template <class ConstraintType,
@@ -221,10 +186,13 @@ struct StateBase
     const dyn_vec_constraint_t constraints;
     const map_cvec_index_t groups;
     const map_cvec_index_t group_sizes;
+    const map_cvec_index_t dual_groups;
     const value_t alpha;
     const map_cvec_value_t penalty;
 
     /* configurations */
+    const size_t constraint_buffer_size;
+
     // lambda path configs
     const value_t min_ratio;
     const size_t lmda_path_size;
@@ -262,8 +230,6 @@ struct StateBase
     dyn_vec_index_t screen_begins;
     dyn_vec_value_t screen_beta;
     dyn_vec_bool_t screen_is_active;
-    dyn_vec_index_t screen_dual_begins;
-    dyn_vec_value_t screen_dual;
     size_t active_set_size;
     vec_index_t active_set;
     value_t lmda;
@@ -272,6 +238,7 @@ struct StateBase
 
     // final results
     dyn_vec_sp_vec_t betas;
+    dyn_vec_sp_vec_t duals;
     dyn_vec_value_t intercepts;
     dyn_vec_value_t devs;
     dyn_vec_value_t lmdas;
@@ -292,6 +259,7 @@ struct StateBase
         const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
+        const Eigen::Ref<const vec_index_t>& dual_groups, 
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_value_t>& lmda_path,
@@ -318,7 +286,6 @@ struct StateBase
         const Eigen::Ref<const vec_index_t>& screen_set,
         const Eigen::Ref<const vec_value_t>& screen_beta,
         const Eigen::Ref<const vec_bool_t>& screen_is_active,
-        const Eigen::Ref<const vec_value_t>& screen_dual,
         size_t active_set_size,
         const Eigen::Ref<const vec_index_t>& active_set,
         value_t lmda,
@@ -327,8 +294,15 @@ struct StateBase
         constraints(constraints),
         groups(groups.data(), groups.size()),
         group_sizes(group_sizes.data(), group_sizes.size()),
+        dual_groups(dual_groups.data(), dual_groups.size()),
         alpha(alpha),
         penalty(penalty.data(), penalty.size()),
+        constraint_buffer_size(
+            util::rowvec_type<size_t>::NullaryExpr(
+                constraints.size(), 
+                [&](auto i) { return constraints[i] ? constraints[i]->buffer_size() : 0; }
+            ).maxCoeff()
+        ),
         min_ratio(min_ratio),
         lmda_path_size(lmda_path_size),
         max_screen_size(max_screen_size),
@@ -353,7 +327,6 @@ struct StateBase
         screen_set(screen_set.data(), screen_set.data() + screen_set.size()),
         screen_beta(screen_beta.data(), screen_beta.data() + screen_beta.size()),
         screen_is_active(screen_is_active.data(), screen_is_active.data() + screen_is_active.size()),
-        screen_dual(screen_dual.data(), screen_dual.data() + screen_dual.size()),
         active_set_size(active_set_size),
         active_set(active_set),
         lmda(lmda),
@@ -363,19 +336,22 @@ struct StateBase
         // sanity checks
         const auto G = groups.size();
         if (constraints.size() != static_cast<size_t>(G)) {
-            throw util::adelie_core_error("constraints must have the same length as groups.");
+            throw util::adelie_core_error("constraints must be (G,) where groups is (G,).");
         }
         if (group_sizes.size() != G) {
-            throw util::adelie_core_error("group_sizes must have the same length as groups.");
+            throw util::adelie_core_error("group_sizes must be (G,) where groups is (G,).");
+        }
+        if (dual_groups.size() != G) {
+            throw util::adelie_core_error("dual_groups must be (G,) where groups is (G,).");
         }
         if (penalty.size() != G) {
-            throw util::adelie_core_error("penalty must have the same length as groups.");
+            throw util::adelie_core_error("penalty must be (G,) where groups is (G,).");
         }
         if (alpha < 0 || alpha > 1) {
             throw util::adelie_core_error("alpha must be in [0,1].");
         }
-        if (tol <= 0) {
-            throw util::adelie_core_error("tol must be > 0.");
+        if (tol < 0) {
+            throw util::adelie_core_error("tol must be >= 0.");
         }
         if (adev_tol < 0 || adev_tol > 1) {
             throw util::adelie_core_error("adev_tol must be in [0,1].");
@@ -402,22 +378,22 @@ struct StateBase
             throw util::adelie_core_error("pivot_slack_ratio must be >= 0.");
         }
         if (screen_set.size() != screen_is_active.size()) {
-            throw util::adelie_core_error("screen_is_active must have the same length as screen_set.");
+            throw util::adelie_core_error("screen_is_active must be (s,) where screen_set is (s,).");
         }
         if (screen_beta.size() < screen_set.size()) {
             throw util::adelie_core_error(
-                "screen_beta has smaller length than screen_set. "
-                "It is likely screen_beta has been initialized incorrectly."
+                "screen_beta must be (bs,) where bs >= s and screen_set is (s,). "
+                "It is likely screen_beta has been initialized incorrectly. "
             );
         }
         if (active_set_size > static_cast<size_t>(G)) {
             throw util::adelie_core_error(
-                "active_set_size must be <= active_set.size()."
+                "active_set_size must be <= G where groups is (G,)."
             );
         }
         if (active_set.size() != G) {
             throw util::adelie_core_error(
-                "active_set must have the same length as groups."
+                "active_set must be (G,) where groups is (G,)."
             );
         }
         if (grad.size() != groups[G-1] + group_sizes[G-1]) {
@@ -438,6 +414,7 @@ struct StateBase
         /* optimize for output storage size */
         const auto n_lmdas = std::max<size_t>(lmda_path.size(), lmda_path_size);
         betas.reserve(n_lmdas);
+        duals.reserve(n_lmdas);
         intercepts.reserve(n_lmdas);
         devs.reserve(n_lmdas);
         lmdas.reserve(n_lmdas);

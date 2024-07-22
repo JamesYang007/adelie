@@ -206,6 +206,7 @@ struct StateGaussianNaive : StateBase<
         const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
+        const Eigen::Ref<const vec_index_t>& dual_groups, 
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_value_t>& weights,
@@ -233,7 +234,6 @@ struct StateGaussianNaive : StateBase<
         const Eigen::Ref<const vec_index_t>& screen_set,
         const Eigen::Ref<const vec_value_t>& screen_beta,
         const Eigen::Ref<const vec_bool_t>& screen_is_active,
-        const Eigen::Ref<const vec_value_t>& screen_dual,
         size_t active_set_size,
         const Eigen::Ref<const vec_index_t>& active_set,
         value_t rsq,
@@ -241,12 +241,12 @@ struct StateGaussianNaive : StateBase<
         const Eigen::Ref<const vec_value_t>& grad
     ):
         base_t(
-            constraints, groups, group_sizes, alpha, penalty, lmda_path, lmda_max, min_ratio, lmda_path_size,
+            constraints, groups, group_sizes, dual_groups, alpha, penalty, lmda_path, lmda_max, min_ratio, lmda_path_size,
             max_screen_size, max_active_size,
             pivot_subset_ratio, pivot_subset_min, pivot_slack_ratio, screen_rule, 
             max_iters, tol, adev_tol, ddev_tol, newton_tol, newton_max_iters, early_exit, 
             setup_lmda_max, setup_lmda_path, intercept, n_threads,
-            screen_set, screen_beta, screen_is_active, screen_dual, active_set_size, active_set, lmda, grad
+            screen_set, screen_beta, screen_is_active, active_set_size, active_set, lmda, grad
         ),
         weights(weights.data(), weights.size()),
         weights_sqrt(weights.sqrt()),
@@ -260,11 +260,19 @@ struct StateGaussianNaive : StateBase<
         resid_sum(resid_sum),
         rsq(rsq)
     { 
-        if (weights.size() != resid.size()) {
-            throw util::adelie_core_error("weights must have the same length as resid.");
+        const auto n = X.rows();
+        const auto p = X.cols();
+        if (weights.size() != n) {
+            throw util::adelie_core_error("weights must be (n,) where X is (n, p).");
         }
-        if (X_means.size() != this->grad.size()) {
-            throw util::adelie_core_error("X_means must have the same length as grad.");
+        if (X_means.size() != p) {
+            throw util::adelie_core_error("X_means must be (p,) where X is (n, p).");
+        }
+        if (resid.size() != n) {
+            throw util::adelie_core_error("resid must be (n,) where X is (n, p).");
+        }
+        if (this->grad.size() != p) {
+            throw util::adelie_core_error("grad must be (p,) where X is (n, p).");
         }
         /* initialize the rest of the screen quantities */
         gaussian::naive::update_screen_derived(*this); 

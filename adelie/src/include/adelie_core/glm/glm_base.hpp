@@ -22,7 +22,6 @@ public:
     map_cvec_value_t y;
     map_cvec_value_t weights;
     const bool is_multi = false;
-    const bool is_symmetric = false;
 
 protected:
     void check_gradient(
@@ -120,7 +119,7 @@ public:
         weights(weights.data(), weights.size())
     {
         if (y.size() != weights.size()) {
-            throw util::adelie_core_error("y and weights must have same length.");
+            throw util::adelie_core_error("y must be (n,) where weights is (n,).");
         }
     }
 
