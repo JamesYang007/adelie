@@ -15,8 +15,8 @@ struct StateHingeFull
     using map_cmatrix_t = Eigen::Map<const matrix_t>;
 
     const map_cmatrix_t quad;
-    const map_cvec_value_t penalty_pos;
     const map_cvec_value_t penalty_neg;
+    const map_cvec_value_t penalty_pos;
 
     const size_t max_iters;
     const value_t tol;
