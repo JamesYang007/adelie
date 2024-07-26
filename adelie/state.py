@@ -1076,7 +1076,6 @@ def _render_gaussian_naive_inputs(
 def _render_multi_inputs(
     *,
     X,
-    groups,
     offsets,
     intercept,
     n_threads,
@@ -1097,16 +1096,8 @@ def _render_multi_inputs(
             n_threads=n_threads,
         )
 
-    # G == (p+intercept) * K if and only if ungrouped
-    if groups.shape[0] == X.cols():
-        group_type = "ungrouped"
-    else:
-        if groups.shape[0] != X.cols() // n_classes + (n_classes - 1) * intercept:
-            raise RuntimeError("groups must be of the \"grouped\" or \"ungrouped\" type.")
-        group_type = "grouped"
-
     return (
-        X, offsets, group_type
+        X, offsets, 
     )
 
 
@@ -2266,10 +2257,8 @@ def multigaussian_naive(
     (
         X,
         offsets,
-        group_type,
     ) = _render_multi_inputs(
         X=X,
-        groups=groups,
         offsets=offsets,
         intercept=intercept,
         n_threads=n_threads,
@@ -2306,7 +2295,6 @@ def multigaussian_naive(
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
             core_base.__init__(
                 self,
-                group_type=group_type,
                 n_classes=n_classes,
                 multi_intercept=intercept,
                 X=self._X_expanded,
@@ -2996,10 +2984,8 @@ def multiglm_naive(
     (
         X,
         offsets,
-        group_type,
     ) = _render_multi_inputs(
         X=X,
-        groups=groups,
         offsets=offsets,
         intercept=intercept,
         n_threads=n_threads,
@@ -3034,7 +3020,6 @@ def multiglm_naive(
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
             core_base.__init__(
                 self,
-                group_type=group_type,
                 n_classes=n_classes,
                 multi_intercept=intercept,
                 X=self._X_expanded,

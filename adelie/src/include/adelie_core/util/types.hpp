@@ -39,12 +39,6 @@ enum class nnqp_screen_rule_type
     _greedy
 };
 
-enum class multi_group_type
-{
-    _grouped,
-    _ungrouped
-};
-
 enum class tie_method_type
 {
     _efron,
@@ -91,15 +85,6 @@ inline nnqp_screen_rule_type convert_nnqp_screen_rule(
 {
     if (rule == "greedy") return nnqp_screen_rule_type::_greedy;
     throw util::adelie_core_error("Invalid screen rule type: " + rule);
-}
-
-inline multi_group_type convert_multi_group(
-    const std::string& group
-) 
-{
-    if (group == "grouped") return multi_group_type::_grouped;
-    if (group == "ungrouped") return multi_group_type::_ungrouped;
-    throw util::adelie_core_error("Invalid multi-response grouping type: " + group);
 }
 
 inline tie_method_type convert_tie_method(

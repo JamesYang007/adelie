@@ -519,14 +519,10 @@ def grpnet(
     groups : (G,) ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-        If ``glm`` is multi-response type, then we only allow two types of groupings:
-
-            - ``"grouped"``: coefficients for each predictor is grouped across the classes.
-            - ``"ungrouped"``: every coefficient is its own group.
-
-        Default is ``None``, in which case it is set to
-        ``np.arange(p)`` if ``y`` is single-response
-        and ``"grouped"`` if multi-response.
+        If ``glm`` is of multi-response type, then
+        ``groups[i]`` is the starting *feature* index of the ``i`` th group.
+        In either case, ``groups[i]`` must then be a value in the range :math:`\\{1,\\ldots, p\\}`.
+        Default is ``None``, in which case it is set to ``np.arange(p)``.
     alpha : float, optional
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
@@ -669,6 +665,7 @@ def grpnet(
             The algorithm early exits if ``exit_cond(state)``
             evaluates to ``True`` *or* the built-in early exit
             function evaluates to ``True`` (if ``early_exit`` is ``True``).
+            The latter can be disabled with ``early_exit=False``.
 
     Returns
     -------
@@ -756,20 +753,16 @@ def grpnet(
         solver_args["y"] = glm.y
         solver_args["weights"] = glm.weights
 
+    if groups is None:
+        groups = np.arange(p, dtype=int)
+
     # multi-response GLMs
     if glm.is_multi:
         K = glm.y.shape[-1]
 
-        if groups is None:
-            groups = "grouped"
-        if groups == "grouped":
-            groups = K * np.arange(p, dtype=int)
-        elif groups == "ungrouped":
-            groups = np.arange(K * p, dtype=int)
-        else:
-            raise RuntimeError(
-                "groups must be one of \"grouped\" or \"ungrouped\" for multi-response."
-            )
+        # flatten the grouping index across the classes
+        groups = groups * K
+
         if intercept:
             groups = np.concatenate([np.arange(K), K + groups], dtype=int)
         group_sizes = np.concatenate([groups, [(p+intercept)*K]], dtype=int)
@@ -911,8 +904,6 @@ def grpnet(
 
     # single-response GLMs
     else:
-        if groups is None:
-            groups = np.arange(p, dtype=int)
         group_sizes = np.concatenate([groups, [p]], dtype=int)
         group_sizes = group_sizes[1:] - group_sizes[:-1]
 
