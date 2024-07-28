@@ -355,6 +355,93 @@ def concatenate(
     return _concatenate()
 
 
+def convex_relu(
+    mat: np.ndarray,
+    mask: np.ndarray,
+    *,
+    copy: bool =False,
+    n_threads: int =1,
+):
+    """Creates a feature matrix for the convex relu problem.
+
+    The feature matrix for the convex relu problem is given by
+
+    .. math::
+        \\begin{align*}
+            X &= 
+            \\begin{bmatrix}
+                Y & -Y
+            \\end{bmatrix}
+            \\\\
+            Y &= 
+            \\begin{bmatrix}
+                D_1 Z & \\ldots & D_m Z
+            \\end{bmatrix}
+        \\end{align*}
+
+    and :math:`D_i \\in \\{0, 1\\}^{n \\times n}` are diagonal matrices.
+
+    Parameters
+    ----------
+    mat : (n, d) ndarray
+        The base matrix :math:`Z` from which to construct the convex relu matrix.        
+    mask : (n, m) ndarray
+        The boolean mask matrix whose columns define the diagonal of :math:`D_i`.
+    copy : bool, optional
+        If ``True``, a copy of the inputs is stored internally.
+        Otherwise, a reference is stored instead.
+        Default is ``False``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64F
+    """
+    dispatcher = {
+        np.dtype("float64"): {
+            "C": core.matrix.MatrixNaiveConvexReluDense64C,
+            "F": core.matrix.MatrixNaiveConvexReluDense64F,
+        },
+        np.dtype("float32"): {
+            "C": core.matrix.MatrixNaiveConvexReluDense32C,
+            "F": core.matrix.MatrixNaiveConvexReluDense32F,
+        },
+    }
+    dtype = mat.dtype
+    order = (
+        "F"
+        # prioritize choosing Fortran contiguity
+        if mat.flags.f_contiguous else
+        "C"
+    )
+    if order == "C":
+        warnings.warn(
+            "Detected matrix to be C-contiguous. "
+            "Performance may improve with F-contiguous matrix."
+        )
+    core_base = dispatcher[dtype][order]
+    py_base = PyMatrixNaiveBase
+
+    class _convex_relu(core_base, py_base):
+        def __init__(self):
+            self._mat = np.array(mat, copy=copy)
+            self._mask = np.array(mask, copy=copy, dtype=bool, order="F")
+            core_base.__init__(self, self._mat, self._mask, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
+        
+    return _convex_relu()
+
+
 def dense(
     mat: np.ndarray,
     *,
@@ -579,7 +666,7 @@ def interaction(
     Parameters
     ----------
     mat : (n, d) ndarray
-        The dense matrix :math:`Z` from which to construct interaction terms.
+        The base matrix :math:`Z` from which to construct interaction terms.
     intr_map : dict
         Dictionary mapping a column index of ``mat``
         to a list of (column) indices to pair with.
@@ -698,7 +785,7 @@ def kronecker_eye(
     """Creates a Kronecker product with identity matrix.
 
     The matrix is represented as :math:`X \\otimes I_K`
-    where :math:`X` is the underlying dense matrix and 
+    where :math:`X` is the underlying base matrix and 
     :math:`I_K` is the identity matrix of dimension :math:`K`.
 
     .. note::
@@ -891,7 +978,7 @@ def one_hot(
     Parameters
     ----------
     mat : (n, d) ndarray
-        The dense matrix :math:`Z` from which to construct one-hot encodings.
+        The base matrix :math:`Z` from which to construct one-hot encodings.
     levels : (d,) ndarray, optional
         Number of levels for each column in ``mat``.
         A non-positive value indicates that the column is a continuous variable
