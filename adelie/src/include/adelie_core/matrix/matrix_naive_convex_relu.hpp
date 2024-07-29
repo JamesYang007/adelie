@@ -65,8 +65,6 @@ public:
         _buff(n_threads * std::min<size_t>(mat.rows(), mat.cols()) + mat.rows())
     {
         const auto n = mat.rows();
-        const auto d = mat.cols();
-        const auto m = mask.cols();
 
         if (mask.rows() != n) {
             throw util::adelie_core_error("mask must be (n, m) where mat is (n, d).");
