@@ -148,6 +148,9 @@ def linear(
 
     The linear constraint is given by :math:`\\ell \\leq A x \\leq u`
     where :math:`\\ell \\leq 0 \\leq u`.
+    This constraint object is intended to support general linear constraints.
+    If :math:`A` is structured (e.g. box constraint),
+    it is more efficient to use specialized constraint types.
 
     Parameters
     ----------
@@ -232,6 +235,10 @@ def linear(
 
     See Also
     --------
+    adelie.constraint.box
+    adelie.constraint.one_sided
+    adelie.constraint.lower
+    adelie.constraint.upper
     adelie.adelie_core.constraint.ConstraintLinearProximalNewton32
     adelie.adelie_core.constraint.ConstraintLinearProximalNewton64
     """
