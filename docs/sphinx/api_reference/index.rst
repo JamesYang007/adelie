@@ -186,6 +186,7 @@ adelie.matrix
 
     block_diag
     concatenate
+    convex_relu
     dense
     eager_cov
     interaction

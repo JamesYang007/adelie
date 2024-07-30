@@ -6,6 +6,7 @@
 #include <adelie_core/matrix/matrix_cov_sparse.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/matrix/matrix_naive_concatenate.hpp>
+#include <adelie_core/matrix/matrix_naive_convex_relu.hpp>
 #include <adelie_core/matrix/matrix_naive_dense.hpp>
 #include <adelie_core/matrix/matrix_naive_interaction.hpp>
 #include <adelie_core/matrix/matrix_naive_kronecker_eye.hpp>
@@ -564,6 +565,29 @@ void matrix_naive_rconcatenate(py::module_& m, const char* name)
         ;
 }
 
+template <class DenseType, class MaskType>
+void matrix_naive_convex_relu_dense(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveConvexReluDense<DenseType, MaskType>;
+    using base_t = typename internal_t::base_t;
+    using dense_t = typename internal_t::dense_t;
+    using mask_t = typename internal_t::mask_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive convex relu matrix."
+        )
+        .def(
+            py::init<
+                const Eigen::Ref<const dense_t>&,
+                const Eigen::Ref<const mask_t>&,
+                size_t
+            >(), 
+            py::arg("mat").noconvert(),
+            py::arg("mask").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
 template <class DenseType>
 void matrix_naive_dense(py::module_& m, const char* name)
 {
@@ -860,6 +884,23 @@ void register_matrix(py::module_& m)
     matrix_cov_sparse<sparse_type<float, Eigen::ColMajor>>(m, "MatrixCovSparse32F");
 
     /* naive matrices */
+    matrix_naive_convex_relu_dense<
+        dense_type<double, Eigen::RowMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexReluDense64C");
+    matrix_naive_convex_relu_dense<
+        dense_type<double, Eigen::ColMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexReluDense64F");
+    matrix_naive_convex_relu_dense<
+        dense_type<float, Eigen::RowMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexReluDense32C");
+    matrix_naive_convex_relu_dense<
+        dense_type<float, Eigen::ColMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexReluDense32F");
+
     matrix_naive_cconcatenate<double>(m, "MatrixNaiveCConcatenate64");
     matrix_naive_cconcatenate<float>(m, "MatrixNaiveCConcatenate32");
     matrix_naive_rconcatenate<double>(m, "MatrixNaiveRConcatenate64");

@@ -149,15 +149,10 @@ def objective(
     groups : (G,) ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-        If ``glm`` is multi-response type, then we only allow two types of groupings:
-
-            - ``"grouped"``: coefficients for each predictor is grouped across the classes.
-            - ``"ungrouped"``: every coefficient is its own group.
-
-        It is only used when ``add_penalty=True``.
-        Default is ``None``, in which case it is set to
-        ``np.arange(p)`` if ``y`` is single-response
-        and ``"grouped"`` if multi-response.
+        If ``glm`` is of multi-response type, then
+        ``groups[i]`` is the starting *feature* index of the ``i`` th group.
+        In either case, ``groups[i]`` must then be a value in the range :math:`\\{1,\\ldots, p\\}`.
+        Default is ``None``, in which case it is set to ``np.arange(p)``.
     alpha : float, optional
         Elastic net parameter :math:`\\alpha`.
         It must be in the range :math:`[0,1]`.
@@ -199,28 +194,21 @@ def objective(
     """
     X_raw = X
     y = glm.y
+
+    if groups is None:
+        groups = np.arange(p, dtype=int)
+
     if glm.is_multi:
         K = y.shape[1]
         X = matrix.kronecker_eye(X, K, n_threads=n_threads)
         p = X.cols() // K
-        if groups is None:
-            groups = "grouped"
-        if groups == "grouped":
-            groups = K * np.arange(p, dtype=int)
-        elif groups == "ungrouped":
-            groups = np.arange(K * p, dtype=int)
-        else:
-            raise RuntimeError(
-                "groups must be one of \"grouped\" or \"ungrouped\" for multi-response."
-            )
+        groups = groups * K 
         group_sizes = np.concatenate([groups, [p*K]], dtype=int)
         group_sizes = group_sizes[1:] - group_sizes[:-1]
     else:
         if isinstance(X, np.ndarray):
             X = matrix.dense(X, method="naive", n_threads=n_threads)
         p = X.cols()
-        if groups is None:
-            groups = np.arange(p)
         group_sizes = np.concatenate([groups, [p]], dtype=int)
         group_sizes = group_sizes[1:] - group_sizes[:-1]
 
@@ -415,14 +403,10 @@ def gradient_norms(
     groups : (G,) ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-        If the gradient is of multi-response type, then we only allow two types of groupings:
-
-            - ``"grouped"``: coefficients for each predictor is grouped across the classes.
-            - ``"ungrouped"``: every coefficient is its own group.
-
-        Default is ``None``, in which case it is set to
-        ``np.arange(p)`` if ``y`` is single-response
-        and ``"grouped"`` if multi-response.
+        If ``glm`` is of multi-response type, then
+        ``groups[i]`` is the starting *feature* index of the ``i`` th group.
+        In either case, ``groups[i]`` must then be a value in the range :math:`\\{1,\\ldots, p\\}`.
+        Default is ``None``, in which case it is set to ``np.arange(p)``.
     alpha : float, optional
         Elastic net parameter :math:`\\alpha`.
         It must be in the range :math:`[0,1]`.
@@ -443,24 +427,16 @@ def gradient_norms(
     """
     is_multi = len(grads.shape) == 3
 
+    if groups is None:
+        groups = np.arange(p)
+
     if is_multi:
         p, K = grads.shape[1:]
-        if groups is None:
-            groups = "grouped"
-        if groups == "grouped":
-            groups = K * np.arange(p, dtype=int)
-        elif groups == "ungrouped":
-            groups = np.arange(K * p, dtype=int)
-        else:
-            raise RuntimeError(
-                "groups must be one of \"grouped\" or \"ungrouped\" for multi-response."
-            )
+        groups = groups * K
         group_sizes = np.concatenate([groups, [p*K]], dtype=int)
         group_sizes = group_sizes[1:] - group_sizes[:-1]
     else:
         p = grads.shape[-1]
-        if groups is None:
-            groups = np.arange(p)
         group_sizes = np.concatenate([groups, [p]], dtype=int)
         group_sizes = group_sizes[1:] - group_sizes[:-1]
 
@@ -1250,8 +1226,8 @@ class DiagnosticNaive:
         self._is_multi = state._glm.is_multi
         self._args = {}
         if self._is_multi:
-            self._args["groups"] = state.group_type
             p_begin = self.state.multi_intercept * self._n_classes
+            self._args["groups"] = state.groups[p_begin:] // self._n_classes - 1
             constraints = state.constraints[p_begin:]
             if np.all([c is None for c in constraints]):
                 constraints = None

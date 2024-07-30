@@ -182,10 +182,26 @@ def zero_constraint(
         def gradient(self, x, out):
             out[...] = self.mu
 
-        def gradient(self, x, mu, out):
+        def gradient_static(self, x, mu, out):
             out[...] = mu
 
+        def project(self, x):
+            x[...] = 0
+
+        def clear(self):
+            self.mu[...] = 0
+
+        def dual(self, indices, values):
+            indices[...] = np.arange(self.size)
+            values[...] = self.mu
+
+        def duals_nnz(self):
+            return self.size
+
         def duals(self):
+            return self.size
+
+        def primals(self):
             return self.size
 
     return _zero_constraint()
@@ -326,36 +342,31 @@ def solve_cvxpy(
     constraints: list =None,
 ):
     _, p = X.shape
+    G = groups.shape[0]
+
+    group_sizes = np.concatenate([groups, [p]], dtype=int)
+    group_sizes = group_sizes[1:] - group_sizes[:-1]
+
+    if constraints is None:
+        constraints = [None] * G
+
     if cvxpy_glm.is_multi:
-        assert groups == "grouped"
         K = cvxpy_glm.y.shape[-1]
 
-        if constraints is None:
-            constraints = [None] * K
-
         penalty = penalty[K:] if intercept else penalty
+        assert penalty.shape[0] == G
+
         beta = cp.Variable((p, K))
         beta0 = cp.Variable(K)
         eta = X @ beta + beta0[None]
         expr = cvxpy_glm.loss(eta)
-        expr += lmda * penalty @ (
-            alpha * cp.norm(beta, axis=1) 
-            + 0.5 * (1-alpha) * cp.sum(cp.square(beta), axis=1)
-        )
-
-        constraints = [
-            beta[i] == 0
-            for i, c in enumerate(constraints)
-            if not (c is None)
-        ]
+        for g, gs, w in zip(groups, group_sizes, penalty):
+            expr += (lmda * w) * (
+                alpha * cp.norm(beta[g:g+gs], "fro") 
+                + 0.5 * (1-alpha) * cp.sum_squares(beta[g:g+gs])
+            )
 
     else:
-        if constraints is None:
-            constraints = [None] * groups.shape[0]
-
-        group_sizes = np.concatenate([groups, [p]], dtype=int)
-        group_sizes = group_sizes[1:] - group_sizes[:-1]
-
         beta = cp.Variable(p)
         beta0 = cp.Variable(1)
         eta = X @ beta + beta0
@@ -366,18 +377,18 @@ def solve_cvxpy(
                 + 0.5 * (1-alpha) * cp.sum_squares(beta[g:g+gs])
             )
 
-        constraints = [
-            beta[g:g+gs] == 0
-            for c, g, gs in zip(constraints, groups, group_sizes)
-            if not (c is None)
-        ]
+    constraints = [
+        beta[g:g+gs] == 0
+        for c, g, gs in zip(constraints, groups, group_sizes)
+        if not (c is None)
+    ]
 
-        if pin:
-            constraints += [
-                beta[groups[i] : groups[i] + group_sizes[i]] == 0
-                for i in range(len(groups))
-                if not (i in screen_set)
-            ]
+    if pin:
+        constraints += [
+            beta[g:g+gs] == 0
+            for i, (g, gs) in enumerate(zip(groups, group_sizes))
+            if not (i in screen_set)
+        ]
 
     if not intercept:
         constraints += [ beta0 == 0 ]
@@ -913,43 +924,36 @@ def test_grpnet(
     K = 3 if "multi" in glm_type else 1
     data = ad.data.dense(n, p, p, K=K, glm=glm_type)
     X, glm = data["X"], data["glm"]
-    if glm.is_multi:
-        groups = "grouped"
+    groups = np.concatenate([
+        [0],
+        np.random.choice(np.arange(1, p), size=G-1, replace=False)
+    ])
+    groups = np.sort(groups).astype(int)
+    group_sizes = np.concatenate([groups, [p]], dtype=int)
+    group_sizes = group_sizes[1:] - group_sizes[:-1]
+
+    if glm_type == "cox":
+        cvxpy_glm = CvxpyGlmCox(
+            glm.start,
+            glm.stop,
+            glm.status,
+            glm.weights,
+        )
+        glm = cvxpy_glm.to_adelie()
+    else:
         cvxpy_glm = {
+            "gaussian": CvxpyGlmGaussian,
+            "binomial": CvxpyGlmBinomial,
+            "poisson": CvxpyGlmPoisson,
             "multigaussian": CvxpyGlmMultiGaussian,
             "multinomial": CvxpyGlmMultinomial,
         }[glm_type](glm.y, glm.weights)
-        group_sizes = np.full(X.shape[1], glm.y.shape[1], dtype=int)
-    else:
-        groups = np.concatenate([
-            [0],
-            np.random.choice(np.arange(1, p), size=G-1, replace=False)
-        ])
-        groups = np.sort(groups).astype(int)
-        group_sizes = np.concatenate([groups, [p]], dtype=int)
-        group_sizes = group_sizes[1:] - group_sizes[:-1]
-
-        if glm_type == "cox":
-            cvxpy_glm = CvxpyGlmCox(
-                glm.start,
-                glm.stop,
-                glm.status,
-                glm.weights,
-            )
-            glm = cvxpy_glm.to_adelie()
-        else:
-            cvxpy_glm = {
-                "gaussian": CvxpyGlmGaussian,
-                "binomial": CvxpyGlmBinomial,
-                "poisson": CvxpyGlmPoisson,
-            }[glm_type](glm.y, glm.weights)
 
     if constraint:
-        G = group_sizes.shape[0]
         constraints = [None] * G
         c_order = np.random.choice(G, G // 2, replace=False)
         for i in c_order:
-            size = group_sizes[i]
+            size = group_sizes[i] * K
             constraints[i] = zero_constraint(size, dtype=np.float64)
     else:
         constraints = None
@@ -963,10 +967,11 @@ def test_grpnet(
     state = ad.grpnet(
         X=X, 
         glm=glm, 
+        constraints=constraints,
         groups=groups,
         intercept=intercept,
         adev_tol=adev_tol,
-        irls_tol=1e-8,
+        irls_tol=1e-9,
         tol=1e-10,
         progress_bar=False,
     )

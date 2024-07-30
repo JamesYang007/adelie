@@ -44,7 +44,6 @@ struct StateMultiGlmNaive: StateGlmNaive<
     using rowarr_value_t = util::rowarr_type<value_t>;
 
     /* static states */
-    const util::multi_group_type group_type;
     const size_t n_classes;
     const bool multi_intercept;
 
@@ -52,7 +51,6 @@ struct StateMultiGlmNaive: StateGlmNaive<
     std::vector<vec_value_t> intercepts;
 
     explicit StateMultiGlmNaive(
-        const std::string& group_type,
         size_t n_classes,
         bool multi_intercept,
         matrix_t& X,
@@ -108,7 +106,6 @@ struct StateMultiGlmNaive: StateGlmNaive<
             newton_tol, newton_max_iters, early_exit, setup_loss_null, setup_lmda_max, setup_lmda_path, intercept, n_threads,
             screen_set, screen_beta, screen_is_active, active_set_size, active_set, beta0, lmda, grad
         ),
-        group_type(util::convert_multi_group(group_type)),
         n_classes(n_classes),
         multi_intercept(multi_intercept)
     {}
