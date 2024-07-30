@@ -3,10 +3,30 @@ from .adelie_core.constraint import (
     ConstraintBase64,
 )
 from .configs import Configs
-from .glm import _coerce_dtype
 from . import adelie_core as core
 from typing import Union
 import numpy as np
+
+
+def _coerce_dtype(y, dtype):
+    dtype_map = {
+        np.dtype("float32"): np.float32,
+        np.dtype("float64"): np.float64,
+    }
+    valid_dtypes = list(dtype_map.keys())
+    y = np.array(y, copy=False)
+    if dtype is None:
+        if not (y.dtype in valid_dtypes):
+            raise RuntimeError(
+                "y must have an underlying type of np.float32 or np.float64, "
+                "or dtype must be explicitly specified."
+            )
+        dtype = dtype_map[y.dtype]
+    else:
+        if not (dtype in valid_dtypes):
+            raise RuntimeError("dtype must be either np.float32 or np.float64.")
+    y = y.astype(dtype, copy=False)
+    return y, dtype
 
 
 def box(
