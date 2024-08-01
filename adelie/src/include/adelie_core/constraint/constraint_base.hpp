@@ -310,7 +310,7 @@ public:
 
     virtual value_t solve_zero(
         const Eigen::Ref<const vec_value_t>& v,
-        Eigen::Ref<vec_uint64_t> buffer
+        Eigen::Ref<vec_uint64_t> 
     ) 
     {
         return v.matrix().norm();

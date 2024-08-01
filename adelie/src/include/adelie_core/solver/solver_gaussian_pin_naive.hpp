@@ -230,7 +230,6 @@ inline void solve(
     auto& X = *state.X;
     const auto y_mean = state.y_mean;
     const auto y_var = state.y_var;
-    const auto& constraints = *state.constraints;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto& screen_set = state.screen_set;
@@ -245,7 +244,6 @@ inline void solve(
     const auto max_iters = state.max_iters;
     const auto adev_tol = state.adev_tol;
     const auto ddev_tol = state.ddev_tol;
-    const auto n_threads = state.n_threads;
     auto& screen_is_active = state.screen_is_active;
     auto& active_set_size = state.active_set_size;
     auto& active_set = state.active_set;
@@ -262,7 +260,6 @@ inline void solve(
     sw_t stopwatch;
     const auto n = X.rows();
     const auto p = X.cols();
-    const auto G = groups.size();
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
