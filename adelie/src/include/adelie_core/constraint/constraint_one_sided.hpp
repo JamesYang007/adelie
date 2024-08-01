@@ -92,6 +92,7 @@ public:
     {
         x = _sgn * (_sgn * x).min(_b);
     }
+
     int duals() override { return _b.size(); }
     int primals() override { return _b.size(); }
 };
@@ -289,6 +290,18 @@ public:
         out = _sgn * _mu;
     }
 
+    value_t solve_zero(
+        const Eigen::Ref<const vec_value_t>& v,
+        Eigen::Ref<vec_uint64_t> 
+    ) override
+    {
+        const auto is_b_zero = (_b <= 0).template cast<value_t>();
+        _mu = (_sgn * v).max(0).min(
+            Configs::max_solver_value * is_b_zero
+        );
+        return (v - _sgn * _mu).matrix().norm();
+    };
+
     void clear() override 
     {
         _mu.setZero();
@@ -469,6 +482,18 @@ public:
     {
         out = _sgn * _mu;
     }
+
+    value_t solve_zero(
+        const Eigen::Ref<const vec_value_t>& v,
+        Eigen::Ref<vec_uint64_t> 
+    ) override
+    {
+        const auto is_b_zero = (_b <= 0).template cast<value_t>();
+        _mu = (_sgn * v).max(0).min(
+            Configs::max_solver_value * is_b_zero
+        );
+        return (v - _sgn * _mu).matrix().norm();
+    };
 
     void clear() override 
     {

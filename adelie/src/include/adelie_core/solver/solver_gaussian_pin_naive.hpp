@@ -246,6 +246,7 @@ inline void solve(
     const auto max_iters = state.max_iters;
     const auto adev_tol = state.adev_tol;
     const auto ddev_tol = state.ddev_tol;
+    const auto n_threads = state.n_threads;
     auto& screen_is_active = state.screen_is_active;
     auto& active_set_size = state.active_set_size;
     auto& active_set = state.active_set;
@@ -389,7 +390,8 @@ inline void solve(
         sparsify_active_dual(
             state,
             active_dual_indices,
-            active_dual_ordered
+            active_dual_ordered,
+            n_threads
         );
 
         Eigen::Map<const sp_vec_value_t> beta_map(

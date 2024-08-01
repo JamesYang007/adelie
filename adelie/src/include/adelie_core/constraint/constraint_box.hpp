@@ -300,6 +300,21 @@ public:
         out = mu;
     }
 
+    value_t solve_zero(
+        const Eigen::Ref<const vec_value_t>& v,
+        Eigen::Ref<vec_uint64_t> 
+    ) override
+    {
+        const auto is_u_zero = (_u <= 0).template cast<value_t>();
+        const auto is_l_zero = (_l <= 0).template cast<value_t>();
+        _mu = v.max(
+            (-Configs::max_solver_value) * is_l_zero
+        ).min(
+            Configs::max_solver_value * is_u_zero
+        );
+        return (v - _mu).matrix().norm();
+    };
+
     void clear() override 
     {
         _mu.setZero();

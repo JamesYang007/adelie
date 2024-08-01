@@ -282,6 +282,35 @@ void constraint_base(py::module_& m, const char* name)
         )delimiter",
             py::arg("x").noconvert()
         )
+        .def("solve_zero", &internal_t::solve_zero, R"delimiter(
+        Solves the zero primal KKT condition problem.
+
+        The zero primal KKT condition problem is given by
+
+        .. math::
+            \begin{align*}
+                \mathrm{minimize}_{\mu \geq 0}
+                \|v - \phi'(0)^\top \mu\|_2
+            \end{align*}
+
+        where :math:`\phi` is the current constraint function
+        and :math:`\mu` is the dual variable.
+        It is advised, but not necessary, that the object stores the solution internally
+        so that a subsequent call to :func:`dual` will return the solution.
+
+        Parameters
+        ----------
+        v : (d,) ndarray
+            The vector :math:`v`.
+        buffer : (b,) ndarray
+            Buffer of type ``uint64_t`` aligned at 8 bytes.
+            The size must be at least as large as :func:`buffer_size`.
+
+        Returns
+        -------
+        norm : float
+            The optimal objective for the zero primal KKT condition problem.
+        )delimiter")
         .def("clear", &internal_t::clear, R"delimiter(
         Clears internal data.
 

@@ -103,54 +103,58 @@ void sparsify_active_beta(
     assert(values.size() == std::distance(values.data(), vals_begin));
 }
 
+// TODO: 
+// It might be too much to save all of them though especially if we have a lot of active constraints.
+// Then, state.dual is going to be super dense and we have 100 rows of such dense vectors.
+// Nonetheless, it's still useful to have this for diagnostic purposes... maybe a flag to control whether this gets saved?
 template <class StateType, class VecIndexType, class VecValueType>
 ADELIE_CORE_STRONG_INLINE
 void sparsify_active_dual(
     const StateType& state,
     VecIndexType& indices,
-    VecValueType& values
+    VecValueType& values,
+    size_t n_threads
 )
 {
     using index_t = typename StateType::index_t;
     using vec_index_t = typename StateType::vec_index_t;
     using vec_value_t = typename StateType::vec_value_t;
 
-    const auto& screen_set = state.screen_set;
     const auto& constraints = *state.constraints;
     const auto& dual_groups = state.dual_groups;
 
-    const auto S = screen_set.size();
-    std::vector<index_t> screen_order(S);
-    std::iota(
-        screen_order.data(),
-        screen_order.data() + screen_order.size(),
-        0
+    const auto n_constraints = constraints.size();
+    vec_index_t begins(n_constraints+1);
+    begins[0] = 0;
+    begins.tail(n_constraints) = vec_index_t::NullaryExpr(
+        n_constraints, 
+        [&](auto i) {
+            const auto constraint = constraints[i];
+            return constraint ? constraint->duals_nnz() : 0;
+        }
     );
-    std::sort(
-        screen_order.data(),
-        screen_order.data() + screen_order.size(),
-        [&](auto i, auto j) { return dual_groups[screen_set[i]] < dual_groups[screen_set[j]]; }
-    );
+    for (Eigen::Index i = 1; i < begins.size(); ++i) {
+        begins[i] += begins[i-1];
+    }
+    indices.resize(begins[n_constraints]);
+    values.resize(begins[n_constraints]);
 
-    for (size_t i = 0; i < screen_order.size(); ++i) {
-        const auto ss_idx = screen_order[i];
-        const auto group = screen_set[ss_idx];
-        const auto constraint = constraints[group];
-        const size_t nnz = constraint ? constraint->duals_nnz() : 0;
-        if (nnz <= 0) continue;
-        const size_t old_size = indices.size();
-        indices.resize(old_size + nnz);
-        values.resize(old_size + nnz);
-        Eigen::Map<vec_index_t> indices_v(
-            indices.data() + old_size,
-            nnz
-        );
-        Eigen::Map<vec_value_t> values_v(
-            values.data() + old_size,
-            nnz
-        );
+    const auto routine = [&](auto i) {
+        const auto b = begins[i];
+        const auto nnz = begins[i+1] - b;
+        if (nnz <= 0) return;
+        const auto constraint = constraints[i];
+        Eigen::Map<vec_index_t> indices_v(indices.data() + b, nnz);
+        Eigen::Map<vec_value_t> values_v(values.data() + b, nnz);
         constraint->dual(indices_v, values_v);
-        indices_v += dual_groups[group];
+        indices_v += dual_groups[i];
+    };
+    
+    if (n_threads <= 1) {
+        for (Eigen::Index i = 0; i < static_cast<Eigen::Index>(n_constraints); ++i) routine(i);
+    } else {
+        #pragma omp parallel for schedule(static) num_threads(n_threads)
+        for (Eigen::Index i = 0; i < static_cast<Eigen::Index>(n_constraints); ++i) routine(i);
     }
 }
 

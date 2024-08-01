@@ -308,6 +308,14 @@ public:
     )
     {}
 
+    virtual value_t solve_zero(
+        const Eigen::Ref<const vec_value_t>& v,
+        Eigen::Ref<vec_uint64_t> buffer
+    ) 
+    {
+        return v.matrix().norm();
+    };
+
     virtual void clear() =0;
 
     virtual void dual(
