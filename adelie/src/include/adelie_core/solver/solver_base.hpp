@@ -68,7 +68,7 @@ auto sparsify_dual(
     const auto last_constraint = constraints[n_constraints-1];
     const auto n_duals = (
         dual_groups[n_constraints-1] + 
-        last_constraint ? last_constraint->duals() : 0
+        (last_constraint ? last_constraint->duals() : 0)
     );
     Eigen::Map<const sp_vec_value_t> dual_map(
         n_duals,

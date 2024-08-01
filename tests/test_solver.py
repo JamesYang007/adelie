@@ -185,6 +185,10 @@ def zero_constraint(
         def gradient_static(self, x, mu, out):
             out[...] = mu
 
+        def solve_zero(self, v, buffer):
+            self.mu[...] = v
+            return 0
+
         def project(self, x):
             x[...] = 0
 
