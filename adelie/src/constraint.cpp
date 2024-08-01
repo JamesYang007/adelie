@@ -76,6 +76,19 @@ public:
         );
     }
 
+    value_t solve_zero(
+        const Eigen::Ref<const vec_value_t>& v,
+        Eigen::Ref<vec_uint64_t> buffer
+    ) override
+    {
+        PYBIND11_OVERRIDE(
+            value_t,
+            base_t,
+            solve_zero,
+            v, buffer
+        );
+    }
+
     void clear() override 
     {
         PYBIND11_OVERRIDE_PURE(
