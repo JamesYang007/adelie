@@ -115,8 +115,8 @@ public:
 private:
     const size_t _max_iters;
     const value_t _tol;
-    const size_t _nnls_max_iters;
-    const value_t _nnls_tol;
+    const size_t _hinge_max_iters;
+    const value_t _hinge_tol;
     const value_t _cs_tol;
     const value_t _slack;
 
@@ -128,16 +128,16 @@ public:
         const Eigen::Ref<const vec_value_t>& u,
         size_t max_iters,
         value_t tol,
-        size_t nnls_max_iters,
-        value_t nnls_tol,
+        size_t hinge_max_iters,
+        value_t hinge_tol,
         value_t cs_tol,
         value_t slack
     ):
         base_t(l, u),
         _max_iters(max_iters),
         _tol(tol),
-        _nnls_max_iters(nnls_max_iters),
-        _nnls_tol(nnls_tol),
+        _hinge_max_iters(hinge_max_iters),
+        _hinge_tol(hinge_tol),
         _cs_tol(cs_tol),
         _slack(slack),
         _mu(vec_value_t::Zero(l.size()))
@@ -145,8 +145,8 @@ public:
         if (tol < 0) {
             throw util::adelie_core_error("tol must be >= 0.");
         }
-        if (nnls_tol < 0) {
-            throw util::adelie_core_error("nnls_tol must be >= 0.");
+        if (hinge_tol < 0) {
+            throw util::adelie_core_error("hinge_tol must be >= 0.");
         }
         if (cs_tol < 0) {
             throw util::adelie_core_error("cs_tol must be >= 0.");
@@ -259,7 +259,7 @@ public:
             const auto& hess
         ) {
             optimization::StateHingeFull<colmat_value_t> state_hinge(
-                hess, _l, _u, _nnls_max_iters, _nnls_tol, _mu, grad 
+                hess, _l, _u, _hinge_max_iters, _hinge_tol, _mu, grad 
             );
             state_hinge.solve();
         };

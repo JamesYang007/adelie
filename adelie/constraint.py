@@ -67,12 +67,12 @@ def box(
                 tol : float, optional
                     Convergence tolerance for proximal Newton.
                     Default is ``1e-9``.
-                nnls_max_iters : int, optional
-                    Maximum number of non-negative least squares iterations.
+                hinge_max_iters : int, optional
+                    Maximum number of hinge loss iterations.
                     Default is ``int(1e5)``.
-                nnls_tol : float, optional
-                    Maximum number of non-negative least squares iterations.
-                    Default is ``1e-14``.
+                hinge_tol : float, optional
+                    Convergence tolerance for the hinge loss optimizer.
+                    Default is ``1e-9``.
                 cs_tol : float, optional
                     Complementary slackness tolerance.
                     Default is ``1e-9``.
@@ -128,8 +128,8 @@ def box(
         "proximal-newton": {
             "max_iters": 100,
             "tol": 1e-9,
-            "nnls_max_iters": int(1e5),
-            "nnls_tol": 1e-14,
+            "hinge_max_iters": int(1e5),
+            "hinge_tol": 1e-9,
             "cs_tol": 1e-9,
             "slack": 1e-4,
         },
@@ -211,15 +211,21 @@ def linear(
                 tol : float, optional
                     Convergence tolerance for proximal Newton.
                     Default is ``1e-9``.
-                nnls_batch_size : int, optional
-                    Batch size of active dual variables to include at a time.
-                    Default is ``10``.
                 nnls_max_iters : int, optional
                     Maximum number of non-negative least squares iterations.
                     Default is ``int(1e5)``.
                 nnls_tol : float, optional
-                    Maximum number of non-negative least squares iterations.
-                    Default is ``1e-14``.
+                    Convergence tolerance for non-negative least squares.
+                    Default is ``1e-9``.
+                hinge_batch_size : int, optional
+                    Batch size of active dual variables to include at a time in the hinge loss optimizer.
+                    Default is ``50``.
+                hinge_max_iters : int, optional
+                    Maximum number of hinge loss iterations.
+                    Default is ``int(1e5)``.
+                hinge_tol : float, optional
+                    Convergence tolerance for the hinge loss optimizer.
+                    Default is ``1e-9``.
                 cs_tol : float, optional
                     Complementary slackness tolerance.
                     Default is ``1e-9``.
@@ -292,9 +298,11 @@ def linear(
         "proximal-newton": {
             "max_iters": 100,
             "tol": 1e-9,
-            "nnls_batch_size": 10,
             "nnls_max_iters": int(1e5),
-            "nnls_tol": 1e-14,
+            "nnls_tol": 1e-9,
+            "hinge_batch_size": 50,
+            "hinge_max_iters": int(1e5),
+            "hinge_tol": 1e-9,
             "cs_tol": 1e-9,
             "slack": 1e-4,
             "n_threads": 1,
@@ -398,12 +406,12 @@ def one_sided(
                 tol : float, optional
                     Convergence tolerance for proximal Newton.
                     Default is ``1e-9``.
-                nnls_max_iters : int, optional
-                    Maximum number of non-negative least squares iterations.
+                hinge_max_iters : int, optional
+                    Maximum number of hinge loss iterations.
                     Default is ``int(1e5)``.
-                nnls_tol : float, optional
-                    Maximum number of non-negative least squares iterations.
-                    Default is ``1e-14``.
+                hinge_tol : float, optional
+                    Convergence tolerance for the hinge loss optimizer.
+                    Default is ``1e-9``.
                 cs_tol : float, optional
                     Complementary slackness tolerance.
                     Default is ``1e-9``.
@@ -474,8 +482,8 @@ def one_sided(
         "proximal-newton": {
             "max_iters": 100,
             "tol": 1e-9,
-            "nnls_max_iters": int(1e5),
-            "nnls_tol": 1e-14,
+            "hinge_max_iters": int(1e5),
+            "hinge_tol": 1e-9,
             "cs_tol": 1e-9,
             "slack": 1e-4,
         },

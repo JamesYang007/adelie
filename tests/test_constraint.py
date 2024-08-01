@@ -76,7 +76,7 @@ def test_box(d, method, dtype, seed):
         "proximal-newton": {
             "max_iters": 1000,
             "tol": 1e-14,
-            "nnls_tol": 1e-14,
+            "hinge_tol": 1e-14,
         },
     }[method]
     cnstr = constraint.box(lower, upper, method=method, configs=configs, dtype=dtype)
@@ -113,8 +113,8 @@ def test_linear(m, d, method, dtype, seed):
         "proximal-newton": {
             "max_iters": 1000,
             "tol": 1e-16,
-            "nnls_max_iters": 100000,
-            "nnls_tol": 1e-16,
+            "hinge_max_iters": 100000,
+            "hinge_tol": 1e-16,
         }
     }[method]
     cnstr = constraint.linear(A, lower, upper, method=method, configs=configs)
@@ -148,7 +148,7 @@ def test_lower(d, method, dtype, seed):
         "proximal-newton": {
             "max_iters": 1000,
             "tol": 1e-14,
-            "nnls_tol": 1e-14,
+            "hinge_tol": 1e-14,
         },
     }[method]
     cnstr = constraint.lower(b, method=method, configs=configs, dtype=dtype)
@@ -182,7 +182,7 @@ def test_one_sided(d, method, dtype, seed):
         "proximal-newton": {
             "max_iters": 1000,
             "tol": 1e-14,
-            "nnls_tol": 1e-14,
+            "hinge_tol": 1e-14,
         },
         "admm": {
             "max_iters": 4000,
@@ -221,7 +221,7 @@ def test_upper(d, method, dtype, seed):
         "proximal-newton": {
             "max_iters": 1000,
             "tol": 1e-14,
-            "nnls_tol": 1e-14,
+            "hinge_tol": 1e-14,
         },
     }[method]
     cnstr = constraint.upper(b, method=method, configs=configs, dtype=dtype)

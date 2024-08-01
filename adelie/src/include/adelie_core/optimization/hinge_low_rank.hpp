@@ -223,7 +223,7 @@ struct StateHingeLowRank
                         "StateHingeLowRank: max iterations reached!"
                     );
                 }
-                if (convg_measure <= tol) break;
+                if (convg_measure <= A.cols() * tol) break;
             }
 
             /* Invariance step */

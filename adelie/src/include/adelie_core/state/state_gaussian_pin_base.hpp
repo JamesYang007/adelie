@@ -38,7 +38,6 @@ struct StateGaussianPinBase
     const dyn_vec_constraint_t* constraints;
     const map_cvec_index_t groups;
     const map_cvec_index_t group_sizes;
-    const map_cvec_index_t dual_groups;
     const value_t alpha;
     const map_cvec_value_t penalty;
     const map_cvec_index_t screen_set;
@@ -68,7 +67,6 @@ struct StateGaussianPinBase
     dyn_vec_index_t active_begins;
     dyn_vec_index_t active_order;
     dyn_vec_sp_vec_t betas;
-    dyn_vec_sp_vec_t duals;
     dyn_vec_value_t intercepts;
     dyn_vec_value_t rsqs;
     dyn_vec_value_t lmdas;
@@ -84,7 +82,6 @@ struct StateGaussianPinBase
         const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
-        const Eigen::Ref<const vec_index_t>& dual_groups, 
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_index_t>& screen_set, 
@@ -111,7 +108,6 @@ struct StateGaussianPinBase
         constraints(&constraints),
         groups(groups.data(), groups.size()),
         group_sizes(group_sizes.data(), group_sizes.size()),
-        dual_groups(dual_groups.data(), dual_groups.size()),
         alpha(alpha),
         penalty(penalty.data(), penalty.size()),
         screen_set(screen_set.data(), screen_set.size()),

@@ -101,7 +101,7 @@ struct StateNNLS
                 loss -= del * gi - 0.5 * scaled_del_sq;
                 resid -= del * X.col(i).array();
             }
-            if (convg_measure < tol) return;
+            if (convg_measure < X.rows() * tol) return;
         }
 
         throw util::adelie_core_solver_error(

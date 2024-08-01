@@ -91,9 +91,11 @@ private:
     const size_t _A_rank;
     const size_t _max_iters;
     const value_t _tol;
-    const size_t _nnls_batch_size;
     const size_t _nnls_max_iters;
     const value_t _nnls_tol;
+    const size_t _hinge_batch_size;
+    const size_t _hinge_max_iters;
+    const value_t _hinge_tol;
     const value_t _cs_tol;
     const value_t _slack;
     const size_t _n_threads;
@@ -142,9 +144,11 @@ public:
         const Eigen::Ref<const vec_value_t>& A_vars,
         size_t max_iters,
         value_t tol,
-        size_t nnls_batch_size,
         size_t nnls_max_iters,
         value_t nnls_tol,
+        size_t hinge_batch_size,
+        size_t hinge_max_iters,
+        value_t hinge_tol,
         value_t cs_tol,
         value_t slack,
         size_t n_threads
@@ -157,9 +161,11 @@ public:
         _A_rank(init_A_rank(A_d)),
         _max_iters(max_iters),
         _tol(tol),
-        _nnls_batch_size(nnls_batch_size),
         _nnls_max_iters(nnls_max_iters),
         _nnls_tol(nnls_tol),
+        _hinge_batch_size(hinge_batch_size),
+        _hinge_max_iters(hinge_max_iters),
+        _hinge_tol(hinge_tol),
         _cs_tol(cs_tol),
         _slack(slack),
         _n_threads(n_threads),
@@ -185,6 +191,9 @@ public:
         }
         if (nnls_tol < 0) {
             throw util::adelie_core_error("nnls_tol must be >= 0.");
+        }
+        if (hinge_tol < 0) {
+            throw util::adelie_core_error("hinge_tol must be >= 0.");
         }
         if (cs_tol < 0) {
             throw util::adelie_core_error("cs_tol must be >= 0.");
@@ -349,6 +358,8 @@ public:
                 // The relaxed constraint version above was just to check if a zero solution is 
                 // a good approximation to the true solution.
                 // For sparsity, we omit values that are hitting the boundaries (these are the ones that are "relaxed").
+                // Also usually, at this point, the next iteration will start the proximal Newton iterations.
+                // This means the more sparse mu is, the fewer coordinates to initially iterate over.
                 mu = (
                     mu.min(0) * (mu.min(0) * _l > -_cs_tol).template cast<value_t>()
                     + mu.max(0) * (mu.max(0) * _u < _cs_tol).template cast<value_t>()
@@ -418,7 +429,7 @@ public:
                 hess_small = _A * hess * _A.transpose();
                 hinge_grad = grad.matrix() * _A.transpose();
                 optimization::StateHingeFull<colmat_value_t> state_hinge(
-                    hess_small, _l, _u, _nnls_max_iters, _nnls_tol,
+                    hess_small, _l, _u, _hinge_max_iters, _hinge_tol,
                     mu, hinge_grad
                 );
                 state_hinge.solve();
@@ -442,7 +453,7 @@ public:
                     for (Eigen::Index ii = 0; ii < static_cast<Eigen::Index>(active_size); ++ii) active_invariance(ii);
                 }
                 optimization::StateHingeLowRank<value_t, index_t> state_hinge(
-                    hess, _A, _l, _u, _nnls_batch_size, _nnls_max_iters, _nnls_tol, _n_threads,
+                    hess, _A, _l, _u, _hinge_batch_size, _hinge_max_iters, _hinge_tol, _n_threads,
                     _mu_active, _mu_value, active_vars, active_AQ, grad, hinge_grad
                 );
                 state_hinge.solve();
@@ -493,6 +504,67 @@ public:
     ) override
     {
         out.matrix() = mu.matrix() * _A;
+    }
+
+    value_t solve_zero(
+        const Eigen::Ref<const vec_value_t>& v,
+        Eigen::Ref<vec_uint64_t> buffer
+    ) override
+    {
+        const auto m = _A.rows();
+        const auto d = _A.cols();
+
+        auto buff_ptr = reinterpret_cast<value_t*>(buffer.data());
+        const auto buff_begin = buff_ptr;
+        Eigen::Map<vec_value_t> grad(buff_ptr, d); buff_ptr += d;
+        Eigen::Map<vec_value_t> mu(buff_ptr, m); buff_ptr += m;
+
+        // check SVD-based warm-start
+        mu.setZero();
+        for (size_t i = 0; i < _mu_active.size(); ++i) {
+            const auto idx = _mu_active[i];
+            const auto val = _mu_value[i];
+            mu[idx] = val;
+        }
+
+        // refine check with NNLS
+        auto& Qmu_resid = grad;
+        Qmu_resid = v - _ATmu;
+        const value_t loss = 0.5 * Qmu_resid.square().sum();
+        const Eigen::Map<const colmat_value_t> AT(
+            _A.data(), _A.cols(), _A.rows()
+        );
+        optimization::StateNNLS<colmat_value_t> state_nnls(
+            AT, _A_vars, _nnls_max_iters, _nnls_tol,
+            mu, Qmu_resid, loss
+        );
+        const auto lower_constraint = vec_value_t::NullaryExpr(_l.size(), [&](auto i) {
+            const auto li = _l[i];
+            return (li <= 0) ? (-Configs::max_solver_value) : 0;
+        });
+        const auto upper_constraint = vec_value_t::NullaryExpr(_u.size(), [&](auto i) {
+            const auto ui = _u[i];
+            return (ui <= 0) ? Configs::max_solver_value : 0;
+        });
+        state_nnls.solve(
+            [&]() { return false; },
+            lower_constraint,
+            upper_constraint
+        );
+
+        _mu_active_set.clear();
+        _mu_active.clear();
+        _mu_value.clear();
+        for (Eigen::Index i = 0; i < mu.size(); ++i) {
+            const auto mi = mu[i];
+            if (mi == 0) continue;
+            _mu_active_set.insert(i);
+            _mu_active.push_back(i);
+            _mu_value.push_back(mi);
+        }
+        _ATmu = v - Qmu_resid;
+
+        return std::sqrt(2 * state_nnls.loss);
     }
 
     void clear() override 

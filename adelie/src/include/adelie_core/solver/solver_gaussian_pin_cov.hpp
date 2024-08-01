@@ -34,8 +34,7 @@ struct GaussianPinCovBufferPack: public GaussianPinBufferPack<ValueType, IndexTy
         size_t constraint_buffer_size,
         size_t buffer_index_size,
         size_t buffer_sg_size,
-        size_t active_beta_size,
-        size_t active_dual_size
+        size_t active_beta_size
     ): 
         base_t(
             buffer1_size,
@@ -43,8 +42,7 @@ struct GaussianPinCovBufferPack: public GaussianPinBufferPack<ValueType, IndexTy
             buffer3_size,
             buffer4_size,
             constraint_buffer_size,
-            active_beta_size,
-            active_dual_size
+            active_beta_size
         ),
         buffer_index(buffer_index_size),
         buffer_sg(buffer_sg_size)
@@ -473,7 +471,6 @@ inline void solve(
     const auto& constraints = *state.constraints;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
-    const auto& dual_groups = state.dual_groups;
     const auto& screen_set = state.screen_set;
     const auto& screen_beta = state.screen_beta;
     const auto& lmda_path = state.lmda_path;
@@ -489,7 +486,6 @@ inline void solve(
     auto& active_order = state.active_order;
     auto& screen_is_active = state.screen_is_active;
     auto& betas = state.betas;
-    auto& duals = state.duals;
     auto& intercepts = state.intercepts;
     auto& rsqs = state.rsqs;
     auto& lmdas = state.lmdas;
@@ -501,8 +497,6 @@ inline void solve(
     sw_t stopwatch;
     const auto p = A.cols();
     const auto G = groups.size();
-    const auto n_last_dual = constraints[G-1] ? constraints[G-1]->duals() : 0;
-    const auto n_duals = G ? (dual_groups[G-1] + n_last_dual) : 0;
 
     // buffers for the routine
     const auto max_group_size = group_sizes.maxCoeff();
@@ -514,15 +508,12 @@ inline void solve(
         constraint_buffer_size,
         max_group_size,
         screen_beta.size(), 
-        screen_beta.size(),
-        std::min<size_t>(n_duals, 1 << 20)
+        screen_beta.size()
     );    
 
     // buffer to store final result
     auto& active_beta_indices = buffer_pack.active_beta_indices; 
     auto& active_beta_ordered = buffer_pack.active_beta_ordered;
-    auto& active_dual_indices = buffer_pack.active_dual_indices;
-    auto& active_dual_ordered = buffer_pack.active_dual_ordered;
 
     // compute number of active coefficients
     size_t active_beta_size = 0;
@@ -629,16 +620,6 @@ inline void solve(
             active_beta_ordered
         );
 
-        // order the active duals
-        active_dual_indices.clear();
-        active_dual_ordered.clear();
-        sparsify_active_dual(
-            state,
-            active_dual_indices,
-            active_dual_ordered,
-            n_threads
-        );
-
         Eigen::Map<const sp_vec_value_t> beta_map(
             p,
             active_beta_indices.size(),
@@ -646,15 +627,7 @@ inline void solve(
             active_beta_ordered.data()
         );
 
-        Eigen::Map<const sp_vec_value_t> dual_map(
-            n_duals,
-            active_dual_indices.size(),
-            active_dual_indices.data(),
-            active_dual_ordered.data()
-        );
-
         betas.emplace_back(beta_map);
-        duals.emplace_back(dual_map);
         intercepts.emplace_back(0);
         rsqs.emplace_back(rsq);
         lmdas.emplace_back(lmda_path[l]);

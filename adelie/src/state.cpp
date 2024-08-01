@@ -90,7 +90,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
-            const Eigen::Ref<const vec_index_t>&, 
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_index_t>&, 
@@ -117,7 +116,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
-            py::arg("dual_groups").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("screen_set").noconvert(),
@@ -152,10 +150,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         .def_readonly("group_sizes", &state_t::group_sizes, R"delimiter(
         List of group sizes corresponding to each element in ``groups``.
         ``group_sizes[i]`` is the group size of the ``i`` th group. 
-        )delimiter")
-        .def_readonly("dual_groups", &state_t::dual_groups, R"delimiter(
-        List of starting indices to each dual group where `G` is the number of groups.
-        ``dual_groups[i]`` is the starting index of the ``i`` th dual group. 
         )delimiter")
         .def_readonly("alpha", &state_t::alpha, R"delimiter(
         Elastic net parameter.
@@ -270,20 +264,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         }, R"delimiter(
         ``betas[i]`` is the solution at ``lmdas[i]``.
         )delimiter")
-        .def_property_readonly("duals", [](const state_t& s) {
-            const auto& constraints = *s.constraints;
-            const auto& dual_groups = s.dual_groups;
-            const auto G = dual_groups.size();
-            const auto constraint = constraints[G-1];
-            const auto group_size = constraint ? constraint->duals() : 0;
-            const auto n_duals = G ? (dual_groups[G-1] + group_size) : 0;
-            return convert_sparse_to_dense(
-                n_duals,
-                s.duals
-            );
-        }, R"delimiter(
-        ``duals[i]`` is the dual at ``lmdas[i]``.
-        )delimiter")
         .def_property_readonly("intercepts", [](const state_t& s) {
             return Eigen::Map<const vec_value_t>(s.intercepts.data(), s.intercepts.size());
         }, R"delimiter(
@@ -361,7 +341,6 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
-            const Eigen::Ref<const vec_index_t>&, 
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
@@ -395,7 +374,6 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
-            py::arg("dual_groups").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("weights").noconvert(),
@@ -507,7 +485,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
-            const Eigen::Ref<const vec_index_t>&, 
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_index_t>&, 
@@ -536,7 +513,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
-            py::arg("dual_groups").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("screen_set").noconvert(),

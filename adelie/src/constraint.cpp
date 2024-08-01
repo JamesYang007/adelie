@@ -412,8 +412,8 @@ void constraint_box_proximal_newton(py::module_& m, const char* name)
             py::arg("upper").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("nnls_max_iters"),
-            py::arg("nnls_tol"),
+            py::arg("hinge_max_iters"),
+            py::arg("hinge_tol"),
             py::arg("cs_tol"),
             py::arg("slack")
         )
@@ -454,6 +454,8 @@ void constraint_linear_proximal_newton(py::module_& m, const char* name)
             size_t,
             value_t,
             size_t,
+            value_t,
+            size_t,
             size_t,
             value_t,
             value_t,
@@ -469,9 +471,11 @@ void constraint_linear_proximal_newton(py::module_& m, const char* name)
             py::arg("A_vars").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("nnls_batch_size"),
             py::arg("nnls_max_iters"),
             py::arg("nnls_tol"),
+            py::arg("hinge_batch_size"),
+            py::arg("hinge_max_iters"),
+            py::arg("hinge_tol"),
             py::arg("cs_tol"),
             py::arg("slack"),
             py::arg("n_threads")
@@ -515,8 +519,8 @@ void constraint_one_sided_proximal_newton(py::module_& m, const char* name)
             py::arg("b").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("nnls_max_iters"),
-            py::arg("nnls_tol"),
+            py::arg("hinge_max_iters"),
+            py::arg("hinge_tol"),
             py::arg("cs_tol"),
             py::arg("slack")
         )
