@@ -338,11 +338,6 @@ inline void solve_core(
     auto& active_sizes = state.active_sizes;
     auto& screen_sizes = state.screen_sizes;
 
-    // Clear cached information for every constraint object.
-    for (auto& c : constraints) {
-        if (c) c->clear();
-    }
-
     // Manually set progress bar to iters_done_ == 1.
     // This ensures that until pb is properly initialized to the range of [0, lmda_path.size()),
     // if the function finishes earlier then pb will print "... 0/0 ..." instead of "... -1/0 ...".

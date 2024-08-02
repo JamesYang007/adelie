@@ -701,6 +701,12 @@ def grpnet(
 
     n, p = X.rows(), X.cols()
 
+    # clear cached information for every constraint object
+    if isinstance(constraints, list):
+        for c in constraints:
+            if c is None: continue
+            c.clear()
+
     # compute common quantities
     if not (offsets is None): 
         if offsets.shape != glm.y.shape:
