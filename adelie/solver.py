@@ -323,6 +323,12 @@ def gaussian_cov(
     
     p = A.cols()
 
+    # clear cached information for every constraint object
+    if isinstance(constraints, list):
+        for c in constraints:
+            if c is None: continue
+            c.clear()
+
     if not (lmda_path is None):
         # MUST evaluate the flip to be able to pass into C++ backend.
         lmda_path = np.array(np.flip(np.sort(lmda_path)))
@@ -700,6 +706,12 @@ def grpnet(
     )
 
     n, p = X.rows(), X.cols()
+
+    # clear cached information for every constraint object
+    if isinstance(constraints, list):
+        for c in constraints:
+            if c is None: continue
+            c.clear()
 
     # compute common quantities
     if not (offsets is None): 
