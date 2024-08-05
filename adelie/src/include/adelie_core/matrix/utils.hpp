@@ -415,6 +415,46 @@ void spaxi(
     }
 }
 
+template <class InnerType, class ValueType, class DenseType, class OutType>
+ADELIE_CORE_STRONG_INLINE
+void spdaddi(
+    const InnerType& inner, 
+    const ValueType& value,
+    const DenseType& v,
+    OutType& out,
+    size_t n_threads
+)
+{
+    using value_t = typename std::decay_t<ValueType>::Scalar;
+    const size_t nnz = inner.size();
+    // NOTE: multiplier from experimentation
+    const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+        for (size_t i = 0; i < nnz; ++i) {
+            const auto idx = inner[i];
+            out[idx] += v[idx] * value[i];
+        }
+        return;
+    }
+    const int n_blocks = std::min(n_threads, nnz);
+    const int block_size = nnz / n_blocks;
+    const int remainder = nnz % n_blocks;
+
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
+    for (int t = 0; t < n_blocks; ++t)
+    {
+        const auto begin = (
+            std::min<int>(t, remainder) * (block_size + 1) 
+            + std::max<int>(t-remainder, 0) * block_size
+        );
+        const auto size = block_size + (t < remainder);
+        for (int i = begin; i < begin+size; ++i) {
+            const auto idx = inner[i];
+            out[idx] += v[idx] * value[i];
+        }
+    }
+}
+
 template <class UnaryType, class IOType, class VType, class BuffType>
 ADELIE_CORE_STRONG_INLINE
 auto snp_unphased_dot(

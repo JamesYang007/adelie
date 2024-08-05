@@ -200,7 +200,7 @@ def linear(
                     Default is ``1e-9``.
                 hinge_batch_size : int, optional
                     Batch size of active dual variables to include at a time in the hinge loss optimizer.
-                    Default is ``50``.
+                    Default is ``A.shape[0]``.
                 hinge_max_iters : int, optional
                     Maximum number of hinge loss iterations.
                     Default is ``int(1e5)``.
@@ -281,7 +281,7 @@ def linear(
             "tol": 1e-9,
             "nnls_max_iters": int(1e5),
             "nnls_tol": 1e-9,
-            "hinge_batch_size": 50,
+            "hinge_batch_size": A.shape[0],
             "hinge_max_iters": int(1e5),
             "hinge_tol": 1e-9,
             "cs_tol": 1e-9,

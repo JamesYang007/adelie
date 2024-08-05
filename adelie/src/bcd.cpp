@@ -1,7 +1,6 @@
 #include "decl.hpp"
 #include <adelie_core/bcd/constrained/admm.hpp>
 #include <adelie_core/bcd/constrained/coordinate_descent.hpp>
-#include <adelie_core/bcd/constrained/proximal_newton.hpp>
 #include <adelie_core/bcd/unconstrained/brent.hpp>
 #include <adelie_core/bcd/unconstrained/ista.hpp>
 #include <adelie_core/bcd/unconstrained/newton.hpp>
@@ -307,52 +306,6 @@ py::dict constrained_coordinate_descent_solver(
     return dct;
 }
 
-py::dict constrained_proximal_newton_general_solver(
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& mu0,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& quad,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& linear,
-    double l1,
-    double l2,
-    const Eigen::Ref<const ad::util::rowmat_type<double>>& A,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& b,
-    size_t max_iters,
-    double tol,
-    size_t newton_max_iters,
-    double newton_tol,
-    size_t nnls_max_iters,
-    double nnls_tol
-)
-{
-    using sw_t = ad::util::Stopwatch;
-
-    const auto m = A.rows();
-    const auto d = A.cols();
-
-    size_t iters;
-    ad::util::rowvec_type<double> buff(m*(m+4+d)+3*d);
-    ad::util::rowvec_type<double> x(d);
-    ad::util::rowvec_type<double> mu = mu0;
-    ad::util::rowvec_type<double> mu_resid = (
-        linear.matrix() - mu.matrix() * A
-    );
-    ad::util::rowvec_type<double> AT_vars = (
-        A.array().square().rowwise().sum()
-    );
-
-    sw_t sw;
-    sw.start();
-    ad::bcd::constrained::proximal_newton_general_solver(
-        quad, linear, l1, l2, A, b, AT_vars,
-        max_iters, tol, newton_max_iters, newton_tol, nnls_max_iters, nnls_tol,
-        iters, x, mu, mu_resid, buff
-    );
-    const auto time_elapsed = sw.elapsed();
-
-    return py::dict(
-        "x"_a=x, "mu"_a=mu, "iters"_a=iters, "time_elapsed"_a=time_elapsed
-    );
-}
-
 void register_bcd(py::module_& m)
 {
     /* utility functions */
@@ -363,7 +316,6 @@ void register_bcd(py::module_& m)
     /* constrained */
     m.def("constrained_admm_solver", &constrained_admm_solver);
     m.def("constrained_coordinate_descent_solver", &constrained_coordinate_descent_solver);
-    m.def("constrained_proximal_newton_general_solver", &constrained_proximal_newton_general_solver);
 
     /* unconstrained */
     m.def("unconstrained_brent_solver", &unconstrained_brent_solver);
