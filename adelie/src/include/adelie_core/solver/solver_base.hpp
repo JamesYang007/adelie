@@ -22,7 +22,6 @@ auto sparsify_dual(
     VecValueType& values
 )
 {
-    using index_t = typename StateType::index_t;
     using vec_index_t = typename StateType::vec_index_t;
     using vec_value_t = typename StateType::vec_value_t;
     using sp_vec_value_t = typename StateType::sp_vec_value_t;

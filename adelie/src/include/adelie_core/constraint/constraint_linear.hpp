@@ -557,7 +557,6 @@ public:
         const auto d = _A.cols();
 
         auto buff_ptr = reinterpret_cast<value_t*>(buffer.data());
-        const auto buff_begin = buff_ptr;
         Eigen::Map<vec_value_t> grad(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> mu(buff_ptr, m); buff_ptr += m;
         Eigen::Map<vec_bool_t> is_active(reinterpret_cast<bool*>(buff_ptr), m); buff_ptr += m;
