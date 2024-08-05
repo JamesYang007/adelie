@@ -176,11 +176,13 @@ def test_nnls(d, seed):
 
     x_cvxpy = run_cvxpy(X, y)
 
-    x = np.zeros(d)
     X_vars = np.sum(X ** 2, axis=0)
+    x = np.zeros(d)
+    active_set = np.empty(0, dtype=int)
+    is_active = np.zeros(d, dtype=bool)
     resid = y.copy()
     loss = 0.5 * np.sum(resid ** 2)
-    state = opt.StateNNLS(X, X_vars, 1000000, 1e-24, x, resid, loss)
+    state = opt.StateNNLS(X, X_vars, 1000000, 1e-24, active_set, is_active, x, resid, loss)
     state.solve()
 
     # test loss against truth

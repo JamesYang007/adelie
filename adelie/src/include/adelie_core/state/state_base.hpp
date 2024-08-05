@@ -94,7 +94,7 @@ void update_abs_grad(
         for (int i = 0; i < groups.size(); ++i) routine(i);
     } else {
         #if defined(_OPENMP)
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
+        #pragma omp parallel for schedule(dynamic) num_threads(n_threads)
         #endif
         for (int i = 0; i < groups.size(); ++i) routine(i);
     }

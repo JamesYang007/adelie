@@ -1,16 +1,23 @@
 #pragma once
+#include <adelie_core/util/macros.hpp>
 #include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
 namespace optimization {
 
-template <class MatrixType>
+template <class MatrixType,
+          class IndexType=Eigen::Index,
+          class DynVecIndexType=std::vector<IndexType>&>
 struct StateNNLS
 {
     using matrix_t = MatrixType;
-    using value_t = typename std::decay_t<MatrixType>::Scalar;
+    using value_t = typename MatrixType::Scalar;
+    using index_t = IndexType;
+    using dyn_vec_index_t = DynVecIndexType;
     using vec_value_t = util::rowvec_type<value_t>;
+    using vec_bool_t = util::rowvec_type<bool>;
     using map_vec_value_t = Eigen::Map<vec_value_t>;
+    using map_vec_bool_t = Eigen::Map<vec_bool_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
     using map_cmatrix_t = Eigen::Map<const matrix_t>;
 
@@ -21,7 +28,9 @@ struct StateNNLS
     const value_t tol;
 
     size_t iters = 0;
-    map_vec_value_t beta;      
+    dyn_vec_index_t active_set;
+    map_vec_bool_t is_active;
+    map_vec_value_t beta;
     map_vec_value_t resid;
     value_t loss;
 
@@ -32,6 +41,8 @@ struct StateNNLS
         const Eigen::Ref<const vec_value_t>& X_vars,
         size_t max_iters,
         value_t tol,
+        dyn_vec_index_t& active_set,
+        Eigen::Ref<vec_bool_t> is_active,
         Eigen::Ref<vec_value_t> beta,
         Eigen::Ref<vec_value_t> resid,
         value_t loss
@@ -40,6 +51,8 @@ struct StateNNLS
         X_vars(X_vars.data(), X_vars.size()),
         max_iters(max_iters),
         tol(tol),
+        active_set(active_set),
+        is_active(is_active.data(), is_active.size()),
         beta(beta.data(), beta.size()),
         resid(resid.data(), resid.size()),
         loss(loss)
@@ -76,37 +89,97 @@ struct StateNNLS
         UpperType upper
     )
     {
-        const auto n = beta.size();
+        const auto add_active = [&](int i) {
+            if (!is_active[i]) {
+                active_set.push_back(i);
+                is_active[i] = true;
+            }
+        };
+        const auto prune = [&]() {
+            size_t n_active = 0;
+            for (size_t i = 0; i < active_set.size(); ++i) {
+                const auto k = active_set[i];
+                const auto bk = beta[k];
+                if (std::abs(bk) <= 1e-16) {
+                    is_active[k] = false;
+                    continue;
+                }
+                active_set[n_active] = k;
+                ++n_active;
+            }
+            active_set.erase(
+                std::next(active_set.begin(), n_active),
+                active_set.end()
+            );
+        };
 
         iters = 0;
+        const auto n = X.rows();
+        const auto p = X.cols();
 
-        while (iters < max_iters) {
-            value_t convg_measure = 0;
+        while (1) {
             ++iters;
-            for (int i = 0; i < n; ++i) {
+            value_t convg_measure = 0;
+            for (size_t k = 0; k < p; ++k) {
                 if (early_exit_f()) return;
-                const auto X_vars_i = X_vars[i];
-                auto& bi = beta[i];
-                const auto gi = X.col(i).dot(resid.matrix());
-                const auto bi_old = bi;
-                const auto step = (X_vars_i <= 0) ? 0 : (gi / X_vars_i);
-                const auto bi_cand = bi + step;
-                const auto li = lower(i);
-                const auto ui = upper(i);
-                bi = std::min<value_t>(std::max<value_t>(bi_cand, li), ui);
-                const auto del = bi - bi_old;
-                if (del == 0) continue;
-                const auto scaled_del_sq = X_vars_i * del * del; 
+                const auto lk = lower(k);
+                const auto uk = upper(k);
+                const auto vk = X_vars[k];
+                const auto gk = X.col(k).dot(resid.matrix());
+                auto& bk = beta[k];
+                const auto bk_old = bk;
+                const auto step = (vk <= 0) ? 0 : (gk / vk);
+                const auto bk_cand = bk + step;
+                bk = std::min<value_t>(std::max<value_t>(bk_cand, lk), uk);
+                if (bk == bk_old) continue;
+                const auto del = bk - bk_old;
+                const auto scaled_del_sq = vk * del * del; 
                 convg_measure = std::max<value_t>(convg_measure, scaled_del_sq);
-                loss -= del * gi - 0.5 * scaled_del_sq;
-                resid -= del * X.col(i).array();
+                loss -= del * gk - 0.5 * scaled_del_sq;
+                resid -= del * X.col(k).array();
+                add_active(k);
             }
-            if (convg_measure < X.rows() * tol) return;
-        }
 
-        throw util::adelie_core_solver_error(
-            "StateNNLS: max iterations reached!"
-        );
+            if (iters >= max_iters) {
+                throw util::adelie_core_solver_error(
+                    "StateNNLS: max iterations reached!"
+                );
+            }
+            if (convg_measure <= n * tol) break;
+
+            prune();
+
+            while (1) {
+                ++iters;
+                value_t convg_measure = 0;
+                for (size_t i = 0; i < active_set.size(); ++i) {
+                    if (early_exit_f()) return;
+                    const auto k = active_set[i];
+                    const auto lk = lower(k);
+                    const auto uk = upper(k);
+                    const auto vk = X_vars[k];
+                    const auto gk = X.col(k).dot(resid.matrix());
+                    auto& bk = beta[k];
+                    const auto bk_old = bk;
+                    const auto step = (vk <= 0) ? 0 : (gk / vk);
+                    const auto bk_cand = bk + step;
+                    bk = std::min<value_t>(std::max<value_t>(bk_cand, lk), uk);
+                    if (bk == bk_old) continue;
+                    const auto del = bk - bk_old;
+                    const auto scaled_del_sq = vk * del * del; 
+                    convg_measure = std::max<value_t>(convg_measure, scaled_del_sq);
+                    loss -= del * gk - 0.5 * scaled_del_sq;
+                    resid -= del * X.col(k).array();
+                }
+
+                if (iters >= max_iters) {
+                    throw util::adelie_core_solver_error(
+                        "StateNNLS: max iterations reached!"
+                    );
+                }
+                if (convg_measure <= n * tol) break;
+            }
+        } // end while(1)
     }
 };
 
