@@ -120,7 +120,7 @@ struct StateNNLS
         while (1) {
             ++iters;
             value_t convg_measure = 0;
-            for (size_t k = 0; k < p; ++k) {
+            for (Eigen::Index k = 0; k < p; ++k) {
                 if (early_exit_f()) return;
                 const auto lk = lower(k);
                 const auto uk = upper(k);

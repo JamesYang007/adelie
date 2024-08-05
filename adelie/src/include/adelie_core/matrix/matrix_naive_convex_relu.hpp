@@ -339,7 +339,7 @@ private:
             inner_j_d,
             value_j_d,
             (v * weights * _mask.col(j_m).transpose().array().template cast<value_t>()),
-            _n_threads,
+            n_threads,
             _buff
         );
     }
@@ -395,7 +395,7 @@ public:
         _n_threads(n_threads),
         _buff(n_threads/* TODO */)
     {
-        const auto n = rows;
+        const Eigen::Index n = rows;
 
         if (mask.rows() != n) {
             throw util::adelie_core_error("mask must be (n, m) where mat is (n, d).");
