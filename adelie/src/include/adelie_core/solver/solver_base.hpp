@@ -315,7 +315,6 @@ inline void solve_core(
     using vec_value_t = typename state_t::vec_value_t;
     using sw_t = util::Stopwatch;
 
-    const auto& constraints = state.constraints;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
     const auto& screen_set = state.screen_set;
