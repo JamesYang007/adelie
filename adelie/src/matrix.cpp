@@ -573,7 +573,7 @@ void matrix_naive_convex_relu_dense(py::module_& m, const char* name)
     using dense_t = typename internal_t::dense_t;
     using mask_t = typename internal_t::mask_t;
     py::class_<internal_t, base_t>(m, name,
-        "Core matrix class for naive convex relu matrix."
+        "Core matrix class for naive convex relu matrix with dense underlying."
         )
         .def(
             py::init<
@@ -582,6 +582,40 @@ void matrix_naive_convex_relu_dense(py::module_& m, const char* name)
                 size_t
             >(), 
             py::arg("mat").noconvert(),
+            py::arg("mask").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+template <class SparseType, class MaskType>
+void matrix_naive_convex_relu_sparse(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveConvexReluSparse<SparseType, MaskType>;
+    using base_t = typename internal_t::base_t;
+    using vec_sp_index_t = typename internal_t::vec_sp_index_t;
+    using vec_sp_value_t = typename internal_t::vec_sp_value_t;
+    using mask_t = typename internal_t::mask_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive convex relu matrix with sparse underlying."
+        )
+        .def(
+            py::init<
+                size_t,
+                size_t,
+                size_t,
+                const Eigen::Ref<const vec_sp_index_t>&,
+                const Eigen::Ref<const vec_sp_index_t>&,
+                const Eigen::Ref<const vec_sp_value_t>&,
+                const Eigen::Ref<const mask_t>&,
+                size_t 
+            >(), 
+            py::arg("rows"),
+            py::arg("cols"),
+            py::arg("nnz"),
+            py::arg("outer").noconvert(),
+            py::arg("inner").noconvert(),
+            py::arg("value").noconvert(),
             py::arg("mask").noconvert(),
             py::arg("n_threads")
         )
@@ -900,6 +934,14 @@ void register_matrix(py::module_& m)
         dense_type<float, Eigen::ColMajor>,
         dense_type<bool, Eigen::ColMajor>
     >(m, "MatrixNaiveConvexReluDense32F");
+    matrix_naive_convex_relu_sparse<
+        sparse_type<double, Eigen::ColMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexReluSparse64F");
+    matrix_naive_convex_relu_sparse<
+        sparse_type<float, Eigen::ColMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexReluSparse32F");
 
     matrix_naive_cconcatenate<double>(m, "MatrixNaiveCConcatenate64");
     matrix_naive_cconcatenate<float>(m, "MatrixNaiveCConcatenate32");
