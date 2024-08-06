@@ -16,11 +16,9 @@ struct StateHingeLowRank
     using index_t = IndexType;
     using dyn_vec_index_t = DynVecIndexType;
     using dyn_vec_value_t = DynVecValueType;
-    using vec_index_t = util::rowvec_type<index_t>;
     using vec_value_t = util::rowvec_type<value_t>;
     using colmat_value_t = util::colmat_type<value_t>;
     using rowmat_value_t = util::rowmat_type<value_t>;
-    using map_vec_index_t = Eigen::Map<vec_index_t>;
     using map_vec_value_t = Eigen::Map<vec_value_t>;
     using map_rowmat_value_t = Eigen::Map<rowmat_value_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
@@ -223,7 +221,7 @@ struct StateHingeLowRank
                         "StateHingeLowRank: max iterations reached!"
                     );
                 }
-                if (convg_measure <= tol) break;
+                if (convg_measure <= A.cols() * tol) break;
             }
 
             /* Invariance step */

@@ -76,6 +76,19 @@ public:
         );
     }
 
+    value_t solve_zero(
+        const Eigen::Ref<const vec_value_t>& v,
+        Eigen::Ref<vec_uint64_t> buffer
+    ) override
+    {
+        PYBIND11_OVERRIDE(
+            value_t,
+            base_t,
+            solve_zero,
+            v, buffer
+        );
+    }
+
     void clear() override 
     {
         PYBIND11_OVERRIDE_PURE(
@@ -282,6 +295,35 @@ void constraint_base(py::module_& m, const char* name)
         )delimiter",
             py::arg("x").noconvert()
         )
+        .def("solve_zero", &internal_t::solve_zero, R"delimiter(
+        Solves the zero primal KKT condition problem.
+
+        The zero primal KKT condition problem is given by
+
+        .. math::
+            \begin{align*}
+                \mathrm{minimize}_{\mu \geq 0}
+                \|v - \phi'(0)^\top \mu\|_2
+            \end{align*}
+
+        where :math:`\phi` is the current constraint function
+        and :math:`\mu` is the dual variable.
+        It is advised, but not necessary, that the object stores the solution internally
+        so that a subsequent call to :func:`dual` will return the solution.
+
+        Parameters
+        ----------
+        v : (d,) ndarray
+            The vector :math:`v`.
+        buffer : (b,) ndarray
+            Buffer of type ``uint64_t`` aligned at 8 bytes.
+            The size must be at least as large as :func:`buffer_size`.
+
+        Returns
+        -------
+        norm : float
+            The optimal objective for the zero primal KKT condition problem.
+        )delimiter")
         .def("clear", &internal_t::clear, R"delimiter(
         Clears internal data.
 
@@ -370,8 +412,8 @@ void constraint_box_proximal_newton(py::module_& m, const char* name)
             py::arg("upper").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("nnls_max_iters"),
-            py::arg("nnls_tol"),
+            py::arg("hinge_max_iters"),
+            py::arg("hinge_tol"),
             py::arg("cs_tol"),
             py::arg("slack")
         )
@@ -412,6 +454,8 @@ void constraint_linear_proximal_newton(py::module_& m, const char* name)
             size_t,
             value_t,
             size_t,
+            value_t,
+            size_t,
             size_t,
             value_t,
             value_t,
@@ -427,9 +471,11 @@ void constraint_linear_proximal_newton(py::module_& m, const char* name)
             py::arg("A_vars").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("nnls_batch_size"),
             py::arg("nnls_max_iters"),
             py::arg("nnls_tol"),
+            py::arg("hinge_batch_size"),
+            py::arg("hinge_max_iters"),
+            py::arg("hinge_tol"),
             py::arg("cs_tol"),
             py::arg("slack"),
             py::arg("n_threads")
@@ -473,8 +519,8 @@ void constraint_one_sided_proximal_newton(py::module_& m, const char* name)
             py::arg("b").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("nnls_max_iters"),
-            py::arg("nnls_tol"),
+            py::arg("hinge_max_iters"),
+            py::arg("hinge_tol"),
             py::arg("cs_tol"),
             py::arg("slack")
         )

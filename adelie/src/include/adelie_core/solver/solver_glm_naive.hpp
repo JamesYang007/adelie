@@ -67,6 +67,10 @@ void update_solutions(
     ValueType lmda
 )
 {
+    using state_t = std::decay_t<StateType>;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_value_t = typename state_t::vec_value_t;
+
     const auto loss_null = state.loss_null;
     const auto loss_full = state.loss_full;
     const auto& eta = state.eta;
@@ -76,8 +80,11 @@ void update_solutions(
     auto& lmdas = state.lmdas;
     auto& intercepts = state.intercepts;
 
+    vec_index_t dual_indices; 
+    vec_value_t dual_values;
+
     betas.emplace_back(std::move(state_gaussian_pin_naive.betas.back()));
-    duals.emplace_back(std::move(state_gaussian_pin_naive.duals.back()));
+    duals.emplace_back(sparsify_dual(state, dual_indices, dual_values));
     intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
     lmdas.emplace_back(lmda);
 
@@ -195,7 +202,6 @@ auto fit(
     const auto& constraints = state.constraints;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
-    const auto& dual_groups = state.dual_groups;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
     const auto& offsets = state.offsets;
@@ -319,7 +325,6 @@ auto fit(
             constraints,
             groups, 
             group_sizes,
-            dual_groups,
             alpha, 
             penalty,
             irls_weights,

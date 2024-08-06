@@ -64,14 +64,12 @@ def deduce_states(
         constraints,
         dtype,
     )
-    dual_groups = render_dual_groups(constraints)
     screen_begins = np.cumsum(
         np.concatenate([[0], group_sizes[screen_set]]),
         dtype=int,
     )[:-1]
     return (
         constraints,
-        dual_groups,
         screen_begins,
     )
 
@@ -596,7 +594,6 @@ def gaussian_pin_naive(
 
             (
                 self._constraints,
-                self._dual_groups,
                 self._screen_begins,
             ) = deduce_states(
                 constraints=constraints,
@@ -658,7 +655,6 @@ def gaussian_pin_naive(
                 constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
-                dual_groups=self._dual_groups,
                 alpha=alpha,
                 penalty=self._penalty,
                 weights=self._weights,
@@ -893,7 +889,6 @@ def gaussian_pin_cov(
 
             (
                 self._constraints,
-                self._dual_groups,
                 self._screen_begins,
             ) = deduce_states(
                 constraints=constraints,
@@ -943,7 +938,6 @@ def gaussian_pin_cov(
                 constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
-                dual_groups=self._dual_groups,
                 alpha=alpha,
                 penalty=self._penalty,
                 screen_set=self._screen_set,

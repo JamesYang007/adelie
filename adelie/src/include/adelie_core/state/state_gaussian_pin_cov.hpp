@@ -119,7 +119,6 @@ struct StateGaussianPinCov: StateGaussianPinBase<
         const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
-        const Eigen::Ref<const vec_index_t>& dual_groups, 
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_index_t>& screen_set, 
@@ -145,7 +144,7 @@ struct StateGaussianPinCov: StateGaussianPinBase<
         Eigen::Ref<vec_index_t> active_set
     ): 
         base_t(
-            constraints, groups, group_sizes, dual_groups, alpha, penalty, 
+            constraints, groups, group_sizes, alpha, penalty, 
             screen_set, screen_begins, screen_vars, screen_transforms, lmda_path, 
             constraint_buffer_size, false, max_active_size, max_iters, tol, 0, 0, newton_tol, newton_max_iters, n_threads,
             rsq, screen_beta, screen_is_active, active_set_size, active_set

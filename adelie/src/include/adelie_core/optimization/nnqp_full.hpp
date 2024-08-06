@@ -91,7 +91,7 @@ struct StateNNQPFull
                     grad -= del * quad.array().col(i);
                 }
             }
-            if (convg_measure < tol) return;
+            if (convg_measure < quad.cols() * tol) return;
         }
 
         throw util::adelie_core_solver_error(
@@ -167,7 +167,7 @@ struct StateNNQPFull<MatrixType, true>
                     grad -= del * quad.array().col(i);
                 }
             }
-            if (convg_measure < tol) return;
+            if (convg_measure < quad.cols() * tol) return;
         }
 
         throw util::adelie_core_solver_error(

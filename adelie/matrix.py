@@ -356,7 +356,7 @@ def concatenate(
 
 
 def convex_relu(
-    mat: np.ndarray,
+    mat: Union[np.ndarray, csc_matrix],
     mask: np.ndarray,
     *,
     copy: bool =False,
@@ -383,10 +383,11 @@ def convex_relu(
 
     Parameters
     ----------
-    mat : (n, d) ndarray
+    mat : (n, d) Union[ndarray, csc_matrix]
         The base matrix :math:`Z` from which to construct the convex relu matrix.        
     mask : (n, m) ndarray
         The boolean mask matrix whose columns define the diagonal of :math:`D_i`.
+        If it is not in ``"F"``-ordering, an ``"F"``-ordered copy is made.
     copy : bool, optional
         If ``True``, a copy of the inputs is stored internally.
         Otherwise, a reference is stored instead.
@@ -406,39 +407,75 @@ def convex_relu(
     adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F
     adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C
     adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64F
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse32F
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse64F
     """
-    dispatcher = {
-        np.dtype("float64"): {
-            "C": core.matrix.MatrixNaiveConvexReluDense64C,
-            "F": core.matrix.MatrixNaiveConvexReluDense64F,
-        },
-        np.dtype("float32"): {
-            "C": core.matrix.MatrixNaiveConvexReluDense32C,
-            "F": core.matrix.MatrixNaiveConvexReluDense32F,
-        },
-    }
-    dtype = mat.dtype
-    order = (
-        "F"
-        # prioritize choosing Fortran contiguity
-        if mat.flags.f_contiguous else
-        "C"
-    )
-    if order == "C":
-        warnings.warn(
-            "Detected matrix to be C-contiguous. "
-            "Performance may improve with F-contiguous matrix."
-        )
-    core_base = dispatcher[dtype][order]
     py_base = PyMatrixNaiveBase
 
-    class _convex_relu(core_base, py_base):
-        def __init__(self):
-            self._mat = np.array(mat, copy=copy)
-            self._mask = np.array(mask, copy=copy, dtype=bool, order="F")
-            core_base.__init__(self, self._mat, self._mask, n_threads)
-            py_base.__init__(self, n_threads=n_threads)
-        
+    if isinstance(mat, np.ndarray):
+        dispatcher = {
+            np.dtype("float64"): {
+                "C": core.matrix.MatrixNaiveConvexReluDense64C,
+                "F": core.matrix.MatrixNaiveConvexReluDense64F,
+            },
+            np.dtype("float32"): {
+                "C": core.matrix.MatrixNaiveConvexReluDense32C,
+                "F": core.matrix.MatrixNaiveConvexReluDense32F,
+            },
+        }
+        dtype = mat.dtype
+        order = (
+            "F"
+            # prioritize choosing Fortran contiguity
+            if mat.flags.f_contiguous else
+            "C"
+        )
+        if order == "C":
+            warnings.warn(
+                "Detected matrix to be C-contiguous. "
+                "Performance may improve with F-contiguous matrix."
+            )
+        core_base = dispatcher[dtype][order]
+
+        class _convex_relu(core_base, py_base):
+            def __init__(self):
+                self._mat = np.array(mat, copy=copy)
+                self._mask = np.array(mask, copy=copy, dtype=bool, order="F")
+                core_base.__init__(self, self._mat, self._mask, n_threads)
+                py_base.__init__(self, n_threads=n_threads)
+
+    elif isinstance(mat, csc_matrix):
+        mat = mat.copy()
+        mat.prune()
+        mat.sort_indices()
+
+        dispatcher = {
+            np.dtype("float64"): core.matrix.MatrixNaiveConvexReluSparse64F,
+            np.dtype("float32"): core.matrix.MatrixNaiveConvexReluSparse32F,
+        }
+        dtype = mat.dtype
+        core_base = dispatcher[dtype]
+
+        class _convex_relu(core_base, py_base):
+            def __init__(self):
+                self._mat = mat
+                self._mask = np.array(mask, copy=copy, dtype=bool, order="F")
+                core_base.__init__(
+                    self, 
+                    self._mat.shape[0], 
+                    self._mat.shape[1], 
+                    self._mat.nnz,
+                    self._mat.indptr,
+                    self._mat.indices,
+                    self._mat.data,
+                    self._mask,
+                    n_threads,
+                )
+                py_base.__init__(self, n_threads=n_threads)
+
+    else:
+        raise TypeError("mat must be a numpy array or a scipy csc_matrix.")
+
     return _convex_relu()
 
 

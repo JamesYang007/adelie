@@ -97,10 +97,14 @@ void nnqp_full(py::module_& m, const char* name)
 template <class MatrixType>
 void nnls(py::module_& m, const char* name)
 {
-    using state_t = ad::optimization::StateNNLS<MatrixType>;
+    using dyn_vec_index_t = std::vector<Eigen::Index>;
+    using state_t = ad::optimization::StateNNLS<
+        MatrixType, Eigen::Index, dyn_vec_index_t
+    >;
     using matrix_t = typename state_t::matrix_t;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
+    using vec_bool_t = typename state_t::vec_bool_t;
     py::class_<state_t>(m, name, R"delimiter(
     Solves the non-negative least squares (NNLS) problem.
 
@@ -122,8 +126,12 @@ void nnls(py::module_& m, const char* name)
         Maximum number of coordinate descent iterations.
     tol : float
         Convergence tolerance.
+    active_set : (m,) ndarray
+        Active set indices.
+    is_active : (d,) ndarray
+        Active flags.
     beta : (d,) ndarray
-        Solution vector.
+        Beta vector.
     resid : (n,) ndarray
         Residual vector :math:`y - X \beta`.
     loss : float
@@ -134,6 +142,8 @@ void nnls(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             size_t,
             value_t,
+            dyn_vec_index_t&,
+            Eigen::Ref<vec_bool_t>,
             Eigen::Ref<vec_value_t>,
             Eigen::Ref<vec_value_t>,
             value_t 
@@ -142,6 +152,8 @@ void nnls(py::module_& m, const char* name)
             py::arg("X_vars").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
+            py::arg("active_set"),
+            py::arg("is_active"),
             py::arg("beta"),
             py::arg("resid"),
             py::arg("loss")
@@ -150,6 +162,8 @@ void nnls(py::module_& m, const char* name)
         .def_readonly("X_vars", &state_t::X_vars)
         .def_readonly("max_iters", &state_t::max_iters)
         .def_readonly("tol", &state_t::tol)
+        .def_readonly("active_set", &state_t::active_set)
+        .def_readonly("is_active", &state_t::is_active)
         .def_readonly("beta", &state_t::beta)
         .def_readonly("resid", &state_t::resid)
         .def_readonly("loss", &state_t::loss)
@@ -160,8 +174,8 @@ void nnls(py::module_& m, const char* name)
             sw.start();
             state.solve(
                 [](){return false;}, 
-                [](auto) {return 0;},
-                [](auto) {return std::numeric_limits<value_t>::infinity();}
+                vec_value_t::NullaryExpr(state.X.cols(), [](auto) { return 0; }),
+                vec_value_t::NullaryExpr(state.X.cols(), [](auto) { return std::numeric_limits<value_t>::infinity(); })
             );
             state.time_elapsed = sw.elapsed();
         })
