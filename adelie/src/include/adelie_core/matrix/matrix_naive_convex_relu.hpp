@@ -393,7 +393,7 @@ public:
         _mat(rows, cols, nnz, outer.data(), inner.data(), value.data()),
         _mask(mask.data(), mask.rows(), mask.cols()),
         _n_threads(n_threads),
-        _buff(n_threads/* TODO */)
+        _buff(n_threads)
     {
         const Eigen::Index n = rows;
 
@@ -534,7 +534,7 @@ public:
         if (_n_threads <= 1) {
             for (int i1 = 0; i1 < q; ++i1) routine(i1);
         } else {
-            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            #pragma omp parallel for schedule(dynamic) num_threads(_n_threads)
             for (int i1 = 0; i1 < q; ++i1) routine(i1);
         }
         for (int i1 = 0; i1 < q; ++i1) {
