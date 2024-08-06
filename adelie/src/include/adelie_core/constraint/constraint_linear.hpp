@@ -330,45 +330,52 @@ public:
             if ((Qv - _ATmu).square().sum() <= l1 * l1) return value_t(0);
 
             // compute SVD-based warm-start
-            const auto u0 = _A_u.leftCols(_A_rank);
-            const auto d0 = _A_d.head(_A_rank);
-            const auto vh0 = _A_vh.topRows(_A_rank);
-            auto DinvVTQv = grad.head(_A_rank).matrix();
-            DinvVTQv = (Qv.matrix() * vh0.transpose()).cwiseQuotient(d0.matrix()); 
-            auto mu_m = mu.matrix();
-            if (u0.rows() >= u0.cols()) {
-                matrix::dgemv(
-                    u0.transpose(),
-                    DinvVTQv,
-                    _n_threads,
-                    grad /* unused dummy input */,
-                    mu_m
-                );
-            } else {
-                mu_m = DinvVTQv * u0.transpose();
-            }
-            ATmu.matrix() = DinvVTQv.cwiseProduct(d0.matrix()) * vh0;
+            //const auto u0 = _A_u.leftCols(_A_rank);
+            //const auto d0 = _A_d.head(_A_rank);
+            //const auto vh0 = _A_vh.topRows(_A_rank);
+            //auto DinvVTQv = grad.head(_A_rank).matrix();
+            //DinvVTQv = (Qv.matrix() * vh0.transpose()).cwiseQuotient(d0.matrix()); 
+            //auto mu_m = mu.matrix();
+            //if (u0.rows() >= u0.cols()) {
+            //    matrix::dgemv(
+            //        u0.transpose(),
+            //        DinvVTQv,
+            //        _n_threads,
+            //        grad /* unused dummy input */,
+            //        mu_m
+            //    );
+            //} else {
+            //    mu_m = DinvVTQv * u0.transpose();
+            //}
+            //ATmu.matrix() = DinvVTQv.cwiseProduct(d0.matrix()) * vh0;
 
             const auto lower_constraint = vec_value_t::NullaryExpr(_l.size(), [&](auto i) {
                 const auto li = _l[i];
-                return (li <= 0) ? (-Configs::max_solver_value) : (-_cs_tol / li);
+                return (li <= 0) ? (-Configs::max_solver_value) : (-_cs_tol / li * (_cs_tol >= li * 1e-14));
             });
             const auto upper_constraint = vec_value_t::NullaryExpr(_u.size(), [&](auto i) {
                 const auto ui = _u[i];
-                return (ui <= 0) ? Configs::max_solver_value : (_cs_tol / ui);
+                return (ui <= 0) ? Configs::max_solver_value : (_cs_tol / ui * (_cs_tol >= ui * 1e-14));
             });
 
             // if warm-start is not feasible, refine with NNLS
             value_t mu_resid_norm_sq = -1;
-            if (!((lower_constraint <= mu) && (mu <= upper_constraint)).all()) {
+            //if (!((lower_constraint <= mu) && (mu <= upper_constraint)).all()) {
                 mu_active_tmp = _mu_active;
                 Eigen::Map<vec_bool_t> is_active(reinterpret_cast<bool*>(hinge_grad.data()), m);
                 auto& Qmu_resid = grad;
 
-                _mu_active.resize(m);
-                std::iota(_mu_active.begin(), _mu_active.end(), 0);
-                is_active.fill(true);
-                Qmu_resid = Qv - ATmu;
+                //_mu_active.resize(m);
+                //std::iota(_mu_active.begin(), _mu_active.end(), 0);
+                //is_active.fill(true);
+                //Qmu_resid = Qv - ATmu;
+
+                mu_to_dense(mu);
+                is_active.setZero();
+                for (size_t i = 0; i < _mu_active.size(); ++i) {
+                    is_active[_mu_active[i]] = true;
+                }
+                Qmu_resid = Qv - _ATmu;
 
                 value_t loss = 0.5 * Qmu_resid.square().sum();
                 const Eigen::Map<const colmat_value_t> AT(
@@ -379,7 +386,7 @@ public:
                     _mu_active, is_active, mu, Qmu_resid, loss
                 );
                 state_nnls.solve(
-                    [&]() { return (state_nnls.iters > 1) && (state_nnls.loss <= 0.5 * l1 * l1); },
+                    [&]() { return false; },
                     lower_constraint,
                     upper_constraint
                 );
@@ -400,13 +407,13 @@ public:
                 } else {
                     _mu_active = mu_active_tmp;
                 }
-            } else {
-                mu_resid_norm_sq = (Qv - ATmu).square().sum();
-                if ((!is_init && !is_prev_valid_old) || (mu_resid_norm_sq <= l1 * l1)) {
-                    mu_to_sparse(mu);
-                    _ATmu = ATmu;
-                }
-            }
+            //} else {
+            //    mu_resid_norm_sq = (Qv - ATmu).square().sum();
+            //    if ((!is_init && !is_prev_valid_old) || (mu_resid_norm_sq <= l1 * l1)) {
+            //        mu_to_sparse(mu);
+            //        _ATmu = ATmu;
+            //    }
+            //}
 
             return mu_resid_norm_sq;
         };
