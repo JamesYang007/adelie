@@ -161,29 +161,6 @@ struct StateHingeLowRank
         iters = 0;
 
         while (1) {
-            /* Screening step */
-            if (iters)
-            {
-                const auto active_size = active_set.size();
-                const size_t max_n_new_active = std::min<size_t>(batch_size, A.rows()-active_size);
-                if (max_n_new_active <= 0) return;
-
-                size_t n_new_active = 0;
-
-                // check if any violations exist and append to active set
-                for (Eigen::Index i = 0; i < grad.size(); ++i) {
-                    if (grad[i] <= 0) continue;
-
-                    add_active(i);
-                    ++n_new_active;
-
-                    if (n_new_active >= max_n_new_active) break;
-                }
-                if (n_new_active <= 0) return;
-            }
-
-            /* Fit step */
-
             while (1) {
                 ++iters;
                 value_t convg_measure = 0;
@@ -224,9 +201,24 @@ struct StateHingeLowRank
                 if (convg_measure <= A.cols() * tol) break;
             }
 
-            /* Invariance step */
-
             compute_grad();
+
+            const auto active_size = active_set.size();
+            const size_t max_n_new_active = std::min<size_t>(batch_size, A.rows()-active_size);
+            if (max_n_new_active <= 0) return;
+
+            size_t n_new_active = 0;
+
+            // check if any violations exist and append to active set
+            for (Eigen::Index i = 0; i < grad.size(); ++i) {
+                if (grad[i] <= 0) continue;
+
+                add_active(i);
+                ++n_new_active;
+
+                if (n_new_active >= max_n_new_active) break;
+            }
+            if (n_new_active <= 0) return;
         } // end while(1)
     }
 };

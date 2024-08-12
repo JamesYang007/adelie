@@ -385,11 +385,18 @@ public:
                     AT, _A_vars, _nnls_max_iters, _nnls_tol,
                     _mu_active, is_active, mu, Qmu_resid, loss
                 );
+                //using sw_t = util::Stopwatch;
+                //sw_t sw;
+                //sw.start();
                 state_nnls.solve(
-                    [&]() { return false; },
+                    [&]() { return 2 * state_nnls.loss <= l1 * l1; },
                     lower_constraint,
                     upper_constraint
                 );
+                //const auto elapsed = sw.elapsed();
+                //PRINT(this);
+                //PRINT(elapsed);
+                //PRINT(state_nnls.iters);
                 mu_resid_norm_sq = 2 * state_nnls.loss;
 
                 if ((!is_init && !is_prev_valid_old) || (mu_resid_norm_sq <= l1 * l1)) {
@@ -503,7 +510,14 @@ public:
                     hess, _A, _l, _u, _hinge_batch_size, _hinge_max_iters, _hinge_tol, _n_threads,
                     _mu_active, _mu_value, active_vars, active_AQ, grad, hinge_grad
                 );
+                //using sw_t = util::Stopwatch;
+                //sw_t sw;
+                //sw.start();
                 state_hinge.solve();
+                //const auto elapsed = sw.elapsed();
+                //PRINT(this);
+                //PRINT(elapsed);
+                //PRINT(state_hinge.iters);
                 _mu_active_set.insert(
                     _mu_active.data() + active_size,
                     _mu_active.data() + _mu_active.size()
@@ -577,7 +591,6 @@ public:
             mu[idx] = val;
         }
 
-        // refine check with NNLS
         auto& Qmu_resid = grad;
         Qmu_resid = v - _ATmu;
         const value_t loss = 0.5 * Qmu_resid.square().sum();

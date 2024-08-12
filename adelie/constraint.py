@@ -197,7 +197,7 @@ def linear(
                     Default is ``int(1e5)``.
                 nnls_tol : float, optional
                     Convergence tolerance for non-negative least squares.
-                    Default is ``1e-9``.
+                    Default is ``1e-7``.
                 hinge_batch_size : int, optional
                     Batch size of active dual variables to include at a time in the hinge loss optimizer.
                     Default is ``A.shape[0]``.
@@ -280,7 +280,7 @@ def linear(
             "max_iters": 100,
             "tol": 1e-9,
             "nnls_max_iters": int(1e5),
-            "nnls_tol": 1e-9,
+            "nnls_tol": 1e-7,
             "hinge_batch_size": A.shape[0],
             "hinge_max_iters": int(1e5),
             "hinge_tol": 1e-9,

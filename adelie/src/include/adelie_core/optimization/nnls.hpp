@@ -118,37 +118,6 @@ struct StateNNLS
         const auto p = X.cols();
 
         while (1) {
-            ++iters;
-            value_t convg_measure = 0;
-            for (Eigen::Index k = 0; k < p; ++k) {
-                if (early_exit_f()) return;
-                const auto lk = lower(k);
-                const auto uk = upper(k);
-                const auto vk = X_vars[k];
-                const auto gk = X.col(k).dot(resid.matrix());
-                auto& bk = beta[k];
-                const auto bk_old = bk;
-                const auto step = (vk <= 0) ? 0 : (gk / vk);
-                const auto bk_cand = bk + step;
-                bk = std::min<value_t>(std::max<value_t>(bk_cand, lk), uk);
-                if (bk == bk_old) continue;
-                const auto del = bk - bk_old;
-                const auto scaled_del_sq = vk * del * del; 
-                convg_measure = std::max<value_t>(convg_measure, scaled_del_sq);
-                loss -= del * gk - 0.5 * scaled_del_sq;
-                resid -= del * X.col(k).array();
-                add_active(k);
-            }
-
-            if (iters >= max_iters) {
-                throw util::adelie_core_solver_error(
-                    "StateNNLS: max iterations reached!"
-                );
-            }
-            if (convg_measure <= n * tol) break;
-
-            prune();
-
             while (1) {
                 ++iters;
                 value_t convg_measure = 0;
@@ -179,6 +148,37 @@ struct StateNNLS
                 }
                 if (convg_measure <= n * tol) break;
             }
+
+            prune();
+
+            ++iters;
+            value_t convg_measure = 0;
+            for (Eigen::Index k = 0; k < p; ++k) {
+                if (early_exit_f()) return;
+                const auto lk = lower(k);
+                const auto uk = upper(k);
+                const auto vk = X_vars[k];
+                const auto gk = X.col(k).dot(resid.matrix());
+                auto& bk = beta[k];
+                const auto bk_old = bk;
+                const auto step = (vk <= 0) ? 0 : (gk / vk);
+                const auto bk_cand = bk + step;
+                bk = std::min<value_t>(std::max<value_t>(bk_cand, lk), uk);
+                if (bk == bk_old) continue;
+                const auto del = bk - bk_old;
+                const auto scaled_del_sq = vk * del * del; 
+                convg_measure = std::max<value_t>(convg_measure, scaled_del_sq);
+                loss -= del * gk - 0.5 * scaled_del_sq;
+                resid -= del * X.col(k).array();
+                add_active(k);
+            }
+
+            if (iters >= max_iters) {
+                throw util::adelie_core_solver_error(
+                    "StateNNLS: max iterations reached!"
+                );
+            }
+            if (convg_measure <= n * tol) break;
         } // end while(1)
     }
 };
