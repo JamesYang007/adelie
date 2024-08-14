@@ -212,12 +212,12 @@ public:
         _mat->cov(_subset[j], q, sqrt_weights, out, buffer);
     }
 
-    void sp_btmul(
+    void sp_tmul(
         const sp_mat_value_t& v, 
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
-        base_t::check_sp_btmul(
+        base_t::check_sp_tmul(
             v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
 
@@ -409,16 +409,16 @@ public:
         _mat->cov(j, q, _buffer, out, cov_buffer);
     }
 
-    void sp_btmul(
+    void sp_tmul(
         const sp_mat_value_t& v, 
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
-        base_t::check_sp_btmul(
+        base_t::check_sp_tmul(
             v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
         rowmat_value_t _out(out.rows(), _mat->rows());
-        _mat->sp_btmul(v, _out);
+        _mat->sp_tmul(v, _out);
         for (int i = 0; i < _subset.size(); ++i) {
             out.col(i) = _out.col(_subset[i]);
         }

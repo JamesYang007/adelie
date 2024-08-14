@@ -109,7 +109,7 @@ protected:
         }
     }
 
-    static void check_sp_btmul(
+    static void check_sp_tmul(
         int vr, int vc, int o_r, int o_c, int r, int c
     )
     {
@@ -120,8 +120,8 @@ protected:
         ) {
             throw util::adelie_core_error(
                 util::format(
-                    "sp_btmul() is given inconsistent inputs! "
-                    "Invoked check_sp_btmul(vr=%d, vc=%d, o_r=%d, o_c=%d, r=%d, c=%d)",
+                    "sp_tmul() is given inconsistent inputs! "
+                    "Invoked check_sp_tmul(vr=%d, vc=%d, o_r=%d, o_c=%d, r=%d, c=%d)",
                     vr, vc, o_r, o_c, r, c
                 )
             );
@@ -183,7 +183,7 @@ public:
 
     /* Non-speed critical routines */
 
-    virtual void sp_btmul(
+    virtual void sp_tmul(
         const sp_mat_value_t& v,
         Eigen::Ref<rowmat_value_t> out
     ) =0;

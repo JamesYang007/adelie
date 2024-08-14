@@ -259,13 +259,13 @@ def run_naive(
     assert cX.cols() == p
     assert cX.shape == (n, p)
 
-    # test sp_btmul
+    # test sp_tmul
     out = np.empty((2, n), dtype=dtype)
     v = np.random.normal(0, 1, (2, p)).astype(dtype)
     v[:, :p//2] = 0
     expected = v @ X.T
     v = scipy.sparse.csr_matrix(v)
-    cX.sp_btmul(v, out)
+    cX.sp_tmul(v, out)
     assert np.allclose(expected, out, atol=atol)
 
 

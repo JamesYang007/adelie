@@ -103,7 +103,7 @@ def predict(
         for i in range(etas.shape[0]):
             X.btmul(0, X.cols(), betas[i], etas[i].ravel())
     elif isinstance(betas, csr_matrix):
-        X.sp_btmul(betas, etas.reshape((L, -1))) 
+        X.sp_tmul(betas, etas.reshape((L, -1))) 
     else:
         raise RuntimeError("beta is not one of np.ndarray or scipy.sparse.csr_matrix.")
     etas += intercepts[:, None] + offsets

@@ -170,7 +170,7 @@ public:
         );
     }
 
-    void sp_btmul(
+    void sp_tmul(
         const sp_mat_value_t& v,
         Eigen::Ref<rowmat_value_t> out
     ) override
@@ -178,7 +178,7 @@ public:
         PYBIND11_OVERRIDE_PURE(
             void,
             base_t,
-            sp_btmul,
+            sp_tmul,
             v, out
         );
     }
@@ -306,7 +306,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         out : (q,) ndarray
             Vector to store in-place the result.
         )delimiter")
-        .def("sp_btmul", &internal_t::sp_btmul, R"delimiter(
+        .def("sp_tmul", &internal_t::sp_tmul, R"delimiter(
         Computes a matrix transpose-sparse matrix multiplication.
 
         Computes the matrix transpose-sparse matrix multiplication

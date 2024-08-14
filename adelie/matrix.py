@@ -162,7 +162,7 @@ class PyMatrixNaiveBase:
         if isinstance(v, (csr_matrix, csc_matrix)):
             v = v.tocsr().transpose()
             out = np.empty((v.shape[0], n), dtype=dtype)
-            self.sp_btmul(v, out)
+            self.sp_tmul(v, out)
             return out.T
 
         v = np.asarray(v, dtype=dtype)
