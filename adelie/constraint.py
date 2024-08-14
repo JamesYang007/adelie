@@ -56,10 +56,10 @@ def box(
                     Default is ``1e-9``.
                 hinge_max_iters : int, optional
                     Maximum number of hinge loss iterations.
-                    Default is ``int(1e5)``.
+                    Default is ``int(1e6)``.
                 hinge_tol : float, optional
                     Convergence tolerance for the hinge loss optimizer.
-                    Default is ``1e-9``.
+                    Default is ``1e-14``.
                 cs_tol : float, optional
                     Complementary slackness tolerance.
                     Default is ``1e-9``.
@@ -115,8 +115,8 @@ def box(
         "proximal-newton": {
             "max_iters": 100,
             "tol": 1e-9,
-            "hinge_max_iters": int(1e5),
-            "hinge_tol": 1e-9,
+            "hinge_max_iters": int(1e6),
+            "hinge_tol": 1e-14,
             "cs_tol": 1e-9,
             "slack": 1e-4,
         },
@@ -211,10 +211,10 @@ def linear(
                     Default is ``A.shape[0]``.
                 hinge_max_iters : int, optional
                     Maximum number of hinge loss iterations.
-                    Default is ``int(1e5)``.
+                    Default is ``int(1e6)``.
                 hinge_tol : float, optional
                     Convergence tolerance for the hinge loss optimizer.
-                    Default is ``1e-9``.
+                    Default is ``1e-14``.
                 cs_tol : float, optional
                     Complementary slackness tolerance.
                     Default is ``1e-9``.
@@ -309,8 +309,8 @@ def linear(
             "nnls_max_iters": int(1e5),
             "nnls_tol": 1e-7,
             "hinge_batch_size": A.shape[0],
-            "hinge_max_iters": int(1e5),
-            "hinge_tol": 1e-9,
+            "hinge_max_iters": int(1e6),
+            "hinge_tol": 1e-14,
             "cs_tol": 1e-9,
             "slack": 1e-4,
             "n_threads": 1,
@@ -416,10 +416,10 @@ def one_sided(
                     Default is ``1e-9``.
                 hinge_max_iters : int, optional
                     Maximum number of hinge loss iterations.
-                    Default is ``int(1e5)``.
+                    Default is ``int(1e6)``.
                 hinge_tol : float, optional
                     Convergence tolerance for the hinge loss optimizer.
-                    Default is ``1e-9``.
+                    Default is ``1e-14``.
                 cs_tol : float, optional
                     Complementary slackness tolerance.
                     Default is ``1e-9``.
@@ -490,8 +490,8 @@ def one_sided(
         "proximal-newton": {
             "max_iters": 100,
             "tol": 1e-9,
-            "hinge_max_iters": int(1e5),
-            "hinge_tol": 1e-9,
+            "hinge_max_iters": int(1e6),
+            "hinge_tol": 1e-14,
             "cs_tol": 1e-9,
             "slack": 1e-4,
         },
