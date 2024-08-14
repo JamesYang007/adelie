@@ -1,4 +1,5 @@
 #include "decl.hpp"
+#include <adelie_core/matrix/matrix_constraint_dense.hpp>
 #include <adelie_core/optimization/linqp_full.hpp>
 #include <adelie_core/optimization/nnls.hpp>
 #include <adelie_core/optimization/nnqp_full.hpp>
@@ -118,8 +119,8 @@ void nnls(py::module_& m, const char* name)
 
     Parameters
     ----------
-    X : (n, d) ndarray
-        Feature matrix.
+    XT : (d, n) ndarray
+        Feature matrix transposed.
     X_vars : (d,) ndarray
         :math:`\ell_2`-norm squared of the columns of ``X``.
     max_iters : int
@@ -138,7 +139,7 @@ void nnls(py::module_& m, const char* name)
         Loss :math:`1/2 \|y-X\beta\|_2^2`.
     )delimiter")
         .def(py::init<
-            const Eigen::Ref<const matrix_t>&,
+            matrix_t&,
             const Eigen::Ref<const vec_value_t>&,
             size_t,
             value_t,
@@ -148,7 +149,7 @@ void nnls(py::module_& m, const char* name)
             Eigen::Ref<vec_value_t>,
             value_t 
         >(),
-            py::arg("X").noconvert(),
+            py::arg("XT").noconvert(),
             py::arg("X_vars").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
@@ -158,7 +159,7 @@ void nnls(py::module_& m, const char* name)
             py::arg("resid"),
             py::arg("loss")
         )
-        .def_readonly("X", &state_t::X)
+        .def_readonly("XT", &state_t::XT)
         .def_readonly("X_vars", &state_t::X_vars)
         .def_readonly("max_iters", &state_t::max_iters)
         .def_readonly("tol", &state_t::tol)
@@ -174,8 +175,8 @@ void nnls(py::module_& m, const char* name)
             sw.start();
             state.solve(
                 [](){return false;}, 
-                vec_value_t::NullaryExpr(state.X.cols(), [](auto) { return 0; }),
-                vec_value_t::NullaryExpr(state.X.cols(), [](auto) { return std::numeric_limits<value_t>::infinity(); })
+                vec_value_t::NullaryExpr(state.XT->rows(), [](auto) { return 0; }),
+                vec_value_t::NullaryExpr(state.XT->rows(), [](auto) { return std::numeric_limits<value_t>::infinity(); })
             );
             state.time_elapsed = sw.elapsed();
         })
@@ -325,13 +326,14 @@ void hinge_full(py::module_& m, const char* name)
         ;
 }
 
-template <class ValueType>
+template <class MatrixType>
 void hinge_low_rank(py::module_& m, const char* name)
 {
+    using matrix_t = MatrixType;
     using dyn_vec_index_t = std::vector<Eigen::Index>;
-    using dyn_vec_value_t = std::vector<ValueType>;
+    using dyn_vec_value_t = std::vector<typename matrix_t::value_t>;
     using state_t = ad::optimization::StateHingeLowRank<
-        ValueType, 
+        matrix_t, 
         Eigen::Index, 
         dyn_vec_index_t,
         dyn_vec_value_t
@@ -359,7 +361,7 @@ void hinge_low_rank(py::module_& m, const char* name)
     quad : (n, n) ndarray
         Full positive semi-definite dense matrix :math:`S`.
     A : (m, n) ndarray
-        Dense matrix :math:`A`.
+        Matrix :math:`A`.
     penalty_neg : (m,) ndarray
         Penalty factor :math:`\omega_-` on the non-positive values.
     penalty_pos : (m,) ndarray
@@ -387,13 +389,12 @@ void hinge_low_rank(py::module_& m, const char* name)
     )delimiter")
         .def(py::init<
             const Eigen::Ref<const colmat_value_t>&,
-            const Eigen::Ref<const rowmat_value_t>&,
+            matrix_t&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             size_t,
             size_t,
             value_t,
-            size_t,
             dyn_vec_index_t&,
             dyn_vec_value_t&,
             Eigen::Ref<vec_value_t>,
@@ -408,7 +409,6 @@ void hinge_low_rank(py::module_& m, const char* name)
             py::arg("batch_size"),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("n_threads"),
             py::arg("active_set"),
             py::arg("active_value"),
             py::arg("active_vars"),
@@ -423,7 +423,6 @@ void hinge_low_rank(py::module_& m, const char* name)
         .def_readonly("batch_size", &state_t::batch_size)
         .def_readonly("max_iters", &state_t::max_iters)
         .def_readonly("tol", &state_t::tol)
-        .def_readonly("n_threads", &state_t::n_threads)
         .def_readonly("iters", &state_t::iters)
         .def_readonly("active_set", &state_t::active_set)
         .def_readonly("active_value", &state_t::active_value)
@@ -597,8 +596,8 @@ void register_optimization(py::module_& m)
 
     linqp_full<ad::util::colmat_type<double>>(m, "StateLinQPFull");
     nnqp_full<ad::util::colmat_type<double>>(m, "StateNNQPFull");
-    nnls<ad::util::colmat_type<double>>(m, "StateNNLS");
+    nnls<ad::matrix::MatrixConstraintDense<ad::util::rowmat_type<double>>>(m, "StateNNLS");
     lasso_full<ad::util::colmat_type<double>>(m, "StateLassoFull");
     hinge_full<ad::util::colmat_type<double>>(m, "StateHingeFull");
-    hinge_low_rank<double>(m, "StateHingeLowRank");
+    hinge_low_rank<ad::matrix::MatrixConstraintDense<ad::util::rowmat_type<double>>>(m, "StateHingeLowRank");
 }

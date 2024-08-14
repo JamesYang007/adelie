@@ -1,3 +1,4 @@
+import adelie.matrix as matrix
 import adelie.optimization as opt
 import cvxpy as cp
 import numpy as np
@@ -88,8 +89,9 @@ def test_hinge_low_rank(m, d, seed):
     active_AQ = np.empty((m, d))
     resid = linear.copy()
     grad = np.empty(m)
+    cA = matrix.dense(A, method="constraint")
     state = opt.StateHingeLowRank(
-        quad, A, penalty_neg, penalty_pos, 10, 100000, 1e-24, 1, 
+        quad, cA, penalty_neg, penalty_pos, 10, 100000, 1e-24, 
         active_set, active_value, active_vars, active_AQ, resid, grad,
     )
     state.solve()
@@ -182,7 +184,8 @@ def test_nnls(d, seed):
     is_active = np.zeros(d, dtype=bool)
     resid = y.copy()
     loss = 0.5 * np.sum(resid ** 2)
-    state = opt.StateNNLS(X, X_vars, 1000000, 1e-24, active_set, is_active, x, resid, loss)
+    XT = matrix.dense(X.T, method="constraint")
+    state = opt.StateNNLS(XT, X_vars, 1000000, 1e-24, active_set, is_active, x, resid, loss)
     state.solve()
 
     # test loss against truth

@@ -1,12 +1,19 @@
+from . import adelie_core as core
+from . import matrix 
 from .adelie_core.constraint import (
     ConstraintBase32,
     ConstraintBase64,
 )
 from .configs import Configs
 from .glm import _coerce_dtype
-from . import adelie_core as core
+from .matrix import (
+    MatrixConstraintBase32,
+    MatrixConstraintBase64,
+)
+from scipy.sparse import csr_matrix
 from typing import Union
 import numpy as np
+import scipy
 
 
 def box(
@@ -133,7 +140,7 @@ def box(
 
 
 def linear(
-    A: np.ndarray,
+    A: Union[np.ndarray, csr_matrix, MatrixConstraintBase32, MatrixConstraintBase64],
     lower: np.ndarray,
     upper: np.ndarray,
     *,
@@ -154,9 +161,8 @@ def linear(
 
     Parameters
     ----------
-    A : (m, d) ndarray
+    A : (m, d) Union[ndarray, csr_matrix, MatrixConstraintBase32, MatrixConstraintBase64]
         Constraint matrix :math:`A`.
-        If it is not in ``"C"``-ordering, a ``"C"``-ordered copy will be made internally.
     lower : (m,) ndarray
         Lower bound :math:`\\ell`.
     upper : (m,) ndarray
@@ -164,11 +170,13 @@ def linear(
     svd : tuple, optional
         A tuple ``(u, d, vh)`` as outputted by :func:`numpy.linalg.svd`.
         However, ``u`` must have ``"F"``-ordering.
-        If ``None``, it is computed internally.
+        If ``None`` and ``A`` is ``ndarray`` or ``csr_matrix``, it is computed internally.
+        Otherwise, it must be explicitly provided by the user.
         Default is ``None``.
     vars : ndarray, optional
         Equivalent to ``np.sum(A ** 2, axis=1)``.
-        If ``None``, it is computed internally.
+        If ``None`` and ``A`` is ``ndarray`` or ``csr_matrix``, it is computed internally.
+        Otherwise, it must be explicitly provided by the user.
         Default is ``None``.
     copy : bool, optional
         If ``True``, a copy of the inputs are stored internally.
@@ -242,27 +250,46 @@ def linear(
 
     See Also
     --------
-    adelie.constraint.box
-    adelie.constraint.one_sided
-    adelie.constraint.lower
-    adelie.constraint.upper
     adelie.adelie_core.constraint.ConstraintLinearProximalNewton32
     adelie.adelie_core.constraint.ConstraintLinearProximalNewton64
+    adelie.constraint.box
+    adelie.constraint.lower
+    adelie.constraint.one_sided
+    adelie.constraint.upper
     """
-    A, A_dtype = _coerce_dtype(A, dtype)
+    if isinstance(A, np.ndarray):
+        if svd is None:
+            A_u, A_d, A_vh = np.linalg.svd(A, full_matrices=False, compute_uv=True)
+            A_u = np.asfortranarray(A_u)
+            svd = (A_u, A_d, A_vh)
+
+        if vars is None:
+            vars = np.sum(A ** 2, axis=1)
+
+        A, A_dtype = _coerce_dtype(A, dtype)
+        A = matrix.dense(A, method="constraint", copy=copy)
+    elif isinstance(A, csr_matrix):
+        if svd is None:
+            A_u, A_d, A_vh = scipy.linalg.svd(A, full_matrices=False, compute_uv=True)
+            A_u = np.asfortranarray(A_u)
+            svd = (A_u, A_d, A_vh)
+
+        if vars is None:
+            vars = (A ** 2).sum(axis=1)
+
+        # TODO: check?
+        A_dtype = A.dtype
+        A = matrix.sparse(A, method="constraint", copy=copy)
+    else:
+        assert not (svd is None)
+        assert not (vars is None)
+        A_dtype = np.float32 if "32" in A.__class__.__name__ else np.float64
+
     lower, l_dtype = _coerce_dtype(lower, dtype)
     upper, u_dtype = _coerce_dtype(upper, dtype)
     assert A_dtype == l_dtype
     assert A_dtype == u_dtype
     dtype = A_dtype
-
-    if svd is None:
-        A_u, A_d, A_vh = np.linalg.svd(A, full_matrices=False, compute_uv=True)
-        A_u = np.asfortranarray(A_u)
-        svd = (A_u, A_d, A_vh)
-
-    if vars is None:
-        vars = np.sum(A ** 2, axis=1)
 
     lower = np.minimum(-lower, Configs.max_solver_value)
     upper = np.minimum(upper, Configs.max_solver_value)
@@ -295,7 +322,7 @@ def linear(
 
     class _linear(core_base):
         def __init__(self):
-            self._A = np.array(A, copy=copy, dtype=dtype, order="C")
+            self._A = A
             self._lower = np.array(lower, dtype=dtype)
             self._upper = np.array(upper, dtype=dtype)
             self._svd = tuple(np.array(x, copy=copy, dtype=dtype) for x in svd)

@@ -12,6 +12,96 @@ ad.configs.set_configs("min_bytes", 20)
 
 
 # ==========================================================================================
+# TEST constraint
+# ==========================================================================================
+
+
+def run_constraint(
+    A,
+    cA,
+    dtype,
+):
+    m, d = A.shape
+
+    atol = 1e-4 if dtype == np.float32 else 1e-14
+
+    # test rmmul
+    Q = np.asfortranarray(np.random.normal(0, 1, (d, d)).astype(dtype))
+    for i in range(m):
+        out = np.empty(d, dtype=dtype)
+        cA.rmmul(i, Q, out)
+        expected = A[i] @ Q
+        assert np.allclose(expected, out, atol=atol)
+
+    # test rvmul
+    v = np.random.normal(0, 1, d).astype(dtype)
+    for i in range(m):
+        out = cA.rvmul(i, v)
+        expected = A[i] @ v
+        assert np.allclose(expected, out, atol=atol)
+
+    # test rvtmul
+    v = np.random.normal(0, 1)
+    for i in range(m):
+        base = np.random.normal(0, 1, d).astype(dtype)
+        out = base.copy()
+        cA.rvtmul(i, v, out)
+        expected = base + A[i] * v
+        assert np.allclose(expected, out, atol=atol)
+
+    # test mul
+    v = np.random.normal(0, 1, m).astype(dtype)
+    out = np.empty(d, dtype=dtype)
+    cA.mul(v, out)
+    expected = v @ A
+    assert np.allclose(expected, out, atol=atol)
+
+    # test tmul
+    v = np.random.normal(0, 1, d).astype(dtype)
+    out = np.empty(m, dtype=dtype)
+    cA.tmul(v, out)
+    expected = v @ A.T
+    assert np.allclose(expected, out, atol=atol)
+
+    # test cov
+    Q = np.asfortranarray(np.random.normal(0, 1, (d, d)).astype(dtype))
+    out = np.empty((m, m), order="F", dtype=dtype)
+    cA.cov(Q, out)
+    expected = A @ Q @ A.T
+    assert np.allclose(expected, out, atol=atol)
+
+    # test rows and cols
+    assert cA.rows() == A.shape[0]
+    assert cA.cols() == A.shape[1]
+
+    # test sp_mul
+    indices = np.random.choice(m, m // 2, replace=False)
+    values = np.random.normal(0, 1, m // 2).astype(dtype)
+    out = np.empty(d, dtype=dtype)
+    cA.sp_mul(indices, values, out)
+    x = np.zeros(m)
+    x[indices] = values
+    expected = x @ A
+    assert np.allclose(expected, out, atol=atol)
+
+
+@pytest.mark.filterwarnings("ignore: Detected matrix to be F-contiguous.")
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+@pytest.mark.parametrize("order", ["C", "F"])
+@pytest.mark.parametrize("m, d", [
+    [2, 2],
+    [100, 20],
+    [20, 100],
+])
+def test_constraint_dense(m, d, order, dtype, seed=0):
+    np.random.seed(seed)
+    A = np.random.normal(0, 1, (m, d))
+    A = np.array(A, dtype=dtype, order=order)
+    cA = mod.dense(A, method="constraint", n_threads=4)
+    run_constraint(A, cA, dtype)
+
+
+# ==========================================================================================
 # TEST cov
 # ==========================================================================================
 

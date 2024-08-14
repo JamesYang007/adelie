@@ -1,10 +1,12 @@
 from . import adelie_core as core
 from . import io
 from .adelie_core.matrix import (
-    MatrixNaiveBase64,
-    MatrixNaiveBase32,
-    MatrixCovBase64,
+    MatrixConstraintBase32,
+    MatrixConstraintBase64,
     MatrixCovBase32,
+    MatrixCovBase64,
+    MatrixNaiveBase32,
+    MatrixNaiveBase64,
 )
 from sys import platform
 from scipy.sparse import (
@@ -36,6 +38,12 @@ def _to_dtype(mat):
 
 
 class PyMatrixCovBase:
+    # TODO?
+    def __init__(self, n_threads=1):
+        self._n_threads = n_threads
+
+
+class PyMatrixConstraintBase:
     # TODO?
     def __init__(self, n_threads=1):
         self._n_threads = n_threads
@@ -495,8 +503,9 @@ def dense(
     method : str, optional
         Method type. It must be one of the following:
 
-            - ``"naive"``: naive method.
-            - ``"cov"``: covariance method.
+            - ``"naive"``: naive matrix.
+            - ``"cov"``: covariance matrix.
+            - ``"constraint"``: constraint matrix.
 
         Default is ``"naive"``.
     copy : bool, optional
@@ -514,6 +523,10 @@ def dense(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixConstraintDense32C
+    adelie.adelie_core.matrix.MatrixConstraintDense32F
+    adelie.adelie_core.matrix.MatrixConstraintDense64C
+    adelie.adelie_core.matrix.MatrixConstraintDense64F
     adelie.adelie_core.matrix.MatrixCovDense32C
     adelie.adelie_core.matrix.MatrixCovDense32F
     adelie.adelie_core.matrix.MatrixCovDense64C
@@ -545,28 +558,58 @@ def dense(
         },
     }
 
+    constraint_dispatcher = {
+        np.dtype("float64"): {
+            "C": core.matrix.MatrixConstraintDense64C,
+            "F": core.matrix.MatrixConstraintDense64F,
+        },
+        np.dtype("float32"): {
+            "C": core.matrix.MatrixConstraintDense32C,
+            "F": core.matrix.MatrixConstraintDense32F,
+        },
+    }
+
     dispatcher = {
         "naive" : naive_dispatcher,
         "cov" : cov_dispatcher,
+        "constraint": constraint_dispatcher,
     }
 
     dtype = mat.dtype
-    order = (
-        "F"
+
+    if method != "constraint":
         # prioritize choosing Fortran contiguity
-        if mat.flags.f_contiguous else
-        "C"
-    )
-    if order == "C":
-        warnings.warn(
-            "Detected matrix to be C-contiguous. "
-            "Performance may improve with F-contiguous matrix."
+        order = (
+            "F"
+            if mat.flags.f_contiguous else
+            "C"
         )
+
+        if order == "C":
+            warnings.warn(
+                "Detected matrix to be C-contiguous. "
+                "Performance may improve with F-contiguous matrix."
+            )
+    else:
+        # prioritize choosing C contiguity
+        order = (
+            "C"
+            if mat.flags.c_contiguous else
+            "F"
+        )
+
+        if order == "F":
+            warnings.warn(
+                "Detected matrix to be F-contiguous. "
+                "Performance may improve with C-contiguous matrix."
+            )
+
     core_base = dispatcher[method][dtype][order]
 
     py_base = {
         "naive" : PyMatrixNaiveBase,
         "cov" : PyMatrixCovBase,
+        "constraint" : PyMatrixConstraintBase,
     }[method]
 
     class _dense(core_base, py_base):
@@ -1216,8 +1259,8 @@ def sparse(
     method : str, optional
         Method type. It must be one of the following:
 
-            - ``"naive"``: naive method.
-            - ``"cov"``: covariance method.
+            - ``"naive"``: naive matrix.
+            - ``"cov"``: covariance matrix.
 
         Default is ``"naive"``.
     copy : bool, optional

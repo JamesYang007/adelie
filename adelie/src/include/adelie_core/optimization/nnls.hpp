@@ -11,7 +11,7 @@ template <class MatrixType,
 struct StateNNLS
 {
     using matrix_t = MatrixType;
-    using value_t = typename MatrixType::Scalar;
+    using value_t = typename MatrixType::value_t;
     using index_t = IndexType;
     using dyn_vec_index_t = DynVecIndexType;
     using vec_value_t = util::rowvec_type<value_t>;
@@ -19,9 +19,8 @@ struct StateNNLS
     using map_vec_value_t = Eigen::Map<vec_value_t>;
     using map_vec_bool_t = Eigen::Map<vec_bool_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
-    using map_cmatrix_t = Eigen::Map<const matrix_t>;
 
-    const map_cmatrix_t X;
+    matrix_t* XT;
     const map_cvec_value_t X_vars;
 
     const size_t max_iters;
@@ -37,7 +36,7 @@ struct StateNNLS
     double time_elapsed = 0;
 
     explicit StateNNLS(
-        const Eigen::Ref<const matrix_t>& X,
+        matrix_t& XT,
         const Eigen::Ref<const vec_value_t>& X_vars,
         size_t max_iters,
         value_t tol,
@@ -47,7 +46,7 @@ struct StateNNLS
         Eigen::Ref<vec_value_t> resid,
         value_t loss
     ):
-        X(X.data(), X.rows(), X.cols()),
+        XT(&XT),
         X_vars(X_vars.data(), X_vars.size()),
         max_iters(max_iters),
         tol(tol),
@@ -57,12 +56,12 @@ struct StateNNLS
         resid(resid.data(), resid.size()),
         loss(loss)
     {
-        const auto n = X.rows();
-        const auto p = X.cols();
+        const auto n = XT.cols();
+        const auto p = XT.rows();
 
         if (X_vars.size() != p) {
             throw util::adelie_core_solver_error(
-                "X_vars must be (p,) where X is (n, p). "
+                "X_vars must be (p,) where XT is (p, n). "
             );
         }
         if (tol < 0) {
@@ -72,12 +71,12 @@ struct StateNNLS
         }
         if (beta.size() != p) {
             throw util::adelie_core_solver_error(
-                "beta must be (p,) where X is (n, p). "
+                "beta must be (p,) where XT is (p, n). "
             );
         }
         if (resid.size() != n) {
             throw util::adelie_core_solver_error(
-                "resid must be (n,) where X is (n, p). "
+                "resid must be (n,) where XT is (p, n). "
             );
         }
     }
@@ -114,8 +113,8 @@ struct StateNNLS
         };
 
         iters = 0;
-        const auto n = X.rows();
-        const auto p = X.cols();
+        const auto n = XT->cols();
+        const auto p = XT->rows();
 
         while (1) {
             while (1) {
@@ -127,7 +126,7 @@ struct StateNNLS
                     const auto lk = lower(k);
                     const auto uk = upper(k);
                     const auto vk = X_vars[k];
-                    const auto gk = X.col(k).dot(resid.matrix());
+                    const auto gk = XT->rvmul(k, resid);
                     auto& bk = beta[k];
                     const auto bk_old = bk;
                     const auto step = (vk <= 0) ? 0 : (gk / vk);
@@ -138,7 +137,7 @@ struct StateNNLS
                     const auto scaled_del_sq = vk * del * del; 
                     convg_measure = std::max<value_t>(convg_measure, scaled_del_sq);
                     loss -= del * gk - 0.5 * scaled_del_sq;
-                    resid -= del * X.col(k).array();
+                    XT->rvtmul(k, -del, resid);
                 }
 
                 if (iters >= max_iters) {
@@ -158,7 +157,7 @@ struct StateNNLS
                 const auto lk = lower(k);
                 const auto uk = upper(k);
                 const auto vk = X_vars[k];
-                const auto gk = X.col(k).dot(resid.matrix());
+                const auto gk = XT->rvmul(k, resid);
                 auto& bk = beta[k];
                 const auto bk_old = bk;
                 const auto step = (vk <= 0) ? 0 : (gk / vk);
@@ -169,7 +168,7 @@ struct StateNNLS
                 const auto scaled_del_sq = vk * del * del; 
                 convg_measure = std::max<value_t>(convg_measure, scaled_del_sq);
                 loss -= del * gk - 0.5 * scaled_del_sq;
-                resid -= del * X.col(k).array();
+                XT->rvtmul(k, -del, resid);
                 add_active(k);
             }
 

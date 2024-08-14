@@ -10,11 +10,16 @@
 namespace adelie_core {
 namespace constraint { 
 
-template <class ValueType, class IndexType=Eigen::Index>
-class ConstraintLinearBase: public ConstraintBase<ValueType, IndexType>
+template <class AType, 
+          class IndexType=Eigen::Index>
+class ConstraintLinearProximalNewton: public ConstraintBase<
+    typename std::decay_t<AType>::value_t, 
+    IndexType
+>
 {
 public:
-    using base_t = ConstraintBase<ValueType, IndexType>;
+    using A_t = std::decay_t<AType>;
+    using base_t = ConstraintBase<typename A_t::value_t, IndexType>;
     using typename base_t::index_t;
     using typename base_t::value_t;
     using typename base_t::vec_index_t;
@@ -22,68 +27,16 @@ public:
     using typename base_t::vec_uint64_t;
     using typename base_t::colmat_value_t;
     using rowmat_value_t = util::rowmat_type<value_t>;
-    using map_crowmat_value_t = Eigen::Map<const rowmat_value_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
+    using map_crowmat_value_t = Eigen::Map<const rowmat_value_t>;
+    using map_ccolmat_value_t = Eigen::Map<const colmat_value_t>;
 
 protected:
     using base_t::check_solve;
 
-    const map_crowmat_value_t _A;
+    A_t* _A;
     const map_cvec_value_t _l;
     const map_cvec_value_t _u;
-
-public:
-    explicit ConstraintLinearBase(
-        const Eigen::Ref<const rowmat_value_t> A,
-        const Eigen::Ref<const vec_value_t> l,
-        const Eigen::Ref<const vec_value_t> u
-    ):
-        _A(A.data(), A.rows(), A.cols()),
-        _l(l.data(), l.size()),
-        _u(u.data(), u.size())
-    {
-        const auto m = A.rows();
-        if (_u.size() != m) {
-            throw util::adelie_core_error("upper must be (m,) where A is (m, d).");
-        }
-        if (_l.size() != m) {
-            throw util::adelie_core_error("lower must be (m,) where A is (m, d).");
-        }
-        if ((_u < 0).any()) {
-            throw util::adelie_core_error("upper must be >= 0.");
-        }
-        if ((_l < 0).any()) { 
-            // NOTE: user passes in lower == -l
-            throw util::adelie_core_error("lower must be <= 0.");
-        }
-    }
-
-    using base_t::project;
-
-    int duals() override { return _A.rows(); }
-    int primals() override { return _A.cols(); }
-};
-
-template <class ValueType, class IndexType=Eigen::Index>
-class ConstraintLinearProximalNewton: public ConstraintLinearBase<ValueType, IndexType>
-{
-public:
-    using base_t = ConstraintLinearBase<ValueType, IndexType>;
-    using typename base_t::index_t;
-    using typename base_t::value_t;
-    using typename base_t::vec_index_t;
-    using typename base_t::vec_value_t;
-    using typename base_t::vec_uint64_t;
-    using typename base_t::colmat_value_t;
-    using typename base_t::rowmat_value_t;
-    using typename base_t::map_crowmat_value_t;
-    using typename base_t::map_cvec_value_t;
-    using map_ccolmat_value_t = Eigen::Map<const colmat_value_t>;
-    using base_t::_A;
-    using base_t::_l;
-    using base_t::_u;
-
-private:
     const map_ccolmat_value_t _A_u;
     const map_cvec_value_t _A_d;
     const map_crowmat_value_t _A_vh;
@@ -116,7 +69,7 @@ private:
         const value_t A_d_sum = A_d.sum();
         value_t cumsum = 0; 
         for (Eigen::Index i = 0; i < A_d.size(); ++i) {
-            if (cumsum > 0.99 * A_d_sum) return i;
+            if (cumsum > (1-1e-5) * A_d_sum) return i;
             cumsum += A_d[i];
         }
         return A_d.size();
@@ -127,10 +80,9 @@ private:
         Eigen::Ref<vec_value_t> out
     ) 
     {
-        out.setZero();
-        for (size_t i = 0; i < _mu_active.size(); ++i) {
-            out += _mu_value[i] * _A.row(_mu_active[i]).array();
-        }
+        const Eigen::Map<const vec_index_t> indices(_mu_active.data(), _mu_active.size());
+        const Eigen::Map<const vec_value_t> values(_mu_value.data(), _mu_value.size());
+        _A->sp_mul(indices, values, out);
     };
 
     ADELIE_CORE_STRONG_INLINE
@@ -198,7 +150,7 @@ private:
 
 public:
     explicit ConstraintLinearProximalNewton(
-        const Eigen::Ref<const rowmat_value_t>& A,
+        A_t& A,
         const Eigen::Ref<const vec_value_t>& l,
         const Eigen::Ref<const vec_value_t>& u,
         const Eigen::Ref<const colmat_value_t>& A_u,
@@ -216,7 +168,9 @@ public:
         value_t slack,
         size_t n_threads
     ):
-        base_t(A, l, u),
+        _A(&A),
+        _l(l.data(), l.size()),
+        _u(u.data(), u.size()),
         _A_u(A_u.data(), A_u.rows(), A_u.cols()),
         _A_d(A_d.data(), A_d.size()),
         _A_vh(A_vh.data(), A_vh.rows(), A_vh.cols()),
@@ -237,6 +191,19 @@ public:
         const auto m = A.rows();
         const auto d = A.cols();
 
+        if (l.size() != m) {
+            throw util::adelie_core_error("lower must be (m,) where A is (m, d).");
+        }
+        if (u.size() != m) {
+            throw util::adelie_core_error("upper must be (m,) where A is (m, d).");
+        }
+        if ((u < 0).any()) {
+            throw util::adelie_core_error("upper must be >= 0.");
+        }
+        if ((l < 0).any()) { 
+            // NOTE: user passes in lower == -l
+            throw util::adelie_core_error("lower must be <= 0.");
+        }
         if (A_u.rows() != m) {
             throw util::adelie_core_error("A_u must be (m, r) where A is (m, d).");
         }
@@ -266,10 +233,12 @@ public:
         }
     }
 
+    using base_t::project;
+
     size_t buffer_size() override 
     {
-        const auto m = _A.rows();
-        const auto d = _A.cols();
+        const auto m = _A->rows();
+        const auto d = _A->cols();
         return d * (10 + 2 * d) + 2 * m + ((m < d) ? (m * m) : ((1 + d) * m));
     }
 
@@ -285,8 +254,8 @@ public:
     {
         using vec_bool_t = util::rowvec_type<bool>;
 
-        const auto m = _A.rows();
-        const auto d = _A.cols();
+        const auto m = _A->rows();
+        const auto d = _A->cols();
 
         base_t::check_solve(x.size(), quad.cols(), linear.size(), m, d);
 
@@ -378,11 +347,8 @@ public:
                 Qmu_resid = Qv - _ATmu;
 
                 value_t loss = 0.5 * Qmu_resid.square().sum();
-                const Eigen::Map<const colmat_value_t> AT(
-                    _A.data(), _A.cols(), _A.rows()
-                );
-                optimization::StateNNLS<colmat_value_t> state_nnls(
-                    AT, _A_vars, _nnls_max_iters, _nnls_tol,
+                optimization::StateNNLS<A_t> state_nnls(
+                    *_A, _A_vars, _nnls_max_iters, _nnls_tol,
                     _mu_active, is_active, mu, Qmu_resid, loss
                 );
                 //using sw_t = util::Stopwatch;
@@ -480,8 +446,8 @@ public:
         ) {
             if (m < d) {
                 mu_to_dense(mu);
-                hess_small = _A * hess * _A.transpose();
-                hinge_grad = grad.matrix() * _A.transpose();
+                _A->cov(hess, hess_small);
+                _A->tmul(grad, hinge_grad);
                 optimization::StateHingeFull<colmat_value_t> state_hinge(
                     hess_small, _l, _u, _hinge_max_iters, _hinge_tol,
                     mu, hinge_grad
@@ -491,10 +457,10 @@ public:
             } else {
                 const auto active_invariance = [&](auto ii) {
                     const auto i = _mu_active[ii];
-                    const auto Ai = _A.row(i);
-                    active_AQ.row(ii) = Ai * hess;
+                    auto AiQ = active_AQ.row(ii);
+                    _A->rmmul(i, hess, AiQ);
                     active_vars[ii] = std::max<value_t>(
-                        active_AQ.row(ii).dot(Ai),
+                        _A->rvmul(i, AiQ),
                         1e-14
                     );
                 };
@@ -506,8 +472,8 @@ public:
                     #pragma omp parallel for schedule(static) num_threads(_n_threads)
                     for (Eigen::Index ii = 0; ii < static_cast<Eigen::Index>(active_size); ++ii) active_invariance(ii);
                 }
-                optimization::StateHingeLowRank<value_t, index_t> state_hinge(
-                    hess, _A, _l, _u, _hinge_batch_size, _hinge_max_iters, _hinge_tol, _n_threads,
+                optimization::StateHingeLowRank<A_t, index_t> state_hinge(
+                    hess, *_A, _l, _u, _hinge_batch_size, _hinge_max_iters, _hinge_tol,
                     _mu_active, _mu_value, active_vars, active_AQ, grad, hinge_grad
                 );
                 //using sw_t = util::Stopwatch;
@@ -564,18 +530,18 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        out.matrix() = mu.matrix() * _A;
+        _A->mul(mu, out);
     }
 
     value_t solve_zero(
         const Eigen::Ref<const vec_value_t>& v,
         Eigen::Ref<vec_uint64_t> buffer
-    ) override
+    ) override 
     {
         using vec_bool_t = util::rowvec_type<bool>;
 
-        const auto m = _A.rows();
-        const auto d = _A.cols();
+        const auto m = _A->rows();
+        const auto d = _A->cols();
 
         auto buff_ptr = reinterpret_cast<value_t*>(buffer.data());
         Eigen::Map<vec_value_t> grad(buff_ptr, d); buff_ptr += d;
@@ -594,9 +560,6 @@ public:
         auto& Qmu_resid = grad;
         Qmu_resid = v - _ATmu;
         const value_t loss = 0.5 * Qmu_resid.square().sum();
-        const Eigen::Map<const colmat_value_t> AT(
-            _A.data(), _A.cols(), _A.rows()
-        );
         const auto lower_constraint = vec_value_t::NullaryExpr(_l.size(), [&](auto i) {
             const auto li = _l[i];
             return (li <= 0) ? (-Configs::max_solver_value) : 0;
@@ -605,8 +568,8 @@ public:
             const auto ui = _u[i];
             return (ui <= 0) ? Configs::max_solver_value : 0;
         });
-        optimization::StateNNLS<colmat_value_t> state_nnls(
-            AT, _A_vars, _nnls_max_iters, _nnls_tol,
+        optimization::StateNNLS<A_t> state_nnls(
+            *_A, _A_vars, _nnls_max_iters, _nnls_tol,
             _mu_active, is_active, mu, Qmu_resid, loss
         );
         state_nnls.solve(
@@ -656,6 +619,9 @@ public:
     {
         return _mu_active.size();
     }
+
+    int duals() override { return _A->rows(); }
+    int primals() override { return _A->cols(); }
 };
 
 } // namespace constraint

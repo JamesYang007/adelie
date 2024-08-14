@@ -1,4 +1,6 @@
 #include "decl.hpp"
+#include <adelie_core/matrix/matrix_constraint_base.hpp>
+#include <adelie_core/matrix/matrix_constraint_dense.hpp>
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 #include <adelie_core/matrix/matrix_cov_block_diag.hpp>
 #include <adelie_core/matrix/matrix_cov_dense.hpp>
@@ -19,6 +21,288 @@
 
 namespace py = pybind11;
 namespace ad = adelie_core;
+
+template <class T>
+class PyMatrixConstraintBase: public ad::matrix::MatrixConstraintBase<T>
+{
+    using base_t = ad::matrix::MatrixConstraintBase<T>;
+public:
+    /* Inherit the constructors */
+    using base_t::base_t;
+    using typename base_t::value_t;
+    using typename base_t::vec_index_t;
+    using typename base_t::vec_value_t;
+    using typename base_t::colmat_value_t;
+
+    void rmmul(
+        int j, 
+        const Eigen::Ref<const colmat_value_t>& Q,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            rmmul,
+            j, Q, out
+        );
+    }
+    
+    value_t rvmul(
+        int j, 
+        const Eigen::Ref<const vec_value_t>& v
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            value_t,
+            base_t,
+            rvmul,
+            j, v
+        );
+    }
+
+    void rvtmul(
+        int j, 
+        value_t v, 
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            rvtmul,
+            j, v, out
+        );
+    }
+
+    void mul(
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            mul,
+            v, out
+        );
+    }
+
+    void tmul(
+        const Eigen::Ref<const vec_value_t>& v, 
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            tmul,
+            v, out
+        );
+    }
+
+    void cov(
+        const Eigen::Ref<const colmat_value_t>& Q,
+        Eigen::Ref<colmat_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            cov,
+            Q, out
+        );
+    }
+
+    int rows() const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            int,
+            base_t,
+            rows,
+        );
+    }
+    
+    int cols() const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            int,
+            base_t,
+            cols,
+        );
+    }
+
+    void sp_mul(
+        const Eigen::Ref<const vec_index_t>& indices,
+        const Eigen::Ref<const vec_value_t>& values,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            sp_mul,
+            indices, values, out
+        );
+    }
+};
+
+template <class T>
+void matrix_constraint_base(py::module_& m, const char* name)
+{
+    using trampoline_t = PyMatrixConstraintBase<T>;
+    using internal_t = ad::matrix::MatrixConstraintBase<T>;
+    py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
+        Base matrix class for constraint matrices.
+    )delimiter")
+        .def(py::init<>())
+        .def("rmmul", &internal_t::rmmul, R"delimiter(
+        Computes a row vector-matrix multiplication.
+
+        Computes the matrix-vector multiplication 
+        ``A[j] @ Q``.
+
+        Parameters
+        ----------
+        j : int
+            Row index.
+        Q : (d, d) ndarray
+            Matrix to dot product with the ``j`` th row.
+        out : (d,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("rvmul", &internal_t::rvmul, R"delimiter(
+        Computes a row vector-vector multiplication.
+
+        Computes the dot-product
+        ``A[j] @ v``.
+
+        Parameters
+        ----------
+        j : int
+            Row index.
+        v : (d,) ndarray
+            Vector to dot product with the ``j`` th row.
+
+        Returns
+        -------
+        dot : float
+            Row vector-vector multiplication.
+        )delimiter")
+        .def("rvtmul", &internal_t::rvtmul, R"delimiter(
+        Computes a row vector-scalar multiplication increment.
+
+        Computes the vector-scalar multiplication ``A[j] * v``.
+        The result is *incremented* into the output vector.
+
+        Parameters
+        ----------
+        j : int
+            Row index.
+        v : float
+            Scalar to multiply with the ``j`` th row.
+        out : (d,) ndarray
+            Vector to increment in-place the result.
+        )delimiter")
+        .def("mul", &internal_t::mul, R"delimiter(
+        Computes a matrix-vector multiplication.
+
+        Computes the matrix-vector multiplication
+        ``v.T @ A``.
+
+        Parameters
+        ----------
+        v : (m,) ndarray
+            Vector to multiply with the matrix.
+        out : (d,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("tmul", &internal_t::tmul, R"delimiter(
+        Computes a matrix transpose-vector multiplication.
+
+        Computes the matrix transpose-vector multiplication
+        ``v.T @ A.T``.
+
+        Parameters
+        ----------
+        v : (d,) ndarray
+            Vector to multiply with the matrix.
+        out : (m,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("cov", &internal_t::cov, R"delimiter(
+        Computes the covariance matrix.
+
+        Computes the covariance matrix ``A @ Q @ A.T``.
+
+        Parameters
+        ----------
+        Q : (d, d) ndarray
+            Matrix of weights.
+        out : (m, m) ndarray
+            Matrix to store in-place the result.
+        )delimiter")
+        .def("rows", &internal_t::rows, R"delimiter(
+        Returns the number of rows.
+
+        Returns
+        -------
+        rows : int
+            Number of rows.
+        )delimiter")
+        .def("cols", &internal_t::cols, R"delimiter(
+        Returns the number of columns.
+
+        Returns
+        -------
+        cols : int
+            Number of columns.
+        )delimiter")
+        .def("sp_mul", &internal_t::sp_mul, R"delimiter(
+        Computes a matrix-sparse vector multiplication.
+
+        Computes the matrix-sparse vector multiplication
+        ``v.T @ A`` where ``v`` is represented by the sparse-format 
+        ``indices`` and ``values``.
+
+        Parameters
+        ----------
+        indices : (nnz,) ndarray
+            Vector of indices with non-zero values of ``v``.
+            It does not have to be sorted in increasing order.
+        values : (nnz,) ndarray
+            Vector of values corresponding to ``indices``.
+        out : (d,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        /* Augmented API for Python */
+        .def_property_readonly("ndim", [](const internal_t&) { return 2; }, R"delimiter(
+        Number of dimensions. It is always ``2``.
+        )delimiter")
+        .def_property_readonly("shape", [](const internal_t& m) {
+            return std::make_tuple(m.rows(), m.cols());
+        }, R"delimiter(
+        Shape of the matrix.
+        )delimiter")
+        ;
+}
+
+template <class DenseType>
+void matrix_constraint_dense(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixConstraintDense<DenseType>;
+    using base_t = typename internal_t::base_t;
+    using dense_t = typename internal_t::dense_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for dense constraint matrix."
+        )
+        .def(
+            py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
+            py::arg("mat").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
 
 template <class T>
 class PyMatrixCovBase: public ad::matrix::MatrixCovBase<T>
@@ -83,6 +367,178 @@ public:
         );
     }
 };
+
+template <class T>
+void matrix_cov_base(py::module_& m, const char* name)
+{
+    using trampoline_t = PyMatrixCovBase<T>;
+    using internal_t = ad::matrix::MatrixCovBase<T>;
+    py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
+        Base matrix class for covariance matrices.
+    )delimiter")
+        .def(py::init<>())
+        .def("bmul", &internal_t::bmul, R"delimiter(
+        Computes a block matrix-sparse vector multiplication.
+
+        Computes the matrix-sparse vector multiplication
+        ``v.T @ A[:, subset]`` where ``v`` is represented by the sparse-format
+        ``indices`` and ``values``.
+
+        Parameters
+        ----------
+        subset : (s,) ndarray
+            Vector of column indices of ``A`` to subset in increasing order.
+        indices : (nnz,) ndarray
+            Vector of indices in increasing order.
+        values : (nnz,) ndarray
+            Vector of values associated with ``indices``.
+        out : (s,) ndarray
+            Vector to store the result.
+        )delimiter")
+        .def("mul", &internal_t::mul, R"delimiter(
+        Computes a matrix-sparse vector multiplication.
+
+        Computes the matrix-sparse vector multiplication
+        ``v.T @ A`` where ``v`` is represented by the sparse-format
+        ``indices`` and ``values``.
+
+        Parameters
+        ----------
+        indices : (nnz,) ndarray
+            Vector of indices in increasing order.
+        values : (nnz,) ndarray
+            Vector of values associated with ``indices``.
+        out : (n,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("to_dense", &internal_t::to_dense, R"delimiter(
+        Converts a block to a dense matrix.
+
+        Converts the block ``A[i:i+p, i:i+p]`` into a dense matrix.
+
+        Parameters
+        ----------
+        i : int
+            Row index.
+        p : int
+            Number of rows.
+        out : (p, p) ndarray
+            Matrix to store the dense result.
+        )delimiter")
+        .def("rows", &internal_t::rows, R"delimiter(
+        Returns the number of rows.
+
+        Returns
+        -------
+        rows : int
+            Number of rows.
+        )delimiter")
+        .def("cols", &internal_t::cols, R"delimiter(
+        Returns the number of columns.
+
+        Returns
+        -------
+        cols : int
+            Number of columns.
+        )delimiter")
+        /* Augmented API for Python */
+        .def_property_readonly("ndim", [](const internal_t&) { return 2; }, R"delimiter(
+        Number of dimensions. It is always ``2``.
+        )delimiter")
+        .def_property_readonly("shape", [](const internal_t& m) {
+            return std::make_tuple(m.rows(), m.cols());
+        }, R"delimiter(
+        Shape of the matrix.
+        )delimiter")
+        ;
+}
+
+template <class ValueType>
+void matrix_cov_block_diag(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixCovBlockDiag<ValueType>;
+    using base_t = typename internal_t::base_t;
+    py::class_<internal_t, base_t>(m, name, 
+        "Core matrix class for covariance block-diagonal matrix."
+        )
+        .def(
+            py::init([](py::list mat_list_py, size_t n_threads) {
+                std::vector<base_t*> mat_list;
+                mat_list.reserve(mat_list_py.size());
+                for (auto obj : mat_list_py) {
+                    mat_list.push_back(py::cast<base_t*>(obj));
+                }
+                return new internal_t(mat_list, n_threads);
+            }), 
+            py::arg("mat_list").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+template <class DenseType>
+void matrix_cov_dense(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixCovDense<DenseType>;
+    using base_t = typename internal_t::base_t;
+    using dense_t = typename internal_t::dense_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for covariance dense matrix."
+        )
+        .def(
+            py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
+            py::arg("mat").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+template <class DenseType>
+void matrix_cov_lazy_cov(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixCovLazyCov<DenseType>;
+    using base_t = typename internal_t::base_t;
+    using dense_t = typename internal_t::dense_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for covariance lazy-covariance matrix.")
+        .def(
+            py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
+            py::arg("mat").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+template <class SparseType>
+void matrix_cov_sparse(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixCovSparse<SparseType>;
+    using base_t = typename internal_t::base_t;
+    using vec_sp_value_t = typename internal_t::vec_sp_value_t;
+    using vec_sp_index_t = typename internal_t::vec_sp_index_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for covariance sparse matrix."
+        )
+        .def(
+            py::init<
+                size_t,
+                size_t,
+                size_t,
+                const Eigen::Ref<const vec_sp_index_t>&,
+                const Eigen::Ref<const vec_sp_index_t>&,
+                const Eigen::Ref<const vec_sp_value_t>&,
+                size_t
+            >(), 
+            py::arg("rows"),
+            py::arg("cols"),
+            py::arg("nnz"),
+            py::arg("outer").noconvert(),
+            py::arg("inner").noconvert(),
+            py::arg("value").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
 
 template <class T>
 class PyMatrixNaiveBase: public ad::matrix::MatrixNaiveBase<T>
@@ -223,27 +679,33 @@ void matrix_naive_base(py::module_& m, const char* name)
     using trampoline_t = PyMatrixNaiveBase<T>;
     using internal_t = ad::matrix::MatrixNaiveBase<T>;
     py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
-        Base matrix class for naive method.
+        Base matrix class for naive matrices.
         )delimiter")
         .def(py::init<>())
         .def("cmul", &internal_t::cmul, R"delimiter(
         Computes a column vector-vector multiplication.
 
-        Computes the dot-product ``(v * w).T @ X[:,j]`` for a column ``j``.
+        Computes the dot-product 
+        ``(v * w).T @ X[:,j]``.
 
         Parameters
         ----------
         j : int
             Column index.
         v : (n,) ndarray
-            Vector to dot product with the ``j`` th column with.
+            Vector to dot product with the ``j`` th column.
         w : (n,) ndarray
             Vector of weights.
+
+        Returns
+        -------
+        dot : float
+            Column vector-vector multiplication.
         )delimiter")
         .def("ctmul", &internal_t::ctmul, R"delimiter(
         Computes a column vector-scalar multiplication increment.
 
-        Computes the vector-scalar multiplication ``v * X[:,j]`` for a column ``j``.
+        Computes the vector-scalar multiplication ``v * X[:,j]``.
         The result is *incremented* into the output vector.
 
         Parameters
@@ -300,7 +762,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         Parameters
         ----------
         v : (n,) ndarray
-            Vector to multiply with the block matrix.
+            Vector to multiply with the matrix.
         w : (n,) ndarray
             Vector of weights.
         out : (q,) ndarray
@@ -310,7 +772,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         Computes a matrix transpose-sparse matrix multiplication.
 
         Computes the matrix transpose-sparse matrix multiplication
-        ``v @ X.T``.
+        ``v.T @ X.T``.
 
         Parameters
         ----------
@@ -343,84 +805,19 @@ void matrix_naive_base(py::module_& m, const char* name)
         )delimiter")
         .def("rows", &internal_t::rows, R"delimiter(
         Returns the number of rows.
-        )delimiter")
-        .def("cols", &internal_t::cols, R"delimiter(
-        Returns the number of columns.
-        )delimiter")
-        /* Augmented API for Python */
-        .def_property_readonly("ndim", [](const internal_t&) { return 2; }, R"delimiter(
-        Number of dimensions. It is always ``2``.
-        )delimiter")
-        .def_property_readonly("shape", [](const internal_t& m) {
-            return std::make_tuple(m.rows(), m.cols());
-        }, R"delimiter(
-        Shape of the matrix.
-        )delimiter")
-        ;
-}
 
-template <class T>
-void matrix_cov_base(py::module_& m, const char* name)
-{
-    using trampoline_t = PyMatrixCovBase<T>;
-    using internal_t = ad::matrix::MatrixCovBase<T>;
-    py::class_<internal_t, trampoline_t>(m, name, R"delimiter(
-        Base matrix class for covariance method.
-    )delimiter")
-        .def(py::init<>())
-        .def("bmul", &internal_t::bmul, R"delimiter(
-        Computes a block matrix-sparse vector multiplication.
-
-        Computes the matrix-sparse vector multiplication
-        ``v.T @ A[:, subset]`` where ``v`` is represented by the sparse-format
-        ``indices`` and ``values``.
-
-        Parameters
-        ----------
-        subset : (s,) ndarray
-            Vector of column indices of ``A`` to subset in increasing order.
-        indices : (nnz,) ndarray
-            Vector of indices in increasing order.
-        values : (nnz,) ndarray
-            Vector of values associated with ``indices``.
-        out : (s,) ndarray
-            Vector to store the result.
-        )delimiter")
-        .def("mul", &internal_t::mul, R"delimiter(
-        Computes a matrix-sparse vector multiplication.
-
-        Computes the matrix-sparse vector multiplication
-        ``v.T @ A`` where ``v`` is represented by the sparse-format
-        ``indices`` and ``values``.
-
-        Parameters
-        ----------
-        indices : (nnz,) ndarray
-            Vector of indices in increasing order.
-        values : (nnz,) ndarray
-            Vector of values associated with ``indices``.
-        out : (n,) ndarray
-            Vector to store in-place the result.
-        )delimiter")
-        .def("to_dense", &internal_t::to_dense, R"delimiter(
-        Converts a block to a dense matrix.
-
-        Converts the block ``A[i:i+p, i:i+p]`` into a dense matrix.
-
-        Parameters
-        ----------
-        i : int
-            Row index.
-        p : int
+        Returns
+        -------
+        rows : int
             Number of rows.
-        out : (p, p) ndarray
-            Matrix to store the dense result.
-        )delimiter")
-        .def("rows", &internal_t::rows, R"delimiter(
-        Returns the number of rows.
         )delimiter")
         .def("cols", &internal_t::cols, R"delimiter(
         Returns the number of columns.
+
+        Returns
+        -------
+        cols : int
+            Number of columns.
         )delimiter")
         /* Augmented API for Python */
         .def_property_readonly("ndim", [](const internal_t&) { return 2; }, R"delimiter(
@@ -431,93 +828,6 @@ void matrix_cov_base(py::module_& m, const char* name)
         }, R"delimiter(
         Shape of the matrix.
         )delimiter")
-        ;
-}
-
-template <class ValueType>
-void matrix_cov_block_diag(py::module_& m, const char* name)
-{
-    using internal_t = ad::matrix::MatrixCovBlockDiag<ValueType>;
-    using base_t = typename internal_t::base_t;
-    py::class_<internal_t, base_t>(m, name, 
-        "Core matrix class for covariance block-diagonal matrix."
-        )
-        .def(
-            py::init([](py::list mat_list_py, size_t n_threads) {
-                std::vector<base_t*> mat_list;
-                mat_list.reserve(mat_list_py.size());
-                for (auto obj : mat_list_py) {
-                    mat_list.push_back(py::cast<base_t*>(obj));
-                }
-                return new internal_t(mat_list, n_threads);
-            }), 
-            py::arg("mat_list").noconvert(),
-            py::arg("n_threads")
-        )
-        ;
-}
-
-template <class DenseType>
-void matrix_cov_dense(py::module_& m, const char* name)
-{
-    using internal_t = ad::matrix::MatrixCovDense<DenseType>;
-    using base_t = typename internal_t::base_t;
-    using dense_t = typename internal_t::dense_t;
-    py::class_<internal_t, base_t>(m, name,
-        "Core matrix class for covariance dense matrix."
-        )
-        .def(
-            py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
-            py::arg("mat").noconvert(),
-            py::arg("n_threads")
-        )
-        ;
-}
-
-template <class DenseType>
-void matrix_cov_lazy_cov(py::module_& m, const char* name)
-{
-    using internal_t = ad::matrix::MatrixCovLazyCov<DenseType>;
-    using base_t = typename internal_t::base_t;
-    using dense_t = typename internal_t::dense_t;
-    py::class_<internal_t, base_t>(m, name,
-        "Core matrix class for covariance lazy-covariance matrix.")
-        .def(
-            py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
-            py::arg("mat").noconvert(),
-            py::arg("n_threads")
-        )
-        ;
-}
-
-template <class SparseType>
-void matrix_cov_sparse(py::module_& m, const char* name)
-{
-    using internal_t = ad::matrix::MatrixCovSparse<SparseType>;
-    using base_t = typename internal_t::base_t;
-    using vec_sp_value_t = typename internal_t::vec_sp_value_t;
-    using vec_sp_index_t = typename internal_t::vec_sp_index_t;
-    py::class_<internal_t, base_t>(m, name,
-        "Core matrix class for covariance sparse matrix."
-        )
-        .def(
-            py::init<
-                size_t,
-                size_t,
-                size_t,
-                const Eigen::Ref<const vec_sp_index_t>&,
-                const Eigen::Ref<const vec_sp_index_t>&,
-                const Eigen::Ref<const vec_sp_value_t>&,
-                size_t
-            >(), 
-            py::arg("rows"),
-            py::arg("cols"),
-            py::arg("nnz"),
-            py::arg("outer").noconvert(),
-            py::arg("inner").noconvert(),
-            py::arg("value").noconvert(),
-            py::arg("n_threads")
-        )
         ;
 }
 
@@ -894,13 +1204,19 @@ using sparse_type = Eigen::SparseMatrix<T, Storage>;
 
 void register_matrix(py::module_& m)
 {
-    /* base matrices */
-    matrix_naive_base<double>(m, "MatrixNaiveBase64");
-    matrix_naive_base<float>(m, "MatrixNaiveBase32");
+    /* constraint matrices */
+    matrix_constraint_base<double>(m, "MatrixConstraintBase64");
+    matrix_constraint_base<float>(m, "MatrixConstraintBase32");
+
+    matrix_constraint_dense<dense_type<double, Eigen::RowMajor>>(m, "MatrixConstraintDense64C");
+    matrix_constraint_dense<dense_type<double, Eigen::ColMajor>>(m, "MatrixConstraintDense64F");
+    matrix_constraint_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixConstraintDense32C");
+    matrix_constraint_dense<dense_type<float, Eigen::ColMajor>>(m, "MatrixConstraintDense32F");
+
+    /* cov matrices */
     matrix_cov_base<double>(m, "MatrixCovBase64");
     matrix_cov_base<float>(m, "MatrixCovBase32");
 
-    /* cov matrices */
     matrix_cov_block_diag<double>(m, "MatrixCovBlockDiag64");
     matrix_cov_block_diag<float>(m, "MatrixCovBlockDiag32");
 
@@ -918,6 +1234,9 @@ void register_matrix(py::module_& m)
     matrix_cov_sparse<sparse_type<float, Eigen::ColMajor>>(m, "MatrixCovSparse32F");
 
     /* naive matrices */
+    matrix_naive_base<double>(m, "MatrixNaiveBase64");
+    matrix_naive_base<float>(m, "MatrixNaiveBase32");
+
     matrix_naive_convex_relu_dense<
         dense_type<double, Eigen::RowMajor>,
         dense_type<bool, Eigen::ColMajor>

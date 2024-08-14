@@ -3,6 +3,7 @@
 #include <adelie_core/constraint/constraint_box.hpp>
 #include <adelie_core/constraint/constraint_linear.hpp>
 #include <adelie_core/constraint/constraint_one_sided.hpp>
+#include <adelie_core/matrix/matrix_constraint_base.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -420,21 +421,11 @@ void constraint_box_proximal_newton(py::module_& m, const char* name)
         ;
 }
 
-template <class ValueType>
-void constraint_linear_base(py::module_& m, const char* name)
-{
-    using internal_t = ad::constraint::ConstraintLinearBase<ValueType>;
-    using base_t = typename internal_t::base_t;
-    py::class_<internal_t, base_t>(m, name, 
-        "Core constraint base class for linear constraint."
-        )
-        ;
-}
-
-template <class ValueType>
+template <class AType>
 void constraint_linear_proximal_newton(py::module_& m, const char* name)
 {
-    using internal_t = ad::constraint::ConstraintLinearProximalNewton<ValueType>;
+    using internal_t = ad::constraint::ConstraintLinearProximalNewton<AType>;
+    using A_t = typename internal_t::A_t;
     using base_t = typename internal_t::base_t;
     using value_t = typename internal_t::value_t;
     using vec_value_t = typename internal_t::vec_value_t;
@@ -444,7 +435,7 @@ void constraint_linear_proximal_newton(py::module_& m, const char* name)
         "Core constraint class for linear constraint with proximal Newton solver."
         )
         .def(py::init<
-            const Eigen::Ref<const rowmat_value_t>&,
+            A_t&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const colmat_value_t>&,
@@ -568,10 +559,8 @@ void register_constraint(py::module_& m)
     constraint_box_proximal_newton<double>(m, "ConstraintBoxProximalNewton64");
     constraint_box_proximal_newton<float>(m, "ConstraintBoxProximalNewton32");
 
-    constraint_linear_base<double>(m, "ConstraintLinearBase64");
-    constraint_linear_base<float>(m, "ConstraintLinearBase32");
-    constraint_linear_proximal_newton<double>(m, "ConstraintLinearProximalNewton64");
-    constraint_linear_proximal_newton<float>(m, "ConstraintLinearProximalNewton32");
+    constraint_linear_proximal_newton<ad::matrix::MatrixConstraintBase<double>>(m, "ConstraintLinearProximalNewton64");
+    constraint_linear_proximal_newton<ad::matrix::MatrixConstraintBase<float>>(m, "ConstraintLinearProximalNewton32");
 
     constraint_one_sided_base<double>(m, "ConstraintOneSidedBase64");
     constraint_one_sided_base<float>(m, "ConstraintOneSidedBase32");
