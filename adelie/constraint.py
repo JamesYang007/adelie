@@ -277,8 +277,10 @@ def linear(
         if vars is None:
             vars = (A ** 2).sum(axis=1)
 
-        # TODO: check?
-        A_dtype = A.dtype
+        A_dtype = {
+            np.dtype("float64"): np.float64,
+            np.dtype("float32"): np.float32,
+        }[A.dtype]
         A = matrix.sparse(A, method="constraint", copy=copy)
     else:
         assert not (svd is None)

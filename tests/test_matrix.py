@@ -101,6 +101,26 @@ def test_constraint_dense(m, d, order, dtype, seed=0):
     run_constraint(A, cA, dtype)
 
 
+@pytest.mark.filterwarnings("ignore: Converting to CSR format.")
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+@pytest.mark.parametrize("order", ["C", "F"])
+@pytest.mark.parametrize("m, d", [
+    [2, 2],
+    [100, 20],
+    [20, 100],
+])
+def test_constraint_sparse(m, d, dtype, order, seed=0):
+    np.random.seed(seed)
+    A = np.random.normal(0, 1, (m, d)).astype(dtype)
+    A.flat[np.random.binomial(1, 0.3, A.size)] = 0
+    A_sp = {
+        "C": scipy.sparse.csr_matrix,
+        "F": scipy.sparse.csc_matrix,
+    }[order](A)
+    cA = mod.sparse(A_sp, method="constraint", n_threads=3)
+    run_constraint(A, cA, dtype)
+
+
 # ==========================================================================================
 # TEST cov
 # ==========================================================================================

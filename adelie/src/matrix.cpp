@@ -1,6 +1,7 @@
 #include "decl.hpp"
 #include <adelie_core/matrix/matrix_constraint_base.hpp>
 #include <adelie_core/matrix/matrix_constraint_dense.hpp>
+#include <adelie_core/matrix/matrix_constraint_sparse.hpp>
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 #include <adelie_core/matrix/matrix_cov_block_diag.hpp>
 #include <adelie_core/matrix/matrix_cov_dense.hpp>
@@ -299,6 +300,37 @@ void matrix_constraint_dense(py::module_& m, const char* name)
         .def(
             py::init<const Eigen::Ref<const dense_t>&, size_t>(), 
             py::arg("mat").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+template <class SparseType>
+void matrix_constraint_sparse(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixConstraintSparse<SparseType>;
+    using base_t = typename internal_t::base_t;
+    using vec_sp_index_t = typename internal_t::vec_sp_index_t;
+    using vec_sp_value_t = typename internal_t::vec_sp_value_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for sparse constraint matrix."
+        )
+        .def(
+            py::init<
+                size_t,
+                size_t,
+                size_t,
+                const Eigen::Ref<const vec_sp_index_t>&,
+                const Eigen::Ref<const vec_sp_index_t>&,
+                const Eigen::Ref<const vec_sp_value_t>&,
+                size_t
+            >(), 
+            py::arg("rows"),
+            py::arg("cols"),
+            py::arg("nnz"),
+            py::arg("outer").noconvert(),
+            py::arg("inner").noconvert(),
+            py::arg("value").noconvert(),
             py::arg("n_threads")
         )
         ;
@@ -1212,6 +1244,9 @@ void register_matrix(py::module_& m)
     matrix_constraint_dense<dense_type<double, Eigen::ColMajor>>(m, "MatrixConstraintDense64F");
     matrix_constraint_dense<dense_type<float, Eigen::RowMajor>>(m, "MatrixConstraintDense32C");
     matrix_constraint_dense<dense_type<float, Eigen::ColMajor>>(m, "MatrixConstraintDense32F");
+
+    matrix_constraint_sparse<sparse_type<double, Eigen::RowMajor>>(m, "MatrixConstraintSparse64C");
+    matrix_constraint_sparse<sparse_type<float, Eigen::RowMajor>>(m, "MatrixConstraintSparse32C");
 
     /* cov matrices */
     matrix_cov_base<double>(m, "MatrixCovBase64");

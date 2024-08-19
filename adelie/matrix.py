@@ -1261,6 +1261,7 @@ def sparse(
 
             - ``"naive"``: naive matrix.
             - ``"cov"``: covariance matrix.
+            - ``"constraint"``: constraint matrix.
 
         Default is ``"naive"``.
     copy : bool, optional
@@ -1278,6 +1279,8 @@ def sparse(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixConstraintSparse32C
+    adelie.adelie_core.matrix.MatrixConstraintSparse64C
     adelie.adelie_core.matrix.MatrixCovSparse32F
     adelie.adelie_core.matrix.MatrixCovSparse64F
     adelie.adelie_core.matrix.MatrixNaiveSparse32F
@@ -1286,11 +1289,18 @@ def sparse(
     if not (isinstance(mat, csr_matrix) or isinstance(mat, csc_matrix)):
         raise TypeError("mat must be scipy.sparse.csr_matrix or scipy.sparse.csc_matrix.")
 
-    if isinstance(mat, csr_matrix):
-        warnings.warn("Converting to CSC format.")
-        mat = mat.tocsc(copy=True)
-    elif copy:
-        mat = mat.copy()
+    if method != "constraint":
+        if isinstance(mat, csr_matrix):
+            warnings.warn("Converting to CSC format.")
+            mat = mat.tocsc(copy=True)
+        elif copy:
+            mat = mat.copy()
+    else:
+        if isinstance(mat, csc_matrix):
+            warnings.warn("Converting to CSR format.")
+            mat = mat.tocsr(copy=True)
+        elif copy:
+            mat = mat.copy()
 
     mat.prune()
     mat.sort_indices()
@@ -1305,9 +1315,15 @@ def sparse(
         np.dtype("float32"): core.matrix.MatrixCovSparse32F,
     }
 
+    constraint_dispatcher = {
+        np.dtype("float64"): core.matrix.MatrixConstraintSparse64C,
+        np.dtype("float32"): core.matrix.MatrixConstraintSparse32C,
+    }
+
     dispatcher = {
         "naive" : naive_dispatcher,
         "cov" : cov_dispatcher,
+        "constraint": constraint_dispatcher,
     }
 
     dtype = mat.dtype
@@ -1315,6 +1331,7 @@ def sparse(
     py_base = {
         "naive" : PyMatrixNaiveBase,
         "cov" : PyMatrixCovBase,
+        "constraint": PyMatrixConstraintBase,
     }[method]
 
     class _sparse(core_base, py_base):
