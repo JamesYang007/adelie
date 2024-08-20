@@ -13,7 +13,9 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
     """
 
     def __init__(
-        self, solver: str = "grpnet", family: str = "gaussian", **kwargs: Dict[str, Any]
+        self,
+        solver: str = "grpnet",
+        family: str = "gaussian",
     ):
         """
         Initialize the GroupElasticNet estimator.
@@ -21,39 +23,24 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
         Args:
             solver (str): The solver to use. Either "grpnet" or "cv_grpnet".
             family (str): The family of the response variable.
-            **kwargs: Additional arguments to pass to the solver.
         """
-        self.family = family
         self.solver = solver
-        self.kwargs = kwargs
+        self.family = family
 
-        if self.solver == "grpnet":
-            self.ff = grpnet
-        elif self.solver == "cv_grpnet":
-            self.ff = cv_grpnet
-        else:
-            raise ValueError(f"Unknown solver: {solver}")
-
-        if self.family not in [
-            "gaussian",
-            "binomial",
-            "poisson",
-            "multigaussian",
-            "multinomial",
-        ]:
-            raise ValueError(f"Unknown family: {family}")
-
-    def fit(self, X: np.ndarray, y: np.ndarray):
+    def fit(self, X: np.ndarray, y: np.ndarray, **kwargs: Dict[str, Any]):
         """
         Fit the Group Elastic Net model.
 
         Args:
             X (np.ndarray): The input samples.
             y (np.ndarray): The target values.
+            **kwargs: Additional arguments to pass to the solver.
 
         Returns:
             self: Returns an instance of self.
         """
+        self._validate_params()
+
         # Prepare the response object
         glm_dict = {
             "gaussian": gaussian,
@@ -62,25 +49,28 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
             "multigaussian": multigaussian,
             "multinomial": multinomial,
         }
-        self.glm = glm_dict[self.family](y)
+        self.glm_ = glm_dict[self.family](y)
+
+        # Choose the solver
+        solver_func = cv_grpnet if self.solver == "cv_grpnet" else grpnet
 
         # Fit the model
-        self.state_ = self.ff(
+        self.state_ = solver_func(
             X=X,
-            glm=self.glm,
-            **self.kwargs,
+            glm=self.glm_,
+            **kwargs,
         )
 
         # If cross validation used, re-fit with best lambda
         if isinstance(self.state_, CVGrpnetResult):
             lm_star = self.state_.lmdas[self.state_.best_idx]
-            self.lmda_star = lm_star
+            self.lmda_star_ = lm_star
             # Final state is a model with single lambda (and hence single coef)
             self.state_ = grpnet(
                 X=X,
-                glm=self.glm,
+                glm=self.glm_,
                 lmda_path=np.r_[lm_star:lm_star:1j],  # only one lambda
-                **self.kwargs,
+                **kwargs,
             )
 
         # Store coefficients and intercepts
@@ -119,3 +109,16 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
         ss_res = np.sum((y - yhat) ** 2)
         ss_tot = np.sum((y - ybar) ** 2)
         return np.clip(1 - ss_res / ss_tot, 0, 1)
+
+    def _validate_params(self):
+        if self.solver not in ["grpnet", "cv_grpnet"]:
+            raise ValueError(f"Unknown solver: {self.solver}")
+
+        if self.family not in [
+            "gaussian",
+            "binomial",
+            "poisson",
+            "multigaussian",
+            "multinomial",
+        ]:
+            raise ValueError(f"Unknown family: {self.family}")
