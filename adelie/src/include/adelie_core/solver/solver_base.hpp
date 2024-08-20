@@ -46,22 +46,24 @@ auto sparsify_dual(
     indices.resize(begins[n_constraints]); 
     values.resize(begins[n_constraints]);
 
-    const auto routine = [&](auto i) {
-        const auto b = begins[i];
-        const auto nnz = begins[i+1] - b;
-        if (nnz <= 0) return;
-        const auto constraint = constraints[i];
-        Eigen::Map<vec_index_t> indices_v(indices.data() + b, nnz);
-        Eigen::Map<vec_value_t> values_v(values.data() + b, nnz);
-        constraint->dual(indices_v, values_v);
-        indices_v += dual_groups[i];
-    };
-    
-    if (n_threads <= 1) {
-        for (Eigen::Index i = 0; i < static_cast<Eigen::Index>(n_constraints); ++i) routine(i);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (Eigen::Index i = 0; i < static_cast<Eigen::Index>(n_constraints); ++i) routine(i);
+    if (begins[n_constraints]) {
+        const auto routine = [&](auto i) {
+            const auto b = begins[i];
+            const auto nnz = begins[i+1] - b;
+            if (nnz <= 0) return;
+            const auto constraint = constraints[i];
+            Eigen::Map<vec_index_t> indices_v(indices.data() + b, nnz);
+            Eigen::Map<vec_value_t> values_v(values.data() + b, nnz);
+            constraint->dual(indices_v, values_v);
+            indices_v += dual_groups[i];
+        };
+        
+        if (n_threads <= 1) {
+            for (Eigen::Index i = 0; i < static_cast<Eigen::Index>(n_constraints); ++i) routine(i);
+        } else {
+            #pragma omp parallel for schedule(static) num_threads(n_threads)
+            for (Eigen::Index i = 0; i < static_cast<Eigen::Index>(n_constraints); ++i) routine(i);
+        }
     }
 
     const auto last_constraint = constraints[n_constraints-1];
