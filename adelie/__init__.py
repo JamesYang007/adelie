@@ -42,6 +42,7 @@ from .cv import (
     cv_grpnet,
 )
 from .solver import (
-    gaussian_cov, 
+    gaussian_cov,
     grpnet,
 )
+from .skapi import GroupElasticNet
