@@ -1,5 +1,6 @@
 from typing import Dict, Any
 import numpy as np
+from scipy.special import expit, softmax
 from sklearn.base import BaseEstimator, RegressorMixin
 from .glm import binomial, gaussian, poisson, multigaussian, multinomial
 from .solver import grpnet
@@ -79,6 +80,34 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
 
         return self
 
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
+        """
+        Predict class probabilities for X.
+
+        This method is only available for 'binomial' and 'multinomial' families.
+
+        Args:
+            X (np.ndarray): The input samples.
+
+        Returns:
+            np.ndarray: The class probabilities of the input samples.
+        """
+        if not hasattr(self, "state_"):
+            raise RuntimeError("The model has not been fitted yet. Call 'fit' first.")
+
+        if self.family not in ["binomial", "multinomial"]:
+            raise ValueError(
+                "predict_proba is only available for 'binomial' and 'multinomial' families"
+            )
+
+        linear_pred = predict(X, self.coef_, self.intercept_)
+
+        if self.family == "binomial":
+            proba = expit(linear_pred)
+            return np.stack((1 - proba, proba), axis=-1).squeeze()
+        elif self.family == "multinomial":
+            return softmax(linear_pred, axis=-1).squeeze()
+
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
         Predict using the fitted Group Elastic Net model.
@@ -91,7 +120,12 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
         """
         if not hasattr(self, "state_"):
             raise RuntimeError("The model has not been fitted yet. Call 'fit' first.")
-        return predict(X, self.coef_, self.intercept_).squeeze()
+
+        if self.family in ["binomial", "multinomial"]:
+            proba = self.predict_proba(X)
+            return np.argmax(proba, axis=-1).squeeze()
+        else:
+            return predict(X, self.coef_, self.intercept_).squeeze()
 
     def score(self, X: np.ndarray, y: np.ndarray) -> float:
         """
