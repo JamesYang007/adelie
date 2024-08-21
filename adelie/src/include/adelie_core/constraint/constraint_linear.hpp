@@ -308,51 +308,51 @@ public:
             });
 
             // save current mu active indices
-                mu_active_tmp = _mu_active;
-                Eigen::Map<vec_bool_t> is_active(reinterpret_cast<bool*>(hinge_grad.data()), m);
-                auto& Qmu_resid = grad;
+            mu_active_tmp = _mu_active;
+            Eigen::Map<vec_bool_t> is_active(reinterpret_cast<bool*>(hinge_grad.data()), m);
+            auto& Qmu_resid = grad;
 
-                mu_to_dense(mu);
-                is_active.setZero();
-                for (size_t i = 0; i < _mu_active.size(); ++i) {
-                    is_active[_mu_active[i]] = true;
-                }
-                Qmu_resid = Qv - _ATmu;
+            mu_to_dense(mu);
+            is_active.setZero();
+            for (size_t i = 0; i < _mu_active.size(); ++i) {
+                is_active[_mu_active[i]] = true;
+            }
+            Qmu_resid = Qv - _ATmu;
 
-                value_t loss = 0.5 * Qmu_resid.square().sum();
-                optimization::StateNNLS<A_t> state_nnls(
-                    *_A, _A_vars, _nnls_max_iters, _nnls_tol,
-                    _mu_active, is_active, mu, Qmu_resid, loss
-                );
-                //using sw_t = util::Stopwatch;
-                //sw_t sw;
-                //sw.start();
-                state_nnls.solve(
-                    [&]() { return 2 * state_nnls.loss <= l1 * l1; },
-                    lower_constraint,
-                    upper_constraint
-                );
-                //const auto elapsed = sw.elapsed();
-                //PRINT(this);
-                //PRINT(elapsed);
-                //PRINT(state_nnls.iters);
+            value_t loss = 0.5 * Qmu_resid.square().sum();
+            optimization::StateNNLS<A_t> state_nnls(
+                *_A, _A_vars, _nnls_max_iters, _nnls_tol,
+                _mu_active, is_active, mu, Qmu_resid, loss
+            );
+            //using sw_t = util::Stopwatch;
+            //sw_t sw;
+            //sw.start();
+            state_nnls.solve(
+                [&]() { return 2 * state_nnls.loss <= l1 * l1; },
+                lower_constraint,
+                upper_constraint
+            );
+            //const auto elapsed = sw.elapsed();
+            //PRINT(this);
+            //PRINT(elapsed);
+            //PRINT(state_nnls.iters);
             const value_t mu_resid_norm_sq = 2 * state_nnls.loss;
 
-                if ((!is_init && !is_prev_valid_old) || (mu_resid_norm_sq <= l1 * l1)) {
-                    _mu_value.clear();
-                    for (size_t i = 0; i < _mu_active.size(); ++i) {
-                        _mu_value.push_back(mu[_mu_active[i]]);
-                    }
-                    _mu_active_set.clear();
-                    _mu_active_set.insert(
-                        _mu_active.data(),
-                        _mu_active.data() + _mu_active.size()
-                    );
-                    mu_prune(1e-16);
-                    _ATmu = Qv - Qmu_resid;
-                } else {
-                    _mu_active = mu_active_tmp;
+            if ((!is_init && !is_prev_valid_old) || (mu_resid_norm_sq <= l1 * l1)) {
+                _mu_value.clear();
+                for (size_t i = 0; i < _mu_active.size(); ++i) {
+                    _mu_value.push_back(mu[_mu_active[i]]);
                 }
+                _mu_active_set.clear();
+                _mu_active_set.insert(
+                    _mu_active.data(),
+                    _mu_active.data() + _mu_active.size()
+                );
+                mu_prune(1e-16);
+                _ATmu = Qv - Qmu_resid;
+            } else {
+                _mu_active = mu_active_tmp;
+            }
 
             return mu_resid_norm_sq;
         };
@@ -534,15 +534,23 @@ public:
             const auto ui = _u[i];
             return (ui <= 0) ? Configs::max_solver_value : 0;
         });
+        // TODO: change to path=true
         optimization::StateNNLS<A_t> state_nnls(
             *_A, _A_vars, _nnls_max_iters, _nnls_tol,
             _mu_active, is_active, mu, Qmu_resid, loss
         );
+        //using sw_t = util::Stopwatch;
+        //sw_t sw;
+        //sw.start();
         state_nnls.solve(
             [&]() { return false; },
             lower_constraint,
             upper_constraint
         );
+        //auto elapsed = sw.elapsed();
+        //PRINT(this);
+        //PRINT(elapsed);
+        //PRINT(state_nnls.iters);
 
         _mu_value.clear();
         for (size_t i = 0; i < _mu_active.size(); ++i) {
