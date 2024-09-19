@@ -1108,6 +1108,11 @@ def bvls(
     -------
     state
         The resulting state after running the solver.
+
+    See Also
+    --------
+    adelie.adelie_core.state.StateBVLS32
+    adelie.adelie_core.state.StateBVLS64
     """
     X_raw = X
 
