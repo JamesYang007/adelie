@@ -146,7 +146,7 @@ struct StateBVLS
                 "kkt_tol must be >= 0."
             );
         }
-        if (active_set_size > p) {
+        if (static_cast<Eigen::Index>(active_set_size) > p) {
             throw util::adelie_core_solver_error(
                 "active_set_size must be <= p where X is (n, p). "
             );

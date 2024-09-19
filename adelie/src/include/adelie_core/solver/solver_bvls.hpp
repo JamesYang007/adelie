@@ -274,7 +274,7 @@ bool kkt_screen(
     bool kkt_passed = true;
 
     // check KKT and screen
-    for (size_t j = 0; j < p; ++j) {
+    for (Eigen::Index j = 0; j < p; ++j) {
         const auto k = viols_order[j];
         const auto vk = viols[k];
         const auto xvk = X_vars[k];
