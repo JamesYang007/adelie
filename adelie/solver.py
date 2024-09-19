@@ -1,7 +1,7 @@
 from . import adelie_core as core
-from . import glm
 from . import logger
 from . import matrix
+from .configs import Configs
 from .constraint import (
     ConstraintBase32,
     ConstraintBase64,
@@ -19,12 +19,14 @@ from .matrix import (
     MatrixNaiveBase64,
 )
 from .state import (
+    bvls as state_bvls,
     gaussian_cov as state_gaussian_cov,
     gaussian_naive as state_gaussian_naive,
     glm_naive as state_glm_naive,
     multigaussian_naive as state_multigaussian_naive,
     multiglm_naive as state_multiglm_naive,
 ) 
+from scipy.sparse import csr_matrix
 from typing import (
     Callable,
     Union,
@@ -55,6 +57,9 @@ def _solve(
         core.state.StateGlmNaive32: core.solver.solve_glm_naive_32,
         core.state.StateMultiGlmNaive64: core.solver.solve_multiglm_naive_64,
         core.state.StateMultiGlmNaive32: core.solver.solve_multiglm_naive_32,
+        # bvls methods
+        core.state.StateBVLS64: core.solver.solve_bvls_64,
+        core.state.StateBVLS32: core.solver.solve_bvls_32,
     }
 
     is_gaussian_pin = (
@@ -77,6 +82,10 @@ def _solve(
         isinstance(state, core.state.StateMultiGlmNaive64) or
         isinstance(state, core.state.StateMultiGlmNaive32)
     )
+    is_bvls = (
+        isinstance(state, core.state.StateBVLS64) or
+        isinstance(state, core.state.StateBVLS32)
+    )
 
     # solve group elastic net
     f = f_dict[state._core_type]
@@ -86,6 +95,8 @@ def _solve(
         out = f(state, progress_bar, exit_cond)
     elif is_glm:
         out = f(state, state._glm, progress_bar, exit_cond)
+    elif is_bvls:
+        out = f(state)
     else:
         raise RuntimeError("Unexpected state type.")
 
@@ -1028,3 +1039,148 @@ def grpnet(
         progress_bar=progress_bar,
         exit_cond=exit_cond,
     )
+
+
+def bvls(
+    X: Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64],
+    y: np.ndarray,
+    lower: np.ndarray,
+    upper: np.ndarray,
+    *,
+    weights: np.ndarray =None,
+    kappa: int =None,
+    max_iters: int =100000,
+    tol: float =1e-9,
+    kkt_tol: float =1e-9,
+    n_threads: int =1,
+):
+    """Solves bounded variable least squares.
+
+    The bounded variable least squares is given by
+
+    .. math::
+        \\begin{align*}
+            \\mathrm{minimize} &\\quad
+            \\frac{1}{2} \\|y - X \\beta\\|_{W}^2 \\\\
+            \\text{subject to} &\\quad
+            \\ell \\leq \\beta \\leq u
+        \\end{align*}
+
+    where 
+    :math:`X \\in \\mathbb{R}^{n \\times p}` is the feature matrix,
+    :math:`y \\in \\mathbb{R}^n` is the response vector,
+    :math:`W \\in \\mathbb{R}_+^{n \\times n}` is the (diagonal) observation weights,
+    and :math:`\\ell \\leq u \\in \\mathbb{R}^p` are the lower and upper bounds, respectively.
+
+    Parameters
+    ----------
+    X : (n, p) Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
+        Feature matrix.
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
+    y : (n,) ndarray
+        Response vector.
+    lower : (p,) ndarray
+        Lower bound for each variable.
+    upper : (p,) ndarray
+        Upper bound for each variable.
+    weights : (n,) ndarray, optional
+        Observation weights.
+        If ``None``, it is set to ``np.full(n, 1/n)``.
+        Default is ``None``.
+    kappa : int, optional
+        Violation batching size.
+        If ``None``, it is set to ``min(n, p)``.
+        Default is ``None``.
+    max_iters : int, optional
+        Maximum number of coordinate descents.
+        Default is ``100000``.
+    tol : float, optional
+        Coordinate descent convergence tolerance.
+        Default is ``1e-9``.
+    kkt_tol : float, optional
+        KKT check tolerance.
+        Default is ``1e-9``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    state
+        The resulting state after running the solver.
+    """
+    X_raw = X
+
+    if isinstance(X, np.ndarray):
+        X = matrix.dense(X, method="naive", n_threads=n_threads)
+
+    assert (
+        isinstance(X, matrix.MatrixNaiveBase64) or
+        isinstance(X, matrix.MatrixNaiveBase32)
+    )
+
+    dtype = (
+        np.float64
+        if isinstance(X, matrix.MatrixNaiveBase64) else
+        np.float32
+    )
+
+    n, p = X.shape
+
+    if weights is None:
+        weights = np.full(n, 1 / n)
+    if kappa is None:
+        kappa = min(n, p)
+    y_var = np.sum(y ** 2 * weights)
+
+    if isinstance(X_raw, np.ndarray):
+        X_vars = np.sum(weights[:, None] * X_raw ** 2, axis=0)
+
+    else:
+        X_vars = np.zeros(X.shape[1], dtype)
+        sqrt_weights = np.sqrt(weights).astype(dtype)
+        buffer = np.empty((n, 1), dtype=dtype, order="F")
+        for j in range(p):
+            X.cov(j, 1, sqrt_weights, X_vars[j:j+1], buffer)
+
+    lower = np.maximum(lower, -Configs.max_solver_value)
+    upper = np.minimum(upper,  Configs.max_solver_value)
+
+    beta = np.where(np.abs(lower) < np.abs(upper), lower, upper)
+    active_set = np.empty(p, dtype=int)
+    active_set_size = 0
+    is_active = np.zeros(p, dtype=bool)
+    screen_set = np.empty(p, dtype=int)
+    screen_set_size = 0
+    is_screen = np.zeros(p, dtype=bool)
+    if isinstance(X_raw, np.ndarray):
+        resid = y - X @ beta
+    else:
+        resid = y - (X @ csr_matrix(beta[None]).T)[:, 0]
+    grad = np.empty(p, dtype=dtype)
+    loss = 0.5 * np.sum(resid ** 2 * weights)
+
+    state = state_bvls(
+        X=X,
+        y_var=y_var,
+        X_vars=X_vars,
+        lower=lower,
+        upper=upper,
+        weights=weights,
+        kappa=kappa,
+        max_iters=max_iters,
+        tol=tol,
+        kkt_tol=kkt_tol,
+        screen_set_size=screen_set_size,
+        screen_set=screen_set,
+        is_screen=is_screen,
+        active_set_size=active_set_size,
+        active_set=active_set,
+        is_active=is_active,
+        beta=beta,
+        resid=resid,
+        grad=grad,
+        loss=loss,
+    )
+
+    return _solve(state)

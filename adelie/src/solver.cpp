@@ -4,6 +4,7 @@
 #include <adelie_core/glm/glm_multibase.hpp>
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
+#include <adelie_core/state/state_bvls.hpp>
 #include <adelie_core/state/state_gaussian_cov.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
 #include <adelie_core/state/state_gaussian_pin_cov.hpp>
@@ -11,6 +12,7 @@
 #include <adelie_core/state/state_glm_naive.hpp>
 #include <adelie_core/state/state_multigaussian_naive.hpp>
 #include <adelie_core/state/state_multiglm_naive.hpp>
+#include <adelie_core/solver/solver_bvls.hpp>
 #include <adelie_core/solver/solver_gaussian_cov.hpp>
 #include <adelie_core/solver/solver_gaussian_naive.hpp>
 #include <adelie_core/solver/solver_gaussian_pin_cov.hpp>
@@ -292,6 +294,36 @@ py::dict solve_multiglm_naive(
     );
 } 
 
+template <class StateType>
+py::dict solve_bvls(StateType state)
+{
+    using sw_t = ad::util::Stopwatch;
+
+    const auto check_user_interrupt = [&]() {
+        if (PyErr_CheckSignals() != 0) {
+            throw py::error_already_set();
+        }
+    };
+
+    std::string error;
+
+    sw_t sw;
+    sw.start();
+    try {
+        ad::solver::bvls::solve(state, check_user_interrupt);
+    } catch(const std::exception& e) {
+        error = e.what(); 
+    }
+    double total_time = sw.elapsed();
+
+    return py::dict("state"_a=state, "error"_a=error, "total_time"_a=total_time);
+}
+
+
+template <class T>
+using state_bvls = ad::state::StateBVLS<
+    ad::matrix::MatrixNaiveBase<T>
+>;
 template <class T> 
 using state_gaussian_pin_naive_t = ad::state::StateGaussianPinNaive<
     ad::constraint::ConstraintBase<T>,
@@ -357,4 +389,8 @@ void register_solver(py::module_& m)
     m.def("solve_glm_naive_32", &solve_glm_naive<state_glm_naive_t<float>, glm_t<float>>);
     m.def("solve_multiglm_naive_64", &solve_multiglm_naive<state_multiglm_naive_t<double>, glm_multi_t<double>>);
     m.def("solve_multiglm_naive_32", &solve_multiglm_naive<state_multiglm_naive_t<float>, glm_multi_t<float>>);
+
+    /* solve bvls method */
+    m.def("solve_bvls_64", &solve_bvls<state_bvls<double>>);
+    m.def("solve_bvls_32", &solve_bvls<state_bvls<float>>);
 }

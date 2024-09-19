@@ -3,6 +3,7 @@
 #include <adelie_core/glm/glm_base.hpp>
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
+#include <adelie_core/state/state_bvls.hpp>
 #include <adelie_core/state/state_gaussian_cov.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
 #include <adelie_core/state/state_gaussian_pin_cov.hpp>
@@ -1743,6 +1744,122 @@ void state_multiglm_naive(py::module_& m, const char* name)
         ;
 }
 
+template <class MatrixType>
+class PyStateBVLS : public ad::state::StateBVLS<MatrixType>
+{
+    using base_t = ad::state::StateBVLS<MatrixType>;
+public:
+    using base_t::base_t;
+    PyStateBVLS(base_t&& base) : base_t(std::move(base)) {}
+};
+
+template <class MatrixType>
+void state_bvls(py::module_& m, const char* name)
+{
+    using matrix_t = MatrixType;
+    using state_t = ad::state::StateBVLS<MatrixType>;
+    using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_bool_t = typename state_t::vec_bool_t;
+    py::class_<state_t, PyStateBVLS<matrix_t>>(m, name, R"delimiter(
+        Core state class for BVLS.
+        )delimiter")
+        .def(py::init<
+            matrix_t&,
+            value_t,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            size_t,
+            size_t,
+            value_t,
+            value_t,
+            size_t,
+            Eigen::Ref<vec_index_t>,
+            Eigen::Ref<vec_bool_t>,
+            size_t,
+            Eigen::Ref<vec_index_t>,
+            Eigen::Ref<vec_bool_t>,
+            Eigen::Ref<vec_value_t>,
+            Eigen::Ref<vec_value_t>,
+            Eigen::Ref<vec_value_t>,
+            value_t 
+        >(),
+            py::arg("X"),
+            py::arg("y_var"),
+            py::arg("X_vars").noconvert(),
+            py::arg("lower").noconvert(),
+            py::arg("upper").noconvert(),
+            py::arg("weights").noconvert(),
+            py::arg("kappa"),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("kkt_tol"),
+            py::arg("screen_set_size"),
+            py::arg("screen_set").noconvert(),
+            py::arg("is_screen").noconvert(),
+            py::arg("active_set_size"),
+            py::arg("active_set").noconvert(),
+            py::arg("is_active").noconvert(),
+            py::arg("beta").noconvert(),
+            py::arg("resid").noconvert(),
+            py::arg("grad").noconvert(),
+            py::arg("loss")
+        )
+        .def(py::init([](const state_t& s) { return new state_t(s); }))
+        .def_readonly("active_set_size", &state_t::active_set_size, R"delimiter(
+        Active set size.
+        )delimiter")
+        .def_readonly("active_set", &state_t::active_set, R"delimiter(
+        Active set buffer.
+        )delimiter")
+        .def_readonly("is_active", &state_t::is_active, R"delimiter(
+        Boolean buffer to indicate the active variables.
+        )delimiter")
+        .def_readonly("beta", &state_t::beta, R"delimiter(
+        Coefficient vector.
+        )delimiter")
+        .def_readonly("resid", &state_t::resid, R"delimiter(
+        Residual :math:`y - X \beta`.
+        )delimiter")
+        .def_readonly("grad", &state_t::grad, R"delimiter(
+        Internal buffer that is implementation-defined.
+        )delimiter")
+        .def_readonly("loss", &state_t::loss, R"delimiter(
+        Loss :math:`\frac{1}{2} \|y-X\beta\|_W^2`.
+        )delimiter")
+        .def_readonly("iters", &state_t::iters, R"delimiter(
+        Number of coordinate descent iterations.
+        )delimiter")
+        .def_readonly("benchmark_fit_active", &state_t::benchmark_fit_active, R"delimiter(
+        Benchmark time for fitting on the active set.
+        )delimiter")
+        .def_readonly("benchmark_fit_screen", &state_t::benchmark_fit_screen, R"delimiter(
+        Benchmark time for fitting on the screen set.
+        )delimiter")
+        .def_readonly("benchmark_gradient", &state_t::benchmark_gradient, R"delimiter(
+        Benchmark time for computing the gradient.
+        )delimiter")
+        .def_readonly("benchmark_viols_sort", &state_t::benchmark_viols_sort, R"delimiter(
+        Benchmark time for sorting the violations.
+        )delimiter")
+        .def_readonly("dbg_beta", &state_t::dbg_beta, R"delimiter(
+        List of the coefficient vectors at each outer loop.
+        )delimiter")
+        .def_readonly("dbg_active_set", &state_t::dbg_active_set, R"delimiter(
+        List of the active sets at each outer loop.
+        )delimiter")
+        .def_readonly("dbg_iter", &state_t::dbg_iter, R"delimiter(
+        List of the number of iterations at each outer loop.
+        )delimiter")
+        .def_readonly("dbg_loss", &state_t::dbg_loss, R"delimiter(
+        List of the losses at each outer loop.
+        )delimiter")
+        ;
+}
+
 void register_state(py::module_& m)
 {
     state_gaussian_pin_base<
@@ -1814,4 +1931,11 @@ void register_state(py::module_& m)
         ad::constraint::ConstraintBase<float>,
         ad::matrix::MatrixNaiveBase<float>
     >(m, "StateMultiGlmNaive32");
+
+    state_bvls<
+        ad::matrix::MatrixNaiveBase<double>
+    >(m, "StateBVLS64");
+    state_bvls<
+        ad::matrix::MatrixNaiveBase<float>
+    >(m, "StateBVLS32");
 }

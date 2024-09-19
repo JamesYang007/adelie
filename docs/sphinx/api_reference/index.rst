@@ -214,6 +214,7 @@ adelie.solver
     :toctree: generated/
 
 
+    bvls
     gaussian_cov
     grpnet
 
@@ -232,6 +233,7 @@ adelie.state
     :toctree: generated/
 
 
+    bvls
     gaussian_cov
     gaussian_naive
     gaussian_pin_cov

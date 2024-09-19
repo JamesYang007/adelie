@@ -3070,3 +3070,147 @@ def multiglm_naive(
             return obj
 
     return _multiglm_naive()
+
+
+def bvls(
+    X: Union[MatrixNaiveBase32, MatrixNaiveBase64],
+    y_var: float,
+    X_vars: float,
+    lower: np.ndarray,
+    upper: np.ndarray,
+    weights: np.ndarray,
+    kappa: int,
+    max_iters: int,
+    tol: float,
+    kkt_tol: float,
+    screen_set_size: int,
+    screen_set: np.ndarray,
+    is_screen: np.ndarray,
+    active_set_size: int,
+    active_set: np.ndarray,
+    is_active: np.ndarray,
+    beta: np.ndarray,
+    resid: np.ndarray,
+    grad: np.ndarray,
+    loss: float,
+):
+    """Creates a BVLS state object.
+
+    Parameters
+    ----------
+    X : (n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64]
+        Feature matrix.
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
+    y_var : float
+        Variance of :math:`y` equivalent to :math:`y^\\top W y`.
+    X_vars : (p,) ndarray
+        Variance of each column of ``X`` equivalent to
+        :math:`\\mathrm{diag}(X^\\top W X)`.
+    lower : (p,) ndarray
+        Lower bound for each variable.
+    upper : (p,) ndarray
+        Upper bound for each variable.
+    weights : (n,) ndarray
+        Observation weights.
+    kappa : int
+        Violation batching size.
+    max_iters : int 
+        Maximum number of coordinate descents.
+    tol : float 
+        Coordinate descent convergence tolerance.
+    kkt_tol : float
+        KKT check tolerance.
+    active_set_size : int
+        Number of active groups.
+        ``active_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, active_set_size)``.
+    active_set : (p,) ndarray
+        Active set buffer.
+        ``active_set[i]`` is the ``i`` th active variable
+        that is in the range ``[0, p)``.
+    is_active : (p,) ndarray
+        Boolean vector indicating whether the ``j`` th feature is active.
+    beta : (p,) ndarray
+        Coefficient vector.
+    resid : (n,) ndarray
+        Residual :math:`y-X\\beta`.
+    grad : (p,) ndarray
+        Internal buffer that is implementation-defined.
+    loss : float
+        The current loss :math:`\\frac{1}{2} \\|y - X\\beta\\|_W^2`.
+
+    Returns
+    -------
+    wrap
+        Wrapper state object.
+
+    See Also
+    --------
+    adelie.adelie_core.state.StateBVLS32
+    adelie.adelie_core.state.StateBVLS64
+    """
+    dtype = (
+        np.float64
+        if isinstance(X, matrix.MatrixNaiveBase64) else
+        np.float32
+    )
+
+    dispatcher = {
+        np.float64: core.state.StateBVLS64,
+        np.float32: core.state.StateBVLS32,
+    }
+    core_base = dispatcher[dtype]
+
+    class _bvls(core_base):
+        def __init__(self):
+            self._core_type = core_base
+            ## save inputs due to lifetime issues
+            # static inputs require a reference to input
+            # or copy if it must be made
+            self._X = X
+            self._X_vars = np.array(X_vars, copy=False, dtype=dtype)
+            self._lower = np.array(lower, copy=False, dtype=dtype)
+            self._upper = np.array(upper, copy=False, dtype=dtype)
+            self._weights = np.array(weights, copy=False, dtype=dtype)
+            self._screen_set = np.array(screen_set, copy=True, dtype=int)
+            self._is_screen = np.array(is_screen, copy=True, dtype=bool)
+            self._active_set = np.array(active_set, copy=True, dtype=int)
+            self._is_active = np.array(is_active, copy=True, dtype=bool)
+            self._beta = np.array(beta, copy=True, dtype=dtype)
+            self._resid = np.array(resid, copy=True, dtype=dtype)
+            self._grad = np.array(grad, copy=True, dtype=dtype)
+
+            # MUST call constructor directly and not use super()!
+            # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
+            core_base.__init__(
+                self,
+                X=self._X,
+                y_var=y_var,
+                X_vars=self._X_vars,
+                lower=self._lower,
+                upper=self._upper,
+                weights=self._weights,
+                kappa=kappa,
+                max_iters=max_iters,
+                tol=tol,
+                kkt_tol=kkt_tol,
+                screen_set_size=screen_set_size,
+                screen_set=self._screen_set,
+                is_screen=self._is_screen,
+                active_set_size=active_set_size,
+                active_set=self._active_set,
+                is_active=self._is_active,
+                beta=self._beta,
+                resid=self._resid,
+                grad=self._grad,
+                loss=loss,
+            )
+
+        @classmethod
+        def create_from_core(cls, state, core_state):
+            obj = base.create_from_core(
+                cls, state, core_state, _bvls, core_base,
+            )
+            return obj
+
+    return _bvls()
