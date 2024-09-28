@@ -980,3 +980,50 @@ def test_grpnet(
         progress_bar=False,
     )
     check_solutions(args, state, cvxpy_glm, eps=1e-4)
+
+
+# ==========================================================================================
+# TEST bvls
+# ==========================================================================================
+
+
+def _cvxpy_bvls(
+    X, y, lower, upper
+):
+    lower = np.maximum(lower, -100)
+    upper = np.minimum(upper,  100)
+    n, p = X.shape
+    beta = cp.Variable(p)
+    expr = cp.sum((y - X @ beta) ** 2) / (2 * n)
+    constraints = [beta >= lower, beta <= upper]
+    prob = cp.Problem(cp.Minimize(expr), constraints)
+    prob.solve(solver=cp.MOSEK)
+    return beta.value
+
+
+@pytest.mark.parametrize("n, p", [
+    [10, 50],
+    [40, 13],
+    [100, 1000],
+])
+def test_bvls(n, p, seed=0):
+    np.random.seed(seed)
+    X = np.random.uniform(0, 1, (n, p))
+    X.ravel()[np.random.binomial(1, 0.8, X.size).astype(bool)] = 0
+    u = np.random.normal(0, 1, n)
+    D = (X.T @ u) >= 0
+    X = X * (1 - 2 * D)
+    X = np.asfortranarray(X)
+    n, p = X.shape
+    u = np.random.normal(1, 1, p)
+    y = X @ (D * u) / n
+    lower = np.full(p, -0.5)
+    upper = np.full(p, 1.5)
+
+    state = ad.solver.bvls(X, y, lower, upper, tol=1e-9, kkt_tol=1e-9)
+    cvxpy_beta = _cvxpy_bvls(X, y, lower, upper)
+
+    actual = 0.5 * np.mean((y - X @ state.beta) ** 2)
+    expected = 0.5 * np.mean((y - X @ cvxpy_beta) ** 2)
+
+    assert np.allclose(actual, expected)

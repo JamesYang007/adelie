@@ -1096,10 +1096,10 @@ def bvls(
         Default is ``100000``.
     tol : float, optional
         Coordinate descent convergence tolerance.
-        Default is ``1e-9``.
+        Default is ``1e-7``.
     kkt_tol : float, optional
         KKT check tolerance.
-        Default is ``1e-9``.
+        Default is ``1e-7``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
