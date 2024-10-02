@@ -155,54 +155,6 @@ def test_lasso_full(d, seed):
 
 @pytest.mark.parametrize("d", [3, 5, 10, 20])
 @pytest.mark.parametrize("seed", np.arange(20))
-def test_nnls(d, seed):
-    def run_cvxpy(X, y):
-        d = X.shape[1]
-        x = cp.Variable(d)
-        expr = 0.5 * cp.sum_squares(y - X @ x)
-        constraints = [x >= 0]
-        prob = cp.Problem(cp.Minimize(expr), constraints)
-        prob.solve()
-        return x.value
-
-    def objective(x, X, y):
-        return 0.5 * np.sum((y - X @ x) ** 2)
-
-    np.random.seed(seed)
-    n = 10
-    X = np.random.normal(0, 1, (n, d))
-    X = np.asfortranarray(X)
-    y = np.random.normal(0, 1, n)
-    X /= np.sqrt(n)
-    y /= np.sqrt(n)
-
-    x_cvxpy = run_cvxpy(X, y)
-
-    X_vars = np.sum(X ** 2, axis=0)
-    x = np.zeros(d)
-    active_set = np.empty(0, dtype=int)
-    is_active = np.zeros(d, dtype=bool)
-    resid = y.copy()
-    loss = 0.5 * np.sum(resid ** 2)
-    XT = matrix.dense(X.T, method="constraint")
-    state = opt.StateNNLS(XT, X_vars, 1000000, 1e-24, active_set, is_active, x, resid, loss)
-    state.solve()
-
-    # test loss against truth
-    loss_actual = objective(x, X, y)
-    loss_expected = objective(x_cvxpy, X, y)
-    assert np.allclose(loss_actual, loss_expected)
-    loss_actual = state.loss
-    assert np.allclose(loss_actual, loss_expected)
-
-    # test residual
-    resid_actual = resid
-    resid_expected = y - X @ x
-    assert np.allclose(resid_actual, resid_expected)
-
-
-@pytest.mark.parametrize("d", [3, 5, 10, 20])
-@pytest.mark.parametrize("seed", np.arange(20))
 def test_nnqp_full(d, seed):
     def run_cvxpy(quad, linear):
         d = quad.shape[0]

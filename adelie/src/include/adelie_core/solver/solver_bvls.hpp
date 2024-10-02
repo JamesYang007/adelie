@@ -11,6 +11,7 @@ namespace bvls {
 template <class StateType, 
           class LowerType,
           class UpperType,
+          class WeightsType,
           class Iter,
           class ValueType,
           class EarlyExitType=util::no_op,
@@ -20,6 +21,7 @@ void coordinate_descent(
     StateType&& state,
     const LowerType& lower,
     const UpperType& upper,
+    const WeightsType& weights,
     Iter begin,
     Iter end,
     ValueType& convg_measure,
@@ -31,7 +33,6 @@ void coordinate_descent(
     using value_t = typename state_t::value_t;
     auto& X = *state.X;
     const auto& X_vars = state.X_vars;
-    const auto& weights = state.weights;
     auto& beta = state.beta;
     auto& resid = state.resid;
     auto& loss = state.loss;
@@ -61,12 +62,14 @@ void coordinate_descent(
 template <class StateType, 
           class LowerType,
           class UpperType,
+          class WeightsType,
           class EarlyExitType=util::no_op,
           class CheckUserInterruptType=util::no_op>
 void solve_active(
     StateType&& state,
     const LowerType& lower,
     const UpperType& upper,
+    const WeightsType& weights,
     EarlyExitType early_exit=EarlyExitType(),
     CheckUserInterruptType check_user_interrupt=CheckUserInterruptType()
 )
@@ -89,6 +92,7 @@ void solve_active(
             state,
             lower,
             upper,
+            weights,
             active_set.data(),
             active_set.data() + active_set_size,
             convg_measure,
@@ -106,12 +110,14 @@ void solve_active(
 template <class StateType, 
           class LowerType,
           class UpperType,
+          class WeightsType,
           class EarlyExitType=util::no_op,
           class CheckUserInterruptType=util::no_op>
 void fit(
     StateType&& state,
     const LowerType& lower,
     const UpperType& upper,
+    const WeightsType& weights,
     EarlyExitType early_exit=EarlyExitType(),
     CheckUserInterruptType check_user_interrupt=CheckUserInterruptType()
 )
@@ -171,6 +177,7 @@ void fit(
             state,
             lower,
             upper,
+            weights,
             screen_set.data(),
             screen_set.data() + screen_set_size,
             convg_measure,
@@ -185,7 +192,7 @@ void fit(
                 "bvls: max iterations reached!"
             );
         }
-        if (convg_measure <= tol * y_var) {
+        if (convg_measure <= tol * y_var || early_exit()) {
             prune();
             break;
         }
@@ -193,7 +200,7 @@ void fit(
         #ifdef ADELIE_CORE_DEBUG
         sw.start();
         #endif
-        solve_active(state, lower, upper, early_exit, check_user_interrupt);
+        solve_active(state, lower, upper, weights, early_exit, check_user_interrupt);
         #ifdef ADELIE_CORE_DEBUG
         fit_active_time += sw.elapsed();
         #endif
@@ -209,11 +216,13 @@ void fit(
 template <class StateType, 
           class LowerType,
           class UpperType,
+          class WeightsType,
           class ViolsOrderType>
 bool kkt_screen(
     StateType&& state,
     const LowerType& lower,
     const UpperType& upper,
+    const WeightsType& weights,
     ViolsOrderType& viols_order
 )
 {
@@ -223,7 +232,6 @@ bool kkt_screen(
     auto& X = *state.X;
     const auto y_var = state.y_var;
     const auto& X_vars = state.X_vars;
-    const auto& weights = state.weights;
     const auto& beta = state.beta;
     const auto& resid = state.resid;
     const auto kkt_tol = state.kkt_tol;
@@ -294,6 +302,7 @@ bool kkt_screen(
 template <class StateType, 
           class LowerType,
           class UpperType,
+          class WeightsType,
           class EarlyExitType=util::no_op,
           class CheckUserInterruptType=util::no_op>
 ADELIE_CORE_STRONG_INLINE
@@ -301,6 +310,7 @@ void solve(
     StateType&& state,
     const LowerType& lower,
     const UpperType& upper,
+    const WeightsType& weights,
     EarlyExitType early_exit=EarlyExitType(),
     CheckUserInterruptType check_user_interrupt=CheckUserInterruptType()
 )
@@ -313,7 +323,8 @@ void solve(
 
     while (1) {
         const auto loss_prev = state.loss;
-        fit(state, lower, upper, early_exit, check_user_interrupt);
+        fit(state, lower, upper, weights, early_exit, check_user_interrupt);
+        if (early_exit()) return;
         #ifdef ADELIE_CORE_DEBUG
         state.dbg_beta.push_back(state.beta);
         state.dbg_active_set.push_back(state.active_set.head(state.active_set_size));
@@ -325,7 +336,7 @@ void solve(
             std::abs(state.loss-loss_prev) < 1e-3 * std::abs(loss_prev)
         ) return;
         const bool kkt_passed = kkt_screen(
-            state, lower, upper, viols_order
+            state, lower, upper, weights, viols_order
         );
         if (kkt_passed) return;
     }
@@ -339,7 +350,14 @@ void solve(
     CheckUserInterruptType check_user_interrupt=CheckUserInterruptType()
 )
 {
-    solve(state, state.lower, state.upper, []() { return false; }, check_user_interrupt);
+    solve(
+        state, 
+        state.lower, 
+        state.upper, 
+        state.weights, 
+        []() { return false; }, 
+        check_user_interrupt
+    );
 }
 
 } // namespace bvls

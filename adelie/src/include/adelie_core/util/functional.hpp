@@ -14,6 +14,8 @@ struct no_op
     //void operator()(Args&&... args) {}
     template <class T>
     void operator()(T) {}
+
+    void operator()() {}
 };
 
 } // namespace util

@@ -217,9 +217,6 @@ protected:
                     throw util::adelie_core_error(
                         "Possibly an unexpected error! "
                         "Previous iterate should have been properly initialized. "
-                        "This may occur if cs_tol is too small. "
-                        "If increasing cs_tol does not fix the issue, "
-                        "please report this as a bug! "
                     );
                 }
                 const value_t lmda_target = (1-slack) * l1 + slack * mu_resid_norm_prev;

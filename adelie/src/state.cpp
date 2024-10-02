@@ -1818,6 +1818,15 @@ void state_bvls(py::module_& m, const char* name)
         .def_readonly("is_active", &state_t::is_active, R"delimiter(
         Boolean buffer to indicate the active variables.
         )delimiter")
+        .def_readonly("screen_set_size", &state_t::screen_set_size, R"delimiter(
+        Screen set size.
+        )delimiter")
+        .def_readonly("screen_set", &state_t::screen_set, R"delimiter(
+        Screen set buffer.
+        )delimiter")
+        .def_readonly("is_screen", &state_t::is_screen, R"delimiter(
+        Boolean buffer to indicate the screen variables.
+        )delimiter")
         .def_readonly("beta", &state_t::beta, R"delimiter(
         Coefficient vector.
         )delimiter")

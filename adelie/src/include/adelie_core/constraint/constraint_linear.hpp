@@ -9,6 +9,62 @@
 
 namespace adelie_core {
 namespace constraint { 
+namespace internal {
+
+template <class MatrixType>
+struct MatrixConstraintNNLS
+{
+    using matrix_t = MatrixType;
+    using value_t = typename matrix_t::value_t;
+    using vec_value_t = typename matrix_t::vec_value_t;
+
+    matrix_t* _A;
+
+    MatrixConstraintNNLS(
+        matrix_t& A
+    ):
+        _A(&A)
+    {}
+
+    value_t cmul(
+        int j, 
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& 
+    )
+    {
+        return _A->rvmul(j, v);
+    }
+
+    void ctmul(
+        int j, 
+        value_t v, 
+        Eigen::Ref<vec_value_t> out
+    ) 
+    {
+        _A->rvtmul(j, v, out);
+    }
+
+    void mul(
+        const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>&,
+        Eigen::Ref<vec_value_t> out
+    ) 
+    {
+        _A->tmul(v, out);
+    }
+
+    int rows() const 
+    {
+        return _A->cols();
+    }
+    
+    int cols() const
+    {
+        return _A->rows();
+    }
+};
+
+} // namespace internal
 
 template <class AType, 
           class IndexType=Eigen::Index>
@@ -26,6 +82,7 @@ public:
     using typename base_t::vec_value_t;
     using typename base_t::vec_uint64_t;
     using typename base_t::colmat_value_t;
+    using bool_t = bool;
     using rowmat_value_t = util::rowmat_type<value_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
     using map_crowmat_value_t = Eigen::Map<const rowmat_value_t>;
@@ -37,19 +94,14 @@ protected:
     A_t* _A;
     const map_cvec_value_t _l;
     const map_cvec_value_t _u;
-    const map_ccolmat_value_t _A_u;
-    const map_cvec_value_t _A_d;
-    const map_crowmat_value_t _A_vh;
     const map_cvec_value_t _A_vars;
-    const size_t _A_rank;
     const size_t _max_iters;
     const value_t _tol;
     const size_t _nnls_max_iters;
     const value_t _nnls_tol;
-    const size_t _hinge_batch_size;
+    const value_t _nnls_kkt_tol;
     const size_t _hinge_max_iters;
     const value_t _hinge_tol;
-    const value_t _cs_tol;
     const value_t _slack;
     const size_t _n_threads;
 
@@ -60,20 +112,6 @@ protected:
     std::vector<value_t> _mu_value;
     std::vector<value_t> _mu_value_prev;
     vec_value_t _ATmu;
-
-    ADELIE_CORE_STRONG_INLINE
-    static size_t init_A_rank(
-        const Eigen::Ref<const vec_value_t>& A_d
-    )
-    {
-        const value_t A_d_sum = A_d.sum();
-        value_t cumsum = 0; 
-        for (Eigen::Index i = 0; i < A_d.size(); ++i) {
-            if (cumsum > (1-1e-5) * A_d_sum) return i;
-            cumsum += A_d[i];
-        }
-        return A_d.size();
-    }
 
     ADELIE_CORE_STRONG_INLINE
     void compute_ATmu(
@@ -153,37 +191,28 @@ public:
         A_t& A,
         const Eigen::Ref<const vec_value_t>& l,
         const Eigen::Ref<const vec_value_t>& u,
-        const Eigen::Ref<const colmat_value_t>& A_u,
-        const Eigen::Ref<const vec_value_t>& A_d,
-        const Eigen::Ref<const rowmat_value_t>& A_vh,
         const Eigen::Ref<const vec_value_t>& A_vars,
         size_t max_iters,
         value_t tol,
         size_t nnls_max_iters,
         value_t nnls_tol,
-        size_t hinge_batch_size,
+        value_t nnls_kkt_tol,
         size_t hinge_max_iters,
         value_t hinge_tol,
-        value_t cs_tol,
         value_t slack,
         size_t n_threads
     ):
         _A(&A),
         _l(l.data(), l.size()),
         _u(u.data(), u.size()),
-        _A_u(A_u.data(), A_u.rows(), A_u.cols()),
-        _A_d(A_d.data(), A_d.size()),
-        _A_vh(A_vh.data(), A_vh.rows(), A_vh.cols()),
         _A_vars(A_vars.data(), A_vars.size()),
-        _A_rank(init_A_rank(A_d)),
         _max_iters(max_iters),
         _tol(tol),
         _nnls_max_iters(nnls_max_iters),
         _nnls_tol(nnls_tol),
-        _hinge_batch_size(hinge_batch_size),
+        _nnls_kkt_tol(nnls_kkt_tol),
         _hinge_max_iters(hinge_max_iters),
         _hinge_tol(hinge_tol),
-        _cs_tol(cs_tol),
         _slack(slack),
         _n_threads(n_threads),
         _ATmu(vec_value_t::Zero(A.cols()))
@@ -204,15 +233,6 @@ public:
             // NOTE: user passes in lower == -l
             throw util::adelie_core_error("lower must be <= 0.");
         }
-        if (A_u.rows() != m) {
-            throw util::adelie_core_error("A_u must be (m, r) where A is (m, d).");
-        }
-        if (A_d.size() > std::min(A_u.cols(), A_vh.rows())) {
-            throw util::adelie_core_error("A_d must be (b,) where b <= min(r, s), A_u is (m, r) and A_vh is (s, d).");
-        }
-        if (A_vh.cols() != d) {
-            throw util::adelie_core_error("A_vh must be (s, d) where A is (m, d).");
-        }
         if (A_vars.size() != m) {
             throw util::adelie_core_error("A_vars must be (m,) where A is (m, d).");
         }
@@ -222,11 +242,11 @@ public:
         if (nnls_tol < 0) {
             throw util::adelie_core_error("nnls_tol must be >= 0.");
         }
+        if (nnls_kkt_tol < 0) {
+            throw util::adelie_core_error("nnls_kkt_tol must be >= 0.");
+        }
         if (hinge_tol < 0) {
             throw util::adelie_core_error("hinge_tol must be >= 0.");
-        }
-        if (cs_tol < 0) {
-            throw util::adelie_core_error("cs_tol must be >= 0.");
         }
         if (slack <= 0 || slack >= 1) {
             throw util::adelie_core_error("slack must be in (0,1).");
@@ -239,7 +259,7 @@ public:
     {
         const auto m = _A->rows();
         const auto d = _A->cols();
-        return d * (10 + 2 * d) + 2 * m + ((m < d) ? (m * m) : ((1 + d) * m));
+        return d * (10 + 2 * d) + 5 * m + ((m < d) ? (m * m) : ((1 + d) * m));
     }
 
     void solve(
@@ -252,7 +272,8 @@ public:
         Eigen::Ref<vec_uint64_t> buffer
     ) override
     {
-        using vec_bool_t = util::rowvec_type<bool>;
+        using vec_bool_t = util::rowvec_type<bool_t>;
+        using internal_matrix_t = internal::MatrixConstraintNNLS<A_t>;
 
         const auto m = _A->rows();
         const auto d = _A->cols();
@@ -260,30 +281,35 @@ public:
         base_t::check_solve(x.size(), quad.cols(), linear.size(), m, d);
 
         // check if x = 0, mu = 0 is optimal
-        if (linear.matrix().norm() <= l1) {
+        const auto v_norm = linear.matrix().norm();
+        if (v_norm <= l1) {
             x.setZero();
             _clear(); 
             return;
         }
 
-        auto buff_ptr = reinterpret_cast<value_t*>(buffer.data());
-        const auto buff_begin = buff_ptr;
-        Eigen::Map<vec_value_t> grad_prev(buff_ptr, d); buff_ptr += d;
-        Eigen::Map<vec_value_t> grad(buff_ptr, d); buff_ptr += d;
-        Eigen::Map<vec_value_t> ATmu_prev(buff_ptr, d); buff_ptr += d;
-        Eigen::Map<vec_value_t> ATmu(buff_ptr, d); buff_ptr += d;
-        Eigen::Map<vec_value_t> mu(buff_ptr, m); buff_ptr += m;
-        Eigen::Map<vec_value_t> hinge_grad(buff_ptr, m); buff_ptr += m;
-        const auto m_large = (m < d) ? 0 : m;
-        Eigen::Map<vec_value_t> active_vars(buff_ptr, m_large); buff_ptr += m_large;
-        Eigen::Map<rowmat_value_t> active_AQ(buff_ptr, m_large, d); buff_ptr += m_large * d;
-        const auto m_small = (m < d) ? m : 0;
-        Eigen::Map<colmat_value_t> hess_small(buff_ptr, m_small, m_small); buff_ptr += m_small * m_small;
-        const auto n_read = std::distance(buff_begin, buff_ptr);
-        Eigen::Map<vec_uint64_t> next_buff(buffer.data() + n_read, buffer.size() - n_read);
+        auto buff_iptr = reinterpret_cast<index_t*>(buffer.data());
+        const auto buff_ibegin = buff_iptr;
+        Eigen::Map<vec_index_t> screen_set(buff_iptr, m); buff_iptr += m;
+        Eigen::Map<vec_index_t> active_set(buff_iptr, m); buff_iptr += m;
+        size_t n_read = std::distance(buff_ibegin, buff_iptr);
 
-        // TODO: cost of using this?
-        std::vector<index_t> mu_active_tmp;
+        auto buff_vptr = reinterpret_cast<value_t*>(buffer.data() + n_read);
+        const auto buff_vbegin = buff_vptr;
+        Eigen::Map<vec_value_t> grad_prev(buff_vptr, d); buff_vptr += d;
+        Eigen::Map<vec_value_t> grad(buff_vptr, d); buff_vptr += d;
+        Eigen::Map<vec_value_t> ATmu_prev(buff_vptr, d); buff_vptr += d;
+        Eigen::Map<vec_value_t> ATmu(buff_vptr, d); buff_vptr += d;
+        Eigen::Map<vec_value_t> mu(buff_vptr, m); buff_vptr += m;
+        Eigen::Map<vec_value_t> hinge_grad(buff_vptr, m); buff_vptr += m;
+        Eigen::Map<vec_value_t> nnls_grad(buff_vptr, m); buff_vptr += m;
+        const auto m_large = (m < d) ? 0 : m;
+        Eigen::Map<vec_value_t> active_vars(buff_vptr, m_large); buff_vptr += m_large;
+        Eigen::Map<rowmat_value_t> active_AQ(buff_vptr, m_large, d); buff_vptr += m_large * d;
+        const auto m_small = (m < d) ? m : 0;
+        Eigen::Map<colmat_value_t> hess_small(buff_vptr, m_small, m_small); buff_vptr += m_small * m_small;
+        n_read += std::distance(buff_vbegin, buff_vptr);
+        Eigen::Map<vec_uint64_t> next_buff(buffer.data() + n_read, buffer.size() - n_read);
 
         const auto compute_mu_resid = [&](
             auto& mu_resid
@@ -300,29 +326,40 @@ public:
 
             const auto lower_constraint = vec_value_t::NullaryExpr(_l.size(), [&](auto i) {
                 const auto li = _l[i];
-                return (li <= 0) ? (-Configs::max_solver_value) : (-_cs_tol / li * (_cs_tol >= li * 1e-14));
+                return (li <= 0) ? (-Configs::max_solver_value) : 0;
             });
             const auto upper_constraint = vec_value_t::NullaryExpr(_u.size(), [&](auto i) {
                 const auto ui = _u[i];
-                return (ui <= 0) ? Configs::max_solver_value : (_cs_tol / ui * (_cs_tol >= ui * 1e-14));
+                return (ui <= 0) ? Configs::max_solver_value : 0;
             });
 
-            // save current mu active indices
-            mu_active_tmp = _mu_active;
-            Eigen::Map<vec_bool_t> is_active(reinterpret_cast<bool*>(hinge_grad.data()), m);
+            Eigen::Map<vec_bool_t> is_screen(reinterpret_cast<bool_t*>(hinge_grad.data()), m);
+            Eigen::Map<vec_bool_t> is_active(reinterpret_cast<bool_t*>(hinge_grad.data())+m, m);
             auto& Qmu_resid = grad;
 
             mu_to_dense(mu);
+            is_screen.setZero();
             is_active.setZero();
             for (size_t i = 0; i < _mu_active.size(); ++i) {
-                is_active[_mu_active[i]] = true;
+                const auto k = _mu_active[i];
+                is_screen[k] = true;
+                is_active[k] = true;
+                screen_set[i] = k;
+                active_set[i] = k;
             }
             Qmu_resid = Qv - _ATmu;
-
-            value_t loss = 0.5 * Qmu_resid.square().sum();
-            optimization::StateNNLS<A_t> state_nnls(
-                *_A, _A_vars, _nnls_max_iters, _nnls_tol,
-                _mu_active, is_active, mu, Qmu_resid, loss
+            const value_t loss = 0.5 * Qmu_resid.square().sum();
+            internal_matrix_t _X(*_A); // _X == _A^T
+            optimization::StateNNLS<internal_matrix_t> state_nnls(
+                _X, v_norm * v_norm, _A_vars, std::min<size_t>(m, d),
+                _nnls_max_iters, _nnls_tol, _nnls_kkt_tol,
+                _mu_active.size(),
+                screen_set,
+                is_screen,
+                _mu_active.size(),
+                active_set, 
+                is_active, 
+                mu, Qmu_resid, nnls_grad, loss
             );
             //using sw_t = util::Stopwatch;
             //sw_t sw;
@@ -339,9 +376,12 @@ public:
             const value_t mu_resid_norm_sq = 2 * state_nnls.loss;
 
             if ((!is_init && !is_prev_valid_old) || (mu_resid_norm_sq <= l1 * l1)) {
+                _mu_active.clear();
                 _mu_value.clear();
-                for (size_t i = 0; i < _mu_active.size(); ++i) {
-                    _mu_value.push_back(mu[_mu_active[i]]);
+                for (size_t i = 0; i < state_nnls.active_set_size; ++i) {
+                    const auto k = active_set[i];
+                    _mu_active.push_back(k);
+                    _mu_value.push_back(mu[k]);
                 }
                 _mu_active_set.clear();
                 _mu_active_set.insert(
@@ -350,8 +390,6 @@ public:
                 );
                 mu_prune(1e-16);
                 _ATmu = Qv - Qmu_resid;
-            } else {
-                _mu_active = mu_active_tmp;
             }
 
             return mu_resid_norm_sq;
@@ -438,8 +476,8 @@ public:
                     #pragma omp parallel for schedule(static) num_threads(_n_threads)
                     for (Eigen::Index ii = 0; ii < static_cast<Eigen::Index>(active_size); ++ii) active_invariance(ii);
                 }
-                optimization::StateHingeLowRank<A_t, index_t> state_hinge(
-                    hess, *_A, _l, _u, _hinge_batch_size, _hinge_max_iters, _hinge_tol,
+                optimization::StateHingeLowRank<A_t> state_hinge(
+                    hess, *_A, _l, _u, std::min(m, d), _hinge_max_iters, _hinge_tol,
                     _mu_active, _mu_value, active_vars, active_AQ, grad, hinge_grad
                 );
                 //using sw_t = util::Stopwatch;
@@ -504,21 +542,34 @@ public:
         Eigen::Ref<vec_uint64_t> buffer
     ) override 
     {
-        using vec_bool_t = util::rowvec_type<bool>;
+        using vec_bool_t = util::rowvec_type<bool_t>;
+        using internal_matrix_t = internal::MatrixConstraintNNLS<A_t>;
 
         const auto m = _A->rows();
         const auto d = _A->cols();
 
-        auto buff_ptr = reinterpret_cast<value_t*>(buffer.data());
-        Eigen::Map<vec_value_t> grad(buff_ptr, d); buff_ptr += d;
-        Eigen::Map<vec_value_t> mu(buff_ptr, m); buff_ptr += m;
-        Eigen::Map<vec_bool_t> is_active(reinterpret_cast<bool*>(buff_ptr), m); buff_ptr += m;
+        auto buff_iptr = reinterpret_cast<index_t*>(buffer.data());
+        const auto buff_ibegin = buff_iptr;
+        Eigen::Map<vec_index_t> screen_set(buff_iptr, m); buff_iptr += m;
+        Eigen::Map<vec_index_t> active_set(buff_iptr, m); buff_iptr += m;
+        size_t n_read = std::distance(buff_ibegin, buff_iptr);
 
+        auto buff_vptr = reinterpret_cast<value_t*>(buffer.data() + n_read);
+        Eigen::Map<vec_value_t> grad(buff_vptr, d); buff_vptr += d;
+        Eigen::Map<vec_value_t> mu(buff_vptr, m); buff_vptr += m;
+        Eigen::Map<vec_value_t> nnls_grad(buff_vptr, m); buff_vptr += m;
+        Eigen::Map<vec_bool_t> is_screen(reinterpret_cast<bool_t*>(buff_vptr), m); buff_vptr += m;
+        Eigen::Map<vec_bool_t> is_active(reinterpret_cast<bool_t*>(buff_vptr), m); buff_vptr += m;
+
+        is_screen.setZero();
         is_active.setZero();
         mu.setZero();
         for (size_t i = 0; i < _mu_active.size(); ++i) {
             const auto idx = _mu_active[i];
             const auto val = _mu_value[i];
+            screen_set[i] = idx;
+            active_set[i] = idx;
+            is_screen[idx] = true;
             is_active[idx] = true;
             mu[idx] = val;
         }
@@ -534,10 +585,17 @@ public:
             const auto ui = _u[i];
             return (ui <= 0) ? Configs::max_solver_value : 0;
         });
-        // TODO: change to path=true
-        optimization::StateNNLS<A_t> state_nnls(
-            *_A, _A_vars, _nnls_max_iters, _nnls_tol,
-            _mu_active, is_active, mu, Qmu_resid, loss
+        internal_matrix_t _X(*_A); // _X == _A^T
+        optimization::StateNNLS<internal_matrix_t> state_nnls(
+            _X, v.square().sum(), _A_vars, std::min<size_t>(m, d), 
+            _nnls_max_iters, _nnls_tol, _nnls_kkt_tol,
+            _mu_active.size(),
+            screen_set,
+            is_screen,
+            _mu_active.size(),
+            active_set,
+            is_active,
+            mu, Qmu_resid, nnls_grad, loss
         );
         //using sw_t = util::Stopwatch;
         //sw_t sw;
@@ -552,9 +610,11 @@ public:
         //PRINT(elapsed);
         //PRINT(state_nnls.iters);
 
+        _mu_active.clear();
         _mu_value.clear();
-        for (size_t i = 0; i < _mu_active.size(); ++i) {
-            const auto k = _mu_active[i];
+        for (size_t i = 0; i < state_nnls.active_set_size; ++i) {
+            const auto k = active_set[i];
+            _mu_active.push_back(k);
             _mu_value.push_back(mu[k]);
         }
         _mu_active_set.clear();

@@ -18,6 +18,7 @@ struct StateHingeLowRank
     using dyn_vec_index_t = DynVecIndexType;
     using dyn_vec_value_t = DynVecValueType;
     using vec_value_t = util::rowvec_type<value_t>;
+    using vec_index_t = util::rowvec_type<index_t>;
     using colmat_value_t = util::colmat_type<value_t>;
     using rowmat_value_t = util::rowmat_type<value_t>;
     using map_vec_value_t = Eigen::Map<vec_value_t>;
@@ -143,9 +144,10 @@ struct StateHingeLowRank
             );
         };
 
-        iters = 0;
         const auto m = A->rows();
         const auto d = A->cols();
+        vec_index_t viols_order = vec_index_t::LinSpaced(m, 0, m-1);
+        iters = 0;
 
         while (1) {
             while (1) {
@@ -188,23 +190,27 @@ struct StateHingeLowRank
             }
 
             compute_grad();
+            auto& viols = grad;
+            std::sort(
+                viols_order.data(),
+                viols_order.data() + m,
+                [&](auto i, auto j) { return viols[i] > viols[j]; }
+            );
 
-            const auto active_size = active_set.size();
-            const size_t max_n_new_active = std::min<size_t>(batch_size, m-active_size);
-            if (max_n_new_active <= 0) return;
-
-            size_t n_new_active = 0;
+            const auto active_size_old = active_set.size();
+            bool kkt_passed = true;
 
             // check if any violations exist and append to active set
-            for (Eigen::Index i = 0; i < grad.size(); ++i) {
-                if (grad[i] <= 0) continue;
-
-                add_active(i);
-                ++n_new_active;
-
-                if (n_new_active >= max_n_new_active) break;
+            for (Eigen::Index i = 0; i < m; ++i) {
+                const auto k = viols_order[i];
+                const auto vk = viols[k];
+                if (vk <= tol) continue;
+                kkt_passed = false;
+                if (active_set.size() >= active_size_old + batch_size) break;
+                add_active(k);
             }
-            if (n_new_active <= 0) return;
+
+            if (kkt_passed) return;
         } // end while(1)
     }
 };

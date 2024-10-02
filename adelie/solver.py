@@ -1053,6 +1053,7 @@ def bvls(
     tol: float =1e-9,
     kkt_tol: float =1e-9,
     n_threads: int =1,
+    warm_start =None,
 ):
     """Solves bounded variable least squares.
 
@@ -1103,6 +1104,10 @@ def bvls(
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
+    warm_start : optional
+        If no warm-start is provided, the initial solution is set to the vertex of the box closest to the origin.
+        Otherwise, the warm-start is used to extract all necessary state variables.
+        Default is ``None``.
 
     Returns
     -------
@@ -1151,15 +1156,26 @@ def bvls(
     lower = np.maximum(lower, -Configs.max_solver_value)
     upper = np.minimum(upper,  Configs.max_solver_value)
 
-    beta = np.where(np.abs(lower) < np.abs(upper), lower, upper)
-    active_set = np.empty(p, dtype=int)
-    active_set_size = 0
-    is_active = np.zeros(p, dtype=bool)
-    screen_set = np.empty(p, dtype=int)
-    screen_set_size = 0
-    is_screen = np.zeros(p, dtype=bool)
+    if warm_start is None:
+        beta = np.where(np.abs(lower) < np.abs(upper), lower, upper)
+        active_set = np.empty(p, dtype=int)
+        active_set_size = 0
+        is_active = np.zeros(p, dtype=bool)
+        screen_set = np.empty(p, dtype=int)
+        screen_set_size = 0
+        is_screen = np.zeros(p, dtype=bool)
+
+    else:
+        beta = warm_start.beta
+        active_set = warm_start.active_set
+        active_set_size = warm_start.active_set_size
+        is_active = warm_start.is_active
+        screen_set = warm_start.screen_set
+        screen_set_size = warm_start.screen_set_size
+        is_screen = warm_start.is_screen
+
     if isinstance(X_raw, np.ndarray):
-        resid = y - X @ beta
+        resid = y - X_raw @ beta
     else:
         resid = y - (X @ csr_matrix(beta[None]).T)[:, 0]
     grad = np.empty(p, dtype=dtype)

@@ -60,9 +60,6 @@ def box(
                 hinge_tol : float, optional
                     Convergence tolerance for the hinge loss optimizer.
                     Default is ``1e-14``.
-                cs_tol : float, optional
-                    Complementary slackness tolerance.
-                    Default is ``1e-9``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
                     the boundary where primal is zero.
@@ -117,7 +114,6 @@ def box(
             "tol": 1e-9,
             "hinge_max_iters": int(1e6),
             "hinge_tol": 1e-14,
-            "cs_tol": 1e-9,
             "slack": 1e-4,
         },
     }[method]
@@ -144,7 +140,6 @@ def linear(
     lower: np.ndarray,
     upper: np.ndarray,
     *,
-    svd: tuple =None,
     vars: np.ndarray =None,
     copy: bool =False,
     method: str ="proximal-newton",
@@ -167,12 +162,6 @@ def linear(
         Lower bound :math:`\\ell`.
     upper : (m,) ndarray
         Upper bound :math:`u`.
-    svd : tuple, optional
-        A tuple ``(u, d, vh)`` as outputted by :func:`numpy.linalg.svd`.
-        However, ``u`` must have ``"F"``-ordering.
-        If ``None`` and ``A`` is ``ndarray`` or ``csr_matrix``, it is computed internally.
-        Otherwise, it must be explicitly provided by the user.
-        Default is ``None``.
     vars : ndarray, optional
         Equivalent to ``np.sum(A ** 2, axis=1)``.
         If ``None`` and ``A`` is ``ndarray`` or ``csr_matrix``, it is computed internally.
@@ -206,18 +195,15 @@ def linear(
                 nnls_tol : float, optional
                     Convergence tolerance for non-negative least squares.
                     Default is ``1e-7``.
-                hinge_batch_size : int, optional
-                    Batch size of active dual variables to include at a time in the hinge loss optimizer.
-                    Default is ``A.shape[0]``.
+                nnls_kkt_tol : float, optional
+                    KKT convergence tolerance for non-negative least squares.
+                    Default is ``1e-7`.
                 hinge_max_iters : int, optional
                     Maximum number of hinge loss iterations.
                     Default is ``int(1e6)``.
                 hinge_tol : float, optional
                     Convergence tolerance for the hinge loss optimizer.
                     Default is ``1e-14``.
-                cs_tol : float, optional
-                    Complementary slackness tolerance.
-                    Default is ``1e-9``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
                     the boundary where primal is zero.
@@ -258,22 +244,12 @@ def linear(
     adelie.constraint.upper
     """
     if isinstance(A, np.ndarray):
-        if svd is None:
-            A_u, A_d, A_vh = np.linalg.svd(A, full_matrices=False, compute_uv=True)
-            A_u = np.asfortranarray(A_u)
-            svd = (A_u, A_d, A_vh)
-
         if vars is None:
             vars = np.sum(A ** 2, axis=1)
 
         A, A_dtype = _coerce_dtype(A, dtype)
         A = matrix.dense(A, method="constraint", copy=copy)
     elif isinstance(A, csr_matrix):
-        if svd is None:
-            A_u, A_d, A_vh = scipy.linalg.svd(A, full_matrices=False, compute_uv=True)
-            A_u = np.asfortranarray(A_u)
-            svd = (A_u, A_d, A_vh)
-
         if vars is None:
             vars = (A ** 2).sum(axis=1)
 
@@ -283,7 +259,6 @@ def linear(
         }[A.dtype]
         A = matrix.sparse(A, method="constraint", copy=copy)
     else:
-        assert not (svd is None)
         assert not (vars is None)
         A_dtype = np.float32 if "32" in A.__class__.__name__ else np.float64
 
@@ -310,10 +285,9 @@ def linear(
             "tol": 1e-9,
             "nnls_max_iters": int(1e5),
             "nnls_tol": 1e-7,
-            "hinge_batch_size": A.shape[0],
+            "nnls_kkt_tol": 1e-7,
             "hinge_max_iters": int(1e6),
             "hinge_tol": 1e-14,
-            "cs_tol": 1e-9,
             "slack": 1e-4,
             "n_threads": 1,
         },
@@ -327,16 +301,12 @@ def linear(
             self._A = A
             self._lower = np.array(lower, dtype=dtype)
             self._upper = np.array(upper, dtype=dtype)
-            self._svd = tuple(np.array(x, copy=copy, dtype=dtype) for x in svd)
             self._vars = np.array(vars, copy=copy, dtype=dtype)
             core_base.__init__(
                 self,
                 A=self._A,
                 lower=self._lower,
                 upper=self._upper,
-                A_u=self._svd[0],
-                A_d=self._svd[1],
-                A_vh=self._svd[2],
                 A_vars=self._vars,
                 **configs,
             )
@@ -422,9 +392,6 @@ def one_sided(
                 hinge_tol : float, optional
                     Convergence tolerance for the hinge loss optimizer.
                     Default is ``1e-14``.
-                cs_tol : float, optional
-                    Complementary slackness tolerance.
-                    Default is ``1e-9``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
                     the boundary where primal is zero.
@@ -494,7 +461,6 @@ def one_sided(
             "tol": 1e-9,
             "hinge_max_iters": int(1e6),
             "hinge_tol": 1e-14,
-            "cs_tol": 1e-9,
             "slack": 1e-4,
         },
         "admm": {

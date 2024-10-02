@@ -117,7 +117,6 @@ private:
     const value_t _tol;
     const size_t _hinge_max_iters;
     const value_t _hinge_tol;
-    const value_t _cs_tol;
     const value_t _slack;
 
     vec_value_t _mu;
@@ -130,7 +129,6 @@ public:
         value_t tol,
         size_t hinge_max_iters,
         value_t hinge_tol,
-        value_t cs_tol,
         value_t slack
     ):
         base_t(l, u),
@@ -138,7 +136,6 @@ public:
         _tol(tol),
         _hinge_max_iters(hinge_max_iters),
         _hinge_tol(hinge_tol),
-        _cs_tol(cs_tol),
         _slack(slack),
         _mu(vec_value_t::Zero(l.size()))
     {
@@ -147,9 +144,6 @@ public:
         }
         if (hinge_tol < 0) {
             throw util::adelie_core_error("hinge_tol must be >= 0.");
-        }
-        if (cs_tol < 0) {
-            throw util::adelie_core_error("cs_tol must be >= 0.");
         }
         if (slack <= 0 || slack >= 1) {
             throw util::adelie_core_error("slack must be in (0,1).");
@@ -212,10 +206,8 @@ public:
             const auto is_u_zero = (_u <= 0).template cast<value_t>();
             const auto is_l_zero = (_l <= 0).template cast<value_t>();
             _mu = Qv.max(
-                (-_cs_tol) * (1 - is_l_zero) / (_l + is_l_zero) +
                 (-Configs::max_solver_value) * is_l_zero
             ).min(
-                _cs_tol * (1 - is_u_zero) / (_u + is_u_zero) +
                 Configs::max_solver_value * is_u_zero
             );
             const auto mu_resid_norm_sq = (Qv - _mu).square().sum();

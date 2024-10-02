@@ -1,7 +1,6 @@
 #include "decl.hpp"
 #include <adelie_core/matrix/matrix_constraint_dense.hpp>
 #include <adelie_core/optimization/linqp_full.hpp>
-#include <adelie_core/optimization/nnls.hpp>
 #include <adelie_core/optimization/nnqp_full.hpp>
 #include <adelie_core/optimization/hinge_full.hpp>
 #include <adelie_core/optimization/hinge_low_rank.hpp>
@@ -90,162 +89,6 @@ void nnqp_full(py::module_& m, const char* name)
             sw_t sw;
             sw.start();
             state.solve();
-            state.time_elapsed = sw.elapsed();
-        })
-        ;
-}
-
-template <class MatrixType>
-void nnls(py::module_& m, const char* name)
-{
-    using dyn_vec_index_t = std::vector<Eigen::Index>;
-    using state_t = ad::optimization::StateNNLS<
-        MatrixType, false, Eigen::Index, dyn_vec_index_t
-    >;
-    using matrix_t = typename state_t::matrix_t;
-    using value_t = typename state_t::value_t;
-    using vec_value_t = typename state_t::vec_value_t;
-    using vec_bool_t = typename state_t::vec_bool_t;
-    py::class_<state_t>(m, name, R"delimiter(
-    Solves the non-negative least squares (NNLS) problem.
-
-    The non-negative least squares problem is given by
-
-    .. math::
-        \begin{align*}
-            \mathrm{minimize}_{\beta \geq 0} 
-            \frac{1}{2} \|y - X\beta\|_2^2
-        \end{align*}
-
-    Parameters
-    ----------
-    XT : (d, n) ndarray
-        Feature matrix transposed.
-    X_vars : (d,) ndarray
-        :math:`\ell_2`-norm squared of the columns of ``X``.
-    max_iters : int
-        Maximum number of coordinate descent iterations.
-    tol : float
-        Convergence tolerance.
-    active_set : (m,) ndarray
-        Active set indices.
-    is_active : (d,) ndarray
-        Active flags.
-    beta : (d,) ndarray
-        Beta vector.
-    resid : (n,) ndarray
-        Residual vector :math:`y - X \beta`.
-    loss : float
-        Loss :math:`1/2 \|y-X\beta\|_2^2`.
-    )delimiter")
-        .def(py::init<
-            matrix_t&,
-            const Eigen::Ref<const vec_value_t>&,
-            size_t,
-            value_t,
-            dyn_vec_index_t&,
-            Eigen::Ref<vec_bool_t>,
-            Eigen::Ref<vec_value_t>,
-            Eigen::Ref<vec_value_t>,
-            value_t 
-        >(),
-            py::arg("XT").noconvert(),
-            py::arg("X_vars").noconvert(),
-            py::arg("max_iters"),
-            py::arg("tol"),
-            py::arg("active_set"),
-            py::arg("is_active"),
-            py::arg("beta"),
-            py::arg("resid"),
-            py::arg("loss")
-        )
-        .def_readonly("XT", &state_t::XT)
-        .def_readonly("X_vars", &state_t::X_vars)
-        .def_readonly("max_iters", &state_t::max_iters)
-        .def_readonly("tol", &state_t::tol)
-        .def_readonly("active_set", &state_t::active_set)
-        .def_readonly("is_active", &state_t::is_active)
-        .def_readonly("beta", &state_t::beta)
-        .def_readonly("resid", &state_t::resid)
-        .def_readonly("loss", &state_t::loss)
-        .def_readonly("time_elapsed", &state_t::time_elapsed)
-        .def("solve", [](state_t& state) {
-            using sw_t = ad::util::Stopwatch;
-            sw_t sw;
-            sw.start();
-            state.solve(
-                [](){return false;}, 
-                vec_value_t::NullaryExpr(state.XT->rows(), [](auto) { return 0; }),
-                vec_value_t::NullaryExpr(state.XT->rows(), [](auto) { return std::numeric_limits<value_t>::infinity(); })
-            );
-            state.time_elapsed = sw.elapsed();
-        })
-        ;
-}
-
-template <class MatrixType>
-void nnls_path(py::module_& m, const char* name)
-{
-    using dyn_vec_index_t = std::vector<Eigen::Index>;
-    using state_t = ad::optimization::StateNNLS<
-        MatrixType, true, Eigen::Index, dyn_vec_index_t
-    >;
-    using matrix_t = typename state_t::matrix_t;
-    using value_t = typename state_t::value_t;
-    using vec_value_t = typename state_t::vec_value_t;
-    using vec_bool_t = typename state_t::vec_bool_t;
-    py::class_<state_t>(m, name)
-        .def(py::init<
-            matrix_t&,
-            const Eigen::Ref<const vec_value_t>&,
-            size_t,
-            value_t,
-            size_t,
-            value_t,
-            value_t,
-            dyn_vec_index_t&,
-            Eigen::Ref<vec_bool_t>,
-            Eigen::Ref<vec_value_t>,
-            Eigen::Ref<vec_value_t>,
-            Eigen::Ref<vec_value_t>,
-            value_t 
-        >(),
-            py::arg("XT").noconvert(),
-            py::arg("X_vars").noconvert(),
-            py::arg("max_iters"),
-            py::arg("tol"),
-            py::arg("lmda_path_size"),
-            py::arg("min_ratio"),
-            py::arg("path_tol"),
-            py::arg("active_set"),
-            py::arg("is_active"),
-            py::arg("beta"),
-            py::arg("resid"),
-            py::arg("grad"),
-            py::arg("loss")
-        )
-        .def_readonly("XT", &state_t::XT)
-        .def_readonly("X_vars", &state_t::X_vars)
-        .def_readonly("max_iters", &state_t::max_iters)
-        .def_readonly("tol", &state_t::tol)
-        .def_readonly("lmda_path_size", &state_t::lmda_path_size)
-        .def_readonly("min_ratio", &state_t::min_ratio)
-        .def_readonly("path_tol", &state_t::path_tol)
-        .def_readonly("active_set", &state_t::active_set)
-        .def_readonly("is_active", &state_t::is_active)
-        .def_readonly("beta", &state_t::beta)
-        .def_readonly("resid", &state_t::resid)
-        .def_readonly("grad", &state_t::grad)
-        .def_readonly("loss", &state_t::loss)
-        .def_readonly("time_elapsed", &state_t::time_elapsed)
-        .def("solve", [](state_t& state) {
-            using sw_t = ad::util::Stopwatch;
-            sw_t sw;
-            sw.start();
-            state.solve(
-                vec_value_t::NullaryExpr(state.XT->rows(), [](auto) { return 0; }),
-                vec_value_t::NullaryExpr(state.XT->rows(), [](auto) { return std::numeric_limits<value_t>::infinity(); })
-            );
             state.time_elapsed = sw.elapsed();
         })
         ;
@@ -664,8 +507,6 @@ void register_optimization(py::module_& m)
 
     linqp_full<ad::util::colmat_type<double>>(m, "StateLinQPFull");
     nnqp_full<ad::util::colmat_type<double>>(m, "StateNNQPFull");
-    nnls<ad::matrix::MatrixConstraintDense<ad::util::rowmat_type<double>>>(m, "StateNNLS");
-    nnls_path<ad::matrix::MatrixConstraintDense<ad::util::rowmat_type<double>>>(m, "StateNNLSPath");
     lasso_full<ad::util::colmat_type<double>>(m, "StateLassoFull");
     hinge_full<ad::util::colmat_type<double>>(m, "StateHingeFull");
     hinge_low_rank<ad::matrix::MatrixConstraintDense<ad::util::rowmat_type<double>>>(m, "StateHingeLowRank");
