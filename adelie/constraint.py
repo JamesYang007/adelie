@@ -191,7 +191,7 @@ def linear(
                     Default is ``1e-9``.
                 nnls_max_iters : int, optional
                     Maximum number of non-negative least squares iterations.
-                    Default is ``int(1e5)``.
+                    Default is ``int(1e6)``.
                 nnls_tol : float, optional
                     Convergence tolerance for non-negative least squares.
                     Default is ``1e-7``.
@@ -283,7 +283,7 @@ def linear(
         "proximal-newton": {
             "max_iters": 100,
             "tol": 1e-9,
-            "nnls_max_iters": int(1e5),
+            "nnls_max_iters": int(1e6),
             "nnls_tol": 1e-7,
             "nnls_kkt_tol": 1e-7,
             "hinge_max_iters": int(1e6),
