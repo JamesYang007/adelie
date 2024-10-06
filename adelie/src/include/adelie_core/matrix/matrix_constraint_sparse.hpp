@@ -76,7 +76,6 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        // TODO: parallelize?
         out.matrix() = v.matrix() * _mat;
     }
 
@@ -85,7 +84,6 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        // TODO: parallelize?
         out.matrix() = v.matrix() * _mat.transpose();
     }
 

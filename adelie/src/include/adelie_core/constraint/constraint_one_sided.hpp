@@ -407,7 +407,6 @@ public:
         Eigen::Map<vec_value_t> linear_shifted(buff_ptr, d); buff_ptr += d;
         Eigen::Map<vec_value_t> s(buff_ptr, m); buff_ptr += m;
 
-        // TODO: these warm-starts may not be optimal
         z = ((x.matrix() * Q.transpose()).array() * _sgn).min(_b);
         u.setZero();
 
