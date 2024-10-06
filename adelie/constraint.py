@@ -59,7 +59,7 @@ def box(
                     Default is ``int(1e6)``.
                 hinge_tol : float, optional
                     Convergence tolerance for the hinge loss optimizer.
-                    Default is ``1e-14``.
+                    Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
                     the boundary where primal is zero.
@@ -113,7 +113,7 @@ def box(
             "max_iters": 100,
             "tol": 1e-9,
             "hinge_max_iters": int(1e6),
-            "hinge_tol": 1e-14,
+            "hinge_tol": 1e-7,
             "slack": 1e-4,
         },
     }[method]
@@ -203,7 +203,7 @@ def linear(
                     Default is ``int(1e6)``.
                 hinge_tol : float, optional
                     Convergence tolerance for the hinge loss optimizer.
-                    Default is ``1e-14``.
+                    Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
                     the boundary where primal is zero.
@@ -287,7 +287,7 @@ def linear(
             "nnls_tol": 1e-7,
             "nnls_kkt_tol": 1e-7,
             "hinge_max_iters": int(1e6),
-            "hinge_tol": 1e-14,
+            "hinge_tol": 1e-7,
             "slack": 1e-4,
             "n_threads": 1,
         },
@@ -391,7 +391,7 @@ def one_sided(
                     Default is ``int(1e6)``.
                 hinge_tol : float, optional
                     Convergence tolerance for the hinge loss optimizer.
-                    Default is ``1e-14``.
+                    Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
                     the boundary where primal is zero.
@@ -460,7 +460,7 @@ def one_sided(
             "max_iters": 100,
             "tol": 1e-9,
             "hinge_max_iters": int(1e6),
-            "hinge_tol": 1e-14,
+            "hinge_tol": 1e-7,
             "slack": 1e-4,
         },
         "admm": {
