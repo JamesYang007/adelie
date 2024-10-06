@@ -273,13 +273,14 @@ protected:
             // x^T S^{-1} x using Woodbury identity
             alpha_tmp = x.matrix() * Q;
             const auto xy = (x * alpha_tmp).sum();
-            const auto var = (
+            value_t var = (
                 (alpha_tmp.square() / x_buffer2).sum() - (
                     xy * xy
                 ) / (
                     (x_norm * x_norm) / (l1 * kappa) + (x.square() * x_buffer2).sum()
                 )
             ) / x_norm;
+            var = std::max<value_t>(var, 1e-64);
 
             compute_proximal_newton_step(hess, var);
         }
