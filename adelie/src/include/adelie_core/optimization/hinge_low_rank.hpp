@@ -30,6 +30,7 @@ struct StateHingeLowRank
     matrix_t* A;
     const map_cvec_value_t penalty_neg;
     const map_cvec_value_t penalty_pos;
+    const value_t y_var;
 
     const size_t batch_size;
     const size_t max_iters;
@@ -50,6 +51,7 @@ struct StateHingeLowRank
         matrix_t& A,
         const Eigen::Ref<const vec_value_t>& penalty_neg,
         const Eigen::Ref<const vec_value_t>& penalty_pos,
+        value_t y_var,
         size_t batch_size,
         size_t max_iters,
         value_t tol,
@@ -64,6 +66,7 @@ struct StateHingeLowRank
         A(&A),
         penalty_neg(penalty_neg.data(), penalty_neg.size()),
         penalty_pos(penalty_pos.data(), penalty_pos.size()),
+        y_var(y_var),
         batch_size(batch_size),
         max_iters(max_iters),
         tol(tol),
@@ -186,7 +189,7 @@ struct StateHingeLowRank
                         "StateHingeLowRank: max iterations reached!"
                     );
                 }
-                if (convg_measure <= d * tol) break;
+                if (convg_measure <= y_var * tol) break;
             }
 
             compute_grad();

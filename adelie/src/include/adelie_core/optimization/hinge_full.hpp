@@ -17,6 +17,7 @@ struct StateHingeFull
     const map_cmatrix_t quad;
     const map_cvec_value_t penalty_neg;
     const map_cvec_value_t penalty_pos;
+    const value_t y_var;
 
     const size_t max_iters;
     const value_t tol;
@@ -31,6 +32,7 @@ struct StateHingeFull
         const Eigen::Ref<const matrix_t>& quad,
         const Eigen::Ref<const vec_value_t>& penalty_neg,
         const Eigen::Ref<const vec_value_t>& penalty_pos,
+        value_t y_var,
         size_t max_iters,
         value_t tol,
         Eigen::Ref<vec_value_t> x,
@@ -39,6 +41,7 @@ struct StateHingeFull
         quad(quad.data(), quad.rows(), quad.cols()),
         penalty_neg(penalty_neg.data(), penalty_neg.size()),
         penalty_pos(penalty_pos.data(), penalty_pos.size()),
+        y_var(y_var),
         max_iters(max_iters),
         tol(tol),
         x(x.data(), x.size()),
@@ -108,7 +111,7 @@ struct StateHingeFull
                     grad -= del * quad.array().col(i);
                 }
             }
-            if (convg_measure < quad.cols() * tol) return;
+            if (convg_measure < y_var * tol) return;
         }
 
         throw util::adelie_core_solver_error(

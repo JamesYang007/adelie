@@ -35,7 +35,7 @@ def test_hinge_full(d, seed):
 
     x = np.zeros(d)
     grad = linear.copy()
-    state = opt.StateHingeFull(quad, penalty_neg, penalty_pos, 100000, 1e-24, x, grad)
+    state = opt.StateHingeFull(quad, penalty_neg, penalty_pos, d, 100000, 1e-24, x, grad)
     state.solve()
 
     # test loss against truth
@@ -91,7 +91,7 @@ def test_hinge_low_rank(m, d, seed):
     grad = np.empty(m)
     cA = matrix.dense(A, method="constraint")
     state = opt.StateHingeLowRank(
-        quad, cA, penalty_neg, penalty_pos, 10, 100000, 1e-24, 
+        quad, cA, penalty_neg, penalty_pos, d, 10, 100000, 1e-24, 
         active_set, active_value, active_vars, active_AQ, resid, grad,
     )
     state.solve()

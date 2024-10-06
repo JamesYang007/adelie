@@ -446,14 +446,15 @@ public:
             );
         };
         const auto compute_proximal_newton_step = [&](
-            const auto& hess
+            const auto& hess,
+            const auto var
         ) {
             if (m < d) {
                 mu_to_dense(mu);
                 _A->cov(hess, hess_small);
                 _A->tmul(grad, hinge_grad);
                 optimization::StateHingeFull<colmat_value_t> state_hinge(
-                    hess_small, _l, _u, _hinge_max_iters, _hinge_tol,
+                    hess_small, _l, _u, var, _hinge_max_iters, _hinge_tol,
                     mu, hinge_grad
                 );
                 state_hinge.solve();
@@ -477,7 +478,7 @@ public:
                     for (Eigen::Index ii = 0; ii < static_cast<Eigen::Index>(active_size); ++ii) active_invariance(ii);
                 }
                 optimization::StateHingeLowRank<A_t> state_hinge(
-                    hess, *_A, _l, _u, std::min(m, d), _hinge_max_iters, _hinge_tol,
+                    hess, *_A, _l, _u, var, std::min(m, d), _hinge_max_iters, _hinge_tol,
                     _mu_active, _mu_value, active_vars, active_AQ, grad, hinge_grad
                 );
                 //using sw_t = util::Stopwatch;

@@ -192,6 +192,8 @@ void hinge_full(py::module_& m, const char* name)
         Penalty factor :math:`\omega_-` on the non-positive values.
     penalty_pos : (n,) ndarray
         Penalty factor :math:`\omega_+` on the non-negative values.
+    y_var : float
+        Scale of the problem.
     max_iters : int
         Maximum number of coordinate descent iterations.
     tol : float
@@ -205,6 +207,7 @@ void hinge_full(py::module_& m, const char* name)
             const Eigen::Ref<const matrix_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
+            value_t,
             size_t,
             value_t,
             Eigen::Ref<vec_value_t>,
@@ -213,6 +216,7 @@ void hinge_full(py::module_& m, const char* name)
             py::arg("quad").noconvert(),
             py::arg("penalty_neg").noconvert(),
             py::arg("penalty_pos").noconvert(),
+            py::arg("y_var"),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("x"),
@@ -221,6 +225,7 @@ void hinge_full(py::module_& m, const char* name)
         .def_readonly("quad", &state_t::quad)
         .def_readonly("penalty_neg", &state_t::penalty_neg)
         .def_readonly("penalty_pos", &state_t::penalty_pos)
+        .def_readonly("y_var", &state_t::y_var)
         .def_readonly("max_iters", &state_t::max_iters)
         .def_readonly("tol", &state_t::tol)
         .def_readonly("iters", &state_t::iters)
@@ -277,6 +282,8 @@ void hinge_low_rank(py::module_& m, const char* name)
         Penalty factor :math:`\omega_-` on the non-positive values.
     penalty_pos : (m,) ndarray
         Penalty factor :math:`\omega_+` on the non-negative values.
+    y_var : float
+        Scale of the problem.
     batch_size : int
         Batch size during KKT check.
     max_iters : int
@@ -303,6 +310,7 @@ void hinge_low_rank(py::module_& m, const char* name)
             matrix_t&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
+            value_t,
             size_t,
             size_t,
             value_t,
@@ -317,6 +325,7 @@ void hinge_low_rank(py::module_& m, const char* name)
             py::arg("A").noconvert(),
             py::arg("penalty_neg").noconvert(),
             py::arg("penalty_pos").noconvert(),
+            py::arg("y_var"),
             py::arg("batch_size"),
             py::arg("max_iters"),
             py::arg("tol"),
@@ -331,6 +340,7 @@ void hinge_low_rank(py::module_& m, const char* name)
         .def_readonly("A", &state_t::A)
         .def_readonly("penalty_neg", &state_t::penalty_neg)
         .def_readonly("penalty_pos", &state_t::penalty_pos)
+        .def_readonly("y_var", &state_t::y_var)
         .def_readonly("batch_size", &state_t::batch_size)
         .def_readonly("max_iters", &state_t::max_iters)
         .def_readonly("tol", &state_t::tol)

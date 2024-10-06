@@ -263,13 +263,25 @@ protected:
             // lower(hess) += x_norm * lmda * kappa * alpha alpha^T
             alpha_tmp = (x * x_buffer2) / x_norm;
             alpha.matrix() = alpha_tmp.matrix() * Q.transpose();
-            const auto l1_kappa_norm = l1 * x_norm / (x * x_buffer1 * alpha_tmp).sum();
+            const auto kappa = 1 / (x * x_buffer1 * alpha_tmp).sum();
+            const auto l1_kappa_norm = l1 * kappa * x_norm;
             hess_lower.rankUpdate(alpha.matrix().transpose(), l1_kappa_norm);
 
             // full hessian update
             hess.template triangularView<Eigen::Upper>() = hess.transpose();
 
-            compute_proximal_newton_step(hess);
+            // x^T S^{-1} x using Woodbury identity
+            alpha_tmp = x.matrix() * Q;
+            const auto xy = (x * alpha_tmp).sum();
+            const auto var = (
+                (alpha_tmp.square() / x_buffer2).sum() - (
+                    xy * xy
+                ) / (
+                    (x_norm * x_norm) / (l1 * kappa) + (x.square() * x_buffer2).sum()
+                )
+            ) / x_norm;
+
+            compute_proximal_newton_step(hess, var);
         }
 
         throw util::adelie_core_solver_error("ConstraintBase: proximal newton max iterations reached!");

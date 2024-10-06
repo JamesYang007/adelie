@@ -240,7 +240,8 @@ public:
             );
         };
         const auto compute_proximal_newton_step = [&](
-            const auto& hess
+            const auto& hess,
+            const auto var
         ) {
             // reparametrize
             grad *= _sgn;
@@ -248,7 +249,7 @@ public:
 
             // solve NNQP for new mu
             optimization::StateNNQPFull<colmat_value_t, true> state_nnqp(
-                _sgn, hess, _hinge_max_iters, _hinge_tol, _mu, grad
+                _sgn, hess, var, _hinge_max_iters, _hinge_tol, _mu, grad
             );
             state_nnqp.solve();
 

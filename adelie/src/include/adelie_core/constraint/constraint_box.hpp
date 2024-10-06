@@ -248,10 +248,11 @@ public:
             );
         };
         const auto compute_proximal_newton_step = [&](
-            const auto& hess
+            const auto& hess,
+            const auto var
         ) {
             optimization::StateHingeFull<colmat_value_t> state_hinge(
-                hess, _l, _u, _hinge_max_iters, _hinge_tol, _mu, grad 
+                hess, _l, _u, var, _hinge_max_iters, _hinge_tol, _mu, grad 
             );
             state_hinge.solve();
         };
