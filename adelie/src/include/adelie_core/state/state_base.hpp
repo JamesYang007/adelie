@@ -73,8 +73,9 @@ void update_abs_grad(
 
     // can be parallelized since access is in linear order.
     // any false sharing is happening near the beginning/ends of the block of indices.
+    std::atomic_bool try_failed = false; 
     const auto routine = [&](int i) {
-        if (is_screen(i)) return;
+        if (try_failed.load(std::memory_order_relaxed) || is_screen(i)) return;
         #if defined(_OPENMP)
         auto cbuff = constraint_buffer.row(omp_get_thread_num());
         #else
@@ -84,26 +85,29 @@ void update_abs_grad(
         const auto size_k = group_sizes[i];
         const auto constraint = constraints[i];
         const auto v_k = grad.segment(k, size_k);
-        abs_grad[i] = (
-            constraint ?
-            constraint->solve_zero(v_k, cbuff) :
-            v_k.matrix().norm()
-        );
+        try {
+            abs_grad[i] = (
+                constraint ?
+                constraint->solve_zero(v_k, cbuff) :
+                v_k.matrix().norm()
+            );
+        } catch (...) {
+            try_failed = true;
+        }
     };
     if (n_threads <= 1) {
         for (int i = 0; i < groups.size(); ++i) routine(i);
     } else {
-        if (constraint_buffer.size()) {
-            #if defined(_OPENMP)
-            #pragma omp parallel for schedule(dynamic) num_threads(n_threads)
-            #endif
-            for (int i = 0; i < groups.size(); ++i) routine(i);
-        } else {
-            #if defined(_OPENMP)
-            #pragma omp parallel for schedule(static) num_threads(n_threads)
-            #endif
-            for (int i = 0; i < groups.size(); ++i) routine(i);
-        }
+        #if defined(_OPENMP)
+        #pragma omp parallel for schedule(static) num_threads(n_threads)
+        #endif
+        for (int i = 0; i < groups.size(); ++i) routine(i);
+    }
+    if (try_failed) {
+        throw util::adelie_core_solver_error(
+            "exception raised in constraint->solve_zero(). "
+            "Try changing the configurations such as convergence tolerance that affect solve_zero(). "
+        );
     }
 }
 

@@ -89,6 +89,8 @@ public:
     using map_ccolmat_value_t = Eigen::Map<const colmat_value_t>;
 
 protected:
+    static constexpr value_t _eps = 1e-16; // ignorable coefficient magnitude
+
     using base_t::check_solve;
 
     A_t* _A;
@@ -149,7 +151,7 @@ protected:
             _mu_active.push_back(i);
             _mu_value.push_back(mi);
         }
-        mu_prune(1e-16);
+        mu_prune(_eps);
     };
 
     ADELIE_CORE_STRONG_INLINE
@@ -388,7 +390,7 @@ public:
                     _mu_active.data(),
                     _mu_active.data() + _mu_active.size()
                 );
-                mu_prune(1e-16);
+                mu_prune(_eps);
                 _ATmu = Qv - Qmu_resid;
             }
 
@@ -464,10 +466,7 @@ public:
                     const auto i = _mu_active[ii];
                     auto AiQ = active_AQ.row(ii);
                     _A->rmmul(i, hess, AiQ);
-                    active_vars[ii] = std::max<value_t>(
-                        _A->rvmul(i, AiQ),
-                        1e-14
-                    );
+                    active_vars[ii] = std::max<value_t>(_A->rvmul(i, AiQ), 0);
                 };
                 const size_t active_size = _mu_active.size();
                 const size_t n_bytes = sizeof(value_t) * d * (d + 1) * active_size;
@@ -493,7 +492,7 @@ public:
                     _mu_active.data() + active_size,
                     _mu_active.data() + _mu_active.size()
                 );
-                mu_prune(1e-16);
+                mu_prune(_eps);
             }
             compute_ATmu(_ATmu);
         };
@@ -559,8 +558,8 @@ public:
         Eigen::Map<vec_value_t> grad(buff_vptr, d); buff_vptr += d;
         Eigen::Map<vec_value_t> mu(buff_vptr, m); buff_vptr += m;
         Eigen::Map<vec_value_t> nnls_grad(buff_vptr, m); buff_vptr += m;
-        Eigen::Map<vec_bool_t> is_screen(reinterpret_cast<bool_t*>(buff_vptr), m); buff_vptr += m;
-        Eigen::Map<vec_bool_t> is_active(reinterpret_cast<bool_t*>(buff_vptr), m); buff_vptr += m;
+        Eigen::Map<vec_bool_t> is_screen(reinterpret_cast<bool_t*>(buff_vptr), m);
+        Eigen::Map<vec_bool_t> is_active(reinterpret_cast<bool_t*>(buff_vptr)+m, m); buff_vptr += m;
 
         is_screen.setZero();
         is_active.setZero();
@@ -598,18 +597,11 @@ public:
             is_active,
             mu, Qmu_resid, nnls_grad, loss
         );
-        //using sw_t = util::Stopwatch;
-        //sw_t sw;
-        //sw.start();
         state_nnls.solve(
             [&]() { return false; },
             lower_constraint,
             upper_constraint
         );
-        //auto elapsed = sw.elapsed();
-        //PRINT(this);
-        //PRINT(elapsed);
-        //PRINT(state_nnls.iters);
 
         _mu_active.clear();
         _mu_value.clear();
@@ -623,10 +615,10 @@ public:
             _mu_active.data(),
             _mu_active.data() + _mu_active.size()
         );
-        mu_prune(1e-16);
+        mu_prune(_eps);
         _ATmu = v - Qmu_resid;
 
-        return std::sqrt(2 * state_nnls.loss);
+        return std::sqrt(std::max<value_t>(2 * state_nnls.loss, 0));
     }
 
     void clear() override 

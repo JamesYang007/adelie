@@ -187,42 +187,6 @@ public:
                         _io, begin0, a_size, sqrt_weights.square(), out_diag, _n_threads, _buff
                     );
 
-                    // compute cross-terms
-                    //for (int k0 = 0; k0 < a_size; ++k0) {
-                    //    // cache hap0 information
-                    //    size_t nnz = 0;
-                    //    auto it0 = _io.begin(snp, a_low + k0, 0);
-                    //    const auto end0 = _io.end(snp, a_low + k0, 0);
-                    //    for (; it0 != end0; ++it0) {
-                    //        const auto idx = *it0;
-                    //        _bbuff[idx] = true;
-                    //        _ibuff[nnz] = idx;
-                    //        ++nnz;
-                    //    }
-
-                    //    // loop through hap1's ancestries
-                    //    for (int k1 = 0; k1 < a_size; ++k1) {
-                    //        auto it1 = _io.begin(snp, a_low + k1, 1);
-                    //        const auto end1 = _io.end(snp, a_low + k1, 1);
-                    //        value_t sum = 0;
-                    //        for (; it1 != end1; ++it1) {
-                    //            const auto idx = *it1;
-                    //            const auto sqrt_w = sqrt_weights[idx];
-                    //            sum += sqrt_w * sqrt_w * _bbuff[idx];
-                    //        }
-
-                    //        const auto kk0 = n_solved0 + k0;
-                    //        const auto kk1 = n_solved0 + k1;
-                    //        out(kk0, kk1) += sum;
-                    //        out(kk1, kk0) += sum;
-                    //    }
-
-                    //    // keep invariance by populating with false
-                    //    for (size_t i = 0; i < nnz; ++i) {
-                    //        _bbuff[_ibuff[i]] = false;
-                    //    }
-                    //}
-
                     #pragma omp parallel for schedule(static) num_threads(_n_threads) collapse(2) if(_n_threads > 1)
                     for (int k0 = 0; k0 < static_cast<int>(a_size); ++k0) {
                         for (int k1 = 0; k1 < static_cast<int>(a_size); ++k1) {

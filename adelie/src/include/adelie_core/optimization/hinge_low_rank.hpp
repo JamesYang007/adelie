@@ -141,10 +141,7 @@ struct StateHingeLowRank
             active_value.push_back(0);
             auto AiQ = active_AQ.row(active_size);
             A->rmmul(i, quad, AiQ);
-            active_vars[active_size] = std::max<value_t>(
-                A->rvmul(i, AiQ),
-                1e-14
-            );
+            active_vars[active_size] = std::max<value_t>(A->rvmul(i, AiQ), 0);
         };
 
         const auto m = A->rows();
@@ -167,7 +164,7 @@ struct StateHingeLowRank
                     const auto xk_old = xk;
                     const auto gk0 = gk + vk * xk_old;
                     const auto gk0_lk = gk0 + lk;
-                    xk = std::copysign(
+                    xk = (vk <= 0) ? xk_old : std::copysign(
                         std::max<value_t>(std::max<value_t>(
                             -gk0_lk, gk0-uk
                         ), 0),
