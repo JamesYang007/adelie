@@ -54,11 +54,11 @@ def box(
                 tol : float, optional
                     Convergence tolerance for proximal Newton.
                     Default is ``1e-9``.
-                hinge_max_iters : int, optional
-                    Maximum number of hinge loss iterations.
+                pinball_max_iters : int, optional
+                    Maximum number of pinball loss iterations.
                     Default is ``int(1e6)``.
-                hinge_tol : float, optional
-                    Convergence tolerance for the hinge loss optimizer.
+                pinball_tol : float, optional
+                    Convergence tolerance for the pinball loss optimizer.
                     Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
@@ -112,8 +112,8 @@ def box(
         "proximal-newton": {
             "max_iters": 100,
             "tol": 1e-9,
-            "hinge_max_iters": int(1e6),
-            "hinge_tol": 1e-7,
+            "pinball_max_iters": int(1e6),
+            "pinball_tol": 1e-7,
             "slack": 1e-4,
         },
     }[method]
@@ -197,12 +197,15 @@ def linear(
                     Default is ``1e-7``.
                 nnls_kkt_tol : float, optional
                     KKT convergence tolerance for non-negative least squares.
-                    Default is ``1e-7`.
-                hinge_max_iters : int, optional
-                    Maximum number of hinge loss iterations.
+                    Default is ``1e-7``.
+                pinball_max_iters : int, optional
+                    Maximum number of pinball loss iterations.
                     Default is ``int(1e6)``.
-                hinge_tol : float, optional
-                    Convergence tolerance for the hinge loss optimizer.
+                pinball_tol : float, optional
+                    Convergence tolerance for the pinball loss optimizer.
+                    Default is ``1e-7``.
+                pinball_kkt_tol : float, optional
+                    KKT convergence tolerance for the pinball loss optimizer.
                     Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
@@ -286,8 +289,9 @@ def linear(
             "nnls_max_iters": int(1e6),
             "nnls_tol": 1e-7,
             "nnls_kkt_tol": 1e-7,
-            "hinge_max_iters": int(1e6),
-            "hinge_tol": 1e-7,
+            "pinball_max_iters": int(1e6),
+            "pinball_tol": 1e-7,
+            "pinball_kkt_tol": 1e-7,
             "slack": 1e-4,
             "n_threads": 1,
         },
@@ -386,11 +390,11 @@ def one_sided(
                 tol : float, optional
                     Convergence tolerance for proximal Newton.
                     Default is ``1e-9``.
-                hinge_max_iters : int, optional
-                    Maximum number of hinge loss iterations.
+                pinball_max_iters : int, optional
+                    Maximum number of pinball loss iterations.
                     Default is ``int(1e6)``.
-                hinge_tol : float, optional
-                    Convergence tolerance for the hinge loss optimizer.
+                pinball_tol : float, optional
+                    Convergence tolerance for the pinball loss optimizer.
                     Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
@@ -459,8 +463,8 @@ def one_sided(
         "proximal-newton": {
             "max_iters": 100,
             "tol": 1e-9,
-            "hinge_max_iters": int(1e6),
-            "hinge_tol": 1e-7,
+            "pinball_max_iters": int(1e6),
+            "pinball_tol": 1e-7,
             "slack": 1e-4,
         },
         "admm": {

@@ -7,7 +7,7 @@ import pytest
 
 @pytest.mark.parametrize("d", [3, 5, 10, 20])
 @pytest.mark.parametrize("seed", np.arange(20))
-def test_hinge_full(d, seed):
+def test_pinball_full(d, seed):
     def run_cvxpy(quad, linear, penalty_pos, penalty_neg):
         d = quad.shape[0]
         x = cp.Variable(d)
@@ -35,7 +35,7 @@ def test_hinge_full(d, seed):
 
     x = np.zeros(d)
     grad = linear.copy()
-    state = opt.StateHingeFull(quad, penalty_neg, penalty_pos, d, 100000, 1e-24, x, grad)
+    state = opt.StatePinballFull(quad, penalty_neg, penalty_pos, d, 100000, 1e-24, x, grad)
     state.solve()
 
     # test loss against truth
@@ -47,67 +47,6 @@ def test_hinge_full(d, seed):
     grad_actual = state.grad
     grad_expected = linear - quad @ x
     assert np.allclose(grad_actual, grad_expected, atol=1e-7)
-
-
-@pytest.mark.parametrize("m", [3, 5, 10, 20])
-@pytest.mark.parametrize("d", [1, 5, 10])
-@pytest.mark.parametrize("seed", np.arange(10))
-def test_hinge_low_rank(m, d, seed):
-    def run_cvxpy(A, quad, linear, penalty_pos, penalty_neg):
-        m, d = A.shape
-        x = cp.Variable(m)
-        z = cp.Variable(d)
-        expr = 0.5 * cp.quad_form(z, quad) - linear @ z + penalty_pos @ cp.pos(x) + penalty_neg @ cp.neg(x)
-        constraints = [
-            z == A.T @ x,
-        ]
-        prob = cp.Problem(cp.Minimize(expr), constraints)
-        prob.solve()
-        return x.value
-
-    def objective(x, A, quad, linear, penalty_pos, penalty_neg):
-        z = A.T @ x
-        return 0.5 * (z.T @ quad @ z) - linear @ z + penalty_pos @ np.maximum(x, 0) + penalty_neg @ np.maximum(-x, 0)
-
-    np.random.seed(seed)
-    n = 10
-    X = np.random.normal(0, 1, (n, d))
-    y = np.random.normal(0, 1, n)
-    penalty_pos = np.random.uniform(0, 1, m)
-    penalty_neg = np.random.uniform(0, 1, m)
-    X /= np.sqrt(n)
-    y /= np.sqrt(n)
-    A = np.random.normal(0, 1, (m, d))
-    quad = np.asfortranarray(X.T @ X)
-    linear = X.T @ y
-
-    x_cvxpy = run_cvxpy(A, quad, linear, penalty_pos, penalty_neg)
-
-    active_set = np.empty(0, dtype=int)
-    active_value = np.zeros(0)
-    active_vars = np.empty(m)
-    active_AQ = np.empty((m, d))
-    resid = linear.copy()
-    grad = np.empty(m)
-    cA = matrix.dense(A, method="constraint")
-    state = opt.StateHingeLowRank(
-        quad, cA, penalty_neg, penalty_pos, d, 10, 100000, 1e-24, 
-        active_set, active_value, active_vars, active_AQ, resid, grad,
-    )
-    state.solve()
-
-    x = np.zeros(m)
-    x[state.active_set] = state.active_value
-
-    # test loss against truth
-    loss_actual = objective(x, A, quad, linear, penalty_pos, penalty_neg)
-    loss_expected = objective(x_cvxpy, A, quad, linear, penalty_pos, penalty_neg)
-    assert np.all(loss_actual <= loss_expected * (1 + np.sign(loss_expected) * 1e-7))
-
-    # test gradient
-    resid_actual = state.resid
-    resid_expected = linear - quad @ A.T @ x
-    assert np.allclose(resid_actual, resid_expected, atol=1e-7)
 
 
 @pytest.mark.parametrize("d", [3, 5, 10, 20])

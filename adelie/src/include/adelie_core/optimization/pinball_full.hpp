@@ -5,7 +5,7 @@ namespace adelie_core {
 namespace optimization {
 
 template <class MatrixType>
-struct StateHingeFull
+struct StatePinballFull
 {
     using matrix_t = MatrixType;
     using value_t = typename std::decay_t<MatrixType>::Scalar;
@@ -28,7 +28,7 @@ struct StateHingeFull
 
     double time_elapsed = 0;
 
-    explicit StateHingeFull(
+    explicit StatePinballFull(
         const Eigen::Ref<const matrix_t>& quad,
         const Eigen::Ref<const vec_value_t>& penalty_neg,
         const Eigen::Ref<const vec_value_t>& penalty_pos,
@@ -115,7 +115,7 @@ struct StateHingeFull
         }
 
         throw util::adelie_core_solver_error(
-            "StateHingeFull: max iterations reached!"
+            "StatePinballFull: max iterations reached!"
         );
     }
 };

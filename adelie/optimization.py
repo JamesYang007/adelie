@@ -3,7 +3,6 @@ from .adelie_core.optimization import (
     symmetric_penalty,
     StateLinQPFull,
     StateNNQPFull,
-    StateHingeFull,
-    StateHingeLowRank,
+    StatePinballFull,
     StateLassoFull,
 )

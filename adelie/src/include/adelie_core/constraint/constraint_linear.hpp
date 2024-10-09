@@ -3,9 +3,9 @@
 #include <vector>
 #include <adelie_core/configs.hpp>
 #include <adelie_core/constraint/constraint_base.hpp>
-#include <adelie_core/optimization/hinge_full.hpp>
-#include <adelie_core/optimization/hinge_low_rank.hpp>
 #include <adelie_core/optimization/nnls.hpp>
+#include <adelie_core/optimization/pinball_full.hpp>
+#include <adelie_core/optimization/pinball.hpp>
 
 namespace adelie_core {
 namespace constraint { 
@@ -102,8 +102,9 @@ protected:
     const size_t _nnls_max_iters;
     const value_t _nnls_tol;
     const value_t _nnls_kkt_tol;
-    const size_t _hinge_max_iters;
-    const value_t _hinge_tol;
+    const size_t _pinball_max_iters;
+    const value_t _pinball_tol;
+    const value_t _pinball_kkt_tol;
     const value_t _slack;
     const size_t _n_threads;
 
@@ -199,8 +200,9 @@ public:
         size_t nnls_max_iters,
         value_t nnls_tol,
         value_t nnls_kkt_tol,
-        size_t hinge_max_iters,
-        value_t hinge_tol,
+        size_t pinball_max_iters,
+        value_t pinball_tol,
+        value_t pinball_kkt_tol,
         value_t slack,
         size_t n_threads
     ):
@@ -213,8 +215,9 @@ public:
         _nnls_max_iters(nnls_max_iters),
         _nnls_tol(nnls_tol),
         _nnls_kkt_tol(nnls_kkt_tol),
-        _hinge_max_iters(hinge_max_iters),
-        _hinge_tol(hinge_tol),
+        _pinball_max_iters(pinball_max_iters),
+        _pinball_tol(pinball_tol),
+        _pinball_kkt_tol(pinball_kkt_tol),
         _slack(slack),
         _n_threads(n_threads),
         _ATmu(vec_value_t::Zero(A.cols()))
@@ -247,8 +250,11 @@ public:
         if (nnls_kkt_tol < 0) {
             throw util::adelie_core_error("nnls_kkt_tol must be >= 0.");
         }
-        if (hinge_tol < 0) {
-            throw util::adelie_core_error("hinge_tol must be >= 0.");
+        if (pinball_tol < 0) {
+            throw util::adelie_core_error("pinball_tol must be >= 0.");
+        }
+        if (pinball_kkt_tol < 0) {
+            throw util::adelie_core_error("pinball_kkt_tol must be >= 0.");
         }
         if (slack <= 0 || slack >= 1) {
             throw util::adelie_core_error("slack must be in (0,1).");
@@ -261,7 +267,7 @@ public:
     {
         const auto m = _A->rows();
         const auto d = _A->cols();
-        return d * (10 + 2 * d) + 5 * m + ((m < d) ? (m * m) : ((1 + d) * m));
+        return d * (9 + 2 * d) + 5 * m + ((m < d) ? (m * m) : ((1 + d) * m));
     }
 
     void solve(
@@ -301,13 +307,12 @@ public:
         Eigen::Map<vec_value_t> grad_prev(buff_vptr, d); buff_vptr += d;
         Eigen::Map<vec_value_t> grad(buff_vptr, d); buff_vptr += d;
         Eigen::Map<vec_value_t> ATmu_prev(buff_vptr, d); buff_vptr += d;
-        Eigen::Map<vec_value_t> ATmu(buff_vptr, d); buff_vptr += d;
         Eigen::Map<vec_value_t> mu(buff_vptr, m); buff_vptr += m;
-        Eigen::Map<vec_value_t> hinge_grad(buff_vptr, m); buff_vptr += m;
+        Eigen::Map<vec_value_t> pinball_grad(buff_vptr, m); buff_vptr += m;
         Eigen::Map<vec_value_t> nnls_grad(buff_vptr, m); buff_vptr += m;
         const auto m_large = (m < d) ? 0 : m;
-        Eigen::Map<vec_value_t> active_vars(buff_vptr, m_large); buff_vptr += m_large;
-        Eigen::Map<rowmat_value_t> active_AQ(buff_vptr, m_large, d); buff_vptr += m_large * d;
+        Eigen::Map<vec_value_t> screen_ASAT_diag(buff_vptr, m_large); buff_vptr += m_large;
+        Eigen::Map<rowmat_value_t> screen_AS(buff_vptr, m_large, d); buff_vptr += m_large * d;
         const auto m_small = (m < d) ? m : 0;
         Eigen::Map<colmat_value_t> hess_small(buff_vptr, m_small, m_small); buff_vptr += m_small * m_small;
         n_read += std::distance(buff_vbegin, buff_vptr);
@@ -335,19 +340,21 @@ public:
                 return (ui <= 0) ? Configs::max_solver_value : 0;
             });
 
-            Eigen::Map<vec_bool_t> is_screen(reinterpret_cast<bool_t*>(hinge_grad.data()), m);
-            Eigen::Map<vec_bool_t> is_active(reinterpret_cast<bool_t*>(hinge_grad.data())+m, m);
+            Eigen::Map<vec_bool_t> is_screen(reinterpret_cast<bool_t*>(pinball_grad.data()), m);
+            Eigen::Map<vec_bool_t> is_active(reinterpret_cast<bool_t*>(pinball_grad.data())+m, m);
             auto& Qmu_resid = grad;
 
-            mu_to_dense(mu);
             is_screen.setZero();
             is_active.setZero();
+            mu.setZero();
             for (size_t i = 0; i < _mu_active.size(); ++i) {
-                const auto k = _mu_active[i];
-                is_screen[k] = true;
-                is_active[k] = true;
-                screen_set[i] = k;
-                active_set[i] = k;
+                const auto idx = _mu_active[i];
+                const auto val = _mu_value[i];
+                is_screen[idx] = true;
+                is_active[idx] = true;
+                screen_set[i] = idx;
+                active_set[i] = idx;
+                mu[idx] = val;
             }
             Qmu_resid = Qv - _ATmu;
             const value_t loss = 0.5 * Qmu_resid.square().sum();
@@ -363,27 +370,21 @@ public:
                 is_active, 
                 mu, Qmu_resid, nnls_grad, loss
             );
-            //using sw_t = util::Stopwatch;
-            //sw_t sw;
-            //sw.start();
             state_nnls.solve(
                 [&]() { return 2 * state_nnls.loss <= l1 * l1; },
                 lower_constraint,
                 upper_constraint
             );
-            //const auto elapsed = sw.elapsed();
-            //PRINT(this);
-            //PRINT(elapsed);
-            //PRINT(state_nnls.iters);
             const value_t mu_resid_norm_sq = 2 * state_nnls.loss;
 
             if ((!is_init && !is_prev_valid_old) || (mu_resid_norm_sq <= l1 * l1)) {
                 _mu_active.clear();
                 _mu_value.clear();
                 for (size_t i = 0; i < state_nnls.active_set_size; ++i) {
-                    const auto k = active_set[i];
-                    _mu_active.push_back(k);
-                    _mu_value.push_back(mu[k]);
+                    const auto idx = active_set[i];
+                    const auto val = mu[idx];
+                    _mu_active.push_back(idx);
+                    _mu_value.push_back(val);
                 }
                 _mu_active_set.clear();
                 _mu_active_set.insert(
@@ -454,42 +455,82 @@ public:
             if (m < d) {
                 mu_to_dense(mu);
                 _A->cov(hess, hess_small);
-                _A->tmul(grad, hinge_grad);
-                optimization::StateHingeFull<colmat_value_t> state_hinge(
-                    hess_small, _l, _u, var, _hinge_max_iters, _hinge_tol,
-                    mu, hinge_grad
+                _A->tmul(grad, pinball_grad);
+                optimization::StatePinballFull<colmat_value_t> state_pinball(
+                    hess_small, _l, _u, var, _pinball_max_iters, _pinball_tol,
+                    mu, pinball_grad
                 );
-                state_hinge.solve();
+                state_pinball.solve();
                 mu_to_sparse(mu);
             } else {
-                const auto active_invariance = [&](auto ii) {
+                Eigen::Map<vec_bool_t> is_screen(reinterpret_cast<bool_t*>(nnls_grad.data()), m);
+                Eigen::Map<vec_bool_t> is_active(reinterpret_cast<bool_t*>(nnls_grad.data())+m, m);
+                auto& resid = grad;
+
+                is_screen.setZero();
+                is_active.setZero();
+                mu.setZero();
+                for (size_t i = 0; i < _mu_active.size(); ++i) {
+                    const auto idx = _mu_active[i];
+                    const auto val = _mu_value[i];
+                    screen_set[i] = idx;
+                    active_set[i] = idx;
+                    is_screen[idx] = true;
+                    is_active[idx] = true;
+                    mu[idx] = val;
+                }
+
+                const auto screen_invariance = [&](auto ii) {
                     const auto i = _mu_active[ii];
-                    auto AiQ = active_AQ.row(ii);
-                    _A->rmmul(i, hess, AiQ);
-                    active_vars[ii] = std::max<value_t>(_A->rvmul(i, AiQ), 0);
+                    auto AS_i = screen_AS.row(i);
+                    _A->rmmul(i, hess, AS_i);
+                    screen_ASAT_diag[i] = std::max<value_t>(_A->rvmul(i, AS_i), 0);
                 };
                 const size_t active_size = _mu_active.size();
                 const size_t n_bytes = sizeof(value_t) * d * (d + 1) * active_size;
                 if (_n_threads <= 1 || n_bytes <= Configs::min_bytes) {
-                    for (Eigen::Index ii = 0; ii < static_cast<Eigen::Index>(active_size); ++ii) active_invariance(ii);
+                    for (Eigen::Index ii = 0; ii < static_cast<Eigen::Index>(active_size); ++ii) screen_invariance(ii);
                 } else {
                     #pragma omp parallel for schedule(static) num_threads(_n_threads)
-                    for (Eigen::Index ii = 0; ii < static_cast<Eigen::Index>(active_size); ++ii) active_invariance(ii);
+                    for (Eigen::Index ii = 0; ii < static_cast<Eigen::Index>(active_size); ++ii) screen_invariance(ii);
                 }
-                optimization::StateHingeLowRank<A_t> state_hinge(
-                    hess, *_A, _l, _u, var, std::min(m, d), _hinge_max_iters, _hinge_tol,
-                    _mu_active, _mu_value, active_vars, active_AQ, grad, hinge_grad
+
+                optimization::StatePinball<A_t> state_pinball(
+                    *_A, var, _A_vars, hess, _l, _u, 
+                    std::min(m, d), _pinball_max_iters, _pinball_tol, _pinball_kkt_tol,
+                    _mu_active.size(),
+                    screen_set,
+                    is_screen,
+                    screen_ASAT_diag,
+                    screen_AS,
+                    _mu_active.size(),
+                    active_set,
+                    is_active,
+                    mu,
+                    resid,
+                    pinball_grad,
+                    0 /* loss is only used as a relative difference internally */
                 );
                 //using sw_t = util::Stopwatch;
                 //sw_t sw;
                 //sw.start();
-                state_hinge.solve();
+                state_pinball.solve();
                 //const auto elapsed = sw.elapsed();
                 //PRINT(this);
                 //PRINT(elapsed);
-                //PRINT(state_hinge.iters);
+                //PRINT(state_pinball.iters);
+
+                _mu_active.clear();
+                _mu_value.clear();
+                for (size_t i = 0; i < state_pinball.active_set_size; ++i) {
+                    const auto idx = active_set[i];
+                    const auto val = mu[idx];
+                    _mu_active.push_back(idx);
+                    _mu_value.push_back(val);
+                }
+                _mu_active_set.clear();
                 _mu_active_set.insert(
-                    _mu_active.data() + active_size,
+                    _mu_active.data(),
                     _mu_active.data() + _mu_active.size()
                 );
                 mu_prune(_eps);
@@ -606,9 +647,10 @@ public:
         _mu_active.clear();
         _mu_value.clear();
         for (size_t i = 0; i < state_nnls.active_set_size; ++i) {
-            const auto k = active_set[i];
-            _mu_active.push_back(k);
-            _mu_value.push_back(mu[k]);
+            const auto idx = active_set[i];
+            const auto val = mu[idx];
+            _mu_active.push_back(idx);
+            _mu_value.push_back(val);
         }
         _mu_active_set.clear();
         _mu_active_set.insert(

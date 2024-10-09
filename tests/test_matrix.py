@@ -417,6 +417,7 @@ def test_naive_rconcatenate(ns, p, dtype, n_threads=2, seed=0):
     run_naive(X, cX, dtype)
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("n", [10, 50, 100])
 @pytest.mark.parametrize("d", [1, 10, 20])
 @pytest.mark.parametrize("m", [1, 5])

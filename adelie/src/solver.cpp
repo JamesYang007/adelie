@@ -2,6 +2,7 @@
 #include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/glm/glm_base.hpp>
 #include <adelie_core/glm/glm_multibase.hpp>
+#include <adelie_core/matrix/matrix_constraint_base.hpp>
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/state/state_bvls.hpp>
@@ -12,6 +13,7 @@
 #include <adelie_core/state/state_glm_naive.hpp>
 #include <adelie_core/state/state_multigaussian_naive.hpp>
 #include <adelie_core/state/state_multiglm_naive.hpp>
+#include <adelie_core/state/state_pinball.hpp>
 #include <adelie_core/solver/solver_bvls.hpp>
 #include <adelie_core/solver/solver_gaussian_cov.hpp>
 #include <adelie_core/solver/solver_gaussian_naive.hpp>
@@ -21,6 +23,7 @@
 #include <adelie_core/solver/solver_glm_naive.hpp>
 #include <adelie_core/solver/solver_multigaussian_naive.hpp>
 #include <adelie_core/solver/solver_multiglm_naive.hpp>
+#include <adelie_core/solver/solver_pinball.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -319,6 +322,30 @@ py::dict solve_bvls(StateType state)
     return py::dict("state"_a=state, "error"_a=error, "total_time"_a=total_time);
 }
 
+template <class StateType>
+py::dict solve_pinball(StateType state)
+{
+    using sw_t = ad::util::Stopwatch;
+
+    const auto check_user_interrupt = [&]() {
+        if (PyErr_CheckSignals() != 0) {
+            throw py::error_already_set();
+        }
+    };
+
+    std::string error;
+
+    sw_t sw;
+    sw.start();
+    try {
+        ad::solver::pinball::solve(state, check_user_interrupt);
+    } catch(const std::exception& e) {
+        error = e.what(); 
+    }
+    double total_time = sw.elapsed();
+
+    return py::dict("state"_a=state, "error"_a=error, "total_time"_a=total_time);
+}
 
 template <class T>
 using state_bvls = ad::state::StateBVLS<
@@ -360,6 +387,10 @@ using state_multiglm_naive_t = ad::state::StateMultiGlmNaive<
     ad::matrix::MatrixNaiveBase<T>
 >;
 template <class T>
+using state_pinball = ad::state::StatePinball<
+    ad::matrix::MatrixConstraintBase<T>
+>;
+template <class T>
 using glm_t = ad::glm::GlmBase<T>;
 template <class T>
 using glm_multi_t = ad::glm::GlmMultiBase<T>;
@@ -393,4 +424,8 @@ void register_solver(py::module_& m)
     /* solve bvls method */
     m.def("solve_bvls_64", &solve_bvls<state_bvls<double>>);
     m.def("solve_bvls_32", &solve_bvls<state_bvls<float>>);
+
+    /* solve pinball method */
+    m.def("solve_pinball_64", &solve_pinball<state_pinball<double>>);
+    m.def("solve_pinball_32", &solve_pinball<state_pinball<float>>);
 }

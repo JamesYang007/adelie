@@ -1,9 +1,6 @@
 from adelie.diagnostic import (
     objective,
 )
-from adelie.solver import (
-    _solve,
-)
 from adelie import adelie_core as core
 import adelie as ad
 import cvxpy as cp
@@ -473,7 +470,7 @@ def check_solutions(
 
 def run_solve_gaussian(state, args, pin):
     state.check(method="assert")
-    state = _solve(state)    
+    state = state.solve()    
     state.check(method="assert")
     cvxpy_glm = CvxpyGlmGaussian(args["y"], args["weights"])
     check_solutions(args, state, cvxpy_glm, pin)
@@ -732,17 +729,13 @@ def test_solve_gaussian_concatenate(
 
     for Xpy in Xs:
         test_data["X"] = Xpy
-        state_special = ad.solver._solve(
-            ad.state.gaussian_naive(**test_data),
-        )
+        state_special = ad.state.gaussian_naive(**test_data).solve()
         test_data["X"] = ad.matrix.dense(
             X.astype(np.float64), 
             method="naive", 
             n_threads=n_threads,
         )
-        state_dense = ad.solver._solve(
-            ad.state.gaussian_naive(**test_data)
-        )
+        state_dense = ad.state.gaussian_naive(**test_data).solve()
 
         assert np.allclose(state_special.lmdas, state_dense.lmdas)
         assert np.allclose(state_special.devs, state_dense.devs)
@@ -806,17 +799,13 @@ def test_solve_gaussian_snp_unphased(
 
     for Xpy in Xs:
         test_data["X"] = Xpy
-        state_special = ad.solver._solve(
-            ad.state.gaussian_naive(**test_data),
-        )
+        state_special = ad.state.gaussian_naive(**test_data).solve()
         test_data["X"] = ad.matrix.dense(
             X.astype(np.float64), 
             method="naive", 
             n_threads=n_threads,
         )
-        state_dense = ad.solver._solve(
-            ad.state.gaussian_naive(**test_data),
-        )
+        state_dense = ad.state.gaussian_naive(**test_data).solve()
 
         assert np.allclose(state_special.lmdas, state_dense.lmdas)
         assert np.allclose(state_special.devs, state_dense.devs)
@@ -883,17 +872,13 @@ def test_solve_gaussian_snp_phased_ancestry(
 
     for Xpy in Xs:
         test_data["X"] = Xpy
-        state_special = ad.solver._solve(
-            ad.state.gaussian_naive(**test_data),
-        )
+        state_special = ad.state.gaussian_naive(**test_data).solve()
         test_data["X"] = ad.matrix.dense(
             X.astype(np.float64), 
             method="naive", 
             n_threads=n_threads,
         )
-        state_dense = ad.solver._solve(
-            ad.state.gaussian_naive(**test_data),
-        )
+        state_dense = ad.state.gaussian_naive(**test_data).solve()
 
         assert np.allclose(state_special.lmdas, state_dense.lmdas)
         assert np.allclose(state_special.devs, state_dense.devs)
@@ -1027,3 +1012,54 @@ def test_bvls(n, p, seed=0):
     expected = 0.5 * np.mean((y - X @ cvxpy_beta) ** 2)
 
     assert np.allclose(actual, expected)
+
+
+@pytest.mark.parametrize("m", [3, 5, 10, 20])
+@pytest.mark.parametrize("d", [1, 5, 10])
+@pytest.mark.parametrize("seed", np.arange(10))
+def test_pinball(m, d, seed):
+    def run_cvxpy(A, quad, linear, penalty_pos, penalty_neg):
+        m, d = A.shape
+        x = cp.Variable(m)
+        z = cp.Variable(d)
+        expr = 0.5 * cp.quad_form(z, quad) - linear @ z + penalty_pos @ cp.pos(x) + penalty_neg @ cp.neg(x)
+        constraints = [
+            z == A.T @ x,
+        ]
+        prob = cp.Problem(cp.Minimize(expr), constraints)
+        prob.solve()
+        return x.value
+
+    def objective(x, A, quad, linear, penalty_pos, penalty_neg):
+        z = A.T @ x
+        return 0.5 * (z.T @ quad @ z) - linear @ z + penalty_pos @ np.maximum(x, 0) + penalty_neg @ np.maximum(-x, 0)
+
+    np.random.seed(seed)
+    n = 10
+    X = np.random.normal(0, 1, (n, d))
+    y = np.random.normal(0, 1, n)
+    penalty_pos = np.random.uniform(0, 1, m)
+    penalty_neg = np.random.uniform(0, 1, m)
+    X /= np.sqrt(n)
+    y /= np.sqrt(n)
+    A = np.random.normal(0, 1, (m, d))
+    quad = np.asfortranarray(X.T @ X)
+    linear = X.T @ y
+
+    x_cvxpy = run_cvxpy(A, quad, linear, penalty_pos, penalty_neg)
+
+    state = ad.solver.pinball(
+        A, quad, linear, penalty_neg, penalty_pos, tol=1e-24, kkt_tol=1e-14,
+    )
+
+    x = state.beta
+
+    # test loss against truth
+    loss_actual = objective(x, A, quad, linear, penalty_pos, penalty_neg)
+    loss_expected = objective(x_cvxpy, A, quad, linear, penalty_pos, penalty_neg)
+    assert np.all(loss_actual <= loss_expected * (1 + np.sign(loss_expected) * 1e-7))
+
+    # test gradient
+    resid_actual = state.resid
+    resid_expected = linear - quad @ A.T @ x
+    assert np.allclose(resid_actual, resid_expected, atol=1e-7)

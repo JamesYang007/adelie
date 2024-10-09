@@ -280,8 +280,9 @@ protected:
                     (x_norm * x_norm) / (l1 * kappa) + (x.square() * x_buffer2).sum()
                 )
             ) / x_norm;
-            var = std::max<value_t>(var, 1e-64);
+            var = std::max<value_t>(var, 0);
 
+            // compute the proximal quasi-newton update
             compute_proximal_newton_step(hess, var);
         }
 

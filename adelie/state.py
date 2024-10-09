@@ -7,6 +7,8 @@ from .constraint import (
     ConstraintBase64,
 )
 from .matrix import (
+    MatrixConstraintBase32,
+    MatrixConstraintBase64,
     MatrixCovBase32,
     MatrixCovBase64,
     MatrixNaiveBase32,
@@ -151,6 +153,26 @@ class base:
         # initialize core state
         corecls.__init__(obj, core_state)
         return obj
+
+    @staticmethod
+    def solve(f, state):
+        out = f(state)
+
+        # raise any errors
+        if out["error"] != "":
+            if out["error"].startswith("adelie_core solver: "):
+                logger.logger.warning(RuntimeError(out["error"]))
+            else:
+                logger.logger.error(RuntimeError(out["error"]))
+
+        # return a subsetted Python result object
+        core_state = out["state"]
+        state = type(state).create_from_core(state, core_state)
+
+        # add extra total time information
+        state.total_time = out["total_time"]
+
+        return state
 
 
 class gaussian_pin_base(base):
@@ -373,7 +395,7 @@ class gaussian_pin_base(base):
             "check lmdas shape",
             method, logger,
         )
-
+    
 
 class gaussian_pin_naive_base(gaussian_pin_base):
     """State wrapper base class for all gaussian pin naive method."""
@@ -691,6 +713,13 @@ def gaussian_pin_naive(
             gaussian_pin_naive_base.__init__(obj)
             return obj
 
+        def solve(self, *args, **kwargs):
+            f = {
+                np.float64: core.solver.solve_gaussian_pin_naive_64,
+                np.float32: core.solver.solve_gaussian_pin_naive_32,
+            }[dtype]
+            return gaussian_pin_naive_base.solve(f, self)
+
     return _gaussian_pin_naive()
 
 
@@ -970,6 +999,13 @@ def gaussian_pin_cov(
             )
             gaussian_pin_cov_base.__init__(obj)
             return obj
+
+        def solve(self, *args, **kwargs):
+            f = {
+                np.float64: core.solver.solve_gaussian_pin_cov_64,
+                np.float32: core.solver.solve_gaussian_pin_cov_32,
+            }[dtype]
+            return gaussian_pin_cov_base.solve(f, self)
 
     return _gaussian_pin_cov()
 
@@ -1380,6 +1416,13 @@ def gaussian_cov(
                 cls, state, core_state, _gaussian_cov, core_base,
             )
             return obj
+            
+        def solve(self, *args, progress_bar=True, exit_cond=None, **kwargs):
+            f = lambda x : {
+                np.float64: core.solver.solve_gaussian_cov_64,
+                np.float32: core.solver.solve_gaussian_cov_32,
+            }[dtype](x, progress_bar, exit_cond)
+            return base.solve(f, self)
 
     return _gaussian_cov()
     
@@ -1984,6 +2027,13 @@ def gaussian_naive(
             gaussian_naive_base.__init__(obj)
             return obj
 
+        def solve(self, *args, progress_bar=True, exit_cond=None, **kwargs):
+            f = lambda x : {
+                np.float64: core.solver.solve_gaussian_naive_64,
+                np.float32: core.solver.solve_gaussian_naive_32,
+            }[dtype](x, progress_bar, exit_cond)
+            return gaussian_naive_base.solve(f, self)
+
     return _gaussian_naive()
 
 
@@ -2347,6 +2397,13 @@ def multigaussian_naive(
             gaussian_naive_base.__init__(obj)
             return obj
 
+        def solve(self, *args, progress_bar=True, exit_cond=None, **kwargs):
+            f = lambda x : {
+                np.float64: core.solver.solve_multigaussian_naive_64,
+                np.float32: core.solver.solve_multigaussian_naive_32,
+            }[dtype](x, progress_bar, exit_cond)
+            return gaussian_naive_base.solve(f, self)
+
     return _multigaussian_naive()
 
 
@@ -2704,6 +2761,13 @@ def glm_naive(
                 cls, state, core_state, _glm_naive, core_base,
             )
             return obj
+
+        def solve(self, *args, progress_bar=True, exit_cond=None, **kwargs):
+            f = lambda x : {
+                np.float64: core.solver.solve_glm_naive_64,
+                np.float32: core.solver.solve_glm_naive_32,
+            }[dtype](x, self._glm, progress_bar, exit_cond)
+            return base.solve(f, self)
 
     return _glm_naive()
 
@@ -3069,13 +3133,20 @@ def multiglm_naive(
             )
             return obj
 
+        def solve(self, *args, progress_bar=True, exit_cond=None, **kwargs):
+            f = lambda x : {
+                np.float64: core.solver.solve_multiglm_naive_64,
+                np.float32: core.solver.solve_multiglm_naive_32,
+            }[dtype](x, self._glm, progress_bar, exit_cond)
+            return base.solve(f, self)
+
     return _multiglm_naive()
 
 
 def bvls(
     X: Union[MatrixNaiveBase32, MatrixNaiveBase64],
     y_var: float,
-    X_vars: float,
+    X_vars: np.ndarray,
     lower: np.ndarray,
     upper: np.ndarray,
     weights: np.ndarray,
@@ -3120,6 +3191,16 @@ def bvls(
         Coordinate descent convergence tolerance.
     kkt_tol : float
         KKT check tolerance.
+    screen_set_size : int
+        Number of screen groups.
+        ``screen_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, screen_set_size)``.
+    screen_set : (p,) ndarray
+        Screen set buffer.
+        ``screen_set[i]`` is the ``i`` th screen variable
+        that is in the range ``[0, p)``.
+    is_screen : (p,) ndarray
+        Boolean vector indicating whether the ``j`` th feature is screen.
     active_set_size : int
         Number of active groups.
         ``active_set[i]`` is only well-defined
@@ -3213,4 +3294,182 @@ def bvls(
             )
             return obj
 
+        def solve(self, *args, **kwargs):
+            f = {
+                np.float64: core.solver.solve_bvls_64,
+                np.float32: core.solver.solve_bvls_32,
+            }[dtype]
+            return base.solve(f, self)
+
     return _bvls()
+
+
+def pinball(
+    A: Union[MatrixConstraintBase32, MatrixConstraintBase64],
+    y_var: float,
+    A_vars: np.ndarray,
+    S: np.ndarray,
+    penalty_neg: np.ndarray,
+    penalty_pos: np.ndarray,
+    kappa: int,
+    max_iters: int,
+    tol: float,
+    kkt_tol: float,
+    screen_set_size: int,
+    screen_set: np.ndarray,
+    is_screen: np.ndarray,
+    screen_ASAT_diag: np.ndarray,
+    screen_AS: np.ndarray,
+    active_set_size: int,
+    active_set: np.ndarray,
+    is_active: np.ndarray,
+    beta: np.ndarray,
+    resid: np.ndarray,
+    grad: np.ndarray,
+    loss: float,
+):
+    """Creates a pinball state object.
+
+    Parameters
+    ----------
+    A : (m, d) Union[MatrixConstraintBase32, MatrixConstraintBase64]
+        Constraint matrix.
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
+    y_var : float
+        Variance of :math:`y = S^{-\\frac{1}{2}} v` equivalent to :math:`\\|y\\|_2^2`.
+    A_vars : (m,) ndarray
+        Variance of each row of ``A`` equivalent to
+        :math:`\\mathrm{diag}(AA^\\top)`.
+    S : (d, d) ndarray
+        Positive semi-definite matrix.
+    penalty_neg : (m,) ndarray
+        Penalty on the negative part of :math:`\\beta`.
+    penalty_pos : (m,) ndarray
+        Penalty on the positive part of :math:`\\beta`.
+    kappa : int
+        Violation batching size.
+    max_iters : int 
+        Maximum number of coordinate descents.
+    tol : float 
+        Coordinate descent convergence tolerance.
+    kkt_tol : float
+        KKT check tolerance.
+    screen_set_size : int
+        Number of screen groups.
+        ``screen_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, screen_set_size)``.
+    screen_set : (m,) ndarray
+        Screen set buffer.
+        ``screen_set[i]`` is the ``i`` th screen variable
+        that is in the range ``[0, p)``.
+    is_screen : (m,) ndarray
+        Boolean vector indicating whether the ``j`` th feature is screen.
+    screen_ASAT_diag : (m,) ndarray
+        :math:`A_j^\\top S A_j` where feature ``j`` is screen.
+    screen_AS : (m,) ndarray
+        :math:`A_j^\\top S` where feature ``j`` is screen.
+    active_set_size : int
+        Number of active groups.
+        ``active_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, active_set_size)``.
+    active_set : (m,) ndarray
+        Active set buffer.
+        ``active_set[i]`` is the ``i`` th active variable
+        that is in the range ``[0, m)``.
+    is_active : (m,) ndarray
+        Boolean vector indicating whether the ``j`` th feature is active.
+    beta : (m,) ndarray
+        Coefficient vector.
+    resid : (d,) ndarray
+        Residual :math:`v-SA^\\top\\beta`.
+    grad : (m,) ndarray
+        Internal buffer that is implementation-defined.
+    loss : float
+        The current loss :math:`\\frac{1}{2} \\|S^{-\\frac{1}{2}} v - S^{\\frac{1}{2}} A^\\top \\beta\\|_2^2`.
+
+    Returns
+    -------
+    wrap
+        Wrapper state object.
+
+    See Also
+    --------
+    adelie.adelie_core.state.StatePinball32
+    adelie.adelie_core.state.StatePinball64
+    """
+    dtype = (
+        np.float64
+        if isinstance(A, matrix.MatrixConstraintBase64) else
+        np.float32
+    )
+
+    dispatcher = {
+        np.float64: core.state.StatePinball64,
+        np.float32: core.state.StatePinball32,
+    }
+    core_base = dispatcher[dtype]
+
+    class _pinball(core_base):
+        def __init__(self):
+            self._core_type = core_base
+            ## save inputs due to lifetime issues
+            # static inputs require a reference to input
+            # or copy if it must be made
+            self._A = A
+            self._A_vars = np.array(A_vars, copy=False, dtype=dtype)
+            self._S = np.array(S, copy=False, dtype=dtype, order="F")
+            self._penalty_neg = np.array(penalty_neg, copy=False, dtype=dtype)
+            self._penalty_pos = np.array(penalty_pos, copy=False, dtype=dtype)
+            self._screen_set = np.array(screen_set, copy=True, dtype=int)
+            self._is_screen = np.array(is_screen, copy=True, dtype=bool)
+            self._screen_ASAT_diag = np.array(screen_ASAT_diag, copy=True, dtype=dtype)
+            self._screen_AS = np.array(screen_AS, copy=True, dtype=dtype, order="C")
+            self._active_set = np.array(active_set, copy=True, dtype=int)
+            self._is_active = np.array(is_active, copy=True, dtype=bool)
+            self._beta = np.array(beta, copy=True, dtype=dtype)
+            self._resid = np.array(resid, copy=True, dtype=dtype)
+            self._grad = np.array(grad, copy=True, dtype=dtype)
+
+            # MUST call constructor directly and not use super()!
+            # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
+            core_base.__init__(
+                self,
+                A=self._A,
+                y_var=y_var,
+                A_vars=self._A_vars,
+                S=self._S,
+                penalty_neg=self._penalty_neg,
+                penalty_pos=self._penalty_pos,
+                kappa=kappa,
+                max_iters=max_iters,
+                tol=tol,
+                kkt_tol=kkt_tol,
+                screen_set_size=screen_set_size,
+                screen_set=self._screen_set,
+                is_screen=self._is_screen,
+                screen_ASAT_diag=self._screen_ASAT_diag,
+                screen_AS=self._screen_AS,
+                active_set_size=active_set_size,
+                active_set=self._active_set,
+                is_active=self._is_active,
+                beta=self._beta,
+                resid=self._resid,
+                grad=self._grad,
+                loss=loss,
+            )
+
+        @classmethod
+        def create_from_core(cls, state, core_state):
+            obj = base.create_from_core(
+                cls, state, core_state, _pinball, core_base,
+            )
+            return obj
+
+        def solve(self, *args, **kwargs):
+            f = {
+                np.float64: core.solver.solve_pinball_64,
+                np.float32: core.solver.solve_pinball_32,
+            }[dtype]
+            return base.solve(f, self)
+
+    return _pinball()
