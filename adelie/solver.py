@@ -969,7 +969,6 @@ def bvls(
     kappa: int =None,
     max_iters: int =100000,
     tol: float =1e-7,
-    kkt_tol: float =1e-7,
     n_threads: int =1,
     warm_start =None,
 ):
@@ -1015,9 +1014,6 @@ def bvls(
         Default is ``100000``.
     tol : float, optional
         Coordinate descent convergence tolerance.
-        Default is ``1e-7``.
-    kkt_tol : float, optional
-        KKT check tolerance.
         Default is ``1e-7``.
     n_threads : int, optional
         Number of threads.
@@ -1088,9 +1084,9 @@ def bvls(
         active_set = warm_start.active_set
         active_set_size = warm_start.active_set_size
         is_active = warm_start.is_active
-        screen_set = warm_start.screen_set
-        screen_set_size = warm_start.screen_set_size
-        is_screen = warm_start.is_screen
+        screen_set = warm_start.active_set
+        screen_set_size = warm_start.active_set_size
+        is_screen = warm_start.is_active
 
     if isinstance(X_raw, np.ndarray):
         resid = y - X_raw @ beta
@@ -1109,7 +1105,6 @@ def bvls(
         kappa=kappa,
         max_iters=max_iters,
         tol=tol,
-        kkt_tol=kkt_tol,
         screen_set_size=screen_set_size,
         screen_set=screen_set,
         is_screen=is_screen,
@@ -1135,7 +1130,6 @@ def pinball(
     kappa: int =None,
     max_iters: int =100000,
     tol: float =1e-7,
-    kkt_tol: float =1e-7,
     n_threads: int =1,
     warm_start =None,
 ):
@@ -1179,9 +1173,6 @@ def pinball(
         Default is ``100000``.
     tol : float, optional
         Coordinate descent convergence tolerance.
-        Default is ``1e-7``.
-    kkt_tol : float, optional
-        KKT check tolerance.
         Default is ``1e-7``.
     n_threads : int, optional
         Number of threads.
@@ -1246,17 +1237,21 @@ def pinball(
         loss = 0.5 * y_var
 
     else:
-        screen_set_size = warm_start.screen_set_size
-        screen_set = warm_start.screen_set
-        is_screen = warm_start.is_screen
-        screen_ASAT_diag = warm_start.screen_ASAT_diag
-        screen_AS = warm_start.screen_AS
+        screen_set_size = warm_start.active_set_size
+        screen_set = warm_start.active_set
+        is_screen = warm_start.is_active
+        screen_ASAT_diag = np.empty(m, dtype=dtype)
+        screen_AS = np.empty((m, d), dtype=dtype, order="C")
+        for i in range(screen_set_size):
+            k = screen_set[i]
+            A.rmmul(k, S, screen_AS[k])
+            screen_ASAT_diag[k] = max(A.rvmul(k, screen_AS[k]), 0)
         active_set_size = warm_start.active_set_size
         active_set = warm_start.active_set
         is_active = warm_start.is_active
         beta = warm_start.beta
-        resid = warm_start.resid
-        loss = warm_start.loss
+        resid = v - S @ A_raw.T @ beta
+        loss = 0.5 * resid @ np.linalg.solve(S, resid)
 
     grad = np.empty(m, dtype=dtype)
 
@@ -1270,7 +1265,6 @@ def pinball(
         kappa=kappa,
         max_iters=max_iters,
         tol=tol,
-        kkt_tol=kkt_tol,
         screen_set_size=screen_set_size,
         screen_set=screen_set,
         is_screen=is_screen,

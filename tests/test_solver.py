@@ -1005,7 +1005,7 @@ def test_bvls(n, p, seed=0):
     lower = np.full(p, -0.5)
     upper = np.full(p, 1.5)
 
-    state = ad.solver.bvls(X, y, lower, upper, tol=1e-9, kkt_tol=1e-9)
+    state = ad.solver.bvls(X, y, lower, upper, tol=1e-9)
     cvxpy_beta = _cvxpy_bvls(X, y, lower, upper)
 
     actual = 0.5 * np.mean((y - X @ state.beta) ** 2)
@@ -1049,7 +1049,7 @@ def test_pinball(m, d, seed):
     x_cvxpy = run_cvxpy(A, quad, linear, penalty_pos, penalty_neg)
 
     state = ad.solver.pinball(
-        A, quad, linear, penalty_neg, penalty_pos, tol=1e-24, kkt_tol=1e-14,
+        A, quad, linear, penalty_neg, penalty_pos, tol=1e-24, 
     )
 
     x = state.beta

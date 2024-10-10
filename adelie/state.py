@@ -3153,7 +3153,6 @@ def bvls(
     kappa: int,
     max_iters: int,
     tol: float,
-    kkt_tol: float,
     screen_set_size: int,
     screen_set: np.ndarray,
     is_screen: np.ndarray,
@@ -3189,8 +3188,6 @@ def bvls(
         Maximum number of coordinate descents.
     tol : float 
         Coordinate descent convergence tolerance.
-    kkt_tol : float
-        KKT check tolerance.
     screen_set_size : int
         Number of screen groups.
         ``screen_set[i]`` is only well-defined
@@ -3274,7 +3271,6 @@ def bvls(
                 kappa=kappa,
                 max_iters=max_iters,
                 tol=tol,
-                kkt_tol=kkt_tol,
                 screen_set_size=screen_set_size,
                 screen_set=self._screen_set,
                 is_screen=self._is_screen,
@@ -3314,7 +3310,6 @@ def pinball(
     kappa: int,
     max_iters: int,
     tol: float,
-    kkt_tol: float,
     screen_set_size: int,
     screen_set: np.ndarray,
     is_screen: np.ndarray,
@@ -3352,8 +3347,6 @@ def pinball(
         Maximum number of coordinate descents.
     tol : float 
         Coordinate descent convergence tolerance.
-    kkt_tol : float
-        KKT check tolerance.
     screen_set_size : int
         Number of screen groups.
         ``screen_set[i]`` is only well-defined
@@ -3443,7 +3436,6 @@ def pinball(
                 kappa=kappa,
                 max_iters=max_iters,
                 tol=tol,
-                kkt_tol=kkt_tol,
                 screen_set_size=screen_set_size,
                 screen_set=self._screen_set,
                 is_screen=self._is_screen,

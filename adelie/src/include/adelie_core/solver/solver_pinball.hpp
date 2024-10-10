@@ -198,14 +198,10 @@ bool kkt_screen(
     using value_t = typename state_t::value_t;
 
     auto& A = *state.A;
-    const auto y_var = state.y_var;
-    const auto& A_vars = state.A_vars;
     const auto& S = state.S;
     const auto& penalty_neg = state.penalty_neg;
     const auto& penalty_pos = state.penalty_pos;
-    const auto& beta = state.beta;
     const auto& resid = state.resid;
-    const auto kkt_tol = state.kkt_tol;
     const auto kappa = state.kappa;
     auto& screen_set_size = state.screen_set_size;
     auto& screen_set = state.screen_set;
@@ -255,8 +251,7 @@ bool kkt_screen(
     for (Eigen::Index j = 0; j < m; ++j) {
         const auto k = viols_order[j];
         const auto vk = viols[k];
-        const auto xvk = A_vars[k];
-        if (vk * vk <= xvk * y_var * kkt_tol * kkt_tol || is_screen[k]) continue;
+        if (is_screen[k] || vk <= 0) continue;
         kkt_passed = false;
         // break if reached max active capacity
         if (screen_set_size >= screen_set_size_old + kappa) break;
@@ -297,7 +292,7 @@ void solve(
         #endif
         if (
             state.n_kkt > 0 &&
-            std::abs(state.loss-loss_prev) < 1e-9 * std::abs(state.y_var)
+            std::abs(state.loss-loss_prev) < 1e-6 * std::abs(state.y_var)
         ) return;
         const bool kkt_passed = kkt_screen(state, viols_order);
         if (kkt_passed) return;

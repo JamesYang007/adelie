@@ -195,17 +195,11 @@ def linear(
                 nnls_tol : float, optional
                     Convergence tolerance for non-negative least squares.
                     Default is ``1e-7``.
-                nnls_kkt_tol : float, optional
-                    KKT convergence tolerance for non-negative least squares.
-                    Default is ``1e-7``.
                 pinball_max_iters : int, optional
                     Maximum number of pinball loss iterations.
                     Default is ``int(1e6)``.
                 pinball_tol : float, optional
                     Convergence tolerance for the pinball loss optimizer.
-                    Default is ``1e-7``.
-                pinball_kkt_tol : float, optional
-                    KKT convergence tolerance for the pinball loss optimizer.
                     Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
@@ -288,10 +282,8 @@ def linear(
             "tol": 1e-9,
             "nnls_max_iters": int(1e6),
             "nnls_tol": 1e-7,
-            "nnls_kkt_tol": 1e-7,
             "pinball_max_iters": int(1e6),
             "pinball_tol": 1e-7,
-            "pinball_kkt_tol": 1e-7,
             "slack": 1e-4,
             "n_threads": 1,
         },

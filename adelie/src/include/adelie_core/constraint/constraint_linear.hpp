@@ -101,10 +101,8 @@ protected:
     const value_t _tol;
     const size_t _nnls_max_iters;
     const value_t _nnls_tol;
-    const value_t _nnls_kkt_tol;
     const size_t _pinball_max_iters;
     const value_t _pinball_tol;
-    const value_t _pinball_kkt_tol;
     const value_t _slack;
     const size_t _n_threads;
 
@@ -199,10 +197,8 @@ public:
         value_t tol,
         size_t nnls_max_iters,
         value_t nnls_tol,
-        value_t nnls_kkt_tol,
         size_t pinball_max_iters,
         value_t pinball_tol,
-        value_t pinball_kkt_tol,
         value_t slack,
         size_t n_threads
     ):
@@ -214,10 +210,8 @@ public:
         _tol(tol),
         _nnls_max_iters(nnls_max_iters),
         _nnls_tol(nnls_tol),
-        _nnls_kkt_tol(nnls_kkt_tol),
         _pinball_max_iters(pinball_max_iters),
         _pinball_tol(pinball_tol),
-        _pinball_kkt_tol(pinball_kkt_tol),
         _slack(slack),
         _n_threads(n_threads),
         _ATmu(vec_value_t::Zero(A.cols()))
@@ -247,14 +241,8 @@ public:
         if (nnls_tol < 0) {
             throw util::adelie_core_error("nnls_tol must be >= 0.");
         }
-        if (nnls_kkt_tol < 0) {
-            throw util::adelie_core_error("nnls_kkt_tol must be >= 0.");
-        }
         if (pinball_tol < 0) {
             throw util::adelie_core_error("pinball_tol must be >= 0.");
-        }
-        if (pinball_kkt_tol < 0) {
-            throw util::adelie_core_error("pinball_kkt_tol must be >= 0.");
         }
         if (slack <= 0 || slack >= 1) {
             throw util::adelie_core_error("slack must be in (0,1).");
@@ -361,7 +349,7 @@ public:
             internal_matrix_t _X(*_A); // _X == _A^T
             optimization::StateNNLS<internal_matrix_t> state_nnls(
                 _X, v_norm * v_norm, _A_vars, std::min<size_t>(m, d),
-                _nnls_max_iters, _nnls_tol, _nnls_kkt_tol,
+                _nnls_max_iters, _nnls_tol, 
                 _mu_active.size(),
                 screen_set,
                 is_screen,
@@ -496,8 +484,8 @@ public:
                 }
 
                 optimization::StatePinball<A_t> state_pinball(
-                    *_A, var, _A_vars, hess, _l, _u, 
-                    std::min(m, d), _pinball_max_iters, _pinball_tol, _pinball_kkt_tol,
+                    *_A, var, hess, _l, _u, 
+                    std::min(m, d), _pinball_max_iters, _pinball_tol, 
                     _mu_active.size(),
                     screen_set,
                     is_screen,
@@ -629,7 +617,7 @@ public:
         internal_matrix_t _X(*_A); // _X == _A^T
         optimization::StateNNLS<internal_matrix_t> state_nnls(
             _X, v.square().sum(), _A_vars, std::min<size_t>(m, d), 
-            _nnls_max_iters, _nnls_tol, _nnls_kkt_tol,
+            _nnls_max_iters, _nnls_tol, 
             _mu_active.size(),
             screen_set,
             is_screen,

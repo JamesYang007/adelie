@@ -38,7 +38,6 @@ struct StateNNLS
     const size_t kappa;
     const size_t max_iters;
     const value_t tol;
-    const value_t kkt_tol;
 
     size_t screen_set_size;
     map_vec_index_t screen_set;
@@ -62,7 +61,6 @@ struct StateNNLS
         size_t kappa,
         size_t max_iters,
         value_t tol,
-        value_t kkt_tol,
         size_t screen_set_size,
         Eigen::Ref<vec_index_t> screen_set,
         Eigen::Ref<vec_bool_t> is_screen,
@@ -80,7 +78,6 @@ struct StateNNLS
         kappa(kappa),
         max_iters(max_iters),
         tol(tol),
-        kkt_tol(kkt_tol),
         screen_set_size(screen_set_size),
         screen_set(screen_set.data(), screen_set.size()),
         is_screen(is_screen.data(), is_screen.size()),
@@ -108,11 +105,6 @@ struct StateNNLS
         if (tol < 0) {
             throw util::adelie_core_solver_error(
                 "tol must be >= 0."
-            );
-        }
-        if (kkt_tol < 0) {
-            throw util::adelie_core_solver_error(
-                "kkt_tol must be >= 0."
             );
         }
         if (static_cast<Eigen::Index>(active_set_size) > p) {

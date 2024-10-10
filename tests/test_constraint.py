@@ -118,7 +118,6 @@ def test_linear(m, d, lower, upper, method, dtype, seed):
             "max_iters": 1000,
             "tol": 1e-16,
             "nnls_tol": 1e-16,
-            "nnls_kkt_tol": 1e-16,
             "pinball_max_iters": 1000000,
             "pinball_tol": 1e-9,
         }

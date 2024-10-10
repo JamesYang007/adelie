@@ -31,7 +31,6 @@ struct StatePinball
 
     /* static states */
     const value_t y_var;
-    const map_cvec_value_t A_vars;
     const map_ccolmat_value_t S;
     const map_cvec_value_t penalty_neg;
     const map_cvec_value_t penalty_pos;
@@ -40,7 +39,6 @@ struct StatePinball
     const size_t kappa;
     const size_t max_iters;
     const value_t tol;
-    const value_t kkt_tol;
 
     /* dynamic states */
     size_t screen_set_size;
@@ -74,14 +72,12 @@ struct StatePinball
     explicit StatePinball(
         matrix_t& A,
         value_t y_var,
-        const Eigen::Ref<const vec_value_t>& A_vars,
         const Eigen::Ref<const colmat_value_t>& S,
         const Eigen::Ref<const vec_value_t>& penalty_neg,
         const Eigen::Ref<const vec_value_t>& penalty_pos,
         size_t kappa,
         size_t max_iters,
         value_t tol,
-        value_t kkt_tol,
         size_t screen_set_size,
         Eigen::Ref<vec_index_t> screen_set,
         Eigen::Ref<vec_bool_t> is_screen,
@@ -97,14 +93,12 @@ struct StatePinball
     ):
         A(&A),
         y_var(y_var),
-        A_vars(A_vars.data(), A_vars.size()),
         S(S.data(), S.rows(), S.cols()),
         penalty_neg(penalty_neg.data(), penalty_neg.size()),
         penalty_pos(penalty_pos.data(), penalty_pos.size()),
         kappa(kappa),
         max_iters(max_iters),
         tol(tol),
-        kkt_tol(kkt_tol),
         screen_set_size(screen_set_size),
         screen_set(screen_set.data(), screen_set.size()),
         is_screen(is_screen.data(), is_screen.size()),
@@ -121,11 +115,6 @@ struct StatePinball
         const auto m = A.rows();
         const auto d = A.cols();
 
-        if (A_vars.size() != m) {
-            throw util::adelie_core_solver_error(
-                "A_vars must be (m,) where A is (m, d)."
-            );
-        }
         if (S.rows() != d || S.cols() != d) {
             throw util::adelie_core_solver_error(
                 "S must be (d, d) where A is (m, d). "
@@ -149,11 +138,6 @@ struct StatePinball
         if (tol < 0) {
             throw util::adelie_core_solver_error(
                 "tol must be >= 0."
-            );
-        }
-        if (kkt_tol < 0) {
-            throw util::adelie_core_solver_error(
-                "kkt_tol must be >= 0."
             );
         }
         if (static_cast<Eigen::Index>(screen_set_size) > m) {
