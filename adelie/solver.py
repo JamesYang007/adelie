@@ -1214,12 +1214,6 @@ def pinball(
         kappa = min(m, d)
     y_var = v @ np.linalg.solve(S, v)
 
-    if isinstance(A_raw, np.ndarray):
-        A_vars = np.sum(A_raw ** 2, axis=-1)
-
-    else:
-        raise ValueError("Currently, A must be a numpy array.")
-
     penalty_neg = np.minimum(penalty_neg, Configs.max_solver_value)
     penalty_pos = np.minimum(penalty_pos, Configs.max_solver_value)
 
@@ -1250,7 +1244,9 @@ def pinball(
         active_set = warm_start.active_set
         is_active = warm_start.is_active
         beta = warm_start.beta
-        resid = v - S @ A_raw.T @ beta
+        resid = np.empty(d, dtype=dtype)
+        A.mul(beta, resid)
+        resid = v - S @ resid
         loss = 0.5 * resid @ np.linalg.solve(S, resid)
 
     grad = np.empty(m, dtype=dtype)
@@ -1258,7 +1254,6 @@ def pinball(
     state = state_pinball(
         A=A,
         y_var=y_var,
-        A_vars=A_vars,
         S=S,
         penalty_neg=penalty_neg,
         penalty_pos=penalty_pos,

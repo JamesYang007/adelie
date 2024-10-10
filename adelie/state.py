@@ -3303,7 +3303,6 @@ def bvls(
 def pinball(
     A: Union[MatrixConstraintBase32, MatrixConstraintBase64],
     y_var: float,
-    A_vars: np.ndarray,
     S: np.ndarray,
     penalty_neg: np.ndarray,
     penalty_pos: np.ndarray,
@@ -3332,9 +3331,6 @@ def pinball(
         It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
     y_var : float
         Variance of :math:`y = S^{-\\frac{1}{2}} v` equivalent to :math:`\\|y\\|_2^2`.
-    A_vars : (m,) ndarray
-        Variance of each row of ``A`` equivalent to
-        :math:`\\mathrm{diag}(AA^\\top)`.
     S : (d, d) ndarray
         Positive semi-definite matrix.
     penalty_neg : (m,) ndarray
@@ -3409,7 +3405,6 @@ def pinball(
             # static inputs require a reference to input
             # or copy if it must be made
             self._A = A
-            self._A_vars = np.array(A_vars, copy=False, dtype=dtype)
             self._S = np.array(S, copy=False, dtype=dtype, order="F")
             self._penalty_neg = np.array(penalty_neg, copy=False, dtype=dtype)
             self._penalty_pos = np.array(penalty_pos, copy=False, dtype=dtype)
@@ -3429,7 +3424,6 @@ def pinball(
                 self,
                 A=self._A,
                 y_var=y_var,
-                A_vars=self._A_vars,
                 S=self._S,
                 penalty_neg=self._penalty_neg,
                 penalty_pos=self._penalty_pos,
