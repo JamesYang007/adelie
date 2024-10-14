@@ -124,12 +124,12 @@ struct StateNNLS
         }
         if (beta.size() != p) {
             throw util::adelie_core_solver_error(
-                "beta must be (p,) where XT is (p, n). "
+                "beta must be (p,) where X is (n, p). "
             );
         }
         if (resid.size() != n) {
             throw util::adelie_core_solver_error(
-                "resid must be (n,) where XT is (p, n). "
+                "resid must be (n,) where X is (n, p). "
             );
         }
         if (grad.size() != p) {
