@@ -54,10 +54,10 @@ def box(
                     Convergence tolerance for proximal Newton.
                     Default is ``1e-9``.
                 pinball_max_iters : int, optional
-                    Maximum number of pinball loss iterations.
-                    Default is ``int(1e6)``.
+                    Maximum number of coordinate descent iterations for the pinball least squares solver.
+                    Default is ``int(1e5)``.
                 pinball_tol : float, optional
-                    Convergence tolerance for the pinball loss optimizer.
+                    Convergence tolerance for the pinball least squares solver.
                     Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
@@ -111,7 +111,7 @@ def box(
         "proximal-newton": {
             "max_iters": 100,
             "tol": 1e-9,
-            "pinball_max_iters": int(1e6),
+            "pinball_max_iters": int(1e5),
             "pinball_tol": 1e-7,
             "slack": 1e-4,
         },
@@ -162,7 +162,7 @@ def linear(
     upper : (m,) ndarray
         Upper bound :math:`u`.
     vars : ndarray, optional
-        Equivalent to ``np.sum(A ** 2, axis=1)``.
+        Equivalent to :math:`\\mathrm{diag}(AA^\\top)`.
         If ``None`` and ``A`` is ``ndarray`` or ``csr_matrix``, it is computed internally.
         Otherwise, it must be explicitly provided by the user.
         Default is ``None``.
@@ -189,16 +189,16 @@ def linear(
                     Convergence tolerance for proximal Newton.
                     Default is ``1e-9``.
                 nnls_max_iters : int, optional
-                    Maximum number of non-negative least squares iterations.
-                    Default is ``int(1e6)``.
+                    Maximum number of coordinate descent iterations for the non-negative least squares solver.
+                    Default is ``int(1e5)``.
                 nnls_tol : float, optional
-                    Convergence tolerance for non-negative least squares.
+                    Convergence tolerance for the non-negative least squares solver.
                     Default is ``1e-7``.
                 pinball_max_iters : int, optional
-                    Maximum number of pinball loss iterations.
-                    Default is ``int(1e6)``.
+                    Maximum number of coordinate descent iterations for the pinball least squares solver.
+                    Default is ``int(1e5)``.
                 pinball_tol : float, optional
-                    Convergence tolerance for the pinball loss optimizer.
+                    Convergence tolerance for the pinball least squares solver.
                     Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
@@ -234,29 +234,22 @@ def linear(
     --------
     adelie.adelie_core.constraint.ConstraintLinearProximalNewton32
     adelie.adelie_core.constraint.ConstraintLinearProximalNewton64
-    adelie.constraint.box
-    adelie.constraint.lower
-    adelie.constraint.one_sided
-    adelie.constraint.upper
     """
     if isinstance(A, np.ndarray):
         if vars is None:
             vars = np.sum(A ** 2, axis=1)
 
-        A, A_dtype = _coerce_dtype(A, dtype)
+        A, _ = _coerce_dtype(A, dtype)
         A = matrix.dense(A, method="constraint", copy=copy)
     elif isinstance(A, csr_matrix):
         if vars is None:
             vars = (A ** 2).sum(axis=1)
 
-        A_dtype = {
-            np.dtype("float64"): np.float64,
-            np.dtype("float32"): np.float32,
-        }[A.dtype]
         A = matrix.sparse(A, method="constraint", copy=copy)
     else:
         assert not (vars is None)
-        A_dtype = np.float32 if "32" in A.__class__.__name__ else np.float64
+
+    A_dtype = np.float32 if "32" in A.__class__.__name__ else np.float64
 
     lower, l_dtype = _coerce_dtype(lower, dtype)
     upper, u_dtype = _coerce_dtype(upper, dtype)
@@ -279,9 +272,9 @@ def linear(
         "proximal-newton": {
             "max_iters": 100,
             "tol": 1e-9,
-            "nnls_max_iters": int(1e6),
+            "nnls_max_iters": int(1e5),
             "nnls_tol": 1e-7,
-            "pinball_max_iters": int(1e6),
+            "pinball_max_iters": int(1e5),
             "pinball_tol": 1e-7,
             "slack": 1e-4,
             "n_threads": 1,
@@ -382,10 +375,10 @@ def one_sided(
                     Convergence tolerance for proximal Newton.
                     Default is ``1e-9``.
                 pinball_max_iters : int, optional
-                    Maximum number of pinball loss iterations.
-                    Default is ``int(1e6)``.
+                    Maximum number of coordinate descent iterations for the pinball least squares solver.
+                    Default is ``int(1e5)``.
                 pinball_tol : float, optional
-                    Convergence tolerance for the pinball loss optimizer.
+                    Convergence tolerance for the pinball least squares solver.
                     Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
@@ -454,7 +447,7 @@ def one_sided(
         "proximal-newton": {
             "max_iters": 100,
             "tol": 1e-9,
-            "pinball_max_iters": int(1e6),
+            "pinball_max_iters": int(1e5),
             "pinball_tol": 1e-7,
             "slack": 1e-4,
         },
