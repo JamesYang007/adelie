@@ -84,7 +84,15 @@ public:
         Eigen::Ref<vec_value_t> out
     ) override
     {
-        out.matrix() = v.matrix() * _mat.transpose();
+        const auto routine = [&](int k) {
+            out[k] = _mat.row(k).dot(v.matrix());
+        };
+        if (_n_threads <= 1) {
+            for (int k = 0; k < out.size(); ++k) routine(k);
+        } else {
+            #pragma omp parallel for schedule(static) num_threads(_n_threads)
+            for (int k = 0; k < out.size(); ++k) routine(k);
+        }
     }
 
     void cov(
