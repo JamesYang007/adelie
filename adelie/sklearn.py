@@ -125,11 +125,22 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
 
         # If cross validation used, re-fit with best lambda
         if isinstance(self.state_, CVGrpnetResult):
-            self._state_ = self.state_.fit(**kwargs)
+            self.state_ = self.state_.fit(
+                X=X, 
+                glm=self.glm_, 
+                **kwargs,
+            )
 
-        # Store coefficients and intercepts
-        self.coef_ = self.state_.betas
-        self.intercept_ = self.state_.intercepts
+            # Store metadata
+            self.coef_ = self.state_.betas[-1]
+            self.intercept_ = np.array([self.state_.intercepts[-1]])
+            self.lambda_ = np.array([self.state_.lmdas[-1]])
+
+        else:
+            # Store metadata
+            self.coef_ = self.state_.betas
+            self.intercept_ = self.state_.intercepts
+            self.lambda_ = self.state_.lmdas
 
         return self
 
