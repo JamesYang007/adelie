@@ -217,7 +217,6 @@ adelie.sklearn
     GroupElasticNet
 
 
-
 adelie.solver
 -------------
 
