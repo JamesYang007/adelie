@@ -161,7 +161,7 @@ void matrix_constraint_base(py::module_& m, const char* name)
         Computes a row vector-matrix multiplication.
 
         Computes the matrix-vector multiplication 
-        ``A[j] @ Q``.
+        ``A[j].T @ Q``.
 
         Parameters
         ----------
@@ -176,7 +176,7 @@ void matrix_constraint_base(py::module_& m, const char* name)
         Computes a row vector-vector multiplication.
 
         Computes the dot-product
-        ``A[j] @ v``.
+        ``A[j].T @ v``.
 
         Parameters
         ----------
