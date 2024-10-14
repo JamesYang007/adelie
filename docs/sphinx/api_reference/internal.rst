@@ -38,6 +38,14 @@ Internal
     adelie_core.glm.GlmMultinomial64
     adelie_core.glm.GlmPoisson32
     adelie_core.glm.GlmPoisson64
+    adelie_core.matrix.MatrixConstraintBase32
+    adelie_core.matrix.MatrixConstraintBase64
+    adelie_core.matrix.MatrixConstraintDense32C
+    adelie_core.matrix.MatrixConstraintDense32F
+    adelie_core.matrix.MatrixConstraintDense64C
+    adelie_core.matrix.MatrixConstraintDense64F
+    adelie_core.matrix.MatrixConstraintSparse32C
+    adelie_core.matrix.MatrixConstraintSparse64C
     adelie_core.matrix.MatrixCovBase32
     adelie_core.matrix.MatrixCovBase64
     adelie_core.matrix.MatrixCovBlockDiag32
@@ -62,6 +70,8 @@ Internal
     adelie_core.matrix.MatrixNaiveConvexReluDense32F
     adelie_core.matrix.MatrixNaiveConvexReluDense64C
     adelie_core.matrix.MatrixNaiveConvexReluDense64F
+    adelie_core.matrix.MatrixNaiveConvexReluSparse32F
+    adelie_core.matrix.MatrixNaiveConvexReluSparse64F
     adelie_core.matrix.MatrixNaiveDense32C
     adelie_core.matrix.MatrixNaiveDense32F
     adelie_core.matrix.MatrixNaiveDense64C

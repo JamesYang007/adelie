@@ -1,5 +1,3 @@
-from . import adelie_core as core
-from . import logger
 from . import matrix
 from .configs import Configs
 from .constraint import (
@@ -967,7 +965,7 @@ def bvls(
     *,
     weights: np.ndarray =None,
     kappa: int =None,
-    max_iters: int =100000,
+    max_iters: int =int(1e5),
     tol: float =1e-7,
     n_threads: int =1,
     warm_start =None,
@@ -978,7 +976,7 @@ def bvls(
 
     .. math::
         \\begin{align*}
-            \\mathrm{minimize} &\\quad
+            \\mathrm{minimize}_{\\beta} &\\quad
             \\frac{1}{2} \\|y - X \\beta\\|_{W}^2 \\\\
             \\text{subject to} &\\quad
             \\ell \\leq \\beta \\leq u
@@ -994,7 +992,7 @@ def bvls(
     ----------
     X : (n, p) Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
         Feature matrix.
-        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule or :class:`numpy.ndarray`.
     y : (n,) ndarray
         Response vector.
     lower : (p,) ndarray
@@ -1011,9 +1009,9 @@ def bvls(
         Default is ``None``.
     max_iters : int, optional
         Maximum number of coordinate descents.
-        Default is ``100000``.
+        Default is ``int(1e5)``.
     tol : float, optional
-        Coordinate descent convergence tolerance.
+        Convergence tolerance.
         Default is ``1e-7``.
     n_threads : int, optional
         Number of threads.
@@ -1128,7 +1126,7 @@ def pinball(
     penalty_pos: np.ndarray,
     *,
     kappa: int =None,
-    max_iters: int =100000,
+    max_iters: int =int(1e5),
     tol: float =1e-7,
     n_threads: int =1,
     warm_start =None,
@@ -1170,7 +1168,7 @@ def pinball(
         Default is ``None``.
     max_iters : int, optional
         Maximum number of coordinate descents.
-        Default is ``100000``.
+        Default is ``int(1e5)``.
     tol : float, optional
         Coordinate descent convergence tolerance.
         Default is ``1e-7``.
@@ -1192,8 +1190,6 @@ def pinball(
     adelie.adelie_core.state.StatePinball32
     adelie.adelie_core.state.StatePinball64
     """
-    A_raw = A
-
     if isinstance(A, np.ndarray):
         A = matrix.dense(A, method="constraint", n_threads=n_threads)
 
