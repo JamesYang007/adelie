@@ -184,14 +184,15 @@ public:
     {
         const auto d = _mat.cols();
         const auto m = _mask.cols();
+        const auto v_weights = (v * weights).matrix();
+        Eigen::Map<rowmat_value_t> buff(_buff.data(), _n_threads, d);
         const auto routine = [&](auto i) {
             const auto i_sgn = i / m;
             const auto i_m = i - i_sgn * m;
             auto out_m = out.segment(i * d, d).matrix();
-            Eigen::Map<rowmat_value_t> buff(_buff.data(), _n_threads, d);
             dgemv(
                 _mat,
-                (1-2*i_sgn) * _mask.col(i_m).transpose().template cast<value_t>().cwiseProduct((v * weights).matrix()),
+                (1-2*i_sgn) * _mask.col(i_m).transpose().template cast<value_t>().cwiseProduct(v_weights),
                 1,
                 buff /* unused */,
                 out_m
