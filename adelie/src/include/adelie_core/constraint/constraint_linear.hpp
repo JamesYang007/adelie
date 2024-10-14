@@ -217,7 +217,6 @@ public:
         _ATmu(vec_value_t::Zero(A.cols()))
     {
         const auto m = A.rows();
-        const auto d = A.cols();
 
         if (l.size() != m) {
             throw util::adelie_core_error("lower must be (m,) where A is (m, d).");

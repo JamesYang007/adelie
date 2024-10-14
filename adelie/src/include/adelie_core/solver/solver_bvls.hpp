@@ -230,7 +230,6 @@ bool kkt_screen(
     using value_t = typename state_t::value_t;
 
     auto& X = *state.X;
-    const auto y_var = state.y_var;
     const auto& beta = state.beta;
     const auto& resid = state.resid;
     const auto kappa = state.kappa;
