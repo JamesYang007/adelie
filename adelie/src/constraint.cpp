@@ -427,8 +427,6 @@ void constraint_linear_proximal_newton(py::module_& m, const char* name)
     using base_t = typename internal_t::base_t;
     using value_t = typename internal_t::value_t;
     using vec_value_t = typename internal_t::vec_value_t;
-    using rowmat_value_t = typename internal_t::rowmat_value_t;
-    using colmat_value_t = typename internal_t::colmat_value_t;
     py::class_<internal_t, base_t>(m, name, 
         "Core constraint class for linear constraint with proximal Newton solver."
         )
