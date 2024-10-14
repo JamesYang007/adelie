@@ -184,9 +184,9 @@ public:
     {
         const auto d = _mat.cols();
         const auto m = _mask.cols();
-        const auto v_weights = (v * weights).matrix();
-        Eigen::Map<rowmat_value_t> buff(_buff.data(), _n_threads, d);
-        const auto routine = [&](auto i) {
+        // NOTE: MSVC does not like it when we try to capture v_weights and buff.
+        // This is a bug in MSVC (god I hate microsoft so much...).
+        const auto routine = [&](auto i, const auto& v_weights, auto& buff) {
             const auto i_sgn = i / m;
             const auto i_m = i - i_sgn * m;
             auto out_m = out.segment(i * d, d).matrix();
@@ -198,11 +198,13 @@ public:
                 out_m
             );
         };
+        const auto v_weights = (v * weights).matrix();
+        Eigen::Map<rowmat_value_t> buff(_buff.data(), _n_threads, d);
         if (_n_threads <= 1) {
-            for (int i = 0; i < 2 * m; ++i) routine(i);
+            for (int i = 0; i < 2 * m; ++i) routine(i, v_weights, buff);
         } else {
             #pragma omp parallel for schedule(static) num_threads(_n_threads)
-            for (int i = 0; i < 2 * m; ++i) routine(i);
+            for (int i = 0; i < 2 * m; ++i) routine(i, v_weights, buff);
         }
     }
 
