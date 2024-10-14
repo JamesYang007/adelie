@@ -41,8 +41,10 @@ from . import state
 from .cv import (
     cv_grpnet,
 )
+from .sklearn import (
+    GroupElasticNet
+)
 from .solver import (
     gaussian_cov,
     grpnet,
 )
-from .skapi import GroupElasticNet

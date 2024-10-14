@@ -200,6 +200,24 @@ adelie.matrix
     subset
 
 
+adelie.sklearn
+--------------
+
+
+.. currentmodule:: adelie.sklearn
+
+
+.. automodule:: adelie.sklearn
+    
+
+.. autosummary::
+    :toctree: generated/
+
+
+    GroupElasticNet
+
+
+
 adelie.solver
 -------------
 
