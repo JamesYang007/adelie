@@ -108,3 +108,5 @@ Internal
     adelie_core.state.StateMultiGaussianNaive64
     adelie_core.state.StateMultiGlmNaive32
     adelie_core.state.StateMultiGlmNaive64
+    adelie_core.state.StatePinball32
+    adelie_core.state.StatePinball64

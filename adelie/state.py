@@ -3350,12 +3350,12 @@ def pinball(
     screen_set : (m,) ndarray
         Screen set buffer.
         ``screen_set[i]`` is the ``i`` th screen variable
-        that is in the range ``[0, p)``.
+        that is in the range ``[0, m)``.
     is_screen : (m,) ndarray
         Boolean vector indicating whether the ``j`` th feature is screen.
     screen_ASAT_diag : (m,) ndarray
         :math:`A_j^\\top S A_j` where feature ``j`` is screen.
-    screen_AS : (m,) ndarray
+    screen_AS : (m, d) ndarray
         :math:`A_j^\\top S` where feature ``j`` is screen.
     active_set_size : int
         Number of active groups.

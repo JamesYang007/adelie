@@ -1139,7 +1139,7 @@ def pinball(
 
     .. math::
         \\begin{align*}
-            \\mathrm{minimize} &\\quad
+            \\mathrm{minimize}_{\\beta} &\\quad
             \\frac{1}{2} \\|S^{-\\frac{1}{2}} v - S^{\\frac{1}{2}} A^\\top \\beta\\|_{2}^2 
             + \\ell^\\top \\beta_- + u^\\top \\beta_+
         \\end{align*}

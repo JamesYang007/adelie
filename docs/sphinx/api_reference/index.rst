@@ -217,6 +217,7 @@ adelie.solver
     bvls
     gaussian_cov
     grpnet
+    pinball
 
 
 adelie.state
@@ -241,6 +242,7 @@ adelie.state
     glm_naive
     multigaussian_naive
     multiglm_naive
+    pinball
 
 
 .. toctree::

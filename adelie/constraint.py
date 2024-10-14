@@ -13,7 +13,6 @@ from .matrix import (
 from scipy.sparse import csr_matrix
 from typing import Union
 import numpy as np
-import scipy
 
 
 def box(
