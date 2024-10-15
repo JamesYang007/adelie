@@ -25,10 +25,8 @@ def run_cmd(cmd):
     return output.rstrip()
 
 
-# Optional multithreaded build for non-Windows build.
-# MSVC runs out of heap memory with multithreading.
-if os.name != "nt":
-    ParallelCompile("NPY_NUM_BUILD_JOBS").install()
+ParallelCompile("NPY_NUM_BUILD_JOBS").install()
+
 
 if os.name == "posix":
     # GCC + Clang options to be extra stringent with warnings.
