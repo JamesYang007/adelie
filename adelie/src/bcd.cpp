@@ -1,6 +1,4 @@
 #include "decl.hpp"
-#include <adelie_core/bcd/constrained/admm.hpp>
-#include <adelie_core/bcd/constrained/coordinate_descent.hpp>
 #include <adelie_core/bcd/unconstrained/brent.hpp>
 #include <adelie_core/bcd/unconstrained/ista.hpp>
 #include <adelie_core/bcd/unconstrained/newton.hpp>
@@ -227,95 +225,12 @@ py::dict unconstrained_brent_solver(
     return d;
 }
 
-// ================================================================
-// Constrained
-// ================================================================
-
-py::dict constrained_admm_solver(
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& quad_c,
-    double l1,
-    double l2,
-    const Eigen::Ref<const ad::util::rowmat_type<double>>& Q_c,
-    const Eigen::Ref<const ad::util::rowmat_type<double>>& AQ_c,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& QTv_c,
-    const Eigen::Ref<const ad::util::rowmat_type<double>>& A,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& b,
-    double rho,
-    size_t max_iters,
-    double tol_abs,
-    double tol_rel,
-    ad::util::rowvec_type<double> x,
-    ad::util::rowvec_type<double> z,
-    ad::util::rowvec_type<double> u
-)
-{
-    using sw_t = ad::util::Stopwatch;
-
-    const auto m = A.rows();
-    const auto d = A.cols();
-    ad::util::rowvec_type<double> buff(3*m + 4*d);
-    size_t iters;
-    sw_t sw;
-    sw.start();
-    ad::bcd::constrained::admm_solver(
-        quad_c, l1, l2, Q_c, AQ_c, QTv_c, A, b, rho, max_iters, tol_abs, tol_rel,
-        x, z, u, iters, buff
-    );
-    const auto elapsed = sw.elapsed();
-    py::dict dct("x"_a=x, "z"_a=z, "u"_a=u, "iters"_a=iters, "time_elapsed"_a=elapsed);
-    return dct;
-}
-
-py::dict constrained_coordinate_descent_solver(
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& mu0,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& quad,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& linear,
-    double l1,
-    double l2,
-    const Eigen::Ref<const ad::util::rowmat_type<double>>& A,
-    const Eigen::Ref<const ad::util::rowvec_type<double>>& b,
-    size_t max_iters,
-    double tol,
-    size_t pnewton_max_iters,
-    double pnewton_tol,
-    size_t newton_max_iters,
-    double newton_tol
-)
-{
-    using sw_t = ad::util::Stopwatch;
-
-    const auto d = A.cols();
-    ad::util::rowvec_type<double> A_vars = A.array().square().rowwise().sum();
-    ad::util::rowvec_type<double> buff(4*d);
-    ad::util::rowvec_type<double> x(d);
-    ad::util::rowvec_type<double> mu = mu0;
-    ad::util::rowvec_type<double> mu_resid = (
-        linear.matrix() - mu.matrix() * A
-    );
-    double mu_rsq = mu_resid.square().sum();
-    size_t iters;
-    sw_t sw;
-    sw.start();
-    ad::bcd::constrained::coordinate_descent_solver(
-        quad, linear, l1, l2, A, b, A_vars,
-        max_iters, tol, pnewton_max_iters, pnewton_tol, newton_max_iters, newton_tol,
-        iters, x, mu, mu_resid, mu_rsq, buff
-    );
-    const auto elapsed = sw.elapsed();
-    py::dict dct("x"_a=x, "mu"_a=mu, "iters"_a=iters, "time_elapsed"_a=elapsed);
-    return dct;
-}
-
 void register_bcd(py::module_& m)
 {
     /* utility functions */
     m.def("root_function", &root_function);
     m.def("root_lower_bound", &root_lower_bound);
     m.def("root_upper_bound", &root_upper_bound);
-
-    /* constrained */
-    m.def("constrained_admm_solver", &constrained_admm_solver);
-    m.def("constrained_coordinate_descent_solver", &constrained_coordinate_descent_solver);
 
     /* unconstrained */
     m.def("unconstrained_brent_solver", &unconstrained_brent_solver);
