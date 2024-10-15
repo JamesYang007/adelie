@@ -39,7 +39,6 @@ if os.name == "posix":
         "-O3",
     ]
 elif os.name == "nt":
-    # MSVC defauls to /W3 and /O2, but we make them explicit anyways.
     extra_compile_args = [
         "/W3",
         "/WX",
@@ -49,6 +48,7 @@ elif os.name == "nt":
         "/wd4267", # 'var' : conversion from 'size_t' to 'type', possible loss of data
         "/wd4849", # OpenMP 'clause' clause ignored in 'directive' directive
         "/O2",
+        "/m:4",    # limit to 4 threads to avoid C1060
     ]
 include_dirs = [
     os.path.join("adelie", "src"),
