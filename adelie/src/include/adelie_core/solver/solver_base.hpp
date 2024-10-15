@@ -10,6 +10,76 @@
 namespace adelie_core {
 namespace solver {
 
+// TODO: 
+// It might be too much to save all of them though especially if we have a lot of active constraints.
+// Then, state.dual is going to be super dense and we have 100 rows of such dense vectors.
+// Nonetheless, it's still useful to have this for diagnostic purposes... maybe a flag to control whether this gets saved?
+template <class StateType, class VecIndexType, class VecValueType>
+ADELIE_CORE_STRONG_INLINE
+auto sparsify_dual(
+    const StateType& state,
+    VecIndexType& indices,
+    VecValueType& values
+)
+{
+    using vec_index_t = typename StateType::vec_index_t;
+    using vec_value_t = typename StateType::vec_value_t;
+    using sp_vec_value_t = typename StateType::sp_vec_value_t;
+
+    const auto& constraints = state.constraints;
+    const auto& dual_groups = state.dual_groups;
+    const auto n_threads = state.n_threads;
+
+    const auto n_constraints = constraints.size();
+    vec_index_t begins(n_constraints+1);
+    begins[0] = 0;
+    begins.tail(n_constraints) = vec_index_t::NullaryExpr(
+        n_constraints, 
+        [&](auto i) {
+            const auto constraint = constraints[i];
+            return constraint ? constraint->duals_nnz() : 0;
+        }
+    );
+    for (Eigen::Index i = 1; i < begins.size(); ++i) {
+        begins[i] += begins[i-1];
+    }
+    indices.resize(begins[n_constraints]); 
+    values.resize(begins[n_constraints]);
+
+    if (begins[n_constraints]) {
+        const auto routine = [&](auto i) {
+            const auto b = begins[i];
+            const auto nnz = begins[i+1] - b;
+            if (nnz <= 0) return;
+            const auto constraint = constraints[i];
+            Eigen::Map<vec_index_t> indices_v(indices.data() + b, nnz);
+            Eigen::Map<vec_value_t> values_v(values.data() + b, nnz);
+            constraint->dual(indices_v, values_v);
+            indices_v += dual_groups[i];
+        };
+        
+        if (n_threads <= 1) {
+            for (Eigen::Index i = 0; i < static_cast<Eigen::Index>(n_constraints); ++i) routine(i);
+        } else {
+            #pragma omp parallel for schedule(static) num_threads(n_threads)
+            for (Eigen::Index i = 0; i < static_cast<Eigen::Index>(n_constraints); ++i) routine(i);
+        }
+    }
+
+    const auto last_constraint = constraints[n_constraints-1];
+    const auto n_duals = (
+        dual_groups[n_constraints-1] + 
+        (last_constraint ? last_constraint->duals() : 0)
+    );
+    Eigen::Map<const sp_vec_value_t> dual_map(
+        n_duals,
+        indices.size(),
+        indices.data(),
+        values.data()
+    );
+    return dual_map;
+}
+
 template <class StateType, class PBType>
 ADELIE_CORE_STRONG_INLINE
 void pb_add_suffix(
@@ -247,7 +317,6 @@ inline void solve_core(
     using vec_value_t = typename state_t::vec_value_t;
     using sw_t = util::Stopwatch;
 
-    const auto& constraints = state.constraints;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
     const auto& screen_set = state.screen_set;
@@ -268,11 +337,6 @@ inline void solve_core(
     auto& n_valid_solutions = state.n_valid_solutions;
     auto& active_sizes = state.active_sizes;
     auto& screen_sizes = state.screen_sizes;
-
-    // Clear cached information for every constraint object.
-    for (auto& c : constraints) {
-        if (c) c->clear();
-    }
 
     // Manually set progress bar to iters_done_ == 1.
     // This ensures that until pb is properly initialized to the range of [0, lmda_path.size()),

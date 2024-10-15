@@ -313,8 +313,13 @@ public:
         idx += sizeof(outer_t) * outer_size;
         std::memcpy(outer_ptr, &idx, sizeof(outer_t));
 
+        // flag to detect any errors
+        std::atomic_char try_failed = 0;
+
         // populate outer 
         const auto outer_routine = [&](outer_t j) {
+            if (try_failed.load(std::memory_order_relaxed)) return;
+
             outer_t snp_bytes = 0;
             for (size_t a = 0; a < A; ++a) {
                 snp_bytes += sizeof(outer_t);
@@ -331,22 +336,12 @@ public:
                             const outer_t cidx = chnk + c;
                             if (cidx >= n) break;
                             if ((anc_jh[cidx] < 0) || (anc_jh[cidx] >= static_cast<char>(A))) {
-                                throw util::adelie_core_error(
-                                    "Detected an ancestry not in the range [0,A):"
-                                    "\n\tancestries[" + std::to_string(cidx) +
-                                    ", " + std::to_string(k) +
-                                    "] = " + std::to_string(anc_jh[cidx]) +
-                                    "\nMake sure ancestries only contains values in [0,A)."
-                                );
+                                try_failed = 1;
+                                return;
                             }
                             if ((cal_jh[cidx] != 0) && (cal_jh[cidx] != 1)) {
-                                throw util::adelie_core_error(
-                                    "Detected a non-binary value: "
-                                    "\n\tcalldata[" + std::to_string(cidx) +
-                                    ", " + std::to_string(k) +
-                                    "] = " + std::to_string(cal_jh[cidx]) +
-                                    "\nMake sure calldata only contains 0 or 1 values."
-                                );
+                                try_failed = 2;
+                                return;
                             }
                             // always error check (above) before proceeding
                             const bool to_not_skip = (
@@ -372,6 +367,23 @@ public:
         }
         benchmark["outer_time"] = sw.elapsed();
 
+        switch (try_failed) {
+            case 1: {
+                throw util::adelie_core_error(
+                    "Detected an ancestry not in the range [0, A). "
+                    "Make sure ancestries only contains values in [0, A). "
+                );
+                break;
+            }
+            case 2: {
+                throw util::adelie_core_error(
+                    "Detected a non-binary value. "
+                    "Make sure calldata only contains 0 or 1 values. "
+                );
+                break;
+            }
+        }
+
         // cumsum outer
         for (outer_t j = 0; j < s; ++j) {
             const outer_t outer_curr = internal::read_as<outer_t>(outer_ptr + sizeof(outer_t) * (j+1));
@@ -392,7 +404,10 @@ public:
         idx = outer_last;
 
         // populate (column) inner buffers
+        try_failed = 0;
         const auto inner_routine = [&](outer_t j) {
+            if (try_failed.load(std::memory_order_relaxed)) return;
+
             const outer_t outer_curr = internal::read_as<outer_t>(outer_ptr + sizeof(outer_t) * (j+1));
             const outer_t outer_prev = internal::read_as<outer_t>(outer_ptr + sizeof(outer_t) * j);
             Eigen::Map<buffer_t> buffer_j(
@@ -453,12 +468,7 @@ public:
             }
 
             if (cidx != static_cast<size_t>(buffer_j.size())) {
-                throw util::adelie_core_error(
-                    "Column index certificate does not match expected size:"
-                    "\n\tCertificate:   " + std::to_string(cidx) +
-                    "\n\tExpected size: " + std::to_string(buffer_j.size()) +
-                    "\nThis is likely a bug in the code. Please report it! "
-                );
+                try_failed = 1;
             }
         };
         sw.start();
@@ -469,6 +479,13 @@ public:
             for (int j = 0; j < static_cast<int>(s); ++j) inner_routine(j);
         }
         benchmark["inner"] = sw.elapsed();
+
+        if (try_failed) {
+            throw util::adelie_core_error(
+                "Column index certificate does not match expected size. "
+                "This is likely a bug in the code. Please report it! "
+            );
+        }
 
         sw.start();
         auto file_ptr = fopen_safe(_filename.c_str(), "wb");

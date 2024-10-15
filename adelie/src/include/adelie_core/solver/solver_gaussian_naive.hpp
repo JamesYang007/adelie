@@ -37,6 +37,10 @@ void update_solutions(
     ValueType lmda
 )
 {
+    using state_t = std::decay_t<StateType>;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_value_t = typename state_t::vec_value_t;
+
     const auto y_var = state.y_var;
     auto& betas = state.betas;
     auto& duals = state.duals;
@@ -44,8 +48,11 @@ void update_solutions(
     auto& lmdas = state.lmdas;
     auto& intercepts = state.intercepts;
 
+    vec_index_t dual_indices; 
+    vec_value_t dual_values;
+
     betas.emplace_back(std::move(state_gaussian_pin_naive.betas.back()));
-    duals.emplace_back(std::move(state_gaussian_pin_naive.duals.back()));
+    duals.emplace_back(sparsify_dual(state, dual_indices, dual_values));
     intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
     lmdas.emplace_back(lmda);
 
@@ -88,7 +95,6 @@ auto fit(
     const auto& constraints = state.constraints;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
-    const auto& dual_groups = state.dual_groups;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
     const auto& weights = state.weights;
@@ -145,7 +151,6 @@ auto fit(
         constraints,
         groups, 
         group_sizes,
-        dual_groups,
         alpha, 
         penalty,
         weights,
@@ -157,9 +162,7 @@ auto fit(
         lmda_path,
         constraint_buffer_size,
         intercept, max_active_size, max_iters, 
-        // TODO: still unclear whether we should be max'ing or not.
-        // tolerance is relative to the scaling of null deviance and current total weight sum (== 1)
-        tol * std::max<value_t>(y_var, 1), 
+        tol * y_var, 
         adev_tol, ddev_tol, 
         newton_tol, newton_max_iters, n_threads,
         rsq,

@@ -158,12 +158,12 @@ public:
         out.template triangularView<Eigen::Upper>() = out.transpose();
     }
 
-    void sp_btmul(
+    void sp_tmul(
         const sp_mat_value_t& v, 
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
-        base_t::check_sp_btmul(
+        base_t::check_sp_tmul(
             v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
         if (_n_threads <= 1) {

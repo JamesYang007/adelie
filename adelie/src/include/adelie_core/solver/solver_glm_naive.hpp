@@ -67,6 +67,10 @@ void update_solutions(
     ValueType lmda
 )
 {
+    using state_t = std::decay_t<StateType>;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_value_t = typename state_t::vec_value_t;
+
     const auto loss_null = state.loss_null;
     const auto loss_full = state.loss_full;
     const auto& eta = state.eta;
@@ -76,8 +80,11 @@ void update_solutions(
     auto& lmdas = state.lmdas;
     auto& intercepts = state.intercepts;
 
+    vec_index_t dual_indices; 
+    vec_value_t dual_values;
+
     betas.emplace_back(std::move(state_gaussian_pin_naive.betas.back()));
-    duals.emplace_back(std::move(state_gaussian_pin_naive.duals.back()));
+    duals.emplace_back(sparsify_dual(state, dual_indices, dual_values));
     intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
     lmdas.emplace_back(lmda);
 
@@ -195,7 +202,6 @@ auto fit(
     const auto& constraints = state.constraints;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
-    const auto& dual_groups = state.dual_groups;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
     const auto& offsets = state.offsets;
@@ -319,7 +325,6 @@ auto fit(
             constraints,
             groups, 
             group_sizes,
-            dual_groups,
             alpha, 
             penalty,
             irls_weights,
@@ -331,9 +336,7 @@ auto fit(
             lmda_path_adjusted,
             constraint_buffer_size,
             intercept, max_active_size, max_iters, 
-            // TODO: still unclear whether we should be max'ing or not.
-            // tolerance is relative to the scaling of null deviance and current total weight sum
-            tol * std::max<value_t>((loss_null - loss_full) / hess_sum, 1), 
+            tol * (loss_null - loss_full) / hess_sum, 
             0 /* adev_tol */, 0 /* ddev_tol */,
             newton_tol, newton_max_iters, n_threads,
             0 /* rsq (no need to track) */,
@@ -378,16 +381,7 @@ auto fit(
         glm.gradient(eta, resid); 
 
         /* check convergence */
-        // check directional derivative of gradient (resid) as an approximation
-        // to the quadratic loss. 
-        const auto& active_set = state_gaussian_pin_naive.active_set;
-        const auto& active_begins = state_gaussian_pin_naive.active_begins;
-        const auto n_active = (
-            (active_begins.size() == 0) ? 1 : (
-                active_begins.back() + group_sizes[screen_set[active_set[active_set_size-1]]]
-            )
-        );
-        if (std::abs(((resid - resid_prev) * (eta - eta_prev)).sum()) <= irls_tol * n_active) {
+        if (std::abs(((resid - resid_prev) * (eta - eta_prev)).sum()) <= irls_tol) {
             return std::make_tuple(
                 std::move(state_gaussian_pin_naive),
                 screen_time,

@@ -221,12 +221,12 @@ public:
         mat.cov(index, q, sqrt_weights, out, buffer);
     }
 
-    void sp_btmul(
+    void sp_tmul(
         const sp_mat_value_t& v, 
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
-        base_t::check_sp_btmul(
+        base_t::check_sp_tmul(
             v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
         out.setZero();
@@ -235,7 +235,7 @@ public:
         for (size_t i = 0; i < _mat_list.size(); ++i) {
             auto& mat = *_mat_list[i];
             const auto q_curr = mat.cols();
-            mat.sp_btmul(v.middleCols(n_processed, q_curr), buff);
+            mat.sp_tmul(v.middleCols(n_processed, q_curr), buff);
             out += buff;
             n_processed += q_curr;
         }
@@ -458,12 +458,12 @@ public:
         }
     }
 
-    void sp_btmul(
+    void sp_tmul(
         const sp_mat_value_t& v, 
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
-        base_t::check_sp_btmul(
+        base_t::check_sp_tmul(
             v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
         vec_value_t buff;
@@ -477,7 +477,7 @@ public:
             Eigen::Map<rowmat_value_t> out_curr(
                 buff.data(), L, rows_curr
             );
-            mat.sp_btmul(v, out_curr);
+            mat.sp_tmul(v, out_curr);
             out.middleCols(begin, rows_curr) = out_curr;
             begin += rows_curr;
         }

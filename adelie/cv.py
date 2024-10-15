@@ -75,17 +75,20 @@ class CVGrpnetResult:
 
     def fit(
         self, 
-        *, 
-        lmda_path_size: int =100,
+        X: Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64],
+        glm: Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64],
         **grpnet_params,
     ):
         """Fits group elastic net until the best CV :math:`\\lambda`.
 
         Parameters
         ----------
-        lmda_path_size : int, optional
-            Number of regularizations in the path.
-            Default is ``100``.
+        X : (n, p) Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
+            Feature matrix.
+            It is typically one of the matrices defined in :mod:`adelie.matrix` submodule or :class:`numpy.ndarray`.
+        glm : Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64]
+            GLM object.
+            It is typically one of the GLM classes defined in :mod:`adelie.glm` submodule.
         **grpnet_params : optional
             Parameters to :func:`adelie.solver.grpnet`.
 
@@ -101,18 +104,23 @@ class CVGrpnetResult:
         logger_level = logger.logger.level
         logger.logger.setLevel(logger.logging.ERROR)
         state = grpnet(
-            X=grpnet_params["X"],
-            glm=grpnet_params["glm"],
+            X=X,
+            glm=glm,
             lmda_path_size=0,
             progress_bar=False,
         )
         logger.logger.setLevel(logger_level)
 
+        lmda_path_size = 100
+        if "lmda_path_size" in grpnet_params:
+            lmda_path_size = grpnet_params["lmda_path_size"]
         lmda_star = self.lmdas[self.best_idx]
         full_lmdas = state.lmda_max * np.logspace(
             0, np.log10(lmda_star / state.lmda_max), lmda_path_size
         )
         return grpnet(
+            X=X,
+            glm=glm,
             lmda_path=full_lmdas,
             early_exit=False,
             **grpnet_params,

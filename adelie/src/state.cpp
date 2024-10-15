@@ -1,8 +1,10 @@
 #include "decl.hpp"
 #include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/glm/glm_base.hpp>
+#include <adelie_core/matrix/matrix_constraint_base.hpp>
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
+#include <adelie_core/state/state_bvls.hpp>
 #include <adelie_core/state/state_gaussian_cov.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
 #include <adelie_core/state/state_gaussian_pin_cov.hpp>
@@ -10,6 +12,7 @@
 #include <adelie_core/state/state_glm_naive.hpp>
 #include <adelie_core/state/state_multigaussian_naive.hpp>
 #include <adelie_core/state/state_multiglm_naive.hpp>
+#include <adelie_core/state/state_pinball.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -90,7 +93,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
-            const Eigen::Ref<const vec_index_t>&, 
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_index_t>&, 
@@ -117,7 +119,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
             py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
-            py::arg("dual_groups").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("screen_set").noconvert(),
@@ -152,10 +153,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         .def_readonly("group_sizes", &state_t::group_sizes, R"delimiter(
         List of group sizes corresponding to each element in ``groups``.
         ``group_sizes[i]`` is the group size of the ``i`` th group. 
-        )delimiter")
-        .def_readonly("dual_groups", &state_t::dual_groups, R"delimiter(
-        List of starting indices to each dual group where `G` is the number of groups.
-        ``dual_groups[i]`` is the starting index of the ``i`` th dual group. 
         )delimiter")
         .def_readonly("alpha", &state_t::alpha, R"delimiter(
         Elastic net parameter.
@@ -270,20 +267,6 @@ void state_gaussian_pin_base(py::module_& m, const char* name)
         }, R"delimiter(
         ``betas[i]`` is the solution at ``lmdas[i]``.
         )delimiter")
-        .def_property_readonly("duals", [](const state_t& s) {
-            const auto& constraints = *s.constraints;
-            const auto& dual_groups = s.dual_groups;
-            const auto G = dual_groups.size();
-            const auto constraint = constraints[G-1];
-            const auto group_size = constraint ? constraint->duals() : 0;
-            const auto n_duals = G ? (dual_groups[G-1] + group_size) : 0;
-            return convert_sparse_to_dense(
-                n_duals,
-                s.duals
-            );
-        }, R"delimiter(
-        ``duals[i]`` is the dual at ``lmdas[i]``.
-        )delimiter")
         .def_property_readonly("intercepts", [](const state_t& s) {
             return Eigen::Map<const vec_value_t>(s.intercepts.data(), s.intercepts.size());
         }, R"delimiter(
@@ -361,7 +344,6 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
-            const Eigen::Ref<const vec_index_t>&, 
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
@@ -395,7 +377,6 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
             py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
-            py::arg("dual_groups").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("weights").noconvert(),
@@ -507,7 +488,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             const dyn_vec_constraint_t&,
             const Eigen::Ref<const vec_index_t>&, 
             const Eigen::Ref<const vec_index_t>&,
-            const Eigen::Ref<const vec_index_t>&, 
             value_t, 
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_index_t>&, 
@@ -536,7 +516,6 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
             py::arg("constraints").noconvert(),
             py::arg("groups").noconvert(),
             py::arg("group_sizes").noconvert(),
-            py::arg("dual_groups").noconvert(),
             py::arg("alpha"),
             py::arg("penalty").noconvert(),
             py::arg("screen_set").noconvert(),
@@ -1184,7 +1163,6 @@ void state_multigaussian_naive(py::module_& m, const char* name)
         Core state class for MultiGaussian, naive method.
         )delimiter")
         .def(py::init<
-            const std::string&,
             size_t,
             bool,
             matrix_t&,
@@ -1230,7 +1208,6 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             value_t,
             const Eigen::Ref<const vec_value_t>& 
         >(),
-            py::arg("group_type"),
             py::arg("n_classes"),
             py::arg("multi_intercept"),
             py::arg("X"),
@@ -1277,17 +1254,6 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             py::arg("grad").noconvert()
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
-        .def_property_readonly("group_type", [](const state_t& s) -> std::string {
-            switch (s.group_type) {
-                case ad::util::multi_group_type::_grouped:
-                    return "grouped";
-                case ad::util::multi_group_type::_ungrouped:
-                    return "ungrouped";
-            }
-            throw std::runtime_error("Invalid multi-response group type!");
-        }, R"delimiter(
-        Multi-response group type.
-        )delimiter")
         .def_readonly("n_classes", &state_t::n_classes, R"delimiter(
         Number of classes.
         )delimiter")
@@ -1660,7 +1626,6 @@ void state_multiglm_naive(py::module_& m, const char* name)
         Core state class for multi-response GLM, naive method.
         )delimiter")
         .def(py::init<
-            const std::string&,
             size_t,
             bool,
             matrix_t&,
@@ -1708,7 +1673,6 @@ void state_multiglm_naive(py::module_& m, const char* name)
             value_t,
             const Eigen::Ref<const vec_value_t>& 
         >(),
-            py::arg("group_type"),
             py::arg("n_classes"),
             py::arg("multi_intercept"),
             py::arg("X"),
@@ -1757,17 +1721,6 @@ void state_multiglm_naive(py::module_& m, const char* name)
             py::arg("grad").noconvert()
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))
-        .def_property_readonly("group_type", [](const state_t& s) -> std::string {
-            switch (s.group_type) {
-                case ad::util::multi_group_type::_grouped:
-                    return "grouped";
-                case ad::util::multi_group_type::_ungrouped:
-                    return "ungrouped";
-            }
-            throw std::runtime_error("Invalid multi-response group type!");
-        }, R"delimiter(
-        Multi-response group type.
-        )delimiter")
         .def_readonly("multi_intercept", &state_t::multi_intercept, R"delimiter(
         ``True`` if an intercept is added for each response.
         )delimiter")
@@ -1789,6 +1742,262 @@ void state_multiglm_naive(py::module_& m, const char* name)
             return intercepts;
         }, R"delimiter(
         ``intercepts[i]`` is the intercept at ``lmdas[i]`` for each class.
+        )delimiter")
+        ;
+}
+
+template <class MatrixType>
+class PyStateBVLS : public ad::state::StateBVLS<MatrixType>
+{
+    using base_t = ad::state::StateBVLS<MatrixType>;
+public:
+    using base_t::base_t;
+    PyStateBVLS(base_t&& base) : base_t(std::move(base)) {}
+};
+
+template <class MatrixType>
+void state_bvls(py::module_& m, const char* name)
+{
+    using matrix_t = MatrixType;
+    using state_t = ad::state::StateBVLS<MatrixType>;
+    using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_bool_t = typename state_t::vec_bool_t;
+    py::class_<state_t, PyStateBVLS<matrix_t>>(m, name, R"delimiter(
+        Core state class for BVLS.
+        )delimiter")
+        .def(py::init<
+            matrix_t&,
+            value_t,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            size_t,
+            size_t,
+            value_t,
+            size_t,
+            Eigen::Ref<vec_index_t>,
+            Eigen::Ref<vec_bool_t>,
+            size_t,
+            Eigen::Ref<vec_index_t>,
+            Eigen::Ref<vec_bool_t>,
+            Eigen::Ref<vec_value_t>,
+            Eigen::Ref<vec_value_t>,
+            Eigen::Ref<vec_value_t>,
+            value_t 
+        >(),
+            py::arg("X"),
+            py::arg("y_var"),
+            py::arg("X_vars").noconvert(),
+            py::arg("lower").noconvert(),
+            py::arg("upper").noconvert(),
+            py::arg("weights").noconvert(),
+            py::arg("kappa"),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("screen_set_size"),
+            py::arg("screen_set").noconvert(),
+            py::arg("is_screen").noconvert(),
+            py::arg("active_set_size"),
+            py::arg("active_set").noconvert(),
+            py::arg("is_active").noconvert(),
+            py::arg("beta").noconvert(),
+            py::arg("resid").noconvert(),
+            py::arg("grad").noconvert(),
+            py::arg("loss")
+        )
+        .def(py::init([](const state_t& s) { return new state_t(s); }))
+        .def_readonly("screen_set_size", &state_t::screen_set_size, R"delimiter(
+        Screen set size.
+        )delimiter")
+        .def_readonly("screen_set", &state_t::screen_set, R"delimiter(
+        Screen set buffer.
+        )delimiter")
+        .def_readonly("is_screen", &state_t::is_screen, R"delimiter(
+        Boolean buffer to indicate the screen variables.
+        )delimiter")
+        .def_readonly("active_set_size", &state_t::active_set_size, R"delimiter(
+        Active set size.
+        )delimiter")
+        .def_readonly("active_set", &state_t::active_set, R"delimiter(
+        Active set buffer.
+        )delimiter")
+        .def_readonly("is_active", &state_t::is_active, R"delimiter(
+        Boolean buffer to indicate the active variables.
+        )delimiter")
+        .def_readonly("beta", &state_t::beta, R"delimiter(
+        Coefficient vector.
+        )delimiter")
+        .def_readonly("resid", &state_t::resid, R"delimiter(
+        Residual :math:`y - X \beta`.
+        )delimiter")
+        .def_readonly("grad", &state_t::grad, R"delimiter(
+        Internal buffer that is implementation-defined.
+        )delimiter")
+        .def_readonly("loss", &state_t::loss, R"delimiter(
+        Loss :math:`\frac{1}{2} \|y-X\beta\|_W^2`.
+        )delimiter")
+        .def_readonly("iters", &state_t::iters, R"delimiter(
+        Number of coordinate descent iterations.
+        )delimiter")
+        .def_readonly("benchmark_fit_active", &state_t::benchmark_fit_active, R"delimiter(
+        Benchmark time for fitting on the active set.
+        )delimiter")
+        .def_readonly("benchmark_fit_screen", &state_t::benchmark_fit_screen, R"delimiter(
+        Benchmark time for fitting on the screen set.
+        )delimiter")
+        .def_readonly("benchmark_gradient", &state_t::benchmark_gradient, R"delimiter(
+        Benchmark time for computing the gradient.
+        )delimiter")
+        .def_readonly("benchmark_viols_sort", &state_t::benchmark_viols_sort, R"delimiter(
+        Benchmark time for sorting the violations.
+        )delimiter")
+        .def_readonly("dbg_beta", &state_t::dbg_beta, R"delimiter(
+        List of the coefficient vectors at each outer loop.
+        )delimiter")
+        .def_readonly("dbg_active_set", &state_t::dbg_active_set, R"delimiter(
+        List of the active sets at each outer loop.
+        )delimiter")
+        .def_readonly("dbg_iter", &state_t::dbg_iter, R"delimiter(
+        List of the number of iterations at each outer loop.
+        )delimiter")
+        .def_readonly("dbg_loss", &state_t::dbg_loss, R"delimiter(
+        List of the losses at each outer loop.
+        )delimiter")
+        ;
+}
+
+template <class MatrixType>
+class PyStatePinball : public ad::state::StatePinball<MatrixType>
+{
+    using base_t = ad::state::StatePinball<MatrixType>;
+public:
+    using base_t::base_t;
+    PyStatePinball(base_t&& base) : base_t(std::move(base)) {}
+};
+
+template <class MatrixType>
+void state_pinball(py::module_& m, const char* name)
+{
+    using matrix_t = MatrixType;
+    using state_t = ad::state::StatePinball<MatrixType>;
+    using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_bool_t = typename state_t::vec_bool_t;
+    using colmat_value_t = typename state_t::colmat_value_t;
+    using rowmat_value_t = typename state_t::rowmat_value_t;
+    py::class_<state_t, PyStatePinball<matrix_t>>(m, name, R"delimiter(
+        Core state class for pinball least squares.
+        )delimiter")
+        .def(py::init<
+            matrix_t&,
+            value_t,
+            const Eigen::Ref<const colmat_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            size_t,
+            size_t,
+            value_t,
+            size_t,
+            Eigen::Ref<vec_index_t>,
+            Eigen::Ref<vec_bool_t>,
+            Eigen::Ref<vec_value_t>,
+            Eigen::Ref<rowmat_value_t>,
+            size_t,
+            Eigen::Ref<vec_index_t>,
+            Eigen::Ref<vec_bool_t>,
+            Eigen::Ref<vec_value_t>,
+            Eigen::Ref<vec_value_t>,
+            Eigen::Ref<vec_value_t>,
+            value_t 
+        >(),
+            py::arg("A"),
+            py::arg("y_var"),
+            py::arg("S").noconvert(),
+            py::arg("penalty_neg").noconvert(),
+            py::arg("penalty_pos").noconvert(),
+            py::arg("kappa"),
+            py::arg("max_iters"),
+            py::arg("tol"),
+            py::arg("screen_set_size"),
+            py::arg("screen_set").noconvert(),
+            py::arg("is_screen").noconvert(),
+            py::arg("screen_ASAT_diag").noconvert(),
+            py::arg("screen_AS").noconvert(),
+            py::arg("active_set_size"),
+            py::arg("active_set").noconvert(),
+            py::arg("is_active").noconvert(),
+            py::arg("beta").noconvert(),
+            py::arg("resid").noconvert(),
+            py::arg("grad").noconvert(),
+            py::arg("loss")
+        )
+        .def(py::init([](const state_t& s) { return new state_t(s); }))
+        .def_readonly("screen_set_size", &state_t::screen_set_size, R"delimiter(
+        Screen set size.
+        )delimiter")
+        .def_readonly("screen_set", &state_t::screen_set, R"delimiter(
+        Screen set buffer.
+        )delimiter")
+        .def_readonly("is_screen", &state_t::is_screen, R"delimiter(
+        Boolean buffer to indicate the screen variables.
+        )delimiter")
+        .def_readonly("screen_ASAT_diag", &state_t::screen_ASAT_diag, R"delimiter(
+        Diagonal of :math:`A S A^\top`.
+        )delimiter")
+        .def_readonly("screen_AS", &state_t::screen_AS, R"delimiter(
+        :math:`A S`.
+        )delimiter")
+        .def_readonly("active_set_size", &state_t::active_set_size, R"delimiter(
+        Active set size.
+        )delimiter")
+        .def_readonly("active_set", &state_t::active_set, R"delimiter(
+        Active set buffer.
+        )delimiter")
+        .def_readonly("is_active", &state_t::is_active, R"delimiter(
+        Boolean buffer to indicate the active variables.
+        )delimiter")
+        .def_readonly("beta", &state_t::beta, R"delimiter(
+        Coefficient vector.
+        )delimiter")
+        .def_readonly("resid", &state_t::resid, R"delimiter(
+        Residual :math:`v - S A^\top \beta`.
+        )delimiter")
+        .def_readonly("grad", &state_t::grad, R"delimiter(
+        Internal buffer that is implementation-defined.
+        )delimiter")
+        .def_readonly("loss", &state_t::loss, R"delimiter(
+        Loss :math:`\frac{1}{2} \|S^{-\frac{1}{2}} v - S^{\frac{1}{2}} A^\top \beta\|_2^2`.
+        )delimiter")
+        .def_readonly("iters", &state_t::iters, R"delimiter(
+        Number of coordinate descent iterations.
+        )delimiter")
+        .def_readonly("benchmark_fit_active", &state_t::benchmark_fit_active, R"delimiter(
+        Benchmark time for fitting on the active set.
+        )delimiter")
+        .def_readonly("benchmark_fit_screen", &state_t::benchmark_fit_screen, R"delimiter(
+        Benchmark time for fitting on the screen set.
+        )delimiter")
+        .def_readonly("benchmark_gradient", &state_t::benchmark_gradient, R"delimiter(
+        Benchmark time for computing the gradient.
+        )delimiter")
+        .def_readonly("benchmark_viols_sort", &state_t::benchmark_viols_sort, R"delimiter(
+        Benchmark time for sorting the violations.
+        )delimiter")
+        .def_readonly("dbg_beta", &state_t::dbg_beta, R"delimiter(
+        List of the coefficient vectors at each outer loop.
+        )delimiter")
+        .def_readonly("dbg_active_set", &state_t::dbg_active_set, R"delimiter(
+        List of the active sets at each outer loop.
+        )delimiter")
+        .def_readonly("dbg_iter", &state_t::dbg_iter, R"delimiter(
+        List of the number of iterations at each outer loop.
+        )delimiter")
+        .def_readonly("dbg_loss", &state_t::dbg_loss, R"delimiter(
+        List of the losses at each outer loop.
         )delimiter")
         ;
 }
@@ -1864,4 +2073,18 @@ void register_state(py::module_& m)
         ad::constraint::ConstraintBase<float>,
         ad::matrix::MatrixNaiveBase<float>
     >(m, "StateMultiGlmNaive32");
+
+    state_bvls<
+        ad::matrix::MatrixNaiveBase<double>
+    >(m, "StateBVLS64");
+    state_bvls<
+        ad::matrix::MatrixNaiveBase<float>
+    >(m, "StateBVLS32");
+
+    state_pinball<
+        ad::matrix::MatrixConstraintBase<double>
+    >(m, "StatePinball64");
+    state_pinball<
+        ad::matrix::MatrixConstraintBase<float>
+    >(m, "StatePinball32");
 }

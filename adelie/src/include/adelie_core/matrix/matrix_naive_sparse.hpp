@@ -169,21 +169,21 @@ public:
             rows(), cols()
         );
         const auto routine = [&](int i1) {
+            const auto index_1 = j+i1;
+            const auto outer_1 = _mat.outerIndexPtr()[index_1];
+            const auto size_1 = _mat.outerIndexPtr()[index_1+1] - outer_1;
+            const Eigen::Map<const vec_sp_index_t> inner_1(
+                _mat.innerIndexPtr() + outer_1, size_1
+            );
+            const Eigen::Map<const vec_sp_value_t> value_1(
+                _mat.valuePtr() + outer_1, size_1
+            );
             for (int i2 = 0; i2 <= i1; ++i2) {
-                const auto index_1 = j+i1;
                 const auto index_2 = j+i2;
-                const auto outer_1 = _mat.outerIndexPtr()[index_1];
                 const auto outer_2 = _mat.outerIndexPtr()[index_2];
-                const auto size_1 = _mat.outerIndexPtr()[index_1+1] - outer_1;
                 const auto size_2 = _mat.outerIndexPtr()[index_2+1] - outer_2;
-                const Eigen::Map<const vec_sp_index_t> inner_1(
-                    _mat.innerIndexPtr() + outer_1, size_1
-                );
                 const Eigen::Map<const vec_sp_index_t> inner_2(
                     _mat.innerIndexPtr() + outer_2, size_2
-                );
-                const Eigen::Map<const vec_sp_value_t> value_1(
-                    _mat.valuePtr() + outer_1, size_1
                 );
                 const Eigen::Map<const vec_sp_value_t> value_2(
                     _mat.valuePtr() + outer_2, size_2
@@ -209,12 +209,12 @@ public:
         }
     }
 
-    void sp_btmul(
+    void sp_tmul(
         const sp_mat_value_t& v, 
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
-        base_t::check_sp_btmul(
+        base_t::check_sp_tmul(
             v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
         const auto outer = v.outerIndexPtr();

@@ -204,12 +204,12 @@ public:
 
     /* Non-speed critical routines */
 
-    void sp_btmul(
+    void sp_tmul(
         const sp_mat_value_t& v,
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
-        base_t::check_sp_btmul(
+        base_t::check_sp_tmul(
             v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
 
@@ -247,7 +247,7 @@ public:
                 values.data()
             );
 
-            _mat->sp_btmul(_v, _out);
+            _mat->sp_tmul(_v, _out);
 
             const auto routine = [&](int k) {
                 Eigen::Map<rowmat_value_t> out_k(
@@ -446,12 +446,12 @@ public:
     int rows() const override { return _K * _mat.rows(); }
     int cols() const override { return _K * _mat.cols(); }
 
-    void sp_btmul(
+    void sp_tmul(
         const sp_mat_value_t& v,
         Eigen::Ref<rowmat_value_t> out
     ) override
     {
-        base_t::check_sp_btmul(
+        base_t::check_sp_tmul(
             v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
         );
 

@@ -4,6 +4,9 @@
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/macros.hpp>
 #include <adelie_core/util/types.hpp>
+#if defined(_OPENMP)
+#include <omp.h>
+#endif
 
 namespace adelie_core {
 namespace state {
@@ -27,17 +30,20 @@ void update_abs_grad(
     ValueType lmda,
     ValueType alpha,
     AbsGradType& abs_grad,
+    size_t constraint_buffer_size,
     size_t n_threads
 )
 {
     using value_t = ValueType;
     using vec_value_t = util::rowvec_type<value_t>;
+    using rowmat_uint64_t = util::rowmat_type<uint64_t>;
 
     const auto is_screen = [&](auto i) {
         return screen_hashset.find(i) != screen_hashset.end();
     };
 
     vec_value_t buff(group_sizes.maxCoeff());
+    rowmat_uint64_t constraint_buffer(std::max<size_t>(1, n_threads), constraint_buffer_size);
 
     // do not parallelize since it may result in large false sharing 
     // (access to abs_grad[i] is random order)
@@ -67,17 +73,41 @@ void update_abs_grad(
 
     // can be parallelized since access is in linear order.
     // any false sharing is happening near the beginning/ends of the block of indices.
+    std::atomic_bool try_failed = false; 
     const auto routine = [&](int i) {
-        if (is_screen(i)) return;
+        if (try_failed.load(std::memory_order_relaxed) || is_screen(i)) return;
+        #if defined(_OPENMP)
+        auto cbuff = constraint_buffer.row(omp_get_thread_num());
+        #else
+        auto cbuff = constraint_buffer.row(0);
+        #endif
         const auto k = groups[i];
         const auto size_k = group_sizes[i];
-        abs_grad[i] = grad.segment(k, size_k).matrix().norm();
+        const auto constraint = constraints[i];
+        const auto v_k = grad.segment(k, size_k);
+        try {
+            abs_grad[i] = (
+                constraint ?
+                constraint->solve_zero(v_k, cbuff) :
+                v_k.matrix().norm()
+            );
+        } catch (...) {
+            try_failed = true;
+        }
     };
     if (n_threads <= 1) {
         for (int i = 0; i < groups.size(); ++i) routine(i);
     } else {
+        #if defined(_OPENMP)
         #pragma omp parallel for schedule(static) num_threads(n_threads)
+        #endif
         for (int i = 0; i < groups.size(); ++i) routine(i);
+    }
+    if (try_failed) {
+        throw util::adelie_core_solver_error(
+            "exception raised in constraint->solve_zero(). "
+            "Try changing the configurations such as convergence tolerance that affect solve_zero(). "
+        );
     }
 }
 
@@ -107,6 +137,7 @@ void update_abs_grad(
         lmda,
         state.alpha,
         state.abs_grad,
+        state.constraint_buffer_size,
         state.n_threads
     );
 }

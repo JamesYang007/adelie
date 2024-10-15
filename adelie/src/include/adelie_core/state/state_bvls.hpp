@@ -1,20 +1,15 @@
 #pragma once
 #include <adelie_core/util/macros.hpp>
 #include <adelie_core/util/types.hpp>
-#ifdef ADELIE_CORE_DEBUG
-#undef ADELIE_CORE_DEBUG
-#define _ADELIE_CORE_DEBUG
-#endif
-#include <adelie_core/solver/solver_bvls.hpp>
 
 namespace adelie_core {
-namespace optimization {
+namespace state {
 
 template <class MatrixType,
           class ValueType=typename std::decay_t<MatrixType>::value_t,
           class IndexType=Eigen::Index,
           class BoolType=bool>
-struct StateNNLS
+struct StateBVLS
 {
     using matrix_t = MatrixType;
     using value_t = ValueType;
@@ -33,12 +28,16 @@ struct StateNNLS
     /* static states */
     const value_t y_var;
     const map_cvec_value_t X_vars;
+    const map_cvec_value_t lower;
+    const map_cvec_value_t upper;
+    const map_cvec_value_t weights;
 
     /* configurations */
     const size_t kappa;
     const size_t max_iters;
     const value_t tol;
 
+    /* dynamic states */
     size_t screen_set_size;
     map_vec_index_t screen_set;
     map_vec_bool_t is_screen;
@@ -52,12 +51,26 @@ struct StateNNLS
     size_t iters = 0;
     size_t n_kkt = 0;
 
-    double time_elapsed = 0;
+    // debug
+    std::vector<double> benchmark_fit_active;
+    std::vector<double> benchmark_fit_screen;
+    std::vector<double> benchmark_gradient;
+    std::vector<double> benchmark_viols_sort;
 
-    explicit StateNNLS(
+    std::vector<vec_value_t> dbg_beta;
+    std::vector<vec_index_t> dbg_active_set;
+    std::vector<size_t> dbg_iter;
+    std::vector<value_t> dbg_loss;
+
+    virtual ~StateBVLS() =default;
+
+    explicit StateBVLS(
         matrix_t& X,
         value_t y_var,
         const Eigen::Ref<const vec_value_t>& X_vars,
+        const Eigen::Ref<const vec_value_t>& lower,
+        const Eigen::Ref<const vec_value_t>& upper,
+        const Eigen::Ref<const vec_value_t>& weights,
         size_t kappa,
         size_t max_iters,
         value_t tol,
@@ -75,6 +88,9 @@ struct StateNNLS
         X(&X),
         y_var(y_var),
         X_vars(X_vars.data(), X_vars.size()),
+        lower(lower.data(), lower.size()),
+        upper(upper.data(), upper.size()),
+        weights(weights.data(), weights.size()),
         kappa(kappa),
         max_iters(max_iters),
         tol(tol),
@@ -95,6 +111,21 @@ struct StateNNLS
         if (X_vars.size() != p) {
             throw util::adelie_core_solver_error(
                 "X_vars must be (p,) where X is (n, p). "
+            );
+        }
+        if (lower.size() != p) {
+            throw util::adelie_core_solver_error(
+                "lower must be (p,) where X is (n, p). "
+            );
+        }
+        if (upper.size() != p) {
+            throw util::adelie_core_solver_error(
+                "upper must be (p,) where X is (n, p). "
+            );
+        }
+        if (weights.size() != n) {
+            throw util::adelie_core_solver_error(
+                "weights must be (n,) where X is (n, p). "
             );
         }
         if (kappa <= 0) {
@@ -124,7 +155,7 @@ struct StateNNLS
         }
         if (beta.size() != p) {
             throw util::adelie_core_solver_error(
-                "beta must be (p,) where X is (n, p). "
+                "beta must be (p,) where X is (p, n). "
             );
         }
         if (resid.size() != n) {
@@ -138,23 +169,7 @@ struct StateNNLS
             );
         }
     }
-
-    template <class EarlyExitType, class LowerType, class UpperType>
-    void solve(
-        EarlyExitType early_exit_f,
-        LowerType lower,
-        UpperType upper
-    )
-    {
-        const auto weights = vec_value_t::Ones(resid.size());
-        solver::bvls::solve(*this, lower, upper, weights, early_exit_f); 
-    }
 };
 
-} // namespace optimization
+} // namespace state
 } // namespace adelie_core
-
-#ifdef _ADELIE_CORE_DEBUG
-#undef _ADELIE_CORE_DEBUG
-#define ADELIE_CORE_DEBUG
-#endif

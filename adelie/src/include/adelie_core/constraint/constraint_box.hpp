@@ -1,7 +1,7 @@
 #pragma once
 #include <adelie_core/configs.hpp>
 #include <adelie_core/constraint/constraint_base.hpp>
-#include <adelie_core/optimization/hinge_full.hpp>
+#include <adelie_core/optimization/pinball_full.hpp>
 
 namespace adelie_core {
 namespace constraint {
@@ -115,9 +115,8 @@ public:
 private:
     const size_t _max_iters;
     const value_t _tol;
-    const size_t _nnls_max_iters;
-    const value_t _nnls_tol;
-    const value_t _cs_tol;
+    const size_t _pinball_max_iters;
+    const value_t _pinball_tol;
     const value_t _slack;
 
     vec_value_t _mu;
@@ -128,28 +127,23 @@ public:
         const Eigen::Ref<const vec_value_t>& u,
         size_t max_iters,
         value_t tol,
-        size_t nnls_max_iters,
-        value_t nnls_tol,
-        value_t cs_tol,
+        size_t pinball_max_iters,
+        value_t pinball_tol,
         value_t slack
     ):
         base_t(l, u),
         _max_iters(max_iters),
         _tol(tol),
-        _nnls_max_iters(nnls_max_iters),
-        _nnls_tol(nnls_tol),
-        _cs_tol(cs_tol),
+        _pinball_max_iters(pinball_max_iters),
+        _pinball_tol(pinball_tol),
         _slack(slack),
         _mu(vec_value_t::Zero(l.size()))
     {
         if (tol < 0) {
             throw util::adelie_core_error("tol must be >= 0.");
         }
-        if (nnls_tol < 0) {
-            throw util::adelie_core_error("nnls_tol must be >= 0.");
-        }
-        if (cs_tol < 0) {
-            throw util::adelie_core_error("cs_tol must be >= 0.");
+        if (pinball_tol < 0) {
+            throw util::adelie_core_error("pinball_tol must be >= 0.");
         }
         if (slack <= 0 || slack >= 1) {
             throw util::adelie_core_error("slack must be in (0,1).");
@@ -212,10 +206,8 @@ public:
             const auto is_u_zero = (_u <= 0).template cast<value_t>();
             const auto is_l_zero = (_l <= 0).template cast<value_t>();
             _mu = Qv.max(
-                (-_cs_tol) * (1 - is_l_zero) / (_l + is_l_zero) +
                 (-Configs::max_solver_value) * is_l_zero
             ).min(
-                _cs_tol * (1 - is_u_zero) / (_u + is_u_zero) +
                 Configs::max_solver_value * is_u_zero
             );
             const auto mu_resid_norm_sq = (Qv - _mu).square().sum();
@@ -256,12 +248,13 @@ public:
             );
         };
         const auto compute_proximal_newton_step = [&](
-            const auto& hess
+            const auto& hess,
+            const auto var
         ) {
-            optimization::StateHingeFull<colmat_value_t> state_hinge(
-                hess, _l, _u, _nnls_max_iters, _nnls_tol, _mu, grad 
+            optimization::StatePinballFull<colmat_value_t> state_pinball(
+                hess, _l, _u, var, _pinball_max_iters, _pinball_tol, _mu, grad 
             );
-            state_hinge.solve();
+            state_pinball.solve();
         };
         const auto save_additional_prev = [&](bool is_in_ellipse) {
             mu_prev = _mu;
@@ -299,6 +292,21 @@ public:
     {
         out = mu;
     }
+
+    value_t solve_zero(
+        const Eigen::Ref<const vec_value_t>& v,
+        Eigen::Ref<vec_uint64_t> 
+    ) override
+    {
+        const auto is_u_zero = (_u <= 0).template cast<value_t>();
+        const auto is_l_zero = (_l <= 0).template cast<value_t>();
+        _mu = v.max(
+            (-Configs::max_solver_value) * is_l_zero
+        ).min(
+            Configs::max_solver_value * is_u_zero
+        );
+        return (v - _mu).matrix().norm();
+    };
 
     void clear() override 
     {

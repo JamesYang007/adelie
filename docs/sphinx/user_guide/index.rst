@@ -14,3 +14,4 @@ User Guide
     notebooks/parallelism
     notebooks/examples
     notebooks/faq
+    notebooks/sklearn_api

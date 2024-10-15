@@ -186,6 +186,7 @@ adelie.matrix
 
     block_diag
     concatenate
+    convex_relu
     dense
     eager_cov
     interaction
@@ -197,6 +198,23 @@ adelie.matrix
     sparse
     standardize
     subset
+
+
+adelie.sklearn
+--------------
+
+
+.. currentmodule:: adelie.sklearn
+
+
+.. automodule:: adelie.sklearn
+    
+
+.. autosummary::
+    :toctree: generated/
+
+
+    GroupElasticNet
 
 
 adelie.solver
@@ -213,8 +231,10 @@ adelie.solver
     :toctree: generated/
 
 
+    bvls
     gaussian_cov
     grpnet
+    pinball
 
 
 adelie.state
@@ -231,6 +251,7 @@ adelie.state
     :toctree: generated/
 
 
+    bvls
     gaussian_cov
     gaussian_naive
     gaussian_pin_cov
@@ -238,6 +259,7 @@ adelie.state
     glm_naive
     multigaussian_naive
     multiglm_naive
+    pinball
 
 
 .. toctree::

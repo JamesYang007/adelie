@@ -399,8 +399,13 @@ public:
         idx += sizeof(outer_t) * outer_size;
         std::memcpy(outer_ptr, &idx, sizeof(outer_t));
 
+        // flag to detect any errors
+        std::atomic_bool try_failed = false;
+
         // populate outer 
         const auto outer_routine = [&](outer_t j) {
+            if (try_failed.load(std::memory_order_relaxed)) return;
+
             const auto col_j = calldata.col(j);
             outer_t col_bytes = 0;
             for (size_t i = 0; i < n_ctg; ++i) {
@@ -412,16 +417,8 @@ public:
                         const outer_t cidx = chnk + c;
                         if (cidx >= n) break;
                         if (col_j[cidx] >= static_cast<int8_t>(n_ctg)) {
-                            const auto n_ctg_str = std::to_string(n_ctg-1);
-                            throw util::adelie_core_error(
-                                "Detected a value greater than > " + n_ctg_str + ":"
-                                "\n\tcalldata[" + std::to_string(cidx) +
-                                ", " + std::to_string(j) +
-                                "] = " + std::to_string(col_j[cidx]) +
-                                "\nMake sure calldata only contains values <= " +
-                                n_ctg_str +
-                                "."
-                            );
+                            try_failed = true;
+                            return;
                         }
                         const bool to_not_skip = (
                             ((i == 0) && (col_j[cidx] < 0)) ||
@@ -444,6 +441,14 @@ public:
             for (int j = 0; j < static_cast<int>(p); ++j) outer_routine(j);
         }
         benchmark["outer_time"] = sw.elapsed();
+        
+        if (try_failed) {
+            const auto n_ctg_str = std::to_string(n_ctg-1);
+            throw util::adelie_core_error(
+                "Detected a value greater than > " + n_ctg_str + ". "
+                "Make sure calldata only contains values <= " + n_ctg_str + ". "
+            );
+        }
 
         // cumsum outer
         for (outer_t j = 0; j < p; ++j) {
@@ -465,7 +470,10 @@ public:
         idx = outer_last;
 
         // populate (column) inner buffers
+        try_failed = false;
         const auto inner_routine = [&](outer_t j) {
+            if (try_failed.load(std::memory_order_relaxed)) return;
+
             const auto col_j = calldata.col(j);
             const outer_t outer_curr = internal::read_as<outer_t>(outer_ptr + sizeof(outer_t) * (j+1));
             const outer_t outer_prev = internal::read_as<outer_t>(outer_ptr + sizeof(outer_t) * j);
@@ -515,12 +523,7 @@ public:
             }
 
             if (cidx != static_cast<size_t>(buffer_j.size())) {
-                throw util::adelie_core_error(
-                    "Column index certificate does not match expected size:"
-                    "\n\tCertificate:   " + std::to_string(cidx) +
-                    "\n\tExpected size: " + std::to_string(buffer_j.size()) +
-                    "\nThis is likely a bug in the code. Please report it! "
-                );
+                try_failed = true;
             }
         };
         sw.start();
@@ -531,6 +534,13 @@ public:
             for (int j = 0; j < static_cast<int>(p); ++j) inner_routine(j);
         }
         benchmark["inner"] = sw.elapsed();
+
+        if (try_failed) {
+            throw util::adelie_core_error(
+                "Column index certificate does not match expected size. "
+                "This is likely a bug in the code. Please report it! "
+            );
+        }
         
         sw.start();
         auto file_ptr = fopen_safe(_filename.c_str(), "wb");

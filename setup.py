@@ -25,8 +25,9 @@ def run_cmd(cmd):
     return output.rstrip()
 
 
-# Optional multithreaded build
-ParallelCompile("NPY_NUM_BUILD_JOBS").install()
+# Limit number of threads to 1 if Windows.
+ParallelCompile("NPY_NUM_BUILD_JOBS", max=os.name == "nt").install()
+
 
 if os.name == "posix":
     # GCC + Clang options to be extra stringent with warnings.
@@ -39,7 +40,6 @@ if os.name == "posix":
         "-O3",
     ]
 elif os.name == "nt":
-    # MSVC defauls to /W3 and /O2, but we make them explicit anyways.
     extra_compile_args = [
         "/W3",
         "/WX",
@@ -49,6 +49,7 @@ elif os.name == "nt":
         "/wd4267", # 'var' : conversion from 'size_t' to 'type', possible loss of data
         "/wd4849", # OpenMP 'clause' clause ignored in 'directive' directive
         "/O2",
+        "/MP1",
     ]
 include_dirs = [
     os.path.join("adelie", "src"),

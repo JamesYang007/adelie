@@ -1,10 +1,9 @@
 #include "decl.hpp"
+#include <adelie_core/matrix/matrix_constraint_dense.hpp>
 #include <adelie_core/optimization/linqp_full.hpp>
-#include <adelie_core/optimization/nnls.hpp>
-#include <adelie_core/optimization/nnqp_full.hpp>
-#include <adelie_core/optimization/hinge_full.hpp>
-#include <adelie_core/optimization/hinge_low_rank.hpp>
 #include <adelie_core/optimization/lasso_full.hpp>
+#include <adelie_core/optimization/nnqp_full.hpp>
+#include <adelie_core/optimization/pinball_full.hpp>
 #include <adelie_core/optimization/search_pivot.hpp>
 #include <adelie_core/optimization/symmetric_penalty.hpp>
 #include <adelie_core/util/stopwatch.hpp>
@@ -95,80 +94,6 @@ void nnqp_full(py::module_& m, const char* name)
 }
 
 template <class MatrixType>
-void nnls(py::module_& m, const char* name)
-{
-    using state_t = ad::optimization::StateNNLS<MatrixType>;
-    using matrix_t = typename state_t::matrix_t;
-    using value_t = typename state_t::value_t;
-    using vec_value_t = typename state_t::vec_value_t;
-    py::class_<state_t>(m, name, R"delimiter(
-    Solves the non-negative least squares (NNLS) problem.
-
-    The non-negative least squares problem is given by
-
-    .. math::
-        \begin{align*}
-            \mathrm{minimize}_{\beta \geq 0} 
-            \frac{1}{2} \|y - X\beta\|_2^2
-        \end{align*}
-
-    Parameters
-    ----------
-    X : (n, d) ndarray
-        Feature matrix.
-    X_vars : (d,) ndarray
-        :math:`\ell_2`-norm squared of the columns of ``X``.
-    max_iters : int
-        Maximum number of coordinate descent iterations.
-    tol : float
-        Convergence tolerance.
-    beta : (d,) ndarray
-        Solution vector.
-    resid : (n,) ndarray
-        Residual vector :math:`y - X \beta`.
-    loss : float
-        Loss :math:`1/2 \|y-X\beta\|_2^2`.
-    )delimiter")
-        .def(py::init<
-            const Eigen::Ref<const matrix_t>&,
-            const Eigen::Ref<const vec_value_t>&,
-            size_t,
-            value_t,
-            Eigen::Ref<vec_value_t>,
-            Eigen::Ref<vec_value_t>,
-            value_t 
-        >(),
-            py::arg("X").noconvert(),
-            py::arg("X_vars").noconvert(),
-            py::arg("max_iters"),
-            py::arg("tol"),
-            py::arg("beta"),
-            py::arg("resid"),
-            py::arg("loss")
-        )
-        .def_readonly("X", &state_t::X)
-        .def_readonly("X_vars", &state_t::X_vars)
-        .def_readonly("max_iters", &state_t::max_iters)
-        .def_readonly("tol", &state_t::tol)
-        .def_readonly("beta", &state_t::beta)
-        .def_readonly("resid", &state_t::resid)
-        .def_readonly("loss", &state_t::loss)
-        .def_readonly("time_elapsed", &state_t::time_elapsed)
-        .def("solve", [](state_t& state) {
-            using sw_t = ad::util::Stopwatch;
-            sw_t sw;
-            sw.start();
-            state.solve(
-                [](){return false;}, 
-                [](auto) {return 0;},
-                [](auto) {return std::numeric_limits<value_t>::infinity();}
-            );
-            state.time_elapsed = sw.elapsed();
-        })
-        ;
-}
-
-template <class MatrixType>
 void lasso_full(py::module_& m, const char* name)
 {
     using state_t = ad::optimization::StateLassoFull<MatrixType>;
@@ -238,16 +163,16 @@ void lasso_full(py::module_& m, const char* name)
 }
 
 template <class MatrixType>
-void hinge_full(py::module_& m, const char* name)
+void pinball_full(py::module_& m, const char* name)
 {
-    using state_t = ad::optimization::StateHingeFull<MatrixType>;
+    using state_t = ad::optimization::StatePinballFull<MatrixType>;
     using matrix_t = typename state_t::matrix_t;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
     py::class_<state_t>(m, name, R"delimiter(
-    Solves the hinge problem.
+    Solves the pinball least squares problem.
 
-    The hinge problem is given by
+    The pinball least squares problem is given by
 
     .. math::
         \begin{align*}
@@ -266,6 +191,8 @@ void hinge_full(py::module_& m, const char* name)
         Penalty factor :math:`\omega_-` on the non-positive values.
     penalty_pos : (n,) ndarray
         Penalty factor :math:`\omega_+` on the non-negative values.
+    y_var : float
+        Scale of the problem.
     max_iters : int
         Maximum number of coordinate descent iterations.
     tol : float
@@ -279,6 +206,7 @@ void hinge_full(py::module_& m, const char* name)
             const Eigen::Ref<const matrix_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
+            value_t,
             size_t,
             value_t,
             Eigen::Ref<vec_value_t>,
@@ -287,6 +215,7 @@ void hinge_full(py::module_& m, const char* name)
             py::arg("quad").noconvert(),
             py::arg("penalty_neg").noconvert(),
             py::arg("penalty_pos").noconvert(),
+            py::arg("y_var"),
             py::arg("max_iters"),
             py::arg("tol"),
             py::arg("x"),
@@ -295,127 +224,11 @@ void hinge_full(py::module_& m, const char* name)
         .def_readonly("quad", &state_t::quad)
         .def_readonly("penalty_neg", &state_t::penalty_neg)
         .def_readonly("penalty_pos", &state_t::penalty_pos)
+        .def_readonly("y_var", &state_t::y_var)
         .def_readonly("max_iters", &state_t::max_iters)
         .def_readonly("tol", &state_t::tol)
         .def_readonly("iters", &state_t::iters)
         .def_readonly("x", &state_t::x)
-        .def_readonly("grad", &state_t::grad)
-        .def_readonly("time_elapsed", &state_t::time_elapsed)
-        .def("solve", [](state_t& state) {
-            using sw_t = ad::util::Stopwatch;
-            sw_t sw;
-            sw.start();
-            state.solve();
-            state.time_elapsed = sw.elapsed();
-        })
-        ;
-}
-
-template <class ValueType>
-void hinge_low_rank(py::module_& m, const char* name)
-{
-    using dyn_vec_index_t = std::vector<Eigen::Index>;
-    using dyn_vec_value_t = std::vector<ValueType>;
-    using state_t = ad::optimization::StateHingeLowRank<
-        ValueType, 
-        Eigen::Index, 
-        dyn_vec_index_t,
-        dyn_vec_value_t
-    >;
-    using value_t = typename state_t::value_t;
-    using vec_value_t = typename state_t::vec_value_t;
-    using colmat_value_t = typename state_t::colmat_value_t;
-    using rowmat_value_t = typename state_t::rowmat_value_t;
-    py::class_<state_t>(m, name, R"delimiter(
-    Solves the low-rank hinge problem.
-
-    The low-rank hinge problem is given by
-
-    .. math::
-        \begin{align*}
-            \mathrm{minimize} 
-            \frac{1}{2} x^\top A S A^\top x - v^\top x + \omega_+^\top x_+ + \omega_-^\top x_-
-        \end{align*}
-
-    where :math:`S` is a dense positive semi-definite matrix
-    and :math:`\omega_{\pm}` are non-negative vectors.
-
-    Parameters
-    ----------
-    quad : (n, n) ndarray
-        Full positive semi-definite dense matrix :math:`S`.
-    A : (m, n) ndarray
-        Dense matrix :math:`A`.
-    penalty_neg : (m,) ndarray
-        Penalty factor :math:`\omega_-` on the non-positive values.
-    penalty_pos : (m,) ndarray
-        Penalty factor :math:`\omega_+` on the non-negative values.
-    batch_size : int
-        Batch size during KKT check.
-    max_iters : int
-        Maximum number of coordinate descent iterations.
-    tol : float
-        Convergence tolerance.
-    n_threads : int
-        Number of threads.
-    active_set : (m,) ndarray
-        Active set indices.
-    active_value : (m,) ndarray
-        Active set values.
-    active_vars : (m,) ndarray
-        Active variances.
-    active_AQ : (m, d) ndarray
-        Active scaled rows of ``A``.
-    resid : (n,) ndarray
-        Residual vector.
-    grad : (m,) ndarray
-        Gradient vector.
-    )delimiter")
-        .def(py::init<
-            const Eigen::Ref<const colmat_value_t>&,
-            const Eigen::Ref<const rowmat_value_t>&,
-            const Eigen::Ref<const vec_value_t>&,
-            const Eigen::Ref<const vec_value_t>&,
-            size_t,
-            size_t,
-            value_t,
-            size_t,
-            dyn_vec_index_t&,
-            dyn_vec_value_t&,
-            Eigen::Ref<vec_value_t>,
-            Eigen::Ref<rowmat_value_t>,
-            Eigen::Ref<vec_value_t>,
-            Eigen::Ref<vec_value_t>
-        >(),
-            py::arg("quad").noconvert(),
-            py::arg("A").noconvert(),
-            py::arg("penalty_neg").noconvert(),
-            py::arg("penalty_pos").noconvert(),
-            py::arg("batch_size"),
-            py::arg("max_iters"),
-            py::arg("tol"),
-            py::arg("n_threads"),
-            py::arg("active_set"),
-            py::arg("active_value"),
-            py::arg("active_vars"),
-            py::arg("active_AQ"),
-            py::arg("resid"),
-            py::arg("grad")
-        )
-        .def_readonly("quad", &state_t::quad)
-        .def_readonly("A", &state_t::A)
-        .def_readonly("penalty_neg", &state_t::penalty_neg)
-        .def_readonly("penalty_pos", &state_t::penalty_pos)
-        .def_readonly("batch_size", &state_t::batch_size)
-        .def_readonly("max_iters", &state_t::max_iters)
-        .def_readonly("tol", &state_t::tol)
-        .def_readonly("n_threads", &state_t::n_threads)
-        .def_readonly("iters", &state_t::iters)
-        .def_readonly("active_set", &state_t::active_set)
-        .def_readonly("active_value", &state_t::active_value)
-        .def_readonly("active_vars", &state_t::active_vars)
-        .def_readonly("active_AQ", &state_t::active_AQ)
-        .def_readonly("resid", &state_t::resid)
         .def_readonly("grad", &state_t::grad)
         .def_readonly("time_elapsed", &state_t::time_elapsed)
         .def("solve", [](state_t& state) {
@@ -583,8 +396,6 @@ void register_optimization(py::module_& m)
 
     linqp_full<ad::util::colmat_type<double>>(m, "StateLinQPFull");
     nnqp_full<ad::util::colmat_type<double>>(m, "StateNNQPFull");
-    nnls<ad::util::colmat_type<double>>(m, "StateNNLS");
     lasso_full<ad::util::colmat_type<double>>(m, "StateLassoFull");
-    hinge_full<ad::util::colmat_type<double>>(m, "StateHingeFull");
-    hinge_low_rank<double>(m, "StateHingeLowRank");
+    pinball_full<ad::util::colmat_type<double>>(m, "StatePinballFull");
 }

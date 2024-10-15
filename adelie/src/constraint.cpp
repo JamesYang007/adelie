@@ -3,6 +3,7 @@
 #include <adelie_core/constraint/constraint_box.hpp>
 #include <adelie_core/constraint/constraint_linear.hpp>
 #include <adelie_core/constraint/constraint_one_sided.hpp>
+#include <adelie_core/matrix/matrix_constraint_base.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -73,6 +74,19 @@ public:
             base_t,
             project,
             x
+        );
+    }
+
+    value_t solve_zero(
+        const Eigen::Ref<const vec_value_t>& v,
+        Eigen::Ref<vec_uint64_t> buffer
+    ) override
+    {
+        PYBIND11_OVERRIDE(
+            value_t,
+            base_t,
+            solve_zero,
+            v, buffer
         );
     }
 
@@ -282,6 +296,35 @@ void constraint_base(py::module_& m, const char* name)
         )delimiter",
             py::arg("x").noconvert()
         )
+        .def("solve_zero", &internal_t::solve_zero, R"delimiter(
+        Solves the zero primal KKT condition problem.
+
+        The zero primal KKT condition problem is given by
+
+        .. math::
+            \begin{align*}
+                \mathrm{minimize}_{\mu \geq 0}
+                \|v - \phi'(0)^\top \mu\|_2
+            \end{align*}
+
+        where :math:`\phi` is the current constraint function
+        and :math:`\mu` is the dual variable.
+        It is advised, but not necessary, that the object stores the solution internally
+        so that a subsequent call to :func:`dual` will return the solution.
+
+        Parameters
+        ----------
+        v : (d,) ndarray
+            The vector :math:`v`.
+        buffer : (b,) ndarray
+            Buffer of type ``uint64_t`` aligned at 8 bytes.
+            The size must be at least as large as :func:`buffer_size`.
+
+        Returns
+        -------
+        norm : float
+            The optimal objective for the zero primal KKT condition problem.
+        )delimiter")
         .def("clear", &internal_t::clear, R"delimiter(
         Clears internal data.
 
@@ -363,57 +406,40 @@ void constraint_box_proximal_newton(py::module_& m, const char* name)
             value_t,
             size_t,
             value_t,
-            value_t,
             value_t
         >(), 
             py::arg("lower").noconvert(),
             py::arg("upper").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("nnls_max_iters"),
-            py::arg("nnls_tol"),
-            py::arg("cs_tol"),
+            py::arg("pinball_max_iters"),
+            py::arg("pinball_tol"),
             py::arg("slack")
         )
         ;
 }
 
-template <class ValueType>
-void constraint_linear_base(py::module_& m, const char* name)
-{
-    using internal_t = ad::constraint::ConstraintLinearBase<ValueType>;
-    using base_t = typename internal_t::base_t;
-    py::class_<internal_t, base_t>(m, name, 
-        "Core constraint base class for linear constraint."
-        )
-        ;
-}
-
-template <class ValueType>
+template <class AType>
 void constraint_linear_proximal_newton(py::module_& m, const char* name)
 {
-    using internal_t = ad::constraint::ConstraintLinearProximalNewton<ValueType>;
+    using internal_t = ad::constraint::ConstraintLinearProximalNewton<AType>;
+    using A_t = typename internal_t::A_t;
     using base_t = typename internal_t::base_t;
     using value_t = typename internal_t::value_t;
     using vec_value_t = typename internal_t::vec_value_t;
-    using rowmat_value_t = typename internal_t::rowmat_value_t;
-    using colmat_value_t = typename internal_t::colmat_value_t;
     py::class_<internal_t, base_t>(m, name, 
         "Core constraint class for linear constraint with proximal Newton solver."
         )
         .def(py::init<
-            const Eigen::Ref<const rowmat_value_t>&,
+            A_t&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
-            const Eigen::Ref<const colmat_value_t>&,
-            const Eigen::Ref<const vec_value_t>&,
-            const Eigen::Ref<const rowmat_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             size_t,
             value_t,
             size_t,
-            size_t,
             value_t,
+            size_t,
             value_t,
             value_t,
             size_t
@@ -421,16 +447,13 @@ void constraint_linear_proximal_newton(py::module_& m, const char* name)
             py::arg("A").noconvert(),
             py::arg("lower").noconvert(),
             py::arg("upper").noconvert(),
-            py::arg("A_u").noconvert(),
-            py::arg("A_d").noconvert(),
-            py::arg("A_vh").noconvert(),
             py::arg("A_vars").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("nnls_batch_size"),
             py::arg("nnls_max_iters"),
             py::arg("nnls_tol"),
-            py::arg("cs_tol"),
+            py::arg("pinball_max_iters"),
+            py::arg("pinball_tol"),
             py::arg("slack"),
             py::arg("n_threads")
         )
@@ -466,16 +489,14 @@ void constraint_one_sided_proximal_newton(py::module_& m, const char* name)
             value_t,
             size_t,
             value_t,
-            value_t,
             value_t
         >(), 
             py::arg("sgn").noconvert(),
             py::arg("b").noconvert(),
             py::arg("max_iters"),
             py::arg("tol"),
-            py::arg("nnls_max_iters"),
-            py::arg("nnls_tol"),
-            py::arg("cs_tol"),
+            py::arg("pinball_max_iters"),
+            py::arg("pinball_tol"),
             py::arg("slack")
         )
         ;
@@ -522,10 +543,8 @@ void register_constraint(py::module_& m)
     constraint_box_proximal_newton<double>(m, "ConstraintBoxProximalNewton64");
     constraint_box_proximal_newton<float>(m, "ConstraintBoxProximalNewton32");
 
-    constraint_linear_base<double>(m, "ConstraintLinearBase64");
-    constraint_linear_base<float>(m, "ConstraintLinearBase32");
-    constraint_linear_proximal_newton<double>(m, "ConstraintLinearProximalNewton64");
-    constraint_linear_proximal_newton<float>(m, "ConstraintLinearProximalNewton32");
+    constraint_linear_proximal_newton<ad::matrix::MatrixConstraintBase<double>>(m, "ConstraintLinearProximalNewton64");
+    constraint_linear_proximal_newton<ad::matrix::MatrixConstraintBase<float>>(m, "ConstraintLinearProximalNewton32");
 
     constraint_one_sided_base<double>(m, "ConstraintOneSidedBase64");
     constraint_one_sided_base<float>(m, "ConstraintOneSidedBase32");
