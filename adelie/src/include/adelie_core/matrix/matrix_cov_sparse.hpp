@@ -1,6 +1,5 @@
 #pragma once
 #include <adelie_core/matrix/matrix_cov_base.hpp>
-#include <adelie_core/matrix/utils.hpp>
 
 namespace adelie_core {
 namespace matrix {
@@ -33,14 +32,7 @@ public:
         const Eigen::Ref<const vec_sp_index_t>& inner,
         const Eigen::Ref<const vec_sp_value_t>& value,
         size_t n_threads
-    ): 
-        _mat(rows, cols, nnz, outer.data(), inner.data(), value.data()),
-        _n_threads(n_threads)
-    {
-        if (n_threads < 1) {
-            throw util::adelie_core_error("n_threads must be >= 1.");
-        }
-    }
+    );
 
     using base_t::rows;
     
@@ -49,63 +41,20 @@ public:
         const Eigen::Ref<const vec_index_t>& indices,
         const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
-    ) override
-    {
-        base_t::check_bmul(subset.size(), indices.size(), values.size(), out.size(), rows(), cols());
-        out.setZero();
-        for (int j_idx = 0; j_idx < subset.size(); ++j_idx) {
-            const auto j = subset[j_idx];
-            const auto outer = _mat.outerIndexPtr()[j];
-            const auto size = _mat.outerIndexPtr()[j+1] - outer;
-            const Eigen::Map<const vec_sp_index_t> inner(
-                _mat.innerIndexPtr() + outer, size
-            );
-            const Eigen::Map<const vec_sp_value_t> value(
-                _mat.valuePtr() + outer, size
-            );
-            out[j_idx] = svsvdot(indices, values, inner, value);
-        }
-    }
+    ) override;
 
     void mul(
         const Eigen::Ref<const vec_index_t>& indices,
         const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
-    ) override
-    {
-        base_t::check_mul(indices.size(), values.size(), out.size(), rows(), cols());
-        const auto routine = [&](int j) {
-            const auto outer = _mat.outerIndexPtr()[j];
-            const auto size = _mat.outerIndexPtr()[j+1] - outer;
-            const Eigen::Map<const vec_sp_index_t> inner(
-                _mat.innerIndexPtr() + outer, size
-            );
-            const Eigen::Map<const vec_sp_value_t> value(
-                _mat.valuePtr() + outer, size
-            );
-            out[j] = svsvdot(indices, values, inner, value);
-        };
-        if (_n_threads <= 1) {
-            for (int j = 0; j < _mat.cols(); ++j) routine(j);
-        } else {
-            #pragma omp parallel for schedule(static) num_threads(_n_threads)
-            for (int j = 0; j < _mat.cols(); ++j) routine(j);
-        }
-    } 
+    ) override;
 
     void to_dense(
         int i, int p,
         Eigen::Ref<colmat_value_t> out
-    ) override
-    {
-        base_t::check_to_dense(i, p, out.rows(), out.cols(), rows(), cols());
-        out = _mat.block(i, i, p, p);
-    }
+    ) override;
 
-    int cols() const override
-    {
-        return _mat.cols();
-    }
+    int cols() const override;
 };
 
 } // namespace matrix

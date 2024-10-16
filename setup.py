@@ -25,8 +25,7 @@ def run_cmd(cmd):
     return output.rstrip()
 
 
-# Limit number of threads to 1 if Windows.
-ParallelCompile("NPY_NUM_BUILD_JOBS", max=os.name == "nt").install()
+ParallelCompile("NPY_NUM_BUILD_JOBS").install()
 
 
 if os.name == "posix":
@@ -54,6 +53,7 @@ elif os.name == "nt":
 include_dirs = [
     os.path.join("adelie", "src"),
     os.path.join("adelie", "src", "include"),
+    os.path.join("adelie", "src", "src"),
 ]
 extra_link_args = []
 libraries = []
@@ -145,7 +145,11 @@ else:
 ext_modules = [
     Pybind11Extension(
         "adelie.adelie_core",
-        sorted(glob("adelie/src/*.cpp")),  # Sort source files for reproducibility
+        sorted(
+            glob("adelie/src/src/io/*.cpp") +
+            glob("adelie/src/src/matrix/*.cpp")
+            #glob("adelie/src/*.cpp")
+        ),  # Sort source files for reproducibility
         include_dirs=include_dirs,
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,

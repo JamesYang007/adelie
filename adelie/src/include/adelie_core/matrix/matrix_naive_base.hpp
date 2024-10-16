@@ -1,5 +1,4 @@
 #pragma once
-#include <cstdio>
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/format.hpp>
 #include <adelie_core/util/types.hpp>
