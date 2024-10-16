@@ -1,4 +1,4 @@
-#include "decl.hpp"
+#include "py_decl.hpp"
 #include <adelie_core/configs.hpp>
 
 namespace ad = adelie_core;

@@ -1,4 +1,4 @@
-#include "decl.hpp"
+#include "py_decl.hpp"
 #include <adelie_core/constraint/constraint_base.hpp>
 #include <adelie_core/constraint/constraint_box.hpp>
 #include <adelie_core/constraint/constraint_linear.hpp>

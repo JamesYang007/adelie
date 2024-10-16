@@ -1,4 +1,4 @@
-#include "decl.hpp"
+#include "py_decl.hpp"
 #include <adelie_core/bcd/unconstrained/brent.hpp>
 #include <adelie_core/bcd/unconstrained/ista.hpp>
 #include <adelie_core/bcd/unconstrained/newton.hpp>

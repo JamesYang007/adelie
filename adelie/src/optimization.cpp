@@ -1,4 +1,4 @@
-#include "decl.hpp"
+#include "py_decl.hpp"
 #include <adelie_core/matrix/matrix_constraint_dense.hpp>
 #include <adelie_core/optimization/linqp_full.hpp>
 #include <adelie_core/optimization/lasso_full.hpp>

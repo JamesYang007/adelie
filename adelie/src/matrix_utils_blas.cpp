@@ -1,7 +1,7 @@
 #if defined(__APPLE__)
 #define EIGEN_USE_BLAS
 #endif
-#include "decl.hpp"
+#include "py_decl.hpp"
 #include <adelie_core/matrix/utils.hpp>
 
 namespace ad = adelie_core;

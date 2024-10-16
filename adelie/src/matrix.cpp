@@ -1,4 +1,4 @@
-#include "decl.hpp"
+#include "py_decl.hpp"
 #include <adelie_core/matrix/matrix_constraint_base.hpp>
 #include <adelie_core/matrix/matrix_constraint_dense.hpp>
 #include <adelie_core/matrix/matrix_constraint_sparse.hpp>
