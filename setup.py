@@ -149,6 +149,7 @@ ext_modules = [
             #glob("adelie/src/src/io/*.cpp") +
             #glob("adelie/src/src/matrix/*.cpp") +
             #glob("adelie/src/py_*.cpp")
+            glob("adelie/src/src/glm/*.cpp") +
             glob("adelie/src/src/io/*.cpp") +
             glob("adelie/src/src/matrix/*.cpp") +
             glob("adelie/src/*.cpp")

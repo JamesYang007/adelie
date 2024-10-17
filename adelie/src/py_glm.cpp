@@ -1,12 +1,6 @@
 #include "py_decl.hpp"
-#include <adelie_core/glm/glm_base.hpp>
-#include <adelie_core/glm/glm_binomial.hpp>
-#include <adelie_core/glm/glm_cox.hpp>
-#include <adelie_core/glm/glm_gaussian.hpp>
-#include <adelie_core/glm/glm_multibase.hpp>
-#include <adelie_core/glm/glm_multigaussian.hpp>
-#include <adelie_core/glm/glm_multinomial.hpp>
-#include <adelie_core/glm/glm_poisson.hpp>
+#include <glm/glm.hpp>
+#include <adelie_core/glm/glm_cox.ipp> // export private functions for testing
 
 namespace py = pybind11;
 namespace ad = adelie_core;
