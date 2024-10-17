@@ -6,9 +6,9 @@
 namespace adelie_core {
 namespace io {
 
-template <class MmapPtrType>
+ADELIE_CORE_IO_SNP_PHASED_ANCESTRY_TP
 size_t
-IOSNPPhasedAncestry<MmapPtrType>::read() 
+ADELIE_CORE_IO_SNP_PHASED_ANCESTRY::read() 
 {
     const size_t total_bytes = base_t::read();
 
@@ -40,9 +40,9 @@ IOSNPPhasedAncestry<MmapPtrType>::read()
     return total_bytes;
 }
 
-template <class MmapPtrType>
-typename IOSNPPhasedAncestry<MmapPtrType>::rowarr_value_t
-IOSNPPhasedAncestry<MmapPtrType>::to_dense(
+ADELIE_CORE_IO_SNP_PHASED_ANCESTRY_TP
+typename ADELIE_CORE_IO_SNP_PHASED_ANCESTRY::rowarr_value_t
+ADELIE_CORE_IO_SNP_PHASED_ANCESTRY::to_dense(
     size_t n_threads
 ) const
 {
@@ -74,9 +74,9 @@ IOSNPPhasedAncestry<MmapPtrType>::to_dense(
     return dense;
 }
 
-template <class MmapPtrType>
+ADELIE_CORE_IO_SNP_PHASED_ANCESTRY_TP
 std::tuple<size_t, std::unordered_map<std::string, double>>
-IOSNPPhasedAncestry<MmapPtrType>::write(
+ADELIE_CORE_IO_SNP_PHASED_ANCESTRY::write(
     const Eigen::Ref<const colarr_value_t>& calldata,
     const Eigen::Ref<const colarr_value_t>& ancestries,
     size_t A,

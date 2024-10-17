@@ -1,6 +1,15 @@
 #pragma once
 #include <adelie_core/io/io_snp_unphased.hpp>
 
+#ifndef ADELIE_CORE_IO_SNP_PHASED_ANCESTRY_TP
+#define ADELIE_CORE_IO_SNP_PHASED_ANCESTRY_TP \
+    template <class MmapPtrType>
+#endif
+#ifndef ADELIE_CORE_IO_SNP_PHASED_ANCESTRY
+#define ADELIE_CORE_IO_SNP_PHASED_ANCESTRY \
+    IOSNPPhasedAncestry<MmapPtrType>
+#endif
+
 namespace adelie_core {
 namespace io {
 

@@ -18,9 +18,9 @@
 namespace adelie_core {
 namespace io {
 
-template <class MmapPtrType>
+ADELIE_CORE_IO_SNP_BASE_TP
 size_t
-IOSNPBase<MmapPtrType>::read()
+ADELIE_CORE_IO_SNP_BASE::read()
 {
     _is_read = true;
 

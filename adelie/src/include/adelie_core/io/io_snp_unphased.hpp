@@ -124,6 +124,15 @@ struct IOSNPChunkIterator
     }
 };
 
+#ifndef ADELIE_CORE_IO_SNP_UNPHASED_TP
+#define ADELIE_CORE_IO_SNP_UNPHASED_TP \
+    template <class MmapPtrType>
+#endif
+#ifndef ADELIE_CORE_IO_SNP_UNPHASED
+#define ADELIE_CORE_IO_SNP_UNPHASED \
+    IOSNPUnphased<MmapPtrType>
+#endif
+
 template <class MmapPtrType=std::unique_ptr<char, std::function<void(char*)>>>
 class IOSNPUnphased : public IOSNPBase<MmapPtrType>
 {
