@@ -88,8 +88,8 @@ def box(
 
     See Also
     --------
-    adelie.adelie_core.constraint.ConstraintBoxProximalNewton32
-    adelie.adelie_core.constraint.ConstraintBoxProximalNewton64
+    adelie.adelie_core.constraint.ConstraintBox32
+    adelie.adelie_core.constraint.ConstraintBox64
     """
     lower, l_dtype = _coerce_dtype(lower, dtype)
     upper, u_dtype = _coerce_dtype(upper, dtype)
@@ -101,8 +101,8 @@ def box(
 
     core_base = {
         "proximal-newton": {
-            np.float32: core.constraint.ConstraintBoxProximalNewton32,
-            np.float64: core.constraint.ConstraintBoxProximalNewton64,
+            np.float32: core.constraint.ConstraintBox32,
+            np.float64: core.constraint.ConstraintBox64,
         },
     }[method][dtype]
 
@@ -232,8 +232,8 @@ def linear(
 
     See Also
     --------
-    adelie.adelie_core.constraint.ConstraintLinearProximalNewton32
-    adelie.adelie_core.constraint.ConstraintLinearProximalNewton64
+    adelie.adelie_core.constraint.ConstraintLinear32
+    adelie.adelie_core.constraint.ConstraintLinear64
     """
     if isinstance(A, np.ndarray):
         if vars is None:
@@ -262,8 +262,8 @@ def linear(
 
     core_base = {
         "proximal-newton": {
-            np.float32: core.constraint.ConstraintLinearProximalNewton32,
-            np.float64: core.constraint.ConstraintLinearProximalNewton64,
+            np.float32: core.constraint.ConstraintLinear32,
+            np.float64: core.constraint.ConstraintLinear64,
         },
     }[method][dtype]
 
@@ -425,16 +425,16 @@ def one_sided(
     --------
     adelie.adelie_core.constraint.ConstraintOneSidedADMM32
     adelie.adelie_core.constraint.ConstraintOneSidedADMM64
-    adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton32
-    adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton64
+    adelie.adelie_core.constraint.ConstraintOneSided32
+    adelie.adelie_core.constraint.ConstraintOneSided64
     """
     b, dtype = _coerce_dtype(b, dtype)
     b = np.minimum(b, Configs.max_solver_value)
 
     core_base = {
         "proximal-newton": {
-            np.float32: core.constraint.ConstraintOneSidedProximalNewton32,
-            np.float64: core.constraint.ConstraintOneSidedProximalNewton64,
+            np.float32: core.constraint.ConstraintOneSided32,
+            np.float64: core.constraint.ConstraintOneSided64,
         },
         "admm": {
             np.float32: core.constraint.ConstraintOneSidedADMM32,

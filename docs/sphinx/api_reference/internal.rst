@@ -12,14 +12,14 @@ Internal
     adelie_core.configs.Configs
     adelie_core.constraint.ConstraintBase32
     adelie_core.constraint.ConstraintBase64
-    adelie_core.constraint.ConstraintBoxProximalNewton32
-    adelie_core.constraint.ConstraintBoxProximalNewton64
-    adelie_core.constraint.ConstraintLinearProximalNewton32
-    adelie_core.constraint.ConstraintLinearProximalNewton64
+    adelie_core.constraint.ConstraintBox32
+    adelie_core.constraint.ConstraintBox64
+    adelie_core.constraint.ConstraintLinear32
+    adelie_core.constraint.ConstraintLinear64
+    adelie_core.constraint.ConstraintOneSided32
+    adelie_core.constraint.ConstraintOneSided64
     adelie_core.constraint.ConstraintOneSidedADMM32
     adelie_core.constraint.ConstraintOneSidedADMM64
-    adelie_core.constraint.ConstraintOneSidedProximalNewton32
-    adelie_core.constraint.ConstraintOneSidedProximalNewton64
     adelie_core.glm.GlmBase32
     adelie_core.glm.GlmBase64
     adelie_core.glm.GlmBinomialLogit32

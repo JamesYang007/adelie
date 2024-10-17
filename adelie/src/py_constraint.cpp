@@ -1,9 +1,5 @@
 #include "py_decl.hpp"
-#include <adelie_core/constraint/constraint_base.hpp>
-#include <adelie_core/constraint/constraint_box.hpp>
-#include <adelie_core/constraint/constraint_linear.hpp>
-#include <adelie_core/constraint/constraint_one_sided.hpp>
-#include <adelie_core/matrix/matrix_constraint_base.hpp>
+#include <constraint/constraint.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -69,7 +65,7 @@ public:
         Eigen::Ref<vec_value_t> x
     ) override
     {
-        PYBIND11_OVERRIDE(
+        PYBIND11_OVERRIDE_PURE(
             void,
             base_t,
             project,
@@ -82,7 +78,7 @@ public:
         Eigen::Ref<vec_uint64_t> buffer
     ) override
     {
-        PYBIND11_OVERRIDE(
+        PYBIND11_OVERRIDE_PURE(
             value_t,
             base_t,
             solve_zero,
@@ -112,7 +108,7 @@ public:
         );
     }
 
-    int duals_nnz() override
+    int duals_nnz() const override
     {
         PYBIND11_OVERRIDE_PURE(
             int,
@@ -121,7 +117,7 @@ public:
         );
     }
 
-    int duals() override
+    int duals() const override
     {
         PYBIND11_OVERRIDE_PURE(
             int,
@@ -130,7 +126,7 @@ public:
         );
     }
 
-    int primals() override
+    int primals() const override
     {
         PYBIND11_OVERRIDE_PURE(
             int,
@@ -139,9 +135,9 @@ public:
         );
     }
 
-    size_t buffer_size() override
+    size_t buffer_size() const override
     {
-        PYBIND11_OVERRIDE(
+        PYBIND11_OVERRIDE_PURE(
             size_t,
             base_t,
             buffer_size,
@@ -379,25 +375,14 @@ void constraint_base(py::module_& m, const char* name)
 }
 
 template <class ValueType>
-void constraint_box_base(py::module_& m, const char* name)
+void constraint_box(py::module_& m, const char* name)
 {
-    using internal_t = ad::constraint::ConstraintBoxBase<ValueType>;
-    using base_t = typename internal_t::base_t;
-    py::class_<internal_t, base_t>(m, name, 
-        "Core constraint base class for box constraint."
-        )
-        ;
-}
-
-template <class ValueType>
-void constraint_box_proximal_newton(py::module_& m, const char* name)
-{
-    using internal_t = ad::constraint::ConstraintBoxProximalNewton<ValueType>;
+    using internal_t = ad::constraint::ConstraintBox<ValueType>;
     using base_t = typename internal_t::base_t;
     using value_t = typename internal_t::value_t;
     using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, base_t>(m, name, 
-        "Core constraint class for box constraint with proximal Newton solver."
+        "Core constraint class for box constraint."
         )
         .def(py::init<
             const Eigen::Ref<const vec_value_t>&,
@@ -420,15 +405,15 @@ void constraint_box_proximal_newton(py::module_& m, const char* name)
 }
 
 template <class AType>
-void constraint_linear_proximal_newton(py::module_& m, const char* name)
+void constraint_linear(py::module_& m, const char* name)
 {
-    using internal_t = ad::constraint::ConstraintLinearProximalNewton<AType>;
+    using internal_t = ad::constraint::ConstraintLinear<AType>;
     using A_t = typename internal_t::A_t;
     using base_t = typename internal_t::base_t;
     using value_t = typename internal_t::value_t;
     using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, base_t>(m, name, 
-        "Core constraint class for linear constraint with proximal Newton solver."
+        "Core constraint class for linear constraint."
         )
         .def(py::init<
             A_t&,
@@ -462,25 +447,14 @@ void constraint_linear_proximal_newton(py::module_& m, const char* name)
 
 
 template <class ValueType>
-void constraint_one_sided_base(py::module_& m, const char* name)
+void constraint_one_sided(py::module_& m, const char* name)
 {
-    using internal_t = ad::constraint::ConstraintOneSidedBase<ValueType>;
-    using base_t = typename internal_t::base_t;
-    py::class_<internal_t, base_t>(m, name, 
-        "Core constraint base class for one-sided bound constraint."
-        )
-        ;
-}
-
-template <class ValueType>
-void constraint_one_sided_proximal_newton(py::module_& m, const char* name)
-{
-    using internal_t = ad::constraint::ConstraintOneSidedProximalNewton<ValueType>;
+    using internal_t = ad::constraint::ConstraintOneSided<ValueType>;
     using base_t = typename internal_t::base_t;
     using value_t = typename internal_t::value_t;
     using vec_value_t = typename internal_t::vec_value_t;
     py::class_<internal_t, base_t>(m, name, 
-        "Core constraint class for one-sided bound constraint with proximal Newton solver."
+        "Core constraint class for one-sided bound constraint."
         )
         .def(py::init<
             const Eigen::Ref<const vec_value_t>&,
@@ -538,18 +512,14 @@ void register_constraint(py::module_& m)
     constraint_base<double>(m, "ConstraintBase64");
     constraint_base<float>(m, "ConstraintBase32");
 
-    constraint_box_base<double>(m, "ConstraintBoxBase64");
-    constraint_box_base<float>(m, "ConstraintBoxBase32");
-    constraint_box_proximal_newton<double>(m, "ConstraintBoxProximalNewton64");
-    constraint_box_proximal_newton<float>(m, "ConstraintBoxProximalNewton32");
+    constraint_box<double>(m, "ConstraintBox64");
+    constraint_box<float>(m, "ConstraintBox32");
 
-    constraint_linear_proximal_newton<ad::matrix::MatrixConstraintBase<double>>(m, "ConstraintLinearProximalNewton64");
-    constraint_linear_proximal_newton<ad::matrix::MatrixConstraintBase<float>>(m, "ConstraintLinearProximalNewton32");
+    constraint_linear<ad::matrix::MatrixConstraintBase<double>>(m, "ConstraintLinear64");
+    constraint_linear<ad::matrix::MatrixConstraintBase<float>>(m, "ConstraintLinear32");
 
-    constraint_one_sided_base<double>(m, "ConstraintOneSidedBase64");
-    constraint_one_sided_base<float>(m, "ConstraintOneSidedBase32");
-    constraint_one_sided_proximal_newton<double>(m, "ConstraintOneSidedProximalNewton64");
-    constraint_one_sided_proximal_newton<float>(m, "ConstraintOneSidedProximalNewton32");
+    constraint_one_sided<double>(m, "ConstraintOneSided64");
+    constraint_one_sided<float>(m, "ConstraintOneSided32");
     constraint_one_sided_admm<double>(m, "ConstraintOneSidedADMM64");
     constraint_one_sided_admm<float>(m, "ConstraintOneSidedADMM32");
 }

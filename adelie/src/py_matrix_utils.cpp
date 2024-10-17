@@ -1,7 +1,8 @@
 #include "py_decl.hpp"
-#include <adelie_core/matrix/utils.hpp>
-#include <adelie_core/io/io_snp_unphased.hpp>
 #include <adelie_core/io/io_snp_phased_ancestry.hpp>
+#include <adelie_core/io/io_snp_unphased.hpp>
+#include <adelie_core/matrix/utils.hpp>
+#include <adelie_core/util/stopwatch.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;

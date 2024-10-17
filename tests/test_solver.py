@@ -172,6 +172,9 @@ def zero_constraint(
             self.size = size
             self.mu = np.zeros(size)
 
+        def buffer_size(self):
+            return 0
+
         def solve(self, x, quad, linear, l1, l2, Q, buffer):
             x[...] = 0
             self.mu[...] = linear

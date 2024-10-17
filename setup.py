@@ -146,9 +146,7 @@ ext_modules = [
     Pybind11Extension(
         "adelie.adelie_core",
         sorted(
-            #glob("adelie/src/src/io/*.cpp") +
-            #glob("adelie/src/src/matrix/*.cpp") +
-            #glob("adelie/src/py_*.cpp")
+            glob("adelie/src/src/constraint/*.cpp") +
             glob("adelie/src/src/glm/*.cpp") +
             glob("adelie/src/src/io/*.cpp") +
             glob("adelie/src/src/matrix/*.cpp") +
