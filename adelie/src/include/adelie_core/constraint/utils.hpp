@@ -18,7 +18,8 @@ template <
     class ComputeHardOptimalityType,
     class ComputeConvergenceMeasureType,
     class ComputeProximalNewtonStepType,
-    class SaveAdditionalPrevType>
+    class SaveAdditionalPrevType
+>
 void solve_proximal_newton(
     Eigen::Ref<util::rowvec_type<ValueType>> x,
     const Eigen::Ref<const util::rowvec_type<ValueType>>& quad,

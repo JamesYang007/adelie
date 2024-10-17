@@ -186,12 +186,13 @@ void update_screen_derived_base(
     screen_is_active.resize(screen_set.size(), false);
 }
 
-template <class ConstraintType,
-          class ValueType=typename std::decay_t<ConstraintType>::value_t,
-          class IndexType=Eigen::Index,
-          class BoolType=bool,
-          class SafeBoolType=int8_t
-        >
+template <
+    class ConstraintType,
+    class ValueType=typename std::decay_t<ConstraintType>::value_t,
+    class IndexType=Eigen::Index,
+    class BoolType=bool,
+    class SafeBoolType=int8_t
+>
 struct StateBase
 {
     using constraint_t = ConstraintType;

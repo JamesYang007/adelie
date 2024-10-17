@@ -22,9 +22,11 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class DenseType, 
-          class MaskType,
-          class IndexType=Eigen::Index>
+template <
+    class DenseType, 
+    class MaskType,
+    class IndexType=Eigen::Index
+>
 class MatrixNaiveConvexReluDense: public MatrixNaiveBase<typename DenseType::Scalar, IndexType>
 {
 public:
@@ -63,9 +65,11 @@ public:
     ADELIE_CORE_MATRIX_NAIVE_PURE_OVERRIDE_DECL
 };
 
-template <class SparseType, 
-          class MaskType,
-          class IndexType=Eigen::Index>
+template <
+    class SparseType, 
+    class MaskType,
+    class IndexType=Eigen::Index
+>
 class MatrixNaiveConvexReluSparse: public MatrixNaiveBase<typename SparseType::Scalar, IndexType>
 {
 public:

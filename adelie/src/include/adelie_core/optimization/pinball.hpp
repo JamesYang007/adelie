@@ -10,10 +10,12 @@
 namespace adelie_core {
 namespace optimization {
 
-template <class MatrixType,
-          class ValueType=typename std::decay_t<MatrixType>::value_t,
-          class IndexType=Eigen::Index,
-          class BoolType=bool>
+template <
+    class MatrixType,
+    class ValueType=typename std::decay_t<MatrixType>::value_t,
+    class IndexType=Eigen::Index,
+    class BoolType=bool
+>
 struct StatePinball
 {
     using matrix_t = MatrixType;

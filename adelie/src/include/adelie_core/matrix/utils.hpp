@@ -190,8 +190,13 @@ void dmmeq(
     }
 }
 
-template <util::operator_type op=util::operator_type::_eq, 
-          class MType, class VType, class BuffType, class OutType>
+template <
+    util::operator_type op=util::operator_type::_eq, 
+    class MType, 
+    class VType, 
+    class BuffType, 
+    class OutType
+>
 ADELIE_CORE_STRONG_INLINE
 void dgemv(
     const MType& m,
@@ -298,8 +303,12 @@ auto svsvwdot(
     return sum;
 }
 
-template <class Inner1Type, class Value1Type,
-          class Inner2Type, class Value2Type>
+template <
+    class Inner1Type, 
+    class Value1Type,
+    class Inner2Type, 
+    class Value2Type
+>
 ADELIE_CORE_STRONG_INLINE
 auto svsvdot(
     const Inner1Type& inner_1,

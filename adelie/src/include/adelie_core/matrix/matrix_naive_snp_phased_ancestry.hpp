@@ -17,9 +17,11 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType,
-          class MmapPtrType=std::unique_ptr<char, std::function<void(char*)>>,
-          class IndexType=Eigen::Index>
+template <
+    class ValueType,
+    class MmapPtrType=std::unique_ptr<char, std::function<void(char*)>>,
+    class IndexType=Eigen::Index
+>
 class MatrixNaiveSNPPhasedAncestry: public MatrixNaiveBase<ValueType, IndexType>
 {
 public:

@@ -15,8 +15,7 @@
 namespace adelie_core {
 namespace constraint { 
 
-template <class AType, 
-          class IndexType=Eigen::Index>
+template <class AType, class IndexType=Eigen::Index>
 class ConstraintLinear: public ConstraintBase<
     typename std::decay_t<AType>::value_t, 
     IndexType

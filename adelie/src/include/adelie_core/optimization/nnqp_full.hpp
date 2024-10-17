@@ -4,8 +4,7 @@
 namespace adelie_core {
 namespace optimization {
 
-template <class MatrixType,
-          bool _sign=false>
+template <class MatrixType, bool _sign=false>
 struct StateNNQPFull
 {
     using matrix_t = MatrixType;
