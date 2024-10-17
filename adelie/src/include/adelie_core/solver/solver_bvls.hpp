@@ -8,14 +8,16 @@ namespace adelie_core {
 namespace solver {
 namespace bvls {
 
-template <class StateType, 
-          class LowerType,
-          class UpperType,
-          class WeightsType,
-          class Iter,
-          class ValueType,
-          class EarlyExitType=util::no_op,
-          class AdditionalStepType=util::no_op>
+template <
+    class StateType, 
+    class LowerType,
+    class UpperType,
+    class WeightsType,
+    class Iter,
+    class ValueType,
+    class EarlyExitType=util::no_op,
+    class AdditionalStepType=util::no_op
+>
 ADELIE_CORE_STRONG_INLINE
 void coordinate_descent(
     StateType&& state,
@@ -59,13 +61,15 @@ void coordinate_descent(
     }
 }
 
-template <class StateType, 
-          class LowerType,
-          class UpperType,
-          class WeightsType,
-          class EarlyExitType=util::no_op,
-          class CheckUserInterruptType=util::no_op>
-void solve_active(
+template <
+    class StateType, 
+    class LowerType,
+    class UpperType,
+    class WeightsType,
+    class EarlyExitType=util::no_op,
+    class CheckUserInterruptType=util::no_op
+>
+inline void solve_active(
     StateType&& state,
     const LowerType& lower,
     const UpperType& upper,
@@ -107,13 +111,15 @@ void solve_active(
     }
 }
 
-template <class StateType, 
-          class LowerType,
-          class UpperType,
-          class WeightsType,
-          class EarlyExitType=util::no_op,
-          class CheckUserInterruptType=util::no_op>
-void fit(
+template <
+    class StateType, 
+    class LowerType,
+    class UpperType,
+    class WeightsType,
+    class EarlyExitType=util::no_op,
+    class CheckUserInterruptType=util::no_op
+>
+inline void fit(
     StateType&& state,
     const LowerType& lower,
     const UpperType& upper,
@@ -213,12 +219,14 @@ void fit(
     #endif
 }
 
-template <class StateType, 
-          class LowerType,
-          class UpperType,
-          class WeightsType,
-          class ViolsOrderType>
-bool kkt_screen(
+template <
+    class StateType, 
+    class LowerType,
+    class UpperType,
+    class WeightsType,
+    class ViolsOrderType
+>
+inline bool kkt_screen(
     StateType&& state,
     const LowerType& lower,
     const UpperType& upper,
@@ -295,14 +303,15 @@ bool kkt_screen(
     return kkt_passed;
 }
 
-template <class StateType, 
-          class LowerType,
-          class UpperType,
-          class WeightsType,
-          class EarlyExitType=util::no_op,
-          class CheckUserInterruptType=util::no_op>
-ADELIE_CORE_STRONG_INLINE
-void solve(
+template <
+    class StateType, 
+    class LowerType,
+    class UpperType,
+    class WeightsType,
+    class EarlyExitType=util::no_op,
+    class CheckUserInterruptType=util::no_op
+>
+inline void solve(
     StateType&& state,
     const LowerType& lower,
     const UpperType& upper,
@@ -338,10 +347,11 @@ void solve(
     }
 }
 
-template <class StateType,
-          class CheckUserInterruptType=util::no_op>
-ADELIE_CORE_STRONG_INLINE
-void solve(
+template <
+    class StateType,
+    class CheckUserInterruptType=util::no_op
+>
+inline void solve(
     StateType&& state,
     CheckUserInterruptType check_user_interrupt=CheckUserInterruptType()
 )

@@ -1,27 +1,27 @@
 #pragma once
-#include <numeric>
-#include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
 
 namespace adelie_core {
 namespace state {
 
-template <class ConstraintType,
-          class MatrixType, 
-          class ValueType=typename std::decay_t<MatrixType>::value_t,
-          class IndexType=Eigen::Index,
-          class BoolType=bool,
-          class SafeBoolType=int8_t
-        >
-struct StateMultiGaussianNaive : StateGaussianNaive<
-        ConstraintType,
-        MatrixType,
-        ValueType,
-        IndexType,
-        BoolType,
-        SafeBoolType
-    >
+template <
+    class ConstraintType,
+    class MatrixType, 
+    class ValueType=typename std::decay_t<MatrixType>::value_t,
+    class IndexType=Eigen::Index,
+    class BoolType=bool,
+    class SafeBoolType=int8_t
+>
+class StateMultiGaussianNaive: public StateGaussianNaive<
+    ConstraintType,
+    MatrixType,
+    ValueType,
+    IndexType,
+    BoolType,
+    SafeBoolType
+>
 {
+public:
     using base_t = StateGaussianNaive<
         ConstraintType,
         MatrixType,

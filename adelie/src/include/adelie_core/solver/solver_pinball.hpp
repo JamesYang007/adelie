@@ -8,10 +8,12 @@ namespace adelie_core {
 namespace solver {
 namespace pinball {
 
-template <class StateType, 
-          class Iter,
-          class ValueType,
-          class AdditionalStepType=util::no_op>
+template <
+    class StateType, 
+    class Iter,
+    class ValueType,
+    class AdditionalStepType=util::no_op
+>
 ADELIE_CORE_STRONG_INLINE
 void coordinate_descent(
     StateType&& state,
@@ -59,9 +61,11 @@ void coordinate_descent(
     }
 }
 
-template <class StateType, 
-          class CheckUserInterruptType=util::no_op>
-void solve_active(
+template <
+    class StateType, 
+    class CheckUserInterruptType=util::no_op
+>
+inline void solve_active(
     StateType&& state,
     CheckUserInterruptType check_user_interrupt=CheckUserInterruptType()
 )
@@ -95,9 +99,11 @@ void solve_active(
     }
 }
 
-template <class StateType, 
-          class CheckUserInterruptType=util::no_op>
-void fit(
+template <
+    class StateType, 
+    class CheckUserInterruptType=util::no_op
+>
+inline void fit(
     StateType&& state,
     CheckUserInterruptType check_user_interrupt=CheckUserInterruptType()
 )
@@ -187,9 +193,11 @@ void fit(
     #endif
 }
 
-template <class StateType, 
-          class ViolsOrderType>
-bool kkt_screen(
+template <
+    class StateType, 
+    class ViolsOrderType
+>
+inline bool kkt_screen(
     StateType&& state,
     ViolsOrderType& viols_order
 )
@@ -267,10 +275,11 @@ bool kkt_screen(
     return kkt_passed;
 }
 
-template <class StateType, 
-          class CheckUserInterruptType=util::no_op>
-ADELIE_CORE_STRONG_INLINE
-void solve(
+template <
+    class StateType, 
+    class CheckUserInterruptType=util::no_op
+>
+inline void solve(
     StateType&& state,
     CheckUserInterruptType check_user_interrupt=CheckUserInterruptType()
 )

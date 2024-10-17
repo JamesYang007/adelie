@@ -1,166 +1,49 @@
 #pragma once
-#include <numeric>
-#include <Eigen/Eigenvalues>
-#include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/state/state_base.hpp>
+
+#ifndef ADELIE_CORE_STATE_GAUSSIAN_NAIVE_TP
+#define ADELIE_CORE_STATE_GAUSSIAN_NAIVE_TP \
+    template <\
+        class ConstraintType,\
+        class MatrixType,\
+        class ValueType,\
+        class IndexType,\
+        class BoolType,\
+        class SafeBoolType\
+    >
+#endif
+#ifndef ADELIE_CORE_STATE_GAUSSIAN_NAIVE
+#define ADELIE_CORE_STATE_GAUSSIAN_NAIVE \
+    StateGaussianNaive<\
+        ConstraintType,\
+        MatrixType,\
+        ValueType,\
+        IndexType,\
+        BoolType,\
+        SafeBoolType\
+    >
+#endif
 
 namespace adelie_core {
 namespace state {
-namespace gaussian {
-namespace naive {
 
-/**
- * Updates in-place the screen quantities 
- * in the range [begin, begin+size) of the groups in screen_set. 
- * NOTE: X_means only needs to be well-defined on the groups in that range,
- * that is, weighted mean according to weights_sqrt ** 2.
- */
-template <class XType, class XMType, class WType,
-          class GroupsType, class GroupSizesType, 
-          class SSType, class SBType,
-          class SXMType, class STType, class SVType>
-void update_screen_derived(
-    XType& X,
-    const XMType& X_means,
-    const WType& weights_sqrt,
-    const GroupsType& groups,
-    const GroupSizesType& group_sizes,
-    const SSType& screen_set,
-    const SBType& screen_begins,
-    size_t begin,
-    size_t size,
-    bool intercept,
-    SXMType& screen_X_means,
-    STType& screen_transforms,
-    SVType& screen_vars
-)
+template <
+    class ConstraintType,
+    class MatrixType, 
+    class ValueType=typename std::decay_t<MatrixType>::value_t,
+    class IndexType=Eigen::Index,
+    class BoolType=bool,
+    class SafeBoolType=int8_t
+>
+class StateGaussianNaive: public StateBase<
+    ConstraintType,
+    ValueType,
+    IndexType,
+    BoolType,
+    SafeBoolType
+>
 {
-    using value_t = typename std::decay_t<XType>::value_t;
-    using vec_value_t = util::rowvec_type<value_t>;
-
-    // buffers
-    const auto n = X.rows();
-    const auto max_gs = group_sizes.maxCoeff();
-    util::colmat_type<value_t> buffer1(n, max_gs);
-    util::rowvec_type<value_t> buffer2(max_gs * max_gs);
-
-    for (size_t i = begin; i < size; ++i) {
-        const auto g = groups[screen_set[i]];
-        const auto gs = group_sizes[screen_set[i]];
-        const auto sb = screen_begins[i];
-
-        // compute column-means
-        Eigen::Map<vec_value_t> Xi_means(
-            screen_X_means.data() + sb, gs
-        );
-        Xi_means = X_means.segment(g, gs);
-
-        // resize output and buffer 
-        Eigen::Map<util::colmat_type<value_t>> Xi(
-            buffer1.data(), n, gs
-        );
-        Eigen::Map<util::colmat_type<value_t>> XiTXi(
-            buffer2.data(), gs, gs
-        );
-
-        // compute weighted covariance matrix
-        X.cov(g, gs, weights_sqrt, XiTXi, Xi);
-
-        if (intercept) {
-            auto XiTXi_lower = XiTXi.template selfadjointView<Eigen::Lower>();
-            XiTXi_lower.rankUpdate(Xi_means.matrix().transpose(), -1);
-            XiTXi.template triangularView<Eigen::Upper>() = XiTXi.transpose();
-        }
-
-        if (gs == 1) {
-            util::colmat_type<value_t, 1, 1> Q;
-            Q(0, 0) = 1;
-            screen_transforms[i] = Q;
-            screen_vars[sb] = XiTXi(0, 0);
-            continue;
-        }
-
-        Eigen::SelfAdjointEigenSolver<util::colmat_type<value_t>> solver(XiTXi);
-
-        /* update screen_transforms */
-        screen_transforms[i] = std::move(solver.eigenvectors());
-
-        /* update screen_vars */
-        const auto& D = solver.eigenvalues();
-        Eigen::Map<vec_value_t> svars(screen_vars.data() + sb, gs);
-        // numerical stability to remove small negative eigenvalues
-        svars.head(D.size()) = D.array() * (D.array() >= 0).template cast<value_t>(); 
-    }
-}
-
-/**
- * Updates all derived screen quantities for naive state.
- * See the incoming state requirements in update_screen_derived_base.
- * After the function finishes, all screen quantities in the base + naive class
- * will be consistent with screen_set, and the state is otherwise effectively
- * unchanged in the sense that other quantities dependent on screen states are unchanged.
- */
-template <class StateType>
-void update_screen_derived(
-    StateType& state
-)
-{
-    update_screen_derived_base(state);
-
-    const auto& group_sizes = state.group_sizes;
-    const auto& screen_set = state.screen_set;
-    auto& screen_transforms = state.screen_transforms;
-    const auto& screen_begins = state.screen_begins;
-    auto& screen_X_means = state.screen_X_means;
-    auto& screen_vars = state.screen_vars;
-
-    const auto old_screen_size = screen_transforms.size();
-    const auto new_screen_size = screen_set.size();
-    const int new_screen_value_size = (
-        (screen_begins.size() == 0) ? 0 : (
-            screen_begins.back() + group_sizes[screen_set.back()]
-        )
-    );
-
-    screen_X_means.resize(new_screen_value_size);    
-    screen_transforms.resize(new_screen_size);
-    screen_vars.resize(new_screen_value_size, 0);
-
-    update_screen_derived(
-        *state.X, 
-        state.X_means, 
-        state.weights_sqrt,
-        state.groups, 
-        state.group_sizes, 
-        state.screen_set, 
-        state.screen_begins, 
-        old_screen_size, 
-        new_screen_size, 
-        state.intercept, 
-        state.screen_X_means, 
-        state.screen_transforms, 
-        state.screen_vars
-    );
-}
-
-} // namespace naive
-} // namespace gaussian
-
-template <class ConstraintType,
-          class MatrixType, 
-          class ValueType=typename std::decay_t<MatrixType>::value_t,
-          class IndexType=Eigen::Index,
-          class BoolType=bool,
-          class SafeBoolType=int8_t
-        >
-struct StateGaussianNaive : StateBase<
-        ConstraintType,
-        ValueType,
-        IndexType,
-        BoolType,
-        SafeBoolType
-    >
-{
+public:
     using base_t = StateBase<
         ConstraintType,
         ValueType,
@@ -196,6 +79,10 @@ struct StateGaussianNaive : StateBase<
     dyn_vec_mat_value_t screen_transforms;
     dyn_vec_value_t screen_vars;
 
+private:
+    void initialize();
+
+public:
     explicit StateGaussianNaive(
         matrix_t& X,
         const Eigen::Ref<const vec_value_t>& X_means,
@@ -260,22 +147,7 @@ struct StateGaussianNaive : StateBase<
         resid_sum(resid_sum),
         rsq(rsq)
     { 
-        const auto n = X.rows();
-        const auto p = X.cols();
-        if (weights.size() != n) {
-            throw util::adelie_core_error("weights must be (n,) where X is (n, p).");
-        }
-        if (X_means.size() != p) {
-            throw util::adelie_core_error("X_means must be (p,) where X is (n, p).");
-        }
-        if (resid.size() != n) {
-            throw util::adelie_core_error("resid must be (n,) where X is (n, p).");
-        }
-        if (this->grad.size() != p) {
-            throw util::adelie_core_error("grad must be (p,) where X is (n, p).");
-        }
-        /* initialize the rest of the screen quantities */
-        gaussian::naive::update_screen_derived(*this); 
+        initialize();
     }
 };
 

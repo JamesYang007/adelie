@@ -3,7 +3,6 @@
 #include <adelie_core/constraint/constraint_box.hpp>
 #include <adelie_core/constraint/utils.hpp>
 #include <adelie_core/optimization/pinball_full.hpp>
-#include <adelie_core/util/macros.hpp>
 
 namespace adelie_core {
 namespace constraint {

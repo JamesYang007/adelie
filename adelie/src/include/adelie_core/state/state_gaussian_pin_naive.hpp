@@ -1,22 +1,45 @@
 #pragma once
 #include <adelie_core/state/state_gaussian_pin_base.hpp>
 
+#ifndef ADELIE_CORE_STATE_GAUSSIAN_PIN_NAIVE_TP
+#define ADELIE_CORE_STATE_GAUSSIAN_PIN_NAIVE_TP \
+    template <\
+        class ConstraintType,\
+        class MatrixType,\
+        class ValueType,\
+        class IndexType,\
+        class BoolType\
+    >
+#endif
+#ifndef ADELIE_CORE_STATE_GAUSSIAN_PIN_NAIVE
+#define ADELIE_CORE_STATE_GAUSSIAN_PIN_NAIVE \
+    StateGaussianPinNaive<\
+        ConstraintType,\
+        MatrixType,\
+        ValueType,\
+        IndexType,\
+        BoolType\
+    >
+#endif
+
 namespace adelie_core {
 namespace state {
 
-template <class ConstraintType,
-          class MatrixType, 
-          class ValueType=typename std::decay_t<MatrixType>::value_t,
-          class IndexType=Eigen::Index,
-          class BoolType=bool
-        >
-struct StateGaussianPinNaive: StateGaussianPinBase<
-        ConstraintType,
-        ValueType,
-        IndexType,
-        BoolType
-    >
+template <
+    class ConstraintType,
+    class MatrixType, 
+    class ValueType=typename std::decay_t<MatrixType>::value_t,
+    class IndexType=Eigen::Index,
+    class BoolType=bool
+>
+class StateGaussianPinNaive: public StateGaussianPinBase<
+    ConstraintType,
+    ValueType,
+    IndexType,
+    BoolType
+>
 {
+public:
     using base_t = StateGaussianPinBase<
         ConstraintType,
         ValueType,

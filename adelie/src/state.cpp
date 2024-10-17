@@ -1,18 +1,5 @@
 #include "py_decl.hpp"
-#include <adelie_core/constraint/constraint_base.hpp>
-#include <adelie_core/glm/glm_base.hpp>
-#include <adelie_core/matrix/matrix_constraint_base.hpp>
-#include <adelie_core/matrix/matrix_cov_base.hpp>
-#include <adelie_core/matrix/matrix_naive_base.hpp>
-#include <adelie_core/state/state_bvls.hpp>
-#include <adelie_core/state/state_gaussian_cov.hpp>
-#include <adelie_core/state/state_gaussian_naive.hpp>
-#include <adelie_core/state/state_gaussian_pin_cov.hpp>
-#include <adelie_core/state/state_gaussian_pin_naive.hpp>
-#include <adelie_core/state/state_glm_naive.hpp>
-#include <adelie_core/state/state_multigaussian_naive.hpp>
-#include <adelie_core/state/state_multiglm_naive.hpp>
-#include <adelie_core/state/state_pinball.hpp>
+#include <state/state.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;

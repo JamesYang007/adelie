@@ -1,16 +1,37 @@
 #pragma once
-#include <adelie_core/util/macros.hpp>
 #include <adelie_core/util/types.hpp>
+
+#ifndef ADELIE_CORE_STATE_BVLS_TP
+#define ADELIE_CORE_STATE_BVLS_TP \
+    template <\
+        class MatrixType,\
+        class ValueType,\
+        class IndexType,\
+        class BoolType\
+    >
+#endif
+#ifndef ADELIE_CORE_STATE_BVLS
+#define ADELIE_CORE_STATE_BVLS \
+    StateBVLS<\
+        MatrixType,\
+        ValueType,\
+        IndexType,\
+        BoolType\
+    >
+#endif
 
 namespace adelie_core {
 namespace state {
 
-template <class MatrixType,
-          class ValueType=typename std::decay_t<MatrixType>::value_t,
-          class IndexType=Eigen::Index,
-          class BoolType=bool>
-struct StateBVLS
+template <
+    class MatrixType,
+    class ValueType=typename std::decay_t<MatrixType>::value_t,
+    class IndexType=Eigen::Index,
+    class BoolType=bool
+>
+class StateBVLS
 {
+public:
     using matrix_t = MatrixType;
     using value_t = ValueType;
     using index_t = IndexType;
@@ -62,7 +83,11 @@ struct StateBVLS
     std::vector<size_t> dbg_iter;
     std::vector<value_t> dbg_loss;
 
-    virtual ~StateBVLS() =default;
+private:
+    void initialize();
+
+public:
+    virtual ~StateBVLS() {};
 
     explicit StateBVLS(
         matrix_t& X,
@@ -105,69 +130,7 @@ struct StateBVLS
         grad(grad.data(), grad.size()),
         loss(loss)
     {
-        const auto n = X.rows();
-        const auto p = X.cols();
-
-        if (X_vars.size() != p) {
-            throw util::adelie_core_solver_error(
-                "X_vars must be (p,) where X is (n, p). "
-            );
-        }
-        if (lower.size() != p) {
-            throw util::adelie_core_solver_error(
-                "lower must be (p,) where X is (n, p). "
-            );
-        }
-        if (upper.size() != p) {
-            throw util::adelie_core_solver_error(
-                "upper must be (p,) where X is (n, p). "
-            );
-        }
-        if (weights.size() != n) {
-            throw util::adelie_core_solver_error(
-                "weights must be (n,) where X is (n, p). "
-            );
-        }
-        if (kappa <= 0) {
-            throw util::adelie_core_solver_error(
-                "kappa must be > 0. "
-            );
-        }
-        if (tol < 0) {
-            throw util::adelie_core_solver_error(
-                "tol must be >= 0."
-            );
-        }
-        if (static_cast<Eigen::Index>(active_set_size) > p) {
-            throw util::adelie_core_solver_error(
-                "active_set_size must be <= p where X is (n, p). "
-            );
-        }
-        if (active_set.size() != p) {
-            throw util::adelie_core_solver_error(
-                "active_set must be (p,) where X is (n, p). "
-            );
-        }
-        if (is_active.size() != p) {
-            throw util::adelie_core_solver_error(
-                "is_active must be (p,) where X is (n, p). "
-            );
-        }
-        if (beta.size() != p) {
-            throw util::adelie_core_solver_error(
-                "beta must be (p,) where X is (p, n). "
-            );
-        }
-        if (resid.size() != n) {
-            throw util::adelie_core_solver_error(
-                "resid must be (n,) where X is (n, p). "
-            );
-        }
-        if (grad.size() != p) {
-            throw util::adelie_core_solver_error(
-                "grad must be (p,) where X is (n, p). "
-            );
-        }
+        initialize();
     }
 };
 

@@ -1,5 +1,4 @@
 #pragma once
-#include <adelie_core/util/macros.hpp>
 #include <adelie_core/util/types.hpp>
 #ifdef ADELIE_CORE_DEBUG
 #undef ADELIE_CORE_DEBUG

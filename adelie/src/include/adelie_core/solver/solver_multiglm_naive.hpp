@@ -190,11 +190,13 @@ void update_loss_null(
     }
 }
 
-template <class StateType,
-          class GlmType,
-          class PBType,
-          class ExitCondType,
-          class CUIType=util::no_op>
+template <
+    class StateType,
+    class GlmType,
+    class PBType,
+    class ExitCondType,
+    class CUIType=util::no_op
+>
 inline void solve(
     StateType&& state,
     GlmType&& glm,

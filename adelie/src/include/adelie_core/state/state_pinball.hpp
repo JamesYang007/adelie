@@ -1,16 +1,37 @@
 #pragma once
-#include <adelie_core/util/macros.hpp>
 #include <adelie_core/util/types.hpp>
+
+#ifndef ADELIE_CORE_STATE_PINBALL_TP
+#define ADELIE_CORE_STATE_PINBALL_TP \
+    template <\
+        class MatrixType,\
+        class ValueType,\
+        class IndexType,\
+        class BoolType\
+    >
+#endif
+#ifndef ADELIE_CORE_STATE_PINBALL
+#define ADELIE_CORE_STATE_PINBALL \
+    StatePinball<\
+        MatrixType,\
+        ValueType,\
+        IndexType,\
+        BoolType\
+    >
+#endif
 
 namespace adelie_core {
 namespace state {
 
-template <class MatrixType, 
-          class ValueType=typename std::decay_t<MatrixType>::value_t,
-          class IndexType=Eigen::Index,
-          class BoolType=bool>
-struct StatePinball
+template <
+    class MatrixType, 
+    class ValueType=typename std::decay_t<MatrixType>::value_t,
+    class IndexType=Eigen::Index,
+    class BoolType=bool
+>
+class StatePinball
 {
+public:
     using matrix_t = MatrixType;
     using value_t = ValueType;
     using index_t = IndexType;
@@ -67,7 +88,11 @@ struct StatePinball
     std::vector<size_t> dbg_iter;
     std::vector<value_t> dbg_loss;
 
-    virtual ~StatePinball() =default;
+private:
+    void initialize();
+
+public:
+    virtual ~StatePinball() {};
 
     explicit StatePinball(
         matrix_t& A,
@@ -112,89 +137,7 @@ struct StatePinball
         grad(grad.data(), grad.size()),
         loss(loss)
     {
-        const auto m = A.rows();
-        const auto d = A.cols();
-
-        if (S.rows() != d || S.cols() != d) {
-            throw util::adelie_core_solver_error(
-                "S must be (d, d) where A is (m, d). "
-            );
-        }
-        if (penalty_neg.size() != m) {
-            throw util::adelie_core_solver_error(
-                "penalty_neg must be (m,) where A is (m, d). "
-            );
-        }
-        if (penalty_pos.size() != m) {
-            throw util::adelie_core_solver_error(
-                "penalty_pos must be (m,) where A is (m, d). "
-            );
-        }
-        if (kappa <= 0) {
-            throw util::adelie_core_solver_error(
-                "kappa must be > 0. "
-            );
-        }
-        if (tol < 0) {
-            throw util::adelie_core_solver_error(
-                "tol must be >= 0."
-            );
-        }
-        if (static_cast<Eigen::Index>(screen_set_size) > m) {
-            throw util::adelie_core_solver_error(
-                "screen_set_size must be <= m where A is (m, d). "
-            );
-        }
-        if (screen_set.size() != m) {
-            throw util::adelie_core_solver_error(
-                "screen_set must be (m,) where A is (m, d). "
-            );
-        }
-        if (is_screen.size() != m) {
-            throw util::adelie_core_solver_error(
-                "is_screen must be (m,) where A is (m, d). "
-            );
-        }
-        if (screen_ASAT_diag.size() != m) {
-            throw util::adelie_core_solver_error(
-                "screen_ASAT_diag must be (m,) where A is (m, d). "
-            );
-        }
-        if (screen_AS.rows() != m || screen_AS.cols() != d) {
-            throw util::adelie_core_solver_error(
-                "screen_AS must be (m, d) where A is (m, d). "
-            );
-        }
-        if (static_cast<Eigen::Index>(active_set_size) > m) {
-            throw util::adelie_core_solver_error(
-                "active_set_size must be <= m where A is (m, d). "
-            );
-        }
-        if (active_set.size() != m) {
-            throw util::adelie_core_solver_error(
-                "active_set must be (m,) where A is (m, d). "
-            );
-        }
-        if (is_active.size() != m) {
-            throw util::adelie_core_solver_error(
-                "is_active must be (m,) where A is (m, d). "
-            );
-        }
-        if (beta.size() != m) {
-            throw util::adelie_core_solver_error(
-                "beta must be (m,) where A is (m, d). "
-            );
-        }
-        if (resid.size() != d) {
-            throw util::adelie_core_solver_error(
-                "resid must be (d,) where A is (m, d). "
-            );
-        }
-        if (grad.size() != m) {
-            throw util::adelie_core_solver_error(
-                "grad must be (m,) where A is (m, d). "
-            );
-        }
+        initialize();
     }
 };
 

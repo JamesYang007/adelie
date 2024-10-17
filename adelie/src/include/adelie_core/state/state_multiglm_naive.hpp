@@ -1,26 +1,27 @@
 #pragma once
 #include <adelie_core/state/state_glm_naive.hpp>
-#include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
 namespace state {
 
-template <class ConstraintType,
-          class MatrixType, 
-          class ValueType=typename std::decay_t<MatrixType>::value_t,
-          class IndexType=Eigen::Index,
-          class BoolType=bool,
-          class SafeBoolType=int8_t
-        >
-struct StateMultiGlmNaive: StateGlmNaive<
-        ConstraintType,
-        MatrixType,
-        ValueType,
-        IndexType,
-        BoolType,
-        SafeBoolType
-    >
+template <
+    class ConstraintType,
+    class MatrixType, 
+    class ValueType=typename std::decay_t<MatrixType>::value_t,
+    class IndexType=Eigen::Index,
+    class BoolType=bool,
+    class SafeBoolType=int8_t
+>
+class StateMultiGlmNaive: public StateGlmNaive<
+    ConstraintType,
+    MatrixType,
+    ValueType,
+    IndexType,
+    BoolType,
+    SafeBoolType
+>
 {
+public:
     using base_t = StateGlmNaive<
         ConstraintType,
         MatrixType,

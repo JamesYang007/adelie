@@ -1,11 +1,12 @@
 #pragma once
+#include <numeric>
 #include <adelie_core/configs.hpp>
+#include <adelie_core/solver/solver_gaussian_pin_base.hpp>
 #include <adelie_core/util/counting_iterator.hpp>
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/functional.hpp>
 #include <adelie_core/util/stopwatch.hpp>
 #include <adelie_core/util/eigen/map_sparsevector.hpp>
-#include <adelie_core/solver/solver_gaussian_pin_base.hpp>
 
 namespace adelie_core {
 namespace solver {
@@ -54,8 +55,61 @@ struct GaussianPinCovBufferPack: public GaussianPinBufferPack<ValueType, IndexTy
     }
 };
 
-template <class StateType, class BufferPackType,
-          class IndicesType, class ValuesType>
+template <class StateType>
+inline void update_active_inactive_subset(
+    StateType& state
+)
+{
+    using state_t = std::decay_t<StateType>;
+    using vec_bool_t = typename state_t::vec_bool_t;
+
+    const auto& group_sizes = state.group_sizes;
+    const auto& screen_set = state.screen_set;
+    const auto& screen_subset_order = state.screen_subset_order;
+    const auto& screen_subset_ordered = state.screen_subset_ordered;
+    const auto& screen_is_active = state.screen_is_active;
+    auto& screen_is_active_subset = state.screen_is_active_subset;
+    auto& active_subset_order = state.active_subset_order;
+    auto& active_subset_ordered = state.active_subset_ordered;
+    auto& inactive_subset_order = state.inactive_subset_order;
+    auto& inactive_subset_ordered = state.inactive_subset_ordered;
+
+    // update screen_is_active_subset
+    int n_processed = 0;
+    for (int ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) {
+        const auto ss = screen_set[ss_idx];
+        const auto gs = group_sizes[ss];
+        Eigen::Map<vec_bool_t>(
+            screen_is_active_subset.data() + n_processed, gs
+        ) = screen_is_active[ss_idx];
+        n_processed += gs;
+    }
+
+    // update active/inactive subset order/ordered
+    active_subset_order.clear();
+    active_subset_ordered.clear();
+    inactive_subset_order.clear();
+    inactive_subset_ordered.clear();
+    for (int i = 0; i < screen_subset_order.size(); ++i) {
+        const auto ssoi = screen_subset_order[i];
+        const auto sso = screen_subset_ordered[i];
+        if (screen_is_active_subset[ssoi]) {
+            active_subset_order.push_back(i);
+            active_subset_ordered.push_back(sso);
+        } else {
+            inactive_subset_order.push_back(i);
+            inactive_subset_ordered.push_back(sso);
+        }
+    }
+}
+
+
+template <
+    class StateType, 
+    class BufferPackType,
+    class IndicesType, 
+    class ValuesType
+>
 ADELIE_CORE_STRONG_INLINE
 void update_screen_grad_screen(
     StateType& state,
@@ -78,8 +132,12 @@ void update_screen_grad_screen(
     }
 }
 
-template <class StateType, class BufferPackType,
-          class IndicesType, class ValuesType>
+template <
+    class StateType, 
+    class BufferPackType,
+    class IndicesType, 
+    class ValuesType
+>
 ADELIE_CORE_STRONG_INLINE
 void update_screen_grad_active(
     StateType& state,
@@ -109,8 +167,12 @@ void update_screen_grad_active(
     }
 }
 
-template <class StateType, class BufferPackType,
-          class IndicesType, class ValuesType>
+template <
+    class StateType, 
+    class BufferPackType,
+    class IndicesType, 
+    class ValuesType
+>
 ADELIE_CORE_STRONG_INLINE
 void update_screen_grad_inactive(
     StateType& state,
@@ -142,7 +204,7 @@ void update_screen_grad_inactive(
 }
 
 template <class StateType, class ABDiffType, class IndicesType, class ValuesType>
-void sparsify_active_beta_diff(
+inline void sparsify_active_beta_diff(
     const StateType& state,
     const ABDiffType& ab_diff,
     IndicesType& indices,
@@ -177,12 +239,16 @@ void sparsify_active_beta_diff(
     }        
 }
 
-template <class StateType, class Iter,
-          class ValueType, class BufferPackType,
-          class UpdateCoefficientG0Type,
-          class UpdateCoefficientG1Type,
-          class UpdateScreenGradType,
-          class AdditionalStepType=util::no_op>
+template <
+    class StateType, 
+    class Iter,
+    class ValueType, 
+    class BufferPackType,
+    class UpdateCoefficientG0Type,
+    class UpdateCoefficientG1Type,
+    class UpdateScreenGradType,
+    class AdditionalStepType=util::no_op
+>
 ADELIE_CORE_STRONG_INLINE
 void coordinate_descent(
     StateType&& state,
@@ -323,13 +389,14 @@ void coordinate_descent(
 /**
  * Applies multiple blockwise coordinate descent on the active set.
  */
-template <class StateType, 
-          class BufferPackType, 
-          class UpdateCoefficientG0Type,
-          class UpdateCoefficientG1Type,
-          class CUIType>
-ADELIE_CORE_STRONG_INLINE
-void solve_active(
+template <
+    class StateType, 
+    class BufferPackType, 
+    class UpdateCoefficientG0Type,
+    class UpdateCoefficientG1Type,
+    class CUIType
+>
+inline void solve_active(
     StateType&& state,
     size_t lmda_idx,
     BufferPackType& buffer_pack,
@@ -450,10 +517,12 @@ void solve_active(
     );
 }
 
-template <class StateType,
-          class UpdateCoefficientG0Type,
-          class UpdateCoefficientG1Type,
-          class CUIType = util::no_op>
+template <
+    class StateType,
+    class UpdateCoefficientG0Type,
+    class UpdateCoefficientG1Type,
+    class CUIType = util::no_op
+>
 inline void solve(
     StateType&& state,
     UpdateCoefficientG0Type update_coordinate_g0_f,
@@ -601,7 +670,7 @@ inline void solve(
                     }
                 );
 
-                state::gaussian::pin::cov::update_active_inactive_subset(state);
+                update_active_inactive_subset(state);
             }
 
             if (convg_measure < tol) break;
@@ -635,8 +704,7 @@ inline void solve(
     }
 }
 
-template <class StateType,
-          class CUIType = util::no_op>
+template <class StateType, class CUIType = util::no_op>
 inline void solve(
     StateType&& state,
     CUIType check_user_interrupt = CUIType()

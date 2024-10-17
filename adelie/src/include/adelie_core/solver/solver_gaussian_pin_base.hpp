@@ -1,8 +1,8 @@
 #pragma once
 #include <adelie_core/configs.hpp>
 #include <adelie_core/bcd/unconstrained/newton.hpp>
-#include <adelie_core/util/types.hpp>
 #include <adelie_core/util/macros.hpp>
+#include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
 namespace solver {
@@ -56,8 +56,7 @@ struct GaussianPinBufferPack
  * @param   values      corresponding active values to indices.
  */
 template <class StateType, class VecIndexType, class VecValueType>
-ADELIE_CORE_STRONG_INLINE
-void sparsify_active_beta(
+inline void sparsify_active_beta(
     const StateType& state,
     VecIndexType& indices,
     VecValueType& values
@@ -146,8 +145,13 @@ void update_rsq(
     rsq += del * (2 * grad - del * x_var);
 }
 
-template <class LType, class VType, class ValueType, 
-          class XType, class BufferType>
+template <
+    class LType, 
+    class VType, 
+    class ValueType, 
+    class XType, 
+    class BufferType
+>
 ADELIE_CORE_STRONG_INLINE
 void update_coordinate(
     XType& x,

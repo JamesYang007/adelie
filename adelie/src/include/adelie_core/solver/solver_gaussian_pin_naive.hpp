@@ -15,11 +15,15 @@ namespace gaussian {
 namespace pin {
 namespace naive {
 
-template <class StateType, class Iter,
-          class ValueType, class BufferPackType,
-          class UpdateCoefficientG0Type,
-          class UpdateCoefficientG1Type,
-          class AdditionalStepType=util::no_op>
+template <
+    class StateType, 
+    class Iter,
+    class ValueType, 
+    class BufferPackType,
+    class UpdateCoefficientG0Type,
+    class UpdateCoefficientG1Type,
+    class AdditionalStepType=util::no_op
+>
 ADELIE_CORE_STRONG_INLINE
 void coordinate_descent(
     StateType&& state,
@@ -168,11 +172,13 @@ void coordinate_descent(
 /**
  * Applies multiple blockwise coordinate descent on the active set.
  */
-template <class StateType, 
-          class BufferPackType, 
-          class UpdateCoefficientG0Type,
-          class UpdateCoefficientG1Type,
-          class CUIType>
+template <
+    class StateType, 
+    class BufferPackType, 
+    class UpdateCoefficientG0Type,
+    class UpdateCoefficientG1Type,
+    class CUIType
+>
 ADELIE_CORE_STRONG_INLINE
 void solve_active(
     StateType&& state,
@@ -210,10 +216,12 @@ void solve_active(
     }
 }
 
-template <class StateType,
-          class UpdateCoefficientG0Type,
-          class UpdateCoefficientG1Type,
-          class CUIType = util::no_op>
+template <
+    class StateType,
+    class UpdateCoefficientG0Type,
+    class UpdateCoefficientG1Type,
+    class CUIType = util::no_op
+>
 inline void solve(
     StateType&& state,
     UpdateCoefficientG0Type update_coordinate_g0_f,
@@ -393,8 +401,7 @@ inline void solve(
     }
 }
 
-template <class StateType,
-          class CUIType = util::no_op>
+template <class StateType, class CUIType = util::no_op>
 inline void solve(
     StateType&& state,
     CUIType check_user_interrupt = CUIType()
