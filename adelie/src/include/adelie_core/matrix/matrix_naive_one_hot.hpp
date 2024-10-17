@@ -1,6 +1,15 @@
 #pragma once
 #include <adelie_core/matrix/matrix_naive_base.hpp>
 
+#ifndef ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
+#define ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP \
+    template <class DenseType, class IndexType>
+#endif
+#ifndef ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE
+#define ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE \
+    MatrixNaiveOneHotDense<DenseType, IndexType>
+#endif
+
 namespace adelie_core {
 namespace matrix {
 
@@ -98,52 +107,7 @@ public:
         return _outer.tail(G) - _outer.head(G);
     }
 
-    value_t cmul(
-        int j, 
-        const Eigen::Ref<const vec_value_t>& v,
-        const Eigen::Ref<const vec_value_t>& weights
-    ) override;
-
-    void ctmul(
-        int j, 
-        value_t v, 
-        Eigen::Ref<vec_value_t> out
-    ) override;
-
-    void bmul(
-        int j, int q, 
-        const Eigen::Ref<const vec_value_t>& v, 
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override;
-
-    void btmul(
-        int j, int q, 
-        const Eigen::Ref<const vec_value_t>& v, 
-        Eigen::Ref<vec_value_t> out
-    ) override;
-
-    void mul(
-        const Eigen::Ref<const vec_value_t>& v, 
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override;
-
-    int rows() const override;
-    
-    int cols() const override;
-
-    void cov(
-        int j, int q,
-        const Eigen::Ref<const vec_value_t>& sqrt_weights,
-        Eigen::Ref<colmat_value_t> out,
-        Eigen::Ref<colmat_value_t> buffer
-    ) override;
-
-    void sp_tmul(
-        const sp_mat_value_t& v, 
-        Eigen::Ref<rowmat_value_t> out
-    ) override;
+    ADELIE_CORE_MATRIX_NAIVE_PURE_OVERRIDE_DECL
 };
 
 } // namespace matrix

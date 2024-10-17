@@ -4,9 +4,9 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
 auto
-MatrixNaiveCSubset<ValueType, IndexType>::init_subset_cinfo(
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::init_subset_cinfo(
     const Eigen::Ref<const vec_index_t>& subset
 )
 {
@@ -43,8 +43,8 @@ MatrixNaiveCSubset<ValueType, IndexType>::init_subset_cinfo(
     return std::make_tuple(subset_csize, subset_cbegin);
 }
 
-template <class ValueType, class IndexType>
-MatrixNaiveCSubset<ValueType, IndexType>::MatrixNaiveCSubset(
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::MatrixNaiveCSubset(
     base_t& mat,
     const Eigen::Ref<const vec_index_t>& subset,
     size_t n_threads
@@ -65,9 +65,9 @@ MatrixNaiveCSubset<ValueType, IndexType>::MatrixNaiveCSubset(
     }
 }
 
-template <class ValueType, class IndexType>
-typename MatrixNaiveCSubset<ValueType, IndexType>::value_t
-MatrixNaiveCSubset<ValueType, IndexType>::cmul(
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
+typename ADELIE_CORE_MATRIX_NAIVE_CSUBSET::value_t
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -77,9 +77,9 @@ MatrixNaiveCSubset<ValueType, IndexType>::cmul(
     return _mat->cmul(_subset[j], v, weights);
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
 void
-MatrixNaiveCSubset<ValueType, IndexType>::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -89,9 +89,9 @@ MatrixNaiveCSubset<ValueType, IndexType>::ctmul(
     _mat->ctmul(_subset[j], v, out);
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
 void
-MatrixNaiveCSubset<ValueType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -114,9 +114,9 @@ MatrixNaiveCSubset<ValueType, IndexType>::bmul(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
 void
-MatrixNaiveCSubset<ValueType, IndexType>::btmul(
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -138,9 +138,9 @@ MatrixNaiveCSubset<ValueType, IndexType>::btmul(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
 void
-MatrixNaiveCSubset<ValueType, IndexType>::mul(
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -164,23 +164,23 @@ MatrixNaiveCSubset<ValueType, IndexType>::mul(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
 int
-MatrixNaiveCSubset<ValueType, IndexType>::rows() const
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::rows() const
 {
     return _mat->rows();
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
 int
-MatrixNaiveCSubset<ValueType, IndexType>::cols() const
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::cols() const
 {
     return _subset.size();
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
 void
-MatrixNaiveCSubset<ValueType, IndexType>::cov(
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -202,9 +202,9 @@ MatrixNaiveCSubset<ValueType, IndexType>::cov(
     _mat->cov(_subset[j], q, sqrt_weights, out, buffer);
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
 void
-MatrixNaiveCSubset<ValueType, IndexType>::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
 )
@@ -229,9 +229,9 @@ MatrixNaiveCSubset<ValueType, IndexType>::sp_tmul(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
 auto
-MatrixNaiveRSubset<ValueType, IndexType>::init_mask(
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::init_mask(
     size_t n,
     const Eigen::Ref<const vec_index_t>& subset
 )
@@ -250,8 +250,8 @@ MatrixNaiveRSubset<ValueType, IndexType>::init_mask(
     return mask;
 }
 
-template <class ValueType, class IndexType>
-MatrixNaiveRSubset<ValueType, IndexType>::MatrixNaiveRSubset(
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::MatrixNaiveRSubset(
     base_t& mat,
     const Eigen::Ref<const vec_index_t>& subset,
     size_t n_threads
@@ -273,9 +273,9 @@ MatrixNaiveRSubset<ValueType, IndexType>::MatrixNaiveRSubset(
     }
 }
 
-template <class ValueType, class IndexType>
-typename MatrixNaiveRSubset<ValueType, IndexType>::value_t
-MatrixNaiveRSubset<ValueType, IndexType>::cmul(
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
+typename ADELIE_CORE_MATRIX_NAIVE_RSUBSET::value_t
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -289,9 +289,9 @@ MatrixNaiveRSubset<ValueType, IndexType>::cmul(
     return _mat->cmul(j, _mask, _buffer);
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
 void
-MatrixNaiveRSubset<ValueType, IndexType>::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -305,9 +305,9 @@ MatrixNaiveRSubset<ValueType, IndexType>::ctmul(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
 void
-MatrixNaiveRSubset<ValueType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -322,9 +322,9 @@ MatrixNaiveRSubset<ValueType, IndexType>::bmul(
     _mat->bmul(j, q, _mask, _buffer, out);
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
 void
-MatrixNaiveRSubset<ValueType, IndexType>::btmul(
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -338,9 +338,9 @@ MatrixNaiveRSubset<ValueType, IndexType>::btmul(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
 void
-MatrixNaiveRSubset<ValueType, IndexType>::mul(
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -353,23 +353,23 @@ MatrixNaiveRSubset<ValueType, IndexType>::mul(
     _mat->mul(_mask, _buffer, out);
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
 int
-MatrixNaiveRSubset<ValueType, IndexType>::rows() const
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::rows() const
 {
     return _subset.size();
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
 int
-MatrixNaiveRSubset<ValueType, IndexType>::cols() const
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::cols() const
 {
     return _mat->cols();
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
 void
-MatrixNaiveRSubset<ValueType, IndexType>::cov(
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -396,9 +396,9 @@ MatrixNaiveRSubset<ValueType, IndexType>::cov(
     _mat->cov(j, q, _buffer, out, cov_buffer);
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
 void
-MatrixNaiveRSubset<ValueType, IndexType>::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
 )

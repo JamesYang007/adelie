@@ -1,6 +1,15 @@
 #pragma once
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 
+#ifndef ADELIE_CORE_MATRIX_COV_BLOCK_DIAG_TP
+#define ADELIE_CORE_MATRIX_COV_BLOCK_DIAG_TP \
+    template <class ValueType, class IndexType>
+#endif
+#ifndef ADELIE_CORE_MATRIX_COV_BLOCK_DIAG
+#define ADELIE_CORE_MATRIX_COV_BLOCK_DIAG \
+    MatrixCovBlockDiag<ValueType, IndexType>
+#endif
+
 namespace adelie_core {
 namespace matrix {
 
@@ -43,26 +52,8 @@ public:
     );
 
     using base_t::rows;
-    
-    void bmul(
-        const Eigen::Ref<const vec_index_t>& subset,
-        const Eigen::Ref<const vec_index_t>& indices,
-        const Eigen::Ref<const vec_value_t>& values,
-        Eigen::Ref<vec_value_t> out
-    ) override;
 
-    void mul(
-        const Eigen::Ref<const vec_index_t>& indices,
-        const Eigen::Ref<const vec_value_t>& values,
-        Eigen::Ref<vec_value_t> out
-    ) override;
-
-    void to_dense(
-        int i, int p,
-        Eigen::Ref<colmat_value_t> out
-    ) override;
-
-    int cols() const override;
+    ADELIE_CORE_MATRIX_COV_PURE_OVERRIDE_DECL    
 };
 
 } // namespace matrix

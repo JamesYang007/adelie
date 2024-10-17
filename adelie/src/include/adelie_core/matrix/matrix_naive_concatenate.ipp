@@ -5,9 +5,9 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
 auto 
-MatrixNaiveCConcatenate<ValueType, IndexType>::init_rows(
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::init_rows(
     const std::vector<base_t*>& mat_list
 )
 {
@@ -25,9 +25,9 @@ MatrixNaiveCConcatenate<ValueType, IndexType>::init_rows(
     return n;
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
 auto 
-MatrixNaiveCConcatenate<ValueType, IndexType>::init_cols(
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::init_cols(
     const std::vector<base_t*>& mat_list
 )
 {
@@ -36,9 +36,9 @@ MatrixNaiveCConcatenate<ValueType, IndexType>::init_cols(
     return p;
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
 auto 
-MatrixNaiveCConcatenate<ValueType, IndexType>::init_slice_map(
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::init_slice_map(
     const std::vector<base_t*>& mat_list,
     size_t p
 )
@@ -56,9 +56,9 @@ MatrixNaiveCConcatenate<ValueType, IndexType>::init_slice_map(
     return slice_map;
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
 auto 
-MatrixNaiveCConcatenate<ValueType, IndexType>::init_index_map(
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::init_index_map(
     const std::vector<base_t*>& mat_list,
     size_t p
 )
@@ -76,8 +76,8 @@ MatrixNaiveCConcatenate<ValueType, IndexType>::init_index_map(
     return index_map;
 }
 
-template <class ValueType, class IndexType>
-MatrixNaiveCConcatenate<ValueType, IndexType>::MatrixNaiveCConcatenate(
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::MatrixNaiveCConcatenate(
     const std::vector<base_t*>& mat_list
 ): 
     _mat_list(mat_list),
@@ -92,9 +92,9 @@ MatrixNaiveCConcatenate<ValueType, IndexType>::MatrixNaiveCConcatenate(
     }
 }
 
-template <class ValueType, class IndexType>
-typename MatrixNaiveCConcatenate<ValueType, IndexType>::value_t
-MatrixNaiveCConcatenate<ValueType, IndexType>::cmul(
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::value_t
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -107,9 +107,9 @@ MatrixNaiveCConcatenate<ValueType, IndexType>::cmul(
     return mat.cmul(index, v, weights);
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
 void
-MatrixNaiveCConcatenate<ValueType, IndexType>::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -122,9 +122,9 @@ MatrixNaiveCConcatenate<ValueType, IndexType>::ctmul(
     mat.ctmul(index, v, out);
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
 void
-MatrixNaiveCConcatenate<ValueType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -144,9 +144,9 @@ MatrixNaiveCConcatenate<ValueType, IndexType>::bmul(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
 void
-MatrixNaiveCConcatenate<ValueType, IndexType>::btmul(
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -165,9 +165,9 @@ MatrixNaiveCConcatenate<ValueType, IndexType>::btmul(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
 void
-MatrixNaiveCConcatenate<ValueType, IndexType>::mul(
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -182,23 +182,23 @@ MatrixNaiveCConcatenate<ValueType, IndexType>::mul(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
 int
-MatrixNaiveCConcatenate<ValueType, IndexType>::rows() const
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::rows() const
 {
     return _rows;
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
 int
-MatrixNaiveCConcatenate<ValueType, IndexType>::cols() const
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::cols() const
 {
     return _cols;
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
 void
-MatrixNaiveCConcatenate<ValueType, IndexType>::cov(
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -225,9 +225,9 @@ MatrixNaiveCConcatenate<ValueType, IndexType>::cov(
     mat.cov(index, q, sqrt_weights, out, buffer);
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
 void
-MatrixNaiveCConcatenate<ValueType, IndexType>::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
 ) 
@@ -247,9 +247,9 @@ MatrixNaiveCConcatenate<ValueType, IndexType>::sp_tmul(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
 auto 
-MatrixNaiveRConcatenate<ValueType, IndexType>::init_rows(
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::init_rows(
     const std::vector<base_t*>& mat_list
 )
 {
@@ -258,9 +258,9 @@ MatrixNaiveRConcatenate<ValueType, IndexType>::init_rows(
     return n;
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
 auto 
-MatrixNaiveRConcatenate<ValueType, IndexType>::init_cols(
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::init_cols(
     const std::vector<base_t*>& mat_list
 )
 {
@@ -278,8 +278,8 @@ MatrixNaiveRConcatenate<ValueType, IndexType>::init_cols(
     return p;
 }
 
-template <class ValueType, class IndexType>
-MatrixNaiveRConcatenate<ValueType, IndexType>::MatrixNaiveRConcatenate(
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::MatrixNaiveRConcatenate(
     const std::vector<base_t*>& mat_list
 ): 
     _mat_list(mat_list),
@@ -292,9 +292,9 @@ MatrixNaiveRConcatenate<ValueType, IndexType>::MatrixNaiveRConcatenate(
     }
 }
 
-template <class ValueType, class IndexType>
-typename MatrixNaiveRConcatenate<ValueType, IndexType>::value_t
-MatrixNaiveRConcatenate<ValueType, IndexType>::cmul(
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::value_t
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -318,9 +318,9 @@ MatrixNaiveRConcatenate<ValueType, IndexType>::cmul(
     return sum;
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
 void
-MatrixNaiveRConcatenate<ValueType, IndexType>::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -339,9 +339,9 @@ MatrixNaiveRConcatenate<ValueType, IndexType>::ctmul(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
 void
-MatrixNaiveRConcatenate<ValueType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -367,9 +367,9 @@ MatrixNaiveRConcatenate<ValueType, IndexType>::bmul(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
 void
-MatrixNaiveRConcatenate<ValueType, IndexType>::btmul(
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -388,9 +388,9 @@ MatrixNaiveRConcatenate<ValueType, IndexType>::btmul(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
 void
-MatrixNaiveRConcatenate<ValueType, IndexType>::mul(
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -414,23 +414,23 @@ MatrixNaiveRConcatenate<ValueType, IndexType>::mul(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
 int
-MatrixNaiveRConcatenate<ValueType, IndexType>::rows() const
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::rows() const
 {
     return _rows;
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
 int
-MatrixNaiveRConcatenate<ValueType, IndexType>::cols() const
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::cols() const
 {
     return _cols;
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
 void
-MatrixNaiveRConcatenate<ValueType, IndexType>::cov(
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -465,9 +465,9 @@ MatrixNaiveRConcatenate<ValueType, IndexType>::cov(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
 void
-MatrixNaiveRConcatenate<ValueType, IndexType>::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
 ) 

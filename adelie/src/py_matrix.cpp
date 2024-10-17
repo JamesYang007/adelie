@@ -1,24 +1,5 @@
 #include "py_decl.hpp"
-#include <adelie_core/matrix/matrix_constraint_base.hpp>
-#include <adelie_core/matrix/matrix_constraint_dense.hpp>
-#include <adelie_core/matrix/matrix_constraint_sparse.hpp>
-#include <adelie_core/matrix/matrix_cov_base.hpp>
-#include <adelie_core/matrix/matrix_cov_block_diag.hpp>
-#include <adelie_core/matrix/matrix_cov_dense.hpp>
-#include <adelie_core/matrix/matrix_cov_lazy_cov.hpp>
-#include <adelie_core/matrix/matrix_cov_sparse.hpp>
-#include <adelie_core/matrix/matrix_naive_base.hpp>
-#include <adelie_core/matrix/matrix_naive_concatenate.hpp>
-#include <adelie_core/matrix/matrix_naive_convex_relu.hpp>
-#include <adelie_core/matrix/matrix_naive_dense.hpp>
-#include <adelie_core/matrix/matrix_naive_interaction.hpp>
-#include <adelie_core/matrix/matrix_naive_kronecker_eye.hpp>
-#include <adelie_core/matrix/matrix_naive_one_hot.hpp>
-#include <adelie_core/matrix/matrix_naive_snp_unphased.hpp>
-#include <adelie_core/matrix/matrix_naive_snp_phased_ancestry.hpp>
-#include <adelie_core/matrix/matrix_naive_sparse.hpp>
-#include <adelie_core/matrix/matrix_naive_standardize.hpp>
-#include <adelie_core/matrix/matrix_naive_subset.hpp>
+#include <matrix/matrix.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -1228,11 +1209,6 @@ void matrix_naive_rsubset(py::module_& m, const char* name)
         )
         ;
 }
-
-template <class T, int Storage>
-using dense_type = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Storage>;
-template <class T, int Storage>
-using sparse_type = Eigen::SparseMatrix<T, Storage>;
 
 void register_matrix(py::module_& m)
 {

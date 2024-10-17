@@ -5,11 +5,9 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class DenseType, 
-          class MaskType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
 void
-MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::_ctmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::_ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out,
@@ -32,10 +30,8 @@ MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::_ctmul(
     );
 }
 
-template <class DenseType, 
-          class MaskType,
-          class IndexType>
-MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::MatrixNaiveConvexReluDense(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::MatrixNaiveConvexReluDense(
     const Eigen::Ref<const dense_t>& mat,
     const Eigen::Ref<const mask_t>& mask,
     size_t n_threads
@@ -55,9 +51,9 @@ MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::MatrixNaiveConvexRel
     }
 }
 
-template <class DenseType, class MaskType, class IndexType>
-typename MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::value_t
-MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::cmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -79,9 +75,9 @@ MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::cmul(
     );
 }
 
-template <class DenseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
 void
-MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -91,9 +87,9 @@ MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::ctmul(
     _ctmul(j, v, out, _n_threads);
 }
 
-template <class DenseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
 void
-MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -125,9 +121,9 @@ MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::bmul(
     }
 }
 
-template <class DenseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
 void
-MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::btmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -165,9 +161,9 @@ MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::btmul(
     }
 }
 
-template <class DenseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
 void
-MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::mul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -199,23 +195,23 @@ MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::mul(
     }
 }
 
-template <class DenseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
 int
-MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::rows() const
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::rows() const
 {
     return _mat.rows();
 }
 
-template <class DenseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
 int
-MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::cols() const
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::cols() const
 {
     return _mat.cols() * _mask.cols() * 2;
 }
 
-template <class DenseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
 void
-MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::cov(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -256,9 +252,9 @@ MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::cov(
     out = buffer.transpose() * buffer;
 }
 
-template <class DenseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
 void
-MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
 ) 
@@ -282,11 +278,9 @@ MatrixNaiveConvexReluDense<DenseType, MaskType, IndexType>::sp_tmul(
     }
 }
 
-template <class SparseType, 
-          class MaskType,
-          class IndexType>
-typename MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::value_t 
-MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::_cmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::value_t 
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::_cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights,
@@ -320,11 +314,9 @@ MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::_cmul(
     );
 }
 
-template <class SparseType, 
-          class MaskType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
 void 
-MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::_ctmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::_ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out,
@@ -358,10 +350,8 @@ MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::_ctmul(
     );
 }
 
-template <class SparseType, 
-          class MaskType,
-          class IndexType>
-MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::MatrixNaiveConvexReluSparse(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::MatrixNaiveConvexReluSparse(
     size_t rows,
     size_t cols,
     size_t nnz,
@@ -386,9 +376,9 @@ MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::MatrixNaiveConvexR
     }
 }
 
-template <class SparseType, class MaskType, class IndexType>
-typename MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::value_t
-MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::cmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -398,9 +388,9 @@ MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::cmul(
     return _cmul(j, v, weights, _n_threads);
 }
 
-template <class SparseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
 void
-MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -410,9 +400,9 @@ MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::ctmul(
     _ctmul(j, v, out, _n_threads);
 }
 
-template <class SparseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
 void
-MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -425,9 +415,9 @@ MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::bmul(
     }
 }
 
-template <class SparseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
 void
-MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::btmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -439,9 +429,9 @@ MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::btmul(
     }
 }
 
-template <class SparseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
 void
-MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::mul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -458,23 +448,23 @@ MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::mul(
     }
 }
 
-template <class SparseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
 int
-MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::rows() const
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::rows() const
 {
     return _mat.rows();
 }
 
-template <class SparseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
 int
-MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::cols() const
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::cols() const
 {
     return _mat.cols() * _mask.cols() * 2;
 }
 
-template <class SparseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
 void
-MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::cov(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -541,9 +531,9 @@ MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::cov(
     }
 }
 
-template <class SparseType, class MaskType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
 void
-MatrixNaiveConvexReluSparse<SparseType, MaskType, IndexType>::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
 ) 

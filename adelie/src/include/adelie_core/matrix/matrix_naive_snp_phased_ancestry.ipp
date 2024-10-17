@@ -1,18 +1,15 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <adelie_core/io/io_snp_phased_ancestry.hpp>
 #include <adelie_core/matrix/matrix_naive_snp_phased_ancestry.hpp>
 #include <adelie_core/matrix/utils.hpp>
 
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
-typename MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::value_t
-MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::_cmul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
+typename ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::value_t
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::_cmul(
     int j,
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights,
@@ -24,11 +21,9 @@ MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::_cmul(
     );
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
 void
-MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::_ctmul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::_ctmul(
     int j,
     value_t v,
     Eigen::Ref<vec_value_t> out,
@@ -40,10 +35,8 @@ MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::_ctmul(
     );
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
-MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::MatrixNaiveSNPPhasedAncestry(
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::MatrixNaiveSNPPhasedAncestry(
     const io_t& io,
     size_t n_threads
 ): 
@@ -59,11 +52,9 @@ MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::MatrixNaiveSNPP
     _bbuff.setZero();
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
-typename MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::value_t
-MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::cmul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
+typename ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::value_t
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -73,11 +64,9 @@ MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::cmul(
     return _cmul(j, v, weights, _n_threads);
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
 void
-MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -87,11 +76,9 @@ MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::ctmul(
     _ctmul(j, v, out, _n_threads);
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
 void
-MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -105,11 +92,9 @@ MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::bmul(
     );
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
 void
-MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::btmul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -122,11 +107,9 @@ MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::btmul(
     );
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
 void
-MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::mul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -143,11 +126,9 @@ MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::mul(
     }
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
 void
-MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::cov(
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -291,29 +272,23 @@ MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::cov(
     }     
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
 int
-MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::rows() const 
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::rows() const 
 { 
     return _io.rows(); 
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
 int
-MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::cols() const 
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::cols() const 
 { 
     return _io.snps() * ancestries(); 
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
 void
-MatrixNaiveSNPPhasedAncestry<ValueType, MmapPtrType, IndexType>::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::sp_tmul(
     const sp_mat_value_t& v,
     Eigen::Ref<rowmat_value_t> out
 )

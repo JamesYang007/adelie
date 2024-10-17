@@ -5,8 +5,8 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType, class IndexType> 
-MatrixNaiveKroneckerEye<ValueType, IndexType>::MatrixNaiveKroneckerEye(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::MatrixNaiveKroneckerEye(
     base_t& mat,
     size_t K,
     size_t n_threads
@@ -24,9 +24,9 @@ MatrixNaiveKroneckerEye<ValueType, IndexType>::MatrixNaiveKroneckerEye(
     }
 }
 
-template <class ValueType, class IndexType> 
-typename MatrixNaiveKroneckerEye<ValueType, IndexType>::value_t
-MatrixNaiveKroneckerEye<ValueType, IndexType>::cmul(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP 
+typename ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::value_t
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -44,9 +44,9 @@ MatrixNaiveKroneckerEye<ValueType, IndexType>::cmul(
     return _mat->cmul(i, _v, _w);
 }
 
-template <class ValueType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP 
 void
-MatrixNaiveKroneckerEye<ValueType, IndexType>::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -63,9 +63,9 @@ MatrixNaiveKroneckerEye<ValueType, IndexType>::ctmul(
     dvaddi(Out_l, _out, _n_threads);
 }
 
-template <class ValueType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP 
 void
-MatrixNaiveKroneckerEye<ValueType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -94,9 +94,9 @@ MatrixNaiveKroneckerEye<ValueType, IndexType>::bmul(
     }
 }
 
-template <class ValueType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP 
 void
-MatrixNaiveKroneckerEye<ValueType, IndexType>::btmul(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -122,9 +122,9 @@ MatrixNaiveKroneckerEye<ValueType, IndexType>::btmul(
     }
 }
 
-template <class ValueType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP 
 void
-MatrixNaiveKroneckerEye<ValueType, IndexType>::mul(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -146,9 +146,9 @@ MatrixNaiveKroneckerEye<ValueType, IndexType>::mul(
     }
 }
 
-template <class ValueType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP 
 void
-MatrixNaiveKroneckerEye<ValueType, IndexType>::cov(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -192,23 +192,23 @@ MatrixNaiveKroneckerEye<ValueType, IndexType>::cov(
     }
 }
 
-template <class ValueType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP 
 int
-MatrixNaiveKroneckerEye<ValueType, IndexType>::rows() const 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::rows() const 
 { 
     return _K * _mat->rows(); 
 }
 
-template <class ValueType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP 
 int
-MatrixNaiveKroneckerEye<ValueType, IndexType>::cols() const 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::cols() const 
 { 
     return _K * _mat->cols(); 
 }
 
-template <class ValueType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP 
 void
-MatrixNaiveKroneckerEye<ValueType, IndexType>::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::sp_tmul(
     const sp_mat_value_t& v,
     Eigen::Ref<rowmat_value_t> out
 )
@@ -268,8 +268,8 @@ MatrixNaiveKroneckerEye<ValueType, IndexType>::sp_tmul(
     }
 }
 
-template <class DenseType, class IndexType> 
-MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::MatrixNaiveKroneckerEyeDense(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::MatrixNaiveKroneckerEyeDense(
     const Eigen::Ref<const dense_t>& mat,
     size_t K,
     size_t n_threads
@@ -288,9 +288,9 @@ MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::MatrixNaiveKroneckerEyeDense
     }
 }
 
-template <class DenseType, class IndexType> 
-typename MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::value_t
-MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::cmul(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
+typename ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -305,9 +305,9 @@ MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::cmul(
     return ddot(V.col(l).cwiseProduct(W.col(l)), _mat.col(i), _n_threads, vbuff);
 }
 
-template <class DenseType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
 void
-MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -321,9 +321,9 @@ MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::ctmul(
     dvaddi(_out, v * _mat.col(i), _n_threads);
 }
 
-template <class DenseType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
 void
-MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -350,9 +350,9 @@ MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::bmul(
     }
 }
 
-template <class DenseType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
 void
-MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::btmul(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -374,9 +374,9 @@ MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::btmul(
     }
 }
 
-template <class DenseType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
 void
-MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::mul(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -390,9 +390,9 @@ MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::mul(
     Out.noalias() = _mat.transpose() * VW;
 }
 
-template <class DenseType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
 void
-MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::cov(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -438,23 +438,23 @@ MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::cov(
     }
 }
 
-template <class DenseType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
 int
-MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::rows() const 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::rows() const 
 { 
     return _K * _mat.rows(); 
 }
 
-template <class DenseType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
 int
-MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::cols() const 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::cols() const 
 { 
     return _K * _mat.cols(); 
 }
 
-template <class DenseType, class IndexType> 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
 void
-MatrixNaiveKroneckerEyeDense<DenseType, IndexType>::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::sp_tmul(
     const sp_mat_value_t& v,
     Eigen::Ref<rowmat_value_t> out
 )

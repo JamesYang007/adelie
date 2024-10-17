@@ -5,9 +5,9 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class SparseType, class IndexType>
-typename MatrixNaiveSparse<SparseType, IndexType>::value_t
-MatrixNaiveSparse<SparseType, IndexType>::_cmul(
+ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_SPARSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_SPARSE::_cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights,
@@ -25,9 +25,9 @@ MatrixNaiveSparse<SparseType, IndexType>::_cmul(
     return spddot(inner, value, v * weights, n_threads, _buff);
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
 void
-MatrixNaiveSparse<SparseType, IndexType>::_ctmul(
+ADELIE_CORE_MATRIX_NAIVE_SPARSE::_ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out,
@@ -45,8 +45,8 @@ MatrixNaiveSparse<SparseType, IndexType>::_ctmul(
     spaxi(inner, value, v, out, n_threads);
 }
 
-template <class SparseType, class IndexType>
-MatrixNaiveSparse<SparseType, IndexType>::MatrixNaiveSparse(
+ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
+ADELIE_CORE_MATRIX_NAIVE_SPARSE::MatrixNaiveSparse(
     size_t rows,
     size_t cols,
     size_t nnz,
@@ -64,9 +64,9 @@ MatrixNaiveSparse<SparseType, IndexType>::MatrixNaiveSparse(
     }
 }
 
-template <class SparseType, class IndexType>
-typename MatrixNaiveSparse<SparseType, IndexType>::value_t
-MatrixNaiveSparse<SparseType, IndexType>::cmul(
+ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_SPARSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_SPARSE::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -76,9 +76,9 @@ MatrixNaiveSparse<SparseType, IndexType>::cmul(
     return _cmul(j, v, weights, _n_threads);
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
 void
-MatrixNaiveSparse<SparseType, IndexType>::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_SPARSE::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -88,9 +88,9 @@ MatrixNaiveSparse<SparseType, IndexType>::ctmul(
     _ctmul(j, v, out, _n_threads);
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
 void
-MatrixNaiveSparse<SparseType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_NAIVE_SPARSE::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -103,9 +103,9 @@ MatrixNaiveSparse<SparseType, IndexType>::bmul(
     }
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
 void
-MatrixNaiveSparse<SparseType, IndexType>::btmul(
+ADELIE_CORE_MATRIX_NAIVE_SPARSE::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -117,9 +117,9 @@ MatrixNaiveSparse<SparseType, IndexType>::btmul(
     }
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
 void
-MatrixNaiveSparse<SparseType, IndexType>::mul(
+ADELIE_CORE_MATRIX_NAIVE_SPARSE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -136,23 +136,23 @@ MatrixNaiveSparse<SparseType, IndexType>::mul(
     }
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
 int
-MatrixNaiveSparse<SparseType, IndexType>::rows() const
+ADELIE_CORE_MATRIX_NAIVE_SPARSE::rows() const
 {
     return _mat.rows();
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
 int
-MatrixNaiveSparse<SparseType, IndexType>::cols() const
+ADELIE_CORE_MATRIX_NAIVE_SPARSE::cols() const
 {
     return _mat.cols();
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
 void
-MatrixNaiveSparse<SparseType, IndexType>::cov(
+ADELIE_CORE_MATRIX_NAIVE_SPARSE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -205,9 +205,9 @@ MatrixNaiveSparse<SparseType, IndexType>::cov(
     }
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
 void
-MatrixNaiveSparse<SparseType, IndexType>::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_SPARSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
 )

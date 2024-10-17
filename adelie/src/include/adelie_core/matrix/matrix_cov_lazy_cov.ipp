@@ -6,9 +6,9 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_COV_LAZY_COV_TP
 void
-MatrixCovLazyCov<DenseType, IndexType>::cache(
+ADELIE_CORE_MATRIX_COV_LAZY_COV::cache(
     int i, 
     int p
 ) 
@@ -45,8 +45,8 @@ MatrixCovLazyCov<DenseType, IndexType>::cache(
     _cache.emplace_back(std::move(cov));
 }
 
-template <class DenseType, class IndexType>
-MatrixCovLazyCov<DenseType, IndexType>::MatrixCovLazyCov(
+ADELIE_CORE_MATRIX_COV_LAZY_COV_TP
+ADELIE_CORE_MATRIX_COV_LAZY_COV::MatrixCovLazyCov(
     const Eigen::Ref<const dense_t>& X,
     size_t n_threads
 ): 
@@ -61,9 +61,9 @@ MatrixCovLazyCov<DenseType, IndexType>::MatrixCovLazyCov(
     _cache.reserve(X.cols());
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_COV_LAZY_COV_TP
 void
-MatrixCovLazyCov<DenseType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_COV_LAZY_COV::bmul(
     const Eigen::Ref<const vec_index_t>& subset,
     const Eigen::Ref<const vec_index_t>& indices,
     const Eigen::Ref<const vec_value_t>& values,
@@ -96,9 +96,9 @@ MatrixCovLazyCov<DenseType, IndexType>::bmul(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_COV_LAZY_COV_TP
 void
-MatrixCovLazyCov<DenseType, IndexType>::mul(
+ADELIE_CORE_MATRIX_COV_LAZY_COV::mul(
     const Eigen::Ref<const vec_index_t>& indices,
     const Eigen::Ref<const vec_value_t>& values,
     Eigen::Ref<vec_value_t> out
@@ -121,9 +121,9 @@ MatrixCovLazyCov<DenseType, IndexType>::mul(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_COV_LAZY_COV_TP
 void
-MatrixCovLazyCov<DenseType, IndexType>::to_dense(
+ADELIE_CORE_MATRIX_COV_LAZY_COV::to_dense(
     int i, int p,
     Eigen::Ref<colmat_value_t> out
 ) 
@@ -145,9 +145,9 @@ MatrixCovLazyCov<DenseType, IndexType>::to_dense(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_COV_LAZY_COV_TP
 int
-MatrixCovLazyCov<DenseType, IndexType>::cols() const
+ADELIE_CORE_MATRIX_COV_LAZY_COV::cols() const
 { 
     return _X.cols(); 
 }

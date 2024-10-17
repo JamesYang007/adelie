@@ -5,8 +5,8 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType, class IndexType>
-MatrixNaiveStandardize<ValueType, IndexType>::MatrixNaiveStandardize(
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::MatrixNaiveStandardize(
     base_t& mat,
     const Eigen::Ref<const vec_value_t>& centers,
     const Eigen::Ref<const vec_value_t>& scales,
@@ -35,9 +35,9 @@ MatrixNaiveStandardize<ValueType, IndexType>::MatrixNaiveStandardize(
     }
 }
 
-template <class ValueType, class IndexType>
-typename MatrixNaiveStandardize<ValueType, IndexType>::value_t
-MatrixNaiveStandardize<ValueType, IndexType>::cmul(
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::value_t
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -51,9 +51,9 @@ MatrixNaiveStandardize<ValueType, IndexType>::cmul(
     return (_mat->cmul(j, v, weights) - c * vw_sum) / _scales[j];
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
 void
-MatrixNaiveStandardize<ValueType, IndexType>::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -73,9 +73,9 @@ MatrixNaiveStandardize<ValueType, IndexType>::ctmul(
     );
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
 void
-MatrixNaiveStandardize<ValueType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -92,9 +92,9 @@ MatrixNaiveStandardize<ValueType, IndexType>::bmul(
     dvveq(out, (out - vw_sum * c) / s, _n_threads);
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
 void
-MatrixNaiveStandardize<ValueType, IndexType>::btmul(
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -120,9 +120,9 @@ MatrixNaiveStandardize<ValueType, IndexType>::btmul(
     );
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
 void
-MatrixNaiveStandardize<ValueType, IndexType>::mul(
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -133,23 +133,23 @@ MatrixNaiveStandardize<ValueType, IndexType>::mul(
     dvveq(out, (out - vw_sum * _centers) / _scales, _n_threads);
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
 int
-MatrixNaiveStandardize<ValueType, IndexType>::rows() const
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::rows() const
 {
     return _mat->rows();
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
 int
-MatrixNaiveStandardize<ValueType, IndexType>::cols() const
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::cols() const
 {
     return _mat->cols();
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
 void
-MatrixNaiveStandardize<ValueType, IndexType>::cov(
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -180,9 +180,9 @@ MatrixNaiveStandardize<ValueType, IndexType>::cov(
     out.array().colwise() /= scales.matrix().transpose().array();
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
 void
-MatrixNaiveStandardize<ValueType, IndexType>::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
 )

@@ -5,8 +5,8 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class SparseType, class IndexType>
-MatrixConstraintSparse<SparseType, IndexType>::MatrixConstraintSparse(
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE_TP
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE::MatrixConstraintSparse(
     size_t rows,
     size_t cols,
     size_t nnz,
@@ -24,9 +24,9 @@ MatrixConstraintSparse<SparseType, IndexType>::MatrixConstraintSparse(
     }
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE_TP
 void
-MatrixConstraintSparse<SparseType, IndexType>::rmmul(
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE::rmmul(
     int j,
     const Eigen::Ref<const colmat_value_t>& Q,
     Eigen::Ref<vec_value_t> out
@@ -35,9 +35,9 @@ MatrixConstraintSparse<SparseType, IndexType>::rmmul(
     out.matrix() = _mat.row(j) * Q;
 }
 
-template <class SparseType, class IndexType>
-typename MatrixConstraintSparse<SparseType, IndexType>::value_t
-MatrixConstraintSparse<SparseType, IndexType>::rvmul(
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE_TP
+typename ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE::value_t
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE::rvmul(
     int j,
     const Eigen::Ref<const vec_value_t>& v
 ) 
@@ -45,9 +45,9 @@ MatrixConstraintSparse<SparseType, IndexType>::rvmul(
     return _mat.row(j).dot(v.matrix());
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE_TP
 void
-MatrixConstraintSparse<SparseType, IndexType>::rvtmul(
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE::rvtmul(
     int j,
     value_t v,
     Eigen::Ref<vec_value_t> out
@@ -56,9 +56,9 @@ MatrixConstraintSparse<SparseType, IndexType>::rvtmul(
     out.matrix() += v * _mat.row(j);
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE_TP
 void
-MatrixConstraintSparse<SparseType, IndexType>::mul(
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE::mul(
     const Eigen::Ref<const vec_value_t>& v,
     Eigen::Ref<vec_value_t> out
 ) 
@@ -66,9 +66,9 @@ MatrixConstraintSparse<SparseType, IndexType>::mul(
     out.matrix() = v.matrix() * _mat;
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE_TP
 void
-MatrixConstraintSparse<SparseType, IndexType>::tmul(
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE::tmul(
     const Eigen::Ref<const vec_value_t>& v,
     Eigen::Ref<vec_value_t> out
 ) 
@@ -84,9 +84,9 @@ MatrixConstraintSparse<SparseType, IndexType>::tmul(
     }
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE_TP
 void
-MatrixConstraintSparse<SparseType, IndexType>::cov(
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE::cov(
     const Eigen::Ref<const colmat_value_t>& Q,
     Eigen::Ref<colmat_value_t> out
 ) 
@@ -95,23 +95,23 @@ MatrixConstraintSparse<SparseType, IndexType>::cov(
     out.noalias() = _mat * Q * _mat.transpose();
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE_TP
 int
-MatrixConstraintSparse<SparseType, IndexType>::rows() const 
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE::rows() const 
 {
     return _mat.rows();
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE_TP
 int
-MatrixConstraintSparse<SparseType, IndexType>::cols() const
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE::cols() const
 {
     return _mat.cols();
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE_TP
 void
-MatrixConstraintSparse<SparseType, IndexType>::sp_mul(
+ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE::sp_mul(
     const Eigen::Ref<const vec_index_t>& indices,
     const Eigen::Ref<const vec_value_t>& values,
     Eigen::Ref<vec_value_t> out

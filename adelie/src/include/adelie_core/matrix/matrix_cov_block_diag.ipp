@@ -6,9 +6,9 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG_TP
 auto
-MatrixCovBlockDiag<ValueType, IndexType>::init_mat_size_cumsum(
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG::init_mat_size_cumsum(
     const std::vector<base_t*>& mat_list
 )
 {
@@ -20,10 +20,11 @@ MatrixCovBlockDiag<ValueType, IndexType>::init_mat_size_cumsum(
     return mat_size_cumsum;
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG_TP
 auto
-MatrixCovBlockDiag<ValueType, IndexType>::init_cols(
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG::init_cols(
     const std::vector<base_t*>& mat_list
+
 )
 {
     size_t p = 0;
@@ -31,9 +32,9 @@ MatrixCovBlockDiag<ValueType, IndexType>::init_cols(
     return p;
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG_TP
 auto
-MatrixCovBlockDiag<ValueType, IndexType>::init_slice_map(
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG::init_slice_map(
     const std::vector<base_t*>& mat_list,
     size_t p
 )
@@ -51,8 +52,8 @@ MatrixCovBlockDiag<ValueType, IndexType>::init_slice_map(
     return slice_map;
 }
 
-template <class ValueType, class IndexType>
-MatrixCovBlockDiag<ValueType, IndexType>::MatrixCovBlockDiag(
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG_TP
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG::MatrixCovBlockDiag(
     const std::vector<base_t*>& mat_list,
     size_t n_threads
 ): 
@@ -72,9 +73,9 @@ MatrixCovBlockDiag<ValueType, IndexType>::MatrixCovBlockDiag(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG_TP
 void
-MatrixCovBlockDiag<ValueType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG::bmul(
     const Eigen::Ref<const vec_index_t>& subset,
     const Eigen::Ref<const vec_index_t>& indices,
     const Eigen::Ref<const vec_value_t>& values,
@@ -129,9 +130,9 @@ MatrixCovBlockDiag<ValueType, IndexType>::bmul(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG_TP
 void
-MatrixCovBlockDiag<ValueType, IndexType>::mul(
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG::mul(
     const Eigen::Ref<const vec_index_t>& indices,
     const Eigen::Ref<const vec_value_t>& values,
     Eigen::Ref<vec_value_t> out
@@ -174,9 +175,9 @@ MatrixCovBlockDiag<ValueType, IndexType>::mul(
     }
 } 
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG_TP
 void
-MatrixCovBlockDiag<ValueType, IndexType>::to_dense(
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG::to_dense(
     int i, int p,
     Eigen::Ref<colmat_value_t> out
 ) 
@@ -203,9 +204,9 @@ MatrixCovBlockDiag<ValueType, IndexType>::to_dense(
     }
 }
 
-template <class ValueType, class IndexType>
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG_TP
 int
-MatrixCovBlockDiag<ValueType, IndexType>::cols() const
+ADELIE_CORE_MATRIX_COV_BLOCK_DIAG::cols() const
 {
     return _cols;
 }

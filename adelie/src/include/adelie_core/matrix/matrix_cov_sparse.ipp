@@ -5,8 +5,8 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class SparseType, class IndexType>
-MatrixCovSparse<SparseType, IndexType>::MatrixCovSparse(
+ADELIE_CORE_MATRIX_COV_SPARSE_TP
+ADELIE_CORE_MATRIX_COV_SPARSE::MatrixCovSparse(
     size_t rows,
     size_t cols,
     size_t nnz,
@@ -23,9 +23,9 @@ MatrixCovSparse<SparseType, IndexType>::MatrixCovSparse(
     }
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_COV_SPARSE_TP
 void
-MatrixCovSparse<SparseType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_COV_SPARSE::bmul(
     const Eigen::Ref<const vec_index_t>& subset,
     const Eigen::Ref<const vec_index_t>& indices,
     const Eigen::Ref<const vec_value_t>& values,
@@ -48,9 +48,9 @@ MatrixCovSparse<SparseType, IndexType>::bmul(
     }
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_COV_SPARSE_TP
 void
-MatrixCovSparse<SparseType, IndexType>::mul(
+ADELIE_CORE_MATRIX_COV_SPARSE::mul(
     const Eigen::Ref<const vec_index_t>& indices,
     const Eigen::Ref<const vec_value_t>& values,
     Eigen::Ref<vec_value_t> out
@@ -76,9 +76,9 @@ MatrixCovSparse<SparseType, IndexType>::mul(
     }
 } 
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_COV_SPARSE_TP
 void
-MatrixCovSparse<SparseType, IndexType>::to_dense(
+ADELIE_CORE_MATRIX_COV_SPARSE::to_dense(
     int i, int p,
     Eigen::Ref<colmat_value_t> out
 ) 
@@ -87,9 +87,9 @@ MatrixCovSparse<SparseType, IndexType>::to_dense(
     out = _mat.block(i, i, p, p);
 }
 
-template <class SparseType, class IndexType>
+ADELIE_CORE_MATRIX_COV_SPARSE_TP
 int
-MatrixCovSparse<SparseType, IndexType>::cols() const
+ADELIE_CORE_MATRIX_COV_SPARSE::cols() const
 {
     return _mat.cols();
 }

@@ -5,9 +5,9 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
 auto
-MatrixNaiveInteractionDense<DenseType, IndexType>::init_outer(
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::init_outer(
     const Eigen::Ref<const rowarr_index_t>& pairs,
     const Eigen::Ref<const vec_index_t>& levels
 )
@@ -25,9 +25,9 @@ MatrixNaiveInteractionDense<DenseType, IndexType>::init_outer(
     return outer;
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
 auto
-MatrixNaiveInteractionDense<DenseType, IndexType>::init_slice_map(
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::init_slice_map(
     const Eigen::Ref<const rowarr_index_t>& pairs,
     const Eigen::Ref<const vec_index_t>& levels,
     size_t cols
@@ -50,9 +50,9 @@ MatrixNaiveInteractionDense<DenseType, IndexType>::init_slice_map(
     return slice_map;
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
 auto
-MatrixNaiveInteractionDense<DenseType, IndexType>::init_index_map(
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::init_index_map(
     const Eigen::Ref<const rowarr_index_t>& pairs,
     const Eigen::Ref<const vec_index_t>& levels,
     size_t cols
@@ -75,9 +75,9 @@ MatrixNaiveInteractionDense<DenseType, IndexType>::init_index_map(
     return index_map;
 }
 
-template <class DenseType, class IndexType>
-typename MatrixNaiveInteractionDense<DenseType, IndexType>::value_t
-MatrixNaiveInteractionDense<DenseType, IndexType>::_cmul(
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights,
@@ -171,9 +171,9 @@ MatrixNaiveInteractionDense<DenseType, IndexType>::_cmul(
     return std::numeric_limits<value_t>::infinity() + 1; // lol
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
 void
-MatrixNaiveInteractionDense<DenseType, IndexType>::_ctmul(
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out,
@@ -260,9 +260,9 @@ MatrixNaiveInteractionDense<DenseType, IndexType>::_ctmul(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
 void
-MatrixNaiveInteractionDense<DenseType, IndexType>::_bmul(
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_bmul(
     int begin,
     int i0, int i1,
     int l0, int l1,
@@ -327,9 +327,9 @@ MatrixNaiveInteractionDense<DenseType, IndexType>::_bmul(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
 void
-MatrixNaiveInteractionDense<DenseType, IndexType>::_btmul(
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_btmul(
     int begin,
     int i0, int i1,
     int l0, int l1,
@@ -403,8 +403,8 @@ MatrixNaiveInteractionDense<DenseType, IndexType>::_btmul(
     }
 }
 
-template <class DenseType, class IndexType>
-MatrixNaiveInteractionDense<DenseType, IndexType>::MatrixNaiveInteractionDense(
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::MatrixNaiveInteractionDense(
     const Eigen::Ref<const dense_t>& mat,
     const Eigen::Ref<const rowarr_index_t>& pairs,
     const Eigen::Ref<const vec_index_t>& levels,
@@ -432,9 +432,9 @@ MatrixNaiveInteractionDense<DenseType, IndexType>::MatrixNaiveInteractionDense(
     }
 }
 
-template <class DenseType, class IndexType>
-typename MatrixNaiveInteractionDense<DenseType, IndexType>::value_t
-MatrixNaiveInteractionDense<DenseType, IndexType>::cmul(
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -444,9 +444,9 @@ MatrixNaiveInteractionDense<DenseType, IndexType>::cmul(
     return _cmul(j, v, weights, _n_threads);
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
 void
-MatrixNaiveInteractionDense<DenseType, IndexType>::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -456,9 +456,9 @@ MatrixNaiveInteractionDense<DenseType, IndexType>::ctmul(
     _ctmul(j, v, out, _n_threads);
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
 void
-MatrixNaiveInteractionDense<DenseType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -487,9 +487,9 @@ MatrixNaiveInteractionDense<DenseType, IndexType>::bmul(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
 void
-MatrixNaiveInteractionDense<DenseType, IndexType>::btmul(
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -517,9 +517,9 @@ MatrixNaiveInteractionDense<DenseType, IndexType>::btmul(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
 void
-MatrixNaiveInteractionDense<DenseType, IndexType>::mul(
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -547,23 +547,23 @@ MatrixNaiveInteractionDense<DenseType, IndexType>::mul(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
 int
-MatrixNaiveInteractionDense<DenseType, IndexType>::rows() const
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::rows() const
 {
     return _mat.rows();
 }
     
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
 int
-MatrixNaiveInteractionDense<DenseType, IndexType>::cols() const
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::cols() const
 {
     return _cols;
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
 void
-MatrixNaiveInteractionDense<DenseType, IndexType>::cov(
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -665,9 +665,9 @@ MatrixNaiveInteractionDense<DenseType, IndexType>::cov(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
 void
-MatrixNaiveInteractionDense<DenseType, IndexType>::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
 )

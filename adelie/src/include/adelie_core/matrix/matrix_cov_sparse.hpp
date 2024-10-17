@@ -1,6 +1,15 @@
 #pragma once
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 
+#ifndef ADELIE_CORE_MATRIX_COV_SPARSE_TP
+#define ADELIE_CORE_MATRIX_COV_SPARSE_TP \
+    template <class SparseType, class IndexType>
+#endif
+#ifndef ADELIE_CORE_MATRIX_COV_SPARSE
+#define ADELIE_CORE_MATRIX_COV_SPARSE \
+    MatrixCovSparse<SparseType, IndexType>
+#endif
+
 namespace adelie_core {
 namespace matrix {
 
@@ -36,25 +45,7 @@ public:
 
     using base_t::rows;
     
-    void bmul(
-        const Eigen::Ref<const vec_index_t>& subset,
-        const Eigen::Ref<const vec_index_t>& indices,
-        const Eigen::Ref<const vec_value_t>& values,
-        Eigen::Ref<vec_value_t> out
-    ) override;
-
-    void mul(
-        const Eigen::Ref<const vec_index_t>& indices,
-        const Eigen::Ref<const vec_value_t>& values,
-        Eigen::Ref<vec_value_t> out
-    ) override;
-
-    void to_dense(
-        int i, int p,
-        Eigen::Ref<colmat_value_t> out
-    ) override;
-
-    int cols() const override;
+    ADELIE_CORE_MATRIX_COV_PURE_OVERRIDE_DECL    
 };
 
 } // namespace matrix

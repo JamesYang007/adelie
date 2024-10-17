@@ -5,8 +5,8 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class DenseType, class IndexType>
-MatrixConstraintDense<DenseType, IndexType>::MatrixConstraintDense(
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE_TP
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE::MatrixConstraintDense(
     const Eigen::Ref<const dense_t>& mat,
     size_t n_threads
 ): 
@@ -19,9 +19,9 @@ MatrixConstraintDense<DenseType, IndexType>::MatrixConstraintDense(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE_TP
 void
-MatrixConstraintDense<DenseType, IndexType>::rmmul(
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE::rmmul(
     int j,
     const Eigen::Ref<const colmat_value_t>& Q,
     Eigen::Ref<vec_value_t> out
@@ -30,9 +30,9 @@ MatrixConstraintDense<DenseType, IndexType>::rmmul(
     out.matrix() = _mat.row(j) * Q;
 }
 
-template <class DenseType, class IndexType>
-typename MatrixConstraintDense<DenseType, IndexType>::value_t
-MatrixConstraintDense<DenseType, IndexType>::rvmul(
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE_TP
+typename ADELIE_CORE_MATRIX_CONSTRAINT_DENSE::value_t
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE::rvmul(
     int j,
     const Eigen::Ref<const vec_value_t>& v
 ) 
@@ -40,9 +40,9 @@ MatrixConstraintDense<DenseType, IndexType>::rvmul(
     return _mat.row(j).dot(v.matrix());
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE_TP
 void
-MatrixConstraintDense<DenseType, IndexType>::rvtmul(
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE::rvtmul(
     int j,
     value_t v,
     Eigen::Ref<vec_value_t> out
@@ -51,9 +51,9 @@ MatrixConstraintDense<DenseType, IndexType>::rvtmul(
     out.matrix() += v * _mat.row(j);
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE_TP
 void
-MatrixConstraintDense<DenseType, IndexType>::mul(
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE::mul(
     const Eigen::Ref<const vec_value_t>& v,
     Eigen::Ref<vec_value_t> out
 ) 
@@ -68,9 +68,9 @@ MatrixConstraintDense<DenseType, IndexType>::mul(
     );
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE_TP
 void
-MatrixConstraintDense<DenseType, IndexType>::tmul(
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE::tmul(
     const Eigen::Ref<const vec_value_t>& v,
     Eigen::Ref<vec_value_t> out
 ) 
@@ -85,9 +85,9 @@ MatrixConstraintDense<DenseType, IndexType>::tmul(
     );
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE_TP
 void
-MatrixConstraintDense<DenseType, IndexType>::cov(
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE::cov(
     const Eigen::Ref<const colmat_value_t>& Q,
     Eigen::Ref<colmat_value_t> out
 ) 
@@ -96,23 +96,23 @@ MatrixConstraintDense<DenseType, IndexType>::cov(
     out.noalias() = _mat * Q * _mat.transpose();
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE_TP
 int
-MatrixConstraintDense<DenseType, IndexType>::rows() const
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE::rows() const
 {
     return _mat.rows();
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE_TP
 int
-MatrixConstraintDense<DenseType, IndexType>::cols() const 
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE::cols() const 
 {
     return _mat.cols();
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE_TP
 void
-MatrixConstraintDense<DenseType, IndexType>::sp_mul(
+ADELIE_CORE_MATRIX_CONSTRAINT_DENSE::sp_mul(
     const Eigen::Ref<const vec_index_t>& indices,
     const Eigen::Ref<const vec_value_t>& values,
     Eigen::Ref<vec_value_t> out

@@ -5,11 +5,9 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
-typename MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::value_t
-MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::_cmul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
+typename ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::value_t
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::_cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights,
@@ -22,11 +20,9 @@ MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::_cmul(
     );
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
 void
-MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::_ctmul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::_ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out,
@@ -36,10 +32,8 @@ MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::_ctmul(
     snp_unphased_axi(_io, j, v, out, n_threads);
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
-MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::MatrixNaiveSNPUnphased(
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::MatrixNaiveSNPUnphased(
     const io_t& io,
     size_t n_threads
 ): 
@@ -55,11 +49,9 @@ MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::MatrixNaiveSNPUnphase
     _vbuff.setConstant(_max);
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
-typename MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::value_t
-MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::cmul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
+typename ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::value_t
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -69,11 +61,9 @@ MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::cmul(
     return _cmul(j, v, weights, _n_threads);
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
 void
-MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -83,11 +73,9 @@ MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::ctmul(
     _ctmul(j, v, out, _n_threads);
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
 void
-MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -100,11 +88,9 @@ MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::bmul(
     }
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
 void
-MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::btmul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -116,11 +102,9 @@ MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::btmul(
     }
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
 void
-MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::mul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -137,11 +121,9 @@ MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::mul(
     }
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
 void
-MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::cov(
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -214,29 +196,23 @@ MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::cov(
     }
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
 int
-MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::rows() const 
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::rows() const 
 { 
     return _io.rows(); 
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
 int
-MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::cols() const 
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::cols() const 
 { 
     return _io.cols(); 
 }
 
-template <class ValueType,
-          class MmapPtrType,
-          class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
 void
-MatrixNaiveSNPUnphased<ValueType, MmapPtrType, IndexType>::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::sp_tmul(
     const sp_mat_value_t& v,
     Eigen::Ref<rowmat_value_t> out
 )

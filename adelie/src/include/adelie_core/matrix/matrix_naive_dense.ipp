@@ -5,8 +5,8 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class DenseType, class IndexType>
-MatrixNaiveDense<DenseType, IndexType>::MatrixNaiveDense(
+ADELIE_CORE_MATRIX_NAIVE_DENSE_TP
+ADELIE_CORE_MATRIX_NAIVE_DENSE::MatrixNaiveDense(
     const Eigen::Ref<const dense_t>& mat,
     size_t n_threads
 ): 
@@ -20,9 +20,9 @@ MatrixNaiveDense<DenseType, IndexType>::MatrixNaiveDense(
     }
 }
 
-template <class DenseType, class IndexType>
-typename MatrixNaiveDense<DenseType, IndexType>::value_t
-MatrixNaiveDense<DenseType, IndexType>::cmul(
+ADELIE_CORE_MATRIX_NAIVE_DENSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_DENSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_DENSE::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -33,9 +33,9 @@ MatrixNaiveDense<DenseType, IndexType>::cmul(
     return ddot(_mat.col(j), (v * weights).matrix(), _n_threads, vbuff);
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_DENSE_TP
 void
-MatrixNaiveDense<DenseType, IndexType>::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_DENSE::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -45,9 +45,9 @@ MatrixNaiveDense<DenseType, IndexType>::ctmul(
     dvaddi(out, v * _mat.col(j).transpose().array(), _n_threads);
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_DENSE_TP
 void
-MatrixNaiveDense<DenseType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_NAIVE_DENSE::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -66,9 +66,9 @@ MatrixNaiveDense<DenseType, IndexType>::bmul(
     );
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_DENSE_TP
 void
-MatrixNaiveDense<DenseType, IndexType>::btmul(
+ADELIE_CORE_MATRIX_NAIVE_DENSE::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -85,9 +85,9 @@ MatrixNaiveDense<DenseType, IndexType>::btmul(
     );
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_DENSE_TP
 void
-MatrixNaiveDense<DenseType, IndexType>::mul(
+ADELIE_CORE_MATRIX_NAIVE_DENSE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -104,23 +104,23 @@ MatrixNaiveDense<DenseType, IndexType>::mul(
     );
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_DENSE_TP
 int
-MatrixNaiveDense<DenseType, IndexType>::rows() const
+ADELIE_CORE_MATRIX_NAIVE_DENSE::rows() const
 {
     return _mat.rows();
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_DENSE_TP
 int
-MatrixNaiveDense<DenseType, IndexType>::cols() const
+ADELIE_CORE_MATRIX_NAIVE_DENSE::cols() const
 {
     return _mat.cols();
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_DENSE_TP
 void
-MatrixNaiveDense<DenseType, IndexType>::cov(
+ADELIE_CORE_MATRIX_NAIVE_DENSE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -155,9 +155,9 @@ MatrixNaiveDense<DenseType, IndexType>::cov(
     out.template triangularView<Eigen::Upper>() = out.transpose();
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_DENSE_TP
 void
-MatrixNaiveDense<DenseType, IndexType>::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_DENSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
 )

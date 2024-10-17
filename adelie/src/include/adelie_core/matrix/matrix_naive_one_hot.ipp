@@ -5,9 +5,9 @@
 namespace adelie_core {
 namespace matrix {
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
 auto
-MatrixNaiveOneHotDense<DenseType, IndexType>::init_outer(
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::init_outer(
     const Eigen::Ref<const vec_index_t>& levels
 )
 {
@@ -21,9 +21,9 @@ MatrixNaiveOneHotDense<DenseType, IndexType>::init_outer(
     return outer;
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
 auto
-MatrixNaiveOneHotDense<DenseType, IndexType>::init_slice_map(
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::init_slice_map(
     const Eigen::Ref<const vec_index_t>& levels,
     size_t cols
 )
@@ -41,9 +41,9 @@ MatrixNaiveOneHotDense<DenseType, IndexType>::init_slice_map(
     return slice_map;
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
 auto
-MatrixNaiveOneHotDense<DenseType, IndexType>::init_index_map(
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::init_index_map(
     const Eigen::Ref<const vec_index_t>& levels,
     size_t cols
 )
@@ -61,9 +61,9 @@ MatrixNaiveOneHotDense<DenseType, IndexType>::init_index_map(
     return index_map;
 }
 
-template <class DenseType, class IndexType>
-typename MatrixNaiveOneHotDense<DenseType, IndexType>::value_t
-MatrixNaiveOneHotDense<DenseType, IndexType>::_cmul(
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::_cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights,
@@ -97,9 +97,9 @@ MatrixNaiveOneHotDense<DenseType, IndexType>::_cmul(
     }
 } 
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
 void
-MatrixNaiveOneHotDense<DenseType, IndexType>::_ctmul(
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::_ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out,
@@ -137,9 +137,9 @@ MatrixNaiveOneHotDense<DenseType, IndexType>::_ctmul(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
 void
-MatrixNaiveOneHotDense<DenseType, IndexType>::_bmul(
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::_bmul(
     int begin,
     int slice,
     int index,
@@ -178,9 +178,9 @@ MatrixNaiveOneHotDense<DenseType, IndexType>::_bmul(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
 void
-MatrixNaiveOneHotDense<DenseType, IndexType>::_btmul(
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::_btmul(
     int begin,
     int slice,
     int index,
@@ -228,8 +228,8 @@ MatrixNaiveOneHotDense<DenseType, IndexType>::_btmul(
     }
 }
 
-template <class DenseType, class IndexType>
-MatrixNaiveOneHotDense<DenseType, IndexType>::MatrixNaiveOneHotDense(
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::MatrixNaiveOneHotDense(
     const Eigen::Ref<const dense_t>& mat,
     const Eigen::Ref<const vec_index_t>& levels,
     size_t n_threads
@@ -253,9 +253,9 @@ MatrixNaiveOneHotDense<DenseType, IndexType>::MatrixNaiveOneHotDense(
     }
 }
 
-template <class DenseType, class IndexType>
-typename MatrixNaiveOneHotDense<DenseType, IndexType>::value_t
-MatrixNaiveOneHotDense<DenseType, IndexType>::cmul(
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -265,9 +265,9 @@ MatrixNaiveOneHotDense<DenseType, IndexType>::cmul(
     return _cmul(j, v, weights, _n_threads);
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
 void
-MatrixNaiveOneHotDense<DenseType, IndexType>::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -277,9 +277,9 @@ MatrixNaiveOneHotDense<DenseType, IndexType>::ctmul(
     _ctmul(j, v, out, _n_threads);
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
 void
-MatrixNaiveOneHotDense<DenseType, IndexType>::bmul(
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -301,9 +301,9 @@ MatrixNaiveOneHotDense<DenseType, IndexType>::bmul(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
 void
-MatrixNaiveOneHotDense<DenseType, IndexType>::btmul(
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -324,9 +324,9 @@ MatrixNaiveOneHotDense<DenseType, IndexType>::btmul(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
 void
-MatrixNaiveOneHotDense<DenseType, IndexType>::mul(
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -347,23 +347,23 @@ MatrixNaiveOneHotDense<DenseType, IndexType>::mul(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
 int
-MatrixNaiveOneHotDense<DenseType, IndexType>::rows() const
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::rows() const
 {
     return _mat.rows();
 }
     
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
 int
-MatrixNaiveOneHotDense<DenseType, IndexType>::cols() const
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::cols() const
 {
     return _cols;
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
 void
-MatrixNaiveOneHotDense<DenseType, IndexType>::cov(
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -414,9 +414,9 @@ MatrixNaiveOneHotDense<DenseType, IndexType>::cov(
     }
 }
 
-template <class DenseType, class IndexType>
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
 void
-MatrixNaiveOneHotDense<DenseType, IndexType>::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
 )
