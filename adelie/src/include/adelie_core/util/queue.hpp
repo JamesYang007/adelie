@@ -7,7 +7,8 @@ namespace util {
 template<
     class T,
     class Container = std::vector<T>,
-    class Compare = std::less<typename Container::value_type> >
+    class Compare = std::less<typename Container::value_type> 
+>
 class priority_queue : 
     public std::priority_queue<T, Container, Compare>
 {

@@ -1,77 +1,46 @@
 #pragma once
 #include <adelie_core/state/state_gaussian_pin_base.hpp>
-#include <adelie_core/util/macros.hpp>
+#include <adelie_core/util/functional.hpp>
+
+#ifndef ADELIE_CORE_STATE_GAUSSIAN_PIN_COV_TP
+#define ADELIE_CORE_STATE_GAUSSIAN_PIN_COV_TP \
+    template <\
+        class ConstraintType,\
+        class MatrixType,\
+        class ValueType,\
+        class IndexType,\
+        class BoolType\
+    >
+#endif
+#ifndef ADELIE_CORE_STATE_GAUSSIAN_PIN_COV
+#define ADELIE_CORE_STATE_GAUSSIAN_PIN_COV \
+    StateGaussianPinCov<\
+        ConstraintType,\
+        MatrixType,\
+        ValueType,\
+        IndexType,\
+        BoolType\
+    >
+#endif
 
 namespace adelie_core {
 namespace state {
-namespace gaussian {
-namespace pin {
-namespace cov {
 
-template <class StateType>
-ADELIE_CORE_STRONG_INLINE
-void update_active_inactive_subset(StateType& state)
+template <
+    class ConstraintType,
+    class MatrixType, 
+    class ValueType=typename std::decay_t<MatrixType>::value_t,
+    class IndexType=Eigen::Index,
+    class BoolType=bool
+>
+class StateGaussianPinCov: public StateGaussianPinBase<
+    ConstraintType,
+    ValueType,
+    IndexType,
+    BoolType
+>
 {
-    using state_t = std::decay_t<StateType>;
-    using vec_bool_t = typename state_t::vec_bool_t;
-
-    const auto& group_sizes = state.group_sizes;
-    const auto& screen_set = state.screen_set;
-    const auto& screen_subset_order = state.screen_subset_order;
-    const auto& screen_subset_ordered = state.screen_subset_ordered;
-    const auto& screen_is_active = state.screen_is_active;
-    auto& screen_is_active_subset = state.screen_is_active_subset;
-    auto& active_subset_order = state.active_subset_order;
-    auto& active_subset_ordered = state.active_subset_ordered;
-    auto& inactive_subset_order = state.inactive_subset_order;
-    auto& inactive_subset_ordered = state.inactive_subset_ordered;
-
-    // update screen_is_active_subset
-    int n_processed = 0;
-    for (int ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) {
-        const auto ss = screen_set[ss_idx];
-        const auto gs = group_sizes[ss];
-        Eigen::Map<vec_bool_t>(
-            screen_is_active_subset.data() + n_processed, gs
-        ) = screen_is_active[ss_idx];
-        n_processed += gs;
-    }
-
-    // update active/inactive subset order/ordered
-    active_subset_order.clear();
-    active_subset_ordered.clear();
-    inactive_subset_order.clear();
-    inactive_subset_ordered.clear();
-    for (int i = 0; i < screen_subset_order.size(); ++i) {
-        const auto ssoi = screen_subset_order[i];
-        const auto sso = screen_subset_ordered[i];
-        if (screen_is_active_subset[ssoi]) {
-            active_subset_order.push_back(i);
-            active_subset_ordered.push_back(sso);
-        } else {
-            inactive_subset_order.push_back(i);
-            inactive_subset_ordered.push_back(sso);
-        }
-    }
-}
-
-} // namespace cov
-} // namespace pin
-} // namespace gaussian
-
-template <class ConstraintType,
-          class MatrixType, 
-          class ValueType=typename std::decay_t<MatrixType>::value_t,
-          class IndexType=Eigen::Index,
-          class BoolType=bool
-        >
-struct StateGaussianPinCov: StateGaussianPinBase<
-        ConstraintType,
-        ValueType,
-        IndexType,
-        BoolType
-    >
-{
+public:
     using base_t = StateGaussianPinBase<
         ConstraintType,
         ValueType,
@@ -114,12 +83,15 @@ struct StateGaussianPinCov: StateGaussianPinBase<
     dyn_vec_index_t inactive_subset_order; 
     dyn_vec_index_t inactive_subset_ordered;
 
+private:
+    void initialize();
+
+public:
     explicit StateGaussianPinCov(
         matrix_t& A,
         const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
-        const Eigen::Ref<const vec_index_t>& dual_groups, 
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_index_t>& screen_set, 
@@ -145,7 +117,7 @@ struct StateGaussianPinCov: StateGaussianPinBase<
         Eigen::Ref<vec_index_t> active_set
     ): 
         base_t(
-            constraints, groups, group_sizes, dual_groups, alpha, penalty, 
+            constraints, groups, group_sizes, alpha, penalty, 
             screen_set, screen_begins, screen_vars, screen_transforms, lmda_path, 
             constraint_buffer_size, false, max_active_size, max_iters, tol, 0, 0, newton_tol, newton_max_iters, n_threads,
             rsq, screen_beta, screen_is_active, active_set_size, active_set
@@ -157,14 +129,12 @@ struct StateGaussianPinCov: StateGaussianPinBase<
         screen_grad(screen_grad.data(), screen_grad.size()),
         screen_is_active_subset(screen_grad.size())
     {
-        // optimization
-        active_subset_order.reserve(screen_subset_order.size());
-        active_subset_ordered.reserve(screen_subset_order.size());
-        inactive_subset_order.reserve(screen_subset_order.size());
-        inactive_subset_ordered.reserve(screen_subset_order.size());
-
-        gaussian::pin::cov::update_active_inactive_subset(*this);
+        initialize();
     }
+
+    void solve(
+        std::function<void()> check_user_interrupt =util::no_op()
+    );
 };
 
 } // namespace state

@@ -1,8 +1,10 @@
 #pragma once
+#include <Eigen/Eigenvalues>
 #include <adelie_core/solver/solver_base.hpp>
 #include <adelie_core/solver/solver_gaussian_pin_naive.hpp>
-#include <adelie_core/state/state_gaussian_naive.hpp>
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
+#include <adelie_core/matrix/utils.hpp>
+#include <adelie_core/util/macros.hpp>
 
 namespace adelie_core {
 namespace solver {
@@ -29,6 +31,148 @@ struct GaussianNaiveBufferPack
     dyn_vec_bool_t screen_is_active_prev;
 };
 
+/**
+ * Updates in-place the screen quantities 
+ * in the range [begin, begin+size) of the groups in screen_set. 
+ * NOTE: X_means only needs to be well-defined on the groups in that range,
+ * that is, weighted mean according to weights_sqrt ** 2.
+ */
+template <
+    class XType, 
+    class XMType, 
+    class WType,
+    class GroupsType, 
+    class GroupSizesType, 
+    class SSType, 
+    class SBType,
+    class SXMType, 
+    class STType, 
+    class SVType
+>
+inline void update_screen_derived(
+    XType& X,
+    const XMType& X_means,
+    const WType& weights_sqrt,
+    const GroupsType& groups,
+    const GroupSizesType& group_sizes,
+    const SSType& screen_set,
+    const SBType& screen_begins,
+    size_t begin,
+    size_t size,
+    bool intercept,
+    SXMType& screen_X_means,
+    STType& screen_transforms,
+    SVType& screen_vars
+)
+{
+    using value_t = typename std::decay_t<XType>::value_t;
+    using vec_value_t = util::rowvec_type<value_t>;
+
+    // buffers
+    const auto n = X.rows();
+    const auto max_gs = group_sizes.maxCoeff();
+    util::colmat_type<value_t> buffer1(n, max_gs);
+    util::rowvec_type<value_t> buffer2(max_gs * max_gs);
+
+    for (size_t i = begin; i < size; ++i) {
+        const auto g = groups[screen_set[i]];
+        const auto gs = group_sizes[screen_set[i]];
+        const auto sb = screen_begins[i];
+
+        // compute column-means
+        Eigen::Map<vec_value_t> Xi_means(
+            screen_X_means.data() + sb, gs
+        );
+        Xi_means = X_means.segment(g, gs);
+
+        // resize output and buffer 
+        Eigen::Map<util::colmat_type<value_t>> Xi(
+            buffer1.data(), n, gs
+        );
+        Eigen::Map<util::colmat_type<value_t>> XiTXi(
+            buffer2.data(), gs, gs
+        );
+
+        // compute weighted covariance matrix
+        X.cov(g, gs, weights_sqrt, XiTXi, Xi);
+
+        if (intercept) {
+            auto XiTXi_lower = XiTXi.template selfadjointView<Eigen::Lower>();
+            XiTXi_lower.rankUpdate(Xi_means.matrix().transpose(), -1);
+            XiTXi.template triangularView<Eigen::Upper>() = XiTXi.transpose();
+        }
+
+        if (gs == 1) {
+            util::colmat_type<value_t, 1, 1> Q;
+            Q(0, 0) = 1;
+            screen_transforms[i] = Q;
+            screen_vars[sb] = XiTXi(0, 0);
+            continue;
+        }
+
+        Eigen::SelfAdjointEigenSolver<util::colmat_type<value_t>> solver(XiTXi);
+
+        /* update screen_transforms */
+        screen_transforms[i] = std::move(solver.eigenvectors());
+
+        /* update screen_vars */
+        const auto& D = solver.eigenvalues();
+        Eigen::Map<vec_value_t> svars(screen_vars.data() + sb, gs);
+        // numerical stability to remove small negative eigenvalues
+        svars.head(D.size()) = D.array() * (D.array() >= 0).template cast<value_t>(); 
+    }
+}
+
+/**
+ * Updates all derived screen quantities for naive state.
+ * See the incoming state requirements in update_screen_derived_base.
+ * After the function finishes, all screen quantities in the base + naive class
+ * will be consistent with screen_set, and the state is otherwise effectively
+ * unchanged in the sense that other quantities dependent on screen states are unchanged.
+ */
+template <class StateType>
+inline void update_screen_derived(
+    StateType& state
+)
+{
+    update_screen_derived_base(state);
+
+    const auto& group_sizes = state.group_sizes;
+    const auto& screen_set = state.screen_set;
+    auto& screen_transforms = state.screen_transforms;
+    const auto& screen_begins = state.screen_begins;
+    auto& screen_X_means = state.screen_X_means;
+    auto& screen_vars = state.screen_vars;
+
+    const auto old_screen_size = screen_transforms.size();
+    const auto new_screen_size = screen_set.size();
+    const int new_screen_value_size = (
+        (screen_begins.size() == 0) ? 0 : (
+            screen_begins.back() + group_sizes[screen_set.back()]
+        )
+    );
+
+    screen_X_means.resize(new_screen_value_size);    
+    screen_transforms.resize(new_screen_size);
+    screen_vars.resize(new_screen_value_size, 0);
+
+    update_screen_derived(
+        *state.X, 
+        state.X_means, 
+        state.weights_sqrt,
+        state.groups, 
+        state.group_sizes, 
+        state.screen_set, 
+        state.screen_begins, 
+        old_screen_size, 
+        new_screen_size, 
+        state.intercept, 
+        state.screen_X_means, 
+        state.screen_transforms, 
+        state.screen_vars
+    );
+}
+
 template <class StateType, class StateGaussianPinType, class ValueType>
 ADELIE_CORE_STRONG_INLINE
 void update_solutions(
@@ -37,6 +181,11 @@ void update_solutions(
     ValueType lmda
 )
 {
+    using state_t = std::decay_t<StateType>;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    using sp_vec_value_t = typename state_t::sp_vec_value_t;
+
     const auto y_var = state.y_var;
     auto& betas = state.betas;
     auto& duals = state.duals;
@@ -44,8 +193,12 @@ void update_solutions(
     auto& lmdas = state.lmdas;
     auto& intercepts = state.intercepts;
 
+    vec_index_t dual_indices; 
+    vec_value_t dual_values;
+
     betas.emplace_back(std::move(state_gaussian_pin_naive.betas.back()));
-    duals.emplace_back(std::move(state_gaussian_pin_naive.duals.back()));
+    sp_vec_value_t dual = sparsify_dual(state, dual_indices, dual_values);
+    duals.emplace_back(std::move(dual));
     intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
     lmdas.emplace_back(lmda);
 
@@ -53,12 +206,13 @@ void update_solutions(
     devs.emplace_back(dev / y_var);
 }
 
-template <class StateType,
-          class BufferPackType,
-          class ValueType,
-          class CUIType=util::no_op>
-ADELIE_CORE_STRONG_INLINE
-auto fit(
+template <
+    class StateType,
+    class BufferPackType,
+    class ValueType,
+    class CUIType=util::no_op
+>
+inline auto fit(
     StateType& state,
     BufferPackType& buffer_pack,
     ValueType lmda,
@@ -88,7 +242,6 @@ auto fit(
     const auto& constraints = state.constraints;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
-    const auto& dual_groups = state.dual_groups;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
     const auto& weights = state.weights;
@@ -145,7 +298,6 @@ auto fit(
         constraints,
         groups, 
         group_sizes,
-        dual_groups,
         alpha, 
         penalty,
         weights,
@@ -157,9 +309,7 @@ auto fit(
         lmda_path,
         constraint_buffer_size,
         intercept, max_active_size, max_iters, 
-        // TODO: still unclear whether we should be max'ing or not.
-        // tolerance is relative to the scaling of null deviance and current total weight sum (== 1)
-        tol * std::max<value_t>(y_var, 1), 
+        tol * y_var, 
         adev_tol, ddev_tol, 
         newton_tol, newton_max_iters, n_threads,
         rsq,
@@ -172,10 +322,7 @@ auto fit(
     );
 
     try {
-        pin::naive::solve(
-            state_gaussian_pin_naive, 
-            check_user_interrupt
-        );
+        state_gaussian_pin_naive.solve(check_user_interrupt);
     } catch(...) {
         load_prev_valid();
         throw;
@@ -201,11 +348,13 @@ auto fit(
     );
 }
 
-template <class StateType,
-          class PBType,
-          class ExitCondType,
-          class TidyType,
-          class CUIType>
+template <
+    class StateType,
+    class PBType,
+    class ExitCondType,
+    class TidyType,
+    class CUIType
+>
 inline void solve(
     StateType&& state,
     PBType&& pb,
@@ -240,7 +389,7 @@ inline void solve(
         if (intercept) {
             matrix::dvsubi(grad, resid_sum * X_means, n_threads);
         }
-        state::update_abs_grad(state, lmda);
+        update_abs_grad(state, lmda);
     };
     const auto update_solutions_f = [&](auto& state, auto& state_gaussian_pin_naive, auto lmda) {
         update_solutions(
@@ -260,7 +409,7 @@ inline void solve(
             kkt_passed,
             n_new_active
         );
-        state::gaussian::naive::update_screen_derived(state);
+        update_screen_derived(state);
     };
     const auto fit_f = [&](auto& state, auto lmda) {
         return fit(
@@ -284,10 +433,12 @@ inline void solve(
     );
 }
 
-template <class StateType,
-          class PBType,
-          class ExitCondType,
-          class CUIType=util::no_op>
+template <
+    class StateType,
+    class PBType,
+    class ExitCondType,
+    class CUIType=util::no_op
+>
 inline void solve(
     StateType&& state,
     PBType&& pb,

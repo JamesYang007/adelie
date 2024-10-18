@@ -32,8 +32,14 @@ namespace unconstrained {
  * @param buffer2       buffer to store buffer1 * h + l1.
  * @param initial_f     see newton_root_find.
  */
-template <class LType, class VType, class ValueType, 
-          class XType, class BufferType, class InitialType>
+template <
+    class LType, 
+    class VType, 
+    class ValueType, 
+    class XType, 
+    class BufferType, 
+    class InitialType
+>
 inline
 void newton_solver_base(
     const LType& L,
@@ -107,8 +113,13 @@ void newton_solver_base(
 /*
  * Vanilla Newton solver.
  */
-template <class LType, class VType, class ValueType, 
-          class XType, class BufferType>
+template <
+    class LType, 
+    class VType, 
+    class ValueType, 
+    class XType, 
+    class BufferType
+>
 inline
 void newton_solver(
     const LType& L,
@@ -133,8 +144,13 @@ void newton_solver(
 /*
  * Newton + Brent solver.
  */
-template <class LType, class VType, class ValueType, 
-          class XType, class BufferType>
+template <
+    class LType, 
+    class VType, 
+    class ValueType, 
+    class XType, 
+    class BufferType
+>
 inline
 void newton_brent_solver(
     const LType& L,
@@ -186,8 +202,13 @@ void newton_brent_solver(
 /*
  * Newton-ABS solver
  */
-template <class LType, class VType, class ValueType, 
-          class XType, class BufferType>
+template <
+    class LType, 
+    class VType, 
+    class ValueType, 
+    class XType, 
+    class BufferType
+>
 inline
 void newton_abs_solver(
     const LType& L,
@@ -258,8 +279,14 @@ void newton_abs_solver(
  * @param   buffer1     any vector with L.size() <= buffer1.size().
  * @param   buffer2     any vector with L.size() <= buffer2.size().
  */
-template <class LType, class VType, class ValueType, 
-          class XType, class ItersType, class BufferType>
+template <
+    class LType, 
+    class VType, 
+    class ValueType, 
+    class XType, 
+    class ItersType, 
+    class BufferType
+>
 inline
 void newton_abs_debug_solver(
     const LType& L,

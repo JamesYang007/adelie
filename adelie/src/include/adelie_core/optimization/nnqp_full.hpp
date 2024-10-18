@@ -4,8 +4,7 @@
 namespace adelie_core {
 namespace optimization {
 
-template <class MatrixType,
-          bool _sign=false>
+template <class MatrixType, bool _sign=false>
 struct StateNNQPFull
 {
     using matrix_t = MatrixType;
@@ -91,7 +90,7 @@ struct StateNNQPFull
                     grad -= del * quad.array().col(i);
                 }
             }
-            if (convg_measure < tol) return;
+            if (convg_measure < quad.cols() * tol) return;
         }
 
         throw util::adelie_core_solver_error(
@@ -114,6 +113,7 @@ struct StateNNQPFull<MatrixType, true>
 
     const map_cvec_value_t sgn;
     const map_cmatrix_t quad;
+    const value_t y_var;
 
     const size_t max_iters;
     const value_t tol;
@@ -127,6 +127,7 @@ struct StateNNQPFull<MatrixType, true>
     explicit StateNNQPFull(
         const Eigen::Ref<const vec_value_t>& sgn,
         const Eigen::Ref<const matrix_t>& quad,
+        value_t y_var,
         size_t max_iters,
         value_t tol,
         Eigen::Ref<vec_value_t> x,
@@ -134,6 +135,7 @@ struct StateNNQPFull<MatrixType, true>
     ):
         sgn(sgn.data(), sgn.size()),
         quad(quad.data(), quad.rows(), quad.cols()),
+        y_var(y_var),
         max_iters(max_iters),
         tol(tol),
         x(x.data(), x.size()),
@@ -167,7 +169,7 @@ struct StateNNQPFull<MatrixType, true>
                     grad -= del * quad.array().col(i);
                 }
             }
-            if (convg_measure < tol) return;
+            if (convg_measure < y_var * tol) return;
         }
 
         throw util::adelie_core_solver_error(

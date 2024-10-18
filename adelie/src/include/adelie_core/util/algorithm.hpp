@@ -1,7 +1,6 @@
 #pragma once
 #include <numeric>
 #include <adelie_core/util/queue.hpp>
-#include <adelie_core/util/macros.hpp>
 
 namespace adelie_core {
 namespace util {

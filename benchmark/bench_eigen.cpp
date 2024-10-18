@@ -661,6 +661,74 @@ BENCHMARK(BM_xtx_naive)
     -> Args({1000000, 16})
     ;
 
+static void BM_xtwx_naive(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto n_threads = state.range(1);
+    const auto d = 100;
+    ad::util::colmat_type<double> X;
+    X.setRandom(n, d);
+    ad::util::colvec_type<double> w;
+    w.setRandom(n);
+    ad::util::colvec_type<bool> mask;
+    mask.setRandom(n);
+    ad::util::colmat_type<double> XTX;
+    XTX.resize(d, d);
+
+    Eigen::setNbThreads(n_threads);
+
+    for (auto _ : state) {
+        XTX.noalias() = X.transpose() * (w.square() * mask.template cast<double>()).matrix().asDiagonal() * X;
+    }
+}
+
+BENCHMARK(BM_xtwx_naive)
+    -> Args({10000, 1})
+    -> Args({100000, 1})
+    -> Args({1000000, 1})
+    -> Args({10000, 4})
+    -> Args({100000, 4})
+    -> Args({1000000, 4})
+    -> Args({10000, 8})
+    -> Args({100000, 8})
+    -> Args({1000000, 8})
+    ;
+
+static void BM_xtwx_naive_buffer(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto n_threads = state.range(1);
+    const auto d = 100;
+    ad::util::colmat_type<double> X;
+    X.setRandom(n, d);
+    ad::util::colvec_type<double> w;
+    w.setRandom(n);
+    ad::util::colvec_type<bool> mask;
+    mask.setRandom(n);
+    ad::util::colmat_type<double> buff(n, d);
+    ad::util::colmat_type<double> XTX;
+    XTX.resize(d, d);
+
+    Eigen::setNbThreads(n_threads);
+
+    for (auto _ : state) {
+        buff.array() = X.array().colwise() * (w * mask.template cast<double>());
+        XTX.noalias() = buff.transpose() * buff;
+    }
+}
+
+BENCHMARK(BM_xtwx_naive_buffer)
+    -> Args({10000, 1})
+    -> Args({100000, 1})
+    -> Args({1000000, 1})
+    -> Args({10000, 4})
+    -> Args({100000, 4})
+    -> Args({1000000, 4})
+    -> Args({10000, 8})
+    -> Args({100000, 8})
+    -> Args({1000000, 8})
+    ;
+
 static void BM_matrix_vector_dense(benchmark::State& state)
 {
     const auto n = state.range(0);

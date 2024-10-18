@@ -1,27 +1,52 @@
 #pragma once
-#include <numeric>
-#include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
+#include <adelie_core/util/functional.hpp>
+#include <adelie_core/util/tqdm.hpp>
+
+#ifndef ADELIE_CORE_STATE_MULTI_GAUSSIAN_NAIVE_TP
+#define ADELIE_CORE_STATE_MULTI_GAUSSIAN_NAIVE_TP \
+    template <\
+        class ConstraintType,\
+        class MatrixType,\
+        class ValueType,\
+        class IndexType,\
+        class BoolType,\
+        class SafeBoolType\
+    >
+#endif
+#ifndef ADELIE_CORE_STATE_MULTI_GAUSSIAN_NAIVE
+#define ADELIE_CORE_STATE_MULTI_GAUSSIAN_NAIVE \
+    StateMultiGaussianNaive<\
+        ConstraintType,\
+        MatrixType,\
+        ValueType,\
+        IndexType,\
+        BoolType,\
+        SafeBoolType\
+    >
+#endif
 
 namespace adelie_core {
 namespace state {
 
-template <class ConstraintType,
-          class MatrixType, 
-          class ValueType=typename std::decay_t<MatrixType>::value_t,
-          class IndexType=Eigen::Index,
-          class BoolType=bool,
-          class SafeBoolType=int8_t
-        >
-struct StateMultiGaussianNaive : StateGaussianNaive<
-        ConstraintType,
-        MatrixType,
-        ValueType,
-        IndexType,
-        BoolType,
-        SafeBoolType
-    >
+template <
+    class ConstraintType,
+    class MatrixType, 
+    class ValueType=typename std::decay_t<MatrixType>::value_t,
+    class IndexType=Eigen::Index,
+    class BoolType=bool,
+    class SafeBoolType=int8_t
+>
+class StateMultiGaussianNaive: public StateGaussianNaive<
+    ConstraintType,
+    MatrixType,
+    ValueType,
+    IndexType,
+    BoolType,
+    SafeBoolType
+>
 {
+public:
     using base_t = StateGaussianNaive<
         ConstraintType,
         MatrixType,
@@ -44,7 +69,6 @@ struct StateMultiGaussianNaive : StateGaussianNaive<
     using matrix_t = MatrixType;
 
     /* static states */
-    const util::multi_group_type group_type;
     const size_t n_classes;
     const bool multi_intercept;
 
@@ -52,7 +76,6 @@ struct StateMultiGaussianNaive : StateGaussianNaive<
     std::vector<vec_value_t> intercepts;
 
     explicit StateMultiGaussianNaive(
-        const std::string& group_type,
         size_t n_classes,
         bool multi_intercept,
         matrix_t& X,
@@ -107,10 +130,15 @@ struct StateMultiGaussianNaive : StateGaussianNaive<
             newton_tol, newton_max_iters, early_exit, setup_lmda_max, setup_lmda_path, intercept, n_threads,
             screen_set, screen_beta, screen_is_active, active_set_size, active_set, rsq, lmda, grad
         ),
-        group_type(util::convert_multi_group(group_type)),
         n_classes(n_classes),
         multi_intercept(multi_intercept)
     {}
+
+    void solve(
+        util::tq::progress_bar_t& pb,
+        std::function<bool()> exit_cond,
+        std::function<void()> check_user_interrupt =util::no_op()
+    );
 };
 
 } // namespace state

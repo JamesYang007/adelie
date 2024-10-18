@@ -1,10 +1,17 @@
 #pragma once
-#include <cstdio>
 #include <string>
-#include <adelie_core/configs.hpp>
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/format.hpp>
 #include <adelie_core/util/types.hpp>
+
+#ifndef ADELIE_CORE_GLM_BASE_TP
+#define ADELIE_CORE_GLM_BASE_TP \
+    template <class ValueType>
+#endif
+#ifndef ADELIE_CORE_GLM_BASE
+#define ADELIE_CORE_GLM_BASE \
+    GlmBase<ValueType>
+#endif
 
 namespace adelie_core {
 namespace glm {
@@ -24,106 +31,36 @@ public:
     const bool is_multi = false;
 
 protected:
-    void check_gradient(
+    inline void check_gradient(
         const Eigen::Ref<const vec_value_t>& eta,
         const Eigen::Ref<const vec_value_t>& grad
-    ) const
-    {
-        if (
-            (weights.size() != y.size()) ||
-            (weights.size() != eta.size()) ||
-            (weights.size() != grad.size())
-        ) {
-            throw util::adelie_core_error(
-                util::format(
-                    "gradient() is given inconsistent inputs! "
-                    "(weights=%d, y=%d, eta=%d, grad=%d)",
-                    weights.size(), y.size(), eta.size(), grad.size()
-                )
-            );
-        }
-    }
+    ) const;
 
-    void check_hessian(
+    inline void check_hessian(
         const Eigen::Ref<const vec_value_t>& eta,
         const Eigen::Ref<const vec_value_t>& grad,
         const Eigen::Ref<const vec_value_t>& hess
-    ) const
-    {
-        if (
-            (weights.size() != y.size()) ||
-            (weights.size() != eta.size()) ||
-            (weights.size() != grad.size()) ||
-            (weights.size() != hess.size())
-        ) {
-            throw util::adelie_core_error(
-                util::format(
-                    "hessian() is given inconsistent inputs! "
-                    "(weights=%d, y=%d, eta=%d, grad=%d, hess=%d)",
-                    weights.size(), y.size(), eta.size(), grad.size(), hess.size()
-                )
-            );
-        }
-    }
+    ) const;
 
-    void check_inv_hessian_gradient(
+    inline void check_inv_hessian_gradient(
         const Eigen::Ref<const vec_value_t>& eta,
         const Eigen::Ref<const vec_value_t>& grad,
         const Eigen::Ref<const vec_value_t>& hess,
         const Eigen::Ref<const vec_value_t>& inv_hess_grad
-    ) const
-    {
-        if (
-            (weights.size() != y.size()) ||
-            (weights.size() != eta.size()) ||
-            (weights.size() != grad.size()) ||
-            (weights.size() != hess.size()) ||
-            (weights.size() != inv_hess_grad.size())
-        ) {
-            throw util::adelie_core_error(
-                util::format(
-                    "inv_hessian_grad() is given inconsistent inputs! "
-                    "(weights=%d, y=%d, eta=%d, grad=%d, hess=%d, inv_hess_grad=%d)",
-                    weights.size(), y.size(), eta.size(), grad.size(), hess.size(), inv_hess_grad.size()
-                )
-            );
-        }
-    }
+    ) const;
 
-    void check_loss(
+    inline void check_loss(
         const Eigen::Ref<const vec_value_t>& eta
-    ) const
-    {
-        if (
-            (y.size() != weights.size()) ||
-            (y.size() != eta.size())
-        ) {
-            throw util::adelie_core_error(
-                util::format(
-                    "loss() is given inconsistent inputs! "
-                    "(y=%d, weights=%d, eta=%d)",
-                    y.size(), weights.size(), eta.size()
-                )
-            );
-        }
-    }
+    ) const;
 
 public:
     explicit GlmBase(
         const string_t& name,
         const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& weights
-    ):
-        name(name),
-        y(y.data(), y.size()),
-        weights(weights.data(), weights.size())
-    {
-        if (y.size() != weights.size()) {
-            throw util::adelie_core_error("y must be (n,) where weights is (n,).");
-        }
-    }
+    );
 
-    virtual ~GlmBase() =default;
+    virtual ~GlmBase() {};
 
     virtual void gradient(
         const Eigen::Ref<const vec_value_t>& eta,
@@ -141,14 +78,7 @@ public:
         const Eigen::Ref<const vec_value_t>& grad,
         const Eigen::Ref<const vec_value_t>& hess,
         Eigen::Ref<vec_value_t> inv_hess_grad
-    )
-    {
-        check_inv_hessian_gradient(eta, grad, hess, inv_hess_grad);
-        inv_hess_grad = grad / (
-            hess.max(0) + 
-            value_t(Configs::hessian_min) * (hess <= 0).template cast<value_t>()
-        );
-    }
+    );
 
     virtual value_t loss(
         const Eigen::Ref<const vec_value_t>& eta
@@ -157,5 +87,114 @@ public:
     virtual value_t loss_full() =0;
 };
 
+ADELIE_CORE_GLM_BASE_TP
+void 
+ADELIE_CORE_GLM_BASE::check_gradient(
+    const Eigen::Ref<const vec_value_t>& eta,
+    const Eigen::Ref<const vec_value_t>& grad
+) const
+{
+    if (
+        (weights.size() != y.size()) ||
+        (weights.size() != eta.size()) ||
+        (weights.size() != grad.size())
+    ) {
+        throw util::adelie_core_error(
+            util::format(
+                "gradient() is given inconsistent inputs! "
+                "(weights=%d, y=%d, eta=%d, grad=%d)",
+                weights.size(), y.size(), eta.size(), grad.size()
+            )
+        );
+    }
+}
+
+ADELIE_CORE_GLM_BASE_TP
+void 
+ADELIE_CORE_GLM_BASE::check_hessian(
+    const Eigen::Ref<const vec_value_t>& eta,
+    const Eigen::Ref<const vec_value_t>& grad,
+    const Eigen::Ref<const vec_value_t>& hess
+) const
+{
+    if (
+        (weights.size() != y.size()) ||
+        (weights.size() != eta.size()) ||
+        (weights.size() != grad.size()) ||
+        (weights.size() != hess.size())
+    ) {
+        throw util::adelie_core_error(
+            util::format(
+                "hessian() is given inconsistent inputs! "
+                "(weights=%d, y=%d, eta=%d, grad=%d, hess=%d)",
+                weights.size(), y.size(), eta.size(), grad.size(), hess.size()
+            )
+        );
+    }
+}
+
+ADELIE_CORE_GLM_BASE_TP
+void 
+ADELIE_CORE_GLM_BASE::check_inv_hessian_gradient(
+    const Eigen::Ref<const vec_value_t>& eta,
+    const Eigen::Ref<const vec_value_t>& grad,
+    const Eigen::Ref<const vec_value_t>& hess,
+    const Eigen::Ref<const vec_value_t>& inv_hess_grad
+) const
+{
+    if (
+        (weights.size() != y.size()) ||
+        (weights.size() != eta.size()) ||
+        (weights.size() != grad.size()) ||
+        (weights.size() != hess.size()) ||
+        (weights.size() != inv_hess_grad.size())
+    ) {
+        throw util::adelie_core_error(
+            util::format(
+                "inv_hessian_grad() is given inconsistent inputs! "
+                "(weights=%d, y=%d, eta=%d, grad=%d, hess=%d, inv_hess_grad=%d)",
+                weights.size(), y.size(), eta.size(), grad.size(), hess.size(), inv_hess_grad.size()
+            )
+        );
+    }
+}
+
+ADELIE_CORE_GLM_BASE_TP
+void 
+ADELIE_CORE_GLM_BASE::check_loss(
+    const Eigen::Ref<const vec_value_t>& eta
+) const
+{
+    if (
+        (y.size() != weights.size()) ||
+        (y.size() != eta.size())
+    ) {
+        throw util::adelie_core_error(
+            util::format(
+                "loss() is given inconsistent inputs! "
+                "(y=%d, weights=%d, eta=%d)",
+                y.size(), weights.size(), eta.size()
+            )
+        );
+    }
+}
+
 } // namespace glm
 } // namespace adelie_core
+
+#ifndef ADELIE_CORE_GLM_PURE_OVERRIDE_DECL
+#define ADELIE_CORE_GLM_PURE_OVERRIDE_DECL \
+    void gradient(\
+        const Eigen::Ref<const vec_value_t>& eta,\
+        Eigen::Ref<vec_value_t> grad\
+    ) override;\
+    void hessian(\
+        const Eigen::Ref<const vec_value_t>& eta,\
+        const Eigen::Ref<const vec_value_t>& grad,\
+        Eigen::Ref<vec_value_t> hess\
+    ) override;\
+    value_t loss(\
+        const Eigen::Ref<const vec_value_t>& eta\
+    ) override;\
+    value_t loss_full() override;
+#endif

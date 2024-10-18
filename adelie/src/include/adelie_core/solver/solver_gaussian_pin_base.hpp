@@ -1,8 +1,8 @@
 #pragma once
 #include <adelie_core/configs.hpp>
 #include <adelie_core/bcd/unconstrained/newton.hpp>
-#include <adelie_core/util/types.hpp>
 #include <adelie_core/util/macros.hpp>
+#include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
 namespace solver {
@@ -27,8 +27,6 @@ struct GaussianPinBufferPack
 
     std::vector<index_t> active_beta_indices;
     std::vector<value_t> active_beta_ordered;
-    std::vector<index_t> active_dual_indices;
-    std::vector<value_t> active_dual_ordered;
 
     explicit GaussianPinBufferPack(
         size_t buffer1_size, 
@@ -36,8 +34,7 @@ struct GaussianPinBufferPack
         size_t buffer3_size,
         size_t buffer4_size,
         size_t constraint_buffer_size,
-        size_t active_beta_size,
-        size_t active_dual_size
+        size_t active_beta_size
     ): 
         buffer1(buffer1_size),
         buffer2(buffer2_size),
@@ -48,8 +45,6 @@ struct GaussianPinBufferPack
         // allocate buffers for optimization
         active_beta_indices.reserve(active_beta_size);
         active_beta_ordered.reserve(active_beta_size);
-        active_dual_indices.reserve(active_dual_size);
-        active_dual_ordered.reserve(active_dual_size);
     }
 };
 
@@ -61,8 +56,7 @@ struct GaussianPinBufferPack
  * @param   values      corresponding active values to indices.
  */
 template <class StateType, class VecIndexType, class VecValueType>
-ADELIE_CORE_STRONG_INLINE
-void sparsify_active_beta(
+inline void sparsify_active_beta(
     const StateType& state,
     VecIndexType& indices,
     VecValueType& values
@@ -101,57 +95,6 @@ void sparsify_active_beta(
     }        
     assert(indices.size() == std::distance(indices.data(), idxs_begin));
     assert(values.size() == std::distance(values.data(), vals_begin));
-}
-
-template <class StateType, class VecIndexType, class VecValueType>
-ADELIE_CORE_STRONG_INLINE
-void sparsify_active_dual(
-    const StateType& state,
-    VecIndexType& indices,
-    VecValueType& values
-)
-{
-    using index_t = typename StateType::index_t;
-    using vec_index_t = typename StateType::vec_index_t;
-    using vec_value_t = typename StateType::vec_value_t;
-
-    const auto& screen_set = state.screen_set;
-    const auto& constraints = *state.constraints;
-    const auto& dual_groups = state.dual_groups;
-
-    const auto S = screen_set.size();
-    std::vector<index_t> screen_order(S);
-    std::iota(
-        screen_order.data(),
-        screen_order.data() + screen_order.size(),
-        0
-    );
-    std::sort(
-        screen_order.data(),
-        screen_order.data() + screen_order.size(),
-        [&](auto i, auto j) { return dual_groups[screen_set[i]] < dual_groups[screen_set[j]]; }
-    );
-
-    for (size_t i = 0; i < screen_order.size(); ++i) {
-        const auto ss_idx = screen_order[i];
-        const auto group = screen_set[ss_idx];
-        const auto constraint = constraints[group];
-        const size_t nnz = constraint ? constraint->duals_nnz() : 0;
-        if (nnz <= 0) continue;
-        const size_t old_size = indices.size();
-        indices.resize(old_size + nnz);
-        values.resize(old_size + nnz);
-        Eigen::Map<vec_index_t> indices_v(
-            indices.data() + old_size,
-            nnz
-        );
-        Eigen::Map<vec_value_t> values_v(
-            values.data() + old_size,
-            nnz
-        );
-        constraint->dual(indices_v, values_v);
-        indices_v += dual_groups[group];
-    }
 }
 
 template <class ValueType, class DelType, class VarType>
@@ -202,8 +145,13 @@ void update_rsq(
     rsq += del * (2 * grad - del * x_var);
 }
 
-template <class LType, class VType, class ValueType, 
-          class XType, class BufferType>
+template <
+    class LType, 
+    class VType, 
+    class ValueType, 
+    class XType, 
+    class BufferType
+>
 ADELIE_CORE_STRONG_INLINE
 void update_coordinate(
     XType& x,

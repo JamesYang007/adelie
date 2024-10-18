@@ -1,6 +1,15 @@
 #pragma once
 #include <adelie_core/glm/glm_base.hpp>
 
+#ifndef ADELIE_CORE_GLM_POISSON_TP
+#define ADELIE_CORE_GLM_POISSON_TP \
+    template <class ValueType>
+#endif
+#ifndef ADELIE_CORE_GLM_POISSON
+#define ADELIE_CORE_GLM_POISSON \
+    GlmPoisson<ValueType>
+#endif
+
 namespace adelie_core {
 namespace glm {
 
@@ -17,42 +26,9 @@ public:
     explicit GlmPoisson(
         const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& weights
-    ):
-        base_t("poisson", y, weights)
-    {}
+    );
 
-    void gradient(
-        const Eigen::Ref<const vec_value_t>& eta,
-        Eigen::Ref<vec_value_t> grad
-    ) override
-    {
-        base_t::check_gradient(eta, grad);
-        grad = weights * (y - eta.exp());
-    }
-
-    void hessian(
-        const Eigen::Ref<const vec_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& grad,
-        Eigen::Ref<vec_value_t> hess
-    ) override
-    {
-        base_t::check_hessian(eta, grad, hess);
-        hess = weights * y - grad;
-    }
-
-    value_t loss(
-        const Eigen::Ref<const vec_value_t>& eta
-    ) override
-    {
-        base_t::check_loss(eta);
-        // numerically stable when y == 0 and eta could be -inf
-        return (weights * ((-eta).min(std::numeric_limits<value_t>::max()) * y + eta.exp())).sum();
-    }
-
-    value_t loss_full() override
-    {
-        return (weights * ((-y.log()).min(std::numeric_limits<value_t>::max()) * y + y)).sum();
-    }
+    ADELIE_CORE_GLM_PURE_OVERRIDE_DECL
 };
 
 } // namespace glm

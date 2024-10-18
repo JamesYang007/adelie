@@ -1,9 +1,17 @@
 #pragma once
-#include <cstdio>
 #include <string>
-#include <adelie_core/configs.hpp>
-#include <adelie_core/util/types.hpp>
+#include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/format.hpp>
+#include <adelie_core/util/types.hpp>
+
+#ifndef ADELIE_CORE_GLM_MULTIBASE_TP
+#define ADELIE_CORE_GLM_MULTIBASE_TP \
+    template <class ValueType>
+#endif
+#ifndef ADELIE_CORE_GLM_MULTIBASE
+#define ADELIE_CORE_GLM_MULTIBASE \
+    GlmMultiBase<ValueType>
+#endif
 
 namespace adelie_core {
 namespace glm {
@@ -25,119 +33,36 @@ public:
     const bool is_multi = true;
 
 protected:
-    void check_gradient(
+    inline void check_gradient(
         const Eigen::Ref<const rowarr_value_t>& eta,
         const Eigen::Ref<const rowarr_value_t>& grad
-    ) const
-    {
-        if (
-            (weights.size() != y.rows()) ||
-            (weights.size() != eta.rows()) ||
-            (weights.size() != grad.rows()) ||
-            (eta.cols() != y.cols()) ||
-            (eta.cols() != grad.cols())
-        ) {
-            throw util::adelie_core_error(
-                util::format(
-                    "gradient() is given inconsistent inputs! "
-                    "(weights=%d, y=(%d, %d), eta=(%d, %d), grad=(%d, %d))",
-                    weights.size(), y.rows(), y.cols(), eta.rows(), eta.cols(), grad.rows(), grad.cols()
-                )
-            );
-        }
-    }
+    ) const;
 
-    void check_hessian(
+    inline void check_hessian(
         const Eigen::Ref<const rowarr_value_t>& eta,
         const Eigen::Ref<const rowarr_value_t>& grad,
         const Eigen::Ref<const rowarr_value_t>& hess
-    ) const
-    {
-        if (
-            (weights.size() != y.rows()) ||
-            (weights.size() != eta.rows()) ||
-            (weights.size() != grad.rows()) ||
-            (weights.size() != hess.rows()) ||
-            (eta.cols() != y.cols()) ||
-            (eta.cols() != grad.cols()) ||
-            (eta.cols() != hess.cols())
-        ) {
-            throw util::adelie_core_error(
-                util::format(
-                    "hessian() is given inconsistent inputs! "
-                    "(weights=%d, y=(%d, %d), eta=(%d, %d), grad=(%d, %d), hess=(%d, %d))",
-                    weights.size(), y.rows(), y.cols(), eta.rows(), eta.cols(), 
-                    grad.rows(), grad.cols(), hess.rows(), hess.cols()
-                )
-            );
-        }
-    }
+    ) const;
 
-    void check_inv_hessian_gradient(
+    inline void check_inv_hessian_gradient(
         const Eigen::Ref<const rowarr_value_t>& eta,
         const Eigen::Ref<const rowarr_value_t>& grad,
         const Eigen::Ref<const rowarr_value_t>& hess,
         const Eigen::Ref<const rowarr_value_t>& inv_hess_grad
-    ) const
-    {
-        if (
-            (weights.size() != y.rows()) ||
-            (weights.size() != eta.rows()) ||
-            (weights.size() != grad.rows()) ||
-            (weights.size() != hess.rows()) ||
-            (weights.size() != inv_hess_grad.rows()) ||
-            (eta.cols() != y.cols()) ||
-            (eta.cols() != grad.cols()) ||
-            (eta.cols() != hess.cols()) ||
-            (eta.cols() != inv_hess_grad.cols())
-        ) {
-            throw util::adelie_core_error(
-                util::format(
-                    "inv_hessian_gradient() is given inconsistent inputs! "
-                    "(weights=%d, y=(%d, %d), eta=(%d, %d), grad=(%d, %d), hess=(%d, %d), inv_hess_grad=(%d, %d))",
-                    weights.size(), y.rows(), y.cols(), eta.rows(), eta.cols(), 
-                    grad.rows(), grad.cols(), hess.rows(), hess.cols(),
-                    inv_hess_grad.rows(), inv_hess_grad.cols()
-                )
-            );
-        }
-    }
+    ) const;
 
-    void check_loss(
+    inline void check_loss(
         const Eigen::Ref<const rowarr_value_t>& eta
-    ) const
-    {
-        if (
-            (y.rows() != weights.size()) ||
-            (y.rows() != eta.rows()) ||
-            (y.cols() != eta.cols())
-        ) {
-            throw util::adelie_core_error(
-                util::format(
-                    "loss() is given inconsistent inputs! "
-                    "(y=(%d, %d), weights=%d, eta=(%d, %d))",
-                    y.rows(), y.cols(), weights.size(), eta.rows(), eta.cols()
-                )
-            );
-        }
-    }
+    ) const;
 
 public:
     explicit GlmMultiBase(
         const string_t& name,
         const Eigen::Ref<const rowarr_value_t>& y,
         const Eigen::Ref<const vec_value_t>& weights
-    ):
-        name(name),
-        y(y.data(), y.rows(), y.cols()),
-        weights(weights.data(), weights.size())
-    {
-        if (y.rows() != weights.size()) {
-            throw util::adelie_core_error("y must be (n, K) where weights is (n,).");
-        }
-    }
+    );
 
-    virtual ~GlmMultiBase() =default;
+    virtual ~GlmMultiBase() {};
 
     virtual void gradient(
         const Eigen::Ref<const rowarr_value_t>& eta,
@@ -155,14 +80,7 @@ public:
         const Eigen::Ref<const rowarr_value_t>& grad,
         const Eigen::Ref<const rowarr_value_t>& hess,
         Eigen::Ref<rowarr_value_t> inv_hess_grad
-    )
-    {
-        check_inv_hessian_gradient(eta, grad, hess, inv_hess_grad);
-        inv_hess_grad = grad / (
-            hess.max(0) + 
-            value_t(Configs::hessian_min) * (hess <= 0).template cast<value_t>()
-        );
-    }
+    );
 
     virtual value_t loss(
         const Eigen::Ref<const rowarr_value_t>& eta
@@ -171,5 +89,127 @@ public:
     virtual value_t loss_full() =0;
 };
 
+ADELIE_CORE_GLM_MULTIBASE_TP
+void
+ADELIE_CORE_GLM_MULTIBASE::check_gradient(
+    const Eigen::Ref<const rowarr_value_t>& eta,
+    const Eigen::Ref<const rowarr_value_t>& grad
+) const
+{
+    if (
+        (weights.size() != y.rows()) ||
+        (weights.size() != eta.rows()) ||
+        (weights.size() != grad.rows()) ||
+        (eta.cols() != y.cols()) ||
+        (eta.cols() != grad.cols())
+    ) {
+        throw util::adelie_core_error(
+            util::format(
+                "gradient() is given inconsistent inputs! "
+                "(weights=%d, y=(%d, %d), eta=(%d, %d), grad=(%d, %d))",
+                weights.size(), y.rows(), y.cols(), eta.rows(), eta.cols(), grad.rows(), grad.cols()
+            )
+        );
+    }
+}
+
+ADELIE_CORE_GLM_MULTIBASE_TP
+void
+ADELIE_CORE_GLM_MULTIBASE::check_hessian(
+    const Eigen::Ref<const rowarr_value_t>& eta,
+    const Eigen::Ref<const rowarr_value_t>& grad,
+    const Eigen::Ref<const rowarr_value_t>& hess
+) const
+{
+    if (
+        (weights.size() != y.rows()) ||
+        (weights.size() != eta.rows()) ||
+        (weights.size() != grad.rows()) ||
+        (weights.size() != hess.rows()) ||
+        (eta.cols() != y.cols()) ||
+        (eta.cols() != grad.cols()) ||
+        (eta.cols() != hess.cols())
+    ) {
+        throw util::adelie_core_error(
+            util::format(
+                "hessian() is given inconsistent inputs! "
+                "(weights=%d, y=(%d, %d), eta=(%d, %d), grad=(%d, %d), hess=(%d, %d))",
+                weights.size(), y.rows(), y.cols(), eta.rows(), eta.cols(), 
+                grad.rows(), grad.cols(), hess.rows(), hess.cols()
+            )
+        );
+    }
+}
+
+ADELIE_CORE_GLM_MULTIBASE_TP
+void
+ADELIE_CORE_GLM_MULTIBASE::check_inv_hessian_gradient(
+    const Eigen::Ref<const rowarr_value_t>& eta,
+    const Eigen::Ref<const rowarr_value_t>& grad,
+    const Eigen::Ref<const rowarr_value_t>& hess,
+    const Eigen::Ref<const rowarr_value_t>& inv_hess_grad
+) const
+{
+    if (
+        (weights.size() != y.rows()) ||
+        (weights.size() != eta.rows()) ||
+        (weights.size() != grad.rows()) ||
+        (weights.size() != hess.rows()) ||
+        (weights.size() != inv_hess_grad.rows()) ||
+        (eta.cols() != y.cols()) ||
+        (eta.cols() != grad.cols()) ||
+        (eta.cols() != hess.cols()) ||
+        (eta.cols() != inv_hess_grad.cols())
+    ) {
+        throw util::adelie_core_error(
+            util::format(
+                "inv_hessian_gradient() is given inconsistent inputs! "
+                "(weights=%d, y=(%d, %d), eta=(%d, %d), grad=(%d, %d), hess=(%d, %d), inv_hess_grad=(%d, %d))",
+                weights.size(), y.rows(), y.cols(), eta.rows(), eta.cols(), 
+                grad.rows(), grad.cols(), hess.rows(), hess.cols(),
+                inv_hess_grad.rows(), inv_hess_grad.cols()
+            )
+        );
+    }
+}
+
+ADELIE_CORE_GLM_MULTIBASE_TP
+void
+ADELIE_CORE_GLM_MULTIBASE::check_loss(
+    const Eigen::Ref<const rowarr_value_t>& eta
+) const
+{
+    if (
+        (y.rows() != weights.size()) ||
+        (y.rows() != eta.rows()) ||
+        (y.cols() != eta.cols())
+    ) {
+        throw util::adelie_core_error(
+            util::format(
+                "loss() is given inconsistent inputs! "
+                "(y=(%d, %d), weights=%d, eta=(%d, %d))",
+                y.rows(), y.cols(), weights.size(), eta.rows(), eta.cols()
+            )
+        );
+    }
+}
+
 } // namespace glm
 } // namespace adelie_core
+
+#ifndef ADELIE_CORE_GLM_MULTI_PURE_OVERRIDE_DECL
+#define ADELIE_CORE_GLM_MULTI_PURE_OVERRIDE_DECL\
+    void gradient(\
+        const Eigen::Ref<const rowarr_value_t>& eta,\
+        Eigen::Ref<rowarr_value_t> grad\
+    ) override;\
+    void hessian(\
+        const Eigen::Ref<const rowarr_value_t>& eta,\
+        const Eigen::Ref<const rowarr_value_t>& grad,\
+        Eigen::Ref<rowarr_value_t> hess\
+    ) override;\
+    value_t loss(\
+        const Eigen::Ref<const rowarr_value_t>& eta\
+    ) override;\
+    value_t loss_full() override;
+#endif

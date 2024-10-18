@@ -7,6 +7,8 @@ from .constraint import (
     ConstraintBase64,
 )
 from .matrix import (
+    MatrixConstraintBase32,
+    MatrixConstraintBase64,
     MatrixCovBase32,
     MatrixCovBase64,
     MatrixNaiveBase32,
@@ -64,14 +66,12 @@ def deduce_states(
         constraints,
         dtype,
     )
-    dual_groups = render_dual_groups(constraints)
     screen_begins = np.cumsum(
         np.concatenate([[0], group_sizes[screen_set]]),
         dtype=int,
     )[:-1]
     return (
         constraints,
-        dual_groups,
         screen_begins,
     )
 
@@ -153,6 +153,26 @@ class base:
         # initialize core state
         corecls.__init__(obj, core_state)
         return obj
+
+    @staticmethod
+    def solve(f, state):
+        out = f(state)
+
+        # raise any errors
+        if out["error"] != "":
+            if out["error"].startswith("adelie_core solver: "):
+                logger.logger.warning(RuntimeError(out["error"]))
+            else:
+                logger.logger.error(RuntimeError(out["error"]))
+
+        # return a subsetted Python result object
+        core_state = out["state"]
+        state = type(state).create_from_core(state, core_state)
+
+        # add extra total time information
+        state.total_time = out["total_time"]
+
+        return state
 
 
 class gaussian_pin_base(base):
@@ -375,7 +395,7 @@ class gaussian_pin_base(base):
             "check lmdas shape",
             method, logger,
         )
-
+    
 
 class gaussian_pin_naive_base(gaussian_pin_base):
     """State wrapper base class for all gaussian pin naive method."""
@@ -596,7 +616,6 @@ def gaussian_pin_naive(
 
             (
                 self._constraints,
-                self._dual_groups,
                 self._screen_begins,
             ) = deduce_states(
                 constraints=constraints,
@@ -658,7 +677,6 @@ def gaussian_pin_naive(
                 constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
-                dual_groups=self._dual_groups,
                 alpha=alpha,
                 penalty=self._penalty,
                 weights=self._weights,
@@ -694,6 +712,10 @@ def gaussian_pin_naive(
             )
             gaussian_pin_naive_base.__init__(obj)
             return obj
+
+        def solve(self, *args, **kwargs):
+            f = lambda s: core_base.solve(s)
+            return gaussian_pin_naive_base.solve(f, self)
 
     return _gaussian_pin_naive()
 
@@ -893,7 +915,6 @@ def gaussian_pin_cov(
 
             (
                 self._constraints,
-                self._dual_groups,
                 self._screen_begins,
             ) = deduce_states(
                 constraints=constraints,
@@ -943,7 +964,6 @@ def gaussian_pin_cov(
                 constraints=self._constraints,
                 groups=self._groups,
                 group_sizes=self._group_sizes,
-                dual_groups=self._dual_groups,
                 alpha=alpha,
                 penalty=self._penalty,
                 screen_set=self._screen_set,
@@ -976,6 +996,10 @@ def gaussian_pin_cov(
             )
             gaussian_pin_cov_base.__init__(obj)
             return obj
+
+        def solve(self, *args, **kwargs):
+            f = lambda s: core_base.solve(s)
+            return gaussian_pin_cov_base.solve(f, self)
 
     return _gaussian_pin_cov()
 
@@ -1076,7 +1100,6 @@ def _render_gaussian_naive_inputs(
 def _render_multi_inputs(
     *,
     X,
-    groups,
     offsets,
     intercept,
     n_threads,
@@ -1097,16 +1120,8 @@ def _render_multi_inputs(
             n_threads=n_threads,
         )
 
-    # G == (p+intercept) * K if and only if ungrouped
-    if groups.shape[0] == X.cols():
-        group_type = "ungrouped"
-    else:
-        if groups.shape[0] != X.cols() // n_classes + (n_classes - 1) * intercept:
-            raise RuntimeError("groups must be of the \"grouped\" or \"ungrouped\" type.")
-        group_type = "grouped"
-
     return (
-        X, offsets, group_type
+        X, offsets, 
     )
 
 
@@ -1395,6 +1410,10 @@ def gaussian_cov(
                 cls, state, core_state, _gaussian_cov, core_base,
             )
             return obj
+            
+        def solve(self, *args, progress_bar=True, exit_cond=None, **kwargs):
+            f = lambda s: core_base.solve(s, progress_bar, exit_cond)
+            return base.solve(f, self)
 
     return _gaussian_cov()
     
@@ -1999,6 +2018,10 @@ def gaussian_naive(
             gaussian_naive_base.__init__(obj)
             return obj
 
+        def solve(self, *args, progress_bar=True, exit_cond=None, **kwargs):
+            f = lambda s: core_base.solve(s, progress_bar, exit_cond)
+            return gaussian_naive_base.solve(f, self)
+
     return _gaussian_naive()
 
 
@@ -2266,10 +2289,8 @@ def multigaussian_naive(
     (
         X,
         offsets,
-        group_type,
     ) = _render_multi_inputs(
         X=X,
-        groups=groups,
         offsets=offsets,
         intercept=intercept,
         n_threads=n_threads,
@@ -2306,7 +2327,6 @@ def multigaussian_naive(
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
             core_base.__init__(
                 self,
-                group_type=group_type,
                 n_classes=n_classes,
                 multi_intercept=intercept,
                 X=self._X_expanded,
@@ -2364,6 +2384,10 @@ def multigaussian_naive(
             )
             gaussian_naive_base.__init__(obj)
             return obj
+
+        def solve(self, *args, progress_bar=True, exit_cond=None, **kwargs):
+            f = lambda s: core_base.solve(s, progress_bar, exit_cond)
+            return gaussian_naive_base.solve(f, self)
 
     return _multigaussian_naive()
 
@@ -2723,6 +2747,10 @@ def glm_naive(
             )
             return obj
 
+        def solve(self, *args, progress_bar=True, exit_cond=None, **kwargs):
+            f = lambda s: core_base.solve(s, self._glm, progress_bar, exit_cond)
+            return base.solve(f, self)
+
     return _glm_naive()
 
 
@@ -2996,10 +3024,8 @@ def multiglm_naive(
     (
         X,
         offsets,
-        group_type,
     ) = _render_multi_inputs(
         X=X,
-        groups=groups,
         offsets=offsets,
         intercept=intercept,
         n_threads=n_threads,
@@ -3034,7 +3060,6 @@ def multiglm_naive(
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
             core_base.__init__(
                 self,
-                group_type=group_type,
                 n_classes=n_classes,
                 multi_intercept=intercept,
                 X=self._X_expanded,
@@ -3090,4 +3115,320 @@ def multiglm_naive(
             )
             return obj
 
+        def solve(self, *args, progress_bar=True, exit_cond=None, **kwargs):
+            f = lambda s: core_base.solve(s, self._glm, progress_bar, exit_cond)
+            return base.solve(f, self)
+
     return _multiglm_naive()
+
+
+def bvls(
+    X: Union[MatrixNaiveBase32, MatrixNaiveBase64],
+    y_var: float,
+    X_vars: np.ndarray,
+    lower: np.ndarray,
+    upper: np.ndarray,
+    weights: np.ndarray,
+    kappa: int,
+    max_iters: int,
+    tol: float,
+    screen_set_size: int,
+    screen_set: np.ndarray,
+    is_screen: np.ndarray,
+    active_set_size: int,
+    active_set: np.ndarray,
+    is_active: np.ndarray,
+    beta: np.ndarray,
+    resid: np.ndarray,
+    grad: np.ndarray,
+    loss: float,
+):
+    """Creates a BVLS state object.
+
+    Parameters
+    ----------
+    X : (n, p) Union[MatrixNaiveBase32, MatrixNaiveBase64]
+        Feature matrix.
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
+    y_var : float
+        Variance of :math:`y` equivalent to :math:`y^\\top W y`.
+    X_vars : (p,) ndarray
+        Variance of each column of ``X`` equivalent to
+        :math:`\\mathrm{diag}(X^\\top W X)`.
+    lower : (p,) ndarray
+        Lower bound for each variable.
+    upper : (p,) ndarray
+        Upper bound for each variable.
+    weights : (n,) ndarray
+        Observation weights.
+    kappa : int
+        Violation batching size.
+    max_iters : int 
+        Maximum number of coordinate descents.
+    tol : float 
+        Coordinate descent convergence tolerance.
+    screen_set_size : int
+        Number of screen groups.
+        ``screen_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, screen_set_size)``.
+    screen_set : (p,) ndarray
+        Screen set buffer.
+        ``screen_set[i]`` is the ``i`` th screen variable
+        that is in the range ``[0, p)``.
+    is_screen : (p,) ndarray
+        Boolean vector indicating whether the ``j`` th feature is screen.
+    active_set_size : int
+        Number of active groups.
+        ``active_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, active_set_size)``.
+    active_set : (p,) ndarray
+        Active set buffer.
+        ``active_set[i]`` is the ``i`` th active variable
+        that is in the range ``[0, p)``.
+    is_active : (p,) ndarray
+        Boolean vector indicating whether the ``j`` th feature is active.
+    beta : (p,) ndarray
+        Coefficient vector.
+    resid : (n,) ndarray
+        Residual :math:`y-X\\beta`.
+    grad : (p,) ndarray
+        Internal buffer that is implementation-defined.
+    loss : float
+        The current loss :math:`\\frac{1}{2} \\|y - X\\beta\\|_W^2`.
+
+    Returns
+    -------
+    wrap
+        Wrapper state object.
+
+    See Also
+    --------
+    adelie.adelie_core.state.StateBVLS32
+    adelie.adelie_core.state.StateBVLS64
+    """
+    dtype = (
+        np.float64
+        if isinstance(X, matrix.MatrixNaiveBase64) else
+        np.float32
+    )
+
+    dispatcher = {
+        np.float64: core.state.StateBVLS64,
+        np.float32: core.state.StateBVLS32,
+    }
+    core_base = dispatcher[dtype]
+
+    class _bvls(core_base):
+        def __init__(self):
+            self._core_type = core_base
+            ## save inputs due to lifetime issues
+            # static inputs require a reference to input
+            # or copy if it must be made
+            self._X = X
+            self._X_vars = np.array(X_vars, copy=False, dtype=dtype)
+            self._lower = np.array(lower, copy=False, dtype=dtype)
+            self._upper = np.array(upper, copy=False, dtype=dtype)
+            self._weights = np.array(weights, copy=False, dtype=dtype)
+            self._screen_set = np.array(screen_set, copy=True, dtype=int)
+            self._is_screen = np.array(is_screen, copy=True, dtype=bool)
+            self._active_set = np.array(active_set, copy=True, dtype=int)
+            self._is_active = np.array(is_active, copy=True, dtype=bool)
+            self._beta = np.array(beta, copy=True, dtype=dtype)
+            self._resid = np.array(resid, copy=True, dtype=dtype)
+            self._grad = np.array(grad, copy=True, dtype=dtype)
+
+            # MUST call constructor directly and not use super()!
+            # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
+            core_base.__init__(
+                self,
+                X=self._X,
+                y_var=y_var,
+                X_vars=self._X_vars,
+                lower=self._lower,
+                upper=self._upper,
+                weights=self._weights,
+                kappa=kappa,
+                max_iters=max_iters,
+                tol=tol,
+                screen_set_size=screen_set_size,
+                screen_set=self._screen_set,
+                is_screen=self._is_screen,
+                active_set_size=active_set_size,
+                active_set=self._active_set,
+                is_active=self._is_active,
+                beta=self._beta,
+                resid=self._resid,
+                grad=self._grad,
+                loss=loss,
+            )
+
+        @classmethod
+        def create_from_core(cls, state, core_state):
+            obj = base.create_from_core(
+                cls, state, core_state, _bvls, core_base,
+            )
+            return obj
+
+        def solve(self, *args, **kwargs):
+            f = lambda s: core_base.solve(s)
+            return base.solve(f, self)
+
+    return _bvls()
+
+
+def pinball(
+    A: Union[MatrixConstraintBase32, MatrixConstraintBase64],
+    y_var: float,
+    S: np.ndarray,
+    penalty_neg: np.ndarray,
+    penalty_pos: np.ndarray,
+    kappa: int,
+    max_iters: int,
+    tol: float,
+    screen_set_size: int,
+    screen_set: np.ndarray,
+    is_screen: np.ndarray,
+    screen_ASAT_diag: np.ndarray,
+    screen_AS: np.ndarray,
+    active_set_size: int,
+    active_set: np.ndarray,
+    is_active: np.ndarray,
+    beta: np.ndarray,
+    resid: np.ndarray,
+    grad: np.ndarray,
+    loss: float,
+):
+    """Creates a pinball state object.
+
+    Parameters
+    ----------
+    A : (m, d) Union[MatrixConstraintBase32, MatrixConstraintBase64]
+        Constraint matrix.
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
+    y_var : float
+        Variance of :math:`y = S^{-\\frac{1}{2}} v` equivalent to :math:`\\|y\\|_2^2`.
+    S : (d, d) ndarray
+        Positive semi-definite matrix.
+    penalty_neg : (m,) ndarray
+        Penalty on the negative part of :math:`\\beta`.
+    penalty_pos : (m,) ndarray
+        Penalty on the positive part of :math:`\\beta`.
+    kappa : int
+        Violation batching size.
+    max_iters : int 
+        Maximum number of coordinate descents.
+    tol : float 
+        Coordinate descent convergence tolerance.
+    screen_set_size : int
+        Number of screen groups.
+        ``screen_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, screen_set_size)``.
+    screen_set : (m,) ndarray
+        Screen set buffer.
+        ``screen_set[i]`` is the ``i`` th screen variable
+        that is in the range ``[0, m)``.
+    is_screen : (m,) ndarray
+        Boolean vector indicating whether the ``j`` th feature is screen.
+    screen_ASAT_diag : (m,) ndarray
+        :math:`A_j^\\top S A_j` where feature ``j`` is screen.
+    screen_AS : (m, d) ndarray
+        :math:`A_j^\\top S` where feature ``j`` is screen.
+    active_set_size : int
+        Number of active groups.
+        ``active_set[i]`` is only well-defined
+        for ``i`` in the range ``[0, active_set_size)``.
+    active_set : (m,) ndarray
+        Active set buffer.
+        ``active_set[i]`` is the ``i`` th active variable
+        that is in the range ``[0, m)``.
+    is_active : (m,) ndarray
+        Boolean vector indicating whether the ``j`` th feature is active.
+    beta : (m,) ndarray
+        Coefficient vector.
+    resid : (d,) ndarray
+        Residual :math:`v-SA^\\top\\beta`.
+    grad : (m,) ndarray
+        Internal buffer that is implementation-defined.
+    loss : float
+        The current loss :math:`\\frac{1}{2} \\|S^{-\\frac{1}{2}} v - S^{\\frac{1}{2}} A^\\top \\beta\\|_2^2`.
+
+    Returns
+    -------
+    wrap
+        Wrapper state object.
+
+    See Also
+    --------
+    adelie.adelie_core.state.StatePinball32
+    adelie.adelie_core.state.StatePinball64
+    """
+    dtype = (
+        np.float64
+        if isinstance(A, matrix.MatrixConstraintBase64) else
+        np.float32
+    )
+
+    dispatcher = {
+        np.float64: core.state.StatePinball64,
+        np.float32: core.state.StatePinball32,
+    }
+    core_base = dispatcher[dtype]
+
+    class _pinball(core_base):
+        def __init__(self):
+            self._core_type = core_base
+            ## save inputs due to lifetime issues
+            # static inputs require a reference to input
+            # or copy if it must be made
+            self._A = A
+            self._S = np.array(S, copy=False, dtype=dtype, order="F")
+            self._penalty_neg = np.array(penalty_neg, copy=False, dtype=dtype)
+            self._penalty_pos = np.array(penalty_pos, copy=False, dtype=dtype)
+            self._screen_set = np.array(screen_set, copy=True, dtype=int)
+            self._is_screen = np.array(is_screen, copy=True, dtype=bool)
+            self._screen_ASAT_diag = np.array(screen_ASAT_diag, copy=True, dtype=dtype)
+            self._screen_AS = np.array(screen_AS, copy=True, dtype=dtype, order="C")
+            self._active_set = np.array(active_set, copy=True, dtype=int)
+            self._is_active = np.array(is_active, copy=True, dtype=bool)
+            self._beta = np.array(beta, copy=True, dtype=dtype)
+            self._resid = np.array(resid, copy=True, dtype=dtype)
+            self._grad = np.array(grad, copy=True, dtype=dtype)
+
+            # MUST call constructor directly and not use super()!
+            # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
+            core_base.__init__(
+                self,
+                A=self._A,
+                y_var=y_var,
+                S=self._S,
+                penalty_neg=self._penalty_neg,
+                penalty_pos=self._penalty_pos,
+                kappa=kappa,
+                max_iters=max_iters,
+                tol=tol,
+                screen_set_size=screen_set_size,
+                screen_set=self._screen_set,
+                is_screen=self._is_screen,
+                screen_ASAT_diag=self._screen_ASAT_diag,
+                screen_AS=self._screen_AS,
+                active_set_size=active_set_size,
+                active_set=self._active_set,
+                is_active=self._is_active,
+                beta=self._beta,
+                resid=self._resid,
+                grad=self._grad,
+                loss=loss,
+            )
+
+        @classmethod
+        def create_from_core(cls, state, core_state):
+            obj = base.create_from_core(
+                cls, state, core_state, _pinball, core_base,
+            )
+            return obj
+
+        def solve(self, *args, **kwargs):
+            f = lambda s: core_base.solve(s)
+            return base.solve(f, self)
+
+    return _pinball()

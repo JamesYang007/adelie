@@ -1,10 +1,16 @@
+from . import adelie_core as core
+from . import matrix 
 from .adelie_core.constraint import (
     ConstraintBase32,
     ConstraintBase64,
 )
 from .configs import Configs
 from .glm import _coerce_dtype
-from . import adelie_core as core
+from .matrix import (
+    MatrixConstraintBase32,
+    MatrixConstraintBase64,
+)
+from scipy.sparse import csr_matrix
 from typing import Union
 import numpy as np
 
@@ -47,15 +53,12 @@ def box(
                 tol : float, optional
                     Convergence tolerance for proximal Newton.
                     Default is ``1e-9``.
-                nnls_max_iters : int, optional
-                    Maximum number of non-negative least squares iterations.
+                pinball_max_iters : int, optional
+                    Maximum number of coordinate descent iterations for the pinball least squares solver.
                     Default is ``int(1e5)``.
-                nnls_tol : float, optional
-                    Maximum number of non-negative least squares iterations.
-                    Default is ``1e-9``.
-                cs_tol : float, optional
-                    Complementary slackness tolerance.
-                    Default is ``1e-9``.
+                pinball_tol : float, optional
+                    Convergence tolerance for the pinball least squares solver.
+                    Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
                     the boundary where primal is zero.
@@ -85,8 +88,8 @@ def box(
 
     See Also
     --------
-    adelie.adelie_core.constraint.ConstraintBoxProximalNewton32
-    adelie.adelie_core.constraint.ConstraintBoxProximalNewton64
+    adelie.adelie_core.constraint.ConstraintBox32
+    adelie.adelie_core.constraint.ConstraintBox64
     """
     lower, l_dtype = _coerce_dtype(lower, dtype)
     upper, u_dtype = _coerce_dtype(upper, dtype)
@@ -98,8 +101,8 @@ def box(
 
     core_base = {
         "proximal-newton": {
-            np.float32: core.constraint.ConstraintBoxProximalNewton32,
-            np.float64: core.constraint.ConstraintBoxProximalNewton64,
+            np.float32: core.constraint.ConstraintBox32,
+            np.float64: core.constraint.ConstraintBox64,
         },
     }[method][dtype]
 
@@ -108,9 +111,8 @@ def box(
         "proximal-newton": {
             "max_iters": 100,
             "tol": 1e-9,
-            "nnls_max_iters": int(1e5),
-            "nnls_tol": 1e-9,
-            "cs_tol": 1e-9,
+            "pinball_max_iters": int(1e5),
+            "pinball_tol": 1e-7,
             "slack": 1e-4,
         },
     }[method]
@@ -133,11 +135,10 @@ def box(
 
 
 def linear(
-    A: np.ndarray,
+    A: Union[np.ndarray, csr_matrix, MatrixConstraintBase32, MatrixConstraintBase64],
     lower: np.ndarray,
     upper: np.ndarray,
     *,
-    svd: tuple =None,
     vars: np.ndarray =None,
     copy: bool =False,
     method: str ="proximal-newton",
@@ -148,23 +149,22 @@ def linear(
 
     The linear constraint is given by :math:`\\ell \\leq A x \\leq u`
     where :math:`\\ell \\leq 0 \\leq u`.
+    This constraint object is intended to support general linear constraints.
+    If :math:`A` is structured (e.g. box constraint),
+    it is more efficient to use specialized constraint types.
 
     Parameters
     ----------
-    A : (m, d) ndarray
+    A : (m, d) Union[ndarray, csr_matrix, MatrixConstraintBase32, MatrixConstraintBase64]
         Constraint matrix :math:`A`.
     lower : (m,) ndarray
         Lower bound :math:`\\ell`.
     upper : (m,) ndarray
         Upper bound :math:`u`.
-    svd : tuple, optional
-        A tuple ``(u, d, vh)`` as outputted by :func:`numpy.linalg.svd`.
-        However, ``u`` must have ``"F"``-ordering.
-        If ``None``, it is computed internally.
-        Default is ``None``.
     vars : ndarray, optional
-        Equivalent to ``np.sum(A ** 2, axis=1)``.
-        If ``None``, it is computed internally.
+        Equivalent to :math:`\\mathrm{diag}(AA^\\top)`.
+        If ``None`` and ``A`` is ``ndarray`` or ``csr_matrix``, it is computed internally.
+        Otherwise, it must be explicitly provided by the user.
         Default is ``None``.
     copy : bool, optional
         If ``True``, a copy of the inputs are stored internally.
@@ -188,18 +188,18 @@ def linear(
                 tol : float, optional
                     Convergence tolerance for proximal Newton.
                     Default is ``1e-9``.
-                nnls_batch_size : int, optional
-                    Batch size of active dual variables to include at a time.
-                    Default is ``10``.
                 nnls_max_iters : int, optional
-                    Maximum number of non-negative least squares iterations.
+                    Maximum number of coordinate descent iterations for the non-negative least squares solver.
                     Default is ``int(1e5)``.
                 nnls_tol : float, optional
-                    Maximum number of non-negative least squares iterations.
-                    Default is ``1e-9``.
-                cs_tol : float, optional
-                    Complementary slackness tolerance.
-                    Default is ``1e-9``.
+                    Convergence tolerance for the non-negative least squares solver.
+                    Default is ``1e-7``.
+                pinball_max_iters : int, optional
+                    Maximum number of coordinate descent iterations for the pinball least squares solver.
+                    Default is ``int(1e5)``.
+                pinball_tol : float, optional
+                    Convergence tolerance for the pinball least squares solver.
+                    Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
                     the boundary where primal is zero.
@@ -232,31 +232,38 @@ def linear(
 
     See Also
     --------
-    adelie.adelie_core.constraint.ConstraintLinearProximalNewton32
-    adelie.adelie_core.constraint.ConstraintLinearProximalNewton64
+    adelie.adelie_core.constraint.ConstraintLinear32
+    adelie.adelie_core.constraint.ConstraintLinear64
     """
-    A, A_dtype = _coerce_dtype(A, dtype)
+    if isinstance(A, np.ndarray):
+        if vars is None:
+            vars = np.sum(A ** 2, axis=1)
+
+        A, _ = _coerce_dtype(A, dtype)
+        A = matrix.dense(A, method="constraint", copy=copy)
+    elif isinstance(A, csr_matrix):
+        if vars is None:
+            vars = (A ** 2).sum(axis=1)
+
+        A = matrix.sparse(A, method="constraint", copy=copy)
+    else:
+        assert not (vars is None)
+
+    A_dtype = np.float32 if "32" in A.__class__.__name__ else np.float64
+
     lower, l_dtype = _coerce_dtype(lower, dtype)
     upper, u_dtype = _coerce_dtype(upper, dtype)
     assert A_dtype == l_dtype
     assert A_dtype == u_dtype
     dtype = A_dtype
 
-    if svd is None:
-        A_u, A_d, A_vh = np.linalg.svd(A, full_matrices=False, compute_uv=True)
-        A_u = np.asfortranarray(A_u)
-        svd = (A_u, A_d, A_vh)
-
-    if vars is None:
-        vars = np.sum(A ** 2, axis=1)
-
     lower = np.minimum(-lower, Configs.max_solver_value)
     upper = np.minimum(upper, Configs.max_solver_value)
 
     core_base = {
         "proximal-newton": {
-            np.float32: core.constraint.ConstraintLinearProximalNewton32,
-            np.float64: core.constraint.ConstraintLinearProximalNewton64,
+            np.float32: core.constraint.ConstraintLinear32,
+            np.float64: core.constraint.ConstraintLinear64,
         },
     }[method][dtype]
 
@@ -265,10 +272,10 @@ def linear(
         "proximal-newton": {
             "max_iters": 100,
             "tol": 1e-9,
-            "nnls_batch_size": 10,
             "nnls_max_iters": int(1e5),
-            "nnls_tol": 1e-9,
-            "cs_tol": 1e-9,
+            "nnls_tol": 1e-7,
+            "pinball_max_iters": int(1e5),
+            "pinball_tol": 1e-7,
             "slack": 1e-4,
             "n_threads": 1,
         },
@@ -279,19 +286,15 @@ def linear(
 
     class _linear(core_base):
         def __init__(self):
-            self._A = np.array(A, copy=copy, dtype=dtype, order="C")
+            self._A = A
             self._lower = np.array(lower, dtype=dtype)
             self._upper = np.array(upper, dtype=dtype)
-            self._svd = tuple(np.array(x, copy=copy, dtype=dtype) for x in svd)
             self._vars = np.array(vars, copy=copy, dtype=dtype)
             core_base.__init__(
                 self,
                 A=self._A,
                 lower=self._lower,
                 upper=self._upper,
-                A_u=self._svd[0],
-                A_d=self._svd[1],
-                A_vh=self._svd[2],
                 A_vars=self._vars,
                 **configs,
             )
@@ -371,15 +374,12 @@ def one_sided(
                 tol : float, optional
                     Convergence tolerance for proximal Newton.
                     Default is ``1e-9``.
-                nnls_max_iters : int, optional
-                    Maximum number of non-negative least squares iterations.
+                pinball_max_iters : int, optional
+                    Maximum number of coordinate descent iterations for the pinball least squares solver.
                     Default is ``int(1e5)``.
-                nnls_tol : float, optional
-                    Maximum number of non-negative least squares iterations.
-                    Default is ``1e-9``.
-                cs_tol : float, optional
-                    Complementary slackness tolerance.
-                    Default is ``1e-9``.
+                pinball_tol : float, optional
+                    Convergence tolerance for the pinball least squares solver.
+                    Default is ``1e-7``.
                 slack : float, optional
                     Slackness for backtracking when proximal Newton overshoots
                     the boundary where primal is zero.
@@ -425,16 +425,16 @@ def one_sided(
     --------
     adelie.adelie_core.constraint.ConstraintOneSidedADMM32
     adelie.adelie_core.constraint.ConstraintOneSidedADMM64
-    adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton32
-    adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton64
+    adelie.adelie_core.constraint.ConstraintOneSided32
+    adelie.adelie_core.constraint.ConstraintOneSided64
     """
     b, dtype = _coerce_dtype(b, dtype)
     b = np.minimum(b, Configs.max_solver_value)
 
     core_base = {
         "proximal-newton": {
-            np.float32: core.constraint.ConstraintOneSidedProximalNewton32,
-            np.float64: core.constraint.ConstraintOneSidedProximalNewton64,
+            np.float32: core.constraint.ConstraintOneSided32,
+            np.float64: core.constraint.ConstraintOneSided64,
         },
         "admm": {
             np.float32: core.constraint.ConstraintOneSidedADMM32,
@@ -447,9 +447,8 @@ def one_sided(
         "proximal-newton": {
             "max_iters": 100,
             "tol": 1e-9,
-            "nnls_max_iters": int(1e5),
-            "nnls_tol": 1e-9,
-            "cs_tol": 1e-9,
+            "pinball_max_iters": int(1e5),
+            "pinball_tol": 1e-7,
             "slack": 1e-4,
         },
         "admm": {

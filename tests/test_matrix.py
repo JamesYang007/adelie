@@ -12,6 +12,116 @@ ad.configs.set_configs("min_bytes", 20)
 
 
 # ==========================================================================================
+# TEST constraint
+# ==========================================================================================
+
+
+def run_constraint(
+    A,
+    cA,
+    dtype,
+):
+    m, d = A.shape
+
+    atol = 1e-4 if dtype == np.float32 else 1e-14
+
+    # test rmmul
+    Q = np.asfortranarray(np.random.normal(0, 1, (d, d)).astype(dtype))
+    for i in range(m):
+        out = np.empty(d, dtype=dtype)
+        cA.rmmul(i, Q, out)
+        expected = A[i] @ Q
+        assert np.allclose(expected, out, atol=atol)
+
+    # test rvmul
+    v = np.random.normal(0, 1, d).astype(dtype)
+    for i in range(m):
+        out = cA.rvmul(i, v)
+        expected = A[i] @ v
+        assert np.allclose(expected, out, atol=atol)
+
+    # test rvtmul
+    v = np.random.normal(0, 1)
+    for i in range(m):
+        base = np.random.normal(0, 1, d).astype(dtype)
+        out = base.copy()
+        cA.rvtmul(i, v, out)
+        expected = base + A[i] * v
+        assert np.allclose(expected, out, atol=atol)
+
+    # test mul
+    v = np.random.normal(0, 1, m).astype(dtype)
+    out = np.empty(d, dtype=dtype)
+    cA.mul(v, out)
+    expected = v @ A
+    assert np.allclose(expected, out, atol=atol)
+
+    # test tmul
+    v = np.random.normal(0, 1, d).astype(dtype)
+    out = np.empty(m, dtype=dtype)
+    cA.tmul(v, out)
+    expected = v @ A.T
+    assert np.allclose(expected, out, atol=atol)
+
+    # test cov
+    Q = np.asfortranarray(np.random.normal(0, 1, (d, d)).astype(dtype))
+    out = np.empty((m, m), order="F", dtype=dtype)
+    cA.cov(Q, out)
+    expected = A @ Q @ A.T
+    assert np.allclose(expected, out, atol=atol)
+
+    # test rows and cols
+    assert cA.rows() == A.shape[0]
+    assert cA.cols() == A.shape[1]
+
+    # test sp_mul
+    indices = np.random.choice(m, m // 2, replace=False)
+    values = np.random.normal(0, 1, m // 2).astype(dtype)
+    out = np.empty(d, dtype=dtype)
+    cA.sp_mul(indices, values, out)
+    x = np.zeros(m)
+    x[indices] = values
+    expected = x @ A
+    assert np.allclose(expected, out, atol=atol)
+
+
+@pytest.mark.filterwarnings("ignore: Detected matrix to be F-contiguous.")
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+@pytest.mark.parametrize("order", ["C", "F"])
+@pytest.mark.parametrize("m, d", [
+    [2, 2],
+    [100, 20],
+    [20, 100],
+])
+def test_constraint_dense(m, d, order, dtype, seed=0):
+    np.random.seed(seed)
+    A = np.random.normal(0, 1, (m, d))
+    A = np.array(A, dtype=dtype, order=order)
+    cA = mod.dense(A, method="constraint", n_threads=4)
+    run_constraint(A, cA, dtype)
+
+
+@pytest.mark.filterwarnings("ignore: Converting to CSR format.")
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+@pytest.mark.parametrize("order", ["C", "F"])
+@pytest.mark.parametrize("m, d", [
+    [2, 2],
+    [100, 20],
+    [20, 100],
+])
+def test_constraint_sparse(m, d, dtype, order, seed=0):
+    np.random.seed(seed)
+    A = np.random.normal(0, 1, (m, d)).astype(dtype)
+    A.flat[np.random.binomial(1, 0.3, A.size)] = 0
+    A_sp = {
+        "C": scipy.sparse.csr_matrix,
+        "F": scipy.sparse.csc_matrix,
+    }[order](A)
+    cA = mod.sparse(A_sp, method="constraint", n_threads=3)
+    run_constraint(A, cA, dtype)
+
+
+# ==========================================================================================
 # TEST cov
 # ==========================================================================================
 
@@ -259,13 +369,13 @@ def run_naive(
     assert cX.cols() == p
     assert cX.shape == (n, p)
 
-    # test sp_btmul
+    # test sp_tmul
     out = np.empty((2, n), dtype=dtype)
     v = np.random.normal(0, 1, (2, p)).astype(dtype)
     v[:, :p//2] = 0
     expected = v @ X.T
     v = scipy.sparse.csr_matrix(v)
-    cX.sp_btmul(v, out)
+    cX.sp_tmul(v, out)
     assert np.allclose(expected, out, atol=atol)
 
 
@@ -304,6 +414,27 @@ def test_naive_rconcatenate(ns, p, dtype, n_threads=2, seed=0):
         axis=0,
         n_threads=n_threads, 
     )
+    run_naive(X, cX, dtype)
+
+
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
+@pytest.mark.parametrize("n", [10, 50, 100])
+@pytest.mark.parametrize("d", [1, 10, 20])
+@pytest.mark.parametrize("m", [1, 5])
+@pytest.mark.parametrize("storage", ["dense", "sparse"])
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+def test_naive_convex_relu(n, d, m, storage, dtype, n_threads=2, seed=0):
+    np.random.seed(seed)
+    Z = np.random.normal(0, 1, (n, d)).astype(dtype)
+    mask = np.random.binomial(1, 0.5, (n, m)).astype(bool)
+    Y = np.concatenate([
+        mask[:, i][:, None] * Z
+        for i in range(mask.shape[1])
+    ], axis=1)
+    X = np.concatenate([Y, -Y], axis=1).astype(dtype)
+    if storage == "sparse":
+        Z = scipy.sparse.csc_matrix(Z)
+    cX = mod.convex_relu(Z, mask, n_threads=n_threads)
     run_naive(X, cX, dtype)
 
 
