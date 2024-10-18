@@ -2,10 +2,10 @@
 #include <numeric>
 #include <adelie_core/configs.hpp>
 #include <adelie_core/util/counting_iterator.hpp>
+#include <adelie_core/util/eigen/map_sparsevector.hpp>
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/functional.hpp>
 #include <adelie_core/util/stopwatch.hpp>
-#include <adelie_core/util/eigen/map_sparsevector.hpp>
 #include <adelie_core/solver/solver_gaussian_pin_base.hpp>
 #include <adelie_core/matrix/utils.hpp>
 
@@ -389,7 +389,8 @@ inline void solve(
             active_beta_ordered.data()
         );
 
-        betas.emplace_back(beta_map);
+        sp_vec_value_t beta = beta_map;
+        betas.emplace_back(std::move(beta));
         intercepts.emplace_back(intercept * (y_mean + resid_sum));
         rsqs.emplace_back(rsq);
         lmdas.emplace_back(lmda_path[l]);

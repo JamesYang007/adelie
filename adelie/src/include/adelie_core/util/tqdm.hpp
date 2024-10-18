@@ -647,6 +647,10 @@ inline auto tqdm(timer t)
     return tqdm_timer(t.num_seconds);
 }
 
+template <class IntType>
+using progress_bar_int_t = std::decay_t<decltype(trange(std::declval<IntType>()))>;
+using progress_bar_t = progress_bar_int_t<int>;
+
 } // namespace tq
 } // namespace util
 } // namespace adelie_core

@@ -1,5 +1,29 @@
 #pragma once
+#include <adelie_core/glm/glm_multibase.hpp>
 #include <adelie_core/state/state_glm_naive.hpp>
+
+#ifndef ADELIE_CORE_STATE_MULTI_GLM_NAIVE_TP
+#define ADELIE_CORE_STATE_MULTI_GLM_NAIVE_TP \
+    template <\
+        class ConstraintType,\
+        class MatrixType,\
+        class ValueType,\
+        class IndexType,\
+        class BoolType,\
+        class SafeBoolType\
+    >
+#endif
+#ifndef ADELIE_CORE_STATE_MULTI_GLM_NAIVE
+#define ADELIE_CORE_STATE_MULTI_GLM_NAIVE \
+    StateMultiGlmNaive<\
+        ConstraintType,\
+        MatrixType,\
+        ValueType,\
+        IndexType,\
+        BoolType,\
+        SafeBoolType\
+    >
+#endif
 
 namespace adelie_core {
 namespace state {
@@ -43,6 +67,7 @@ public:
     using typename base_t::dyn_vec_bool_t;
     using typename base_t::matrix_t;
     using rowarr_value_t = util::rowarr_type<value_t>;
+    using glm_t = glm::GlmMultiBase<value_t>;
 
     /* static states */
     const size_t n_classes;
@@ -110,6 +135,13 @@ public:
         n_classes(n_classes),
         multi_intercept(multi_intercept)
     {}
+
+    void solve(
+        glm_t& glm,
+        util::tq::progress_bar_t& pb,
+        std::function<bool()> exit_cond,
+        std::function<void()> check_user_interrupt =util::no_op()
+    );
 };
 
 } // namespace state

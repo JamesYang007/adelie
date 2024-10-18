@@ -2,7 +2,7 @@
 
 ## Package Build
 
-1. __(Single run)__ Install the package in editable mode the first time:
+1. Install the package in editable mode:
     ```bash
     pip install -e . --verbose
     ```
@@ -15,3 +15,7 @@
     ```bash
     CC="ccache clang" CXX="ccache clang++" python setup.py build_ext --inplace --force
     ```
+
+3. For testing the release build, run step 1.
+    The flags used for the linker are different between the two steps.
+    The former ensures that OpenMP is linked properly.

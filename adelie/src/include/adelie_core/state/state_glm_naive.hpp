@@ -1,5 +1,8 @@
 #pragma once
+#include <adelie_core/glm/glm_base.hpp>
 #include <adelie_core/state/state_base.hpp>
+#include <adelie_core/util/functional.hpp>
+#include <adelie_core/util/tqdm.hpp>
 
 #ifndef ADELIE_CORE_STATE_GLM_NAIVE_TP
 #define ADELIE_CORE_STATE_GLM_NAIVE_TP \
@@ -58,6 +61,7 @@ public:
     using typename base_t::map_cvec_value_t;
     using typename base_t::dyn_vec_constraint_t;
     using matrix_t = MatrixType;
+    using glm_t = glm::GlmBase<value_t>;
 
     /* static states */
     const value_t loss_full;
@@ -80,7 +84,7 @@ public:
     vec_value_t resid;
 
 private:
-    void initialize();
+    inline void initialize();
 
 public:
     explicit StateGlmNaive(
@@ -150,7 +154,33 @@ public:
     {
         initialize();
     }
+
+    void solve(
+        glm_t& glm,
+        util::tq::progress_bar_t& pb,
+        std::function<bool()> exit_cond,
+        std::function<void()> check_user_interrupt =util::no_op()
+    );
 };
+
+ADELIE_CORE_STATE_GLM_NAIVE_TP
+void
+ADELIE_CORE_STATE_GLM_NAIVE::initialize()
+{
+    const auto n = X->rows();
+    if (offsets.size() != n) {
+        throw util::adelie_core_error("offsets must be (n,) where X is (n, p).");
+    }
+    if (eta.size() != n) {
+        throw util::adelie_core_error("eta must be (n,) where X is (n, p).");
+    }
+    if (resid.size() != n) {
+        throw util::adelie_core_error("resid must be (n,) where X is (n, p).");
+    }
+    if (irls_tol <= 0) {
+        throw util::adelie_core_error("irls_tol must be > 0.");
+    }
+}
 
 } // namespace state
 } // namespace adelie_core

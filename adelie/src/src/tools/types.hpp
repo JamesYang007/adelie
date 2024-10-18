@@ -2,6 +2,8 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 #include <adelie_core/constraint/constraint_base.hpp>
+#include <adelie_core/glm/glm_base.hpp>
+#include <adelie_core/glm/glm_multibase.hpp>
 #include <adelie_core/matrix/matrix_constraint_base.hpp>
 #include <adelie_core/matrix/matrix_cov_base.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
@@ -14,6 +16,12 @@ using sparse_type = Eigen::SparseMatrix<T, Storage>;
 
 template <class T>
 using constraint_type = adelie_core::constraint::ConstraintBase<T>;
+
+template <class T>
+using glm_type = adelie_core::glm::GlmBase<T>;
+
+template <class T>
+using glm_multi_type = adelie_core::glm::GlmMultiBase<T>;
 
 template <class T>
 using matrix_constraint_type = adelie_core::matrix::MatrixConstraintBase<T>;

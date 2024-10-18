@@ -714,10 +714,7 @@ def gaussian_pin_naive(
             return obj
 
         def solve(self, *args, **kwargs):
-            f = {
-                np.float64: core.solver.solve_gaussian_pin_naive_64,
-                np.float32: core.solver.solve_gaussian_pin_naive_32,
-            }[dtype]
+            f = lambda s: core_base.solve(s)
             return gaussian_pin_naive_base.solve(f, self)
 
     return _gaussian_pin_naive()
@@ -1001,10 +998,7 @@ def gaussian_pin_cov(
             return obj
 
         def solve(self, *args, **kwargs):
-            f = {
-                np.float64: core.solver.solve_gaussian_pin_cov_64,
-                np.float32: core.solver.solve_gaussian_pin_cov_32,
-            }[dtype]
+            f = lambda s: core_base.solve(s)
             return gaussian_pin_cov_base.solve(f, self)
 
     return _gaussian_pin_cov()
@@ -1418,10 +1412,7 @@ def gaussian_cov(
             return obj
             
         def solve(self, *args, progress_bar=True, exit_cond=None, **kwargs):
-            f = lambda x : {
-                np.float64: core.solver.solve_gaussian_cov_64,
-                np.float32: core.solver.solve_gaussian_cov_32,
-            }[dtype](x, progress_bar, exit_cond)
+            f = lambda s: core_base.solve(s, progress_bar, exit_cond)
             return base.solve(f, self)
 
     return _gaussian_cov()
@@ -2028,10 +2019,7 @@ def gaussian_naive(
             return obj
 
         def solve(self, *args, progress_bar=True, exit_cond=None, **kwargs):
-            f = lambda x : {
-                np.float64: core.solver.solve_gaussian_naive_64,
-                np.float32: core.solver.solve_gaussian_naive_32,
-            }[dtype](x, progress_bar, exit_cond)
+            f = lambda s: core_base.solve(s, progress_bar, exit_cond)
             return gaussian_naive_base.solve(f, self)
 
     return _gaussian_naive()
@@ -2398,10 +2386,7 @@ def multigaussian_naive(
             return obj
 
         def solve(self, *args, progress_bar=True, exit_cond=None, **kwargs):
-            f = lambda x : {
-                np.float64: core.solver.solve_multigaussian_naive_64,
-                np.float32: core.solver.solve_multigaussian_naive_32,
-            }[dtype](x, progress_bar, exit_cond)
+            f = lambda s: core_base.solve(s, progress_bar, exit_cond)
             return gaussian_naive_base.solve(f, self)
 
     return _multigaussian_naive()
@@ -2763,10 +2748,7 @@ def glm_naive(
             return obj
 
         def solve(self, *args, progress_bar=True, exit_cond=None, **kwargs):
-            f = lambda x : {
-                np.float64: core.solver.solve_glm_naive_64,
-                np.float32: core.solver.solve_glm_naive_32,
-            }[dtype](x, self._glm, progress_bar, exit_cond)
+            f = lambda s: core_base.solve(s, self._glm, progress_bar, exit_cond)
             return base.solve(f, self)
 
     return _glm_naive()
@@ -3134,10 +3116,7 @@ def multiglm_naive(
             return obj
 
         def solve(self, *args, progress_bar=True, exit_cond=None, **kwargs):
-            f = lambda x : {
-                np.float64: core.solver.solve_multiglm_naive_64,
-                np.float32: core.solver.solve_multiglm_naive_32,
-            }[dtype](x, self._glm, progress_bar, exit_cond)
+            f = lambda s: core_base.solve(s, self._glm, progress_bar, exit_cond)
             return base.solve(f, self)
 
     return _multiglm_naive()
@@ -3291,10 +3270,7 @@ def bvls(
             return obj
 
         def solve(self, *args, **kwargs):
-            f = {
-                np.float64: core.solver.solve_bvls_64,
-                np.float32: core.solver.solve_bvls_32,
-            }[dtype]
+            f = lambda s: core_base.solve(s)
             return base.solve(f, self)
 
     return _bvls()
@@ -3452,10 +3428,7 @@ def pinball(
             return obj
 
         def solve(self, *args, **kwargs):
-            f = {
-                np.float64: core.solver.solve_pinball_64,
-                np.float32: core.solver.solve_pinball_32,
-            }[dtype]
+            f = lambda s: core_base.solve(s)
             return base.solve(f, self)
 
     return _pinball()

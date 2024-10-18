@@ -1,8 +1,10 @@
 #include "py_decl.hpp"
 #include <state/state.hpp>
+#include <adelie_core/util/stopwatch.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
+using namespace pybind11::literals; // to bring in the `_a` literal
 
 template <class BetasType>
 static auto convert_sparse_to_dense(
@@ -55,6 +57,91 @@ static auto convert_sparse_to_dense(
         values.data()
     );
     return out;
+}
+
+template <class StateType, class SolveType>
+py::dict _solve(
+    StateType& state,
+    SolveType solve_f
+)
+{
+    using sw_t = ad::util::Stopwatch;
+
+    const auto check_user_interrupt = [&]() {
+        if (PyErr_CheckSignals() != 0) {
+            throw py::error_already_set();
+        }
+    };
+
+    std::string error;
+
+    // this is to redirect std::cerr to sys.stderr in Python.
+    // https://pybind11.readthedocs.io/en/stable/advanced/pycpp/utilities.html?highlight=cout#capturing-standard-output-from-ostream
+    py::scoped_estream_redirect _estream;
+    sw_t sw;
+    sw.start();
+    try {
+        solve_f(state, check_user_interrupt);
+    } catch(const std::exception& e) {
+        error = e.what(); 
+    }
+    double total_time = sw.elapsed();
+
+    return py::dict("state"_a=state, "error"_a=error, "total_time"_a=total_time);
+}
+
+template <class StateType>
+py::dict _solve(
+    StateType& state
+)
+{
+    return _solve(
+        state,
+        [&](auto& state, auto c) { state.solve(c); }
+    );
+}
+
+template <class StateType>
+py::dict _solve(
+    StateType& state,
+    bool display_progress_bar,
+    std::function<bool(const StateType&)> exit_cond
+)
+{
+    return _solve(
+        state,
+        [&](auto& state, auto c) {
+            const auto exit_cond_f = [&]() {
+                return exit_cond && exit_cond(state);
+            };
+            auto pb = ad::util::tq::trange(0);
+            pb.set_display(display_progress_bar);
+            pb.set_ostream(std::cerr);
+            state.solve(pb, exit_cond_f, c);
+        }
+    );
+}
+
+template <class StateType, class GlmType>
+py::dict _solve(
+    StateType& state,
+    GlmType& glm,
+    bool display_progress_bar,
+    std::function<bool(const StateType&)> exit_cond
+)
+{
+    return _solve(
+        state,
+        [&](auto& state, auto c) {
+            const auto exit_cond_f = [&]() {
+                return exit_cond && exit_cond(state);
+            };
+            auto pb = ad::util::tq::trange(0);
+            pb.set_display(display_progress_bar);
+            pb.set_ostream(std::cerr);
+            state.solve(glm, pb, exit_cond_f, c);
+        }
+    );
 }
 
 // ========================================================================
@@ -441,6 +528,7 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
         .def_readonly("resid_sum", &state_t::resid_sum, R"delimiter(
         Weighted (by :math:`W`) sum of ``resid``.
         )delimiter")
+        .def("solve", [](state_t state) { return _solve(state); })
         ;
 }
 
@@ -575,6 +663,7 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         )delimiter")
+        .def("solve", [](state_t state) { return _solve(state); })
         ;
 }
 
@@ -1122,6 +1211,13 @@ void state_gaussian_naive(py::module_& m, const char* name)
         }, R"delimiter(
         ``betas[i]`` is the solution at ``lmdas[i]``.
         )delimiter")
+        .def("solve", [](
+            state_t state, 
+            bool pb, 
+            std::function<bool(const state_t&)> exit_cond
+        ) { 
+            return _solve(state, pb, exit_cond); 
+        })
         ;
 }
 
@@ -1266,6 +1362,13 @@ void state_multigaussian_naive(py::module_& m, const char* name)
         }, R"delimiter(
         ``intercepts[i]`` is the intercept at ``lmdas[i]`` for each class.
         )delimiter")
+        .def("solve", [](
+            state_t state, 
+            bool pb, 
+            std::function<bool(const state_t&)> exit_cond
+        ) { 
+            return _solve(state, pb, exit_cond); 
+        })
         ;
 }
 
@@ -1417,6 +1520,13 @@ void state_gaussian_cov(py::module_& m, const char* name)
         }, R"delimiter(
         ``betas[i]`` is the solution at ``lmdas[i]``.
         )delimiter")
+        .def("solve", [](
+            state_t state, 
+            bool pb, 
+            std::function<bool(const state_t&)> exit_cond
+        ) { 
+            return _solve(state, pb, exit_cond); 
+        })
         ;
 }
 
@@ -1445,6 +1555,7 @@ void state_glm_naive(py::module_& m, const char* name)
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
     using dyn_vec_constraint_t = typename state_t::dyn_vec_constraint_t;
+    using glm_t = typename state_t::glm_t;
     py::class_<state_t, base_t, PyStateGlmNaive<constraint_t, matrix_t>>(m, name, R"delimiter(
         Core state class for GLM, naive method.
         )delimiter")
@@ -1585,6 +1696,14 @@ void state_glm_naive(py::module_& m, const char* name)
         }, R"delimiter(
         ``betas[i]`` is the solution at ``lmdas[i]``.
         )delimiter")
+        .def("solve", [](
+            state_t state, 
+            glm_t& glm,
+            bool pb, 
+            std::function<bool(const state_t&)> exit_cond
+        ) { 
+            return _solve(state, glm, pb, exit_cond); 
+        })
         ;
 }
 
@@ -1609,6 +1728,7 @@ void state_multiglm_naive(py::module_& m, const char* name)
     using vec_index_t = typename state_t::vec_index_t;
     using vec_bool_t = typename state_t::vec_bool_t;
     using dyn_vec_constraint_t = typename state_t::dyn_vec_constraint_t;
+    using glm_t = typename state_t::glm_t;
     py::class_<state_t, base_t, PyStateMultiGlmNaive<constraint_t, matrix_t>>(m, name, R"delimiter(
         Core state class for multi-response GLM, naive method.
         )delimiter")
@@ -1730,6 +1850,14 @@ void state_multiglm_naive(py::module_& m, const char* name)
         }, R"delimiter(
         ``intercepts[i]`` is the intercept at ``lmdas[i]`` for each class.
         )delimiter")
+        .def("solve", [](
+            state_t state, 
+            glm_t& glm,
+            bool pb, 
+            std::function<bool(const state_t&)> exit_cond
+        ) { 
+            return _solve(state, glm, pb, exit_cond); 
+        })
         ;
 }
 
@@ -1853,6 +1981,7 @@ void state_bvls(py::module_& m, const char* name)
         .def_readonly("dbg_loss", &state_t::dbg_loss, R"delimiter(
         List of the losses at each outer loop.
         )delimiter")
+        .def("solve", [](state_t state) { return _solve(state); })
         ;
 }
 
@@ -1986,92 +2115,93 @@ void state_pinball(py::module_& m, const char* name)
         .def_readonly("dbg_loss", &state_t::dbg_loss, R"delimiter(
         List of the losses at each outer loop.
         )delimiter")
+        .def("solve", [](state_t state) { return _solve(state); })
         ;
 }
 
 void register_state(py::module_& m)
 {
     state_gaussian_pin_base<
-        ad::constraint::ConstraintBase<double>
+        constraint_type<double>
     >(m, "StateGaussianPinBase64");
     state_gaussian_pin_base<
-        ad::constraint::ConstraintBase<float>
+        constraint_type<float>
     >(m, "StateGaussianPinBase32");
     state_gaussian_pin_cov<
-        ad::constraint::ConstraintBase<double>,
-        ad::matrix::MatrixCovBase<double>
+        constraint_type<double>,
+        matrix_cov_type<double>
     >(m, "StateGaussianPinCov64");
     state_gaussian_pin_cov<
-        ad::constraint::ConstraintBase<float>,
-        ad::matrix::MatrixCovBase<float>
+        constraint_type<float>,
+        matrix_cov_type<float>
     >(m, "StateGaussianPinCov32");
     state_gaussian_pin_naive<
-        ad::constraint::ConstraintBase<double>,
-        ad::matrix::MatrixNaiveBase<double>
+        constraint_type<double>,
+        matrix_naive_type<double>
     >(m, "StateGaussianPinNaive64");
     state_gaussian_pin_naive<
-        ad::constraint::ConstraintBase<float>,
-        ad::matrix::MatrixNaiveBase<float>
+        constraint_type<float>,
+        matrix_naive_type<float>
     >(m, "StateGaussianPinNaive32");
 
     state_base<
-        ad::constraint::ConstraintBase<double>
+        constraint_type<double>
     >(m, "StateBase64");
     state_base<
-        ad::constraint::ConstraintBase<float>
+        constraint_type<float>
     >(m, "StateBase32");
     state_gaussian_cov<
-        ad::constraint::ConstraintBase<double>,
-        ad::matrix::MatrixCovBase<double>
+        constraint_type<double>,
+        matrix_cov_type<double>
     >(m, "StateGaussianCov64");
     state_gaussian_cov<
-        ad::constraint::ConstraintBase<float>,
-        ad::matrix::MatrixCovBase<float>
+        constraint_type<float>,
+        matrix_cov_type<float>
     >(m, "StateGaussianCov32");
     state_gaussian_naive<
-        ad::constraint::ConstraintBase<double>,
-        ad::matrix::MatrixNaiveBase<double>
+        constraint_type<double>,
+        matrix_naive_type<double>
     >(m, "StateGaussianNaive64");
     state_gaussian_naive<
-        ad::constraint::ConstraintBase<float>,
-        ad::matrix::MatrixNaiveBase<float>
+        constraint_type<float>,
+        matrix_naive_type<float>
     >(m, "StateGaussianNaive32");
     state_multigaussian_naive<
-        ad::constraint::ConstraintBase<double>,
-        ad::matrix::MatrixNaiveBase<double>
+        constraint_type<double>,
+        matrix_naive_type<double>
     >(m, "StateMultiGaussianNaive64");
     state_multigaussian_naive<
-        ad::constraint::ConstraintBase<float>,
-        ad::matrix::MatrixNaiveBase<float>
+        constraint_type<float>,
+        matrix_naive_type<float>
     >(m, "StateMultiGaussianNaive32");
     state_glm_naive<
-        ad::constraint::ConstraintBase<double>,
-        ad::matrix::MatrixNaiveBase<double>
+        constraint_type<double>,
+        matrix_naive_type<double>
     >(m, "StateGlmNaive64");
     state_glm_naive<
-        ad::constraint::ConstraintBase<float>,
-        ad::matrix::MatrixNaiveBase<float>
+        constraint_type<float>,
+        matrix_naive_type<float>
     >(m, "StateGlmNaive32");
     state_multiglm_naive<
-        ad::constraint::ConstraintBase<double>,
-        ad::matrix::MatrixNaiveBase<double>
+        constraint_type<double>,
+        matrix_naive_type<double>
     >(m, "StateMultiGlmNaive64");
     state_multiglm_naive<
-        ad::constraint::ConstraintBase<float>,
-        ad::matrix::MatrixNaiveBase<float>
+        constraint_type<float>,
+        matrix_naive_type<float>
     >(m, "StateMultiGlmNaive32");
 
     state_bvls<
-        ad::matrix::MatrixNaiveBase<double>
+        matrix_naive_type<double>
     >(m, "StateBVLS64");
     state_bvls<
-        ad::matrix::MatrixNaiveBase<float>
+        matrix_naive_type<float>
     >(m, "StateBVLS32");
 
     state_pinball<
-        ad::matrix::MatrixConstraintBase<double>
+        matrix_constraint_type<double>
     >(m, "StatePinball64");
     state_pinball<
-        ad::matrix::MatrixConstraintBase<float>
+        matrix_constraint_type<float>
     >(m, "StatePinball32");
 }

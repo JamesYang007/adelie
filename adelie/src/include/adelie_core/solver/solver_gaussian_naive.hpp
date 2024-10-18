@@ -182,6 +182,7 @@ void update_solutions(
     using state_t = std::decay_t<StateType>;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_value_t = typename state_t::vec_value_t;
+    using sp_vec_value_t = typename state_t::sp_vec_value_t;
 
     const auto y_var = state.y_var;
     auto& betas = state.betas;
@@ -194,7 +195,8 @@ void update_solutions(
     vec_value_t dual_values;
 
     betas.emplace_back(std::move(state_gaussian_pin_naive.betas.back()));
-    duals.emplace_back(sparsify_dual(state, dual_indices, dual_values));
+    sp_vec_value_t dual = sparsify_dual(state, dual_indices, dual_values);
+    duals.emplace_back(std::move(dual));
     intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
     lmdas.emplace_back(lmda);
 

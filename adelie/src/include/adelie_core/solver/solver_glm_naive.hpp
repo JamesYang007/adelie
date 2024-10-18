@@ -1,6 +1,7 @@
 #pragma once
 #include <adelie_core/configs.hpp>
 #include <adelie_core/solver/solver_base.hpp>
+#include <adelie_core/solver/solver_gaussian_naive.hpp>
 #include <adelie_core/solver/solver_gaussian_pin_naive.hpp>
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
 
@@ -130,6 +131,7 @@ void update_solutions(
     using state_t = std::decay_t<StateType>;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_value_t = typename state_t::vec_value_t;
+    using sp_vec_value_t = typename state_t::sp_vec_value_t;
 
     const auto loss_null = state.loss_null;
     const auto loss_full = state.loss_full;
@@ -144,7 +146,8 @@ void update_solutions(
     vec_value_t dual_values;
 
     betas.emplace_back(std::move(state_gaussian_pin_naive.betas.back()));
-    duals.emplace_back(sparsify_dual(state, dual_indices, dual_values));
+    sp_vec_value_t dual = sparsify_dual(state, dual_indices, dual_values);
+    duals.emplace_back(std::move(dual));
     intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
     lmdas.emplace_back(lmda);
 
@@ -368,7 +371,7 @@ inline auto fit(
         }
         // this call should only adjust the size of screen_* quantities
         // and repopulate every entry using the new weights.
-        state::glm::naive::update_screen_derived(
+        update_screen_derived(
             state,
             X_means,
             irls_weights_sqrt,
@@ -497,7 +500,7 @@ inline void solve(
         const auto& ones = buffer_pack.ones;
         state.lmda = lmda;
         X.mul(resid, ones, grad);
-        state::update_abs_grad(state, lmda);
+        update_abs_grad(state, lmda);
     };
     const auto update_solutions_f = [&](auto& state, auto& state_gaussian_pin_naive, auto lmda) {
         update_solutions(
@@ -518,7 +521,7 @@ inline void solve(
             kkt_passed,
             n_new_active
         );
-        state::update_screen_derived_base(state);
+        update_screen_derived_base(state);
     };
     const auto fit_f = [&](auto& state, auto lmda) {
         return fit(

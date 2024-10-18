@@ -473,7 +473,7 @@ def check_solutions(
 
 def run_solve_gaussian(state, args, pin):
     state.check(method="assert")
-    state = state.solve()    
+    state = state.solve() 
     state.check(method="assert")
     cvxpy_glm = CvxpyGlmGaussian(args["y"], args["weights"])
     check_solutions(args, state, cvxpy_glm, pin)

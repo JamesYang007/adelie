@@ -1,5 +1,6 @@
 #pragma once
 #include <adelie_core/state/state_gaussian_pin_base.hpp>
+#include <adelie_core/util/functional.hpp>
 
 #ifndef ADELIE_CORE_STATE_GAUSSIAN_PIN_NAIVE_TP
 #define ADELIE_CORE_STATE_GAUSSIAN_PIN_NAIVE_TP \
@@ -128,6 +129,10 @@ public:
         resid_sum(resid_sum),
         screen_grad(screen_beta.size())
     {}
+
+    void solve(
+        std::function<void()> check_user_interrupt =util::no_op()
+    );
 };
 
 } // namespace state
