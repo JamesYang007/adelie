@@ -1,6 +1,7 @@
 #pragma once
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
+#include <adelie_core/util/eigen/map_sparsevector.hpp>
 #include <string>
 #include <adelie_core/util/exceptions.hpp>
 

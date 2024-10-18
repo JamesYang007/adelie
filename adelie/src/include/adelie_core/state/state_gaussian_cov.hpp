@@ -1,5 +1,4 @@
 #pragma once
-#include <adelie_core/solver/solver_gaussian_cov.hpp>
 #include <adelie_core/state/state_base.hpp>
 #include <adelie_core/util/functional.hpp>
 #include <adelie_core/util/tqdm.hpp>
@@ -80,7 +79,7 @@ public:
     dyn_vec_index_t screen_subset_ordered;
 
 private:
-    inline void initialize();
+    void initialize();
 
 public:
     explicit StateGaussianCov(
@@ -142,17 +141,6 @@ public:
         std::function<void()> check_user_interrupt =util::no_op()
     );
 };
-
-ADELIE_CORE_STATE_GAUSSIAN_COV_TP
-void
-ADELIE_CORE_STATE_GAUSSIAN_COV::initialize()
-{
-    if (v.size() != A->cols()) {
-        throw util::adelie_core_error("v must be (p,) where A is (p, p).");
-    }
-    /* initialize the rest of the screen quantities */
-    solver::gaussian::cov::update_screen_derived(*this);
-}
 
 } // namespace state
 } // namespace adelie_core

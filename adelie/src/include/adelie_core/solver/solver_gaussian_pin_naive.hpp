@@ -1,13 +1,11 @@
 #pragma once
 #include <numeric>
 #include <adelie_core/configs.hpp>
+#include <adelie_core/solver/solver_gaussian_pin_base.hpp>
 #include <adelie_core/util/counting_iterator.hpp>
-#include <adelie_core/util/eigen/map_sparsevector.hpp>
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/functional.hpp>
 #include <adelie_core/util/stopwatch.hpp>
-#include <adelie_core/solver/solver_gaussian_pin_base.hpp>
-#include <adelie_core/matrix/utils.hpp>
 
 namespace adelie_core {
 namespace solver {

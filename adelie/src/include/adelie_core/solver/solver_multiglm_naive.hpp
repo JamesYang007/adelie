@@ -1,6 +1,5 @@
 #pragma once
 #include <adelie_core/configs.hpp>
-#include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/solver/solver_glm_naive.hpp>
 
 namespace adelie_core {

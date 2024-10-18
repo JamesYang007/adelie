@@ -84,7 +84,7 @@ public:
     vec_value_t resid;
 
 private:
-    inline void initialize();
+    void initialize();
 
 public:
     explicit StateGlmNaive(
@@ -162,25 +162,6 @@ public:
         std::function<void()> check_user_interrupt =util::no_op()
     );
 };
-
-ADELIE_CORE_STATE_GLM_NAIVE_TP
-void
-ADELIE_CORE_STATE_GLM_NAIVE::initialize()
-{
-    const auto n = X->rows();
-    if (offsets.size() != n) {
-        throw util::adelie_core_error("offsets must be (n,) where X is (n, p).");
-    }
-    if (eta.size() != n) {
-        throw util::adelie_core_error("eta must be (n,) where X is (n, p).");
-    }
-    if (resid.size() != n) {
-        throw util::adelie_core_error("resid must be (n,) where X is (n, p).");
-    }
-    if (irls_tol <= 0) {
-        throw util::adelie_core_error("irls_tol must be > 0.");
-    }
-}
 
 } // namespace state
 } // namespace adelie_core

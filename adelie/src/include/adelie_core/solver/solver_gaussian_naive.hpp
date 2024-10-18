@@ -3,6 +3,8 @@
 #include <adelie_core/solver/solver_base.hpp>
 #include <adelie_core/solver/solver_gaussian_pin_naive.hpp>
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
+#include <adelie_core/matrix/utils.hpp>
+#include <adelie_core/util/macros.hpp>
 
 namespace adelie_core {
 namespace solver {
@@ -320,10 +322,7 @@ inline auto fit(
     );
 
     try {
-        pin::naive::solve(
-            state_gaussian_pin_naive, 
-            check_user_interrupt
-        );
+        state_gaussian_pin_naive.solve(check_user_interrupt);
     } catch(...) {
         load_prev_valid();
         throw;

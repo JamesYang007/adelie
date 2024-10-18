@@ -1,6 +1,5 @@
 #pragma once
 #include <adelie_core/configs.hpp>
-#include <adelie_core/solver/solver_base.hpp>
 #include <adelie_core/solver/solver_gaussian_naive.hpp>
 #include <adelie_core/solver/solver_gaussian_pin_naive.hpp>
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
@@ -414,10 +413,7 @@ inline auto fit(
             active_set
         );
         try { 
-            gaussian::pin::naive::solve(
-                state_gaussian_pin_naive, 
-                check_user_interrupt
-            );
+            state_gaussian_pin_naive.solve(check_user_interrupt);
         } catch(...) {
             load_prev_valid();
             throw;

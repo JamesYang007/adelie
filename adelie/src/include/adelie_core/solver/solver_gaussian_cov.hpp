@@ -336,10 +336,7 @@ inline auto fit(
     );
 
     try {
-        pin::cov::solve(
-            state_gaussian_pin_cov, 
-            check_user_interrupt
-        );
+        state_gaussian_pin_cov.solve(check_user_interrupt);
     } catch(...) {
         load_prev_valid();
         throw;
