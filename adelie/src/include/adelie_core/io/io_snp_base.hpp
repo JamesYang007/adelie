@@ -1,4 +1,7 @@
 #pragma once
+#if defined(_MSC_VER)
+#pragma warning(disable : 4996) // remove stupid warning about fopen
+#endif
 #include <cstdio>
 #include <functional>
 #include <memory>
