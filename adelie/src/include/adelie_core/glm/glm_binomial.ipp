@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include <unsupported/Eigen/SpecialFunctions>
 #include <adelie_core/glm/glm_binomial.hpp>
 #include <adelie_core/util/macros.hpp>
