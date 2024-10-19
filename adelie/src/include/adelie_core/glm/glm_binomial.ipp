@@ -1,4 +1,5 @@
 #pragma once
+#define _USE_MATH_DEFINES // for C++
 #include <cmath>
 #include <unsupported/Eigen/SpecialFunctions>
 #include <adelie_core/glm/glm_binomial.hpp>
