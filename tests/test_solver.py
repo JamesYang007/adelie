@@ -1,9 +1,6 @@
 from adelie.diagnostic import (
     objective,
 )
-from adelie.solver import (
-    _solve,
-)
 from adelie import adelie_core as core
 import adelie as ad
 import cvxpy as cp
@@ -175,6 +172,9 @@ def zero_constraint(
             self.size = size
             self.mu = np.zeros(size)
 
+        def buffer_size(self):
+            return 0
+
         def solve(self, x, quad, linear, l1, l2, Q, buffer):
             x[...] = 0
             self.mu[...] = linear
@@ -182,10 +182,30 @@ def zero_constraint(
         def gradient(self, x, out):
             out[...] = self.mu
 
-        def gradient(self, x, mu, out):
+        def gradient_static(self, x, mu, out):
             out[...] = mu
 
+        def solve_zero(self, v, buffer):
+            self.mu[...] = v
+            return 0
+
+        def project(self, x):
+            x[...] = 0
+
+        def clear(self):
+            self.mu[...] = 0
+
+        def dual(self, indices, values):
+            indices[...] = np.arange(self.size)
+            values[...] = self.mu
+
+        def duals_nnz(self):
+            return self.size
+
         def duals(self):
+            return self.size
+
+        def primals(self):
             return self.size
 
     return _zero_constraint()
@@ -326,36 +346,31 @@ def solve_cvxpy(
     constraints: list =None,
 ):
     _, p = X.shape
+    G = groups.shape[0]
+
+    group_sizes = np.concatenate([groups, [p]], dtype=int)
+    group_sizes = group_sizes[1:] - group_sizes[:-1]
+
+    if constraints is None:
+        constraints = [None] * G
+
     if cvxpy_glm.is_multi:
-        assert groups == "grouped"
         K = cvxpy_glm.y.shape[-1]
 
-        if constraints is None:
-            constraints = [None] * K
-
         penalty = penalty[K:] if intercept else penalty
+        assert penalty.shape[0] == G
+
         beta = cp.Variable((p, K))
         beta0 = cp.Variable(K)
         eta = X @ beta + beta0[None]
         expr = cvxpy_glm.loss(eta)
-        expr += lmda * penalty @ (
-            alpha * cp.norm(beta, axis=1) 
-            + 0.5 * (1-alpha) * cp.sum(cp.square(beta), axis=1)
-        )
-
-        constraints = [
-            beta[i] == 0
-            for i, c in enumerate(constraints)
-            if not (c is None)
-        ]
+        for g, gs, w in zip(groups, group_sizes, penalty):
+            expr += (lmda * w) * (
+                alpha * cp.norm(beta[g:g+gs], "fro") 
+                + 0.5 * (1-alpha) * cp.sum_squares(beta[g:g+gs])
+            )
 
     else:
-        if constraints is None:
-            constraints = [None] * groups.shape[0]
-
-        group_sizes = np.concatenate([groups, [p]], dtype=int)
-        group_sizes = group_sizes[1:] - group_sizes[:-1]
-
         beta = cp.Variable(p)
         beta0 = cp.Variable(1)
         eta = X @ beta + beta0
@@ -366,18 +381,18 @@ def solve_cvxpy(
                 + 0.5 * (1-alpha) * cp.sum_squares(beta[g:g+gs])
             )
 
-        constraints = [
-            beta[g:g+gs] == 0
-            for c, g, gs in zip(constraints, groups, group_sizes)
-            if not (c is None)
-        ]
+    constraints = [
+        beta[g:g+gs] == 0
+        for c, g, gs in zip(constraints, groups, group_sizes)
+        if not (c is None)
+    ]
 
-        if pin:
-            constraints += [
-                beta[groups[i] : groups[i] + group_sizes[i]] == 0
-                for i in range(len(groups))
-                if not (i in screen_set)
-            ]
+    if pin:
+        constraints += [
+            beta[g:g+gs] == 0
+            for i, (g, gs) in enumerate(zip(groups, group_sizes))
+            if not (i in screen_set)
+        ]
 
     if not intercept:
         constraints += [ beta0 == 0 ]
@@ -458,7 +473,7 @@ def check_solutions(
 
 def run_solve_gaussian(state, args, pin):
     state.check(method="assert")
-    state = _solve(state)    
+    state = state.solve() 
     state.check(method="assert")
     cvxpy_glm = CvxpyGlmGaussian(args["y"], args["weights"])
     check_solutions(args, state, cvxpy_glm, pin)
@@ -717,17 +732,13 @@ def test_solve_gaussian_concatenate(
 
     for Xpy in Xs:
         test_data["X"] = Xpy
-        state_special = ad.solver._solve(
-            ad.state.gaussian_naive(**test_data),
-        )
+        state_special = ad.state.gaussian_naive(**test_data).solve()
         test_data["X"] = ad.matrix.dense(
             X.astype(np.float64), 
             method="naive", 
             n_threads=n_threads,
         )
-        state_dense = ad.solver._solve(
-            ad.state.gaussian_naive(**test_data)
-        )
+        state_dense = ad.state.gaussian_naive(**test_data).solve()
 
         assert np.allclose(state_special.lmdas, state_dense.lmdas)
         assert np.allclose(state_special.devs, state_dense.devs)
@@ -791,17 +802,13 @@ def test_solve_gaussian_snp_unphased(
 
     for Xpy in Xs:
         test_data["X"] = Xpy
-        state_special = ad.solver._solve(
-            ad.state.gaussian_naive(**test_data),
-        )
+        state_special = ad.state.gaussian_naive(**test_data).solve()
         test_data["X"] = ad.matrix.dense(
             X.astype(np.float64), 
             method="naive", 
             n_threads=n_threads,
         )
-        state_dense = ad.solver._solve(
-            ad.state.gaussian_naive(**test_data),
-        )
+        state_dense = ad.state.gaussian_naive(**test_data).solve()
 
         assert np.allclose(state_special.lmdas, state_dense.lmdas)
         assert np.allclose(state_special.devs, state_dense.devs)
@@ -868,17 +875,13 @@ def test_solve_gaussian_snp_phased_ancestry(
 
     for Xpy in Xs:
         test_data["X"] = Xpy
-        state_special = ad.solver._solve(
-            ad.state.gaussian_naive(**test_data),
-        )
+        state_special = ad.state.gaussian_naive(**test_data).solve()
         test_data["X"] = ad.matrix.dense(
             X.astype(np.float64), 
             method="naive", 
             n_threads=n_threads,
         )
-        state_dense = ad.solver._solve(
-            ad.state.gaussian_naive(**test_data),
-        )
+        state_dense = ad.state.gaussian_naive(**test_data).solve()
 
         assert np.allclose(state_special.lmdas, state_dense.lmdas)
         assert np.allclose(state_special.devs, state_dense.devs)
@@ -913,43 +916,36 @@ def test_grpnet(
     K = 3 if "multi" in glm_type else 1
     data = ad.data.dense(n, p, p, K=K, glm=glm_type)
     X, glm = data["X"], data["glm"]
-    if glm.is_multi:
-        groups = "grouped"
+    groups = np.concatenate([
+        [0],
+        np.random.choice(np.arange(1, p), size=G-1, replace=False)
+    ])
+    groups = np.sort(groups).astype(int)
+    group_sizes = np.concatenate([groups, [p]], dtype=int)
+    group_sizes = group_sizes[1:] - group_sizes[:-1]
+
+    if glm_type == "cox":
+        cvxpy_glm = CvxpyGlmCox(
+            glm.start,
+            glm.stop,
+            glm.status,
+            glm.weights,
+        )
+        glm = cvxpy_glm.to_adelie()
+    else:
         cvxpy_glm = {
+            "gaussian": CvxpyGlmGaussian,
+            "binomial": CvxpyGlmBinomial,
+            "poisson": CvxpyGlmPoisson,
             "multigaussian": CvxpyGlmMultiGaussian,
             "multinomial": CvxpyGlmMultinomial,
         }[glm_type](glm.y, glm.weights)
-        group_sizes = np.full(X.shape[1], glm.y.shape[1], dtype=int)
-    else:
-        groups = np.concatenate([
-            [0],
-            np.random.choice(np.arange(1, p), size=G-1, replace=False)
-        ])
-        groups = np.sort(groups).astype(int)
-        group_sizes = np.concatenate([groups, [p]], dtype=int)
-        group_sizes = group_sizes[1:] - group_sizes[:-1]
-
-        if glm_type == "cox":
-            cvxpy_glm = CvxpyGlmCox(
-                glm.start,
-                glm.stop,
-                glm.status,
-                glm.weights,
-            )
-            glm = cvxpy_glm.to_adelie()
-        else:
-            cvxpy_glm = {
-                "gaussian": CvxpyGlmGaussian,
-                "binomial": CvxpyGlmBinomial,
-                "poisson": CvxpyGlmPoisson,
-            }[glm_type](glm.y, glm.weights)
 
     if constraint:
-        G = group_sizes.shape[0]
         constraints = [None] * G
         c_order = np.random.choice(G, G // 2, replace=False)
         for i in c_order:
-            size = group_sizes[i]
+            size = group_sizes[i] * K
             constraints[i] = zero_constraint(size, dtype=np.float64)
     else:
         constraints = None
@@ -963,11 +959,171 @@ def test_grpnet(
     state = ad.grpnet(
         X=X, 
         glm=glm, 
+        constraints=constraints,
         groups=groups,
         intercept=intercept,
         adev_tol=adev_tol,
-        irls_tol=1e-8,
+        irls_tol=1e-9,
         tol=1e-10,
         progress_bar=False,
     )
     check_solutions(args, state, cvxpy_glm, eps=1e-4)
+
+
+# ==========================================================================================
+# TEST gaussian_cov
+# ==========================================================================================
+
+
+@pytest.mark.parametrize("constraint", [False, True])
+@pytest.mark.parametrize("n, p, G", [
+    [10, 50, 10],
+    [40, 13, 7],
+])
+def test_gaussian_cov(
+    n, p, G, constraint, adev_tol=0.2,
+):
+    data = ad.data.dense(n, p, p)
+    X, glm = data["X"], data["glm"]
+    groups = np.concatenate([
+        [0],
+        np.random.choice(np.arange(1, p), size=G-1, replace=False)
+    ])
+    groups = np.sort(groups).astype(int)
+    group_sizes = np.concatenate([groups, [p]], dtype=int)
+    group_sizes = group_sizes[1:] - group_sizes[:-1]
+
+    if constraint:
+        constraints = [None] * G
+        c_order = np.random.choice(G, G // 2, replace=False)
+        for i in c_order:
+            size = group_sizes[i]
+            constraints[i] = zero_constraint(size, dtype=np.float64)
+    else:
+        constraints = None
+
+    state_naive = ad.grpnet(
+        X=X, 
+        glm=glm, 
+        constraints=constraints,
+        groups=groups,
+        intercept=False,
+        adev_tol=adev_tol,
+        progress_bar=False,
+    )
+
+    A = np.asfortranarray(X.T @ X) / n
+    v = X.T @ glm.y / n
+    state_cov = ad.gaussian_cov(
+        A=A,
+        v=v,
+        constraints=constraints,
+        groups=groups,
+        lmda_path=state_naive.lmdas, 
+        progress_bar=False,
+    )
+
+    assert np.allclose(state_naive.betas.toarray(), state_cov.betas.toarray())
+
+
+# ==========================================================================================
+# TEST bvls
+# ==========================================================================================
+
+
+def _cvxpy_bvls(
+    X, y, lower, upper
+):
+    lower = np.maximum(lower, -100)
+    upper = np.minimum(upper,  100)
+    n, p = X.shape
+    beta = cp.Variable(p)
+    expr = cp.sum((y - X @ beta) ** 2) / (2 * n)
+    constraints = [beta >= lower, beta <= upper]
+    prob = cp.Problem(cp.Minimize(expr), constraints)
+    prob.solve(solver=cp.MOSEK)
+    return beta.value
+
+
+@pytest.mark.parametrize("n, p", [
+    [10, 50],
+    [40, 13],
+    [100, 1000],
+])
+def test_bvls(n, p, seed=0):
+    np.random.seed(seed)
+    X = np.random.uniform(0, 1, (n, p))
+    X.ravel()[np.random.binomial(1, 0.8, X.size).astype(bool)] = 0
+    u = np.random.normal(0, 1, n)
+    D = (X.T @ u) >= 0
+    X = X * (1 - 2 * D)
+    X = np.asfortranarray(X)
+    n, p = X.shape
+    u = np.random.normal(1, 1, p)
+    y = X @ (D * u) / n
+    lower = np.full(p, -0.5)
+    upper = np.full(p, 1.5)
+
+    state = ad.solver.bvls(X, y, lower, upper, tol=1e-9)
+    cvxpy_beta = _cvxpy_bvls(X, y, lower, upper)
+
+    actual = 0.5 * np.mean((y - X @ state.beta) ** 2)
+    expected = 0.5 * np.mean((y - X @ cvxpy_beta) ** 2)
+
+    assert np.allclose(actual, expected)
+
+
+# ==========================================================================================
+# TEST pinball
+# ==========================================================================================
+
+
+@pytest.mark.parametrize("m", [3, 5, 10, 20])
+@pytest.mark.parametrize("d", [1, 5, 10])
+@pytest.mark.parametrize("seed", np.arange(10))
+def test_pinball(m, d, seed):
+    def run_cvxpy(A, quad, linear, penalty_pos, penalty_neg):
+        m, d = A.shape
+        x = cp.Variable(m)
+        z = cp.Variable(d)
+        expr = 0.5 * cp.quad_form(z, quad) - linear @ z + penalty_pos @ cp.pos(x) + penalty_neg @ cp.neg(x)
+        constraints = [
+            z == A.T @ x,
+        ]
+        prob = cp.Problem(cp.Minimize(expr), constraints)
+        prob.solve()
+        return x.value
+
+    def objective(x, A, quad, linear, penalty_pos, penalty_neg):
+        z = A.T @ x
+        return 0.5 * (z.T @ quad @ z) - linear @ z + penalty_pos @ np.maximum(x, 0) + penalty_neg @ np.maximum(-x, 0)
+
+    np.random.seed(seed)
+    n = 10
+    X = np.random.normal(0, 1, (n, d))
+    y = np.random.normal(0, 1, n)
+    penalty_pos = np.random.uniform(0, 1, m)
+    penalty_neg = np.random.uniform(0, 1, m)
+    X /= np.sqrt(n)
+    y /= np.sqrt(n)
+    A = np.random.normal(0, 1, (m, d))
+    quad = np.asfortranarray(X.T @ X)
+    linear = X.T @ y
+
+    x_cvxpy = run_cvxpy(A, quad, linear, penalty_pos, penalty_neg)
+
+    state = ad.solver.pinball(
+        A, quad, linear, penalty_neg, penalty_pos, tol=1e-24, 
+    )
+
+    x = state.beta
+
+    # test loss against truth
+    loss_actual = objective(x, A, quad, linear, penalty_pos, penalty_neg)
+    loss_expected = objective(x_cvxpy, A, quad, linear, penalty_pos, penalty_neg)
+    assert np.all(loss_actual <= loss_expected * (1 + np.sign(loss_expected) * 1e-7))
+
+    # test gradient
+    resid_actual = state.resid
+    resid_expected = linear - quad @ A.T @ x
+    assert np.allclose(resid_actual, resid_expected, atol=1e-7)

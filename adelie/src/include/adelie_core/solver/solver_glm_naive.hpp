@@ -1,9 +1,8 @@
 #pragma once
 #include <adelie_core/configs.hpp>
-#include <adelie_core/solver/solver_base.hpp>
+#include <adelie_core/solver/solver_gaussian_naive.hpp>
 #include <adelie_core/solver/solver_gaussian_pin_naive.hpp>
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
-#include <adelie_core/state/state_glm_naive.hpp>
 
 namespace adelie_core {
 namespace solver {
@@ -55,10 +54,71 @@ struct GlmNaiveBufferPack
     vec_value_t buffer_n;   // (n,) extra buffer
 };
 
-template <class StateType, 
-          class GlmType,
-          class StateGaussianPinType,
-          class ValueType>
+/**
+ * Unlike the similar function in gaussian::naive,
+ * this does not call the base version to update the base classes's screen derived quantities.
+ * This is because in GLM fitting, the three screen_* inputs are modified at every IRLS loop,
+ * while the base quantities remain the same. 
+ * It is only when IRLS finishes and we must screen for variables where we have to update the base quantities.
+ * In gaussian naive setting, the IRLS has loop size of 1 essentially, so the two versions are synonymous.
+ */
+template <
+    class StateType, 
+    class XMType, 
+    class WType,
+    class SXMType, 
+    class STType, 
+    class SVType
+>
+inline void update_screen_derived(
+    StateType& state,
+    const XMType& X_means,
+    const WType& weights_sqrt,
+    size_t begin,
+    size_t size,
+    SXMType& screen_X_means,
+    STType& screen_transforms,
+    SVType& screen_vars
+)
+{
+    const auto& group_sizes = state.group_sizes;
+    const auto& screen_set = state.screen_set;
+    const auto& screen_begins = state.screen_begins;
+
+    const auto new_screen_size = screen_set.size();
+    const int new_screen_value_size = (
+        (screen_begins.size() == 0) ? 0 : (
+            screen_begins.back() + group_sizes[screen_set.back()]
+        )
+    );
+
+    screen_X_means.resize(new_screen_value_size);    
+    screen_transforms.resize(new_screen_size);
+    screen_vars.resize(new_screen_value_size, 0);
+
+    gaussian::naive::update_screen_derived(
+        *state.X,
+        X_means,
+        weights_sqrt,
+        state.groups,
+        state.group_sizes,
+        state.screen_set,
+        state.screen_begins,
+        begin,
+        size,
+        state.intercept,
+        screen_X_means,
+        screen_transforms,
+        screen_vars
+    );
+}
+
+template <
+    class StateType, 
+    class GlmType,
+    class StateGaussianPinType,
+    class ValueType
+>
 ADELIE_CORE_STRONG_INLINE
 void update_solutions(
     StateType& state,
@@ -67,6 +127,11 @@ void update_solutions(
     ValueType lmda
 )
 {
+    using state_t = std::decay_t<StateType>;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_value_t = typename state_t::vec_value_t;
+    using sp_vec_value_t = typename state_t::sp_vec_value_t;
+
     const auto loss_null = state.loss_null;
     const auto loss_full = state.loss_full;
     const auto& eta = state.eta;
@@ -76,8 +141,12 @@ void update_solutions(
     auto& lmdas = state.lmdas;
     auto& intercepts = state.intercepts;
 
+    vec_index_t dual_indices; 
+    vec_value_t dual_values;
+
     betas.emplace_back(std::move(state_gaussian_pin_naive.betas.back()));
-    duals.emplace_back(std::move(state_gaussian_pin_naive.duals.back()));
+    sp_vec_value_t dual = sparsify_dual(state, dual_indices, dual_values);
+    duals.emplace_back(std::move(dual));
     intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
     lmdas.emplace_back(lmda);
 
@@ -88,9 +157,11 @@ void update_solutions(
     );
 }
 
-template <class StateType,
-          class GlmType,
-          class BufferPackType>
+template <
+    class StateType,
+    class GlmType,
+    class BufferPackType
+>
 ADELIE_CORE_STRONG_INLINE
 void update_loss_null(
     StateType& state,
@@ -160,13 +231,14 @@ void update_loss_null(
     }
 }
 
-template <class StateType,
-          class GlmType,
-          class BufferPackType,
-          class ValueType,
-          class CUIType=util::no_op>
-ADELIE_CORE_STRONG_INLINE
-auto fit(
+template <
+    class StateType,
+    class GlmType,
+    class BufferPackType,
+    class ValueType,
+    class CUIType=util::no_op
+>
+inline auto fit(
     StateType& state,
     GlmType& glm,
     BufferPackType& buffer_pack,
@@ -195,7 +267,6 @@ auto fit(
     const auto& constraints = state.constraints;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
-    const auto& dual_groups = state.dual_groups;
     const auto alpha = state.alpha;
     const auto& penalty = state.penalty;
     const auto& offsets = state.offsets;
@@ -299,7 +370,7 @@ auto fit(
         }
         // this call should only adjust the size of screen_* quantities
         // and repopulate every entry using the new weights.
-        state::glm::naive::update_screen_derived(
+        update_screen_derived(
             state,
             X_means,
             irls_weights_sqrt,
@@ -319,7 +390,6 @@ auto fit(
             constraints,
             groups, 
             group_sizes,
-            dual_groups,
             alpha, 
             penalty,
             irls_weights,
@@ -331,9 +401,7 @@ auto fit(
             lmda_path_adjusted,
             constraint_buffer_size,
             intercept, max_active_size, max_iters, 
-            // TODO: still unclear whether we should be max'ing or not.
-            // tolerance is relative to the scaling of null deviance and current total weight sum
-            tol * std::max<value_t>((loss_null - loss_full) / hess_sum, 1), 
+            tol * (loss_null - loss_full) / hess_sum, 
             0 /* adev_tol */, 0 /* ddev_tol */,
             newton_tol, newton_max_iters, n_threads,
             0 /* rsq (no need to track) */,
@@ -345,10 +413,7 @@ auto fit(
             active_set
         );
         try { 
-            gaussian::pin::naive::solve(
-                state_gaussian_pin_naive, 
-                check_user_interrupt
-            );
+            state_gaussian_pin_naive.solve(check_user_interrupt);
         } catch(...) {
             load_prev_valid();
             throw;
@@ -378,16 +443,7 @@ auto fit(
         glm.gradient(eta, resid); 
 
         /* check convergence */
-        // check directional derivative of gradient (resid) as an approximation
-        // to the quadratic loss. 
-        const auto& active_set = state_gaussian_pin_naive.active_set;
-        const auto& active_begins = state_gaussian_pin_naive.active_begins;
-        const auto n_active = (
-            (active_begins.size() == 0) ? 1 : (
-                active_begins.back() + group_sizes[screen_set[active_set[active_set_size-1]]]
-            )
-        );
-        if (std::abs(((resid - resid_prev) * (eta - eta_prev)).sum()) <= irls_tol * n_active) {
+        if (std::abs(((resid - resid_prev) * (eta - eta_prev)).sum()) <= irls_tol) {
             return std::make_tuple(
                 std::move(state_gaussian_pin_naive),
                 screen_time,
@@ -399,13 +455,15 @@ auto fit(
     }
 }
 
-template <class StateType,
-          class GlmType,
-          class PBType,
-          class ExitCondType,
-          class UpdateLossNullType,
-          class TidyType,
-          class CUIType>
+template <
+    class StateType,
+    class GlmType,
+    class PBType,
+    class ExitCondType,
+    class UpdateLossNullType,
+    class TidyType,
+    class CUIType
+>
 inline void solve(
     StateType&& state,
     GlmType&& glm,
@@ -438,7 +496,7 @@ inline void solve(
         const auto& ones = buffer_pack.ones;
         state.lmda = lmda;
         X.mul(resid, ones, grad);
-        state::update_abs_grad(state, lmda);
+        update_abs_grad(state, lmda);
     };
     const auto update_solutions_f = [&](auto& state, auto& state_gaussian_pin_naive, auto lmda) {
         update_solutions(
@@ -459,7 +517,7 @@ inline void solve(
             kkt_passed,
             n_new_active
         );
-        state::update_screen_derived_base(state);
+        update_screen_derived_base(state);
     };
     const auto fit_f = [&](auto& state, auto lmda) {
         return fit(
@@ -484,11 +542,13 @@ inline void solve(
     );
 }
 
-template <class StateType,
-          class GlmType,
-          class PBType,
-          class ExitCondType,
-          class CUIType=util::no_op>
+template <
+    class StateType,
+    class GlmType,
+    class PBType,
+    class ExitCondType,
+    class CUIType=util::no_op
+>
 inline void solve(
     StateType&& state,
     GlmType&& glm,

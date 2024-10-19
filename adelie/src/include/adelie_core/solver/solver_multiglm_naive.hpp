@@ -1,6 +1,5 @@
 #pragma once
 #include <adelie_core/configs.hpp>
-#include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/solver/solver_glm_naive.hpp>
 
 namespace adelie_core {
@@ -190,11 +189,13 @@ void update_loss_null(
     }
 }
 
-template <class StateType,
-          class GlmType,
-          class PBType,
-          class ExitCondType,
-          class CUIType=util::no_op>
+template <
+    class StateType,
+    class GlmType,
+    class PBType,
+    class ExitCondType,
+    class CUIType=util::no_op
+>
 inline void solve(
     StateType&& state,
     GlmType&& glm,

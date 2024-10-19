@@ -202,9 +202,9 @@ def bench_naive(X, q=8, L=10, skip_cov=False):
     v = scipy.sparse.csr_matrix(v)
     out = np.empty((L, n))
     start = time()
-    X.sp_btmul(v, out)
+    X.sp_tmul(v, out)
     elapsed = time() - start
-    df["sp_btmul"] = [elapsed * 1e3]
+    df["sp_tmul"] = [elapsed * 1e3]
 
     return df
 
@@ -320,8 +320,8 @@ def bench_naive(X, q=8, L=10, skip_cov=False):
     v = scipy.sparse.csr_matrix(v)
     out = np.empty((L, n))
     start = time()
-    X.sp_btmul(v, out)
+    X.sp_tmul(v, out)
     elapsed = time() - start
-    df["sp_btmul"] = [elapsed * 1e3]
+    df["sp_tmul"] = [elapsed * 1e3]
 
     return df
