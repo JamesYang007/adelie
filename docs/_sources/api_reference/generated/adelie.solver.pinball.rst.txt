@@ -1,0 +1,6 @@
+﻿adelie.solver.pinball
+=====================
+
+.. currentmodule:: adelie.solver
+
+.. autofunction:: pinball

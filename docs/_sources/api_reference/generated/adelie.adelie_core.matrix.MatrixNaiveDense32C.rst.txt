@@ -20,7 +20,7 @@
       ~MatrixNaiveDense32C.ctmul
       ~MatrixNaiveDense32C.mul
       ~MatrixNaiveDense32C.rows
-      ~MatrixNaiveDense32C.sp_btmul
+      ~MatrixNaiveDense32C.sp_tmul
    
    
 
@@ -47,7 +47,7 @@
    .. automethod:: ctmul
    .. automethod:: mul
    .. automethod:: rows
-   .. automethod:: sp_btmul
+   .. automethod:: sp_tmul
    
    
 

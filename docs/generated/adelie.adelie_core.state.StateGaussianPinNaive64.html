@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.adelie_core.state.StateGaussianPinNaive64 &#8212; adelie 1.1.46 documentation</title>
+    <title>adelie.adelie_core.state.StateGaussianPinNaive64 &#8212; adelie 1.1.47 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=66c8c96b"></script>
+    <script src="../_static/documentation_options.js?v=c2b04d72"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -122,8 +122,8 @@
     
     
     
-    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.46 documentation - Home"/>
-    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.46 documentation - Home"/>`);</script>
+    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.47 documentation - Home"/>
+    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.47 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -373,6 +373,9 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.__init__" title="adelie.adelie_core.state.StateGaussianPinNaive64.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*args, **kwargs)</p></td>
 <td><p>Overloaded function.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.solve" title="adelie.adelie_core.state.StateGaussianPinNaive64.solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve</span></code></a>(self)</p></td>
+<td><p></p></td>
+</tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
@@ -416,12 +419,6 @@ document.write(`
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.ddev_tol" title="adelie.adelie_core.state.StateGaussianPinNaive64.ddev_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ddev_tol</span></code></a></p></td>
 <td><p>Difference in percent deviance explained tolerance.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.dual_groups" title="adelie.adelie_core.state.StateGaussianPinNaive64.dual_groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dual_groups</span></code></a></p></td>
-<td><p>List of starting indices to each dual group where <cite>G</cite> is the number of groups.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.duals" title="adelie.adelie_core.state.StateGaussianPinNaive64.duals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">duals</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">duals[i]</span></code> is the dual at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64.group_sizes" title="adelie.adelie_core.state.StateGaussianPinNaive64.group_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_sizes</span></code></a></p></td>
 <td><p>List of group sizes corresponding to each element in <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
@@ -514,10 +511,15 @@ document.write(`
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive64.__init__" title="Link to this definition">#</a></dt>
 <dd><p>Overloaded function.</p>
 <ol class="arabic simple">
-<li><p>__init__(self: adelie.adelie_core.state.StateGaussianPinNaive64, X: adelie.adelie_core.matrix.MatrixNaiveBase64, y_mean: float, y_var: float, constraints: adelie.adelie_core.constraint.VectorConstraintBase64, groups: numpy.ndarray[numpy.int64[1, n]], group_sizes: numpy.ndarray[numpy.int64[1, n]], dual_groups: numpy.ndarray[numpy.int64[1, n]], alpha: float, penalty: numpy.ndarray[numpy.float64[1, n]], weights: numpy.ndarray[numpy.float64[1, n]], screen_set: numpy.ndarray[numpy.int64[1, n]], screen_begins: numpy.ndarray[numpy.int64[1, n]], screen_vars: numpy.ndarray[numpy.float64[1, n]], screen_X_means: numpy.ndarray[numpy.float64[1, n]], screen_transforms: adelie.adelie_core.VectorMatrix64, lmda_path: numpy.ndarray[numpy.float64[1, n]], constraint_buffer_size: int, intercept: bool, max_active_size: int, max_iters: int, tol: float, adev_tol: float, ddev_tol: float, newton_tol: float, newton_max_iters: int, n_threads: int, rsq: float, resid: numpy.ndarray[numpy.float64[1, n], flags.writeable], resid_sum: float, screen_beta: numpy.ndarray[numpy.float64[1, n], flags.writeable], screen_is_active: numpy.ndarray[bool[1, n], flags.writeable], active_set_size: int, active_set: numpy.ndarray[numpy.int64[1, n], flags.writeable]) -&gt; None</p></li>
+<li><p>__init__(self: adelie.adelie_core.state.StateGaussianPinNaive64, X: adelie.adelie_core.matrix.MatrixNaiveBase64, y_mean: float, y_var: float, constraints: adelie.adelie_core.constraint.VectorConstraintBase64, groups: numpy.ndarray[numpy.int64[1, n]], group_sizes: numpy.ndarray[numpy.int64[1, n]], alpha: float, penalty: numpy.ndarray[numpy.float64[1, n]], weights: numpy.ndarray[numpy.float64[1, n]], screen_set: numpy.ndarray[numpy.int64[1, n]], screen_begins: numpy.ndarray[numpy.int64[1, n]], screen_vars: numpy.ndarray[numpy.float64[1, n]], screen_X_means: numpy.ndarray[numpy.float64[1, n]], screen_transforms: adelie.adelie_core.VectorMatrix64, lmda_path: numpy.ndarray[numpy.float64[1, n]], constraint_buffer_size: int, intercept: bool, max_active_size: int, max_iters: int, tol: float, adev_tol: float, ddev_tol: float, newton_tol: float, newton_max_iters: int, n_threads: int, rsq: float, resid: numpy.ndarray[numpy.float64[1, n], flags.writeable], resid_sum: float, screen_beta: numpy.ndarray[numpy.float64[1, n], flags.writeable], screen_is_active: numpy.ndarray[bool[1, n], flags.writeable], active_set_size: int, active_set: numpy.ndarray[numpy.int64[1, n], flags.writeable]) -&gt; None</p></li>
 <li><p>__init__(self: adelie.adelie_core.state.StateGaussianPinNaive64, arg0: adelie.adelie_core.state.StateGaussianPinNaive64) -&gt; None</p></li>
 </ol>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive64.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive64" title="adelie.adelie_core.state.StateGaussianPinNaive64"><span class="pre">adelie.adelie_core.state.StateGaussianPinNaive64</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive64.solve" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive64.X">
@@ -609,19 +611,6 @@ Equivalent to <code class="docutils literal notranslate"><span class="pre">np.ma
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive64.ddev_tol">
 <span class="sig-name descname"><span class="pre">ddev_tol</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive64.ddev_tol" title="Link to this definition">#</a></dt>
 <dd><p>Difference in percent deviance explained tolerance.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive64.dual_groups">
-<span class="sig-name descname"><span class="pre">dual_groups</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive64.dual_groups" title="Link to this definition">#</a></dt>
-<dd><p>List of starting indices to each dual group where <cite>G</cite> is the number of groups.
-<code class="docutils literal notranslate"><span class="pre">dual_groups[i]</span></code> is the starting index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th dual group.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive64.duals">
-<span class="sig-name descname"><span class="pre">duals</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive64.duals" title="Link to this definition">#</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">duals[i]</span></code> is the dual at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -856,6 +845,7 @@ i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span>.</p>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.__init__"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.solve"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.solve()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.X"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.X</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_begins"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.active_begins</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.active_order"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.active_order</span></code></a></li>
@@ -869,8 +859,6 @@ i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span>.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.constraint_buffer_size"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.constraint_buffer_size</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.constraints"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.constraints</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.ddev_tol"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.ddev_tol</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.dual_groups"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.dual_groups</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.duals"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.duals</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.group_sizes"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.group_sizes</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.groups"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.groups</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive64.intercept"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive64.intercept</span></code></a></li>

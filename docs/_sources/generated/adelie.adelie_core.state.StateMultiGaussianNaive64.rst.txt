@@ -12,6 +12,7 @@
    .. autosummary::
    
       ~StateMultiGaussianNaive64.__init__
+      ~StateMultiGaussianNaive64.solve
    
    
 
@@ -44,7 +45,6 @@
       ~StateMultiGaussianNaive64.early_exit
       ~StateMultiGaussianNaive64.grad
       ~StateMultiGaussianNaive64.group_sizes
-      ~StateMultiGaussianNaive64.group_type
       ~StateMultiGaussianNaive64.groups
       ~StateMultiGaussianNaive64.intercept
       ~StateMultiGaussianNaive64.intercepts
@@ -95,6 +95,7 @@
    
    
    .. automethod:: __init__
+   .. automethod:: solve
    
    
 
@@ -124,7 +125,6 @@
    .. autoattribute:: early_exit
    .. autoattribute:: grad
    .. autoattribute:: group_sizes
-   .. autoattribute:: group_type
    .. autoattribute:: groups
    .. autoattribute:: intercept
    .. autoattribute:: intercepts

@@ -20,7 +20,7 @@
       ~MatrixNaiveOneHotDense64C.ctmul
       ~MatrixNaiveOneHotDense64C.mul
       ~MatrixNaiveOneHotDense64C.rows
-      ~MatrixNaiveOneHotDense64C.sp_btmul
+      ~MatrixNaiveOneHotDense64C.sp_tmul
    
    
 
@@ -49,7 +49,7 @@
    .. automethod:: ctmul
    .. automethod:: mul
    .. automethod:: rows
-   .. automethod:: sp_btmul
+   .. automethod:: sp_tmul
    
    
 

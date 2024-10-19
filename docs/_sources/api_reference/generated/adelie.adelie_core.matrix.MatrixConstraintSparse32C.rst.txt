@@ -1,0 +1,60 @@
+﻿adelie.adelie\_core.matrix.MatrixConstraintSparse32C
+====================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixConstraintSparse32C
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixConstraintSparse32C.__init__
+      ~MatrixConstraintSparse32C.cols
+      ~MatrixConstraintSparse32C.cov
+      ~MatrixConstraintSparse32C.mul
+      ~MatrixConstraintSparse32C.rmmul
+      ~MatrixConstraintSparse32C.rows
+      ~MatrixConstraintSparse32C.rvmul
+      ~MatrixConstraintSparse32C.rvtmul
+      ~MatrixConstraintSparse32C.sp_mul
+      ~MatrixConstraintSparse32C.tmul
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixConstraintSparse32C.ndim
+      ~MatrixConstraintSparse32C.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: mul
+   .. automethod:: rmmul
+   .. automethod:: rows
+   .. automethod:: rvmul
+   .. automethod:: rvtmul
+   .. automethod:: sp_mul
+   .. automethod:: tmul
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

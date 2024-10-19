@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.adelie_core.constraint.ConstraintBase64 &#8212; adelie 1.1.46 documentation</title>
+    <title>adelie.adelie_core.constraint.ConstraintBase64 &#8212; adelie 1.1.47 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=66c8c96b"></script>
+    <script src="../_static/documentation_options.js?v=c2b04d72"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -122,8 +122,8 @@
     
     
     
-    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.46 documentation - Home"/>
-    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.46 documentation - Home"/>`);</script>
+    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.47 documentation - Home"/>
+    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.47 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -407,6 +407,9 @@ before passing into the solver.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64.solve" title="adelie.adelie_core.constraint.ConstraintBase64.solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve</span></code></a>(self, x, quad, linear, l1, l2, Q, buffer)</p></td>
 <td><p>Computes the block-coordinate update.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64.solve_zero" title="adelie.adelie_core.constraint.ConstraintBase64.solve_zero"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_zero</span></code></a>(self, arg0, arg1)</p></td>
+<td><p>Solves the zero primal KKT condition problem.</p></td>
+</tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
@@ -620,6 +623,39 @@ The size must be at least as large as <a class="reference internal" href="#adeli
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.adelie_core.constraint.ConstraintBase64.solve_zero">
+<span class="sig-name descname"><span class="pre">solve_zero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64" title="adelie.adelie_core.constraint.ConstraintBase64"><span class="pre">adelie.adelie_core.constraint.ConstraintBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#adelie.adelie_core.constraint.ConstraintBase64.solve_zero" title="Link to this definition">#</a></dt>
+<dd><p>Solves the zero primal KKT condition problem.</p>
+<p>The zero primal KKT condition problem is given by</p>
+<div class="math notranslate nohighlight">
+\[\begin{align*}
+    \mathrm{minimize}_{\mu \geq 0}
+    \|v - \phi'(0)^\top \mu\|_2
+\end{align*}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\phi\)</span> is the current constraint function
+and <span class="math notranslate nohighlight">\(\mu\)</span> is the dual variable.
+It is advised, but not necessary, that the object stores the solution internally
+so that a subsequent call to <a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64.dual" title="adelie.adelie_core.constraint.ConstraintBase64.dual"><code class="xref py py-func docutils literal notranslate"><span class="pre">dual()</span></code></a> will return the solution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>v</strong><span class="classifier">(d,) ndarray</span></dt><dd><p>The vector <span class="math notranslate nohighlight">\(v\)</span>.</p>
+</dd>
+<dt><strong>buffer</strong><span class="classifier">(b,) ndarray</span></dt><dd><p>Buffer of type <code class="docutils literal notranslate"><span class="pre">uint64_t</span></code> aligned at 8 bytes.
+The size must be at least as large as <a class="reference internal" href="#adelie.adelie_core.constraint.ConstraintBase64.buffer_size" title="adelie.adelie_core.constraint.ConstraintBase64.buffer_size"><code class="xref py py-func docutils literal notranslate"><span class="pre">buffer_size()</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>norm</strong><span class="classifier">float</span></dt><dd><p>The optimal objective for the zero primal KKT condition problem.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.constraint.ConstraintBase64.dual_size">
 <span class="sig-name descname"><span class="pre">dual_size</span></span><a class="headerlink" href="#adelie.adelie_core.constraint.ConstraintBase64.dual_size" title="Link to this definition">#</a></dt>
@@ -674,6 +710,7 @@ The size must be at least as large as <a class="reference internal" href="#adeli
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.constraint.ConstraintBase64.primals"><code class="docutils literal notranslate"><span class="pre">ConstraintBase64.primals()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.constraint.ConstraintBase64.project"><code class="docutils literal notranslate"><span class="pre">ConstraintBase64.project()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.constraint.ConstraintBase64.solve"><code class="docutils literal notranslate"><span class="pre">ConstraintBase64.solve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.constraint.ConstraintBase64.solve_zero"><code class="docutils literal notranslate"><span class="pre">ConstraintBase64.solve_zero()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.constraint.ConstraintBase64.dual_size"><code class="docutils literal notranslate"><span class="pre">ConstraintBase64.dual_size</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.constraint.ConstraintBase64.primal_size"><code class="docutils literal notranslate"><span class="pre">ConstraintBase64.primal_size</span></code></a></li>
 </ul>

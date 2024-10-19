@@ -1,0 +1,60 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveConvexReluDense64F
+========================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveConvexReluDense64F
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveConvexReluDense64F.__init__
+      ~MatrixNaiveConvexReluDense64F.bmul
+      ~MatrixNaiveConvexReluDense64F.btmul
+      ~MatrixNaiveConvexReluDense64F.cmul
+      ~MatrixNaiveConvexReluDense64F.cols
+      ~MatrixNaiveConvexReluDense64F.cov
+      ~MatrixNaiveConvexReluDense64F.ctmul
+      ~MatrixNaiveConvexReluDense64F.mul
+      ~MatrixNaiveConvexReluDense64F.rows
+      ~MatrixNaiveConvexReluDense64F.sp_tmul
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveConvexReluDense64F.ndim
+      ~MatrixNaiveConvexReluDense64F.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_tmul
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

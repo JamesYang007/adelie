@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.diagnostic.gradient_norms &#8212; adelie 1.1.46 documentation</title>
+    <title>adelie.diagnostic.gradient_norms &#8212; adelie 1.1.47 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=66c8c96b"></script>
+    <script src="../_static/documentation_options.js?v=c2b04d72"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -122,8 +122,8 @@
     
     
     
-    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.46 documentation - Home"/>
-    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.46 documentation - Home"/>`);</script>
+    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.47 documentation - Home"/>
+    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.47 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -365,7 +365,7 @@ document.write(`
 <h1>adelie.diagnostic.gradient_norms<a class="headerlink" href="#adelie-diagnostic-gradient-norms" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.diagnostic.gradient_norms">
-<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">gradient_norms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csr_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csr_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../api_reference/generated/adelie.adelie_core.constraint.ConstraintBase32.html#adelie.adelie_core.constraint.ConstraintBase32" title="adelie.adelie_core.constraint.ConstraintBase32"><span class="pre">ConstraintBase32</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBase64.html#adelie.adelie_core.constraint.ConstraintBase64" title="adelie.adelie_core.constraint.ConstraintBase64"><span class="pre">ConstraintBase64</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/diagnostic.py#L366-L509"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.diagnostic.gradient_norms" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.diagnostic.</span></span><span class="sig-name descname"><span class="pre">gradient_norms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csr_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csr_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../api_reference/generated/adelie.adelie_core.constraint.ConstraintBase32.html#adelie.adelie_core.constraint.ConstraintBase32" title="adelie.adelie_core.constraint.ConstraintBase32"><span class="pre">ConstraintBase32</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBase64.html#adelie.adelie_core.constraint.ConstraintBase64" title="adelie.adelie_core.constraint.ConstraintBase64"><span class="pre">ConstraintBase64</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/diagnostic.py#L354-L485"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.diagnostic.gradient_norms" title="Link to this definition">#</a></dt>
 <dd><p>Computes the group-wise gradient norms.</p>
 <p>The group-wise gradient norm is given by <span class="math notranslate nohighlight">\(\hat{h} \in \mathbb{R}^{G}\)</span> where</p>
 <div class="math notranslate nohighlight">
@@ -384,9 +384,9 @@ document.write(`
 <span class="math notranslate nohighlight">\(\beta_g\)</span> is the coefficient block for group <span class="math notranslate nohighlight">\(g\)</span>,
 <span class="math notranslate nohighlight">\(\phi_g\)</span> is the constraint function for group <span class="math notranslate nohighlight">\(g\)</span>,
 and <span class="math notranslate nohighlight">\(\mu_g\)</span> is the dual block for group <span class="math notranslate nohighlight">\(g\)</span>.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
+<dd class="field-odd"><dl class="simple">
 <dt><strong>grads</strong><span class="classifier">(L, p) or (L, p, K) ndarray</span></dt><dd><p>Gradients.</p>
 </dd>
 <dt><strong>betas</strong><span class="classifier">(L, p) or (L, p*K) csr_matrix</span></dt><dd><p>Coefficient vectors <span class="math notranslate nohighlight">\(\beta\)</span>.</p>
@@ -403,16 +403,10 @@ Default is <code class="docutils literal notranslate"><span class="pre">None</sp
 </dd>
 <dt><strong>groups</strong><span class="classifier">(G,) ndarray, optional</span></dt><dd><p>List of starting indices to each group where <cite>G</cite> is the number of groups.
 <code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group. 
-If the gradient is of multi-response type, then we only allow two types of groupings:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;grouped&quot;</span></code>: coefficients for each predictor is grouped across the classes.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;ungrouped&quot;</span></code>: every coefficient is its own group.</p></li>
-</ul>
-</div></blockquote>
-<p>Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case it is set to
-<code class="docutils literal notranslate"><span class="pre">np.arange(p)</span></code> if <code class="docutils literal notranslate"><span class="pre">y</span></code> is single-response
-and <code class="docutils literal notranslate"><span class="pre">&quot;grouped&quot;</span></code> if multi-response.</p>
+If <code class="docutils literal notranslate"><span class="pre">glm</span></code> is of multi-response type, then
+<code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting <em>feature</em> index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group.
+In either case, <code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> must then be a value in the range <span class="math notranslate nohighlight">\(\{1,\ldots, p\}\)</span>.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case it is set to <code class="docutils literal notranslate"><span class="pre">np.arange(p)</span></code>.</p>
 </dd>
 <dt><strong>alpha</strong><span class="classifier">float, optional</span></dt><dd><p>Elastic net parameter <span class="math notranslate nohighlight">\(\alpha\)</span>.
 It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</span>.

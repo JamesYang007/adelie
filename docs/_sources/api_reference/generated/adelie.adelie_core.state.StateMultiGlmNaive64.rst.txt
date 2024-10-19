@@ -12,6 +12,7 @@
    .. autosummary::
    
       ~StateMultiGlmNaive64.__init__
+      ~StateMultiGlmNaive64.solve
    
    
 
@@ -45,7 +46,6 @@
       ~StateMultiGlmNaive64.eta
       ~StateMultiGlmNaive64.grad
       ~StateMultiGlmNaive64.group_sizes
-      ~StateMultiGlmNaive64.group_type
       ~StateMultiGlmNaive64.groups
       ~StateMultiGlmNaive64.intercept
       ~StateMultiGlmNaive64.intercepts
@@ -91,6 +91,7 @@
    
    
    .. automethod:: __init__
+   .. automethod:: solve
    
    
 
@@ -121,7 +122,6 @@
    .. autoattribute:: eta
    .. autoattribute:: grad
    .. autoattribute:: group_sizes
-   .. autoattribute:: group_type
    .. autoattribute:: groups
    .. autoattribute:: intercept
    .. autoattribute:: intercepts

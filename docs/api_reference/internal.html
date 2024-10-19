@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Internal &#8212; adelie 1.1.46 documentation</title>
+    <title>Internal &#8212; adelie 1.1.47 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=66c8c96b"></script>
+    <script src="../_static/documentation_options.js?v=c2b04d72"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -48,7 +48,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="adelie.adelie_core.configs.Configs" href="generated/adelie.adelie_core.configs.Configs.html" />
-    <link rel="prev" title="adelie.state.multiglm_naive" href="generated/adelie.state.multiglm_naive.html" />
+    <link rel="prev" title="adelie.state.pinball" href="generated/adelie.state.pinball.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -124,8 +124,8 @@
     
     
     
-    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.46 documentation - Home"/>
-    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.46 documentation - Home"/>`);</script>
+    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.47 documentation - Home"/>
+    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.47 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -378,6 +378,7 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.block_diag.html">adelie.matrix.block_diag</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.concatenate.html">adelie.matrix.concatenate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.convex_relu.html">adelie.matrix.convex_relu</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.dense.html">adelie.matrix.dense</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.eager_cov.html">adelie.matrix.eager_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.interaction.html">adelie.matrix.interaction</a></li>
@@ -391,10 +392,16 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.matrix.subset.html">adelie.matrix.subset</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.sklearn.GroupElasticNet.html">adelie.sklearn.GroupElasticNet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.bvls.html">adelie.solver.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.solver.pinball.html">adelie.solver.pinball</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.bvls.html">adelie.state.bvls</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.gaussian_cov.html">adelie.state.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
@@ -402,20 +409,21 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.glm_naive.html">adelie.state.glm_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.multigaussian_naive.html">adelie.state.multigaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/adelie.state.pinball.html">adelie.state.pinball</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Internal</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.configs.Configs.html">adelie.adelie_core.configs.Configs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintBase32.html">adelie.adelie_core.constraint.ConstraintBase32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintBase64.html">adelie.adelie_core.constraint.ConstraintBase64</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintBoxProximalNewton32.html">adelie.adelie_core.constraint.ConstraintBoxProximalNewton32</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintBoxProximalNewton64.html">adelie.adelie_core.constraint.ConstraintBoxProximalNewton64</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintLinearProximalNewton32.html">adelie.adelie_core.constraint.ConstraintLinearProximalNewton32</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintLinearProximalNewton64.html">adelie.adelie_core.constraint.ConstraintLinearProximalNewton64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintBox32.html">adelie.adelie_core.constraint.ConstraintBox32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintBox64.html">adelie.adelie_core.constraint.ConstraintBox64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintLinear32.html">adelie.adelie_core.constraint.ConstraintLinear32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintLinear64.html">adelie.adelie_core.constraint.ConstraintLinear64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintOneSided32.html">adelie.adelie_core.constraint.ConstraintOneSided32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintOneSided64.html">adelie.adelie_core.constraint.ConstraintOneSided64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintOneSidedADMM32.html">adelie.adelie_core.constraint.ConstraintOneSidedADMM32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintOneSidedADMM64.html">adelie.adelie_core.constraint.ConstraintOneSidedADMM64</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton32.html">adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton32</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton64.html">adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.glm.GlmBase32.html">adelie.adelie_core.glm.GlmBase32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.glm.GlmBase64.html">adelie.adelie_core.glm.GlmBase64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.glm.GlmBinomialLogit32.html">adelie.adelie_core.glm.GlmBinomialLogit32</a></li>
@@ -434,6 +442,14 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.glm.GlmMultinomial64.html">adelie.adelie_core.glm.GlmMultinomial64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.glm.GlmPoisson32.html">adelie.adelie_core.glm.GlmPoisson32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.glm.GlmPoisson64.html">adelie.adelie_core.glm.GlmPoisson64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintBase32.html">adelie.adelie_core.matrix.MatrixConstraintBase32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintBase64.html">adelie.adelie_core.matrix.MatrixConstraintBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintDense32C.html">adelie.adelie_core.matrix.MatrixConstraintDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintDense32F.html">adelie.adelie_core.matrix.MatrixConstraintDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintDense64C.html">adelie.adelie_core.matrix.MatrixConstraintDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintDense64F.html">adelie.adelie_core.matrix.MatrixConstraintDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintSparse32C.html">adelie.adelie_core.matrix.MatrixConstraintSparse32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintSparse64C.html">adelie.adelie_core.matrix.MatrixConstraintSparse64C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixCovBase32.html">adelie.adelie_core.matrix.MatrixCovBase32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixCovBase64.html">adelie.adelie_core.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixCovBlockDiag32.html">adelie.adelie_core.matrix.MatrixCovBlockDiag32</a></li>
@@ -454,6 +470,12 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveCConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveRConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse64F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveDense32C.html">adelie.adelie_core.matrix.MatrixNaiveDense32C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveDense32F.html">adelie.adelie_core.matrix.MatrixNaiveDense32F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveDense64C.html">adelie.adelie_core.matrix.MatrixNaiveDense64C</a></li>
@@ -484,6 +506,8 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveCSubset64.html">adelie.adelie_core.matrix.MatrixNaiveCSubset64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveRSubset32.html">adelie.adelie_core.matrix.MatrixNaiveRSubset32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveRSubset64.html">adelie.adelie_core.matrix.MatrixNaiveRSubset64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.state.StateBVLS32.html">adelie.adelie_core.state.StateBVLS32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.state.StateBVLS64.html">adelie.adelie_core.state.StateBVLS64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinCov32.html">adelie.adelie_core.state.StateGaussianPinCov32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinNaive32.html">adelie.adelie_core.state.StateGaussianPinNaive32</a></li>
@@ -498,6 +522,8 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.state.StateMultiGlmNaive32.html">adelie.adelie_core.state.StateMultiGlmNaive32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.state.StateMultiGlmNaive64.html">adelie.adelie_core.state.StateMultiGlmNaive64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinball32.html">adelie.adelie_core.state.StatePinball32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinball64.html">adelie.adelie_core.state.StatePinball64</a></li>
 </ul>
 </li>
 </ul>
@@ -570,29 +596,29 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="../generated/adelie.adelie_core.constraint.ConstraintBase64.html#adelie.adelie_core.constraint.ConstraintBase64" title="adelie.adelie_core.constraint.ConstraintBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintBase64</span></code></a></p></td>
 <td><p>Base constraint class.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintBoxProximalNewton32.html#adelie.adelie_core.constraint.ConstraintBoxProximalNewton32" title="adelie.adelie_core.constraint.ConstraintBoxProximalNewton32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintBoxProximalNewton32</span></code></a></p></td>
-<td><p>Core constraint class for box constraint with proximal Newton solver.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintBox32.html#adelie.adelie_core.constraint.ConstraintBox32" title="adelie.adelie_core.constraint.ConstraintBox32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintBox32</span></code></a></p></td>
+<td><p>Core constraint class for box constraint.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintBoxProximalNewton64.html#adelie.adelie_core.constraint.ConstraintBoxProximalNewton64" title="adelie.adelie_core.constraint.ConstraintBoxProximalNewton64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintBoxProximalNewton64</span></code></a></p></td>
-<td><p>Core constraint class for box constraint with proximal Newton solver.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintBox64.html#adelie.adelie_core.constraint.ConstraintBox64" title="adelie.adelie_core.constraint.ConstraintBox64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintBox64</span></code></a></p></td>
+<td><p>Core constraint class for box constraint.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintLinearProximalNewton32.html#adelie.adelie_core.constraint.ConstraintLinearProximalNewton32" title="adelie.adelie_core.constraint.ConstraintLinearProximalNewton32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintLinearProximalNewton32</span></code></a></p></td>
-<td><p>Core constraint class for linear constraint with proximal Newton solver.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintLinear32.html#adelie.adelie_core.constraint.ConstraintLinear32" title="adelie.adelie_core.constraint.ConstraintLinear32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintLinear32</span></code></a></p></td>
+<td><p>Core constraint class for linear constraint.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintLinearProximalNewton64.html#adelie.adelie_core.constraint.ConstraintLinearProximalNewton64" title="adelie.adelie_core.constraint.ConstraintLinearProximalNewton64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintLinearProximalNewton64</span></code></a></p></td>
-<td><p>Core constraint class for linear constraint with proximal Newton solver.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintLinear64.html#adelie.adelie_core.constraint.ConstraintLinear64" title="adelie.adelie_core.constraint.ConstraintLinear64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintLinear64</span></code></a></p></td>
+<td><p>Core constraint class for linear constraint.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintOneSided32.html#adelie.adelie_core.constraint.ConstraintOneSided32" title="adelie.adelie_core.constraint.ConstraintOneSided32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintOneSided32</span></code></a></p></td>
+<td><p>Core constraint class for one-sided bound constraint.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintOneSided64.html#adelie.adelie_core.constraint.ConstraintOneSided64" title="adelie.adelie_core.constraint.ConstraintOneSided64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintOneSided64</span></code></a></p></td>
+<td><p>Core constraint class for one-sided bound constraint.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintOneSidedADMM32.html#adelie.adelie_core.constraint.ConstraintOneSidedADMM32" title="adelie.adelie_core.constraint.ConstraintOneSidedADMM32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintOneSidedADMM32</span></code></a></p></td>
 <td><p>Core constraint class for one-sided bound constraint with ADMM solver.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintOneSidedADMM64.html#adelie.adelie_core.constraint.ConstraintOneSidedADMM64" title="adelie.adelie_core.constraint.ConstraintOneSidedADMM64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintOneSidedADMM64</span></code></a></p></td>
 <td><p>Core constraint class for one-sided bound constraint with ADMM solver.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton32.html#adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton32" title="adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintOneSidedProximalNewton32</span></code></a></p></td>
-<td><p>Core constraint class for one-sided bound constraint with proximal Newton solver.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton64.html#adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton64" title="adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.constraint.ConstraintOneSidedProximalNewton64</span></code></a></p></td>
-<td><p>Core constraint class for one-sided bound constraint with proximal Newton solver.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.glm.GlmBase32.html#adelie.adelie_core.glm.GlmBase32" title="adelie.adelie_core.glm.GlmBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.glm.GlmBase32</span></code></a></p></td>
 <td><p>Base GLM class.</p></td>
@@ -648,11 +674,35 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="../generated/adelie.adelie_core.glm.GlmPoisson64.html#adelie.adelie_core.glm.GlmPoisson64" title="adelie.adelie_core.glm.GlmPoisson64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.glm.GlmPoisson64</span></code></a></p></td>
 <td><p>Core GLM class for Poisson family.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintBase32.html#adelie.adelie_core.matrix.MatrixConstraintBase32" title="adelie.adelie_core.matrix.MatrixConstraintBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixConstraintBase32</span></code></a></p></td>
+<td><p>Base matrix class for constraint matrices.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintBase64.html#adelie.adelie_core.matrix.MatrixConstraintBase64" title="adelie.adelie_core.matrix.MatrixConstraintBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixConstraintBase64</span></code></a></p></td>
+<td><p>Base matrix class for constraint matrices.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintDense32C.html#adelie.adelie_core.matrix.MatrixConstraintDense32C" title="adelie.adelie_core.matrix.MatrixConstraintDense32C"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixConstraintDense32C</span></code></a></p></td>
+<td><p>Core matrix class for dense constraint matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintDense32F.html#adelie.adelie_core.matrix.MatrixConstraintDense32F" title="adelie.adelie_core.matrix.MatrixConstraintDense32F"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixConstraintDense32F</span></code></a></p></td>
+<td><p>Core matrix class for dense constraint matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintDense64C.html#adelie.adelie_core.matrix.MatrixConstraintDense64C" title="adelie.adelie_core.matrix.MatrixConstraintDense64C"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixConstraintDense64C</span></code></a></p></td>
+<td><p>Core matrix class for dense constraint matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintDense64F.html#adelie.adelie_core.matrix.MatrixConstraintDense64F" title="adelie.adelie_core.matrix.MatrixConstraintDense64F"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixConstraintDense64F</span></code></a></p></td>
+<td><p>Core matrix class for dense constraint matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintSparse32C.html#adelie.adelie_core.matrix.MatrixConstraintSparse32C" title="adelie.adelie_core.matrix.MatrixConstraintSparse32C"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixConstraintSparse32C</span></code></a></p></td>
+<td><p>Core matrix class for sparse constraint matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixConstraintSparse64C.html#adelie.adelie_core.matrix.MatrixConstraintSparse64C" title="adelie.adelie_core.matrix.MatrixConstraintSparse64C"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixConstraintSparse64C</span></code></a></p></td>
+<td><p>Core matrix class for sparse constraint matrix.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixCovBase32.html#adelie.adelie_core.matrix.MatrixCovBase32" title="adelie.adelie_core.matrix.MatrixCovBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixCovBase32</span></code></a></p></td>
-<td><p>Base matrix class for covariance method.</p></td>
+<td><p>Base matrix class for covariance matrices.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../generated/adelie.adelie_core.matrix.MatrixCovBase64.html#adelie.adelie_core.matrix.MatrixCovBase64" title="adelie.adelie_core.matrix.MatrixCovBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixCovBase64</span></code></a></p></td>
-<td><p>Base matrix class for covariance method.</p></td>
+<td><p>Base matrix class for covariance matrices.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixCovBlockDiag32.html#adelie.adelie_core.matrix.MatrixCovBlockDiag32" title="adelie.adelie_core.matrix.MatrixCovBlockDiag32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixCovBlockDiag32</span></code></a></p></td>
 <td><p>Core matrix class for covariance block-diagonal matrix.</p></td>
@@ -691,10 +741,10 @@ document.write(`
 <td><p>Core matrix class for covariance sparse matrix.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveBase32.html#adelie.adelie_core.matrix.MatrixNaiveBase32" title="adelie.adelie_core.matrix.MatrixNaiveBase32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixNaiveBase32</span></code></a></p></td>
-<td><p>Base matrix class for naive method.</p></td>
+<td><p>Base matrix class for naive matrices.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixNaiveBase64</span></code></a></p></td>
-<td><p>Base matrix class for naive method.</p></td>
+<td><p>Base matrix class for naive matrices.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveCConcatenate32.html#adelie.adelie_core.matrix.MatrixNaiveCConcatenate32" title="adelie.adelie_core.matrix.MatrixNaiveCConcatenate32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixNaiveCConcatenate32</span></code></a></p></td>
 <td><p>Core matrix class for naive column-wise concatenated matrix.</p></td>
@@ -707,6 +757,24 @@ document.write(`
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../generated/adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.html#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64" title="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixNaiveRConcatenate64</span></code></a></p></td>
 <td><p>Core matrix class for naive row-wise concatenated matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C.html#adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C" title="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixNaiveConvexReluDense32C</span></code></a></p></td>
+<td><p>Core matrix class for naive convex relu matrix with dense underlying.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F.html#adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F" title="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixNaiveConvexReluDense32F</span></code></a></p></td>
+<td><p>Core matrix class for naive convex relu matrix with dense underlying.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C.html#adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C" title="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixNaiveConvexReluDense64C</span></code></a></p></td>
+<td><p>Core matrix class for naive convex relu matrix with dense underlying.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64F.html#adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64F" title="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64F"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixNaiveConvexReluDense64F</span></code></a></p></td>
+<td><p>Core matrix class for naive convex relu matrix with dense underlying.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse32F.html#adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse32F" title="adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse32F"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixNaiveConvexReluSparse32F</span></code></a></p></td>
+<td><p>Core matrix class for naive convex relu matrix with sparse underlying.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse64F.html#adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse64F" title="adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse64F"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixNaiveConvexReluSparse64F</span></code></a></p></td>
+<td><p>Core matrix class for naive convex relu matrix with sparse underlying.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.matrix.MatrixNaiveDense32C.html#adelie.adelie_core.matrix.MatrixNaiveDense32C" title="adelie.adelie_core.matrix.MatrixNaiveDense32C"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixNaiveDense32C</span></code></a></p></td>
 <td><p>Core matrix class for naive dense matrix.</p></td>
@@ -798,6 +866,12 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="../generated/adelie.adelie_core.matrix.MatrixNaiveRSubset64.html#adelie.adelie_core.matrix.MatrixNaiveRSubset64" title="adelie.adelie_core.matrix.MatrixNaiveRSubset64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.matrix.MatrixNaiveRSubset64</span></code></a></p></td>
 <td><p>Core matrix class for naive row-subsetted matrix.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateBVLS32.html#adelie.adelie_core.state.StateBVLS32" title="adelie.adelie_core.state.StateBVLS32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateBVLS32</span></code></a></p></td>
+<td><p>Core state class for BVLS.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateBVLS64.html#adelie.adelie_core.state.StateBVLS64" title="adelie.adelie_core.state.StateBVLS64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateBVLS64</span></code></a></p></td>
+<td><p>Core state class for BVLS.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StateGaussianPinCov32.html#adelie.adelie_core.state.StateGaussianPinCov32" title="adelie.adelie_core.state.StateGaussianPinCov32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateGaussianPinCov32</span></code></a></p></td>
 <td><p>Core state class for Gaussian, pin, covariance method.</p></td>
 </tr>
@@ -840,6 +914,12 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="../generated/adelie.adelie_core.state.StateMultiGlmNaive64.html#adelie.adelie_core.state.StateMultiGlmNaive64" title="adelie.adelie_core.state.StateMultiGlmNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StateMultiGlmNaive64</span></code></a></p></td>
 <td><p>Core state class for multi-response GLM, naive method.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinball32.html#adelie.adelie_core.state.StatePinball32" title="adelie.adelie_core.state.StatePinball32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StatePinball32</span></code></a></p></td>
+<td><p>Core state class for pinball least squares.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/adelie.adelie_core.state.StatePinball64.html#adelie.adelie_core.state.StatePinball64" title="adelie.adelie_core.state.StatePinball64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie_core.state.StatePinball64</span></code></a></p></td>
+<td><p>Core state class for pinball least squares.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -855,12 +935,12 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="generated/adelie.state.multiglm_naive.html"
+       href="generated/adelie.state.pinball.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.state.multiglm_naive</p>
+        <p class="prev-next-title">adelie.state.pinball</p>
       </div>
     </a>
     <a class="right-next"

@@ -20,7 +20,7 @@
       ~MatrixNaiveStandardize32.ctmul
       ~MatrixNaiveStandardize32.mul
       ~MatrixNaiveStandardize32.rows
-      ~MatrixNaiveStandardize32.sp_btmul
+      ~MatrixNaiveStandardize32.sp_tmul
    
    
 
@@ -47,7 +47,7 @@
    .. automethod:: ctmul
    .. automethod:: mul
    .. automethod:: rows
-   .. automethod:: sp_btmul
+   .. automethod:: sp_tmul
    
    
 

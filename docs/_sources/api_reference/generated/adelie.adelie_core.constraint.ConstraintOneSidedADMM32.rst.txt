@@ -22,6 +22,7 @@
       ~ConstraintOneSidedADMM32.primals
       ~ConstraintOneSidedADMM32.project
       ~ConstraintOneSidedADMM32.solve
+      ~ConstraintOneSidedADMM32.solve_zero
    
    
 
@@ -50,6 +51,7 @@
    .. automethod:: primals
    .. automethod:: project
    .. automethod:: solve
+   .. automethod:: solve_zero
    
    
 

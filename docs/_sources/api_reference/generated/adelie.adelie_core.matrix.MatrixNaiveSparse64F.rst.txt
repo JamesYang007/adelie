@@ -20,7 +20,7 @@
       ~MatrixNaiveSparse64F.ctmul
       ~MatrixNaiveSparse64F.mul
       ~MatrixNaiveSparse64F.rows
-      ~MatrixNaiveSparse64F.sp_btmul
+      ~MatrixNaiveSparse64F.sp_tmul
    
    
 
@@ -47,7 +47,7 @@
    .. automethod:: ctmul
    .. automethod:: mul
    .. automethod:: rows
-   .. automethod:: sp_btmul
+   .. automethod:: sp_tmul
    
    
 

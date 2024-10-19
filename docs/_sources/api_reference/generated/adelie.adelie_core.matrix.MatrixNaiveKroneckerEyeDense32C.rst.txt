@@ -20,7 +20,7 @@
       ~MatrixNaiveKroneckerEyeDense32C.ctmul
       ~MatrixNaiveKroneckerEyeDense32C.mul
       ~MatrixNaiveKroneckerEyeDense32C.rows
-      ~MatrixNaiveKroneckerEyeDense32C.sp_btmul
+      ~MatrixNaiveKroneckerEyeDense32C.sp_tmul
    
    
 
@@ -47,7 +47,7 @@
    .. automethod:: ctmul
    .. automethod:: mul
    .. automethod:: rows
-   .. automethod:: sp_btmul
+   .. automethod:: sp_tmul
    
    
 

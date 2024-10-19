@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F &#8212; adelie 1.1.46 documentation</title>
+    <title>adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F &#8212; adelie 1.1.47 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../../_static/documentation_options.js?v=66c8c96b"></script>
+    <script src="../../_static/documentation_options.js?v=c2b04d72"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/design-tabs.js?v=36754332"></script>
@@ -122,8 +122,8 @@
     
     
     
-    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.46 documentation - Home"/>
-    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.46 documentation - Home"/>`);</script>
+    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.47 documentation - Home"/>
+    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.47 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -376,6 +376,7 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.block_diag.html">adelie.matrix.block_diag</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.concatenate.html">adelie.matrix.concatenate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.convex_relu.html">adelie.matrix.convex_relu</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.eager_cov.html">adelie.matrix.eager_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.interaction.html">adelie.matrix.interaction</a></li>
@@ -389,10 +390,16 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.subset.html">adelie.matrix.subset</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.sklearn.GroupElasticNet.html">adelie.sklearn.GroupElasticNet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.bvls.html">adelie.solver.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.pinball.html">adelie.solver.pinball</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.bvls.html">adelie.state.bvls</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_cov.html">adelie.state.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
@@ -400,20 +407,21 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.glm_naive.html">adelie.state.glm_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.multigaussian_naive.html">adelie.state.multigaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pinball.html">adelie.state.pinball</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../internal.html">Internal</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.configs.Configs.html">adelie.adelie_core.configs.Configs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBase32.html">adelie.adelie_core.constraint.ConstraintBase32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBase64.html">adelie.adelie_core.constraint.ConstraintBase64</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBoxProximalNewton32.html">adelie.adelie_core.constraint.ConstraintBoxProximalNewton32</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBoxProximalNewton64.html">adelie.adelie_core.constraint.ConstraintBoxProximalNewton64</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintLinearProximalNewton32.html">adelie.adelie_core.constraint.ConstraintLinearProximalNewton32</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintLinearProximalNewton64.html">adelie.adelie_core.constraint.ConstraintLinearProximalNewton64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBox32.html">adelie.adelie_core.constraint.ConstraintBox32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBox64.html">adelie.adelie_core.constraint.ConstraintBox64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintLinear32.html">adelie.adelie_core.constraint.ConstraintLinear32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintLinear64.html">adelie.adelie_core.constraint.ConstraintLinear64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintOneSided32.html">adelie.adelie_core.constraint.ConstraintOneSided32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintOneSided64.html">adelie.adelie_core.constraint.ConstraintOneSided64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintOneSidedADMM32.html">adelie.adelie_core.constraint.ConstraintOneSidedADMM32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintOneSidedADMM64.html">adelie.adelie_core.constraint.ConstraintOneSidedADMM64</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton32.html">adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton32</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton64.html">adelie.adelie_core.constraint.ConstraintOneSidedProximalNewton64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmBase32.html">adelie.adelie_core.glm.GlmBase32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmBase64.html">adelie.adelie_core.glm.GlmBase64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialLogit32.html">adelie.adelie_core.glm.GlmBinomialLogit32</a></li>
@@ -432,6 +440,14 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultinomial64.html">adelie.adelie_core.glm.GlmMultinomial64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmPoisson32.html">adelie.adelie_core.glm.GlmPoisson32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmPoisson64.html">adelie.adelie_core.glm.GlmPoisson64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintBase32.html">adelie.adelie_core.matrix.MatrixConstraintBase32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintBase64.html">adelie.adelie_core.matrix.MatrixConstraintBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintDense32C.html">adelie.adelie_core.matrix.MatrixConstraintDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintDense32F.html">adelie.adelie_core.matrix.MatrixConstraintDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintDense64C.html">adelie.adelie_core.matrix.MatrixConstraintDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintDense64F.html">adelie.adelie_core.matrix.MatrixConstraintDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintSparse32C.html">adelie.adelie_core.matrix.MatrixConstraintSparse32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintSparse64C.html">adelie.adelie_core.matrix.MatrixConstraintSparse64C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBase32.html">adelie.adelie_core.matrix.MatrixCovBase32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBase64.html">adelie.adelie_core.matrix.MatrixCovBase64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBlockDiag32.html">adelie.adelie_core.matrix.MatrixCovBlockDiag32</a></li>
@@ -452,6 +468,12 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse64F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveDense32C.html">adelie.adelie_core.matrix.MatrixNaiveDense32C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveDense32F.html">adelie.adelie_core.matrix.MatrixNaiveDense32F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveDense64C.html">adelie.adelie_core.matrix.MatrixNaiveDense64C</a></li>
@@ -482,6 +504,8 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCSubset64.html">adelie.adelie_core.matrix.MatrixNaiveCSubset64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRSubset32.html">adelie.adelie_core.matrix.MatrixNaiveRSubset32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRSubset64.html">adelie.adelie_core.matrix.MatrixNaiveRSubset64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS32.html">adelie.adelie_core.state.StateBVLS32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS64.html">adelie.adelie_core.state.StateBVLS64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov32.html">adelie.adelie_core.state.StateGaussianPinCov32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive32.html">adelie.adelie_core.state.StateGaussianPinNaive32</a></li>
@@ -496,6 +520,8 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive32.html">adelie.adelie_core.state.StateMultiGlmNaive32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive64.html">adelie.adelie_core.state.StateMultiGlmNaive64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StatePinball32.html">adelie.adelie_core.state.StatePinball32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StatePinball64.html">adelie.adelie_core.state.StatePinball64</a></li>
 </ul>
 </li>
 </ul>
@@ -594,7 +620,7 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.html#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.rows" title="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rows</span></code></a>(self)</p></td>
 <td><p>Returns the number of rows.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.html#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.sp_btmul" title="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.sp_btmul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sp_btmul</span></code></a>(self, arg0, arg1)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.html#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.sp_tmul" title="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.sp_tmul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sp_tmul</span></code></a>(self, arg0, arg1)</p></td>
 <td><p>Computes a matrix transpose-sparse matrix multiplication.</p></td>
 </tr>
 </tbody>
@@ -665,15 +691,22 @@ The result is <em>incremented</em> into the output vector.</p>
 <dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.cmul">
 <span class="sig-name descname"><span class="pre">cmul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.cmul" title="Link to this definition">#</a></dt>
 <dd><p>Computes a column vector-vector multiplication.</p>
-<p>Computes the dot-product <code class="docutils literal notranslate"><span class="pre">(v</span> <span class="pre">*</span> <span class="pre">w).T</span> <span class="pre">&#64;</span> <span class="pre">X[:,j]</span></code> for a column <code class="docutils literal notranslate"><span class="pre">j</span></code>.</p>
+<p>Computes the dot-product 
+<code class="docutils literal notranslate"><span class="pre">(v</span> <span class="pre">*</span> <span class="pre">w).T</span> <span class="pre">&#64;</span> <span class="pre">X[:,j]</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>j</strong><span class="classifier">int</span></dt><dd><p>Column index.</p>
 </dd>
-<dt><strong>v</strong><span class="classifier">(n,) ndarray</span></dt><dd><p>Vector to dot product with the <code class="docutils literal notranslate"><span class="pre">j</span></code> th column with.</p>
+<dt><strong>v</strong><span class="classifier">(n,) ndarray</span></dt><dd><p>Vector to dot product with the <code class="docutils literal notranslate"><span class="pre">j</span></code> th column.</p>
 </dd>
 <dt><strong>w</strong><span class="classifier">(n,) ndarray</span></dt><dd><p>Vector of weights.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>dot</strong><span class="classifier">float</span></dt><dd><p>Column vector-vector multiplication.</p>
 </dd>
 </dl>
 </dd>
@@ -684,6 +717,14 @@ The result is <em>incremented</em> into the output vector.</p>
 <dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.cols">
 <span class="sig-name descname"><span class="pre">cols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveBase64</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.cols" title="Link to this definition">#</a></dt>
 <dd><p>Returns the number of columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>cols</strong><span class="classifier">int</span></dt><dd><p>Number of columns.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -718,7 +759,7 @@ The result is <em>incremented</em> into the output vector.</p>
 <dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.ctmul">
 <span class="sig-name descname"><span class="pre">ctmul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.ctmul" title="Link to this definition">#</a></dt>
 <dd><p>Computes a column vector-scalar multiplication increment.</p>
-<p>Computes the vector-scalar multiplication <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">*</span> <span class="pre">X[:,j]</span></code> for a column <code class="docutils literal notranslate"><span class="pre">j</span></code>.
+<p>Computes the vector-scalar multiplication <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">*</span> <span class="pre">X[:,j]</span></code>.
 The result is <em>incremented</em> into the output vector.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -743,7 +784,7 @@ The result is <em>incremented</em> into the output vector.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>v</strong><span class="classifier">(n,) ndarray</span></dt><dd><p>Vector to multiply with the block matrix.</p>
+<dt><strong>v</strong><span class="classifier">(n,) ndarray</span></dt><dd><p>Vector to multiply with the matrix.</p>
 </dd>
 <dt><strong>w</strong><span class="classifier">(n,) ndarray</span></dt><dd><p>Vector of weights.</p>
 </dd>
@@ -758,14 +799,22 @@ The result is <em>incremented</em> into the output vector.</p>
 <dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.rows">
 <span class="sig-name descname"><span class="pre">rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveBase64</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.rows" title="Link to this definition">#</a></dt>
 <dd><p>Returns the number of rows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>rows</strong><span class="classifier">int</span></dt><dd><p>Number of rows.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.sp_btmul">
-<span class="sig-name descname"><span class="pre">sp_btmul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">scipy.sparse.csr_matrix</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.c_contiguous</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.sp_btmul" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.sp_tmul">
+<span class="sig-name descname"><span class="pre">sp_tmul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">scipy.sparse.csr_matrix</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.c_contiguous</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.sp_tmul" title="Link to this definition">#</a></dt>
 <dd><p>Computes a matrix transpose-sparse matrix multiplication.</p>
 <p>Computes the matrix transpose-sparse matrix multiplication
-<code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">&#64;</span> <span class="pre">X.T</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">v.T</span> <span class="pre">&#64;</span> <span class="pre">X.T</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -848,7 +897,7 @@ The result is <em>incremented</em> into the output vector.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.ctmul"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveKroneckerEyeDense64F.ctmul()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.mul"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveKroneckerEyeDense64F.mul()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.rows"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveKroneckerEyeDense64F.rows()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.sp_btmul"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveKroneckerEyeDense64F.sp_btmul()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.sp_tmul"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveKroneckerEyeDense64F.sp_tmul()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.ndim"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveKroneckerEyeDense64F.ndim</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.shape"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveKroneckerEyeDense64F.shape</span></code></a></li>
 </ul>

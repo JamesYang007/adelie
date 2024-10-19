@@ -20,7 +20,7 @@
       ~MatrixNaiveInteractionDense64F.ctmul
       ~MatrixNaiveInteractionDense64F.mul
       ~MatrixNaiveInteractionDense64F.rows
-      ~MatrixNaiveInteractionDense64F.sp_btmul
+      ~MatrixNaiveInteractionDense64F.sp_tmul
    
    
 
@@ -49,7 +49,7 @@
    .. automethod:: ctmul
    .. automethod:: mul
    .. automethod:: rows
-   .. automethod:: sp_btmul
+   .. automethod:: sp_tmul
    
    
 

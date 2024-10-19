@@ -1,0 +1,64 @@
+﻿adelie.adelie\_core.constraint.ConstraintBox32
+==============================================
+
+.. currentmodule:: adelie.adelie_core.constraint
+
+.. autoclass:: ConstraintBox32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ConstraintBox32.__init__
+      ~ConstraintBox32.buffer_size
+      ~ConstraintBox32.clear
+      ~ConstraintBox32.dual
+      ~ConstraintBox32.duals
+      ~ConstraintBox32.duals_nnz
+      ~ConstraintBox32.gradient
+      ~ConstraintBox32.gradient_static
+      ~ConstraintBox32.primals
+      ~ConstraintBox32.project
+      ~ConstraintBox32.solve
+      ~ConstraintBox32.solve_zero
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ConstraintBox32.dual_size
+      ~ConstraintBox32.primal_size
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: buffer_size
+   .. automethod:: clear
+   .. automethod:: dual
+   .. automethod:: duals
+   .. automethod:: duals_nnz
+   .. automethod:: gradient
+   .. automethod:: gradient_static
+   .. automethod:: primals
+   .. automethod:: project
+   .. automethod:: solve
+   .. automethod:: solve_zero
+   
+   
+
+   
+   
+   
+   .. autoattribute:: dual_size
+   .. autoattribute:: primal_size
+   
+   

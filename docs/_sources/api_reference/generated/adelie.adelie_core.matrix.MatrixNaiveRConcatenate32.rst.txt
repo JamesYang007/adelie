@@ -20,7 +20,7 @@
       ~MatrixNaiveRConcatenate32.ctmul
       ~MatrixNaiveRConcatenate32.mul
       ~MatrixNaiveRConcatenate32.rows
-      ~MatrixNaiveRConcatenate32.sp_btmul
+      ~MatrixNaiveRConcatenate32.sp_tmul
    
    
 
@@ -47,7 +47,7 @@
    .. automethod:: ctmul
    .. automethod:: mul
    .. automethod:: rows
-   .. automethod:: sp_btmul
+   .. automethod:: sp_tmul
    
    
 

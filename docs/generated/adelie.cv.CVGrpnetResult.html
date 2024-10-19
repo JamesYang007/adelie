@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.cv.CVGrpnetResult &#8212; adelie 1.1.46 documentation</title>
+    <title>adelie.cv.CVGrpnetResult &#8212; adelie 1.1.47 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=66c8c96b"></script>
+    <script src="../_static/documentation_options.js?v=c2b04d72"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -122,8 +122,8 @@
     
     
     
-    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.46 documentation - Home"/>
-    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.46 documentation - Home"/>`);</script>
+    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.47 documentation - Home"/>
+    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.47 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -365,7 +365,7 @@ document.write(`
 <h1>adelie.cv.CVGrpnetResult<a class="headerlink" href="#adelie-cv-cvgrpnetresult" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.cv.</span></span><span class="sig-name descname"><span class="pre">CVGrpnetResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">losses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_losses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/cv.py#L25-L119"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.cv.CVGrpnetResult" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.cv.</span></span><span class="sig-name descname"><span class="pre">CVGrpnetResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmdas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">losses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_losses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/cv.py#L25-L127"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.cv.CVGrpnetResult" title="Link to this definition">#</a></dt>
 <dd><p>Result of K-fold CV group elastic net.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
@@ -373,7 +373,7 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.__init__" title="adelie.cv.CVGrpnetResult.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(lmdas, losses, avg_losses, best_idx)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.fit" title="adelie.cv.CVGrpnetResult.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(*[, lmda_path_size])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.fit" title="adelie.cv.CVGrpnetResult.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(X, glm, **grpnet_params)</p></td>
 <td><p>Fits group elastic net until the best CV <span class="math notranslate nohighlight">\(\lambda\)</span>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.cv.CVGrpnetResult.plot_loss" title="adelie.cv.CVGrpnetResult.plot_loss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_loss</span></code></a>()</p></td>
@@ -405,13 +405,16 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.cv.CVGrpnetResult.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">grpnet_params</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/cv.py#L76-L119"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.cv.CVGrpnetResult.fit" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../api_reference/generated/adelie.adelie_core.matrix.MatrixNaiveBase32.html#adelie.adelie_core.matrix.MatrixNaiveBase32" title="adelie.adelie_core.matrix.MatrixNaiveBase32"><span class="pre">MatrixNaiveBase32</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">MatrixNaiveBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">glm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../api_reference/generated/adelie.adelie_core.glm.GlmBase32.html#adelie.adelie_core.glm.GlmBase32" title="adelie.adelie_core.glm.GlmBase32"><span class="pre">GlmBase32</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.adelie_core.glm.GlmBase64.html#adelie.adelie_core.glm.GlmBase64" title="adelie.adelie_core.glm.GlmBase64"><span class="pre">GlmBase64</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../api_reference/generated/adelie.adelie_core.glm.GlmMultiBase32.html#adelie.adelie_core.glm.GlmMultiBase32" title="adelie.adelie_core.glm.GlmMultiBase32"><span class="pre">GlmMultiBase32</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiBase64.html#adelie.adelie_core.glm.GlmMultiBase64" title="adelie.adelie_core.glm.GlmMultiBase64"><span class="pre">GlmMultiBase64</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">grpnet_params</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/cv.py#L76-L127"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.cv.CVGrpnetResult.fit" title="Link to this definition">#</a></dt>
 <dd><p>Fits group elastic net until the best CV <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>lmda_path_size</strong><span class="classifier">int, optional</span></dt><dd><p>Number of regularizations in the path.
-Default is <code class="docutils literal notranslate"><span class="pre">100</span></code>.</p>
+<dt><strong>X</strong><span class="classifier">(n, p) Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]</span></dt><dd><p>Feature matrix.
+It is typically one of the matrices defined in <a class="reference internal" href="../api_reference/index.html#module-adelie.matrix" title="adelie.matrix"><code class="xref py py-mod docutils literal notranslate"><span class="pre">adelie.matrix</span></code></a> submodule or <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>.</p>
+</dd>
+<dt><strong>glm</strong><span class="classifier">Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64]</span></dt><dd><p>GLM object.
+It is typically one of the GLM classes defined in <a class="reference internal" href="../api_reference/index.html#module-adelie.glm" title="adelie.glm"><code class="xref py py-mod docutils literal notranslate"><span class="pre">adelie.glm</span></code></a> submodule.</p>
 </dd>
 <dt><strong>**grpnet_params</strong><span class="classifier">optional</span></dt><dd><p>Parameters to <a class="reference internal" href="adelie.solver.grpnet.html#adelie.solver.grpnet" title="adelie.solver.grpnet"><code class="xref py py-func docutils literal notranslate"><span class="pre">adelie.solver.grpnet()</span></code></a>.</p>
 </dd>

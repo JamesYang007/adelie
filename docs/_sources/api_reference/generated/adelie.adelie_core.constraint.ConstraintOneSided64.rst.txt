@@ -1,0 +1,64 @@
+﻿adelie.adelie\_core.constraint.ConstraintOneSided64
+===================================================
+
+.. currentmodule:: adelie.adelie_core.constraint
+
+.. autoclass:: ConstraintOneSided64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ConstraintOneSided64.__init__
+      ~ConstraintOneSided64.buffer_size
+      ~ConstraintOneSided64.clear
+      ~ConstraintOneSided64.dual
+      ~ConstraintOneSided64.duals
+      ~ConstraintOneSided64.duals_nnz
+      ~ConstraintOneSided64.gradient
+      ~ConstraintOneSided64.gradient_static
+      ~ConstraintOneSided64.primals
+      ~ConstraintOneSided64.project
+      ~ConstraintOneSided64.solve
+      ~ConstraintOneSided64.solve_zero
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ConstraintOneSided64.dual_size
+      ~ConstraintOneSided64.primal_size
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: buffer_size
+   .. automethod:: clear
+   .. automethod:: dual
+   .. automethod:: duals
+   .. automethod:: duals_nnz
+   .. automethod:: gradient
+   .. automethod:: gradient_static
+   .. automethod:: primals
+   .. automethod:: project
+   .. automethod:: solve
+   .. automethod:: solve_zero
+   
+   
+
+   
+   
+   
+   .. autoattribute:: dual_size
+   .. autoattribute:: primal_size
+   
+   

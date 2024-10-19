@@ -20,7 +20,7 @@
       ~MatrixNaiveCSubset64.ctmul
       ~MatrixNaiveCSubset64.mul
       ~MatrixNaiveCSubset64.rows
-      ~MatrixNaiveCSubset64.sp_btmul
+      ~MatrixNaiveCSubset64.sp_tmul
    
    
 
@@ -47,7 +47,7 @@
    .. automethod:: ctmul
    .. automethod:: mul
    .. automethod:: rows
-   .. automethod:: sp_btmul
+   .. automethod:: sp_tmul
    
    
 

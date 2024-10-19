@@ -1,0 +1,64 @@
+﻿adelie.adelie\_core.constraint.ConstraintLinear64
+=================================================
+
+.. currentmodule:: adelie.adelie_core.constraint
+
+.. autoclass:: ConstraintLinear64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ConstraintLinear64.__init__
+      ~ConstraintLinear64.buffer_size
+      ~ConstraintLinear64.clear
+      ~ConstraintLinear64.dual
+      ~ConstraintLinear64.duals
+      ~ConstraintLinear64.duals_nnz
+      ~ConstraintLinear64.gradient
+      ~ConstraintLinear64.gradient_static
+      ~ConstraintLinear64.primals
+      ~ConstraintLinear64.project
+      ~ConstraintLinear64.solve
+      ~ConstraintLinear64.solve_zero
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ConstraintLinear64.dual_size
+      ~ConstraintLinear64.primal_size
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: buffer_size
+   .. automethod:: clear
+   .. automethod:: dual
+   .. automethod:: duals
+   .. automethod:: duals_nnz
+   .. automethod:: gradient
+   .. automethod:: gradient_static
+   .. automethod:: primals
+   .. automethod:: project
+   .. automethod:: solve
+   .. automethod:: solve_zero
+   
+   
+
+   
+   
+   
+   .. autoattribute:: dual_size
+   .. autoattribute:: primal_size
+   
+   

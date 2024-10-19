@@ -12,6 +12,7 @@
    .. autosummary::
    
       ~StateGaussianPinCov32.__init__
+      ~StateGaussianPinCov32.solve
    
    
 
@@ -34,8 +35,6 @@
       ~StateGaussianPinCov32.constraint_buffer_size
       ~StateGaussianPinCov32.constraints
       ~StateGaussianPinCov32.ddev_tol
-      ~StateGaussianPinCov32.dual_groups
-      ~StateGaussianPinCov32.duals
       ~StateGaussianPinCov32.group_sizes
       ~StateGaussianPinCov32.groups
       ~StateGaussianPinCov32.intercept
@@ -69,6 +68,7 @@
    
    
    .. automethod:: __init__
+   .. automethod:: solve
    
    
 
@@ -88,8 +88,6 @@
    .. autoattribute:: constraint_buffer_size
    .. autoattribute:: constraints
    .. autoattribute:: ddev_tol
-   .. autoattribute:: dual_groups
-   .. autoattribute:: duals
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
    .. autoattribute:: intercept

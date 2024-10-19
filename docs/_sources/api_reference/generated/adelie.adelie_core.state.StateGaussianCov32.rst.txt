@@ -12,6 +12,7 @@
    .. autosummary::
    
       ~StateGaussianCov32.__init__
+      ~StateGaussianCov32.solve
    
    
 
@@ -86,6 +87,7 @@
    
    
    .. automethod:: __init__
+   .. automethod:: solve
    
    
 

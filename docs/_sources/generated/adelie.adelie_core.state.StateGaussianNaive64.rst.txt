@@ -12,6 +12,7 @@
    .. autosummary::
    
       ~StateGaussianNaive64.__init__
+      ~StateGaussianNaive64.solve
    
    
 
@@ -92,6 +93,7 @@
    
    
    .. automethod:: __init__
+   .. automethod:: solve
    
    
 

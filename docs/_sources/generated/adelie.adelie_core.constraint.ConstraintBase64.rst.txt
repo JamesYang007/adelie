@@ -22,6 +22,7 @@
       ~ConstraintBase64.primals
       ~ConstraintBase64.project
       ~ConstraintBase64.solve
+      ~ConstraintBase64.solve_zero
    
    
 
@@ -50,6 +51,7 @@
    .. automethod:: primals
    .. automethod:: project
    .. automethod:: solve
+   .. automethod:: solve_zero
    
    
 

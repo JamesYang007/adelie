@@ -1,0 +1,60 @@
+﻿adelie.adelie\_core.matrix.MatrixConstraintDense32F
+===================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixConstraintDense32F
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixConstraintDense32F.__init__
+      ~MatrixConstraintDense32F.cols
+      ~MatrixConstraintDense32F.cov
+      ~MatrixConstraintDense32F.mul
+      ~MatrixConstraintDense32F.rmmul
+      ~MatrixConstraintDense32F.rows
+      ~MatrixConstraintDense32F.rvmul
+      ~MatrixConstraintDense32F.rvtmul
+      ~MatrixConstraintDense32F.sp_mul
+      ~MatrixConstraintDense32F.tmul
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixConstraintDense32F.ndim
+      ~MatrixConstraintDense32F.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: mul
+   .. automethod:: rmmul
+   .. automethod:: rows
+   .. automethod:: rvmul
+   .. automethod:: rvtmul
+   .. automethod:: sp_mul
+   .. automethod:: tmul
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

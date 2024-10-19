@@ -12,6 +12,7 @@
    .. autosummary::
    
       ~StateGlmNaive32.__init__
+      ~StateGlmNaive32.solve
    
    
 
@@ -89,6 +90,7 @@
    
    
    .. automethod:: __init__
+   .. automethod:: solve
    
    
 

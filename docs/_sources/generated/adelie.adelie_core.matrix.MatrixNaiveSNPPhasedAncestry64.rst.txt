@@ -20,7 +20,7 @@
       ~MatrixNaiveSNPPhasedAncestry64.ctmul
       ~MatrixNaiveSNPPhasedAncestry64.mul
       ~MatrixNaiveSNPPhasedAncestry64.rows
-      ~MatrixNaiveSNPPhasedAncestry64.sp_btmul
+      ~MatrixNaiveSNPPhasedAncestry64.sp_tmul
    
    
 
@@ -47,7 +47,7 @@
    .. automethod:: ctmul
    .. automethod:: mul
    .. automethod:: rows
-   .. automethod:: sp_btmul
+   .. automethod:: sp_tmul
    
    
 

@@ -12,6 +12,7 @@
    .. autosummary::
    
       ~StateGaussianPinNaive64.__init__
+      ~StateGaussianPinNaive64.solve
    
    
 
@@ -34,8 +35,6 @@
       ~StateGaussianPinNaive64.constraint_buffer_size
       ~StateGaussianPinNaive64.constraints
       ~StateGaussianPinNaive64.ddev_tol
-      ~StateGaussianPinNaive64.dual_groups
-      ~StateGaussianPinNaive64.duals
       ~StateGaussianPinNaive64.group_sizes
       ~StateGaussianPinNaive64.groups
       ~StateGaussianPinNaive64.intercept
@@ -71,6 +70,7 @@
    
    
    .. automethod:: __init__
+   .. automethod:: solve
    
    
 
@@ -90,8 +90,6 @@
    .. autoattribute:: constraint_buffer_size
    .. autoattribute:: constraints
    .. autoattribute:: ddev_tol
-   .. autoattribute:: dual_groups
-   .. autoattribute:: duals
    .. autoattribute:: group_sizes
    .. autoattribute:: groups
    .. autoattribute:: intercept

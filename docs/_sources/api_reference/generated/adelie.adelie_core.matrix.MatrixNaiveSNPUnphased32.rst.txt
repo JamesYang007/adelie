@@ -20,7 +20,7 @@
       ~MatrixNaiveSNPUnphased32.ctmul
       ~MatrixNaiveSNPUnphased32.mul
       ~MatrixNaiveSNPUnphased32.rows
-      ~MatrixNaiveSNPUnphased32.sp_btmul
+      ~MatrixNaiveSNPUnphased32.sp_tmul
    
    
 
@@ -47,7 +47,7 @@
    .. automethod:: ctmul
    .. automethod:: mul
    .. automethod:: rows
-   .. automethod:: sp_btmul
+   .. automethod:: sp_tmul
    
    
 

@@ -1,0 +1,82 @@
+﻿adelie.adelie\_core.state.StatePinball64
+========================================
+
+.. currentmodule:: adelie.adelie_core.state
+
+.. autoclass:: StatePinball64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~StatePinball64.__init__
+      ~StatePinball64.solve
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StatePinball64.active_set
+      ~StatePinball64.active_set_size
+      ~StatePinball64.benchmark_fit_active
+      ~StatePinball64.benchmark_fit_screen
+      ~StatePinball64.benchmark_gradient
+      ~StatePinball64.benchmark_viols_sort
+      ~StatePinball64.beta
+      ~StatePinball64.dbg_active_set
+      ~StatePinball64.dbg_beta
+      ~StatePinball64.dbg_iter
+      ~StatePinball64.dbg_loss
+      ~StatePinball64.grad
+      ~StatePinball64.is_active
+      ~StatePinball64.is_screen
+      ~StatePinball64.iters
+      ~StatePinball64.loss
+      ~StatePinball64.resid
+      ~StatePinball64.screen_AS
+      ~StatePinball64.screen_ASAT_diag
+      ~StatePinball64.screen_set
+      ~StatePinball64.screen_set_size
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: solve
+   
+   
+
+   
+   
+   
+   .. autoattribute:: active_set
+   .. autoattribute:: active_set_size
+   .. autoattribute:: benchmark_fit_active
+   .. autoattribute:: benchmark_fit_screen
+   .. autoattribute:: benchmark_gradient
+   .. autoattribute:: benchmark_viols_sort
+   .. autoattribute:: beta
+   .. autoattribute:: dbg_active_set
+   .. autoattribute:: dbg_beta
+   .. autoattribute:: dbg_iter
+   .. autoattribute:: dbg_loss
+   .. autoattribute:: grad
+   .. autoattribute:: is_active
+   .. autoattribute:: is_screen
+   .. autoattribute:: iters
+   .. autoattribute:: loss
+   .. autoattribute:: resid
+   .. autoattribute:: screen_AS
+   .. autoattribute:: screen_ASAT_diag
+   .. autoattribute:: screen_set
+   .. autoattribute:: screen_set_size
+   
+   
