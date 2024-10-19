@@ -48,7 +48,6 @@ elif os.name == "nt":
         "/wd4267", # 'var' : conversion from 'size_t' to 'type', possible loss of data
         "/wd4849", # OpenMP 'clause' clause ignored in 'directive' directive
         "/O2",
-        "/MP1",
     ]
 include_dirs = [
     os.path.join("adelie", "src"),
