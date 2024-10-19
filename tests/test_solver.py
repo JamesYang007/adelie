@@ -971,6 +971,62 @@ def test_grpnet(
 
 
 # ==========================================================================================
+# TEST gaussian_cov
+# ==========================================================================================
+
+
+@pytest.mark.parametrize("constraint", [False, True])
+@pytest.mark.parametrize("n, p, G", [
+    [10, 50, 10],
+    [40, 13, 7],
+])
+def test_gaussian_cov(
+    n, p, G, constraint, adev_tol=0.2,
+):
+    data = ad.data.dense(n, p, p)
+    X, glm = data["X"], data["glm"]
+    groups = np.concatenate([
+        [0],
+        np.random.choice(np.arange(1, p), size=G-1, replace=False)
+    ])
+    groups = np.sort(groups).astype(int)
+    group_sizes = np.concatenate([groups, [p]], dtype=int)
+    group_sizes = group_sizes[1:] - group_sizes[:-1]
+
+    if constraint:
+        constraints = [None] * G
+        c_order = np.random.choice(G, G // 2, replace=False)
+        for i in c_order:
+            size = group_sizes[i]
+            constraints[i] = zero_constraint(size, dtype=np.float64)
+    else:
+        constraints = None
+
+    state_naive = ad.grpnet(
+        X=X, 
+        glm=glm, 
+        constraints=constraints,
+        groups=groups,
+        intercept=False,
+        adev_tol=adev_tol,
+        progress_bar=False,
+    )
+
+    A = np.asfortranarray(X.T @ X) / n
+    v = X.T @ glm.y / n
+    state_cov = ad.gaussian_cov(
+        A=A,
+        v=v,
+        constraints=constraints,
+        groups=groups,
+        lmda_path=state_naive.lmdas, 
+        progress_bar=False,
+    )
+
+    assert np.allclose(state_naive.betas.toarray(), state_cov.betas.toarray())
+
+
+# ==========================================================================================
 # TEST bvls
 # ==========================================================================================
 
@@ -1015,6 +1071,11 @@ def test_bvls(n, p, seed=0):
     expected = 0.5 * np.mean((y - X @ cvxpy_beta) ** 2)
 
     assert np.allclose(actual, expected)
+
+
+# ==========================================================================================
+# TEST pinball
+# ==========================================================================================
 
 
 @pytest.mark.parametrize("m", [3, 5, 10, 20])

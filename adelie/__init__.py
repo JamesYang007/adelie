@@ -45,6 +45,8 @@ from .sklearn import (
     GroupElasticNet
 )
 from .solver import (
+    bvls,
     gaussian_cov,
     grpnet,
+    pinball,
 )
