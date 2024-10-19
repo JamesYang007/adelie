@@ -36,6 +36,7 @@ from . import io
 from . import logger
 from . import matrix
 from . import optimization
+from . import sklearn
 from . import solver
 from . import state
 from .cv import (
