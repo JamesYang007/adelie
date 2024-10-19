@@ -47,6 +47,7 @@ elif os.name == "nt":
         "/wd4305", # 'conversion': truncation from 'type1' to 'type2'
         "/wd4267", # 'var' : conversion from 'size_t' to 'type', possible loss of data
         "/wd4849", # OpenMP 'clause' clause ignored in 'directive' directive
+        "/wd4506", # no definition for inline function (I know what I'm doing Microsoft...)
         "/O2",
     ]
 include_dirs = [
