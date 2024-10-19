@@ -4,7 +4,7 @@
 #   - Leda Guin
 #   - Ginnie Guin
 
-__version__ = "1.1.46"
+__version__ = "1.1.47"
 
 # Set environment flags before loading adelie_core
 import os
@@ -41,7 +41,12 @@ from . import state
 from .cv import (
     cv_grpnet,
 )
+from .sklearn import (
+    GroupElasticNet
+)
 from .solver import (
-    gaussian_cov, 
+    bvls,
+    gaussian_cov,
     grpnet,
+    pinball,
 )

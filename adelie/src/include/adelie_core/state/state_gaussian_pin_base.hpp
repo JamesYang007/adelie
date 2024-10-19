@@ -3,16 +3,37 @@
 #include <numeric>
 #include <adelie_core/util/types.hpp>
 
+#ifndef ADELIE_CORE_STATE_GAUSSIAN_PIN_BASE_TP
+#define ADELIE_CORE_STATE_GAUSSIAN_PIN_BASE_TP \
+    template <\
+        class ConstraintType,\
+        class ValueType,\
+        class IndexType,\
+        class BoolType\
+    >
+#endif
+#ifndef ADELIE_CORE_STATE_GAUSSIAN_PIN_BASE
+#define ADELIE_CORE_STATE_GAUSSIAN_PIN_BASE \
+    StateGaussianPinBase<\
+        ConstraintType,\
+        ValueType,\
+        IndexType,\
+        BoolType\
+    >
+#endif
+
 namespace adelie_core {
 namespace state {
 
-template <class ConstraintType,
-          class ValueType=typename std::decay_t<ConstraintType>::value_t,
-          class IndexType=Eigen::Index,
-          class BoolType=bool
-        >
-struct StateGaussianPinBase
+template <
+    class ConstraintType,
+    class ValueType=typename std::decay_t<ConstraintType>::value_t,
+    class IndexType=Eigen::Index,
+    class BoolType=bool
+>
+class StateGaussianPinBase
 {
+public:
     using constraint_t = ConstraintType;
     using value_t = ValueType;
     using index_t = IndexType;
@@ -38,7 +59,6 @@ struct StateGaussianPinBase
     const dyn_vec_constraint_t* constraints;
     const map_cvec_index_t groups;
     const map_cvec_index_t group_sizes;
-    const map_cvec_index_t dual_groups;
     const value_t alpha;
     const map_cvec_value_t penalty;
     const map_cvec_index_t screen_set;
@@ -68,7 +88,6 @@ struct StateGaussianPinBase
     dyn_vec_index_t active_begins;
     dyn_vec_index_t active_order;
     dyn_vec_sp_vec_t betas;
-    dyn_vec_sp_vec_t duals;
     dyn_vec_value_t intercepts;
     dyn_vec_value_t rsqs;
     dyn_vec_value_t lmdas;
@@ -78,13 +97,16 @@ struct StateGaussianPinBase
     std::vector<double> benchmark_screen;
     std::vector<double> benchmark_active;
 
+private:
+    void initialize();
+
+public:
     virtual ~StateGaussianPinBase() =default;
     
     explicit StateGaussianPinBase(
         const dyn_vec_constraint_t& constraints,
         const Eigen::Ref<const vec_index_t>& groups, 
         const Eigen::Ref<const vec_index_t>& group_sizes,
-        const Eigen::Ref<const vec_index_t>& dual_groups, 
         value_t alpha, 
         const Eigen::Ref<const vec_value_t>& penalty,
         const Eigen::Ref<const vec_index_t>& screen_set, 
@@ -111,7 +133,6 @@ struct StateGaussianPinBase
         constraints(&constraints),
         groups(groups.data(), groups.size()),
         group_sizes(group_sizes.data(), group_sizes.size()),
-        dual_groups(dual_groups.data(), dual_groups.size()),
         alpha(alpha),
         penalty(penalty.data(), penalty.size()),
         screen_set(screen_set.data(), screen_set.size()),
@@ -135,31 +156,7 @@ struct StateGaussianPinBase
         active_set_size(active_set_size),
         active_set(active_set.data(), active_set.size())
     {
-        active_begins.reserve(screen_set.size());
-        int active_begin = 0;
-        for (size_t i = 0; i < active_set_size; ++i) {
-            const auto ia = active_set[i];
-            const auto curr_size = group_sizes[screen_set[ia]];
-            active_begins.push_back(active_begin);
-            active_begin += curr_size;
-        }
-
-        active_order.resize(active_set_size);
-        std::iota(active_order.begin(), active_order.end(), 0);
-        std::sort(
-            active_order.begin(),
-            active_order.end(),
-            [&](auto i, auto j) { 
-                return groups[screen_set[active_set[i]]] < groups[screen_set[active_set[j]]]; 
-            }
-        );
-
-        betas.reserve(lmda_path.size());
-        intercepts.reserve(lmda_path.size());
-        rsqs.reserve(lmda_path.size());
-        lmdas.reserve(lmda_path.size());
-        benchmark_screen.reserve(1000);
-        benchmark_active.reserve(1000);
+        initialize();
     }
 };
 

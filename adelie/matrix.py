@@ -1,10 +1,12 @@
 from . import adelie_core as core
 from . import io
 from .adelie_core.matrix import (
-    MatrixNaiveBase64,
-    MatrixNaiveBase32,
-    MatrixCovBase64,
+    MatrixConstraintBase32,
+    MatrixConstraintBase64,
     MatrixCovBase32,
+    MatrixCovBase64,
+    MatrixNaiveBase32,
+    MatrixNaiveBase64,
 )
 from sys import platform
 from scipy.sparse import (
@@ -36,6 +38,12 @@ def _to_dtype(mat):
 
 
 class PyMatrixCovBase:
+    # TODO?
+    def __init__(self, n_threads=1):
+        self._n_threads = n_threads
+
+
+class PyMatrixConstraintBase:
     # TODO?
     def __init__(self, n_threads=1):
         self._n_threads = n_threads
@@ -162,7 +170,7 @@ class PyMatrixNaiveBase:
         if isinstance(v, (csr_matrix, csc_matrix)):
             v = v.tocsr().transpose()
             out = np.empty((v.shape[0], n), dtype=dtype)
-            self.sp_btmul(v, out)
+            self.sp_tmul(v, out)
             return out.T
 
         v = np.asarray(v, dtype=dtype)
@@ -355,6 +363,130 @@ def concatenate(
     return _concatenate()
 
 
+def convex_relu(
+    mat: Union[np.ndarray, csc_matrix],
+    mask: np.ndarray,
+    *,
+    copy: bool =False,
+    n_threads: int =1,
+):
+    """Creates a feature matrix for the convex relu problem.
+
+    The feature matrix for the convex relu problem is given by
+
+    .. math::
+        \\begin{align*}
+            X &= 
+            \\begin{bmatrix}
+                Y & -Y
+            \\end{bmatrix}
+            \\\\
+            Y &= 
+            \\begin{bmatrix}
+                D_1 Z & \\ldots & D_m Z
+            \\end{bmatrix}
+        \\end{align*}
+
+    and :math:`D_i \\in \\{0, 1\\}^{n \\times n}` are diagonal matrices.
+
+    Parameters
+    ----------
+    mat : (n, d) Union[ndarray, csc_matrix]
+        The base matrix :math:`Z` from which to construct the convex relu matrix.        
+    mask : (n, m) ndarray
+        The boolean mask matrix whose columns define the diagonal of :math:`D_i`.
+        If it is not in ``"F"``-ordering, an ``"F"``-ordered copy is made.
+    copy : bool, optional
+        If ``True``, a copy of the inputs is stored internally.
+        Otherwise, a reference is stored instead.
+        Default is ``False``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64F
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse32F
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse64F
+    """
+    py_base = PyMatrixNaiveBase
+
+    if isinstance(mat, np.ndarray):
+        dispatcher = {
+            np.dtype("float64"): {
+                "C": core.matrix.MatrixNaiveConvexReluDense64C,
+                "F": core.matrix.MatrixNaiveConvexReluDense64F,
+            },
+            np.dtype("float32"): {
+                "C": core.matrix.MatrixNaiveConvexReluDense32C,
+                "F": core.matrix.MatrixNaiveConvexReluDense32F,
+            },
+        }
+        dtype = mat.dtype
+        order = (
+            "F"
+            # prioritize choosing Fortran contiguity
+            if mat.flags.f_contiguous else
+            "C"
+        )
+        if order == "C":
+            warnings.warn(
+                "Detected matrix to be C-contiguous. "
+                "Performance may improve with F-contiguous matrix."
+            )
+        core_base = dispatcher[dtype][order]
+
+        class _convex_relu(core_base, py_base):
+            def __init__(self):
+                self._mat = np.array(mat, copy=copy)
+                self._mask = np.array(mask, copy=copy, dtype=bool, order="F")
+                core_base.__init__(self, self._mat, self._mask, n_threads)
+                py_base.__init__(self, n_threads=n_threads)
+
+    elif isinstance(mat, csc_matrix):
+        mat = mat.copy()
+        mat.prune()
+        mat.sort_indices()
+
+        dispatcher = {
+            np.dtype("float64"): core.matrix.MatrixNaiveConvexReluSparse64F,
+            np.dtype("float32"): core.matrix.MatrixNaiveConvexReluSparse32F,
+        }
+        dtype = mat.dtype
+        core_base = dispatcher[dtype]
+
+        class _convex_relu(core_base, py_base):
+            def __init__(self):
+                self._mat = mat
+                self._mask = np.array(mask, copy=copy, dtype=bool, order="F")
+                core_base.__init__(
+                    self, 
+                    self._mat.shape[0], 
+                    self._mat.shape[1], 
+                    self._mat.nnz,
+                    self._mat.indptr,
+                    self._mat.indices,
+                    self._mat.data,
+                    self._mask,
+                    n_threads,
+                )
+                py_base.__init__(self, n_threads=n_threads)
+
+    else:
+        raise TypeError("mat must be a numpy array or a scipy csc_matrix.")
+
+    return _convex_relu()
+
+
 def dense(
     mat: np.ndarray,
     *,
@@ -371,8 +503,9 @@ def dense(
     method : str, optional
         Method type. It must be one of the following:
 
-            - ``"naive"``: naive method.
-            - ``"cov"``: covariance method.
+            - ``"naive"``: naive matrix.
+            - ``"cov"``: covariance matrix.
+            - ``"constraint"``: constraint matrix.
 
         Default is ``"naive"``.
     copy : bool, optional
@@ -390,6 +523,10 @@ def dense(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixConstraintDense32C
+    adelie.adelie_core.matrix.MatrixConstraintDense32F
+    adelie.adelie_core.matrix.MatrixConstraintDense64C
+    adelie.adelie_core.matrix.MatrixConstraintDense64F
     adelie.adelie_core.matrix.MatrixCovDense32C
     adelie.adelie_core.matrix.MatrixCovDense32F
     adelie.adelie_core.matrix.MatrixCovDense64C
@@ -421,28 +558,58 @@ def dense(
         },
     }
 
+    constraint_dispatcher = {
+        np.dtype("float64"): {
+            "C": core.matrix.MatrixConstraintDense64C,
+            "F": core.matrix.MatrixConstraintDense64F,
+        },
+        np.dtype("float32"): {
+            "C": core.matrix.MatrixConstraintDense32C,
+            "F": core.matrix.MatrixConstraintDense32F,
+        },
+    }
+
     dispatcher = {
         "naive" : naive_dispatcher,
         "cov" : cov_dispatcher,
+        "constraint": constraint_dispatcher,
     }
 
     dtype = mat.dtype
-    order = (
-        "F"
+
+    if method != "constraint":
         # prioritize choosing Fortran contiguity
-        if mat.flags.f_contiguous else
-        "C"
-    )
-    if order == "C":
-        warnings.warn(
-            "Detected matrix to be C-contiguous. "
-            "Performance may improve with F-contiguous matrix."
+        order = (
+            "F"
+            if mat.flags.f_contiguous else
+            "C"
         )
+
+        if order == "C":
+            warnings.warn(
+                "Detected matrix to be C-contiguous. "
+                "Performance may improve with F-contiguous matrix."
+            )
+    else:
+        # prioritize choosing C contiguity
+        order = (
+            "C"
+            if mat.flags.c_contiguous else
+            "F"
+        )
+
+        if order == "F":
+            warnings.warn(
+                "Detected matrix to be F-contiguous. "
+                "Performance may improve with C-contiguous matrix."
+            )
+
     core_base = dispatcher[method][dtype][order]
 
     py_base = {
         "naive" : PyMatrixNaiveBase,
         "cov" : PyMatrixCovBase,
+        "constraint" : PyMatrixConstraintBase,
     }[method]
 
     class _dense(core_base, py_base):
@@ -579,7 +746,7 @@ def interaction(
     Parameters
     ----------
     mat : (n, d) ndarray
-        The dense matrix :math:`Z` from which to construct interaction terms.
+        The base matrix :math:`Z` from which to construct interaction terms.
     intr_map : dict
         Dictionary mapping a column index of ``mat``
         to a list of (column) indices to pair with.
@@ -698,7 +865,7 @@ def kronecker_eye(
     """Creates a Kronecker product with identity matrix.
 
     The matrix is represented as :math:`X \\otimes I_K`
-    where :math:`X` is the underlying dense matrix and 
+    where :math:`X` is the underlying base matrix and 
     :math:`I_K` is the identity matrix of dimension :math:`K`.
 
     .. note::
@@ -891,7 +1058,7 @@ def one_hot(
     Parameters
     ----------
     mat : (n, d) ndarray
-        The dense matrix :math:`Z` from which to construct one-hot encodings.
+        The base matrix :math:`Z` from which to construct one-hot encodings.
     levels : (d,) ndarray, optional
         Number of levels for each column in ``mat``.
         A non-positive value indicates that the column is a continuous variable
@@ -1092,8 +1259,9 @@ def sparse(
     method : str, optional
         Method type. It must be one of the following:
 
-            - ``"naive"``: naive method.
-            - ``"cov"``: covariance method.
+            - ``"naive"``: naive matrix.
+            - ``"cov"``: covariance matrix.
+            - ``"constraint"``: constraint matrix.
 
         Default is ``"naive"``.
     copy : bool, optional
@@ -1111,6 +1279,8 @@ def sparse(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixConstraintSparse32C
+    adelie.adelie_core.matrix.MatrixConstraintSparse64C
     adelie.adelie_core.matrix.MatrixCovSparse32F
     adelie.adelie_core.matrix.MatrixCovSparse64F
     adelie.adelie_core.matrix.MatrixNaiveSparse32F
@@ -1119,11 +1289,18 @@ def sparse(
     if not (isinstance(mat, csr_matrix) or isinstance(mat, csc_matrix)):
         raise TypeError("mat must be scipy.sparse.csr_matrix or scipy.sparse.csc_matrix.")
 
-    if isinstance(mat, csr_matrix):
-        warnings.warn("Converting to CSC format.")
-        mat = mat.tocsc(copy=True)
-    elif copy:
-        mat = mat.copy()
+    if method != "constraint":
+        if isinstance(mat, csr_matrix):
+            warnings.warn("Converting to CSC format.")
+            mat = mat.tocsc(copy=True)
+        elif copy:
+            mat = mat.copy()
+    else:
+        if isinstance(mat, csc_matrix):
+            warnings.warn("Converting to CSR format.")
+            mat = mat.tocsr(copy=True)
+        elif copy:
+            mat = mat.copy()
 
     mat.prune()
     mat.sort_indices()
@@ -1138,9 +1315,15 @@ def sparse(
         np.dtype("float32"): core.matrix.MatrixCovSparse32F,
     }
 
+    constraint_dispatcher = {
+        np.dtype("float64"): core.matrix.MatrixConstraintSparse64C,
+        np.dtype("float32"): core.matrix.MatrixConstraintSparse32C,
+    }
+
     dispatcher = {
         "naive" : naive_dispatcher,
         "cov" : cov_dispatcher,
+        "constraint": constraint_dispatcher,
     }
 
     dtype = mat.dtype
@@ -1148,6 +1331,7 @@ def sparse(
     py_base = {
         "naive" : PyMatrixNaiveBase,
         "cov" : PyMatrixCovBase,
+        "constraint": PyMatrixConstraintBase,
     }[method]
 
     class _sparse(core_base, py_base):

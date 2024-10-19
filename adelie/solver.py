@@ -1,7 +1,5 @@
-from . import adelie_core as core
-from . import glm
-from . import logger
 from . import matrix
+from .configs import Configs
 from .constraint import (
     ConstraintBase32,
     ConstraintBase64,
@@ -13,97 +11,28 @@ from .glm import (
     GlmMultiBase64,
 )
 from .matrix import (
+    MatrixConstraintBase32,
+    MatrixConstraintBase64,
     MatrixCovBase32,
     MatrixCovBase64,
     MatrixNaiveBase32,
     MatrixNaiveBase64,
 )
 from .state import (
+    bvls as state_bvls,
     gaussian_cov as state_gaussian_cov,
     gaussian_naive as state_gaussian_naive,
     glm_naive as state_glm_naive,
     multigaussian_naive as state_multigaussian_naive,
     multiglm_naive as state_multiglm_naive,
+    pinball as state_pinball,
 ) 
+from scipy.sparse import csr_matrix
 from typing import (
     Callable,
     Union,
 )
 import numpy as np
-
-
-def _solve(
-    state, 
-    progress_bar: bool =False,
-    exit_cond: Callable =None,
-):
-    # mapping of each state type to the corresponding solver
-    f_dict = {
-        # cov methods
-        core.state.StateGaussianPinCov64: core.solver.solve_gaussian_pin_cov_64,
-        core.state.StateGaussianPinCov32: core.solver.solve_gaussian_pin_cov_32,
-        core.state.StateGaussianCov64: core.solver.solve_gaussian_cov_64,
-        core.state.StateGaussianCov32: core.solver.solve_gaussian_cov_32,
-        # naive methods
-        core.state.StateGaussianPinNaive64: core.solver.solve_gaussian_pin_naive_64,
-        core.state.StateGaussianPinNaive32: core.solver.solve_gaussian_pin_naive_32,
-        core.state.StateGaussianNaive64: core.solver.solve_gaussian_naive_64,
-        core.state.StateGaussianNaive32: core.solver.solve_gaussian_naive_32,
-        core.state.StateMultiGaussianNaive64: core.solver.solve_multigaussian_naive_64,
-        core.state.StateMultiGaussianNaive32: core.solver.solve_multigaussian_naive_32,
-        core.state.StateGlmNaive64: core.solver.solve_glm_naive_64,
-        core.state.StateGlmNaive32: core.solver.solve_glm_naive_32,
-        core.state.StateMultiGlmNaive64: core.solver.solve_multiglm_naive_64,
-        core.state.StateMultiGlmNaive32: core.solver.solve_multiglm_naive_32,
-    }
-
-    is_gaussian_pin = (
-        isinstance(state, core.state.StateGaussianPinCov64) or
-        isinstance(state, core.state.StateGaussianPinCov32) or
-        isinstance(state, core.state.StateGaussianPinNaive64) or
-        isinstance(state, core.state.StateGaussianPinNaive32)
-    )
-    is_gaussian = (
-        isinstance(state, core.state.StateGaussianCov64) or
-        isinstance(state, core.state.StateGaussianCov32) or
-        isinstance(state, core.state.StateGaussianNaive64) or
-        isinstance(state, core.state.StateGaussianNaive32) or
-        isinstance(state, core.state.StateMultiGaussianNaive64) or
-        isinstance(state, core.state.StateMultiGaussianNaive32)
-    )
-    is_glm = (
-        isinstance(state, core.state.StateGlmNaive64) or
-        isinstance(state, core.state.StateGlmNaive32) or
-        isinstance(state, core.state.StateMultiGlmNaive64) or
-        isinstance(state, core.state.StateMultiGlmNaive32)
-    )
-
-    # solve group elastic net
-    f = f_dict[state._core_type]
-    if is_gaussian_pin:
-        out = f(state)
-    elif is_gaussian:
-        out = f(state, progress_bar, exit_cond)
-    elif is_glm:
-        out = f(state, state._glm, progress_bar, exit_cond)
-    else:
-        raise RuntimeError("Unexpected state type.")
-
-    # raise any errors
-    if out["error"] != "":
-        if out["error"].startswith("adelie_core solver: "):
-            logger.logger.warning(RuntimeError(out["error"]))
-        else:
-            logger.logger.error(RuntimeError(out["error"]))
-
-    # return a subsetted Python result object
-    core_state = out["state"]
-    state = type(state).create_from_core(state, core_state)
-
-    # add extra total time information
-    state.total_time = out["total_time"]
-
-    return state
 
 
 def gaussian_cov(
@@ -323,6 +252,12 @@ def gaussian_cov(
     
     p = A.cols()
 
+    # clear cached information for every constraint object
+    if isinstance(constraints, list):
+        for c in constraints:
+            if c is None: continue
+            c.clear()
+
     if not (lmda_path is None):
         # MUST evaluate the flip to be able to pass into C++ backend.
         lmda_path = np.array(np.flip(np.sort(lmda_path)))
@@ -409,8 +344,7 @@ def gaussian_cov(
     if check_state:
         state.check(method="assert")
 
-    return _solve(
-        state=state, 
+    return state.solve(
         progress_bar=progress_bar,
         exit_cond=exit_cond,
     )
@@ -519,14 +453,10 @@ def grpnet(
     groups : (G,) ndarray, optional
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
-        If ``glm`` is multi-response type, then we only allow two types of groupings:
-
-            - ``"grouped"``: coefficients for each predictor is grouped across the classes.
-            - ``"ungrouped"``: every coefficient is its own group.
-
-        Default is ``None``, in which case it is set to
-        ``np.arange(p)`` if ``y`` is single-response
-        and ``"grouped"`` if multi-response.
+        If ``glm`` is of multi-response type, then
+        ``groups[i]`` is the starting *feature* index of the ``i`` th group.
+        In either case, ``groups[i]`` must then be a value in the range :math:`\\{1,\\ldots, p\\}`.
+        Default is ``None``, in which case it is set to ``np.arange(p)``.
     alpha : float, optional
         Elastic net parameter.
         It must be in the range :math:`[0,1]`.
@@ -669,6 +599,7 @@ def grpnet(
             The algorithm early exits if ``exit_cond(state)``
             evaluates to ``True`` *or* the built-in early exit
             function evaluates to ``True`` (if ``early_exit`` is ``True``).
+            The latter can be disabled with ``early_exit=False``.
 
     Returns
     -------
@@ -703,6 +634,12 @@ def grpnet(
     )
 
     n, p = X.rows(), X.cols()
+
+    # clear cached information for every constraint object
+    if isinstance(constraints, list):
+        for c in constraints:
+            if c is None: continue
+            c.clear()
 
     # compute common quantities
     if not (offsets is None): 
@@ -756,20 +693,16 @@ def grpnet(
         solver_args["y"] = glm.y
         solver_args["weights"] = glm.weights
 
+    if groups is None:
+        groups = np.arange(p, dtype=int)
+
     # multi-response GLMs
     if glm.is_multi:
         K = glm.y.shape[-1]
 
-        if groups is None:
-            groups = "grouped"
-        if groups == "grouped":
-            groups = K * np.arange(p, dtype=int)
-        elif groups == "ungrouped":
-            groups = np.arange(K * p, dtype=int)
-        else:
-            raise RuntimeError(
-                "groups must be one of \"grouped\" or \"ungrouped\" for multi-response."
-            )
+        # flatten the grouping index across the classes
+        groups = groups * K
+
         if intercept:
             groups = np.concatenate([np.arange(K), K + groups], dtype=int)
         group_sizes = np.concatenate([groups, [(p+intercept)*K]], dtype=int)
@@ -911,8 +844,6 @@ def grpnet(
 
     # single-response GLMs
     else:
-        if groups is None:
-            groups = np.arange(p, dtype=int)
         group_sizes = np.concatenate([groups, [p]], dtype=int)
         group_sizes = group_sizes[1:] - group_sizes[:-1]
 
@@ -1020,8 +951,323 @@ def grpnet(
     if check_state:
         state.check(method="assert")
 
-    return _solve(
-        state=state,
+    return state.solve(
         progress_bar=progress_bar,
         exit_cond=exit_cond,
     )
+
+
+def bvls(
+    X: Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64],
+    y: np.ndarray,
+    lower: np.ndarray,
+    upper: np.ndarray,
+    *,
+    weights: np.ndarray =None,
+    kappa: int =None,
+    max_iters: int =int(1e5),
+    tol: float =1e-7,
+    n_threads: int =1,
+    warm_start =None,
+):
+    """Solves bounded variable least squares.
+
+    The bounded variable least squares is given by
+
+    .. math::
+        \\begin{align*}
+            \\mathrm{minimize}_{\\beta} &\\quad
+            \\frac{1}{2} \\|y - X \\beta\\|_{W}^2 \\\\
+            \\text{subject to} &\\quad
+            \\ell \\leq \\beta \\leq u
+        \\end{align*}
+
+    where 
+    :math:`X \\in \\mathbb{R}^{n \\times p}` is the feature matrix,
+    :math:`y \\in \\mathbb{R}^n` is the response vector,
+    :math:`W \\in \\mathbb{R}_+^{n \\times n}` is the (diagonal) observation weights,
+    and :math:`\\ell \\leq u \\in \\mathbb{R}^p` are the lower and upper bounds, respectively.
+
+    Parameters
+    ----------
+    X : (n, p) Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
+        Feature matrix.
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule or :class:`numpy.ndarray`.
+    y : (n,) ndarray
+        Response vector.
+    lower : (p,) ndarray
+        Lower bound for each variable.
+    upper : (p,) ndarray
+        Upper bound for each variable.
+    weights : (n,) ndarray, optional
+        Observation weights.
+        If ``None``, it is set to ``np.full(n, 1/n)``.
+        Default is ``None``.
+    kappa : int, optional
+        Violation batching size.
+        If ``None``, it is set to ``min(n, p)``.
+        Default is ``None``.
+    max_iters : int, optional
+        Maximum number of coordinate descents.
+        Default is ``int(1e5)``.
+    tol : float, optional
+        Convergence tolerance.
+        Default is ``1e-7``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+    warm_start : optional
+        If no warm-start is provided, the initial solution is set to the vertex of the box closest to the origin.
+        Otherwise, the warm-start is used to extract all necessary state variables.
+        Default is ``None``.
+
+    Returns
+    -------
+    state
+        The resulting state after running the solver.
+
+    See Also
+    --------
+    adelie.adelie_core.state.StateBVLS32
+    adelie.adelie_core.state.StateBVLS64
+    """
+    X_raw = X
+
+    if isinstance(X, np.ndarray):
+        X = matrix.dense(X, method="naive", n_threads=n_threads)
+
+    assert (
+        isinstance(X, matrix.MatrixNaiveBase64) or
+        isinstance(X, matrix.MatrixNaiveBase32)
+    )
+
+    dtype = (
+        np.float64
+        if isinstance(X, matrix.MatrixNaiveBase64) else
+        np.float32
+    )
+
+    n, p = X.shape
+
+    if weights is None:
+        weights = np.full(n, 1 / n)
+    if kappa is None:
+        kappa = min(n, p)
+    y_var = np.sum(y ** 2 * weights)
+
+    if isinstance(X_raw, np.ndarray):
+        X_vars = np.sum(weights[:, None] * X_raw ** 2, axis=0)
+
+    else:
+        X_vars = np.zeros(X.shape[1], dtype)
+        sqrt_weights = np.sqrt(weights).astype(dtype)
+        buffer = np.empty((n, 1), dtype=dtype, order="F")
+        for j in range(p):
+            X.cov(j, 1, sqrt_weights, X_vars[j:j+1], buffer)
+
+    lower = np.maximum(lower, -Configs.max_solver_value)
+    upper = np.minimum(upper,  Configs.max_solver_value)
+
+    if warm_start is None:
+        beta = np.where(np.abs(lower) < np.abs(upper), lower, upper)
+        active_set = np.empty(p, dtype=int)
+        active_set_size = 0
+        is_active = np.zeros(p, dtype=bool)
+        screen_set = np.empty(p, dtype=int)
+        screen_set_size = 0
+        is_screen = np.zeros(p, dtype=bool)
+
+    else:
+        beta = warm_start.beta
+        active_set = warm_start.active_set
+        active_set_size = warm_start.active_set_size
+        is_active = warm_start.is_active
+        screen_set = warm_start.active_set
+        screen_set_size = warm_start.active_set_size
+        is_screen = warm_start.is_active
+
+    if isinstance(X_raw, np.ndarray):
+        resid = y - X_raw @ beta
+    else:
+        resid = y - (X @ csr_matrix(beta[None]).T)[:, 0]
+    grad = np.empty(p, dtype=dtype)
+    loss = 0.5 * np.sum(resid ** 2 * weights)
+
+    state = state_bvls(
+        X=X,
+        y_var=y_var,
+        X_vars=X_vars,
+        lower=lower,
+        upper=upper,
+        weights=weights,
+        kappa=kappa,
+        max_iters=max_iters,
+        tol=tol,
+        screen_set_size=screen_set_size,
+        screen_set=screen_set,
+        is_screen=is_screen,
+        active_set_size=active_set_size,
+        active_set=active_set,
+        is_active=is_active,
+        beta=beta,
+        resid=resid,
+        grad=grad,
+        loss=loss,
+    )
+
+    return state.solve()
+
+
+def pinball(
+    A: Union[np.ndarray, MatrixConstraintBase32, MatrixConstraintBase64],
+    S: np.ndarray,
+    v: np.ndarray,
+    penalty_neg: np.ndarray,
+    penalty_pos: np.ndarray,
+    *,
+    kappa: int =None,
+    max_iters: int =int(1e5),
+    tol: float =1e-7,
+    n_threads: int =1,
+    warm_start =None,
+):
+    """Solves pinball least squares.
+
+    The pinball least squares is given by
+
+    .. math::
+        \\begin{align*}
+            \\mathrm{minimize}_{\\beta} &\\quad
+            \\frac{1}{2} \\|S^{-\\frac{1}{2}} v - S^{\\frac{1}{2}} A^\\top \\beta\\|_{2}^2 
+            + \\ell^\\top \\beta_- + u^\\top \\beta_+
+        \\end{align*}
+
+    where 
+    :math:`A \\in \\mathbb{R}^{m \\times d}` is a constraint matrix,
+    :math:`S \\in \\mathbb{R}^{d \\times d}` is a positive semi-definite matrix,
+    :math:`v \\in \\mathbb{R}^d` is the linear term,
+    and :math:`\\ell, u \\in \\mathbb{R}^m` are the penalty factors 
+    for the negative and positive parts of :math:`\\beta`, respectively.
+
+    Parameters
+    ----------
+    A : (m, d) Union[ndarray, MatrixConstraintBase32, MatrixConstraintBase64]
+        Constraint matrix :math:`A`.
+        It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
+    S : (d, d) ndarray
+        Positive semi-definite matrix :math:`S`.
+    v : (n,) ndarray
+        Linear term :math:`v`.
+    penalty_neg : (m,) ndarray
+        Penalty :math:`\\ell` on the negative part of :math:`\\beta`.
+    penalty_pos : (m,) ndarray
+        Penalty :math:`u` on the positive part of :math:`\\beta`.
+    kappa : int, optional
+        Violation batching size.
+        If ``None``, it is set to ``min(m, d)``.
+        Default is ``None``.
+    max_iters : int, optional
+        Maximum number of coordinate descents.
+        Default is ``int(1e5)``.
+    tol : float, optional
+        Coordinate descent convergence tolerance.
+        Default is ``1e-7``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+    warm_start : optional
+        If no warm-start is provided, the initial solution is set to all zeros.
+        Otherwise, the warm-start is used to extract all necessary state variables.
+        Default is ``None``.
+
+    Returns
+    -------
+    state
+        The resulting state after running the solver.
+
+    See Also
+    --------
+    adelie.adelie_core.state.StatePinball32
+    adelie.adelie_core.state.StatePinball64
+    """
+    if isinstance(A, np.ndarray):
+        A = matrix.dense(A, method="constraint", n_threads=n_threads)
+
+    assert (
+        isinstance(A, matrix.MatrixConstraintBase64) or
+        isinstance(A, matrix.MatrixConstraintBase32)
+    )
+
+    dtype = (
+        np.float64
+        if isinstance(A, matrix.MatrixConstraintBase64) else
+        np.float32
+    )
+
+    m, d = A.shape
+
+    if kappa is None:
+        kappa = min(m, d)
+    y_var = v @ np.linalg.solve(S, v)
+
+    penalty_neg = np.minimum(penalty_neg, Configs.max_solver_value)
+    penalty_pos = np.minimum(penalty_pos, Configs.max_solver_value)
+
+    if warm_start is None:
+        screen_set_size = 0
+        screen_set = np.empty(m, dtype=int)
+        is_screen = np.zeros(m, dtype=bool)
+        screen_ASAT_diag = np.empty(m, dtype=dtype)
+        screen_AS = np.empty((m, d), dtype=dtype, order="C")
+        active_set_size = 0
+        active_set = np.empty(m, dtype=int)
+        is_active = np.zeros(m, dtype=bool)
+        beta = np.zeros(m, dtype=dtype)
+        resid = np.array(v, dtype=dtype)
+        loss = 0.5 * y_var
+
+    else:
+        screen_set_size = warm_start.active_set_size
+        screen_set = warm_start.active_set
+        is_screen = warm_start.is_active
+        screen_ASAT_diag = np.empty(m, dtype=dtype)
+        screen_AS = np.empty((m, d), dtype=dtype, order="C")
+        for i in range(screen_set_size):
+            k = screen_set[i]
+            A.rmmul(k, S, screen_AS[k])
+            screen_ASAT_diag[k] = max(A.rvmul(k, screen_AS[k]), 0)
+        active_set_size = warm_start.active_set_size
+        active_set = warm_start.active_set
+        is_active = warm_start.is_active
+        beta = warm_start.beta
+        resid = np.empty(d, dtype=dtype)
+        A.mul(beta, resid)
+        resid = v - S @ resid
+        loss = 0.5 * resid @ np.linalg.solve(S, resid)
+
+    grad = np.empty(m, dtype=dtype)
+
+    state = state_pinball(
+        A=A,
+        y_var=y_var,
+        S=S,
+        penalty_neg=penalty_neg,
+        penalty_pos=penalty_pos,
+        kappa=kappa,
+        max_iters=max_iters,
+        tol=tol,
+        screen_set_size=screen_set_size,
+        screen_set=screen_set,
+        is_screen=is_screen,
+        screen_ASAT_diag=screen_ASAT_diag,
+        screen_AS=screen_AS,
+        active_set_size=active_set_size,
+        active_set=active_set,
+        is_active=is_active,
+        beta=beta,
+        resid=resid,
+        grad=grad,
+        loss=loss,
+    )
+
+    return state.solve()

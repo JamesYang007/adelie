@@ -25,8 +25,8 @@ def run_cmd(cmd):
     return output.rstrip()
 
 
-# Optional multithreaded build
 ParallelCompile("NPY_NUM_BUILD_JOBS").install()
+
 
 if os.name == "posix":
     # GCC + Clang options to be extra stringent with warnings.
@@ -39,7 +39,6 @@ if os.name == "posix":
         "-O3",
     ]
 elif os.name == "nt":
-    # MSVC defauls to /W3 and /O2, but we make them explicit anyways.
     extra_compile_args = [
         "/W3",
         "/WX",
@@ -48,11 +47,13 @@ elif os.name == "nt":
         "/wd4305", # 'conversion': truncation from 'type1' to 'type2'
         "/wd4267", # 'var' : conversion from 'size_t' to 'type', possible loss of data
         "/wd4849", # OpenMP 'clause' clause ignored in 'directive' directive
+        "/wd4506", # no definition for inline function (I know what I'm doing Microsoft...)
         "/O2",
     ]
 include_dirs = [
     os.path.join("adelie", "src"),
     os.path.join("adelie", "src", "include"),
+    os.path.join("adelie", "src", "src"),
 ]
 extra_link_args = []
 libraries = []
@@ -144,7 +145,14 @@ else:
 ext_modules = [
     Pybind11Extension(
         "adelie.adelie_core",
-        sorted(glob("adelie/src/*.cpp")),  # Sort source files for reproducibility
+        sorted(
+            glob("adelie/src/src/constraint/*.cpp") +
+            glob("adelie/src/src/glm/*.cpp") +
+            glob("adelie/src/src/io/*.cpp") +
+            glob("adelie/src/src/matrix/*.cpp") +
+            glob("adelie/src/src/state/*.cpp") +
+            glob("adelie/src/*.cpp")
+        ),  # Sort source files for reproducibility
         include_dirs=include_dirs,
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,

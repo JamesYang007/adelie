@@ -1,7 +1,6 @@
 #pragma once
 #include <Eigen/Cholesky>
 #include <adelie_core/util/types.hpp>
-#include <adelie_core/util/macros.hpp>
 
 namespace adelie_core {
 namespace optimization {

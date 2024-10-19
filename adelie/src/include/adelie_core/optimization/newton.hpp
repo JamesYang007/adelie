@@ -25,8 +25,12 @@ namespace optimization {
  * @param max_iters     max number of iterations
  * @return (x, i, e) where x is the solution, i is the number of iterations, and e is the error.
  */
-template <class InitialType, class StepType, 
-          class ProjectType, class ValueType>
+template <
+    class InitialType, 
+    class StepType, 
+    class ProjectType, 
+    class ValueType
+>
 inline
 auto newton_root_find(
     InitialType initial_f,

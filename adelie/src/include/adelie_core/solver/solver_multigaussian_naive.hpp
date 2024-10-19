@@ -1,19 +1,17 @@
 #pragma once
-#include <adelie_core/state/state_gaussian_naive.hpp>
-#include <adelie_core/state/state_multigaussian_naive.hpp>
 #include <adelie_core/solver/solver_gaussian_naive.hpp>
-#include <adelie_core/util/functional.hpp>
-#include <memory>
 
 namespace adelie_core {
 namespace solver {
 namespace multigaussian {
 namespace naive {
 
-template <class StateType,
-          class PBType,
-          class ExitCondType,
-          class CUIType=util::no_op>
+template <
+    class StateType,
+    class PBType,
+    class ExitCondType,
+    class CUIType=util::no_op
+>
 inline void solve(
     StateType&& state,
     PBType&& pb,
