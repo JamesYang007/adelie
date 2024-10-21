@@ -249,7 +249,11 @@ def linear(
     else:
         assert not (vars is None)
 
-    A_dtype = np.float32 if "32" in A.__class__.__name__ else np.float64
+    A_dtype = (
+        np.float32
+        if isinstance(A, MatrixConstraintBase32) else
+        np.float64
+    )
 
     lower, l_dtype = _coerce_dtype(lower, dtype)
     upper, u_dtype = _coerce_dtype(upper, dtype)

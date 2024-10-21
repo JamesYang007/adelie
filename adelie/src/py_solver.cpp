@@ -8,8 +8,8 @@ namespace ad = adelie_core;
 // =================================================================
 template <class T>
 ad::util::rowvec_type<T> compute_penalty_sparse(
-    const Eigen::Ref<const ad::util::rowvec_type<int>>& groups,
-    const Eigen::Ref<const ad::util::rowvec_type<int>>& group_sizes,
+    const Eigen::Ref<const ad::util::rowvec_type<Eigen::Index>>& groups,
+    const Eigen::Ref<const ad::util::rowvec_type<Eigen::Index>>& group_sizes,
     const Eigen::Ref<const ad::util::rowvec_type<T>>& penalty,
     T alpha,
     const Eigen::SparseMatrix<T, Eigen::RowMajor>& betas,
@@ -52,8 +52,8 @@ ad::util::rowvec_type<T> compute_penalty_sparse(
 
 template <class T>
 ad::util::rowvec_type<T> compute_penalty_dense(
-    const Eigen::Ref<const ad::util::rowvec_type<int>>& groups,
-    const Eigen::Ref<const ad::util::rowvec_type<int>>& group_sizes,
+    const Eigen::Ref<const ad::util::rowvec_type<Eigen::Index>>& groups,
+    const Eigen::Ref<const ad::util::rowvec_type<Eigen::Index>>& group_sizes,
     const Eigen::Ref<const ad::util::rowvec_type<T>>& penalty,
     T alpha,
     const Eigen::Ref<const ad::util::rowmat_type<T>>& betas,
@@ -92,6 +92,8 @@ ad::util::rowvec_type<T> compute_penalty_dense(
 void register_solver(py::module_& m)
 {
     /* helper functions */
-    m.def("compute_penalty_sparse", &compute_penalty_sparse<double>);
-    m.def("compute_penalty_dense", &compute_penalty_dense<double>);
+    m.def("compute_penalty_sparse_32", &compute_penalty_sparse<float>);
+    m.def("compute_penalty_sparse_64", &compute_penalty_sparse<double>);
+    m.def("compute_penalty_dense_32", &compute_penalty_dense<float>);
+    m.def("compute_penalty_dense_64", &compute_penalty_dense<double>);
 }

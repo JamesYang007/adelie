@@ -81,6 +81,7 @@ def predict(
     linear_preds : (L, n) or (L, n, K) ndarray
         Linear predictions.
     """
+    intercepts = np.atleast_1d(intercepts)
     is_multi = len(intercepts.shape) == 2
     if is_multi:
         K = intercepts.shape[1]
@@ -93,12 +94,21 @@ def predict(
         n = X.rows()
         y_shape = (n,)
 
+    dtype = (
+        np.float32
+        if isinstance(X, MatrixNaiveBase32) else
+        np.float64
+    )
+
     if offsets is None:
-        offsets = np.zeros(y_shape)
+        offsets = np.zeros(y_shape, dtype=dtype)
+
+    if isinstance(betas, np.ndarray):
+        betas = np.atleast_2d(betas)
 
     L = betas.shape[0]
 
-    etas = np.zeros((L,) + y_shape, order="C")
+    etas = np.zeros((L,) + y_shape, order="C", dtype=dtype)
     if isinstance(betas, np.ndarray):
         for i in range(etas.shape[0]):
             X.btmul(0, X.cols(), betas[i], etas[i].ravel())
@@ -213,8 +223,15 @@ def objective(
         group_sizes = np.concatenate([groups, [p]], dtype=int)
         group_sizes = group_sizes[1:] - group_sizes[:-1]
 
+    
+    dtype = (
+        np.float32
+        if isinstance(X, MatrixNaiveBase32) else
+        np.float64
+    )
+
     if penalty is None:
-        penalty = np.sqrt(group_sizes)
+        penalty = np.sqrt(group_sizes).astype(dtype)
 
     etas = predict(
         X=X_raw,
@@ -228,7 +245,7 @@ def objective(
     objs = np.array([
         glm.loss(etas[i])
         for i in range(etas.shape[0])
-    ])
+    ], dtype=dtype)
 
     # relative to saturated model
     if relative:
@@ -238,9 +255,15 @@ def objective(
     if add_penalty:
         penalty_f = None
         if isinstance(betas, np.ndarray):
-            penalty_f = core.solver.compute_penalty_dense
+            penalty_f = {
+                np.float32: core.solver.compute_penalty_dense_32,
+                np.float64: core.solver.compute_penalty_dense_64,
+            }[dtype]
         elif isinstance(betas, csr_matrix): 
-            penalty_f = core.solver.compute_penalty_sparse
+            penalty_f = {
+                np.float32: core.solver.compute_penalty_sparse_32,
+                np.float64: core.solver.compute_penalty_sparse_64,
+            }[dtype]
         objs += lmdas * penalty_f(
             groups,
             group_sizes,
@@ -283,7 +306,12 @@ def residuals(
     --------
     adelie.diagnostic.predict
     """
-    resids = np.empty(etas.shape)
+    dtype = (
+        np.float32
+        if isinstance(glm, (GlmBase32, GlmMultiBase32)) else
+        np.float64
+    )
+    resids = np.empty(etas.shape, dtype=dtype)
     for eta, resid in zip(etas, resids):
         glm.gradient(eta, resid)
     return resids
@@ -345,7 +373,13 @@ def gradients(
             X = matrix.dense(X, method="naive", n_threads=n_threads)
         grad_shape = (X.cols(),)
 
-    grads = np.empty((resids.shape[0],) + grad_shape)
+    dtype = (
+        np.float32
+        if isinstance(X, MatrixNaiveBase32) else
+        np.float64
+    )
+
+    grads = np.empty((resids.shape[0],) + grad_shape, dtype=dtype)
     ones = np.ones(np.prod(resids.shape[1:]))
     for i in range(grads.shape[0]):
         X.mul(resids[i].ravel(), ones, grads[i].ravel())
@@ -463,9 +497,9 @@ def gradient_norms(
             dual_groups = render_dual_groups(constraints)
             mu_grads = np.zeros(grads.shape, dtype=dtype)
             for k in range(L):
-                beta_curr = betas[k].toarray()[0]
-                mu_curr = duals[k].toarray()[0]
-                mu_grads_curr = mu_grads[k]
+                beta_curr = betas[k].toarray()[0].astype(dtype)
+                mu_curr = duals[k].toarray()[0].astype(dtype)
+                mu_grads_curr = mu_grads[k].astype(dtype)
                 for constraint, g, gs, dg in zip(
                     constraints,
                     groups,
