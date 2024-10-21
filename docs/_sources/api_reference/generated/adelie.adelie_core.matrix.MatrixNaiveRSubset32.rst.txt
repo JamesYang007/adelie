@@ -21,6 +21,7 @@
       ~MatrixNaiveRSubset32.mul
       ~MatrixNaiveRSubset32.rows
       ~MatrixNaiveRSubset32.sp_tmul
+      ~MatrixNaiveRSubset32.sq_mul
    
    
 
@@ -48,6 +49,7 @@
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
+   .. automethod:: sq_mul
    
    
 

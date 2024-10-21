@@ -21,6 +21,7 @@
       ~MatrixNaiveCConcatenate64.mul
       ~MatrixNaiveCConcatenate64.rows
       ~MatrixNaiveCConcatenate64.sp_tmul
+      ~MatrixNaiveCConcatenate64.sq_mul
    
    
 
@@ -48,6 +49,7 @@
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
+   .. automethod:: sq_mul
    
    
 

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.adelie_core.glm.GlmMultiBase64 &#8212; adelie 1.1.47 documentation</title>
+    <title>adelie.adelie_core.glm.GlmMultiBase64 &#8212; adelie 1.1.48 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../../_static/documentation_options.js?v=c2b04d72"></script>
+    <script src="../../_static/documentation_options.js?v=2aaaeeb0"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/design-tabs.js?v=36754332"></script>
@@ -124,8 +124,8 @@
     
     
     
-    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.47 documentation - Home"/>
-    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.47 documentation - Home"/>`);</script>
+    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.48 documentation - Home"/>
+    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.48 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -621,10 +621,13 @@ before passing into the solver.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="../../generated/adelie.adelie_core.glm.GlmMultiBase64.html#adelie.adelie_core.glm.GlmMultiBase64.inv_hessian_gradient" title="adelie.adelie_core.glm.GlmMultiBase64.inv_hessian_gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inv_hessian_gradient</span></code></a>(self, arg0, arg1, arg2, ...)</p></td>
 <td><p>Computes the inverse hessian of the (negative) gradient of the loss function.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../generated/adelie.adelie_core.glm.GlmMultiBase64.html#adelie.adelie_core.glm.GlmMultiBase64.loss" title="adelie.adelie_core.glm.GlmMultiBase64.loss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loss</span></code></a>(self, arg0)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../generated/adelie.adelie_core.glm.GlmMultiBase64.html#adelie.adelie_core.glm.GlmMultiBase64.inv_link" title="adelie.adelie_core.glm.GlmMultiBase64.inv_link"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inv_link</span></code></a>(self, arg0, arg1)</p></td>
+<td><p>Computes the inverse link function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../generated/adelie.adelie_core.glm.GlmMultiBase64.html#adelie.adelie_core.glm.GlmMultiBase64.loss" title="adelie.adelie_core.glm.GlmMultiBase64.loss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loss</span></code></a>(self, arg0)</p></td>
 <td><p>Computes the loss function.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../generated/adelie.adelie_core.glm.GlmMultiBase64.html#adelie.adelie_core.glm.GlmMultiBase64.loss_full" title="adelie.adelie_core.glm.GlmMultiBase64.loss_full"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loss_full</span></code></a>(self)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../generated/adelie.adelie_core.glm.GlmMultiBase64.html#adelie.adelie_core.glm.GlmMultiBase64.loss_full" title="adelie.adelie_core.glm.GlmMultiBase64.loss_full"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loss_full</span></code></a>(self)</p></td>
 <td><p>Computes the loss function at the saturated model.</p></td>
 </tr>
 </tbody>
@@ -713,6 +716,23 @@ where <code class="docutils literal notranslate"><span class="pre">eps</span></c
 <dt><strong>hess</strong><span class="classifier">(n, K) ndarray</span></dt><dd><p>Hessian as in <a class="reference internal" href="../../generated/adelie.adelie_core.glm.GlmMultiBase64.html#adelie.adelie_core.glm.GlmMultiBase64.hessian" title="adelie.adelie_core.glm.GlmMultiBase64.hessian"><code class="xref py py-func docutils literal notranslate"><span class="pre">hessian()</span></code></a> method.</p>
 </dd>
 <dt><strong>inv_hess_grad</strong><span class="classifier">(n, K) ndarray</span></dt><dd><p>The inverse hessian gradient to store.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.adelie_core.glm.GlmMultiBase64.inv_link">
+<span class="sig-name descname"><span class="pre">inv_link</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../generated/adelie.adelie_core.glm.GlmMultiBase64.html#adelie.adelie_core.glm.GlmMultiBase64" title="adelie.adelie_core.glm.GlmMultiBase64"><span class="pre">adelie.adelie_core.glm.GlmMultiBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.c_contiguous</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.c_contiguous</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.glm.GlmMultiBase64.inv_link" title="Link to this definition">#</a></dt>
+<dd><p>Computes the inverse link function.</p>
+<p>Computes <span class="math notranslate nohighlight">\(g^{-1}(\eta)\)</span> where <span class="math notranslate nohighlight">\(g(\mu)\)</span> is the link function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>eta</strong><span class="classifier">(n, K) ndarray</span></dt><dd><p>Natural parameter.</p>
+</dd>
+<dt><strong>out</strong><span class="classifier">(n, K) ndarray</span></dt><dd><p>Inverse link <span class="math notranslate nohighlight">\(g^{-1}(\eta)\)</span>.</p>
 </dd>
 </dl>
 </dd>
@@ -821,6 +841,7 @@ It is always <code class="docutils literal notranslate"><span class="pre">True</
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.glm.GlmMultiBase64.gradient"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.gradient()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.glm.GlmMultiBase64.hessian"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.hessian()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.glm.GlmMultiBase64.inv_hessian_gradient"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.inv_hessian_gradient()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.glm.GlmMultiBase64.inv_link"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.inv_link()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.glm.GlmMultiBase64.loss"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.loss()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.glm.GlmMultiBase64.loss_full"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.loss_full()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.glm.GlmMultiBase64.is_multi"><code class="docutils literal notranslate"><span class="pre">GlmMultiBase64.is_multi</span></code></a></li>

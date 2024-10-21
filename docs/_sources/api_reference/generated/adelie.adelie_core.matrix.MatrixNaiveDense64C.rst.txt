@@ -21,6 +21,7 @@
       ~MatrixNaiveDense64C.mul
       ~MatrixNaiveDense64C.rows
       ~MatrixNaiveDense64C.sp_tmul
+      ~MatrixNaiveDense64C.sq_mul
    
    
 
@@ -48,6 +49,7 @@
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
+   .. automethod:: sq_mul
    
    
 

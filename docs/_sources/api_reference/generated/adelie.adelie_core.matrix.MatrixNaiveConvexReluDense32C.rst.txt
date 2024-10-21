@@ -21,6 +21,7 @@
       ~MatrixNaiveConvexReluDense32C.mul
       ~MatrixNaiveConvexReluDense32C.rows
       ~MatrixNaiveConvexReluDense32C.sp_tmul
+      ~MatrixNaiveConvexReluDense32C.sq_mul
    
    
 
@@ -48,6 +49,7 @@
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
+   .. automethod:: sq_mul
    
    
 

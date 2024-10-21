@@ -15,6 +15,7 @@
       ~GlmPoisson32.gradient
       ~GlmPoisson32.hessian
       ~GlmPoisson32.inv_hessian_gradient
+      ~GlmPoisson32.inv_link
       ~GlmPoisson32.loss
       ~GlmPoisson32.loss_full
    
@@ -38,6 +39,7 @@
    .. automethod:: gradient
    .. automethod:: hessian
    .. automethod:: inv_hessian_gradient
+   .. automethod:: inv_link
    .. automethod:: loss
    .. automethod:: loss_full
    

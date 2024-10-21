@@ -21,6 +21,7 @@
       ~MatrixNaiveSparse32F.mul
       ~MatrixNaiveSparse32F.rows
       ~MatrixNaiveSparse32F.sp_tmul
+      ~MatrixNaiveSparse32F.sq_mul
    
    
 
@@ -48,6 +49,7 @@
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
+   .. automethod:: sq_mul
    
    
 

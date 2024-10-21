@@ -15,6 +15,7 @@
       ~GlmCox32.gradient
       ~GlmCox32.hessian
       ~GlmCox32.inv_hessian_gradient
+      ~GlmCox32.inv_link
       ~GlmCox32.loss
       ~GlmCox32.loss_full
    
@@ -28,15 +29,6 @@
    
       ~GlmCox32.is_multi
       ~GlmCox32.name
-      ~GlmCox32.scale_to
-      ~GlmCox32.start_order
-      ~GlmCox32.start_so
-      ~GlmCox32.status_to
-      ~GlmCox32.stop_order
-      ~GlmCox32.stop_to
-      ~GlmCox32.weights_mean_to
-      ~GlmCox32.weights_size_to
-      ~GlmCox32.weights_to
    
    
 
@@ -47,6 +39,7 @@
    .. automethod:: gradient
    .. automethod:: hessian
    .. automethod:: inv_hessian_gradient
+   .. automethod:: inv_link
    .. automethod:: loss
    .. automethod:: loss_full
    
@@ -57,14 +50,5 @@
    
    .. autoattribute:: is_multi
    .. autoattribute:: name
-   .. autoattribute:: scale_to
-   .. autoattribute:: start_order
-   .. autoattribute:: start_so
-   .. autoattribute:: status_to
-   .. autoattribute:: stop_order
-   .. autoattribute:: stop_to
-   .. autoattribute:: weights_mean_to
-   .. autoattribute:: weights_size_to
-   .. autoattribute:: weights_to
    
    

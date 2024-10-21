@@ -15,6 +15,7 @@
       ~GlmMultiGaussian32.gradient
       ~GlmMultiGaussian32.hessian
       ~GlmMultiGaussian32.inv_hessian_gradient
+      ~GlmMultiGaussian32.inv_link
       ~GlmMultiGaussian32.loss
       ~GlmMultiGaussian32.loss_full
    
@@ -38,6 +39,7 @@
    .. automethod:: gradient
    .. automethod:: hessian
    .. automethod:: inv_hessian_gradient
+   .. automethod:: inv_link
    .. automethod:: loss
    .. automethod:: loss_full
    

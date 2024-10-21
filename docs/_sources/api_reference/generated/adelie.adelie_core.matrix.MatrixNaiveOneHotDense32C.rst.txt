@@ -21,6 +21,7 @@
       ~MatrixNaiveOneHotDense32C.mul
       ~MatrixNaiveOneHotDense32C.rows
       ~MatrixNaiveOneHotDense32C.sp_tmul
+      ~MatrixNaiveOneHotDense32C.sq_mul
    
    
 
@@ -50,6 +51,7 @@
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
+   .. automethod:: sq_mul
    
    
 

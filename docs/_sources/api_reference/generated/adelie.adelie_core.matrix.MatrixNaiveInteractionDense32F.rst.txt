@@ -21,6 +21,7 @@
       ~MatrixNaiveInteractionDense32F.mul
       ~MatrixNaiveInteractionDense32F.rows
       ~MatrixNaiveInteractionDense32F.sp_tmul
+      ~MatrixNaiveInteractionDense32F.sq_mul
    
    
 
@@ -50,6 +51,7 @@
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
+   .. automethod:: sq_mul
    
    
 

@@ -21,6 +21,7 @@
       ~MatrixNaiveKroneckerEyeDense64C.mul
       ~MatrixNaiveKroneckerEyeDense64C.rows
       ~MatrixNaiveKroneckerEyeDense64C.sp_tmul
+      ~MatrixNaiveKroneckerEyeDense64C.sq_mul
    
    
 
@@ -48,6 +49,7 @@
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
+   .. automethod:: sq_mul
    
    
 

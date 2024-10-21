@@ -15,6 +15,7 @@
       ~GlmBinomialProbit64.gradient
       ~GlmBinomialProbit64.hessian
       ~GlmBinomialProbit64.inv_hessian_gradient
+      ~GlmBinomialProbit64.inv_link
       ~GlmBinomialProbit64.loss
       ~GlmBinomialProbit64.loss_full
    
@@ -38,6 +39,7 @@
    .. automethod:: gradient
    .. automethod:: hessian
    .. automethod:: inv_hessian_gradient
+   .. automethod:: inv_link
    .. automethod:: loss
    .. automethod:: loss_full
    

@@ -21,6 +21,7 @@
       ~MatrixNaiveSparse64F.mul
       ~MatrixNaiveSparse64F.rows
       ~MatrixNaiveSparse64F.sp_tmul
+      ~MatrixNaiveSparse64F.sq_mul
    
    
 
@@ -48,6 +49,7 @@
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
+   .. automethod:: sq_mul
    
    
 

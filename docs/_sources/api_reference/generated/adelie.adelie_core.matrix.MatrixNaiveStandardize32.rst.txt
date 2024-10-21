@@ -21,6 +21,7 @@
       ~MatrixNaiveStandardize32.mul
       ~MatrixNaiveStandardize32.rows
       ~MatrixNaiveStandardize32.sp_tmul
+      ~MatrixNaiveStandardize32.sq_mul
    
    
 
@@ -48,6 +49,7 @@
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
+   .. automethod:: sq_mul
    
    
 
