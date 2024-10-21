@@ -83,6 +83,13 @@ private:
         size_t n_threads
     );
 
+    inline void _sq_bmul(
+        int i0, int i1,
+        int l0, int l1,
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    );
+
     inline void _btmul(
         int begin,
         int i0, int i1,

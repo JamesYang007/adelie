@@ -225,6 +225,23 @@ ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::cov(
     mat.cov(index, q, sqrt_weights, out, buffer);
 }
 
+
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::sq_mul(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    int n_processed = 0;
+    for (size_t i = 0; i < _mat_list.size(); ++i) {
+        auto& mat = *_mat_list[i];
+        const auto p = mat.cols();
+        mat.sq_mul(weights, out.segment(n_processed, p));
+        n_processed += p;
+    }
+}
+
 ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
 void
 ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::sp_tmul(
@@ -461,6 +478,29 @@ ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::cov(
         );
         mat.cov(j, q, sqrt_weights_curr, out_curr, buffer_curr);
         out += out_curr;
+        begin += rows_curr;
+    }
+}
+
+
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::sq_mul(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    size_t begin = 0;
+    out.setZero();
+    Eigen::Map<vec_value_t> buff(_buff.data(), out.size());
+    for (size_t i = 0; i < _mat_list.size(); ++i) {
+        auto& mat = *_mat_list[i];
+        const auto rows_curr = mat.rows();
+        const Eigen::Map<const vec_value_t> weights_curr(
+            weights.data() + begin, rows_curr
+        );
+        mat.sq_mul(weights_curr, buff);
+        out += buff;
         begin += rows_curr;
     }
 }

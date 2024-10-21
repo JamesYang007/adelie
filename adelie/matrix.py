@@ -1461,11 +1461,8 @@ def standardize(
             means = np.empty(p, dtype=dtype) 
             mat.mul(sqrt_weights, sqrt_weights, means)
 
-        vars = np.empty((p, 1, 1), dtype=dtype, order="F")
-        buffer = np.empty((n, 1), dtype=dtype, order="F")
-        for j in range(p):
-            mat.cov(j, 1, sqrt_weights, vars[j], buffer) 
-        vars = vars.reshape(p)
+        vars = np.empty(p, dtype=dtype)
+        mat.sq_mul(sqrt_weights ** 2, vars)
         vars += centers * (centers - 2 * means)
         scales = np.sqrt((n / (n - ddof)) * vars)
 

@@ -254,6 +254,38 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::cov(
 
 ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
 void
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::sq_mul(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) 
+{
+    const auto d = _mat.cols();
+    const auto m = _mask.cols();
+    colmat_value_t mat_sq = _mat.array().square().matrix();
+    // NOTE: MSVC does not like it when we try to capture v_weights and buff.
+    // This is a bug in MSVC (god I hate microsoft so much...).
+    const auto routine = [&](auto i, const auto& w, auto& buff) {
+        auto out_m = out.segment(i * d, d).matrix();
+        dgemv(
+            mat_sq,
+            _mask.col(i).transpose().template cast<value_t>().cwiseProduct(w.matrix()),
+            1,
+            buff /* unused */,
+            out_m
+        );
+    };
+    Eigen::Map<rowmat_value_t> buff(_buff.data(), _n_threads, d);
+    if (_n_threads <= 1) {
+        for (int i = 0; i < m; ++i) routine(i, weights, buff);
+    } else {
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
+        for (int i = 0; i < m; ++i) routine(i, weights, buff);
+    }
+    out.tail(m * d) = out.head(m * d);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
+void
 ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
@@ -529,6 +561,32 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::cov(
             out(i1, i2) = out(i2, i1);
         }
     }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::sq_mul(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) 
+{
+    const auto d = _mat.cols();
+    const auto m = _mask.cols();
+    Eigen::SparseMatrix<value_t, Eigen::ColMajor> mat_sq = _mat.cwiseProduct(_mat);
+    // NOTE: MSVC does not like it when we try to capture mat_sq.
+    // This is a bug in MSVC (god I hate microsoft so much...).
+    const auto routine = [&](int k, const auto& mat_sq) {
+        out.segment(k * d, d).matrix() = (
+            (weights * _mask.col(k).transpose().array().template cast<value_t>()).matrix()
+        ) * mat_sq;
+    };
+    if (_n_threads <= 1) {
+        for (int k = 0; k < m; ++k) routine(k, mat_sq);
+    } else {
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
+        for (int k = 0; k < m; ++k) routine(k, mat_sq);
+    }
+    out.tail(m * d) = out.head(m * d);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP

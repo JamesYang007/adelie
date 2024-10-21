@@ -21,6 +21,20 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::_cmul(
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
+typename ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::value_t
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::_sq_cmul(
+    int j, 
+    const Eigen::Ref<const vec_value_t>& weights
+) 
+{
+    constexpr size_t n_threads = 1;
+    return snp_unphased_dot(
+        [](auto x) { return x * x; },
+        _io, j, weights, n_threads, _buff
+    );
+}
+
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
 void
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::_ctmul(
     int j, 
@@ -208,6 +222,24 @@ int
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::cols() const 
 { 
     return _io.cols(); 
+}
+
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::sq_mul(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    const auto routine = [&](int t) {
+        out[t] = _sq_cmul(t, weights);
+    };
+    if (_n_threads <= 1) {
+        for (int t = 0; t < cols(); ++t) routine(t);
+    } else {
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
+        for (int t = 0; t < cols(); ++t) routine(t);
+    }
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP

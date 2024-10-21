@@ -227,9 +227,9 @@ void _scale(
 
 } // namespace cox
 
-ADELIE_CORE_GLM_COX_TP
+ADELIE_CORE_GLM_COX_PACK_TP
 auto
-ADELIE_CORE_GLM_COX::init_order(
+ADELIE_CORE_GLM_COX_PACK::init_order(
     const Eigen::Ref<const vec_value_t>& x
 )
 {
@@ -242,9 +242,9 @@ ADELIE_CORE_GLM_COX::init_order(
     return x_order;
 }
 
-ADELIE_CORE_GLM_COX_TP
+ADELIE_CORE_GLM_COX_PACK_TP
 auto
-ADELIE_CORE_GLM_COX::init_in_order(
+ADELIE_CORE_GLM_COX_PACK::init_in_order(
     const Eigen::Ref<const vec_value_t>& x,
     const Eigen::Ref<const vec_index_t>& order
 )
@@ -256,9 +256,9 @@ ADELIE_CORE_GLM_COX::init_in_order(
     return x_sorted;
 } 
 
-ADELIE_CORE_GLM_COX_TP
+ADELIE_CORE_GLM_COX_PACK_TP
 auto
-ADELIE_CORE_GLM_COX::init_weights_size_to(
+ADELIE_CORE_GLM_COX_PACK::init_weights_size_to(
     const Eigen::Ref<const vec_value_t>& stop_to,
     const Eigen::Ref<const vec_value_t>& status_to,
     const Eigen::Ref<const vec_value_t>& weights_to
@@ -275,9 +275,9 @@ ADELIE_CORE_GLM_COX::init_weights_size_to(
     return weights_size_to;
 }
 
-ADELIE_CORE_GLM_COX_TP
+ADELIE_CORE_GLM_COX_PACK_TP
 auto
-ADELIE_CORE_GLM_COX::init_weights_mean_to(
+ADELIE_CORE_GLM_COX_PACK::init_weights_mean_to(
     const Eigen::Ref<const vec_value_t>& stop_to,
     const Eigen::Ref<const vec_value_t>& status_to,
     const Eigen::Ref<const vec_value_t>& weights_to,
@@ -300,9 +300,9 @@ ADELIE_CORE_GLM_COX::init_weights_mean_to(
     return weights_mean_to;
 }
 
-ADELIE_CORE_GLM_COX_TP
+ADELIE_CORE_GLM_COX_PACK_TP
 auto
-ADELIE_CORE_GLM_COX::init_scale_to(
+ADELIE_CORE_GLM_COX_PACK::init_scale_to(
     const Eigen::Ref<const vec_value_t>& stop_to,
     const Eigen::Ref<const vec_value_t>& status_to,
     const Eigen::Ref<const vec_value_t>& weights_to,
@@ -320,18 +320,19 @@ ADELIE_CORE_GLM_COX::init_scale_to(
     return scale_to;
 }
 
-ADELIE_CORE_GLM_COX_TP
-ADELIE_CORE_GLM_COX::GlmCox(
+ADELIE_CORE_GLM_COX_PACK_TP
+ADELIE_CORE_GLM_COX_PACK::GlmCoxPack(
     const Eigen::Ref<const vec_value_t>& start,
     const Eigen::Ref<const vec_value_t>& stop,
     const Eigen::Ref<const vec_value_t>& status,
     const Eigen::Ref<const vec_value_t>& weights,
     const std::string& tie_method_str
 ):
-    base_t("cox", status, weights),
     tie_method(util::convert_tie_method(tie_method_str)),
     start(start.data(), start.size()),
     stop(stop.data(), stop.size()),
+    status(status.data(), status.size()),
+    weights(weights.data(), weights.size()),
     start_order(init_order(start)),
     start_so(init_in_order(start, start_order)),
     stop_order(init_order(stop)),
@@ -348,24 +349,15 @@ ADELIE_CORE_GLM_COX::GlmCox(
         stop_to, status_to, weights_to, tie_method
     )),
     buffer(5 * (start.size() + 1))
-{
-    const auto n = status.size();
-    if (start.size() != n) {
-        throw util::adelie_core_error("start must be (n,) where status is (n,).");
-    }
-    if (stop.size() != n) {
-        throw util::adelie_core_error("stop must be (n,) where status is (n,).");
-    }
-}
+{}
 
-ADELIE_CORE_GLM_COX_TP
+ADELIE_CORE_GLM_COX_PACK_TP
 void
-ADELIE_CORE_GLM_COX::gradient(
+ADELIE_CORE_GLM_COX_PACK::gradient(
     const Eigen::Ref<const vec_value_t>& eta,
     Eigen::Ref<vec_value_t> grad
 ) 
 {
-    base_t::check_gradient(eta, grad);
     const auto n = eta.size();
     Eigen::Map<vec_value_t> z(buffer.data(), n);
     z = weights * eta.exp();
@@ -414,15 +406,14 @@ ADELIE_CORE_GLM_COX::gradient(
     grad = weights * status - grad * z;
 }
 
-ADELIE_CORE_GLM_COX_TP
+ADELIE_CORE_GLM_COX_PACK_TP
 void
-ADELIE_CORE_GLM_COX::hessian(
+ADELIE_CORE_GLM_COX_PACK::hessian(
     const Eigen::Ref<const vec_value_t>& eta,
     const Eigen::Ref<const vec_value_t>& grad,
     Eigen::Ref<vec_value_t> hess
 ) 
 {
-    base_t::check_hessian(eta, grad, hess);
     const auto n = eta.size();
     Eigen::Map<vec_value_t> z(buffer.data(), n);
     z = weights * eta.exp();
@@ -471,13 +462,12 @@ ADELIE_CORE_GLM_COX::hessian(
     hess = weights * status - grad - hess * z.square();
 }
 
-ADELIE_CORE_GLM_COX_TP
-typename ADELIE_CORE_GLM_COX::value_t
-ADELIE_CORE_GLM_COX::loss(
+ADELIE_CORE_GLM_COX_PACK_TP
+typename ADELIE_CORE_GLM_COX_PACK::value_t
+ADELIE_CORE_GLM_COX_PACK::loss(
     const Eigen::Ref<const vec_value_t>& eta
 ) 
 {
-    base_t::check_loss(eta);
     constexpr auto neg_max = -std::numeric_limits<value_t>::max();
     const auto n = eta.size();
     const auto eta_max = eta.maxCoeff();
@@ -512,15 +502,251 @@ ADELIE_CORE_GLM_COX::loss(
     );
 }
 
-ADELIE_CORE_GLM_COX_TP
-typename ADELIE_CORE_GLM_COX::value_t
-ADELIE_CORE_GLM_COX::loss_full() 
+ADELIE_CORE_GLM_COX_PACK_TP
+typename ADELIE_CORE_GLM_COX_PACK::value_t
+ADELIE_CORE_GLM_COX_PACK::loss_full() 
 {
     const constexpr auto most_neg = -std::numeric_limits<value_t>::max();
     return (
         weights_mean_to * status_to * 
         (weights_size_to * weights_mean_to * (1 - scale_to)).log().max(most_neg)
     ).sum();
+}
+
+ADELIE_CORE_GLM_COX_TP
+auto
+ADELIE_CORE_GLM_COX::init_strata_outer(
+    const Eigen::Ref<const vec_index_t>& strata,
+    size_t n_stratas
+)
+{
+    vec_index_t strata_outer(n_stratas + 1);
+    strata_outer.setZero();
+    for (index_t i = 0; i < strata.size(); ++i) {
+        const auto si = strata[i];
+        ++strata_outer[si+1];
+    }
+    for (index_t i = 1; i < strata_outer.size(); ++i) {
+        strata_outer[i] += strata_outer[i-1];
+    }
+    return strata_outer;
+}
+
+ADELIE_CORE_GLM_COX_TP
+auto
+ADELIE_CORE_GLM_COX::init_strata_order(
+    const Eigen::Ref<const vec_index_t>& strata
+)
+{
+    const auto n = strata.size();
+    vec_index_t order = vec_index_t::LinSpaced(n, 0, n-1);
+    std::sort(
+        order.data(),
+        order.data() + n,
+        [&](auto i, auto j) {
+            const auto si = strata[i];
+            const auto sj = strata[j];
+            return (si < sj) || ((si == sj) && (i < j));
+        }
+    );
+    return order;
+}
+
+ADELIE_CORE_GLM_COX_TP
+void
+ADELIE_CORE_GLM_COX::init_in_order(
+    const Eigen::Ref<const vec_value_t>& x,
+    const Eigen::Ref<const vec_index_t>& order,
+    Eigen::Ref<vec_value_t> x_sorted
+)
+{
+    for (int i = 0; i < order.size(); ++i) {
+        x_sorted[i] = x[order[i]];
+    }
+} 
+
+ADELIE_CORE_GLM_COX_TP
+auto
+ADELIE_CORE_GLM_COX::init_in_order(
+    const Eigen::Ref<const vec_value_t>& x,
+    const Eigen::Ref<const vec_index_t>& order
+)
+{
+    vec_value_t x_sorted(x.size());
+    init_in_order(x, order, x_sorted);
+    return x_sorted;
+} 
+
+ADELIE_CORE_GLM_COX_TP
+void
+ADELIE_CORE_GLM_COX::init_from_order(
+    const Eigen::Ref<const vec_value_t>& x_sorted,
+    const Eigen::Ref<const vec_index_t>& order,
+    Eigen::Ref<vec_value_t> x
+)
+{
+    for (int i = 0; i < order.size(); ++i) {
+        x[order[i]] = x_sorted[i];
+    }
+} 
+
+ADELIE_CORE_GLM_COX_TP
+auto
+ADELIE_CORE_GLM_COX::init_packs(
+    const std::string& tie_method_str
+)
+{
+    std::vector<pack_t> packs;
+    packs.reserve(n_stratas);
+    for (size_t i = 0; i < n_stratas; ++i) {
+        const auto bi = strata_outer[i];
+        const auto si = strata_outer[i+1] - bi;
+        packs.emplace_back(
+            start_sto.segment(bi, si),
+            stop_sto.segment(bi, si),
+            status_sto.segment(bi, si),
+            weights_sto.segment(bi, si),
+            tie_method_str
+        );
+    }
+    return packs;
+}
+
+ADELIE_CORE_GLM_COX_TP
+ADELIE_CORE_GLM_COX::GlmCox(
+    const Eigen::Ref<const vec_value_t>& start,
+    const Eigen::Ref<const vec_value_t>& stop,
+    const Eigen::Ref<const vec_value_t>& status,
+    const Eigen::Ref<const vec_index_t>& strata,
+    const Eigen::Ref<const vec_value_t>& weights,
+    const std::string& tie_method_str
+):
+    base_t("cox", status, weights),
+    n_stratas(strata.maxCoeff() + 1),
+    strata_outer(init_strata_outer(strata, n_stratas)),
+    strata_order(init_strata_order(strata)),
+    start_sto(init_in_order(start, strata_order)),
+    stop_sto(init_in_order(stop, strata_order)),
+    status_sto(init_in_order(status, strata_order)),
+    weights_sto(init_in_order(weights, strata_order)),
+    packs(init_packs(tie_method_str)),
+    buffer(3 * status.size())
+{
+    const auto n = status.size();
+    if (start.size() != n) {
+        throw util::adelie_core_error("start must be (n,) where status is (n,).");
+    }
+    if (stop.size() != n) {
+        throw util::adelie_core_error("stop must be (n,) where status is (n,).");
+    }
+    if (strata.size() != n) {
+        throw util::adelie_core_error("strata must be (n,) where status is (n,).");
+    }
+}
+
+ADELIE_CORE_GLM_COX_TP
+void
+ADELIE_CORE_GLM_COX::gradient(
+    const Eigen::Ref<const vec_value_t>& eta,
+    Eigen::Ref<vec_value_t> grad
+) 
+{
+    base_t::check_gradient(eta, grad);
+    const auto n = eta.size();
+    auto eta_sto = buffer.segment(0, n);
+    auto grad_sto = buffer.segment(n, n);
+
+    init_in_order(eta, strata_order, eta_sto);
+
+    for (size_t i = 0; i < packs.size(); ++i) {
+        auto& pack = packs[i];
+        const auto bi = strata_outer[i];
+        const auto si = strata_outer[i+1] - bi;
+        pack.gradient(
+            eta_sto.segment(bi, si),
+            grad_sto.segment(bi, si)
+        );
+    }
+
+    init_from_order(grad_sto, strata_order, grad);
+}
+
+ADELIE_CORE_GLM_COX_TP
+void
+ADELIE_CORE_GLM_COX::hessian(
+    const Eigen::Ref<const vec_value_t>& eta,
+    const Eigen::Ref<const vec_value_t>& grad,
+    Eigen::Ref<vec_value_t> hess
+) 
+{
+    base_t::check_hessian(eta, grad, hess);
+    const auto n = eta.size();
+    auto eta_sto = buffer.segment(0, n);
+    auto grad_sto = buffer.segment(n, n);
+    auto hess_sto = buffer.segment(2*n, n);
+
+    init_in_order(eta, strata_order, eta_sto);
+    init_in_order(grad, strata_order, grad_sto);
+    init_in_order(hess, strata_order, hess_sto);
+
+    for (size_t i = 0; i < packs.size(); ++i) {
+        auto& pack = packs[i];
+        const auto bi = strata_outer[i];
+        const auto si = strata_outer[i+1] - bi;
+        pack.hessian(
+            eta_sto.segment(bi, si),
+            grad_sto.segment(bi, si),
+            hess_sto.segment(bi, si)
+        );
+    }
+
+    init_from_order(hess_sto, strata_order, hess);
+}
+
+ADELIE_CORE_GLM_COX_TP
+typename ADELIE_CORE_GLM_COX::value_t
+ADELIE_CORE_GLM_COX::loss(
+    const Eigen::Ref<const vec_value_t>& eta
+) 
+{
+    base_t::check_loss(eta);
+    const auto n = eta.size();
+    auto eta_sto = buffer.segment(0, n);
+
+    init_in_order(eta, strata_order, eta_sto);
+
+    value_t sum = 0;
+    for (size_t i = 0; i < packs.size(); ++i) {
+        auto& pack = packs[i];
+        const auto bi = strata_outer[i];
+        const auto si = strata_outer[i+1] - bi;
+        sum += pack.loss(
+            eta_sto.segment(bi, si)
+        );
+    }
+    return sum;
+}
+
+ADELIE_CORE_GLM_COX_TP
+typename ADELIE_CORE_GLM_COX::value_t
+ADELIE_CORE_GLM_COX::loss_full() 
+{
+    value_t sum = 0;
+    for (size_t i = 0; i < packs.size(); ++i) {
+        auto& pack = packs[i];
+        sum += pack.loss_full();
+    }
+    return sum;
+}
+
+ADELIE_CORE_GLM_COX_TP
+void
+ADELIE_CORE_GLM_COX::inv_link(
+    const Eigen::Ref<const vec_value_t>& eta,
+    Eigen::Ref<vec_value_t> out 
+)
+{
+    out = eta.exp();
 }
 
 } // namespace glm

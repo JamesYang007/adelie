@@ -1,10 +1,4 @@
-# Only happy guins may read this code.
-# Examples of happy guins are:
-#   - Anav Guin (a.k.a. Kumar)
-#   - Leda Guin
-#   - Ginnie Guin
-
-__version__ = "1.1.47"
+__version__ = "1.1.48"
 
 # Set environment flags before loading adelie_core
 import os

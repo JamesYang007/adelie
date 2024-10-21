@@ -101,6 +101,15 @@ def binomial(
             \\right)
         \\end{align*}
 
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_i
+            &=
+            \\log\\left(\\frac{\\mu_i}{1 - \\mu_i}\\right)
+        \\end{align*}
+
     The Binomial GLM family with the probit link function 
     specifies the loss function as:
 
@@ -114,6 +123,14 @@ def binomial(
         \\end{align*}
 
     where :math:`\\Phi` is the standard normal CDF.
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_i
+            &=
+            \\Phi^{-1}(\\mu_i)
+        \\end{align*}
 
     We assume that :math:`y_i \\in [0,1]`.
 
@@ -184,6 +201,7 @@ def cox(
     stop: np.ndarray,
     status: np.ndarray,
     *,
+    strata: np.ndarray =None,
     weights: np.ndarray =None,
     tie_method: str ="efron",
     dtype: Union[np.float32, np.float64] =None,
@@ -238,6 +256,35 @@ def cox(
     Note that :math:`\\overline{w}_i` and :math:`A_i(\\eta)` are only well-defined 
     whenever :math:`\\delta_i=1`, which is not an issue in the computation of :math:`\\ell(\\eta)`.
 
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_i = \\log(\\mu_i)
+        \\end{align*}
+
+    If ``strata`` is specified, then the loss function 
+    is simply the sum of the losses for each strata.
+    Namely, given the strata vector :math:`S`,
+
+    .. math::
+        \\begin{align*}
+            \\ell(\\eta)
+            &=
+            \\sum_{m=0}^{M-1}
+            \\ell_m(\\eta_{\\mathcal{I}_m})
+        \\end{align*}
+
+    where
+    :math:`M` is the number of strata,
+    :math:`\\mathcal{I}_m = \\{i : S_i = m\\}` is the set of individuals in stratum :math:`m`,
+    :math:`\\eta_I` is the subset of :math:`\\eta` given by the indices in :math:`I`,
+    and :math:`\\ell_m` is the usual Cox loss function as above
+    using only the input data in :math:`\\mathcal{I}_m`.
+
+    .. note::
+        The strata indicator :math:`S_i` *must* take on values in the set :math:`\\{0, \\ldots, M-1\\}`.
+
     Parameters
     ----------
     start : (n,) ndarray
@@ -246,6 +293,10 @@ def cox(
         Stop time vector :math:`t`.
     status : (n,) ndarray 
         Status vector :math:`\\delta`.
+    strata : (n,) ndarray, optional
+        Strata vector :math:`S`.
+        If ``None``, there is only one stratum.
+        Default is ``None``.
     weights : (n,) ndarray, optional
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
@@ -284,18 +335,23 @@ def cox(
 
     core_base = dispatcher[dtype]
 
+    if strata is None:
+        strata = np.zeros(status.size, dtype=int)
+
     class _cox(glm_base, core_base):
         def __init__(self):
             self.start = np.array(start, copy=True, dtype=dtype)
             self.stop = np.array(stop, copy=True, dtype=dtype)
             glm_base.__init__(self, status, weights, core_base, dtype)
             self.status = self.y
+            self.strata = np.array(strata, copy=True, dtype=int)
             self.tie_method = tie_method
             core_base.__init__(
                 self, 
                 self.start, 
                 self.stop, 
                 self.status, 
+                self.strata,
                 self.weights, 
                 self.tie_method,
             )
@@ -306,6 +362,7 @@ def cox(
                 start=start, 
                 stop=stop,
                 status=status,
+                strata=strata,
                 weights=weights, 
                 tie_method=tie_method,
                 dtype=dtype,
@@ -332,6 +389,15 @@ def gaussian(
             \\sum\\limits_{i=1}^n w_i \\left(
                 -y_i \\eta_i + \\frac{\\eta_i^2}{2}
             \\right) 
+        \\end{align*}
+
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_i
+            &=
+            \\mu_i
         \\end{align*}
 
     Parameters
@@ -408,6 +474,15 @@ def multigaussian(
                 -\\sum\\limits_{k=1}^K y_{ik} \\eta_{ik} 
                 +\\frac{\\|\\eta_{i\\cdot}\\|^2}{2}
             \\right)
+        \\end{align*}
+
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_{ik}
+            &=
+            \\mu_{ik}
         \\end{align*}
 
     Parameters
@@ -488,6 +563,17 @@ def multinomial(
             \\right)
         \\end{align*}
 
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_{ik}
+            &=
+            \\log(\\mu_{ik}) + C_i
+        \\end{align*}
+
+    for any arbitrary constants :math:`C_i`.
+
     We assume that every :math:`y_{ik} \\in [0,1]` and
     for each fixed :math:`i`, :math:`\\sum_{k=1}^K y_{ik} = 1`.
 
@@ -559,6 +645,15 @@ def poisson(
             \\sum\\limits_{i=1}^n w_i \\left(
                 -y_i \\eta_i + e^{\\eta_i}
             \\right) 
+        \\end{align*}
+
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_i
+            &=
+            \\log(\\mu_i)
         \\end{align*}
 
     We assume that :math:`y_i \\in \\mathbb{N}_0`.

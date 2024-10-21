@@ -98,6 +98,11 @@ public:
 
     /* Non-speed critical routines */
 
+    virtual void sq_mul(
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    ) =0;
+
     virtual void sp_tmul(
         const sp_mat_value_t& v,
         Eigen::Ref<rowmat_value_t> out
@@ -272,6 +277,10 @@ ADELIE_CORE_MATRIX_NAIVE_BASE::check_sp_tmul(
     ) override;\
     int rows() const override;\
     int cols() const override;\
+    void sq_mul(\
+        const Eigen::Ref<const vec_value_t>& weights,\
+        Eigen::Ref<vec_value_t> out\
+    ) override;\
     void sp_tmul(\
         const sp_mat_value_t& v,\
         Eigen::Ref<rowmat_value_t> out\

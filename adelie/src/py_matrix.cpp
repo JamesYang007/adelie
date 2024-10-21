@@ -639,6 +639,19 @@ public:
         );
     }
 
+    void sq_mul(
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            sq_mul,
+            weights, out
+        );
+    }
+
     void sp_tmul(
         const sp_mat_value_t& v,
         Eigen::Ref<rowmat_value_t> out
@@ -779,6 +792,19 @@ void matrix_naive_base(py::module_& m, const char* name)
         w : (n,) ndarray
             Vector of weights.
         out : (q,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("sq_mul", &internal_t::sq_mul, R"delimiter(
+        Computes a squared matrix-vector multiplication.
+
+        Computes the squared matrix-vector multiplication
+        ``w.T @ X ** 2``.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (n,) ndarray
             Vector to store in-place the result.
         )delimiter")
         .def("sp_tmul", &internal_t::sp_tmul, R"delimiter(

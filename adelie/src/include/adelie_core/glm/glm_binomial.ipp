@@ -88,6 +88,16 @@ ADELIE_CORE_GLM_BINOMIAL_LOGIT::loss_full()
     return binomial::loss_full(y, weights);
 }
 
+ADELIE_CORE_GLM_BINOMIAL_LOGIT_TP
+void
+ADELIE_CORE_GLM_BINOMIAL_LOGIT::inv_link(
+    const Eigen::Ref<const vec_value_t>& eta,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    out = 1 / (1 + (-eta).exp());
+}
+
 ADELIE_CORE_GLM_BINOMIAL_PROBIT_TP
 auto
 ADELIE_CORE_GLM_BINOMIAL_PROBIT::std_cdf(
@@ -167,6 +177,16 @@ typename ADELIE_CORE_GLM_BINOMIAL_PROBIT::value_t
 ADELIE_CORE_GLM_BINOMIAL_PROBIT::loss_full() 
 {
     return binomial::loss_full(y, weights);
+}
+
+ADELIE_CORE_GLM_BINOMIAL_PROBIT_TP
+void
+ADELIE_CORE_GLM_BINOMIAL_PROBIT::inv_link(
+    const Eigen::Ref<const vec_value_t>& eta,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    out = std_cdf(eta);
 }
 
 } // namespace glm

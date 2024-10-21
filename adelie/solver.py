@@ -1060,10 +1060,7 @@ def bvls(
 
     else:
         X_vars = np.zeros(X.shape[1], dtype)
-        sqrt_weights = np.sqrt(weights).astype(dtype)
-        buffer = np.empty((n, 1), dtype=dtype, order="F")
-        for j in range(p):
-            X.cov(j, 1, sqrt_weights, X_vars[j:j+1], buffer)
+        X.sq_mul(weights, X_vars)
 
     lower = np.maximum(lower, -Configs.max_solver_value)
     upper = np.minimum(upper,  Configs.max_solver_value)

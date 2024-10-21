@@ -182,6 +182,21 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::cov(
 
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
 void
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::sq_mul(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    _mat->sq_mul(weights, out);
+    vec_value_t mat_means(out.size());
+    vec_value_t ones = vec_value_t::Ones(weights.size());
+    _mat->mul(ones, weights, mat_means);
+    const auto w_sum = weights.sum();
+    dvveq(out, (out - 2 * _centers * mat_means + w_sum * _centers.square()) / _scales.square(), _n_threads);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
+void
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out

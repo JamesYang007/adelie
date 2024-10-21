@@ -52,5 +52,15 @@ ADELIE_CORE_GLM_GAUSSIAN::loss_full()
     return -0.5 * (y.square() * weights).sum();
 }
 
+ADELIE_CORE_GLM_GAUSSIAN_TP
+void
+ADELIE_CORE_GLM_GAUSSIAN::inv_link(
+    const Eigen::Ref<const vec_value_t>& eta,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    out = eta;
+}
+
 } // namespace glm
 } // namespace adelie_core
