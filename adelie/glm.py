@@ -255,8 +255,13 @@ def cox(
     Note that :math:`\\overline{w}_i` and :math:`A_i(\\eta)` are only well-defined 
     whenever :math:`\\delta_i=1`, which is not an issue in the computation of :math:`\\ell(\\eta)`.
 
-    .. note::
-        The link function is **not defined** for this family.
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_i = \\log(\\mu_i)
+        \\end{align*}
+
 
     Parameters
     ----------

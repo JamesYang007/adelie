@@ -592,6 +592,9 @@ class GlmTestCox(GlmTest):
         w_sum = self.weights_sum
         return np.sum(d * w_mean * np.log(w_sum * (1 - sigma) + (w_sum <= 0)))
 
+    def inv_link(self, eta, out):
+        out[...] = np.exp(eta)
+
 
 @pytest.mark.parametrize("n", [1, 2, 5, 10, 20, 100])
 def test_cox(n, seed=0):
