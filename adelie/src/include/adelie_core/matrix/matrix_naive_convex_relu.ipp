@@ -573,16 +573,18 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::sq_mul(
     const auto d = _mat.cols();
     const auto m = _mask.cols();
     Eigen::SparseMatrix<value_t, Eigen::ColMajor> mat_sq = _mat.cwiseProduct(_mat);
-    const auto routine = [&](int k) {
+    // NOTE: MSVC does not like it when we try to capture mat_sq.
+    // This is a bug in MSVC (god I hate microsoft so much...).
+    const auto routine = [&](int k, const auto& mat_sq) {
         out.segment(k * d, d).matrix() = (
             (weights * _mask.col(k).transpose().array().template cast<value_t>()).matrix()
         ) * mat_sq;
     };
     if (_n_threads <= 1) {
-        for (int k = 0; k < m; ++k) routine(k);
+        for (int k = 0; k < m; ++k) routine(k, mat_sq);
     } else {
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < m; ++k) routine(k);
+        for (int k = 0; k < m; ++k) routine(k, mat_sq);
     }
     out.tail(m * d) = out.head(m * d);
 }
