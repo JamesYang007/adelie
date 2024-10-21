@@ -157,6 +157,23 @@ ADELIE_CORE_MATRIX_NAIVE_DENSE::cov(
 
 ADELIE_CORE_MATRIX_NAIVE_DENSE_TP
 void
+ADELIE_CORE_MATRIX_NAIVE_DENSE::sq_mul(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    auto outm = out.matrix();
+    dgemv(
+        _mat.array().square().matrix(),
+        weights.matrix(),
+        _n_threads,
+        _buff,
+        outm
+    );
+}
+
+ADELIE_CORE_MATRIX_NAIVE_DENSE_TP
+void
 ADELIE_CORE_MATRIX_NAIVE_DENSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out

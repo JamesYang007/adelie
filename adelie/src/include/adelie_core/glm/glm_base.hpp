@@ -85,6 +85,11 @@ public:
     ) =0;
 
     virtual value_t loss_full() =0;
+
+    virtual void inv_link(
+        const Eigen::Ref<const vec_value_t>& eta,
+        Eigen::Ref<vec_value_t> out
+    ) =0;
 };
 
 ADELIE_CORE_GLM_BASE_TP
@@ -196,5 +201,9 @@ ADELIE_CORE_GLM_BASE::check_loss(
     value_t loss(\
         const Eigen::Ref<const vec_value_t>& eta\
     ) override;\
-    value_t loss_full() override;
+    value_t loss_full() override;\
+    void inv_link(\
+        const Eigen::Ref<const vec_value_t>& eta,\
+        Eigen::Ref<vec_value_t> out\
+    ) override;
 #endif

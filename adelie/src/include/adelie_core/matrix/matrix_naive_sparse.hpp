@@ -42,6 +42,11 @@ private:
         size_t n_threads
     );
 
+    inline value_t _sq_cmul(
+        int j, 
+        const Eigen::Ref<const vec_value_t>& weights
+    );
+
     inline void _ctmul(
         int j, 
         value_t v, 

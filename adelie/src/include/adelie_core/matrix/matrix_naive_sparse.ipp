@@ -26,6 +26,25 @@ ADELIE_CORE_MATRIX_NAIVE_SPARSE::_cmul(
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_SPARSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_SPARSE::_sq_cmul(
+    int j, 
+    const Eigen::Ref<const vec_value_t>& weights
+) 
+{
+    constexpr size_t n_threads = 1;
+    const auto outer = _mat.outerIndexPtr()[j];
+    const auto size = _mat.outerIndexPtr()[j+1] - outer;
+    const Eigen::Map<const vec_sp_index_t> inner(
+        _mat.innerIndexPtr() + outer, size
+    );
+    const Eigen::Map<const vec_sp_value_t> value(
+        _mat.valuePtr() + outer, size
+    );
+    return spddot(inner, value.square(), weights, n_threads, _buff);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
 void
 ADELIE_CORE_MATRIX_NAIVE_SPARSE::_ctmul(
     int j, 
@@ -202,6 +221,24 @@ ADELIE_CORE_MATRIX_NAIVE_SPARSE::cov(
         for (int i2 = i1+1; i2 < q; ++i2) {
             out(i1, i2) = out(i2, i1);
         }
+    }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_SPARSE::sq_mul(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    const auto routine = [&](int k) {
+        out[k] = _sq_cmul(k, weights);
+    };
+    if (_n_threads <= 1) {
+        for (int k = 0; k < out.size(); ++k) routine(k);
+    } else {
+        #pragma omp parallel for schedule(static) num_threads(_n_threads)
+        for (int k = 0; k < out.size(); ++k) routine(k);
     }
 }
 

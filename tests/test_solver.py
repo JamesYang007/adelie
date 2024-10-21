@@ -73,7 +73,7 @@ class CvxpyGlmCox():
         self.inv_stop_order = np.argsort(self.stop_order)
 
         self.weights_sum = np.empty(n)
-        core.glm.GlmCox64._nnz_event_ties_sum(
+        core.glm.GlmCoxPack64._nnz_event_ties_sum(
             self.weights[self.stop_order], 
             stop[self.stop_order], 
             status[self.stop_order], 
@@ -83,7 +83,7 @@ class CvxpyGlmCox():
         self.weights_sum = self.weights_sum[self.inv_stop_order]
 
         self.weights_size = np.empty(n)
-        core.glm.GlmCox64._nnz_event_ties_sum(
+        core.glm.GlmCoxPack64._nnz_event_ties_sum(
             np.ones(n),
             stop[self.stop_order], 
             status[self.stop_order], 

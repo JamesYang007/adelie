@@ -57,5 +57,15 @@ ADELIE_CORE_GLM_MULTIGAUSSIAN::loss_full()
     ) / y.cols();
 }
 
+ADELIE_CORE_GLM_MULTIGAUSSIAN_TP
+void
+ADELIE_CORE_GLM_MULTIGAUSSIAN::inv_link(
+    const Eigen::Ref<const rowarr_value_t>& eta,
+    Eigen::Ref<rowarr_value_t> out
+)
+{
+    out = eta;
+}
+
 } // namespace glm
 } // namespace adelie_core
