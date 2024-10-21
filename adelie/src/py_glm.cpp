@@ -76,6 +76,19 @@ public:
             loss_full,
         );
     }
+
+    void inv_link(
+        const Eigen::Ref<const vec_value_t>& eta,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            inv_link,
+            eta, out
+        );
+    }
 };
 
 template <class T>
@@ -205,6 +218,18 @@ void glm_base(py::module_& m, const char* name)
         -------
         loss : float
             Loss at the saturated model.
+        )delimiter")
+        .def("inv_link", &internal_t::inv_link, R"delimiter(
+        Computes the inverse link function.
+
+        Computes :math:`g^{-1}(\eta)` where :math:`g(\mu)` is the link function.
+
+        Parameters
+        ----------
+        eta : (n,) ndarray
+            Natural parameter.
+        out : (n,) ndarray
+            Inverse link :math:`g^{-1}(\eta)`.
         )delimiter")
         ;
 }
@@ -417,6 +442,19 @@ public:
             loss_full,
         );
     }
+
+    void inv_link(
+        const Eigen::Ref<const rowarr_value_t>& eta,
+        Eigen::Ref<rowarr_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            inv_link,
+            eta, out
+        );
+    }
 };
 
 template <class T>
@@ -546,6 +584,18 @@ void glm_multibase(py::module_& m, const char* name)
         -------
         loss : float
             Loss at the saturated model.
+        )delimiter")
+        .def("inv_link", &internal_t::inv_link, R"delimiter(
+        Computes the inverse link function.
+
+        Computes :math:`g^{-1}(\eta)` where :math:`g(\mu)` is the link function.
+
+        Parameters
+        ----------
+        eta : (n, K) ndarray
+            Natural parameter.
+        out : (n, K) ndarray
+            Inverse link :math:`g^{-1}(\eta)`.
         )delimiter")
         ;
 }

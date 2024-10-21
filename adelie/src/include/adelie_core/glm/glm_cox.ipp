@@ -523,5 +523,15 @@ ADELIE_CORE_GLM_COX::loss_full()
     ).sum();
 }
 
+ADELIE_CORE_GLM_COX_TP
+void
+ADELIE_CORE_GLM_COX::inv_link(
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> 
+)
+{
+    throw util::adelie_core_error("GlmCox: inverse link is not defined.");
+}
+
 } // namespace glm
 } // namespace adelie_core

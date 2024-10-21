@@ -46,6 +46,17 @@ def run_common_test(
     loss_full_exp = model_exp.loss_full()
     assert np.allclose(loss_full, loss_full_exp)
 
+    # test inv_link
+    try:
+        inv_link = np.empty(shape)
+        model.inv_link(eta, inv_link)
+        inv_link_exp = np.empty(shape)
+        model_exp.inv_link(eta, inv_link_exp)
+        assert np.allclose(inv_link, inv_link_exp)
+    except Exception as e:
+        if "inverse link is not defined" not in str(e):
+            raise e
+
 
 def run_subset_test(
     model,
@@ -117,6 +128,9 @@ class GlmTestGaussian(GlmTest):
     def loss_full(self):
         return -np.sum(self.weights * self.y ** 2 / 2)
 
+    def inv_link(self, eta, out):
+        out[...] = eta
+
 
 @pytest.mark.parametrize("n", [1, 2, 5, 10, 20, 100])
 def test_gaussian(n, seed=0):
@@ -163,6 +177,9 @@ class GlmTestBinomialLogit(GlmTest):
             self.weights * (xlogy(self.y, self.y) + xlogy(1-self.y, 1-self.y))
         )
 
+    def inv_link(self, eta, out):
+        out[...] = 1 / (1 + np.exp(-eta))
+
 
 class GlmTestBinomialProbit(GlmTest):
     def __init__(self, y, weights):
@@ -195,6 +212,9 @@ class GlmTestBinomialProbit(GlmTest):
         return -np.sum(
             self.weights * (xlogy(self.y, self.y) + xlogy(1-self.y, 1-self.y))
         )
+
+    def inv_link(self, eta, out):
+        out[...] = norm.cdf(eta)
 
 
 @pytest.mark.parametrize("n", [1, 2, 5, 10, 20, 100])
@@ -247,6 +267,9 @@ class GlmTestPoisson(GlmTest):
 
     def loss_full(self):
         return np.sum(self.weights * (-xlogy(self.y, self.y) + self.y))
+
+    def inv_link(self, eta, out):
+        out[...] = np.exp(eta)
 
 
 @pytest.mark.parametrize("n",  [1, 2, 5, 10, 20, 100])
@@ -635,6 +658,9 @@ class GlmTestMultiGaussian(GlmTest):
         K = self.y.shape[-1]
         return -np.sum(self.weights[:, None] * self.y ** 2 / 2) / K
 
+    def inv_link(self, eta, out):
+        out[...] = eta
+
 
 @pytest.mark.parametrize("n", [1, 2, 5, 10, 20, 100])
 @pytest.mark.parametrize("K", [1, 2, 3, 4])
@@ -685,6 +711,9 @@ class GlmTestMultinomial(GlmTest):
     def loss_full(self):
         K = self.y.shape[-1]
         return -np.sum(self.weights * np.sum(xlogy(self.y, self.y), axis=-1)) / K
+
+    def inv_link(self, eta, out):
+        out[...] = np.exp(eta) / np.sum(np.exp(eta), axis=-1)[:, None]
 
 
 @pytest.mark.parametrize("n", [1, 2, 5, 10, 20, 100])

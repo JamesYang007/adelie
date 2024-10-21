@@ -53,5 +53,15 @@ ADELIE_CORE_GLM_POISSON::loss_full()
     return (weights * ((-y.log()).min(std::numeric_limits<value_t>::max()) * y + y)).sum();
 }
 
+ADELIE_CORE_GLM_POISSON_TP
+void
+ADELIE_CORE_GLM_POISSON::inv_link(
+    const Eigen::Ref<const vec_value_t>& eta,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    out = eta.exp();
+}
+
 } // namespace glm
 } // namespace adelie_core

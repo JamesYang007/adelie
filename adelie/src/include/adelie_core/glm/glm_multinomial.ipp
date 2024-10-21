@@ -97,5 +97,20 @@ ADELIE_CORE_GLM_MULTINOMIAL::loss_full()
     return loss;
 }
 
+ADELIE_CORE_GLM_MULTINOMIAL_TP
+void
+ADELIE_CORE_GLM_MULTINOMIAL::inv_link(
+    const Eigen::Ref<const rowarr_value_t>& eta,
+    Eigen::Ref<rowarr_value_t> out
+)
+{
+    Eigen::Map<vec_value_t> eta_max(_buff.data(), y.rows());
+    eta_max = eta.rowwise().maxCoeff();
+    out = (eta.colwise() - eta_max.matrix().transpose().array()).exp();
+    auto& sum_exp = eta_max;
+    sum_exp = out.rowwise().sum();
+    out.colwise() /= sum_exp.matrix().transpose().array();
+}
+
 } // namespace glm
 } // namespace adelie_core

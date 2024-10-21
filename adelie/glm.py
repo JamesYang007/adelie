@@ -101,6 +101,15 @@ def binomial(
             \\right)
         \\end{align*}
 
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_i
+            &=
+            \\log\\left(\\frac{\\mu_i}{1 - \\mu_i}\\right)
+        \\end{align*}
+
     The Binomial GLM family with the probit link function 
     specifies the loss function as:
 
@@ -114,6 +123,14 @@ def binomial(
         \\end{align*}
 
     where :math:`\\Phi` is the standard normal CDF.
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_i
+            &=
+            \\Phi^{-1}(\\mu_i)
+        \\end{align*}
 
     We assume that :math:`y_i \\in [0,1]`.
 
@@ -238,6 +255,9 @@ def cox(
     Note that :math:`\\overline{w}_i` and :math:`A_i(\\eta)` are only well-defined 
     whenever :math:`\\delta_i=1`, which is not an issue in the computation of :math:`\\ell(\\eta)`.
 
+    .. note::
+        The link function is **not defined** for this family.
+
     Parameters
     ----------
     start : (n,) ndarray
@@ -334,6 +354,15 @@ def gaussian(
             \\right) 
         \\end{align*}
 
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_i
+            &=
+            \\mu_i
+        \\end{align*}
+
     Parameters
     ----------
     y : (n,) ndarray 
@@ -408,6 +437,15 @@ def multigaussian(
                 -\\sum\\limits_{k=1}^K y_{ik} \\eta_{ik} 
                 +\\frac{\\|\\eta_{i\\cdot}\\|^2}{2}
             \\right)
+        \\end{align*}
+
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_{ik}
+            &=
+            \\mu_{ik}
         \\end{align*}
 
     Parameters
@@ -488,6 +526,17 @@ def multinomial(
             \\right)
         \\end{align*}
 
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_{ik}
+            &=
+            \\log(\\mu_{ik}) + C_i
+        \\end{align*}
+
+    for any arbitrary constants :math:`C_i`.
+
     We assume that every :math:`y_{ik} \\in [0,1]` and
     for each fixed :math:`i`, :math:`\\sum_{k=1}^K y_{ik} = 1`.
 
@@ -559,6 +608,15 @@ def poisson(
             \\sum\\limits_{i=1}^n w_i \\left(
                 -y_i \\eta_i + e^{\\eta_i}
             \\right) 
+        \\end{align*}
+
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_i
+            &=
+            \\log(\\mu_i)
         \\end{align*}
 
     We assume that :math:`y_i \\in \\mathbb{N}_0`.

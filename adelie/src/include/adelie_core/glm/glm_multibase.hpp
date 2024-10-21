@@ -87,6 +87,11 @@ public:
     ) =0;
 
     virtual value_t loss_full() =0;
+
+    virtual void inv_link(
+        const Eigen::Ref<const rowarr_value_t>& eta,
+        Eigen::Ref<rowarr_value_t> out
+    ) =0;
 };
 
 ADELIE_CORE_GLM_MULTIBASE_TP
@@ -211,5 +216,9 @@ ADELIE_CORE_GLM_MULTIBASE::check_loss(
     value_t loss(\
         const Eigen::Ref<const rowarr_value_t>& eta\
     ) override;\
-    value_t loss_full() override;
+    value_t loss_full() override;\
+    void inv_link(\
+        const Eigen::Ref<const rowarr_value_t>& eta,\
+        Eigen::Ref<rowarr_value_t> out\
+    ) override;
 #endif
