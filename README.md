@@ -4,7 +4,7 @@
 
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JamesYang007/adelie/test_docs.yml)
 [![Downloads](https://static.pepy.tech/badge/adelie)](https://pepy.tech/project/adelie)
-[![PyPI Downloads](https://img.shields.io/pypi/dm/adelie.svg?label=PyPI%20downloads)](https://pypi.org/project/adelie/)
+[![Downloads](https://static.pepy.tech/badge/adelie/month)](https://pepy.tech/project/adelie)
 ![versions](https://img.shields.io/pypi/pyversions/adelie.svg)
 ![PyPI - Version](https://img.shields.io/pypi/v/adelie)
 ![GitHub Release](https://img.shields.io/github/v/release/JamesYang007/adelie)
