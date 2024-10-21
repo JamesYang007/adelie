@@ -201,6 +201,7 @@ def cox(
     stop: np.ndarray,
     status: np.ndarray,
     *,
+    strata: np.ndarray =None,
     weights: np.ndarray =None,
     tie_method: str ="efron",
     dtype: Union[np.float32, np.float64] =None,
@@ -262,6 +263,27 @@ def cox(
             g(\\mu)_i = \\log(\\mu_i)
         \\end{align*}
 
+    If ``strata`` is specified, then the loss function 
+    is simply the sum of the losses for each strata.
+    Namely, given the strata vector :math:`S`,
+
+    .. math::
+        \\begin{align*}
+            \\ell(\\eta)
+            &=
+            \\sum_{m=0}^{M-1}
+            \\ell_m(\\eta_{\\mathcal{I}_m})
+        \\end{align*}
+
+    where
+    :math:`M` is the number of strata,
+    :math:`\\mathcal{I}_m = \\{i : S_i = m\\}` is the set of individuals in stratum :math:`m`,
+    :math:`\\eta_I` is the subset of :math:`\\eta` given by the indices in :math:`I`,
+    and :math:`\\ell_m` is the usual Cox loss function as above
+    using only the input data in :math:`\\mathcal{I}_m`.
+
+    .. note::
+        The strata indicator :math:`S_i` *must* take on values in the set :math:`\\{0, \\ldots, M-1\\}`.
 
     Parameters
     ----------
@@ -271,6 +293,10 @@ def cox(
         Stop time vector :math:`t`.
     status : (n,) ndarray 
         Status vector :math:`\\delta`.
+    strata : (n,) ndarray, optional
+        Strata vector :math:`S`.
+        If ``None``, there is only one stratum.
+        Default is ``None``.
     weights : (n,) ndarray, optional
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
@@ -309,18 +335,23 @@ def cox(
 
     core_base = dispatcher[dtype]
 
+    if strata is None:
+        strata = np.zeros(status.size, dtype=int)
+
     class _cox(glm_base, core_base):
         def __init__(self):
             self.start = np.array(start, copy=True, dtype=dtype)
             self.stop = np.array(stop, copy=True, dtype=dtype)
             glm_base.__init__(self, status, weights, core_base, dtype)
             self.status = self.y
+            self.strata = np.array(strata, copy=True, dtype=int)
             self.tie_method = tie_method
             core_base.__init__(
                 self, 
                 self.start, 
                 self.stop, 
                 self.status, 
+                self.strata,
                 self.weights, 
                 self.tie_method,
             )
@@ -331,6 +362,7 @@ def cox(
                 start=start, 
                 stop=stop,
                 status=status,
+                strata=strata,
                 weights=weights, 
                 tie_method=tie_method,
                 dtype=dtype,

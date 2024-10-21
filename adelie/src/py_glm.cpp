@@ -267,19 +267,18 @@ void glm_binomial_probit(py::module_& m, const char* name)
 }
 
 template <class T>
-void glm_cox(py::module_& m, const char* name)
+void glm_cox_pack(py::module_& m, const char* name)
 {
-    using internal_t = ad::glm::GlmCox<T>;
-    using base_t = typename internal_t::base_t;
+    using internal_t = ad::glm::GlmCoxPack<T>;
     using vec_value_t = typename internal_t::vec_value_t;
-    py::class_<internal_t, base_t>(m, name,
-        "Core GLM class for Cox family."
+    py::class_<internal_t>(m, name,
+        "Core GLM class for internal Cox family."
         )
         .def(py::init<
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
-            const Eigen::Ref<const vec_value_t>& ,
+            const Eigen::Ref<const vec_value_t>&,
             const std::string&
         >(),
             py::arg("start").noconvert(),
@@ -335,6 +334,34 @@ void glm_cox(py::module_& m, const char* name)
         ){
             ad::glm::cox::_scale(t, status, w, ad::util::convert_tie_method(tie_method), out);
         })
+        ;
+}
+
+template <class T>
+void glm_cox(py::module_& m, const char* name)
+{
+    using internal_t = ad::glm::GlmCox<T>;
+    using base_t = typename internal_t::base_t;
+    using vec_value_t = typename internal_t::vec_value_t;
+    using vec_index_t = typename internal_t::vec_index_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core GLM class for Cox family."
+        )
+        .def(py::init<
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const Eigen::Ref<const vec_index_t>&,
+            const Eigen::Ref<const vec_value_t>&,
+            const std::string&
+        >(),
+            py::arg("start").noconvert(),
+            py::arg("stop").noconvert(),
+            py::arg("status").noconvert(),
+            py::arg("strata").noconvert(),
+            py::arg("weights").noconvert(),
+            py::arg("tie_method")
+        )
         ;
 }
 
@@ -644,6 +671,8 @@ void register_glm(py::module_& m)
     glm_binomial_logit<float>(m, "GlmBinomialLogit32");
     glm_binomial_probit<double>(m, "GlmBinomialProbit64");
     glm_binomial_probit<float>(m, "GlmBinomialProbit32");
+    glm_cox_pack<double>(m, "GlmCoxPack64");
+    glm_cox_pack<float>(m, "GlmCoxPack32");
     glm_cox<double>(m, "GlmCox64");
     glm_cox<float>(m, "GlmCox32");
     glm_gaussian<double>(m, "GlmGaussian64");
