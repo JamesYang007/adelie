@@ -200,6 +200,26 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::rows() const
 }
 
 ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP 
+void
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::sq_mul(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    Eigen::Map<const rowmat_value_t> W(weights.data(), rows() / _K, _K);
+    Eigen::Map<vec_value_t> _w(_buff.data() + W.rows(), W.rows());
+    const auto p = _mat->cols();
+    for (int l = 0; l < static_cast<int>(_K); ++l) {
+        dvveq(_w, W.col(l), _n_threads);
+        Eigen::Map<vec_value_t> _out(_buff.data() + 2 * W.rows(), p);
+        _mat->sq_mul(_w, _out);
+        Eigen::Map<rowmat_value_t> Out(out.data(), out.size() / _K, _K);
+        auto Out_l = Out.col(l).array();
+        dvveq(Out_l, _out, _n_threads);
+    }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP 
 int
 ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::cols() const 
 { 
@@ -450,6 +470,19 @@ int
 ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::cols() const 
 { 
     return _K * _mat.cols(); 
+}
+
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
+void
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::sq_mul(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    Eigen::Map<const rowmat_value_t> W(weights.data(), rows() / _K, _K);
+    Eigen::Map<rowmat_value_t> Out(out.data(), cols() / _K, _K);
+    Eigen::setNbThreads(_n_threads);
+    Out.noalias() = _mat.array().square().matrix().transpose() * W;
 }
 
 ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 

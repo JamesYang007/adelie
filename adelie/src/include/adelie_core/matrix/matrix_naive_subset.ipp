@@ -204,6 +204,27 @@ ADELIE_CORE_MATRIX_NAIVE_CSUBSET::cov(
 
 ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
 void
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::sq_mul(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    const auto& _subset_csize = std::get<0>(_subset_cinfo);
+    const auto& _subset_cbegin = std::get<1>(_subset_cinfo);
+
+    vec_value_t sq_means(_mat->cols());
+    _mat->sq_mul(weights, sq_means);
+    for (int t = 0; t < static_cast<int>(_subset_cbegin.size()); ++t) {
+        const auto subset_idx = _subset_cbegin[t];
+        const auto j = _subset[subset_idx];
+        const auto q = _subset_csize[subset_idx];
+        auto curr_out = out.segment(subset_idx, q);
+        curr_out = sq_means.segment(j, q);
+    }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
+void
 ADELIE_CORE_MATRIX_NAIVE_CSUBSET::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
@@ -394,6 +415,20 @@ ADELIE_CORE_MATRIX_NAIVE_RSUBSET::cov(
         q
     );
     _mat->cov(j, q, _buffer, out, cov_buffer);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::sq_mul(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    _buffer.setZero();
+    for (int i = 0; i < _subset.size(); ++i) {
+        _buffer[_subset[i]] = weights[i];
+    }
+    _mat->sq_mul(_buffer, out);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP

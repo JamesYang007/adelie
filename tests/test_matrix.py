@@ -369,6 +369,13 @@ def run_naive(
     assert cX.cols() == p
     assert cX.shape == (n, p)
 
+    # test sq_mul
+    w = np.random.normal(0, 1, n).astype(dtype)
+    out = np.empty(p, dtype=dtype)
+    cX.sq_mul(w, out)
+    expected = w.T @ X ** 2
+    assert np.allclose(expected, out, atol=atol)
+
     # test sp_tmul
     out = np.empty((2, n), dtype=dtype)
     v = np.random.normal(0, 1, (2, p)).astype(dtype)

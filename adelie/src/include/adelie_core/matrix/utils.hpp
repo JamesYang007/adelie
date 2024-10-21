@@ -654,6 +654,51 @@ auto snp_phased_ancestry_dot(
     return vbuff.sum();
 }
 
+template <class IOType, class VType>
+auto snp_phased_ancestry_cross_dot(
+    const IOType& io,
+    int j0, 
+    int j1, 
+    const VType& v
+)
+{
+    using value_t = typename std::decay_t<VType>::Scalar;
+
+    const auto A = io.ancestries();
+    const auto snp0 = j0 / A;
+    const auto a0 = j0 - A * snp0;
+    const auto snp1 = j1 / A;
+    const auto a1 = j1 - A * snp1;
+
+    auto it0 = io.begin(snp0, a0, 0);
+    const auto end0 = io.end(snp0, a0, 0);
+    auto it1 = io.begin(snp1, a1, 1);
+    const auto end1 = io.end(snp1, a1, 1);
+
+    value_t sum = 0;
+    while (
+        (it0 != end0) &&
+        (it1 != end1)
+    ) {
+        const auto idx0 = *it0;
+        const auto idx1 = *it1;
+        if (idx0 < idx1) {
+            ++it0; 
+            continue;
+        }
+        else if (idx0 > idx1) {
+            ++it1;
+            continue;
+        } 
+        else {
+            sum += v[idx0];
+            ++it0;
+            ++it1;
+        }
+    }
+    return sum;
+}
+
 template <class IOType, class ValueType, class OutType>
 void snp_phased_ancestry_axi(
     const IOType& io,

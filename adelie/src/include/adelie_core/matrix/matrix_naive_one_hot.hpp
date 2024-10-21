@@ -59,6 +59,11 @@ private:
         size_t n_threads
     );
 
+    inline value_t _sq_cmul(
+        int j, 
+        const Eigen::Ref<const vec_value_t>& weights
+    );
+
     inline void _ctmul(
         int j, 
         value_t v, 
@@ -75,6 +80,14 @@ private:
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out,
         size_t n_threads
+    );
+
+    inline void _sq_bmul(
+        int begin,
+        int slice,
+        int level,
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
     );
 
     inline void _btmul(
