@@ -196,6 +196,7 @@ def objective(
     y = glm.y
 
     if groups is None:
+        p = X.shape[1]
         groups = np.arange(p, dtype=int)
 
     if glm.is_multi:
