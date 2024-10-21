@@ -19,7 +19,7 @@ def box(
     lower: np.ndarray,
     upper: np.ndarray,
     *,
-    method: str ="proximal-newton",
+    method: str ="proximal_newton",
     configs: dict =None,
     dtype: Union[np.float32, np.float64] =None,
 ):
@@ -39,14 +39,14 @@ def box(
         Method for :func:`~adelie.adelie_core.constraint.ConstraintBase64.solve`.
         It must be one of the following:
 
-            - ``"proximal-newton"``: proximal Newton algorithm.
+            - ``"proximal_newton"``: proximal Newton algorithm.
 
-        Default is ``"proximal-newton"``.
+        Default is ``"proximal_newton"``.
     configs : dict, optional
         Configurations specific to ``method``.
         For each method type, the following arguments are used:
 
-            - ``"proximal-newton"``:
+            - ``"proximal_newton"``:
                 max_iters : int, optional
                     Maximum number of proximal Newton iterations.
                     Default is ``100``.
@@ -100,7 +100,7 @@ def box(
     upper = np.minimum(upper, Configs.max_solver_value)
 
     core_base = {
-        "proximal-newton": {
+        "proximal_newton": {
             np.float32: core.constraint.ConstraintBox32,
             np.float64: core.constraint.ConstraintBox64,
         },
@@ -108,7 +108,7 @@ def box(
 
     user_configs = configs
     configs = {
-        "proximal-newton": {
+        "proximal_newton": {
             "max_iters": 100,
             "tol": 1e-9,
             "pinball_max_iters": int(1e5),
@@ -141,7 +141,7 @@ def linear(
     *,
     vars: np.ndarray =None,
     copy: bool =False,
-    method: str ="proximal-newton",
+    method: str ="proximal_newton",
     configs: dict =None,
     dtype: Union[np.float32, np.float64] =None,
 ):
@@ -174,14 +174,14 @@ def linear(
         Method for :func:`~adelie.adelie_core.constraint.ConstraintBase64.solve`.
         It must be one of the following:
 
-            - ``"proximal-newton"``: proximal Newton algorithm.
+            - ``"proximal_newton"``: proximal Newton algorithm.
 
-        Default is ``"proximal-newton"``.
+        Default is ``"proximal_newton"``.
     configs : dict, optional
         Configurations specific to ``method``.
         For each method type, the following arguments are used:
 
-            - ``"proximal-newton"``:
+            - ``"proximal_newton"``:
                 max_iters : int, optional
                     Maximum number of proximal Newton iterations.
                     Default is ``100``.
@@ -265,7 +265,7 @@ def linear(
     upper = np.minimum(upper, Configs.max_solver_value)
 
     core_base = {
-        "proximal-newton": {
+        "proximal_newton": {
             np.float32: core.constraint.ConstraintLinear32,
             np.float64: core.constraint.ConstraintLinear64,
         },
@@ -273,7 +273,7 @@ def linear(
 
     user_configs = configs
     configs = {
-        "proximal-newton": {
+        "proximal_newton": {
             "max_iters": 100,
             "tol": 1e-9,
             "nnls_max_iters": int(1e5),
@@ -342,7 +342,7 @@ def one_sided(
     D: np.ndarray,
     b: np.ndarray,
     *,
-    method: str ="proximal-newton",
+    method: str ="proximal_newton",
     configs: dict =None,
     dtype: Union[np.float32, np.float64] =None,
 ):
@@ -363,15 +363,15 @@ def one_sided(
         Method for :func:`~adelie.adelie_core.constraint.ConstraintBase64.solve`.
         It must be one of the following:
 
-            - ``"proximal-newton"``: proximal Newton algorithm.
+            - ``"proximal_newton"``: proximal Newton algorithm.
             - ``"admm"``: ADMM algorithm.
 
-        Default is ``"proximal-newton"``.
+        Default is ``"proximal_newton"``.
     configs : dict, optional
         Configurations specific to ``method``.
         For each method type, the following arguments are used:
 
-            - ``"proximal-newton"``:
+            - ``"proximal_newton"``:
                 max_iters : int, optional
                     Maximum number of proximal Newton iterations.
                     Default is ``100``.
@@ -436,7 +436,7 @@ def one_sided(
     b = np.minimum(b, Configs.max_solver_value)
 
     core_base = {
-        "proximal-newton": {
+        "proximal_newton": {
             np.float32: core.constraint.ConstraintOneSided32,
             np.float64: core.constraint.ConstraintOneSided64,
         },
@@ -448,7 +448,7 @@ def one_sided(
 
     user_configs = configs
     configs = {
-        "proximal-newton": {
+        "proximal_newton": {
             "max_iters": 100,
             "tol": 1e-9,
             "pinball_max_iters": int(1e5),

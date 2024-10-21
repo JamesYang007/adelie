@@ -67,7 +67,7 @@ def run_test(
 @pytest.mark.parametrize("d", [1, 2, 5, 10, 20, 50])
 @pytest.mark.parametrize("lower", [-1, -1e-14, 0])
 @pytest.mark.parametrize("upper", [1, 1e-14, 0])
-@pytest.mark.parametrize("method", ["proximal-newton"])
+@pytest.mark.parametrize("method", ["proximal_newton"])
 @pytest.mark.parametrize("dtype", [np.float64])
 @pytest.mark.parametrize("seed", np.arange(10))
 def test_box(d, lower, upper, method, dtype, seed):
@@ -75,7 +75,7 @@ def test_box(d, lower, upper, method, dtype, seed):
     lower = np.random.uniform(lower, 0, d)
     upper = np.random.uniform(0, 1, d)
     configs = {
-        "proximal-newton": {
+        "proximal_newton": {
             "max_iters": 1000,
             "tol": 1e-14,
             "pinball_tol": 1e-14,
@@ -104,7 +104,7 @@ def test_box(d, lower, upper, method, dtype, seed):
 @pytest.mark.parametrize("d", [10])
 @pytest.mark.parametrize("lower", [-1, -1e-14, 0])
 @pytest.mark.parametrize("upper", [1, 1e-14, 0])
-@pytest.mark.parametrize("method", ["proximal-newton"])
+@pytest.mark.parametrize("method", ["proximal_newton"])
 @pytest.mark.parametrize("dtype", [np.float64])
 @pytest.mark.parametrize("seed", np.arange(10))
 def test_linear(m, d, lower, upper, method, dtype, seed):
@@ -114,7 +114,7 @@ def test_linear(m, d, lower, upper, method, dtype, seed):
     lower = np.random.uniform(lower, 0, m)
     upper = np.random.uniform(0, upper, m)
     configs = {
-        "proximal-newton": {
+        "proximal_newton": {
             "max_iters": 1000,
             "tol": 1e-16,
             "nnls_tol": 1e-16,
@@ -143,14 +143,14 @@ def test_linear(m, d, lower, upper, method, dtype, seed):
 
 
 @pytest.mark.parametrize("d", [1, 2, 5, 10, 20, 50])
-@pytest.mark.parametrize("method", ["proximal-newton"])
+@pytest.mark.parametrize("method", ["proximal_newton"])
 @pytest.mark.parametrize("dtype", [np.float64])
 @pytest.mark.parametrize("seed", np.arange(10))
 def test_lower(d, method, dtype, seed):
     np.random.seed(seed)
     b = -np.random.uniform(0, 1, d)
     configs = {
-        "proximal-newton": {
+        "proximal_newton": {
             "max_iters": 1000,
             "tol": 1e-14,
             "pinball_tol": 1e-14,
@@ -177,7 +177,7 @@ def test_lower(d, method, dtype, seed):
 
 @pytest.mark.parametrize("d", [1, 2, 5, 10, 20, 50])
 @pytest.mark.parametrize("upper", [1, 1e-14, 0])
-@pytest.mark.parametrize("method", ["proximal-newton", "admm"])
+@pytest.mark.parametrize("method", ["proximal_newton", "admm"])
 @pytest.mark.parametrize("dtype", [np.float64])
 @pytest.mark.parametrize("seed", np.arange(5))
 def test_one_sided(d, upper, method, dtype, seed):
@@ -185,7 +185,7 @@ def test_one_sided(d, upper, method, dtype, seed):
     D = 2 * np.random.binomial(1, 0.5, d) - 1
     b = np.random.uniform(0, upper, d)
     configs = {
-        "proximal-newton": {
+        "proximal_newton": {
             "max_iters": 1000,
             "tol": 1e-14,
             "pinball_tol": 1e-14,
@@ -217,14 +217,14 @@ def test_one_sided(d, upper, method, dtype, seed):
 
 
 @pytest.mark.parametrize("d", [1, 2, 5, 10, 20, 50])
-@pytest.mark.parametrize("method", ["proximal-newton"])
+@pytest.mark.parametrize("method", ["proximal_newton"])
 @pytest.mark.parametrize("dtype", [np.float64])
 @pytest.mark.parametrize("seed", np.arange(5))
 def test_upper(d, method, dtype, seed):
     np.random.seed(seed)
     b = np.random.uniform(0, 1, d)
     configs = {
-        "proximal-newton": {
+        "proximal_newton": {
             "max_iters": 1000,
             "tol": 1e-14,
             "pinball_tol": 1e-14,
