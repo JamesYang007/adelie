@@ -17,7 +17,8 @@ Adelie documentation
 `Issue Tracker <https://github.com/JamesYang007/adelie/issues>`_ 
 
 
-Adelie is a fast and flexible Python package for solving group lasso and elastic net problems. 
+Adelie is a fast and flexible Python package for solving 
+lasso, elastic net, group lasso, and group elastic net problems. 
 It offers a general purpose group elastic net solver, 
 a wide range of matrix classes that can exploit special structure to allow large-scale inputs,
 and an assortment of generalized linear model (GLM) classes for fitting various types of data.
