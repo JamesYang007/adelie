@@ -3,34 +3,34 @@
 
 #ifndef ADELIE_CORE_GLM_COX_PACK_TP
 #define ADELIE_CORE_GLM_COX_PACK_TP \
-    template <class ValueType>
+    template <class ValueType, class IndexType>
 #endif
 #ifndef ADELIE_CORE_GLM_COX_PACK
 #define ADELIE_CORE_GLM_COX_PACK \
-    GlmCoxPack<ValueType>
+    GlmCoxPack<ValueType, IndexType>
 #endif
 
 #ifndef ADELIE_CORE_GLM_COX_TP
 #define ADELIE_CORE_GLM_COX_TP \
-    template <class ValueType>
+    template <class ValueType, class IndexType>
 #endif
 #ifndef ADELIE_CORE_GLM_COX
 #define ADELIE_CORE_GLM_COX \
-    GlmCox<ValueType>
+    GlmCox<ValueType, IndexType>
 #endif
 
 namespace adelie_core {
 namespace glm {
 
-template <class ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
 class GlmCoxPack
 {
 public:
+    using index_t = IndexType;
     using value_t = ValueType;
+    using vec_index_t = util::rowvec_type<index_t>;
     using vec_value_t = util::rowvec_type<value_t>;
     using map_cvec_value_t = Eigen::Map<const vec_value_t>;
-    using index_t = Eigen::Index;
-    using vec_index_t = util::rowvec_type<index_t>;
 
     const util::tie_method_type tie_method;
 
@@ -113,7 +113,7 @@ public:
     inline value_t loss_full();
 };
 
-template <class ValueType>
+template <class ValueType, class IndexType=Eigen::Index>
 class GlmCox: public GlmBase<ValueType>
 {
 public:
@@ -121,7 +121,7 @@ public:
     using typename base_t::value_t;
     using typename base_t::vec_value_t;
     using typename base_t::map_cvec_value_t;
-    using pack_t = GlmCoxPack<value_t>;
+    using pack_t = GlmCoxPack<value_t, IndexType>;
     using index_t = typename pack_t::index_t;
     using vec_index_t = typename pack_t::vec_index_t;
 
