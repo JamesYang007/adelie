@@ -585,7 +585,7 @@ ADELIE_CORE_CONSTRAINT_LINEAR::solve_zero(
         return (ui <= 0) ? Configs::max_solver_value : 0;
     });
     internal_matrix_t _X(*_A); // _X == _A^T
-    optimization::StateNNLS<internal_matrix_t> state_nnls(
+    optimization::StateNNLS<internal_matrix_t, value_t, index_t> state_nnls(
         _X, v.square().sum(), _A_vars, std::min<size_t>(m, d), 
         _nnls_max_iters, _nnls_tol, 
         _mu_active.size(),
