@@ -311,7 +311,7 @@ ADELIE_CORE_CONSTRAINT_LINEAR::solve(
         Qmu_resid = Qv - _ATmu;
         const value_t loss = 0.5 * Qmu_resid.square().sum();
         internal_matrix_t _X(*_A); // _X == _A^T
-        optimization::StateNNLS<internal_matrix_t> state_nnls(
+        optimization::StateNNLS<internal_matrix_t, value_t, index_t> state_nnls(
             _X, v_norm * v_norm, _A_vars, std::min<size_t>(m, d),
             _nnls_max_iters, _nnls_tol, 
             _mu_active.size(),
@@ -447,7 +447,7 @@ ADELIE_CORE_CONSTRAINT_LINEAR::solve(
                 for (Eigen::Index ii = 0; ii < static_cast<Eigen::Index>(active_size); ++ii) screen_invariance(ii);
             }
 
-            optimization::StatePinball<A_t> state_pinball(
+            optimization::StatePinball<A_t, value_t, index_t> state_pinball(
                 *_A, var, hess, _l, _u, 
                 std::min(m, d), _pinball_max_iters, _pinball_tol, 
                 _mu_active.size(),
@@ -585,7 +585,7 @@ ADELIE_CORE_CONSTRAINT_LINEAR::solve_zero(
         return (ui <= 0) ? Configs::max_solver_value : 0;
     });
     internal_matrix_t _X(*_A); // _X == _A^T
-    optimization::StateNNLS<internal_matrix_t> state_nnls(
+    optimization::StateNNLS<internal_matrix_t, value_t, index_t> state_nnls(
         _X, v.square().sum(), _A_vars, std::min<size_t>(m, d), 
         _nnls_max_iters, _nnls_tol, 
         _mu_active.size(),
