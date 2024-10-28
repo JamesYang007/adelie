@@ -871,6 +871,29 @@ void matrix_naive_base(py::module_& m, const char* name)
 }
 
 template <class ValueType>
+void matrix_naive_block_diag(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveBlockDiag<ValueType>;
+    using base_t = typename internal_t::base_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive block-diagonal matrix."
+        )
+        .def(
+            py::init([](py::list mat_list_py, size_t n_threads) {
+                std::vector<base_t*> mat_list;
+                mat_list.reserve(mat_list_py.size());
+                for (auto obj : mat_list_py) {
+                    mat_list.push_back(py::cast<base_t*>(obj));
+                }
+                return new internal_t(mat_list, n_threads);
+            }), 
+            py::arg("mat_list").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+template <class ValueType>
 void matrix_naive_cconcatenate(py::module_& m, const char* name)
 {
     using internal_t = ad::matrix::MatrixNaiveCConcatenate<ValueType>;
@@ -1273,6 +1296,9 @@ void register_matrix(py::module_& m)
     /* naive matrices */
     matrix_naive_base<double>(m, "MatrixNaiveBase64");
     matrix_naive_base<float>(m, "MatrixNaiveBase32");
+
+    matrix_naive_block_diag<double>(m, "MatrixNaiveBlockDiag64");
+    matrix_naive_block_diag<float>(m, "MatrixNaiveBlockDiag32");
 
     matrix_naive_convex_relu_dense<
         dense_type<double, Eigen::RowMajor>,

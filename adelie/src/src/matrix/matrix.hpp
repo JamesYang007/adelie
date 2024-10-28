@@ -9,6 +9,7 @@
 #include <adelie_core/matrix/matrix_cov_lazy_cov.hpp>
 #include <adelie_core/matrix/matrix_cov_sparse.hpp>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
+#include <adelie_core/matrix/matrix_naive_block_diag.hpp>
 #include <adelie_core/matrix/matrix_naive_concatenate.hpp>
 #include <adelie_core/matrix/matrix_naive_convex_relu.hpp>
 #include <adelie_core/matrix/matrix_naive_dense.hpp>
@@ -53,6 +54,9 @@ extern template class adelie_core::matrix::MatrixCovSparse<sparse_type<double, E
 
 extern template class adelie_core::matrix::MatrixNaiveBase<float>;
 extern template class adelie_core::matrix::MatrixNaiveBase<double>;
+
+extern template class adelie_core::matrix::MatrixNaiveBlockDiag<float>;
+extern template class adelie_core::matrix::MatrixNaiveBlockDiag<double>;
 
 extern template class adelie_core::matrix::MatrixNaiveCConcatenate<float>;
 extern template class adelie_core::matrix::MatrixNaiveCConcatenate<double>;

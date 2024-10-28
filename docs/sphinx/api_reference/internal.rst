@@ -62,6 +62,8 @@ Internal
     adelie_core.matrix.MatrixCovSparse64F
     adelie_core.matrix.MatrixNaiveBase32
     adelie_core.matrix.MatrixNaiveBase64
+    adelie_core.matrix.MatrixNaiveBlockDiag32
+    adelie_core.matrix.MatrixNaiveBlockDiag64
     adelie_core.matrix.MatrixNaiveCConcatenate32
     adelie_core.matrix.MatrixNaiveCConcatenate64
     adelie_core.matrix.MatrixNaiveRConcatenate32

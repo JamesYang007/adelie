@@ -4,7 +4,6 @@ import numpy as np
 import scipy
 import os
 import pytest
-import warnings
 
 # Set to a value that will test all cases
 # of n_threads being capped to 1 and using the passed-in value.
@@ -180,7 +179,7 @@ def test_cov_block_diag(n, ps, dtype, seed=0):
     for i, pi in enumerate(ps):
         A[pos:pos+pi, pos:pos+pi] = As[i]
         pos += pi
-    cA = mod.block_diag(As, n_threads=4)
+    cA = mod.block_diag(As, method="cov", n_threads=4)
     run_cov(A, cA, dtype)
 
 
@@ -388,17 +387,39 @@ def run_naive(
 
 @pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
+@pytest.mark.parametrize("ns, ps", [
+    [[1, 3, 10], [3, 1, 2]],
+    [[2, 3, 1], [3, 10, 2]],
+    [[5, 2, 5], [1, 1, 1]],
+    [[1, 1, 1], [1, 1, 1]],
+])
+def test_naive_block_diag(ns, ps, dtype, n_threads=2, seed=0):
+    np.random.seed(seed)
+    Xs = [
+        np.random.normal(0, 1, (n, p)).astype(dtype)
+        for n, p in zip(ns, ps)
+    ]
+    X = scipy.linalg.block_diag(*Xs)
+    cX = mod.block_diag(
+        [mod.dense(_X, method="naive", n_threads=n_threads) for _X in Xs], 
+        n_threads=n_threads, 
+    )
+    run_naive(X, cX, dtype)
+
+
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("ps", [[1, 7, 41, 13, 113]])
 @pytest.mark.parametrize("n", [10, 20, 30])
 def test_naive_cconcatenate(n, ps, dtype, n_threads=2, seed=0):
     np.random.seed(seed)
     Xs = [
-        np.random.normal(0, 1, (n, p))
+        np.random.normal(0, 1, (n, p)).astype(dtype)
         for p in ps
     ]
     X = np.concatenate(Xs, axis=1, dtype=dtype)
     cX = mod.concatenate(
-        [mod.dense(_X.astype(dtype), method="naive", n_threads=n_threads) for _X in Xs], 
+        [mod.dense(_X, method="naive", n_threads=n_threads) for _X in Xs], 
         axis=1,
         n_threads=n_threads, 
     )
@@ -412,12 +433,12 @@ def test_naive_cconcatenate(n, ps, dtype, n_threads=2, seed=0):
 def test_naive_rconcatenate(ns, p, dtype, n_threads=2, seed=0):
     np.random.seed(seed)
     Xs = [
-        np.random.normal(0, 1, (n, p))
+        np.random.normal(0, 1, (n, p)).astype(dtype)
         for n in ns
     ]
     X = np.concatenate(Xs, axis=0, dtype=dtype)
     cX = mod.concatenate(
-        [mod.dense(_X.astype(dtype), method="naive", n_threads=n_threads) for _X in Xs], 
+        [mod.dense(_X, method="naive", n_threads=n_threads) for _X in Xs], 
         axis=0,
         n_threads=n_threads, 
     )

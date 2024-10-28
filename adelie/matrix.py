@@ -198,6 +198,7 @@ class PyMatrixNaiveBase:
 def block_diag(
     mats: list,
     *,
+    method: str ="naive",
     n_threads: int =1,
 ):
     """Creates a block-diagonal matrix given by the list of matrices.
@@ -207,6 +208,8 @@ def block_diag(
 
     .. math::
         \\begin{align*}
+            A 
+            =
             \\begin{bmatrix}
                 A_1 & 0 & \\cdots & 0 \\\\
                 0 & A_2 & \\cdots & 0 \\\\
@@ -216,12 +219,20 @@ def block_diag(
         \\end{align*}
 
     .. note::
-        This matrix only works for covariance method!
+        The routines for this matrix are faster when there are many small blocks
+        rather than few large blocks.
 
     Parameters
     ----------
     mats : list
         List of matrices to represent the block diagonal matrix.
+    method : str, optional
+        Method type. It must be one of the following:
+
+            - ``"naive"``: naive matrix.
+            - ``"cov"``: covariance matrix.
+
+        Default is ``"naive"``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -235,9 +246,11 @@ def block_diag(
     --------
     adelie.adelie_core.matrix.MatrixCovBlockDiag32
     adelie.adelie_core.matrix.MatrixCovBlockDiag64
+    adelie.adelie_core.matrix.MatrixNaiveBlockDiag32
+    adelie.adelie_core.matrix.MatrixNaiveBlockDiag64
     """
     mats = [
-        dense(mat, method="cov", n_threads=1)
+        dense(mat, method=method, n_threads=1)
         if isinstance(mat, np.ndarray) else
         mat
         for mat in mats
@@ -248,13 +261,24 @@ def block_diag(
         if dtype == _to_dtype(mat): continue
         raise ValueError("All matrices must have the same underlying data type.")
 
-    dispatcher = {
+    cov_dispatcher = {
         np.float64: core.matrix.MatrixCovBlockDiag64,
         np.float32: core.matrix.MatrixCovBlockDiag32,
     }
+    naive_dispatcher = {
+        np.float64: core.matrix.MatrixNaiveBlockDiag64,
+        np.float32: core.matrix.MatrixNaiveBlockDiag32,
+    }
+    dispatcher = {
+        "cov": cov_dispatcher,
+        "naive": naive_dispatcher,
+    }
 
-    core_base = dispatcher[dtype]
-    py_base = PyMatrixCovBase
+    core_base = dispatcher[method][dtype]
+    py_base = {
+        "naive" : PyMatrixNaiveBase,
+        "cov" : PyMatrixCovBase,
+    }[method]
 
     class _block_diag(core_base, py_base):
         def __init__(self):
@@ -388,6 +412,9 @@ def convex_relu(
         \\end{align*}
 
     and :math:`D_i \\in \\{0, 1\\}^{n \\times n}` are diagonal matrices.
+
+    .. note::
+        This matrix only works for naive method!
 
     Parameters
     ----------
