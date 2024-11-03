@@ -75,6 +75,17 @@ public:
     );
 
     ADELIE_CORE_MATRIX_NAIVE_PURE_OVERRIDE_DECL
+
+    void mean(
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    ) override; 
+
+    void var(
+        const Eigen::Ref<const vec_value_t>& centers,
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    ) override;
 };
 
 } // namespace matrix

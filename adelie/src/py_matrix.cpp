@@ -680,6 +680,33 @@ public:
         );
     }
 
+    void mean(
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE(
+            void,
+            base_t,
+            mean,
+            weights, out
+        );
+    }
+
+    void var(
+        const Eigen::Ref<const vec_value_t>& centers,
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE(
+            void,
+            base_t,
+            var,
+            centers, weights, out
+        );
+    }
+
     int rows() const override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -791,7 +818,7 @@ void matrix_naive_base(py::module_& m, const char* name)
             Vector to multiply with the matrix.
         w : (n,) ndarray
             Vector of weights.
-        out : (q,) ndarray
+        out : (p,) ndarray
             Vector to store in-place the result.
         )delimiter")
         .def("sq_mul", &internal_t::sq_mul, R"delimiter(
@@ -804,7 +831,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         ----------
         weights : (n,) ndarray
             Vector of weights.
-        out : (n,) ndarray
+        out : (p,) ndarray
             Vector to store in-place the result.
         )delimiter")
         .def("sp_tmul", &internal_t::sp_tmul, R"delimiter(
@@ -819,6 +846,46 @@ void matrix_naive_base(py::module_& m, const char* name)
             Sparse matrix to multiply with the matrix.
         out : (L, n) ndarray
             Matrix to store in-place the result.
+        )delimiter")
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The default implied column means are given by
+
+        .. math::
+            \begin{align*}
+                m_j = \sum_{i=1}^n w_i X_{ij}
+            \end{align*}
+
+        Unless stated otherwise, this function will compute the above.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        The default implied column variances are given by
+
+        .. math::
+            \begin{align*}
+                v_j = \sum_{i=1}^n w_i (X_{ij} - c_j)^2
+            \end{align*}
+
+        Unless stated otherwise, this function will compute the above.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
         )delimiter")
         .def("cov", &internal_t::cov, R"delimiter(
         Computes a weighted covariance matrix.
@@ -890,6 +957,36 @@ void matrix_naive_block_diag(py::module_& m, const char* name)
             py::arg("mat_list").noconvert(),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The implied column means are a concatenation of the 
+        implied column means of each block diagonal matrix
+        where the weights are subsetted to the corresponding entries.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        The implied column variances are a concatenation of the 
+        implied column variances of each block diagonal matrix
+        where the centers and weights are subsetted to the corresponding entries.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -912,6 +1009,35 @@ void matrix_naive_cconcatenate(py::module_& m, const char* name)
             }), 
             py::arg("mat_list").noconvert()
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The implied column means are a concatenation of the 
+        implied column means of each sub-matrix.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        The implied column variances are a concatenation of the 
+        implied column variances of each sub-matrix
+        where the centers are subsetted to the corresponding entries.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -934,6 +1060,36 @@ void matrix_naive_rconcatenate(py::module_& m, const char* name)
             }), 
             py::arg("mat_list").noconvert()
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The implied column means are a sum of the 
+        implied column means of each sub-matrix
+        where the weights are subsetted to the corresponding entries.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        The implied column variances are a sum of the 
+        implied column variances of each sub-matrix
+        where the weights are subsetted to the corresponding entries.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 

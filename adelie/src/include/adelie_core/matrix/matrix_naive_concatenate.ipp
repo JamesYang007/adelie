@@ -264,6 +264,39 @@ ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::sp_tmul(
     }
 }
 
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::mean(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    int n_processed = 0;
+    for (size_t i = 0; i < _mat_list.size(); ++i) {
+        auto& mat = *_mat_list[i];
+        const auto p = mat.cols();
+        mat.mean(weights, out.segment(n_processed, p));
+        n_processed += p;
+    }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::var(
+    const Eigen::Ref<const vec_value_t>& centers,
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    int n_processed = 0;
+    for (size_t i = 0; i < _mat_list.size(); ++i) {
+        auto& mat = *_mat_list[i];
+        const auto p = mat.cols();
+        mat.var(weights, out.segment(n_processed, p));
+        n_processed += p;
+    }
+}
+
 ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
 auto 
 ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::init_rows(
@@ -528,6 +561,51 @@ ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::sp_tmul(
         );
         mat.sp_tmul(v, out_curr);
         out.middleCols(begin, rows_curr) = out_curr;
+        begin += rows_curr;
+    }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::mean(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    size_t begin = 0;
+    out.setZero();
+    Eigen::Map<vec_value_t> buff(_buff.data(), out.size());
+    for (size_t i = 0; i < _mat_list.size(); ++i) {
+        auto& mat = *_mat_list[i];
+        const auto rows_curr = mat.rows();
+        const Eigen::Map<const vec_value_t> weights_curr(
+            weights.data() + begin, rows_curr
+        );
+        mat.mean(weights_curr, buff);
+        out += buff;
+        begin += rows_curr;
+    }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::var(
+    const Eigen::Ref<const vec_value_t>& centers,
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    size_t begin = 0;
+    out.setZero();
+    Eigen::Map<vec_value_t> buff(_buff.data(), out.size());
+    for (size_t i = 0; i < _mat_list.size(); ++i) {
+        auto& mat = *_mat_list[i];
+        const auto rows_curr = mat.rows();
+        const Eigen::Map<const vec_value_t> weights_curr(
+            weights.data() + begin, rows_curr
+        );
+        mat.var(centers, weights_curr, buff);
+        out += buff;
         begin += rows_curr;
     }
 }
