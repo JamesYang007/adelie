@@ -37,9 +37,6 @@ public:
     using index_t = IndexType;
     using vec_value_t = util::rowvec_type<value_t>;
     using vec_index_t = util::rowvec_type<index_t>;
-    using map_vec_value_t = Eigen::Map<vec_value_t>;
-    using map_vec_index_t = Eigen::Map<vec_index_t>;
-    using map_cvec_value_t = Eigen::Map<const vec_value_t>;
 
     const Eigen::Map<const matrix_t> S;
 
