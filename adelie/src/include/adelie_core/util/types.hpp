@@ -79,7 +79,9 @@ enum class css_method_type
 
 enum class css_loss_type
 {
-    _least_squares
+    _least_squares,
+    _subset_factor,
+    _min_det
 };
 
 inline screen_rule_type convert_screen_rule(
@@ -149,6 +151,8 @@ inline css_loss_type convert_css_loss(
 )
 {
     if (css_loss == "least_squares") return css_loss_type::_least_squares;
+    if (css_loss == "subset_factor") return css_loss_type::_subset_factor;
+    if (css_loss == "min_det") return css_loss_type::_min_det;
     throw util::adelie_core_error("Invalid CSS loss type: " + css_loss);
 }
 

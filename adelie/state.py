@@ -3473,6 +3473,8 @@ def css_cov(
         Loss type. It must be one of the following:
 
             - ``"least_squares"``: least squares loss.
+            - ``"subset_factor"``: subset factor loss.
+            - ``"min_det"``: minimum determinant loss.
 
     n_threads : int
         Number of threads.

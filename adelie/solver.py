@@ -1297,7 +1297,7 @@ def css_cov(
     :math:`\\Sigma \\in \\mathbb{R}^{p \\times p}` is a positive semi-definite matrix
     and :math:`T` is an index set of size :math:`k`.
 
-    The least squares objective is given by
+    The least squares loss is given by
 
     .. math::
         \\begin{align*}
@@ -1306,6 +1306,28 @@ def css_cov(
             \\mathrm{Tr}\\left(
                 \\Sigma - \\Sigma_{\\cdot T} \\Sigma_{T,T}^\\dagger \\Sigma_{T \\cdot}
             \\right)
+        \\end{align*}
+
+    The subset factor loss is given by
+
+    .. math::
+        \\begin{align*}
+            \\ell(\\Sigma, T)
+            =
+            \\log|\\Sigma_T| 
+            +
+            \\log(|\\mathrm{diag}(
+                \\Sigma_{-T,-T} - \\Sigma_{-T,T} \\Sigma_{T,T}^\\dagger \\Sigma_{T,-T}
+            )|)
+        \\end{align*}
+
+    The minimum determinant loss is given by
+
+    .. math::
+        \\begin{align*}
+            \\ell(\\Sigma, T)
+            =
+            \\left|\\Sigma_T\\right|
         \\end{align*}
 
     .. note::
@@ -1346,6 +1368,8 @@ def css_cov(
         Loss type. It must be one of the following:
 
             - ``"least_squares"``: least squares loss.
+            - ``"subset_factor"``: subset factor loss.
+            - ``"min_det"``: minimum determinant loss.
 
         Default is ``"least_squares"``.
     n_threads : int, optional

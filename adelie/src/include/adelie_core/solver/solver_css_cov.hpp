@@ -1,4 +1,6 @@
 #pragma once
+#include <unordered_set>
+#include <vector>
 #include <Eigen/Cholesky>
 #include <adelie_core/configs.hpp>
 #include <adelie_core/matrix/utils.hpp>
@@ -41,6 +43,46 @@ void compute_least_squares_scores(
     const auto S_diag = S.diagonal().transpose().array();
     const auto mask = (S_diag <= 0).template cast<value_t>();
     out = out / (S_diag + mask) * (1-mask);
+}
+
+template <class ValueType, class IndexType>
+ADELIE_CORE_STRONG_INLINE
+void compute_subset_factor_scores(
+    const std::unordered_set<IndexType>& subset_set,
+    const Eigen::Ref<const util::colmat_type<ValueType>>& S,
+    Eigen::Ref<util::rowvec_type<ValueType>> out,
+    size_t n_threads
+)
+{
+    using value_t = ValueType;
+    using vec_value_t = util::rowvec_type<value_t>;
+    const auto S_diag = S.diagonal().transpose().array();
+    const auto p = S.cols();
+    out = -S_diag.max(1e-100).log();
+    const auto routine = [&](auto i) {
+        const auto S_ii = S_diag[i];
+        const auto S_i = S.col(i).transpose().array();
+        const auto r_i = (S_diag - S_i.square() * ((S_ii > 0) / (S_ii + (S_ii <= 0)))).max(1e-100).log();
+        out[i] -= vec_value_t::NullaryExpr(p, [&](auto j) {
+            return ((subset_set.find(j) != subset_set.end()) || (j == i)) ? 0 : r_i[j];
+        }).sum();
+    };
+    if (n_threads <= 1) {
+        for (int i = 0; i < p; ++i) routine(i);
+    } else {
+        #pragma omp parallel for schedule(static) num_threads(n_threads)
+        for (int i = 0; i < p; ++i) routine(i);
+    }
+}
+
+template <class ValueType>
+ADELIE_CORE_STRONG_INLINE
+void compute_min_det_scores(
+    const Eigen::Ref<const util::colmat_type<ValueType>>& S,
+    Eigen::Ref<util::rowvec_type<ValueType>> out
+)
+{
+    out = -S.diagonal().transpose().array();
 }
 
 template <
@@ -101,7 +143,7 @@ inline void solve_greedy(
     {
         check_user_interrupt();
 
-        compute_scores(S_resid, scores);
+        compute_scores(subset_set, subset, S_resid, scores);
 
         Eigen::Index i_star;
         vec_value_t::NullaryExpr(p, [&](auto i) {
@@ -264,7 +306,7 @@ inline void solve_swapping(
             subset_set.erase(j);
 
             // compute scores using current residual covariance
-            compute_scores(S_resid, scores);
+            compute_scores(subset_set, subset, S_resid, scores);
 
             // compute max score outside U
             Eigen::Index j_star;
@@ -343,10 +385,13 @@ inline void solve(
 {
     using state_t = std::decay_t<StateType>;
     using matrix_t = typename state_t::matrix_t;
+    using index_t = typename state_t::index_t;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
     using score_func_t = std::function<
         void(
+            const std::unordered_set<index_t>&,
+            const std::vector<index_t>&,
             const Eigen::Ref<const matrix_t>&,
             Eigen::Ref<vec_value_t>
         )
@@ -359,14 +404,38 @@ inline void solve(
 
     BufferPack<value_t> buffer(p);
 
-    score_func_t score_func = [&]() {
+    score_func_t score_func = [&]() -> score_func_t {
         switch (loss) {
             case util::css_loss_type::_least_squares: {
                 return [&](
+                    const std::unordered_set<index_t>&,
+                    const std::vector<index_t>&,
                     const Eigen::Ref<const matrix_t>& S,
                     Eigen::Ref<vec_value_t> out
                 ) {
                     compute_least_squares_scores(S, out, n_threads);
+                };
+                break;
+            }
+            case util::css_loss_type::_subset_factor: {
+                return [&](
+                    const std::unordered_set<index_t>& subset_set,
+                    const std::vector<index_t>&,
+                    const Eigen::Ref<const matrix_t>& S,
+                    Eigen::Ref<vec_value_t> out 
+                ) {
+                    compute_subset_factor_scores(subset_set, S, out, n_threads);
+                };
+                break;
+            }
+            case util::css_loss_type::_min_det: {
+                return [&](
+                    const std::unordered_set<index_t>&,
+                    const std::vector<index_t>&,
+                    const Eigen::Ref<const matrix_t>& S,
+                    Eigen::Ref<vec_value_t> out
+                ) {
+                    compute_min_det_scores(S, out);
                 };
                 break;
             }
