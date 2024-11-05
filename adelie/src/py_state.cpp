@@ -1986,6 +1986,52 @@ void state_bvls(py::module_& m, const char* name)
 }
 
 template <class MatrixType>
+class PyStateCSSCov : public ad::state::StateCSSCov<MatrixType>
+{
+    using base_t = ad::state::StateCSSCov<MatrixType>;
+public:
+    using base_t::base_t;
+    PyStateCSSCov(base_t&& base) : base_t(std::move(base)) {}
+};
+
+template <class MatrixType>
+void state_css_cov(py::module_& m, const char* name)
+{
+    using matrix_t = MatrixType;
+    using state_t = ad::state::StateCSSCov<MatrixType>;
+    using vec_index_t = typename state_t::vec_index_t;
+    py::class_<state_t, PyStateCSSCov<matrix_t>>(m, name, R"delimiter(
+        Core state class for CSS via covariance method.
+        )delimiter")
+        .def(py::init<
+            const Eigen::Ref<const matrix_t>&,
+            size_t,
+            const Eigen::Ref<const vec_index_t>&,
+            const std::string&,
+            const std::string&,
+            size_t
+        >(),
+            py::arg("S").noconvert(),
+            py::arg("subset_size"),
+            py::arg("subset").noconvert(),
+            py::arg("method"),
+            py::arg("loss"),
+            py::arg("n_threads")
+        )
+        .def(py::init([](const state_t& s) { return new state_t(s); }))
+        .def_property_readonly("subset", [](const state_t& s) {
+            return Eigen::Map<const vec_index_t>(
+                s.subset.data(),
+                s.subset.size()
+            );
+        }, R"delimiter(
+        Selected subset.
+        )delimiter")
+        .def("solve", [](state_t state) { return _solve(state); })
+        ;
+}
+
+template <class MatrixType>
 class PyStatePinball : public ad::state::StatePinball<MatrixType>
 {
     using base_t = ad::state::StatePinball<MatrixType>;
@@ -2197,6 +2243,13 @@ void register_state(py::module_& m)
     state_bvls<
         matrix_naive_type<float>
     >(m, "StateBVLS32");
+
+    state_css_cov<
+        dense_type<double, Eigen::ColMajor>
+    >(m, "StateCSSCov64");
+    state_css_cov<
+        dense_type<float, Eigen::ColMajor>
+    >(m, "StateCSSCov32");
 
     state_pinball<
         matrix_constraint_type<double>

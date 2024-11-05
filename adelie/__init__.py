@@ -41,6 +41,7 @@ from .sklearn import (
 )
 from .solver import (
     bvls,
+    css_cov,
     gaussian_cov,
     grpnet,
     pinball,

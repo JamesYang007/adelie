@@ -267,6 +267,41 @@ void dgemv(
     }
 }
 
+template <
+    class MType,
+    class OutType
+>
+ADELIE_CORE_STRONG_INLINE
+void sq_norm(
+    const MType& m,
+    OutType& out,
+    size_t n_threads
+)
+{
+    using value_t = typename std::decay_t<MType>::Scalar;
+    const size_t n = m.rows();
+    const size_t p = m.cols();
+    const size_t n_bytes = sizeof(value_t) * n * (p + 1);
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+        out = m.array().square().colwise().sum(); 
+        return;
+    }
+    const int n_blocks = std::min(n_threads, p);
+    const int block_size = p / n_blocks;
+    const int remainder = p % n_blocks;
+
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
+    for (int t = 0; t < n_blocks; ++t)
+    {
+        const auto begin = (
+            std::min<int>(t, remainder) * (block_size + 1) 
+            + std::max<int>(t-remainder, 0) * block_size
+        );
+        const auto size = block_size + (t < remainder);
+        out.segment(begin, size) = m.middleCols(begin, size).array().square().colwise().sum();
+    }
+}
+
 template <class InnerType, class ValueType, class WeightsType>
 ADELIE_CORE_STRONG_INLINE
 auto svsvwdot(

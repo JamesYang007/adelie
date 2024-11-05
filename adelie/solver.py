@@ -20,6 +20,7 @@ from .matrix import (
 )
 from .state import (
     bvls as state_bvls,
+    css_cov as state_css_cov,
     gaussian_cov as state_gaussian_cov,
     gaussian_naive as state_gaussian_naive,
     glm_naive as state_glm_naive,
@@ -1265,6 +1266,126 @@ def pinball(
         resid=resid,
         grad=grad,
         loss=loss,
+    )
+
+    return state.solve()
+
+
+def css_cov(
+    S: np.ndarray,
+    subset_size: int =None,
+    *,
+    subset: np.ndarray =None,
+    method: str ="swapping",
+    loss: str ="least_squares",
+    n_threads: int =1,
+):
+    """Solves column subset selection via covariance method.
+
+    Column subset selection via covariance method solves
+
+    .. math::
+        \\begin{align*}
+            \\mathrm{minimize}_{T \\subseteq [p] : |T|=k} &\\quad
+            \\ell\\left(
+                \\Sigma, T
+            \\right)
+        \\end{align*}
+
+    for a variety of loss functions :math:`\\ell`
+    where 
+    :math:`\\Sigma \\in \\mathbb{R}^{p \\times p}` is a positive semi-definite matrix
+    and :math:`T` is an index set of size :math:`k`.
+
+    The least squares objective is given by
+
+    .. math::
+        \\begin{align*}
+            \\ell(\\Sigma, T)
+            =
+            \\mathrm{Tr}\\left(
+                \\Sigma - \\Sigma_{\\cdot T} \\Sigma_{T,T}^\\dagger \\Sigma_{T \\cdot}
+            \\right)
+        \\end{align*}
+
+    .. note::
+        The greedy method is generally significantly faster than the swapping method.
+        However, the swapping method yields a much more accurate solution to the CSS problem.
+        We recommend using the greedy method only if the swapping method is too time-consuming
+        or an accurate solution is not necessary.
+
+    Parameters
+    ----------
+    S : (p, p) ndarray
+        Positive semi-definite matrix :math:`\\Sigma`.
+    subset_size : int, optional
+        Subset size :math:`k`.
+        It must satisfy the following conditions for each method type:
+
+            - ``"greedy"``: must be an integer.
+            - ``"swapping"``: must satisfy the conditions for ``"greedy"`` 
+              if ``subset`` is ``None``.
+              Otherwise, it is ignored.
+
+        Default is ``None``.  
+    subset : ndarray, optional
+        Initial subset :math:`T`.
+        This argument is only used by the swapping method.
+        If ``None``, the greedy method is used 
+        to first initialize a subset of size ``subset_size``.
+        Default is ``None``.
+    method : str, optional
+        Search method to identify the optimal :math:`T`. 
+        It must be one of the following:
+        
+            - ``"greedy"``: greedy method.
+            - ``"swapping"``: swapping method.
+
+        Default is ``"swapping"``.
+    loss : str, optional
+        Loss type. It must be one of the following:
+
+            - ``"least_squares"``: least squares loss.
+
+        Default is ``"least_squares"``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    state
+        The resulting state after running the solver.
+
+    See Also
+    --------
+    adelie.adelie_core.state.StateCSSCov32
+    adelie.adelie_core.state.StateCSSCov64
+    """
+    if method == "greedy":
+        if not isinstance(subset_size, int):
+            raise ValueError("subset_size must be an integer for the greedy method.")
+        subset = np.empty(0, dtype=int)
+
+    if method == "swapping":
+        if subset is None:
+            subset = css_cov(
+                S=S, 
+                subset_size=subset_size,
+                method="greedy",
+                loss=loss,
+                n_threads=n_threads,
+            ).subset
+        subset = np.array(subset, dtype=int)
+        subset_size = subset.size
+
+    state = state_css_cov(
+        S=S,
+        subset_size=subset_size,
+        subset=subset,
+        method=method,
+        loss=loss,
+        n_threads=n_threads
     )
 
     return state.solve()
