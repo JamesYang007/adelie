@@ -180,9 +180,10 @@ inline void solve_swapping(
     using colmat_value_t = util::colmat_type<value_t>;
 
     constexpr value_t neg_inf = -std::numeric_limits<value_t>::infinity();
-    constexpr value_t eps = 1e-14;
+    constexpr value_t eps = 1e-9;
 
     const auto& S = state.S;
+    const auto max_iters = state.max_iters;
     const auto n_threads = state.n_threads;
     auto& subset_set = state.subset_set;
     auto& subset = state.subset;
@@ -199,7 +200,7 @@ inline void solve_swapping(
     S_resid = S;
     for (size_t jj = 0; jj < subset.size(); ++jj) {
         const auto j = subset[jj];
-        if (S_resid(j, j) <= 0) {
+        if (S_resid(j, j) <= eps) {
             throw util::adelie_core_solver_error(
                 "Initial subset are not linearly independent columns. "
             );
@@ -233,7 +234,8 @@ inline void solve_swapping(
     // extra buffer
     vec_value_t buff(2*k+p-1);
 
-    while (1) {
+    for (size_t iters = 0; iters < max_iters; ++iters) 
+    {
         bool converged = true;
 
         // cycle through each selected feature and try swapping
@@ -351,7 +353,7 @@ inline void solve_swapping(
                     const auto denom = c - b.dot(b_tilde);
 
                     // check whether T is collinear along the way
-                    is_T_collinear = std::min<value_t>(denom, S_resid(j_star, j_star)) <= eps;
+                    is_T_collinear = (denom <= 1e-7) || (S_resid(j_star, j_star) <= eps);
 
                     const auto c_tilde = 1 / denom;
                     b_tilde *= -c_tilde;
@@ -387,8 +389,10 @@ inline void solve_swapping(
             if (is_T_collinear) return;
         }
 
-        if (converged) break;
+        if (converged) return;
     }
+
+    throw util::adelie_core_solver_error("Maximum swapping cycles reached!");
 }
 
 template <

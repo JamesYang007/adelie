@@ -1278,6 +1278,7 @@ def css_cov(
     subset: np.ndarray =None,
     method: str ="swapping",
     loss: str ="least_squares",
+    max_iters: int =int(1e3),
     n_threads: int =1,
 ):
     """Solves column subset selection via covariance method.
@@ -1372,6 +1373,9 @@ def css_cov(
             - ``"min_det"``: minimum determinant loss.
 
         Default is ``"least_squares"``.
+    max_iters : int, optional
+        Maximum number of cycles.
+        Default is ``int(1e3)``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -1398,6 +1402,7 @@ def css_cov(
                 subset_size=subset_size,
                 method="greedy",
                 loss=loss,
+                max_iters=max_iters,
                 n_threads=n_threads,
             ).subset
         subset = np.array(subset, dtype=int)
@@ -1409,6 +1414,7 @@ def css_cov(
         subset=subset,
         method=method,
         loss=loss,
+        max_iters=max_iters,
         n_threads=n_threads
     )
 

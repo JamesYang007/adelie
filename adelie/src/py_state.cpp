@@ -2009,6 +2009,7 @@ void state_css_cov(py::module_& m, const char* name)
             const Eigen::Ref<const vec_index_t>&,
             const std::string&,
             const std::string&,
+            size_t,
             size_t
         >(),
             py::arg("S").noconvert(),
@@ -2016,6 +2017,7 @@ void state_css_cov(py::module_& m, const char* name)
             py::arg("subset").noconvert(),
             py::arg("method"),
             py::arg("loss"),
+            py::arg("max_iters"),
             py::arg("n_threads")
         )
         .def(py::init([](const state_t& s) { return new state_t(s); }))

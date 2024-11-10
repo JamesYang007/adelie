@@ -46,6 +46,7 @@ public:
     const util::css_loss_type loss;
 
     /* configurations */
+    const size_t max_iters;
     const size_t n_threads;
 
     /* dynamic states */
@@ -66,12 +67,14 @@ public:
         const Eigen::Ref<const vec_index_t>& init_subset,
         const std::string& method,
         const std::string& loss,
+        size_t max_iters,
         size_t n_threads
     ):
         S(S.data(), S.rows(), S.cols()),
         subset_size(subset_size),
         method(util::convert_css_method(method)),
         loss(util::convert_css_loss(loss)),
+        max_iters(max_iters),
         n_threads(n_threads),
         subset_set(init_subset.data(), init_subset.data() + init_subset.size()),
         subset(init_subset.data(), init_subset.data() + init_subset.size())

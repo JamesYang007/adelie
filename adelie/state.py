@@ -3440,6 +3440,7 @@ def css_cov(
     subset: np.ndarray,
     method: str,
     loss: str,
+    max_iters: int,
     n_threads: int,
 ):
     """Creates a CSS covariance state object.
@@ -3476,6 +3477,8 @@ def css_cov(
             - ``"subset_factor"``: subset factor loss.
             - ``"min_det"``: minimum determinant loss.
 
+    max_iters : int
+        Maximum number of cycles.
     n_threads : int
         Number of threads.
 
@@ -3516,6 +3519,7 @@ def css_cov(
                 subset=subset,
                 method=method,
                 loss=loss,
+                max_iters=max_iters,
                 n_threads=n_threads,
             )
 
