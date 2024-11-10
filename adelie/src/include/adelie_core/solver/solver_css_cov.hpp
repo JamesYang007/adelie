@@ -56,13 +56,15 @@ void compute_subset_factor_scores(
 {
     using value_t = ValueType;
     using vec_value_t = util::rowvec_type<value_t>;
+    constexpr value_t eps = 1e-100;
+    const value_t stable_cap = 32;
     const auto S_diag = S.diagonal().transpose().array();
     const auto p = S.cols();
-    out = -S_diag.max(1e-100).log();
+    out = -S_diag.max(eps).log();
     const auto routine = [&](auto i) {
         const auto S_ii = S_diag[i];
         const auto S_i = S.col(i).transpose().array();
-        const auto r_i = (S_diag - S_i.square() * ((S_ii > 0) / (S_ii + (S_ii <= 0)))).max(1e-100).log();
+        const auto r_i = (S_diag - S_i.square() * ((S_ii > 0) / (S_ii + (S_ii <= 0)))).max(eps).log();
         out[i] -= vec_value_t::NullaryExpr(p, [&](auto j) {
             return ((subset_set.find(j) != subset_set.end()) || (j == i)) ? 0 : r_i[j];
         }).sum();
@@ -73,6 +75,8 @@ void compute_subset_factor_scores(
         #pragma omp parallel for schedule(static) num_threads(n_threads)
         for (int i = 0; i < p; ++i) routine(i);
     }
+    const auto mask = (out <= stable_cap).template cast<value_t>();
+    out = out * mask + std::numeric_limits<value_t>::max() * (1-mask);
 }
 
 template <class ValueType>
@@ -176,6 +180,7 @@ inline void solve_swapping(
     using colmat_value_t = util::colmat_type<value_t>;
 
     constexpr value_t neg_inf = -std::numeric_limits<value_t>::infinity();
+    constexpr value_t eps = 1e-14;
 
     const auto& S = state.S;
     const auto n_threads = state.n_threads;
@@ -251,7 +256,7 @@ inline void solve_swapping(
             {
                 S_U_inv = S_T_inv.topLeftCorner(k-1, k-1);
                 const auto b_tilde = S_T_inv.col(k-1).head(k-1);
-                const auto c_tilde = S_T_inv(k-1, k-1);
+                const auto c_tilde = std::max<value_t>(S_T_inv(k-1, k-1), 1e-24);
                 S_U_inv.template selfadjointView<Eigen::Lower>().rankUpdate(b_tilde, -1/c_tilde);
                 S_U_inv.template triangularView<Eigen::Upper>() = S_U_inv.transpose();
             }
@@ -296,10 +301,10 @@ inline void solve_swapping(
 
                 // update S_resid
                 const auto beta_j = beta[j];
-                if (beta_j > 0) {
-                    S_resid.template selfadjointView<Eigen::Lower>().rankUpdate(beta.matrix().transpose(), 1/beta_j);
-                    S_resid.template triangularView<Eigen::Upper>() = S_resid.transpose();
-                }
+                // numerically unstable, so no swapping will be accurate (just terminate)
+                if (beta_j <= 0) return;
+                S_resid.template selfadjointView<Eigen::Lower>().rankUpdate(beta.matrix().transpose(), 1/beta_j);
+                S_resid.template triangularView<Eigen::Upper>() = S_resid.transpose();
             }
 
             // remove the current index to swap (now at the end)
@@ -314,19 +319,20 @@ inline void solve_swapping(
                 return (subset_set.find(i) != subset_set.end()) ? neg_inf : scores[i];
             }).maxCoeff(&j_star);
 
+            // flag to check if the updated T is collinear
+            bool is_T_collinear = false;
+
             // if swapping strictly improves based on the scores
             if (scores[j] < scores[j_star]) {
-                converged = false;
-
                 // perform the swap
                 subset[k-1] = j_star;
 
                 // compute S_T
                 {
-                    S_T.col(k-1) = vec_value_t::NullaryExpr(k, [&](auto i) {
+                    S_T.col(k-1).transpose() = vec_value_t::NullaryExpr(k, [&](auto i) {
                         return S(subset[i], j_star);
                     });
-                    S_T.row(k-1) = S_T.col(k-1);
+                    S_T.row(k-1) = S_T.col(k-1).transpose();
                 }
 
                 // compute S_T_inv
@@ -342,9 +348,14 @@ inline void solve_swapping(
                         b_tilde_m
                     );
                     const auto c = S_T(k-1, k-1);
-                    const auto c_tilde = 1 / (c - b.dot(b_tilde));
+                    const auto denom = c - b.dot(b_tilde);
+
+                    // check whether T is collinear along the way
+                    is_T_collinear = std::min<value_t>(denom, S_resid(j_star, j_star)) <= eps;
+
+                    const auto c_tilde = 1 / denom;
                     b_tilde *= -c_tilde;
-                    S_T_inv.row(k-1).head(k-1) = b_tilde;
+                    S_T_inv.row(k-1).head(k-1) = b_tilde.transpose();
                     S_T_inv(k-1, k-1) = c_tilde;
                     auto A_tilde = S_T_inv.topLeftCorner(k-1, k-1);
                     A_tilde = S_U_inv;
@@ -354,6 +365,9 @@ inline void solve_swapping(
 
                 // compute S_T_full
                 S_T_full.col(jj) = S.col(j_star);
+
+                // since a swapping occurred, we did not converge
+                converged = false;
             }
 
             // add the updated index
@@ -368,6 +382,9 @@ inline void solve_swapping(
             S_T.row(jj).swap(S_T.row(k-1));
             S_T_inv.col(jj).swap(S_T_inv.col(k-1));
             S_T_inv.row(jj).swap(S_T_inv.row(k-1));
+
+            // check invariance that S_T is still invertible
+            if (is_T_collinear) return;
         }
 
         if (converged) break;

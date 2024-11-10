@@ -32,6 +32,7 @@ ADELIE_CORE_STATE_CSS_COV::initialize()
     }
     if (
         method == util::css_method_type::_swapping &&
+        subset.size() &&
         (
             Eigen::Map<vec_index_t>(subset.data(), subset.size()).minCoeff() < 0 ||
             Eigen::Map<vec_index_t>(subset.data(), subset.size()).maxCoeff() >= p
