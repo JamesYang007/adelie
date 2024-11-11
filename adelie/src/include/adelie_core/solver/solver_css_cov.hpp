@@ -8,6 +8,9 @@
 #include <adelie_core/util/functional.hpp>
 #include <adelie_core/util/macros.hpp>
 #include <adelie_core/util/stopwatch.hpp>
+#if defined(_OPENMP)
+#include <omp.h>
+#endif
 
 namespace adelie_core {
 namespace solver {
@@ -48,26 +51,31 @@ void compute_least_squares_scores(
 template <class ValueType, class IndexType>
 ADELIE_CORE_STRONG_INLINE
 void compute_subset_factor_scores(
-    const std::unordered_set<IndexType>& subset_set,
+    const Eigen::Ref<const util::rowvec_type<IndexType>>& subset,
     const Eigen::Ref<const util::colmat_type<ValueType>>& S,
     Eigen::Ref<util::rowvec_type<ValueType>> out,
+    util::rowvec_type<ValueType>& buffer,
     size_t n_threads
 )
 {
     using value_t = ValueType;
-    using vec_value_t = util::rowvec_type<value_t>;
-    constexpr value_t eps = 1e-100;
-    const value_t stable_cap = 32;
+    using rowarr_value_t = util::rowarr_type<value_t>;
     const auto S_diag = S.diagonal().transpose().array();
     const auto p = S.cols();
-    out = -S_diag.max(eps).log();
+    out = S_diag.max(0);
+    Eigen::Map<rowarr_value_t> buff(buffer.data(), std::max<size_t>(n_threads, 1), p);
     const auto routine = [&](auto i) {
+        #if defined(_OPENMP)
+        auto cbuff = buff.row(omp_get_thread_num());
+        #else
+        auto cbuff = buff.row(0);
+        #endif
         const auto S_ii = S_diag[i];
         const auto S_i = S.col(i).transpose().array();
-        const auto r_i = (S_diag - S_i.square() * ((S_ii > 0) / (S_ii + (S_ii <= 0)))).max(eps).log();
-        out[i] -= vec_value_t::NullaryExpr(p, [&](auto j) {
-            return ((subset_set.find(j) != subset_set.end()) || (j == i)) ? 0 : r_i[j];
-        }).sum();
+        cbuff = S_diag - S_i.square() * ((S_ii > 0) / (S_ii + (S_ii <= 0)));
+        for (auto j : subset) cbuff[j] = 1;
+        cbuff[i] = 1;
+        out[i] *= cbuff.max(0).prod();
     };
     if (n_threads <= 1) {
         for (int i = 0; i < p; ++i) routine(i);
@@ -75,8 +83,7 @@ void compute_subset_factor_scores(
         #pragma omp parallel for schedule(static) num_threads(n_threads)
         for (int i = 0; i < p; ++i) routine(i);
     }
-    const auto mask = (out <= stable_cap).template cast<value_t>();
-    out = out * mask + std::numeric_limits<value_t>::max() * (1-mask);
+    out = -out.max(1e-14);
 }
 
 template <class ValueType>
@@ -124,6 +131,7 @@ inline void solve_greedy(
 {
     using state_t = std::decay_t<StateType>;
     using value_t = typename state_t::value_t;
+    using vec_index_t = typename state_t::vec_index_t;
     using vec_value_t = typename state_t::vec_value_t;
 
     constexpr value_t neg_inf = -std::numeric_limits<value_t>::infinity();
@@ -147,7 +155,8 @@ inline void solve_greedy(
     {
         check_user_interrupt();
 
-        compute_scores(subset_set, subset, S_resid, scores);
+        const Eigen::Map<const vec_index_t> subset_T(subset.data(), subset.size());
+        compute_scores(subset_T, S_resid, scores);
 
         Eigen::Index i_star;
         vec_value_t::NullaryExpr(p, [&](auto i) {
@@ -176,6 +185,7 @@ inline void solve_swapping(
 {
     using state_t = std::decay_t<StateType>;
     using value_t = typename state_t::value_t;
+    using vec_index_t = typename state_t::vec_index_t;
     using vec_value_t = typename state_t::vec_value_t;
     using colmat_value_t = util::colmat_type<value_t>;
 
@@ -313,7 +323,8 @@ inline void solve_swapping(
             subset_set.erase(j);
 
             // compute scores using current residual covariance
-            compute_scores(subset_set, subset, S_resid, scores);
+            const Eigen::Map<const vec_index_t> subset_U(subset.data(), k-1);
+            compute_scores(subset_U, S_resid, scores);
 
             // compute max score outside U
             Eigen::Index j_star;
@@ -406,13 +417,12 @@ inline void solve(
 {
     using state_t = std::decay_t<StateType>;
     using matrix_t = typename state_t::matrix_t;
-    using index_t = typename state_t::index_t;
     using value_t = typename state_t::value_t;
+    using vec_index_t = typename state_t::vec_index_t;
     using vec_value_t = typename state_t::vec_value_t;
     using score_func_t = std::function<
         void(
-            const std::unordered_set<index_t>&,
-            const std::vector<index_t>&,
+            const Eigen::Ref<const vec_index_t>&,
             const Eigen::Ref<const matrix_t>&,
             Eigen::Ref<vec_value_t>
         )
@@ -424,13 +434,13 @@ inline void solve(
     const auto p = state.S.cols();
 
     BufferPack<value_t> buffer(p);
+    vec_value_t loss_buffer;
 
     score_func_t score_func = [&]() -> score_func_t {
         switch (loss) {
             case util::css_loss_type::_least_squares: {
                 return [&](
-                    const std::unordered_set<index_t>&,
-                    const std::vector<index_t>&,
+                    const Eigen::Ref<const vec_index_t>&,
                     const Eigen::Ref<const matrix_t>& S,
                     Eigen::Ref<vec_value_t> out
                 ) {
@@ -439,20 +449,19 @@ inline void solve(
                 break;
             }
             case util::css_loss_type::_subset_factor: {
+                loss_buffer.resize(std::max<size_t>(n_threads, 1) * p);
                 return [&](
-                    const std::unordered_set<index_t>& subset_set,
-                    const std::vector<index_t>&,
+                    const Eigen::Ref<const vec_index_t>& subset,
                     const Eigen::Ref<const matrix_t>& S,
                     Eigen::Ref<vec_value_t> out 
                 ) {
-                    compute_subset_factor_scores(subset_set, S, out, n_threads);
+                    compute_subset_factor_scores(subset, S, out, loss_buffer, n_threads);
                 };
                 break;
             }
             case util::css_loss_type::_min_det: {
                 return [&](
-                    const std::unordered_set<index_t>&,
-                    const std::vector<index_t>&,
+                    const Eigen::Ref<const vec_index_t>&,
                     const Eigen::Ref<const matrix_t>& S,
                     Eigen::Ref<vec_value_t> out
                 ) {
