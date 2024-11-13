@@ -1235,4 +1235,6 @@ def test_css_cov_swapping(p, k, loss, seed):
     state = ad.solver.css_cov(S, k, method="swapping", loss=loss)
     actual = state.subset
     expected = CSSCov(S, loss).swapping(actual)
+    print(CSSCov(S, loss).loss(actual))
+    print(CSSCov(S, loss).loss(expected))
     assert np.all(actual == expected)
