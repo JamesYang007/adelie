@@ -33,19 +33,33 @@ struct BufferPack
     {}
 };
 
-template <class ValueType>
+template <class ValueType, class IndexType>
 ADELIE_CORE_STRONG_INLINE
 void compute_least_squares_scores(
+    const std::unordered_set<IndexType>& subset_set,
     const Eigen::Ref<const util::colmat_type<ValueType>>& S,
     Eigen::Ref<util::rowvec_type<ValueType>> out,
     size_t n_threads
 )
 {
-    using value_t = ValueType;
-    matrix::sq_norm(S, out, n_threads);
-    const auto S_diag = S.diagonal().transpose().array();
-    const auto mask = (S_diag <= 0).template cast<value_t>();
-    out = out / (S_diag + mask) * (1-mask);
+    const auto p = S.cols();
+    const auto routine = [&](auto j) {
+        const auto S_jj = S(j, j);
+        if (
+            (subset_set.find(j) != subset_set.end()) ||
+            (S_jj <= 0)
+        ) {
+            out[j] = 0;
+            return;
+        }
+        out[j] = (S.row(j).head(j).squaredNorm() + S.col(j).tail(p-j).squaredNorm()) / S_jj;
+    };
+    if (n_threads <= 1) {
+        for (int j = 0; j < p; ++j) routine(j);
+    } else {
+        #pragma omp parallel for schedule(static) num_threads(n_threads)
+        for (int j = 0; j < p; ++j) routine(j);
+    }
 }
 
 template <class ValueType, class IndexType>
@@ -76,9 +90,7 @@ void compute_subset_factor_scores(
             out[j] = -inf;
             return;
         }
-        const auto S_j = S.col(j).transpose().array();
-        const auto S_jj = S_j[j];
-        const auto r_j = S_diag - S_j.square() * ((S_jj > 0) / (S_jj + (S_jj <= 0)));
+        const auto S_jj = S_diag[j];
         if (S_jj <= 0) {
             out[j] = inf;
             return;
@@ -86,7 +98,11 @@ void compute_subset_factor_scores(
         value_t sum = -std::log(S_jj);
         for (int i = 0; i < p; ++i) {
             if ((subset_set.find(i) != subset_set.end()) || (i == j)) continue;
-            const auto r_ij = r_j[i];
+            const auto is_i_leq_j = i <= j;
+            const auto ij_min = is_i_leq_j ? i : j;
+            const auto ij_max = is_i_leq_j ? j : i;
+            const auto S_ij = S(ij_max, ij_min);
+            const auto r_ij = S_diag[i] - S_ij * S_ij / S_jj;
             if (r_ij <= eps) {
                 sum = inf;
                 break;
@@ -124,13 +140,13 @@ void update_cov_resid_fwd(
     util::rowvec_type<ValueType>& buff
 )
 {
+    const auto S_ii = S(i, i);
+    if (S_ii <= 0) return;
     const auto p = S.cols();
     auto beta = buff.head(p).matrix().transpose();
-    beta = S.col(i);
-    const auto beta_i = beta[i];
-    if (beta_i <= 0) return;
-    S.template selfadjointView<Eigen::Lower>().rankUpdate(beta, -1/beta_i);
-    S.template triangularView<Eigen::Upper>() = S.transpose();
+    beta.head(i) = S.row(i).head(i).transpose();
+    beta.tail(p-i) = S.col(i).tail(p-i);
+    S.template selfadjointView<Eigen::Lower>().rankUpdate(beta, -1 / S_ii);
 }
 
 template <
@@ -165,7 +181,8 @@ inline void solve_greedy(
     subset_set.clear();
     subset.clear();
     subset.reserve(p);
-    S_resid = S;
+    // NOTE: S_resid is only well-defined on the lower triangular part!
+    S_resid.template triangularView<Eigen::Lower>() = S;
 
     for (size_t t = 0; t < subset_size; ++t) 
     {
@@ -221,7 +238,8 @@ inline void solve_swapping(
     auto& scores = buffer.scores;
 
     // initialize residual covariance w.r.t. T
-    S_resid = S;
+    // NOTE: S_resid is only well-defined on the lower triangular part!
+    S_resid.template triangularView<Eigen::Lower>() = S;
     for (size_t jj = 0; jj < subset.size(); ++jj) {
         const auto j = subset[jj];
         if (S_resid(j, j) <= eps) {
@@ -235,10 +253,11 @@ inline void solve_swapping(
     // initialize L_T
     colmat_value_t S_T(k, k);
     for (size_t i1 = 0; i1 < subset.size(); ++i1) {
-        for (size_t i2 = 0; i2 < subset.size(); ++i2) {
+        for (size_t i2 = 0; i2 <= i1; ++i2) {
             S_T(i1, i2) = S(subset[i1], subset[i2]);
         }
     }
+    S_T.template triangularView<Eigen::Upper>() = S_T.transpose();
     Eigen::LLT<colmat_value_t> S_T_llt(S_T);
     colmat_value_t L_T = S_T_llt.matrixL();
 
@@ -327,7 +346,6 @@ inline void solve_swapping(
                 // numerically unstable, so no swapping will be accurate (just terminate)
                 if (beta_j <= 0) return;
                 S_resid.template selfadjointView<Eigen::Lower>().rankUpdate(beta.matrix().transpose(), 1/beta_j);
-                S_resid.template triangularView<Eigen::Upper>() = S_resid.transpose();
             }
 
             // remove the current index to swap
@@ -422,11 +440,11 @@ inline void solve(
         switch (loss) {
             case util::css_loss_type::_least_squares: {
                 return [&](
-                    const std::unordered_set<index_t>&,
+                    const std::unordered_set<index_t>& subset_set,
                     const Eigen::Ref<const matrix_t>& S,
                     Eigen::Ref<vec_value_t> out
                 ) {
-                    return compute_least_squares_scores(S, out, n_threads);
+                    return compute_least_squares_scores(subset_set, S, out, n_threads);
                 };
                 break;
             }
