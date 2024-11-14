@@ -1,4 +1,5 @@
 #pragma once
+#include <atomic>
 #include <unordered_set>
 #include <vector>
 #include <Eigen/Cholesky>
@@ -35,7 +36,7 @@ struct BufferPack
 
 template <class ValueType, class IndexType>
 ADELIE_CORE_STRONG_INLINE
-void compute_least_squares_scores(
+bool compute_least_squares_scores(
     const std::unordered_set<IndexType>& subset_set,
     const Eigen::Ref<const util::colmat_type<ValueType>>& S,
     Eigen::Ref<util::rowvec_type<ValueType>> out,
@@ -60,12 +61,14 @@ void compute_least_squares_scores(
         #pragma omp parallel for schedule(static) num_threads(n_threads)
         for (int j = 0; j < p; ++j) routine(j);
     }
+    return false;
 }
 
 template <class ValueType, class IndexType>
 ADELIE_CORE_STRONG_INLINE
-void compute_subset_factor_scores(
+bool compute_subset_factor_scores(
     const std::unordered_set<IndexType>& subset_set,
+    int j_to_swap,
     const Eigen::Ref<const util::colmat_type<ValueType>>& S,
     Eigen::Ref<util::rowvec_type<ValueType>> out,
     size_t n_threads
@@ -85,14 +88,21 @@ void compute_subset_factor_scores(
     // All such columns are given maximum score.
     // NOTE: we skip computation if either i or j is in U or i == j.
     // Hence, this check effectively only applies to i != j both not in U.
+    std::atomic_bool early_exit = false;
     const auto routine = [&](auto j) {
-        if (subset_set.find(j) != subset_set.end()) {
-            out[j] = -inf;
+        if (
+            (
+                (j != j_to_swap) && 
+                early_exit.load(std::memory_order_relaxed) 
+            ) ||
+            (subset_set.find(j) != subset_set.end())
+        ) {
             return;
         }
         const auto S_jj = S_diag[j];
         if (S_jj <= 0) {
             out[j] = inf;
+            early_exit = true;
             return;
         }
         value_t sum = -std::log(S_jj);
@@ -105,28 +115,54 @@ void compute_subset_factor_scores(
             const auto r_ij = S_diag[i] - S_ij * S_ij / S_jj;
             if (r_ij <= eps) {
                 sum = inf;
+                early_exit = true;
                 break;
             }
             sum -= std::log(r_ij);
         }
         out[j] = sum;
     };
+
+    // Initialize all scores to be lowest.
+    out = -inf;
+
+    // First, attempt to solve for the j_to_swap entry.
+    // If this entry is already infinite score, we don't need to compute for other entries.
+    if (j_to_swap >= 0) {
+        routine(j_to_swap);
+        if (out[j_to_swap] == inf) return true; 
+    }
+
     if (n_threads <= 1) {
         for (int j = 0; j < p; ++j) routine(j);
     } else {
         #pragma omp parallel for schedule(static) num_threads(n_threads)
         for (int j = 0; j < p; ++j) routine(j);
     }
+
+    return early_exit;
 }
 
-template <class ValueType>
+template <class ValueType, class IndexType>
 ADELIE_CORE_STRONG_INLINE
-void compute_min_det_scores(
+bool compute_min_det_scores(
+    const std::unordered_set<IndexType>& subset_set,
     const Eigen::Ref<const util::colmat_type<ValueType>>& S,
     Eigen::Ref<util::rowvec_type<ValueType>> out
 )
 {
+    using value_t = ValueType;
+    constexpr value_t eps = 1e-10;
+    const auto p = S.cols();
     out = -S.diagonal().transpose().array().max(0);
+    for (int j = 0; j < p; ++j) {
+        if (subset_set.find(j) != subset_set.end()) continue;
+        if (out[j] >= -eps) {
+            out[j] = 0;
+            return true;
+        }
+    }
+    return false;
 }
 
 template <
@@ -188,7 +224,7 @@ inline void solve_greedy(
     {
         check_user_interrupt();
 
-        compute_scores(subset_set, S_resid, scores);
+        compute_scores(subset_set, -1, S_resid, scores);
 
         Eigen::Index i_star;
         vec_value_t::NullaryExpr(p, [&](auto i) {
@@ -237,6 +273,10 @@ inline void solve_swapping(
     auto& S_resid = buffer.S_resid;
     auto& scores = buffer.scores;
 
+    util::Stopwatch sw;
+
+    sw.start();
+
     // initialize residual covariance w.r.t. T
     // NOTE: S_resid is only well-defined on the lower triangular part!
     S_resid.template triangularView<Eigen::Lower>() = S;
@@ -281,6 +321,8 @@ inline void solve_swapping(
 
     // convergence metric
     size_t n_consec_keep = 0;
+    
+    state.benchmark_init = sw.elapsed();
 
     for (size_t iters = 0; iters < max_iters; ++iters) 
     {
@@ -297,15 +339,18 @@ inline void solve_swapping(
 
             // compute L_U
             {
+                sw.start();
                 const auto L_0 = L_T.bottomRightCorner(k-1, k-1).template triangularView<Eigen::Lower>();
                 const auto v_0 = L_T.col(0).tail(k-1);
                 auto _L_U = L_U.template triangularView<Eigen::Lower>();
                 _L_U = L_0;
                 Eigen::internal::llt_rank_update_lower(L_U, v_0, 1.0);
+                state.benchmark_L_U.push_back(sw.elapsed());
             }
 
             // compute S_resid w.r.t. U
             {
+                sw.start();
                 auto buff_ptr = buff.data();
 
                 // compute Sigma_{U,j}
@@ -346,13 +391,16 @@ inline void solve_swapping(
                 // numerically unstable, so no swapping will be accurate (just terminate)
                 if (beta_j <= 0) return;
                 S_resid.template selfadjointView<Eigen::Lower>().rankUpdate(beta.matrix().transpose(), 1/beta_j);
+                state.benchmark_S_resid.push_back(sw.elapsed());
             }
 
             // remove the current index to swap
             subset_set.erase(j);
 
             // compute scores using current residual covariance
-            compute_scores(subset_set, S_resid, scores);
+            sw.start();
+            const bool early_exit = compute_scores(subset_set, j, S_resid, scores);
+            state.benchmark_scores.push_back(sw.elapsed());
 
             // compute max score outside U
             Eigen::Index j_star;
@@ -377,8 +425,12 @@ inline void solve_swapping(
             // add the updated index
             subset_set.insert(subset[jj]);
 
-            // compute L_T
+            // check for convergence or early exit
+            if (n_consec_keep >= k || early_exit) return;
+
+            // compute L_T with the new T for the next iteration
             {
+                sw.start();
                 const auto j = subset[jj];
                 const auto _L_U = L_U.template triangularView<Eigen::Lower>();
                 L_T.topLeftCorner(k-1, k-1).template triangularView<Eigen::Lower>() = _L_U;
@@ -389,18 +441,16 @@ inline void solve_swapping(
                 _L_U.solveInPlace(v.matrix().transpose());
                 const auto v_sq_norm = v.squaredNorm();
                 L_T(k-1, k-1) = std::sqrt(std::max<value_t>(S(j, j) - v_sq_norm, 0));
+                state.benchmark_L_T.push_back(sw.elapsed());
             }
 
-            // compute S_resid w.r.t. T
-            update_cov_resid_fwd(S_resid, subset[jj], scores /* buffer */);
-
             // check invariance that S_T is still invertible
-            // or check for convergence
-            // or check for early exit criterion
-            if (
-                (L_T(k-1, k-1) <= eps) || 
-                (n_consec_keep >= k)
-            ) return;
+            if (L_T(k-1, k-1) <= eps) return;
+
+            // compute S_resid w.r.t. T
+            sw.start();
+            update_cov_resid_fwd(S_resid, subset[jj], scores /* buffer */);
+            state.benchmark_resid_fwd.push_back(sw.elapsed());
         }
     }
 
@@ -422,8 +472,9 @@ inline void solve(
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
     using score_func_t = std::function<
-        void(
+        bool(
             const std::unordered_set<index_t>&,
+            index_t,
             const Eigen::Ref<const matrix_t>&,
             Eigen::Ref<vec_value_t>
         )
@@ -441,6 +492,7 @@ inline void solve(
             case util::css_loss_type::_least_squares: {
                 return [&](
                     const std::unordered_set<index_t>& subset_set,
+                    index_t,
                     const Eigen::Ref<const matrix_t>& S,
                     Eigen::Ref<vec_value_t> out
                 ) {
@@ -451,20 +503,22 @@ inline void solve(
             case util::css_loss_type::_subset_factor: {
                 return [&](
                     const std::unordered_set<index_t>& subset_set,
+                    index_t j_to_swap,
                     const Eigen::Ref<const matrix_t>& S,
                     Eigen::Ref<vec_value_t> out 
                 ) {
-                    return compute_subset_factor_scores(subset_set, S, out, n_threads);
+                    return compute_subset_factor_scores(subset_set, j_to_swap, S, out, n_threads);
                 };
                 break;
             }
             case util::css_loss_type::_min_det: {
                 return [&](
-                    const std::unordered_set<index_t>&,
+                    const std::unordered_set<index_t>& subset_set,
+                    index_t,
                     const Eigen::Ref<const matrix_t>& S,
                     Eigen::Ref<vec_value_t> out
                 ) {
-                    return compute_min_det_scores(S, out);
+                    return compute_min_det_scores(subset_set, S, out);
                 };
                 break;
             }

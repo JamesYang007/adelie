@@ -55,6 +55,13 @@ public:
 
     static_assert(!matrix_t::IsRowMajor, "Matrix must be column-major!");
 
+    double benchmark_init;
+    std::vector<double> benchmark_L_U;
+    std::vector<double> benchmark_S_resid;
+    std::vector<double> benchmark_scores;
+    std::vector<double> benchmark_L_T;
+    std::vector<double> benchmark_resid_fwd;
+
 private:
     void initialize();
 
