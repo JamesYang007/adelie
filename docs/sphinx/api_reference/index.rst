@@ -232,6 +232,7 @@ adelie.solver
 
 
     bvls
+    css_cov
     gaussian_cov
     grpnet
     pinball
@@ -252,6 +253,7 @@ adelie.state
 
 
     bvls
+    css_cov
     gaussian_cov
     gaussian_naive
     gaussian_pin_cov

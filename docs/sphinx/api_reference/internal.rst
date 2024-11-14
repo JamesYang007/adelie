@@ -106,6 +106,8 @@ Internal
     adelie_core.matrix.MatrixNaiveRSubset64
     adelie_core.state.StateBVLS32
     adelie_core.state.StateBVLS64
+    adelie_core.state.StateCSSCov32
+    adelie_core.state.StateCSSCov64
     adelie_core.state.StateGaussianPinCov32
     adelie_core.state.StateGaussianPinCov64
     adelie_core.state.StateGaussianPinNaive32

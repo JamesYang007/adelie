@@ -161,9 +161,9 @@ class base:
         # raise any errors
         if out["error"] != "":
             if out["error"].startswith("adelie_core solver: "):
-                logger.logger.warning(RuntimeError(out["error"]))
-            else:
                 logger.logger.error(RuntimeError(out["error"]))
+            else:
+                logger.logger.warning(RuntimeError(out["error"]))
 
         # return a subsetted Python result object
         core_state = out["state"]
@@ -468,7 +468,7 @@ def gaussian_pin_naive(
         i.e. :math:`\\|y_c\\|_{W}^2`.
         This is only used to check convergence as a relative measure,
         i.e. this quantity is the "null" model MSE.
-    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]] 
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
@@ -773,7 +773,7 @@ def gaussian_pin_cov(
     A : Union[MatrixCovBase32, MatrixCovBase64]
         Covariance matrix :math:`X_c^\\top W X_c`.
         It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
-    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]] 
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
@@ -1169,7 +1169,7 @@ def gaussian_cov(
         It is typically one of the matrices defined in :mod:`adelie.matrix` submodule.
     v : (p,) ndarray
         Linear term.
-    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]] 
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
@@ -1753,7 +1753,7 @@ def gaussian_naive(
         Residual :math:`y_c - X \\beta` where :math:`\\beta` is given by ``screen_beta``.
     resid_sum : float
         Weighted (by :math:`W`) sum of ``resid``.
-    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]] 
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
@@ -2101,7 +2101,7 @@ def multigaussian_naive(
         where :math:`\\beta` is given by ``screen_beta``.
     resid_sum : float
         Weighted (by :math:`\\tilde{W}`) sum of ``resid``.
-    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]] 
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
@@ -2459,7 +2459,7 @@ def glm_naive(
     glm : Union[GlmBase32, GlmBase64]
         GLM object.
         It is typically one of the GLM classes defined in :mod:`adelie.glm` submodule.
-    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]] 
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
@@ -2816,7 +2816,7 @@ def multiglm_naive(
     glm : Union[GlmMultiBase32, GlmMultiBase64]
         Multi-response GLM object.
         It is typically one of the GLM classes defined in :mod:`adelie.glm` submodule.
-    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]], optional
+    constraints : (G,) list[Union[ConstraintBase32, ConstraintBase64]]
         List of constraints for each group.
         ``constraints[i]`` is the constraint object corresponding to group ``i``.
         If ``constraints[i]`` is ``None``, then the ``i`` th group is unconstrained.
@@ -3432,3 +3432,106 @@ def pinball(
             return base.solve(f, self)
 
     return _pinball()
+
+
+def css_cov(
+    S: np.ndarray,
+    subset_size: int,
+    subset: np.ndarray,
+    method: str,
+    loss: str,
+    max_iters: int,
+    n_threads: int,
+):
+    """Creates a CSS covariance state object.
+
+    Parameters
+    ----------
+    S : (p, p) ndarray
+        Positive semi-definite matrix.
+    subset_size : int
+        Subset size :math:`k`.
+        It must satisfy the following conditions for each method type:
+
+            - ``"greedy"``: must be an integer.
+            - ``"swapping"``: must satisfy the conditions for ``"greedy"`` 
+              if ``subset`` is ``None``.
+              Otherwise, it is ignored.
+
+    subset : ndarray
+        Initial subset :math:`T`.
+        This argument is only used by the swapping method.
+        If ``None``, the greedy method is used 
+        to first initialize a subset of size ``subset_size``.
+    method : str
+        Search method to identify the optimal :math:`T`. 
+        It must be one of the following:
+        
+            - ``"greedy"``: greedy method.
+            - ``"swapping"``: swapping method.
+
+    loss : str
+        Loss type. It must be one of the following:
+
+            - ``"least_squares"``: least squares loss.
+            - ``"subset_factor"``: subset factor loss.
+            - ``"min_det"``: minimum determinant loss.
+
+    max_iters : int
+        Maximum number of cycles.
+    n_threads : int
+        Number of threads.
+
+    Returns
+    -------
+    wrap
+        Wrapper state object.
+
+    See Also
+    --------
+    adelie.adelie_core.state.StateCSSCov32
+    adelie.adelie_core.state.StateCSSCov64
+    """
+    assert isinstance(S, np.ndarray)
+
+    dtype = S.dtype
+
+    if S.flags.c_contiguous:
+        S = S.T
+        assert not S.flags.c_contiguous
+        assert S.flags.f_contiguous
+
+    dispatcher = {
+        np.dtype("float64"): core.state.StateCSSCov64,
+        np.dtype("float32"): core.state.StateCSSCov32,
+    }
+    core_base = dispatcher[dtype]
+
+    class _css_cov(core_base):
+        def __init__(self):
+            self._core_type = core_base
+            self._S = S
+
+            core_base.__init__(
+                self,
+                S=self._S,
+                subset_size=subset_size,
+                subset=subset,
+                method=method,
+                loss=loss,
+                max_iters=max_iters,
+                n_threads=n_threads,
+            )
+
+        @classmethod
+        def create_from_core(cls, state, core_state):
+            obj = base.create_from_core(
+                cls, state, core_state, _css_cov, core_base,
+            )
+            return obj
+
+        def solve(self, *args, **kwargs):
+            f = lambda s: core_base.solve(s)
+            return base.solve(f, self)
+
+    return _css_cov()

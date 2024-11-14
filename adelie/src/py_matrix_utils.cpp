@@ -209,6 +209,22 @@ void utils(py::module_& m)
         return time_elapsed / n_sims;
     });
 
+    m.def("bench_sq_norm", [](
+        cref_colmat_value_t m, 
+        size_t n_threads,
+        size_t n_sims
+    ) {
+        mvec_value_t out(m.cols());
+        sw_t sw;
+        double time_elapsed = 0;
+        for (size_t i = 0; i < n_sims; ++i) {
+            sw.start();
+            ad::matrix::sq_norm(m, out, n_threads);
+            time_elapsed += sw.elapsed();
+        }
+        return time_elapsed / n_sims;
+    });
+
     m.def("bench_spddot", [](
         cref_vec_index_t inner,
         cref_vec_value_t value,
