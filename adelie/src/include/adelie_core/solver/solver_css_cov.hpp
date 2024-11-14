@@ -9,9 +9,6 @@
 #include <adelie_core/util/functional.hpp>
 #include <adelie_core/util/macros.hpp>
 #include <adelie_core/util/stopwatch.hpp>
-#if defined(_OPENMP)
-#include <omp.h>
-#endif
 
 namespace adelie_core {
 namespace solver {
