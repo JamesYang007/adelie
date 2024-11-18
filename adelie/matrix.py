@@ -1399,7 +1399,14 @@ def standardize(
             X = (Z - \\mathbf{1} c^\\top) \\mathrm{diag}(s)^{-1}
         \\end{align*}
 
-    We define the column means :math:`\\overline{Z} \\in \\mathbb{R}^p` to be
+    The centers :math:`c` and scales :math:`s` are either user-provided or
+    deduced from :math:`Z` via 
+    :func:`~adelie.adelie_core.matrix.MatrixNaiveBase64.mean` and 
+    :func:`~adelie.adelie_core.matrix.MatrixNaiveBase64.var`, respectively,
+    with equal sample weights :math:`1/n`.
+    The degrees of freedom :math:`\\mathrm{df}` can be specified for :math:`s`
+    so that the sample weights are :math:`1 / (n-\\mathrm{df})` instead.
+    Therefore, :math:`c` will usually coincide with
 
     .. math::
         \\begin{align*}
@@ -1408,7 +1415,7 @@ def standardize(
             \\frac{1}{n} Z^\\top \\mathbf{1}
         \\end{align*}
 
-    Lastly, we define the column standard deviations :math:`\\hat{\\sigma} \\in \\mathbb{R}^p` to be
+    and :math:`s` with 
 
     .. math::
         \\begin{align*}
@@ -1416,8 +1423,6 @@ def standardize(
             =
             \\frac{1}{\\sqrt{n - \\mathrm{df}}} \\|Z_{\\cdot j} - c_j \\mathbf{1} \\|_2
         \\end{align*}
-
-    where :math:`\\mathrm{df}` is the degrees of freedom given by ``ddof``.
 
     .. note::
         This matrix only works for naive method!
@@ -1428,11 +1433,13 @@ def standardize(
         The underlying matrix :math:`Z` to standardize.
     centers : ndarray, optional
         The center values :math:`c` for each column of ``mat``.
-        If ``None``, the column means :math:`\\overline{Z}` are used as centers.
+        If ``None``, the implied column means are used via 
+        :func:`~adelie.adelie_core.matrix.MatrixNaiveBase64.mean`.
         Default is ``None``.
     scales : ndarray, optional
         The scale values :math:`s` for each column of ``mat``.
-        If ``None``, the column standard deviations :math:`\\hat{\\sigma}` are used as scales.
+        If ``None``, the implied column standard deviations are used via
+        :func:`~adelie.adelie_core.matrix.MatrixNaiveBase64.var`.
         Default is ``None``.
     ddof : int, optional
         The degrees of freedom used to compute ``scales``.
@@ -1474,23 +1481,16 @@ def standardize(
     py_base = PyMatrixNaiveBase
 
     n, p = mat.shape
-    sqrt_weights = np.full(n, 1/np.sqrt(n), dtype=dtype) 
+    weights = np.full(n, 1/n, dtype=dtype) 
     is_centers_none = centers is None
 
     if is_centers_none:
         centers = np.empty(p, dtype=dtype) 
-        mat.mul(sqrt_weights, sqrt_weights, centers)
+        mat.mean(weights, centers)
 
     if scales is None:
-        if is_centers_none:
-            means = centers
-        else:
-            means = np.empty(p, dtype=dtype) 
-            mat.mul(sqrt_weights, sqrt_weights, means)
-
         vars = np.empty(p, dtype=dtype)
-        mat.sq_mul(sqrt_weights ** 2, vars)
-        vars += centers * (centers - 2 * means)
+        mat.var(centers, weights, vars)
         scales = np.sqrt((n / (n - ddof)) * vars)
 
     class _standardize(core_base, py_base):
