@@ -680,6 +680,33 @@ public:
         );
     }
 
+    void mean(
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE(
+            void,
+            base_t,
+            mean,
+            weights, out
+        );
+    }
+
+    void var(
+        const Eigen::Ref<const vec_value_t>& centers,
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    ) override
+    {
+        PYBIND11_OVERRIDE(
+            void,
+            base_t,
+            var,
+            centers, weights, out
+        );
+    }
+
     int rows() const override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -791,7 +818,7 @@ void matrix_naive_base(py::module_& m, const char* name)
             Vector to multiply with the matrix.
         w : (n,) ndarray
             Vector of weights.
-        out : (q,) ndarray
+        out : (p,) ndarray
             Vector to store in-place the result.
         )delimiter")
         .def("sq_mul", &internal_t::sq_mul, R"delimiter(
@@ -804,7 +831,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         ----------
         weights : (n,) ndarray
             Vector of weights.
-        out : (n,) ndarray
+        out : (p,) ndarray
             Vector to store in-place the result.
         )delimiter")
         .def("sp_tmul", &internal_t::sp_tmul, R"delimiter(
@@ -819,6 +846,34 @@ void matrix_naive_base(py::module_& m, const char* name)
             Sparse matrix to multiply with the matrix.
         out : (L, n) ndarray
             Matrix to store in-place the result.
+        )delimiter")
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The default implied column means are given by ``w.T @ X``.
+        Unless stated otherwise, this function will compute the default version.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        The default implied column variances are given by ``w.T @ (X-c[None])**2``.
+        Unless stated otherwise, this function will compute the default version.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
         )delimiter")
         .def("cov", &internal_t::cov, R"delimiter(
         Computes a weighted covariance matrix.
@@ -871,6 +926,55 @@ void matrix_naive_base(py::module_& m, const char* name)
 }
 
 template <class ValueType>
+void matrix_naive_block_diag(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveBlockDiag<ValueType>;
+    using base_t = typename internal_t::base_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive block-diagonal matrix."
+        )
+        .def(
+            py::init([](py::list mat_list_py, size_t n_threads) {
+                std::vector<base_t*> mat_list;
+                mat_list.reserve(mat_list_py.size());
+                for (auto obj : mat_list_py) {
+                    mat_list.push_back(py::cast<base_t*>(obj));
+                }
+                return new internal_t(mat_list, n_threads);
+            }), 
+            py::arg("mat_list").noconvert(),
+            py::arg("n_threads")
+        )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        ;
+}
+
+template <class ValueType>
 void matrix_naive_cconcatenate(py::module_& m, const char* name)
 {
     using internal_t = ad::matrix::MatrixNaiveCConcatenate<ValueType>;
@@ -889,6 +993,35 @@ void matrix_naive_cconcatenate(py::module_& m, const char* name)
             }), 
             py::arg("mat_list").noconvert()
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The implied column means are a concatenation of the 
+        implied column means of each sub-matrix.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        The implied column variances are a concatenation of the 
+        implied column variances of each sub-matrix
+        where the centers are subsetted to the corresponding entries.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -910,6 +1043,89 @@ void matrix_naive_rconcatenate(py::module_& m, const char* name)
                 return new internal_t(mat_list);
             }), 
             py::arg("mat_list").noconvert()
+        )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        ;
+}
+
+template <class DenseType, class MaskType>
+void matrix_naive_convex_gated_relu_dense(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveConvexGatedReluDense<DenseType, MaskType>;
+    using base_t = typename internal_t::base_t;
+    using dense_t = typename internal_t::dense_t;
+    using mask_t = typename internal_t::mask_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive convex gated relu matrix with dense underlying."
+        )
+        .def(
+            py::init<
+                const Eigen::Ref<const dense_t>&,
+                const Eigen::Ref<const mask_t>&,
+                size_t
+            >(), 
+            py::arg("mat").noconvert(),
+            py::arg("mask").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+template <class SparseType, class MaskType>
+void matrix_naive_convex_gated_relu_sparse(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveConvexGatedReluSparse<SparseType, MaskType>;
+    using base_t = typename internal_t::base_t;
+    using vec_sp_index_t = typename internal_t::vec_sp_index_t;
+    using vec_sp_value_t = typename internal_t::vec_sp_value_t;
+    using mask_t = typename internal_t::mask_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive convex gated relu matrix with sparse underlying."
+        )
+        .def(
+            py::init<
+                size_t,
+                size_t,
+                size_t,
+                const Eigen::Ref<const vec_sp_index_t>&,
+                const Eigen::Ref<const vec_sp_index_t>&,
+                const Eigen::Ref<const vec_sp_value_t>&,
+                const Eigen::Ref<const mask_t>&,
+                size_t 
+            >(), 
+            py::arg("rows"),
+            py::arg("cols"),
+            py::arg("nnz"),
+            py::arg("outer").noconvert(),
+            py::arg("inner").noconvert(),
+            py::arg("value").noconvert(),
+            py::arg("mask").noconvert(),
+            py::arg("n_threads")
         )
         ;
 }
@@ -1011,6 +1227,32 @@ void matrix_naive_interaction_dense(py::module_& m, const char* name)
             py::arg("levels").noconvert(),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         .def_property_readonly("groups", &internal_t::groups, R"delimiter(
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -1040,6 +1282,32 @@ void matrix_naive_kronecker_eye(py::module_& m, const char* name)
             py::arg("K"),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -1058,6 +1326,32 @@ void matrix_naive_kronecker_eye_dense(py::module_& m, const char* name)
             py::arg("K"),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -1081,6 +1375,34 @@ void matrix_naive_one_hot_dense(py::module_& m, const char* name)
             py::arg("levels").noconvert(),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The default method is used for continuous features
+        and the implied mean is zero for categorical features.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        The default method is used for continuous features
+        and the implied variance is one for categorical features.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         .def_property_readonly("groups", &internal_t::groups, R"delimiter(
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -1115,6 +1437,32 @@ void matrix_naive_snp_unphased(py::module_& m, const char* name)
             py::arg("io"),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The implied column means are zero.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+        
+        The implied column variances are one.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -1135,6 +1483,32 @@ void matrix_naive_snp_phased_ancestry(py::module_& m, const char* name)
             py::arg("io"),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The implied column means are zero.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+        
+        The implied column variances are one.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -1189,6 +1563,32 @@ void matrix_naive_standardize(py::module_& m, const char* name)
             py::arg("scales").noconvert(),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The implied column means are zero.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+        
+        The implied column variances are one.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -1211,6 +1611,34 @@ void matrix_naive_csubset(py::module_& m, const char* name)
             py::arg("subset").noconvert(),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The implied column means are the subset of the 
+        implied column means of the underlying matrix.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        The implied column variances are the subset of the 
+        implied column variances of the underlying matrix.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -1233,6 +1661,34 @@ void matrix_naive_rsubset(py::module_& m, const char* name)
             py::arg("subset").noconvert(),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The implied column means are the implied column means of the underlying matrix
+        where the weights are zero outside of the subset.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        The implied column variances are the implied column variances of the underlying matrix
+        where the weights are zero outside of the subset.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -1273,6 +1729,34 @@ void register_matrix(py::module_& m)
     /* naive matrices */
     matrix_naive_base<double>(m, "MatrixNaiveBase64");
     matrix_naive_base<float>(m, "MatrixNaiveBase32");
+
+    matrix_naive_block_diag<double>(m, "MatrixNaiveBlockDiag64");
+    matrix_naive_block_diag<float>(m, "MatrixNaiveBlockDiag32");
+
+    matrix_naive_convex_gated_relu_dense<
+        dense_type<double, Eigen::RowMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexGatedReluDense64C");
+    matrix_naive_convex_gated_relu_dense<
+        dense_type<double, Eigen::ColMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexGatedReluDense64F");
+    matrix_naive_convex_gated_relu_dense<
+        dense_type<float, Eigen::RowMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexGatedReluDense32C");
+    matrix_naive_convex_gated_relu_dense<
+        dense_type<float, Eigen::ColMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexGatedReluDense32F");
+    matrix_naive_convex_gated_relu_sparse<
+        sparse_type<double, Eigen::ColMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexGatedReluSparse64F");
+    matrix_naive_convex_gated_relu_sparse<
+        sparse_type<float, Eigen::ColMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexGatedReluSparse32F");
 
     matrix_naive_convex_relu_dense<
         dense_type<double, Eigen::RowMajor>,

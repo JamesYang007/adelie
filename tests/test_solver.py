@@ -1127,3 +1127,112 @@ def test_pinball(m, d, seed):
     resid_actual = state.resid
     resid_expected = linear - quad @ A.T @ x
     assert np.allclose(resid_actual, resid_expected, atol=1e-7)
+
+
+# ==========================================================================================
+# TEST css_cov
+# ==========================================================================================
+
+
+class CSSCov:
+    def __init__(self, S, loss):
+        self.S = S
+        self.loss = {
+            "least_squares": self._least_squares,
+            "subset_factor": self._subset_factor,
+            "min_det": self._min_det,
+        }[loss]
+
+    def _least_squares(self, T):
+        S = self.S
+        S_TT = S[T][:, T]
+        S_TT_inv_S_T = np.linalg.solve(S_TT, S[T])
+        return np.sum(np.diag(S - S[:, T] @ S_TT_inv_S_T))
+
+    def _subset_factor(self, T):
+        S = self.S
+        p = S.shape[0]
+        S_TT = S[T][:, T]
+        Tc = np.setdiff1d(np.arange(p), T)
+        S_resid = S[Tc][:, Tc] - S[Tc][:, T] @ np.linalg.solve(S_TT, S[T][:, Tc])
+        return np.linalg.det(S_TT) * np.prod(np.diag(S_resid))
+
+    def _min_det(self, T):
+        S = self.S
+        S_TT = S[T][:, T]
+        return np.linalg.det(S_TT)
+
+    def greedy(self, k):
+        p = self.S.shape[1]
+        T = []
+        for _ in range(k):
+            j_star = np.argmin([
+                self.loss(T + [j]) if j not in T else np.inf
+                for j in range(p)
+            ])
+            T.append(j_star)
+        return T
+
+    def swapping(self, subset):
+        S = self.S
+        p = S.shape[1]
+        T = np.copy(subset)
+        while True:
+            converged = True
+            for jj in range(T.size):
+                j = T[jj]
+                U = np.concatenate([T[:jj], T[jj+1:]])
+                losses = np.full(p, np.inf)
+                for k in range(p):
+                    if k in U: continue
+                    T[jj] = k
+                    losses[k] = self.loss(T)
+                    T[jj] = j
+                j_star = np.argmin(losses)
+                if losses[j_star] < losses[j]:
+                    T[jj] = j_star
+                    converged = False
+            if converged: break
+        return T
+
+
+@pytest.mark.parametrize("p, k", [
+    [5, 0], 
+    [5, 1], 
+    [5, 3], 
+    [5, 5],
+    [10, 2], 
+    [20, 3],
+    [20, 5],
+])
+@pytest.mark.parametrize("loss", ["least_squares", "subset_factor", "min_det"])
+@pytest.mark.parametrize("seed", np.arange(3))
+def test_css_cov_greedy(p, k, loss, seed):
+    np.random.seed(seed)
+    X = np.random.normal(0, 1, (2*p, p))
+    S = X.T @ X / p
+    state = ad.solver.css_cov(S, k, method="greedy", loss=loss)
+    actual = state.subset
+    expected = CSSCov(S, loss).greedy(k)
+    assert np.all(actual == expected)
+
+
+@pytest.mark.parametrize("p, k", [
+    [5, 0], 
+    [5, 1], 
+    [5, 3], 
+    [5, 5],
+    [10, 2], 
+    [20, 3],
+    [20, 5],
+])
+@pytest.mark.parametrize("loss", ["least_squares", "subset_factor", "min_det"])
+@pytest.mark.parametrize("seed", np.arange(3))
+def test_css_cov_swapping(p, k, loss, seed):
+    np.random.seed(seed)
+    X = np.random.normal(0, 1, (2*p, p))
+    S = X.T @ X / p
+    state = ad.solver.css_cov(S, k, method="swapping", loss=loss)
+    actual = state.subset
+    expected = CSSCov(S, loss).swapping(actual)
+    assert np.all(actual == expected)

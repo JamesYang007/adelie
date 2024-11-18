@@ -98,6 +98,28 @@ public:
 
     /* Non-speed critical routines */
 
+    virtual void mean(
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    ) 
+    {
+        vec_value_t ones = vec_value_t::Ones(weights.size());
+        mul(ones, weights, out);
+    }
+
+    virtual void var(
+        const Eigen::Ref<const vec_value_t>& centers,
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    )
+    {
+        const auto sum_w = weights.sum();
+        vec_value_t m(out.size());
+        mean(weights, m);
+        sq_mul(weights, out);
+        out += centers * (centers * sum_w - 2 * m);
+    }
+
     virtual void sq_mul(
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out

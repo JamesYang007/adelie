@@ -288,6 +288,35 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::sp_tmul(
     }
 }
 
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::mean(
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> 
+) 
+{
+    throw util::adelie_core_error(
+        "MatrixNaiveKroneckerEye: mean() not implemented! "
+        "If this error occurred from standardizing the matrix, "
+        "consider providing your own center vector. "
+    );
+}
+
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::var(
+    const Eigen::Ref<const vec_value_t>&,
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> 
+)
+{
+    throw util::adelie_core_error(
+        "MatrixNaiveKroneckerEye: var() not implemented! "
+        "If this error occurred from standardizing the matrix, "
+        "consider providing your own scale vector. "
+    );
+}
+
 ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
 ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::MatrixNaiveKroneckerEyeDense(
     const Eigen::Ref<const dense_t>& mat,
@@ -561,6 +590,35 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::sp_tmul(
             routine(k);
         };
     }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::mean(
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> 
+) 
+{
+    throw util::adelie_core_error(
+        "MatrixNaiveKroneckerEyeDense: mean() not implemented! "
+        "If this error occurred from standardizing the matrix, "
+        "consider providing your own center vector. "
+    );
+}
+
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::var(
+    const Eigen::Ref<const vec_value_t>&,
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> 
+)
+{
+    throw util::adelie_core_error(
+        "MatrixNaiveKroneckerEyeDense: var() not implemented! "
+        "If this error occurred from standardizing the matrix, "
+        "consider providing your own scale vector. "
+    );
 }
 
 } // namespace matrix

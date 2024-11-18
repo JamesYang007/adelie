@@ -268,5 +268,26 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::sp_tmul(
     }
 }
 
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::mean(
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> out
+) 
+{
+    out.setZero();
+}
+
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::var(
+    const Eigen::Ref<const vec_value_t>&,
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    out.setOnes();
+}
+
 } // namespace matrix
 } // namespace adelie_core

@@ -71,6 +71,19 @@ enum class operator_type
     _add
 };
 
+enum class css_method_type
+{
+    _greedy,
+    _swapping
+};
+
+enum class css_loss_type
+{
+    _least_squares,
+    _subset_factor,
+    _min_det
+};
+
 inline screen_rule_type convert_screen_rule(
     const std::string& rule
 )
@@ -85,7 +98,7 @@ inline nnqp_screen_rule_type convert_nnqp_screen_rule(
 )
 {
     if (rule == "greedy") return nnqp_screen_rule_type::_greedy;
-    throw util::adelie_core_error("Invalid screen rule type: " + rule);
+    throw util::adelie_core_error("Invalid NNQP screen rule type: " + rule);
 }
 
 inline tie_method_type convert_tie_method(
@@ -121,7 +134,26 @@ inline impute_method_type convert_impute_method(
 {
     if (impute_method == "mean") return impute_method_type::_mean;
     if (impute_method == "user") return impute_method_type::_user;
-    throw util::adelie_core_error("Invalid read mode type: " + impute_method);
+    throw util::adelie_core_error("Invalid impute mode type: " + impute_method);
+}
+
+inline css_method_type convert_css_method(
+    const std::string& css_method
+)
+{
+    if (css_method == "greedy") return css_method_type::_greedy;
+    if (css_method == "swapping") return css_method_type::_swapping;
+    throw util::adelie_core_error("Invalid CSS method type: " + css_method);
+}
+
+inline css_loss_type convert_css_loss(
+    const std::string& css_loss
+)
+{
+    if (css_loss == "least_squares") return css_loss_type::_least_squares;
+    if (css_loss == "subset_factor") return css_loss_type::_subset_factor;
+    if (css_loss == "min_det") return css_loss_type::_min_det;
+    throw util::adelie_core_error("Invalid CSS loss type: " + css_loss);
 }
 
 } // namespace util

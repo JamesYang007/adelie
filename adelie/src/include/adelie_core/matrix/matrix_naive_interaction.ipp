@@ -774,5 +774,34 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::sp_tmul(
     }
 }
 
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::mean(
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> 
+) 
+{
+    throw util::adelie_core_error(
+        "MatrixNaiveInteractionDense: mean() not implemented! "
+        "If this error occurred from standardizing the matrix, "
+        "consider providing your own center vector. "
+    );
+}
+
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::var(
+    const Eigen::Ref<const vec_value_t>&,
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> 
+)
+{
+    throw util::adelie_core_error(
+        "MatrixNaiveInteractionDense: var() not implemented! "
+        "If this error occurred from standardizing the matrix, "
+        "consider providing your own scale vector. "
+    );
+}
+
 } // namespace matrix 
 } // namespace adelie_core
