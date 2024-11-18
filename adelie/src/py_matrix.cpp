@@ -850,14 +850,8 @@ void matrix_naive_base(py::module_& m, const char* name)
         .def("mean", &internal_t::mean, R"delimiter(
         Computes the implied column means.
 
-        The default implied column means are given by
-
-        .. math::
-            \begin{align*}
-                m_j = \sum_{i=1}^n w_i X_{ij}
-            \end{align*}
-
-        Unless stated otherwise, this function will compute the above.
+        The default implied column means are given by ``w.T @ X``.
+        Unless stated otherwise, this function will compute the default version.
 
         Parameters
         ----------
@@ -869,14 +863,8 @@ void matrix_naive_base(py::module_& m, const char* name)
         .def("var", &internal_t::var, R"delimiter(
         Computes the implied column variances.
 
-        The default implied column variances are given by
-
-        .. math::
-            \begin{align*}
-                v_j = \sum_{i=1}^n w_i (X_{ij} - c_j)^2
-            \end{align*}
-
-        Unless stated otherwise, this function will compute the above.
+        The default implied column variances are given by ``w.T @ (X-c[None])**2``.
+        Unless stated otherwise, this function will compute the default version.
 
         Parameters
         ----------
@@ -960,9 +948,7 @@ void matrix_naive_block_diag(py::module_& m, const char* name)
         .def("mean", &internal_t::mean, R"delimiter(
         Computes the implied column means.
 
-        The implied column means are a concatenation of the 
-        implied column means of each block diagonal matrix
-        where the weights are subsetted to the corresponding entries.
+        It is undefined for this matrix class and is only exposed for API consistency.
 
         Parameters
         ----------
@@ -974,9 +960,7 @@ void matrix_naive_block_diag(py::module_& m, const char* name)
         .def("var", &internal_t::var, R"delimiter(
         Computes the implied column variances.
 
-        The implied column variances are a concatenation of the 
-        implied column variances of each block diagonal matrix
-        where the centers and weights are subsetted to the corresponding entries.
+        It is undefined for this matrix class and is only exposed for API consistency.
 
         Parameters
         ----------
@@ -1063,9 +1047,7 @@ void matrix_naive_rconcatenate(py::module_& m, const char* name)
         .def("mean", &internal_t::mean, R"delimiter(
         Computes the implied column means.
 
-        The implied column means are a sum of the 
-        implied column means of each sub-matrix
-        where the weights are subsetted to the corresponding entries.
+        It is undefined for this matrix class and is only exposed for API consistency.
 
         Parameters
         ----------
@@ -1077,9 +1059,7 @@ void matrix_naive_rconcatenate(py::module_& m, const char* name)
         .def("var", &internal_t::var, R"delimiter(
         Computes the implied column variances.
 
-        The implied column variances are a sum of the 
-        implied column variances of each sub-matrix
-        where the weights are subsetted to the corresponding entries.
+        It is undefined for this matrix class and is only exposed for API consistency.
 
         Parameters
         ----------
@@ -1190,6 +1170,32 @@ void matrix_naive_interaction_dense(py::module_& m, const char* name)
             py::arg("levels").noconvert(),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         .def_property_readonly("groups", &internal_t::groups, R"delimiter(
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -1219,6 +1225,32 @@ void matrix_naive_kronecker_eye(py::module_& m, const char* name)
             py::arg("K"),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -1237,6 +1269,32 @@ void matrix_naive_kronecker_eye_dense(py::module_& m, const char* name)
             py::arg("K"),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        It is undefined for this matrix class and is only exposed for API consistency.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -1260,6 +1318,34 @@ void matrix_naive_one_hot_dense(py::module_& m, const char* name)
             py::arg("levels").noconvert(),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The default method is used for continuous features
+        and the implied mean is zero for categorical features.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        The default method is used for continuous features
+        and the implied variance is one for categorical features.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         .def_property_readonly("groups", &internal_t::groups, R"delimiter(
         List of starting indices to each group where `G` is the number of groups.
         ``groups[i]`` is the starting index of the ``i`` th group. 
@@ -1294,6 +1380,32 @@ void matrix_naive_snp_unphased(py::module_& m, const char* name)
             py::arg("io"),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The implied column means are zero.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+        
+        The implied column variances are one.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -1314,6 +1426,32 @@ void matrix_naive_snp_phased_ancestry(py::module_& m, const char* name)
             py::arg("io"),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The implied column means are zero.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+        
+        The implied column variances are one.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -1368,6 +1506,32 @@ void matrix_naive_standardize(py::module_& m, const char* name)
             py::arg("scales").noconvert(),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The implied column means are zero.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+        
+        The implied column variances are one.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -1390,6 +1554,34 @@ void matrix_naive_csubset(py::module_& m, const char* name)
             py::arg("subset").noconvert(),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The implied column means are the subset of the 
+        implied column means of the underlying matrix.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        The implied column variances are the subset of the 
+        implied column variances of the underlying matrix.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 
@@ -1412,6 +1604,34 @@ void matrix_naive_rsubset(py::module_& m, const char* name)
             py::arg("subset").noconvert(),
             py::arg("n_threads")
         )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The implied column means are the implied column means of the underlying matrix
+        where the weights are zero outside of the subset.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+
+        The implied column variances are the implied column variances of the underlying matrix
+        where the weights are zero outside of the subset.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
         ;
 }
 

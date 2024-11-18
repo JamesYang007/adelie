@@ -236,5 +236,26 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::sp_tmul(
     }
 }
 
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::mean(
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> out
+) 
+{
+    out.setZero();
+}
+
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::var(
+    const Eigen::Ref<const vec_value_t>&,
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    out.setOnes();
+}
+
 } // namespace matrix
 } // namespace adelie_core 

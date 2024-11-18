@@ -350,53 +350,30 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::sp_tmul(
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
 void
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::mean(
-    const Eigen::Ref<const vec_value_t>& weights,
-    Eigen::Ref<vec_value_t> out
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t>
 )
 {
-    const auto routine = [&](auto g) {
-        auto& mat = *_mat_list[g];
-        const auto r_begin = _row_outer[g];
-        const auto r_size = _row_outer[g+1] - r_begin;
-        const auto w_slice = weights.segment(r_begin, r_size);
-        const auto c_begin = _col_outer[g];
-        const auto c_size = _col_outer[g+1] - c_begin;
-        auto out_slice = out.segment(c_begin, c_size);
-        mat.mean(w_slice, out_slice);
-    };
-    if (_n_threads <= 1) {
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    }
+    throw util::adelie_core_error(
+        "MatrixNaiveBlockDiag: mean() not implemented! "
+        "If this error occurred from standardizing the matrix, "
+        "consider providing your own center vector. "
+    );
 }
 
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
 void
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::var(
-    const Eigen::Ref<const vec_value_t>& centers,
-    const Eigen::Ref<const vec_value_t>& weights,
-    Eigen::Ref<vec_value_t> out
+    const Eigen::Ref<const vec_value_t>&,
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t>
 )
 {
-    const auto routine = [&](auto g) {
-        auto& mat = *_mat_list[g];
-        const auto r_begin = _row_outer[g];
-        const auto r_size = _row_outer[g+1] - r_begin;
-        const auto w_slice = weights.segment(r_begin, r_size);
-        const auto c_begin = _col_outer[g];
-        const auto c_size = _col_outer[g+1] - c_begin;
-        auto out_slice = out.segment(c_begin, c_size);
-        const auto centers_slice = centers.segment(c_begin, c_size);
-        mat.var(centers_slice, w_slice, out_slice);
-    };
-    if (_n_threads <= 1) {
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    }
+    throw util::adelie_core_error(
+        "MatrixNaiveBlockDiag: var() not implemented! "
+        "If this error occurred from standardizing the matrix, "
+        "consider providing your own scale vector. "
+    );
 }
 
 } // namespace matrix 

@@ -2030,6 +2030,8 @@ void state_css_cov(py::module_& m, const char* name)
         Selected subset.
         )delimiter")
         .def("solve", [](state_t state) { return _solve(state); })
+        .def_readonly("S_resid", &state_t::S_resid)
+        .def_readonly("L_T", &state_t::L_T)
         .def_readonly("benchmark_init", &state_t::benchmark_init)
         .def_readonly("benchmark_L_U", &state_t::benchmark_L_U)
         .def_readonly("benchmark_S_resid", &state_t::benchmark_S_resid)

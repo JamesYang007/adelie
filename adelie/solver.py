@@ -1331,6 +1331,13 @@ def css_cov(
             \\left|\\Sigma_T\\right|
         \\end{align*}
 
+    The greedy method begins with the empty set for :math:`T` 
+    and adds at every iteration the column that most minimizes the loss
+    until :math:`T` is of size :math:`k`.
+    The swapping method begins with an initial set :math:`T` of size :math:`k`
+    and iteratively attempts to swap out each entry of :math:`T` for the column
+    that most improves the loss (strictly).
+
     .. note::
         The greedy method is generally significantly faster than the swapping method.
         However, the swapping method yields a much more accurate solution to the CSS problem.

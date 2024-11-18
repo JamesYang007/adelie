@@ -37,7 +37,8 @@ from .cv import (
     cv_grpnet,
 )
 from .sklearn import (
-    GroupElasticNet
+    CSSModelSelection,
+    GroupElasticNet,
 )
 from .solver import (
     bvls,

@@ -425,6 +425,19 @@ def test_naive_cconcatenate(n, ps, dtype, n_threads=2, seed=0):
     )
     run_naive(X, cX, dtype)
 
+    # test mean
+    w = np.random.uniform(0, 1, cX.shape[0]).astype(dtype)
+    mean = np.empty(cX.shape[1], dtype=dtype)
+    cX.mean(w, mean)
+    expected = X.T @ w
+    assert np.allclose(mean, expected)
+
+    # test var
+    var = np.empty(cX.shape[1], dtype=dtype)
+    cX.var(mean, w, var)
+    expected = np.sum((X - mean) ** 2 * w[:, None], axis=0)
+    assert np.allclose(var, expected)
+
 
 @pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
@@ -465,6 +478,19 @@ def test_naive_convex_relu(n, d, m, storage, dtype, n_threads=2, seed=0):
     cX = mod.convex_relu(Z, mask, n_threads=n_threads)
     run_naive(X, cX, dtype)
 
+    # test mean
+    w = np.random.uniform(0, 1, cX.shape[0]).astype(dtype)
+    mean = np.empty(cX.shape[1], dtype=dtype)
+    cX.mean(w, mean)
+    expected = X.T @ w
+    assert np.allclose(mean, expected)
+
+    # test var
+    var = np.empty(cX.shape[1], dtype=dtype)
+    cX.var(mean, w, var)
+    expected = np.sum((X - mean) ** 2 * w[:, None], axis=0)
+    assert np.allclose(var, expected)
+
 
 @pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
@@ -480,6 +506,19 @@ def test_naive_dense(n, p, dtype, order, seed=0):
     X = np.array(X, dtype=dtype, order=order)
     cX = mod.dense(X, method="naive", n_threads=15)
     run_naive(X, cX, dtype)
+
+    # test mean
+    w = np.random.uniform(0, 1, cX.shape[0]).astype(dtype)
+    mean = np.empty(cX.shape[1], dtype=dtype)
+    cX.mean(w, mean)
+    expected = X.T @ w
+    assert np.allclose(mean, expected)
+
+    # test var
+    var = np.empty(cX.shape[1], dtype=dtype)
+    cX.var(mean, w, var)
+    expected = np.sum((X - mean) ** 2 * w[:, None], axis=0)
+    assert np.allclose(var, expected)
 
     
 @pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
@@ -611,6 +650,29 @@ def test_naive_one_hot_dense(n, d, dtype, order, seed=0):
     X = _create_dense(X, levels)
     run_naive(X, cX, dtype)
 
+    # test mean
+    w = np.random.uniform(0, 1, cX.shape[0]).astype(dtype)
+    mean = np.empty(cX.shape[1], dtype=dtype)
+    cX.mean(w, mean)
+    expected = X.T @ w
+    begin = 0
+    for level in levels:
+        if level > 0:
+            expected[begin:begin+level] = 0
+        begin += max(level, 1)
+    assert np.allclose(mean, expected, atol=1e-6)
+
+    # test var
+    var = np.empty(cX.shape[1], dtype=dtype)
+    cX.var(mean, w, var)
+    expected = np.sum((X - mean) ** 2 * w[:, None], axis=0)
+    begin = 0
+    for level in levels:
+        if level > 0:
+            expected[begin:begin+level] = 1
+        begin += max(level, 1)
+    assert np.allclose(var, expected, atol=1e-6)
+
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("read_mode", ["file", "mmap"])
@@ -643,6 +705,17 @@ def test_naive_snp_unphased(n, p, read_mode, dtype, seed=0):
     os.remove(filename)
 
     ad.configs.set_configs("min_bytes", min_bytes)
+
+    # test mean
+    w = np.random.uniform(0, 1, cX.shape[0]).astype(dtype)
+    mean = np.empty(cX.shape[1], dtype=dtype)
+    cX.mean(w, mean)
+    assert np.allclose(mean, 0)
+
+    # test var
+    var = np.empty(cX.shape[1], dtype=dtype)
+    cX.var(mean, w, var)
+    assert np.allclose(var, 1)
 
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
@@ -686,6 +759,17 @@ def test_naive_snp_phased_ancestry(n, s, A, read_mode, dtype, seed=0):
     X = create_dense(data["X"], data["ancestries"], A) 
     run_naive(X, cX, dtype)
 
+    # test mean
+    w = np.random.uniform(0, 1, cX.shape[0]).astype(dtype)
+    mean = np.empty(cX.shape[1], dtype=dtype)
+    cX.mean(w, mean)
+    assert np.allclose(mean, 0)
+
+    # test var
+    var = np.empty(cX.shape[1], dtype=dtype)
+    cX.var(mean, w, var)
+    assert np.allclose(var, 1)
+
     ad.configs.set_configs("min_bytes", min_bytes)
 
 
@@ -707,6 +791,19 @@ def test_naive_sparse(n, p, dtype, order, seed=0):
     }[order](X)
     cX = mod.sparse(X_sp, method="naive", n_threads=3)
     run_naive(X, cX, dtype)
+
+    # test mean
+    w = np.random.uniform(0, 1, cX.shape[0]).astype(dtype)
+    mean = np.empty(cX.shape[1], dtype=dtype)
+    cX.mean(w, mean)
+    expected = X.T @ w
+    assert np.allclose(mean, expected)
+
+    # test var
+    var = np.empty(cX.shape[1], dtype=dtype)
+    cX.var(mean, w, var)
+    expected = np.sum((X - mean) ** 2 * w[:, None], axis=0)
+    assert np.allclose(var, expected)
 
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
@@ -738,6 +835,17 @@ def test_naive_standardize(n, p, dtype, seed=0):
     X = (X - centers[None]) / scales[None]
     run_naive(X, cX, dtype)
 
+    # test mean
+    w = np.random.uniform(0, 1, cX.shape[0]).astype(dtype)
+    mean = np.empty(cX.shape[1], dtype=dtype)
+    cX.mean(w, mean)
+    assert np.allclose(mean, 0)
+
+    # test var
+    var = np.empty(cX.shape[1], dtype=dtype)
+    cX.var(mean, w, var)
+    assert np.allclose(var, 1)
+
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("subset_prop", [0, 0.5, 1])
@@ -765,6 +873,19 @@ def test_naive_csubset(n, p, subset_prop, dtype, seed=0):
     cX = dX[:, bool_indices]
     X = X[:, np.argsort(indices)]
     run_naive(X, cX, dtype)
+
+    # test mean
+    w = np.random.uniform(0, 1, cX.shape[0]).astype(dtype)
+    mean = np.empty(cX.shape[1], dtype=dtype)
+    cX.mean(w, mean)
+    expected = X.T @ w
+    assert np.allclose(mean, expected)
+
+    # test var
+    var = np.empty(cX.shape[1], dtype=dtype)
+    cX.var(mean, w, var)
+    expected = np.sum((X - mean) ** 2 * w[:, None], axis=0)
+    assert np.allclose(var, expected)
 
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
@@ -797,6 +918,19 @@ def test_naive_rsubset(n, p, subset_prop, dtype, seed=0):
     cX = dX[bool_indices]
     sX = X[np.sort(indices)]
     run_naive(sX, cX, dtype)
+
+    # test mean
+    w = np.random.uniform(0, 1, cX.shape[0]).astype(dtype)
+    mean = np.empty(cX.shape[1], dtype=dtype)
+    cX.mean(w, mean)
+    expected = sX.T @ w
+    assert np.allclose(mean, expected, atol=1e-6)
+
+    # test var
+    var = np.empty(cX.shape[1], dtype=dtype)
+    cX.var(mean, w, var)
+    expected = np.sum((sX - mean) ** 2 * w[:, None], axis=0)
+    assert np.allclose(var, expected, atol=1e-6)
 
 
 # Reset to default settings

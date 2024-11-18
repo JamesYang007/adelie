@@ -527,5 +527,40 @@ ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::sp_tmul(
     }
 }
 
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::mean(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) 
+{
+    base_t::mean(weights, out);
+    const auto d = _mat.cols();
+    for (int g = 0; g < d; ++g) {
+        const auto j = _outer[g];
+        const auto level = _levels[g];
+        if (level <= 0) continue;
+        out.segment(j, level) = 0;
+    }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::var(
+    const Eigen::Ref<const vec_value_t>& centers,
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    base_t::var(centers, weights, out);
+    const auto d = _mat.cols();
+    for (int g = 0; g < d; ++g) {
+        const auto j = _outer[g];
+        const auto level = _levels[g];
+        if (level <= 0) continue;
+        out.segment(j, level) = 1;
+    }
+}
+
 } // namespace matrix
 } // namespace adelie_core 

@@ -320,5 +320,26 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::sp_tmul(
     }
 }
 
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::mean(
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> out
+) 
+{
+    out.setZero();
+}
+
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::var(
+    const Eigen::Ref<const vec_value_t>&,
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    out.setOnes();
+}
+
 } // namespace matrix
 } // namespace adelie_core

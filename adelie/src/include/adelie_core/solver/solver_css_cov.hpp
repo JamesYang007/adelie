@@ -15,22 +15,6 @@ namespace solver {
 namespace css {
 namespace cov {
 
-template <class ValueType>
-struct BufferPack
-{
-    using value_t = ValueType;
-
-    util::colmat_type<value_t> S_resid;
-    util::rowvec_type<value_t> scores;
-
-    explicit BufferPack(
-        size_t p
-    ):
-        S_resid(p, p),
-        scores(p)
-    {}
-};
-
 template <class ValueType, class IndexType>
 ADELIE_CORE_STRONG_INLINE
 bool compute_least_squares_scores(
@@ -184,13 +168,11 @@ void update_cov_resid_fwd(
 
 template <
     class StateType,
-    class BufferPackType,
     class ComputeScoresType,
     class CheckUserInterruptType
 >
 inline void solve_greedy(
     StateType& state,
-    BufferPackType& buffer,
     ComputeScoresType compute_scores,
     CheckUserInterruptType check_user_interrupt
 )
@@ -205,16 +187,17 @@ inline void solve_greedy(
     const auto subset_size = state.subset_size;
     auto& subset_set = state.subset_set;
     auto& subset = state.subset;
-
-    auto& S_resid = buffer.S_resid;
-    auto& scores = buffer.scores;
+    auto& S_resid = state.S_resid;
 
     const auto p = S.cols();
+
+    vec_value_t scores(p);
 
     subset_set.clear();
     subset.clear();
     subset.reserve(p);
     // NOTE: S_resid is only well-defined on the lower triangular part!
+    S_resid.resize(p, p);
     S_resid.template triangularView<Eigen::Lower>() = S;
 
     for (size_t t = 0; t < subset_size; ++t) 
@@ -237,13 +220,11 @@ inline void solve_greedy(
 
 template <
     class StateType,
-    class BufferPackType,
     class ComputeScoresType,
     class CheckUserInterruptType
 >
 inline void solve_swapping(
     StateType& state,
-    BufferPackType& buffer,
     ComputeScoresType compute_scores,
     CheckUserInterruptType check_user_interrupt
 )
@@ -251,7 +232,7 @@ inline void solve_swapping(
     using state_t = std::decay_t<StateType>;
     using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
-    using colmat_value_t = util::colmat_type<value_t>;
+    using colmat_value_t = typename state_t::colmat_value_t;
 
     constexpr value_t neg_inf = -std::numeric_limits<value_t>::infinity();
     constexpr value_t eps = 1e-10;
@@ -261,26 +242,30 @@ inline void solve_swapping(
     const auto n_threads = state.n_threads;
     auto& subset_set = state.subset_set;
     auto& subset = state.subset;
+    auto& S_resid = state.S_resid;
+    auto& L_T = state.L_T;
 
     const size_t p = S.cols();
     const size_t k = subset.size();
     
     if (k <= 0 || k >= p) return;
 
-    auto& S_resid = buffer.S_resid;
-    auto& scores = buffer.scores;
+    vec_value_t scores(p);
 
+#ifdef ADELIE_CORE_CSS_COV_DEBUG
     util::Stopwatch sw;
 
     sw.start();
+#endif
 
     // initialize residual covariance w.r.t. T
     // NOTE: S_resid is only well-defined on the lower triangular part!
+    S_resid.resize(p, p);
     S_resid.template triangularView<Eigen::Lower>() = S;
     for (size_t jj = 0; jj < subset.size(); ++jj) {
         const auto j = subset[jj];
         if (S_resid(j, j) <= eps) {
-            throw util::adelie_core_solver_error(
+            throw util::adelie_core_error(
                 "Initial subset are not linearly independent columns. "
             );
         }
@@ -296,10 +281,10 @@ inline void solve_swapping(
     }
     S_T.template triangularView<Eigen::Upper>() = S_T.transpose();
     Eigen::LLT<colmat_value_t> S_T_llt(S_T);
-    colmat_value_t L_T = S_T_llt.matrixL();
+    L_T = S_T_llt.matrixL();
 
     if ((L_T.diagonal().array() <= eps).any()) {
-        throw util::adelie_core_solver_error(
+        throw util::adelie_core_error(
             "Initial subset are not linearly independent columns. "
         );
     }
@@ -319,7 +304,9 @@ inline void solve_swapping(
     // convergence metric
     size_t n_consec_keep = 0;
     
+#ifdef ADELIE_CORE_CSS_COV_DEBUG
     state.benchmark_init = sw.elapsed();
+#endif
 
     for (size_t iters = 0; iters < max_iters; ++iters) 
     {
@@ -336,18 +323,24 @@ inline void solve_swapping(
 
             // compute L_U
             {
+#ifdef ADELIE_CORE_CSS_COV_DEBUG
                 sw.start();
+#endif
                 const auto L_0 = L_T.bottomRightCorner(k-1, k-1).template triangularView<Eigen::Lower>();
                 const auto v_0 = L_T.col(0).tail(k-1);
                 auto _L_U = L_U.template triangularView<Eigen::Lower>();
                 _L_U = L_0;
                 Eigen::internal::llt_rank_update_lower(L_U, v_0, 1.0);
+#ifdef ADELIE_CORE_CSS_COV_DEBUG
                 state.benchmark_L_U.push_back(sw.elapsed());
+#endif
             }
 
             // compute S_resid w.r.t. U
             {
+#ifdef ADELIE_CORE_CSS_COV_DEBUG
                 sw.start();
+#endif
                 auto buff_ptr = buff.data();
 
                 // compute Sigma_{U,j}
@@ -388,16 +381,22 @@ inline void solve_swapping(
                 // numerically unstable, so no swapping will be accurate (just terminate)
                 if (beta_j <= 0) return;
                 S_resid.template selfadjointView<Eigen::Lower>().rankUpdate(beta.matrix().transpose(), 1/beta_j);
+#ifdef ADELIE_CORE_CSS_COV_DEBUG
                 state.benchmark_S_resid.push_back(sw.elapsed());
+#endif
             }
 
             // remove the current index to swap
             subset_set.erase(j);
 
             // compute scores using current residual covariance
+#ifdef ADELIE_CORE_CSS_COV_DEBUG
             sw.start();
+#endif
             const bool early_exit = compute_scores(subset_set, j, S_resid, scores);
+#ifdef ADELIE_CORE_CSS_COV_DEBUG
             state.benchmark_scores.push_back(sw.elapsed());
+#endif
 
             // compute max score outside U
             Eigen::Index j_star;
@@ -422,12 +421,11 @@ inline void solve_swapping(
             // add the updated index
             subset_set.insert(subset[jj]);
 
-            // check for convergence or early exit
-            if (n_consec_keep >= k || early_exit) return;
-
             // compute L_T with the new T for the next iteration
             {
+#ifdef ADELIE_CORE_CSS_COV_DEBUG
                 sw.start();
+#endif
                 const auto j = subset[jj];
                 const auto _L_U = L_U.template triangularView<Eigen::Lower>();
                 L_T.topLeftCorner(k-1, k-1).template triangularView<Eigen::Lower>() = _L_U;
@@ -438,16 +436,22 @@ inline void solve_swapping(
                 _L_U.solveInPlace(v.matrix().transpose());
                 const auto v_sq_norm = v.squaredNorm();
                 L_T(k-1, k-1) = std::sqrt(std::max<value_t>(S(j, j) - v_sq_norm, 0));
+#ifdef ADELIE_CORE_CSS_COV_DEBUG
                 state.benchmark_L_T.push_back(sw.elapsed());
+#endif
             }
 
-            // check invariance that S_T is still invertible
-            if (L_T(k-1, k-1) <= eps) return;
-
             // compute S_resid w.r.t. T
+#ifdef ADELIE_CORE_CSS_COV_DEBUG
             sw.start();
+#endif
             update_cov_resid_fwd(S_resid, subset[jj], scores /* buffer */);
+#ifdef ADELIE_CORE_CSS_COV_DEBUG
             state.benchmark_resid_fwd.push_back(sw.elapsed());
+#endif
+
+            // check for convergence or early exit or invariance that S_T is still invertible
+            if (n_consec_keep >= k || early_exit || L_T(k-1, k-1) <= eps) return;
         }
     }
 
@@ -466,7 +470,6 @@ inline void solve(
     using state_t = std::decay_t<StateType>;
     using matrix_t = typename state_t::matrix_t;
     using index_t = typename state_t::index_t;
-    using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
     using score_func_t = std::function<
         bool(
@@ -480,9 +483,6 @@ inline void solve(
     const auto method = state.method;
     const auto loss = state.loss;
     const auto n_threads = state.n_threads;
-    const auto p = state.S.cols();
-
-    BufferPack<value_t> buffer(p);
 
     score_func_t score_func = [&]() -> score_func_t {
         switch (loss) {
@@ -524,11 +524,11 @@ inline void solve(
 
     switch (method) {
         case util::css_method_type::_greedy: {
-            solve_greedy(state, buffer, score_func, check_user_interrupt);
+            solve_greedy(state, score_func, check_user_interrupt);
             break;
         }
         case util::css_method_type::_swapping: {
-            solve_swapping(state, buffer, score_func, check_user_interrupt);
+            solve_swapping(state, score_func, check_user_interrupt);
             break;
         }
     }

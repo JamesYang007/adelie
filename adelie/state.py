@@ -170,6 +170,7 @@ class base:
         state = type(state).create_from_core(state, core_state)
 
         # add extra total time information
+        state.error = out["error"]
         state.total_time = out["total_time"]
 
         return state
@@ -3448,8 +3449,8 @@ def css_cov(
     Parameters
     ----------
     S : (p, p) ndarray
-        Positive semi-definite matrix.
-    subset_size : int
+        Positive semi-definite matrix :math:`\\Sigma`.
+    subset_size : int 
         Subset size :math:`k`.
         It must satisfy the following conditions for each method type:
 
@@ -3458,28 +3459,28 @@ def css_cov(
               if ``subset`` is ``None``.
               Otherwise, it is ignored.
 
-    subset : ndarray
+    subset : ndarray 
         Initial subset :math:`T`.
         This argument is only used by the swapping method.
         If ``None``, the greedy method is used 
         to first initialize a subset of size ``subset_size``.
-    method : str
+    method : str 
         Search method to identify the optimal :math:`T`. 
         It must be one of the following:
         
             - ``"greedy"``: greedy method.
             - ``"swapping"``: swapping method.
 
-    loss : str
+    loss : str 
         Loss type. It must be one of the following:
 
             - ``"least_squares"``: least squares loss.
             - ``"subset_factor"``: subset factor loss.
             - ``"min_det"``: minimum determinant loss.
 
-    max_iters : int
+    max_iters : int 
         Maximum number of cycles.
-    n_threads : int
+    n_threads : int 
         Number of threads.
 
     Returns

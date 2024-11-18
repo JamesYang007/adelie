@@ -37,6 +37,7 @@ public:
     using index_t = IndexType;
     using vec_value_t = util::rowvec_type<value_t>;
     using vec_index_t = util::rowvec_type<index_t>;
+    using colmat_value_t = util::colmat_type<value_t>;
 
     const Eigen::Map<const matrix_t> S;
 
@@ -52,6 +53,8 @@ public:
     /* dynamic states */
     std::unordered_set<index_t> subset_set;
     std::vector<index_t> subset;
+    colmat_value_t S_resid;
+    colmat_value_t L_T;
 
     static_assert(!matrix_t::IsRowMajor, "Matrix must be column-major!");
 

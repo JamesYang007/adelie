@@ -1,3 +1,7 @@
+from .adelie_core.sklearn import (
+    css_cov_model_selection_fit_k_32,
+    css_cov_model_selection_fit_k_64,
+)
 from .cv import (
     cv_grpnet, 
     CVGrpnetResult,
@@ -33,6 +37,7 @@ from typing import (
     Union,
 )
 import numpy as np
+import warnings
 
 
 class GroupElasticNet(BaseEstimator, RegressorMixin):
@@ -243,3 +248,217 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
             "poisson",
         ]:
             raise ValueError(f"Unknown family: {self.family}")
+
+
+class CSSModelSelection(BaseEstimator, RegressorMixin):
+    """
+    Column Subset Selection estimator for model selection with scikit-learn compatible API.
+
+    The finite-sample guaranteed test procedure for Gaussian features is run
+    to identify the smallest subset that most likely reconstructs the rest of the features
+    based on the subset factor loss and swapping method.
+
+    Parameters
+    ----------
+    alpha : float
+        Nominal level for the test.
+    n_inits : int, optional
+        Number of random initializations.
+        Default is ``1``.
+    n_sims : int, optional
+        Number of Monte Carlo samples to estimate critical thresholds.
+        Default is ``int(1e4)``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+    seed : int, optional
+        Random seed.
+        If ``None``, no particular seed is used.
+        Default is ``None``.
+
+    See Also
+    --------
+    adelie.solver.css_cov
+    """
+
+    def __init__(
+        self,
+        alpha: float,
+        n_inits: int=1,
+        n_sims: int=int(1e4),
+        n_threads: int =1,
+        seed: int =None,
+    ):
+        """
+        Initialize the CSS estimator.
+        """
+        self.alpha = alpha
+        self.n_inits = n_inits
+        self.n_sims = n_sims
+        self.n_threads = n_threads
+        self.seed = seed
+
+    def fit(
+        self,
+        X: np.ndarray,
+        y: np.ndarray=None,
+    ):
+        """
+        Fit the CSS model under subset factor loss and perform model selection.
+
+        Parameters
+        ----------
+        X : (n, p) ndarray
+            Feature matrix.
+        y : (n,) ndarray, optional
+            Not used and only present here for API consistency by convention.
+            Default is ``None``.
+
+        Returns
+        -------
+        self
+            Returns an instance of self.
+
+        See Also
+        --------
+        :func:`fit_cov`
+        """
+        n = X.shape[0]
+        S = X.T @ X / n
+        return self.fit_cov(S, n)
+
+    def fit_cov(
+        self, 
+        S: np.ndarray, 
+        n: int,
+    ):
+        """
+        Fit the CSS model under subset factor loss and perform model selection.
+
+        Parameters
+        ----------
+        S : (p, p) ndarray
+            Positive semi-definite matrix :math:`\\Sigma`.
+        n : int
+            Number of samples.
+
+        Returns
+        -------
+        self
+            Returns an instance of self.
+
+        See Also
+        --------
+        adelie.solver.css_cov
+        """
+        alpha = self.alpha
+        n_inits = self.n_inits
+        n_sims = self.n_sims
+        n_threads = self.n_threads
+        seed = self.seed
+        p = S.shape[1]
+
+        assert p > 0 and n >= p
+
+        # construct covariance estimate
+        S = np.asfortranarray(S)
+        S_logdet = np.linalg.slogdet(S)[1]
+
+        # prepare samples for critical threshold estimation
+        if not (seed is None):
+            np.random.seed(seed)
+            seeds = np.random.choice(int(1e7), p, replace=False)
+        order = np.arange(1, p)
+        chi2_1 = np.random.chisquare(order, (n_sims, order.size))
+        chi2_2 = np.random.chisquare(n-p-1+order[::-1], (n_sims, order.size))
+
+        # loop through each k and solve CSS
+        for k in range(0, p):
+            # special case when k == p-1: any subset will not reject
+            if k == p-1:
+                reject = False
+                best_subset = np.arange(p-1)
+                break
+
+            # compute (1-alpha) quantile for current k
+            numer = chi2_1[:, :(p-k-1)]
+            denom = chi2_2[:, (k+1-p):]
+            samples = np.sum(np.log(1 + (numer / denom)), axis=-1)
+            cutoff = np.quantile(samples, 1-alpha)
+
+            # special case when k == 0: simple computation
+            if k == 0:
+                T = np.sum(np.log(np.diag(S))) - S_logdet
+                reject = T > cutoff
+                best_subset = np.empty(0, dtype=int)
+
+            # otherwise, run swapping many times
+            else:
+                # if k == 1, it is sufficient to run with only 1 initialization.
+                n_inits_cap = 1 if k == 1 else n_inits
+                assert n_inits_cap >= 1
+
+                # Run n_inits_cap number of random initializations and 
+                # solve swapping CSS with subset factor loss.
+                # The best (smallest) test statistic is returned along with the best subset.
+                fit_out = {
+                    np.dtype("float32"): css_cov_model_selection_fit_k_32,
+                    np.dtype("float64"): css_cov_model_selection_fit_k_64,
+                }[S.dtype](
+                    S,
+                    k,
+                    S_logdet,
+                    cutoff,
+                    n_inits_cap,
+                    n_threads,
+                    seeds[k] if seed is None else (p*(k+1) + seed) % 100007,
+                )
+                best_T = fit_out["T"]
+                best_subset = fit_out["subset"]
+                reject = best_T > cutoff
+
+            if not reject: break
+
+        self.subset_ = best_subset
+
+        return self
+
+    def score(
+        self,
+        X: np.ndarray,
+        y: np.ndarray=None,
+        sample_weight: np.ndarray=None,
+    ):
+        """Compute the (negative) subset factor loss.
+
+        Parameters
+        ----------
+        X : (n, p) ndarray
+            Feature matrix.
+        y : (n,) ndarray, optional
+            Not used and only present here for API consistency by convention.
+            Default is ``None``.
+        sample_weights : (n,) ndarray, optional
+            Not used and only present here for API consistency by convention.
+            Default is ``None``.
+
+        Returns
+        -------
+        loss : float
+            Subset factor loss where :math:`T` is given by the fitted subset.
+        """
+        n, p = X.shape
+        subset = self.subset_
+        subset_c = np.setdiff1d(np.arange(p), subset)
+        S_resid = X.T @ X / n
+        S_T = np.copy(S_resid[:, subset][subset])
+        for i in subset:
+            beta = S_resid[i]
+            S_resid -= np.outer(beta, beta) / beta[i]
+        S_resid_c = S_resid[:, subset_c][subset_c]
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            loss = np.linalg.slogdet(S_T)[1] + np.sum(np.log(np.diag(S_resid_c)))
+        if np.isnan(loss):
+            loss = -np.inf
+        return -loss

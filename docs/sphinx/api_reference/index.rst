@@ -214,6 +214,7 @@ adelie.sklearn
     :toctree: generated/
 
 
+    CSSModelSelection
     GroupElasticNet
 
 

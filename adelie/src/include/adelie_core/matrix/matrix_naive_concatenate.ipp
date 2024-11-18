@@ -292,7 +292,7 @@ ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::var(
     for (size_t i = 0; i < _mat_list.size(); ++i) {
         auto& mat = *_mat_list[i];
         const auto p = mat.cols();
-        mat.var(weights, out.segment(n_processed, p));
+        mat.var(centers.segment(n_processed, p), weights, out.segment(n_processed, p));
         n_processed += p;
     }
 }
@@ -568,46 +568,30 @@ ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::sp_tmul(
 ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
 void
 ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::mean(
-    const Eigen::Ref<const vec_value_t>& weights,
-    Eigen::Ref<vec_value_t> out
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> 
 )
 {
-    size_t begin = 0;
-    out.setZero();
-    Eigen::Map<vec_value_t> buff(_buff.data(), out.size());
-    for (size_t i = 0; i < _mat_list.size(); ++i) {
-        auto& mat = *_mat_list[i];
-        const auto rows_curr = mat.rows();
-        const Eigen::Map<const vec_value_t> weights_curr(
-            weights.data() + begin, rows_curr
-        );
-        mat.mean(weights_curr, buff);
-        out += buff;
-        begin += rows_curr;
-    }
+    throw util::adelie_core_error(
+        "MatrixNaiveRConcatenate: mean() not implemented! "
+        "If this error occurred from standardizing the matrix, "
+        "consider providing your own center vector. "
+    );
 }
 
 ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
 void
 ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::var(
-    const Eigen::Ref<const vec_value_t>& centers,
-    const Eigen::Ref<const vec_value_t>& weights,
-    Eigen::Ref<vec_value_t> out
+    const Eigen::Ref<const vec_value_t>&,
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> 
 )
 {
-    size_t begin = 0;
-    out.setZero();
-    Eigen::Map<vec_value_t> buff(_buff.data(), out.size());
-    for (size_t i = 0; i < _mat_list.size(); ++i) {
-        auto& mat = *_mat_list[i];
-        const auto rows_curr = mat.rows();
-        const Eigen::Map<const vec_value_t> weights_curr(
-            weights.data() + begin, rows_curr
-        );
-        mat.var(centers, weights_curr, buff);
-        out += buff;
-        begin += rows_curr;
-    }
+    throw util::adelie_core_error(
+        "MatrixNaiveRConcatenate: var() not implemented! "
+        "If this error occurred from standardizing the matrix, "
+        "consider providing your own scale vector. "
+    );
 }
 
 } // namespace matrix 
