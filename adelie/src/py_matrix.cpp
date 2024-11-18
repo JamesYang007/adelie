@@ -1074,6 +1074,63 @@ void matrix_naive_rconcatenate(py::module_& m, const char* name)
 }
 
 template <class DenseType, class MaskType>
+void matrix_naive_convex_gated_relu_dense(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveConvexGatedReluDense<DenseType, MaskType>;
+    using base_t = typename internal_t::base_t;
+    using dense_t = typename internal_t::dense_t;
+    using mask_t = typename internal_t::mask_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive convex gated relu matrix with dense underlying."
+        )
+        .def(
+            py::init<
+                const Eigen::Ref<const dense_t>&,
+                const Eigen::Ref<const mask_t>&,
+                size_t
+            >(), 
+            py::arg("mat").noconvert(),
+            py::arg("mask").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+template <class SparseType, class MaskType>
+void matrix_naive_convex_gated_relu_sparse(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveConvexGatedReluSparse<SparseType, MaskType>;
+    using base_t = typename internal_t::base_t;
+    using vec_sp_index_t = typename internal_t::vec_sp_index_t;
+    using vec_sp_value_t = typename internal_t::vec_sp_value_t;
+    using mask_t = typename internal_t::mask_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive convex gated relu matrix with sparse underlying."
+        )
+        .def(
+            py::init<
+                size_t,
+                size_t,
+                size_t,
+                const Eigen::Ref<const vec_sp_index_t>&,
+                const Eigen::Ref<const vec_sp_index_t>&,
+                const Eigen::Ref<const vec_sp_value_t>&,
+                const Eigen::Ref<const mask_t>&,
+                size_t 
+            >(), 
+            py::arg("rows"),
+            py::arg("cols"),
+            py::arg("nnz"),
+            py::arg("outer").noconvert(),
+            py::arg("inner").noconvert(),
+            py::arg("value").noconvert(),
+            py::arg("mask").noconvert(),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+template <class DenseType, class MaskType>
 void matrix_naive_convex_relu_dense(py::module_& m, const char* name)
 {
     using internal_t = ad::matrix::MatrixNaiveConvexReluDense<DenseType, MaskType>;
@@ -1675,6 +1732,31 @@ void register_matrix(py::module_& m)
 
     matrix_naive_block_diag<double>(m, "MatrixNaiveBlockDiag64");
     matrix_naive_block_diag<float>(m, "MatrixNaiveBlockDiag32");
+
+    matrix_naive_convex_gated_relu_dense<
+        dense_type<double, Eigen::RowMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexGatedReluDense64C");
+    matrix_naive_convex_gated_relu_dense<
+        dense_type<double, Eigen::ColMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexGatedReluDense64F");
+    matrix_naive_convex_gated_relu_dense<
+        dense_type<float, Eigen::RowMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexGatedReluDense32C");
+    matrix_naive_convex_gated_relu_dense<
+        dense_type<float, Eigen::ColMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexGatedReluDense32F");
+    matrix_naive_convex_gated_relu_sparse<
+        sparse_type<double, Eigen::ColMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexGatedReluSparse64F");
+    matrix_naive_convex_gated_relu_sparse<
+        sparse_type<float, Eigen::ColMajor>,
+        dense_type<bool, Eigen::ColMajor>
+    >(m, "MatrixNaiveConvexGatedReluSparse32F");
 
     matrix_naive_convex_relu_dense<
         dense_type<double, Eigen::RowMajor>,

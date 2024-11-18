@@ -11,6 +11,7 @@
 #include <adelie_core/matrix/matrix_naive_base.hpp>
 #include <adelie_core/matrix/matrix_naive_block_diag.hpp>
 #include <adelie_core/matrix/matrix_naive_concatenate.hpp>
+#include <adelie_core/matrix/matrix_naive_convex_gated_relu.hpp>
 #include <adelie_core/matrix/matrix_naive_convex_relu.hpp>
 #include <adelie_core/matrix/matrix_naive_dense.hpp>
 #include <adelie_core/matrix/matrix_naive_interaction.hpp>
@@ -62,6 +63,13 @@ extern template class adelie_core::matrix::MatrixNaiveCConcatenate<float>;
 extern template class adelie_core::matrix::MatrixNaiveCConcatenate<double>;
 extern template class adelie_core::matrix::MatrixNaiveRConcatenate<float>;
 extern template class adelie_core::matrix::MatrixNaiveRConcatenate<double>;
+
+extern template class adelie_core::matrix::MatrixNaiveConvexGatedReluDense<dense_type<float, Eigen::RowMajor>, dense_type<bool, Eigen::ColMajor>>;
+extern template class adelie_core::matrix::MatrixNaiveConvexGatedReluDense<dense_type<float, Eigen::ColMajor>, dense_type<bool, Eigen::ColMajor>>;
+extern template class adelie_core::matrix::MatrixNaiveConvexGatedReluDense<dense_type<double, Eigen::RowMajor>, dense_type<bool, Eigen::ColMajor>>;
+extern template class adelie_core::matrix::MatrixNaiveConvexGatedReluDense<dense_type<double, Eigen::ColMajor>, dense_type<bool, Eigen::ColMajor>>;
+extern template class adelie_core::matrix::MatrixNaiveConvexGatedReluSparse<sparse_type<float, Eigen::ColMajor>, dense_type<bool, Eigen::ColMajor>>;
+extern template class adelie_core::matrix::MatrixNaiveConvexGatedReluSparse<sparse_type<double, Eigen::ColMajor>, dense_type<bool, Eigen::ColMajor>>;
 
 extern template class adelie_core::matrix::MatrixNaiveConvexReluDense<dense_type<float, Eigen::RowMajor>, dense_type<bool, Eigen::ColMajor>>;
 extern template class adelie_core::matrix::MatrixNaiveConvexReluDense<dense_type<float, Eigen::ColMajor>, dense_type<bool, Eigen::ColMajor>>;

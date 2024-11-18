@@ -462,9 +462,10 @@ def test_naive_rconcatenate(ns, p, dtype, n_threads=2, seed=0):
 @pytest.mark.parametrize("n", [10, 50, 100])
 @pytest.mark.parametrize("d", [1, 10, 20])
 @pytest.mark.parametrize("m", [1, 5])
+@pytest.mark.parametrize("gated", [False, True])
 @pytest.mark.parametrize("storage", ["dense", "sparse"])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
-def test_naive_convex_relu(n, d, m, storage, dtype, n_threads=2, seed=0):
+def test_naive_convex_relu(n, d, m, gated, storage, dtype, n_threads=2, seed=0):
     np.random.seed(seed)
     Z = np.random.normal(0, 1, (n, d)).astype(dtype)
     mask = np.random.binomial(1, 0.5, (n, m)).astype(bool)
@@ -472,10 +473,13 @@ def test_naive_convex_relu(n, d, m, storage, dtype, n_threads=2, seed=0):
         mask[:, i][:, None] * Z
         for i in range(mask.shape[1])
     ], axis=1)
-    X = np.concatenate([Y, -Y], axis=1).astype(dtype)
+    if gated:
+        X = Y
+    else:
+        X = np.concatenate([Y, -Y], axis=1).astype(dtype)
     if storage == "sparse":
         Z = scipy.sparse.csc_matrix(Z)
-    cX = mod.convex_relu(Z, mask, n_threads=n_threads)
+    cX = mod.convex_relu(Z, mask, gated=gated, n_threads=n_threads)
     run_naive(X, cX, dtype)
 
     # test mean

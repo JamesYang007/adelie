@@ -391,11 +391,23 @@ def convex_relu(
     mat: Union[np.ndarray, csc_matrix],
     mask: np.ndarray,
     *,
+    gated: bool =False,
     copy: bool =False,
     n_threads: int =1,
 ):
     """Creates a feature matrix for the convex relu problem.
 
+    The feature matrix for the convex gated relu problem is given by
+
+    .. math::
+        \\begin{align*}
+            Y &= 
+            \\begin{bmatrix}
+                D_1 Z & \\ldots & D_m Z
+            \\end{bmatrix}
+        \\end{align*}
+
+    where :math:`D_i \\in \\{0, 1\\}^{n \\times n}` are diagonal masking matrices.
     The feature matrix for the convex relu problem is given by
 
     .. math::
@@ -404,14 +416,7 @@ def convex_relu(
             \\begin{bmatrix}
                 Y & -Y
             \\end{bmatrix}
-            \\\\
-            Y &= 
-            \\begin{bmatrix}
-                D_1 Z & \\ldots & D_m Z
-            \\end{bmatrix}
         \\end{align*}
-
-    and :math:`D_i \\in \\{0, 1\\}^{n \\times n}` are diagonal matrices.
 
     .. note::
         This matrix only works for naive method!
@@ -423,6 +428,9 @@ def convex_relu(
     mask : (n, m) ndarray
         The boolean mask matrix whose columns define the diagonal of :math:`D_i`.
         If it is not in ``"F"``-ordering, an ``"F"``-ordered copy is made.
+    gated : bool, optional
+        If ``True``, the matrix will represent :math:`Y` and otherwise :math:`X`.
+        Default is ``False``.
     copy : bool, optional
         If ``True``, a copy of the inputs is stored internally.
         Otherwise, a reference is stored instead.
@@ -438,6 +446,12 @@ def convex_relu(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F
     adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C
     adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F
     adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C
@@ -448,16 +462,28 @@ def convex_relu(
     py_base = PyMatrixNaiveBase
 
     if isinstance(mat, np.ndarray):
-        dispatcher = {
-            np.dtype("float64"): {
-                "C": core.matrix.MatrixNaiveConvexReluDense64C,
-                "F": core.matrix.MatrixNaiveConvexReluDense64F,
-            },
-            np.dtype("float32"): {
-                "C": core.matrix.MatrixNaiveConvexReluDense32C,
-                "F": core.matrix.MatrixNaiveConvexReluDense32F,
-            },
-        }
+        if gated:
+            dispatcher = {
+                np.dtype("float64"): {
+                    "C": core.matrix.MatrixNaiveConvexGatedReluDense64C,
+                    "F": core.matrix.MatrixNaiveConvexGatedReluDense64F,
+                },
+                np.dtype("float32"): {
+                    "C": core.matrix.MatrixNaiveConvexGatedReluDense32C,
+                    "F": core.matrix.MatrixNaiveConvexGatedReluDense32F,
+                },
+            }
+        else:
+            dispatcher = {
+                np.dtype("float64"): {
+                    "C": core.matrix.MatrixNaiveConvexReluDense64C,
+                    "F": core.matrix.MatrixNaiveConvexReluDense64F,
+                },
+                np.dtype("float32"): {
+                    "C": core.matrix.MatrixNaiveConvexReluDense32C,
+                    "F": core.matrix.MatrixNaiveConvexReluDense32F,
+                },
+            }
         dtype = mat.dtype
         order = (
             "F"
@@ -484,10 +510,16 @@ def convex_relu(
         mat.prune()
         mat.sort_indices()
 
-        dispatcher = {
-            np.dtype("float64"): core.matrix.MatrixNaiveConvexReluSparse64F,
-            np.dtype("float32"): core.matrix.MatrixNaiveConvexReluSparse32F,
-        }
+        if gated:
+            dispatcher = {
+                np.dtype("float64"): core.matrix.MatrixNaiveConvexGatedReluSparse64F,
+                np.dtype("float32"): core.matrix.MatrixNaiveConvexGatedReluSparse32F,
+            }
+        else:
+            dispatcher = {
+                np.dtype("float64"): core.matrix.MatrixNaiveConvexReluSparse64F,
+                np.dtype("float32"): core.matrix.MatrixNaiveConvexReluSparse32F,
+            }
         dtype = mat.dtype
         core_base = dispatcher[dtype]
 
