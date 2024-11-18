@@ -36,7 +36,7 @@ py::dict css_cov_model_selection_fit_k(
 
     const auto p = S.cols();
 
-    if (k <= 0 || k >= p-1) {
+    if (static_cast<index_t>(k) <= 0 || static_cast<index_t>(k) >= p-1) {
         throw ad::util::adelie_core_solver_error(
             "k must be in [1, p-1)."
         );
@@ -76,7 +76,7 @@ py::dict css_cov_model_selection_fit_k(
     }
 
     std::atomic_bool early_exit = false; 
-    const auto routine = [&](auto i) {
+    const auto routine = [&](auto) {
         if (early_exit.load(std::memory_order_relaxed)) return;
         #if defined(_OPENMP)
         const auto thr_idx = omp_get_thread_num();
