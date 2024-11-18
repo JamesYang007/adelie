@@ -18,10 +18,12 @@
       ~MatrixNaiveConvexReluDense64F.cols
       ~MatrixNaiveConvexReluDense64F.cov
       ~MatrixNaiveConvexReluDense64F.ctmul
+      ~MatrixNaiveConvexReluDense64F.mean
       ~MatrixNaiveConvexReluDense64F.mul
       ~MatrixNaiveConvexReluDense64F.rows
       ~MatrixNaiveConvexReluDense64F.sp_tmul
       ~MatrixNaiveConvexReluDense64F.sq_mul
+      ~MatrixNaiveConvexReluDense64F.var
    
    
 
@@ -46,10 +48,12 @@
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul
+   .. automethod:: mean
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
    .. automethod:: sq_mul
+   .. automethod:: var
    
    
 

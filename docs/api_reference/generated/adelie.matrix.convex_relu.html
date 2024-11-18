@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.matrix.convex_relu &#8212; adelie 1.1.49 documentation</title>
+    <title>adelie.matrix.convex_relu &#8212; adelie 1.1.50 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../../_static/documentation_options.js?v=8ed26aa9"></script>
+    <script src="../../_static/documentation_options.js?v=6df60dfb"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/design-tabs.js?v=36754332"></script>
@@ -124,8 +124,8 @@
     
     
     
-    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.49 documentation - Home"/>
-    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.49 documentation - Home"/>`);</script>
+    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.50 documentation - Home"/>
+    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.50 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -392,16 +392,19 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.subset.html">adelie.matrix.subset</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.sklearn.CSSModelSelection.html">adelie.sklearn.CSSModelSelection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.sklearn.GroupElasticNet.html">adelie.sklearn.GroupElasticNet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.bvls.html">adelie.solver.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.css_cov.html">adelie.solver.css_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.pinball.html">adelie.solver.pinball</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.bvls.html">adelie.state.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.css_cov.html">adelie.state.css_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_cov.html">adelie.state.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
@@ -466,10 +469,18 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovSparse64F.html">adelie.adelie_core.matrix.MatrixCovSparse64F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase32.html">adelie.adelie_core.matrix.MatrixNaiveBase32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase64.html">adelie.adelie_core.matrix.MatrixNaiveBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag32.html">adelie.adelie_core.matrix.MatrixNaiveBlockDiag32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag64.html">adelie.adelie_core.matrix.MatrixNaiveBlockDiag64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C</a></li>
@@ -508,6 +519,8 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRSubset64.html">adelie.adelie_core.matrix.MatrixNaiveRSubset64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS32.html">adelie.adelie_core.state.StateBVLS32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS64.html">adelie.adelie_core.state.StateBVLS64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateCSSCov32.html">adelie.adelie_core.state.StateCSSCov32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateCSSCov64.html">adelie.adelie_core.state.StateCSSCov64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov32.html">adelie.adelie_core.state.StateGaussianPinCov32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive32.html">adelie.adelie_core.state.StateGaussianPinNaive32</a></li>
@@ -587,22 +600,29 @@ document.write(`
 <h1>adelie.matrix.convex_relu<a class="headerlink" href="#adelie-matrix-convex-relu" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.matrix.convex_relu">
-<span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">convex_relu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">csc_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/matrix.py#L366-L487"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.matrix.convex_relu" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">convex_relu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">csc_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gated</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/matrix.py#L390-L546"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.matrix.convex_relu" title="Link to this definition">#</a></dt>
 <dd><p>Creates a feature matrix for the convex relu problem.</p>
-<p>The feature matrix for the convex relu problem is given by</p>
+<p>The feature matrix for the convex gated relu problem is given by</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}\begin{align*}
-    X &amp;= 
-    \begin{bmatrix}
-        Y &amp; -Y
-    \end{bmatrix}
-    \\
+\[\begin{align*}
     Y &amp;= 
     \begin{bmatrix}
         D_1 Z &amp; \ldots &amp; D_m Z
     \end{bmatrix}
-\end{align*}\end{split}\]</div>
-<p>and <span class="math notranslate nohighlight">\(D_i \in \{0, 1\}^{n \times n}\)</span> are diagonal matrices.</p>
+\end{align*}\]</div>
+<p>where <span class="math notranslate nohighlight">\(D_i \in \{0, 1\}^{n \times n}\)</span> are diagonal masking matrices.
+The feature matrix for the convex relu problem is given by</p>
+<div class="math notranslate nohighlight">
+\[\begin{align*}
+    X &amp;= 
+    \begin{bmatrix}
+        Y &amp; -Y
+    \end{bmatrix}
+\end{align*}\]</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This matrix only works for naive method!</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -610,6 +630,9 @@ document.write(`
 </dd>
 <dt><strong>mask</strong><span class="classifier">(n, m) ndarray</span></dt><dd><p>The boolean mask matrix whose columns define the diagonal of <span class="math notranslate nohighlight">\(D_i\)</span>.
 If it is not in <code class="docutils literal notranslate"><span class="pre">&quot;F&quot;</span></code>-ordering, an <code class="docutils literal notranslate"><span class="pre">&quot;F&quot;</span></code>-ordered copy is made.</p>
+</dd>
+<dt><strong>gated</strong><span class="classifier">bool, optional</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the matrix will represent <span class="math notranslate nohighlight">\(Y\)</span> and otherwise <span class="math notranslate nohighlight">\(X\)</span>.
+Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
 </dd>
 <dt><strong>copy</strong><span class="classifier">bool, optional</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, a copy of the inputs is stored internally.
 Otherwise, a reference is stored instead.
@@ -630,6 +653,12 @@ Default is <code class="docutils literal notranslate"><span class="pre">1</span>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
+<dt><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C.html#adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C" title="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F.html#adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F" title="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C.html#adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C" title="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F.html#adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F" title="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F.html#adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F" title="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F.html#adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F" title="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F</span></code></a></dt><dd></dd>
 <dt><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C.html#adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C" title="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C</span></code></a></dt><dd></dd>
 <dt><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F.html#adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F" title="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F</span></code></a></dt><dd></dd>
 <dt><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C.html#adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C" title="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C</span></code></a></dt><dd></dd>

@@ -18,10 +18,12 @@
       ~MatrixNaiveBase64.cols
       ~MatrixNaiveBase64.cov
       ~MatrixNaiveBase64.ctmul
+      ~MatrixNaiveBase64.mean
       ~MatrixNaiveBase64.mul
       ~MatrixNaiveBase64.rows
       ~MatrixNaiveBase64.sp_tmul
       ~MatrixNaiveBase64.sq_mul
+      ~MatrixNaiveBase64.var
    
    
 
@@ -46,10 +48,12 @@
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul
+   .. automethod:: mean
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
    .. automethod:: sq_mul
+   .. automethod:: var
    
    
 

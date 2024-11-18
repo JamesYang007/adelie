@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.adelie_core.matrix.MatrixNaiveRConcatenate64 &#8212; adelie 1.1.49 documentation</title>
+    <title>adelie.adelie_core.matrix.MatrixNaiveRConcatenate64 &#8212; adelie 1.1.50 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=8ed26aa9"></script>
+    <script src="../_static/documentation_options.js?v=6df60dfb"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -120,8 +120,8 @@
     
     
     
-    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.49 documentation - Home"/>
-    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.49 documentation - Home"/>`);</script>
+    <img src="../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.50 documentation - Home"/>
+    <script>document.write(`<img src="../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.50 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -389,17 +389,23 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.ctmul" title="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.ctmul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ctmul</span></code></a>(self, arg0, arg1, arg2)</p></td>
 <td><p>Computes a column vector-scalar multiplication increment.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.mul" title="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.mul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mul</span></code></a>(self, arg0, arg1, arg2)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.mean" title="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code></a>(self, arg0, arg1)</p></td>
+<td><p>Computes the implied column means.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.mul" title="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.mul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mul</span></code></a>(self, arg0, arg1, arg2)</p></td>
 <td><p>Computes a matrix-vector multiplication.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.rows" title="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rows</span></code></a>(self)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.rows" title="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rows</span></code></a>(self)</p></td>
 <td><p>Returns the number of rows.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.sp_tmul" title="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.sp_tmul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sp_tmul</span></code></a>(self, arg0, arg1)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.sp_tmul" title="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.sp_tmul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sp_tmul</span></code></a>(self, arg0, arg1)</p></td>
 <td><p>Computes a matrix transpose-sparse matrix multiplication.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.sq_mul" title="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.sq_mul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sq_mul</span></code></a>(self, arg0, arg1)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.sq_mul" title="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.sq_mul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sq_mul</span></code></a>(self, arg0, arg1)</p></td>
 <td><p>Computes a squared matrix-vector multiplication.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.var" title="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.var"><code class="xref py py-obj docutils literal notranslate"><span class="pre">var</span></code></a>(self, arg0, arg1, arg2)</p></td>
+<td><p>Computes the implied column variances.</p></td>
 </tr>
 </tbody>
 </table>
@@ -554,6 +560,23 @@ The result is <em>incremented</em> into the output vector.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.mean">
+<span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64" title="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveRConcatenate64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.mean" title="Link to this definition">#</a></dt>
+<dd><p>Computes the implied column means.</p>
+<p>It is undefined for this matrix class and is only exposed for API consistency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>weights</strong><span class="classifier">(n,) ndarray</span></dt><dd><p>Vector of weights.</p>
+</dd>
+<dt><strong>out</strong><span class="classifier">(p,) ndarray</span></dt><dd><p>Vector to store in-place the result.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.mul">
 <span class="sig-name descname"><span class="pre">mul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.mul" title="Link to this definition">#</a></dt>
 <dd><p>Computes a matrix-vector multiplication.</p>
@@ -566,7 +589,7 @@ The result is <em>incremented</em> into the output vector.</p>
 </dd>
 <dt><strong>w</strong><span class="classifier">(n,) ndarray</span></dt><dd><p>Vector of weights.</p>
 </dd>
-<dt><strong>out</strong><span class="classifier">(q,) ndarray</span></dt><dd><p>Vector to store in-place the result.</p>
+<dt><strong>out</strong><span class="classifier">(p,) ndarray</span></dt><dd><p>Vector to store in-place the result.</p>
 </dd>
 </dl>
 </dd>
@@ -616,7 +639,26 @@ The result is <em>incremented</em> into the output vector.</p>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>weights</strong><span class="classifier">(n,) ndarray</span></dt><dd><p>Vector of weights.</p>
 </dd>
-<dt><strong>out</strong><span class="classifier">(n,) ndarray</span></dt><dd><p>Vector to store in-place the result.</p>
+<dt><strong>out</strong><span class="classifier">(p,) ndarray</span></dt><dd><p>Vector to store in-place the result.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.var">
+<span class="sig-name descname"><span class="pre">var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64" title="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveRConcatenate64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flags.writeable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.var" title="Link to this definition">#</a></dt>
+<dd><p>Computes the implied column variances.</p>
+<p>It is undefined for this matrix class and is only exposed for API consistency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>centers</strong><span class="classifier">(p,) ndarray</span></dt><dd><p>Vector of centers.</p>
+</dd>
+<dt><strong>weights</strong><span class="classifier">(n,) ndarray</span></dt><dd><p>Vector of weights.</p>
+</dd>
+<dt><strong>out</strong><span class="classifier">(p,) ndarray</span></dt><dd><p>Vector to store in-place the result.</p>
 </dd>
 </dl>
 </dd>
@@ -673,10 +715,12 @@ The result is <em>incremented</em> into the output vector.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.cols"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveRConcatenate64.cols()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.cov"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveRConcatenate64.cov()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.ctmul"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveRConcatenate64.ctmul()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.mean"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveRConcatenate64.mean()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.mul"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveRConcatenate64.mul()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.rows"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveRConcatenate64.rows()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.sp_tmul"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveRConcatenate64.sp_tmul()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.sq_mul"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveRConcatenate64.sq_mul()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.var"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveRConcatenate64.var()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.ndim"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveRConcatenate64.ndim</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.shape"><code class="docutils literal notranslate"><span class="pre">MatrixNaiveRConcatenate64.shape</span></code></a></li>
 </ul>

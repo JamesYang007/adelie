@@ -18,10 +18,12 @@
       ~MatrixNaiveCConcatenate32.cols
       ~MatrixNaiveCConcatenate32.cov
       ~MatrixNaiveCConcatenate32.ctmul
+      ~MatrixNaiveCConcatenate32.mean
       ~MatrixNaiveCConcatenate32.mul
       ~MatrixNaiveCConcatenate32.rows
       ~MatrixNaiveCConcatenate32.sp_tmul
       ~MatrixNaiveCConcatenate32.sq_mul
+      ~MatrixNaiveCConcatenate32.var
    
    
 
@@ -46,10 +48,12 @@
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul
+   .. automethod:: mean
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
    .. automethod:: sq_mul
+   .. automethod:: var
    
    
 

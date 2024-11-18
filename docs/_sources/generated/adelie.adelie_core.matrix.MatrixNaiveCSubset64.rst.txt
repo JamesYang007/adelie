@@ -18,10 +18,12 @@
       ~MatrixNaiveCSubset64.cols
       ~MatrixNaiveCSubset64.cov
       ~MatrixNaiveCSubset64.ctmul
+      ~MatrixNaiveCSubset64.mean
       ~MatrixNaiveCSubset64.mul
       ~MatrixNaiveCSubset64.rows
       ~MatrixNaiveCSubset64.sp_tmul
       ~MatrixNaiveCSubset64.sq_mul
+      ~MatrixNaiveCSubset64.var
    
    
 
@@ -46,10 +48,12 @@
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul
+   .. automethod:: mean
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
    .. automethod:: sq_mul
+   .. automethod:: var
    
    
 

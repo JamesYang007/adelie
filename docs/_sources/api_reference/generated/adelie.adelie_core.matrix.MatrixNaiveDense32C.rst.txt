@@ -18,10 +18,12 @@
       ~MatrixNaiveDense32C.cols
       ~MatrixNaiveDense32C.cov
       ~MatrixNaiveDense32C.ctmul
+      ~MatrixNaiveDense32C.mean
       ~MatrixNaiveDense32C.mul
       ~MatrixNaiveDense32C.rows
       ~MatrixNaiveDense32C.sp_tmul
       ~MatrixNaiveDense32C.sq_mul
+      ~MatrixNaiveDense32C.var
    
    
 
@@ -46,10 +48,12 @@
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul
+   .. automethod:: mean
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
    .. automethod:: sq_mul
+   .. automethod:: var
    
    
 

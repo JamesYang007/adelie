@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.matrix.block_diag &#8212; adelie 1.1.49 documentation</title>
+    <title>adelie.matrix.block_diag &#8212; adelie 1.1.50 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../../_static/documentation_options.js?v=8ed26aa9"></script>
+    <script src="../../_static/documentation_options.js?v=6df60dfb"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/design-tabs.js?v=36754332"></script>
@@ -124,8 +124,8 @@
     
     
     
-    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.49 documentation - Home"/>
-    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.49 documentation - Home"/>`);</script>
+    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.50 documentation - Home"/>
+    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.50 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -392,16 +392,19 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.subset.html">adelie.matrix.subset</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.sklearn.CSSModelSelection.html">adelie.sklearn.CSSModelSelection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.sklearn.GroupElasticNet.html">adelie.sklearn.GroupElasticNet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.bvls.html">adelie.solver.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.css_cov.html">adelie.solver.css_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.pinball.html">adelie.solver.pinball</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.bvls.html">adelie.state.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.css_cov.html">adelie.state.css_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_cov.html">adelie.state.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
@@ -466,10 +469,18 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovSparse64F.html">adelie.adelie_core.matrix.MatrixCovSparse64F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase32.html">adelie.adelie_core.matrix.MatrixNaiveBase32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase64.html">adelie.adelie_core.matrix.MatrixNaiveBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag32.html">adelie.adelie_core.matrix.MatrixNaiveBlockDiag32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag64.html">adelie.adelie_core.matrix.MatrixNaiveBlockDiag64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C</a></li>
@@ -508,6 +519,8 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRSubset64.html">adelie.adelie_core.matrix.MatrixNaiveRSubset64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS32.html">adelie.adelie_core.state.StateBVLS32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS64.html">adelie.adelie_core.state.StateBVLS64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateCSSCov32.html">adelie.adelie_core.state.StateCSSCov32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateCSSCov64.html">adelie.adelie_core.state.StateCSSCov64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov32.html">adelie.adelie_core.state.StateGaussianPinCov32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive32.html">adelie.adelie_core.state.StateGaussianPinNaive32</a></li>
@@ -587,12 +600,14 @@ document.write(`
 <h1>adelie.matrix.block_diag<a class="headerlink" href="#adelie-matrix-block-diag" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.matrix.block_diag">
-<span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">block_diag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mats</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/matrix.py#L198-L265"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.matrix.block_diag" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">block_diag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mats</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'naive'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/matrix.py#L198-L289"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.matrix.block_diag" title="Link to this definition">#</a></dt>
 <dd><p>Creates a block-diagonal matrix given by the list of matrices.</p>
 <p>If <code class="docutils literal notranslate"><span class="pre">mats</span></code> represents a list of matrices <span class="math notranslate nohighlight">\(A_1,\ldots, A_L\)</span>,
 then the resulting matrix represents the block-diagonal matrix given by</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{align*}
+    A 
+    =
     \begin{bmatrix}
         A_1 &amp; 0 &amp; \cdots &amp; 0 \\
         0 &amp; A_2 &amp; \cdots &amp; 0 \\
@@ -602,12 +617,22 @@ then the resulting matrix represents the block-diagonal matrix given by</p>
 \end{align*}\end{split}\]</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This matrix only works for covariance method!</p>
+<p>The routines for this matrix are faster when there are many small blocks
+rather than few large blocks.</p>
 </div>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>mats</strong><span class="classifier">list</span></dt><dd><p>List of matrices to represent the block diagonal matrix.</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">str, optional</span></dt><dd><p>Method type. It must be one of the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;naive&quot;</span></code>: naive matrix.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;cov&quot;</span></code>: covariance matrix.</p></li>
+</ul>
+</div></blockquote>
+<p>Default is <code class="docutils literal notranslate"><span class="pre">&quot;naive&quot;</span></code>.</p>
 </dd>
 <dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
 Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
@@ -626,6 +651,8 @@ Default is <code class="docutils literal notranslate"><span class="pre">1</span>
 <dl class="simple">
 <dt><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBlockDiag32.html#adelie.adelie_core.matrix.MatrixCovBlockDiag32" title="adelie.adelie_core.matrix.MatrixCovBlockDiag32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.matrix.MatrixCovBlockDiag32</span></code></a></dt><dd></dd>
 <dt><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixCovBlockDiag64.html#adelie.adelie_core.matrix.MatrixCovBlockDiag64" title="adelie.adelie_core.matrix.MatrixCovBlockDiag64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.matrix.MatrixCovBlockDiag64</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag32.html#adelie.adelie_core.matrix.MatrixNaiveBlockDiag32" title="adelie.adelie_core.matrix.MatrixNaiveBlockDiag32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveBlockDiag32</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag64.html#adelie.adelie_core.matrix.MatrixNaiveBlockDiag64" title="adelie.adelie_core.matrix.MatrixNaiveBlockDiag64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.matrix.MatrixNaiveBlockDiag64</span></code></a></dt><dd></dd>
 </dl>
 </div>
 </dd></dl>

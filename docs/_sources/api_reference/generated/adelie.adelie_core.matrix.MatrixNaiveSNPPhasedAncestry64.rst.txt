@@ -18,10 +18,12 @@
       ~MatrixNaiveSNPPhasedAncestry64.cols
       ~MatrixNaiveSNPPhasedAncestry64.cov
       ~MatrixNaiveSNPPhasedAncestry64.ctmul
+      ~MatrixNaiveSNPPhasedAncestry64.mean
       ~MatrixNaiveSNPPhasedAncestry64.mul
       ~MatrixNaiveSNPPhasedAncestry64.rows
       ~MatrixNaiveSNPPhasedAncestry64.sp_tmul
       ~MatrixNaiveSNPPhasedAncestry64.sq_mul
+      ~MatrixNaiveSNPPhasedAncestry64.var
    
    
 
@@ -46,10 +48,12 @@
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul
+   .. automethod:: mean
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
    .. automethod:: sq_mul
+   .. automethod:: var
    
    
 

@@ -18,10 +18,12 @@
       ~MatrixNaiveSNPUnphased32.cols
       ~MatrixNaiveSNPUnphased32.cov
       ~MatrixNaiveSNPUnphased32.ctmul
+      ~MatrixNaiveSNPUnphased32.mean
       ~MatrixNaiveSNPUnphased32.mul
       ~MatrixNaiveSNPUnphased32.rows
       ~MatrixNaiveSNPUnphased32.sp_tmul
       ~MatrixNaiveSNPUnphased32.sq_mul
+      ~MatrixNaiveSNPUnphased32.var
    
    
 
@@ -46,10 +48,12 @@
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul
+   .. automethod:: mean
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
    .. automethod:: sq_mul
+   .. automethod:: var
    
    
 

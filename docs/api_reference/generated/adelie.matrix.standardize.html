@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.matrix.standardize &#8212; adelie 1.1.49 documentation</title>
+    <title>adelie.matrix.standardize &#8212; adelie 1.1.50 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../../_static/documentation_options.js?v=8ed26aa9"></script>
+    <script src="../../_static/documentation_options.js?v=6df60dfb"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/design-tabs.js?v=36754332"></script>
@@ -124,8 +124,8 @@
     
     
     
-    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.49 documentation - Home"/>
-    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.49 documentation - Home"/>`);</script>
+    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.50 documentation - Home"/>
+    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.50 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -392,16 +392,19 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.subset.html">adelie.matrix.subset</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.sklearn.CSSModelSelection.html">adelie.sklearn.CSSModelSelection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.sklearn.GroupElasticNet.html">adelie.sklearn.GroupElasticNet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.bvls.html">adelie.solver.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.css_cov.html">adelie.solver.css_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.pinball.html">adelie.solver.pinball</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.bvls.html">adelie.state.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.css_cov.html">adelie.state.css_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_cov.html">adelie.state.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
@@ -466,10 +469,18 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovSparse64F.html">adelie.adelie_core.matrix.MatrixCovSparse64F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase32.html">adelie.adelie_core.matrix.MatrixNaiveBase32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase64.html">adelie.adelie_core.matrix.MatrixNaiveBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag32.html">adelie.adelie_core.matrix.MatrixNaiveBlockDiag32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag64.html">adelie.adelie_core.matrix.MatrixNaiveBlockDiag64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C</a></li>
@@ -508,6 +519,8 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRSubset64.html">adelie.adelie_core.matrix.MatrixNaiveRSubset64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS32.html">adelie.adelie_core.state.StateBVLS32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS64.html">adelie.adelie_core.state.StateBVLS64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateCSSCov32.html">adelie.adelie_core.state.StateCSSCov32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateCSSCov64.html">adelie.adelie_core.state.StateCSSCov64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov32.html">adelie.adelie_core.state.StateGaussianPinCov32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive32.html">adelie.adelie_core.state.StateGaussianPinNaive32</a></li>
@@ -587,7 +600,7 @@ document.write(`
 <h1>adelie.matrix.standardize<a class="headerlink" href="#adelie-matrix-standardize" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="adelie.matrix.standardize">
-<span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">standardize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase32.html#adelie.adelie_core.matrix.MatrixNaiveBase32" title="adelie.adelie_core.matrix.MatrixNaiveBase32"><span class="pre">MatrixNaiveBase32</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">MatrixNaiveBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddof</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/matrix.py#L1355-L1477"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.matrix.standardize" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">adelie.matrix.</span></span><span class="sig-name descname"><span class="pre">standardize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase32.html#adelie.adelie_core.matrix.MatrixNaiveBase32" title="adelie.adelie_core.matrix.MatrixNaiveBase32"><span class="pre">MatrixNaiveBase32</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">MatrixNaiveBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddof</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/matrix.py#L1414-L1536"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.matrix.standardize" title="Link to this definition">#</a></dt>
 <dd><p>Creates a standardized matrix.</p>
 <p>Given a matrix <span class="math notranslate nohighlight">\(Z \in \mathbb{R}^{n \times p}\)</span>,
 the standardized matrix <span class="math notranslate nohighlight">\(X \in \mathbb{R}^{n \times p}\)</span>
@@ -597,21 +610,27 @@ is defined by</p>
 \[\begin{align*}
     X = (Z - \mathbf{1} c^\top) \mathrm{diag}(s)^{-1}
 \end{align*}\]</div>
-<p>We define the column means <span class="math notranslate nohighlight">\(\overline{Z} \in \mathbb{R}^p\)</span> to be</p>
+<p>The centers <span class="math notranslate nohighlight">\(c\)</span> and scales <span class="math notranslate nohighlight">\(s\)</span> are either user-provided or
+deduced from <span class="math notranslate nohighlight">\(Z\)</span> via 
+<a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64.mean" title="adelie.adelie_core.matrix.MatrixNaiveBase64.mean"><code class="xref py py-func docutils literal notranslate"><span class="pre">mean()</span></code></a> and 
+<a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64.var" title="adelie.adelie_core.matrix.MatrixNaiveBase64.var"><code class="xref py py-func docutils literal notranslate"><span class="pre">var()</span></code></a>, respectively,
+with equal sample weights <span class="math notranslate nohighlight">\(1/n\)</span>.
+The degrees of freedom <span class="math notranslate nohighlight">\(\mathrm{df}\)</span> can be specified for <span class="math notranslate nohighlight">\(s\)</span>
+so that the sample weights are <span class="math notranslate nohighlight">\(1 / (n-\mathrm{df})\)</span> instead.
+Therefore, <span class="math notranslate nohighlight">\(c\)</span> will usually coincide with</p>
 <div class="math notranslate nohighlight">
 \[\begin{align*}
     \overline{Z}
     =
     \frac{1}{n} Z^\top \mathbf{1}
 \end{align*}\]</div>
-<p>Lastly, we define the column standard deviations <span class="math notranslate nohighlight">\(\hat{\sigma} \in \mathbb{R}^p\)</span> to be</p>
+<p>and <span class="math notranslate nohighlight">\(s\)</span> with</p>
 <div class="math notranslate nohighlight">
 \[\begin{align*}
     \hat{\sigma}_j
     =
     \frac{1}{\sqrt{n - \mathrm{df}}} \|Z_{\cdot j} - c_j \mathbf{1} \|_2
 \end{align*}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\mathrm{df}\)</span> is the degrees of freedom given by <code class="docutils literal notranslate"><span class="pre">ddof</span></code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This matrix only works for naive method!</p>
@@ -622,11 +641,13 @@ is defined by</p>
 <dt><strong>mat</strong><span class="classifier">Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]</span></dt><dd><p>The underlying matrix <span class="math notranslate nohighlight">\(Z\)</span> to standardize.</p>
 </dd>
 <dt><strong>centers</strong><span class="classifier">ndarray, optional</span></dt><dd><p>The center values <span class="math notranslate nohighlight">\(c\)</span> for each column of <code class="docutils literal notranslate"><span class="pre">mat</span></code>.
-If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the column means <span class="math notranslate nohighlight">\(\overline{Z}\)</span> are used as centers.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the implied column means are used via 
+<a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64.mean" title="adelie.adelie_core.matrix.MatrixNaiveBase64.mean"><code class="xref py py-func docutils literal notranslate"><span class="pre">mean()</span></code></a>.
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </dd>
 <dt><strong>scales</strong><span class="classifier">ndarray, optional</span></dt><dd><p>The scale values <span class="math notranslate nohighlight">\(s\)</span> for each column of <code class="docutils literal notranslate"><span class="pre">mat</span></code>.
-If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the column standard deviations <span class="math notranslate nohighlight">\(\hat{\sigma}\)</span> are used as scales.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the implied column standard deviations are used via
+<a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64.var" title="adelie.adelie_core.matrix.MatrixNaiveBase64.var"><code class="xref py py-func docutils literal notranslate"><span class="pre">var()</span></code></a>.
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </dd>
 <dt><strong>ddof</strong><span class="classifier">int, optional</span></dt><dd><p>The degrees of freedom used to compute <code class="docutils literal notranslate"><span class="pre">scales</span></code>.

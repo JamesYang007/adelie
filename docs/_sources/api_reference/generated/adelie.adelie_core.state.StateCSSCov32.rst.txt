@@ -1,0 +1,58 @@
+﻿adelie.adelie\_core.state.StateCSSCov32
+=======================================
+
+.. currentmodule:: adelie.adelie_core.state
+
+.. autoclass:: StateCSSCov32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~StateCSSCov32.__init__
+      ~StateCSSCov32.solve
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StateCSSCov32.L_T
+      ~StateCSSCov32.S_resid
+      ~StateCSSCov32.benchmark_L_T
+      ~StateCSSCov32.benchmark_L_U
+      ~StateCSSCov32.benchmark_S_resid
+      ~StateCSSCov32.benchmark_init
+      ~StateCSSCov32.benchmark_resid_fwd
+      ~StateCSSCov32.benchmark_scores
+      ~StateCSSCov32.subset
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: solve
+   
+   
+
+   
+   
+   
+   .. autoattribute:: L_T
+   .. autoattribute:: S_resid
+   .. autoattribute:: benchmark_L_T
+   .. autoattribute:: benchmark_L_U
+   .. autoattribute:: benchmark_S_resid
+   .. autoattribute:: benchmark_init
+   .. autoattribute:: benchmark_resid_fwd
+   .. autoattribute:: benchmark_scores
+   .. autoattribute:: subset
+   
+   

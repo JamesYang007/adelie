@@ -18,10 +18,12 @@
       ~MatrixNaiveKroneckerEye64.cols
       ~MatrixNaiveKroneckerEye64.cov
       ~MatrixNaiveKroneckerEye64.ctmul
+      ~MatrixNaiveKroneckerEye64.mean
       ~MatrixNaiveKroneckerEye64.mul
       ~MatrixNaiveKroneckerEye64.rows
       ~MatrixNaiveKroneckerEye64.sp_tmul
       ~MatrixNaiveKroneckerEye64.sq_mul
+      ~MatrixNaiveKroneckerEye64.var
    
    
 
@@ -46,10 +48,12 @@
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul
+   .. automethod:: mean
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
    .. automethod:: sq_mul
+   .. automethod:: var
    
    
 

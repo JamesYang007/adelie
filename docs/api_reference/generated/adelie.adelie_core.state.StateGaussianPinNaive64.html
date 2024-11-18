@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.adelie_core.state.StateGaussianPinNaive64 &#8212; adelie 1.1.49 documentation</title>
+    <title>adelie.adelie_core.state.StateGaussianPinNaive64 &#8212; adelie 1.1.50 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../../_static/documentation_options.js?v=8ed26aa9"></script>
+    <script src="../../_static/documentation_options.js?v=6df60dfb"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/design-tabs.js?v=36754332"></script>
@@ -124,8 +124,8 @@
     
     
     
-    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.49 documentation - Home"/>
-    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.49 documentation - Home"/>`);</script>
+    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.50 documentation - Home"/>
+    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.50 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -392,16 +392,19 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.subset.html">adelie.matrix.subset</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.sklearn.CSSModelSelection.html">adelie.sklearn.CSSModelSelection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.sklearn.GroupElasticNet.html">adelie.sklearn.GroupElasticNet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.bvls.html">adelie.solver.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.css_cov.html">adelie.solver.css_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.pinball.html">adelie.solver.pinball</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.bvls.html">adelie.state.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.css_cov.html">adelie.state.css_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_cov.html">adelie.state.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
@@ -466,10 +469,18 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovSparse64F.html">adelie.adelie_core.matrix.MatrixCovSparse64F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase32.html">adelie.adelie_core.matrix.MatrixNaiveBase32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase64.html">adelie.adelie_core.matrix.MatrixNaiveBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag32.html">adelie.adelie_core.matrix.MatrixNaiveBlockDiag32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag64.html">adelie.adelie_core.matrix.MatrixNaiveBlockDiag64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C</a></li>
@@ -508,6 +519,8 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRSubset64.html">adelie.adelie_core.matrix.MatrixNaiveRSubset64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS32.html">adelie.adelie_core.state.StateBVLS32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS64.html">adelie.adelie_core.state.StateBVLS64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateCSSCov32.html">adelie.adelie_core.state.StateCSSCov32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateCSSCov64.html">adelie.adelie_core.state.StateCSSCov64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov32.html">adelie.adelie_core.state.StateGaussianPinCov32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive32.html">adelie.adelie_core.state.StateGaussianPinNaive32</a></li>
@@ -599,7 +612,7 @@ document.write(`
 <td><p>Overloaded function.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../generated/adelie.adelie_core.state.StateGaussianPinNaive64.html#adelie.adelie_core.state.StateGaussianPinNaive64.solve" title="adelie.adelie_core.state.StateGaussianPinNaive64.solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve</span></code></a>(self)</p></td>
-<td><p></p></td>
+<td><p>Solves the state-specific problem.</p></td>
 </tr>
 </tbody>
 </table>
@@ -744,7 +757,8 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive64.solve">
 <span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../generated/adelie.adelie_core.state.StateGaussianPinNaive64.html#adelie.adelie_core.state.StateGaussianPinNaive64" title="adelie.adelie_core.state.StateGaussianPinNaive64"><span class="pre">adelie.adelie_core.state.StateGaussianPinNaive64</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive64.solve" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Solves the state-specific problem.</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive64.X">

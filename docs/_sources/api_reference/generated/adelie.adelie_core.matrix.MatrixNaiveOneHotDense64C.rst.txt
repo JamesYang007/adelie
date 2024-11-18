@@ -18,10 +18,12 @@
       ~MatrixNaiveOneHotDense64C.cols
       ~MatrixNaiveOneHotDense64C.cov
       ~MatrixNaiveOneHotDense64C.ctmul
+      ~MatrixNaiveOneHotDense64C.mean
       ~MatrixNaiveOneHotDense64C.mul
       ~MatrixNaiveOneHotDense64C.rows
       ~MatrixNaiveOneHotDense64C.sp_tmul
       ~MatrixNaiveOneHotDense64C.sq_mul
+      ~MatrixNaiveOneHotDense64C.var
    
    
 
@@ -48,10 +50,12 @@
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul
+   .. automethod:: mean
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
    .. automethod:: sq_mul
+   .. automethod:: var
    
    
 

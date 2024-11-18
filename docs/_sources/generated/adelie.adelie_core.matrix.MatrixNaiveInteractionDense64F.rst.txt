@@ -18,10 +18,12 @@
       ~MatrixNaiveInteractionDense64F.cols
       ~MatrixNaiveInteractionDense64F.cov
       ~MatrixNaiveInteractionDense64F.ctmul
+      ~MatrixNaiveInteractionDense64F.mean
       ~MatrixNaiveInteractionDense64F.mul
       ~MatrixNaiveInteractionDense64F.rows
       ~MatrixNaiveInteractionDense64F.sp_tmul
       ~MatrixNaiveInteractionDense64F.sq_mul
+      ~MatrixNaiveInteractionDense64F.var
    
    
 
@@ -48,10 +50,12 @@
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul
+   .. automethod:: mean
    .. automethod:: mul
    .. automethod:: rows
    .. automethod:: sp_tmul
    .. automethod:: sq_mul
+   .. automethod:: var
    
    
 

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>adelie.sklearn.GroupElasticNet &#8212; adelie 1.1.49 documentation</title>
+    <title>adelie.sklearn.GroupElasticNet &#8212; adelie 1.1.50 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../../_static/documentation_options.js?v=8ed26aa9"></script>
+    <script src="../../_static/documentation_options.js?v=6df60dfb"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/design-tabs.js?v=36754332"></script>
@@ -46,7 +46,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="adelie.solver.bvls" href="adelie.solver.bvls.html" />
-    <link rel="prev" title="adelie.matrix.subset" href="adelie.matrix.subset.html" />
+    <link rel="prev" title="adelie.sklearn.CSSModelSelection" href="adelie.sklearn.CSSModelSelection.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -122,8 +122,8 @@
     
     
     
-    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.49 documentation - Home"/>
-    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.49 documentation - Home"/>`);</script>
+    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.50 documentation - Home"/>
+    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.50 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -390,16 +390,19 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="adelie.matrix.subset.html">adelie.matrix.subset</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.sklearn.CSSModelSelection.html">adelie.sklearn.CSSModelSelection</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.sklearn.GroupElasticNet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.bvls.html">adelie.solver.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.css_cov.html">adelie.solver.css_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.solver.pinball.html">adelie.solver.pinball</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.bvls.html">adelie.state.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.css_cov.html">adelie.state.css_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_cov.html">adelie.state.gaussian_cov</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
@@ -464,10 +467,18 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovSparse64F.html">adelie.adelie_core.matrix.MatrixCovSparse64F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase32.html">adelie.adelie_core.matrix.MatrixNaiveBase32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase64.html">adelie.adelie_core.matrix.MatrixNaiveBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag32.html">adelie.adelie_core.matrix.MatrixNaiveBlockDiag32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag64.html">adelie.adelie_core.matrix.MatrixNaiveBlockDiag64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C</a></li>
@@ -506,6 +517,8 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRSubset64.html">adelie.adelie_core.matrix.MatrixNaiveRSubset64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS32.html">adelie.adelie_core.state.StateBVLS32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS64.html">adelie.adelie_core.state.StateBVLS64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateCSSCov32.html">adelie.adelie_core.state.StateCSSCov32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateCSSCov64.html">adelie.adelie_core.state.StateCSSCov64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov32.html">adelie.adelie_core.state.StateGaussianPinCov32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive32.html">adelie.adelie_core.state.StateGaussianPinNaive32</a></li>
@@ -585,7 +598,7 @@ document.write(`
 <h1>adelie.sklearn.GroupElasticNet<a class="headerlink" href="#adelie-sklearn-groupelasticnet" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="adelie.sklearn.GroupElasticNet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.sklearn.</span></span><span class="sig-name descname"><span class="pre">GroupElasticNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'grpnet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">family</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gaussian'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/sklearn.py#L38-L245"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.sklearn.GroupElasticNet" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.sklearn.</span></span><span class="sig-name descname"><span class="pre">GroupElasticNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'grpnet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">family</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gaussian'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/sklearn.py#L43-L250"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.sklearn.GroupElasticNet" title="Link to this definition">#</a></dt>
 <dd><p>Group Elastic Net estimator with scikit-learn compatible API.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -647,13 +660,13 @@ It must be one of the following:</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.sklearn.GroupElasticNet.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'grpnet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">family</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gaussian'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/sklearn.py#L66-L75"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.sklearn.GroupElasticNet.__init__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'grpnet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">family</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gaussian'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/sklearn.py#L71-L80"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.sklearn.GroupElasticNet.__init__" title="Link to this definition">#</a></dt>
 <dd><p>Initialize the GroupElasticNet estimator.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.sklearn.GroupElasticNet.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase32.html#adelie.adelie_core.matrix.MatrixNaiveBase32" title="adelie.adelie_core.matrix.MatrixNaiveBase32"><span class="pre">MatrixNaiveBase32</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">MatrixNaiveBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/sklearn.py#L77-L145"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.sklearn.GroupElasticNet.fit" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase32.html#adelie.adelie_core.matrix.MatrixNaiveBase32" title="adelie.adelie_core.matrix.MatrixNaiveBase32"><span class="pre">MatrixNaiveBase32</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">MatrixNaiveBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/sklearn.py#L82-L150"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.sklearn.GroupElasticNet.fit" title="Link to this definition">#</a></dt>
 <dd><p>Fit the Group Elastic Net model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -716,7 +729,7 @@ contained subobjects that are estimators.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.sklearn.GroupElasticNet.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/sklearn.py#L183-L209"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.sklearn.GroupElasticNet.predict" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/sklearn.py#L188-L214"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.sklearn.GroupElasticNet.predict" title="Link to this definition">#</a></dt>
 <dd><p>Predict using the fitted Group Elastic Net model.</p>
 <p>If <code class="docutils literal notranslate"><span class="pre">self.family</span></code> is either <code class="docutils literal notranslate"><span class="pre">&quot;binomial&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;multinomial&quot;</span></code>,
 the output is class label predictions based on the largest probability predictions.
@@ -740,7 +753,7 @@ It is typically one of the matrices defined in <a class="reference internal" hre
 
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.sklearn.GroupElasticNet.predict_proba">
-<span class="sig-name descname"><span class="pre">predict_proba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase32.html#adelie.adelie_core.matrix.MatrixNaiveBase32" title="adelie.adelie_core.matrix.MatrixNaiveBase32"><span class="pre">MatrixNaiveBase32</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">MatrixNaiveBase64</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/sklearn.py#L147-L181"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.sklearn.GroupElasticNet.predict_proba" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">predict_proba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase32.html#adelie.adelie_core.matrix.MatrixNaiveBase32" title="adelie.adelie_core.matrix.MatrixNaiveBase32"><span class="pre">MatrixNaiveBase32</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">MatrixNaiveBase64</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/sklearn.py#L152-L186"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.sklearn.GroupElasticNet.predict_proba" title="Link to this definition">#</a></dt>
 <dd><p>Predict class probabilities.</p>
 <p>This method is only available for <code class="docutils literal notranslate"><span class="pre">&quot;binomial&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;multinomial&quot;</span></code> families.</p>
 <dl class="field-list simple">
@@ -762,7 +775,7 @@ It is typically one of the matrices defined in <a class="reference internal" hre
 
 <dl class="py method">
 <dt class="sig sig-object py" id="adelie.sklearn.GroupElasticNet.score">
-<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/sklearn.py#L211-L232"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.sklearn.GroupElasticNet.score" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/sklearn.py#L216-L237"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.sklearn.GroupElasticNet.score" title="Link to this definition">#</a></dt>
 <dd><p>Compute the R-squared score of the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -822,12 +835,12 @@ possible to update each component of a nested object.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adelie.matrix.subset.html"
+       href="adelie.sklearn.CSSModelSelection.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">adelie.matrix.subset</p>
+        <p class="prev-next-title">adelie.sklearn.CSSModelSelection</p>
       </div>
     </a>
     <a class="right-next"

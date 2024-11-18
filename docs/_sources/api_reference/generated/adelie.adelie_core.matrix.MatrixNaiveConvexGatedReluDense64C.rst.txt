@@ -1,0 +1,66 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveConvexGatedReluDense64C
+=============================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveConvexGatedReluDense64C
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveConvexGatedReluDense64C.__init__
+      ~MatrixNaiveConvexGatedReluDense64C.bmul
+      ~MatrixNaiveConvexGatedReluDense64C.btmul
+      ~MatrixNaiveConvexGatedReluDense64C.cmul
+      ~MatrixNaiveConvexGatedReluDense64C.cols
+      ~MatrixNaiveConvexGatedReluDense64C.cov
+      ~MatrixNaiveConvexGatedReluDense64C.ctmul
+      ~MatrixNaiveConvexGatedReluDense64C.mean
+      ~MatrixNaiveConvexGatedReluDense64C.mul
+      ~MatrixNaiveConvexGatedReluDense64C.rows
+      ~MatrixNaiveConvexGatedReluDense64C.sp_tmul
+      ~MatrixNaiveConvexGatedReluDense64C.sq_mul
+      ~MatrixNaiveConvexGatedReluDense64C.var
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveConvexGatedReluDense64C.ndim
+      ~MatrixNaiveConvexGatedReluDense64C.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mean
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_tmul
+   .. automethod:: sq_mul
+   .. automethod:: var
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

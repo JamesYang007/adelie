@@ -1,0 +1,66 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveBlockDiag32
+=================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveBlockDiag32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveBlockDiag32.__init__
+      ~MatrixNaiveBlockDiag32.bmul
+      ~MatrixNaiveBlockDiag32.btmul
+      ~MatrixNaiveBlockDiag32.cmul
+      ~MatrixNaiveBlockDiag32.cols
+      ~MatrixNaiveBlockDiag32.cov
+      ~MatrixNaiveBlockDiag32.ctmul
+      ~MatrixNaiveBlockDiag32.mean
+      ~MatrixNaiveBlockDiag32.mul
+      ~MatrixNaiveBlockDiag32.rows
+      ~MatrixNaiveBlockDiag32.sp_tmul
+      ~MatrixNaiveBlockDiag32.sq_mul
+      ~MatrixNaiveBlockDiag32.var
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveBlockDiag32.ndim
+      ~MatrixNaiveBlockDiag32.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mean
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_tmul
+   .. automethod:: sq_mul
+   .. automethod:: var
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   
