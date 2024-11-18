@@ -250,6 +250,41 @@ ADELIE_CORE_MATRIX_NAIVE_CSUBSET::sp_tmul(
     }
 }
 
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::mean(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) 
+{
+    vec_value_t m(_mat->cols());
+    _mat->mean(weights, m);
+    for (int i = 0; i < _subset.size(); ++i) {
+        out[i] = m[_subset[i]];
+    }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::var(
+    const Eigen::Ref<const vec_value_t>& centers,
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    vec_value_t new_c(_mat->cols());
+    new_c.setZero();
+    for (int i = 0; i < _subset.size(); ++i) {
+        new_c[_subset[i]] = centers[i];
+    }
+
+    vec_value_t v(_mat->cols());
+    _mat->var(new_c, weights, v);
+    for (int i = 0; i < _subset.size(); ++i) {
+        out[i] = v[_subset[i]];
+    }
+}
+
 ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
 auto
 ADELIE_CORE_MATRIX_NAIVE_RSUBSET::init_mask(
@@ -446,6 +481,37 @@ ADELIE_CORE_MATRIX_NAIVE_RSUBSET::sp_tmul(
     for (int i = 0; i < _subset.size(); ++i) {
         out.col(i) = _out.col(_subset[i]);
     }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::mean(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) 
+{
+    vec_value_t new_w(_mat->rows());
+    new_w.setZero();
+    for (int i = 0; i < _subset.size(); ++i) {
+        new_w[_subset[i]] = weights[i];
+    }
+    _mat->mean(new_w, out);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::var(
+    const Eigen::Ref<const vec_value_t>& centers,
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    vec_value_t new_w(_mat->rows());
+    new_w.setZero();
+    for (int i = 0; i < _subset.size(); ++i) {
+        new_w[_subset[i]] = weights[i];
+    }
+    _mat->var(centers, new_w, out);
 }
 
 } // namespace matrix

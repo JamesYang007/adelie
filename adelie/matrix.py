@@ -198,6 +198,7 @@ class PyMatrixNaiveBase:
 def block_diag(
     mats: list,
     *,
+    method: str ="naive",
     n_threads: int =1,
 ):
     """Creates a block-diagonal matrix given by the list of matrices.
@@ -207,6 +208,8 @@ def block_diag(
 
     .. math::
         \\begin{align*}
+            A 
+            =
             \\begin{bmatrix}
                 A_1 & 0 & \\cdots & 0 \\\\
                 0 & A_2 & \\cdots & 0 \\\\
@@ -216,12 +219,20 @@ def block_diag(
         \\end{align*}
 
     .. note::
-        This matrix only works for covariance method!
+        The routines for this matrix are faster when there are many small blocks
+        rather than few large blocks.
 
     Parameters
     ----------
     mats : list
         List of matrices to represent the block diagonal matrix.
+    method : str, optional
+        Method type. It must be one of the following:
+
+            - ``"naive"``: naive matrix.
+            - ``"cov"``: covariance matrix.
+
+        Default is ``"naive"``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -235,9 +246,11 @@ def block_diag(
     --------
     adelie.adelie_core.matrix.MatrixCovBlockDiag32
     adelie.adelie_core.matrix.MatrixCovBlockDiag64
+    adelie.adelie_core.matrix.MatrixNaiveBlockDiag32
+    adelie.adelie_core.matrix.MatrixNaiveBlockDiag64
     """
     mats = [
-        dense(mat, method="cov", n_threads=1)
+        dense(mat, method=method, n_threads=1)
         if isinstance(mat, np.ndarray) else
         mat
         for mat in mats
@@ -248,13 +261,24 @@ def block_diag(
         if dtype == _to_dtype(mat): continue
         raise ValueError("All matrices must have the same underlying data type.")
 
-    dispatcher = {
+    cov_dispatcher = {
         np.float64: core.matrix.MatrixCovBlockDiag64,
         np.float32: core.matrix.MatrixCovBlockDiag32,
     }
+    naive_dispatcher = {
+        np.float64: core.matrix.MatrixNaiveBlockDiag64,
+        np.float32: core.matrix.MatrixNaiveBlockDiag32,
+    }
+    dispatcher = {
+        "cov": cov_dispatcher,
+        "naive": naive_dispatcher,
+    }
 
-    core_base = dispatcher[dtype]
-    py_base = PyMatrixCovBase
+    core_base = dispatcher[method][dtype]
+    py_base = {
+        "naive" : PyMatrixNaiveBase,
+        "cov" : PyMatrixCovBase,
+    }[method]
 
     class _block_diag(core_base, py_base):
         def __init__(self):
@@ -367,11 +391,23 @@ def convex_relu(
     mat: Union[np.ndarray, csc_matrix],
     mask: np.ndarray,
     *,
+    gated: bool =False,
     copy: bool =False,
     n_threads: int =1,
 ):
     """Creates a feature matrix for the convex relu problem.
 
+    The feature matrix for the convex gated relu problem is given by
+
+    .. math::
+        \\begin{align*}
+            Y &= 
+            \\begin{bmatrix}
+                D_1 Z & \\ldots & D_m Z
+            \\end{bmatrix}
+        \\end{align*}
+
+    where :math:`D_i \\in \\{0, 1\\}^{n \\times n}` are diagonal masking matrices.
     The feature matrix for the convex relu problem is given by
 
     .. math::
@@ -380,14 +416,10 @@ def convex_relu(
             \\begin{bmatrix}
                 Y & -Y
             \\end{bmatrix}
-            \\\\
-            Y &= 
-            \\begin{bmatrix}
-                D_1 Z & \\ldots & D_m Z
-            \\end{bmatrix}
         \\end{align*}
 
-    and :math:`D_i \\in \\{0, 1\\}^{n \\times n}` are diagonal matrices.
+    .. note::
+        This matrix only works for naive method!
 
     Parameters
     ----------
@@ -396,6 +428,9 @@ def convex_relu(
     mask : (n, m) ndarray
         The boolean mask matrix whose columns define the diagonal of :math:`D_i`.
         If it is not in ``"F"``-ordering, an ``"F"``-ordered copy is made.
+    gated : bool, optional
+        If ``True``, the matrix will represent :math:`Y` and otherwise :math:`X`.
+        Default is ``False``.
     copy : bool, optional
         If ``True``, a copy of the inputs is stored internally.
         Otherwise, a reference is stored instead.
@@ -411,6 +446,12 @@ def convex_relu(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F
     adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C
     adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F
     adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C
@@ -421,16 +462,28 @@ def convex_relu(
     py_base = PyMatrixNaiveBase
 
     if isinstance(mat, np.ndarray):
-        dispatcher = {
-            np.dtype("float64"): {
-                "C": core.matrix.MatrixNaiveConvexReluDense64C,
-                "F": core.matrix.MatrixNaiveConvexReluDense64F,
-            },
-            np.dtype("float32"): {
-                "C": core.matrix.MatrixNaiveConvexReluDense32C,
-                "F": core.matrix.MatrixNaiveConvexReluDense32F,
-            },
-        }
+        if gated:
+            dispatcher = {
+                np.dtype("float64"): {
+                    "C": core.matrix.MatrixNaiveConvexGatedReluDense64C,
+                    "F": core.matrix.MatrixNaiveConvexGatedReluDense64F,
+                },
+                np.dtype("float32"): {
+                    "C": core.matrix.MatrixNaiveConvexGatedReluDense32C,
+                    "F": core.matrix.MatrixNaiveConvexGatedReluDense32F,
+                },
+            }
+        else:
+            dispatcher = {
+                np.dtype("float64"): {
+                    "C": core.matrix.MatrixNaiveConvexReluDense64C,
+                    "F": core.matrix.MatrixNaiveConvexReluDense64F,
+                },
+                np.dtype("float32"): {
+                    "C": core.matrix.MatrixNaiveConvexReluDense32C,
+                    "F": core.matrix.MatrixNaiveConvexReluDense32F,
+                },
+            }
         dtype = mat.dtype
         order = (
             "F"
@@ -457,10 +510,16 @@ def convex_relu(
         mat.prune()
         mat.sort_indices()
 
-        dispatcher = {
-            np.dtype("float64"): core.matrix.MatrixNaiveConvexReluSparse64F,
-            np.dtype("float32"): core.matrix.MatrixNaiveConvexReluSparse32F,
-        }
+        if gated:
+            dispatcher = {
+                np.dtype("float64"): core.matrix.MatrixNaiveConvexGatedReluSparse64F,
+                np.dtype("float32"): core.matrix.MatrixNaiveConvexGatedReluSparse32F,
+            }
+        else:
+            dispatcher = {
+                np.dtype("float64"): core.matrix.MatrixNaiveConvexReluSparse64F,
+                np.dtype("float32"): core.matrix.MatrixNaiveConvexReluSparse32F,
+            }
         dtype = mat.dtype
         core_base = dispatcher[dtype]
 
@@ -1372,7 +1431,14 @@ def standardize(
             X = (Z - \\mathbf{1} c^\\top) \\mathrm{diag}(s)^{-1}
         \\end{align*}
 
-    We define the column means :math:`\\overline{Z} \\in \\mathbb{R}^p` to be
+    The centers :math:`c` and scales :math:`s` are either user-provided or
+    deduced from :math:`Z` via 
+    :func:`~adelie.adelie_core.matrix.MatrixNaiveBase64.mean` and 
+    :func:`~adelie.adelie_core.matrix.MatrixNaiveBase64.var`, respectively,
+    with equal sample weights :math:`1/n`.
+    The degrees of freedom :math:`\\mathrm{df}` can be specified for :math:`s`
+    so that the sample weights are :math:`1 / (n-\\mathrm{df})` instead.
+    Therefore, :math:`c` will usually coincide with
 
     .. math::
         \\begin{align*}
@@ -1381,7 +1447,7 @@ def standardize(
             \\frac{1}{n} Z^\\top \\mathbf{1}
         \\end{align*}
 
-    Lastly, we define the column standard deviations :math:`\\hat{\\sigma} \\in \\mathbb{R}^p` to be
+    and :math:`s` with 
 
     .. math::
         \\begin{align*}
@@ -1389,8 +1455,6 @@ def standardize(
             =
             \\frac{1}{\\sqrt{n - \\mathrm{df}}} \\|Z_{\\cdot j} - c_j \\mathbf{1} \\|_2
         \\end{align*}
-
-    where :math:`\\mathrm{df}` is the degrees of freedom given by ``ddof``.
 
     .. note::
         This matrix only works for naive method!
@@ -1401,11 +1465,13 @@ def standardize(
         The underlying matrix :math:`Z` to standardize.
     centers : ndarray, optional
         The center values :math:`c` for each column of ``mat``.
-        If ``None``, the column means :math:`\\overline{Z}` are used as centers.
+        If ``None``, the implied column means are used via 
+        :func:`~adelie.adelie_core.matrix.MatrixNaiveBase64.mean`.
         Default is ``None``.
     scales : ndarray, optional
         The scale values :math:`s` for each column of ``mat``.
-        If ``None``, the column standard deviations :math:`\\hat{\\sigma}` are used as scales.
+        If ``None``, the implied column standard deviations are used via
+        :func:`~adelie.adelie_core.matrix.MatrixNaiveBase64.var`.
         Default is ``None``.
     ddof : int, optional
         The degrees of freedom used to compute ``scales``.
@@ -1447,23 +1513,16 @@ def standardize(
     py_base = PyMatrixNaiveBase
 
     n, p = mat.shape
-    sqrt_weights = np.full(n, 1/np.sqrt(n), dtype=dtype) 
+    weights = np.full(n, 1/n, dtype=dtype) 
     is_centers_none = centers is None
 
     if is_centers_none:
         centers = np.empty(p, dtype=dtype) 
-        mat.mul(sqrt_weights, sqrt_weights, centers)
+        mat.mean(weights, centers)
 
     if scales is None:
-        if is_centers_none:
-            means = centers
-        else:
-            means = np.empty(p, dtype=dtype) 
-            mat.mul(sqrt_weights, sqrt_weights, means)
-
         vars = np.empty(p, dtype=dtype)
-        mat.sq_mul(sqrt_weights ** 2, vars)
-        vars += centers * (centers - 2 * means)
+        mat.var(centers, weights, vars)
         scales = np.sqrt((n / (n - ddof)) * vars)
 
     class _standardize(core_base, py_base):

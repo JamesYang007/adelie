@@ -264,6 +264,39 @@ ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::sp_tmul(
     }
 }
 
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::mean(
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    int n_processed = 0;
+    for (size_t i = 0; i < _mat_list.size(); ++i) {
+        auto& mat = *_mat_list[i];
+        const auto p = mat.cols();
+        mat.mean(weights, out.segment(n_processed, p));
+        n_processed += p;
+    }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::var(
+    const Eigen::Ref<const vec_value_t>& centers,
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+)
+{
+    int n_processed = 0;
+    for (size_t i = 0; i < _mat_list.size(); ++i) {
+        auto& mat = *_mat_list[i];
+        const auto p = mat.cols();
+        mat.var(centers.segment(n_processed, p), weights, out.segment(n_processed, p));
+        n_processed += p;
+    }
+}
+
 ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
 auto 
 ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::init_rows(
@@ -530,6 +563,35 @@ ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::sp_tmul(
         out.middleCols(begin, rows_curr) = out_curr;
         begin += rows_curr;
     }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::mean(
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> 
+)
+{
+    throw util::adelie_core_error(
+        "MatrixNaiveRConcatenate: mean() not implemented! "
+        "If this error occurred from standardizing the matrix, "
+        "consider providing your own center vector. "
+    );
+}
+
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::var(
+    const Eigen::Ref<const vec_value_t>&,
+    const Eigen::Ref<const vec_value_t>&,
+    Eigen::Ref<vec_value_t> 
+)
+{
+    throw util::adelie_core_error(
+        "MatrixNaiveRConcatenate: var() not implemented! "
+        "If this error occurred from standardizing the matrix, "
+        "consider providing your own scale vector. "
+    );
 }
 
 } // namespace matrix 

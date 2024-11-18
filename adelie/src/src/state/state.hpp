@@ -1,6 +1,7 @@
 #pragma once
 #include <tools/types.hpp>
 #include <adelie_core/state/state_bvls.hpp>
+#include <adelie_core/state/state_css_cov.hpp>
 #include <adelie_core/state/state_gaussian_cov.hpp>
 #include <adelie_core/state/state_gaussian_naive.hpp>
 #include <adelie_core/state/state_gaussian_pin_cov.hpp>
@@ -15,6 +16,9 @@ extern template class adelie_core::state::StateBase<constraint_type<double>>;
 
 extern template class adelie_core::state::StateBVLS<matrix_naive_type<float>>;
 extern template class adelie_core::state::StateBVLS<matrix_naive_type<double>>;
+
+extern template class adelie_core::state::StateCSSCov<dense_type<float, Eigen::ColMajor>>;
+extern template class adelie_core::state::StateCSSCov<dense_type<double, Eigen::ColMajor>>;
 
 extern template class adelie_core::state::StateGaussianCov<constraint_type<float>, matrix_cov_type<float>>;
 extern template class adelie_core::state::StateGaussianCov<constraint_type<double>, matrix_cov_type<double>>;

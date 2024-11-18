@@ -1,13 +1,13 @@
 #pragma once
-#include <adelie_core/matrix/matrix_naive_convex_relu.hpp>
+#include <adelie_core/matrix/matrix_naive_convex_gated_relu.hpp>
 #include <adelie_core/matrix/utils.hpp>
 
 namespace adelie_core {
 namespace matrix {
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE_TP
 void
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::_ctmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::_ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out,
@@ -15,23 +15,20 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::_ctmul(
 )
 {
     const auto d = _mat.cols();
-    const auto m = _mask.cols();
-    const auto j_sgn = j / (m * d);
-    j -= j_sgn * m * d;
     const auto j_m = j / d;
     j -= j_m * d;
     const auto j_d = j;
     dvaddi(
         out, 
-        (v * (1-2*j_sgn)) * _mat.col(j_d).cwiseProduct(
+        v * _mat.col(j_d).cwiseProduct(
             _mask.col(j_m).template cast<value_t>()
         ).array(),
         n_threads
     );
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::MatrixNaiveConvexReluDense(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::MatrixNaiveConvexGatedReluDense(
     const Eigen::Ref<const dense_t>& mat,
     const Eigen::Ref<const mask_t>& mask,
     size_t n_threads
@@ -51,9 +48,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::MatrixNaiveConvexReluDense(
     }
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
-typename ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::value_t
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::cmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -61,13 +58,10 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::cmul(
 {
     base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
     const auto d = _mat.cols();
-    const auto m = _mask.cols();
-    const auto j_sgn = j / (m * d);
-    j -= j_sgn * m * d;
     const auto j_m = j / d;
     j -= j_m * d;
     const auto j_d = j;
-    return (1-2*j_sgn) * ddot(
+    return ddot(
         _mat.col(j_d).cwiseProduct(_mask.col(j_m).template cast<value_t>()),
         (v * weights).matrix(),
         _n_threads,
@@ -75,9 +69,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::cmul(
     );
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE_TP
 void
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -87,9 +81,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::ctmul(
     _ctmul(j, v, out, _n_threads);
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE_TP
 void
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::bmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -98,12 +92,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::bmul(
 {
     base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
     const auto d = _mat.cols();
-    const auto m = _mask.cols();
     int n_processed = 0;
     while (n_processed < q) {
         auto k = j + n_processed;
-        const auto k_sgn = k / (m * d);
-        k -= k_sgn * m * d;
         const auto k_m = k / d;
         k -= k_m * d;
         const auto k_d = k;
@@ -112,7 +103,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::bmul(
         Eigen::Map<rowmat_value_t> buff(_buff.data(), _n_threads, d);
         dgemv(
             _mat.middleCols(k_d, size),
-            (1-2*k_sgn) * _mask.col(k_m).transpose().template cast<value_t>().cwiseProduct((v * weights).matrix()),
+            _mask.col(k_m).transpose().template cast<value_t>().cwiseProduct((v * weights).matrix()),
             _n_threads,
             buff,
             out_m
@@ -121,9 +112,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::bmul(
     }
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE_TP
 void
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::btmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -132,12 +123,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::btmul(
     base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
     const auto n = _mat.rows();
     const auto d = _mat.cols();
-    const auto m = _mask.cols();
     int n_processed = 0;
     while (n_processed < q) {
         auto k = j + n_processed;
-        const auto k_sgn = k / (m * d);
-        k -= k_sgn * m * d;
         const auto k_m = k / d;
         k -= k_m * d;
         const auto k_d = k;
@@ -154,16 +142,16 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::btmul(
         );
         dvaddi(
             out, 
-            (1-2*k_sgn) * Xv * _mask.col(k_m).transpose().template cast<value_t>().array(), 
+            Xv * _mask.col(k_m).transpose().template cast<value_t>().array(), 
             _n_threads
         );
         n_processed += size;
     }
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE_TP
 void
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::mul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -191,26 +179,25 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::mul(
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int i = 0; i < m; ++i) routine(i, v_weights, buff);
     }
-    out.tail(m*d) = -out.head(m*d);
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE_TP
 int
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::rows() const
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::rows() const
 {
     return _mat.rows();
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE_TP
 int
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::cols() const
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::cols() const
 {
-    return _mat.cols() * _mask.cols() * 2;
+    return _mat.cols() * _mask.cols();
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE_TP
 void
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::cov(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -224,15 +211,12 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::cov(
     );
 
     const auto d = _mat.cols();
-    const auto m = _mask.cols();
 
     Eigen::setNbThreads(_n_threads);
 
     int n_processed = 0;
     while (n_processed < q) {
         auto k = j + n_processed;
-        const auto k_sgn = k / (m * d);
-        k -= k_sgn * m * d;
         const auto k_m = k / d;
         k -= k_m * d;
         const auto k_d = k;
@@ -241,7 +225,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::cov(
         const auto mask = _mask.col(k_m);
 
         auto curr_block = buffer.middleCols(n_processed, size).array();
-        curr_block.array() = (1-2*k_sgn) * (
+        curr_block.array() = (
             mat.array().colwise() * 
             mask.template cast<value_t>().cwiseProduct(sqrt_weights.matrix().transpose()).array()
         );
@@ -251,9 +235,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::cov(
     out = buffer.transpose() * buffer;
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE_TP
 void
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::sq_mul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
 ) 
@@ -280,12 +264,11 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::sq_mul(
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int i = 0; i < m; ++i) routine(i, weights, buff);
     }
-    out.tail(m * d) = out.head(m * d);
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE_TP
 void
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
 ) 
@@ -309,9 +292,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::sp_tmul(
     }
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
-typename ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::value_t 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::_cmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::value_t 
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::_cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights,
@@ -319,9 +302,6 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::_cmul(
 )
 {
     const auto d = _mat.cols();
-    const auto m = _mask.cols();
-    const auto j_sgn = j / (m * d);
-    j -= j_sgn * m * d;
     const auto j_m = j / d;
     j -= j_m * d;
     const auto j_d = j;
@@ -336,7 +316,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::_cmul(
         _mat.valuePtr() + outer_j_d,
         size_j_d
     );
-    return (1-2*j_sgn) * spddot(
+    return spddot(
         inner_j_d,
         value_j_d,
         (v * weights * _mask.col(j_m).transpose().array().template cast<value_t>()),
@@ -345,9 +325,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::_cmul(
     );
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
 void 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::_ctmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::_ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out,
@@ -355,9 +335,6 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::_ctmul(
 )
 {
     const auto d = _mat.cols();
-    const auto m = _mask.cols();
-    const auto j_sgn = j / (m * d);
-    j -= j_sgn * m * d;
     const auto j_m = j / d;
     j -= j_m * d;
     const auto j_d = j;
@@ -375,14 +352,14 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::_ctmul(
     spdaddi(
         inner_j_d, 
         value_j_d, 
-        (v * (1-2*j_sgn)) * _mask.col(j_m).transpose().array().template cast<value_t>(),
+        v * _mask.col(j_m).transpose().array().template cast<value_t>(),
         out, 
         n_threads
     );
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::MatrixNaiveConvexReluSparse(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::MatrixNaiveConvexGatedReluSparse(
     size_t rows,
     size_t cols,
     size_t nnz,
@@ -407,9 +384,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::MatrixNaiveConvexReluSparse(
     }
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
-typename ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::value_t
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::cmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights
@@ -419,9 +396,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::cmul(
     return _cmul(j, v, weights, _n_threads);
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
 void
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::ctmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::ctmul(
     int j, 
     value_t v, 
     Eigen::Ref<vec_value_t> out
@@ -431,9 +408,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::ctmul(
     _ctmul(j, v, out, _n_threads);
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
 void
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::bmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::bmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
@@ -446,9 +423,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::bmul(
     }
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
 void
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::btmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out
@@ -460,9 +437,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::btmul(
     }
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
 void
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::mul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
@@ -479,26 +456,25 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::mul(
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int k = 0; k < m*d; ++k) routine(k);
     }
-    out.tail(m*d) = -out.head(m*d);
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
 int
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::rows() const
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::rows() const
 {
     return _mat.rows();
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
 int
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::cols() const
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::cols() const
 {
-    return _mat.cols() * _mask.cols() * 2;
+    return _mat.cols() * _mask.cols();
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
 void
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::cov(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
     Eigen::Ref<colmat_value_t> out,
@@ -512,12 +488,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::cov(
     );
 
     const auto d = _mat.cols();
-    const auto m = _mask.cols();
 
     const auto routine = [&](int i1) {
         auto index_1 = j+i1;
-        const auto index_1_sgn = index_1 / (m * d);
-        index_1 -= index_1_sgn * m * d;
         const auto index_1_m = index_1 / d;
         index_1 -= index_1_m * d;
         const auto outer_1 = _mat.outerIndexPtr()[index_1];
@@ -531,8 +504,6 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::cov(
         const auto mask_1 = _mask.col(index_1_m).transpose().array().template cast<value_t>();
         for (int i2 = 0; i2 <= i1; ++i2) {
             auto index_2 = j+i2;
-            const auto index_2_sgn = index_2 / (m * d);
-            index_2 -= index_2_sgn * m * d;
             const auto index_2_m = index_2 / d;
             index_2 -= index_2_m * d;
             const auto outer_2 = _mat.outerIndexPtr()[index_2];
@@ -548,7 +519,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::cov(
             out(i1, i2) = svsvwdot(
                 inner_1, value_1,
                 inner_2, value_2,
-                ((1-2*index_1_sgn) * (1-2*index_2_sgn)) * sqrt_weights.square() * mask_1 * mask_2
+                sqrt_weights.square() * mask_1 * mask_2
             );
         }
     };
@@ -565,9 +536,9 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::cov(
     }
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
 void
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::sq_mul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
 ) 
@@ -588,12 +559,11 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::sq_mul(
         #pragma omp parallel for schedule(static) num_threads(_n_threads)
         for (int k = 0; k < m; ++k) routine(k, mat_sq);
     }
-    out.tail(m * d) = out.head(m * d);
 }
 
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE_TP
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
 void
-ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::sp_tmul(
+ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
 ) 
