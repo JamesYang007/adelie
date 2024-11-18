@@ -520,6 +520,18 @@ inline void solve(
                 break;
             }
         }
+
+        throw util::adelie_core_solver_error("Unrecognized loss type!");
+
+        // dummy output (only to appease compiler)
+        return [&](
+            const std::unordered_set<index_t>&,
+            index_t,
+            const Eigen::Ref<const matrix_t>&,
+            Eigen::Ref<vec_value_t> 
+        ) {
+            return false;
+        };
     }();
 
     switch (method) {
