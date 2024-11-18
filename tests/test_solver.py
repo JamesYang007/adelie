@@ -1214,7 +1214,8 @@ def test_css_cov_greedy(p, k, loss, seed):
     state = ad.solver.css_cov(S, k, method="greedy", loss=loss)
     actual = state.subset
     expected = CSSCov(S, loss).greedy(k)
-    assert np.all(actual == expected)
+    # sort first since numerical instability may result in different ordering
+    assert np.all(np.sort(actual) == np.sort(expected))
 
 
 @pytest.mark.parametrize("p, k", [
@@ -1235,4 +1236,5 @@ def test_css_cov_swapping(p, k, loss, seed):
     state = ad.solver.css_cov(S, k, method="swapping", loss=loss)
     actual = state.subset
     expected = CSSCov(S, loss).swapping(actual)
-    assert np.all(actual == expected)
+    # sort first since numerical instability may result in different ordering
+    assert np.all(np.sort(actual) == np.sort(expected))

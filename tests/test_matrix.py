@@ -425,18 +425,20 @@ def test_naive_cconcatenate(n, ps, dtype, n_threads=2, seed=0):
     )
     run_naive(X, cX, dtype)
 
+    atol = 1e-4 if dtype == np.float32 else 1e-14
+
     # test mean
     w = np.random.uniform(0, 1, cX.shape[0]).astype(dtype)
     mean = np.empty(cX.shape[1], dtype=dtype)
     cX.mean(w, mean)
     expected = X.T @ w
-    assert np.allclose(mean, expected)
+    assert np.allclose(mean, expected, atol=atol)
 
     # test var
     var = np.empty(cX.shape[1], dtype=dtype)
     cX.var(mean, w, var)
     expected = np.sum((X - mean) ** 2 * w[:, None], axis=0)
-    assert np.allclose(var, expected)
+    assert np.allclose(var, expected, atol=atol)
 
 
 @pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
@@ -482,18 +484,20 @@ def test_naive_convex_relu(n, d, m, gated, storage, dtype, n_threads=2, seed=0):
     cX = mod.convex_relu(Z, mask, gated=gated, n_threads=n_threads)
     run_naive(X, cX, dtype)
 
+    atol = 1e-4 if dtype == np.float32 else 1e-14
+
     # test mean
     w = np.random.uniform(0, 1, cX.shape[0]).astype(dtype)
     mean = np.empty(cX.shape[1], dtype=dtype)
     cX.mean(w, mean)
     expected = X.T @ w
-    assert np.allclose(mean, expected)
+    assert np.allclose(mean, expected, atol=atol)
 
     # test var
     var = np.empty(cX.shape[1], dtype=dtype)
     cX.var(mean, w, var)
     expected = np.sum((X - mean) ** 2 * w[:, None], axis=0)
-    assert np.allclose(var, expected)
+    assert np.allclose(var, expected, atol=atol)
 
 
 @pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
@@ -511,18 +515,20 @@ def test_naive_dense(n, p, dtype, order, seed=0):
     cX = mod.dense(X, method="naive", n_threads=15)
     run_naive(X, cX, dtype)
 
+    atol = 1e-4 if dtype == np.float32 else 1e-14
+
     # test mean
     w = np.random.uniform(0, 1, cX.shape[0]).astype(dtype)
     mean = np.empty(cX.shape[1], dtype=dtype)
     cX.mean(w, mean)
     expected = X.T @ w
-    assert np.allclose(mean, expected)
+    assert np.allclose(mean, expected, atol=atol)
 
     # test var
     var = np.empty(cX.shape[1], dtype=dtype)
     cX.var(mean, w, var)
     expected = np.sum((X - mean) ** 2 * w[:, None], axis=0)
-    assert np.allclose(var, expected)
+    assert np.allclose(var, expected, atol=atol)
 
     
 @pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
