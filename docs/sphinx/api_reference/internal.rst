@@ -68,6 +68,12 @@ Internal
     adelie_core.matrix.MatrixNaiveCConcatenate64
     adelie_core.matrix.MatrixNaiveRConcatenate32
     adelie_core.matrix.MatrixNaiveRConcatenate64
+    adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C
+    adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F
+    adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C
+    adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F
+    adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F
+    adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F
     adelie_core.matrix.MatrixNaiveConvexReluDense32C
     adelie_core.matrix.MatrixNaiveConvexReluDense32F
     adelie_core.matrix.MatrixNaiveConvexReluDense64C

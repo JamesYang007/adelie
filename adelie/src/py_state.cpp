@@ -528,7 +528,9 @@ void state_gaussian_pin_naive(py::module_& m, const char* name)
         .def_readonly("resid_sum", &state_t::resid_sum, R"delimiter(
         Weighted (by :math:`W`) sum of ``resid``.
         )delimiter")
-        .def("solve", [](state_t state) { return _solve(state); })
+        .def("solve", [](state_t state) { return _solve(state); }, R"delimiter(
+        Solves the state-specific problem.
+        )delimiter")
         ;
 }
 
@@ -663,7 +665,9 @@ void state_gaussian_pin_cov(py::module_& m, const char* name)
         ``b = screen_begins[i]``,
         and ``p = group_sizes[k]``.
         )delimiter")
-        .def("solve", [](state_t state) { return _solve(state); })
+        .def("solve", [](state_t state) { return _solve(state); }, R"delimiter(
+        Solves the state-specific problem.
+        )delimiter")
         ;
 }
 
@@ -1217,7 +1221,9 @@ void state_gaussian_naive(py::module_& m, const char* name)
             std::function<bool(const state_t&)> exit_cond
         ) { 
             return _solve(state, pb, exit_cond); 
-        })
+        }, R"delimiter(
+        Solves the state-specific problem.
+        )delimiter")
         ;
 }
 
@@ -1368,7 +1374,9 @@ void state_multigaussian_naive(py::module_& m, const char* name)
             std::function<bool(const state_t&)> exit_cond
         ) { 
             return _solve(state, pb, exit_cond); 
-        })
+        }, R"delimiter(
+        Solves the state-specific problem.
+        )delimiter")
         ;
 }
 
@@ -1526,7 +1534,9 @@ void state_gaussian_cov(py::module_& m, const char* name)
             std::function<bool(const state_t&)> exit_cond
         ) { 
             return _solve(state, pb, exit_cond); 
-        })
+        }, R"delimiter(
+        Solves the state-specific problem.
+        )delimiter")
         ;
 }
 
@@ -1703,7 +1713,9 @@ void state_glm_naive(py::module_& m, const char* name)
             std::function<bool(const state_t&)> exit_cond
         ) { 
             return _solve(state, glm, pb, exit_cond); 
-        })
+        }, R"delimiter(
+        Solves the state-specific problem.
+        )delimiter")
         ;
 }
 
@@ -1857,7 +1869,9 @@ void state_multiglm_naive(py::module_& m, const char* name)
             std::function<bool(const state_t&)> exit_cond
         ) { 
             return _solve(state, glm, pb, exit_cond); 
-        })
+        }, R"delimiter(
+        Solves the state-specific problem.
+        )delimiter")
         ;
 }
 
@@ -1981,7 +1995,9 @@ void state_bvls(py::module_& m, const char* name)
         .def_readonly("dbg_loss", &state_t::dbg_loss, R"delimiter(
         List of the losses at each outer loop.
         )delimiter")
-        .def("solve", [](state_t state) { return _solve(state); })
+        .def("solve", [](state_t state) { return _solve(state); }, R"delimiter(
+        Solves the state-specific problem.
+        )delimiter")
         ;
 }
 
@@ -2029,15 +2045,35 @@ void state_css_cov(py::module_& m, const char* name)
         }, R"delimiter(
         Selected subset.
         )delimiter")
-        .def("solve", [](state_t state) { return _solve(state); })
-        .def_readonly("S_resid", &state_t::S_resid)
-        .def_readonly("L_T", &state_t::L_T)
-        .def_readonly("benchmark_init", &state_t::benchmark_init)
-        .def_readonly("benchmark_L_U", &state_t::benchmark_L_U)
-        .def_readonly("benchmark_S_resid", &state_t::benchmark_S_resid)
-        .def_readonly("benchmark_scores", &state_t::benchmark_scores)
-        .def_readonly("benchmark_L_T", &state_t::benchmark_L_T)
-        .def_readonly("benchmark_resid_fwd", &state_t::benchmark_resid_fwd)
+        .def_readonly("S_resid", &state_t::S_resid, R"delimiter(
+        Residual covariance matrix :math:`\Sigma - \Sigma_{\cdot T} \Sigma_{TT}^{\dagger} \Sigma_{T \cdot}`
+        where :math:`T` is the current subset.
+        )delimiter")
+        .def_readonly("L_T", &state_t::L_T, R"delimiter(
+        Lower Cholesky factor of :math:`\Sigma_{TT}` 
+        where :math:`T` is the current subset.
+        )delimiter")
+        .def_readonly("benchmark_init", &state_t::benchmark_init, R"delimiter(
+        Benchmark time for the initialization.
+        )delimiter")
+        .def_readonly("benchmark_L_U", &state_t::benchmark_L_U, R"delimiter(
+        Benchmark time for updating the Cholesky factor after removing a feature.
+        )delimiter")
+        .def_readonly("benchmark_S_resid", &state_t::benchmark_S_resid, R"delimiter(
+        Benchmark time for updating the residual covariance matrix after removing a feature.
+        )delimiter")
+        .def_readonly("benchmark_scores", &state_t::benchmark_scores, R"delimiter(
+        Benchmark time for computing the scores.
+        )delimiter")
+        .def_readonly("benchmark_L_T", &state_t::benchmark_L_T, R"delimiter(
+        Benchmark time for updating the Cholesky factor after adding a feature.
+        )delimiter")
+        .def_readonly("benchmark_resid_fwd", &state_t::benchmark_resid_fwd, R"delimiter(
+        Benchmark time for updating the residual covariance matrix after adding a feature.
+        )delimiter")
+        .def("solve", [](state_t state) { return _solve(state); }, R"delimiter(
+        Solves the state-specific problem.
+        )delimiter")
         ;
 }
 
@@ -2171,7 +2207,9 @@ void state_pinball(py::module_& m, const char* name)
         .def_readonly("dbg_loss", &state_t::dbg_loss, R"delimiter(
         List of the losses at each outer loop.
         )delimiter")
-        .def("solve", [](state_t state) { return _solve(state); })
+        .def("solve", [](state_t state) { return _solve(state); }, R"delimiter(
+        Solves the state-specific problem.
+        )delimiter")
         ;
 }
 
