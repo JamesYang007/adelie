@@ -268,6 +268,60 @@ void dgemv(
 }
 
 template <
+    class XType, 
+    class BuffType, 
+    class OutType
+>
+ADELIE_CORE_STRONG_INLINE
+void dxtx(
+    const XType& X,
+    size_t n_threads,
+    BuffType& buff,
+    OutType& out
+)
+{
+    using X_t = std::decay_t<XType>;
+    using value_t = typename X_t::Scalar;
+    using colmat_value_t = util::colmat_type<value_t>;
+
+    auto out_lower = out.template triangularView<Eigen::Lower>();
+    out_lower.setZero();
+
+    const size_t n = X.rows();
+    const size_t p = X.cols();
+    const size_t n_bytes = sizeof(value_t) * n * p * p;
+    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+        out.template selfadjointView<Eigen::Lower>().rankUpdate(X.transpose());
+        out.template triangularView<Eigen::Upper>() = out.transpose();
+        return; 
+    }
+
+    const int n_blocks = std::min(n_threads, n);
+    const int block_size = n / n_blocks;
+    const int remainder = n % n_blocks;
+
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
+    for (int t = 0; t < n_blocks; ++t) {
+        const auto begin = (
+            std::min<int>(t, remainder) * (block_size + 1) 
+            + std::max<int>(t-remainder, 0) * block_size
+        );
+        const auto size = block_size + (t < remainder);
+        const auto X_t = X.middleRows(begin, size);
+        Eigen::Map<colmat_value_t> out_t(buff.data() + p * p * t, p, p);
+        auto out_t_lower = out_t.template triangularView<Eigen::Lower>();
+        out_t_lower.setZero();
+        out_t.template selfadjointView<Eigen::Lower>().rankUpdate(X_t.transpose());
+    }
+
+    for (int t = 0; t < n_blocks; ++t) {
+        const Eigen::Map<const colmat_value_t> out_t(buff.data() + p * p * t, p, p);
+        out_lower += out_t;
+    }
+    out.template triangularView<Eigen::Upper>() = out.transpose();
+}
+
+template <
     class MType,
     class OutType
 >
