@@ -364,6 +364,27 @@ def run_naive(
             expected = X[:, g:g+gs].T @ (w[:, None] * X[:, g:g+gs])
             assert np.allclose(expected, out, atol=atol)
 
+    # test cov (special cases)
+    if isinstance(
+        cX,
+        (
+            ad.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C,
+            ad.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F,
+            ad.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C,
+            ad.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F,
+            ad.adelie_core.matrix.MatrixNaiveConvexReluDense32C,
+            ad.adelie_core.matrix.MatrixNaiveConvexReluDense32F,
+            ad.adelie_core.matrix.MatrixNaiveConvexReluDense64C,
+            ad.adelie_core.matrix.MatrixNaiveConvexReluDense64F,
+        )
+    ):
+        d = cX._mat.shape[1]
+        out = np.empty((d, d), dtype=dtype, order="F")
+        buffer = np.empty((n, d), dtype=dtype, order="F")
+        cX.cov(0, d, sqrt_weights, out, buffer)
+        expected = X[:, :d].T @ (w[:, None] * X[:, :d])
+        assert np.allclose(expected, out, atol=atol)
+
     assert cX.rows() == n
     assert cX.cols() == p
     assert cX.shape == (n, p)

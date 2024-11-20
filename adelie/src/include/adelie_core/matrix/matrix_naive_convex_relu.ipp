@@ -228,6 +228,26 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::cov(
 
     Eigen::setNbThreads(_n_threads);
 
+    // special case: the block is exactly D_i X
+    if ((j % d == 0) && (q == d)) {
+        auto k = j;
+        const auto k_sgn = k / (m * d);
+        k -= k_sgn * m * d;
+        const auto k_m = k / d;
+        k -= k_m * d;
+        const auto mat = _mat;
+        const auto mask = _mask.col(k_m);
+        int n_active = 0;
+        for (int i = 0; i < buffer.rows(); ++i) {
+            if (mask[i] == 0) continue;
+            buffer.row(n_active) = sqrt_weights[i] * mat.row(i);
+            ++n_active;
+        } 
+        const auto Xg = buffer.topRows(n_active);
+        out = Xg.transpose() * Xg;
+        return;
+    }
+
     int n_processed = 0;
     while (n_processed < q) {
         auto k = j + n_processed;
