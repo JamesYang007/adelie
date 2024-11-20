@@ -1,4 +1,4 @@
-__version__ = "1.1.50"
+__version__ = "1.1.51.dev"
 
 # Set environment flags before loading adelie_core
 import os
