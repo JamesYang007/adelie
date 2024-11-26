@@ -371,7 +371,7 @@ inline auto fit(
                 X.bmul(g, gs, ones, irls_weights, Xi_means);
             }
         };
-        util::omp_parallel_for(update_X_means, 0, screen_set.size(), n_threads);
+        util::omp_parallel_for(update_X_means, 0, screen_set.size(), n_threads * (n_threads <= screen_set.size()));
 
         // this call should only adjust the size of screen_* quantities
         // and repopulate every entry using the new weights.

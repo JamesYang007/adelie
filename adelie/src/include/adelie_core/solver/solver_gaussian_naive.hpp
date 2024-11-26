@@ -126,7 +126,7 @@ inline void update_screen_derived(
         // numerical stability to remove small negative eigenvalues
         svars.head(D.size()) = D.array() * (D.array() >= 0).template cast<value_t>(); 
     };
-    util::omp_parallel_for(routine, begin, end, n_threads);
+    util::omp_parallel_for(routine, begin, end, n_threads * ((begin+n_threads) <= end));
 }
 
 /**

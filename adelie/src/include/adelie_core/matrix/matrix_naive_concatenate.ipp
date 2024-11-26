@@ -197,13 +197,13 @@ ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::mul(
     Eigen::Ref<vec_value_t> out
 ) 
 {
-    const auto routine = [&](auto i) {
+    // NOTE: cannot parallelize since mul might not be thread-safe!
+    for (size_t i = 0; i < _mat_list.size(); ++i) {
         const auto outer_i = _outer[i];
         auto& mat = *_mat_list[i];
         const auto p = mat.cols();
         mat.mul(v, weights, out.segment(outer_i, p));
     };
-    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads * (_n_threads <= _mat_list.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
@@ -257,13 +257,13 @@ ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::sq_mul(
     Eigen::Ref<vec_value_t> out
 )
 {
-    const auto routine = [&](auto i) {
+    // NOTE: cannot parallelize since sq_mul might not be thread-safe!
+    for (size_t i = 0; i < _mat_list.size(); ++i) {
         const auto outer_i = _outer[i];
         auto& mat = *_mat_list[i];
         const auto p = mat.cols();
         mat.sq_mul(weights, out.segment(outer_i, p));
     };
-    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads * (_n_threads <= _mat_list.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
@@ -295,13 +295,13 @@ ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::mean(
     Eigen::Ref<vec_value_t> out
 )
 {
-    const auto routine = [&](auto i) {
+    // NOTE: cannot parallelize since mul might not be thread-safe!
+    for (size_t i = 0; i < _mat_list.size(); ++i) {
         const auto outer_i = _outer[i];
         auto& mat = *_mat_list[i];
         const auto p = mat.cols();
         mat.mean(weights, out.segment(outer_i, p));
     };
-    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads * (_n_threads <= _mat_list.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
@@ -312,13 +312,13 @@ ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::var(
     Eigen::Ref<vec_value_t> out
 )
 {
-    const auto routine = [&](auto i) {
+    // NOTE: cannot parallelize since mul might not be thread-safe!
+    for (size_t i = 0; i < _mat_list.size(); ++i) {
         const auto outer_i = _outer[i];
         auto& mat = *_mat_list[i];
         const auto p = mat.cols();
         mat.var(centers.segment(outer_i, p), weights, out.segment(outer_i, p));
     };
-    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads * (_n_threads <= _mat_list.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
