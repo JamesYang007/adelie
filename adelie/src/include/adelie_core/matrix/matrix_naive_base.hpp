@@ -96,7 +96,7 @@ public:
         const Eigen::Ref<const vec_value_t>& v, 
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) =0;
+    ) const =0;
 
     virtual void cov(
         int j, int q,
@@ -113,7 +113,7 @@ public:
     virtual void mean(
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) 
+    ) const
     {
         vec_value_t ones = vec_value_t::Ones(weights.size());
         mul(ones, weights, out);
@@ -123,7 +123,7 @@ public:
         const Eigen::Ref<const vec_value_t>& centers,
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    )
+    ) const
     {
         const auto sum_w = weights.sum();
         vec_value_t m(out.size());
@@ -135,12 +135,12 @@ public:
     virtual void sq_mul(
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) =0;
+    ) const =0;
 
     virtual void sp_tmul(
         const sp_mat_value_t& v,
         Eigen::Ref<rowmat_value_t> out
-    ) =0;
+    ) const =0;
 };
 
 ADELIE_CORE_MATRIX_NAIVE_BASE_TP
@@ -311,7 +311,7 @@ ADELIE_CORE_MATRIX_NAIVE_BASE::check_sp_tmul(
         const Eigen::Ref<const vec_value_t>& v,\
         const Eigen::Ref<const vec_value_t>& weights,\
         Eigen::Ref<vec_value_t> out\
-    ) override;\
+    ) const override;\
     void cov(\
         int j, int q,\
         const Eigen::Ref<const vec_value_t>& sqrt_weights,\
@@ -322,9 +322,22 @@ ADELIE_CORE_MATRIX_NAIVE_BASE::check_sp_tmul(
     void sq_mul(\
         const Eigen::Ref<const vec_value_t>& weights,\
         Eigen::Ref<vec_value_t> out\
-    ) override;\
+    ) const override;\
     void sp_tmul(\
         const sp_mat_value_t& v,\
         Eigen::Ref<rowmat_value_t> out\
-    ) override;
+    ) const override;
+#endif
+
+#ifndef ADELIE_CORE_MATRIX_NAIVE_OVERRIDE_DECL
+#define ADELIE_CORE_MATRIX_NAIVE_OVERRIDE_DECL \
+    void mean(\
+        const Eigen::Ref<const vec_value_t>& weights,\
+        Eigen::Ref<vec_value_t> out\
+    ) const override;\
+    void var(\
+        const Eigen::Ref<const vec_value_t>& centers,\
+        const Eigen::Ref<const vec_value_t>& weights,\
+        Eigen::Ref<vec_value_t> out\
+    ) const override;
 #endif

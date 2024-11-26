@@ -275,10 +275,10 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](auto g) {
-        auto& mat = *_mat_list[g];
+        const auto& mat = *_mat_list[g];
         const auto r_begin = _row_outer[g];
         const auto r_size = _row_outer[g+1] - r_begin;
         const auto v_slice = v.segment(r_begin, r_size);
@@ -338,10 +338,10 @@ void
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](auto g) {
-        auto& mat = *_mat_list[g];
+        const auto& mat = *_mat_list[g];
         const auto r_begin = _row_outer[g];
         const auto r_size = _row_outer[g+1] - r_begin;
         const auto w_slice = weights.segment(r_begin, r_size);
@@ -358,14 +358,14 @@ void
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::sp_tmul(
     const sp_mat_value_t& v,
     Eigen::Ref<rowmat_value_t> out
-)
+) const
 {
     base_t::check_sp_tmul(
         v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
     );
     out.setZero();
     const auto routine = [&](auto g) {
-        auto& mat = *_mat_list[g];
+        const auto& mat = *_mat_list[g];
         const auto c_begin = _col_outer[g];
         const auto c_size = _col_outer[g+1] - c_begin;
         rowmat_value_t out_curr(out.rows(), mat.rows());
@@ -382,7 +382,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::mean(
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t>
-)
+) const
 {
     throw util::adelie_core_error(
         "MatrixNaiveBlockDiag: mean() not implemented! "
@@ -397,7 +397,7 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::var(
     const Eigen::Ref<const vec_value_t>&,
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t>
-)
+) const
 {
     throw util::adelie_core_error(
         "MatrixNaiveBlockDiag: var() not implemented! "

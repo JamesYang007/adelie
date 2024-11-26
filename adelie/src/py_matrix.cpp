@@ -728,7 +728,7 @@ public:
         const Eigen::Ref<const vec_value_t>& v, 
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -741,7 +741,7 @@ public:
     void sq_mul(
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -754,7 +754,7 @@ public:
     void sp_tmul(
         const sp_mat_value_t& v,
         Eigen::Ref<rowmat_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -781,7 +781,7 @@ public:
     void mean(
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE(
             void,
@@ -795,7 +795,7 @@ public:
         const Eigen::Ref<const vec_value_t>& centers,
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE(
             void,
@@ -839,6 +839,9 @@ void matrix_naive_base(py::module_& m, const char* name)
         Computes the dot-product 
         ``(v * w).T @ X[:,j]``.
 
+        .. warning::
+            This function is not thread-safe!
+
         Parameters
         ----------
         j : int
@@ -878,6 +881,9 @@ void matrix_naive_base(py::module_& m, const char* name)
         Computes the vector-scalar multiplication ``v * X[:,j]``.
         The result is *incremented* into the output vector.
 
+        .. warning::
+            This function is not thread-safe!
+
         Parameters
         ----------
         j : int
@@ -891,6 +897,9 @@ void matrix_naive_base(py::module_& m, const char* name)
         Computes a column block matrix-vector multiplication.
 
         Computes the matrix-vector multiplication ``(v * w).T @ X[:, j:j+q]``.
+
+        .. warning::
+            This function is not thread-safe!
 
         Parameters
         ----------
@@ -929,6 +938,9 @@ void matrix_naive_base(py::module_& m, const char* name)
         Computes the matrix-vector multiplication
         ``v.T @ X[:, j:j+q].T``.
         The result is *incremented* into the output vector.
+
+        .. warning::
+            This function is not thread-safe!
 
         Parameters
         ----------

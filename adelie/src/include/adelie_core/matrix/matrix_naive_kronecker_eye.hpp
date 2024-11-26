@@ -48,17 +48,7 @@ public:
     );
 
     ADELIE_CORE_MATRIX_NAIVE_PURE_OVERRIDE_DECL
-
-    virtual void mean(
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override;
-
-    virtual void var(
-        const Eigen::Ref<const vec_value_t>& centers,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override;
+    ADELIE_CORE_MATRIX_NAIVE_OVERRIDE_DECL
 };
 
 template <class DenseType, class IndexType=Eigen::Index> 
@@ -105,17 +95,7 @@ public:
     );
 
     ADELIE_CORE_MATRIX_NAIVE_PURE_OVERRIDE_DECL
-
-    virtual void mean(
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override;
-
-    virtual void var(
-        const Eigen::Ref<const vec_value_t>& centers,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override;
+    ADELIE_CORE_MATRIX_NAIVE_OVERRIDE_DECL
 };
 
 } // namespace matrix

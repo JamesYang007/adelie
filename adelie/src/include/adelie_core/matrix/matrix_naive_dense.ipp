@@ -42,7 +42,7 @@ ADELIE_CORE_MATRIX_NAIVE_DENSE::cmul_safe(
 ) const
 {
     base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-    vec_value_t vbuff(_n_threads * (_n_threads > 1));
+    vec_value_t vbuff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     return ddot(_mat.col(j), (v * weights).matrix(), _n_threads, vbuff);
 }
 
@@ -90,16 +90,16 @@ ADELIE_CORE_MATRIX_NAIVE_DENSE::bmul_safe(
 {
     base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
     const auto n = _mat.rows();
-    auto outm = out.matrix();
-    vec_value_t vbuff(_vbuff.size());
-    rowmat_value_t buff(_n_threads * (_n_threads > 1), q * (n > q));
+    auto out_m = out.matrix();
+    vec_value_t vbuff(n);
+    rowmat_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel(), q * (n > q));
     dvveq(vbuff, v * weights, _n_threads);
     dgemv(
         _mat.middleCols(j, q),
         vbuff.matrix(),
         _n_threads,
         buff,
-        outm
+        out_m
     );
 }
 
@@ -128,16 +128,20 @@ ADELIE_CORE_MATRIX_NAIVE_DENSE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
-    auto outm = out.matrix();
-    dvveq(_vbuff, v * weights, _n_threads);
+    const auto n = _mat.rows();
+    const auto p = _mat.cols();
+    auto out_m = out.matrix();
+    vec_value_t vbuff(n);
+    rowmat_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel(), p * (n > p));
+    dvveq(vbuff, v * weights, _n_threads);
     dgemv(
         _mat,
-        _vbuff.matrix(),
+        vbuff.matrix(),
         _n_threads,
-        _buff,
-        outm
+        buff,
+        out_m
     );
 }
 
@@ -171,7 +175,7 @@ ADELIE_CORE_MATRIX_NAIVE_DENSE::cov(
     
     if (q == 1) {
         const auto sqrt_w_mj = (_mat.col(j).transpose().array() * sqrt_weights).matrix();
-        vec_value_t vbuff(_n_threads * (_n_threads > 1));
+        vec_value_t vbuff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
         out(0, 0) = ddot(sqrt_w_mj, sqrt_w_mj, _n_threads, vbuff);
         return;
     }
@@ -197,15 +201,18 @@ void
 ADELIE_CORE_MATRIX_NAIVE_DENSE::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
-    auto outm = out.matrix();
+    const auto n = _mat.rows();
+    const auto p = _mat.cols();
+    auto out_m = out.matrix();
+    rowmat_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel(), p * (n > p));
     dgemv(
         _mat.array().square().matrix(),
         weights.matrix(),
         _n_threads,
-        _buff,
-        outm
+        buff,
+        out_m
     );
 }
 
@@ -214,7 +221,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_DENSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
-)
+) const
 {
     base_t::check_sp_tmul(
         v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()

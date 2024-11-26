@@ -65,6 +65,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::_bmul(
 ) const
 {
     const auto d = _mat.cols();
+    Eigen::Map<rowmat_value_t> buff(buffer.data(), _n_threads, d);
     const auto m = _mask.cols();
     int n_processed = 0;
     while (n_processed < q) {
@@ -76,7 +77,6 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::_bmul(
         const auto k_d = k;
         const auto size = std::min<int>(d-k_d, q-n_processed);
         auto out_m = out.segment(n_processed, size).matrix();
-        Eigen::Map<rowmat_value_t> buff(buffer.data(), _n_threads, d);
         dgemv(
             _mat.middleCols(k_d, size),
             (1-2*k_sgn) * _mask.col(k_m).transpose().template cast<value_t>().cwiseProduct((v * weights).matrix()),
@@ -130,7 +130,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::cmul_safe(
 ) const
 {
     base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-    vec_value_t buff(_n_threads);
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     return _cmul(j, v, weights, buff);
 }
 
@@ -169,7 +169,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::bmul_safe(
 ) const
 {
     base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-    vec_value_t buffer(_n_threads * _mat.cols());
+    vec_value_t buffer(_n_threads * (_n_threads > 1) * !util::omp_in_parallel() * _mat.cols());
     _bmul(j, q, v, weights, out, buffer);
 }
 
@@ -219,13 +219,14 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     const auto d = _mat.cols();
     const auto m = _mask.cols();
     // NOTE: MSVC does not like it when we try to capture v_weights and buff.
     // This is a bug in MSVC (god I hate microsoft so much...).
-    const auto routine = [&](auto i, const auto& v_weights, auto& buff) {
+    const auto routine = [&](auto i, const auto& v_weights) {
+        Eigen::Map<rowmat_value_t> buff(out.data(), _n_threads, d);
         auto out_m = out.segment(i * d, d).matrix();
         dgemv(
             _mat,
@@ -236,8 +237,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::mul(
         );
     };
     const auto v_weights = (v * weights).matrix();
-    Eigen::Map<rowmat_value_t> buff(_buff.data(), _n_threads, d);
-    util::omp_parallel_for([&](auto i) { routine(i, v_weights, buff); }, 0, m, _n_threads);
+    util::omp_parallel_for([&](auto i) { routine(i, v_weights); }, 0, m, _n_threads);
     out.tail(m*d) = -out.head(m*d);
 }
 
@@ -303,14 +303,15 @@ void
 ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     const auto d = _mat.cols();
     const auto m = _mask.cols();
     colmat_value_t mat_sq = _mat.array().square().matrix();
     // NOTE: MSVC does not like it when we try to capture v_weights and buff.
     // This is a bug in MSVC (god I hate microsoft so much...).
-    const auto routine = [&](auto i, const auto& w, auto& buff) {
+    const auto routine = [&](auto i, const auto& w) {
+        Eigen::Map<rowmat_value_t> buff(out.data(), _n_threads, d);
         auto out_m = out.segment(i * d, d).matrix();
         dgemv(
             mat_sq,
@@ -320,8 +321,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::sq_mul(
             out_m
         );
     };
-    Eigen::Map<rowmat_value_t> buff(_buff.data(), _n_threads, d);
-    util::omp_parallel_for([&](auto i) { routine(i, weights, buff); }, 0, m, _n_threads);
+    util::omp_parallel_for([&](auto i) { routine(i, weights); }, 0, m, _n_threads);
     out.tail(m * d) = out.head(m * d);
 }
 
@@ -330,7 +330,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_DENSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
-) 
+) const
 {
     base_t::check_sp_tmul(
         v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
@@ -481,7 +481,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::cmul_safe(
 ) const
 {
     base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-    vec_value_t buff(_n_threads);
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     return _cmul(j, v, weights, _n_threads, buff);
 }
 
@@ -520,7 +520,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::bmul_safe(
 ) const
 {
     base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-    vec_value_t buff(_n_threads);
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     _bmul(j, q, v, weights, out, buff);
 }
 
@@ -544,12 +544,12 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     const auto d = _mat.cols();
     const auto m = _mask.cols();
     const auto routine = [&](int k) {
-        out[k] = _cmul(k, v, weights, 1, _buff);
+        out[k] = _cmul(k, v, weights, 1, out /* unused */);
     };
     util::omp_parallel_for(routine, 0, m*d, _n_threads);
     out.tail(m*d) = -out.head(m*d);
@@ -637,7 +637,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     const auto d = _mat.cols();
     const auto m = _mask.cols();
@@ -658,7 +658,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_CONVEX_RELU_SPARSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
-) 
+) const
 {
     base_t::check_sp_tmul(
         v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()

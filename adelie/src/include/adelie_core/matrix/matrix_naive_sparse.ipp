@@ -106,7 +106,7 @@ ADELIE_CORE_MATRIX_NAIVE_SPARSE::cmul_safe(
 ) const
 {
     base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-    vec_value_t buff(_n_threads);
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     return _cmul(j, v, weights, _n_threads, buff);
 }
 
@@ -147,7 +147,7 @@ ADELIE_CORE_MATRIX_NAIVE_SPARSE::bmul_safe(
 ) const
 {
     base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-    vec_value_t buff(_n_threads);
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     for (int k = 0; k < q; ++k) {
         out[k] = _cmul(j+k, v, weights, _n_threads, buff);
     }
@@ -173,10 +173,10 @@ ADELIE_CORE_MATRIX_NAIVE_SPARSE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](int k) {
-        out[k] = _cmul(k, v, weights, 1, _buff);
+        out[k] = _cmul(k, v, weights, 1, out /* unused */);
     };
     util::omp_parallel_for(routine, 0, out.size(), _n_threads);
 }
@@ -249,10 +249,10 @@ void
 ADELIE_CORE_MATRIX_NAIVE_SPARSE::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](int k) {
-        out[k] = _sq_cmul(k, weights, _buff);
+        out[k] = _sq_cmul(k, weights, out /* unused */);
     };
     util::omp_parallel_for(routine, 0, out.size(), _n_threads);
 }
@@ -262,7 +262,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_SPARSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
-)
+) const
 {
     base_t::check_sp_tmul(
         v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()

@@ -343,7 +343,7 @@ ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::cmul_safe(
 ) const
 {
     base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-    vec_value_t buff(_n_threads);
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     return _cmul(j, v, weights, _n_threads, buff);
 }
 
@@ -393,7 +393,7 @@ ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::bmul_safe(
 ) const
 {
     base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-    vec_value_t buff(_buff.size());
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     int n_processed = 0;
     while (n_processed < q) {
         const auto jj = j + n_processed;
@@ -437,14 +437,14 @@ ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](auto g) {
         const auto j = _outer[g];
         const auto level = _levels[g];
         const auto full_size = std::max<size_t>(level, 1);
         auto out_curr = out.segment(j, full_size);
-        _bmul(j, g, 0, level, v, weights, out_curr, _buff, 1);
+        _bmul(j, g, 0, level, v, weights, out_curr, out /* unused */, 1);
     };
     util::omp_parallel_for(routine, 0, _mat.cols(), _n_threads);
 }
@@ -492,7 +492,7 @@ ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::cov(
     const auto& sqrt_w = sqrt_weights;
     const auto level = std::max<size_t>(_levels[slice], 0);
 
-    vec_value_t buff(_buff.size());
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
 
     switch (level) {
         case 0: {
@@ -522,14 +522,14 @@ void
 ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](auto g) {
         const auto j = _outer[g];
         const auto level = _levels[g];
         const auto full_size = std::max<size_t>(level, 1);
         auto out_curr = out.segment(j, full_size);
-        _sq_bmul(j, g, level, weights, out_curr, _buff);
+        _sq_bmul(j, g, level, weights, out_curr, out /* unused */);
     };
     util::omp_parallel_for(routine, 0, _mat.cols(), _n_threads);
 }
@@ -539,7 +539,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
-)
+) const
 {
     base_t::check_sp_tmul(
         v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
@@ -560,7 +560,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::mean(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-) 
+) const 
 {
     base_t::mean(weights, out);
     const auto d = _mat.cols();
@@ -578,7 +578,7 @@ ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::var(
     const Eigen::Ref<const vec_value_t>& centers,
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     base_t::var(centers, weights, out);
     const auto d = _mat.cols();

@@ -60,7 +60,7 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::cmul_safe(
 ) const
 {
     base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-    vec_value_t buff(_n_threads);
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     const auto c = _centers[j];
     const auto vw_sum = (
         (c == 0) ? 0 : ddot(v.matrix(), weights.matrix(), _n_threads, buff)
@@ -119,7 +119,7 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::bmul_safe(
 ) const
 {
     base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-    vec_value_t buff(_n_threads);
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     _mat->bmul_safe(j, q, v, weights, out);
     const auto c = _centers.segment(j, q);
     const auto vw_sum = (
@@ -163,10 +163,11 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     _mat->mul(v, weights, out);
-    const auto vw_sum = ddot(v.matrix(), weights.matrix(), _n_threads, _buff);
+    const auto vw_sum = ddot(v.matrix(), weights.matrix(), _n_threads, buff);
     dvveq(out, (out - vw_sum * _centers) / _scales, _n_threads);
 }
 
@@ -221,7 +222,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     _mat->sq_mul(weights, out);
     vec_value_t mat_means(out.size());
@@ -236,7 +237,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
-)
+) const
 {
     base_t::check_sp_tmul(
         v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
@@ -272,7 +273,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::mean(
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     out.setZero();
 }
@@ -283,7 +284,7 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::var(
     const Eigen::Ref<const vec_value_t>&,
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     out.setOnes();
 }

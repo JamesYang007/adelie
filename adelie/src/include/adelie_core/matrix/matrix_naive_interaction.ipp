@@ -510,7 +510,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::cmul_safe(
 ) const
 {
     base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-    vec_value_t buff(_buff.size());
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     return _cmul(j, v, weights, _n_threads, buff);
 }
 
@@ -567,7 +567,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::bmul_safe(
 ) const
 {
     base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-    vec_value_t buff(_buff.size());
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     int n_processed = 0;
     while (n_processed < q) {
         const auto jj = j + n_processed;
@@ -625,7 +625,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](auto g) {
         const auto j = _outer[g];
@@ -639,7 +639,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::mul(
         const auto l1_exp = (l1 <= 0) ? _n_levels_cont : l1;
         const auto full_size = l0_exp * l1_exp - both_cont;
         auto out_curr = out.segment(j, full_size);
-        _bmul(j, i0, i1, l0, l1, 0, v, weights, out_curr, _buff, 1);
+        _bmul(j, i0, i1, l0, l1, 0, v, weights, out_curr, out /* unused */, 1);
     };
     util::omp_parallel_for(routine, 0, _outer.size()-1, _n_threads);
 }
@@ -692,7 +692,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::cov(
     const auto l1 = _levels[i1];
     const auto _case = static_cast<int>(l0 > 0) | static_cast<int>(l1 > 0 ? _n_levels_cont : 0);
 
-    vec_value_t buff(_n_threads);
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     
     switch (_case) {
         case 0: {
@@ -768,7 +768,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](auto g) {
         const auto j = _outer[g];
@@ -782,7 +782,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::sq_mul(
         const auto l1_exp = (l1 <= 0) ? _n_levels_cont : l1;
         const auto full_size = l0_exp * l1_exp - both_cont;
         auto out_curr = out.segment(j, full_size);
-        _sq_bmul(i0, i1, l0, l1, weights, out_curr, _buff);
+        _sq_bmul(i0, i1, l0, l1, weights, out_curr, out /* unused */);
     };
     util::omp_parallel_for(routine, 0, _outer.size()-1, _n_threads);
 }
@@ -792,7 +792,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
-)
+) const
 {
     base_t::check_sp_tmul(
         v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
@@ -813,7 +813,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::mean(
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> 
-) 
+) const
 {
     throw util::adelie_core_error(
         "MatrixNaiveInteractionDense: mean() not implemented! "
@@ -828,7 +828,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::var(
     const Eigen::Ref<const vec_value_t>&,
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> 
-)
+) const
 {
     throw util::adelie_core_error(
         "MatrixNaiveInteractionDense: var() not implemented! "

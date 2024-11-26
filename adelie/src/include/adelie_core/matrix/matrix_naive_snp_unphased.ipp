@@ -83,7 +83,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::cmul_safe(
 ) const
 {
     base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-    vec_value_t buff(_n_threads);
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     return _cmul(j, v, weights, _n_threads, buff);
 }
 
@@ -124,7 +124,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::bmul_safe(
 ) const
 {
     base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-    vec_value_t buff(_n_threads);
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     for (int t = 0; t < q; ++t) {
         out[t] = _cmul(j + t, v, weights, _n_threads, buff);
     }
@@ -150,10 +150,10 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](int t) {
-        out[t] = _cmul(t, v, weights, 1, _buff);
+        out[t] = _cmul(t, v, weights, 1, out /* unused */);
     };
     util::omp_parallel_for(routine, 0, cols(), _n_threads);
 }
@@ -174,7 +174,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::cov(
 
     vec_index_t ibuff(_io.rows());
     vec_value_t vbuff(_io.rows());
-    vec_value_t buff(_n_threads);
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     vbuff.setConstant(_max);
 
     for (int i1 = 0; i1 < q; ++i1) 
@@ -256,10 +256,10 @@ void
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](int t) {
-        out[t] = _sq_cmul(t, weights, _buff);
+        out[t] = _sq_cmul(t, weights, out /* unused */);
     };
     util::omp_parallel_for(routine, 0, cols(), _n_threads);
 }
@@ -269,7 +269,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::sp_tmul(
     const sp_mat_value_t& v,
     Eigen::Ref<rowmat_value_t> out
-)
+) const
 {
     base_t::check_sp_tmul(
         v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
@@ -290,7 +290,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::mean(
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     out.setZero();
 }
@@ -301,7 +301,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::var(
     const Eigen::Ref<const vec_value_t>&,
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     out.setOnes();
 }
