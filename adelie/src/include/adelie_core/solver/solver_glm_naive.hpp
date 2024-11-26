@@ -3,6 +3,7 @@
 #include <adelie_core/solver/solver_gaussian_naive.hpp>
 #include <adelie_core/solver/solver_gaussian_pin_naive.hpp>
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
+#include <adelie_core/util/omp.hpp>
 
 namespace adelie_core {
 namespace solver {
@@ -75,7 +76,7 @@ inline void update_screen_derived(
     const XMType& X_means,
     const WType& weights_sqrt,
     size_t begin,
-    size_t size,
+    size_t end,
     SXMType& screen_X_means,
     STType& screen_transforms,
     SVType& screen_vars
@@ -105,8 +106,9 @@ inline void update_screen_derived(
         state.screen_set,
         state.screen_begins,
         begin,
-        size,
+        end,
         state.intercept,
+        state.n_threads,
         screen_X_means,
         screen_transforms,
         screen_vars
@@ -357,7 +359,8 @@ inline auto fit(
                 );
             }
         }
-        for (size_t ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) {
+
+        const auto update_X_means = [&](auto ss_idx) {
             const auto i = screen_set[ss_idx];
             const auto g = groups[i];
             const size_t gs = group_sizes[i];
@@ -367,7 +370,9 @@ inline auto fit(
                 Eigen::Map<vec_value_t> Xi_means(X_means.data() + g, gs);
                 X.bmul(g, gs, ones, irls_weights, Xi_means);
             }
-        }
+        };
+        util::omp_parallel_for(update_X_means, 0, screen_set.size(), n_threads);
+
         // this call should only adjust the size of screen_* quantities
         // and repopulate every entry using the new weights.
         update_screen_derived(

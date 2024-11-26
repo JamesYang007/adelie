@@ -6,9 +6,7 @@
 #include <state/state.hpp>
 #include <adelie_core/util/counting_iterator.hpp>
 #include <adelie_core/util/macros.hpp>
-#if defined(_OPENMP)
-#include <omp.h>
-#endif
+#include <adelie_core/util/omp.hpp>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -133,15 +131,7 @@ py::dict css_cov_model_selection_fit_k(
 
         if (!reject) early_exit = true;
     };
-
-    if (n_threads <= 1) {
-        for (int i = 0; i < static_cast<int>(n_inits); ++i) routine(i);
-    } else {
-        #if defined(_OPENMP)
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        #endif
-        for (int i = 0; i < static_cast<int>(n_inits); ++i) routine(i);
-    }
+    ad::util::omp_parallel_for(routine, 0, n_inits, n_threads);
 
     // find best index
     index_t i_star; 

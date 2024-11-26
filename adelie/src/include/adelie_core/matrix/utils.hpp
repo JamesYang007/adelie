@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <adelie_core/configs.hpp>
 #include <adelie_core/util/macros.hpp>
+#include <adelie_core/util/omp.hpp>
 #include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
@@ -18,7 +19,7 @@ void dvaddi(
     using value_t = typename std::decay_t<X1Type>::Scalar;
     const size_t n = x1.size();
     const size_t n_bytes = (2 * sizeof(value_t)) * n;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         x1 += x2; 
         return; 
     }
@@ -48,7 +49,7 @@ void dvsubi(
     using value_t = typename std::decay_t<X1Type>::Scalar;
     const size_t n = x1.size();
     const size_t n_bytes = (2 * sizeof(value_t)) * n;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         x1 -= x2;
         return; 
     }
@@ -78,7 +79,7 @@ void dvveq(
     using value_t = typename std::decay_t<X1Type>::Scalar;
     const size_t n = x1.size();
     const size_t n_bytes = sizeof(value_t) * n;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         x1 = x2;
         return; 
     }
@@ -107,7 +108,7 @@ void dvzero(
     using value_t = typename std::decay_t<OutType>::Scalar;
     const size_t n = out.size();
     const size_t n_bytes = sizeof(value_t) * n;
-    if (n_threads <= 1 || n_bytes <= 2 * Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= 2 * Configs::min_bytes) { 
         out.setZero(); 
         return; 
     }
@@ -139,7 +140,7 @@ typename std::decay_t<X1Type>::Scalar ddot(
     using value_t = typename std::decay_t<X1Type>::Scalar;
     const size_t n = x1.size();
     const size_t n_bytes = (2 * sizeof(value_t)) * n;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         return x1.dot(x2); 
     }
     const int n_blocks = std::min(n_threads, n);
@@ -171,7 +172,7 @@ void dmmeq(
     const size_t n = x1.rows();
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (8 * sizeof(value_t)) * n * x1.cols();
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         x1 = x2; 
         return; 
     }
@@ -211,7 +212,7 @@ void dgemv(
     const size_t p = m.cols();
     const size_t max_np = std::max(n, p);
     const size_t n_bytes = sizeof(value_t) * n * (p + 1);
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         if constexpr (op == util::operator_type::_eq) {
             out = v * m; 
         } else if constexpr (op == util::operator_type::_add) {
@@ -290,7 +291,7 @@ void dxtx(
     const size_t n = X.rows();
     const size_t p = X.cols();
     const size_t n_bytes = sizeof(value_t) * n * p * p;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         out.template selfadjointView<Eigen::Lower>().rankUpdate(X.transpose());
         out.template triangularView<Eigen::Upper>() = out.transpose();
         return; 
@@ -336,7 +337,7 @@ void sq_norm(
     const size_t n = m.rows();
     const size_t p = m.cols();
     const size_t n_bytes = sizeof(value_t) * n * (p + 1);
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         out = m.array().square().colwise().sum(); 
         return;
     }
@@ -447,7 +448,7 @@ auto spddot(
     const size_t nnz = inner.size();
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (16 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         value_t sum = 0;
         for (int i = 0; i < inner.size(); ++i) {
             sum += x[inner[i]] * value[i];
@@ -489,7 +490,7 @@ void spaxi(
     const size_t nnz = inner.size();
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         for (size_t i = 0; i < nnz; ++i) {
             out[inner[i]] += v * value[i];
         }
@@ -527,7 +528,7 @@ void spdaddi(
     const size_t nnz = inner.size();
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         for (size_t i = 0; i < nnz; ++i) {
             const auto idx = inner[i];
             out[idx] += v[idx] * value[i];
@@ -571,7 +572,7 @@ auto snp_unphased_dot(
     const value_t imp = io.impute()[j];
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         value_t sum = 0;
         for (size_t c = 0; c < io_t::n_categories; ++c) {
             auto it = io.begin(j, c);
@@ -639,7 +640,7 @@ void snp_unphased_axi(
     const value_t imp = io.impute()[j];
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (4 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         for (size_t c = 0; c < io_t::n_categories; ++c) {
             auto it = io.begin(j, c);
             const auto end = io.end(j, c);
@@ -698,7 +699,7 @@ auto snp_phased_ancestry_dot(
     const auto nnz = io.nnz0()[j] + io.nnz1()[j];
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         value_t sum = 0;
         for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
             auto it = io.begin(snp, anc, hap);
@@ -806,7 +807,7 @@ void snp_phased_ancestry_axi(
     const auto nnz = io.nnz0()[j] + io.nnz1()[j];
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (4 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
             auto it = io.begin(snp, anc, hap);
             const auto end = io.end(snp, anc, hap);
@@ -862,7 +863,7 @@ void snp_phased_ancestry_block_dot(
     );
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         for (int k = 0; k < q; ++k) {
             snp_phased_ancestry_dot(io, j+k, v, n_threads, buff);
         }
@@ -930,7 +931,7 @@ void snp_phased_ancestry_block_axi(
     );
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (4 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         for (int k = 0; k < q; ++k) {
             snp_phased_ancestry_axi(
                 io, j+k, v[k], out, n_threads
@@ -998,7 +999,7 @@ void dgemtm(
     const size_t n = m.rows();
     const size_t p = m.cols();
     const size_t n_bytes = sizeof(value_t) * n * p * p;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         out.setZero();
         out.template selfadjointView<Eigen::Lower>().rankUpdate(m.transpose());
         out.template triangularView<Eigen::Upper>() = out.transpose();

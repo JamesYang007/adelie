@@ -1,5 +1,6 @@
 #pragma once
 #include <adelie_core/matrix/matrix_naive_block_diag.hpp>
+#include <adelie_core/util/omp.hpp>
 
 namespace adelie_core {
 namespace matrix {
@@ -242,12 +243,7 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::mul(
         auto out_slice = out.segment(c_begin, c_size);
         mat.mul(v_slice, w_slice, out_slice);
     };
-    if (_n_threads <= 1) {
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    }
+    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads * (_n_threads <= _mat_list.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
@@ -310,12 +306,7 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::sq_mul(
         auto out_slice = out.segment(c_begin, c_size);
         mat.sq_mul(w_slice, out_slice);
     };
-    if (_n_threads <= 1) {
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    }
+    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads * (_n_threads <= _mat_list.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
@@ -339,12 +330,7 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::sp_tmul(
         const auto r_size = _row_outer[g+1] - r_begin;
         out.middleCols(r_begin, r_size) = out_curr;
     };
-    if (_n_threads <= 1) {
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    }
+    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads * (_n_threads <= _mat_list.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP

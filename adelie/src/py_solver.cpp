@@ -40,12 +40,7 @@ ad::util::rowvec_type<T> compute_penalty_sparse(
         }
         out[k] = pnlty;
     };
-    if (n_threads <= 1) {
-        for (int k = 0; k < betas.outerSize(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int k = 0; k < betas.outerSize(); ++k) routine(k);
-    }
+    ad::util::omp_parallel_for(routine, 0, betas.outerSize(), n_threads);
 
     return out;
 }
@@ -79,12 +74,7 @@ ad::util::rowvec_type<T> compute_penalty_dense(
         }
         out[k] = pnlty;
     };
-    if (n_threads <= 1) {
-        for (int k = 0; k < betas.rows(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int k = 0; k < betas.rows(); ++k) routine(k);
-    }
+    ad::util::omp_parallel_for(routine, 0, betas.rows(), n_threads);
 
     return out;
 }

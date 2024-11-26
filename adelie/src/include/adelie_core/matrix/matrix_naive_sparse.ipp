@@ -147,12 +147,7 @@ ADELIE_CORE_MATRIX_NAIVE_SPARSE::mul(
     const auto routine = [&](int k) {
         out[k] = _cmul(k, v, weights, 1);
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < out.size(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < out.size(); ++k) routine(k);
-    }
+    util::omp_parallel_for(routine, 0, out.size(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
@@ -211,12 +206,7 @@ ADELIE_CORE_MATRIX_NAIVE_SPARSE::cov(
             );
         }
     };
-    if (_n_threads <= 1) {
-        for (int i1 = 0; i1 < q; ++i1) routine(i1);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int i1 = 0; i1 < q; ++i1) routine(i1);
-    }
+    util::omp_parallel_for(routine, 0, q, _n_threads);
     for (int i1 = 0; i1 < q; ++i1) {
         for (int i2 = i1+1; i2 < q; ++i2) {
             out(i1, i2) = out(i2, i1);
@@ -234,12 +224,7 @@ ADELIE_CORE_MATRIX_NAIVE_SPARSE::sq_mul(
     const auto routine = [&](int k) {
         out[k] = _sq_cmul(k, weights);
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < out.size(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < out.size(); ++k) routine(k);
-    }
+    util::omp_parallel_for(routine, 0, out.size(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP
@@ -268,12 +253,7 @@ ADELIE_CORE_MATRIX_NAIVE_SPARSE::sp_tmul(
         auto out_k = out.row(k);
         out_k = vk * _mat.transpose();
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    }
+    util::omp_parallel_for(routine, 0, v.outerSize(), _n_threads);
 }
 
 } // namespace matrix

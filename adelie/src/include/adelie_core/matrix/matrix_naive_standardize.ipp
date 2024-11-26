@@ -228,12 +228,7 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::sp_tmul(
         }
         if (vsc) out_k.array() -= vsc;
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    }
+    util::omp_parallel_for(routine, 0, v.outerSize(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP

@@ -1,5 +1,6 @@
 #pragma once
 #include <adelie_core/matrix/matrix_naive_subset.hpp>
+#include <adelie_core/util/omp.hpp>
 
 namespace adelie_core {
 namespace matrix {
@@ -156,12 +157,7 @@ ADELIE_CORE_MATRIX_NAIVE_CSUBSET::mul(
         auto curr_out = out.segment(subset_idx, q);
         _mat->bmul(j, q, v, weights, curr_out);
     };
-    if (_n_threads <= 1) {
-        for (int t = 0; t < static_cast<int>(_subset_cbegin.size()); ++t) routine(t);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int t = 0; t < static_cast<int>(_subset_cbegin.size()); ++t) routine(t);
-    }
+    util::omp_parallel_for(routine, 0, _subset_cbegin.size(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
@@ -242,12 +238,7 @@ ADELIE_CORE_MATRIX_NAIVE_CSUBSET::sp_tmul(
             _mat->ctmul(_subset[it.index()], it.value(), out_k);
         }
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    }
+    util::omp_parallel_for(routine, 0, v.outerSize(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP

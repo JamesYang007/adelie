@@ -127,12 +127,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::mul(
     const auto routine = [&](int t) {
         out[t] = _cmul(t, v, weights, 1);
     };
-    if (_n_threads <= 1) {
-        for (int t = 0; t < cols(); ++t) routine(t);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int t = 0; t < cols(); ++t) routine(t);
-    }
+    util::omp_parallel_for(routine, 0, cols(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
@@ -234,12 +229,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::sq_mul(
     const auto routine = [&](int t) {
         out[t] = _sq_cmul(t, weights);
     };
-    if (_n_threads <= 1) {
-        for (int t = 0; t < cols(); ++t) routine(t);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int t = 0; t < cols(); ++t) routine(t);
-    }
+    util::omp_parallel_for(routine, 0, cols(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
@@ -260,12 +250,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::sp_tmul(
             _ctmul(it.index(), it.value(), out_k, 1);
         }
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    }
+    util::omp_parallel_for(routine, 0, v.outerSize(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP

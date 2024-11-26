@@ -76,12 +76,7 @@ ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE::tmul(
     const auto routine = [&](int k) {
         out[k] = _mat.row(k).dot(v.matrix());
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < out.size(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < out.size(); ++k) routine(k);
-    }
+    util::omp_parallel_for(routine, 0, out.size(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE_TP

@@ -4,6 +4,7 @@
 #include <adelie_core/util/algorithm.hpp>
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/macros.hpp>
+#include <adelie_core/util/omp.hpp>
 #include <adelie_core/util/stopwatch.hpp>
 #include <adelie_core/util/tqdm.hpp>
 #if defined(_OPENMP)
@@ -100,14 +101,7 @@ inline void update_abs_grad(
             try_failed = true;
         }
     };
-    if (n_threads <= 1) {
-        for (int i = 0; i < groups.size(); ++i) routine(i);
-    } else {
-        #if defined(_OPENMP)
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        #endif
-        for (int i = 0; i < groups.size(); ++i) routine(i);
-    }
+    util::omp_parallel_for(routine, 0, groups.size(), n_threads);
     if (try_failed) {
         throw util::adelie_core_solver_error(
             "exception raised in constraint->solve_zero(). "
@@ -205,13 +199,7 @@ inline auto sparsify_dual(
             constraint->dual(indices_v, values_v);
             indices_v += dual_groups[i];
         };
-        
-        if (n_threads <= 1) {
-            for (Eigen::Index i = 0; i < static_cast<Eigen::Index>(n_constraints); ++i) routine(i);
-        } else {
-            #pragma omp parallel for schedule(static) num_threads(n_threads)
-            for (Eigen::Index i = 0; i < static_cast<Eigen::Index>(n_constraints); ++i) routine(i);
-        }
+        util::omp_parallel_for(routine, 0, n_constraints, n_threads);
     }
 
     const auto last_constraint = constraints[n_constraints-1];

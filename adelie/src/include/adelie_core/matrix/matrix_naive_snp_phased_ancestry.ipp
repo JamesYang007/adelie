@@ -130,12 +130,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::mul(
     const auto routine = [&](int t) {
         out[t] = _cmul(t, v, weights, 1);
     };
-    if (_n_threads <= 1) {
-        for (int t = 0; t < cols(); ++t) routine(t);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int t = 0; t < cols(); ++t) routine(t);
-    }
+    util::omp_parallel_for(routine, 0, cols(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
@@ -186,19 +181,30 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::cov(
                 snp_phased_ancestry_block_dot(
                     _io, begin0, a_size, sqrt_weights.square(), out_diag, _n_threads, _buff
                 );
-
-                #pragma omp parallel for schedule(static) num_threads(_n_threads) collapse(2) if(_n_threads > 1)
-                for (int k0 = 0; k0 < static_cast<int>(a_size); ++k0) {
-                    for (int k1 = 0; k1 < static_cast<int>(a_size); ++k1) {
-                        const auto sum = snp_phased_ancestry_cross_dot(
-                            _io,
-                            snp * A + a_low + k0,
-                            snp * A + a_low + k1,
-                            sqrt_weights.square()
-                        );
-                        const auto kk0 = n_solved0 + k0;
-                        const auto kk1 = n_solved0 + k1;
-                        out(kk0, kk1) += sum * (1 + (kk0 == kk1));
+                
+                const auto routine = [&](auto k0, auto k1) {
+                    const auto sum = snp_phased_ancestry_cross_dot(
+                        _io,
+                        snp * A + a_low + k0,
+                        snp * A + a_low + k1,
+                        sqrt_weights.square()
+                    );
+                    const auto kk0 = n_solved0 + k0;
+                    const auto kk1 = n_solved0 + k1;
+                    out(kk0, kk1) += sum * (1 + (kk0 == kk1));
+                };
+                if (_n_threads <= 1 || util::omp_in_parallel()) {
+                    for (int k0 = 0; k0 < static_cast<int>(a_size); ++k0) {
+                        for (int k1 = 0; k1 < static_cast<int>(a_size); ++k1) {
+                            routine(k0, k1);
+                        }
+                    }
+                } else {
+                    #pragma omp parallel for schedule(static) num_threads(_n_threads) collapse(2)
+                    for (int k0 = 0; k0 < static_cast<int>(a_size); ++k0) {
+                        for (int k1 = 0; k1 < static_cast<int>(a_size); ++k1) {
+                            routine(k0, k1);
+                        }
                     }
                 }
 
@@ -286,12 +292,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::sq_mul(
     const auto routine = [&](int t) {
         out[t] = _sq_cmul(t, weights);
     };
-    if (_n_threads <= 1) {
-        for (int t = 0; t < cols(); ++t) routine(t);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int t = 0; t < cols(); ++t) routine(t);
-    }
+    util::omp_parallel_for(routine, 0, cols(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
@@ -312,12 +313,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::sp_tmul(
             _ctmul(it.index(), it.value(), out_k, 1);
         }
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    }
+    util::omp_parallel_for(routine, 0, v.outerSize(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP

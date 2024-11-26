@@ -23,7 +23,7 @@ ADELIE_CORE_MATRIX_COV_LAZY_COV::cache(
 
     const auto block = _X.middleCols(i, p);
     util::rowmat_type<value_t> cov(p, _X.cols());
-    if (_n_threads <= 1) { 
+    if (_n_threads <= 1 || util::omp_in_parallel()) { 
         cov.noalias() = block.transpose() * _X; 
         _cache.emplace_back(std::move(cov));
         return;

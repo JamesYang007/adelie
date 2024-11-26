@@ -37,6 +37,24 @@ ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::init_cols(
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
+auto
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::init_outer(
+    const std::vector<base_t*>& mat_list
+)
+{
+    vec_index_t outer(mat_list.size() + 1);
+    outer[0] = 0;
+    size_t begin = 0;
+    for (size_t i = 0; i < mat_list.size(); ++i) {
+        const auto& mat = *mat_list[i];
+        const auto pi = mat.cols();
+        outer[i+1] = outer[i] + pi;
+        begin += pi;
+    } 
+    return outer;
+}
+
+ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
 auto 
 ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::init_slice_map(
     const std::vector<base_t*>& mat_list,
@@ -78,17 +96,23 @@ ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::init_index_map(
 
 ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
 ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::MatrixNaiveCConcatenate(
-    const std::vector<base_t*>& mat_list
+    const std::vector<base_t*>& mat_list,
+    size_t n_threads
 ): 
     _mat_list(mat_list),
     _rows(init_rows(mat_list)),
     _cols(init_cols(mat_list)),
+    _outer(init_outer(mat_list)),
     _slice_map(init_slice_map(mat_list, _cols)),
     _index_map(init_index_map(mat_list, _cols)),
+    _n_threads(n_threads),
     _buff(_rows)
 {
     if (mat_list.size() <= 0) {
         throw util::adelie_core_error("mat_list must be non-empty.");
+    }
+    if (n_threads < 1) {
+        throw util::adelie_core_error("n_threads must be >= 1.");
     }
 }
 
@@ -173,13 +197,13 @@ ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::mul(
     Eigen::Ref<vec_value_t> out
 ) 
 {
-    int n_processed = 0;
-    for (size_t i = 0; i < _mat_list.size(); ++i) {
+    const auto routine = [&](auto i) {
+        const auto outer_i = _outer[i];
         auto& mat = *_mat_list[i];
         const auto p = mat.cols();
-        mat.mul(v, weights, out.segment(n_processed, p));
-        n_processed += p;
-    }
+        mat.mul(v, weights, out.segment(outer_i, p));
+    };
+    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads * (_n_threads <= _mat_list.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
@@ -233,13 +257,13 @@ ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::sq_mul(
     Eigen::Ref<vec_value_t> out
 )
 {
-    int n_processed = 0;
-    for (size_t i = 0; i < _mat_list.size(); ++i) {
+    const auto routine = [&](auto i) {
+        const auto outer_i = _outer[i];
         auto& mat = *_mat_list[i];
         const auto p = mat.cols();
-        mat.sq_mul(weights, out.segment(n_processed, p));
-        n_processed += p;
-    }
+        mat.sq_mul(weights, out.segment(outer_i, p));
+    };
+    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads * (_n_threads <= _mat_list.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
@@ -271,13 +295,13 @@ ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::mean(
     Eigen::Ref<vec_value_t> out
 )
 {
-    int n_processed = 0;
-    for (size_t i = 0; i < _mat_list.size(); ++i) {
+    const auto routine = [&](auto i) {
+        const auto outer_i = _outer[i];
         auto& mat = *_mat_list[i];
         const auto p = mat.cols();
-        mat.mean(weights, out.segment(n_processed, p));
-        n_processed += p;
-    }
+        mat.mean(weights, out.segment(outer_i, p));
+    };
+    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads * (_n_threads <= _mat_list.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE_TP
@@ -288,13 +312,13 @@ ADELIE_CORE_MATRIX_NAIVE_CCONCATENATE::var(
     Eigen::Ref<vec_value_t> out
 )
 {
-    int n_processed = 0;
-    for (size_t i = 0; i < _mat_list.size(); ++i) {
+    const auto routine = [&](auto i) {
+        const auto outer_i = _outer[i];
         auto& mat = *_mat_list[i];
         const auto p = mat.cols();
-        mat.var(centers.segment(n_processed, p), weights, out.segment(n_processed, p));
-        n_processed += p;
-    }
+        mat.var(centers.segment(outer_i, p), weights, out.segment(outer_i, p));
+    };
+    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads * (_n_threads <= _mat_list.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
@@ -330,15 +354,20 @@ ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::init_cols(
 
 ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE_TP
 ADELIE_CORE_MATRIX_NAIVE_RCONCATENATE::MatrixNaiveRConcatenate(
-    const std::vector<base_t*>& mat_list
+    const std::vector<base_t*>& mat_list,
+    size_t n_threads
 ): 
     _mat_list(mat_list),
     _rows(init_rows(mat_list)),
     _cols(init_cols(mat_list)),
+    _n_threads(n_threads),
     _buff(_cols)
 {
     if (mat_list.size() <= 0) {
         throw util::adelie_core_error("mat_list must be non-empty.");
+    }
+    if (n_threads < 1) {
+        throw util::adelie_core_error("n_threads must be >= 1.");
     }
 }
 

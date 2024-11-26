@@ -5,6 +5,7 @@
 #include <adelie_core/optimization/nnls.hpp>
 #include <adelie_core/optimization/pinball.hpp>
 #include <adelie_core/optimization/pinball_full.hpp>
+#include <adelie_core/util/omp.hpp>
 
 namespace adelie_core {
 namespace constraint { 
@@ -440,12 +441,7 @@ ADELIE_CORE_CONSTRAINT_LINEAR::solve(
             };
             const size_t active_size = _mu_active.size();
             const size_t n_bytes = sizeof(value_t) * d * (d + 1) * active_size;
-            if (_n_threads <= 1 || n_bytes <= Configs::min_bytes) {
-                for (Eigen::Index ii = 0; ii < static_cast<Eigen::Index>(active_size); ++ii) screen_invariance(ii);
-            } else {
-                #pragma omp parallel for schedule(static) num_threads(_n_threads)
-                for (Eigen::Index ii = 0; ii < static_cast<Eigen::Index>(active_size); ++ii) screen_invariance(ii);
-            }
+            util::omp_parallel_for(screen_invariance, 0, active_size, _n_threads * (n_bytes > Configs::min_bytes));
 
             optimization::StatePinball<A_t, value_t, index_t> state_pinball(
                 *_A, var, hess, _l, _u, 

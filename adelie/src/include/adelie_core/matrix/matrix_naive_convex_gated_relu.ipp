@@ -175,12 +175,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::mul(
     };
     const auto v_weights = (v * weights).matrix();
     Eigen::Map<rowmat_value_t> buff(_buff.data(), _n_threads, d);
-    if (_n_threads <= 1) {
-        for (int i = 0; i < m; ++i) routine(i, v_weights, buff);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int i = 0; i < m; ++i) routine(i, v_weights, buff);
-    }
+    util::omp_parallel_for([&](auto i) { routine(i, v_weights, buff); }, 0, m, _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE_TP
@@ -259,12 +254,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::sq_mul(
         );
     };
     Eigen::Map<rowmat_value_t> buff(_buff.data(), _n_threads, d);
-    if (_n_threads <= 1) {
-        for (int i = 0; i < m; ++i) routine(i, weights, buff);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int i = 0; i < m; ++i) routine(i, weights, buff);
-    }
+    util::omp_parallel_for([&](auto i) { routine(i, weights, buff); }, 0, m, _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE_TP
@@ -285,12 +275,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_DENSE::sp_tmul(
             _ctmul(it.index(), it.value(), out_k, 1);
         }
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    }
+    util::omp_parallel_for(routine, 0, v.outerSize(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
@@ -451,12 +436,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::mul(
     const auto routine = [&](int k) {
         out[k] = _cmul(k, v, weights, 1);
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < m*d; ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < m*d; ++k) routine(k);
-    }
+    util::omp_parallel_for(routine, 0, m*d, _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
@@ -524,12 +504,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::cov(
             );
         }
     };
-    if (_n_threads <= 1) {
-        for (int i1 = 0; i1 < q; ++i1) routine(i1);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int i1 = 0; i1 < q; ++i1) routine(i1);
-    }
+    util::omp_parallel_for(routine, 0, q, _n_threads);
     for (int i1 = 0; i1 < q; ++i1) {
         for (int i2 = i1+1; i2 < q; ++i2) {
             out(i1, i2) = out(i2, i1);
@@ -554,12 +529,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::sq_mul(
             (weights * _mask.col(k).transpose().array().template cast<value_t>()).matrix()
         ) * mat_sq;
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < m; ++k) routine(k, mat_sq);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < m; ++k) routine(k, mat_sq);
-    }
+    util::omp_parallel_for([&](auto k) { routine(k, mat_sq); }, 0, m, _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE_TP
@@ -580,12 +550,7 @@ ADELIE_CORE_MATRIX_NAIVE_CONVEX_GATED_RELU_SPARSE::sp_tmul(
             _ctmul(it.index(), it.value(), out_k, 1);
         }
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    }
+    util::omp_parallel_for(routine, 0, v.outerSize(), _n_threads);
 }
 
 } // namespace matrix

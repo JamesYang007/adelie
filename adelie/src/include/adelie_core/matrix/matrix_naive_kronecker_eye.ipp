@@ -279,12 +279,7 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::sp_tmul(
             );
             out_k.col(l) = _out.row(k);
         };
-        if (_n_threads <= 1) {
-            for (int k = 0; k < out.rows(); ++k) routine(k);
-        } else {
-            #pragma omp parallel for schedule(static) num_threads(_n_threads)
-            for (int k = 0; k < out.rows(); ++k) routine(k);
-        }
+        util::omp_parallel_for(routine, 0, out.rows(), _n_threads);
     }
 }
 
@@ -575,8 +570,7 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::sp_tmul(
         const auto outer = _v.outerIndexPtr();
         const auto inner = _v.innerIndexPtr();
         const auto value = _v.valuePtr();
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < _v.outerSize(); ++k) {
+        const auto sroutine = [&](auto k) {
             const Eigen::Map<const sp_mat_value_t> vk(
                 1,
                 _v.cols(),
@@ -589,6 +583,7 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::sp_tmul(
             out_k = vk * _mat.transpose();
             routine(k);
         };
+        util::omp_parallel_for(sroutine, 0, _v.outerSize(), _n_threads);
     }
 }
 

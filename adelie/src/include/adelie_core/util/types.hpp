@@ -84,6 +84,15 @@ enum class css_loss_type
     _min_det
 };
 
+enum class omp_schedule_type
+{
+    _static,
+    _dynamic,
+    _guided,
+    _runtime,
+    _auto
+};
+
 inline screen_rule_type convert_screen_rule(
     const std::string& rule
 )

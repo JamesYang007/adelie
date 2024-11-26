@@ -36,12 +36,7 @@ bool compute_least_squares_scores(
         }
         out[j] = (S.row(j).head(j).squaredNorm() + S.col(j).tail(p-j).squaredNorm()) / S_jj;
     };
-    if (n_threads <= 1) {
-        for (int j = 0; j < p; ++j) routine(j);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int j = 0; j < p; ++j) routine(j);
-    }
+    util::omp_parallel_for(routine, 0, p, n_threads);
     return false;
 }
 
@@ -114,12 +109,7 @@ bool compute_subset_factor_scores(
         if (out[j_to_swap] == inf) return true; 
     }
 
-    if (n_threads <= 1) {
-        for (int j = 0; j < p; ++j) routine(j);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int j = 0; j < p; ++j) routine(j);
-    }
+    util::omp_parallel_for(routine, 0, p, n_threads);
 
     return early_exit;
 }

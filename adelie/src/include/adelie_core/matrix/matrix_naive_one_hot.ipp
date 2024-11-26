@@ -404,12 +404,7 @@ ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::mul(
         auto out_curr = out.segment(j, full_size);
         _bmul(j, g, 0, level, v, weights, out_curr, 1);
     };
-    if (_n_threads <= 1) {
-        for (int g = 0; g < _mat.cols(); ++g) routine(g);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int g = 0; g < _mat.cols(); ++g) routine(g);
-    }
+    util::omp_parallel_for(routine, 0, _mat.cols(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
@@ -493,12 +488,7 @@ ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::sq_mul(
         auto out_curr = out.segment(j, full_size);
         _sq_bmul(j, g, level, weights, out_curr);
     };
-    if (_n_threads <= 1) {
-        for (int g = 0; g < _mat.cols(); ++g) routine(g);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int g = 0; g < _mat.cols(); ++g) routine(g);
-    }
+    util::omp_parallel_for(routine, 0, _mat.cols(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP
@@ -519,12 +509,7 @@ ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE::sp_tmul(
             _ctmul(it.index(), it.value(), out_k, 1);
         }
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    }
+    util::omp_parallel_for(routine, 0, v.outerSize(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_ONE_HOT_DENSE_TP

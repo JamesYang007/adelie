@@ -68,12 +68,7 @@ ADELIE_CORE_MATRIX_COV_SPARSE::mul(
         );
         out[j] = svsvdot(indices, values, inner, value);
     };
-    if (_n_threads <= 1) {
-        for (int j = 0; j < _mat.cols(); ++j) routine(j);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int j = 0; j < _mat.cols(); ++j) routine(j);
-    }
+    util::omp_parallel_for(routine, 0, _mat.cols(), _n_threads);
 } 
 
 ADELIE_CORE_MATRIX_COV_SPARSE_TP

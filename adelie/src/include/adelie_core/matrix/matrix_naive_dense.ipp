@@ -196,8 +196,7 @@ ADELIE_CORE_MATRIX_NAIVE_DENSE::sp_tmul(
     const auto outer = v_ref.outerIndexPtr();
     const auto inner = v_ref.innerIndexPtr();
     const auto value = v_ref.valuePtr();
-    #pragma omp parallel for schedule(static) num_threads(_n_threads)
-    for (int k = 0; k < v_ref.outerSize(); ++k) {
+    const auto routine = [&](auto k) {
         const Eigen::Map<const sp_mat_value_t> vk(
             1,
             v_ref.cols(),
@@ -209,6 +208,7 @@ ADELIE_CORE_MATRIX_NAIVE_DENSE::sp_tmul(
         auto out_k = out.row(k);
         out_k = vk * _mat.transpose();
     };
+    util::omp_parallel_for(routine, 0, v_ref.outerSize(), _n_threads);
 }
 
 } // namespace matrix
