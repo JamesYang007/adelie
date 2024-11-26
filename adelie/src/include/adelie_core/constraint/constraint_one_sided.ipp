@@ -95,7 +95,7 @@ ADELIE_CORE_CONSTRAINT_ONE_SIDED::gradient(
     const Eigen::Ref<const vec_value_t>&,
     const Eigen::Ref<const vec_value_t>& mu,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     out = _sgn * mu;
 }
@@ -104,7 +104,7 @@ ADELIE_CORE_CONSTRAINT_ONE_SIDED_TP
 void
 ADELIE_CORE_CONSTRAINT_ONE_SIDED::project(
     Eigen::Ref<vec_value_t> x
-) 
+) const
 {
     x = _sgn * (_sgn * x).min(_b);
 }
@@ -259,7 +259,7 @@ void
 ADELIE_CORE_CONSTRAINT_ONE_SIDED::gradient(
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> out
-) 
+) const 
 {
     out = _sgn * _mu;
 }
@@ -290,7 +290,7 @@ void
 ADELIE_CORE_CONSTRAINT_ONE_SIDED::dual(
     Eigen::Ref<vec_index_t> indices,
     Eigen::Ref<vec_value_t> values
-) 
+) const 
 {
     size_t nnz = 0;
     for (Eigen::Index i = 0; i < _mu.size(); ++i) {
@@ -343,7 +343,7 @@ ADELIE_CORE_CONSTRAINT_ONE_SIDED_ADMM::gradient(
     const Eigen::Ref<const vec_value_t>&,
     const Eigen::Ref<const vec_value_t>& mu,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     out = _sgn * mu;
 }
@@ -352,7 +352,7 @@ ADELIE_CORE_CONSTRAINT_ONE_SIDED_ADMM_TP
 void
 ADELIE_CORE_CONSTRAINT_ONE_SIDED_ADMM::project(
     Eigen::Ref<vec_value_t> x
-) 
+) const
 {
     x = _sgn * (_sgn * x).min(_b);
 }
@@ -477,7 +477,7 @@ void
 ADELIE_CORE_CONSTRAINT_ONE_SIDED_ADMM::gradient(
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     out = _sgn * _mu;
 }
@@ -508,7 +508,7 @@ void
 ADELIE_CORE_CONSTRAINT_ONE_SIDED_ADMM::dual(
     Eigen::Ref<vec_index_t> indices,
     Eigen::Ref<vec_value_t> values
-) 
+) const
 {
     size_t nnz = 0;
     for (Eigen::Index i = 0; i < _mu.size(); ++i) {

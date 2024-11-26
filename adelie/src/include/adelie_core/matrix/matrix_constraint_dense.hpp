@@ -29,7 +29,6 @@ public:
 private:
     const Eigen::Map<const dense_t> _mat;   // underlying dense matrix
     const size_t _n_threads;                // number of threads
-    rowmat_value_t _buff;
     
 public:
     explicit MatrixConstraintDense(

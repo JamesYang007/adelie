@@ -37,7 +37,7 @@ public:
     void gradient(
         const Eigen::Ref<const vec_value_t>& x,
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -51,7 +51,7 @@ public:
         const Eigen::Ref<const vec_value_t>& x,
         const Eigen::Ref<const vec_value_t>& mu,
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -63,7 +63,7 @@ public:
 
     void project(
         Eigen::Ref<vec_value_t> x
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -98,7 +98,7 @@ public:
     void dual(
         Eigen::Ref<vec_index_t> indices,
         Eigen::Ref<vec_value_t> values
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -183,6 +183,9 @@ void constraint_base(py::module_& m, const char* name)
 
         where :math:`\phi` defines the current constraint.
 
+        .. warning::
+            This function is not thread-safe!
+
         Parameters
         ----------
         x : (d,) ndarray 
@@ -214,7 +217,7 @@ void constraint_base(py::module_& m, const char* name)
         .def("gradient", py::overload_cast<
             const Eigen::Ref<const vec_value_t>&,
             Eigen::Ref<vec_value_t> 
-        >(&internal_t::gradient), R"delimiter(
+        >(&internal_t::gradient, py::const_), R"delimiter(
         Computes the gradient of the Lagrangian.
 
         The gradient of the Lagrangian (with respect to the primal) is given by
@@ -241,7 +244,7 @@ void constraint_base(py::module_& m, const char* name)
             const Eigen::Ref<const vec_value_t>&,
             const Eigen::Ref<const vec_value_t>&,
             Eigen::Ref<vec_value_t> 
-        >(&internal_t::gradient), R"delimiter(
+        >(&internal_t::gradient, py::const_), R"delimiter(
         Computes the gradient of the Lagrangian.
 
         The gradient of the Lagrangian (with respect to the primal) is given by
@@ -308,6 +311,9 @@ void constraint_base(py::module_& m, const char* name)
         It is advised, but not necessary, that the object stores the solution internally
         so that a subsequent call to :func:`dual` will return the solution.
 
+        .. warning::
+            This function is not thread-safe!
+
         Parameters
         ----------
         v : (d,) ndarray
@@ -326,6 +332,10 @@ void constraint_base(py::module_& m, const char* name)
 
         The state of the constraint object must return back to
         that of the initial construction.
+
+        .. warning::
+            This function is not thread-safe!
+
         )delimiter")
         .def("dual", &internal_t::dual, R"delimiter(
         Returns the current dual variable in sparse format.

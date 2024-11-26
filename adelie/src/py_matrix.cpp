@@ -29,7 +29,21 @@ public:
             j, Q, out
         );
     }
-    
+
+    void rmmul_safe(
+        int j, 
+        const Eigen::Ref<const colmat_value_t>& Q,
+        Eigen::Ref<vec_value_t> out
+    ) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            rmmul_safe,
+            j, Q, out
+        );
+    }
+
     value_t rvmul(
         int j, 
         const Eigen::Ref<const vec_value_t>& v
@@ -39,6 +53,19 @@ public:
             value_t,
             base_t,
             rvmul,
+            j, v
+        );
+    }
+
+    value_t rvmul_safe(
+        int j, 
+        const Eigen::Ref<const vec_value_t>& v
+    ) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            value_t,
+            base_t,
+            rvmul_safe,
             j, v
         );
     }
@@ -60,7 +87,7 @@ public:
     void mul(
         const Eigen::Ref<const vec_value_t>& v, 
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -73,7 +100,7 @@ public:
     void tmul(
         const Eigen::Ref<const vec_value_t>& v, 
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -86,7 +113,7 @@ public:
     void cov(
         const Eigen::Ref<const colmat_value_t>& Q,
         Eigen::Ref<colmat_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -118,7 +145,7 @@ public:
         const Eigen::Ref<const vec_index_t>& indices,
         const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -144,6 +171,23 @@ void matrix_constraint_base(py::module_& m, const char* name)
         Computes the matrix-vector multiplication 
         ``A[j].T @ Q``.
 
+        .. warning::
+            This function is not thread-safe!
+
+        Parameters
+        ----------
+        j : int
+            Row index.
+        Q : (d, d) ndarray
+            Matrix to dot product with the ``j`` th row.
+        out : (d,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("rmmul_safe", &internal_t::rmmul_safe, R"delimiter(
+        Computes a row vector-matrix multiplication.
+
+        Thread-safe version of :func:`rmmul`.
+
         Parameters
         ----------
         j : int
@@ -158,6 +202,26 @@ void matrix_constraint_base(py::module_& m, const char* name)
 
         Computes the dot-product
         ``A[j].T @ v``.
+
+        .. warning::
+            This function is not thread-safe!
+
+        Parameters
+        ----------
+        j : int
+            Row index.
+        v : (d,) ndarray
+            Vector to dot product with the ``j`` th row.
+
+        Returns
+        -------
+        dot : float
+            Row vector-vector multiplication.
+        )delimiter")
+        .def("rvmul_safe", &internal_t::rvmul_safe, R"delimiter(
+        Computes a row vector-vector multiplication.
+
+        Thread-safe version of :func:`rvmul`.
 
         Parameters
         ----------
@@ -176,6 +240,9 @@ void matrix_constraint_base(py::module_& m, const char* name)
 
         Computes the vector-scalar multiplication ``A[j] * v``.
         The result is *incremented* into the output vector.
+
+        .. warning::
+            This function is not thread-safe!
 
         Parameters
         ----------
@@ -945,10 +1012,11 @@ void matrix_naive_base(py::module_& m, const char* name)
 
         Computes the weighted covariance matrix
         ``X[:, j:j+q].T @ W @ X[:, j:j+q]``.
+
+        This function is thread-safe.
         
         .. note::
             Although the name is "covariance", we do not center the columns of ``X``!
-            This function is also thread-safe!
 
         Parameters
         ----------

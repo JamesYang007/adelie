@@ -30,7 +30,7 @@ struct MatrixConstraintNNLS
         int j, 
         const Eigen::Ref<const vec_value_t>& v,
         const Eigen::Ref<const vec_value_t>& 
-    )
+    ) 
     {
         return _A->rvmul(j, v);
     }
@@ -48,7 +48,7 @@ struct MatrixConstraintNNLS
         const Eigen::Ref<const vec_value_t>& v, 
         const Eigen::Ref<const vec_value_t>&,
         Eigen::Ref<vec_value_t> out
-    ) 
+    ) const 
     {
         _A->tmul(v, out);
     }
@@ -209,7 +209,7 @@ ADELIE_CORE_CONSTRAINT_LINEAR_TP
 void
 ADELIE_CORE_CONSTRAINT_LINEAR::project(
     Eigen::Ref<vec_value_t>
-)
+) const
 {}
 
 ADELIE_CORE_CONSTRAINT_LINEAR_TP
@@ -436,8 +436,8 @@ ADELIE_CORE_CONSTRAINT_LINEAR::solve(
             const auto screen_invariance = [&](auto ii) {
                 const auto i = _mu_active[ii];
                 auto AS_i = screen_AS.row(i);
-                _A->rmmul(i, hess, AS_i);
-                screen_ASAT_diag[i] = std::max<value_t>(_A->rvmul(i, AS_i), 0);
+                _A->rmmul_safe(i, hess, AS_i);
+                screen_ASAT_diag[i] = std::max<value_t>(_A->rvmul_safe(i, AS_i), 0);
             };
             const size_t active_size = _mu_active.size();
             const size_t n_bytes = sizeof(value_t) * d * (d + 1) * active_size;
@@ -514,7 +514,7 @@ void
 ADELIE_CORE_CONSTRAINT_LINEAR::gradient(
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     out = _ATmu;
 }
@@ -525,7 +525,7 @@ ADELIE_CORE_CONSTRAINT_LINEAR::gradient(
     const Eigen::Ref<const vec_value_t>&,
     const Eigen::Ref<const vec_value_t>& mu,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     _A->mul(mu, out);
 }
@@ -629,14 +629,14 @@ void
 ADELIE_CORE_CONSTRAINT_LINEAR::dual(
     Eigen::Ref<vec_index_t> indices,
     Eigen::Ref<vec_value_t> values
-) 
+) const
 {
     const size_t nnz = _mu_active.size();
-    indices.head(nnz) = Eigen::Map<vec_index_t>(
+    indices.head(nnz) = Eigen::Map<const vec_index_t>(
         _mu_active.data(),
         nnz
     );
-    values.head(nnz) = Eigen::Map<vec_value_t>(
+    values.head(nnz) = Eigen::Map<const vec_value_t>(
         _mu_value.data(),
         nnz
     );
