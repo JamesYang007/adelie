@@ -120,6 +120,7 @@ ADELIE_CORE_MATRIX_CONSTRAINT_DENSE::cov(
 {
     Eigen::setNbThreads(_n_threads);
     out.noalias() = _mat * Q * _mat.transpose();
+    Eigen::setNbThreads(1);
 }
 
 ADELIE_CORE_MATRIX_CONSTRAINT_DENSE_TP

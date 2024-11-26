@@ -415,7 +415,7 @@ public:
         const Eigen::Ref<const vec_index_t>& indices,
         const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -428,7 +428,7 @@ public:
     void to_dense(
         int i, int p,
         Eigen::Ref<colmat_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -463,6 +463,9 @@ void matrix_cov_base(py::module_& m, const char* name)
         Computes the matrix-sparse vector multiplication
         ``v.T @ A[:, subset]`` where ``v`` is represented by the sparse-format
         ``indices`` and ``values``.
+
+        .. warning::
+            This function is not thread-safe!
 
         Parameters
         ----------

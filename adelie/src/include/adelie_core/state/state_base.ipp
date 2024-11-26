@@ -15,8 +15,15 @@ ADELIE_CORE_STATE_BASE::initialize()
     if (constraints.size() != static_cast<size_t>(G)) {
         throw util::adelie_core_error("constraints must be (G,) where groups is (G,).");
     }
-    if (std::unordered_set(constraints.begin(), constraints.end()).size() != static_cast<size_t>(G)) {
-        throw util::adelie_core_error("constraints must be distinct objects.");
+    {
+        std::unordered_set<constraint_t*> constraints_set;
+        for (auto c : constraints) {
+            if (!c) continue;
+            if (constraints_set.find(c) != constraints_set.end()) {
+                throw util::adelie_core_error("constraints must contain distinct objects or nullptr.");
+            }
+            constraints_set.insert(c);
+        }
     }
     if (group_sizes.size() != G) {
         throw util::adelie_core_error("group_sizes must be (G,) where groups is (G,).");

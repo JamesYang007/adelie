@@ -136,11 +136,12 @@ ADELIE_CORE_MATRIX_COV_BLOCK_DIAG::mul(
     const Eigen::Ref<const vec_index_t>& indices,
     const Eigen::Ref<const vec_value_t>& values,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     base_t::check_mul(indices.size(), values.size(), out.size(), rows(), cols());
+    vec_index_t ibuff(_ibuff.size());
     const auto routine = [&](int i) {
-        auto& mat = *_mat_list[i];
+        const auto& mat = *_mat_list[i];
         const auto mat_pos = _mat_size_cumsum[i];
         const auto begin = std::lower_bound(
             indices.data(),
@@ -154,7 +155,7 @@ ADELIE_CORE_MATRIX_COV_BLOCK_DIAG::mul(
         ) - indices.data();
         const auto new_indices_size = end-begin;
         Eigen::Map<vec_index_t> new_indices(
-            _ibuff.data() + mat_pos, new_indices_size
+            ibuff.data() + mat_pos, new_indices_size
         );
         const Eigen::Map<const vec_value_t> new_values(
             values.data() + begin, new_indices_size
@@ -175,23 +176,24 @@ void
 ADELIE_CORE_MATRIX_COV_BLOCK_DIAG::to_dense(
     int i, int p,
     Eigen::Ref<colmat_value_t> out
-) 
+) const
 {
     base_t::check_to_dense(i, p, out.rows(), out.cols(), rows(), cols());
+    vec_value_t vbuff;
     out.setZero();
     int n_processed = 0;
     while (n_processed < p) {
         const auto j = i + n_processed;
-        auto& mat = *_mat_list[_slice_map[j]];
+        const auto& mat = *_mat_list[_slice_map[j]];
         const auto mat_pos = _mat_size_cumsum[_slice_map[j]];
         const auto new_i = j - mat_pos;
         const auto new_p = std::min<size_t>(mat.cols()-new_i, p-n_processed);
         const auto new_p_sq = new_p * new_p;
-        if (static_cast<size_t>(_vbuff.size()) < new_p_sq) {
-            _vbuff.resize(new_p_sq);
+        if (static_cast<size_t>(vbuff.size()) < new_p_sq) {
+            vbuff.resize(new_p_sq);
         }
         Eigen::Map<colmat_value_t> new_out(
-            _vbuff.data(), new_p, new_p
+            vbuff.data(), new_p, new_p
         );
         mat.to_dense(new_i, new_p, new_out);
         out.block(n_processed, n_processed, new_p, new_p) = new_out;
