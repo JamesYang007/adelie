@@ -76,11 +76,7 @@ py::dict css_cov_model_selection_fit_k(
     std::atomic_bool early_exit = false; 
     const auto routine = [&](auto) {
         if (early_exit.load(std::memory_order_relaxed)) return;
-        #if defined(_OPENMP)
-        const auto thr_idx = omp_get_thread_num();
-        #else
-        const auto thr_idx = 0;
-        #endif
+        const auto thr_idx = ad::util::omp_get_thread_num();
         auto& state = states[thr_idx];
         auto& subset = state.subset;
         auto& subset_set = state.subset_set;

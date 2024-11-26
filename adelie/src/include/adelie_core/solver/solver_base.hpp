@@ -7,9 +7,6 @@
 #include <adelie_core/util/omp.hpp>
 #include <adelie_core/util/stopwatch.hpp>
 #include <adelie_core/util/tqdm.hpp>
-#if defined(_OPENMP)
-#include <omp.h>
-#endif
 
 namespace adelie_core {
 namespace solver {
@@ -82,11 +79,7 @@ inline void update_abs_grad(
     std::atomic_bool try_failed = false; 
     const auto routine = [&](int i) {
         if (try_failed.load(std::memory_order_relaxed) || is_screen(i)) return;
-        #if defined(_OPENMP)
-        auto cbuff = constraint_buffer.row(omp_get_thread_num());
-        #else
-        auto cbuff = constraint_buffer.row(0);
-        #endif
+        auto cbuff = constraint_buffer.row(util::omp_get_thread_num());
         const auto k = groups[i];
         const auto size_k = group_sizes[i];
         const auto constraint = constraints[i];
