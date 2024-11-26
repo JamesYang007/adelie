@@ -72,11 +72,9 @@ inline void update_screen_derived(
     using colmat_value_t = util::colmat_type<value_t>;
 
     // buffers
-    const auto n = X.rows();
     const auto max_gs = group_sizes.maxCoeff();
     const auto n_threads_cap_1 = std::max<size_t>(n_threads, 1);
-    util::rowvec_type<value_t> buffer1(n_threads_cap_1 * n * max_gs);
-    util::rowvec_type<value_t> buffer2(n_threads_cap_1 * max_gs * max_gs);
+    util::rowvec_type<value_t> buffer(n_threads_cap_1 * max_gs * max_gs);
 
     const auto routine = [&](auto i) {
         const auto g = groups[screen_set[i]];
@@ -91,15 +89,12 @@ inline void update_screen_derived(
         Xi_means = X_means.segment(g, gs);
 
         // resize output and buffer 
-        Eigen::Map<colmat_value_t> Xi(
-            buffer1.data() + thr_id * n * max_gs, n, gs
-        );
         Eigen::Map<colmat_value_t> XiTXi(
-            buffer2.data() + thr_id * max_gs * max_gs, gs, gs
+            buffer.data() + thr_id * max_gs * max_gs, gs, gs
         );
 
         // compute weighted covariance matrix
-        X.cov(g, gs, weights_sqrt, XiTXi, Xi);
+        X.cov(g, gs, weights_sqrt, XiTXi);
 
         if (intercept) {
             auto XiTXi_lower = XiTXi.template selfadjointView<Eigen::Lower>();

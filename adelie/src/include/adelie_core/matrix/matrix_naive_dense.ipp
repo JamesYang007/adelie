@@ -34,6 +34,19 @@ ADELIE_CORE_MATRIX_NAIVE_DENSE::cmul(
 }
 
 ADELIE_CORE_MATRIX_NAIVE_DENSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_DENSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_DENSE::cmul_safe(
+    int j, 
+    const Eigen::Ref<const vec_value_t>& v,
+    const Eigen::Ref<const vec_value_t>& weights
+) const
+{
+    base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
+    vec_value_t vbuff(_n_threads * (_n_threads > 1));
+    return ddot(_mat.col(j), (v * weights).matrix(), _n_threads, vbuff);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_DENSE_TP
 void
 ADELIE_CORE_MATRIX_NAIVE_DENSE::ctmul(
     int j, 
@@ -62,6 +75,30 @@ ADELIE_CORE_MATRIX_NAIVE_DENSE::bmul(
         _vbuff.matrix(),
         _n_threads,
         _buff,
+        outm
+    );
+}
+
+ADELIE_CORE_MATRIX_NAIVE_DENSE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_DENSE::bmul_safe(
+    int j, int q, 
+    const Eigen::Ref<const vec_value_t>& v, 
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) const
+{
+    base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+    const auto n = _mat.rows();
+    auto outm = out.matrix();
+    vec_value_t vbuff(_vbuff.size());
+    rowmat_value_t buff(_n_threads * (_n_threads > 1), q * (n > q));
+    dvveq(vbuff, v * weights, _n_threads);
+    dgemv(
+        _mat.middleCols(j, q),
+        vbuff.matrix(),
+        _n_threads,
+        buff,
         outm
     );
 }
@@ -123,24 +160,24 @@ void
 ADELIE_CORE_MATRIX_NAIVE_DENSE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
-    Eigen::Ref<colmat_value_t> out,
-    Eigen::Ref<colmat_value_t> buffer
-)
+    Eigen::Ref<colmat_value_t> out
+) const
 {
     base_t::check_cov(
         j, q, sqrt_weights.size(), 
-        out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
+        out.rows(), out.cols(),
         rows(), cols()
     );
     
     if (q == 1) {
         const auto sqrt_w_mj = (_mat.col(j).transpose().array() * sqrt_weights).matrix();
-        Eigen::Map<vec_value_t> vbuff(_buff.data(), _n_threads);
+        vec_value_t vbuff(_n_threads * (_n_threads > 1));
         out(0, 0) = ddot(sqrt_w_mj, sqrt_w_mj, _n_threads, vbuff);
         return;
     }
 
-    auto& Xj = buffer;
+    const auto n = _mat.rows();
+    colmat_value_t Xj(n, q);
     
     auto Xj_array = Xj.array();
     dmmeq(

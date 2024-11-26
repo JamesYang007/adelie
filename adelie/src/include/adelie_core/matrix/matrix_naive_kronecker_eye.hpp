@@ -39,7 +39,7 @@ private:
     const size_t _K;
     const size_t _n_threads;
     vec_value_t _buff;
-    
+
 public:
     explicit MatrixNaiveKroneckerEye(
         base_t& mat,
@@ -80,7 +80,23 @@ private:
     const size_t _n_threads;
     rowmat_value_t _buff;
     vec_value_t _vbuff;
-    
+
+    inline auto _cmul(
+        int j, 
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<rowmat_value_t> buff
+    ) const;
+
+    inline void _bmul(
+        int j, int q, 
+        const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out,
+        Eigen::Ref<vec_value_t> vbuff,
+        Eigen::Ref<rowmat_value_t> buff
+    ) const;
+
 public:
     explicit MatrixNaiveKroneckerEyeDense(
         const Eigen::Ref<const dense_t>& mat,

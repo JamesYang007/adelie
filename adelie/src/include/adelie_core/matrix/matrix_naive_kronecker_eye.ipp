@@ -33,15 +33,36 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::cmul(
 ) 
 {
     base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-    Eigen::Map<const rowmat_value_t> V(v.data(), rows() / _K, _K);
-    Eigen::Map<const rowmat_value_t> W(weights.data(), V.rows(), V.cols());
-    int i = j / _K;
-    int l = j - _K * i;
+    const Eigen::Map<const rowmat_value_t> V(v.data(), rows() / _K, _K);
+    const Eigen::Map<const rowmat_value_t> W(weights.data(), V.rows(), V.cols());
+    const int i = j / _K;
+    const int l = j - _K * i;
     Eigen::Map<vec_value_t> _v(_buff.data(), V.rows());
     Eigen::Map<vec_value_t> _w(_buff.data() + V.rows(), V.rows());
     dvveq(_v, V.col(l), _n_threads);
     dvveq(_w, W.col(l), _n_threads);
     return _mat->cmul(i, _v, _w);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP 
+typename ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::value_t
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::cmul_safe(
+    int j, 
+    const Eigen::Ref<const vec_value_t>& v,
+    const Eigen::Ref<const vec_value_t>& weights
+) const
+{
+    base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
+    const Eigen::Map<const rowmat_value_t> V(v.data(), rows() / _K, _K);
+    const Eigen::Map<const rowmat_value_t> W(weights.data(), V.rows(), V.cols());
+    const int i = j / _K;
+    const int l = j - _K * i;
+    vec_value_t buffer(2 * V.rows());
+    Eigen::Map<vec_value_t> _v(buffer.data(), V.rows());
+    Eigen::Map<vec_value_t> _w(buffer.data() + V.rows(), V.rows());
+    dvveq(_v, V.col(l), _n_threads);
+    dvveq(_w, W.col(l), _n_threads);
+    return _mat->cmul_safe(i, _v, _w);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP 
@@ -73,8 +94,8 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::bmul(
 )
 {
     base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-    Eigen::Map<const rowmat_value_t> V(v.data(), rows() / _K, _K);
-    Eigen::Map<const rowmat_value_t> W(weights.data(), V.rows(), V.cols());
+    const Eigen::Map<const rowmat_value_t> V(v.data(), rows() / _K, _K);
+    const Eigen::Map<const rowmat_value_t> W(weights.data(), V.rows(), V.cols());
     Eigen::Map<vec_value_t> _v(_buff.data(), V.rows());
     Eigen::Map<vec_value_t> _w(_buff.data() + V.rows(), V.rows());
     for (int l = 0; l < static_cast<int>(_K); ++l) {
@@ -88,6 +109,38 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::bmul(
         dvveq(_w, W.col(l), _n_threads);
         Eigen::Map<vec_value_t> _out(_buff.data() + 2 * V.rows(), i_q);
         _mat->bmul(i_begin, i_q, _v, _w, _out);
+        Eigen::Map<rowmat_value_t> Out(out.data(), out.size() / _K, _K);
+        auto Out_curr = Out.col(l-j).segment(i_begin, i_q);
+        dvveq(Out_curr, _out, _n_threads);
+    }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_TP 
+void
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::bmul_safe(
+    int j, int q, 
+    const Eigen::Ref<const vec_value_t>& v, 
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) const
+{
+    base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+    const Eigen::Map<const rowmat_value_t> V(v.data(), rows() / _K, _K);
+    const Eigen::Map<const rowmat_value_t> W(weights.data(), V.rows(), V.cols());
+    vec_value_t buffer(2 * V.rows() + q);
+    Eigen::Map<vec_value_t> _v(buffer.data(), V.rows());
+    Eigen::Map<vec_value_t> _w(buffer.data() + V.rows(), V.rows());
+    for (int l = 0; l < static_cast<int>(_K); ++l) {
+        const auto j_l = std::max(j-l, 0);
+        const auto i_begin = j_l / static_cast<int>(_K) + ((j_l % _K) != 0);
+        if (j-l+q <= 0) continue;
+        const auto i_end = (j-l+q-1) / static_cast<int>(_K) + 1;
+        const auto i_q = i_end - i_begin;
+        if (i_q <= 0) continue;
+        dvveq(_v, V.col(l), _n_threads);
+        dvveq(_w, W.col(l), _n_threads);
+        Eigen::Map<vec_value_t> _out(buffer.data() + 2 * V.rows(), i_q);
+        _mat->bmul_safe(i_begin, i_q, _v, _w, _out);
         Eigen::Map<rowmat_value_t> Out(out.data(), out.size() / _K, _K);
         auto Out_curr = Out.col(l-j).segment(i_begin, i_q);
         dvveq(Out_curr, _out, _n_threads);
@@ -151,17 +204,17 @@ void
 ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
-    Eigen::Ref<colmat_value_t> out,
-    Eigen::Ref<colmat_value_t> buffer
-)
+    Eigen::Ref<colmat_value_t> out
+) const
 {
     base_t::check_cov(
         j, q, sqrt_weights.size(), 
-        out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
+        out.rows(), out.cols(),
         rows(), cols()
     );
     Eigen::Map<const rowmat_value_t> sqrt_W(sqrt_weights.data(), rows() / _K, _K);
     out.setZero();
+    vec_value_t vbuff(_buff.size());
     for (int l = 0; l < static_cast<int>(_K); ++l) {
         const auto j_l = std::max(j-l, 0);
         const auto i_begin = j_l / static_cast<int>(_K) + ((j_l % _K) != 0);
@@ -169,21 +222,16 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::cov(
         const auto i_end = (j-l+q-1) / static_cast<int>(_K) + 1;
         const auto i_q = i_end - i_begin;
         if (i_q <= 0) continue;
-        if (_buff.size() < sqrt_W.rows() + i_q * i_q) {
-            _buff.resize(_buff.size() + i_q * i_q);
+        if (vbuff.size() < sqrt_W.rows() + i_q * i_q) {
+            vbuff.resize(vbuff.size() + i_q * i_q);
         }
-        Eigen::Map<vec_value_t> _sqrt_weights(_buff.data(), sqrt_W.rows());
+        Eigen::Map<vec_value_t> _sqrt_weights(vbuff.data(), sqrt_W.rows());
         dvveq(_sqrt_weights, sqrt_W.col(l), _n_threads);
         Eigen::Map<colmat_value_t> _out(
-            _buff.data() + _sqrt_weights.size(),
+            vbuff.data() + _sqrt_weights.size(),
             i_q, i_q
         );
-        Eigen::Map<colmat_value_t> _buffer(
-            buffer.data(),
-            _mat->rows(),
-            i_q
-        );
-        _mat->cov(i_begin, i_q, _sqrt_weights, _out, _buffer);
+        _mat->cov(i_begin, i_q, _sqrt_weights, _out);
         for (int i1 = 0; i1 < i_q; ++i1) {
             for (int i2 = 0; i2 < i_q; ++i2) {
                 out((i1+i_begin)*_K+l-j, (i2+i_begin)*_K+l-j) = _out(i1, i2);
@@ -313,6 +361,53 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::var(
 }
 
 ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
+auto
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::_cmul(
+    int j, 
+    const Eigen::Ref<const vec_value_t>& v,
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<rowmat_value_t> buff
+) const
+{
+    const Eigen::Map<const rowmat_value_t> V(v.data(), rows() / _K, _K);
+    const Eigen::Map<const rowmat_value_t> W(weights.data(), V.rows(), V.cols());
+    const int i = j / _K;
+    const int l = j - _K * i;
+    Eigen::Map<vec_value_t> vbuff(buff.data(), _n_threads);
+    return ddot(V.col(l).cwiseProduct(W.col(l)), _mat.col(i), _n_threads, vbuff);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
+void
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::_bmul(
+    int j, int q, 
+    const Eigen::Ref<const vec_value_t>& v, 
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out,
+    Eigen::Ref<vec_value_t> vbuff,
+    Eigen::Ref<rowmat_value_t> buff
+) const
+{
+    dvveq(vbuff, v * weights, _n_threads);
+    Eigen::Map<const rowmat_value_t> VW(vbuff.data(), rows() / _K, _K);
+    int n_processed = 0;
+    while (n_processed < q) {
+        const int i = (j + n_processed) / _K;
+        const int l = (j + n_processed) - _K * i;
+        const int size = std::min<int>(_K-l, q-n_processed);
+        auto _out = out.segment(n_processed, size).matrix();
+        dgemv(
+            VW.middleCols(l, size), 
+            _mat.col(i).transpose(), 
+            _n_threads, 
+            buff, 
+            _out
+        );
+        n_processed += size;
+    }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
 ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::MatrixNaiveKroneckerEyeDense(
     const Eigen::Ref<const dense_t>& mat,
     size_t K,
@@ -341,12 +436,20 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::cmul(
 ) 
 {
     base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-    Eigen::Map<const rowmat_value_t> V(v.data(), rows() / _K, _K);
-    Eigen::Map<const rowmat_value_t> W(weights.data(), V.rows(), V.cols());
-    const int i = j / _K;
-    const int l = j - _K * i;
-    Eigen::Map<vec_value_t> vbuff(_buff.data(), _n_threads);
-    return ddot(V.col(l).cwiseProduct(W.col(l)), _mat.col(i), _n_threads, vbuff);
+    return _cmul(j, v, weights, _buff);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
+typename ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::cmul_safe(
+    int j, 
+    const Eigen::Ref<const vec_value_t>& v,
+    const Eigen::Ref<const vec_value_t>& weights
+) const
+{
+    base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
+    rowmat_value_t buff(_buff.rows(), _buff.cols());
+    return _cmul(j, v, weights, buff);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
@@ -375,23 +478,22 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::bmul(
 )
 {
     base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
-    dvveq(_vbuff, v * weights, _n_threads);
-    Eigen::Map<const rowmat_value_t> VW(_vbuff.data(), rows() / _K, _K);
-    int n_processed = 0;
-    while (n_processed < q) {
-        const int i = (j + n_processed) / _K;
-        const int l = (j + n_processed) - _K * i;
-        const int size = std::min<int>(_K-l, q-n_processed);
-        auto _out = out.segment(n_processed, size).matrix();
-        dgemv(
-            VW.middleCols(l, size), 
-            _mat.col(i).transpose(), 
-            _n_threads, 
-            _buff, 
-            _out
-        );
-        n_processed += size;
-    }
+    _bmul(j, q, v, weights, out, _vbuff, _buff);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
+void
+ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::bmul_safe(
+    int j, int q, 
+    const Eigen::Ref<const vec_value_t>& v, 
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) const
+{
+    base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+    vec_value_t vbuff(_vbuff.size());
+    rowmat_value_t buff(_buff.rows(), _buff.cols());
+    _bmul(j, q, v, weights, out, vbuff, buff);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE_TP 
@@ -439,17 +541,18 @@ void
 ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
-    Eigen::Ref<colmat_value_t> out,
-    Eigen::Ref<colmat_value_t> buffer
-)
+    Eigen::Ref<colmat_value_t> out
+) const
 {
     base_t::check_cov(
         j, q, sqrt_weights.size(), 
-        out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
+        out.rows(), out.cols(),
         rows(), cols()
     );
     Eigen::Map<const rowmat_value_t> sqrt_W(sqrt_weights.data(), rows() / _K, _K);
     out.setZero(); // do NOT parallelize!
+    vec_value_t vbuff(_vbuff.size());
+    colmat_value_t buffer(_mat.rows(), q);
     for (int l = 0; l < static_cast<int>(_K); ++l) {
         const auto j_l = std::max(j-l, 0);
         const auto i_begin = j_l / static_cast<int>(_K) + ((j_l % _K) != 0);
@@ -466,8 +569,8 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::cov(
             _n_threads
         );
 
-        if (_vbuff.size() < i_q * i_q) _vbuff.resize(i_q * i_q);
-        Eigen::Map<colmat_value_t> XTWX(_vbuff.data(), i_q, i_q);
+        if (vbuff.size() < i_q * i_q) vbuff.resize(i_q * i_q);
+        Eigen::Map<colmat_value_t> XTWX(vbuff.data(), i_q, i_q);
         XTWX.setZero(); // do NOT parallelize!
         XTWX.template selfadjointView<Eigen::Lower>().rankUpdate(sqrt_WX.transpose());
         for (int i1 = 0; i1 < i_q; ++i1) {

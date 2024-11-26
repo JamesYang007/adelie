@@ -365,10 +365,10 @@ inline auto fit(
             const auto g = groups[i];
             const size_t gs = group_sizes[i];
             if (gs == 1) {
-                X_means[g] = X.cmul(g, ones, irls_weights);
+                X_means[g] = X.cmul_safe(g, ones, irls_weights);
             } else {
                 Eigen::Map<vec_value_t> Xi_means(X_means.data() + g, gs);
-                X.bmul(g, gs, ones, irls_weights, Xi_means);
+                X.bmul_safe(g, gs, ones, irls_weights, Xi_means);
             }
         };
         util::omp_parallel_for(update_X_means, 0, screen_set.size(), n_threads * (n_threads <= screen_set.size()));

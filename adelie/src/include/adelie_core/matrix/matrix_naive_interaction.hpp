@@ -62,15 +62,16 @@ private:
         int j, 
         const Eigen::Ref<const vec_value_t>& v,
         const Eigen::Ref<const vec_value_t>& weights,
-        size_t n_threads
-    );
+        size_t n_threads,
+        Eigen::Ref<vec_value_t> buff
+    ) const;
 
     inline void _ctmul(
         int j, 
         value_t v, 
         Eigen::Ref<vec_value_t> out,
         size_t n_threads
-    );
+    ) const;
 
     inline void _bmul(
         int begin,
@@ -80,15 +81,17 @@ private:
         const Eigen::Ref<const vec_value_t>& v, 
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out,
+        Eigen::Ref<vec_value_t> buff,
         size_t n_threads
-    );
+    ) const;
 
     inline void _sq_bmul(
         int i0, int i1,
         int l0, int l1,
         const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    );
+        Eigen::Ref<vec_value_t> out,
+        Eigen::Ref<vec_value_t> buff
+    ) const;
 
     inline void _btmul(
         int begin,
@@ -99,7 +102,7 @@ private:
         const Eigen::Ref<const vec_value_t>& v, 
         Eigen::Ref<vec_value_t> out,
         size_t n_threads
-    );
+    ) const;
 
 public:
     explicit MatrixNaiveInteractionDense(

@@ -582,6 +582,20 @@ public:
         );
     }
 
+    value_t cmul_safe(
+        int j, 
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& weights
+    ) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            value_t,
+            base_t,
+            cmul_safe,
+            j, v, weights
+        );
+    }
+
     void ctmul(
         int j, 
         value_t v, 
@@ -607,6 +621,21 @@ public:
             void,
             base_t,
             bmul,
+            j, q, v, weights, out
+        );
+    }
+
+    void bmul_safe(
+        int j, int q, 
+        const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    ) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            bmul_safe,
             j, q, v, weights, out
         );
     }
@@ -668,15 +697,14 @@ public:
     void cov(
         int j, int q,
         const Eigen::Ref<const vec_value_t>& sqrt_weights,
-        Eigen::Ref<colmat_value_t> out,
-        Eigen::Ref<colmat_value_t> buffer
-    ) override
+        Eigen::Ref<colmat_value_t> out
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
             base_t,
             cov,
-            j, q, sqrt_weights, out, buffer
+            j, q, sqrt_weights, out
         );
     }
 
@@ -755,6 +783,25 @@ void matrix_naive_base(py::module_& m, const char* name)
         dot : float
             Column vector-vector multiplication.
         )delimiter")
+        .def("cmul_safe", &internal_t::cmul_safe, R"delimiter(
+        Computes a column vector-vector multiplication.
+
+        Thread-safe version of :func:`cmul`.
+
+        Parameters
+        ----------
+        j : int
+            Column index.
+        v : (n,) ndarray
+            Vector to dot product with the ``j`` th column.
+        w : (n,) ndarray
+            Vector of weights.
+
+        Returns
+        -------
+        dot : float
+            Column vector-vector multiplication.
+        )delimiter")
         .def("ctmul", &internal_t::ctmul, R"delimiter(
         Computes a column vector-scalar multiplication increment.
 
@@ -774,6 +821,24 @@ void matrix_naive_base(py::module_& m, const char* name)
         Computes a column block matrix-vector multiplication.
 
         Computes the matrix-vector multiplication ``(v * w).T @ X[:, j:j+q]``.
+
+        Parameters
+        ----------
+        j : int
+            Column index.
+        q : int
+            Number of columns.
+        v : (n,) ndarray
+            Vector to multiply with the block matrix.
+        w : (n,) ndarray
+            Vector of weights.
+        out : (q,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("bmul_safe", &internal_t::bmul_safe, R"delimiter(
+        Computes a column block matrix-vector multiplication.
+
+        Thread-safe version of :func:`bmul`.
 
         Parameters
         ----------
@@ -883,6 +948,7 @@ void matrix_naive_base(py::module_& m, const char* name)
         
         .. note::
             Although the name is "covariance", we do not center the columns of ``X``!
+            This function is also thread-safe!
 
         Parameters
         ----------
@@ -894,8 +960,6 @@ void matrix_naive_base(py::module_& m, const char* name)
             Square-root of the weights.
         out : (q, q) ndarray
             Matrix to store in-place the result.
-        buffer : (n, q) ndarray
-            Extra buffer space if needed.
         )delimiter")
         .def("rows", &internal_t::rows, R"delimiter(
         Returns the number of rows.

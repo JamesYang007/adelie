@@ -42,7 +42,6 @@ private:
     const vec_index_t _slice_map;           // (p,) array mapping to matrix slice
     const vec_index_t _index_map;           // (p,) array mapping to (relative) index of the slice
     const size_t _n_threads;                // number of threads
-    vec_value_t _buff;                      // (n,) buffer
 
     static inline auto init_rows(
         const std::vector<base_t*>& mat_list

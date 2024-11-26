@@ -52,6 +52,23 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::cmul(
 }
 
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::value_t
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::cmul_safe(
+    int j, 
+    const Eigen::Ref<const vec_value_t>& v,
+    const Eigen::Ref<const vec_value_t>& weights
+) const
+{
+    base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
+    vec_value_t buff(_n_threads);
+    const auto c = _centers[j];
+    const auto vw_sum = (
+        (c == 0) ? 0 : ddot(v.matrix(), weights.matrix(), _n_threads, buff)
+    );
+    return (_mat->cmul_safe(j, v, weights) - c * vw_sum) / _scales[j];
+}
+
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
 void
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::ctmul(
     int j, 
@@ -87,6 +104,26 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::bmul(
     const auto c = _centers.segment(j, q);
     const auto vw_sum = (
         (c == 0).all() ? 0 : ddot(v.matrix(), weights.matrix(), _n_threads, _buff)
+    );
+    const auto s = _scales.segment(j, q);
+    dvveq(out, (out - vw_sum * c) / s, _n_threads);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::bmul_safe(
+    int j, int q, 
+    const Eigen::Ref<const vec_value_t>& v, 
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) const
+{
+    base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+    vec_value_t buff(_n_threads);
+    _mat->bmul_safe(j, q, v, weights, out);
+    const auto c = _centers.segment(j, q);
+    const auto vw_sum = (
+        (c == 0).all() ? 0 : ddot(v.matrix(), weights.matrix(), _n_threads, buff)
     );
     const auto s = _scales.segment(j, q);
     dvveq(out, (out - vw_sum * c) / s, _n_threads);
@@ -152,25 +189,24 @@ void
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
-    Eigen::Ref<colmat_value_t> out,
-    Eigen::Ref<colmat_value_t> buffer
-)
+    Eigen::Ref<colmat_value_t> out
+) const
 {
     base_t::check_cov(
         j, q, sqrt_weights.size(), 
-        out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
+        out.rows(), out.cols(),
         rows(), cols()
     );
 
-    _mat->cov(j, q, sqrt_weights, out, buffer);
+    _mat->cov(j, q, sqrt_weights, out);
 
     const auto centers = _centers.segment(j, q);
     const auto scales = _scales.segment(j, q);
 
     if ((centers != 0).any()) {
+        vec_value_t means(q);
         auto out_lower = out.template selfadjointView<Eigen::Lower>();
-        auto means = _buff.segment(j, q);
-        _mat->bmul(j, q, sqrt_weights, sqrt_weights, means);
+        _mat->bmul_safe(j, q, sqrt_weights, sqrt_weights, means);
         out_lower.rankUpdate(centers.matrix().transpose(), means.matrix().transpose(), -1);
         out_lower.rankUpdate(centers.matrix().transpose(), sqrt_weights.square().sum());
         out.template triangularView<Eigen::Upper>() = out.transpose();

@@ -81,8 +81,9 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights,
-    size_t n_threads
-)
+    size_t n_threads,
+    Eigen::Ref<vec_value_t> buff
+) const
 {
     const auto& w = weights;
     const auto slice = _slice_map[j];
@@ -100,15 +101,15 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_cmul(
         case 0: {
             switch (index) {
                 case 0: {
-                    return ddot((v * w).matrix(), _mat.col(i0).transpose(), n_threads, _buff);
+                    return ddot((v * w).matrix(), _mat.col(i0).transpose(), n_threads, buff);
                     break;
                 }
                 case 1: {
-                    return ddot((v * w).matrix(), _mat.col(i1).transpose(), n_threads, _buff);
+                    return ddot((v * w).matrix(), _mat.col(i1).transpose(), n_threads, buff);
                     break;
                 }
                 case 2: {
-                    return ddot((v * w).matrix(), _mat.col(i0).cwiseProduct(_mat.col(i1)).transpose(), n_threads, _buff);
+                    return ddot((v * w).matrix(), _mat.col(i0).cwiseProduct(_mat.col(i1)).transpose(), n_threads, buff);
                     break;
                 }
             }
@@ -121,7 +122,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_cmul(
                     (v * w).matrix(), 
                     (mi0 == k0).template cast<value_t>().matrix(), 
                     n_threads, 
-                    _buff
+                    buff
                 );
             } else {
                 const auto mi0 = _mat.col(i0).transpose().array();
@@ -130,7 +131,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_cmul(
                     (v * w).matrix(), 
                     (mi1 * (mi0 == k0).template cast<value_t>()).matrix(), 
                     n_threads, 
-                    _buff
+                    buff
                 );
             }
             break;
@@ -142,7 +143,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_cmul(
                     (v * w).matrix(), 
                     (mi1 == k1).template cast<value_t>().matrix(), 
                     n_threads, 
-                    _buff
+                    buff
                 );
             } else {
                 const auto mi0 = _mat.col(i0).transpose().array();
@@ -151,7 +152,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_cmul(
                     (v * w).matrix(), 
                     (mi0 * (mi1 == k1).template cast<value_t>()).matrix(), 
                     n_threads, 
-                    _buff
+                    buff
                 );
             }
             break;
@@ -163,7 +164,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_cmul(
                 (v * w).matrix(), 
                 ((mi0 == k0) && (mi1 == k1)).template cast<value_t>().matrix(), 
                 n_threads, 
-                _buff
+                buff
             );
             break;
         }
@@ -178,7 +179,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_ctmul(
     value_t v, 
     Eigen::Ref<vec_value_t> out,
     size_t n_threads
-)
+) const
 {
     const auto slice = _slice_map[j];
     const auto index = _index_map[j];
@@ -270,8 +271,9 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_bmul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out,
+    Eigen::Ref<vec_value_t> buff,
     size_t n_threads
-)
+) const
 {
     const size_t size = out.size();
     const auto both_cont = (l0 <= 0) & (l1 <= 0);
@@ -281,7 +283,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_bmul(
     // not a full-block
     if (index != 0 || size != full_size) {
         for (size_t l = 0; l < size; ++l) {
-            out[l] = _cmul(begin+l, v, weights, n_threads);
+            out[l] = _cmul(begin+l, v, weights, n_threads, buff);
         }
         return;
     }
@@ -289,9 +291,9 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_bmul(
     const auto _case = static_cast<int>(l0 > 0) | static_cast<int>(l1 > 0 ? _n_levels_cont : 0);
     switch (_case) {
         case 0: {
-            out[0] = ddot(_mat.col(i0), (v * w).matrix(), n_threads, _buff);
-            out[1] = ddot(_mat.col(i1), (v * w).matrix(), n_threads, _buff);
-            out[2] = ddot(_mat.col(i0).cwiseProduct(_mat.col(i1)), (v * w).matrix(), n_threads, _buff);
+            out[0] = ddot(_mat.col(i0), (v * w).matrix(), n_threads, buff);
+            out[1] = ddot(_mat.col(i1), (v * w).matrix(), n_threads, buff);
+            out[2] = ddot(_mat.col(i0).cwiseProduct(_mat.col(i1)), (v * w).matrix(), n_threads, buff);
             break;
         }
         case 1: {
@@ -333,17 +335,18 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_sq_bmul(
     int i0, int i1,
     int l0, int l1,
     const Eigen::Ref<const vec_value_t>& weights,
-    Eigen::Ref<vec_value_t> out
-)
+    Eigen::Ref<vec_value_t> out,
+    Eigen::Ref<vec_value_t> buff
+) const
 {
     constexpr size_t n_threads = 1;
     const auto& w = weights;
     const auto _case = static_cast<int>(l0 > 0) | static_cast<int>(l1 > 0 ? _n_levels_cont : 0);
     switch (_case) {
         case 0: {
-            out[0] = ddot(_mat.col(i0).array().square().matrix(), w.matrix(), n_threads, _buff);
-            out[1] = ddot(_mat.col(i1).array().square().matrix(), w.matrix(), n_threads, _buff);
-            out[2] = ddot(_mat.col(i0).cwiseProduct(_mat.col(i1)).array().square().matrix(), w.matrix(), n_threads, _buff);
+            out[0] = ddot(_mat.col(i0).array().square().matrix(), w.matrix(), n_threads, buff);
+            out[1] = ddot(_mat.col(i1).array().square().matrix(), w.matrix(), n_threads, buff);
+            out[2] = ddot(_mat.col(i0).cwiseProduct(_mat.col(i1)).array().square().matrix(), w.matrix(), n_threads, buff);
             break;
         }
         case 1: {
@@ -392,7 +395,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::_btmul(
     const Eigen::Ref<const vec_value_t>& v, 
     Eigen::Ref<vec_value_t> out,
     size_t n_threads
-)
+) const
 {
     const auto both_cont = (l0 <= 0) & (l1 <= 0);
     const auto l0_exp = l0 <= 0 ? _n_levels_cont : l0;
@@ -495,7 +498,20 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::cmul(
 ) 
 {
     base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-    return _cmul(j, v, weights, _n_threads);
+    return _cmul(j, v, weights, _n_threads, _buff);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::value_t
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::cmul_safe(
+    int j, 
+    const Eigen::Ref<const vec_value_t>& v,
+    const Eigen::Ref<const vec_value_t>& weights
+) const
+{
+    base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
+    vec_value_t buff(_buff.size());
+    return _cmul(j, v, weights, _n_threads, buff);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
@@ -536,7 +552,39 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::bmul(
         const auto full_size = l0_exp * l1_exp - both_cont;
         const auto size = std::min<size_t>(full_size - index, q - n_processed);
         auto out_curr = out.segment(n_processed, size);
-        _bmul(jj, i0, i1, l0, l1, index, v, weights, out_curr, _n_threads);
+        _bmul(jj, i0, i1, l0, l1, index, v, weights, out_curr, _buff, _n_threads);
+        n_processed += size;
+    }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::bmul_safe(
+    int j, int q, 
+    const Eigen::Ref<const vec_value_t>& v, 
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) const
+{
+    base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+    vec_value_t buff(_buff.size());
+    int n_processed = 0;
+    while (n_processed < q) {
+        const auto jj = j + n_processed;
+        const auto slice = _slice_map[jj];
+        const auto index = _index_map[jj];
+        const auto pair = _pairs.row(slice);
+        const auto i0 = pair[0];
+        const auto i1 = pair[1];
+        const auto l0 = _levels[i0];
+        const auto l1 = _levels[i1];
+        const auto both_cont = (l0 <= 0) & (l1 <= 0);
+        const auto l0_exp = (l0 <= 0) ? _n_levels_cont : l0;
+        const auto l1_exp = (l1 <= 0) ? _n_levels_cont : l1;
+        const auto full_size = l0_exp * l1_exp - both_cont;
+        const auto size = std::min<size_t>(full_size - index, q - n_processed);
+        auto out_curr = out.segment(n_processed, size);
+        _bmul(jj, i0, i1, l0, l1, index, v, weights, out_curr, buff, _n_threads);
         n_processed += size;
     }
 }
@@ -591,7 +639,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::mul(
         const auto l1_exp = (l1 <= 0) ? _n_levels_cont : l1;
         const auto full_size = l0_exp * l1_exp - both_cont;
         auto out_curr = out.segment(j, full_size);
-        _bmul(j, i0, i1, l0, l1, 0, v, weights, out_curr, 1);
+        _bmul(j, i0, i1, l0, l1, 0, v, weights, out_curr, _buff, 1);
     };
     util::omp_parallel_for(routine, 0, _outer.size()-1, _n_threads);
 }
@@ -615,13 +663,12 @@ void
 ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
-    Eigen::Ref<colmat_value_t> out,
-    Eigen::Ref<colmat_value_t> buffer
-)
+    Eigen::Ref<colmat_value_t> out
+) const
 {
     base_t::check_cov(
         j, q, sqrt_weights.size(), 
-        out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
+        out.rows(), out.cols(),
         rows(), cols()
     );
 
@@ -645,18 +692,20 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::cov(
     const auto l1 = _levels[i1];
     const auto _case = static_cast<int>(l0 > 0) | static_cast<int>(l1 > 0 ? _n_levels_cont : 0);
 
+    vec_value_t buff(_n_threads);
+    
     switch (_case) {
         case 0: {
             const auto mi0 = _mat.col(i0).array();
             const auto mi1 = _mat.col(i1).array();
-            auto w = buffer.col(0).array();
+            vec_value_t w(sqrt_w.size());
             dvveq(w, sqrt_w.square(), _n_threads);
-            out(0, 0) = ddot(w.matrix(), mi0.square().matrix(), _n_threads, _buff);
-            out(1, 0) = ddot(w.matrix(), (mi0 * mi1).matrix(), _n_threads, _buff);
-            out(1, 1) = ddot(w.matrix(), mi1.square().matrix(), _n_threads, _buff);
-            out(2, 0) = ddot(w.matrix(), (mi0.square() * mi1).matrix(), _n_threads, _buff);
-            out(2, 1) = ddot(w.matrix(), (mi1.square() * mi0).matrix(), _n_threads, _buff);
-            out(2, 2) = ddot(w.matrix(), (mi0 * mi1).square().matrix(), _n_threads, _buff);
+            out(0, 0) = ddot(w.matrix(), mi0.square().matrix(), _n_threads, buff);
+            out(1, 0) = ddot(w.matrix(), (mi0 * mi1).matrix(), _n_threads, buff);
+            out(1, 1) = ddot(w.matrix(), mi1.square().matrix(), _n_threads, buff);
+            out(2, 0) = ddot(w.matrix(), (mi0.square() * mi1).matrix(), _n_threads, buff);
+            out(2, 1) = ddot(w.matrix(), (mi1.square() * mi0).matrix(), _n_threads, buff);
+            out(2, 2) = ddot(w.matrix(), (mi0 * mi1).square().matrix(), _n_threads, buff);
             for (int i0 = 0; i0 < q; ++i0) {
                 for (int i1 = i0+1; i1 < q; ++i1) {
                     out(i0, i1) = out(i1, i0);
@@ -733,7 +782,7 @@ ADELIE_CORE_MATRIX_NAIVE_INTERACTION_DENSE::sq_mul(
         const auto l1_exp = (l1 <= 0) ? _n_levels_cont : l1;
         const auto full_size = l0_exp * l1_exp - both_cont;
         auto out_curr = out.segment(j, full_size);
-        _sq_bmul(i0, i1, l0, l1, weights, out_curr);
+        _sq_bmul(i0, i1, l0, l1, weights, out_curr, _buff);
     };
     util::omp_parallel_for(routine, 0, _outer.size()-1, _n_threads);
 }
