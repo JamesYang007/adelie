@@ -168,7 +168,7 @@ ADELIE_CORE_MATRIX_COV_BLOCK_DIAG::mul(
         ) - mat_pos;
         mat.mul(new_indices, new_values, new_out);
     };
-    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads);
+    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads * (_n_threads <= _mat_list.size()));
 } 
 
 ADELIE_CORE_MATRIX_COV_BLOCK_DIAG_TP
