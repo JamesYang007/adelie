@@ -56,20 +56,22 @@ private:
         int j, 
         const Eigen::Ref<const vec_value_t>& v,
         const Eigen::Ref<const vec_value_t>& weights,
-        size_t n_threads
-    );
+        size_t n_threads,
+        Eigen::Ref<vec_value_t> buff
+    ) const;
 
     inline value_t _sq_cmul(
         int j, 
-        const Eigen::Ref<const vec_value_t>& weights
-    );
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> buff
+    ) const;
 
     inline void _ctmul(
         int j, 
         value_t v, 
         Eigen::Ref<vec_value_t> out,
         size_t n_threads
-    );
+    ) const;
 
     inline void _bmul(
         int begin,
@@ -79,16 +81,18 @@ private:
         const Eigen::Ref<const vec_value_t>& v, 
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out,
+        Eigen::Ref<vec_value_t> buff,
         size_t n_threads
-    );
+    ) const;
 
     inline void _sq_bmul(
         int begin,
         int slice,
         int level,
         const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    );
+        Eigen::Ref<vec_value_t> out,
+        Eigen::Ref<vec_value_t> buff
+    ) const;
 
     inline void _btmul(
         int begin,
@@ -99,7 +103,7 @@ private:
         const Eigen::Ref<const vec_value_t>& v, 
         Eigen::Ref<vec_value_t> out,
         size_t n_threads
-    );
+    ) const;
 
 public:
     explicit MatrixNaiveOneHotDense(
@@ -121,17 +125,7 @@ public:
     }
 
     ADELIE_CORE_MATRIX_NAIVE_PURE_OVERRIDE_DECL
-
-    virtual void mean(
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override;
-
-    virtual void var(
-        const Eigen::Ref<const vec_value_t>& centers,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override;
+    ADELIE_CORE_MATRIX_NAIVE_OVERRIDE_DECL
 };
 
 } // namespace matrix

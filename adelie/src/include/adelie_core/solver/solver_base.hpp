@@ -4,11 +4,9 @@
 #include <adelie_core/util/algorithm.hpp>
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/macros.hpp>
+#include <adelie_core/util/omp.hpp>
 #include <adelie_core/util/stopwatch.hpp>
 #include <adelie_core/util/tqdm.hpp>
-#if defined(_OPENMP)
-#include <omp.h>
-#endif
 
 namespace adelie_core {
 namespace solver {
@@ -26,6 +24,7 @@ inline void update_abs_grad(
 )
 {
     using state_t = std::decay_t<StateType>;
+    using value_t = typename state_t::value_t;
     using vec_value_t = typename state_t::vec_value_t;
     using rowmat_uint64_t = util::rowmat_type<uint64_t>;
 
@@ -81,11 +80,7 @@ inline void update_abs_grad(
     std::atomic_bool try_failed = false; 
     const auto routine = [&](int i) {
         if (try_failed.load(std::memory_order_relaxed) || is_screen(i)) return;
-        #if defined(_OPENMP)
-        auto cbuff = constraint_buffer.row(omp_get_thread_num());
-        #else
-        auto cbuff = constraint_buffer.row(0);
-        #endif
+        auto cbuff = constraint_buffer.row(util::omp_get_thread_num());
         const auto k = groups[i];
         const auto size_k = group_sizes[i];
         const auto constraint = constraints[i];
@@ -100,14 +95,12 @@ inline void update_abs_grad(
             try_failed = true;
         }
     };
-    if (n_threads <= 1) {
-        for (int i = 0; i < groups.size(); ++i) routine(i);
-    } else {
-        #if defined(_OPENMP)
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        #endif
-        for (int i = 0; i < groups.size(); ++i) routine(i);
-    }
+    const bool is_not_all_none = util::rowvec_type<bool>::NullaryExpr(
+        constraints.size(), 
+        [&](auto i) { return constraints[i] != nullptr; }
+    ).any();
+    const size_t n_bytes = sizeof(value_t) * abs_grad.size();
+    util::omp_parallel_for(routine, 0, groups.size(), n_threads * (is_not_all_none || (n_bytes > Configs::min_bytes)));
     if (try_failed) {
         throw util::adelie_core_solver_error(
             "exception raised in constraint->solve_zero(). "
@@ -170,6 +163,8 @@ inline auto sparsify_dual(
     VecValueType& values
 )
 {
+    using index_t = typename StateType::index_t;
+    using value_t = typename StateType::value_t;
     using vec_index_t = typename StateType::vec_index_t;
     using vec_value_t = typename StateType::vec_value_t;
     using sp_vec_value_t = typename StateType::sp_vec_value_t;
@@ -205,13 +200,12 @@ inline auto sparsify_dual(
             constraint->dual(indices_v, values_v);
             indices_v += dual_groups[i];
         };
-        
-        if (n_threads <= 1) {
-            for (Eigen::Index i = 0; i < static_cast<Eigen::Index>(n_constraints); ++i) routine(i);
-        } else {
-            #pragma omp parallel for schedule(static) num_threads(n_threads)
-            for (Eigen::Index i = 0; i < static_cast<Eigen::Index>(n_constraints); ++i) routine(i);
-        }
+        const bool is_not_all_none = util::rowvec_type<bool>::NullaryExpr(
+            constraints.size(), 
+            [&](auto i) { return constraints[i] != nullptr; }
+        ).any();
+        const size_t n_bytes = (sizeof(index_t) + sizeof(value_t)) * indices.size();
+        util::omp_parallel_for(routine, 0, n_constraints, n_threads * (is_not_all_none || (n_bytes > Configs::min_bytes)));
     }
 
     const auto last_constraint = constraints[n_constraints-1];

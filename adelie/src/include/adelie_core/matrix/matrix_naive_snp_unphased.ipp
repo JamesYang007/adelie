@@ -11,12 +11,13 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::_cmul(
     int j, 
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights,
-    size_t n_threads
-) 
+    size_t n_threads,
+    Eigen::Ref<vec_value_t> buff
+) const 
 {
     return snp_unphased_dot(
         [](auto x) { return x; },
-        _io, j, v * weights, n_threads, _buff
+        _io, j, v * weights, n_threads, buff
     );
 }
 
@@ -24,13 +25,14 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
 typename ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::value_t
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::_sq_cmul(
     int j, 
-    const Eigen::Ref<const vec_value_t>& weights
-) 
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> buff
+) const
 {
     constexpr size_t n_threads = 1;
     return snp_unphased_dot(
         [](auto x) { return x * x; },
-        _io, j, weights, n_threads, _buff
+        _io, j, weights, n_threads, buff
     );
 }
 
@@ -53,14 +55,11 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::MatrixNaiveSNPUnphased(
 ): 
     _io(io),
     _n_threads(n_threads),
-    _ibuff(_io.rows()),
-    _vbuff(_io.rows()),
     _buff(n_threads)
 {
     if (n_threads < 1) {
         throw util::adelie_core_error("n_threads must be >= 1.");
     }
-    _vbuff.setConstant(_max);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
@@ -72,7 +71,20 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::cmul(
 )
 {
     base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-    return _cmul(j, v, weights, _n_threads);
+    return _cmul(j, v, weights, _n_threads, _buff);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
+typename ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::value_t
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::cmul_safe(
+    int j, 
+    const Eigen::Ref<const vec_value_t>& v,
+    const Eigen::Ref<const vec_value_t>& weights
+) const
+{
+    base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
+    return _cmul(j, v, weights, _n_threads, buff);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
@@ -98,7 +110,23 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::bmul(
 {
     base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
     for (int t = 0; t < q; ++t) {
-        out[t] = _cmul(j + t, v, weights, _n_threads);
+        out[t] = _cmul(j + t, v, weights, _n_threads, _buff);
+    }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
+void
+ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::bmul_safe(
+    int j, int q, 
+    const Eigen::Ref<const vec_value_t>& v, 
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) const
+{
+    base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
+    for (int t = 0; t < q; ++t) {
+        out[t] = _cmul(j + t, v, weights, _n_threads, buff);
     }
 }
 
@@ -122,17 +150,12 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](int t) {
-        out[t] = _cmul(t, v, weights, 1);
+        out[t] = _cmul(t, v, weights, 1, out /* unused */);
     };
-    if (_n_threads <= 1) {
-        for (int t = 0; t < cols(); ++t) routine(t);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int t = 0; t < cols(); ++t) routine(t);
-    }
+    util::omp_parallel_for(routine, 0, cols(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
@@ -140,15 +163,19 @@ void
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
-    Eigen::Ref<colmat_value_t> out,
-    Eigen::Ref<colmat_value_t> buffer
-)
+    Eigen::Ref<colmat_value_t> out
+) const
 {
     base_t::check_cov(
         j, q, sqrt_weights.size(), 
-        out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
+        out.rows(), out.cols(),
         rows(), cols()
     );
+
+    vec_index_t ibuff(_io.rows());
+    vec_value_t vbuff(_io.rows());
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
+    vbuff.setConstant(_max);
 
     for (int i1 = 0; i1 < q; ++i1) 
     {
@@ -165,8 +192,8 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::cov(
                 const value_t val = (c == 0) ? imp_1 : c;
                 for (; it != end; ++it) {
                     const auto idx = *it;
-                    _vbuff[idx] = val;
-                    _ibuff[nnz] = idx;
+                    vbuff[idx] = val;
+                    ibuff[nnz] = idx;
                     ++nnz;
                 }
             }
@@ -180,7 +207,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::cov(
                     index_1, 
                     sqrt_weights.square(), 
                     _n_threads, 
-                    _buff
+                    buff
                 );
                 continue;
             }
@@ -190,16 +217,16 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::cov(
                 _io, 
                 index_2,
                 sqrt_weights.square() * (
-                    (_vbuff != _max).template cast<value_t>() * _vbuff
+                    (vbuff != _max).template cast<value_t>() * vbuff
                 ),
                 _n_threads,
-                _buff
+                buff
             );
         }
 
         // keep invariance by populating with inf
         for (size_t i = 0; i < nnz; ++i) {
-            _vbuff[_ibuff[i]] = _max;
+            vbuff[ibuff[i]] = _max;
         }
     }
 
@@ -229,17 +256,12 @@ void
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](int t) {
-        out[t] = _sq_cmul(t, weights);
+        out[t] = _sq_cmul(t, weights, out /* unused */);
     };
-    if (_n_threads <= 1) {
-        for (int t = 0; t < cols(); ++t) routine(t);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int t = 0; t < cols(); ++t) routine(t);
-    }
+    util::omp_parallel_for(routine, 0, cols(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
@@ -247,7 +269,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::sp_tmul(
     const sp_mat_value_t& v,
     Eigen::Ref<rowmat_value_t> out
-)
+) const
 {
     base_t::check_sp_tmul(
         v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
@@ -260,12 +282,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::sp_tmul(
             _ctmul(it.index(), it.value(), out_k, 1);
         }
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    }
+    util::omp_parallel_for(routine, 0, v.outerSize(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED_TP
@@ -273,7 +290,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::mean(
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     out.setZero();
 }
@@ -284,7 +301,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_UNPHASED::var(
     const Eigen::Ref<const vec_value_t>&,
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     out.setOnes();
 }

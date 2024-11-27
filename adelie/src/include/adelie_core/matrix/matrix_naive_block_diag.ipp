@@ -1,5 +1,6 @@
 #pragma once
 #include <adelie_core/matrix/matrix_naive_block_diag.hpp>
+#include <adelie_core/util/omp.hpp>
 
 namespace adelie_core {
 namespace matrix {
@@ -8,7 +9,7 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
 auto
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::init_rows(
     const std::vector<base_t*>& mat_list
-)
+) 
 {
     size_t n = 0;
     for (auto mat : mat_list) n += mat->rows();
@@ -19,7 +20,7 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
 auto
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::init_cols(
     const std::vector<base_t*>& mat_list
-)
+) 
 {
     size_t p = 0;
     for (auto mat : mat_list) p += mat->cols();
@@ -30,7 +31,7 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
 auto
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::init_max_cols(
     const std::vector<base_t*>& mat_list
-)
+) 
 {
     return vec_index_t::NullaryExpr(
         mat_list.size(), 
@@ -42,8 +43,8 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
 auto 
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::init_col_slice_map(
     const std::vector<base_t*>& mat_list,
-    size_t p
-)
+   size_t p
+) 
 {
     vec_index_t slice_map(p);
     size_t begin = 0;
@@ -63,7 +64,7 @@ auto
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::init_col_index_map(
     const std::vector<base_t*>& mat_list,
     size_t p
-)
+) 
 {
     vec_index_t index_map(p);
     size_t begin = 0;
@@ -82,7 +83,7 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
 auto 
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::init_row_outer(
     const std::vector<base_t*>& mat_list
-)
+) 
 {
     vec_index_t outer(mat_list.size()+1);
     outer[0] = 0;
@@ -98,7 +99,7 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
 auto 
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::init_col_outer(
     const std::vector<base_t*>& mat_list
-)
+) 
 {
     vec_index_t outer(mat_list.size()+1);
     outer[0] = 0;
@@ -123,8 +124,7 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::MatrixNaiveBlockDiag(
     _col_index_map(init_col_index_map(mat_list, _cols)),
     _row_outer(init_row_outer(mat_list)),
     _col_outer(init_col_outer(mat_list)),
-    _n_threads(n_threads),
-    _buff(_max_cols * _max_cols)
+    _n_threads(n_threads)
 {
     if (mat_list.size() <= 0) {
         throw util::adelie_core_error("mat_list must be non-empty.");
@@ -151,6 +151,25 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::cmul(
     const auto v_slice = v.segment(r_begin, r_size);
     const auto w_slice = weights.segment(r_begin, r_size);
     return mat.cmul(index, v_slice, w_slice);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
+typename ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::value_t 
+ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::cmul_safe(
+    int j, 
+    const Eigen::Ref<const vec_value_t>& v,
+    const Eigen::Ref<const vec_value_t>& weights
+) const
+{
+    base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
+    const auto slice = _col_slice_map[j];
+    const auto& mat = *_mat_list[slice];
+    const auto index = _col_index_map[j];
+    const auto r_begin = _row_outer[slice];
+    const auto r_size = _row_outer[slice+1] - r_begin;
+    const auto v_slice = v.segment(r_begin, r_size);
+    const auto w_slice = weights.segment(r_begin, r_size);
+    return mat.cmul_safe(index, v_slice, w_slice);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
@@ -200,6 +219,33 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::bmul(
 
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
 void
+ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::bmul_safe(
+    int j, int q, 
+    const Eigen::Ref<const vec_value_t>& v, 
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) const
+{
+    base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+    int n_processed = 0;
+    while (n_processed < q) {
+        const auto k = j + n_processed;
+        const auto slice = _col_slice_map[k];
+        const auto& mat = *_mat_list[slice];
+        const auto index = _col_index_map[k];
+        const auto size = std::min<size_t>(mat.cols()-index, q-n_processed);
+        auto out_slice = out.segment(n_processed, size);
+        const auto r_begin = _row_outer[slice];
+        const auto r_size = _row_outer[slice+1] - r_begin;
+        const auto v_slice = v.segment(r_begin, r_size);
+        const auto w_slice = weights.segment(r_begin, r_size);
+        mat.bmul_safe(index, size, v_slice, w_slice, out_slice);
+        n_processed += size;
+    }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
+void
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
@@ -229,10 +275,10 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](auto g) {
-        auto& mat = *_mat_list[g];
+        const auto& mat = *_mat_list[g];
         const auto r_begin = _row_outer[g];
         const auto r_size = _row_outer[g+1] - r_begin;
         const auto v_slice = v.segment(r_begin, r_size);
@@ -242,12 +288,7 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::mul(
         auto out_slice = out.segment(c_begin, c_size);
         mat.mul(v_slice, w_slice, out_slice);
     };
-    if (_n_threads <= 1) {
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    }
+    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads * (_n_threads <= _mat_list.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
@@ -255,25 +296,24 @@ void
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
-    Eigen::Ref<colmat_value_t> out,
-    Eigen::Ref<colmat_value_t> buffer
-)
+    Eigen::Ref<colmat_value_t> out
+) const
 {
-    base_t::check_cov(j, q, sqrt_weights.size(), out.rows(), out.cols(), buffer.rows(), buffer.cols(), rows(), cols());
+    base_t::check_cov(j, q, sqrt_weights.size(), out.rows(), out.cols(), rows(), cols());
+    vec_value_t buff(_max_cols * _max_cols);
     out.setZero();
     int n_processed = 0;
     while (n_processed < q) {
         const auto k = j + n_processed;
         const auto slice = _col_slice_map[k];
-        auto& mat = *_mat_list[slice];
+        const auto& mat = *_mat_list[slice];
         const auto index = _col_index_map[k];
         const auto size = std::min<size_t>(mat.cols()-index, q-n_processed);
-        Eigen::Map<colmat_value_t> out_curr(_buff.data(), size, size);
+        Eigen::Map<colmat_value_t> out_curr(buff.data(), size, size);
         const auto r_begin = _row_outer[slice];
         const auto r_size = _row_outer[slice+1] - r_begin;
         const auto sqrt_w_slice = sqrt_weights.segment(r_begin, r_size);
-        Eigen::Map<colmat_value_t> buffer_curr(buffer.data(), r_size, size);
-        mat.cov(index, size, sqrt_w_slice, out_curr, buffer_curr);
+        mat.cov(index, size, sqrt_w_slice, out_curr);
         out.block(n_processed, n_processed, size, size) = out_curr;
         n_processed += size;
     }
@@ -298,10 +338,10 @@ void
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](auto g) {
-        auto& mat = *_mat_list[g];
+        const auto& mat = *_mat_list[g];
         const auto r_begin = _row_outer[g];
         const auto r_size = _row_outer[g+1] - r_begin;
         const auto w_slice = weights.segment(r_begin, r_size);
@@ -310,12 +350,7 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::sq_mul(
         auto out_slice = out.segment(c_begin, c_size);
         mat.sq_mul(w_slice, out_slice);
     };
-    if (_n_threads <= 1) {
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    }
+    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads * (_n_threads <= _mat_list.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
@@ -323,14 +358,14 @@ void
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::sp_tmul(
     const sp_mat_value_t& v,
     Eigen::Ref<rowmat_value_t> out
-)
+) const
 {
     base_t::check_sp_tmul(
         v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
     );
     out.setZero();
     const auto routine = [&](auto g) {
-        auto& mat = *_mat_list[g];
+        const auto& mat = *_mat_list[g];
         const auto c_begin = _col_outer[g];
         const auto c_size = _col_outer[g+1] - c_begin;
         rowmat_value_t out_curr(out.rows(), mat.rows());
@@ -339,12 +374,7 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::sp_tmul(
         const auto r_size = _row_outer[g+1] - r_begin;
         out.middleCols(r_begin, r_size) = out_curr;
     };
-    if (_n_threads <= 1) {
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int g = 0; g < static_cast<index_t>(_mat_list.size()); ++g) routine(g);
-    }
+    util::omp_parallel_for(routine, 0, _mat_list.size(), _n_threads * (_n_threads <= _mat_list.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG_TP
@@ -352,7 +382,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::mean(
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t>
-)
+) const
 {
     throw util::adelie_core_error(
         "MatrixNaiveBlockDiag: mean() not implemented! "
@@ -367,7 +397,7 @@ ADELIE_CORE_MATRIX_NAIVE_BLOCK_DIAG::var(
     const Eigen::Ref<const vec_value_t>&,
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t>
-)
+) const
 {
     throw util::adelie_core_error(
         "MatrixNaiveBlockDiag: var() not implemented! "

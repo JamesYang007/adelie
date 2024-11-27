@@ -648,8 +648,7 @@ def gaussian_pin_naive(
             for i in self._screen_set:
                 g, gs = groups[i], group_sizes[i]
                 XiTXi = np.empty((gs, gs), dtype=dtype, order="F")
-                buffer = np.empty((n, gs), dtype=dtype, order="F")
-                X.cov(g, gs, sqrt_weights, XiTXi, buffer)
+                X.cov(g, gs, sqrt_weights, XiTXi)
                 Xi_means = X_means[g:g+gs]
                 if intercept:
                     XiTXi -= Xi_means[:, None] @ Xi_means[None]
@@ -1654,9 +1653,8 @@ class gaussian_naive_base(base):
         for ss_idx in range(len(self.screen_set)):
             i = self.screen_set[ss_idx]
             g, gs = self.groups[i], self.group_sizes[i]
-            Xi = np.empty((n, gs), order="F")
             XiTXi = np.empty((gs, gs), order="F")
-            self.X.cov(g, gs, sqrt_weights, XiTXi, Xi)
+            self.X.cov(g, gs, sqrt_weights, XiTXi)
             if self.intercept:
                 Xi_means = self.X_means[g:g+gs]
                 XiTXi -= Xi_means[:, None] @ Xi_means[None]

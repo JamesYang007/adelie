@@ -48,7 +48,7 @@ ADELIE_CORE_MATRIX_COV_DENSE::mul(
     const Eigen::Ref<const vec_index_t>& indices,
     const Eigen::Ref<const vec_value_t>& values,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     base_t::check_mul(indices.size(), values.size(), out.size(), rows(), cols());
     out.setZero();
@@ -68,7 +68,7 @@ void
 ADELIE_CORE_MATRIX_COV_DENSE::to_dense(
     int i, int p,
     Eigen::Ref<colmat_value_t> out
-) 
+) const
 {
     base_t::check_to_dense(i, p, out.rows(), out.cols(), rows(), cols());
     out = _mat.block(i, i, p, p);

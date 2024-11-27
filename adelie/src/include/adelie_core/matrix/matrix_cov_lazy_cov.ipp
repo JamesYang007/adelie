@@ -23,7 +23,8 @@ ADELIE_CORE_MATRIX_COV_LAZY_COV::cache(
 
     const auto block = _X.middleCols(i, p);
     util::rowmat_type<value_t> cov(p, _X.cols());
-    if (_n_threads <= 1) { 
+    if (_n_threads <= 1 || util::omp_in_parallel()) { 
+        Eigen::setNbThreads(1);
         cov.noalias() = block.transpose() * _X; 
         _cache.emplace_back(std::move(cov));
         return;
@@ -38,6 +39,7 @@ ADELIE_CORE_MATRIX_COV_LAZY_COV::cache(
             + std::max<int>(t-remainder, 0) * block_size
         );
         const auto size = block_size + (t < remainder);
+        Eigen::setNbThreads(1);
         cov.middleRows(begin, size).noalias() = (
             block.transpose().middleRows(begin, size) * _X
         );
@@ -102,22 +104,50 @@ ADELIE_CORE_MATRIX_COV_LAZY_COV::mul(
     const Eigen::Ref<const vec_index_t>& indices,
     const Eigen::Ref<const vec_value_t>& values,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     base_t::check_mul(indices.size(), values.size(), out.size(), rows(), cols());
+    const auto n = _X.rows();
+    const auto p = _X.cols();
+    const auto max_np = std::max(n, p);
+    util::rowmat_type<value_t> buff;
+    vec_value_t vbuff;
     out.setZero();
-    for (int i_idx = 0; i_idx < indices.size(); ++i_idx) {
+    for (int i_idx = 0; i_idx < indices.size();) {
         const auto i = indices[i_idx];
         if (_index_map[i] < 0) {
-            int cache_size = 0;
-            for(; i+cache_size < cols() && _index_map[i+cache_size] < 0 && 
-                    indices[i_idx+cache_size] == i+cache_size; ++cache_size);
-            cache(i, cache_size);
+            int block_size = 0;
+            for(; i+block_size < p && _index_map[i+block_size] < 0 && 
+                    indices[i_idx+block_size] == i+block_size; ++block_size);
+            if (static_cast<size_t>(buff.size()) < _n_threads * max_np) {
+                buff.resize(_n_threads * (_n_threads > 1) * !util::omp_in_parallel(), max_np);
+            }
+            if (vbuff.size() < n+p) vbuff.resize(n+p);
+            auto Xv_m = vbuff.head(n).matrix();
+            dgemv(
+                _X.middleCols(i, block_size).transpose(),
+                values.segment(i_idx, block_size).matrix(),
+                _n_threads,
+                buff,
+                Xv_m
+            );
+            auto XTXv_m = vbuff.tail(p).matrix();
+            dgemv(
+                _X,
+                Xv_m,
+                _n_threads,
+                buff,
+                XTXv_m
+            );
+            dvaddi(out, XTXv_m.array(), _n_threads);
+            i_idx += block_size;
+            continue;
         }
         const auto& mat = _cache[_index_map[i]];
         const auto i_rel = _slice_map[i];
         const auto v = values[i_idx];
         dvaddi(out, v * mat.row(i_rel).array(), _n_threads);
+        ++i_idx;
     }
 }
 
@@ -126,16 +156,21 @@ void
 ADELIE_CORE_MATRIX_COV_LAZY_COV::to_dense(
     int i, int p,
     Eigen::Ref<colmat_value_t> out
-) 
+) const
 {
     base_t::check_to_dense(i, p, out.rows(), out.cols(), rows(), cols());
+    const auto X_block = _X.middleCols(i, p);
     int n_processed = 0;
     while (n_processed < p) {
         const auto k = i + n_processed;
         if (_index_map[k] < 0) {
-            int cache_size = 0;
-            for(; k+cache_size < i+p && _index_map[k+cache_size] < 0; ++cache_size);
-            cache(k, cache_size);
+            int block_size = 0;
+            for(; k+block_size < i+p && _index_map[k+block_size] < 0; ++block_size);
+            const auto Xk = _X.middleCols(k, block_size);
+            auto out_m = out.middleCols(n_processed, block_size);
+            out_m.noalias() = X_block.transpose() * Xk;
+            n_processed += block_size;
+            continue;
         }
         const auto& mat = _cache[_index_map[k]];
         const auto k_rel = _slice_map[k];

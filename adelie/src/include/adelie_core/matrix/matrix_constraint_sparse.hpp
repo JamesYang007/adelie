@@ -32,7 +32,6 @@ public:
 private:
     const Eigen::Map<const sparse_t> _mat;  // underlying sparse matrix
     const size_t _n_threads;                // number of threads
-    vec_value_t _buff;
     
 public:
     explicit MatrixConstraintSparse(

@@ -29,7 +29,21 @@ public:
             j, Q, out
         );
     }
-    
+
+    void rmmul_safe(
+        int j, 
+        const Eigen::Ref<const colmat_value_t>& Q,
+        Eigen::Ref<vec_value_t> out
+    ) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            rmmul_safe,
+            j, Q, out
+        );
+    }
+
     value_t rvmul(
         int j, 
         const Eigen::Ref<const vec_value_t>& v
@@ -39,6 +53,19 @@ public:
             value_t,
             base_t,
             rvmul,
+            j, v
+        );
+    }
+
+    value_t rvmul_safe(
+        int j, 
+        const Eigen::Ref<const vec_value_t>& v
+    ) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            value_t,
+            base_t,
+            rvmul_safe,
             j, v
         );
     }
@@ -60,7 +87,7 @@ public:
     void mul(
         const Eigen::Ref<const vec_value_t>& v, 
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -73,7 +100,7 @@ public:
     void tmul(
         const Eigen::Ref<const vec_value_t>& v, 
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -86,7 +113,7 @@ public:
     void cov(
         const Eigen::Ref<const colmat_value_t>& Q,
         Eigen::Ref<colmat_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -118,7 +145,7 @@ public:
         const Eigen::Ref<const vec_index_t>& indices,
         const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -144,6 +171,23 @@ void matrix_constraint_base(py::module_& m, const char* name)
         Computes the matrix-vector multiplication 
         ``A[j].T @ Q``.
 
+        .. warning::
+            This function is not thread-safe!
+
+        Parameters
+        ----------
+        j : int
+            Row index.
+        Q : (d, d) ndarray
+            Matrix to dot product with the ``j`` th row.
+        out : (d,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("rmmul_safe", &internal_t::rmmul_safe, R"delimiter(
+        Computes a row vector-matrix multiplication.
+
+        Thread-safe version of :func:`rmmul`.
+
         Parameters
         ----------
         j : int
@@ -158,6 +202,26 @@ void matrix_constraint_base(py::module_& m, const char* name)
 
         Computes the dot-product
         ``A[j].T @ v``.
+
+        .. warning::
+            This function is not thread-safe!
+
+        Parameters
+        ----------
+        j : int
+            Row index.
+        v : (d,) ndarray
+            Vector to dot product with the ``j`` th row.
+
+        Returns
+        -------
+        dot : float
+            Row vector-vector multiplication.
+        )delimiter")
+        .def("rvmul_safe", &internal_t::rvmul_safe, R"delimiter(
+        Computes a row vector-vector multiplication.
+
+        Thread-safe version of :func:`rvmul`.
 
         Parameters
         ----------
@@ -176,6 +240,9 @@ void matrix_constraint_base(py::module_& m, const char* name)
 
         Computes the vector-scalar multiplication ``A[j] * v``.
         The result is *incremented* into the output vector.
+
+        .. warning::
+            This function is not thread-safe!
 
         Parameters
         ----------
@@ -348,7 +415,7 @@ public:
         const Eigen::Ref<const vec_index_t>& indices,
         const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -361,7 +428,7 @@ public:
     void to_dense(
         int i, int p,
         Eigen::Ref<colmat_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -396,6 +463,9 @@ void matrix_cov_base(py::module_& m, const char* name)
         Computes the matrix-sparse vector multiplication
         ``v.T @ A[:, subset]`` where ``v`` is represented by the sparse-format
         ``indices`` and ``values``.
+
+        .. warning::
+            This function is not thread-safe!
 
         Parameters
         ----------
@@ -582,6 +652,20 @@ public:
         );
     }
 
+    value_t cmul_safe(
+        int j, 
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& weights
+    ) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            value_t,
+            base_t,
+            cmul_safe,
+            j, v, weights
+        );
+    }
+
     void ctmul(
         int j, 
         value_t v, 
@@ -611,6 +695,21 @@ public:
         );
     }
 
+    void bmul_safe(
+        int j, int q, 
+        const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    ) const override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            void,
+            base_t,
+            bmul_safe,
+            j, q, v, weights, out
+        );
+    }
+
     void btmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
@@ -629,7 +728,7 @@ public:
         const Eigen::Ref<const vec_value_t>& v, 
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -642,7 +741,7 @@ public:
     void sq_mul(
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -655,7 +754,7 @@ public:
     void sp_tmul(
         const sp_mat_value_t& v,
         Eigen::Ref<rowmat_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
@@ -668,22 +767,21 @@ public:
     void cov(
         int j, int q,
         const Eigen::Ref<const vec_value_t>& sqrt_weights,
-        Eigen::Ref<colmat_value_t> out,
-        Eigen::Ref<colmat_value_t> buffer
-    ) override
+        Eigen::Ref<colmat_value_t> out
+    ) const override
     {
         PYBIND11_OVERRIDE_PURE(
             void,
             base_t,
             cov,
-            j, q, sqrt_weights, out, buffer
+            j, q, sqrt_weights, out
         );
     }
 
     void mean(
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE(
             void,
@@ -697,7 +795,7 @@ public:
         const Eigen::Ref<const vec_value_t>& centers,
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) override
+    ) const override
     {
         PYBIND11_OVERRIDE(
             void,
@@ -741,6 +839,28 @@ void matrix_naive_base(py::module_& m, const char* name)
         Computes the dot-product 
         ``(v * w).T @ X[:,j]``.
 
+        .. warning::
+            This function is not thread-safe!
+
+        Parameters
+        ----------
+        j : int
+            Column index.
+        v : (n,) ndarray
+            Vector to dot product with the ``j`` th column.
+        w : (n,) ndarray
+            Vector of weights.
+
+        Returns
+        -------
+        dot : float
+            Column vector-vector multiplication.
+        )delimiter")
+        .def("cmul_safe", &internal_t::cmul_safe, R"delimiter(
+        Computes a column vector-vector multiplication.
+
+        Thread-safe version of :func:`cmul`.
+
         Parameters
         ----------
         j : int
@@ -761,6 +881,9 @@ void matrix_naive_base(py::module_& m, const char* name)
         Computes the vector-scalar multiplication ``v * X[:,j]``.
         The result is *incremented* into the output vector.
 
+        .. warning::
+            This function is not thread-safe!
+
         Parameters
         ----------
         j : int
@@ -774,6 +897,27 @@ void matrix_naive_base(py::module_& m, const char* name)
         Computes a column block matrix-vector multiplication.
 
         Computes the matrix-vector multiplication ``(v * w).T @ X[:, j:j+q]``.
+
+        .. warning::
+            This function is not thread-safe!
+
+        Parameters
+        ----------
+        j : int
+            Column index.
+        q : int
+            Number of columns.
+        v : (n,) ndarray
+            Vector to multiply with the block matrix.
+        w : (n,) ndarray
+            Vector of weights.
+        out : (q,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("bmul_safe", &internal_t::bmul_safe, R"delimiter(
+        Computes a column block matrix-vector multiplication.
+
+        Thread-safe version of :func:`bmul`.
 
         Parameters
         ----------
@@ -794,6 +938,9 @@ void matrix_naive_base(py::module_& m, const char* name)
         Computes the matrix-vector multiplication
         ``v.T @ X[:, j:j+q].T``.
         The result is *incremented* into the output vector.
+
+        .. warning::
+            This function is not thread-safe!
 
         Parameters
         ----------
@@ -880,6 +1027,8 @@ void matrix_naive_base(py::module_& m, const char* name)
 
         Computes the weighted covariance matrix
         ``X[:, j:j+q].T @ W @ X[:, j:j+q]``.
+
+        This function is thread-safe.
         
         .. note::
             Although the name is "covariance", we do not center the columns of ``X``!
@@ -894,8 +1043,6 @@ void matrix_naive_base(py::module_& m, const char* name)
             Square-root of the weights.
         out : (q, q) ndarray
             Matrix to store in-place the result.
-        buffer : (n, q) ndarray
-            Extra buffer space if needed.
         )delimiter")
         .def("rows", &internal_t::rows, R"delimiter(
         Returns the number of rows.
@@ -983,15 +1130,16 @@ void matrix_naive_cconcatenate(py::module_& m, const char* name)
         "Core matrix class for naive column-wise concatenated matrix."
         )
         .def(
-            py::init([](py::list mat_list_py) {
+            py::init([](py::list mat_list_py, size_t n_threads) {
                 std::vector<base_t*> mat_list;
                 mat_list.reserve(mat_list_py.size());
                 for (auto obj : mat_list_py) {
                     mat_list.push_back(py::cast<base_t*>(obj));
                 }
-                return new internal_t(mat_list);
+                return new internal_t(mat_list, n_threads);
             }), 
-            py::arg("mat_list").noconvert()
+            py::arg("mat_list").noconvert(),
+            py::arg("n_threads")
         )
         .def("mean", &internal_t::mean, R"delimiter(
         Computes the implied column means.
@@ -1034,15 +1182,16 @@ void matrix_naive_rconcatenate(py::module_& m, const char* name)
         "Core matrix class for naive row-wise concatenated matrix."
         )
         .def(
-            py::init([](py::list mat_list_py) {
+            py::init([](py::list mat_list_py, size_t n_threads) {
                 std::vector<base_t*> mat_list;
                 mat_list.reserve(mat_list_py.size());
                 for (auto obj : mat_list_py) {
                     mat_list.push_back(py::cast<base_t*>(obj));
                 }
-                return new internal_t(mat_list);
+                return new internal_t(mat_list, n_threads);
             }), 
-            py::arg("mat_list").noconvert()
+            py::arg("mat_list").noconvert(),
+            py::arg("n_threads")
         )
         .def("mean", &internal_t::mean, R"delimiter(
         Computes the implied column means.

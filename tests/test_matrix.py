@@ -263,8 +263,10 @@ def run_naive(
     v = np.random.normal(0, 1, n).astype(dtype)
     for i in range(p):
         out = cX.cmul(i, v, w)
+        out_safe = cX.cmul_safe(i, v, w)
         expected = (v * w) @ X[:, i]
         assert np.allclose(expected, out, atol=atol)
+        assert np.allclose(expected, out_safe, atol=atol)
 
     # test ctmul
     v = np.random.normal(0, 1)
@@ -280,14 +282,20 @@ def run_naive(
     for i in range(1, p+1):
         out = np.empty(i, dtype=dtype)
         cX.bmul(0, i, v, w, out)
+        out_safe = np.empty(i, dtype=dtype)
+        cX.bmul_safe(0, i, v, w, out_safe)
         expected = (v * w).T @ X[:, :i]
         assert np.allclose(expected, out, atol=atol)
+        assert np.allclose(expected, out_safe, atol=atol)
     q = min(10, p)
     out = np.empty(q, dtype=dtype)
+    out_safe = np.empty(q, dtype=dtype)
     for i in range(p-q+1):
         cX.bmul(i, q, v, w, out)
+        cX.bmul(i, q, v, w, out_safe)
         expected = (v * w).T @ X[:, i:i+q]
         assert np.allclose(expected, out, atol=atol)
+        assert np.allclose(expected, out_safe, atol=atol)
 
     # test btmul
     out = np.zeros(n, dtype=dtype)
@@ -321,11 +329,10 @@ def run_naive(
     # test cov
     q = min(100, p)
     sqrt_weights = np.sqrt(w)
-    buffer = np.empty((n, q), dtype=dtype, order="F")
     out = np.empty((q, q), dtype=dtype, order="F")
     for i in range(p-q+1):
         try:
-            cX.cov(i, q, sqrt_weights, out, buffer)
+            cX.cov(i, q, sqrt_weights, out)
             expected = X[:, i:i+q].T @ (w[:, None] * X[:, i:i+q])
             assert np.allclose(expected, out, atol=atol)
         except RuntimeError as err:
@@ -359,10 +366,29 @@ def run_naive(
         group_sizes = cX.group_sizes
         for g, gs in zip(groups, group_sizes):
             out = np.empty((gs, gs), dtype=dtype, order="F")
-            buffer = np.empty((n, gs), dtype=dtype, order="F")
-            cX.cov(g, gs, sqrt_weights, out, buffer)
+            cX.cov(g, gs, sqrt_weights, out)
             expected = X[:, g:g+gs].T @ (w[:, None] * X[:, g:g+gs])
             assert np.allclose(expected, out, atol=atol)
+
+    # test cov (special cases)
+    if isinstance(
+        cX,
+        (
+            ad.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C,
+            ad.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F,
+            ad.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C,
+            ad.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F,
+            ad.adelie_core.matrix.MatrixNaiveConvexReluDense32C,
+            ad.adelie_core.matrix.MatrixNaiveConvexReluDense32F,
+            ad.adelie_core.matrix.MatrixNaiveConvexReluDense64C,
+            ad.adelie_core.matrix.MatrixNaiveConvexReluDense64F,
+        )
+    ):
+        d = cX._mat.shape[1]
+        out = np.empty((d, d), dtype=dtype, order="F")
+        cX.cov(0, d, sqrt_weights, out)
+        expected = X[:, :d].T @ (w[:, None] * X[:, :d])
+        assert np.allclose(expected, out, atol=atol)
 
     assert cX.rows() == n
     assert cX.cols() == p
@@ -735,6 +761,7 @@ def test_naive_snp_unphased(n, p, read_mode, dtype, seed=0):
     [1, 13, 3],
     [144, 1, 2],
     [10000, 1, 2],
+    [5, 130, 3],
 ])
 def test_naive_snp_phased_ancestry(n, s, A, read_mode, dtype, seed=0):
     def create_dense(calldata, ancestries, A):
@@ -828,14 +855,14 @@ def test_naive_standardize(n, p, dtype, seed=0):
     X = np.asfortranarray(np.random.normal(0, 1, (n, p)).astype(dtype))
     dX = mod.dense(X) 
 
-    cX = mod.standardize(dX)
+    cX = mod.standardize(dX, n_threads=2)
     means = np.mean(X, axis=0)
     scales = np.std(X, axis=0)
     assert np.allclose(cX._centers, means)
     assert np.allclose(cX._scales, scales)
 
     centers = np.random.normal(0, 1, p)
-    cX = mod.standardize(dX, centers)
+    cX = mod.standardize(dX, centers, n_threads=2)
     scales = np.sqrt(
         np.sum((X - centers[None]) ** 2, axis=0) / n
     )

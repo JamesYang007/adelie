@@ -40,21 +40,21 @@ private:
     static constexpr value_t _max = std::numeric_limits<value_t>::max();
     const io_t& _io;             // IO handler
     const size_t _n_threads;    // number of threads
-    vec_index_t _ibuff;
-    vec_value_t _vbuff;
     vec_value_t _buff;
 
     inline value_t _cmul(
         int j, 
         const Eigen::Ref<const vec_value_t>& v,
         const Eigen::Ref<const vec_value_t>& weights,
-        size_t n_threads
-    );
+        size_t n_threads,
+        Eigen::Ref<vec_value_t> buff
+    ) const;
 
     inline value_t _sq_cmul(
         int j, 
-        const Eigen::Ref<const vec_value_t>& weights
-    );
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> buff
+    ) const;
 
     inline void _ctmul(
         int j, 
@@ -70,17 +70,7 @@ public:
     );
 
     ADELIE_CORE_MATRIX_NAIVE_PURE_OVERRIDE_DECL
-
-    virtual void mean(
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override;
-
-    virtual void var(
-        const Eigen::Ref<const vec_value_t>& centers,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override;
+    ADELIE_CORE_MATRIX_NAIVE_OVERRIDE_DECL
 };
 
 } // namespace matrix

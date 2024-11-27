@@ -1,5 +1,6 @@
 #pragma once
 #include <adelie_core/matrix/matrix_naive_subset.hpp>
+#include <adelie_core/util/omp.hpp>
 
 namespace adelie_core {
 namespace matrix {
@@ -78,6 +79,18 @@ ADELIE_CORE_MATRIX_NAIVE_CSUBSET::cmul(
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
+typename ADELIE_CORE_MATRIX_NAIVE_CSUBSET::value_t
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::cmul_safe(
+    int j, 
+    const Eigen::Ref<const vec_value_t>& v,
+    const Eigen::Ref<const vec_value_t>& weights
+) const
+{
+    base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
+    return _mat->cmul_safe(_subset[j], v, weights);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
 void
 ADELIE_CORE_MATRIX_NAIVE_CSUBSET::ctmul(
     int j, 
@@ -116,6 +129,31 @@ ADELIE_CORE_MATRIX_NAIVE_CSUBSET::bmul(
 
 ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
 void
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET::bmul_safe(
+    int j, int q, 
+    const Eigen::Ref<const vec_value_t>& v, 
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) const
+{
+    base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+    const auto& _subset_csize = std::get<0>(_subset_cinfo);
+    int n_processed = 0;
+    while (n_processed < q) {
+        const auto k = j + n_processed;
+        const auto size = std::min<size_t>(_subset_csize[k], q-n_processed);
+        if (size == 1) {
+            out[n_processed] = _mat->cmul_safe(_subset[k], v, weights);
+        } else {
+            auto curr_out = out.segment(n_processed, size);
+            _mat->bmul_safe(_subset[k], size, v, weights, curr_out);
+        }
+        n_processed += size;
+    }
+}
+
+ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
+void
 ADELIE_CORE_MATRIX_NAIVE_CSUBSET::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
@@ -144,7 +182,7 @@ ADELIE_CORE_MATRIX_NAIVE_CSUBSET::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto& _subset_csize = std::get<0>(_subset_cinfo);
     const auto& _subset_cbegin = std::get<1>(_subset_cinfo);
@@ -154,14 +192,9 @@ ADELIE_CORE_MATRIX_NAIVE_CSUBSET::mul(
         const auto j = _subset[subset_idx];
         const auto q = _subset_csize[subset_idx];
         auto curr_out = out.segment(subset_idx, q);
-        _mat->bmul(j, q, v, weights, curr_out);
+        _mat->bmul_safe(j, q, v, weights, curr_out);
     };
-    if (_n_threads <= 1) {
-        for (int t = 0; t < static_cast<int>(_subset_cbegin.size()); ++t) routine(t);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int t = 0; t < static_cast<int>(_subset_cbegin.size()); ++t) routine(t);
-    }
+    util::omp_parallel_for(routine, 0, _subset_cbegin.size(), _n_threads * (_n_threads <= _subset_cbegin.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
@@ -183,13 +216,12 @@ void
 ADELIE_CORE_MATRIX_NAIVE_CSUBSET::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
-    Eigen::Ref<colmat_value_t> out,
-    Eigen::Ref<colmat_value_t> buffer
-)
+    Eigen::Ref<colmat_value_t> out
+) const
 {
     base_t::check_cov(
         j, q, sqrt_weights.size(), 
-        out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
+        out.rows(), out.cols(),
         rows(), cols()
     );
     const auto& _subset_csize = std::get<0>(_subset_cinfo);
@@ -199,7 +231,7 @@ ADELIE_CORE_MATRIX_NAIVE_CSUBSET::cov(
             "subset[j:j+q] is not contiguous. "
         );
     }
-    _mat->cov(_subset[j], q, sqrt_weights, out, buffer);
+    _mat->cov(_subset[j], q, sqrt_weights, out);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP
@@ -207,7 +239,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_CSUBSET::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto& _subset_csize = std::get<0>(_subset_cinfo);
     const auto& _subset_cbegin = std::get<1>(_subset_cinfo);
@@ -228,25 +260,19 @@ void
 ADELIE_CORE_MATRIX_NAIVE_CSUBSET::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
-)
+) const
 {
     base_t::check_sp_tmul(
         v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
     );
 
-    const auto routine = [&](auto k) {
+    for (int k = 0; k < v.outerSize(); ++k) {
         typename sp_mat_value_t::InnerIterator it(v, k);
         auto out_k = out.row(k);
         out_k.setZero();
         for (; it; ++it) {
             _mat->ctmul(_subset[it.index()], it.value(), out_k);
         }
-    };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
     }
 }
 
@@ -255,7 +281,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_CSUBSET::mean(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     vec_value_t m(_mat->cols());
     _mat->mean(weights, m);
@@ -270,7 +296,7 @@ ADELIE_CORE_MATRIX_NAIVE_CSUBSET::var(
     const Eigen::Ref<const vec_value_t>& centers,
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     vec_value_t new_c(_mat->cols());
     new_c.setZero();
@@ -346,6 +372,23 @@ ADELIE_CORE_MATRIX_NAIVE_RSUBSET::cmul(
 }
 
 ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
+typename ADELIE_CORE_MATRIX_NAIVE_RSUBSET::value_t
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::cmul_safe(
+    int j, 
+    const Eigen::Ref<const vec_value_t>& v,
+    const Eigen::Ref<const vec_value_t>& weights
+) const
+{
+    base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
+    vec_value_t buffer(_mat->rows());
+    buffer.setZero();
+    for (int i = 0; i < _subset.size(); ++i) {
+        buffer[_subset[i]] = v[i] * weights[i];
+    }
+    return _mat->cmul_safe(j, _mask, buffer);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
 void
 ADELIE_CORE_MATRIX_NAIVE_RSUBSET::ctmul(
     int j, 
@@ -380,6 +423,24 @@ ADELIE_CORE_MATRIX_NAIVE_RSUBSET::bmul(
 
 ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
 void
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET::bmul_safe(
+    int j, int q, 
+    const Eigen::Ref<const vec_value_t>& v, 
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) const
+{
+    base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+    vec_value_t buffer(_mat->rows());
+    buffer.setZero();
+    for (int i = 0; i < _subset.size(); ++i) {
+        buffer[_subset[i]] = v[i] * weights[i];
+    }
+    _mat->bmul_safe(j, q, _mask, buffer, out);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
+void
 ADELIE_CORE_MATRIX_NAIVE_RSUBSET::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
@@ -400,13 +461,14 @@ ADELIE_CORE_MATRIX_NAIVE_RSUBSET::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
-    _buffer.setZero();
+    vec_value_t buffer(_mat->rows());
+    buffer.setZero();
     for (int i = 0; i < _subset.size(); ++i) {
-        _buffer[_subset[i]] = v[i] * weights[i];
+        buffer[_subset[i]] = v[i] * weights[i];
     }
-    _mat->mul(_mask, _buffer, out);
+    _mat->mul(_mask, buffer, out);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
@@ -428,28 +490,20 @@ void
 ADELIE_CORE_MATRIX_NAIVE_RSUBSET::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
-    Eigen::Ref<colmat_value_t> out,
-    Eigen::Ref<colmat_value_t> buffer
-)
+    Eigen::Ref<colmat_value_t> out
+) const
 {
     base_t::check_cov(
         j, q, sqrt_weights.size(), 
-        out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
+        out.rows(), out.cols(),
         rows(), cols()
     );
-    _buffer.setZero();
+    vec_value_t buffer(_mat->rows());
+    buffer.setZero();
     for (int i = 0; i < _subset.size(); ++i) {
-        _buffer[_subset[i]] = sqrt_weights[i];
+        buffer[_subset[i]] = sqrt_weights[i];
     }
-    if (_cov_buffer.size() < _mat->rows() * q) {
-        _cov_buffer.resize(_mat->rows() * q);
-    }
-    Eigen::Map<colmat_value_t> cov_buffer(
-        _cov_buffer.data(),
-        _mat->rows(),
-        q
-    );
-    _mat->cov(j, q, _buffer, out, cov_buffer);
+    _mat->cov(j, q, buffer, out);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
@@ -457,13 +511,14 @@ void
 ADELIE_CORE_MATRIX_NAIVE_RSUBSET::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
-    _buffer.setZero();
+    vec_value_t buffer(_mat->rows());
+    buffer.setZero();
     for (int i = 0; i < _subset.size(); ++i) {
-        _buffer[_subset[i]] = weights[i];
+        buffer[_subset[i]] = weights[i];
     }
-    _mat->sq_mul(_buffer, out);
+    _mat->sq_mul(buffer, out);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_RSUBSET_TP
@@ -471,7 +526,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_RSUBSET::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
-)
+) const
 {
     base_t::check_sp_tmul(
         v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
@@ -488,7 +543,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_RSUBSET::mean(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     vec_value_t new_w(_mat->rows());
     new_w.setZero();
@@ -504,7 +559,7 @@ ADELIE_CORE_MATRIX_NAIVE_RSUBSET::var(
     const Eigen::Ref<const vec_value_t>& centers,
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     vec_value_t new_w(_mat->rows());
     new_w.setZero();

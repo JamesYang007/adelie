@@ -1,6 +1,7 @@
 #pragma once
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/macros.hpp>
+#include <adelie_core/util/omp.hpp>
 #include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
@@ -26,13 +27,7 @@ void compute_column_mean(
         }
         out[j] = static_cast<double>(sum) / std::max<uint64_t>(n - n_miss, 1);
     };
-
-    if (n_threads <= 1) {
-        for (int j = 0; j < p; ++j) routine(j);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int j = 0; j < p; ++j) routine(j);
-    }
+    util::omp_parallel_for(routine, 0, p, n_threads);
 }
 
 ADELIE_CORE_STRONG_INLINE
@@ -51,13 +46,7 @@ void compute_nnm(
         }
         out[j] = n - n_miss;
     };
-
-    if (n_threads <= 1) {
-        for (int j = 0; j < p; ++j) routine(j);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int j = 0; j < p; ++j) routine(j);
-    }
+    util::omp_parallel_for(routine, 0, p, n_threads);
 }
 
 template <class MType>
@@ -75,13 +64,7 @@ void compute_nnz(
         for (int k = 0; k < n; ++k) if (m(k,j) != 0) ++nnz;
         out[j] = nnz;
     };
-
-    if (n_threads <= 1) {
-        for (int j = 0; j < p; ++j) routine(j);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int j = 0; j < p; ++j) routine(j);
-    }
+    util::omp_parallel_for(routine, 0, p, n_threads);
 }
 
 ADELIE_CORE_STRONG_INLINE

@@ -29,6 +29,7 @@
 #pragma GCC diagnostic pop
 #endif
 #include <adelie_core/constraint/constraint_base.hpp>
+#include <adelie_core/util/omp.hpp>
 #include <adelie_core/util/types.hpp>
 
 PYBIND11_MAKE_OPAQUE(std::vector<adelie_core::util::rowmat_type<double>>)
