@@ -30,11 +30,22 @@ public:
         const Eigen::Ref<const colmat_value_t>& Q,
         Eigen::Ref<vec_value_t> out
     ) =0;
-    
+
+    virtual void rmmul_safe(
+        int j, 
+        const Eigen::Ref<const colmat_value_t>& Q,
+        Eigen::Ref<vec_value_t> out
+    ) const =0;
+
     virtual value_t rvmul(
         int j, 
         const Eigen::Ref<const vec_value_t>& v
     ) =0;
+
+    virtual value_t rvmul_safe(
+        int j, 
+        const Eigen::Ref<const vec_value_t>& v
+    ) const =0;
 
     virtual void rvtmul(
         int j, 
@@ -45,17 +56,17 @@ public:
     virtual void mul(
         const Eigen::Ref<const vec_value_t>& v, 
         Eigen::Ref<vec_value_t> out
-    ) =0;
+    ) const =0;
 
     virtual void tmul(
         const Eigen::Ref<const vec_value_t>& v, 
         Eigen::Ref<vec_value_t> out
-    ) =0;
+    ) const =0;
 
     virtual void cov(
         const Eigen::Ref<const colmat_value_t>& Q,
         Eigen::Ref<colmat_value_t> out
-    ) =0;
+    ) const =0;
 
     virtual int rows() const =0;
     
@@ -65,7 +76,7 @@ public:
         const Eigen::Ref<const vec_index_t>& indices,
         const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
-    ) =0;
+    ) const =0;
 };
 
 } // namespace matrix
@@ -78,10 +89,19 @@ public:
         const Eigen::Ref<const colmat_value_t>& Q,\
         Eigen::Ref<vec_value_t> out\
     ) override;\
+    void rmmul_safe(\
+        int j,\
+        const Eigen::Ref<const colmat_value_t>& Q,\
+        Eigen::Ref<vec_value_t> out\
+    ) const override;\
     value_t rvmul(\
         int j,\
         const Eigen::Ref<const vec_value_t>& v\
     ) override;\
+    value_t rvmul_safe(\
+        int j,\
+        const Eigen::Ref<const vec_value_t>& v\
+    ) const override;\
     void rvtmul(\
         int j,\
         value_t v,\
@@ -90,20 +110,20 @@ public:
     void mul(\
         const Eigen::Ref<const vec_value_t>& v,\
         Eigen::Ref<vec_value_t> out\
-    ) override;\
+    ) const override;\
     void tmul(\
         const Eigen::Ref<const vec_value_t>& v,\
         Eigen::Ref<vec_value_t> out\
-    ) override;\
+    ) const override;\
     void cov(\
         const Eigen::Ref<const colmat_value_t>& Q,\
         Eigen::Ref<colmat_value_t> out\
-    ) override;\
+    ) const override;\
     int rows() const override;\
     int cols() const override;\
     void sp_mul(\
         const Eigen::Ref<const vec_index_t>& indices,\
         const Eigen::Ref<const vec_value_t>& values,\
         Eigen::Ref<vec_value_t> out\
-    ) override;
+    ) const override;
 #endif

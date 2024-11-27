@@ -381,7 +381,7 @@ def concatenate(
     class _concatenate(core_base, py_base):
         def __init__(self):
             self._mats = mats
-            core_base.__init__(self, self._mats)
+            core_base.__init__(self, self._mats, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
     return _concatenate()

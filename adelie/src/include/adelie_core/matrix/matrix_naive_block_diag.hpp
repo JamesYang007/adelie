@@ -36,35 +36,34 @@ private:
     const vec_index_t _row_outer;
     const vec_index_t _col_outer;
     const size_t _n_threads;
-    vec_value_t _buff;
 
-    inline auto init_rows(
+    static inline auto init_rows(
         const std::vector<base_t*>& mat_list
     );
 
-    inline auto init_cols(
+    static inline auto init_cols(
         const std::vector<base_t*>& mat_list
     );
 
-    inline auto init_max_cols(
+    static inline auto init_max_cols(
         const std::vector<base_t*>& mat_list
     );
 
-    inline auto init_col_slice_map(
+    static inline auto init_col_slice_map(
         const std::vector<base_t*>& mat_list,
         size_t p
     );
 
-    inline auto init_col_index_map(
+    static inline auto init_col_index_map(
         const std::vector<base_t*>& mat_list,
         size_t p
     );
 
-    inline auto init_row_outer(
+    static inline auto init_row_outer(
         const std::vector<base_t*>& mat_list
     );
 
-    inline auto init_col_outer(
+    static inline auto init_col_outer(
         const std::vector<base_t*>& mat_list
     );
 
@@ -75,17 +74,7 @@ public:
     );
 
     ADELIE_CORE_MATRIX_NAIVE_PURE_OVERRIDE_DECL
-
-    void mean(
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override; 
-
-    void var(
-        const Eigen::Ref<const vec_value_t>& centers,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override;
+    ADELIE_CORE_MATRIX_NAIVE_OVERRIDE_DECL
 };
 
 } // namespace matrix

@@ -1,6 +1,7 @@
 #pragma once
 #include <adelie_core/io/io_snp_unphased.hpp>
 #include <adelie_core/io/utils.hpp>
+#include <adelie_core/util/omp.hpp>
 #include <adelie_core/util/stopwatch.hpp>
 
 namespace adelie_core {
@@ -61,12 +62,7 @@ ADELIE_CORE_IO_SNP_UNPHASED::to_dense(
             }
         }
     };
-    if (n_threads <= 1) {
-        for (int j = 0; j < static_cast<int>(p); ++j) routine(j);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int j = 0; j < static_cast<int>(p); ++j) routine(j);
-    }
+    util::omp_parallel_for(routine, 0, p, n_threads);
 
     return dense;
 }
@@ -194,12 +190,7 @@ ADELIE_CORE_IO_SNP_UNPHASED::write(
         std::memcpy(outer_ptr + sizeof(outer_t) * (j+1), &col_bytes, sizeof(outer_t));
     };
     sw.start();
-    if (n_threads <= 1) {
-        for (int j = 0; j < static_cast<int>(p); ++j) outer_routine(j);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int j = 0; j < static_cast<int>(p); ++j) outer_routine(j);
-    }
+    util::omp_parallel_for(outer_routine, 0, p, n_threads);
     benchmark["outer_time"] = sw.elapsed();
     
     if (try_failed) {
@@ -287,12 +278,7 @@ ADELIE_CORE_IO_SNP_UNPHASED::write(
         }
     };
     sw.start();
-    if (n_threads <= 1) {
-        for (int j = 0; j < static_cast<int>(p); ++j) inner_routine(j);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int j = 0; j < static_cast<int>(p); ++j) inner_routine(j);
-    }
+    util::omp_parallel_for(inner_routine, 0, p, n_threads);
     benchmark["inner"] = sw.elapsed();
 
     if (try_failed) {

@@ -38,15 +38,20 @@ private:
     const std::vector<base_t*> _mat_list;   // (L,) list of naive matrices
     const size_t _rows;                     // number of rows
     const size_t _cols;                     // number of columns
+    const vec_index_t _outer;               // (L+1,) outer slices for each sub-matrix.
     const vec_index_t _slice_map;           // (p,) array mapping to matrix slice
     const vec_index_t _index_map;           // (p,) array mapping to (relative) index of the slice
-    vec_value_t _buff;                      // (n,) buffer
+    const size_t _n_threads;                // number of threads
 
     static inline auto init_rows(
         const std::vector<base_t*>& mat_list
     );
 
     static inline auto init_cols(
+        const std::vector<base_t*>& mat_list
+    );
+
+    static inline auto init_outer(
         const std::vector<base_t*>& mat_list
     );
 
@@ -62,21 +67,12 @@ private:
 
 public:
     explicit MatrixNaiveCConcatenate(
-        const std::vector<base_t*>& mat_list
+        const std::vector<base_t*>& mat_list,
+        size_t n_threads
     );
 
     ADELIE_CORE_MATRIX_NAIVE_PURE_OVERRIDE_DECL
-
-    void mean(
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override; 
-
-    void var(
-        const Eigen::Ref<const vec_value_t>& centers,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override;
+    ADELIE_CORE_MATRIX_NAIVE_OVERRIDE_DECL
 };
 
 template <class ValueType, class IndexType=Eigen::Index>
@@ -95,6 +91,8 @@ private:
     const std::vector<base_t*> _mat_list;   // (L,) list of naive matrices
     const size_t _rows;                     // number of rows
     const size_t _cols;                     // number of columns
+    const vec_index_t _outer;               // (L+1,) outer slices for each sub-matrix.
+    const size_t _n_threads;                // number of threads
     vec_value_t _buff;                      // (p,) buffer
 
     static inline auto init_rows(
@@ -105,23 +103,18 @@ private:
         const std::vector<base_t*>& mat_list
     );
 
-public:
-    explicit MatrixNaiveRConcatenate(
+    static inline auto init_outer(
         const std::vector<base_t*>& mat_list
     );
 
+public:
+    explicit MatrixNaiveRConcatenate(
+        const std::vector<base_t*>& mat_list,
+        size_t n_threads
+    );
+
     ADELIE_CORE_MATRIX_NAIVE_PURE_OVERRIDE_DECL
-
-    void mean(
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override; 
-
-    void var(
-        const Eigen::Ref<const vec_value_t>& centers,
-        const Eigen::Ref<const vec_value_t>& weights,
-        Eigen::Ref<vec_value_t> out
-    ) override;
+    ADELIE_CORE_MATRIX_NAIVE_OVERRIDE_DECL
 };
 
 } // namespace matrix 

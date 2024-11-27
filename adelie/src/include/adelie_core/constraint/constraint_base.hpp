@@ -51,7 +51,7 @@ public:
     virtual void gradient(
         const Eigen::Ref<const vec_value_t>& x,
         Eigen::Ref<vec_value_t> out
-    ) =0;
+    ) const =0;
 
     // TODO: gradient(x, mu_indices, mu_values, out)
 
@@ -59,11 +59,11 @@ public:
         const Eigen::Ref<const vec_value_t>& x,
         const Eigen::Ref<const vec_value_t>& mu,
         Eigen::Ref<vec_value_t> out
-    ) =0;
+    ) const =0;
 
     virtual void project(
         Eigen::Ref<vec_value_t> x
-    ) =0;
+    ) const =0;
 
     virtual value_t solve_zero(
         const Eigen::Ref<const vec_value_t>& v,
@@ -75,7 +75,7 @@ public:
     virtual void dual(
         Eigen::Ref<vec_index_t> indices,
         Eigen::Ref<vec_value_t> values
-    ) =0;
+    ) const =0;
     virtual int duals_nnz() const =0;
     virtual int duals() const =0;
     virtual int primals() const =0;
@@ -139,15 +139,15 @@ ADELIE_CORE_CONSTRAINT_BASE::check_gradient(
     void gradient(\
         const Eigen::Ref<const vec_value_t>& x,\
         Eigen::Ref<vec_value_t> out\
-    ) override;\
+    ) const override;\
     void gradient(\
         const Eigen::Ref<const vec_value_t>& x,\
         const Eigen::Ref<const vec_value_t>& mu,\
         Eigen::Ref<vec_value_t> out\
-    ) override;\
+    ) const override;\
     void project(\
         Eigen::Ref<vec_value_t> x\
-    ) override;\
+    ) const override;\
     value_t solve_zero(\
         const Eigen::Ref<const vec_value_t>& v,\
         Eigen::Ref<vec_uint64_t> buff\
@@ -156,7 +156,7 @@ ADELIE_CORE_CONSTRAINT_BASE::check_gradient(
     void dual(\
         Eigen::Ref<vec_index_t> indices,\
         Eigen::Ref<vec_value_t> values\
-    ) override;\
+    ) const override;\
     int duals_nnz() const override;\
     int duals() const override;\
     int primals() const override;\

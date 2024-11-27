@@ -1,6 +1,7 @@
 #pragma once
 #include <adelie_core/io/io_snp_phased_ancestry.hpp>
 #include <adelie_core/io/utils.hpp>
+#include <adelie_core/util/omp.hpp>
 #include <adelie_core/util/stopwatch.hpp>
 
 namespace adelie_core {
@@ -64,12 +65,7 @@ ADELIE_CORE_IO_SNP_PHASED_ANCESTRY::to_dense(
             }
         }
     };
-    if (n_threads <= 1) {
-        for (int j = 0; j < static_cast<int>(s); ++j) routine(j);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int j = 0; j < static_cast<int>(s); ++j) routine(j);
-    }
+    util::omp_parallel_for(routine, 0, s, n_threads);
 
     return dense;
 }
@@ -232,12 +228,7 @@ ADELIE_CORE_IO_SNP_PHASED_ANCESTRY::write(
         std::memcpy(outer_ptr + sizeof(outer_t) * (j+1), &snp_bytes, sizeof(outer_t));
     };
     sw.start();
-    if (n_threads <= 1) {
-        for (int j = 0; j < static_cast<int>(s); ++j) outer_routine(j);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int j = 0; j < static_cast<int>(s); ++j) outer_routine(j);
-    }
+    util::omp_parallel_for(outer_routine, 0, s, n_threads);
     benchmark["outer_time"] = sw.elapsed();
 
     switch (try_failed) {
@@ -345,12 +336,7 @@ ADELIE_CORE_IO_SNP_PHASED_ANCESTRY::write(
         }
     };
     sw.start();
-    if (n_threads <= 1) {
-        for (int j = 0; j < static_cast<int>(s); ++j) inner_routine(j);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (int j = 0; j < static_cast<int>(s); ++j) inner_routine(j);
-    }
+    util::omp_parallel_for(inner_routine, 0, s, n_threads);
     benchmark["inner"] = sw.elapsed();
 
     if (try_failed) {

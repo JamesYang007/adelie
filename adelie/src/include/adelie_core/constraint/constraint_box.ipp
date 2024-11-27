@@ -97,7 +97,7 @@ ADELIE_CORE_CONSTRAINT_BOX_TP
 void 
 ADELIE_CORE_CONSTRAINT_BOX::project(
     Eigen::Ref<vec_value_t> x
-) 
+) const
 {
     x = x.min(_u).max(-_l);
 }
@@ -251,7 +251,7 @@ void
 ADELIE_CORE_CONSTRAINT_BOX::gradient(
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     out = _mu;
 }
@@ -262,7 +262,7 @@ ADELIE_CORE_CONSTRAINT_BOX::gradient(
     const Eigen::Ref<const vec_value_t>&,
     const Eigen::Ref<const vec_value_t>& mu,
     Eigen::Ref<vec_value_t> out
-) 
+) const 
 {
     out = mu;
 }
@@ -296,7 +296,7 @@ void
 ADELIE_CORE_CONSTRAINT_BOX::dual(
     Eigen::Ref<vec_index_t> indices,
     Eigen::Ref<vec_value_t> values
-) 
+) const
 {
     size_t nnz = 0;
     for (Eigen::Index i = 0; i < _mu.size(); ++i) {

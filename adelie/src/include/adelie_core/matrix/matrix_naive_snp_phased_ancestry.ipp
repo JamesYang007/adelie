@@ -13,11 +13,12 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::_cmul(
     int j,
     const Eigen::Ref<const vec_value_t>& v,
     const Eigen::Ref<const vec_value_t>& weights,
-    size_t n_threads
-) 
+    size_t n_threads,
+    Eigen::Ref<vec_value_t> buff
+) const 
 {
     return snp_phased_ancestry_dot(
-        _io, j, v * weights, n_threads, _buff
+        _io, j, v * weights, n_threads, buff
     );
 }
 
@@ -25,10 +26,12 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
 typename ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::value_t
 ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::_sq_cmul(
     int j,
-    const Eigen::Ref<const vec_value_t>& weights
-) 
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> buff
+) const 
 {
-    const auto sum = snp_phased_ancestry_dot(_io, j, weights, 1, _buff);
+    constexpr size_t n_threads = 1;
+    const auto sum = snp_phased_ancestry_dot(_io, j, weights, n_threads, buff);
     const auto cross_sum = snp_phased_ancestry_cross_dot(_io, j, j, weights);
     return sum + 2 * cross_sum;
 }
@@ -40,7 +43,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::_ctmul(
     value_t v,
     Eigen::Ref<vec_value_t> out,
     size_t n_threads
-)
+) const
 {
     return snp_phased_ancestry_axi(
         _io, j, v, out, n_threads
@@ -54,14 +57,14 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::MatrixNaiveSNPPhasedAncestry(
 ): 
     _io(io),
     _n_threads(n_threads),
-    _bbuff(_io.rows()),
-    _ibuff(_io.rows()),
-    _buff(n_threads * std::max<size_t>(1, _io.ancestries()))
+    _buff(n_threads * _io.ancestries())
 {
     if (n_threads < 1) {
         throw util::adelie_core_error("n_threads must be >= 1.");
     }
-    _bbuff.setZero();
+    if (_io.ancestries() < 1) {
+        throw util::adelie_core_error("Number of ancestries must be >= 1.");
+    }
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
@@ -73,7 +76,20 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::cmul(
 )
 {
     base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
-    return _cmul(j, v, weights, _n_threads);
+    return _cmul(j, v, weights, _n_threads, _buff);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
+typename ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::value_t
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::cmul_safe(
+    int j, 
+    const Eigen::Ref<const vec_value_t>& v,
+    const Eigen::Ref<const vec_value_t>& weights
+) const
+{
+    base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
+    return _cmul(j, v, weights, _n_threads, buff);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
@@ -106,6 +122,22 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::bmul(
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
 void
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::bmul_safe(
+    int j, int q, 
+    const Eigen::Ref<const vec_value_t>& v, 
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) const
+{
+    base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+    vec_value_t buff(q * _n_threads * (_n_threads > 1) * !util::omp_in_parallel());
+    snp_phased_ancestry_block_dot(
+        _io, j, q, v * weights, out, _n_threads, buff
+    );
+}
+
+ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
+void
 ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
@@ -113,7 +145,6 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::btmul(
 )
 {
     base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
-    if (static_cast<size_t>(_buff.size()) < q * _n_threads) _buff.resize(q * _n_threads);
     snp_phased_ancestry_block_axi(
         _io, j, q, v, out, _n_threads
     );
@@ -125,17 +156,12 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](int t) {
-        out[t] = _cmul(t, v, weights, 1);
+        out[t] = _cmul(t, v, weights, 1, out /* unused */);
     };
-    if (_n_threads <= 1) {
-        for (int t = 0; t < cols(); ++t) routine(t);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int t = 0; t < cols(); ++t) routine(t);
-    }
+    util::omp_parallel_for(routine, 0, cols(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
@@ -143,19 +169,23 @@ void
 ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
-    Eigen::Ref<colmat_value_t> out,
-    Eigen::Ref<colmat_value_t> buffer
-)
+    Eigen::Ref<colmat_value_t> out
+) const
 {
     base_t::check_cov(
         j, q, sqrt_weights.size(), 
-        out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
+        out.rows(), out.cols(),
         rows(), cols()
     );
     
     const auto A = ancestries();
 
     out.setZero(); // don't parallelize! q is usually small
+
+    util::rowvec_type<char> bbuff(_io.rows());
+    vec_index_t ibuff(_io.rows());
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
+    bbuff.setZero();
 
     int n_solved0 = 0;
     while (n_solved0 < q) {
@@ -177,28 +207,43 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::cov(
                 const auto a_size = a_high - a_low;
 
                 // increase buffer including cross-term computation part as well
-                if (static_cast<size_t>(_buff.size()) < a_size * a_size * _n_threads) {
-                    _buff.resize(a_size * a_size * _n_threads);
+                if (
+                    static_cast<size_t>(buff.size()) < a_size * _n_threads &&
+                    _n_threads > 1 &&
+                    !util::omp_in_parallel()
+                ) {
+                    buff.resize(a_size * _n_threads);
                 }
 
                 // compute quadratic diagonal part
                 auto out_diag = out.diagonal().segment(n_solved0, a_size);
                 snp_phased_ancestry_block_dot(
-                    _io, begin0, a_size, sqrt_weights.square(), out_diag, _n_threads, _buff
+                    _io, begin0, a_size, sqrt_weights.square(), out_diag, _n_threads, buff
                 );
-
-                #pragma omp parallel for schedule(static) num_threads(_n_threads) collapse(2) if(_n_threads > 1)
-                for (int k0 = 0; k0 < static_cast<int>(a_size); ++k0) {
-                    for (int k1 = 0; k1 < static_cast<int>(a_size); ++k1) {
-                        const auto sum = snp_phased_ancestry_cross_dot(
-                            _io,
-                            snp * A + a_low + k0,
-                            snp * A + a_low + k1,
-                            sqrt_weights.square()
-                        );
-                        const auto kk0 = n_solved0 + k0;
-                        const auto kk1 = n_solved0 + k1;
-                        out(kk0, kk1) += sum * (1 + (kk0 == kk1));
+                
+                const auto routine = [&](auto k0, auto k1) {
+                    const auto sum = snp_phased_ancestry_cross_dot(
+                        _io,
+                        snp * A + a_low + k0,
+                        snp * A + a_low + k1,
+                        sqrt_weights.square()
+                    );
+                    const auto kk0 = n_solved0 + k0;
+                    const auto kk1 = n_solved0 + k1;
+                    out(kk0, kk1) += sum * (1 + (kk0 == kk1));
+                };
+                if (_n_threads <= 1 || util::omp_in_parallel()) {
+                    for (int k0 = 0; k0 < static_cast<int>(a_size); ++k0) {
+                        for (int k1 = 0; k1 < static_cast<int>(a_size); ++k1) {
+                            routine(k0, k1);
+                        }
+                    }
+                } else {
+                    #pragma omp parallel for schedule(static) num_threads(_n_threads) collapse(2)
+                    for (int k0 = 0; k0 < static_cast<int>(a_size); ++k0) {
+                        for (int k1 = 0; k1 < static_cast<int>(a_size); ++k1) {
+                            routine(k0, k1);
+                        }
                     }
                 }
 
@@ -227,11 +272,11 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::cov(
                     const auto end = _io.end(snp0, ancestry_lower0+a0, hap0);
                     for (; it != end; ++it) {
                         const auto idx = *it;
-                        if (!_bbuff[idx]) {
-                            _ibuff[nnz] = idx;
+                        if (!bbuff[idx]) {
+                            ibuff[nnz] = idx;
                             ++nnz;
                         }
-                        _bbuff[idx] += 1;
+                        bbuff[idx] += 1;
                     }
                 }
 
@@ -240,10 +285,10 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::cov(
                         _io, begin1 + a1, 
                         vec_value_t::NullaryExpr(sqrt_weights.size(), [&](auto i) {
                             const auto sqrt_wi = sqrt_weights[i];
-                            return sqrt_wi * sqrt_wi * _bbuff[i];
+                            return sqrt_wi * sqrt_wi * bbuff[i];
                         }),
                         _n_threads,
-                        _buff
+                        buff
                     );
                     const auto kk0 = n_solved0 + a0;
                     const auto kk1 = n_solved1 + a1;
@@ -252,7 +297,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::cov(
                 }
 
                 for (size_t i = 0; i < nnz; ++i) {
-                    _bbuff[_ibuff[i]] = 0;
+                    bbuff[ibuff[i]] = 0;
                 }
             }
 
@@ -281,17 +326,12 @@ void
 ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     const auto routine = [&](int t) {
-        out[t] = _sq_cmul(t, weights);
+        out[t] = _sq_cmul(t, weights, out /* unused */);
     };
-    if (_n_threads <= 1) {
-        for (int t = 0; t < cols(); ++t) routine(t);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int t = 0; t < cols(); ++t) routine(t);
-    }
+    util::omp_parallel_for(routine, 0, cols(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
@@ -299,7 +339,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::sp_tmul(
     const sp_mat_value_t& v,
     Eigen::Ref<rowmat_value_t> out
-)
+) const
 {
     base_t::check_sp_tmul(
         v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
@@ -312,12 +352,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::sp_tmul(
             _ctmul(it.index(), it.value(), out_k, 1);
         }
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    }
+    util::omp_parallel_for(routine, 0, v.outerSize(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY_TP
@@ -325,7 +360,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::mean(
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     out.setZero();
 }
@@ -336,7 +371,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::var(
     const Eigen::Ref<const vec_value_t>&,
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     out.setOnes();
 }

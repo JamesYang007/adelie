@@ -39,13 +39,15 @@ private:
         int j, 
         const Eigen::Ref<const vec_value_t>& v,
         const Eigen::Ref<const vec_value_t>& weights,
-        size_t n_threads
-    );
+        size_t n_threads,
+        Eigen::Ref<vec_value_t> buff
+    ) const;
 
     inline value_t _sq_cmul(
         int j, 
-        const Eigen::Ref<const vec_value_t>& weights
-    );
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> buff
+    ) const;
 
     inline void _ctmul(
         int j, 

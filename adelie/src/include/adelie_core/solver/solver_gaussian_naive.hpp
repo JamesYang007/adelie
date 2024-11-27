@@ -5,6 +5,7 @@
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
 #include <adelie_core/matrix/utils.hpp>
 #include <adelie_core/util/macros.hpp>
+#include <adelie_core/util/omp.hpp>
 
 namespace adelie_core {
 namespace solver {
@@ -33,7 +34,7 @@ struct GaussianNaiveBufferPack
 
 /**
  * Updates in-place the screen quantities 
- * in the range [begin, begin+size) of the groups in screen_set. 
+ * in the range [begin, end) of the groups in screen_set. 
  * NOTE: X_means only needs to be well-defined on the groups in that range,
  * that is, weighted mean according to weights_sqrt ** 2.
  */
@@ -58,8 +59,9 @@ inline void update_screen_derived(
     const SSType& screen_set,
     const SBType& screen_begins,
     size_t begin,
-    size_t size,
+    size_t end,
     bool intercept,
+    size_t n_threads,
     SXMType& screen_X_means,
     STType& screen_transforms,
     SVType& screen_vars
@@ -67,17 +69,18 @@ inline void update_screen_derived(
 {
     using value_t = typename std::decay_t<XType>::value_t;
     using vec_value_t = util::rowvec_type<value_t>;
+    using colmat_value_t = util::colmat_type<value_t>;
 
     // buffers
-    const auto n = X.rows();
     const auto max_gs = group_sizes.maxCoeff();
-    util::colmat_type<value_t> buffer1(n, max_gs);
-    util::rowvec_type<value_t> buffer2(max_gs * max_gs);
+    const auto n_threads_cap_1 = std::max<size_t>(n_threads, 1);
+    util::rowvec_type<value_t> buffer(n_threads_cap_1 * max_gs * max_gs);
 
-    for (size_t i = begin; i < size; ++i) {
+    const auto routine = [&](auto i) {
         const auto g = groups[screen_set[i]];
         const auto gs = group_sizes[screen_set[i]];
         const auto sb = screen_begins[i];
+        const auto thr_id = util::omp_get_thread_num();
 
         // compute column-means
         Eigen::Map<vec_value_t> Xi_means(
@@ -86,15 +89,12 @@ inline void update_screen_derived(
         Xi_means = X_means.segment(g, gs);
 
         // resize output and buffer 
-        Eigen::Map<util::colmat_type<value_t>> Xi(
-            buffer1.data(), n, gs
-        );
-        Eigen::Map<util::colmat_type<value_t>> XiTXi(
-            buffer2.data(), gs, gs
+        Eigen::Map<colmat_value_t> XiTXi(
+            buffer.data() + thr_id * max_gs * max_gs, gs, gs
         );
 
         // compute weighted covariance matrix
-        X.cov(g, gs, weights_sqrt, XiTXi, Xi);
+        X.cov(g, gs, weights_sqrt, XiTXi);
 
         if (intercept) {
             auto XiTXi_lower = XiTXi.template selfadjointView<Eigen::Lower>();
@@ -106,11 +106,11 @@ inline void update_screen_derived(
             util::colmat_type<value_t, 1, 1> Q;
             Q(0, 0) = 1;
             screen_transforms[i] = Q;
-            screen_vars[sb] = XiTXi(0, 0);
-            continue;
+            screen_vars[sb] = std::max<value_t>(XiTXi(0, 0), 0);
+            return;
         }
 
-        Eigen::SelfAdjointEigenSolver<util::colmat_type<value_t>> solver(XiTXi);
+        Eigen::SelfAdjointEigenSolver<colmat_value_t> solver(XiTXi);
 
         /* update screen_transforms */
         screen_transforms[i] = std::move(solver.eigenvectors());
@@ -120,7 +120,8 @@ inline void update_screen_derived(
         Eigen::Map<vec_value_t> svars(screen_vars.data() + sb, gs);
         // numerical stability to remove small negative eigenvalues
         svars.head(D.size()) = D.array() * (D.array() >= 0).template cast<value_t>(); 
-    }
+    };
+    util::omp_parallel_for(routine, begin, end, n_threads * ((begin+n_threads) <= end));
 }
 
 /**
@@ -167,6 +168,7 @@ inline void update_screen_derived(
         old_screen_size, 
         new_screen_size, 
         state.intercept, 
+        state.n_threads,
         state.screen_X_means, 
         state.screen_transforms, 
         state.screen_vars

@@ -16,7 +16,7 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::MatrixNaiveStandardize(
     _centers(centers.data(), centers.size()),
     _scales(scales.data(), scales.size()),
     _n_threads(n_threads),
-    _buff(std::max<size_t>(mat.cols(), n_threads))
+    _buff(mat.cols() + n_threads)
 {
     const auto p = mat.cols();
 
@@ -49,6 +49,23 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::cmul(
         (c == 0) ? 0 : ddot(v.matrix(), weights.matrix(), _n_threads, _buff)
     );
     return (_mat->cmul(j, v, weights) - c * vw_sum) / _scales[j];
+}
+
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
+typename ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::value_t
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::cmul_safe(
+    int j, 
+    const Eigen::Ref<const vec_value_t>& v,
+    const Eigen::Ref<const vec_value_t>& weights
+) const
+{
+    base_t::check_cmul(j, v.size(), weights.size(), rows(), cols());
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
+    const auto c = _centers[j];
+    const auto vw_sum = (
+        (c == 0) ? 0 : ddot(v.matrix(), weights.matrix(), _n_threads, buff)
+    );
+    return (_mat->cmul_safe(j, v, weights) - c * vw_sum) / _scales[j];
 }
 
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
@@ -94,6 +111,26 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::bmul(
 
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
 void
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::bmul_safe(
+    int j, int q, 
+    const Eigen::Ref<const vec_value_t>& v, 
+    const Eigen::Ref<const vec_value_t>& weights,
+    Eigen::Ref<vec_value_t> out
+) const
+{
+    base_t::check_bmul(j, q, v.size(), weights.size(), out.size(), rows(), cols());
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
+    _mat->bmul_safe(j, q, v, weights, out);
+    const auto c = _centers.segment(j, q);
+    const auto vw_sum = (
+        (c == 0).all() ? 0 : ddot(v.matrix(), weights.matrix(), _n_threads, buff)
+    );
+    const auto s = _scales.segment(j, q);
+    dvveq(out, (out - vw_sum * c) / s, _n_threads);
+}
+
+ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
+void
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::btmul(
     int j, int q, 
     const Eigen::Ref<const vec_value_t>& v, 
@@ -101,16 +138,17 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::btmul(
 )
 {
     base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
-    auto vs = _buff.segment(0, q);
+    auto vs = _buff.head(q);
     const auto s = _scales.segment(j, q);
     dvveq(vs, v / s, _n_threads);
     _mat->btmul(j, q, vs, out);
 
+    auto buff = _buff.segment(q, _n_threads);
     const auto vsc = ddot(
         _centers.segment(j, q).matrix(),
         vs.matrix(),
         _n_threads,
-        _buff
+        buff
     );
     if (!vsc) return;
     dvsubi(
@@ -126,10 +164,11 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::mul(
     const Eigen::Ref<const vec_value_t>& v, 
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     _mat->mul(v, weights, out);
-    const auto vw_sum = ddot(v.matrix(), weights.matrix(), _n_threads, _buff);
+    const auto vw_sum = ddot(v.matrix(), weights.matrix(), _n_threads, buff);
     dvveq(out, (out - vw_sum * _centers) / _scales, _n_threads);
 }
 
@@ -152,25 +191,24 @@ void
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::cov(
     int j, int q,
     const Eigen::Ref<const vec_value_t>& sqrt_weights,
-    Eigen::Ref<colmat_value_t> out,
-    Eigen::Ref<colmat_value_t> buffer
-)
+    Eigen::Ref<colmat_value_t> out
+) const
 {
     base_t::check_cov(
         j, q, sqrt_weights.size(), 
-        out.rows(), out.cols(), buffer.rows(), buffer.cols(), 
+        out.rows(), out.cols(),
         rows(), cols()
     );
 
-    _mat->cov(j, q, sqrt_weights, out, buffer);
+    _mat->cov(j, q, sqrt_weights, out);
 
     const auto centers = _centers.segment(j, q);
     const auto scales = _scales.segment(j, q);
 
     if ((centers != 0).any()) {
+        vec_value_t means(q);
         auto out_lower = out.template selfadjointView<Eigen::Lower>();
-        auto means = _buff.segment(j, q);
-        _mat->bmul(j, q, sqrt_weights, sqrt_weights, means);
+        _mat->bmul_safe(j, q, sqrt_weights, sqrt_weights, means);
         out_lower.rankUpdate(centers.matrix().transpose(), means.matrix().transpose(), -1);
         out_lower.rankUpdate(centers.matrix().transpose(), sqrt_weights.square().sum());
         out.template triangularView<Eigen::Upper>() = out.transpose();
@@ -185,7 +223,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::sq_mul(
     const Eigen::Ref<const vec_value_t>& weights,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     _mat->sq_mul(weights, out);
     vec_value_t mat_means(out.size());
@@ -200,7 +238,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::sp_tmul(
     const sp_mat_value_t& v, 
     Eigen::Ref<rowmat_value_t> out
-)
+) const
 {
     base_t::check_sp_tmul(
         v.rows(), v.cols(), out.rows(), out.cols(), rows(), cols()
@@ -228,12 +266,7 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::sp_tmul(
         }
         if (vsc) out_k.array() -= vsc;
     };
-    if (_n_threads <= 1) {
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(_n_threads)
-        for (int k = 0; k < v.outerSize(); ++k) routine(k);
-    }
+    util::omp_parallel_for(routine, 0, v.outerSize(), _n_threads);
 }
 
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE_TP
@@ -241,7 +274,7 @@ void
 ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::mean(
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> out
-) 
+) const
 {
     out.setZero();
 }
@@ -252,7 +285,7 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::var(
     const Eigen::Ref<const vec_value_t>&,
     const Eigen::Ref<const vec_value_t>&,
     Eigen::Ref<vec_value_t> out
-)
+) const
 {
     out.setOnes();
 }

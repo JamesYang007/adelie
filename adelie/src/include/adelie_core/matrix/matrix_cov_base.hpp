@@ -51,12 +51,12 @@ public:
         const Eigen::Ref<const vec_index_t>& indices,
         const Eigen::Ref<const vec_value_t>& values,
         Eigen::Ref<vec_value_t> out
-    ) =0;
+    ) const =0;
 
     virtual void to_dense(
         int i, int p, 
         Eigen::Ref<colmat_value_t> out
-    ) =0;
+    ) const =0;
 
     int rows() const { return cols(); }
     
@@ -145,10 +145,10 @@ ADELIE_CORE_MATRIX_COV_BASE::check_to_dense(
         const Eigen::Ref<const vec_index_t>& indices,\
         const Eigen::Ref<const vec_value_t>& values,\
         Eigen::Ref<vec_value_t> out\
-    ) override;\
+    ) const override;\
     void to_dense(\
         int i, int p,\
         Eigen::Ref<colmat_value_t> out\
-    ) override;\
+    ) const override;\
     int cols() const override;
 #endif

@@ -36,7 +36,7 @@ protected:
     );
 
     static inline void check_cov(
-        int j, int q, int w, int o_r, int o_c, int br, int bc, int r, int c
+        int j, int q, int w, int o_r, int o_c, int r, int c
     );
 
     static inline void check_sp_tmul(
@@ -60,6 +60,12 @@ public:
         const Eigen::Ref<const vec_value_t>& weights
     ) =0;
 
+    virtual value_t cmul_safe(
+        int j, 
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& weights
+    ) const =0;
+
     virtual void ctmul(
         int j, 
         value_t v, 
@@ -73,6 +79,13 @@ public:
         Eigen::Ref<vec_value_t> out
     ) =0;
 
+    virtual void bmul_safe(
+        int j, int q, 
+        const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out
+    ) const =0;
+
     virtual void btmul(
         int j, int q, 
         const Eigen::Ref<const vec_value_t>& v, 
@@ -83,14 +96,13 @@ public:
         const Eigen::Ref<const vec_value_t>& v, 
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) =0;
+    ) const =0;
 
     virtual void cov(
         int j, int q,
         const Eigen::Ref<const vec_value_t>& sqrt_weights,
-        Eigen::Ref<colmat_value_t> out,
-        Eigen::Ref<colmat_value_t> buffer
-    ) =0;
+        Eigen::Ref<colmat_value_t> out
+    ) const =0;
 
     virtual int rows() const =0;
     
@@ -101,7 +113,7 @@ public:
     virtual void mean(
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) 
+    ) const
     {
         vec_value_t ones = vec_value_t::Ones(weights.size());
         mul(ones, weights, out);
@@ -111,7 +123,7 @@ public:
         const Eigen::Ref<const vec_value_t>& centers,
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    )
+    ) const
     {
         const auto sum_w = weights.sum();
         vec_value_t m(out.size());
@@ -123,12 +135,12 @@ public:
     virtual void sq_mul(
         const Eigen::Ref<const vec_value_t>& weights,
         Eigen::Ref<vec_value_t> out
-    ) =0;
+    ) const =0;
 
     virtual void sp_tmul(
         const sp_mat_value_t& v,
         Eigen::Ref<rowmat_value_t> out
-    ) =0;
+    ) const =0;
 };
 
 ADELIE_CORE_MATRIX_NAIVE_BASE_TP
@@ -218,22 +230,20 @@ ADELIE_CORE_MATRIX_NAIVE_BASE::check_btmul(
 ADELIE_CORE_MATRIX_NAIVE_BASE_TP
 void
 ADELIE_CORE_MATRIX_NAIVE_BASE::check_cov(
-    int j, int q, int w, int o_r, int o_c, int br, int bc, int r, int c
+    int j, int q, int w, int o_r, int o_c, int r, int c
 )
 {
     if (
         (j < 0 || j > c-q) ||
         (w != r) ||
         (o_r != q) ||
-        (o_c != q) ||
-        (br != r) ||
-        (bc != q)
+        (o_c != q)
     ) {
         throw util::adelie_core_error(
             util::format(
                 "cov() is given inconsistent inputs! "
-                "Invoked check_cov(j=%d, q=%d, w=%d, o_r=%d, o_c=%d, br=%d, bc=%d, r=%d, c=%d)",
-                j, q, w, o_r, o_c, br, bc, r, c
+                "Invoked check_cov(j=%d, q=%d, w=%d, o_r=%d, o_c=%d, r=%d, c=%d)",
+                j, q, w, o_r, o_c, r, c
             )
         );
     }
@@ -270,6 +280,11 @@ ADELIE_CORE_MATRIX_NAIVE_BASE::check_sp_tmul(
         const Eigen::Ref<const vec_value_t>& v,\
         const Eigen::Ref<const vec_value_t>& weights\
     ) override;\
+    value_t cmul_safe(\
+        int j,\
+        const Eigen::Ref<const vec_value_t>& v,\
+        const Eigen::Ref<const vec_value_t>& weights\
+    ) const override;\
     void ctmul(\
         int j,\
         value_t v,\
@@ -281,6 +296,12 @@ ADELIE_CORE_MATRIX_NAIVE_BASE::check_sp_tmul(
         const Eigen::Ref<const vec_value_t>& weights,\
         Eigen::Ref<vec_value_t> out\
     ) override;\
+    void bmul_safe(\
+        int j, int q,\
+        const Eigen::Ref<const vec_value_t>& v,\
+        const Eigen::Ref<const vec_value_t>& weights,\
+        Eigen::Ref<vec_value_t> out\
+    ) const override;\
     void btmul(\
         int j, int q,\
         const Eigen::Ref<const vec_value_t>& v,\
@@ -290,21 +311,33 @@ ADELIE_CORE_MATRIX_NAIVE_BASE::check_sp_tmul(
         const Eigen::Ref<const vec_value_t>& v,\
         const Eigen::Ref<const vec_value_t>& weights,\
         Eigen::Ref<vec_value_t> out\
-    ) override;\
+    ) const override;\
     void cov(\
         int j, int q,\
         const Eigen::Ref<const vec_value_t>& sqrt_weights,\
-        Eigen::Ref<colmat_value_t> out,\
-        Eigen::Ref<colmat_value_t> buffer\
-    ) override;\
+        Eigen::Ref<colmat_value_t> out\
+    ) const override;\
     int rows() const override;\
     int cols() const override;\
     void sq_mul(\
         const Eigen::Ref<const vec_value_t>& weights,\
         Eigen::Ref<vec_value_t> out\
-    ) override;\
+    ) const override;\
     void sp_tmul(\
         const sp_mat_value_t& v,\
         Eigen::Ref<rowmat_value_t> out\
-    ) override;
+    ) const override;
+#endif
+
+#ifndef ADELIE_CORE_MATRIX_NAIVE_OVERRIDE_DECL
+#define ADELIE_CORE_MATRIX_NAIVE_OVERRIDE_DECL \
+    void mean(\
+        const Eigen::Ref<const vec_value_t>& weights,\
+        Eigen::Ref<vec_value_t> out\
+    ) const override;\
+    void var(\
+        const Eigen::Ref<const vec_value_t>& centers,\
+        const Eigen::Ref<const vec_value_t>& weights,\
+        Eigen::Ref<vec_value_t> out\
+    ) const override;
 #endif

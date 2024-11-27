@@ -48,12 +48,27 @@ private:
     const size_t _n_threads;
     vec_value_t _buff;
 
+    inline auto _cmul(
+        int j, 
+        const Eigen::Ref<const vec_value_t>& v,
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> buff
+    ) const;
+
     inline void _ctmul(
         int j, 
         value_t v, 
         Eigen::Ref<vec_value_t> out,
         size_t n_threads
-    );
+    ) const;
+
+    inline void _bmul(
+        int j, int q, 
+        const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out,
+        Eigen::Ref<vec_value_t> buffer
+    ) const;
 
 public:
     explicit MatrixNaiveConvexReluDense(
@@ -99,15 +114,24 @@ private:
         int j, 
         const Eigen::Ref<const vec_value_t>& v,
         const Eigen::Ref<const vec_value_t>& weights,
-        size_t n_threads
-    );
+        size_t n_threads,
+        Eigen::Ref<vec_value_t> buff
+    ) const;
 
     inline void _ctmul(
         int j, 
         value_t v, 
         Eigen::Ref<vec_value_t> out,
         size_t n_threads
-    );
+    ) const;
+
+    inline void _bmul(
+        int j, int q, 
+        const Eigen::Ref<const vec_value_t>& v, 
+        const Eigen::Ref<const vec_value_t>& weights,
+        Eigen::Ref<vec_value_t> out,
+        Eigen::Ref<vec_value_t> buff
+    ) const;
 
 public:
     explicit MatrixNaiveConvexReluSparse(

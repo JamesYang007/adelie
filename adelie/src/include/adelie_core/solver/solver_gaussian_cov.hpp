@@ -34,6 +34,7 @@ inline void update_screen_derived(
     const auto& screen_set = state.screen_set;
     const auto& screen_begins = state.screen_begins;
     const auto& grad = state.grad;
+    const auto n_threads = state.n_threads;
     auto& A = *state.A;
     auto& screen_transforms = state.screen_transforms;
     auto& screen_vars = state.screen_vars;
@@ -56,15 +57,17 @@ inline void update_screen_derived(
     screen_grad.resize(new_screen_value_size, 0);
 
     const auto max_gs = group_sizes.maxCoeff();
-    util::rowvec_type<value_t> buffer(max_gs * max_gs);
+    const auto n_threads_cap_1 = std::max<size_t>(n_threads, 1);
+    util::rowvec_type<value_t> buffer(n_threads_cap_1 * max_gs * max_gs);
 
-    for (size_t i = old_screen_size; i < new_screen_size; ++i) {
+    const auto routine = [&](auto i) {
         const auto g = groups[screen_set[i]];
         const auto gs = group_sizes[screen_set[i]];
         const auto sb = screen_begins[i];
+        const auto thr_id = util::omp_get_thread_num();
 
         Eigen::Map<util::colmat_type<value_t>> A_gg(
-            buffer.data(), gs, gs
+            buffer.data() + thr_id * max_gs * max_gs, gs, gs
         );
 
         // compute covariance matrix
@@ -74,8 +77,8 @@ inline void update_screen_derived(
             util::colmat_type<value_t, 1, 1> Q;
             Q(0, 0) = 1;
             screen_transforms[i] = Q;
-            screen_vars[sb] = A_gg(0, 0);
-            continue;
+            screen_vars[sb] = std::max<value_t>(A_gg(0, 0), 0);
+            return;
         }
 
         Eigen::SelfAdjointEigenSolver<util::colmat_type<value_t>> solver(A_gg);
@@ -88,7 +91,8 @@ inline void update_screen_derived(
         Eigen::Map<vec_value_t> svars(screen_vars.data() + sb, gs);
         // numerical stability to remove small negative eigenvalues
         svars.head(D.size()) = D.array() * (D.array() >= 0).template cast<value_t>(); 
-    }
+    };
+    util::omp_parallel_for(routine, old_screen_size, new_screen_size, n_threads * (old_screen_size+n_threads <= new_screen_size));
 
     /* update screen_grad */
     for (size_t i = 0; i < new_screen_size; ++i) {
