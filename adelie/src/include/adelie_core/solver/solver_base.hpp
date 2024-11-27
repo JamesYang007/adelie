@@ -94,7 +94,7 @@ inline void update_abs_grad(
             try_failed = true;
         }
     };
-    util::omp_parallel_for(routine, 0, groups.size(), n_threads * (n_threads <= static_cast<size_t>(groups.size())));
+    util::omp_parallel_for(routine, 0, groups.size(), n_threads);
     if (try_failed) {
         throw util::adelie_core_solver_error(
             "exception raised in constraint->solve_zero(). "
@@ -192,7 +192,7 @@ inline auto sparsify_dual(
             constraint->dual(indices_v, values_v);
             indices_v += dual_groups[i];
         };
-        util::omp_parallel_for(routine, 0, n_constraints, n_threads * (n_threads <= n_constraints));
+        util::omp_parallel_for(routine, 0, n_constraints, n_threads);
     }
 
     const auto last_constraint = constraints[n_constraints-1];
