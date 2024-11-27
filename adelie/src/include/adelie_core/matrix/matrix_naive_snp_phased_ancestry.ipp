@@ -184,7 +184,7 @@ ADELIE_CORE_MATRIX_NAIVE_SNP_PHASED_ANCESTRY::cov(
 
     util::rowvec_type<char> bbuff(_io.rows());
     vec_index_t ibuff(_io.rows());
-    vec_value_t buff;
+    vec_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     bbuff.setZero();
 
     int n_solved0 = 0;

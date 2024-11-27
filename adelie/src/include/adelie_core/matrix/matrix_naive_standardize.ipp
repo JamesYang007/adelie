@@ -16,7 +16,7 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::MatrixNaiveStandardize(
     _centers(centers.data(), centers.size()),
     _scales(scales.data(), scales.size()),
     _n_threads(n_threads),
-    _buff(std::max<size_t>(mat.cols(), n_threads))
+    _buff(mat.cols() + n_threads)
 {
     const auto p = mat.cols();
 
@@ -138,16 +138,17 @@ ADELIE_CORE_MATRIX_NAIVE_STANDARDIZE::btmul(
 )
 {
     base_t::check_btmul(j, q, v.size(), out.size(), rows(), cols());
-    auto vs = _buff.segment(0, q);
+    auto vs = _buff.head(q);
     const auto s = _scales.segment(j, q);
     dvveq(vs, v / s, _n_threads);
     _mat->btmul(j, q, vs, out);
 
+    auto buff = _buff.segment(q, _n_threads);
     const auto vsc = ddot(
         _centers.segment(j, q).matrix(),
         vs.matrix(),
         _n_threads,
-        _buff
+        buff
     );
     if (!vsc) return;
     dvsubi(

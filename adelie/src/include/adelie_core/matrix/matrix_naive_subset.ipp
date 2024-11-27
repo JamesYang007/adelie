@@ -194,7 +194,7 @@ ADELIE_CORE_MATRIX_NAIVE_CSUBSET::mul(
         auto curr_out = out.segment(subset_idx, q);
         _mat->bmul_safe(j, q, v, weights, curr_out);
     };
-    util::omp_parallel_for(routine, 0, _subset_cbegin.size(), _n_threads);
+    util::omp_parallel_for(routine, 0, _subset_cbegin.size(), _n_threads * (_n_threads <= _subset_cbegin.size()));
 }
 
 ADELIE_CORE_MATRIX_NAIVE_CSUBSET_TP

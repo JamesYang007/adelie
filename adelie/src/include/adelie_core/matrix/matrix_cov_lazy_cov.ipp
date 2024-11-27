@@ -24,6 +24,7 @@ ADELIE_CORE_MATRIX_COV_LAZY_COV::cache(
     const auto block = _X.middleCols(i, p);
     util::rowmat_type<value_t> cov(p, _X.cols());
     if (_n_threads <= 1 || util::omp_in_parallel()) { 
+        Eigen::setNbThreads(1);
         cov.noalias() = block.transpose() * _X; 
         _cache.emplace_back(std::move(cov));
         return;
@@ -38,6 +39,7 @@ ADELIE_CORE_MATRIX_COV_LAZY_COV::cache(
             + std::max<int>(t-remainder, 0) * block_size
         );
         const auto size = block_size + (t < remainder);
+        Eigen::setNbThreads(1);
         cov.middleRows(begin, size).noalias() = (
             block.transpose().middleRows(begin, size) * _X
         );
@@ -118,7 +120,7 @@ ADELIE_CORE_MATRIX_COV_LAZY_COV::mul(
             for(; i+block_size < p && _index_map[i+block_size] < 0 && 
                     indices[i_idx+block_size] == i+block_size; ++block_size);
             if (static_cast<size_t>(buff.size()) < _n_threads * max_np) {
-                buff.resize(_n_threads * (_n_threads > 1), max_np);
+                buff.resize(_n_threads * (_n_threads > 1) * !util::omp_in_parallel(), max_np);
             }
             if (vbuff.size() < n+p) vbuff.resize(n+p);
             auto Xv_m = vbuff.head(n).matrix();

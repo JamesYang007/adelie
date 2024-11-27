@@ -92,7 +92,7 @@ inline void update_screen_derived(
         // numerical stability to remove small negative eigenvalues
         svars.head(D.size()) = D.array() * (D.array() >= 0).template cast<value_t>(); 
     };
-    util::omp_parallel_for(routine, old_screen_size, new_screen_size, n_threads);
+    util::omp_parallel_for(routine, old_screen_size, new_screen_size, n_threads * (old_screen_size+n_threads <= new_screen_size));
 
     /* update screen_grad */
     for (size_t i = 0; i < new_screen_size; ++i) {

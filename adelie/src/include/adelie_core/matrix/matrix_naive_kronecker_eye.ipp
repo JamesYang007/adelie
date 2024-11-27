@@ -14,7 +14,7 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::MatrixNaiveKroneckerEye(
     _mat(&mat),
     _K(K),
     _n_threads(n_threads),
-    _buff(3 * mat.rows() + mat.cols())
+    _buff(2 * mat.rows() + mat.cols())
 {
     if (K < 1) {
         throw util::adelie_core_error("K must be >= 1.");
@@ -262,7 +262,7 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::sq_mul(
     Eigen::Ref<vec_value_t> out
 ) const
 {
-    Eigen::Map<const rowmat_value_t> W(weights.data(), rows() / _K, _K);
+    const Eigen::Map<const rowmat_value_t> W(weights.data(), rows() / _K, _K);
     const auto p = _mat->cols();
     vec_value_t buff(W.rows() + p);
     Eigen::Map<vec_value_t> _w(buff.data(), W.rows());
@@ -513,7 +513,7 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::btmul(
         const int i = (j + n_processed) / _K;
         const int l = (j + n_processed) - _K * i;
         const int size = std::min<int>(_K-l, q-n_processed);
-        Eigen::Map<const vec_value_t> _v(v.data() + n_processed, size);
+        const Eigen::Map<const vec_value_t> _v(v.data() + n_processed, size);
         for (int j = 0; j < _v.size(); ++j) {
             auto Out_curr = Out.col(l+j);
             dvaddi(Out_curr, _v[j] * _mat.col(i), _n_threads);

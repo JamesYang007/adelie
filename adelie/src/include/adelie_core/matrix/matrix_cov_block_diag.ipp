@@ -139,7 +139,7 @@ ADELIE_CORE_MATRIX_COV_BLOCK_DIAG::mul(
 ) const
 {
     base_t::check_mul(indices.size(), values.size(), out.size(), rows(), cols());
-    vec_index_t ibuff(_ibuff.size());
+    vec_index_t ibuff(_cols);
     const auto routine = [&](int i) {
         const auto& mat = *_mat_list[i];
         const auto mat_pos = _mat_size_cumsum[i];

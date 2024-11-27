@@ -865,8 +865,9 @@ void snp_phased_ancestry_block_dot(
     const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
     if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         for (int k = 0; k < q; ++k) {
-            snp_phased_ancestry_dot(io, j+k, v, n_threads, buff);
+            out[k] = snp_phased_ancestry_dot(io, j+k, v, n_threads, buff);
         }
+        return;
     }
 
     Eigen::Map<rowarr_value_t> mbuff(

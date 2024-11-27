@@ -855,14 +855,14 @@ def test_naive_standardize(n, p, dtype, seed=0):
     X = np.asfortranarray(np.random.normal(0, 1, (n, p)).astype(dtype))
     dX = mod.dense(X) 
 
-    cX = mod.standardize(dX)
+    cX = mod.standardize(dX, n_threads=2)
     means = np.mean(X, axis=0)
     scales = np.std(X, axis=0)
     assert np.allclose(cX._centers, means)
     assert np.allclose(cX._scales, scales)
 
     centers = np.random.normal(0, 1, p)
-    cX = mod.standardize(dX, centers)
+    cX = mod.standardize(dX, centers, n_threads=2)
     scales = np.sqrt(
         np.sum((X - centers[None]) ** 2, axis=0) / n
     )

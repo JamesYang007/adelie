@@ -81,7 +81,7 @@ ADELIE_CORE_MATRIX_CONSTRAINT_DENSE::mul(
     auto out_m = out.matrix();
     const auto n = _mat.rows();
     const auto m = _mat.cols();
-    rowmat_value_t buff(_n_threads * (_n_threads > 1), m * (n > m));
+    rowmat_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel(), m * (n > m));
     dgemv(
         _mat,
         v.matrix(),
@@ -101,7 +101,7 @@ ADELIE_CORE_MATRIX_CONSTRAINT_DENSE::tmul(
     auto out_m = out.matrix();
     const auto n = _mat.rows();
     const auto m = _mat.cols();
-    rowmat_value_t buff(_n_threads * (_n_threads > 1), n * (m > n));
+    rowmat_value_t buff(_n_threads * (_n_threads > 1) * !util::omp_in_parallel(), n * (m > n));
     dgemv(
         _mat.transpose(),
         v.matrix(),
@@ -118,7 +118,7 @@ ADELIE_CORE_MATRIX_CONSTRAINT_DENSE::cov(
     Eigen::Ref<colmat_value_t> out
 ) const
 {
-    Eigen::setNbThreads(_n_threads);
+    Eigen::setNbThreads(_n_threads * (_n_threads > 1) * !util::omp_in_parallel());
     out.noalias() = _mat * Q * _mat.transpose();
     Eigen::setNbThreads(1);
 }
