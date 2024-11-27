@@ -13,8 +13,10 @@
    
       ~MatrixNaiveSparse64F.__init__
       ~MatrixNaiveSparse64F.bmul
+      ~MatrixNaiveSparse64F.bmul_safe
       ~MatrixNaiveSparse64F.btmul
       ~MatrixNaiveSparse64F.cmul
+      ~MatrixNaiveSparse64F.cmul_safe
       ~MatrixNaiveSparse64F.cols
       ~MatrixNaiveSparse64F.cov
       ~MatrixNaiveSparse64F.ctmul
@@ -43,8 +45,10 @@
    
    .. automethod:: __init__
    .. automethod:: bmul
+   .. automethod:: bmul_safe
    .. automethod:: btmul
    .. automethod:: cmul
+   .. automethod:: cmul_safe
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul

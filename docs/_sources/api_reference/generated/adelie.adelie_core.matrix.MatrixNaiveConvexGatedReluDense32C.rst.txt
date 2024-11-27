@@ -13,8 +13,10 @@
    
       ~MatrixNaiveConvexGatedReluDense32C.__init__
       ~MatrixNaiveConvexGatedReluDense32C.bmul
+      ~MatrixNaiveConvexGatedReluDense32C.bmul_safe
       ~MatrixNaiveConvexGatedReluDense32C.btmul
       ~MatrixNaiveConvexGatedReluDense32C.cmul
+      ~MatrixNaiveConvexGatedReluDense32C.cmul_safe
       ~MatrixNaiveConvexGatedReluDense32C.cols
       ~MatrixNaiveConvexGatedReluDense32C.cov
       ~MatrixNaiveConvexGatedReluDense32C.ctmul
@@ -43,8 +45,10 @@
    
    .. automethod:: __init__
    .. automethod:: bmul
+   .. automethod:: bmul_safe
    .. automethod:: btmul
    .. automethod:: cmul
+   .. automethod:: cmul_safe
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul

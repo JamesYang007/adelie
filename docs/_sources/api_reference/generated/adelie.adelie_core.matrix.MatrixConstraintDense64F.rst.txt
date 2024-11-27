@@ -16,8 +16,10 @@
       ~MatrixConstraintDense64F.cov
       ~MatrixConstraintDense64F.mul
       ~MatrixConstraintDense64F.rmmul
+      ~MatrixConstraintDense64F.rmmul_safe
       ~MatrixConstraintDense64F.rows
       ~MatrixConstraintDense64F.rvmul
+      ~MatrixConstraintDense64F.rvmul_safe
       ~MatrixConstraintDense64F.rvtmul
       ~MatrixConstraintDense64F.sp_mul
       ~MatrixConstraintDense64F.tmul
@@ -43,8 +45,10 @@
    .. automethod:: cov
    .. automethod:: mul
    .. automethod:: rmmul
+   .. automethod:: rmmul_safe
    .. automethod:: rows
    .. automethod:: rvmul
+   .. automethod:: rvmul_safe
    .. automethod:: rvtmul
    .. automethod:: sp_mul
    .. automethod:: tmul

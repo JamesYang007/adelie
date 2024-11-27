@@ -13,8 +13,10 @@
    
       ~MatrixNaiveStandardize64.__init__
       ~MatrixNaiveStandardize64.bmul
+      ~MatrixNaiveStandardize64.bmul_safe
       ~MatrixNaiveStandardize64.btmul
       ~MatrixNaiveStandardize64.cmul
+      ~MatrixNaiveStandardize64.cmul_safe
       ~MatrixNaiveStandardize64.cols
       ~MatrixNaiveStandardize64.cov
       ~MatrixNaiveStandardize64.ctmul
@@ -43,8 +45,10 @@
    
    .. automethod:: __init__
    .. automethod:: bmul
+   .. automethod:: bmul_safe
    .. automethod:: btmul
    .. automethod:: cmul
+   .. automethod:: cmul_safe
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul

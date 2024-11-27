@@ -13,8 +13,10 @@
    
       ~MatrixNaiveBlockDiag64.__init__
       ~MatrixNaiveBlockDiag64.bmul
+      ~MatrixNaiveBlockDiag64.bmul_safe
       ~MatrixNaiveBlockDiag64.btmul
       ~MatrixNaiveBlockDiag64.cmul
+      ~MatrixNaiveBlockDiag64.cmul_safe
       ~MatrixNaiveBlockDiag64.cols
       ~MatrixNaiveBlockDiag64.cov
       ~MatrixNaiveBlockDiag64.ctmul
@@ -43,8 +45,10 @@
    
    .. automethod:: __init__
    .. automethod:: bmul
+   .. automethod:: bmul_safe
    .. automethod:: btmul
    .. automethod:: cmul
+   .. automethod:: cmul_safe
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul

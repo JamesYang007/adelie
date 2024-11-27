@@ -13,8 +13,10 @@
    
       ~MatrixNaiveRConcatenate32.__init__
       ~MatrixNaiveRConcatenate32.bmul
+      ~MatrixNaiveRConcatenate32.bmul_safe
       ~MatrixNaiveRConcatenate32.btmul
       ~MatrixNaiveRConcatenate32.cmul
+      ~MatrixNaiveRConcatenate32.cmul_safe
       ~MatrixNaiveRConcatenate32.cols
       ~MatrixNaiveRConcatenate32.cov
       ~MatrixNaiveRConcatenate32.ctmul
@@ -43,8 +45,10 @@
    
    .. automethod:: __init__
    .. automethod:: bmul
+   .. automethod:: bmul_safe
    .. automethod:: btmul
    .. automethod:: cmul
+   .. automethod:: cmul_safe
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul

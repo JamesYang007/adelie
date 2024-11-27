@@ -13,8 +13,10 @@
    
       ~MatrixNaiveKroneckerEyeDense64F.__init__
       ~MatrixNaiveKroneckerEyeDense64F.bmul
+      ~MatrixNaiveKroneckerEyeDense64F.bmul_safe
       ~MatrixNaiveKroneckerEyeDense64F.btmul
       ~MatrixNaiveKroneckerEyeDense64F.cmul
+      ~MatrixNaiveKroneckerEyeDense64F.cmul_safe
       ~MatrixNaiveKroneckerEyeDense64F.cols
       ~MatrixNaiveKroneckerEyeDense64F.cov
       ~MatrixNaiveKroneckerEyeDense64F.ctmul
@@ -43,8 +45,10 @@
    
    .. automethod:: __init__
    .. automethod:: bmul
+   .. automethod:: bmul_safe
    .. automethod:: btmul
    .. automethod:: cmul
+   .. automethod:: cmul_safe
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul

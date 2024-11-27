@@ -16,8 +16,10 @@
       ~MatrixConstraintSparse32C.cov
       ~MatrixConstraintSparse32C.mul
       ~MatrixConstraintSparse32C.rmmul
+      ~MatrixConstraintSparse32C.rmmul_safe
       ~MatrixConstraintSparse32C.rows
       ~MatrixConstraintSparse32C.rvmul
+      ~MatrixConstraintSparse32C.rvmul_safe
       ~MatrixConstraintSparse32C.rvtmul
       ~MatrixConstraintSparse32C.sp_mul
       ~MatrixConstraintSparse32C.tmul
@@ -43,8 +45,10 @@
    .. automethod:: cov
    .. automethod:: mul
    .. automethod:: rmmul
+   .. automethod:: rmmul_safe
    .. automethod:: rows
    .. automethod:: rvmul
+   .. automethod:: rvmul_safe
    .. automethod:: rvtmul
    .. automethod:: sp_mul
    .. automethod:: tmul

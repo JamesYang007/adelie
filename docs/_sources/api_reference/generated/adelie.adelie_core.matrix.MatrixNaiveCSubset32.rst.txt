@@ -13,8 +13,10 @@
    
       ~MatrixNaiveCSubset32.__init__
       ~MatrixNaiveCSubset32.bmul
+      ~MatrixNaiveCSubset32.bmul_safe
       ~MatrixNaiveCSubset32.btmul
       ~MatrixNaiveCSubset32.cmul
+      ~MatrixNaiveCSubset32.cmul_safe
       ~MatrixNaiveCSubset32.cols
       ~MatrixNaiveCSubset32.cov
       ~MatrixNaiveCSubset32.ctmul
@@ -43,8 +45,10 @@
    
    .. automethod:: __init__
    .. automethod:: bmul
+   .. automethod:: bmul_safe
    .. automethod:: btmul
    .. automethod:: cmul
+   .. automethod:: cmul_safe
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul

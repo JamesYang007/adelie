@@ -13,8 +13,10 @@
    
       ~MatrixNaiveOneHotDense64C.__init__
       ~MatrixNaiveOneHotDense64C.bmul
+      ~MatrixNaiveOneHotDense64C.bmul_safe
       ~MatrixNaiveOneHotDense64C.btmul
       ~MatrixNaiveOneHotDense64C.cmul
+      ~MatrixNaiveOneHotDense64C.cmul_safe
       ~MatrixNaiveOneHotDense64C.cols
       ~MatrixNaiveOneHotDense64C.cov
       ~MatrixNaiveOneHotDense64C.ctmul
@@ -45,8 +47,10 @@
    
    .. automethod:: __init__
    .. automethod:: bmul
+   .. automethod:: bmul_safe
    .. automethod:: btmul
    .. automethod:: cmul
+   .. automethod:: cmul_safe
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul

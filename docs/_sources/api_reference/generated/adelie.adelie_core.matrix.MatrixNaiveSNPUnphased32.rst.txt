@@ -13,8 +13,10 @@
    
       ~MatrixNaiveSNPUnphased32.__init__
       ~MatrixNaiveSNPUnphased32.bmul
+      ~MatrixNaiveSNPUnphased32.bmul_safe
       ~MatrixNaiveSNPUnphased32.btmul
       ~MatrixNaiveSNPUnphased32.cmul
+      ~MatrixNaiveSNPUnphased32.cmul_safe
       ~MatrixNaiveSNPUnphased32.cols
       ~MatrixNaiveSNPUnphased32.cov
       ~MatrixNaiveSNPUnphased32.ctmul
@@ -43,8 +45,10 @@
    
    .. automethod:: __init__
    .. automethod:: bmul
+   .. automethod:: bmul_safe
    .. automethod:: btmul
    .. automethod:: cmul
+   .. automethod:: cmul_safe
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul

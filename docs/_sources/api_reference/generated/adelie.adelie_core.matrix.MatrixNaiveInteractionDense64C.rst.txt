@@ -13,8 +13,10 @@
    
       ~MatrixNaiveInteractionDense64C.__init__
       ~MatrixNaiveInteractionDense64C.bmul
+      ~MatrixNaiveInteractionDense64C.bmul_safe
       ~MatrixNaiveInteractionDense64C.btmul
       ~MatrixNaiveInteractionDense64C.cmul
+      ~MatrixNaiveInteractionDense64C.cmul_safe
       ~MatrixNaiveInteractionDense64C.cols
       ~MatrixNaiveInteractionDense64C.cov
       ~MatrixNaiveInteractionDense64C.ctmul
@@ -45,8 +47,10 @@
    
    .. automethod:: __init__
    .. automethod:: bmul
+   .. automethod:: bmul_safe
    .. automethod:: btmul
    .. automethod:: cmul
+   .. automethod:: cmul_safe
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul

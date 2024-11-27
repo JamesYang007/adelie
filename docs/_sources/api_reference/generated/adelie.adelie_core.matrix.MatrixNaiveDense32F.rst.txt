@@ -13,8 +13,10 @@
    
       ~MatrixNaiveDense32F.__init__
       ~MatrixNaiveDense32F.bmul
+      ~MatrixNaiveDense32F.bmul_safe
       ~MatrixNaiveDense32F.btmul
       ~MatrixNaiveDense32F.cmul
+      ~MatrixNaiveDense32F.cmul_safe
       ~MatrixNaiveDense32F.cols
       ~MatrixNaiveDense32F.cov
       ~MatrixNaiveDense32F.ctmul
@@ -43,8 +45,10 @@
    
    .. automethod:: __init__
    .. automethod:: bmul
+   .. automethod:: bmul_safe
    .. automethod:: btmul
    .. automethod:: cmul
+   .. automethod:: cmul_safe
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul

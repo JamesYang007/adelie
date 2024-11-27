@@ -13,8 +13,10 @@
    
       ~MatrixNaiveSNPPhasedAncestry64.__init__
       ~MatrixNaiveSNPPhasedAncestry64.bmul
+      ~MatrixNaiveSNPPhasedAncestry64.bmul_safe
       ~MatrixNaiveSNPPhasedAncestry64.btmul
       ~MatrixNaiveSNPPhasedAncestry64.cmul
+      ~MatrixNaiveSNPPhasedAncestry64.cmul_safe
       ~MatrixNaiveSNPPhasedAncestry64.cols
       ~MatrixNaiveSNPPhasedAncestry64.cov
       ~MatrixNaiveSNPPhasedAncestry64.ctmul
@@ -43,8 +45,10 @@
    
    .. automethod:: __init__
    .. automethod:: bmul
+   .. automethod:: bmul_safe
    .. automethod:: btmul
    .. automethod:: cmul
+   .. automethod:: cmul_safe
    .. automethod:: cols
    .. automethod:: cov
    .. automethod:: ctmul
