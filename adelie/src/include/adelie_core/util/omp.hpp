@@ -51,9 +51,6 @@ inline void omp_parallel_for(
         } else if constexpr (schedule_type == util::omp_schedule_type::_runtime) {
             #pragma omp parallel for schedule(runtime) num_threads(n_threads)
             for (Eigen::Index i = begin; i < end; ++i) f(i);
-        } else if constexpr (schedule_type == util::omp_schedule_type::_auto) {
-            #pragma omp parallel for schedule(auto) num_threads(n_threads)
-            for (Eigen::Index i = begin; i < end; ++i) f(i);
         } else {
             // dummy check since we cannot put "false" (early compiler error)
             static_assert(schedule_type == util::omp_schedule_type::_static, "Unrecognized schedule type.");

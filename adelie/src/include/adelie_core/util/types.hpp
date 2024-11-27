@@ -89,8 +89,7 @@ enum class omp_schedule_type
     _static,
     _dynamic,
     _guided,
-    _runtime,
-    _auto
+    _runtime
 };
 
 inline screen_rule_type convert_screen_rule(
