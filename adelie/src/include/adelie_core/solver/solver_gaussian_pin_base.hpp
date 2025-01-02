@@ -1,6 +1,6 @@
 #pragma once
 #include <adelie_core/configs.hpp>
-#include <adelie_core/bcd/unconstrained/newton.hpp>
+#include <adelie_core/bcd/unconstrained/elastic_net/newton.hpp>
 #include <adelie_core/util/macros.hpp>
 #include <adelie_core/util/types.hpp>
 

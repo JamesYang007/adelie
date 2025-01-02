@@ -1,7 +1,7 @@
 #include "py_decl.hpp"
-#include <adelie_core/bcd/unconstrained/brent.hpp>
-#include <adelie_core/bcd/unconstrained/ista.hpp>
-#include <adelie_core/bcd/unconstrained/newton.hpp>
+#include <adelie_core/bcd/unconstrained/elastic_net/brent.hpp>
+#include <adelie_core/bcd/unconstrained/elastic_net/ista.hpp>
+#include <adelie_core/bcd/unconstrained/elastic_net/newton.hpp>
 #include <adelie_core/util/stopwatch.hpp>
 
 namespace py = pybind11;

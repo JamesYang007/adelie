@@ -1,5 +1,5 @@
 #pragma once
-#include <adelie_core/bcd/unconstrained/newton.hpp>
+#include <adelie_core/bcd/unconstrained/elastic_net/newton.hpp>
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/types.hpp>
 
