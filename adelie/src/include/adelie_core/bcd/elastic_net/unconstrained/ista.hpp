@@ -3,6 +3,7 @@
 
 namespace adelie_core {
 namespace bcd {
+namespace elastic_net {
 namespace unconstrained {
 
 template <class LType, class VType, class ValueType, class XType>
@@ -144,5 +145,6 @@ void fista_adares_solver(
 }
 
 } // namespace unconstrained
+} // namespace elastic_net
 } // namespace bcd
 } // namespace adelie_core

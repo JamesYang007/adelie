@@ -419,7 +419,7 @@ ADELIE_CORE_CONSTRAINT_ONE_SIDED_ADMM::solve(
         constexpr size_t _newton_max_iters = 100000;
         constexpr value_t _newton_tol = 1e-12;
         size_t x_iters;
-        bcd::unconstrained::newton_solver(
+        bcd::elastic_net::unconstrained::newton_solver(
             quad, linear_shifted, l1, l2+_rho, _newton_tol, _newton_max_iters, 
             x, x_iters, x_buffer1, x_buffer2
         );

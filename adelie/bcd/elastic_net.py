@@ -1,4 +1,4 @@
-from . import adelie_core as core
+from ..adelie_core.bcd import elastic_net as core
 import numpy as np
 
 
@@ -12,29 +12,29 @@ def root_lower_bound(
 
     The lower bound :math:`h_\\star` is guaranteed to be non-negative
     and satisfies :math:`\\varphi(h_\\star) \\geq 0` where :math:`\\varphi`
-    is given by :func:`adelie.bcd.root_function` whenever :math:`\\|v\\|_2 > \\lambda`.
+    is given by :func:`adelie.bcd.elastic_net.root_function` whenever :math:`\\|v\\|_2 > \\lambda`.
     It is undefined behavior if the condition is not satisfied.
 
     Parameters
     ----------
     quad : (p,) ndarray
-        See :func:`adelie.bcd.root_function`.
+        See :func:`adelie.bcd.elastic_net.root_function`.
     linear : (p,) ndarray
-        See :func:`adelie.bcd.root_function`.
+        See :func:`adelie.bcd.elastic_net.root_function`.
     l1 : float
-        See :func:`adelie.bcd.root_function`.
+        See :func:`adelie.bcd.elastic_net.root_function`.
     
     See Also
     --------
-    adelie.bcd.root_upper_bound
-    adelie.bcd.root_function
+    adelie.bcd.elastic_net.root_upper_bound
+    adelie.bcd.elastic_net.root_function
 
     Returns
     -------
     lower : float
         Lower bound on the root.
     """
-    return core.bcd.root_lower_bound(quad, linear, l1)
+    return core.root_lower_bound(quad, linear, l1)
 
 
 def root_upper_bound(
@@ -48,7 +48,7 @@ def root_upper_bound(
 
     The upper bound :math:`h^\\star` is guaranteed to be non-negative.
     However, it *may not satisfy* :math:`\\varphi(h^\\star) \\leq 0` where :math:`\\varphi`
-    is given by :func:`adelie.bcd.root_function` if ``zero_tol`` is too large.
+    is given by :func:`adelie.bcd.elastic_net.root_function` if ``zero_tol`` is too large.
     We assume that :math:`\\|v_S\\|_2 < \\lambda` 
     where :math:`S = \\{i : \\Sigma_{ii} = 0\\}`.
     It is undefined behavior if the condition is not satisfied.
@@ -56,26 +56,26 @@ def root_upper_bound(
     Parameters
     ----------
     quad : (p,) ndarray
-        See :func:`adelie.bcd.root_function`.
+        See :func:`adelie.bcd.elastic_net.root_function`.
     linear : (p,) ndarray
-        See :func:`adelie.bcd.root_function`.
+        See :func:`adelie.bcd.elastic_net.root_function`.
     l1 : float
-        See :func:`adelie.bcd.root_function`.
+        See :func:`adelie.bcd.elastic_net.root_function`.
     zero_tol : float, optional
         A value is considered zero if its absolute value is less than or equal to ``zero_tol``.
         Default is ``1e-14``.
     
     See Also
     --------
-    adelie.bcd.root_lower_bound
-    adelie.bcd.root_function
+    adelie.bcd.elastic_net.root_lower_bound
+    adelie.bcd.elastic_net.root_function
 
     Returns
     -------
     upper : float
         Upper bound on the root.
     """
-    return core.bcd.root_upper_bound(quad, linear, l1, zero_tol)
+    return core.root_upper_bound(quad, linear, l1, zero_tol)
 
 
 def root_function(
@@ -117,7 +117,7 @@ def root_function(
     func : float
         The BCD root function value.
     """
-    return core.bcd.root_function(h, quad, linear, l1)
+    return core.root_function(h, quad, linear, l1)
 
 
 def objective(
@@ -168,14 +168,14 @@ def objective(
 
 
 _solver_dict = {
-    "brent":            core.bcd.unconstrained_brent_solver,
-    "newton":           core.bcd.unconstrained_newton_solver,
-    "newton_brent":     core.bcd.unconstrained_newton_brent_solver,
-    "newton_abs":       core.bcd.unconstrained_newton_abs_solver,
-    "newton_abs_debug": core.bcd.unconstrained_newton_abs_debug_solver,
-    "ista":             core.bcd.unconstrained_ista_solver,
-    "fista":            core.bcd.unconstrained_fista_solver,
-    "fista_adares":     core.bcd.unconstrained_fista_adares_solver,
+    "brent":            core.unconstrained_brent_solver,
+    "newton":           core.unconstrained_newton_solver,
+    "newton_brent":     core.unconstrained_newton_brent_solver,
+    "newton_abs":       core.unconstrained_newton_abs_solver,
+    "newton_abs_debug": core.unconstrained_newton_abs_debug_solver,
+    "ista":             core.unconstrained_ista_solver,
+    "fista":            core.unconstrained_fista_solver,
+    "fista_adares":     core.unconstrained_fista_adares_solver,
 }
 
 
@@ -193,7 +193,7 @@ def solve(
     """Solves the BCD update.
 
     The BCD update for the group elastic net is obtained by minimizing
-    the BCD objective given in :func:`adelie.bcd.objective`.
+    the BCD objective given in :func:`adelie.bcd.elastic_net.objective`.
     The solution exists finitely if and only if 
     :math:`\\|v\\|_2 \\leq \\lambda_1`
     or :math:`\\|v_S\\|_2 < \\lambda_1`,
@@ -204,13 +204,13 @@ def solve(
     Parameters
     ----------
     quad : (p,) ndarray
-        See :func:`adelie.bcd.objective`.
+        See :func:`adelie.bcd.elastic_net.objective`.
     linear : (p,) ndarray
-        See :func:`adelie.bcd.objective`.
+        See :func:`adelie.bcd.elastic_net.objective`.
     l1 : float
-        See :func:`adelie.bcd.objective`.
+        See :func:`adelie.bcd.elastic_net.objective`.
     l2 : float
-        See :func:`adelie.bcd.objective`.
+        See :func:`adelie.bcd.elastic_net.objective`.
     tol : float, optional
         Convergence tolerance. Default is ``1e-12``.
     max_iters : int, optional
@@ -253,8 +253,8 @@ def solve(
 
     See Also
     --------
-    adelie.bcd.objective
-    adelie.bcd.root
+    adelie.bcd.elastic_net.objective
+    adelie.bcd.elastic_net.root
     """
     if solver == "newton_abs_debug":
         return _solver_dict[solver](quad, linear, l1, l2, tol, max_iters, smart_init)
@@ -272,7 +272,7 @@ def root(
 ):
     """Solves the non-negative root of the BCD root function.
 
-    The BCD root function is given in :func:`adelie.bcd.root_function`.
+    The BCD root function is given in :func:`adelie.bcd.elastic_net.root_function`.
     The non-negative root only exists when
     :math:`\\|v_S\\|_2 < \\lambda_1 < \\|v\\|_2`
     where :math:`S` is the subset of indices
@@ -281,11 +281,11 @@ def root(
     Parameters
     ----------
     quad : (p,) ndarray
-        See :func:`adelie.bcd.root_function`.
+        See :func:`adelie.bcd.elastic_net.root_function`.
     linear : (p,) ndarray
-        See :func:`adelie.bcd.root_function`.
+        See :func:`adelie.bcd.elastic_net.root_function`.
     l1 : float
-        See :func:`adelie.bcd.root_function`.
+        See :func:`adelie.bcd.elastic_net.root_function`.
     tol : float, optional
         Convergence tolerance. Default is ``1e-12``.
     max_iters : int, optional
@@ -321,7 +321,7 @@ def root(
 
     See Also
     --------
-    adelie.bcd.root_function
+    adelie.bcd.elastic_net.root_function
     """
     if (np.linalg.norm(linear) <= l1) or \
         (np.linalg.norm(linear[quad <= 0]) >= l1):

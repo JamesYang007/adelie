@@ -1,5 +1,5 @@
 #pragma once
-#include <adelie_core/bcd/unconstrained/elastic_net/newton.hpp>
+#include <adelie_core/bcd/elastic_net/unconstrained/newton.hpp>
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/types.hpp>
 
@@ -86,7 +86,7 @@ void solve_proximal_newton(
         constexpr size_t _newton_max_iters = 100000;
         constexpr value_t _newton_tol = 1e-12;
         size_t x_iters;
-        bcd::unconstrained::newton_solver(
+        bcd::elastic_net::unconstrained::newton_solver(
             quad, mu_resid, l1, l2, _newton_tol, _newton_max_iters, 
             x, x_iters, x_buffer1, x_buffer2
         );

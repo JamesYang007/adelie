@@ -2,15 +2,14 @@ API Reference
 =============
 
 
-adelie.bcd
-----------
+adelie.bcd.elastic_net
+----------------------
 
 
-.. currentmodule:: adelie.bcd
+.. currentmodule:: adelie.bcd.elastic_net
 
 
-.. automodule:: adelie.bcd
-    :no-index:
+.. automodule:: adelie.bcd.elastic_net
 
 
 .. autosummary::
@@ -22,6 +21,26 @@ adelie.bcd
     root_function
     root_lower_bound
     root_upper_bound
+    solve
+
+
+adelie.bcd.sgl
+--------------
+
+
+.. currentmodule:: adelie.bcd.sgl
+
+
+.. automodule:: adelie.bcd.sgl
+
+
+.. autosummary::
+    :toctree: generated/
+
+
+    objective
+    quartic_roots
+    root_secular
     solve
 
 

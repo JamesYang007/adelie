@@ -1,11 +1,12 @@
 #pragma once
-#include <adelie_core/bcd/utils.hpp>
+#include <adelie_core/bcd/elastic_net/utils.hpp>
 #include <adelie_core/optimization/bisect.hpp>
 #include <adelie_core/optimization/newton.hpp>
 #include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
 namespace bcd {
+namespace elastic_net {
 namespace unconstrained {
 
 /**
@@ -434,5 +435,6 @@ void newton_abs_debug_solver(
 }
 
 } // namespace unconstrained
+} // namespace elastic_net
 } // namespace bcd
 } // namespace adelie_core

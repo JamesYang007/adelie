@@ -1,6 +1,6 @@
 #pragma once
 #include <adelie_core/configs.hpp>
-#include <adelie_core/bcd/unconstrained/elastic_net/newton.hpp>
+#include <adelie_core/bcd/elastic_net/unconstrained/newton.hpp>
 #include <adelie_core/util/macros.hpp>
 #include <adelie_core/util/types.hpp>
 
@@ -166,7 +166,7 @@ void update_coordinate(
 )
 {
     size_t iters;
-    bcd::unconstrained::newton_solver(
+    bcd::elastic_net::unconstrained::newton_solver(
         L, v, l1, l2, tol, max_iters,
         x, iters, buffer1, buffer2
     );

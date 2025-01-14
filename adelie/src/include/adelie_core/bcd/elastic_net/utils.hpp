@@ -4,6 +4,7 @@
 
 namespace adelie_core {
 namespace bcd {
+namespace elastic_net {
 
 /**
  * @brief Compute lower bound h_min >= 0 such that 
@@ -107,5 +108,6 @@ auto root_function(
     return (v.array() / (D.array() * h + l1)).matrix().squaredNorm() - 1;
 }
 
+} // namespace elastic_net
 } // namespace bcd
 } // namespace adelie_core
