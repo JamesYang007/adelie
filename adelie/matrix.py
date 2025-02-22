@@ -1,10 +1,14 @@
 from . import adelie_core as core
+from . import io
 from .adelie_core.matrix import (
-    MatrixNaiveBase64,
-    MatrixNaiveBase32,
-    MatrixCovBase64,
+    MatrixConstraintBase32,
+    MatrixConstraintBase64,
     MatrixCovBase32,
+    MatrixCovBase64,
+    MatrixNaiveBase32,
+    MatrixNaiveBase64,
 )
+from sys import platform
 from scipy.sparse import (
     csc_matrix,
     csr_matrix,
@@ -34,6 +38,12 @@ def _to_dtype(mat):
 
 
 class PyMatrixCovBase:
+    # TODO?
+    def __init__(self, n_threads=1):
+        self._n_threads = n_threads
+
+
+class PyMatrixConstraintBase:
     # TODO?
     def __init__(self, n_threads=1):
         self._n_threads = n_threads
@@ -160,7 +170,7 @@ class PyMatrixNaiveBase:
         if isinstance(v, (csr_matrix, csc_matrix)):
             v = v.tocsr().transpose()
             out = np.empty((v.shape[0], n), dtype=dtype)
-            self.sp_btmul(v, out)
+            self.sp_tmul(v, out)
             return out.T
 
         v = np.asarray(v, dtype=dtype)
@@ -188,6 +198,7 @@ class PyMatrixNaiveBase:
 def block_diag(
     mats: list,
     *,
+    method: str ="naive",
     n_threads: int =1,
 ):
     """Creates a block-diagonal matrix given by the list of matrices.
@@ -197,6 +208,8 @@ def block_diag(
 
     .. math::
         \\begin{align*}
+            A 
+            =
             \\begin{bmatrix}
                 A_1 & 0 & \\cdots & 0 \\\\
                 0 & A_2 & \\cdots & 0 \\\\
@@ -206,12 +219,20 @@ def block_diag(
         \\end{align*}
 
     .. note::
-        This matrix only works for covariance method!
+        The routines for this matrix are faster when there are many small blocks
+        rather than few large blocks.
 
     Parameters
     ----------
     mats : list
         List of matrices to represent the block diagonal matrix.
+    method : str, optional
+        Method type. It must be one of the following:
+
+            - ``"naive"``: naive matrix.
+            - ``"cov"``: covariance matrix.
+
+        Default is ``"naive"``.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
@@ -223,10 +244,13 @@ def block_diag(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixCovBlockDiag32
     adelie.adelie_core.matrix.MatrixCovBlockDiag64
+    adelie.adelie_core.matrix.MatrixNaiveBlockDiag32
+    adelie.adelie_core.matrix.MatrixNaiveBlockDiag64
     """
     mats = [
-        dense(mat, method="cov", n_threads=1)
+        dense(mat, method=method, n_threads=1)
         if isinstance(mat, np.ndarray) else
         mat
         for mat in mats
@@ -237,18 +261,29 @@ def block_diag(
         if dtype == _to_dtype(mat): continue
         raise ValueError("All matrices must have the same underlying data type.")
 
-    dispatcher = {
+    cov_dispatcher = {
         np.float64: core.matrix.MatrixCovBlockDiag64,
         np.float32: core.matrix.MatrixCovBlockDiag32,
     }
+    naive_dispatcher = {
+        np.float64: core.matrix.MatrixNaiveBlockDiag64,
+        np.float32: core.matrix.MatrixNaiveBlockDiag32,
+    }
+    dispatcher = {
+        "cov": cov_dispatcher,
+        "naive": naive_dispatcher,
+    }
 
-    core_base = dispatcher[dtype]
-    py_base = PyMatrixCovBase
+    core_base = dispatcher[method][dtype]
+    py_base = {
+        "naive" : PyMatrixNaiveBase,
+        "cov" : PyMatrixCovBase,
+    }[method]
 
     class _block_diag(core_base, py_base):
         def __init__(self):
-            self.mats = mats
-            core_base.__init__(self, self.mats, n_threads)
+            self._mats = mats
+            core_base.__init__(self, self._mats, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
     return _block_diag()
@@ -310,7 +345,9 @@ def concatenate(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixNaiveCConcatenate32
     adelie.adelie_core.matrix.MatrixNaiveCConcatenate64
+    adelie.adelie_core.matrix.MatrixNaiveRConcatenate32
     adelie.adelie_core.matrix.MatrixNaiveRConcatenate64
     """
     mats = [
@@ -343,11 +380,170 @@ def concatenate(
 
     class _concatenate(core_base, py_base):
         def __init__(self):
-            self.mats = mats
-            core_base.__init__(self, self.mats)
+            self._mats = mats
+            core_base.__init__(self, self._mats, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
     return _concatenate()
+
+
+def convex_relu(
+    mat: Union[np.ndarray, csc_matrix],
+    mask: np.ndarray,
+    *,
+    gated: bool =False,
+    copy: bool =False,
+    n_threads: int =1,
+):
+    """Creates a feature matrix for the convex relu problem.
+
+    The feature matrix for the convex gated relu problem is given by
+
+    .. math::
+        \\begin{align*}
+            Y &= 
+            \\begin{bmatrix}
+                D_1 Z & \\ldots & D_m Z
+            \\end{bmatrix}
+        \\end{align*}
+
+    where :math:`D_i \\in \\{0, 1\\}^{n \\times n}` are diagonal masking matrices.
+    The feature matrix for the convex relu problem is given by
+
+    .. math::
+        \\begin{align*}
+            X &= 
+            \\begin{bmatrix}
+                Y & -Y
+            \\end{bmatrix}
+        \\end{align*}
+
+    .. note::
+        This matrix only works for naive method!
+
+    Parameters
+    ----------
+    mat : (n, d) Union[ndarray, csc_matrix]
+        The base matrix :math:`Z` from which to construct the convex relu matrix.        
+    mask : (n, m) ndarray
+        The boolean mask matrix whose columns define the diagonal of :math:`D_i`.
+        If it is not in ``"F"``-ordering, an ``"F"``-ordered copy is made.
+    gated : bool, optional
+        If ``True``, the matrix will represent :math:`Y` and otherwise :math:`X`.
+        Default is ``False``.
+    copy : bool, optional
+        If ``True``, a copy of the inputs is stored internally.
+        Otherwise, a reference is stored instead.
+        Default is ``False``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F
+    adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64F
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse32F
+    adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse64F
+    """
+    py_base = PyMatrixNaiveBase
+
+    if isinstance(mat, np.ndarray):
+        if gated:
+            dispatcher = {
+                np.dtype("float64"): {
+                    "C": core.matrix.MatrixNaiveConvexGatedReluDense64C,
+                    "F": core.matrix.MatrixNaiveConvexGatedReluDense64F,
+                },
+                np.dtype("float32"): {
+                    "C": core.matrix.MatrixNaiveConvexGatedReluDense32C,
+                    "F": core.matrix.MatrixNaiveConvexGatedReluDense32F,
+                },
+            }
+        else:
+            dispatcher = {
+                np.dtype("float64"): {
+                    "C": core.matrix.MatrixNaiveConvexReluDense64C,
+                    "F": core.matrix.MatrixNaiveConvexReluDense64F,
+                },
+                np.dtype("float32"): {
+                    "C": core.matrix.MatrixNaiveConvexReluDense32C,
+                    "F": core.matrix.MatrixNaiveConvexReluDense32F,
+                },
+            }
+        dtype = mat.dtype
+        order = (
+            "F"
+            # prioritize choosing Fortran contiguity
+            if mat.flags.f_contiguous else
+            "C"
+        )
+        if order == "C":
+            warnings.warn(
+                "Detected matrix to be C-contiguous. "
+                "Performance may improve with F-contiguous matrix."
+            )
+        core_base = dispatcher[dtype][order]
+
+        class _convex_relu(core_base, py_base):
+            def __init__(self):
+                self._mat = np.array(mat, copy=copy)
+                self._mask = np.array(mask, copy=copy, dtype=bool, order="F")
+                core_base.__init__(self, self._mat, self._mask, n_threads)
+                py_base.__init__(self, n_threads=n_threads)
+
+    elif isinstance(mat, csc_matrix):
+        mat = mat.copy()
+        mat.prune()
+        mat.sort_indices()
+
+        if gated:
+            dispatcher = {
+                np.dtype("float64"): core.matrix.MatrixNaiveConvexGatedReluSparse64F,
+                np.dtype("float32"): core.matrix.MatrixNaiveConvexGatedReluSparse32F,
+            }
+        else:
+            dispatcher = {
+                np.dtype("float64"): core.matrix.MatrixNaiveConvexReluSparse64F,
+                np.dtype("float32"): core.matrix.MatrixNaiveConvexReluSparse32F,
+            }
+        dtype = mat.dtype
+        core_base = dispatcher[dtype]
+
+        class _convex_relu(core_base, py_base):
+            def __init__(self):
+                self._mat = mat
+                self._mask = np.array(mask, copy=copy, dtype=bool, order="F")
+                core_base.__init__(
+                    self, 
+                    self._mat.shape[0], 
+                    self._mat.shape[1], 
+                    self._mat.nnz,
+                    self._mat.indptr,
+                    self._mat.indices,
+                    self._mat.data,
+                    self._mask,
+                    n_threads,
+                )
+                py_base.__init__(self, n_threads=n_threads)
+
+    else:
+        raise TypeError("mat must be a numpy array or a scipy csc_matrix.")
+
+    return _convex_relu()
 
 
 def dense(
@@ -361,13 +557,14 @@ def dense(
     
     Parameters
     ----------
-    mat : np.ndarray
+    mat : ndarray
         The dense matrix to view.
     method : str, optional
         Method type. It must be one of the following:
 
-            - ``"naive"``: naive method.
-            - ``"cov"``: covariance method.
+            - ``"naive"``: naive matrix.
+            - ``"cov"``: covariance matrix.
+            - ``"constraint"``: constraint matrix.
 
         Default is ``"naive"``.
     copy : bool, optional
@@ -385,7 +582,17 @@ def dense(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixConstraintDense32C
+    adelie.adelie_core.matrix.MatrixConstraintDense32F
+    adelie.adelie_core.matrix.MatrixConstraintDense64C
+    adelie.adelie_core.matrix.MatrixConstraintDense64F
+    adelie.adelie_core.matrix.MatrixCovDense32C
+    adelie.adelie_core.matrix.MatrixCovDense32F
+    adelie.adelie_core.matrix.MatrixCovDense64C
     adelie.adelie_core.matrix.MatrixCovDense64F
+    adelie.adelie_core.matrix.MatrixNaiveDense32C
+    adelie.adelie_core.matrix.MatrixNaiveDense32F
+    adelie.adelie_core.matrix.MatrixNaiveDense64C
     adelie.adelie_core.matrix.MatrixNaiveDense64F
     """
     naive_dispatcher = {
@@ -410,37 +617,105 @@ def dense(
         },
     }
 
+    constraint_dispatcher = {
+        np.dtype("float64"): {
+            "C": core.matrix.MatrixConstraintDense64C,
+            "F": core.matrix.MatrixConstraintDense64F,
+        },
+        np.dtype("float32"): {
+            "C": core.matrix.MatrixConstraintDense32C,
+            "F": core.matrix.MatrixConstraintDense32F,
+        },
+    }
+
     dispatcher = {
         "naive" : naive_dispatcher,
         "cov" : cov_dispatcher,
+        "constraint": constraint_dispatcher,
     }
 
     dtype = mat.dtype
-    order = (
-        "F"
+
+    if method != "constraint":
         # prioritize choosing Fortran contiguity
-        if mat.flags.f_contiguous else
-        "C"
-    )
-    if order == "C":
-        warnings.warn(
-            "Detected matrix to be C-contiguous. "
-            "Performance may improve with F-contiguous matrix."
+        order = (
+            "F"
+            if mat.flags.f_contiguous else
+            "C"
         )
+
+        if order == "C":
+            warnings.warn(
+                "Detected matrix to be C-contiguous. "
+                "Performance may improve with F-contiguous matrix."
+            )
+    else:
+        # prioritize choosing C contiguity
+        order = (
+            "C"
+            if mat.flags.c_contiguous else
+            "F"
+        )
+
+        if order == "F":
+            warnings.warn(
+                "Detected matrix to be F-contiguous. "
+                "Performance may improve with C-contiguous matrix."
+            )
+
     core_base = dispatcher[method][dtype][order]
 
     py_base = {
         "naive" : PyMatrixNaiveBase,
         "cov" : PyMatrixCovBase,
+        "constraint" : PyMatrixConstraintBase,
     }[method]
 
     class _dense(core_base, py_base):
         def __init__(self):
-            self.mat = np.array(mat, copy=copy)
-            core_base.__init__(self, self.mat, n_threads)
+            self._mat = np.array(mat, copy=copy)
+            core_base.__init__(self, self._mat, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
     return _dense()
+
+
+def eager_cov(
+    mat: np.ndarray,
+    n_threads: int =1,
+):
+    """Creates an eager covariance matrix.
+
+    The eager covariance matrix :math:`A` uses 
+    the underlying matrix :math:`X` given by ``mat``
+    to compute the values of :math:`A = X^\\top X` *eagerly*.
+    In other words, it computes the entire :math:`A` matrix.
+    This is useful in :func:`adelie.solver.gaussian_cov` where
+    the dimensions of :math:`A` are small enough that
+    that it is faster to construct the entire matrix upfront.
+    
+    .. note::
+        This matrix only works for covariance method!
+
+    Parameters
+    ----------
+    mat : (n, p) ndarray
+        The data matrix from which to eagerly compute the covariance.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    cov : ndarray
+        The dense covariance matrix.
+    """
+    if platform == "linux":
+        return mat.T @ mat
+    p = mat.shape[1]
+    out = np.empty((p, p), order="F", dtype=mat.dtype)
+    core.matrix.utils.dgemtm(mat, out, n_threads)
+    return out
 
 
 def interaction(
@@ -529,8 +804,8 @@ def interaction(
 
     Parameters
     ----------
-    mat : (n, d) np.ndarray
-        The dense matrix :math:`Z` from which to construct interaction terms.
+    mat : (n, d) ndarray
+        The base matrix :math:`Z` from which to construct interaction terms.
     intr_map : dict
         Dictionary mapping a column index of ``mat``
         to a list of (column) indices to pair with.
@@ -540,7 +815,7 @@ def interaction(
         to construct :math:`S`.
         Moreover, the pairs are stored in lexicographical order of ``(key, val)``
         for each ``val`` in ``intr_map[key]`` and for each ``key``.
-    levels : (d,) np.ndarray, optional
+    levels : (d,) ndarray, optional
         Number of levels for each column in ``mat``.
         A non-positive value indicates that the column is a continuous variable
         whereas a positive value indicates that it is a discrete variable with
@@ -563,6 +838,9 @@ def interaction(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixNaiveInteractionDense32C
+    adelie.adelie_core.matrix.MatrixNaiveInteractionDense32F
+    adelie.adelie_core.matrix.MatrixNaiveInteractionDense64C
     adelie.adelie_core.matrix.MatrixNaiveInteractionDense64F
     """
     dispatcher = {
@@ -623,14 +901,14 @@ def interaction(
             pairs_seen.add((key, val))
     if len(pairs) <= 0:
         raise ValueError("No valid pairs exist. There must be at least one valid pair.")
-    pairs = np.array(pairs, dtype=np.int32)
+    pairs = np.array(pairs, dtype=int)
 
     class _interaction(core_base, py_base):
         def __init__(self):
-            self.mat = np.array(mat, copy=copy)
-            self.pairs = pairs
-            self.levels = np.array(levels, copy=True, dtype=np.int32)
-            core_base.__init__(self, self.mat, self.pairs, self.levels, n_threads)
+            self._mat = np.array(mat, copy=copy)
+            self._pairs = pairs
+            self._levels = np.array(levels, copy=True, dtype=int)
+            core_base.__init__(self, self._mat, self._pairs, self._levels, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         
     return _interaction()
@@ -646,7 +924,7 @@ def kronecker_eye(
     """Creates a Kronecker product with identity matrix.
 
     The matrix is represented as :math:`X \\otimes I_K`
-    where :math:`X` is the underlying dense matrix and 
+    where :math:`X` is the underlying base matrix and 
     :math:`I_K` is the identity matrix of dimension :math:`K`.
 
     .. note::
@@ -654,13 +932,13 @@ def kronecker_eye(
     
     Parameters
     ----------
-    mat : Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
+    mat : Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
         The matrix to view as a Kronecker product with identity matrix.
-        If ``np.ndarray``, a specialized class is created with more optimized routines.
+        If :class:`numpy.ndarray`, a specialized class is created with more optimized routines.
     K : int
         Dimension of the identity matrix.
     copy : bool, optional
-        This argument is only used if ``mat`` is a ``np.ndarray``.
+        This argument is only used if ``mat`` is a :class:`numpy.ndarray`.
         If ``True``, a copy of ``mat`` is stored internally.
         Otherwise, a reference is stored instead.
         Default is ``False``.
@@ -675,7 +953,11 @@ def kronecker_eye(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixNaiveKroneckerEye32
     adelie.adelie_core.matrix.MatrixNaiveKroneckerEye64
+    adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense32C
+    adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense32F
+    adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64C
     adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F
     """
     if isinstance(mat, np.ndarray):
@@ -708,11 +990,84 @@ def kronecker_eye(
     py_base = PyMatrixNaiveBase
     class _kronecker_eye(core_base, py_base):
         def __init__(self):
-            self.mat = mat
-            core_base.__init__(self, self.mat, K, n_threads)
+            self._mat = mat
+            core_base.__init__(self, self._mat, K, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
     return _kronecker_eye()
+
+
+def lazy_cov(
+    mat: np.ndarray,
+    *,
+    copy: bool =False,
+    n_threads: int =1,
+):
+    """Creates a lazy covariance matrix.
+
+    The lazy covariance matrix :math:`A` uses 
+    the underlying matrix :math:`X` given by ``mat``
+    to compute the values of :math:`A = X^\\top X` *dynamically*.
+    It only computes rows of :math:`A`
+    on-the-fly that are needed when calling its member functions.
+    This is useful in :func:`adelie.solver.gaussian_cov` where
+    the covariance method must be used but the dimensions of :math:`A`
+    are too large to construct the entire matrix as a dense matrix.
+    
+    .. note::
+        This matrix only works for covariance method!
+
+    Parameters
+    ----------
+    mat : (n, p) ndarray
+        The data matrix from which to lazily compute the covariance.
+    copy : bool, optional
+        If ``True``, a copy of ``mat`` is stored internally.
+        Otherwise, a reference is stored instead.
+        Default is ``False``.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.adelie_core.matrix.MatrixCovLazyCov32C
+    adelie.adelie_core.matrix.MatrixCovLazyCov32F
+    adelie.adelie_core.matrix.MatrixCovLazyCov64C
+    adelie.adelie_core.matrix.MatrixCovLazyCov64F
+    """
+    dispatcher = {
+        np.dtype("float64"): {
+            "C": core.matrix.MatrixCovLazyCov64C,
+            "F": core.matrix.MatrixCovLazyCov64F,
+        },
+        np.dtype("float32"): {
+            "C": core.matrix.MatrixCovLazyCov32C,
+            "F": core.matrix.MatrixCovLazyCov32F,
+        },
+    }
+
+    dtype = mat.dtype
+    order = (
+        "C"
+        if mat.flags.c_contiguous else
+        "F"
+    )
+    core_base = dispatcher[dtype][order]
+    py_base = PyMatrixCovBase
+
+    class _lazy_cov(core_base, py_base):
+        def __init__(self):
+            self._mat = np.array(mat, copy=copy)
+            core_base.__init__(self, self._mat, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
+
+    return _lazy_cov()
 
 
 def one_hot(
@@ -761,9 +1116,9 @@ def one_hot(
     
     Parameters
     ----------
-    mat : (n, d) np.ndarray
-        The dense matrix :math:`Z` from which to construct one-hot encodings.
-    levels : (d,) np.ndarray, optional
+    mat : (n, d) ndarray
+        The base matrix :math:`Z` from which to construct one-hot encodings.
+    levels : (d,) ndarray, optional
         Number of levels for each column in ``mat``.
         A non-positive value indicates that the column is a continuous variable
         whereas a positive value indicates that it is a discrete variable with
@@ -786,6 +1141,9 @@ def one_hot(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixNaiveOneHotDense32C
+    adelie.adelie_core.matrix.MatrixNaiveOneHotDense32F
+    adelie.adelie_core.matrix.MatrixNaiveOneHotDense64C
     adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F
     """
     dispatcher = {
@@ -820,112 +1178,37 @@ def one_hot(
 
     class _one_hot(core_base, py_base):
         def __init__(self):
-            self.mat = np.array(mat, copy=copy)
-            self.levels = np.array(levels, copy=True, dtype=np.int32)
-            core_base.__init__(self, self.mat, self.levels, n_threads)
+            self._mat = np.array(mat, copy=copy)
+            self._levels = np.array(levels, copy=True, dtype=int)
+            core_base.__init__(self, self._mat, self._levels, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         
     return _one_hot()
 
 
-def lazy_cov(
-    mat: np.ndarray,
-    *,
-    copy: bool =False,
-    n_threads: int =1,
-):
-    """Creates a lazy covariance matrix.
-
-    The lazy covariance matrix :math:`A` uses 
-    the underlying matrix :math:`X` given by ``mat``
-    to compute the values of :math:`A` dynamically.
-    It only computes rows of :math:`A`
-    on-the-fly that are needed when calling its member functions.
-    This is useful in ``adelie.solver.gaussian_cov`` where
-    the covariance method must be used but the dimensions of :math:`A`
-    is too large to construct the entire matrix as a dense matrix.
-    
-    .. note::
-        This matrix only works for covariance method!
-
-    Parameters
-    ----------
-    mat : (n, p) np.ndarray
-        The data matrix from which to lazily compute the covariance.
-    copy : bool, optional
-        If ``True``, a copy of ``mat`` is stored internally.
-        Otherwise, a reference is stored instead.
-        Default is ``False``.
-    n_threads : int, optional
-        Number of threads.
-        Default is ``1``.
-
-    Returns
-    -------
-    wrap
-        Wrapper matrix object.
-
-    See Also
-    --------
-    adelie.adelie_core.matrix.MatrixCovLazyCov64F
-    """
-    dispatcher = {
-        np.dtype("float64"): {
-            "C": core.matrix.MatrixCovLazyCov64C,
-            "F": core.matrix.MatrixCovLazyCov64F,
-        },
-        np.dtype("float32"): {
-            "C": core.matrix.MatrixCovLazyCov32C,
-            "F": core.matrix.MatrixCovLazyCov32F,
-        },
-    }
-
-    dtype = mat.dtype
-    order = (
-        "C"
-        if mat.flags.c_contiguous else
-        "F"
-    )
-    core_base = dispatcher[dtype][order]
-    py_base = PyMatrixCovBase
-
-    class _lazy_cov(core_base, py_base):
-        def __init__(self):
-            self.mat = np.array(mat, copy=copy)
-            core_base.__init__(self, self.mat, n_threads)
-            py_base.__init__(self, n_threads=n_threads)
-
-    return _lazy_cov()
-
-
 def snp_phased_ancestry(
-    filename: str,
+    io: io.snp_phased_ancestry,
     *,
-    read_mode: str ="file",
     n_threads: int =1,
     dtype: Union[np.float32, np.float64] =np.float64,
 ):
     """Creates a SNP phased, ancestry matrix.
 
-    The SNP phased, ancestry matrix is represented by a file with name ``filename``.
-    It must be in the same format as described in ``adelie.io.snp_phased_ancestry``.
-    Typically, the user first writes into the file ``filename`` 
-    using ``adelie.io.snp_phased_ancestry`` and then loads the matrix using this function.
+    The SNP phased, ancestry matrix is a wrapper around 
+    the corresponding IO handler :class:`adelie.io.snp_phased_ancestry`
+    exposing some matrix operations.
 
     .. note::
         This matrix only works for naive method!
     
     Parameters
     ----------
-    filename : str
-        File name that contains the SNP phased, ancestry matrix in ``.snpdat`` format.
-    read_mode : str, optional
-        See the corresponding parameter in ``adelie.io.snp_phased_ancestry``.
-        Default is ``"file"``.
+    io : snp_phased_ancestry
+        IO handler for SNP phased, ancestry data.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         Underlying value type.
         Default is ``np.float64``.
 
@@ -937,6 +1220,7 @@ def snp_phased_ancestry(
     See Also
     --------
     adelie.io.snp_phased_ancestry
+    adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry32
     adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64
     """
     dispatcher = {
@@ -946,42 +1230,41 @@ def snp_phased_ancestry(
     core_base = dispatcher[dtype]
     py_base = PyMatrixNaiveBase
 
+    if not io.is_read:
+        io.read() 
+
     class _snp_phased_ancestry(core_base, py_base):
         def __init__(self):
-            core_base.__init__(self, filename, read_mode, n_threads)
+            self._io = io
+            core_base.__init__(self, self._io, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
     return _snp_phased_ancestry()
 
 
 def snp_unphased(
-    filename: str,
+    io: io.snp_unphased,
     *,
-    read_mode: str ="file",
     n_threads: int =1,
     dtype: Union[np.float32, np.float64] =np.float64,
 ):
     """Creates a SNP unphased matrix.
 
-    The SNP unphased matrix is represented by a file with name ``filename``.
-    It must be in the same format as described in ``adelie.io.snp_unphased``.
-    Typically, the user first writes into the file ``filename`` 
-    using ``adelie.io.snp_unphased`` and then loads the matrix using this function.
+    The SNP unphased matrix is a wrapper around    
+    the corresponding IO handler :class:`adelie.io.snp_unphased`
+    exposing some matrix operations.
 
     .. note::
         This matrix only works for naive method!
     
     Parameters
     ----------
-    filename : str
-        File name that contains unphased calldata in ``.snpdat`` format.
-    read_mode : str, optional
-        See the corresponding parameter in ``adelie.io.snp_unphased``.
-        Default is ``"file"``.
+    io : snp_unphased
+        IO handler for SNP unphased data.
     n_threads : int, optional
         Number of threads.
         Default is ``1``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         Underlying value type.
         Default is ``np.float64``.
 
@@ -993,6 +1276,7 @@ def snp_unphased(
     See Also
     --------
     adelie.io.snp_unphased
+    adelie.adelie_core.matrix.MatrixNaiveSNPUnphased32
     adelie.adelie_core.matrix.MatrixNaiveSNPUnphased64
     """
     dispatcher = {
@@ -1002,9 +1286,13 @@ def snp_unphased(
     core_base = dispatcher[dtype]
     py_base = PyMatrixNaiveBase
 
+    if not io.is_read:
+        io.read()
+
     class _snp_unphased(core_base, py_base):
         def __init__(self):
-            core_base.__init__(self, filename, read_mode, n_threads)
+            self._io = io
+            core_base.__init__(self, self._io, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
     return _snp_unphased()
@@ -1025,13 +1313,14 @@ def sparse(
     
     Parameters
     ----------
-    mat : Union[scipy.sparse.csc_matrix, scipy.sparse.csr_matrix]
+    mat : Union[csc_matrix, csr_matrix]
         The sparse matrix to view.
     method : str, optional
         Method type. It must be one of the following:
 
-            - ``"naive"``: naive method.
-            - ``"cov"``: covariance method.
+            - ``"naive"``: naive matrix.
+            - ``"cov"``: covariance matrix.
+            - ``"constraint"``: constraint matrix.
 
         Default is ``"naive"``.
     copy : bool, optional
@@ -1049,17 +1338,28 @@ def sparse(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixConstraintSparse32C
+    adelie.adelie_core.matrix.MatrixConstraintSparse64C
+    adelie.adelie_core.matrix.MatrixCovSparse32F
     adelie.adelie_core.matrix.MatrixCovSparse64F
+    adelie.adelie_core.matrix.MatrixNaiveSparse32F
     adelie.adelie_core.matrix.MatrixNaiveSparse64F
     """
     if not (isinstance(mat, csr_matrix) or isinstance(mat, csc_matrix)):
         raise TypeError("mat must be scipy.sparse.csr_matrix or scipy.sparse.csc_matrix.")
 
-    if isinstance(mat, csr_matrix):
-        warnings.warn("Converting to CSC format.")
-        mat = mat.tocsc(copy=True)
-    elif copy:
-        mat = mat.copy()
+    if method != "constraint":
+        if isinstance(mat, csr_matrix):
+            warnings.warn("Converting to CSC format.")
+            mat = mat.tocsc(copy=True)
+        elif copy:
+            mat = mat.copy()
+    else:
+        if isinstance(mat, csc_matrix):
+            warnings.warn("Converting to CSR format.")
+            mat = mat.tocsr(copy=True)
+        elif copy:
+            mat = mat.copy()
 
     mat.prune()
     mat.sort_indices()
@@ -1074,9 +1374,15 @@ def sparse(
         np.dtype("float32"): core.matrix.MatrixCovSparse32F,
     }
 
+    constraint_dispatcher = {
+        np.dtype("float64"): core.matrix.MatrixConstraintSparse64C,
+        np.dtype("float32"): core.matrix.MatrixConstraintSparse32C,
+    }
+
     dispatcher = {
         "naive" : naive_dispatcher,
         "cov" : cov_dispatcher,
+        "constraint": constraint_dispatcher,
     }
 
     dtype = mat.dtype
@@ -1084,19 +1390,20 @@ def sparse(
     py_base = {
         "naive" : PyMatrixNaiveBase,
         "cov" : PyMatrixCovBase,
+        "constraint": PyMatrixConstraintBase,
     }[method]
 
     class _sparse(core_base, py_base):
         def __init__(self):
-            self.mat = mat
+            self._mat = mat
             core_base.__init__(
                 self, 
-                self.mat.shape[0], 
-                self.mat.shape[1], 
-                self.mat.nnz,
-                self.mat.indptr,
-                self.mat.indices,
-                self.mat.data,
+                self._mat.shape[0], 
+                self._mat.shape[1], 
+                self._mat.nnz,
+                self._mat.indptr,
+                self._mat.indices,
+                self._mat.data,
                 n_threads,
             )
             py_base.__init__(self, n_threads=n_threads)
@@ -1124,7 +1431,14 @@ def standardize(
             X = (Z - \\mathbf{1} c^\\top) \\mathrm{diag}(s)^{-1}
         \\end{align*}
 
-    We define the column means :math:`\\overline{Z} \\in \\mathbb{R}^p` to be
+    The centers :math:`c` and scales :math:`s` are either user-provided or
+    deduced from :math:`Z` via 
+    :func:`~adelie.adelie_core.matrix.MatrixNaiveBase64.mean` and 
+    :func:`~adelie.adelie_core.matrix.MatrixNaiveBase64.var`, respectively,
+    with equal sample weights :math:`1/n`.
+    The degrees of freedom :math:`\\mathrm{df}` can be specified for :math:`s`
+    so that the sample weights are :math:`1 / (n-\\mathrm{df})` instead.
+    Therefore, :math:`c` will usually coincide with
 
     .. math::
         \\begin{align*}
@@ -1133,7 +1447,7 @@ def standardize(
             \\frac{1}{n} Z^\\top \\mathbf{1}
         \\end{align*}
 
-    Lastly, we define the column standard deviations :math:`\\hat{\\sigma} \\in \\mathbb{R}^p` to be
+    and :math:`s` with 
 
     .. math::
         \\begin{align*}
@@ -1142,22 +1456,22 @@ def standardize(
             \\frac{1}{\\sqrt{n - \\mathrm{df}}} \\|Z_{\\cdot j} - c_j \\mathbf{1} \\|_2
         \\end{align*}
 
-    where :math:`\\mathrm{df}` is the degrees of freedom given by ``ddof``.
-
     .. note::
         This matrix only works for naive method!
     
     Parameters
     ----------
-    mat : Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
+    mat : Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
         The underlying matrix :math:`Z` to standardize.
-    centers : np.ndarray, optional
+    centers : ndarray, optional
         The center values :math:`c` for each column of ``mat``.
-        If ``None``, the column means :math:`\\overline{Z}` are used as centers.
+        If ``None``, the implied column means are used via 
+        :func:`~adelie.adelie_core.matrix.MatrixNaiveBase64.mean`.
         Default is ``None``.
-    scales : np.ndarray, optional
+    scales : ndarray, optional
         The scale values :math:`s` for each column of ``mat``.
-        If ``None``, the column standard deviations :math:`\\hat{\\sigma}` are used as scales.
+        If ``None``, the implied column standard deviations are used via
+        :func:`~adelie.adelie_core.matrix.MatrixNaiveBase64.var`.
         Default is ``None``.
     ddof : int, optional
         The degrees of freedom used to compute ``scales``.
@@ -1174,6 +1488,7 @@ def standardize(
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixNaiveStandardize32
     adelie.adelie_core.matrix.MatrixNaiveStandardize64
     """
     if isinstance(mat, (list, np.ndarray)):
@@ -1198,34 +1513,24 @@ def standardize(
     py_base = PyMatrixNaiveBase
 
     n, p = mat.shape
-    sqrt_weights = np.full(n, 1/np.sqrt(n), dtype=dtype) 
+    weights = np.full(n, 1/n, dtype=dtype) 
     is_centers_none = centers is None
 
     if is_centers_none:
         centers = np.empty(p, dtype=dtype) 
-        mat.mul(sqrt_weights, sqrt_weights, centers)
+        mat.mean(weights, centers)
 
     if scales is None:
-        if is_centers_none:
-            means = centers
-        else:
-            means = np.empty(p, dtype=dtype) 
-            mat.mul(sqrt_weights, sqrt_weights, means)
-
-        vars = np.empty((p, 1, 1), dtype=dtype, order="F")
-        buffer = np.empty((n, 1), dtype=dtype, order="F")
-        for j in range(p):
-            mat.cov(j, 1, sqrt_weights, vars[j], buffer) 
-        vars = vars.reshape(p)
-        vars += centers * (centers - 2 * means)
+        vars = np.empty(p, dtype=dtype)
+        mat.var(centers, weights, vars)
         scales = np.sqrt((n / (n - ddof)) * vars)
 
     class _standardize(core_base, py_base):
         def __init__(self):
-            self.mat = mat
-            self.centers = np.array(centers, copy=True, dtype=dtype)
-            self.scales = np.array(scales, copy=True, dtype=dtype)
-            core_base.__init__(self, mat, self.centers, self.scales, n_threads)
+            self._mat = mat
+            self._centers = np.array(centers, copy=True, dtype=dtype)
+            self._scales = np.array(scales, copy=True, dtype=dtype)
+            core_base.__init__(self, self._mat, self._centers, self._scales, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         
     return _standardize()
@@ -1262,7 +1567,7 @@ def subset(
         it is much more efficient to rather set observation weights 
         along ``indices`` to ``0`` when supplying the GLM object.
         For example, suppose the user wishes to run 
-        ``adelie.solver.grpnet`` with ``mat`` and ``ad.glm.gaussian(y)``
+        :func:`adelie.solver.grpnet` with ``mat`` and ``ad.glm.gaussian(y)``
         but subsetting the samples along ``indices``.
         Then, instead of supplying ``mat[indices]`` and ``ad.glm.gaussian(y[indices])``,
         we recommend creating a weight vector ``w`` where it is ``0`` outside ``indices``
@@ -1270,9 +1575,9 @@ def subset(
 
     Parameters
     ----------
-    mat : Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
+    mat : Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
         The matrix to subset.
-    indices : np.ndarray
+    indices : ndarray
         Array of indices to subset the matrix.
     axis : int, optional
         The axis along which to subset.
@@ -1285,11 +1590,13 @@ def subset(
     -------
     wrap
         Wrapper matrix object.
-        If ``mat`` is ``np.ndarray`` then the usual numpy subsetted matrix is returned.
+        If ``mat`` is :class:`numpy.ndarray` then the usual numpy subsetted matrix is returned.
 
     See Also
     --------
+    adelie.adelie_core.matrix.MatrixNaiveCSubset32
     adelie.adelie_core.matrix.MatrixNaiveCSubset64
+    adelie.adelie_core.matrix.MatrixNaiveRSubset32
     adelie.adelie_core.matrix.MatrixNaiveRSubset64
     """
     if isinstance(mat, np.ndarray):
@@ -1318,9 +1625,9 @@ def subset(
 
     class _subset(core_base, py_base):
         def __init__(self):
-            self.mat = mat
-            self.indices = np.array(indices, copy=True, dtype=np.int32)
-            core_base.__init__(self, mat, self.indices, n_threads)
+            self._mat = mat
+            self._indices = np.array(indices, copy=True, dtype=int)
+            core_base.__init__(self, self._mat, self._indices, n_threads)
             py_base.__init__(self, n_threads=n_threads)
         
     return _subset()

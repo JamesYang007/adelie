@@ -1,16 +1,15 @@
-include VERSION
-graft adelie
-
 global-exclude *.so
 global-exclude **/__pycache__/**
 
 prune .github
 prune .pytest_cache
 prune .vscode
-prune adelie-r
+prune bazel-*
 prune benchmark
 prune build
+prune data
 prune dist
 prune docs
 prune research
 prune tests
+prune tools

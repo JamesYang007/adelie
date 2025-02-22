@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <adelie_core/configs.hpp>
 #include <adelie_core/util/macros.hpp>
+#include <adelie_core/util/omp.hpp>
 #include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
@@ -18,7 +19,7 @@ void dvaddi(
     using value_t = typename std::decay_t<X1Type>::Scalar;
     const size_t n = x1.size();
     const size_t n_bytes = (2 * sizeof(value_t)) * n;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         x1 += x2; 
         return; 
     }
@@ -48,7 +49,7 @@ void dvsubi(
     using value_t = typename std::decay_t<X1Type>::Scalar;
     const size_t n = x1.size();
     const size_t n_bytes = (2 * sizeof(value_t)) * n;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         x1 -= x2;
         return; 
     }
@@ -78,7 +79,7 @@ void dvveq(
     using value_t = typename std::decay_t<X1Type>::Scalar;
     const size_t n = x1.size();
     const size_t n_bytes = sizeof(value_t) * n;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         x1 = x2;
         return; 
     }
@@ -107,7 +108,7 @@ void dvzero(
     using value_t = typename std::decay_t<OutType>::Scalar;
     const size_t n = out.size();
     const size_t n_bytes = sizeof(value_t) * n;
-    if (n_threads <= 1 || n_bytes <= 2 * Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= 2 * Configs::min_bytes) { 
         out.setZero(); 
         return; 
     }
@@ -139,7 +140,7 @@ typename std::decay_t<X1Type>::Scalar ddot(
     using value_t = typename std::decay_t<X1Type>::Scalar;
     const size_t n = x1.size();
     const size_t n_bytes = (2 * sizeof(value_t)) * n;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         return x1.dot(x2); 
     }
     const int n_blocks = std::min(n_threads, n);
@@ -171,7 +172,7 @@ void dmmeq(
     const size_t n = x1.rows();
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (8 * sizeof(value_t)) * n * x1.cols();
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         x1 = x2; 
         return; 
     }
@@ -190,8 +191,13 @@ void dmmeq(
     }
 }
 
-template <util::operator_type op=util::operator_type::_eq, 
-          class MType, class VType, class BuffType, class OutType>
+template <
+    util::operator_type op=util::operator_type::_eq, 
+    class MType, 
+    class VType, 
+    class BuffType, 
+    class OutType
+>
 ADELIE_CORE_STRONG_INLINE
 void dgemv(
     const MType& m,
@@ -206,7 +212,7 @@ void dgemv(
     const size_t p = m.cols();
     const size_t max_np = std::max(n, p);
     const size_t n_bytes = sizeof(value_t) * n * (p + 1);
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) { 
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         if constexpr (op == util::operator_type::_eq) {
             out = v * m; 
         } else if constexpr (op == util::operator_type::_add) {
@@ -262,6 +268,95 @@ void dgemv(
     }
 }
 
+template <
+    class XType, 
+    class BuffType, 
+    class OutType
+>
+ADELIE_CORE_STRONG_INLINE
+void dxtx(
+    const XType& X,
+    size_t n_threads,
+    BuffType& buff,
+    OutType& out
+)
+{
+    using X_t = std::decay_t<XType>;
+    using value_t = typename X_t::Scalar;
+    using colmat_value_t = util::colmat_type<value_t>;
+
+    auto out_lower = out.template triangularView<Eigen::Lower>();
+    out_lower.setZero();
+
+    const size_t n = X.rows();
+    const size_t p = X.cols();
+    const size_t n_bytes = sizeof(value_t) * n * p * p;
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
+        out.template selfadjointView<Eigen::Lower>().rankUpdate(X.transpose());
+        out.template triangularView<Eigen::Upper>() = out.transpose();
+        return; 
+    }
+
+    const int n_blocks = std::min(n_threads, n);
+    const int block_size = n / n_blocks;
+    const int remainder = n % n_blocks;
+
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
+    for (int t = 0; t < n_blocks; ++t) {
+        const auto begin = (
+            std::min<int>(t, remainder) * (block_size + 1) 
+            + std::max<int>(t-remainder, 0) * block_size
+        );
+        const auto size = block_size + (t < remainder);
+        const auto X_t = X.middleRows(begin, size);
+        Eigen::Map<colmat_value_t> out_t(buff.data() + p * p * t, p, p);
+        auto out_t_lower = out_t.template triangularView<Eigen::Lower>();
+        out_t_lower.setZero();
+        out_t.template selfadjointView<Eigen::Lower>().rankUpdate(X_t.transpose());
+    }
+
+    for (int t = 0; t < n_blocks; ++t) {
+        const Eigen::Map<const colmat_value_t> out_t(buff.data() + p * p * t, p, p);
+        out_lower += out_t;
+    }
+    out.template triangularView<Eigen::Upper>() = out.transpose();
+}
+
+template <
+    class MType,
+    class OutType
+>
+ADELIE_CORE_STRONG_INLINE
+void sq_norm(
+    const MType& m,
+    OutType& out,
+    size_t n_threads
+)
+{
+    using value_t = typename std::decay_t<MType>::Scalar;
+    const size_t n = m.rows();
+    const size_t p = m.cols();
+    const size_t n_bytes = sizeof(value_t) * n * (p + 1);
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
+        out = m.array().square().colwise().sum(); 
+        return;
+    }
+    const int n_blocks = std::min(n_threads, p);
+    const int block_size = p / n_blocks;
+    const int remainder = p % n_blocks;
+
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
+    for (int t = 0; t < n_blocks; ++t)
+    {
+        const auto begin = (
+            std::min<int>(t, remainder) * (block_size + 1) 
+            + std::max<int>(t-remainder, 0) * block_size
+        );
+        const auto size = block_size + (t < remainder);
+        out.segment(begin, size) = m.middleCols(begin, size).array().square().colwise().sum();
+    }
+}
+
 template <class InnerType, class ValueType, class WeightsType>
 ADELIE_CORE_STRONG_INLINE
 auto svsvwdot(
@@ -298,8 +393,12 @@ auto svsvwdot(
     return sum;
 }
 
-template <class Inner1Type, class Value1Type,
-          class Inner2Type, class Value2Type>
+template <
+    class Inner1Type, 
+    class Value1Type,
+    class Inner2Type, 
+    class Value2Type
+>
 ADELIE_CORE_STRONG_INLINE
 auto svsvdot(
     const Inner1Type& inner_1,
@@ -349,7 +448,7 @@ auto spddot(
     const size_t nnz = inner.size();
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (16 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         value_t sum = 0;
         for (int i = 0; i < inner.size(); ++i) {
             sum += x[inner[i]] * value[i];
@@ -391,8 +490,8 @@ void spaxi(
     const size_t nnz = inner.size();
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
-        for (int i = 0; i < nnz; ++i) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
+        for (size_t i = 0; i < nnz; ++i) {
             out[inner[i]] += v * value[i];
         }
         return;
@@ -415,6 +514,46 @@ void spaxi(
     }
 }
 
+template <class InnerType, class ValueType, class DenseType, class OutType>
+ADELIE_CORE_STRONG_INLINE
+void spdaddi(
+    const InnerType& inner, 
+    const ValueType& value,
+    const DenseType& v,
+    OutType& out,
+    size_t n_threads
+)
+{
+    using value_t = typename std::decay_t<ValueType>::Scalar;
+    const size_t nnz = inner.size();
+    // NOTE: multiplier from experimentation
+    const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
+        for (size_t i = 0; i < nnz; ++i) {
+            const auto idx = inner[i];
+            out[idx] += v[idx] * value[i];
+        }
+        return;
+    }
+    const int n_blocks = std::min(n_threads, nnz);
+    const int block_size = nnz / n_blocks;
+    const int remainder = nnz % n_blocks;
+
+    #pragma omp parallel for schedule(static) num_threads(n_threads)
+    for (int t = 0; t < n_blocks; ++t)
+    {
+        const auto begin = (
+            std::min<int>(t, remainder) * (block_size + 1) 
+            + std::max<int>(t-remainder, 0) * block_size
+        );
+        const auto size = block_size + (t < remainder);
+        for (int i = begin; i < begin+size; ++i) {
+            const auto idx = inner[i];
+            out[idx] += v[idx] * value[i];
+        }
+    }
+}
+
 template <class UnaryType, class IOType, class VType, class BuffType>
 ADELIE_CORE_STRONG_INLINE
 auto snp_unphased_dot(
@@ -433,9 +572,9 @@ auto snp_unphased_dot(
     const value_t imp = io.impute()[j];
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         value_t sum = 0;
-        for (int c = 0; c < io_t::n_categories; ++c) {
+        for (size_t c = 0; c < io_t::n_categories; ++c) {
             auto it = io.begin(j, c);
             const auto end = io.end(j, c);
             const value_t val = (c == 0) ? imp : c;
@@ -454,7 +593,7 @@ auto snp_unphased_dot(
 
     #pragma omp parallel num_threads(n_threads)
     {
-        for (int c = 0; c < io_t::n_categories; ++c) {
+        for (size_t c = 0; c < io_t::n_categories; ++c) {
             const size_t n_chunks = io.n_chunks(j, c);
             const int n_blocks = std::min(n_threads, n_chunks);
             if (n_blocks <= 0) continue;
@@ -501,8 +640,8 @@ void snp_unphased_axi(
     const value_t imp = io.impute()[j];
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (4 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
-        for (int c = 0; c < io_t::n_categories; ++c) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
+        for (size_t c = 0; c < io_t::n_categories; ++c) {
             auto it = io.begin(j, c);
             const auto end = io.end(j, c);
             const value_t curr_val = v * ((c == 0) ? imp : c);
@@ -516,7 +655,7 @@ void snp_unphased_axi(
 
     #pragma omp parallel num_threads(n_threads)
     {
-        for (int c = 0; c < io_t::n_categories; ++c) {
+        for (size_t c = 0; c < io_t::n_categories; ++c) {
             const size_t n_chunks = io.n_chunks(j, c);
             const int n_blocks = std::min(n_threads, n_chunks);
             if (n_blocks <= 0) continue;
@@ -560,9 +699,9 @@ auto snp_phased_ancestry_dot(
     const auto nnz = io.nnz0()[j] + io.nnz1()[j];
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         value_t sum = 0;
-        for (int hap = 0; hap < io_t::n_haps; ++hap) {
+        for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
             auto it = io.begin(snp, anc, hap);
             const auto end = io.end(snp, anc, hap);
             for (; it != end; ++it) {
@@ -577,7 +716,7 @@ auto snp_phased_ancestry_dot(
 
     #pragma omp parallel num_threads(n_threads)
     {
-        for (int hap = 0; hap < io_t::n_haps; ++hap) {
+        for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
             const size_t n_chunks = io.n_chunks(snp, anc, hap);
             const int n_blocks = std::min(n_threads, n_chunks);
             if (n_blocks <= 0) continue;
@@ -605,6 +744,51 @@ auto snp_phased_ancestry_dot(
     return vbuff.sum();
 }
 
+template <class IOType, class VType>
+auto snp_phased_ancestry_cross_dot(
+    const IOType& io,
+    int j0, 
+    int j1, 
+    const VType& v
+)
+{
+    using value_t = typename std::decay_t<VType>::Scalar;
+
+    const auto A = io.ancestries();
+    const auto snp0 = j0 / A;
+    const auto a0 = j0 - A * snp0;
+    const auto snp1 = j1 / A;
+    const auto a1 = j1 - A * snp1;
+
+    auto it0 = io.begin(snp0, a0, 0);
+    const auto end0 = io.end(snp0, a0, 0);
+    auto it1 = io.begin(snp1, a1, 1);
+    const auto end1 = io.end(snp1, a1, 1);
+
+    value_t sum = 0;
+    while (
+        (it0 != end0) &&
+        (it1 != end1)
+    ) {
+        const auto idx0 = *it0;
+        const auto idx1 = *it1;
+        if (idx0 < idx1) {
+            ++it0; 
+            continue;
+        }
+        else if (idx0 > idx1) {
+            ++it1;
+            continue;
+        } 
+        else {
+            sum += v[idx0];
+            ++it0;
+            ++it1;
+        }
+    }
+    return sum;
+}
+
 template <class IOType, class ValueType, class OutType>
 void snp_phased_ancestry_axi(
     const IOType& io,
@@ -623,8 +807,8 @@ void snp_phased_ancestry_axi(
     const auto nnz = io.nnz0()[j] + io.nnz1()[j];
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (4 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
-        for (int hap = 0; hap < io_t::n_haps; ++hap) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
+        for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
             auto it = io.begin(snp, anc, hap);
             const auto end = io.end(snp, anc, hap);
             for (; it != end; ++it) {
@@ -634,7 +818,7 @@ void snp_phased_ancestry_axi(
         return;
     }
 
-    for (int hap = 0; hap < io_t::n_haps; ++hap) {
+    for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
         const size_t n_chunks = io.n_chunks(snp, anc, hap);
         const int n_blocks = std::min(n_threads, n_chunks);
         if (n_blocks <= 0) continue;
@@ -679,10 +863,11 @@ void snp_phased_ancestry_block_dot(
     );
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (8 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         for (int k = 0; k < q; ++k) {
-            snp_phased_ancestry_dot(io, j+k, v, n_threads, buff);
+            out[k] = snp_phased_ancestry_dot(io, j+k, v, n_threads, buff);
         }
+        return;
     }
 
     Eigen::Map<rowarr_value_t> mbuff(
@@ -698,7 +883,7 @@ void snp_phased_ancestry_block_dot(
             const auto jj = j + k;
             const auto snp = jj / A;
             const auto anc = jj % A;
-            for (int hap = 0; hap < io_t::n_haps; ++hap) {
+            for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
                 const size_t n_chunks = io.n_chunks(snp, anc, hap);
                 const int n_blocks = std::min(n_threads, n_chunks);
                 if (n_blocks <= 0) continue;
@@ -747,7 +932,7 @@ void snp_phased_ancestry_block_axi(
     );
     // NOTE: multiplier from experimentation
     const size_t n_bytes = (4 * sizeof(value_t)) * nnz;
-    if (n_threads <= 1 || n_bytes <= Configs::min_bytes) {
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
         for (int k = 0; k < q; ++k) {
             snp_phased_ancestry_axi(
                 io, j+k, v[k], out, n_threads
@@ -766,10 +951,10 @@ void snp_phased_ancestry_block_axi(
         const auto a_upper = std::min<int>(a_lower + q - n_processed, A);
         const auto size = a_upper - a_lower;
 
-        for (int hap = 0; hap < io_t::n_haps; ++hap) {
+        for (size_t hap = 0; hap < io_t::n_haps; ++hap) {
             #pragma omp parallel num_threads(n_threads)
             {
-                for (int k = 0; k < size; ++k) {
+                for (size_t k = 0; k < size; ++k) {
                     const auto anc = a_lower + k;
                     const size_t n_chunks = io.n_chunks(snp, anc, hap);
                     const int n_blocks = std::min(n_threads, n_chunks);
@@ -798,6 +983,33 @@ void snp_phased_ancestry_block_axi(
 
         n_processed += size;
     }
+}
+
+template <class MType, class OutType>
+void dgemtm(
+    const MType& m,
+    OutType& out,
+    size_t n_threads
+)
+{
+    using value_t = typename std::decay_t<MType>::Scalar;
+    using out_t = std::decay_t<OutType>;
+
+    static_assert(!out_t::IsRowMajor, "out must be column-major!");
+
+    const size_t n = m.rows();
+    const size_t p = m.cols();
+    const size_t n_bytes = sizeof(value_t) * n * p * p;
+    if (n_threads <= 1 || util::omp_in_parallel() || n_bytes <= Configs::min_bytes) { 
+        out.setZero();
+        out.template selfadjointView<Eigen::Lower>().rankUpdate(m.transpose());
+        out.template triangularView<Eigen::Upper>() = out.transpose();
+        return; 
+    }
+
+    Eigen::setNbThreads(n_threads);
+    out.noalias() = m.transpose() * m;
+    Eigen::setNbThreads(1);
 }
 
 } // namespace matrix

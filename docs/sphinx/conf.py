@@ -5,6 +5,7 @@
 
 import os
 import sys
+import adelie as ad
 
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
@@ -16,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'adelie'
 copyright = '2023, James Yang'
 author = 'James Yang'
-release = open("../../VERSION", "r").read().strip()
+release = ad.__version__
 version = release
 
 # -- General configuration ---------------------------------------------------
@@ -44,8 +45,8 @@ html_theme_options = {
         "image_dark": "../logos/adelie-penguin-dark.svg",
     },
     "github_url": "https://github.com/JamesYang007/adelie",
-    "collapse_navigation": True,
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
+    "collapse_navigation": False,
 }
 html_context = {"default_mode": "dark"}
 html_static_path = ['_static']

@@ -1,11 +1,11 @@
 #pragma once
+#include <numeric>
 #include <adelie_core/configs.hpp>
+#include <adelie_core/solver/solver_gaussian_pin_base.hpp>
 #include <adelie_core/util/counting_iterator.hpp>
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/functional.hpp>
 #include <adelie_core/util/stopwatch.hpp>
-#include <adelie_core/util/eigen/map_sparsevector.hpp>
-#include <adelie_core/solver/solver_gaussian_pin_base.hpp>
 
 namespace adelie_core {
 namespace solver {
@@ -31,6 +31,7 @@ struct GaussianPinCovBufferPack: public GaussianPinBufferPack<ValueType, IndexTy
         size_t buffer2_size,
         size_t buffer3_size,
         size_t buffer4_size,
+        size_t constraint_buffer_size,
         size_t buffer_index_size,
         size_t buffer_sg_size,
         size_t active_beta_size
@@ -40,6 +41,7 @@ struct GaussianPinCovBufferPack: public GaussianPinBufferPack<ValueType, IndexTy
             buffer2_size,
             buffer3_size,
             buffer4_size,
+            constraint_buffer_size,
             active_beta_size
         ),
         buffer_index(buffer_index_size),
@@ -52,8 +54,61 @@ struct GaussianPinCovBufferPack: public GaussianPinBufferPack<ValueType, IndexTy
     }
 };
 
-template <class StateType, class BufferPackType,
-          class IndicesType, class ValuesType>
+template <class StateType>
+inline void update_active_inactive_subset(
+    StateType& state
+)
+{
+    using state_t = std::decay_t<StateType>;
+    using vec_bool_t = typename state_t::vec_bool_t;
+
+    const auto& group_sizes = state.group_sizes;
+    const auto& screen_set = state.screen_set;
+    const auto& screen_subset_order = state.screen_subset_order;
+    const auto& screen_subset_ordered = state.screen_subset_ordered;
+    const auto& screen_is_active = state.screen_is_active;
+    auto& screen_is_active_subset = state.screen_is_active_subset;
+    auto& active_subset_order = state.active_subset_order;
+    auto& active_subset_ordered = state.active_subset_ordered;
+    auto& inactive_subset_order = state.inactive_subset_order;
+    auto& inactive_subset_ordered = state.inactive_subset_ordered;
+
+    // update screen_is_active_subset
+    int n_processed = 0;
+    for (int ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) {
+        const auto ss = screen_set[ss_idx];
+        const auto gs = group_sizes[ss];
+        Eigen::Map<vec_bool_t>(
+            screen_is_active_subset.data() + n_processed, gs
+        ) = screen_is_active[ss_idx];
+        n_processed += gs;
+    }
+
+    // update active/inactive subset order/ordered
+    active_subset_order.clear();
+    active_subset_ordered.clear();
+    inactive_subset_order.clear();
+    inactive_subset_ordered.clear();
+    for (int i = 0; i < screen_subset_order.size(); ++i) {
+        const auto ssoi = screen_subset_order[i];
+        const auto sso = screen_subset_ordered[i];
+        if (screen_is_active_subset[ssoi]) {
+            active_subset_order.push_back(i);
+            active_subset_ordered.push_back(sso);
+        } else {
+            inactive_subset_order.push_back(i);
+            inactive_subset_ordered.push_back(sso);
+        }
+    }
+}
+
+
+template <
+    class StateType, 
+    class BufferPackType,
+    class IndicesType, 
+    class ValuesType
+>
 ADELIE_CORE_STRONG_INLINE
 void update_screen_grad_screen(
     StateType& state,
@@ -76,8 +131,12 @@ void update_screen_grad_screen(
     }
 }
 
-template <class StateType, class BufferPackType,
-          class IndicesType, class ValuesType>
+template <
+    class StateType, 
+    class BufferPackType,
+    class IndicesType, 
+    class ValuesType
+>
 ADELIE_CORE_STRONG_INLINE
 void update_screen_grad_active(
     StateType& state,
@@ -102,13 +161,17 @@ void update_screen_grad_active(
     );
     A.bmul(active_subset_ordered_view, indices, values, buffer_sg);
 
-    for (int i = 0; i < active_subset_order.size(); ++i) {
+    for (size_t i = 0; i < active_subset_order.size(); ++i) {
         screen_grad[screen_subset_order[active_subset_order[i]]] -= buffer_sg[i];
     }
 }
 
-template <class StateType, class BufferPackType,
-          class IndicesType, class ValuesType>
+template <
+    class StateType, 
+    class BufferPackType,
+    class IndicesType, 
+    class ValuesType
+>
 ADELIE_CORE_STRONG_INLINE
 void update_screen_grad_inactive(
     StateType& state,
@@ -134,13 +197,13 @@ void update_screen_grad_inactive(
 
     A.bmul(inactive_subset_ordered_view, indices, values, buffer_sg);
 
-    for (int i = 0; i < inactive_subset_order.size(); ++i) {
+    for (size_t i = 0; i < inactive_subset_order.size(); ++i) {
         screen_grad[screen_subset_order[inactive_subset_order[i]]] -= buffer_sg[i];
     }
 }
 
 template <class StateType, class ABDiffType, class IndicesType, class ValuesType>
-void sparsify_active_beta_diff(
+inline void sparsify_active_beta_diff(
     const StateType& state,
     const ABDiffType& ab_diff,
     IndicesType& indices,
@@ -175,11 +238,16 @@ void sparsify_active_beta_diff(
     }        
 }
 
-template <class StateType, class Iter,
-          class ValueType, class BufferPackType,
-          class UpdateCoefficientsType,
-          class UpdateScreenGradType,
-          class AdditionalStepType=util::no_op>
+template <
+    class StateType, 
+    class Iter,
+    class ValueType, 
+    class BufferPackType,
+    class UpdateCoefficientG0Type,
+    class UpdateCoefficientG1Type,
+    class UpdateScreenGradType,
+    class AdditionalStepType=util::no_op
+>
 ADELIE_CORE_STRONG_INLINE
 void coordinate_descent(
     StateType&& state,
@@ -188,14 +256,16 @@ void coordinate_descent(
     size_t lmda_idx,
     ValueType& convg_measure,
     BufferPackType& buffer_pack,
-    UpdateCoefficientsType update_coefficients_f,
+    UpdateCoefficientG0Type update_coordinate_g0_f,
+    UpdateCoefficientG1Type update_coordinate_g1_f,
     UpdateScreenGradType update_screen_grad_f,
     AdditionalStepType additional_step=AdditionalStepType()
 )
 {
     using state_t = std::decay_t<StateType>;
-    using value_t = typename state_t::value_t;
     using index_t = typename state_t::index_t;
+    using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
 
     const auto& penalty = state.penalty;
     const auto& screen_set = state.screen_set;
@@ -206,8 +276,6 @@ void coordinate_descent(
     const auto& group_sizes = state.group_sizes;
     const auto alpha = state.alpha;
     const auto lmda = state.lmda_path[lmda_idx];
-    const auto newton_tol = state.newton_tol;
-    const auto newton_max_iters = state.newton_max_iters;
     auto& screen_beta = state.screen_beta;
     auto& screen_grad = state.screen_grad;
     auto& rsq = state.rsq;
@@ -216,6 +284,7 @@ void coordinate_descent(
     auto& buffer2 = buffer_pack.buffer2;
     auto& buffer3 = buffer_pack.buffer3;
     auto& buffer4 = buffer_pack.buffer4;
+    auto& constraint_buffer = buffer_pack.constraint_buffer;
     auto& buffer_index = buffer_pack.buffer_index;
 
     const auto l1 = lmda * alpha;
@@ -230,15 +299,17 @@ void coordinate_descent(
 
         if (gsize == 1) {
             auto& ak = screen_beta[ss_value_begin]; // corresponding beta
-            const auto gk = screen_grad[ss_value_begin]; // corresponding gradient
+            auto gk = screen_grad[ss_value_begin]; // corresponding gradient
             const auto A_kk = screen_vars[ss_value_begin];  // corresponding A diagonal 
             const auto pk = penalty[k];
 
             const auto ak_old = ak;
 
-            update_coefficient(
-                ak, A_kk, l1, l2, pk, gk
+            gk += ak_old * A_kk;
+            update_coordinate_g0_f(
+                ss_idx, ak, A_kk, gk, l1 * pk, l2 * pk, 1, constraint_buffer
             );
+            gk -= ak_old * A_kk;
 
             if (ak_old == ak) continue;
 
@@ -273,14 +344,15 @@ void coordinate_descent(
             auto ak_old_transformed = buffer4.segment(ak.size(), ak.size());
             ak_old_transformed.matrix() = ak_old.matrix() * Vk; 
             auto ak_transformed = buffer4.segment(2 * ak.size(), ak.size());
+            Eigen::Map<vec_value_t>(
+                ak_transformed.data(),
+                ak_transformed.size()
+             ) = ak_old_transformed;
 
             // update group coefficients
-            size_t iters;
             gk_transformed += A_kk * ak_old_transformed; 
-            update_coefficients_f(
-                A_kk, gk_transformed, l1 * pk, l2 * pk, 
-                newton_tol, newton_max_iters,
-                ak_transformed, iters, buffer1, buffer2
+            update_coordinate_g1_f(
+                ss_idx, ak_transformed, A_kk, gk_transformed, l1 * pk, l2 * pk, Vk, constraint_buffer
             );
             gk_transformed -= A_kk * ak_old_transformed; 
 
@@ -316,16 +388,19 @@ void coordinate_descent(
 /**
  * Applies multiple blockwise coordinate descent on the active set.
  */
-template <class StateType, 
-          class BufferPackType, 
-          class UpdateCoefficientsType,
-          class CUIType>
-ADELIE_CORE_STRONG_INLINE
-void solve_active(
+template <
+    class StateType, 
+    class BufferPackType, 
+    class UpdateCoefficientG0Type,
+    class UpdateCoefficientG1Type,
+    class CUIType
+>
+inline void solve_active(
     StateType&& state,
     size_t lmda_idx,
     BufferPackType& buffer_pack,
-    UpdateCoefficientsType update_coefficients_f,
+    UpdateCoefficientG0Type update_coordinate_g0_f,
+    UpdateCoefficientG1Type update_coordinate_g1_f,
     CUIType check_user_interrupt
 )
 {
@@ -388,7 +463,8 @@ void solve_active(
             lmda_idx, 
             convg_measure, 
             buffer_pack,
-            update_coefficients_f,
+            update_coordinate_g0_f,
+            update_coordinate_g1_f,
             [](auto& state, auto& buffer_pack, const auto& indices, const auto& values) { 
                 update_screen_grad_active(state, buffer_pack, indices, values); 
             }
@@ -440,12 +516,16 @@ void solve_active(
     );
 }
 
-template <class StateType,
-          class UpdateCoefficientsType,
-          class CUIType = util::no_op>
+template <
+    class StateType,
+    class UpdateCoefficientG0Type,
+    class UpdateCoefficientG1Type,
+    class CUIType = util::no_op
+>
 inline void solve(
     StateType&& state,
-    UpdateCoefficientsType update_coefficients_f,
+    UpdateCoefficientG0Type update_coordinate_g0_f,
+    UpdateCoefficientG1Type update_coordinate_g1_f,
     CUIType check_user_interrupt = CUIType()
 )
 {
@@ -461,6 +541,7 @@ inline void solve(
     const auto& screen_set = state.screen_set;
     const auto& screen_beta = state.screen_beta;
     const auto& lmda_path = state.lmda_path;
+    const auto constraint_buffer_size = state.constraint_buffer_size;
     const auto max_active_size = state.max_active_size;
     const auto tol = state.tol;
     const auto rdev_tol = state.rdev_tol;
@@ -489,10 +570,12 @@ inline void solve(
         max_group_size, 
         max_group_size, 
         3 * max_group_size,
+        constraint_buffer_size,
         max_group_size,
         screen_beta.size(), 
         screen_beta.size()
     );    
+
     // buffer to store final result
     auto& active_beta_indices = buffer_pack.active_beta_indices; 
     auto& active_beta_ordered = buffer_pack.active_beta_ordered;
@@ -524,7 +607,8 @@ inline void solve(
             state, 
             l, 
             buffer_pack,
-            update_coefficients_f,
+            update_coordinate_g0_f,
+            update_coordinate_g1_f,
             check_user_interrupt
         );
     };
@@ -550,7 +634,8 @@ inline void solve(
                 l, 
                 convg_measure,
                 buffer_pack,
-                update_coefficients_f,
+                update_coordinate_g0_f,
+                update_coordinate_g1_f,
                 [](auto& state, auto& buffer_pack, const auto& indices, const auto& values) { 
                     update_screen_grad_screen(state, buffer_pack, indices, values); 
                 },
@@ -584,7 +669,7 @@ inline void solve(
                     }
                 );
 
-                state::gaussian::pin::cov::update_active_inactive_subset(state);
+                update_active_inactive_subset(state);
             }
 
             if (convg_measure < tol) break;
@@ -599,6 +684,7 @@ inline void solve(
             active_beta_indices,
             active_beta_ordered
         );
+
         Eigen::Map<const sp_vec_value_t> beta_map(
             p,
             active_beta_indices.size(),
@@ -606,7 +692,8 @@ inline void solve(
             active_beta_ordered.data()
         );
 
-        betas.emplace_back(beta_map);
+        sp_vec_value_t beta = beta_map;
+        betas.emplace_back(std::move(beta));
         intercepts.emplace_back(0);
         rsqs.emplace_back(rsq);
         lmdas.emplace_back(lmda_path[l]);
@@ -615,6 +702,73 @@ inline void solve(
 
         if ((l >= 1) && (rsqs[l]-rsqs[l-1] <= rdev_tol * rsqs[l])) break;
     }
+}
+
+template <class StateType, class CUIType = util::no_op>
+inline void solve(
+    StateType&& state,
+    CUIType check_user_interrupt = CUIType()
+)
+{
+    using state_t = std::decay_t<StateType>;
+    using value_t = typename state_t::value_t;
+    using vec_value_t = typename state_t::vec_value_t;
+
+    const auto& constraints = *state.constraints;
+    const auto& group_sizes = state.group_sizes;
+    const auto& screen_set = state.screen_set;
+
+    const auto max_group_size = group_sizes.maxCoeff();
+    vec_value_t buff(max_group_size * 2);
+
+    const auto update_coordinate_g0_f = [&](
+        auto ss_idx, value_t& ak, value_t A_kk, value_t gk, value_t l1, value_t l2, value_t Q, auto& buffer
+    ) {
+        const auto k = screen_set[ss_idx];
+        const auto constraint = constraints[k];
+
+        // unconstrained case
+        if (constraint == nullptr) {
+            pin::update_coordinate(ak, A_kk, gk, l1, l2);
+
+        // constrained case
+        } else {
+            Eigen::Map<util::rowvec_type<value_t, 1>> ak_view(&ak);
+            const Eigen::Map<const util::rowvec_type<value_t, 1>> A_kk_view(&A_kk);
+            const Eigen::Map<const util::rowvec_type<value_t, 1>> gk_view(&gk);
+            const Eigen::Map<const util::colmat_type<value_t, 1, 1>> Q_view(&Q);
+            constraint->solve(ak_view, A_kk_view, gk_view, l1, l2, Q_view, buffer);
+        }
+    };
+    const auto update_coordinate_g1_f = [&](
+        auto ss_idx, auto& ak, const auto& A_kk, const auto& gk, auto l1, auto l2, const auto& Q, auto& buffer
+    ) {
+        const auto k = screen_set[ss_idx];
+        const auto constraint = constraints[k];
+
+        // unconstrained case
+        if (constraint == nullptr) {
+            const auto size = ak.size();
+            Eigen::Map<vec_value_t> buffer1(buff.data(), size);
+            Eigen::Map<vec_value_t> buffer2(buff.data() + max_group_size, size);
+            pin::update_coordinate(
+                ak, A_kk, gk, l1, l2,
+                state.newton_tol, state.newton_max_iters,
+                buffer1, buffer2
+            );
+
+        // constrained case
+        } else {
+            constraint->solve(ak, A_kk, gk, l1, l2, Q, buffer);
+        }
+    };
+
+    solve(
+        state,
+        update_coordinate_g0_f,
+        update_coordinate_g1_f,
+        check_user_interrupt
+    );
 }
 
 } // namespace cov    

@@ -1,6 +1,7 @@
 #pragma once
 #include <adelie_core/util/exceptions.hpp>
 #include <adelie_core/util/macros.hpp>
+#include <adelie_core/util/omp.hpp>
 #include <adelie_core/util/types.hpp>
 
 namespace adelie_core {
@@ -15,7 +16,7 @@ void compute_column_mean(
 )
 {
     const auto n = m.rows();
-    const auto p = m.cols();
+    const int p = m.cols();
 
     const auto routine = [&](auto j) {
         uint64_t sum = 0;
@@ -26,13 +27,7 @@ void compute_column_mean(
         }
         out[j] = static_cast<double>(sum) / std::max<uint64_t>(n - n_miss, 1);
     };
-
-    if (n_threads <= 1) {
-        for (size_t j = 0; j < p; ++j) routine(j);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (size_t j = 0; j < p; ++j) routine(j);
-    }
+    util::omp_parallel_for(routine, 0, p, n_threads);
 }
 
 ADELIE_CORE_STRONG_INLINE
@@ -43,7 +38,7 @@ void compute_nnm(
 )
 {
     const auto n = m.rows();
-    const auto p = m.cols();
+    const int p = m.cols();
     const auto routine = [&](auto j) {
         uint64_t n_miss = 0;
         for (int k = 0; k < n; ++k) {
@@ -51,13 +46,7 @@ void compute_nnm(
         }
         out[j] = n - n_miss;
     };
-
-    if (n_threads <= 1) {
-        for (size_t j = 0; j < p; ++j) routine(j);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (size_t j = 0; j < p; ++j) routine(j);
-    }
+    util::omp_parallel_for(routine, 0, p, n_threads);
 }
 
 template <class MType>
@@ -69,19 +58,13 @@ void compute_nnz(
 )
 {
     const auto n = m.rows();
-    const auto p = m.cols();
+    const int p = m.cols();
     const auto routine = [&](auto j) {
         uint64_t nnz = 0;
         for (int k = 0; k < n; ++k) if (m(k,j) != 0) ++nnz;
         out[j] = nnz;
     };
-
-    if (n_threads <= 1) {
-        for (size_t j = 0; j < p; ++j) routine(j);
-    } else {
-        #pragma omp parallel for schedule(static) num_threads(n_threads)
-        for (size_t j = 0; j < p; ++j) routine(j);
-    }
+    util::omp_parallel_for(routine, 0, p, n_threads);
 }
 
 ADELIE_CORE_STRONG_INLINE

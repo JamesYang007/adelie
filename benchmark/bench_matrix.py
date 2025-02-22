@@ -191,9 +191,8 @@ def bench_naive(X, q=8, L=10, skip_cov=False):
     if not skip_cov:
         v = np.random.normal(0, 1, n)
         out = np.empty((q, q), order="F")
-        buffer = np.empty((n, q), order="F")
         start = time()
-        X.cov(0, q, sqrt_weights, out, buffer)
+        X.cov(0, q, sqrt_weights, out)
         elapsed = time() - start
         df["cov"] = [elapsed * 1e3]
 
@@ -202,9 +201,9 @@ def bench_naive(X, q=8, L=10, skip_cov=False):
     v = scipy.sparse.csr_matrix(v)
     out = np.empty((L, n))
     start = time()
-    X.sp_btmul(v, out)
+    X.sp_tmul(v, out)
     elapsed = time() - start
-    df["sp_btmul"] = [elapsed * 1e3]
+    df["sp_tmul"] = [elapsed * 1e3]
 
     return df
 
@@ -309,9 +308,8 @@ def bench_naive(X, q=8, L=10, skip_cov=False):
     if not skip_cov:
         v = np.random.normal(0, 1, n)
         out = np.empty((q, q), order="F")
-        buffer = np.empty((n, q), order="F")
         start = time()
-        X.cov(0, q, sqrt_weights, out, buffer)
+        X.cov(0, q, sqrt_weights, out)
         elapsed = time() - start
         df["cov"] = [elapsed * 1e3]
 
@@ -320,8 +318,8 @@ def bench_naive(X, q=8, L=10, skip_cov=False):
     v = scipy.sparse.csr_matrix(v)
     out = np.empty((L, n))
     start = time()
-    X.sp_btmul(v, out)
+    X.sp_tmul(v, out)
     elapsed = time() - start
-    df["sp_btmul"] = [elapsed * 1e3]
+    df["sp_tmul"] = [elapsed * 1e3]
 
     return df

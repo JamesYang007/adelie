@@ -1,6 +1,15 @@
 #pragma once
 #include <adelie_core/glm/glm_base.hpp>
 
+#ifndef ADELIE_CORE_GLM_GAUSSIAN_TP
+#define ADELIE_CORE_GLM_GAUSSIAN_TP \
+    template <class ValueType>
+#endif
+#ifndef ADELIE_CORE_GLM_GAUSSIAN
+#define ADELIE_CORE_GLM_GAUSSIAN \
+    GlmGaussian<ValueType>
+#endif
+
 namespace adelie_core {
 namespace glm {
 
@@ -17,41 +26,9 @@ public:
     explicit GlmGaussian(
         const Eigen::Ref<const vec_value_t>& y,
         const Eigen::Ref<const vec_value_t>& weights
-    ):
-        base_t("gaussian", y, weights)
-    {}
+    );
 
-    void gradient(
-        const Eigen::Ref<const vec_value_t>& eta,
-        Eigen::Ref<vec_value_t> grad
-    ) override
-    {
-        base_t::check_gradient(eta, grad);
-        grad = weights * (y - eta);
-    }
-
-    void hessian(
-        const Eigen::Ref<const vec_value_t>& eta,
-        const Eigen::Ref<const vec_value_t>& grad,
-        Eigen::Ref<vec_value_t> hess
-    ) override
-    {
-        base_t::check_hessian(eta, grad, hess);
-        hess = weights;
-    }
-
-    value_t loss(
-        const Eigen::Ref<const vec_value_t>& eta
-    ) override
-    {
-        base_t::check_loss(eta);
-        return (weights * (0.5 * eta.square() - y * eta)).sum();
-    }
-
-    value_t loss_full() override
-    {
-        return -0.5 * (y.square() * weights).sum();
-    }
+    ADELIE_CORE_GLM_PURE_OVERRIDE_DECL
 };
 
 } // namespace glm

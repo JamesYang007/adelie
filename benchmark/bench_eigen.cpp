@@ -606,3 +606,179 @@ BENCHMARK(BM_many_scan)
     -> Args({10000, 10})
     -> Args({100000, 10})
     ;
+
+static void BM_xtx_sym(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto d = 100;
+    ad::util::colmat_type<double> X;
+    X.setRandom(n, d);
+    ad::util::colmat_type<double> XTX;
+    XTX.resize(d, d);
+
+    for (auto _ : state) {
+        XTX.setZero();
+        XTX.template selfadjointView<Eigen::Lower>().rankUpdate(X.transpose());
+        XTX.template triangularView<Eigen::Upper>() = XTX.transpose();
+    }
+}
+
+BENCHMARK(BM_xtx_sym)
+    -> Args({10000})
+    -> Args({100000})
+    -> Args({1000000})
+    ;
+
+static void BM_xtx_naive(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto n_threads = state.range(1);
+    const auto d = 100;
+    ad::util::colmat_type<double> X;
+    X.setRandom(n, d);
+    ad::util::colmat_type<double> XTX;
+    XTX.resize(d, d);
+
+    Eigen::setNbThreads(n_threads);
+
+    for (auto _ : state) {
+        XTX.noalias() = X.transpose() * X;
+    }
+}
+
+BENCHMARK(BM_xtx_naive)
+    -> Args({10000, 1})
+    -> Args({100000, 1})
+    -> Args({1000000, 1})
+    -> Args({10000, 4})
+    -> Args({100000, 4})
+    -> Args({1000000, 4})
+    -> Args({10000, 8})
+    -> Args({100000, 8})
+    -> Args({1000000, 8})
+    -> Args({10000, 16})
+    -> Args({100000, 16})
+    -> Args({1000000, 16})
+    ;
+
+static void BM_xtwx_naive(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto n_threads = state.range(1);
+    const auto d = 100;
+    ad::util::colmat_type<double> X;
+    X.setRandom(n, d);
+    ad::util::colvec_type<double> w;
+    w.setRandom(n);
+    ad::util::colvec_type<bool> mask;
+    mask.setRandom(n);
+    ad::util::colmat_type<double> XTX;
+    XTX.resize(d, d);
+
+    Eigen::setNbThreads(n_threads);
+
+    for (auto _ : state) {
+        XTX.noalias() = X.transpose() * (w.square() * mask.template cast<double>()).matrix().asDiagonal() * X;
+    }
+}
+
+BENCHMARK(BM_xtwx_naive)
+    -> Args({10000, 1})
+    -> Args({100000, 1})
+    -> Args({1000000, 1})
+    -> Args({10000, 4})
+    -> Args({100000, 4})
+    -> Args({1000000, 4})
+    -> Args({10000, 8})
+    -> Args({100000, 8})
+    -> Args({1000000, 8})
+    ;
+
+static void BM_xtwx_naive_buffer(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto n_threads = state.range(1);
+    const auto d = 100;
+    ad::util::colmat_type<double> X;
+    X.setRandom(n, d);
+    ad::util::colvec_type<double> w;
+    w.setRandom(n);
+    ad::util::colvec_type<bool> mask;
+    mask.setRandom(n);
+    ad::util::colmat_type<double> buff(n, d);
+    ad::util::colmat_type<double> XTX;
+    XTX.resize(d, d);
+
+    Eigen::setNbThreads(n_threads);
+
+    for (auto _ : state) {
+        buff.array() = X.array().colwise() * (w * mask.template cast<double>());
+        XTX.noalias() = buff.transpose() * buff;
+    }
+}
+
+BENCHMARK(BM_xtwx_naive_buffer)
+    -> Args({10000, 1})
+    -> Args({100000, 1})
+    -> Args({1000000, 1})
+    -> Args({10000, 4})
+    -> Args({100000, 4})
+    -> Args({1000000, 4})
+    -> Args({10000, 8})
+    -> Args({100000, 8})
+    -> Args({1000000, 8})
+    ;
+
+static void BM_matrix_vector_dense(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto d = 10;
+    ad::util::colmat_type<double> X(d, n);
+    ad::util::colvec_type<double> v(n);
+    X.setRandom();
+    for (int i = 0; i < n; i += (n / 100)) {
+        v[i] = 1;
+    }
+    ad::util::colvec_type<double> out(d);
+
+    for (auto _ : state) {
+        out.matrix() = X * v.matrix();
+    }
+}
+
+BENCHMARK(BM_matrix_vector_dense)
+    -> Args({1000})
+    -> Args({10000})
+    -> Args({100000})
+    ;
+
+static void BM_matrix_vector_sparse(benchmark::State& state)
+{
+    const auto n = state.range(0);
+    const auto d = 10;
+    ad::util::colmat_type<double> X(d, n);
+    ad::util::colvec_type<double> v(n);
+    X.setRandom();
+    for (int i = 0; i < n; i += (n / 1000)) {
+        v[i] = 1;
+    }
+    ad::util::colvec_type<double> out(d);
+
+    for (auto _ : state) {
+        out.setZero();
+        //for (int i = 0; i < n; i += (n / 1000)) {
+        //    out += v[i] * X.col(i).array();
+        //}
+        for (int i = 0; i < n; ++i) {
+            if (i % (n / 1000)) continue;
+            out += v[i] * X.col(i).array();
+        }
+        benchmark::DoNotOptimize(out);
+    }
+}
+
+BENCHMARK(BM_matrix_vector_sparse)
+    -> Args({1000})
+    -> Args({10000})
+    -> Args({100000})
+    ;

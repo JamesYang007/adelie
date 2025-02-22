@@ -7,7 +7,7 @@ def set_configs(
 ):
     """Sets global configurations.
 
-    See ``adelie.adelie_core.configs.Configs`` to inspect the configuration variables.
+    See :class:`adelie.adelie_core.configs.Configs` to inspect the configuration variables.
 
     Parameters
     ----------

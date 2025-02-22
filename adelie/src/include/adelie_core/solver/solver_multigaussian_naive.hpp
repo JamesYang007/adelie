@@ -1,24 +1,21 @@
 #pragma once
-#include <adelie_core/state/state_gaussian_naive.hpp>
-#include <adelie_core/state/state_multigaussian_naive.hpp>
 #include <adelie_core/solver/solver_gaussian_naive.hpp>
-#include <adelie_core/util/functional.hpp>
-#include <memory>
 
 namespace adelie_core {
 namespace solver {
 namespace multigaussian {
 namespace naive {
 
-template <class StateType,
-          class ExitCondType,
-          class UpdateCoefficientsType,
-          class CUIType=util::no_op>
+template <
+    class StateType,
+    class PBType,
+    class ExitCondType,
+    class CUIType=util::no_op
+>
 inline void solve(
     StateType&& state,
-    bool display,
+    PBType&& pb,
     ExitCondType exit_cond_f,
-    UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
 {
@@ -47,9 +44,8 @@ inline void solve(
 
     gaussian::naive::solve(
         static_cast<state_gaussian_naive_t&>(state),
-        display,
+        pb,
         exit_cond_f,
-        update_coefficients_f,
         tidy,
         check_user_interrupt
     );

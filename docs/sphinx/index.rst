@@ -5,8 +5,8 @@ Adelie documentation
    :maxdepth: 1
    :hidden:
 
-   api_reference
-   user_guide
+   api_reference/index
+   user_guide/index
 
 
 **Version**: |release|
@@ -17,7 +17,8 @@ Adelie documentation
 `Issue Tracker <https://github.com/JamesYang007/adelie/issues>`_ 
 
 
-Adelie is a fast and flexible Python package for solving group elastic net problems. 
+Adelie is a fast and flexible Python package for solving 
+lasso, elastic net, group lasso, and group elastic net problems. 
 It offers a general purpose group elastic net solver, 
 a wide range of matrix classes that can exploit special structure to allow large-scale inputs,
 and an assortment of generalized linear model (GLM) classes for fitting various types of data.
@@ -41,7 +42,7 @@ and the proximal Newton method have been carefully tuned for convergence and num
 
         +++
 
-        .. button-ref:: user_guide
+        .. button-ref:: user_guide/index
             :expand:
             :color: secondary
             :click-parent:
@@ -59,7 +60,7 @@ and the proximal Newton method have been carefully tuned for convergence and num
 
         +++
 
-        .. button-ref:: api_reference
+        .. button-ref:: api_reference/index
             :expand:
             :color: secondary
             :click-parent:

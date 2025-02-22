@@ -2,6 +2,7 @@
 #include <adelie_core/util/types.hpp>
 #include <cstdio>
 #include <memory>
+#include <iostream>
 #if defined(__linux__) || defined(__APPLE__)
 #include <sys/mman.h>
 #include <fcntl.h>
@@ -193,3 +194,53 @@ BENCHMARK(BM_fread_read_copy)
 BENCHMARK(BM_mmap_read_copy)
     -> Args({1000000000}) // 10GB
     ;
+
+static void BM_memcpy_pod_aligned(benchmark::State& state)
+{
+    std::vector<char> vec(2*sizeof(int), 1);
+    int n = -1;
+    for (auto _ : state) {
+        std::memcpy(&n, vec.data(), sizeof(int));
+        benchmark::DoNotOptimize(vec);
+        benchmark::DoNotOptimize(n);
+    }
+}
+
+BENCHMARK(BM_memcpy_pod_aligned);
+
+static void BM_memcpy_pod_unaligned(benchmark::State& state)
+{
+    std::vector<char> vec(2*sizeof(int), 1);
+    int n = -1;
+    for (auto _ : state) {
+        std::memcpy(&n, vec.data()+1, sizeof(int));
+        benchmark::DoNotOptimize(vec);
+    }
+}
+
+BENCHMARK(BM_memcpy_pod_unaligned);
+
+static void BM_pod_aligned(benchmark::State& state)
+{
+    int n = 123;
+    int n2;
+    for (auto _ : state) {
+        n2 = n;
+        benchmark::DoNotOptimize(n2);
+    }
+}
+
+BENCHMARK(BM_pod_aligned);
+
+static void BM_pod_unaligned(benchmark::State& state)
+{
+    std::vector<char> vec(2*sizeof(int), 1);
+    int n = -1;
+    for (auto _ : state) {
+        n = *reinterpret_cast<int*>(vec.data()+3);
+        benchmark::DoNotOptimize(vec);
+        benchmark::DoNotOptimize(n);
+    }
+}
+
+BENCHMARK(BM_pod_unaligned);

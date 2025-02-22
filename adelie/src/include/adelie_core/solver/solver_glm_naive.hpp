@@ -1,9 +1,9 @@
 #pragma once
 #include <adelie_core/configs.hpp>
-#include <adelie_core/solver/solver_base.hpp>
+#include <adelie_core/solver/solver_gaussian_naive.hpp>
 #include <adelie_core/solver/solver_gaussian_pin_naive.hpp>
 #include <adelie_core/state/state_gaussian_pin_naive.hpp>
-#include <adelie_core/state/state_glm_naive.hpp>
+#include <adelie_core/util/omp.hpp>
 
 namespace adelie_core {
 namespace solver {
@@ -55,10 +55,72 @@ struct GlmNaiveBufferPack
     vec_value_t buffer_n;   // (n,) extra buffer
 };
 
-template <class StateType, 
-          class GlmType,
-          class StateGaussianPinType,
-          class ValueType>
+/**
+ * Unlike the similar function in gaussian::naive,
+ * this does not call the base version to update the base classes's screen derived quantities.
+ * This is because in GLM fitting, the three screen_* inputs are modified at every IRLS loop,
+ * while the base quantities remain the same. 
+ * It is only when IRLS finishes and we must screen for variables where we have to update the base quantities.
+ * In gaussian naive setting, the IRLS has loop size of 1 essentially, so the two versions are synonymous.
+ */
+template <
+    class StateType, 
+    class XMType, 
+    class WType,
+    class SXMType, 
+    class STType, 
+    class SVType
+>
+inline void update_screen_derived(
+    StateType& state,
+    const XMType& X_means,
+    const WType& weights_sqrt,
+    size_t begin,
+    size_t end,
+    SXMType& screen_X_means,
+    STType& screen_transforms,
+    SVType& screen_vars
+)
+{
+    const auto& group_sizes = state.group_sizes;
+    const auto& screen_set = state.screen_set;
+    const auto& screen_begins = state.screen_begins;
+
+    const auto new_screen_size = screen_set.size();
+    const int new_screen_value_size = (
+        (screen_begins.size() == 0) ? 0 : (
+            screen_begins.back() + group_sizes[screen_set.back()]
+        )
+    );
+
+    screen_X_means.resize(new_screen_value_size);    
+    screen_transforms.resize(new_screen_size);
+    screen_vars.resize(new_screen_value_size, 0);
+
+    gaussian::naive::update_screen_derived(
+        *state.X,
+        X_means,
+        weights_sqrt,
+        state.groups,
+        state.group_sizes,
+        state.screen_set,
+        state.screen_begins,
+        begin,
+        end,
+        state.intercept,
+        state.n_threads,
+        screen_X_means,
+        screen_transforms,
+        screen_vars
+    );
+}
+
+template <
+    class StateType, 
+    class GlmType,
+    class StateGaussianPinType,
+    class ValueType
+>
 ADELIE_CORE_STRONG_INLINE
 void update_solutions(
     StateType& state,
@@ -67,15 +129,24 @@ void update_solutions(
     ValueType lmda
 )
 {
+    using state_t = std::decay_t<StateType>;
+    using vec_index_t = typename state_t::vec_index_t;
+    using vec_value_t = typename state_t::vec_value_t;
+
     const auto loss_null = state.loss_null;
     const auto loss_full = state.loss_full;
     const auto& eta = state.eta;
     auto& betas = state.betas;
+    auto& duals = state.duals;
     auto& devs = state.devs;
     auto& lmdas = state.lmdas;
     auto& intercepts = state.intercepts;
 
+    vec_index_t dual_indices; 
+    vec_value_t dual_values;
+
     betas.emplace_back(std::move(state_gaussian_pin_naive.betas.back()));
+    duals.emplace_back(sparsify_dual(state, dual_indices, dual_values));
     intercepts.emplace_back(state_gaussian_pin_naive.intercepts.back());
     lmdas.emplace_back(lmda);
 
@@ -86,9 +157,11 @@ void update_solutions(
     );
 }
 
-template <class StateType,
-          class GlmType,
-          class BufferPackType>
+template <
+    class StateType,
+    class GlmType,
+    class BufferPackType
+>
 ADELIE_CORE_STRONG_INLINE
 void update_loss_null(
     StateType& state,
@@ -158,19 +231,18 @@ void update_loss_null(
     }
 }
 
-template <class StateType,
-          class GlmType,
-          class BufferPackType,
-          class ValueType,
-          class UpdateCoefficientsType,
-          class CUIType=util::no_op>
-ADELIE_CORE_STRONG_INLINE
-auto fit(
+template <
+    class StateType,
+    class GlmType,
+    class BufferPackType,
+    class ValueType,
+    class CUIType=util::no_op
+>
+inline auto fit(
     StateType& state,
     GlmType& glm,
     BufferPackType& buffer_pack,
     ValueType lmda,
-    UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
 {
@@ -181,8 +253,10 @@ auto fit(
     using vec_value_t = typename state_t::vec_value_t;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_safe_bool_t = util::rowvec_type<safe_bool_t>;
+    using constraint_t = typename state_t::constraint_t;
     using matrix_naive_t = typename state_t::matrix_t;
     using state_gaussian_pin_naive_t = state::StateGaussianPinNaive<
+        constraint_t,
         matrix_naive_t,
         typename std::decay_t<matrix_naive_t>::value_t,
         index_t,
@@ -190,6 +264,7 @@ auto fit(
     >;
 
     auto& X = *state.X;
+    const auto& constraints = state.constraints;
     const auto& groups = state.groups;
     const auto& group_sizes = state.group_sizes;
     const auto alpha = state.alpha;
@@ -197,6 +272,7 @@ auto fit(
     const auto& offsets = state.offsets;
     const auto& screen_set = state.screen_set;
     const auto& screen_begins = state.screen_begins;
+    const auto constraint_buffer_size = state.constraint_buffer_size;
     const auto intercept = state.intercept;
     const auto max_active_size = state.max_active_size;
     const auto irls_max_iters = state.irls_max_iters;
@@ -281,20 +357,23 @@ auto fit(
                 );
             }
         }
-        for (size_t ss_idx = 0; ss_idx < screen_set.size(); ++ss_idx) {
+
+        const auto update_X_means = [&](auto ss_idx) {
             const auto i = screen_set[ss_idx];
             const auto g = groups[i];
             const size_t gs = group_sizes[i];
             if (gs == 1) {
-                X_means[g] = X.cmul(g, ones, irls_weights);
+                X_means[g] = X.cmul_safe(g, ones, irls_weights);
             } else {
                 Eigen::Map<vec_value_t> Xi_means(X_means.data() + g, gs);
-                X.bmul(g, gs, ones, irls_weights, Xi_means);
+                X.bmul_safe(g, gs, ones, irls_weights, Xi_means);
             }
-        }
+        };
+        util::omp_parallel_for(update_X_means, 0, screen_set.size(), n_threads * (n_threads <= screen_set.size()));
+
         // this call should only adjust the size of screen_* quantities
         // and repopulate every entry using the new weights.
-        state::glm::naive::update_screen_derived(
+        update_screen_derived(
             state,
             X_means,
             irls_weights_sqrt,
@@ -311,6 +390,7 @@ auto fit(
             X,
             y_mean,
             y_var,
+            constraints,
             groups, 
             group_sizes,
             alpha, 
@@ -322,10 +402,9 @@ auto fit(
             Eigen::Map<const vec_value_t>(screen_X_means.data(), screen_X_means.size()), 
             screen_transforms,
             lmda_path_adjusted,
+            constraint_buffer_size,
             intercept, max_active_size, max_iters, 
-            // TODO: still unclear whether we should be max'ing or not.
-            // tolerance is relative to the scaling of null deviance and current total weight sum
-            tol * std::max<value_t>((loss_null - loss_full) / hess_sum, 1), 
+            tol * (loss_null - loss_full) / hess_sum, 
             0 /* adev_tol */, 0 /* ddev_tol */,
             newton_tol, newton_max_iters, n_threads,
             0 /* rsq (no need to track) */,
@@ -337,11 +416,7 @@ auto fit(
             active_set
         );
         try { 
-            gaussian::pin::naive::solve(
-                state_gaussian_pin_naive, 
-                update_coefficients_f, 
-                check_user_interrupt
-            );
+            state_gaussian_pin_naive.solve(check_user_interrupt);
         } catch(...) {
             load_prev_valid();
             throw;
@@ -371,16 +446,7 @@ auto fit(
         glm.gradient(eta, resid); 
 
         /* check convergence */
-        // check directional derivative of gradient (resid) as an approximation
-        // to the quadratic loss. 
-        const auto& active_set = state_gaussian_pin_naive.active_set;
-        const auto& active_begins = state_gaussian_pin_naive.active_begins;
-        const auto n_active = (
-            (active_begins.size() == 0) ? 1 : (
-                active_begins.back() + group_sizes[screen_set[active_set[active_set_size-1]]]
-            )
-        );
-        if (std::abs(((resid - resid_prev) * (eta - eta_prev)).sum()) <= irls_tol * n_active) {
+        if (std::abs(((resid - resid_prev) * (eta - eta_prev)).sum()) <= irls_tol) {
             return std::make_tuple(
                 std::move(state_gaussian_pin_naive),
                 screen_time,
@@ -392,20 +458,21 @@ auto fit(
     }
 }
 
-template <class StateType,
-          class GlmType,
-          class ExitCondType,
-          class UpdateLossNullType,
-          class UpdateCoefficientsType,
-          class TidyType,
-          class CUIType>
+template <
+    class StateType,
+    class GlmType,
+    class PBType,
+    class ExitCondType,
+    class UpdateLossNullType,
+    class TidyType,
+    class CUIType
+>
 inline void solve(
     StateType&& state,
     GlmType&& glm,
-    bool display,
+    PBType&& pb,
     ExitCondType exit_cond_f,
     UpdateLossNullType update_loss_null_f,
-    UpdateCoefficientsType update_coefficients_f,
     TidyType tidy_f,
     CUIType check_user_interrupt
 )
@@ -419,7 +486,7 @@ inline void solve(
     GlmNaiveBufferPack<value_t, safe_bool_t> buffer_pack(n, p);
 
     const auto pb_add_suffix_f = [&](const auto& state, auto& pb) {
-        if (display) solver::pb_add_suffix(state, pb);
+        solver::pb_add_suffix(state, pb);
     };
     const auto update_loss_null_wrap_f = [&](auto& state) {
         const auto setup_loss_null = state.setup_loss_null;
@@ -432,7 +499,7 @@ inline void solve(
         const auto& ones = buffer_pack.ones;
         state.lmda = lmda;
         X.mul(resid, ones, grad);
-        state::update_abs_grad(state, lmda);
+        update_abs_grad(state, lmda);
     };
     const auto update_solutions_f = [&](auto& state, auto& state_gaussian_pin_naive, auto lmda) {
         update_solutions(
@@ -453,7 +520,7 @@ inline void solve(
             kkt_passed,
             n_new_active
         );
-        state::update_screen_derived_base(state);
+        update_screen_derived_base(state);
     };
     const auto fit_f = [&](auto& state, auto lmda) {
         return fit(
@@ -461,14 +528,13 @@ inline void solve(
             glm,
             buffer_pack,
             lmda,
-            update_coefficients_f,
             check_user_interrupt
         );
     };
 
     solver::solve_core(
         state,
-        display,
+        pb,
         pb_add_suffix_f,
         update_loss_null_wrap_f,
         update_invariance_f,
@@ -479,29 +545,29 @@ inline void solve(
     );
 }
 
-template <class StateType,
-          class GlmType,
-          class ExitCondType,
-          class UpdateCoefficientsType,
-          class CUIType=util::no_op>
+template <
+    class StateType,
+    class GlmType,
+    class PBType,
+    class ExitCondType,
+    class CUIType=util::no_op
+>
 inline void solve(
     StateType&& state,
     GlmType&& glm,
-    bool display,
+    PBType&& pb,
     ExitCondType exit_cond_f,
-    UpdateCoefficientsType update_coefficients_f,
     CUIType check_user_interrupt = CUIType()
 )
 {
     solve(
         std::forward<StateType>(state), 
         std::forward<GlmType>(glm), 
-        display, 
+        std::forward<PBType>(pb),
         exit_cond_f,
         [](auto& state, auto& glm, auto& buffer_pack) {
             update_loss_null(state, glm, buffer_pack);
         },
-        update_coefficients_f, 
         [](){},
         check_user_interrupt
     );

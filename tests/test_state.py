@@ -1,18 +1,20 @@
 from adelie.logger import logger
 import logging
 logger.setLevel(logging.DEBUG)
-
 import adelie.state as mod
 import adelie.matrix as matrix
 import numpy as np
+import pytest
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 def test_state_gaussian_pin_naive():
     n = 1000
     p = 100
     G = 2
 
     X = matrix.dense(np.random.normal(0, 1, (n, p)), method="naive", n_threads=4)
+    constraints = None
     groups = np.array([0, 1])
     alpha = 1.0
     penalty = np.random.uniform(0, 1, G)
@@ -33,6 +35,7 @@ def test_state_gaussian_pin_naive():
         X=X,
         y_mean=y_mean,
         y_var=y_var,
+        constraints=constraints,
         groups=groups,
         alpha=alpha,
         penalty=penalty,
@@ -61,6 +64,7 @@ def test_state_gaussian_pin_naive():
     assert state.iters == 0
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 def test_state_gaussian_pin_cov():
     n = 1000
     p = 100
@@ -68,6 +72,7 @@ def test_state_gaussian_pin_cov():
 
     X = np.random.normal(0, 1, (n, p))
     A = matrix.dense(X.T @ X / n, method="cov", n_threads=4)
+    constraints = None
     groups = np.array([0, 1])
     alpha = 1.0
     penalty = np.random.uniform(0, 1, G)
@@ -82,6 +87,7 @@ def test_state_gaussian_pin_cov():
 
     state = mod.gaussian_pin_cov(
         A=A,
+        constraints=constraints,
         groups=groups,
         alpha=alpha,
         penalty=penalty,
@@ -110,6 +116,7 @@ def test_state_gaussian_pin_cov():
     assert state.iters == 0
 
 
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
 def test_state_gaussian_naive():
     n = 3
     p = 100
@@ -119,6 +126,7 @@ def test_state_gaussian_naive():
     X = matrix.dense(_X, method="naive", n_threads=4)
     y = np.random.normal(0, 1, n)
     X_means = np.mean(_X, axis=0)
+    constraints = None
     groups = np.array([0, 1])
     group_sizes = np.array([1, 99])
     y_mean = 0.0
@@ -149,6 +157,7 @@ def test_state_gaussian_naive():
         y_var=y_var,
         resid=resid,
         resid_sum=resid_sum,
+        constraints=constraints,
         groups=groups,
         group_sizes=group_sizes,
         alpha=alpha,

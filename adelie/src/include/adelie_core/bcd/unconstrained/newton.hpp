@@ -32,8 +32,14 @@ namespace unconstrained {
  * @param buffer2       buffer to store buffer1 * h + l1.
  * @param initial_f     see newton_root_find.
  */
-template <class LType, class VType, class ValueType, 
-          class XType, class BufferType, class InitialType>
+template <
+    class LType, 
+    class VType, 
+    class ValueType, 
+    class XType, 
+    class BufferType, 
+    class InitialType
+>
 inline
 void newton_solver_base(
     const LType& L,
@@ -77,10 +83,12 @@ void newton_solver_base(
     const auto step_f = [&](auto h) {
         vbuffer2 = 1 / (vbuffer1 * h + l1);
         x = (v * vbuffer2).square();
-        auto fh = x.sum() - 1.0;
-        auto dfh = -2.0 * (
+        const auto t = x.sum();
+        const auto sqrt_t = std::sqrt(t);
+        const auto fh = t - 1.0;
+        const auto dfh = -(
             x * vbuffer1 * vbuffer2
-        ).sum();
+        ).sum() * (1 + sqrt_t) / t;
         return std::make_pair(fh, dfh);
     };
 
@@ -105,8 +113,13 @@ void newton_solver_base(
 /*
  * Vanilla Newton solver.
  */
-template <class LType, class VType, class ValueType, 
-          class XType, class BufferType>
+template <
+    class LType, 
+    class VType, 
+    class ValueType, 
+    class XType, 
+    class BufferType
+>
 inline
 void newton_solver(
     const LType& L,
@@ -131,8 +144,13 @@ void newton_solver(
 /*
  * Newton + Brent solver.
  */
-template <class LType, class VType, class ValueType, 
-          class XType, class BufferType>
+template <
+    class LType, 
+    class VType, 
+    class ValueType, 
+    class XType, 
+    class BufferType
+>
 inline
 void newton_brent_solver(
     const LType& L,
@@ -184,8 +202,13 @@ void newton_brent_solver(
 /*
  * Newton-ABS solver
  */
-template <class LType, class VType, class ValueType, 
-          class XType, class BufferType>
+template <
+    class LType, 
+    class VType, 
+    class ValueType, 
+    class XType, 
+    class BufferType
+>
 inline
 void newton_abs_solver(
     const LType& L,
@@ -256,8 +279,14 @@ void newton_abs_solver(
  * @param   buffer1     any vector with L.size() <= buffer1.size().
  * @param   buffer2     any vector with L.size() <= buffer2.size().
  */
-template <class LType, class VType, class ValueType, 
-          class XType, class ItersType, class BufferType>
+template <
+    class LType, 
+    class VType, 
+    class ValueType, 
+    class XType, 
+    class ItersType, 
+    class BufferType
+>
 inline
 void newton_abs_debug_solver(
     const LType& L,
@@ -380,8 +409,10 @@ void newton_abs_debug_solver(
     const auto newton_update = [&]() {
         vbuffer2 = vbuffer1 * h + l1;
         x = (v / vbuffer2).square();
-        fh = x.sum() - 1;
-        dfh = -2 * (x * (vbuffer1 / vbuffer2)).sum();
+        const auto t = x.sum();
+        const auto sqrt_t = std::sqrt(t);
+        fh = t - 1;
+        dfh = -(x * (vbuffer1 / vbuffer2)).sum() * (1 + sqrt_t) / t;
     };
     
     newton_update();

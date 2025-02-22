@@ -7,7 +7,6 @@ from .adelie_core.glm import (
 )
 from typing import Union
 import numpy as np
-import warnings
 
 
 def _coerce_dtype(y, dtype):
@@ -16,7 +15,7 @@ def _coerce_dtype(y, dtype):
         np.dtype("float64"): np.float64,
     }
     valid_dtypes = list(dtype_map.keys())
-    y = np.array(y, order="C")
+    y = np.array(y, copy=False, order="C")  # important!
     if dtype is None:
         if not (y.dtype in valid_dtypes):
             raise RuntimeError(
@@ -27,7 +26,7 @@ def _coerce_dtype(y, dtype):
     else:
         if not (dtype in valid_dtypes):
             raise RuntimeError("dtype must be either np.float32 or np.float64.")
-    y = y.astype(dtype)
+    y = y.astype(dtype, copy=False)
     return y, dtype
 
 
@@ -50,7 +49,6 @@ class glm_base:
                 raise RuntimeError("y and weights must have same length.")
             weights_sum = np.sum(weights)
             if not np.allclose(weights_sum, 1):
-                warnings.warn("Normalizing weights to sum to 1.")
                 weights = weights / weights_sum
         else:
             weights = np.full(n, 1/n, dtype=dtype)
@@ -76,7 +74,6 @@ class multiglm_base:
                 raise RuntimeError("y rows and weights must have same length.")
             weights_sum = np.sum(weights)
             if not np.allclose(weights_sum, 1):
-                warnings.warn("Normalizing weights to sum to 1.")
                 weights = weights / np.sum(weights)
         else:
             weights = np.full(n, 1/n, dtype=dtype)
@@ -104,6 +101,15 @@ def binomial(
             \\right)
         \\end{align*}
 
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_i
+            &=
+            \\log\\left(\\frac{\\mu_i}{1 - \\mu_i}\\right)
+        \\end{align*}
+
     The Binomial GLM family with the probit link function 
     specifies the loss function as:
 
@@ -117,14 +123,22 @@ def binomial(
         \\end{align*}
 
     where :math:`\\Phi` is the standard normal CDF.
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_i
+            &=
+            \\Phi^{-1}(\\mu_i)
+        \\end{align*}
 
     We assume that :math:`y_i \\in [0,1]`.
 
     Parameters
     ----------
-    y : (n,) np.ndarray 
+    y : (n,) ndarray 
         Response vector :math:`y`.
-    weights : (n,) np.ndarray, optional
+    weights : (n,) ndarray, optional
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
@@ -136,11 +150,11 @@ def binomial(
             - ``"probit"``: the probit link function.
 
         Default is ``"logit"``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         The underlying data type.
         If ``None``, it is inferred from ``y``,
         in which case ``y`` must have an underlying data type of
-        ``np.float32`` or ``np.float64``.
+        :class:`numpy.float32` or :class:`numpy.float64`.
         Default is ``None``.
 
     Returns
@@ -150,7 +164,9 @@ def binomial(
 
     See Also
     --------
+    adelie.adelie_core.glm.GlmBinomialLogit32
     adelie.adelie_core.glm.GlmBinomialLogit64
+    adelie.adelie_core.glm.GlmBinomialProbit32
     adelie.adelie_core.glm.GlmBinomialProbit64
     """
     dispatcher = {
@@ -185,6 +201,7 @@ def cox(
     stop: np.ndarray,
     status: np.ndarray,
     *,
+    strata: np.ndarray =None,
     weights: np.ndarray =None,
     tie_method: str ="efron",
     dtype: Union[np.float32, np.float64] =None,
@@ -239,15 +256,48 @@ def cox(
     Note that :math:`\\overline{w}_i` and :math:`A_i(\\eta)` are only well-defined 
     whenever :math:`\\delta_i=1`, which is not an issue in the computation of :math:`\\ell(\\eta)`.
 
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_i = \\log(\\mu_i)
+        \\end{align*}
+
+    If ``strata`` is specified, then the loss function 
+    is simply the sum of the losses for each strata.
+    Namely, given the strata vector :math:`S`,
+
+    .. math::
+        \\begin{align*}
+            \\ell(\\eta)
+            &=
+            \\sum_{m=0}^{M-1}
+            \\ell_m(\\eta_{\\mathcal{I}_m})
+        \\end{align*}
+
+    where
+    :math:`M` is the number of strata,
+    :math:`\\mathcal{I}_m = \\{i : S_i = m\\}` is the set of individuals in stratum :math:`m`,
+    :math:`\\eta_I` is the subset of :math:`\\eta` given by the indices in :math:`I`,
+    and :math:`\\ell_m` is the usual Cox loss function as above
+    using only the input data in :math:`\\mathcal{I}_m`.
+
+    .. note::
+        The strata indicator :math:`S_i` *must* take on values in the set :math:`\\{0, \\ldots, M-1\\}`.
+
     Parameters
     ----------
-    start : (n,) np.ndarray
+    start : (n,) ndarray
         Start time vector :math:`s`.
-    stop : (n,) np.ndarray
+    stop : (n,) ndarray
         Stop time vector :math:`t`.
-    status : (n,) np.ndarray 
+    status : (n,) ndarray 
         Status vector :math:`\\delta`.
-    weights : (n,) np.ndarray, optional
+    strata : (n,) ndarray, optional
+        Strata vector :math:`S`.
+        If ``None``, there is only one stratum.
+        Default is ``None``.
+    weights : (n,) ndarray, optional
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
@@ -259,11 +309,11 @@ def cox(
             - ``"breslow"``
 
         Default is ``"efron"``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         The underlying data type.
         If ``None``, it is inferred from ``status``,
         in which case ``status`` must have an underlying data type of
-        ``np.float32`` or ``np.float64``.
+        :class:`numpy.float32` or :class:`numpy.float64`.
         Default is ``None``.
 
     Returns
@@ -273,6 +323,7 @@ def cox(
 
     See Also
     --------
+    adelie.adelie_core.glm.GlmCox32
     adelie.adelie_core.glm.GlmCox64
     """
     dispatcher = {
@@ -284,18 +335,23 @@ def cox(
 
     core_base = dispatcher[dtype]
 
+    if strata is None:
+        strata = np.zeros(status.size, dtype=int)
+
     class _cox(glm_base, core_base):
         def __init__(self):
             self.start = np.array(start, copy=True, dtype=dtype)
             self.stop = np.array(stop, copy=True, dtype=dtype)
             glm_base.__init__(self, status, weights, core_base, dtype)
             self.status = self.y
+            self.strata = np.array(strata, copy=True, dtype=int)
             self.tie_method = tie_method
             core_base.__init__(
                 self, 
                 self.start, 
                 self.stop, 
                 self.status, 
+                self.strata,
                 self.weights, 
                 self.tie_method,
             )
@@ -306,6 +362,7 @@ def cox(
                 start=start, 
                 stop=stop,
                 status=status,
+                strata=strata,
                 weights=weights, 
                 tie_method=tie_method,
                 dtype=dtype,
@@ -334,22 +391,31 @@ def gaussian(
             \\right) 
         \\end{align*}
 
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_i
+            &=
+            \\mu_i
+        \\end{align*}
+
     Parameters
     ----------
-    y : (n,) np.ndarray 
+    y : (n,) ndarray 
         Response vector :math:`y`.
-    weights : (n,) np.ndarray, optional
+    weights : (n,) ndarray, optional
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         The underlying data type.
         If ``None``, it is inferred from ``y``,
         in which case ``y`` must have an underlying data type of
-        ``np.float32`` or ``np.float64``.
+        :class:`numpy.float32` or :class:`numpy.float64`.
         Default is ``None``.
     opt : bool, optional
-        If ``True``, an optimized routine is used when passed into ``adelie.grpnet``.
+        If ``True``, an optimized routine is used when passed into :func:`adelie.solver.grpnet`.
         Otherwise, a general routine with IRLS is used.
         This flag is mainly for developers for testing purposes.
         We advise users to use the default value.
@@ -362,6 +428,7 @@ def gaussian(
 
     See Also
     --------
+    adelie.adelie_core.glm.GlmGaussian32
     adelie.adelie_core.glm.GlmGaussian64
     """
     dispatcher = {
@@ -409,22 +476,31 @@ def multigaussian(
             \\right)
         \\end{align*}
 
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_{ik}
+            &=
+            \\mu_{ik}
+        \\end{align*}
+
     Parameters
     ----------
-    y : (n, K) np.ndarray 
+    y : (n, K) ndarray 
         Response matrix :math:`y`.
-    weights : (n,) np.ndarray, optional
+    weights : (n,) ndarray, optional
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         The underlying data type.
         If ``None``, it is inferred from ``y``,
         in which case ``y`` must have an underlying data type of
-        ``np.float32`` or ``np.float64``.
+        :class:`numpy.float32` or :class:`numpy.float64`.
         Default is ``None``.
     opt : bool, optional
-        If ``True``, an optimized routine is used when passed into ``adelie.grpnet``.
+        If ``True``, an optimized routine is used when passed into :func:`adelie.solver.grpnet`.
         Otherwise, a general routine with IRLS is used.
         This flag is mainly for developers for testing purposes.
         We advise users to use the default value.
@@ -437,6 +513,7 @@ def multigaussian(
 
     See Also
     --------
+    adelie.adelie_core.glm.GlmMultiGaussian32
     adelie.adelie_core.glm.GlmMultiGaussian64
     """
     dispatcher = {
@@ -486,26 +563,38 @@ def multinomial(
             \\right)
         \\end{align*}
 
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_{ik}
+            &=
+            \\log(\\mu_{ik}) + C_i
+        \\end{align*}
+
+    for any arbitrary constants :math:`C_i`.
+
     We assume that every :math:`y_{ik} \\in [0,1]` and
     for each fixed :math:`i`, :math:`\\sum_{k=1}^K y_{ik} = 1`.
 
     .. note::
-        The ``hessian`` method computes :math:`2 \\mathrm{diag}(\\nabla^2 \\ell(\\eta))`
+        The :func:`~adelie.adelie_core.glm.GlmMultiBase64.hessian` method computes 
+        :math:`2 \\mathrm{diag}(\\nabla^2 \\ell(\\eta))`
         as the diagonal majorization.
 
     Parameters
     ----------
-    y : (n, K) np.ndarray 
+    y : (n, K) ndarray 
         Response matrix :math:`y`.
-    weights : (n,) np.ndarray, optional
+    weights : (n,) ndarray, optional
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         The underlying data type.
         If ``None``, it is inferred from ``y``,
         in which case ``y`` must have an underlying data type of
-        ``np.float32`` or ``np.float64``.
+        :class:`numpy.float32` or :class:`numpy.float64`.
         Default is ``None``.
 
     Returns
@@ -515,6 +604,7 @@ def multinomial(
 
     See Also
     --------
+    adelie.adelie_core.glm.GlmMultinomial32
     adelie.adelie_core.glm.GlmMultinomial64
     """
     dispatcher = {
@@ -557,21 +647,30 @@ def poisson(
             \\right) 
         \\end{align*}
 
+    The link function is given by
+
+    .. math::
+        \\begin{align*}
+            g(\\mu)_i
+            &=
+            \\log(\\mu_i)
+        \\end{align*}
+
     We assume that :math:`y_i \\in \\mathbb{N}_0`.
 
     Parameters
     ----------
-    y : (n,) np.ndarray 
+    y : (n,) ndarray 
         Response vector :math:`y`.
-    weights : (n,) np.ndarray, optional
+    weights : (n,) ndarray, optional
         Observation weights :math:`W`.
         Weights are normalized such that they sum to ``1``.
         Default is ``None``, in which case, it is set to ``np.full(n, 1/n)``.
-    dtype : Union[np.float32, np.float64], optional
+    dtype : Union[float32, float64], optional
         The underlying data type.
         If ``None``, it is inferred from ``y``,
         in which case ``y`` must have an underlying data type of
-        ``np.float32`` or ``np.float64``.
+        :class:`numpy.float32` or :class:`numpy.float64`.
         Default is ``None``.
 
     Returns
@@ -581,6 +680,7 @@ def poisson(
 
     See Also
     --------
+    adelie.adelie_core.glm.GlmPoisson32
     adelie.adelie_core.glm.GlmPoisson64
     """
     dispatcher = {
