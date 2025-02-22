@@ -14,6 +14,7 @@
 
 namespace adelie_core {
 namespace constraint {
+namespace elastic_net {
 
 template <class ValueType, class IndexType=Eigen::Index>
 class ConstraintBase
@@ -122,6 +123,7 @@ ADELIE_CORE_CONSTRAINT_BASE::check_gradient(
     }
 }
 
+} // namespace elastic_net
 } // namespace constraint
 } // namespace adelie_core
 

@@ -147,6 +147,7 @@ ext_modules = [
         "adelie.adelie_core",
         sorted(
             glob("adelie/src/src/constraint/*.cpp") +
+            glob("adelie/src/src/constraint/elastic_net/*.cpp") +
             glob("adelie/src/src/glm/*.cpp") +
             glob("adelie/src/src/io/*.cpp") +
             glob("adelie/src/src/matrix/*.cpp") +

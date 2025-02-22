@@ -1,7 +1,7 @@
 #pragma once
 #include <adelie_core/configs.hpp>
-#include <adelie_core/constraint/constraint_linear.hpp>
-#include <adelie_core/constraint/utils.hpp>
+#include <adelie_core/constraint/elastic_net/constraint_linear.hpp>
+#include <adelie_core/constraint/elastic_net/utils.hpp>
 #include <adelie_core/optimization/nnls.hpp>
 #include <adelie_core/optimization/pinball.hpp>
 #include <adelie_core/optimization/pinball_full.hpp>
@@ -9,6 +9,7 @@
 
 namespace adelie_core {
 namespace constraint { 
+namespace elastic_net {
 namespace linear {
 
 template <class MatrixType>
@@ -663,5 +664,6 @@ ADELIE_CORE_CONSTRAINT_LINEAR::primals() const
     return _A->cols(); 
 }
 
+} // namespace elastic_net
 } // namespace constraint
 } // namespace adelie_core

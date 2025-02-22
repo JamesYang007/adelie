@@ -1,7 +1,7 @@
 #pragma once
 #include <unordered_set>
 #include <vector>
-#include <adelie_core/constraint/constraint_base.hpp>
+#include <adelie_core/constraint/elastic_net/constraint_base.hpp>
 
 #ifndef ADELIE_CORE_CONSTRAINT_LINEAR_TP
 #define ADELIE_CORE_CONSTRAINT_LINEAR_TP \
@@ -14,6 +14,7 @@
 
 namespace adelie_core {
 namespace constraint { 
+namespace elastic_net {
 
 template <class AType, class IndexType=Eigen::Index>
 class ConstraintLinear: public ConstraintBase<
@@ -97,5 +98,6 @@ public:
     ADELIE_CORE_CONSTRAINT_PURE_OVERRIDE_DECL
 };
 
+} // namespace elastic_net
 } // namespace constraint
 } // namespace adelie_core

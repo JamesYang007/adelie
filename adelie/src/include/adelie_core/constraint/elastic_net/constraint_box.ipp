@@ -1,11 +1,12 @@
 #pragma once
 #include <adelie_core/configs.hpp>
-#include <adelie_core/constraint/constraint_box.hpp>
-#include <adelie_core/constraint/utils.hpp>
+#include <adelie_core/constraint/elastic_net/constraint_box.hpp>
+#include <adelie_core/constraint/elastic_net/utils.hpp>
 #include <adelie_core/optimization/pinball_full.hpp>
 
 namespace adelie_core {
 namespace constraint {
+namespace elastic_net {
 
 ADELIE_CORE_CONSTRAINT_BOX_TP
 ADELIE_CORE_CONSTRAINT_BOX::ConstraintBox(
@@ -315,5 +316,6 @@ ADELIE_CORE_CONSTRAINT_BOX::duals_nnz() const
     return (_mu != 0).count();
 }
 
+} // namespace elastic_net
 } // namespace constraint
 } // namespace adelie_core

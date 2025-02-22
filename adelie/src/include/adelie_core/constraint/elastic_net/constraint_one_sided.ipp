@@ -1,11 +1,12 @@
 #pragma once
 #include <adelie_core/configs.hpp>
-#include <adelie_core/constraint/constraint_one_sided.hpp>
-#include <adelie_core/constraint/utils.hpp>
+#include <adelie_core/constraint/elastic_net/constraint_one_sided.hpp>
+#include <adelie_core/constraint/elastic_net/utils.hpp>
 #include <adelie_core/optimization/nnqp_full.hpp>
 
 namespace adelie_core {
 namespace constraint {
+namespace elastic_net {
 namespace one_sided {
 
 template <class ValueType>
@@ -527,5 +528,6 @@ ADELIE_CORE_CONSTRAINT_ONE_SIDED_ADMM::duals_nnz() const
     return (_mu != 0).count();
 }
 
+} // namespace elastic_net
 } // namespace constraint
 } // namespace adelie_core

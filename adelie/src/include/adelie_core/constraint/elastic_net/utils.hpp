@@ -5,6 +5,7 @@
 
 namespace adelie_core {
 namespace constraint {
+namespace elastic_net {
 
 // NOTE: this only works for linear inequality constraint!
 template <
@@ -243,5 +244,6 @@ void solve_proximal_newton(
     throw util::adelie_core_solver_error("ConstraintBase: proximal newton max iterations reached!");
 }
 
+} // namespace elastic_net
 } // namespace constraint
 } // namespace adelie_core

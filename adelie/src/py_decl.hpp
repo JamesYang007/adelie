@@ -28,7 +28,7 @@
 #pragma GCC diagnostic pop
 #pragma GCC diagnostic pop
 #endif
-#include <adelie_core/constraint/constraint_base.hpp>
+#include <adelie_core/constraint/elastic_net/constraint_base.hpp>
 #include <adelie_core/util/omp.hpp>
 #include <adelie_core/util/types.hpp>
 

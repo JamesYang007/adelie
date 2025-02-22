@@ -1,7 +1,7 @@
 #pragma once
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
-#include <adelie_core/constraint/constraint_base.hpp>
+#include <adelie_core/constraint/elastic_net/constraint_base.hpp>
 #include <adelie_core/glm/glm_base.hpp>
 #include <adelie_core/glm/glm_multibase.hpp>
 #include <adelie_core/matrix/matrix_constraint_base.hpp>
