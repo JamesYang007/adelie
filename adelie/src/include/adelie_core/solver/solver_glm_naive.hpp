@@ -132,7 +132,6 @@ void update_solutions(
     using state_t = std::decay_t<StateType>;
     using vec_index_t = typename state_t::vec_index_t;
     using vec_value_t = typename state_t::vec_value_t;
-    using sp_vec_value_t = typename state_t::sp_vec_value_t;
 
     const auto loss_null = state.loss_null;
     const auto loss_full = state.loss_full;
