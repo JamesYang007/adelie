@@ -1,0 +1,74 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveOneHotDense64C
+====================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveOneHotDense64C
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveOneHotDense64C.__init__
+      ~MatrixNaiveOneHotDense64C.bmul
+      ~MatrixNaiveOneHotDense64C.bmul_safe
+      ~MatrixNaiveOneHotDense64C.btmul
+      ~MatrixNaiveOneHotDense64C.cmul
+      ~MatrixNaiveOneHotDense64C.cmul_safe
+      ~MatrixNaiveOneHotDense64C.cols
+      ~MatrixNaiveOneHotDense64C.cov
+      ~MatrixNaiveOneHotDense64C.ctmul
+      ~MatrixNaiveOneHotDense64C.mean
+      ~MatrixNaiveOneHotDense64C.mul
+      ~MatrixNaiveOneHotDense64C.rows
+      ~MatrixNaiveOneHotDense64C.sp_tmul
+      ~MatrixNaiveOneHotDense64C.sq_mul
+      ~MatrixNaiveOneHotDense64C.var
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveOneHotDense64C.group_sizes
+      ~MatrixNaiveOneHotDense64C.groups
+      ~MatrixNaiveOneHotDense64C.ndim
+      ~MatrixNaiveOneHotDense64C.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: bmul_safe
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cmul_safe
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mean
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_tmul
+   .. automethod:: sq_mul
+   .. automethod:: var
+   
+   
+
+   
+   
+   
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

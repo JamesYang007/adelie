@@ -1,0 +1,54 @@
+﻿adelie.adelie\_core.glm.GlmMultiBase32
+======================================
+
+.. currentmodule:: adelie.adelie_core.glm
+
+.. autoclass:: GlmMultiBase32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GlmMultiBase32.__init__
+      ~GlmMultiBase32.gradient
+      ~GlmMultiBase32.hessian
+      ~GlmMultiBase32.inv_hessian_gradient
+      ~GlmMultiBase32.inv_link
+      ~GlmMultiBase32.loss
+      ~GlmMultiBase32.loss_full
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GlmMultiBase32.is_multi
+      ~GlmMultiBase32.name
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: gradient
+   .. automethod:: hessian
+   .. automethod:: inv_hessian_gradient
+   .. automethod:: inv_link
+   .. automethod:: loss
+   .. automethod:: loss_full
+   
+   
+
+   
+   
+   
+   .. autoattribute:: is_multi
+   .. autoattribute:: name
+   
+   

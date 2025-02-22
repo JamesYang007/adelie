@@ -1,0 +1,52 @@
+﻿adelie.adelie\_core.matrix.MatrixCovSparse32F
+=============================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixCovSparse32F
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixCovSparse32F.__init__
+      ~MatrixCovSparse32F.bmul
+      ~MatrixCovSparse32F.cols
+      ~MatrixCovSparse32F.mul
+      ~MatrixCovSparse32F.rows
+      ~MatrixCovSparse32F.to_dense
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixCovSparse32F.ndim
+      ~MatrixCovSparse32F.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: cols
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: to_dense
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

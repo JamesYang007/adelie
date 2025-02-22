@@ -1,0 +1,6 @@
+﻿adelie.constraint.upper
+=======================
+
+.. currentmodule:: adelie.constraint
+
+.. autofunction:: upper

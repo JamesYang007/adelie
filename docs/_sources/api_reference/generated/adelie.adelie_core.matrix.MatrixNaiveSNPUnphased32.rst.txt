@@ -1,0 +1,70 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveSNPUnphased32
+===================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveSNPUnphased32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveSNPUnphased32.__init__
+      ~MatrixNaiveSNPUnphased32.bmul
+      ~MatrixNaiveSNPUnphased32.bmul_safe
+      ~MatrixNaiveSNPUnphased32.btmul
+      ~MatrixNaiveSNPUnphased32.cmul
+      ~MatrixNaiveSNPUnphased32.cmul_safe
+      ~MatrixNaiveSNPUnphased32.cols
+      ~MatrixNaiveSNPUnphased32.cov
+      ~MatrixNaiveSNPUnphased32.ctmul
+      ~MatrixNaiveSNPUnphased32.mean
+      ~MatrixNaiveSNPUnphased32.mul
+      ~MatrixNaiveSNPUnphased32.rows
+      ~MatrixNaiveSNPUnphased32.sp_tmul
+      ~MatrixNaiveSNPUnphased32.sq_mul
+      ~MatrixNaiveSNPUnphased32.var
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveSNPUnphased32.ndim
+      ~MatrixNaiveSNPUnphased32.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: bmul_safe
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cmul_safe
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mean
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_tmul
+   .. automethod:: sq_mul
+   .. automethod:: var
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

@@ -1,0 +1,52 @@
+﻿adelie.adelie\_core.matrix.MatrixCovBlockDiag32
+===============================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixCovBlockDiag32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixCovBlockDiag32.__init__
+      ~MatrixCovBlockDiag32.bmul
+      ~MatrixCovBlockDiag32.cols
+      ~MatrixCovBlockDiag32.mul
+      ~MatrixCovBlockDiag32.rows
+      ~MatrixCovBlockDiag32.to_dense
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixCovBlockDiag32.ndim
+      ~MatrixCovBlockDiag32.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: cols
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: to_dense
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

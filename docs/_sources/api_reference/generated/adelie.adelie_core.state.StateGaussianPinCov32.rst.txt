@@ -1,0 +1,118 @@
+﻿adelie.adelie\_core.state.StateGaussianPinCov32
+===============================================
+
+.. currentmodule:: adelie.adelie_core.state
+
+.. autoclass:: StateGaussianPinCov32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~StateGaussianPinCov32.__init__
+      ~StateGaussianPinCov32.solve
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StateGaussianPinCov32.A
+      ~StateGaussianPinCov32.active_begins
+      ~StateGaussianPinCov32.active_order
+      ~StateGaussianPinCov32.active_set
+      ~StateGaussianPinCov32.active_set_size
+      ~StateGaussianPinCov32.adev_tol
+      ~StateGaussianPinCov32.alpha
+      ~StateGaussianPinCov32.benchmark_active
+      ~StateGaussianPinCov32.benchmark_screen
+      ~StateGaussianPinCov32.betas
+      ~StateGaussianPinCov32.constraint_buffer_size
+      ~StateGaussianPinCov32.constraints
+      ~StateGaussianPinCov32.ddev_tol
+      ~StateGaussianPinCov32.group_sizes
+      ~StateGaussianPinCov32.groups
+      ~StateGaussianPinCov32.intercept
+      ~StateGaussianPinCov32.intercepts
+      ~StateGaussianPinCov32.iters
+      ~StateGaussianPinCov32.lmda_path
+      ~StateGaussianPinCov32.lmdas
+      ~StateGaussianPinCov32.max_active_size
+      ~StateGaussianPinCov32.max_iters
+      ~StateGaussianPinCov32.n_threads
+      ~StateGaussianPinCov32.newton_max_iters
+      ~StateGaussianPinCov32.newton_tol
+      ~StateGaussianPinCov32.penalty
+      ~StateGaussianPinCov32.rdev_tol
+      ~StateGaussianPinCov32.rsq
+      ~StateGaussianPinCov32.rsqs
+      ~StateGaussianPinCov32.screen_begins
+      ~StateGaussianPinCov32.screen_beta
+      ~StateGaussianPinCov32.screen_grad
+      ~StateGaussianPinCov32.screen_is_active
+      ~StateGaussianPinCov32.screen_set
+      ~StateGaussianPinCov32.screen_subset_order
+      ~StateGaussianPinCov32.screen_subset_ordered
+      ~StateGaussianPinCov32.screen_transforms
+      ~StateGaussianPinCov32.screen_vars
+      ~StateGaussianPinCov32.tol
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: solve
+   
+   
+
+   
+   
+   
+   .. autoattribute:: A
+   .. autoattribute:: active_begins
+   .. autoattribute:: active_order
+   .. autoattribute:: active_set
+   .. autoattribute:: active_set_size
+   .. autoattribute:: adev_tol
+   .. autoattribute:: alpha
+   .. autoattribute:: benchmark_active
+   .. autoattribute:: benchmark_screen
+   .. autoattribute:: betas
+   .. autoattribute:: constraint_buffer_size
+   .. autoattribute:: constraints
+   .. autoattribute:: ddev_tol
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: intercept
+   .. autoattribute:: intercepts
+   .. autoattribute:: iters
+   .. autoattribute:: lmda_path
+   .. autoattribute:: lmdas
+   .. autoattribute:: max_active_size
+   .. autoattribute:: max_iters
+   .. autoattribute:: n_threads
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: newton_tol
+   .. autoattribute:: penalty
+   .. autoattribute:: rdev_tol
+   .. autoattribute:: rsq
+   .. autoattribute:: rsqs
+   .. autoattribute:: screen_begins
+   .. autoattribute:: screen_beta
+   .. autoattribute:: screen_grad
+   .. autoattribute:: screen_is_active
+   .. autoattribute:: screen_set
+   .. autoattribute:: screen_subset_order
+   .. autoattribute:: screen_subset_ordered
+   .. autoattribute:: screen_transforms
+   .. autoattribute:: screen_vars
+   .. autoattribute:: tol
+   
+   

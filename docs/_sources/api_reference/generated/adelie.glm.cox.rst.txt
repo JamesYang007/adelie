@@ -1,0 +1,6 @@
+﻿adelie.glm.cox
+==============
+
+.. currentmodule:: adelie.glm
+
+.. autofunction:: cox

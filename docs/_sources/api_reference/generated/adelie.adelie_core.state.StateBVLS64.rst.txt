@@ -1,0 +1,78 @@
+﻿adelie.adelie\_core.state.StateBVLS64
+=====================================
+
+.. currentmodule:: adelie.adelie_core.state
+
+.. autoclass:: StateBVLS64
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~StateBVLS64.__init__
+      ~StateBVLS64.solve
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StateBVLS64.active_set
+      ~StateBVLS64.active_set_size
+      ~StateBVLS64.benchmark_fit_active
+      ~StateBVLS64.benchmark_fit_screen
+      ~StateBVLS64.benchmark_gradient
+      ~StateBVLS64.benchmark_viols_sort
+      ~StateBVLS64.beta
+      ~StateBVLS64.dbg_active_set
+      ~StateBVLS64.dbg_beta
+      ~StateBVLS64.dbg_iter
+      ~StateBVLS64.dbg_loss
+      ~StateBVLS64.grad
+      ~StateBVLS64.is_active
+      ~StateBVLS64.is_screen
+      ~StateBVLS64.iters
+      ~StateBVLS64.loss
+      ~StateBVLS64.resid
+      ~StateBVLS64.screen_set
+      ~StateBVLS64.screen_set_size
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: solve
+   
+   
+
+   
+   
+   
+   .. autoattribute:: active_set
+   .. autoattribute:: active_set_size
+   .. autoattribute:: benchmark_fit_active
+   .. autoattribute:: benchmark_fit_screen
+   .. autoattribute:: benchmark_gradient
+   .. autoattribute:: benchmark_viols_sort
+   .. autoattribute:: beta
+   .. autoattribute:: dbg_active_set
+   .. autoattribute:: dbg_beta
+   .. autoattribute:: dbg_iter
+   .. autoattribute:: dbg_loss
+   .. autoattribute:: grad
+   .. autoattribute:: is_active
+   .. autoattribute:: is_screen
+   .. autoattribute:: iters
+   .. autoattribute:: loss
+   .. autoattribute:: resid
+   .. autoattribute:: screen_set
+   .. autoattribute:: screen_set_size
+   
+   

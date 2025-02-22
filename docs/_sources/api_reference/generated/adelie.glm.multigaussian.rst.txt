@@ -1,0 +1,6 @@
+﻿adelie.glm.multigaussian
+========================
+
+.. currentmodule:: adelie.glm
+
+.. autofunction:: multigaussian

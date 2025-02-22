@@ -1,0 +1,6 @@
+﻿adelie.solver.bvls
+==================
+
+.. currentmodule:: adelie.solver
+
+.. autofunction:: bvls

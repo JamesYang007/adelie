@@ -1,0 +1,70 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveCSubset32
+===============================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveCSubset32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveCSubset32.__init__
+      ~MatrixNaiveCSubset32.bmul
+      ~MatrixNaiveCSubset32.bmul_safe
+      ~MatrixNaiveCSubset32.btmul
+      ~MatrixNaiveCSubset32.cmul
+      ~MatrixNaiveCSubset32.cmul_safe
+      ~MatrixNaiveCSubset32.cols
+      ~MatrixNaiveCSubset32.cov
+      ~MatrixNaiveCSubset32.ctmul
+      ~MatrixNaiveCSubset32.mean
+      ~MatrixNaiveCSubset32.mul
+      ~MatrixNaiveCSubset32.rows
+      ~MatrixNaiveCSubset32.sp_tmul
+      ~MatrixNaiveCSubset32.sq_mul
+      ~MatrixNaiveCSubset32.var
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveCSubset32.ndim
+      ~MatrixNaiveCSubset32.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: bmul_safe
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cmul_safe
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mean
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_tmul
+   .. automethod:: sq_mul
+   .. automethod:: var
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

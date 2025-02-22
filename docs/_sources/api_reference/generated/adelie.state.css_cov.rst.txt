@@ -1,0 +1,6 @@
+﻿adelie.state.css\_cov
+=====================
+
+.. currentmodule:: adelie.state
+
+.. autofunction:: css_cov

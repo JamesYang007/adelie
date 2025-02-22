@@ -1,0 +1,6 @@
+﻿adelie.solver.css\_cov
+======================
+
+.. currentmodule:: adelie.solver
+
+.. autofunction:: css_cov

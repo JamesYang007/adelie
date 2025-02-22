@@ -1,0 +1,6 @@
+﻿adelie.diagnostic.gradients
+===========================
+
+.. currentmodule:: adelie.diagnostic
+
+.. autofunction:: gradients

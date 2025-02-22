@@ -1,0 +1,41 @@
+﻿adelie.diagnostic.DiagnosticCov
+===============================
+
+.. currentmodule:: adelie.diagnostic
+
+.. autoclass:: DiagnosticCov
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DiagnosticCov.__init__
+      ~DiagnosticCov.plot_benchmark
+      ~DiagnosticCov.plot_coefficients
+      ~DiagnosticCov.plot_devs
+      ~DiagnosticCov.plot_kkt
+      ~DiagnosticCov.plot_set_sizes
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: plot_benchmark
+   .. automethod:: plot_coefficients
+   .. automethod:: plot_devs
+   .. automethod:: plot_kkt
+   .. automethod:: plot_set_sizes
+   
+   
+
+   
+   
+   

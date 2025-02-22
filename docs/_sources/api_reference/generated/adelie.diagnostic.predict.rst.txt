@@ -1,0 +1,6 @@
+﻿adelie.diagnostic.predict
+=========================
+
+.. currentmodule:: adelie.diagnostic
+
+.. autofunction:: predict

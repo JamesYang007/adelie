@@ -1,0 +1,6 @@
+﻿adelie.state.pinball
+====================
+
+.. currentmodule:: adelie.state
+
+.. autofunction:: pinball

@@ -1,0 +1,54 @@
+﻿adelie.adelie\_core.glm.GlmMultinomial32
+========================================
+
+.. currentmodule:: adelie.adelie_core.glm
+
+.. autoclass:: GlmMultinomial32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GlmMultinomial32.__init__
+      ~GlmMultinomial32.gradient
+      ~GlmMultinomial32.hessian
+      ~GlmMultinomial32.inv_hessian_gradient
+      ~GlmMultinomial32.inv_link
+      ~GlmMultinomial32.loss
+      ~GlmMultinomial32.loss_full
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GlmMultinomial32.is_multi
+      ~GlmMultinomial32.name
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: gradient
+   .. automethod:: hessian
+   .. automethod:: inv_hessian_gradient
+   .. automethod:: inv_link
+   .. automethod:: loss
+   .. automethod:: loss_full
+   
+   
+
+   
+   
+   
+   .. autoattribute:: is_multi
+   .. autoattribute:: name
+   
+   

@@ -1,0 +1,45 @@
+﻿adelie.sklearn.GroupElasticNet
+==============================
+
+.. currentmodule:: adelie.sklearn
+
+.. autoclass:: GroupElasticNet
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GroupElasticNet.__init__
+      ~GroupElasticNet.fit
+      ~GroupElasticNet.get_metadata_routing
+      ~GroupElasticNet.get_params
+      ~GroupElasticNet.predict
+      ~GroupElasticNet.predict_proba
+      ~GroupElasticNet.score
+      ~GroupElasticNet.set_params
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: fit
+   .. automethod:: get_metadata_routing
+   .. automethod:: get_params
+   .. automethod:: predict
+   .. automethod:: predict_proba
+   .. automethod:: score
+   .. automethod:: set_params
+   
+   
+
+   
+   
+   

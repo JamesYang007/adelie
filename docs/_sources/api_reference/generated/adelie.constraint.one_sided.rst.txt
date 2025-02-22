@@ -1,0 +1,6 @@
+﻿adelie.constraint.one\_sided
+============================
+
+.. currentmodule:: adelie.constraint
+
+.. autofunction:: one_sided

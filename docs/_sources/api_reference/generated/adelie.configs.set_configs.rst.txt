@@ -1,0 +1,6 @@
+﻿adelie.configs.set\_configs
+===========================
+
+.. currentmodule:: adelie.configs
+
+.. autofunction:: set_configs

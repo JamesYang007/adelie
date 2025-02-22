@@ -1,0 +1,74 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveInteractionDense32F
+=========================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveInteractionDense32F
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveInteractionDense32F.__init__
+      ~MatrixNaiveInteractionDense32F.bmul
+      ~MatrixNaiveInteractionDense32F.bmul_safe
+      ~MatrixNaiveInteractionDense32F.btmul
+      ~MatrixNaiveInteractionDense32F.cmul
+      ~MatrixNaiveInteractionDense32F.cmul_safe
+      ~MatrixNaiveInteractionDense32F.cols
+      ~MatrixNaiveInteractionDense32F.cov
+      ~MatrixNaiveInteractionDense32F.ctmul
+      ~MatrixNaiveInteractionDense32F.mean
+      ~MatrixNaiveInteractionDense32F.mul
+      ~MatrixNaiveInteractionDense32F.rows
+      ~MatrixNaiveInteractionDense32F.sp_tmul
+      ~MatrixNaiveInteractionDense32F.sq_mul
+      ~MatrixNaiveInteractionDense32F.var
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveInteractionDense32F.group_sizes
+      ~MatrixNaiveInteractionDense32F.groups
+      ~MatrixNaiveInteractionDense32F.ndim
+      ~MatrixNaiveInteractionDense32F.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: bmul_safe
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cmul_safe
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mean
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_tmul
+   .. automethod:: sq_mul
+   .. automethod:: var
+   
+   
+
+   
+   
+   
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

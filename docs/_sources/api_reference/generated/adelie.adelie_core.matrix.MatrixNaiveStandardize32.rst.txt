@@ -1,0 +1,70 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveStandardize32
+===================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveStandardize32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveStandardize32.__init__
+      ~MatrixNaiveStandardize32.bmul
+      ~MatrixNaiveStandardize32.bmul_safe
+      ~MatrixNaiveStandardize32.btmul
+      ~MatrixNaiveStandardize32.cmul
+      ~MatrixNaiveStandardize32.cmul_safe
+      ~MatrixNaiveStandardize32.cols
+      ~MatrixNaiveStandardize32.cov
+      ~MatrixNaiveStandardize32.ctmul
+      ~MatrixNaiveStandardize32.mean
+      ~MatrixNaiveStandardize32.mul
+      ~MatrixNaiveStandardize32.rows
+      ~MatrixNaiveStandardize32.sp_tmul
+      ~MatrixNaiveStandardize32.sq_mul
+      ~MatrixNaiveStandardize32.var
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveStandardize32.ndim
+      ~MatrixNaiveStandardize32.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: bmul_safe
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cmul_safe
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mean
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_tmul
+   .. automethod:: sq_mul
+   .. automethod:: var
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

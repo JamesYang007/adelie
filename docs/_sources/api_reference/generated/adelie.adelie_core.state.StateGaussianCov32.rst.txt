@@ -1,0 +1,156 @@
+﻿adelie.adelie\_core.state.StateGaussianCov32
+============================================
+
+.. currentmodule:: adelie.adelie_core.state
+
+.. autoclass:: StateGaussianCov32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~StateGaussianCov32.__init__
+      ~StateGaussianCov32.solve
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StateGaussianCov32.A
+      ~StateGaussianCov32.abs_grad
+      ~StateGaussianCov32.active_set
+      ~StateGaussianCov32.active_set_size
+      ~StateGaussianCov32.active_sizes
+      ~StateGaussianCov32.adev_tol
+      ~StateGaussianCov32.alpha
+      ~StateGaussianCov32.benchmark_fit_active
+      ~StateGaussianCov32.benchmark_fit_screen
+      ~StateGaussianCov32.benchmark_invariance
+      ~StateGaussianCov32.benchmark_kkt
+      ~StateGaussianCov32.benchmark_screen
+      ~StateGaussianCov32.betas
+      ~StateGaussianCov32.constraint_buffer_size
+      ~StateGaussianCov32.constraints
+      ~StateGaussianCov32.ddev_tol
+      ~StateGaussianCov32.devs
+      ~StateGaussianCov32.dual_groups
+      ~StateGaussianCov32.duals
+      ~StateGaussianCov32.early_exit
+      ~StateGaussianCov32.grad
+      ~StateGaussianCov32.group_sizes
+      ~StateGaussianCov32.groups
+      ~StateGaussianCov32.intercept
+      ~StateGaussianCov32.intercepts
+      ~StateGaussianCov32.lmda
+      ~StateGaussianCov32.lmda_max
+      ~StateGaussianCov32.lmda_path
+      ~StateGaussianCov32.lmda_path_size
+      ~StateGaussianCov32.lmdas
+      ~StateGaussianCov32.max_active_size
+      ~StateGaussianCov32.max_iters
+      ~StateGaussianCov32.max_screen_size
+      ~StateGaussianCov32.min_ratio
+      ~StateGaussianCov32.n_threads
+      ~StateGaussianCov32.n_valid_solutions
+      ~StateGaussianCov32.newton_max_iters
+      ~StateGaussianCov32.newton_tol
+      ~StateGaussianCov32.penalty
+      ~StateGaussianCov32.pivot_slack_ratio
+      ~StateGaussianCov32.pivot_subset_min
+      ~StateGaussianCov32.pivot_subset_ratio
+      ~StateGaussianCov32.rdev_tol
+      ~StateGaussianCov32.rsq
+      ~StateGaussianCov32.screen_begins
+      ~StateGaussianCov32.screen_beta
+      ~StateGaussianCov32.screen_grad
+      ~StateGaussianCov32.screen_hashset
+      ~StateGaussianCov32.screen_is_active
+      ~StateGaussianCov32.screen_rule
+      ~StateGaussianCov32.screen_set
+      ~StateGaussianCov32.screen_sizes
+      ~StateGaussianCov32.screen_transforms
+      ~StateGaussianCov32.screen_vars
+      ~StateGaussianCov32.setup_lmda_max
+      ~StateGaussianCov32.setup_lmda_path
+      ~StateGaussianCov32.tol
+      ~StateGaussianCov32.v
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: solve
+   
+   
+
+   
+   
+   
+   .. autoattribute:: A
+   .. autoattribute:: abs_grad
+   .. autoattribute:: active_set
+   .. autoattribute:: active_set_size
+   .. autoattribute:: active_sizes
+   .. autoattribute:: adev_tol
+   .. autoattribute:: alpha
+   .. autoattribute:: benchmark_fit_active
+   .. autoattribute:: benchmark_fit_screen
+   .. autoattribute:: benchmark_invariance
+   .. autoattribute:: benchmark_kkt
+   .. autoattribute:: benchmark_screen
+   .. autoattribute:: betas
+   .. autoattribute:: constraint_buffer_size
+   .. autoattribute:: constraints
+   .. autoattribute:: ddev_tol
+   .. autoattribute:: devs
+   .. autoattribute:: dual_groups
+   .. autoattribute:: duals
+   .. autoattribute:: early_exit
+   .. autoattribute:: grad
+   .. autoattribute:: group_sizes
+   .. autoattribute:: groups
+   .. autoattribute:: intercept
+   .. autoattribute:: intercepts
+   .. autoattribute:: lmda
+   .. autoattribute:: lmda_max
+   .. autoattribute:: lmda_path
+   .. autoattribute:: lmda_path_size
+   .. autoattribute:: lmdas
+   .. autoattribute:: max_active_size
+   .. autoattribute:: max_iters
+   .. autoattribute:: max_screen_size
+   .. autoattribute:: min_ratio
+   .. autoattribute:: n_threads
+   .. autoattribute:: n_valid_solutions
+   .. autoattribute:: newton_max_iters
+   .. autoattribute:: newton_tol
+   .. autoattribute:: penalty
+   .. autoattribute:: pivot_slack_ratio
+   .. autoattribute:: pivot_subset_min
+   .. autoattribute:: pivot_subset_ratio
+   .. autoattribute:: rdev_tol
+   .. autoattribute:: rsq
+   .. autoattribute:: screen_begins
+   .. autoattribute:: screen_beta
+   .. autoattribute:: screen_grad
+   .. autoattribute:: screen_hashset
+   .. autoattribute:: screen_is_active
+   .. autoattribute:: screen_rule
+   .. autoattribute:: screen_set
+   .. autoattribute:: screen_sizes
+   .. autoattribute:: screen_transforms
+   .. autoattribute:: screen_vars
+   .. autoattribute:: setup_lmda_max
+   .. autoattribute:: setup_lmda_path
+   .. autoattribute:: tol
+   .. autoattribute:: v
+   
+   

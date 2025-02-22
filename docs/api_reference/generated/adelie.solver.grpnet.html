@@ -1,0 +1,957 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" data-theme="dark">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>adelie.solver.grpnet &#8212; adelie 1.1.51 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "dark";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/numpy.css?v=92d1e6fe" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+
+    <script src="../../_static/documentation_options.js?v=c98e89e2"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api_reference/generated/adelie.solver.grpnet';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="adelie.solver.pinball" href="adelie.solver.pinball.html" />
+    <link rel="prev" title="adelie.solver.gaussian_cov" href="adelie.solver.gaussian_cov.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="dark">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.51 documentation - Home"/>
+    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.51 documentation - Home"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/JamesYang007/adelie" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/JamesYang007/adelie" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.objective.html">adelie.bcd.objective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root.html">adelie.bcd.root</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_lower_bound.html">adelie.bcd.root_lower_bound</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.configs.set_configs.html">adelie.configs.set_configs</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.constraint.box.html">adelie.constraint.box</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.constraint.linear.html">adelie.constraint.linear</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.constraint.lower.html">adelie.constraint.lower</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.constraint.one_sided.html">adelie.constraint.one_sided</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.constraint.upper.html">adelie.constraint.upper</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.cv.CVGrpnetResult.html">adelie.cv.CVGrpnetResult</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.cv.cv_grpnet.html">adelie.cv.cv_grpnet</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.dense.html">adelie.data.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_phased_ancestry.html">adelie.data.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_unphased.html">adelie.data.snp_unphased</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.DiagnosticCov.html">adelie.diagnostic.DiagnosticCov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.DiagnosticNaive.html">adelie.diagnostic.DiagnosticNaive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.diagnostic.html">adelie.diagnostic.diagnostic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.objective.html">adelie.diagnostic.objective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_devs.html">adelie.diagnostic.plot_devs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_kkt.html">adelie.diagnostic.plot_kkt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.predict.html">adelie.diagnostic.predict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.cox.html">adelie.glm.cox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.multigaussian.html">adelie.glm.multigaussian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.multinomial.html">adelie.glm.multinomial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.poisson.html">adelie.glm.poisson</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.block_diag.html">adelie.matrix.block_diag</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.concatenate.html">adelie.matrix.concatenate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.convex_relu.html">adelie.matrix.convex_relu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.eager_cov.html">adelie.matrix.eager_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.interaction.html">adelie.matrix.interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.kronecker_eye.html">adelie.matrix.kronecker_eye</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.lazy_cov.html">adelie.matrix.lazy_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.one_hot.html">adelie.matrix.one_hot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.sparse.html">adelie.matrix.sparse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.standardize.html">adelie.matrix.standardize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.subset.html">adelie.matrix.subset</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.sklearn.CSSModelSelection.html">adelie.sklearn.CSSModelSelection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.sklearn.GroupElasticNet.html">adelie.sklearn.GroupElasticNet</a></li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.bvls.html">adelie.solver.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.css_cov.html">adelie.solver.css_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">adelie.solver.grpnet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.pinball.html">adelie.solver.pinball</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.bvls.html">adelie.state.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.css_cov.html">adelie.state.css_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_cov.html">adelie.state.gaussian_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.glm_naive.html">adelie.state.glm_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multigaussian_naive.html">adelie.state.multigaussian_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pinball.html">adelie.state.pinball</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../internal.html">Internal</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.configs.Configs.html">adelie.adelie_core.configs.Configs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBase32.html">adelie.adelie_core.constraint.ConstraintBase32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBase64.html">adelie.adelie_core.constraint.ConstraintBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBox32.html">adelie.adelie_core.constraint.ConstraintBox32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBox64.html">adelie.adelie_core.constraint.ConstraintBox64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintLinear32.html">adelie.adelie_core.constraint.ConstraintLinear32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintLinear64.html">adelie.adelie_core.constraint.ConstraintLinear64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintOneSided32.html">adelie.adelie_core.constraint.ConstraintOneSided32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintOneSided64.html">adelie.adelie_core.constraint.ConstraintOneSided64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintOneSidedADMM32.html">adelie.adelie_core.constraint.ConstraintOneSidedADMM32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintOneSidedADMM64.html">adelie.adelie_core.constraint.ConstraintOneSidedADMM64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmBase32.html">adelie.adelie_core.glm.GlmBase32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmBase64.html">adelie.adelie_core.glm.GlmBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialLogit32.html">adelie.adelie_core.glm.GlmBinomialLogit32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialLogit64.html">adelie.adelie_core.glm.GlmBinomialLogit64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialProbit32.html">adelie.adelie_core.glm.GlmBinomialProbit32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialProbit64.html">adelie.adelie_core.glm.GlmBinomialProbit64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmCox32.html">adelie.adelie_core.glm.GlmCox32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmCox64.html">adelie.adelie_core.glm.GlmCox64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmGaussian32.html">adelie.adelie_core.glm.GlmGaussian32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmGaussian64.html">adelie.adelie_core.glm.GlmGaussian64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiBase32.html">adelie.adelie_core.glm.GlmMultiBase32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiBase64.html">adelie.adelie_core.glm.GlmMultiBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiGaussian32.html">adelie.adelie_core.glm.GlmMultiGaussian32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiGaussian64.html">adelie.adelie_core.glm.GlmMultiGaussian64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultinomial32.html">adelie.adelie_core.glm.GlmMultinomial32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultinomial64.html">adelie.adelie_core.glm.GlmMultinomial64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmPoisson32.html">adelie.adelie_core.glm.GlmPoisson32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmPoisson64.html">adelie.adelie_core.glm.GlmPoisson64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintBase32.html">adelie.adelie_core.matrix.MatrixConstraintBase32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintBase64.html">adelie.adelie_core.matrix.MatrixConstraintBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintDense32C.html">adelie.adelie_core.matrix.MatrixConstraintDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintDense32F.html">adelie.adelie_core.matrix.MatrixConstraintDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintDense64C.html">adelie.adelie_core.matrix.MatrixConstraintDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintDense64F.html">adelie.adelie_core.matrix.MatrixConstraintDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintSparse32C.html">adelie.adelie_core.matrix.MatrixConstraintSparse32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintSparse64C.html">adelie.adelie_core.matrix.MatrixConstraintSparse64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBase32.html">adelie.adelie_core.matrix.MatrixCovBase32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBase64.html">adelie.adelie_core.matrix.MatrixCovBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBlockDiag32.html">adelie.adelie_core.matrix.MatrixCovBlockDiag32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBlockDiag64.html">adelie.adelie_core.matrix.MatrixCovBlockDiag64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovDense32C.html">adelie.adelie_core.matrix.MatrixCovDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovDense32F.html">adelie.adelie_core.matrix.MatrixCovDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovDense64C.html">adelie.adelie_core.matrix.MatrixCovDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovDense64F.html">adelie.adelie_core.matrix.MatrixCovDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovLazyCov32C.html">adelie.adelie_core.matrix.MatrixCovLazyCov32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovLazyCov32F.html">adelie.adelie_core.matrix.MatrixCovLazyCov32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovLazyCov64C.html">adelie.adelie_core.matrix.MatrixCovLazyCov64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovLazyCov64F.html">adelie.adelie_core.matrix.MatrixCovLazyCov64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovSparse32F.html">adelie.adelie_core.matrix.MatrixCovSparse32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovSparse64F.html">adelie.adelie_core.matrix.MatrixCovSparse64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase32.html">adelie.adelie_core.matrix.MatrixNaiveBase32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase64.html">adelie.adelie_core.matrix.MatrixNaiveBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag32.html">adelie.adelie_core.matrix.MatrixNaiveBlockDiag32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag64.html">adelie.adelie_core.matrix.MatrixNaiveBlockDiag64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveDense32C.html">adelie.adelie_core.matrix.MatrixNaiveDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveDense32F.html">adelie.adelie_core.matrix.MatrixNaiveDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveDense64C.html">adelie.adelie_core.matrix.MatrixNaiveDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveDense64F.html">adelie.adelie_core.matrix.MatrixNaiveDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveInteractionDense32C.html">adelie.adelie_core.matrix.MatrixNaiveInteractionDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveInteractionDense32F.html">adelie.adelie_core.matrix.MatrixNaiveInteractionDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveInteractionDense64C.html">adelie.adelie_core.matrix.MatrixNaiveInteractionDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveInteractionDense64F.html">adelie.adelie_core.matrix.MatrixNaiveInteractionDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEye32.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEye32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEye64.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEye64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense32C.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense32F.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64C.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveOneHotDense32C.html">adelie.adelie_core.matrix.MatrixNaiveOneHotDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveOneHotDense32F.html">adelie.adelie_core.matrix.MatrixNaiveOneHotDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveOneHotDense64C.html">adelie.adelie_core.matrix.MatrixNaiveOneHotDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F.html">adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry32.html">adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64.html">adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPUnphased32.html">adelie.adelie_core.matrix.MatrixNaiveSNPUnphased32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPUnphased64.html">adelie.adelie_core.matrix.MatrixNaiveSNPUnphased64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSparse32F.html">adelie.adelie_core.matrix.MatrixNaiveSparse32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveSparse64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveStandardize32.html">adelie.adelie_core.matrix.MatrixNaiveStandardize32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveStandardize64.html">adelie.adelie_core.matrix.MatrixNaiveStandardize64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCSubset32.html">adelie.adelie_core.matrix.MatrixNaiveCSubset32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCSubset64.html">adelie.adelie_core.matrix.MatrixNaiveCSubset64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRSubset32.html">adelie.adelie_core.matrix.MatrixNaiveRSubset32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRSubset64.html">adelie.adelie_core.matrix.MatrixNaiveRSubset64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS32.html">adelie.adelie_core.state.StateBVLS32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS64.html">adelie.adelie_core.state.StateBVLS64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateCSSCov32.html">adelie.adelie_core.state.StateCSSCov32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateCSSCov64.html">adelie.adelie_core.state.StateCSSCov64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov32.html">adelie.adelie_core.state.StateGaussianPinCov32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive32.html">adelie.adelie_core.state.StateGaussianPinNaive32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianCov32.html">adelie.adelie_core.state.StateGaussianCov32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianCov64.html">adelie.adelie_core.state.StateGaussianCov64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive32.html">adelie.adelie_core.state.StateGaussianNaive32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive32.html">adelie.adelie_core.state.StateGlmNaive32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive32.html">adelie.adelie_core.state.StateMultiGaussianNaive32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive32.html">adelie.adelie_core.state.StateMultiGlmNaive32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive64.html">adelie.adelie_core.state.StateMultiGlmNaive64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StatePinball32.html">adelie.adelie_core.state.StatePinball32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StatePinball64.html">adelie.adelie_core.state.StatePinball64</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">API Reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">adelie.solver.grpnet</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="adelie-solver-grpnet">
+<h1>adelie.solver.grpnet<a class="headerlink" href="#adelie-solver-grpnet" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="adelie.solver.grpnet">
+<span class="sig-prename descclassname"><span class="pre">adelie.solver.</span></span><span class="sig-name descname"><span class="pre">grpnet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase32.html#adelie.adelie_core.matrix.MatrixNaiveBase32" title="adelie.adelie_core.matrix.MatrixNaiveBase32"><span class="pre">MatrixNaiveBase32</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../generated/adelie.adelie_core.matrix.MatrixNaiveBase64.html#adelie.adelie_core.matrix.MatrixNaiveBase64" title="adelie.adelie_core.matrix.MatrixNaiveBase64"><span class="pre">MatrixNaiveBase64</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">glm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="adelie.adelie_core.glm.GlmBase32.html#adelie.adelie_core.glm.GlmBase32" title="adelie.adelie_core.glm.GlmBase32"><span class="pre">GlmBase32</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../generated/adelie.adelie_core.glm.GlmBase64.html#adelie.adelie_core.glm.GlmBase64" title="adelie.adelie_core.glm.GlmBase64"><span class="pre">GlmBase64</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiBase32.html#adelie.adelie_core.glm.GlmMultiBase32" title="adelie.adelie_core.glm.GlmMultiBase32"><span class="pre">GlmMultiBase32</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../generated/adelie.adelie_core.glm.GlmMultiBase64.html#adelie.adelie_core.glm.GlmMultiBase64" title="adelie.adelie_core.glm.GlmMultiBase64"><span class="pre">GlmMultiBase64</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBase32.html#adelie.adelie_core.constraint.ConstraintBase32" title="adelie.adelie_core.constraint.ConstraintBase32"><span class="pre">ConstraintBase32</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../generated/adelie.adelie_core.constraint.ConstraintBase64.html#adelie.adelie_core.constraint.ConstraintBase64" title="adelie.adelie_core.constraint.ConstraintBase64"><span class="pre">ConstraintBase64</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">irls_max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">irls_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-07</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-07</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adev_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddev_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newton_max_iters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_exit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intercept</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pivot'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmda_path_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_screen_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_active_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pivot_subset_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pivot_subset_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pivot_slack_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress_bar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warm_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exit_cond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/JamesYang007/adelie/blob/main/adelie/solver.py#L354-L958"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#adelie.solver.grpnet" title="Link to this definition">#</a></dt>
+<dd><p>Solves group elastic net via naive method.</p>
+<p>The group elastic net problem minimizes the following:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+    \mathrm{minimize}_{\beta, \beta_0} \quad&amp;
+    \ell(\eta)
+    + \lambda \sum\limits_{g=1}^G \omega_g \left(
+        \alpha \|\beta_g\|_2 + \frac{1-\alpha}{2} \|\beta_g\|_2^2
+    \right)
+    \\
+    \text{subject to} \quad&amp;
+    \eta = X\beta + \beta_0 \mathbf{1} + \eta^0
+\end{align*}\end{split}\]</div>
+<p>where 
+<span class="math notranslate nohighlight">\(\beta_0\)</span> is the intercept,
+<span class="math notranslate nohighlight">\(\beta\)</span> is the coefficient vector,
+<span class="math notranslate nohighlight">\(X\)</span> is the feature matrix,
+<span class="math notranslate nohighlight">\(\eta^0\)</span> is a fixed offset vector,
+<span class="math notranslate nohighlight">\(\lambda \geq 0\)</span> is the regularization parameter,
+<span class="math notranslate nohighlight">\(G\)</span> is the number of groups,
+<span class="math notranslate nohighlight">\(\omega \geq 0\)</span> is the penalty factor,
+<span class="math notranslate nohighlight">\(\alpha \in [0,1]\)</span> is the elastic net parameter,
+<span class="math notranslate nohighlight">\(\beta_g\)</span> are the coefficients for the <span class="math notranslate nohighlight">\(g\)</span> th group,
+and <span class="math notranslate nohighlight">\(\ell(\cdot)\)</span> is the loss function defined by a GLM.</p>
+<p>For multi-response problems (i.e. when <span class="math notranslate nohighlight">\(y\)</span> is 2-dimensional)
+such as in multigaussian or multinomial,
+the group elastic net problem minimizes the following:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+    \mathrm{minimize}_{\beta, \beta_0} \quad&amp;
+    \ell(\eta)
+    + \lambda \sum\limits_{g=1}^G \omega_g \left(
+        \alpha \|\beta_g\|_2 + \frac{1-\alpha}{2} \|\beta_g\|_2^2
+    \right)
+    \\
+    \text{subject to} \quad&amp;
+    \mathrm{vec}(\eta^\top) 
+    = 
+    (X\otimes I_K) \beta + (\mathbf{1}\otimes I_K) \beta_0 
+    + 
+    \mathrm{vec}(\eta^{0\top})
+\end{align*}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathrm{vec}(\cdot)\)</span> is the operator that flattens the input as column-major.
+Note that if <code class="docutils literal notranslate"><span class="pre">intercept</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, then an intercept for each class is provided
+as additional unpenalized features in the data matrix and the global intercept is turned off.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>X</strong><span class="classifier">(n, p) Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]</span></dt><dd><p>Feature matrix.
+It is typically one of the matrices defined in <a class="reference internal" href="../index.html#module-adelie.matrix" title="adelie.matrix"><code class="xref py py-mod docutils literal notranslate"><span class="pre">adelie.matrix</span></code></a> submodule or <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>.</p>
+</dd>
+<dt><strong>glm</strong><span class="classifier">Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64]</span></dt><dd><p>GLM object.
+It is typically one of the GLM classes defined in <a class="reference internal" href="../index.html#module-adelie.glm" title="adelie.glm"><code class="xref py py-mod docutils literal notranslate"><span class="pre">adelie.glm</span></code></a> submodule.</p>
+</dd>
+<dt><strong>constraints</strong><span class="classifier">(G,) list[Union[ConstraintBase32, ConstraintBase64]], optional</span></dt><dd><p>List of constraints for each group.
+<code class="docutils literal notranslate"><span class="pre">constraints[i]</span></code> is the constraint object corresponding to group <code class="docutils literal notranslate"><span class="pre">i</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">constraints[i]</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, then the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group is unconstrained.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, every group is unconstrained.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+<dt><strong>groups</strong><span class="classifier">(G,) ndarray, optional</span></dt><dd><p>List of starting indices to each group where <cite>G</cite> is the number of groups.
+<code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group. 
+If <code class="docutils literal notranslate"><span class="pre">glm</span></code> is of multi-response type, then
+<code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting <em>feature</em> index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group.
+In either case, <code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> must then be a value in the range <span class="math notranslate nohighlight">\(\{1,\ldots, p\}\)</span>.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case it is set to <code class="docutils literal notranslate"><span class="pre">np.arange(p)</span></code>.</p>
+</dd>
+<dt><strong>alpha</strong><span class="classifier">float, optional</span></dt><dd><p>Elastic net parameter.
+It must be in the range <span class="math notranslate nohighlight">\([0,1]\)</span>.
+Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd>
+<dt><strong>penalty</strong><span class="classifier">(G,) ndarray, optional</span></dt><dd><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.
+It must be a non-negative vector.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to <code class="docutils literal notranslate"><span class="pre">np.sqrt(group_sizes)</span></code>.</p>
+</dd>
+<dt><strong>offsets</strong><span class="classifier">(n,) or (n, K) ndarray, optional</span></dt><dd><p>Observation offsets <span class="math notranslate nohighlight">\(\eta^0\)</span>.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case, it is set to 
+<code class="docutils literal notranslate"><span class="pre">np.zeros(n)</span></code> if <code class="docutils literal notranslate"><span class="pre">y</span></code> is single-response
+and <code class="docutils literal notranslate"><span class="pre">np.zeros((n,</span> <span class="pre">K))</span></code> if multi-response.</p>
+</dd>
+<dt><strong>lmda_path</strong><span class="classifier">(L,) ndarray, optional</span></dt><dd><p>The regularization path to solve for.
+The full path is not considered if <code class="docutils literal notranslate"><span class="pre">early_exit</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.
+It is recommended that the path is sorted in decreasing order.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the path will be generated.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+<dt><strong>irls_max_iters</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum number of IRLS iterations.
+This parameter is only used if <code class="docutils literal notranslate"><span class="pre">glm</span></code> is not of gaussian type.
+Default is <code class="docutils literal notranslate"><span class="pre">int(1e4)</span></code>.</p>
+</dd>
+<dt><strong>irls_tol</strong><span class="classifier">float, optional</span></dt><dd><p>IRLS convergence tolerance.
+This parameter is only used if <code class="docutils literal notranslate"><span class="pre">glm</span></code> is not of gaussian type.
+Default is <code class="docutils literal notranslate"><span class="pre">1e-7</span></code>.</p>
+</dd>
+<dt><strong>max_iters</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum number of coordinate descents.
+Default is <code class="docutils literal notranslate"><span class="pre">int(1e5)</span></code>.</p>
+</dd>
+<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Coordinate descent convergence tolerance.
+Default is <code class="docutils literal notranslate"><span class="pre">1e-7</span></code>.</p>
+</dd>
+<dt><strong>adev_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Percent deviance explained tolerance.
+Default is <code class="docutils literal notranslate"><span class="pre">0.9</span></code>.</p>
+</dd>
+<dt><strong>ddev_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Difference in percent deviance explained tolerance.
+Default is <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+</dd>
+<dt><strong>newton_tol</strong><span class="classifier">float, optional</span></dt><dd><p>Convergence tolerance for the BCD update.
+Default is <code class="docutils literal notranslate"><span class="pre">1e-12</span></code>.</p>
+</dd>
+<dt><strong>newton_max_iters</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum number of iterations for the BCD update.
+Default is <code class="docutils literal notranslate"><span class="pre">1000</span></code>.</p>
+</dd>
+<dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>Number of threads.
+Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd>
+<dt><strong>early_exit</strong><span class="classifier">bool, optional</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should early exit based on training deviance explained.
+Default is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd>
+<dt><strong>min_ratio</strong><span class="classifier">float, optional</span></dt><dd><p>The ratio between the largest and smallest <span class="math notranslate nohighlight">\(\lambda\)</span> in the regularization sequence
+if it is to be generated.
+Default is <code class="docutils literal notranslate"><span class="pre">1e-2</span></code>.</p>
+</dd>
+<dt><strong>lmda_path_size</strong><span class="classifier">int, optional</span></dt><dd><p>Number of regularizations in the path if it is to be generated.
+Default is <code class="docutils literal notranslate"><span class="pre">100</span></code>.</p>
+</dd>
+<dt><strong>intercept</strong><span class="classifier">bool, optional</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should fit with intercept.
+If <code class="docutils literal notranslate"><span class="pre">y</span></code> is multi-response, then an intercept for each class is added
+and the global intercept is turned off.
+Default is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd>
+<dt><strong>screen_rule</strong><span class="classifier">str, optional</span></dt><dd><p>The type of screening rule to use. It must be one of the following options:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;strong&quot;</span></code>: adds groups whose active scores are above the strong threshold.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;pivot&quot;</span></code>: adds groups whose active scores are above the pivot cutoff with slack.</p></li>
+</ul>
+</div></blockquote>
+<p>Default is <code class="docutils literal notranslate"><span class="pre">&quot;pivot&quot;</span></code>.</p>
+</dd>
+<dt><strong>max_screen_size</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum number of screen groups allowed.
+The function will return a valid state and guarantees to have screen set size
+less than or equal to <code class="docutils literal notranslate"><span class="pre">max_screen_size</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, it will be set to the total number of groups.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+<dt><strong>max_active_size</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum number of active groups allowed.
+The function will return a valid state and guarantees to have active set size
+less than or equal to <code class="docutils literal notranslate"><span class="pre">max_active_size</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, it will be set to the total number of groups.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+<dt><strong>pivot_subset_ratio</strong><span class="classifier">float, optional</span></dt><dd><p>If screening takes place, then the <code class="docutils literal notranslate"><span class="pre">(1</span> <span class="pre">+</span> <span class="pre">pivot_subset_ratio)</span> <span class="pre">*</span> <span class="pre">s</span></code>
+largest active scores are used to determine the pivot point
+where <code class="docutils literal notranslate"><span class="pre">s</span></code> is the current screen set size.
+It is only used if <code class="docutils literal notranslate"><span class="pre">screen_rule=&quot;pivot&quot;</span></code>.
+Default is <code class="docutils literal notranslate"><span class="pre">0.1</span></code>.</p>
+</dd>
+<dt><strong>pivot_subset_min</strong><span class="classifier">int, optional</span></dt><dd><p>If screening takes place, then at least <code class="docutils literal notranslate"><span class="pre">pivot_subset_min</span></code>
+number of active scores are used to determine the pivot point.
+It is only used if <code class="docutils literal notranslate"><span class="pre">screen_rule=&quot;pivot&quot;</span></code>.
+Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd>
+<dt><strong>pivot_slack_ratio</strong><span class="classifier">float, optional</span></dt><dd><p>If screening takes place, then <code class="docutils literal notranslate"><span class="pre">pivot_slack_ratio</span></code>
+number of groups with next smallest (new) active scores 
+below the pivot point are also added to the screen set as slack.
+It is only used if <code class="docutils literal notranslate"><span class="pre">screen_rule=&quot;pivot&quot;</span></code>.
+Default is <code class="docutils literal notranslate"><span class="pre">1.25</span></code>.</p>
+</dd>
+<dt><strong>check_state</strong><span class="classifier">bool, optional</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> is state should be checked for inconsistencies before calling solver.
+Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The check may take a long time if the inputs are big!</p>
+</div>
+</dd>
+<dt><strong>progress_bar</strong><span class="classifier">bool, optional</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> to enable progress bar.
+Default is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd>
+<dt><strong>warm_start</strong><span class="classifier">optional</span></dt><dd><p>If no warm-start is provided, the initial solution is set to 0
+and other invariance quantities are set accordingly.
+Otherwise, the warm-start is used to extract all necessary state variables.
+If warm-start is used, the user <em>must</em> still provide consistent inputs,
+that is, warm-start will not overwrite most arguments passed into this function.
+However, changing configuration settings such as tolerance levels is well-defined.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The primary use-case is when a user already called the function with <code class="docutils literal notranslate"><span class="pre">warm_start=False</span></code>
+but would like to continue fitting down a longer path of regularizations.
+This way, the user does not have to restart the fit at the beginning,
+but can simply continue from the last returned state.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>We have only tested warm-starts in the setting described in the note above,
+that is, when <code class="docutils literal notranslate"><span class="pre">lmda_path</span></code> and possibly static configurations have changed.
+Use with caution in other settings!</p>
+</div>
+</dd>
+<dt><strong>exit_cond</strong><span class="classifier">Callable, optional</span></dt><dd><p>If not <code class="docutils literal notranslate"><span class="pre">None</span></code>, it must be a callable object that takes in a single argument.
+The argument is the current state object of the same type as the return value.
+During the optimization, 
+after obtaining the solution at each regularization value,
+<code class="docutils literal notranslate"><span class="pre">exit_cond(state)</span></code> is evaluated as an opportunity
+for the user to early exit the program based on their own rule.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The algorithm early exits if <code class="docutils literal notranslate"><span class="pre">exit_cond(state)</span></code>
+evaluates to <code class="docutils literal notranslate"><span class="pre">True</span></code> <em>or</em> the built-in early exit
+function evaluates to <code class="docutils literal notranslate"><span class="pre">True</span></code> (if <code class="docutils literal notranslate"><span class="pre">early_exit</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>).
+The latter can be disabled with <code class="docutils literal notranslate"><span class="pre">early_exit=False</span></code>.</p>
+</div>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>state</dt><dd><p>The resulting state after running the solver.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive32.html#adelie.adelie_core.state.StateGaussianNaive32" title="adelie.adelie_core.state.StateGaussianNaive32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StateGaussianNaive32</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="../../generated/adelie.adelie_core.state.StateGaussianNaive64.html#adelie.adelie_core.state.StateGaussianNaive64" title="adelie.adelie_core.state.StateGaussianNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StateGaussianNaive64</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive32.html#adelie.adelie_core.state.StateGlmNaive32" title="adelie.adelie_core.state.StateGlmNaive32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StateGlmNaive32</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="../../generated/adelie.adelie_core.state.StateGlmNaive64.html#adelie.adelie_core.state.StateGlmNaive64" title="adelie.adelie_core.state.StateGlmNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StateGlmNaive64</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive32.html#adelie.adelie_core.state.StateMultiGaussianNaive32" title="adelie.adelie_core.state.StateMultiGaussianNaive32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StateMultiGaussianNaive32</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="../../generated/adelie.adelie_core.state.StateMultiGaussianNaive64.html#adelie.adelie_core.state.StateMultiGaussianNaive64" title="adelie.adelie_core.state.StateMultiGaussianNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StateMultiGaussianNaive64</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive32.html#adelie.adelie_core.state.StateMultiGlmNaive32" title="adelie.adelie_core.state.StateMultiGlmNaive32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StateMultiGlmNaive32</span></code></a></dt><dd></dd>
+<dt><a class="reference internal" href="../../generated/adelie.adelie_core.state.StateMultiGlmNaive64.html#adelie.adelie_core.state.StateMultiGlmNaive64" title="adelie.adelie_core.state.StateMultiGlmNaive64"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adelie.adelie_core.state.StateMultiGlmNaive64</span></code></a></dt><dd></dd>
+</dl>
+</div>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="adelie.solver.gaussian_cov.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">adelie.solver.gaussian_cov</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="adelie.solver.pinball.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">adelie.solver.pinball</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.solver.grpnet"><code class="docutils literal notranslate"><span class="pre">grpnet()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/api_reference/generated/adelie.solver.grpnet.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, James Yang.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,64 @@
+﻿adelie.adelie\_core.matrix.MatrixConstraintSparse64C
+====================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixConstraintSparse64C
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixConstraintSparse64C.__init__
+      ~MatrixConstraintSparse64C.cols
+      ~MatrixConstraintSparse64C.cov
+      ~MatrixConstraintSparse64C.mul
+      ~MatrixConstraintSparse64C.rmmul
+      ~MatrixConstraintSparse64C.rmmul_safe
+      ~MatrixConstraintSparse64C.rows
+      ~MatrixConstraintSparse64C.rvmul
+      ~MatrixConstraintSparse64C.rvmul_safe
+      ~MatrixConstraintSparse64C.rvtmul
+      ~MatrixConstraintSparse64C.sp_mul
+      ~MatrixConstraintSparse64C.tmul
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixConstraintSparse64C.ndim
+      ~MatrixConstraintSparse64C.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: mul
+   .. automethod:: rmmul
+   .. automethod:: rmmul_safe
+   .. automethod:: rows
+   .. automethod:: rvmul
+   .. automethod:: rvmul_safe
+   .. automethod:: rvtmul
+   .. automethod:: sp_mul
+   .. automethod:: tmul
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

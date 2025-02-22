@@ -1,0 +1,54 @@
+﻿adelie.adelie\_core.glm.GlmGaussian32
+=====================================
+
+.. currentmodule:: adelie.adelie_core.glm
+
+.. autoclass:: GlmGaussian32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GlmGaussian32.__init__
+      ~GlmGaussian32.gradient
+      ~GlmGaussian32.hessian
+      ~GlmGaussian32.inv_hessian_gradient
+      ~GlmGaussian32.inv_link
+      ~GlmGaussian32.loss
+      ~GlmGaussian32.loss_full
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GlmGaussian32.is_multi
+      ~GlmGaussian32.name
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: gradient
+   .. automethod:: hessian
+   .. automethod:: inv_hessian_gradient
+   .. automethod:: inv_link
+   .. automethod:: loss
+   .. automethod:: loss_full
+   
+   
+
+   
+   
+   
+   .. autoattribute:: is_multi
+   .. autoattribute:: name
+   
+   

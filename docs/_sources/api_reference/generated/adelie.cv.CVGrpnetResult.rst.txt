@@ -1,0 +1,50 @@
+﻿adelie.cv.CVGrpnetResult
+========================
+
+.. currentmodule:: adelie.cv
+
+.. autoclass:: CVGrpnetResult
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CVGrpnetResult.__init__
+      ~CVGrpnetResult.fit
+      ~CVGrpnetResult.plot_loss
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CVGrpnetResult.lmdas
+      ~CVGrpnetResult.losses
+      ~CVGrpnetResult.avg_losses
+      ~CVGrpnetResult.best_idx
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: fit
+   .. automethod:: plot_loss
+   
+   
+
+   
+   
+   
+   .. autoattribute:: lmdas
+   .. autoattribute:: losses
+   .. autoattribute:: avg_losses
+   .. autoattribute:: best_idx
+   
+   

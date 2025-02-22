@@ -1,0 +1,6 @@
+﻿adelie.glm.gaussian
+===================
+
+.. currentmodule:: adelie.glm
+
+.. autofunction:: gaussian

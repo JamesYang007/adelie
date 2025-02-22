@@ -1,0 +1,1924 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" data-theme="dark">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Examples &#8212; adelie 1.1.51 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "dark";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <link rel="stylesheet" type="text/css" href="../../_static/numpy.css?v=92d1e6fe" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+
+    <script src="../../_static/documentation_options.js?v=c98e89e2"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/notebooks/examples';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Frequently-Asked Questions" href="faq.html" />
+    <link rel="prev" title="Parallelism" href="parallelism.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="dark">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.51 documentation - Home"/>
+    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.51 documentation - Home"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../api_reference/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/JamesYang007/adelie" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../api_reference/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/JamesYang007/adelie" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html"><strong>Installation</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html"><strong>Introduction to Group Elastic Net</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html"><strong>Quickstart</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="matrix.html"><strong>Matrix</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="glm.html"><strong>Generalized Linear Model</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="parallelism.html"><strong>Parallelism</strong></a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#"><strong>Examples</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html"><strong>Frequently-Asked Questions</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="sklearn_api.html"><code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code><strong>-style API</strong></a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">User Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><strong>Exam...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="Examples">
+<h1><strong>Examples</strong><a class="headerlink" href="#Examples" title="Link to this heading">#</a></h1>
+<section id="Group-Lasso-with-Interaction-Terms">
+<h2><strong>Group Lasso with Interaction Terms</strong><a class="headerlink" href="#Group-Lasso-with-Interaction-Terms" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">adelie</span> <span class="k">as</span> <span class="nn">ad</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+</div>
+<p>In regression settings, we typically want to include pairwise interaction terms amongst a subset of features to capture some non-linearity. Moreover, we would like to perform feature selection on the interaction terms as well. However, to achieve an interpretable model, we would like to also impose a hierarchy such that interaction terms are only included in the model if the main effects are included. Michael Lim and Trevor Hastie provide a formalization of this problem using group lasso where
+the group structure imposes the hierarchy and the group lasso penalty allows for feature selection. For further details, we provide the following reference:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://hastie.su.domains/Papers/glinternet_jcgs.pdf">Learning interactions via hierarchical group-lasso regularization</a></p></li>
+</ul>
+<p>We will work under a simulation setting. We draw <span class="math notranslate nohighlight">\(n\)</span> independent samples <span class="math notranslate nohighlight">\(Z_i \in \mathbb{R}^d\)</span> where the continuous features are sampled from a standard normal and the discrete features are sampled uniformly.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">1000</span>        <span class="c1"># number of samples</span>
+<span class="n">d_cont</span> <span class="o">=</span> <span class="mi">10</span>     <span class="c1"># number of continuous features</span>
+<span class="n">d_disc</span> <span class="o">=</span> <span class="mi">10</span>     <span class="c1"># number of discrete features</span>
+<span class="n">seed</span> <span class="o">=</span> <span class="mi">1</span>        <span class="c1"># random seed</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+<span class="n">Z_cont</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">d_cont</span><span class="p">))</span>
+<span class="n">levels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">d_disc</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="n">Z_disc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">lvl</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">lvl</span> <span class="ow">in</span> <span class="n">levels</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+</pre></div>
+</div>
+</div>
+<p>It is customary to first center and scale the continuous features so that they have mean <span class="math notranslate nohighlight">\(0\)</span> and standard deviation <span class="math notranslate nohighlight">\(1\)</span>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Z_cont_means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Z_cont</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">Z_cont_stds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">Z_cont</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">Z_cont</span> <span class="o">=</span> <span class="p">(</span><span class="n">Z_cont</span> <span class="o">-</span> <span class="n">Z_cont_means</span><span class="p">)</span> <span class="o">/</span> <span class="n">Z_cont_stds</span>
+</pre></div>
+</div>
+</div>
+<p>This gives us a combined data matrix <span class="math notranslate nohighlight">\(Z\)</span> with the appropriate levels information. By convention, a <span class="math notranslate nohighlight">\(0\)</span>-level feature is a continuous feature and otherwise it is a discrete feature with that many levels.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfortranarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">Z_cont</span><span class="p">,</span> <span class="n">Z_disc</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">levels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">d_cont</span><span class="p">),</span> <span class="n">levels</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>We generate the response vector <span class="math notranslate nohighlight">\(y\)</span> from a linear model where one continuous and discrete main effects as well as their interaction term are included.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Z_one_hot_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">levels</span><span class="p">[</span><span class="n">d_cont</span><span class="p">])))</span>
+<span class="n">Z_one_hot_0</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">Z_disc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">Z_cont_0</span> <span class="o">=</span> <span class="n">Z_cont</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">Z_sub</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+    <span class="n">Z_cont_0</span><span class="p">,</span>
+    <span class="n">Z_one_hot_0</span><span class="p">,</span>
+    <span class="n">Z_cont_0</span> <span class="o">*</span> <span class="n">Z_one_hot_0</span><span class="p">,</span>
+<span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">Z_sub</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">Z_sub</span> <span class="o">@</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We are now in position to construct the full feature matrix to fit a group lasso model. As a demonstration, suppose we (correctly) believe that there is a true interaction term containing the first continuous feature, but we do not know the other feature. We, therefore, wish to construct an interaction between the first continuous feature against all other features. It is easy to specify this pairing, as shown below via <code class="docutils literal notranslate"><span class="pre">intr_map</span></code>. The following code constructs the interaction matrix
+<code class="docutils literal notranslate"><span class="pre">X_intr</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">intr_map</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">X_intr</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">interaction</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">intr_map</span><span class="p">,</span> <span class="n">levels</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>To put all groups of features on the same relative “scale”, we must further center and scale all interaction terms between two continuous features. Then, it can be shown that interactions between two discrete features induce a (Frobenius) norm of <span class="math notranslate nohighlight">\(1\)</span>, a discrete and continuous feature induce a norm of <span class="math notranslate nohighlight">\(\sqrt{2}\)</span>, and two continuous features induce a norm of <span class="math notranslate nohighlight">\(\sqrt{3}\)</span>. These values will be used as penalty factors later when we call the group lasso solver. We first compute the
+necessary centers and scales.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pairs</span> <span class="o">=</span> <span class="n">X_intr</span><span class="o">.</span><span class="n">_pairs</span>
+<span class="n">pair_levels</span> <span class="o">=</span> <span class="n">levels</span><span class="p">[</span><span class="n">pairs</span><span class="p">]</span>
+<span class="n">is_cont_cont</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">pair_levels</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+<span class="n">cont_cont_pairs</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">[</span><span class="n">is_cont_cont</span><span class="p">]</span>
+<span class="n">cont_cont</span> <span class="o">=</span> <span class="n">Z</span><span class="p">[:,</span> <span class="n">cont_cont_pairs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]</span> <span class="o">*</span> <span class="n">Z</span><span class="p">[:,</span> <span class="n">cont_cont_pairs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span>
+<span class="n">centers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">X_intr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">scales</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">X_intr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">cont_cont_indices</span> <span class="o">=</span> <span class="n">X_intr</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">is_cont_cont</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span>
+<span class="n">centers</span><span class="p">[</span><span class="n">cont_cont_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cont_cont</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">scales</span><span class="p">[</span><span class="n">cont_cont_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">cont_cont</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Now, we construct the full feature matrix <span class="math notranslate nohighlight">\(X\)</span> including the one-hot encoded main effects as well as the standardized version of the interaction terms using the centers and scales defined above.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X_one_hot</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">levels</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+    <span class="n">X_one_hot</span><span class="p">,</span>
+    <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span>
+        <span class="n">X_intr</span><span class="p">,</span>
+        <span class="n">centers</span><span class="o">=</span><span class="n">centers</span><span class="p">,</span>
+        <span class="n">scales</span><span class="o">=</span><span class="n">scales</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Before calling the group lasso solver, we must prepare the grouping and penalty factor information.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">groups</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+    <span class="n">X_one_hot</span><span class="o">.</span><span class="n">groups</span><span class="p">,</span>
+    <span class="n">X_one_hot</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">X_intr</span><span class="o">.</span><span class="n">groups</span><span class="p">,</span>
+<span class="p">])</span>
+
+<span class="n">is_cont_disc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">pair_levels</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pair_levels</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">penalty</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">X_intr</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">penalty</span><span class="p">[</span><span class="n">is_cont_cont</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">penalty</span><span class="p">[</span><span class="n">is_cont_disc</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">penalty</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">X_one_hot</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+    <span class="n">penalty</span><span class="p">,</span>
+<span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>Finally, we call the group lasso solver with our prepared inputs.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
+    <span class="n">groups</span><span class="o">=</span><span class="n">groups</span><span class="p">,</span>
+    <span class="n">penalty</span><span class="o">=</span><span class="n">penalty</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+100%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>| 100/100 [00:00:00&lt;00:00:00, 4657.95it/s] [dev:71.1%]
+</pre></div></div>
+</div>
+<p>First, observe that the first two groups of features that enter the model are precisely the first continuous and discrete main effects.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span><span class="o">.</span><span class="n">betas</span><span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="p">:</span><span class="n">X_one_hot</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">indices</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([ 0, 10, 11, 12, 13, 14], dtype=int32)
+</pre></div></div>
+</div>
+<p>Next, we see that the first interaction terms to be included corresponds to the interaction between the first continuous and discrete features in <code class="docutils literal notranslate"><span class="pre">Z</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">first_intr_index</span> <span class="o">=</span> <span class="n">X_one_hot</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">betas</span><span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="n">X_one_hot</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:]</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">relative_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">groups</span> <span class="o">==</span> <span class="n">first_intr_index</span><span class="p">)</span> <span class="o">-</span> <span class="n">X_one_hot</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">pairs</span><span class="p">[</span><span class="n">relative_index</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([ 0, 10], dtype=int32)
+</pre></div></div>
+</div>
+<p>We conclude that the group lasso correctly finds the causal effects of <span class="math notranslate nohighlight">\(y\)</span> early in the path.</p>
+</section>
+<section id="Model-X-Knockoffs-with-Lasso-Feature-Importance-Scores">
+<h2><strong>Model-X Knockoffs with Lasso Feature Importance Scores</strong><a class="headerlink" href="#Model-X-Knockoffs-with-Lasso-Feature-Importance-Scores" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">adelie</span> <span class="k">as</span> <span class="nn">ad</span>
+<span class="kn">import</span> <span class="nn">knockpy</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+</div>
+<p>In this example, we cover a neat application of Lasso in a popular statistical method called <em>Knockoffs</em>, pioneered by Rina Barber and Emmanuel Candès. We briefly describe the Knockoff framework. Knockoffs are fictitious features generated by the user that look similar to an already given set of features. As soon as these knockoffs enjoy certain statistical properties relating their distributions to the original features, we may use them to determine which of the original features are important
+for predicting the response while controlling for the <em>false discovery rate</em> (FDR). For an in-depth treatment of Knockoffs, we provide the following references:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://academic.oup.com/jrsssb/article/80/3/551/7048447">Panning for Gold: ‘Model-X’ Knockoffs for High Dimensional Controlled Variable Selection</a></p></li>
+<li><p><a class="reference external" href="https://web.stanford.edu/group/candes/knockoffs/papers.html">Papers about Knockoffs</a></p></li>
+<li><p><a class="reference external" href="https://en.wikipedia.org/wiki/Knockoffs_(statistics)">Knockoffs on Wikipedia</a></p></li>
+</ul>
+<p>We will work under the Model-X framework. Let’s begin with some data. We assume <span class="math notranslate nohighlight">\(n\)</span> independent samples <span class="math notranslate nohighlight">\(X_i \sim N(0, \Sigma)\)</span> where <span class="math notranslate nohighlight">\(\Sigma \in \mathbb{R}^{p \times p}\)</span> is the equi-correlation matrix with correlation <span class="math notranslate nohighlight">\(\rho\)</span>. Our response <span class="math notranslate nohighlight">\(y\)</span> is generated from a linear model <span class="math notranslate nohighlight">\(y = X \beta + \sigma \varepsilon\)</span> where the first half of the coefficients <span class="math notranslate nohighlight">\(\beta\)</span> are generated from <span class="math notranslate nohighlight">\(N(0,1)\)</span> (and the rest set to zero), <span class="math notranslate nohighlight">\(\varepsilon \sim N(0, I_n)\)</span>,
+and <span class="math notranslate nohighlight">\(\sigma\)</span> such that the signal-to-noise ratio is <span class="math notranslate nohighlight">\(1\)</span>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">10000</span>       <span class="c1"># number of samples</span>
+<span class="n">p</span> <span class="o">=</span> <span class="mi">100</span>         <span class="c1"># number of features</span>
+<span class="n">n_h1</span> <span class="o">=</span> <span class="n">p</span> <span class="o">//</span> <span class="mi">2</span>   <span class="c1"># number of features with signal</span>
+<span class="n">rho</span> <span class="o">=</span> <span class="mf">0.3</span>       <span class="c1"># equi-correlation</span>
+<span class="n">seed</span> <span class="o">=</span> <span class="mi">0</span>        <span class="c1"># random seed</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span> <span class="o">*</span> <span class="n">W</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">rho</span><span class="p">)</span> <span class="o">*</span> <span class="n">Z</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="p">:</span><span class="n">n_h1</span><span class="p">]</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_h1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_h1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Next, we generate our Model-X knockoffs. The definition of Model-X knockoffs states that each knockoff <span class="math notranslate nohighlight">\(\tilde{X}_i \in \mathbb{R}^{p}\)</span> must satisfy the exchangeability condition that swapping any subset of the features with the respective positions in <span class="math notranslate nohighlight">\(X_i\)</span> preserves the joint distribution of <span class="math notranslate nohighlight">\((X_i, \tilde{X}_i)\)</span>, and <span class="math notranslate nohighlight">\(\tilde{X}_i\)</span> must be conditionally independent of the response <span class="math notranslate nohighlight">\(y_i\)</span> given <span class="math notranslate nohighlight">\(X_i\)</span>. Under the Gaussian assumption of <span class="math notranslate nohighlight">\(X_i\)</span>, it is possible
+to show that we may then sample <span class="math notranslate nohighlight">\(\tilde{X}_i\)</span> from <span class="math notranslate nohighlight">\(N(\mu_i, V_i)\)</span> where</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+    \mu_i &amp;= X_i - \mathrm{diag}(s) \Sigma^{-1} X_i \\
+    V_i &amp;= 2 \mathrm{diag}(s) - \mathrm{diag}(s) \Sigma^{-1} \mathrm{diag}(s)
+\end{align*}\end{split}\]</div>
+<p>and <span class="math notranslate nohighlight">\(\mathrm{diag}(s)\)</span> is any non-negative diagonal matrix such that</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+    \begin{bmatrix}
+        \Sigma &amp; \Sigma - \mathrm{diag}(s) \\
+        \Sigma - \mathrm{diag}(s) &amp; \Sigma \\
+    \end{bmatrix}
+\end{align*}\end{split}\]</div>
+<p>is positive semi-definite.</p>
+<p>Although there are many possible choices of <span class="math notranslate nohighlight">\(s\)</span> that satisfy the conditions above, we use the MVR method in the <code class="docutils literal notranslate"><span class="pre">knockpy</span></code> package. To make the situation more realistic, we first estimate <span class="math notranslate nohighlight">\(\Sigma\)</span> using the empirical covariance matrix from <span class="math notranslate nohighlight">\(X\)</span>, since, in practice, we often do not know the true covariance matrix <span class="math notranslate nohighlight">\(\Sigma\)</span>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">S</span> <span class="o">=</span> <span class="n">knockpy</span><span class="o">.</span><span class="n">smatrix</span><span class="o">.</span><span class="n">compute_smatrix</span><span class="p">(</span><span class="n">Sigma</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mvr&quot;</span><span class="p">,</span> <span class="n">choldate_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Next, we sample the knockoffs using the above formula.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Sigma_inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Sigma</span><span class="p">)</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="n">X</span> <span class="o">-</span> <span class="n">X</span> <span class="o">@</span> <span class="n">Sigma_inv</span> <span class="o">@</span> <span class="n">S</span>
+<span class="n">V</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">S</span> <span class="o">-</span> <span class="n">S</span> <span class="o">@</span> <span class="n">Sigma_inv</span> <span class="o">@</span> <span class="n">S</span>
+
+<span class="n">X_knock</span> <span class="o">=</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">V</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Before using <code class="docutils literal notranslate"><span class="pre">adelie</span></code>, we convert <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">X_knock</span></code> into column-major matrices since this storage order is more favorable for our solver.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfortranarray</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">X_knock</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfortranarray</span><span class="p">(</span><span class="n">X_knock</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Once the knockoffs have been constructed, we must construct some <em>feature importance</em> statistic that places an importance score for each original and knockoff feature. This is where the lasso comes in! A common method is solve the lasso problem with the combined feature matrix <span class="math notranslate nohighlight">\((X, \tilde{X})\)</span> and the response <span class="math notranslate nohighlight">\(y\)</span>. Then, we choose our feature importance statistic to be the magnitude of the lasso coefficient, that is, scores <span class="math notranslate nohighlight">\(Z_j = |\hat{\beta}_j(\lambda)|\)</span> and
+<span class="math notranslate nohighlight">\(\tilde{Z}_j = |\hat{\beta}_{j+p}(\lambda)|\)</span> for the original and knockoff features, respectively. Furthermore, the theory also allows the user to run cross-validation to pick the best <span class="math notranslate nohighlight">\(\lambda\)</span> and construct feature importance statistics based on the solution at that <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
+<p>To fit lasso, we first need to concatenate <span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(\tilde{X}\)</span>. Although one could concatenate the two matrices into one large dense matrix, we take this opportunity to demonstrate the usage of <code class="docutils literal notranslate"><span class="pre">adelie.matrix.concatenate</span></code>, which effectively represents the same matrix but does not require any allocation of a new matrix. In practice, we may work in a high-dimensional setting where the number of features is large, in which case, it may be computationally burdensome to construct a
+concatenated dense matrix.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Xc</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">X</span><span class="p">,</span> <span class="n">X_knock</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We run a 5-fold cross-validation (CV) lasso under the Gaussian loss using the combined feature matrix and our response.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cv_res</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">cv_grpnet</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">Xc</span><span class="p">,</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
+    <span class="n">min_ratio</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">intercept</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+100%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>| 100/100 [00:00:00&lt;00:00:00, 397.03it/s] [dev:44.7%]
+100%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>| 100/100 [00:00:00&lt;00:00:00, 415.55it/s] [dev:45.2%]
+100%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>| 101/101 [00:00:00&lt;00:00:00, 443.93it/s] [dev:44.9%]
+100%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>| 100/100 [00:00:00&lt;00:00:00, 442.50it/s] [dev:45.5%]
+100%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>| 101/101 [00:00:00&lt;00:00:00, 421.39it/s] [dev:45.8%]
+</pre></div></div>
+</div>
+<p>We can visualize the average CV loss.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cv_res</span><span class="o">.</span><span class="n">plot_loss</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/user_guide_notebooks_examples_41_0.png" src="../../_images/user_guide_notebooks_examples_41_0.png" />
+</div>
+</div>
+<p>The plot suggests that the best model is somewhere in the middle of the path as the CV loss dips then flattens as we move down the regularization path. We now refit lasso along a regularization path which stops at the best chosen <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">Xc</span><span class="p">,</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
+    <span class="n">intercept</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+100%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>| 100/100 [00:00:00&lt;00:00:00, 765.17it/s] [dev:44.4%]
+</pre></div></div>
+</div>
+<p>We construct the feature importance statistics by taking the last coefficient vector.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">beta</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">betas</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">toarray</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">beta</span><span class="p">[:</span><span class="n">p</span><span class="p">])</span>
+<span class="n">z_knock</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">beta</span><span class="p">[</span><span class="n">p</span><span class="p">:])</span>
+</pre></div>
+</div>
+</div>
+<p>Next, we construct the <em>lasso coefficient difference</em> statistics <span class="math notranslate nohighlight">\(W_j = Z_j - \tilde{Z}_j\)</span>. A large positive <span class="math notranslate nohighlight">\(W_j\)</span> suggests that the <span class="math notranslate nohighlight">\(j\)</span> th (original) feature is important.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">w</span> <span class="o">=</span> <span class="n">z</span> <span class="o">-</span> <span class="n">z_knock</span>
+</pre></div>
+</div>
+</div>
+<p>Finally, to control FDR, we apply the <em>Knockoff-filter</em>. For a given level <span class="math notranslate nohighlight">\(q \in [0,1]\)</span>, the Knockoff-filter constructs</p>
+<div class="math notranslate nohighlight">
+\[\begin{align*}
+    \tau_+ = \min\{t &gt; 0 : \frac{1 + |\{j : W_j \leq -t\}|}{|\{j : W_j \geq t\}|} \leq q\}
+\end{align*}\]</div>
+<p>and selects features in <span class="math notranslate nohighlight">\(\hat{S} = \{j : W_j \geq \tau_+\}\)</span>. This selection procedure controls the FDR so that</p>
+<div class="math notranslate nohighlight">
+\[\begin{align*}
+    \mathbb{E}\left[\frac{|\{j \in \hat{S} \cap \mathcal{H}_0\}|}{|\hat{S}| \vee 1}\right] \leq q
+\end{align*}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathcal{H}_0\)</span> is the true set of null features (in this example, <span class="math notranslate nohighlight">\(\mathcal{H}_0 = \{p / 2 + 1,\ldots, p\}\)</span> since the first half of the features is used to construct <span class="math notranslate nohighlight">\(y\)</span>).</p>
+<p>We let <span class="math notranslate nohighlight">\(q = 0.05\)</span> in this example and construct <span class="math notranslate nohighlight">\(\tau_+\)</span> using <code class="docutils literal notranslate"><span class="pre">knockpy</span></code>. We then print the <em>false discovery proportion</em> (FDP), which is the term inside the expectation above, and the power estimate, which is the proportion of correctly selected non-nulls over the total number of non-nulls, or</p>
+<div class="math notranslate nohighlight">
+\[\begin{align*}
+    \widehat{\mathrm{Power}} = \frac{|\hat{S} \cap \mathcal{H}_1|}{|\mathcal{H}_1|}
+\end{align*}\]</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tau_plus</span> <span class="o">=</span> <span class="n">knockpy</span><span class="o">.</span><span class="n">knockoff_stats</span><span class="o">.</span><span class="n">data_dependent_threshhold</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
+<span class="n">S_hat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">p</span><span class="p">)[</span><span class="n">w</span> <span class="o">&gt;=</span> <span class="n">tau_plus</span><span class="p">]</span>
+<span class="n">H0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_h1</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+<span class="n">H1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_h1</span><span class="p">)</span>
+<span class="n">fdp</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">S_hat</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">H0</span><span class="p">)))</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">S_hat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">pwr</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">S_hat</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">H1</span><span class="p">)))</span> <span class="o">/</span> <span class="n">n_h1</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;FDP:    </span><span class="si">{</span><span class="n">fdp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Power:  </span><span class="si">{</span><span class="n">pwr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+FDP:    0.11363636363636363
+Power:  0.78
+</pre></div></div>
+</div>
+<p>For any one experiment, the FDP may not be under <span class="math notranslate nohighlight">\(q\)</span> (though we hope the FDP has a small enough variance that it is not too far from its mean). The guarantee is that if we repeat this entire procedure many times, the average FDP will be under <span class="math notranslate nohighlight">\(q\)</span>.</p>
+</section>
+<section id="Lasso-on-GWAS-Datasets">
+<h2><strong>Lasso on GWAS Datasets</strong><a class="headerlink" href="#Lasso-on-GWAS-Datasets" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">adelie</span> <span class="k">as</span> <span class="nn">ad</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pgenlib</span> <span class="k">as</span> <span class="nn">pg</span>
+</pre></div>
+</div>
+</div>
+<p>In this example, we show how to use <code class="docutils literal notranslate"><span class="pre">adelie</span></code> to run lasso on GWAS datasets. These datasets often come as <a class="reference external" href="https://www.cog-genomics.org/plink2/formats#bed">.bed</a> or <a class="reference external" href="https://www.cog-genomics.org/plink/2.0/input#pgen">.pgen</a> (PLINK) files accompanied by other files containing metadata. The main feature matrix of interest is the <em>genotype matrix</em> or a <em>single-nucleotide polymorphism (SNP) matrix</em>. This matrix contains values in the range <span class="math notranslate nohighlight">\(\{0,1,2,\mathrm{NA}\}\)</span> with both large number
+of samples (e.g. 0.5 million) and features (e.g. 1.7 million). As a result, special care must be taken to represent such a large matrix to avoid memory issues and optimize for the matrix operations required to solve the lasso. The response vector is typically some measurement of a phenotype such as standing height. The goal is then to learn the association between the genetic information and the phenotype. We will demonstrate that <code class="docutils literal notranslate"><span class="pre">adelie</span></code> can easily handle such a use-case.</p>
+<p>As a reference, we list a few works in the literature that aim to apply lasso on the UK Biobank, one popular GWAS dataset that has been carefully studied in a wide range of applications.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7641476/">A fast and scalable framework for large-scale and ultrahigh-dimensional sparse regression with application to the UK Biobank</a></p></li>
+<li><p><a class="reference external" href="https://academic.oup.com/bioinformatics/article/37/22/4148/6306404">Fast numerical optimization for genome sequencing data in population biobanks</a></p></li>
+<li><p><a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9007437/">Fast Lasso method for large-scale and ultrahigh-dimensional Cox model with applications to UK Biobank</a></p></li>
+<li><p><a class="reference external" href="https://james-cole.github.io/UKBiobank-Brain-Age/">UK Biobank Multi-modality Brain Age LASSO regression analysis</a></p></li>
+</ul>
+<p>Since we only wish to demonstrate the workflow of using <code class="docutils literal notranslate"><span class="pre">adelie</span></code> to solve lasso on GWAS datasets, we work with a small-scale example. The example dataset is provided in the <a class="reference external" href="https://github.com/JamesYang007/adelie/tree/main/data">data</a> folder, which contains PLINK files for the SNP matrix and a CSV file containing the phenotype and covariates. The PLINK files are taken from <a class="reference external" href="https://github.com/OpenMendel/SnpArrays.jl/tree/master/data">SnpArrays.jl</a>. For this demonstration, we randomly
+generated the phenotype. The covariates include sex and the 10 largest principle components (PCs) of the SNP matrix.</p>
+<p>In the following, we outline the steps of applying <code class="docutils literal notranslate"><span class="pre">adelie</span></code>.</p>
+<section id="Load-the-Dense-SNP-Matrix">
+<h3><strong>Load the Dense SNP Matrix</strong><a class="headerlink" href="#Load-the-Dense-SNP-Matrix" title="Link to this heading">#</a></h3>
+<p>The first step is to load the SNP matrix as a dense matrix. We enforce this for two reasons. First, we do not wish to have <code class="docutils literal notranslate"><span class="pre">adelie</span></code> depend on any particular third-party file formats. This extra dependence complicates the maintenance of the package. Secondly, <code class="docutils literal notranslate"><span class="pre">adelie</span></code> will save the SNP matrix in its own special format (<code class="docutils literal notranslate"><span class="pre">.snpdat</span></code>) that is optimized for both memory and speed in some matrix operations required by our solver. Hence, we need to be able to take any user-specified representation
+of the SNP matrix and convert it into our format. We perform this conversion by first asking the user to read the SNP matrix as a dense matrix then use <code class="docutils literal notranslate"><span class="pre">adelie</span></code> to convert and save the dense matrix as a <code class="docutils literal notranslate"><span class="pre">.snpdat</span></code> file.</p>
+<p><strong>Due to memory issues, the user should not read the full SNP matrix as a dense matrix!</strong> It is recommended to read them in batches of columns instead. Typically, we read per chromosome so that we create 22 <code class="docutils literal notranslate"><span class="pre">.snpdat</span></code> files.</p>
+<p>We now demonstrate using <code class="docutils literal notranslate"><span class="pre">pgenlib</span></code> how to read the PLINK files as a dense matrix. For more information on how to use <code class="docutils literal notranslate"><span class="pre">pgenlib</span></code>, we direct the readers to the <a class="reference external" href="https://github.com/BertrandServin/pgenlib">GitHub page</a>.</p>
+<p>We first define the data directory and the relevant PLINK file names.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_dir</span> <span class="o">=</span> <span class="s2">&quot;../../../data&quot;</span>
+<span class="n">bedname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;EUR_subset.bed&quot;</span><span class="p">)</span>
+<span class="n">bimname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;EUR_subset.bim&quot;</span><span class="p">)</span>
+<span class="n">famname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;EUR_subset.fam&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We find the number of samples in the dataset by reading the <code class="docutils literal notranslate"><span class="pre">.fam</span></code> file. This information is required by <code class="docutils literal notranslate"><span class="pre">pgenlib</span></code> since we are working with <code class="docutils literal notranslate"><span class="pre">.bed</span></code> files.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_fam</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+    <span class="n">famname</span><span class="p">,</span>
+    <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span>
+    <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;FID&quot;</span><span class="p">,</span> <span class="s2">&quot;IID&quot;</span><span class="p">,</span> <span class="s2">&quot;Father&quot;</span><span class="p">,</span> <span class="s2">&quot;Mother&quot;</span><span class="p">,</span> <span class="s2">&quot;Sex&quot;</span><span class="p">,</span> <span class="s2">&quot;Phenotype&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">n_samples</span> <span class="o">=</span> <span class="n">df_fam</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">df_fam</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>FID</th>
+      <th>IID</th>
+      <th>Father</th>
+      <th>Mother</th>
+      <th>Sex</th>
+      <th>Phenotype</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>HG00096</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>HG00097</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>HG00099</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4</td>
+      <td>HG00100</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5</td>
+      <td>HG00101</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>374</th>
+      <td>375</td>
+      <td>NA20816</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>375</th>
+      <td>376</td>
+      <td>NA20818</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>376</th>
+      <td>377</td>
+      <td>NA20819</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>377</th>
+      <td>378</td>
+      <td>NA20826</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>378</th>
+      <td>379</td>
+      <td>NA20828</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+<p>379 rows × 6 columns</p>
+</div></div>
+</div>
+<p>We read the <code class="docutils literal notranslate"><span class="pre">.bim</span></code> file to retrieve the SNP metadata. We will use this information to read and process the SNP data per chromosome.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_bim</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+    <span class="n">bimname</span><span class="p">,</span>
+    <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">,</span> <span class="s2">&quot;variant&quot;</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">,</span> <span class="s2">&quot;base&quot;</span><span class="p">,</span> <span class="s2">&quot;a1&quot;</span><span class="p">,</span> <span class="s2">&quot;a2&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">n_snps</span> <span class="o">=</span> <span class="n">df_bim</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">df_bim</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>chr</th>
+      <th>variant</th>
+      <th>pos</th>
+      <th>base</th>
+      <th>a1</th>
+      <th>a2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>17</td>
+      <td>rs34151105</td>
+      <td>0.000000</td>
+      <td>1665</td>
+      <td>T</td>
+      <td>C</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>17</td>
+      <td>rs143500173</td>
+      <td>0.000000</td>
+      <td>2748</td>
+      <td>T</td>
+      <td>A</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>17</td>
+      <td>rs113560219</td>
+      <td>0.000000</td>
+      <td>4702</td>
+      <td>T</td>
+      <td>C</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>17</td>
+      <td>rs1882989</td>
+      <td>0.000056</td>
+      <td>15222</td>
+      <td>G</td>
+      <td>A</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>17</td>
+      <td>rs8069133</td>
+      <td>0.000499</td>
+      <td>32311</td>
+      <td>G</td>
+      <td>A</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>54046</th>
+      <td>22</td>
+      <td>rs113391741</td>
+      <td>0.750923</td>
+      <td>51187440</td>
+      <td>A</td>
+      <td>G</td>
+    </tr>
+    <tr>
+      <th>54047</th>
+      <td>22</td>
+      <td>rs151247655</td>
+      <td>0.750938</td>
+      <td>51189403</td>
+      <td>A</td>
+      <td>G</td>
+    </tr>
+    <tr>
+      <th>54048</th>
+      <td>22</td>
+      <td>rs187225588</td>
+      <td>0.751001</td>
+      <td>51197602</td>
+      <td>T</td>
+      <td>A</td>
+    </tr>
+    <tr>
+      <th>54049</th>
+      <td>22</td>
+      <td>rs9616967</td>
+      <td>0.751090</td>
+      <td>51209343</td>
+      <td>T</td>
+      <td>A</td>
+    </tr>
+    <tr>
+      <th>54050</th>
+      <td>22</td>
+      <td>rs148755559</td>
+      <td>0.751156</td>
+      <td>51218133</td>
+      <td>C</td>
+      <td>T</td>
+    </tr>
+  </tbody>
+</table>
+<p>54051 rows × 6 columns</p>
+</div></div>
+</div>
+<p>Let’s try reading the SNP matrix for chromosome <code class="docutils literal notranslate"><span class="pre">17</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># create bed reader</span>
+<span class="n">reader</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">PgenReader</span><span class="p">(</span>
+    <span class="nb">str</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">bedname</span><span class="p">),</span>
+    <span class="n">raw_sample_ct</span><span class="o">=</span><span class="n">n_samples</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># get 0-indexed indices for current chromosome</span>
+<span class="n">df_bim_chr</span> <span class="o">=</span> <span class="n">df_bim</span><span class="p">[</span><span class="n">df_bim</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">17</span><span class="p">]</span>
+<span class="n">variant_idxs</span> <span class="o">=</span> <span class="n">df_bim_chr</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>
+
+<span class="c1"># read the SNP matrix</span>
+<span class="n">geno_out_chr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">variant_idxs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_samples</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">read_list</span><span class="p">(</span><span class="n">variant_idxs</span><span class="p">,</span> <span class="n">geno_out_chr</span><span class="p">)</span>
+
+<span class="c1"># convert to sample-major</span>
+<span class="n">geno_out_chr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfortranarray</span><span class="p">(</span><span class="n">geno_out_chr</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Convert-to-snpdat-Format">
+<h3><strong>Convert to snpdat Format</strong><a class="headerlink" href="#Convert-to-snpdat-Format" title="Link to this heading">#</a></h3>
+<p>Now that we have the dense SNP matrix for chromosome <code class="docutils literal notranslate"><span class="pre">17</span></code>, we write it in <code class="docutils literal notranslate"><span class="pre">.snpdat</span></code> format using <code class="docutils literal notranslate"><span class="pre">adelie</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define cache directory and snpdat filename</span>
+<span class="n">cache_dir</span> <span class="o">=</span> <span class="s2">&quot;/tmp&quot;</span>
+<span class="n">snpdat_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="s2">&quot;EUR_subset_chr17.snpdat&quot;</span><span class="p">)</span>
+
+<span class="c1"># create handler to convert the SNP matrix to .snpdat</span>
+<span class="n">handler</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">snp_unphased</span><span class="p">(</span><span class="n">snpdat_name</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">handler</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">geno_out_chr</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>That’s it!</p>
+</section>
+<section id="Process-All-Chromosomes">
+<h3><strong>Process All Chromosomes</strong><a class="headerlink" href="#Process-All-Chromosomes" title="Link to this heading">#</a></h3>
+<p>Finally, to mimic the common use-case, we combine all the steps to process all the chromosomes.</p>
+<p>We first get a list of the chromosomes in the dataset.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">chromosomes</span> <span class="o">=</span> <span class="n">df_bim</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+<span class="n">chromosomes</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([17, 18, 19, 20, 21, 22])
+</pre></div></div>
+</div>
+<p>The following code saves each SNP matrix per chromosome as a separate <code class="docutils literal notranslate"><span class="pre">.snpdat</span></code> file.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># create bed reader</span>
+<span class="n">reader</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">PgenReader</span><span class="p">(</span>
+    <span class="nb">str</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">bedname</span><span class="p">),</span>
+    <span class="n">raw_sample_ct</span><span class="o">=</span><span class="n">n_samples</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">for</span> <span class="nb">chr</span> <span class="ow">in</span> <span class="n">chromosomes</span><span class="p">:</span>
+    <span class="c1"># get 0-indexed indices for current chromosome</span>
+    <span class="n">df_bim_chr</span> <span class="o">=</span> <span class="n">df_bim</span><span class="p">[</span><span class="n">df_bim</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="nb">chr</span><span class="p">]</span>
+    <span class="n">variant_idxs</span> <span class="o">=</span> <span class="n">df_bim_chr</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>
+
+    <span class="c1"># read the SNP matrix</span>
+    <span class="n">geno_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">variant_idxs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_samples</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span>
+    <span class="n">reader</span><span class="o">.</span><span class="n">read_list</span><span class="p">(</span><span class="n">variant_idxs</span><span class="p">,</span> <span class="n">geno_out</span><span class="p">)</span>
+
+    <span class="c1"># define snpdat filename</span>
+    <span class="n">snpdat_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;EUR_subset_chr</span><span class="si">{</span><span class="nb">chr</span><span class="si">}</span><span class="s2">.snpdat&quot;</span><span class="p">)</span>
+
+    <span class="c1"># create handler to convert the SNP matrix to .snpdat</span>
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">snp_unphased</span><span class="p">(</span><span class="n">snpdat_name</span><span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">handler</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">geno_out_chr</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Load-the-Feature-Matrix">
+<h3><strong>Load the Feature Matrix</strong><a class="headerlink" href="#Load-the-Feature-Matrix" title="Link to this heading">#</a></h3>
+<p>We first load the covariates as a dense matrix and the phenotype as the response vector.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;master_phe.csv&quot;</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">covars_dense</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>sex</th>
+      <th>PC1</th>
+      <th>PC2</th>
+      <th>PC3</th>
+      <th>PC4</th>
+      <th>PC5</th>
+      <th>PC6</th>
+      <th>PC7</th>
+      <th>PC8</th>
+      <th>PC9</th>
+      <th>PC10</th>
+      <th>phenotype</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>-0.051678</td>
+      <td>-0.020465</td>
+      <td>0.046227</td>
+      <td>-0.014268</td>
+      <td>0.085271</td>
+      <td>-0.002017</td>
+      <td>-0.010386</td>
+      <td>0.036105</td>
+      <td>0.010695</td>
+      <td>-0.082026</td>
+      <td>4.612085</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>-0.050462</td>
+      <td>0.008577</td>
+      <td>-0.058172</td>
+      <td>-0.048560</td>
+      <td>0.014092</td>
+      <td>-0.008358</td>
+      <td>-0.045067</td>
+      <td>-0.005221</td>
+      <td>0.098964</td>
+      <td>0.019094</td>
+      <td>5.175936</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1</td>
+      <td>-0.051158</td>
+      <td>0.013547</td>
+      <td>-0.041690</td>
+      <td>-0.023781</td>
+      <td>-0.057576</td>
+      <td>0.088412</td>
+      <td>0.025772</td>
+      <td>0.082086</td>
+      <td>-0.099380</td>
+      <td>0.016369</td>
+      <td>13.531050</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1</td>
+      <td>-0.051310</td>
+      <td>-0.021508</td>
+      <td>0.049910</td>
+      <td>-0.038484</td>
+      <td>0.006369</td>
+      <td>0.001142</td>
+      <td>0.063346</td>
+      <td>0.045536</td>
+      <td>0.021950</td>
+      <td>-0.019257</td>
+      <td>188.524040</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0</td>
+      <td>-0.051329</td>
+      <td>0.014914</td>
+      <td>-0.067042</td>
+      <td>-0.069162</td>
+      <td>-0.023286</td>
+      <td>0.006299</td>
+      <td>-0.032645</td>
+      <td>-0.019187</td>
+      <td>-0.006523</td>
+      <td>-0.033779</td>
+      <td>65.697673</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>374</th>
+      <td>0</td>
+      <td>-0.051168</td>
+      <td>-0.048192</td>
+      <td>0.025948</td>
+      <td>0.044251</td>
+      <td>-0.025641</td>
+      <td>0.000769</td>
+      <td>0.057611</td>
+      <td>0.052506</td>
+      <td>-0.065036</td>
+      <td>-0.034339</td>
+      <td>91.516444</td>
+    </tr>
+    <tr>
+      <th>375</th>
+      <td>1</td>
+      <td>-0.051801</td>
+      <td>-0.055517</td>
+      <td>-0.004016</td>
+      <td>-0.021153</td>
+      <td>-0.007273</td>
+      <td>-0.041470</td>
+      <td>-0.061246</td>
+      <td>-0.015746</td>
+      <td>0.020271</td>
+      <td>0.014094</td>
+      <td>74.187329</td>
+    </tr>
+    <tr>
+      <th>376</th>
+      <td>1</td>
+      <td>-0.052525</td>
+      <td>-0.022246</td>
+      <td>-0.056309</td>
+      <td>0.092208</td>
+      <td>-0.036200</td>
+      <td>0.070898</td>
+      <td>-0.010716</td>
+      <td>0.055041</td>
+      <td>-0.086128</td>
+      <td>-0.041673</td>
+      <td>77.536242</td>
+    </tr>
+    <tr>
+      <th>377</th>
+      <td>1</td>
+      <td>-0.051577</td>
+      <td>-0.081801</td>
+      <td>0.113044</td>
+      <td>0.024027</td>
+      <td>0.046088</td>
+      <td>-0.002275</td>
+      <td>0.008942</td>
+      <td>0.020224</td>
+      <td>0.038375</td>
+      <td>-0.036612</td>
+      <td>264.019774</td>
+    </tr>
+    <tr>
+      <th>378</th>
+      <td>1</td>
+      <td>-0.051611</td>
+      <td>-0.084751</td>
+      <td>0.088275</td>
+      <td>0.026785</td>
+      <td>0.026810</td>
+      <td>-0.091582</td>
+      <td>0.057924</td>
+      <td>-0.046984</td>
+      <td>-0.040138</td>
+      <td>-0.042171</td>
+      <td>-51.117530</td>
+    </tr>
+  </tbody>
+</table>
+<p>379 rows × 12 columns</p>
+</div></div>
+</div>
+<p>Once the SNP matrices have been processed into <code class="docutils literal notranslate"><span class="pre">.snpdat</span></code> files, we may now load this information as a <code class="docutils literal notranslate"><span class="pre">adelie.matrix.snp_unphased</span></code> object per file. This matrix class implements certain matrix operations highly efficiently for SNP matrices and is recognized by our solver. Finally, we column-wise concatenate all these matrices as well as the dense covariates.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">dense</span><span class="p">(</span><span class="n">covars_dense</span><span class="p">)]</span>
+    <span class="o">+</span> <span class="p">[</span>
+        <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">snp_unphased</span><span class="p">(</span>
+            <span class="n">ad</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">snp_unphased</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;EUR_subset_chr</span><span class="si">{</span><span class="nb">chr</span><span class="si">}</span><span class="s2">.snpdat&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="nb">chr</span> <span class="ow">in</span> <span class="n">chromosomes</span>
+    <span class="p">],</span>
+    <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(379, 66257)
+</pre></div></div>
+</div>
+</section>
+<section id="Fit-Lasso">
+<h3><strong>Fit Lasso</strong><a class="headerlink" href="#Fit-Lasso" title="Link to this heading">#</a></h3>
+<p>We fit lasso using <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> under the Gaussian loss with intercept. Note that we unpenalize the covariates.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">penalty</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">covars_dense</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">covars_dense</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+<span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
+    <span class="n">penalty</span><span class="o">=</span><span class="n">penalty</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 44%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>      | 44/100 [00:00:00&lt;00:00:01, 55.52it/s] [dev:90.3%]
+</pre></div></div>
+</div>
+</section>
+<section id="Run-Diagnostics-(optional)">
+<h3><strong>Run Diagnostics (optional)</strong><a class="headerlink" href="#Run-Diagnostics-(optional)" title="Link to this heading">#</a></h3>
+<p>The user may wish to look at some diagnostic information afterwards. Here is an example of plotting the training <span class="math notranslate nohighlight">\(R^2\)</span>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dg</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">diagnostic</span><span class="o">.</span><span class="n">diagnostic</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+<span class="n">dg</span><span class="o">.</span><span class="n">plot_devs</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/user_guide_notebooks_examples_84_0.png" src="../../_images/user_guide_notebooks_examples_84_0.png" />
+</div>
+</div>
+</section>
+<section id="Cross-Validation">
+<h3><strong>Cross-Validation</strong><a class="headerlink" href="#Cross-Validation" title="Link to this heading">#</a></h3>
+<p>If the dataset contains few samples, the user may be interested in using cross-validation to determine the best model.</p>
+<p>To demonstrate this, we run a 5-fold cross-validation on our dataset.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cv_res</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">cv_grpnet</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+100%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>| 102/102 [00:00:01&lt;00:00:00, 61.82it/s] [dev:94.4%]
+100%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>| 106/106 [00:00:01&lt;00:00:00, 62.96it/s] [dev:94.4%]
+100%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>| 102/102 [00:00:01&lt;00:00:00, 62.49it/s] [dev:94.7%]
+100%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>| 100/100 [00:00:01&lt;00:00:00, 64.71it/s] [dev:94.1%]
+100%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>| 100/100 [00:00:01&lt;00:00:00, 55.79it/s] [dev:93.8%]
+</pre></div></div>
+</div>
+<p>We can visualize the average cross-validation loss in the following way.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cv_res</span><span class="o">.</span><span class="n">plot_loss</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/user_guide_notebooks_examples_89_0.png" src="../../_images/user_guide_notebooks_examples_89_0.png" />
+</div>
+</div>
+<p>In this example, the best model chosen by 5-fold CV is at index <code class="docutils literal notranslate"><span class="pre">48</span></code> of the <span class="math notranslate nohighlight">\(\lambda\)</span> sequence.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cv_res</span><span class="o">.</span><span class="n">best_idx</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+48
+</pre></div></div>
+</div>
+<p>To refit the model at the best model, run the following:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+100%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>| 100/100 [00:00:01&lt;00:00:00, 72.60it/s] [dev:51.7%]
+</pre></div></div>
+</div>
+<p>The last fitted regularization value is the one corresponding to the best model.</p>
+</section>
+<section id="Clean-up-Files">
+<h3><strong>Clean-up Files</strong><a class="headerlink" href="#Clean-up-Files" title="Link to this heading">#</a></h3>
+<p>Once we are done analyzing the dataset, we may remove the <code class="docutils literal notranslate"><span class="pre">.snpdat</span></code> files that we created.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="nb">chr</span> <span class="ow">in</span> <span class="n">chromosomes</span><span class="p">:</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;EUR_subset_chr</span><span class="si">{</span><span class="nb">chr</span><span class="si">}</span><span class="s2">.snpdat&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="SNP-Phased-Ancestry">
+<h2><strong>SNP Phased Ancestry</strong><a class="headerlink" href="#SNP-Phased-Ancestry" title="Link to this heading">#</a></h2>
+<p>The usual phased calldata is a <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">2s)</span></code> matrix of type <code class="docutils literal notranslate"><span class="pre">np.int8</span></code> since the entries are one of <code class="docutils literal notranslate"><span class="pre">{0,1}</span></code> (assuming no missing values), where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the number of observations and <code class="docutils literal notranslate"><span class="pre">s</span></code> is the number of SNPs. The factor of <code class="docutils literal notranslate"><span class="pre">2</span></code> comes from the fact that there are always 2 haplotypes. The ancestry information is also a <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">2s)</span></code> matrix of type <code class="docutils literal notranslate"><span class="pre">np.int8</span></code> where each entry takes on a value in <code class="docutils literal notranslate"><span class="pre">{0,1,...,</span> <span class="pre">A-1}</span></code> where <code class="docutils literal notranslate"><span class="pre">A</span></code> is the number of ancestry categories. Each ancestry information
+corresponds to the individual, haplotype, and SNP as in the calldata. We assume that the user has access to a dense matrix of the phased calldata and the corresponding ancestry information prior to using <code class="docutils literal notranslate"><span class="pre">adelie</span></code>.</p>
+<p>The data matrix we ultimately want to use is the sum of the ancestry-expanded calldata for each haplotype, described next. Fix a haplotype, and consider the corresponding calldata and ancestry matrix. For each <code class="docutils literal notranslate"><span class="pre">(i,j)</span></code> entry of the calldata, suppose it is exanded into a length <code class="docutils literal notranslate"><span class="pre">A</span></code> vector where a mutation is recorded in entry <code class="docutils literal notranslate"><span class="pre">k</span></code> if the ancestry at <code class="docutils literal notranslate"><span class="pre">(i,j)</span></code> is <code class="docutils literal notranslate"><span class="pre">k</span></code> (and zero otherwise). The concatenation of all these expanded vectors results in <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">As)</span></code> matrix. Then, we wish to run
+group lasso by grouping every <code class="docutils literal notranslate"><span class="pre">A</span></code> columns as a group (i.e. SNP).</p>
+<p>To fully mimic the real application, we assume that the calldata is split into chromosomes so that we load column-blocks of the calldata, one chromosome at a time. We will generate <code class="docutils literal notranslate"><span class="pre">n</span></code> observations and <code class="docutils literal notranslate"><span class="pre">ss[i]</span></code> SNPs per chromosome for each chromosome <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">1000</span>                        <span class="c1"># number of observations</span>
+<span class="n">ss</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="mi">3000</span><span class="p">]</span>         <span class="c1"># number of SNPs per chromosome (3 chromosomes)</span>
+<span class="n">A</span> <span class="o">=</span> <span class="mi">8</span>                           <span class="c1"># number of ancestries</span>
+<span class="n">n_threads</span> <span class="o">=</span> <span class="mi">1</span>                   <span class="c1"># number of threads</span>
+</pre></div>
+</div>
+</div>
+<p>Similar to the unphased calldata example, we generate our data for each chromosome using a helper function and store a sparse representation in <code class="docutils literal notranslate"><span class="pre">/tmp/spa_chr_i.snpdat</span></code> for each chromosome <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sa">f</span><span class="s2">&quot;/tmp/spa_chr_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.snpdat&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ss</span><span class="p">))</span>
+<span class="p">]</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ss</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">snp_phased_ancestry</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">snp_phased_ancestry</span><span class="p">(</span><span class="n">filenames</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ancestries&quot;</span><span class="p">],</span> <span class="n">A</span><span class="p">,</span> <span class="n">n_threads</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We then instantiate our special matrix object for phased ancestry SNP data.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">ad</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">snp_phased_ancestry</span><span class="p">(</span>
+            <span class="n">ad</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">snp_phased_ancestry</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span>
+            <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span>
+    <span class="p">],</span>
+    <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>For demonstration purposes, we generate our response vector <code class="docutils literal notranslate"><span class="pre">y</span></code> from a linear model with only the last three SNPs active in the model.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ss</span><span class="p">))</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">A</span> <span class="o">*</span> <span class="n">s</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">314</span><span class="p">)</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">A</span><span class="p">)</span>
+<span class="n">Xb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">X</span><span class="o">.</span><span class="n">btmul</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mi">3</span><span class="o">*</span><span class="n">A</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">A</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">Xb</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">Xb</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Finally, we use <code class="docutils literal notranslate"><span class="pre">adelie</span></code> to fit group lasso!</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">grpnet</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+    <span class="n">glm</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">glm</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">),</span>
+    <span class="n">groups</span><span class="o">=</span><span class="n">A</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">s</span><span class="p">),</span>
+    <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 62%|<span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span><span class="ansi-green-intense-fg ansi-bold">█</span>    | 62/100 [00:00:00&lt;00:00:00, 136.40it/s] [dev:90.5%]
+</pre></div></div>
+</div>
+<p>Now, we can use our diagnostic object to inspect our solutions. For example, we can plot the coefficients.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dg</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">diagnostic</span><span class="o">.</span><span class="n">diagnostic</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+<span class="n">dg</span><span class="o">.</span><span class="n">plot_coefficients</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/user_guide_notebooks_examples_110_0.png" src="../../_images/user_guide_notebooks_examples_110_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># clean-up generated files!</span>
+<span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="parallelism.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><strong>Parallelism</strong></p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="faq.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><strong>Frequently-Asked Questions</strong></p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Group-Lasso-with-Interaction-Terms"><strong>Group Lasso with Interaction Terms</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Model-X-Knockoffs-with-Lasso-Feature-Importance-Scores"><strong>Model-X Knockoffs with Lasso Feature Importance Scores</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Lasso-on-GWAS-Datasets"><strong>Lasso on GWAS Datasets</strong></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-the-Dense-SNP-Matrix"><strong>Load the Dense SNP Matrix</strong></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Convert-to-snpdat-Format"><strong>Convert to snpdat Format</strong></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Process-All-Chromosomes"><strong>Process All Chromosomes</strong></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-the-Feature-Matrix"><strong>Load the Feature Matrix</strong></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Fit-Lasso"><strong>Fit Lasso</strong></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Run-Diagnostics-(optional)"><strong>Run Diagnostics (optional)</strong></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Cross-Validation"><strong>Cross-Validation</strong></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Clean-up-Files"><strong>Clean-up Files</strong></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#SNP-Phased-Ancestry"><strong>SNP Phased Ancestry</strong></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/user_guide/notebooks/examples.ipynb.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, James Yang.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,1217 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" data-theme="dark">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>adelie.adelie_core.state.StateGaussianPinNaive32 &#8212; adelie 1.1.51 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "dark";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/numpy.css?v=92d1e6fe" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+
+    <script src="../../_static/documentation_options.js?v=c98e89e2"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api_reference/generated/adelie.adelie_core.state.StateGaussianPinNaive32';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="adelie.adelie_core.state.StateGaussianPinNaive64" href="adelie.adelie_core.state.StateGaussianPinNaive64.html" />
+    <link rel="prev" title="adelie.adelie_core.state.StateGaussianPinCov64" href="adelie.adelie_core.state.StateGaussianPinCov64.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="dark">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/adelie-penguin-dark.svg" class="logo__image only-dark" alt="adelie 1.1.51 documentation - Home"/>
+    <script>document.write(`<img src="../../_static/adelie-penguin.svg" class="logo__image only-light" alt="adelie 1.1.51 documentation - Home"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/JamesYang007/adelie" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/JamesYang007/adelie" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.objective.html">adelie.bcd.objective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root.html">adelie.bcd.root</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_function.html">adelie.bcd.root_function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_lower_bound.html">adelie.bcd.root_lower_bound</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.root_upper_bound.html">adelie.bcd.root_upper_bound</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.bcd.solve.html">adelie.bcd.solve</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.configs.set_configs.html">adelie.configs.set_configs</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.constraint.box.html">adelie.constraint.box</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.constraint.linear.html">adelie.constraint.linear</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.constraint.lower.html">adelie.constraint.lower</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.constraint.one_sided.html">adelie.constraint.one_sided</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.constraint.upper.html">adelie.constraint.upper</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.cv.CVGrpnetResult.html">adelie.cv.CVGrpnetResult</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.cv.cv_grpnet.html">adelie.cv.cv_grpnet</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.dense.html">adelie.data.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_phased_ancestry.html">adelie.data.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.data.snp_unphased.html">adelie.data.snp_unphased</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.DiagnosticCov.html">adelie.diagnostic.DiagnosticCov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.DiagnosticNaive.html">adelie.diagnostic.DiagnosticNaive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.coefficient.html">adelie.diagnostic.coefficient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.diagnostic.html">adelie.diagnostic.diagnostic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradients.html">adelie.diagnostic.gradients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_norms.html">adelie.diagnostic.gradient_norms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.gradient_scores.html">adelie.diagnostic.gradient_scores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.objective.html">adelie.diagnostic.objective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_benchmark.html">adelie.diagnostic.plot_benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_coefficients.html">adelie.diagnostic.plot_coefficients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_devs.html">adelie.diagnostic.plot_devs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_kkt.html">adelie.diagnostic.plot_kkt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.plot_set_sizes.html">adelie.diagnostic.plot_set_sizes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.predict.html">adelie.diagnostic.predict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.diagnostic.residuals.html">adelie.diagnostic.residuals</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.binomial.html">adelie.glm.binomial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.cox.html">adelie.glm.cox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.gaussian.html">adelie.glm.gaussian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.multigaussian.html">adelie.glm.multigaussian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.multinomial.html">adelie.glm.multinomial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.glm.poisson.html">adelie.glm.poisson</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_phased_ancestry.html">adelie.io.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.io.snp_unphased.html">adelie.io.snp_unphased</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.block_diag.html">adelie.matrix.block_diag</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.concatenate.html">adelie.matrix.concatenate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.convex_relu.html">adelie.matrix.convex_relu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.dense.html">adelie.matrix.dense</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.eager_cov.html">adelie.matrix.eager_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.interaction.html">adelie.matrix.interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.kronecker_eye.html">adelie.matrix.kronecker_eye</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.lazy_cov.html">adelie.matrix.lazy_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.one_hot.html">adelie.matrix.one_hot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_phased_ancestry.html">adelie.matrix.snp_phased_ancestry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.snp_unphased.html">adelie.matrix.snp_unphased</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.sparse.html">adelie.matrix.sparse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.standardize.html">adelie.matrix.standardize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.matrix.subset.html">adelie.matrix.subset</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.sklearn.CSSModelSelection.html">adelie.sklearn.CSSModelSelection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.sklearn.GroupElasticNet.html">adelie.sklearn.GroupElasticNet</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.bvls.html">adelie.solver.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.css_cov.html">adelie.solver.css_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.gaussian_cov.html">adelie.solver.gaussian_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.grpnet.html">adelie.solver.grpnet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.solver.pinball.html">adelie.solver.pinball</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.bvls.html">adelie.state.bvls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.css_cov.html">adelie.state.css_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_cov.html">adelie.state.gaussian_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_naive.html">adelie.state.gaussian_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_cov.html">adelie.state.gaussian_pin_cov</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.gaussian_pin_naive.html">adelie.state.gaussian_pin_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.glm_naive.html">adelie.state.glm_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multigaussian_naive.html">adelie.state.multigaussian_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.multiglm_naive.html">adelie.state.multiglm_naive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adelie.state.pinball.html">adelie.state.pinball</a></li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../internal.html">Internal</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.configs.Configs.html">adelie.adelie_core.configs.Configs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBase32.html">adelie.adelie_core.constraint.ConstraintBase32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBase64.html">adelie.adelie_core.constraint.ConstraintBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBox32.html">adelie.adelie_core.constraint.ConstraintBox32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintBox64.html">adelie.adelie_core.constraint.ConstraintBox64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintLinear32.html">adelie.adelie_core.constraint.ConstraintLinear32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintLinear64.html">adelie.adelie_core.constraint.ConstraintLinear64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintOneSided32.html">adelie.adelie_core.constraint.ConstraintOneSided32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintOneSided64.html">adelie.adelie_core.constraint.ConstraintOneSided64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintOneSidedADMM32.html">adelie.adelie_core.constraint.ConstraintOneSidedADMM32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.constraint.ConstraintOneSidedADMM64.html">adelie.adelie_core.constraint.ConstraintOneSidedADMM64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmBase32.html">adelie.adelie_core.glm.GlmBase32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmBase64.html">adelie.adelie_core.glm.GlmBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialLogit32.html">adelie.adelie_core.glm.GlmBinomialLogit32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialLogit64.html">adelie.adelie_core.glm.GlmBinomialLogit64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialProbit32.html">adelie.adelie_core.glm.GlmBinomialProbit32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmBinomialProbit64.html">adelie.adelie_core.glm.GlmBinomialProbit64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmCox32.html">adelie.adelie_core.glm.GlmCox32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmCox64.html">adelie.adelie_core.glm.GlmCox64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmGaussian32.html">adelie.adelie_core.glm.GlmGaussian32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmGaussian64.html">adelie.adelie_core.glm.GlmGaussian64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiBase32.html">adelie.adelie_core.glm.GlmMultiBase32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiBase64.html">adelie.adelie_core.glm.GlmMultiBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiGaussian32.html">adelie.adelie_core.glm.GlmMultiGaussian32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultiGaussian64.html">adelie.adelie_core.glm.GlmMultiGaussian64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultinomial32.html">adelie.adelie_core.glm.GlmMultinomial32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmMultinomial64.html">adelie.adelie_core.glm.GlmMultinomial64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmPoisson32.html">adelie.adelie_core.glm.GlmPoisson32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.glm.GlmPoisson64.html">adelie.adelie_core.glm.GlmPoisson64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintBase32.html">adelie.adelie_core.matrix.MatrixConstraintBase32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintBase64.html">adelie.adelie_core.matrix.MatrixConstraintBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintDense32C.html">adelie.adelie_core.matrix.MatrixConstraintDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintDense32F.html">adelie.adelie_core.matrix.MatrixConstraintDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintDense64C.html">adelie.adelie_core.matrix.MatrixConstraintDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintDense64F.html">adelie.adelie_core.matrix.MatrixConstraintDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintSparse32C.html">adelie.adelie_core.matrix.MatrixConstraintSparse32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixConstraintSparse64C.html">adelie.adelie_core.matrix.MatrixConstraintSparse64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBase32.html">adelie.adelie_core.matrix.MatrixCovBase32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBase64.html">adelie.adelie_core.matrix.MatrixCovBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBlockDiag32.html">adelie.adelie_core.matrix.MatrixCovBlockDiag32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovBlockDiag64.html">adelie.adelie_core.matrix.MatrixCovBlockDiag64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovDense32C.html">adelie.adelie_core.matrix.MatrixCovDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovDense32F.html">adelie.adelie_core.matrix.MatrixCovDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovDense64C.html">adelie.adelie_core.matrix.MatrixCovDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovDense64F.html">adelie.adelie_core.matrix.MatrixCovDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovLazyCov32C.html">adelie.adelie_core.matrix.MatrixCovLazyCov32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovLazyCov32F.html">adelie.adelie_core.matrix.MatrixCovLazyCov32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovLazyCov64C.html">adelie.adelie_core.matrix.MatrixCovLazyCov64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovLazyCov64F.html">adelie.adelie_core.matrix.MatrixCovLazyCov64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovSparse32F.html">adelie.adelie_core.matrix.MatrixCovSparse32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixCovSparse64F.html">adelie.adelie_core.matrix.MatrixCovSparse64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase32.html">adelie.adelie_core.matrix.MatrixNaiveBase32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBase64.html">adelie.adelie_core.matrix.MatrixNaiveBase64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag32.html">adelie.adelie_core.matrix.MatrixNaiveBlockDiag32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveBlockDiag64.html">adelie.adelie_core.matrix.MatrixNaiveBlockDiag64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveCConcatenate64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate32.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRConcatenate64.html">adelie.adelie_core.matrix.MatrixNaiveRConcatenate64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexGatedReluSparse64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse32F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveConvexReluSparse64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveDense32C.html">adelie.adelie_core.matrix.MatrixNaiveDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveDense32F.html">adelie.adelie_core.matrix.MatrixNaiveDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveDense64C.html">adelie.adelie_core.matrix.MatrixNaiveDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveDense64F.html">adelie.adelie_core.matrix.MatrixNaiveDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveInteractionDense32C.html">adelie.adelie_core.matrix.MatrixNaiveInteractionDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveInteractionDense32F.html">adelie.adelie_core.matrix.MatrixNaiveInteractionDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveInteractionDense64C.html">adelie.adelie_core.matrix.MatrixNaiveInteractionDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveInteractionDense64F.html">adelie.adelie_core.matrix.MatrixNaiveInteractionDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEye32.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEye32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEye64.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEye64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense32C.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense32F.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64C.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F.html">adelie.adelie_core.matrix.MatrixNaiveKroneckerEyeDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveOneHotDense32C.html">adelie.adelie_core.matrix.MatrixNaiveOneHotDense32C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveOneHotDense32F.html">adelie.adelie_core.matrix.MatrixNaiveOneHotDense32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveOneHotDense64C.html">adelie.adelie_core.matrix.MatrixNaiveOneHotDense64C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F.html">adelie.adelie_core.matrix.MatrixNaiveOneHotDense64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry32.html">adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64.html">adelie.adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPUnphased32.html">adelie.adelie_core.matrix.MatrixNaiveSNPUnphased32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSNPUnphased64.html">adelie.adelie_core.matrix.MatrixNaiveSNPUnphased64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSparse32F.html">adelie.adelie_core.matrix.MatrixNaiveSparse32F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveSparse64F.html">adelie.adelie_core.matrix.MatrixNaiveSparse64F</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveStandardize32.html">adelie.adelie_core.matrix.MatrixNaiveStandardize32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveStandardize64.html">adelie.adelie_core.matrix.MatrixNaiveStandardize64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCSubset32.html">adelie.adelie_core.matrix.MatrixNaiveCSubset32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveCSubset64.html">adelie.adelie_core.matrix.MatrixNaiveCSubset64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRSubset32.html">adelie.adelie_core.matrix.MatrixNaiveRSubset32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.matrix.MatrixNaiveRSubset64.html">adelie.adelie_core.matrix.MatrixNaiveRSubset64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS32.html">adelie.adelie_core.state.StateBVLS32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateBVLS64.html">adelie.adelie_core.state.StateBVLS64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateCSSCov32.html">adelie.adelie_core.state.StateCSSCov32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateCSSCov64.html">adelie.adelie_core.state.StateCSSCov64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov32.html">adelie.adelie_core.state.StateGaussianPinCov32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinCov64.html">adelie.adelie_core.state.StateGaussianPinCov64</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">adelie.adelie_core.state.StateGaussianPinNaive32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianPinNaive64.html">adelie.adelie_core.state.StateGaussianPinNaive64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianCov32.html">adelie.adelie_core.state.StateGaussianCov32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianCov64.html">adelie.adelie_core.state.StateGaussianCov64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive32.html">adelie.adelie_core.state.StateGaussianNaive32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGaussianNaive64.html">adelie.adelie_core.state.StateGaussianNaive64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive32.html">adelie.adelie_core.state.StateGlmNaive32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateGlmNaive64.html">adelie.adelie_core.state.StateGlmNaive64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive32.html">adelie.adelie_core.state.StateMultiGaussianNaive32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGaussianNaive64.html">adelie.adelie_core.state.StateMultiGaussianNaive64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive32.html">adelie.adelie_core.state.StateMultiGlmNaive32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StateMultiGlmNaive64.html">adelie.adelie_core.state.StateMultiGlmNaive64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StatePinball32.html">adelie.adelie_core.state.StatePinball32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adelie.adelie_core.state.StatePinball64.html">adelie.adelie_core.state.StatePinball64</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">API Reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../internal.html" class="nav-link">Internal</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">adelie.adeli...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="adelie-adelie-core-state-stategaussianpinnaive32">
+<h1>adelie.adelie_core.state.StateGaussianPinNaive32<a class="headerlink" href="#adelie-adelie-core-state-stategaussianpinnaive32" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adelie.adelie_core.state.</span></span><span class="sig-name descname"><span class="pre">StateGaussianPinNaive32</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32" title="Link to this definition">#</a></dt>
+<dd><p>Core state class for Gaussian, pin, naive method.</p>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.__init__" title="adelie.adelie_core.state.StateGaussianPinNaive32.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Overloaded function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.solve" title="adelie.adelie_core.state.StateGaussianPinNaive32.solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve</span></code></a>(self)</p></td>
+<td><p>Solves the state-specific problem.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.X" title="adelie.adelie_core.state.StateGaussianPinNaive32.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a></p></td>
+<td><p>Feature matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.active_begins" title="adelie.adelie_core.state.StateGaussianPinNaive32.active_begins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_begins</span></code></a></p></td>
+<td><p>List of indices that index a corresponding list of values for each active group.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.active_order" title="adelie.adelie_core.state.StateGaussianPinNaive32.active_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_order</span></code></a></p></td>
+<td><p>Ordering such that <code class="docutils literal notranslate"><span class="pre">groups</span></code> is sorted in ascending order for the active groups.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.active_set" title="adelie.adelie_core.state.StateGaussianPinNaive32.active_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_set</span></code></a></p></td>
+<td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">screen_set</span></code> that correspond to active groups.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.active_set_size" title="adelie.adelie_core.state.StateGaussianPinNaive32.active_set_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_set_size</span></code></a></p></td>
+<td><p>Number of active groups.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.adev_tol" title="adelie.adelie_core.state.StateGaussianPinNaive32.adev_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adev_tol</span></code></a></p></td>
+<td><p>Percent deviance explained tolerance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.alpha" title="adelie.adelie_core.state.StateGaussianPinNaive32.alpha"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alpha</span></code></a></p></td>
+<td><p>Elastic net parameter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.benchmark_active" title="adelie.adelie_core.state.StateGaussianPinNaive32.benchmark_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_active</span></code></a></p></td>
+<td><p>Benchmark time for performing coordinate-descent on the active set for each <span class="math notranslate nohighlight">\(\lambda\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.benchmark_screen" title="adelie.adelie_core.state.StateGaussianPinNaive32.benchmark_screen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark_screen</span></code></a></p></td>
+<td><p>Benchmark time for performing coordinate-descent on the screen set for each <span class="math notranslate nohighlight">\(\lambda\)</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.betas" title="adelie.adelie_core.state.StateGaussianPinNaive32.betas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">betas</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> is the solution at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.constraint_buffer_size" title="adelie.adelie_core.state.StateGaussianPinNaive32.constraint_buffer_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">constraint_buffer_size</span></code></a></p></td>
+<td><p>Max constraint buffer size.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.constraints" title="adelie.adelie_core.state.StateGaussianPinNaive32.constraints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">constraints</span></code></a></p></td>
+<td><p>List of constraints for each group.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.ddev_tol" title="adelie.adelie_core.state.StateGaussianPinNaive32.ddev_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ddev_tol</span></code></a></p></td>
+<td><p>Difference in percent deviance explained tolerance.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.group_sizes" title="adelie.adelie_core.state.StateGaussianPinNaive32.group_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_sizes</span></code></a></p></td>
+<td><p>List of group sizes corresponding to each element in <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.groups" title="adelie.adelie_core.state.StateGaussianPinNaive32.groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">groups</span></code></a></p></td>
+<td><p>List of starting indices to each group where <cite>G</cite> is the number of groups.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.intercept" title="adelie.adelie_core.state.StateGaussianPinNaive32.intercept"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercept</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should fit with intercept.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.intercepts" title="adelie.adelie_core.state.StateGaussianPinNaive32.intercepts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercepts</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">intercepts[i]</span></code> is the intercept at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.iters" title="adelie.adelie_core.state.StateGaussianPinNaive32.iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iters</span></code></a></p></td>
+<td><p>Number of coordinate descents taken.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.lmda_path" title="adelie.adelie_core.state.StateGaussianPinNaive32.lmda_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmda_path</span></code></a></p></td>
+<td><p>The regularization path to solve for.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.lmdas" title="adelie.adelie_core.state.StateGaussianPinNaive32.lmdas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lmdas</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code> is the regularization <span class="math notranslate nohighlight">\(\lambda\)</span> used for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th solution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.max_active_size" title="adelie.adelie_core.state.StateGaussianPinNaive32.max_active_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_active_size</span></code></a></p></td>
+<td><p>Maximum number of active groups allowed.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.max_iters" title="adelie.adelie_core.state.StateGaussianPinNaive32.max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_iters</span></code></a></p></td>
+<td><p>Maximum number of coordinate descents.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.n_threads" title="adelie.adelie_core.state.StateGaussianPinNaive32.n_threads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_threads</span></code></a></p></td>
+<td><p>Number of threads.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.newton_max_iters" title="adelie.adelie_core.state.StateGaussianPinNaive32.newton_max_iters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_max_iters</span></code></a></p></td>
+<td><p>Maximum number of iterations for the BCD update.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.newton_tol" title="adelie.adelie_core.state.StateGaussianPinNaive32.newton_tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">newton_tol</span></code></a></p></td>
+<td><p>Convergence tolerance for the BCD update.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.penalty" title="adelie.adelie_core.state.StateGaussianPinNaive32.penalty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">penalty</span></code></a></p></td>
+<td><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.resid" title="adelie.adelie_core.state.StateGaussianPinNaive32.resid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resid</span></code></a></p></td>
+<td><p>Residual <span class="math notranslate nohighlight">\(y_c - X \beta\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.resid_sum" title="adelie.adelie_core.state.StateGaussianPinNaive32.resid_sum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resid_sum</span></code></a></p></td>
+<td><p>Weighted (by <span class="math notranslate nohighlight">\(W\)</span>) sum of <code class="docutils literal notranslate"><span class="pre">resid</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.rsq" title="adelie.adelie_core.state.StateGaussianPinNaive32.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></p></td>
+<td><p>The change in unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> given by  <span class="math notranslate nohighlight">\(\|y_c-X_c\beta_{\mathrm{old}}\|_{W}^2 - \|y_c-X_c\beta_{\mathrm{curr}}\|_{W}^2\)</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.rsqs" title="adelie.adelie_core.state.StateGaussianPinNaive32.rsqs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsqs</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rsqs[i]</span></code> is the unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_X_means" title="adelie.adelie_core.state.StateGaussianPinNaive32.screen_X_means"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_X_means</span></code></a></p></td>
+<td><p>Column means of <span class="math notranslate nohighlight">\(X\)</span> for screen groups (weighted by <span class="math notranslate nohighlight">\(W\)</span>).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_begins" title="adelie.adelie_core.state.StateGaussianPinNaive32.screen_begins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_begins</span></code></a></p></td>
+<td><p>List of indices that index a corresponding list of values for each screen group.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_beta" title="adelie.adelie_core.state.StateGaussianPinNaive32.screen_beta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_beta</span></code></a></p></td>
+<td><p>Coefficient vector on the screen set.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_is_active" title="adelie.adelie_core.state.StateGaussianPinNaive32.screen_is_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_is_active</span></code></a></p></td>
+<td><p>Boolean vector that indicates whether each screen group in <code class="docutils literal notranslate"><span class="pre">groups</span></code> is active or not.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_set" title="adelie.adelie_core.state.StateGaussianPinNaive32.screen_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_set</span></code></a></p></td>
+<td><p>List of indices into <code class="docutils literal notranslate"><span class="pre">groups</span></code> that correspond to the screen groups.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_transforms" title="adelie.adelie_core.state.StateGaussianPinNaive32.screen_transforms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_transforms</span></code></a></p></td>
+<td><p>List of <span class="math notranslate nohighlight">\(V_k\)</span> where <span class="math notranslate nohighlight">\(V_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span> along the screen groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_vars" title="adelie.adelie_core.state.StateGaussianPinNaive32.screen_vars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen_vars</span></code></a></p></td>
+<td><p>List of <span class="math notranslate nohighlight">\(D_k^2\)</span> where <span class="math notranslate nohighlight">\(D_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span>  along the screen groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.tol" title="adelie.adelie_core.state.StateGaussianPinNaive32.tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tol</span></code></a></p></td>
+<td><p>Coordinate descent convergence tolerance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.weights" title="adelie.adelie_core.state.StateGaussianPinNaive32.weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">weights</span></code></a></p></td>
+<td><p>Observation weights <span class="math notranslate nohighlight">\(W\)</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.y_mean" title="adelie.adelie_core.state.StateGaussianPinNaive32.y_mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_mean</span></code></a></p></td>
+<td><p>Mean of the response vector <span class="math notranslate nohighlight">\(y\)</span> (weighted by <span class="math notranslate nohighlight">\(W\)</span>), i.e. <span class="math notranslate nohighlight">\(\mathbf{1}^\top W y\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32.y_var" title="adelie.adelie_core.state.StateGaussianPinNaive32.y_var"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_var</span></code></a></p></td>
+<td><p>Variance of the response vector <span class="math notranslate nohighlight">\(y\)</span> (weighted by <span class="math notranslate nohighlight">\(W\)</span>),  i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span>.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.__init__" title="Link to this definition">#</a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: adelie.adelie_core.state.StateGaussianPinNaive32, X: adelie.adelie_core.matrix.MatrixNaiveBase32, y_mean: float, y_var: float, constraints: adelie.adelie_core.constraint.VectorConstraintBase32, groups: numpy.ndarray[numpy.int64[1, n]], group_sizes: numpy.ndarray[numpy.int64[1, n]], alpha: float, penalty: numpy.ndarray[numpy.float32[1, n]], weights: numpy.ndarray[numpy.float32[1, n]], screen_set: numpy.ndarray[numpy.int64[1, n]], screen_begins: numpy.ndarray[numpy.int64[1, n]], screen_vars: numpy.ndarray[numpy.float32[1, n]], screen_X_means: numpy.ndarray[numpy.float32[1, n]], screen_transforms: adelie.adelie_core.VectorMatrix32, lmda_path: numpy.ndarray[numpy.float32[1, n]], constraint_buffer_size: int, intercept: bool, max_active_size: int, max_iters: int, tol: float, adev_tol: float, ddev_tol: float, newton_tol: float, newton_max_iters: int, n_threads: int, rsq: float, resid: numpy.ndarray[numpy.float32[1, n], flags.writeable], resid_sum: float, screen_beta: numpy.ndarray[numpy.float32[1, n], flags.writeable], screen_is_active: numpy.ndarray[bool[1, n], flags.writeable], active_set_size: int, active_set: numpy.ndarray[numpy.int64[1, n], flags.writeable]) -&gt; None</p></li>
+<li><p>__init__(self: adelie.adelie_core.state.StateGaussianPinNaive32, arg0: adelie.adelie_core.state.StateGaussianPinNaive32) -&gt; None</p></li>
+</ol>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#adelie.adelie_core.state.StateGaussianPinNaive32" title="adelie.adelie_core.state.StateGaussianPinNaive32"><span class="pre">adelie.adelie_core.state.StateGaussianPinNaive32</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.solve" title="Link to this definition">#</a></dt>
+<dd><p>Solves the state-specific problem.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.X">
+<span class="sig-name descname"><span class="pre">X</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.X" title="Link to this definition">#</a></dt>
+<dd><p>Feature matrix.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.active_begins">
+<span class="sig-name descname"><span class="pre">active_begins</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.active_begins" title="Link to this definition">#</a></dt>
+<dd><p>List of indices that index a corresponding list of values for each active group.
+<code class="docutils literal notranslate"><span class="pre">active_begins[i]</span></code> is the starting index corresponding to the <code class="docutils literal notranslate"><span class="pre">i</span></code> th active group.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.active_order">
+<span class="sig-name descname"><span class="pre">active_order</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.active_order" title="Link to this definition">#</a></dt>
+<dd><p>Ordering such that <code class="docutils literal notranslate"><span class="pre">groups</span></code> is sorted in ascending order for the active groups.
+<code class="docutils literal notranslate"><span class="pre">groups[screen_set[active_set[active_order[i]]]]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th active group in ascending order.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.active_set">
+<span class="sig-name descname"><span class="pre">active_set</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.active_set" title="Link to this definition">#</a></dt>
+<dd><p>List of indices into <code class="docutils literal notranslate"><span class="pre">screen_set</span></code> that correspond to active groups.
+<code class="docutils literal notranslate"><span class="pre">screen_set[active_set[i]]</span></code> is the <code class="docutils literal notranslate"><span class="pre">i</span></code> th active group.
+An active group is one with non-zero coefficient block,
+that is, for every <code class="docutils literal notranslate"><span class="pre">i</span></code> th active group, 
+<code class="docutils literal notranslate"><span class="pre">screen_beta[b:b+p]</span> <span class="pre">==</span> <span class="pre">0</span></code> where 
+<code class="docutils literal notranslate"><span class="pre">j</span> <span class="pre">=</span> <span class="pre">active_set[i]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">screen_set[j]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">screen_begins[j]</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">group_sizes[k]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.active_set_size">
+<span class="sig-name descname"><span class="pre">active_set_size</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.active_set_size" title="Link to this definition">#</a></dt>
+<dd><p>Number of active groups.
+<code class="docutils literal notranslate"><span class="pre">active_set[i]</span></code> is only well-defined
+for <code class="docutils literal notranslate"><span class="pre">i</span></code> in the range <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">active_set_size)</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.adev_tol">
+<span class="sig-name descname"><span class="pre">adev_tol</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.adev_tol" title="Link to this definition">#</a></dt>
+<dd><p>Percent deviance explained tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.alpha">
+<span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.alpha" title="Link to this definition">#</a></dt>
+<dd><p>Elastic net parameter.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.benchmark_active">
+<span class="sig-name descname"><span class="pre">benchmark_active</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.benchmark_active" title="Link to this definition">#</a></dt>
+<dd><p>Benchmark time for performing coordinate-descent on the active set for each <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.benchmark_screen">
+<span class="sig-name descname"><span class="pre">benchmark_screen</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.benchmark_screen" title="Link to this definition">#</a></dt>
+<dd><p>Benchmark time for performing coordinate-descent on the screen set for each <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.betas">
+<span class="sig-name descname"><span class="pre">betas</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.betas" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">betas[i]</span></code> is the solution at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.constraint_buffer_size">
+<span class="sig-name descname"><span class="pre">constraint_buffer_size</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.constraint_buffer_size" title="Link to this definition">#</a></dt>
+<dd><p>Max constraint buffer size.
+Equivalent to <code class="docutils literal notranslate"><span class="pre">np.max([0</span> <span class="pre">if</span> <span class="pre">c</span> <span class="pre">is</span> <span class="pre">None</span> <span class="pre">else</span> <span class="pre">c.buffer_size()</span> <span class="pre">for</span> <span class="pre">c</span> <span class="pre">in</span> <span class="pre">constraints])</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.constraints">
+<span class="sig-name descname"><span class="pre">constraints</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.constraints" title="Link to this definition">#</a></dt>
+<dd><p>List of constraints for each group.
+<code class="docutils literal notranslate"><span class="pre">constraints[i]</span></code> is the constraint object corresponding to group <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.ddev_tol">
+<span class="sig-name descname"><span class="pre">ddev_tol</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.ddev_tol" title="Link to this definition">#</a></dt>
+<dd><p>Difference in percent deviance explained tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.group_sizes">
+<span class="sig-name descname"><span class="pre">group_sizes</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.group_sizes" title="Link to this definition">#</a></dt>
+<dd><p>List of group sizes corresponding to each element in <code class="docutils literal notranslate"><span class="pre">groups</span></code>.
+<code class="docutils literal notranslate"><span class="pre">group_sizes[i]</span></code> is the group size of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.groups">
+<span class="sig-name descname"><span class="pre">groups</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.groups" title="Link to this definition">#</a></dt>
+<dd><p>List of starting indices to each group where <cite>G</cite> is the number of groups.
+<code class="docutils literal notranslate"><span class="pre">groups[i]</span></code> is the starting index of the <code class="docutils literal notranslate"><span class="pre">i</span></code> th group.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.intercept">
+<span class="sig-name descname"><span class="pre">intercept</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.intercept" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the function should fit with intercept.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.intercepts">
+<span class="sig-name descname"><span class="pre">intercepts</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.intercepts" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">intercepts[i]</span></code> is the intercept at <code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.iters">
+<span class="sig-name descname"><span class="pre">iters</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.iters" title="Link to this definition">#</a></dt>
+<dd><p>Number of coordinate descents taken.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.lmda_path">
+<span class="sig-name descname"><span class="pre">lmda_path</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.lmda_path" title="Link to this definition">#</a></dt>
+<dd><p>The regularization path to solve for.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.lmdas">
+<span class="sig-name descname"><span class="pre">lmdas</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.lmdas" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">lmdas[i]</span></code> is the regularization <span class="math notranslate nohighlight">\(\lambda\)</span>
+used for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th solution.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.max_active_size">
+<span class="sig-name descname"><span class="pre">max_active_size</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.max_active_size" title="Link to this definition">#</a></dt>
+<dd><p>Maximum number of active groups allowed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.max_iters">
+<span class="sig-name descname"><span class="pre">max_iters</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.max_iters" title="Link to this definition">#</a></dt>
+<dd><p>Maximum number of coordinate descents.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.n_threads">
+<span class="sig-name descname"><span class="pre">n_threads</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.n_threads" title="Link to this definition">#</a></dt>
+<dd><p>Number of threads.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.newton_max_iters">
+<span class="sig-name descname"><span class="pre">newton_max_iters</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.newton_max_iters" title="Link to this definition">#</a></dt>
+<dd><p>Maximum number of iterations for the BCD update.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.newton_tol">
+<span class="sig-name descname"><span class="pre">newton_tol</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.newton_tol" title="Link to this definition">#</a></dt>
+<dd><p>Convergence tolerance for the BCD update.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.penalty">
+<span class="sig-name descname"><span class="pre">penalty</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.penalty" title="Link to this definition">#</a></dt>
+<dd><p>Penalty factor for each group in the same order as <code class="docutils literal notranslate"><span class="pre">groups</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.resid">
+<span class="sig-name descname"><span class="pre">resid</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.resid" title="Link to this definition">#</a></dt>
+<dd><p>Residual <span class="math notranslate nohighlight">\(y_c - X \beta\)</span> where <span class="math notranslate nohighlight">\(\beta\)</span> is given by <code class="docutils literal notranslate"><span class="pre">screen_beta</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This definition is unconventional.
+This was done deliberately as the algorithm is most efficient 
+when it updates this quantity compared to 
+the conventional quantity <span class="math notranslate nohighlight">\(y_c-X_c \beta\)</span>.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.resid_sum">
+<span class="sig-name descname"><span class="pre">resid_sum</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.resid_sum" title="Link to this definition">#</a></dt>
+<dd><p>Weighted (by <span class="math notranslate nohighlight">\(W\)</span>) sum of <code class="docutils literal notranslate"><span class="pre">resid</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.rsq">
+<span class="sig-name descname"><span class="pre">rsq</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.rsq" title="Link to this definition">#</a></dt>
+<dd><p>The change in unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> given by 
+<span class="math notranslate nohighlight">\(\|y_c-X_c\beta_{\mathrm{old}}\|_{W}^2 - \|y_c-X_c\beta_{\mathrm{curr}}\|_{W}^2\)</span>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.rsqs">
+<span class="sig-name descname"><span class="pre">rsqs</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.rsqs" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">rsqs[i]</span></code> is the unnormalized <span class="math notranslate nohighlight">\(R^2\)</span> at <code class="docutils literal notranslate"><span class="pre">betas[i]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.screen_X_means">
+<span class="sig-name descname"><span class="pre">screen_X_means</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_X_means" title="Link to this definition">#</a></dt>
+<dd><p>Column means of <span class="math notranslate nohighlight">\(X\)</span> for screen groups (weighted by <span class="math notranslate nohighlight">\(W\)</span>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.screen_begins">
+<span class="sig-name descname"><span class="pre">screen_begins</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_begins" title="Link to this definition">#</a></dt>
+<dd><p>List of indices that index a corresponding list of values for each screen group.
+<code class="docutils literal notranslate"><span class="pre">screen_begins[i]</span></code> is the starting index corresponding to the <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group.
+From this index, reading <code class="docutils literal notranslate"><span class="pre">group_sizes[screen_set[i]]</span></code> number of elements
+will grab values corresponding to the full <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group block.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.screen_beta">
+<span class="sig-name descname"><span class="pre">screen_beta</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_beta" title="Link to this definition">#</a></dt>
+<dd><p>Coefficient vector on the screen set.
+<code class="docutils literal notranslate"><span class="pre">screen_beta[b:b+p]</span></code> is the coefficient for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group 
+where
+<code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">screen_set[i]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">screen_begins[i]</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">group_sizes[k]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.screen_is_active">
+<span class="sig-name descname"><span class="pre">screen_is_active</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_is_active" title="Link to this definition">#</a></dt>
+<dd><p>Boolean vector that indicates whether each screen group in <code class="docutils literal notranslate"><span class="pre">groups</span></code> is active or not.
+<code class="docutils literal notranslate"><span class="pre">screen_is_active[i]</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> if and only if <code class="docutils literal notranslate"><span class="pre">screen_set[i]</span></code> is active.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.screen_set">
+<span class="sig-name descname"><span class="pre">screen_set</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_set" title="Link to this definition">#</a></dt>
+<dd><p>List of indices into <code class="docutils literal notranslate"><span class="pre">groups</span></code> that correspond to the screen groups.
+<code class="docutils literal notranslate"><span class="pre">screen_set[i]</span></code> is <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.screen_transforms">
+<span class="sig-name descname"><span class="pre">screen_transforms</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_transforms" title="Link to this definition">#</a></dt>
+<dd><p>List of <span class="math notranslate nohighlight">\(V_k\)</span> where <span class="math notranslate nohighlight">\(V_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span>
+along the screen groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.
+It <em>only</em> needs to be properly initialized for groups with size &gt; 1.
+<code class="docutils literal notranslate"><span class="pre">screen_transforms[i]</span></code> is <span class="math notranslate nohighlight">\(V_k\)</span> for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group where
+<code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">screen_set[i]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.screen_vars">
+<span class="sig-name descname"><span class="pre">screen_vars</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_vars" title="Link to this definition">#</a></dt>
+<dd><p>List of <span class="math notranslate nohighlight">\(D_k^2\)</span> where <span class="math notranslate nohighlight">\(D_k\)</span> is from the SVD of <span class="math notranslate nohighlight">\(\sqrt{W} X_{c,k}\)</span> 
+along the screen groups <span class="math notranslate nohighlight">\(k\)</span> and for possibly column-centered (weighted by <span class="math notranslate nohighlight">\(W\)</span>) <span class="math notranslate nohighlight">\(X_k\)</span>.
+<code class="docutils literal notranslate"><span class="pre">screen_vars[b:b+p]</span></code> is <span class="math notranslate nohighlight">\(D_k^2\)</span> for the <code class="docutils literal notranslate"><span class="pre">i</span></code> th screen group where
+<code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">screen_set[i]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">screen_begins[i]</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">group_sizes[k]</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.tol">
+<span class="sig-name descname"><span class="pre">tol</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.tol" title="Link to this definition">#</a></dt>
+<dd><p>Coordinate descent convergence tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.weights">
+<span class="sig-name descname"><span class="pre">weights</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.weights" title="Link to this definition">#</a></dt>
+<dd><p>Observation weights <span class="math notranslate nohighlight">\(W\)</span>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.y_mean">
+<span class="sig-name descname"><span class="pre">y_mean</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.y_mean" title="Link to this definition">#</a></dt>
+<dd><p>Mean of the response vector <span class="math notranslate nohighlight">\(y\)</span> (weighted by <span class="math notranslate nohighlight">\(W\)</span>),
+i.e. <span class="math notranslate nohighlight">\(\mathbf{1}^\top W y\)</span>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adelie.adelie_core.state.StateGaussianPinNaive32.y_var">
+<span class="sig-name descname"><span class="pre">y_var</span></span><a class="headerlink" href="#adelie.adelie_core.state.StateGaussianPinNaive32.y_var" title="Link to this definition">#</a></dt>
+<dd><p>Variance of the response vector <span class="math notranslate nohighlight">\(y\)</span> (weighted by <span class="math notranslate nohighlight">\(W\)</span>), 
+i.e. <span class="math notranslate nohighlight">\(\|y_c\|_{W}^2\)</span>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="adelie.adelie_core.state.StateGaussianPinCov64.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">adelie.adelie_core.state.StateGaussianPinCov64</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="adelie.adelie_core.state.StateGaussianPinNaive64.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">adelie.adelie_core.state.StateGaussianPinNaive64</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.__init__"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.solve"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.solve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.X"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.X</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.active_begins"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.active_begins</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.active_order"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.active_order</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.active_set"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.active_set</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.active_set_size"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.active_set_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.adev_tol"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.adev_tol</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.alpha"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.alpha</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.benchmark_active"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.benchmark_active</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.benchmark_screen"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.benchmark_screen</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.betas"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.betas</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.constraint_buffer_size"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.constraint_buffer_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.constraints"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.constraints</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.ddev_tol"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.ddev_tol</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.group_sizes"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.group_sizes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.groups"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.groups</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.intercept"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.intercept</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.intercepts"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.intercepts</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.iters"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.iters</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.lmda_path"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.lmda_path</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.lmdas"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.lmdas</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.max_active_size"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.max_active_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.max_iters"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.max_iters</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.n_threads"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.n_threads</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.newton_max_iters"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.newton_max_iters</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.newton_tol"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.newton_tol</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.penalty"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.penalty</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.resid"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.resid</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.resid_sum"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.resid_sum</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.rsq"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.rsq</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.rsqs"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.rsqs</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_X_means"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.screen_X_means</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_begins"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.screen_begins</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_beta"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.screen_beta</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_is_active"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.screen_is_active</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_set"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.screen_set</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_transforms"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.screen_transforms</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.screen_vars"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.screen_vars</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.tol"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.tol</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.weights"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.weights</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.y_mean"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.y_mean</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adelie.adelie_core.state.StateGaussianPinNaive32.y_var"><code class="docutils literal notranslate"><span class="pre">StateGaussianPinNaive32.y_var</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/api_reference/generated/adelie.adelie_core.state.StateGaussianPinNaive32.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, James Yang.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

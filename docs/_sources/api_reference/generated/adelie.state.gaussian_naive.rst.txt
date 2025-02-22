@@ -1,0 +1,6 @@
+﻿adelie.state.gaussian\_naive
+============================
+
+.. currentmodule:: adelie.state
+
+.. autofunction:: gaussian_naive

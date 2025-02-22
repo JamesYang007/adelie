@@ -1,0 +1,70 @@
+﻿adelie.adelie\_core.matrix.MatrixNaiveKroneckerEyeDense32F
+==========================================================
+
+.. currentmodule:: adelie.adelie_core.matrix
+
+.. autoclass:: MatrixNaiveKroneckerEyeDense32F
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatrixNaiveKroneckerEyeDense32F.__init__
+      ~MatrixNaiveKroneckerEyeDense32F.bmul
+      ~MatrixNaiveKroneckerEyeDense32F.bmul_safe
+      ~MatrixNaiveKroneckerEyeDense32F.btmul
+      ~MatrixNaiveKroneckerEyeDense32F.cmul
+      ~MatrixNaiveKroneckerEyeDense32F.cmul_safe
+      ~MatrixNaiveKroneckerEyeDense32F.cols
+      ~MatrixNaiveKroneckerEyeDense32F.cov
+      ~MatrixNaiveKroneckerEyeDense32F.ctmul
+      ~MatrixNaiveKroneckerEyeDense32F.mean
+      ~MatrixNaiveKroneckerEyeDense32F.mul
+      ~MatrixNaiveKroneckerEyeDense32F.rows
+      ~MatrixNaiveKroneckerEyeDense32F.sp_tmul
+      ~MatrixNaiveKroneckerEyeDense32F.sq_mul
+      ~MatrixNaiveKroneckerEyeDense32F.var
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatrixNaiveKroneckerEyeDense32F.ndim
+      ~MatrixNaiveKroneckerEyeDense32F.shape
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: bmul
+   .. automethod:: bmul_safe
+   .. automethod:: btmul
+   .. automethod:: cmul
+   .. automethod:: cmul_safe
+   .. automethod:: cols
+   .. automethod:: cov
+   .. automethod:: ctmul
+   .. automethod:: mean
+   .. automethod:: mul
+   .. automethod:: rows
+   .. automethod:: sp_tmul
+   .. automethod:: sq_mul
+   .. automethod:: var
+   
+   
+
+   
+   
+   
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   
+   

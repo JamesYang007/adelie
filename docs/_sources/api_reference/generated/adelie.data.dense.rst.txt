@@ -1,0 +1,6 @@
+﻿adelie.data.dense
+=================
+
+.. currentmodule:: adelie.data
+
+.. autofunction:: dense

@@ -1,0 +1,6 @@
+﻿adelie.diagnostic.gradient\_scores
+==================================
+
+.. currentmodule:: adelie.diagnostic
+
+.. autofunction:: gradient_scores

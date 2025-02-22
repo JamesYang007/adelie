@@ -1,0 +1,54 @@
+﻿adelie.adelie\_core.glm.GlmPoisson32
+====================================
+
+.. currentmodule:: adelie.adelie_core.glm
+
+.. autoclass:: GlmPoisson32
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GlmPoisson32.__init__
+      ~GlmPoisson32.gradient
+      ~GlmPoisson32.hessian
+      ~GlmPoisson32.inv_hessian_gradient
+      ~GlmPoisson32.inv_link
+      ~GlmPoisson32.loss
+      ~GlmPoisson32.loss_full
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GlmPoisson32.is_multi
+      ~GlmPoisson32.name
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: gradient
+   .. automethod:: hessian
+   .. automethod:: inv_hessian_gradient
+   .. automethod:: inv_link
+   .. automethod:: loss
+   .. automethod:: loss_full
+   
+   
+
+   
+   
+   
+   .. autoattribute:: is_multi
+   .. autoattribute:: name
+   
+   

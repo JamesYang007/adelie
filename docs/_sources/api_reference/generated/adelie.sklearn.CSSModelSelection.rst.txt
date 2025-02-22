@@ -1,0 +1,45 @@
+﻿adelie.sklearn.CSSModelSelection
+================================
+
+.. currentmodule:: adelie.sklearn
+
+.. autoclass:: CSSModelSelection
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CSSModelSelection.__init__
+      ~CSSModelSelection.fit
+      ~CSSModelSelection.fit_cov
+      ~CSSModelSelection.get_metadata_routing
+      ~CSSModelSelection.get_params
+      ~CSSModelSelection.score
+      ~CSSModelSelection.set_params
+      ~CSSModelSelection.set_score_request
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+   .. automethod:: __init__
+   .. automethod:: fit
+   .. automethod:: fit_cov
+   .. automethod:: get_metadata_routing
+   .. automethod:: get_params
+   .. automethod:: score
+   .. automethod:: set_params
+   .. automethod:: set_score_request
+   
+   
+
+   
+   
+   
