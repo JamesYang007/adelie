@@ -284,16 +284,20 @@ def gaussian_cov(
         active_set[:active_set_size] = np.arange(active_set_size)
         rsq = 0
 
-        subset = np.array([
-            np.arange(groups[ss], groups[ss] + group_sizes[ss]) 
-            for ss in screen_set
-        ])
-        order = np.argsort(subset)
-        indices = subset[order]
-        values = screen_beta[order]
+        if screen_set.size > 0:
+            subset = np.hstack([
+                np.arange(groups[ss], groups[ss] + group_sizes[ss]) 
+                for ss in screen_set])
+            order = np.argsort(subset)
+            indices = subset[order]
+            values = screen_beta[order]
 
-        grad = np.empty(p, dtype=dtype)
-        A.mul(indices, values, grad)
+            grad = np.empty(p, dtype=dtype)
+            A.mul(indices, values, grad)
+        else:
+            # it actually just feels like this is what we might as well set as grad...
+            grad = np.zeros(p, dtype=dtype)
+            
         grad = v - grad
 
     else:
