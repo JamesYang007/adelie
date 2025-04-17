@@ -10,3 +10,4 @@ dependencies:
   - ccache
   - pip:
     - poetry
+    - pybind11
