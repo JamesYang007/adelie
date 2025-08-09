@@ -100,9 +100,9 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::bmul(
     Eigen::Map<vec_value_t> _w(_buff.data() + V.rows(), V.rows());
     for (int l = 0; l < static_cast<int>(_K); ++l) {
         const auto j_l = std::max(j-l, 0);
-        const auto i_begin = (j_l + _K - 1) / static_cast<int>(_K);
+        const auto i_begin = (j_l + static_cast<int>(_K) - 1) / static_cast<int>(_K);
         const auto j_l_q = std::max(j-l+q, 0);
-        const auto i_end = (j_l_q + _K - 1) / static_cast<int>(_K);
+        const auto i_end = (j_l_q + static_cast<int>(_K) - 1) / static_cast<int>(_K);
         const auto i_q = i_end - i_begin;
         if (i_q <= 0) continue;
         dvveq(_v, V.col(l), _n_threads);
@@ -132,9 +132,9 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::bmul_safe(
     Eigen::Map<vec_value_t> _w(buffer.data() + V.rows(), V.rows());
     for (int l = 0; l < static_cast<int>(_K); ++l) {
         const auto j_l = std::max(j-l, 0);
-        const auto i_begin = (j_l + _K - 1) / static_cast<int>(_K);
+        const auto i_begin = (j_l + static_cast<int>(_K) - 1) / static_cast<int>(_K);
         const auto j_l_q = std::max(j-l+q, 0);
-        const auto i_end = (j_l_q + _K - 1) / static_cast<int>(_K);
+        const auto i_end = (j_l_q + static_cast<int>(_K) - 1) / static_cast<int>(_K);
         const auto i_q = i_end - i_begin;
         if (i_q <= 0) continue;
         dvveq(_v, V.col(l), _n_threads);
@@ -159,9 +159,9 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::btmul(
     Eigen::Map<rowmat_value_t> Out(out.data(), rows() / _K, _K);
     for (int l = 0; l < static_cast<int>(_K); ++l) {
         const auto j_l = std::max(j-l, 0);
-        const auto i_begin = (j_l + _K - 1) / static_cast<int>(_K);
+        const auto i_begin = (j_l + static_cast<int>(_K) - 1) / static_cast<int>(_K);
         const auto j_l_q = std::max(j-l+q, 0);
-        const auto i_end = (j_l_q + _K - 1) / static_cast<int>(_K);
+        const auto i_end = (j_l_q + static_cast<int>(_K) - 1) / static_cast<int>(_K);
         const auto i_q = i_end - i_begin;
         if (i_q <= 0) continue;
         Eigen::Map<vec_value_t> _v(_buff.data(), i_q);
@@ -218,9 +218,9 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE::cov(
     vec_value_t vbuff;
     for (int l = 0; l < static_cast<int>(_K); ++l) {
         const auto j_l = std::max(j-l, 0);
-        const auto i_begin = (j_l + _K - 1) / static_cast<int>(_K);
+        const auto i_begin = (j_l + static_cast<int>(_K) - 1) / static_cast<int>(_K);
         const auto j_l_q = std::max(j-l+q, 0);
-        const auto i_end = (j_l_q + _K - 1) / static_cast<int>(_K);
+        const auto i_end = (j_l_q + static_cast<int>(_K) - 1) / static_cast<int>(_K);
         const auto i_q = i_end - i_begin;
         if (i_q <= 0) continue;
         if (vbuff.size() < sqrt_W.rows() + i_q * i_q) {
@@ -561,9 +561,9 @@ ADELIE_CORE_MATRIX_NAIVE_KRONECKER_EYE_DENSE::cov(
     colmat_value_t buffer(_mat.rows(), q);
     for (int l = 0; l < static_cast<int>(_K); ++l) {
         const auto j_l = std::max(j-l, 0);
-        const auto i_begin = (j_l + _K - 1) / static_cast<int>(_K);
+        const auto i_begin = (j_l + static_cast<int>(_K) - 1) / static_cast<int>(_K);
         const auto j_l_q = std::max(j-l+q, 0);
-        const auto i_end = (j_l_q + _K - 1) / static_cast<int>(_K);
+        const auto i_end = (j_l_q + static_cast<int>(_K) - 1) / static_cast<int>(_K);
         const auto i_q = i_end - i_begin;
         if (i_q <= 0) continue;
 
