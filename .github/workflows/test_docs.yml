@@ -21,6 +21,7 @@ jobs:
         generate-run-shell: true
     - name: Set up dependencies
       run: |
+        poetry lock
         poetry install --without dev,doc --no-root
       shell: micromamba-shell {0}
     - name: Install Adelie
@@ -51,6 +52,7 @@ jobs:
         generate-run-shell: true
     - name: Set up dependencies
       run: |
+        poetry lock
         poetry install --without test,dev --no-root
       shell: micromamba-shell {0}
     - name: Install Adelie

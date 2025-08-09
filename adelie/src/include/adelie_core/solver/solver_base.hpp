@@ -157,7 +157,7 @@ inline void update_screen_derived_base(
 // Then, state.dual is going to be super dense and we have 100 rows of such dense vectors.
 // Nonetheless, it's still useful to have this for diagnostic purposes... maybe a flag to control whether this gets saved?
 template <class StateType, class VecIndexType, class VecValueType>
-inline auto sparsify_dual(
+inline typename StateType::sp_vec_value_t sparsify_dual(
     const StateType& state,
     VecIndexType& indices,
     VecValueType& values
