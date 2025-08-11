@@ -43,6 +43,10 @@ class CVGrpnetResult:
     """
     Argmin of ``avg_losses``.
     """
+    preval_preds: np.ndarray
+    """
+    ``preval_preds[i]`` is the prevalidated prediction from CV for the ``i`` th training datapoint. Only supported when `glm` is a Gaussian family.
+    """
     
     def plot_loss(self):
         """Plots the average K-fold CV loss.
@@ -236,6 +240,8 @@ def cv_grpnet(
     full_lmdas = state.lmda_max * np.logspace(0, np.log10(min_ratio), lmda_path_size)
 
     cv_losses = np.empty((n_folds, full_lmdas.shape[0]))
+    preval_preds = np.empty((full_lmdas.shape[0], n))
+
     for fold in range(n_folds):
         # current validation fold range
         begin = (
@@ -301,6 +307,8 @@ def cv_grpnet(
             offsets=state._offsets,
             n_threads=n_threads,
         )
+        
+        preval_preds[:,order[begin:begin+curr_fold_size]] = etas[:,order[begin:begin+curr_fold_size]]
 
         # compute loss on full data
         full_data_losses = np.array([glm.loss(eta) for eta in etas])
@@ -322,4 +330,5 @@ def cv_grpnet(
         losses=cv_losses,
         avg_losses=avg_losses,
         best_idx=best_idx,
+        preval_preds=preval_preds[best_idx,:]
     )
