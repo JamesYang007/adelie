@@ -67,6 +67,7 @@ class CVGrpnetResult:
             color="red",
             capsize=2,
         )
+
         # --- 
         # NEW: find λ_min and λ_1se ---
         idx_min = np.argmin(avg_losses)
@@ -127,13 +128,24 @@ class CVGrpnetResult:
         )
         logger.logger.setLevel(logger_level)
 
-        lmda_path_size = 100
+        # lmda_path_size = 100
+        # if "lmda_path_size" in grpnet_params:
+        #     lmda_path_size = grpnet_params["lmda_path_size"]
+        # lmda_star = self.lmdas[self.best_idx]
+        # full_lmdas = state.lmda_max * np.logspace(
+        #     0, np.log10(lmda_star / state.lmda_max), lmda_path_size
+        # )
+        
+        lmda_path_size = self.best_idx + 1
         if "lmda_path_size" in grpnet_params:
             lmda_path_size = grpnet_params["lmda_path_size"]
-        lmda_star = self.lmdas[self.best_idx]
-        full_lmdas = state.lmda_max * np.logspace(
-            0, np.log10(lmda_star / state.lmda_max), lmda_path_size
-        )
+            lmda_star = self.lmdas[self.best_idx]
+            full_lmdas = state.lmda_max * np.logspace(
+                0, np.log10(lmda_star / state.lmda_max), lmda_path_size
+            )
+        else:
+            full_lmdas = self.lmdas[:lmda_path_size]
+
         return grpnet(
             X=X,
             glm=glm,
