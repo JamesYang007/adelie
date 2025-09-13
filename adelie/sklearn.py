@@ -130,10 +130,12 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
 
         # If cross validation used, re-fit with best lambda
         if isinstance(self.state_, CVGrpnetResult):
+            # Remove cv-specific parameters that aren't needed for re-fitting
+            fit_kwargs = {k: v for k, v in kwargs.items() if k not in ['n_folds', 'seed']}
             self.state_ = self.state_.fit(
                 X=X, 
                 glm=self.glm_, 
-                **kwargs,
+                **fit_kwargs,
             )
 
             # Store metadata
