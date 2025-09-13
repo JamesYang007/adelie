@@ -251,6 +251,84 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
         ]:
             raise ValueError(f"Unknown family: {self.family}")
 
+    def plot_validation_curve(self, X_val, y_val):
+        """
+        Plot validation curve showing R^2 and active set size at each lambda.
+
+        Parameters
+        ----------
+        X_val : array-like
+            Validation feature matrix.
+        y_val : array-like
+            Validation response vector.
+        """
+        import matplotlib.pyplot as plt
+        import matplotlib.ticker as mticker
+        from sklearn.metrics import r2_score
+        import numpy as np
+
+        # Compute predictions for each model along the path
+        predictions = self.predict(X_val)
+        # If predictions is 2D (n_lambdas, n_samples), axis=1 is correct
+        # If predictions is 1D, wrap in a 2D array for apply_along_axis
+        if predictions.ndim == 1:
+            predictions = predictions[np.newaxis, :]
+        r2vec = np.apply_along_axis(lambda yhat: r2_score(y_val, yhat), axis=1, arr=predictions)
+
+        lam_path = self.lambda_
+        beta_0 = self.intercept_
+        # Handle sparse or dense coef_
+        betas = self.coef_.toarray() if hasattr(self.coef_, "toarray") else np.asarray(self.coef_)
+
+        # Degrees of freedom: number of nonzero coefficients at each lambda
+        dof = np.sum(betas != 0, axis=1)
+        dof = np.asarray(dof).ravel()
+
+        # Find best R^2 and corresponding lambda and dof
+        best_idx = np.nanargmax(r2vec)
+        best_r2 = r2vec[best_idx]
+        best_coef = dof[best_idx]
+        best_lambda = lam_path[best_idx]
+
+        fig, ax = plt.subplots(figsize=(12, 4))
+
+        ax.plot(-np.log10(lam_path), r2vec, linestyle="None", marker=".")
+        ax.ticklabel_format(style='plain', axis='y')
+        ax.yaxis.get_major_formatter().set_scientific(False)
+        ax.yaxis.get_major_formatter().set_useOffset(False)
+        ax.yaxis.set_major_formatter(mticker.FormatStrFormatter('%.3f'))
+
+        # Horizontal line at max R² + lambda + coeff count in the legend
+        ax.axhline(
+            best_r2,
+            color="red",
+            linestyle="--",
+            label=(
+                f"max $R^2$ = {best_r2:.3f}\n"
+                f"λ = {best_lambda:.5g}\n"
+                f"#coefs = {best_coef}"
+            ),
+        )
+
+        ax.set_xlabel(r"$-\log(\lambda)$")
+        ax.set_ylabel(r"$R^2$")
+        ax.legend(loc="lower right")
+
+        # Twin x-axis: show non-zero‐coeff counts as ticks on the top
+        ax2 = ax.twiny()
+        ax2.set_xlim(ax.get_xlim())
+
+        step = max(1, len(lam_path) // 50)
+        xt = -np.log10(lam_path)[::step]
+        xl = dof[::step].astype(int)
+
+        ax2.set_xticks(xt)
+        ax2.set_xticklabels(xl, rotation=45, fontsize="small")
+        ax2.set_xlabel("Number of non-zero coefficients")
+
+        plt.tight_layout()
+        plt.title("Validation Curve Showing Active Set Size at each $\lambda$", pad=20)
+        plt.show()
 
 class CSSModelSelection(BaseEstimator, RegressorMixin):
     """
