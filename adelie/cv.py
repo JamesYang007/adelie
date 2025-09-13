@@ -67,6 +67,22 @@ class CVGrpnetResult:
             color="red",
             capsize=2,
         )
+        # --- 
+        # NEW: find λ_min and λ_1se ---
+        idx_min = np.argmin(avg_losses)
+        ts_min = ts[idx_min]
+        min_loss = avg_losses[idx_min]
+        se_min = std_losses[idx_min] / np.sqrt(self.losses.shape[0])  # standard error
+
+        threshold = min_loss + se_min
+        valid = np.where(avg_losses <= threshold)[0]
+        idx_1se = valid[np.argmax(self.lmdas[valid])]  # largest λ within 1-SE
+        ts_1se = ts[idx_1se]
+
+        ax.axvline(x=ts_min, color="black", linestyle=":", linewidth=1)
+        ax.axvline(x=ts_1se, color="black", linestyle=":", linewidth=1)
+        # -------------------------------
+
         ax.set_title("K-Fold CV Mean Loss")
         ax.set_xlabel(r"$-\log(\lambda)$")
         ax.set_ylabel("Mean Loss")
