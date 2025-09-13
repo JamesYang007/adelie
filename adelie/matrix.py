@@ -1492,7 +1492,7 @@ def standardize(
     adelie.adelie_core.matrix.MatrixNaiveStandardize64
     """
     if isinstance(mat, (list, np.ndarray)):
-        mat = np.ndarray(mat, order="F", copy=True)
+        mat = np.array(mat, order="F", copy=True)
         if centers is None:
             centers = np.mean(mat, axis=0)
         mat -= centers[None]
@@ -1502,6 +1502,7 @@ def standardize(
                 np.sum(mat ** 2, axis=0) / (n - ddof)
             )
         mat /= scales[None]
+        
         return mat
 
     dtype = _to_dtype(mat)
