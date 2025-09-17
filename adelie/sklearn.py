@@ -215,16 +215,18 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
         else:
             return predict(X, self.coef_, self.intercept_).squeeze()
 
-    def score(self, X: np.ndarray, y: np.ndarray) -> float:
+    def score(self, y_train: np.ndarray, X_val: np.ndarray, y_val: np.ndarray) -> float:
         """
         Compute the R-squared score of the model.
 
         Parameters
         ----------
-        X : (n, p) Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
+        y_train : (n,) ndarray
+            Training response vector.
+        X_val : (n, p) Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
             Feature matrix.
             It is typically one of the matrices defined in :mod:`adelie.matrix` submodule or :class:`numpy.ndarray`.
-        y : (n,) ndarray
+        y_val : (n,) ndarray
             Response vector.
 
         Returns
@@ -232,11 +234,11 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
         R2 : float
             The R-squared score.
         """
-        yhat = self.predict(X)
-        ybar = np.mean(y)
-        ss_res = np.sum((y - yhat) ** 2)
-        ss_tot = np.sum((y - ybar) ** 2)
-        return np.clip(1 - ss_res / ss_tot, 0, 1)
+        yhat = self.predict(X_val)
+        ybar = np.mean(y_train)
+        ss_res = np.sum((y_val - yhat) ** 2)
+        ss_tot = np.sum((y_val - ybar) ** 2)
+        return 1 - (ss_res / ss_tot)
 
     def _validate_params(self):
         if self.solver not in ["grpnet", "cv_grpnet"]:
