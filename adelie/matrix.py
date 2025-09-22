@@ -1542,11 +1542,11 @@ def standardize(
 
         @property
         def centers(self):
-            Return self._centers  
+            return self._centers  
 
         @property
         def scales(self):
-            Return self._scales  
+            return self._scales  
 
         
     return _standardize()
