@@ -653,7 +653,7 @@ def plot_coefficients(
     group_sizes: np.ndarray,
     *,
     l2_norm: bool =False,
-    active_sizes: np.ndarray=None,
+    show_nnz_counts: bool =True,
     top_axis_step: int =2,
 ):
     """Plots the coefficient profile.
@@ -676,9 +676,9 @@ def plot_coefficients(
         This may be more intuitive to visualize since there is only one path
         associated with a group.
         Default is ``False``.
-    active_sizes : (L,) ndarray, optional
-        Active set sizes to display on top axis.
-        Default is ``None``.
+    show_nnz_counts : bool, optional
+        If ``True``, shows number of non-zero coefficients on top axis.
+        Default is ``True``.
     top_axis_step : int, optional
         Step size for top axis labels.
         Default is ``2``.
@@ -719,13 +719,15 @@ def plot_coefficients(
         ax.set_ylabel(r"$\beta$")
         ax.set_xlabel(r"-$\log(\lambda)$")
 
-    # Optional: show number of non-zero coefficients (active set size) on top axis
-    if not (active_sizes is None):
+    # Optional: show number of non-zero coefficients on top axis
+    if show_nnz_counts:
+        dof = np.sum(betas != 0, axis=1)
+        nnz_counts = np.asarray(dof).ravel()
         ax2 = ax.twiny()
         ax2.set_xlim(ax.get_xlim())
         step = top_axis_step
         xt = tls[::step]
-        xl = np.asarray(active_sizes[::step]).astype(int)
+        xl = np.asarray(nnz_counts[::step]).astype(int)
         ax2.set_xticks(xt)
         ax2.set_xticklabels(xl, rotation=45, fontsize="small")
         ax2.set_xlabel("Number of non-zero coefficients")
@@ -737,7 +739,7 @@ def plot_devs(
     lmdas: np.ndarray,
     devs: np.ndarray,
     *,
-    active_sizes: np.ndarray=None,
+    betas: csr_matrix=None,
     top_axis_step: int =2,
 ):
     """Plots the deviance profile.
@@ -748,8 +750,8 @@ def plot_devs(
         Regularization parameters :math:`\\lambda`.
     devs : (L,) ndarray
         Deviances.
-    active_sizes : (L,) ndarray, optional
-        Active set sizes to display on top axis.
+    betas : (L, p) csr_matrix, optional
+        Coefficient vectors :math:`\\beta`.
         Default is ``None``.
     top_axis_step : int, optional
         Step size for top axis labels.
@@ -767,13 +769,15 @@ def plot_devs(
     ax.set_ylabel(r"Deviance Explained (%)")
     ax.set_xlabel(r"$-\log(\lambda)$")
 
-    # Optional: show number of non-zero coefficients (active set size) on top axis
-    if not (active_sizes is None):
+    # Optional: show number of non-zero coefficients on top axis
+    if betas is not None:
+        dof = np.sum(betas != 0, axis=1)
+        nnz_counts = np.asarray(dof).ravel()
         ax2 = ax.twiny()
         ax2.set_xlim(ax.get_xlim())
         step = top_axis_step
         xt = tls[::step]
-        xl = np.asarray(active_sizes[::step]).astype(int)
+        xl = np.asarray(nnz_counts[::step]).astype(int)
         ax2.set_xticks(xt)
         ax2.set_xticklabels(xl, rotation=45, fontsize="small")
         ax2.set_xlabel("Number of non-zero coefficients")
@@ -1215,15 +1219,11 @@ class DiagnosticCov:
         --------
         adelie.diagnostic.plot_coefficients
         """
-        # Compute number of nonzero coefficients at each lambda
-        dof = np.sum(self.betas != 0, axis=1)
-        nnz_counts = np.asarray(dof).ravel()
         return plot_coefficients(
             betas=self.betas,
             lmdas=self.state.lmdas,
             groups=self.state.groups,
             group_sizes=self.state.group_sizes,
-            active_sizes=nnz_counts,
             **kwargs,
         )
 
@@ -1240,7 +1240,7 @@ class DiagnosticCov:
         return plot_devs(
             lmdas=self.state.lmdas,
             devs=self.state.devs,
-            active_sizes=nnz_counts,
+            betas=self.betas,
             **kwargs,
         )
 
@@ -1369,15 +1369,11 @@ class DiagnosticNaive:
             if self._is_multi else
             0
         )
-        # Compute number of nonzero coefficients at each lambda
-        dof = np.sum(self.betas != 0, axis=1)
-        nnz_counts = np.asarray(dof).ravel()
         return plot_coefficients(
             betas=self.betas,
             lmdas=self.state.lmdas,
             groups=self.state.groups[p_begin:]-p_begin,
             group_sizes=self.state.group_sizes[p_begin:],
-            active_sizes=nnz_counts,
             **kwargs,
         )
 
@@ -1394,7 +1390,7 @@ class DiagnosticNaive:
         return plot_devs(
             lmdas=self.state.lmdas,
             devs=self.state.devs,
-            active_sizes=nnz_counts,
+            betas=self.betas,
             **kwargs,
         )
 
