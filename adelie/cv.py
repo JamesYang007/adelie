@@ -43,16 +43,55 @@ class CVGrpnetResult:
     """
     Argmin of ``avg_losses``.
     """
+    glm: Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64] = None
+    """
+    GLM object used for CV. Used to compute deviance in plotting.
+    """
+    deviances: np.ndarray = None
+    """
+    ``deviances[k,i]`` is the CV deviance when validating on fold ``k`` at ``lmdas[i]``.
+    Computed as ``2 * (losses - loss_full)``.
+    """
+    avg_deviances: np.ndarray = None
+    """
+    ``avg_deviances[i]`` is the average CV deviance at ``lmdas[i]``.
+    """
     
-    def plot_loss(self):
-        """Plots the average K-fold CV loss.
+    def plot_loss(self, glm=None, use_deviance=True):
+        """Plots the average K-fold CV deviance.
 
-        For each fitted :math:`\\lambda`, the average K-fold CV loss
+        For each fitted :math:`\\lambda`, the average K-fold CV deviance
         as well as an error bar of one standard deviation (above and below) is plotted.
+        
+        Parameters
+        ----------
+        glm : Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64], optional
+            GLM object needed to compute deviance. If None, uses the stored GLM object.
+        use_deviance : bool, optional
+            If True, plots deviance. If False, plots raw losses.
+            Default is True.
         """
         ts = -np.log(self.lmdas)
-        avg_losses = np.mean(self.losses, axis=0)
-        std_losses = np.std(self.losses, axis=0, ddof=0)
+        
+        if use_deviance and self.avg_deviances is not None:
+            # Use precomputed deviances
+            avg_losses = self.avg_deviances
+            std_losses = np.std(self.deviances, axis=0, ddof=0)
+        else:
+            # Compute from losses
+            avg_losses = np.mean(self.losses, axis=0)
+            std_losses = np.std(self.losses, axis=0, ddof=0)
+            
+            # Convert to deviance if requested and glm is available
+            if use_deviance:
+                # Use stored GLM if no GLM provided
+                if glm is None:
+                    glm = self.glm
+                    
+                if glm is not None:
+                    loss_full = glm.loss_full()
+                    avg_losses = 2 * (avg_losses - loss_full)
+                    std_losses = 2 * std_losses
 
         fig, ax = plt.subplots(figsize=(9, 6), layout="constrained")
 
@@ -84,9 +123,11 @@ class CVGrpnetResult:
         ax.axvline(x=ts_1se, color="black", linestyle=":", linewidth=1)
         # -------------------------------
 
-        ax.set_title("K-Fold CV Mean Loss")
+        title = "K-Fold CV Mean Deviance" if use_deviance else "K-Fold CV Mean Loss"
+        ylabel = "Mean Deviance" if use_deviance else "Mean Loss"
+        ax.set_title(title)
         ax.set_xlabel(r"$-\log(\lambda)$")
-        ax.set_ylabel("Mean Loss")
+        ax.set_ylabel(ylabel)
 
         return fig, ax
 
@@ -344,10 +385,18 @@ def cv_grpnet(
 
     avg_losses = np.mean(cv_losses, axis=0)
     best_idx = np.argmin(avg_losses)
+    
+    # Compute deviances
+    loss_full = glm.loss_full()
+    cv_deviances = 2 * (cv_losses - loss_full)
+    avg_deviances = np.mean(cv_deviances, axis=0)
 
     return CVGrpnetResult(
         lmdas=full_lmdas,
         losses=cv_losses,
         avg_losses=avg_losses,
         best_idx=best_idx,
+        glm=glm,
+        deviances=cv_deviances,
+        avg_deviances=avg_deviances,
     )
