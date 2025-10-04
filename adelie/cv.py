@@ -305,6 +305,8 @@ def cv_grpnet(
     full_lmdas = state.lmda_max * np.logspace(0, np.log10(min_ratio), lmda_path_size)
 
     cv_losses = np.empty((n_folds, full_lmdas.shape[0]))
+    cv_deviances = np.empty((n_folds, full_lmdas.shape[0]))
+    
     for fold in range(n_folds):
         # current validation fold range
         begin = (
@@ -381,15 +383,16 @@ def cv_grpnet(
             if weights_sum_val > 0 else
             0
         )
+        
+        # compute fold-specific loss_full and deviances
+        loss_full_fold = glm_c.loss_full()
+        cv_deviances[fold] = 2 * (cv_losses[fold] - loss_full_fold)
     logger.logger.setLevel(logger_level)
-
-    avg_losses = np.mean(cv_losses, axis=0)
-    best_idx = np.argmin(avg_losses)
     
-    # Compute deviances
-    loss_full = glm.loss_full()
-    cv_deviances = 2 * (cv_losses - loss_full)
+    # Compute average deviances (already computed per fold above)
+    avg_losses = np.mean(cv_losses, axis=0)
     avg_deviances = np.mean(cv_deviances, axis=0)
+    best_idx = np.argmin(avg_deviances)
 
     return CVGrpnetResult(
         lmdas=full_lmdas,
