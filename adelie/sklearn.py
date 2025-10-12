@@ -233,7 +233,7 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
             The R-squared score.
         """
         yhat = self.predict(X)
-        ybar = np.sum(self.glm_.y * self.glm_.weights)
+        ybar = np.mean(self.glm_.y * self.glm_.weights)
         ss_res = np.sum((y - yhat) ** 2)
         ss_tot = np.sum((y - ybar) ** 2)
         return 1 - (ss_res / ss_tot)
