@@ -179,6 +179,13 @@ def binomial(
             np.float32: core.glm.GlmBinomialProbit32,
         },
     }
+    y_unique = np.unique(y)
+    if not (np.all((y_unique == 0) | (y_unique == 1)) and y_unique.size > 0):
+        raise ValueError(
+            f"Binomial family requires the response y to take only values 0 or 1, "
+            f"but got unique values: {y_unique}. "
+            "Please ensure y is coded as binary (0/1)."
+        )
 
     y, dtype = _coerce_dtype(y, dtype)
 
