@@ -65,11 +65,11 @@ class CVGrpnetResult:
         
         Parameters
         ----------
-        glm : Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64], optional
-            GLM object needed to compute deviance. If None, uses the stored GLM object.
+        glm : Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64, None], optional
+            GLM object needed to compute deviance. If ``None``, uses the stored GLM object.
         use_deviance : bool, optional
-            If True, plots deviance. If False, plots raw losses.
-            Default is True.
+            If ``True``, plots deviance. If ``False``, plots raw losses.
+            Default is ``True``.
         """
         ts = -np.log(self.lmdas)
         
@@ -168,14 +168,6 @@ class CVGrpnetResult:
             progress_bar=False,
         )
         logger.logger.setLevel(logger_level)
-
-        # lmda_path_size = 100
-        # if "lmda_path_size" in grpnet_params:
-        #     lmda_path_size = grpnet_params["lmda_path_size"]
-        # lmda_star = self.lmdas[self.best_idx]
-        # full_lmdas = state.lmda_max * np.logspace(
-        #     0, np.log10(lmda_star / state.lmda_max), lmda_path_size
-        # )
         
         lmda_path_size = self.best_idx + 1
         if "lmda_path_size" in grpnet_params:

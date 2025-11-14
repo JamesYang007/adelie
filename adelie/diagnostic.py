@@ -739,7 +739,7 @@ def plot_devs(
     lmdas: np.ndarray,
     devs: np.ndarray,
     *,
-    betas: csr_matrix=None,
+    betas: Union[csr_matrix, None] =None,
     top_axis_step: int =2,
 ):
     """Plots the deviance profile.
@@ -750,8 +750,9 @@ def plot_devs(
         Regularization parameters :math:`\\lambda`.
     devs : (L,) ndarray
         Deviances.
-    betas : (L, p) csr_matrix, optional
+    betas : (L, p) csr_matrix or None, optional
         Coefficient vectors :math:`\\beta`.
+        If ``None``, does not show number of non-zero coefficients on top axis.
         Default is ``None``.
     top_axis_step : int, optional
         Step size for top axis labels.
@@ -1234,13 +1235,11 @@ class DiagnosticCov:
         --------
         adelie.diagnostic.plot_devs
         """
-        # Compute number of nonzero coefficients at each lambda
-        dof = np.sum(self.betas != 0, axis=1)
-        nnz_counts = np.asarray(dof).ravel()
+        betas = kwargs.pop("betas", self.betas)
         return plot_devs(
             lmdas=self.state.lmdas,
             devs=self.state.devs,
-            betas=self.betas,
+            betas=betas,
             **kwargs,
         )
 
@@ -1384,13 +1383,11 @@ class DiagnosticNaive:
         --------
         adelie.diagnostic.plot_devs
         """
-        # Compute number of nonzero coefficients at each lambda
-        dof = np.sum(self.betas != 0, axis=1)
-        nnz_counts = np.asarray(dof).ravel()
+        betas = kwargs.pop("betas", self.betas)
         return plot_devs(
             lmdas=self.state.lmdas,
             devs=self.state.devs,
-            betas=self.betas,
+            betas=betas,
             **kwargs,
         )
 

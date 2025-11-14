@@ -27,6 +27,7 @@ from scipy.special import (
     expit, 
     softmax,
 )
+from scipy.sparse import csr_matrix
 from sklearn.base import (
     BaseEstimator, 
     RegressorMixin,
@@ -233,7 +234,7 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
             The R-squared score.
         """
         yhat = self.predict(X)
-        ybar = np.mean(self.glm_.y * self.glm_.weights)
+        ybar = np.sum(self.glm_.y * self.glm_.weights)
         ss_res = np.sum((y - yhat) ** 2)
         ss_tot = np.sum((y - ybar) ** 2)
         return 1 - (ss_res / ss_tot)
@@ -278,7 +279,7 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
         lam_path = self.lambda_
         beta_0 = self.intercept_
         # Handle sparse or dense coef_
-        betas = self.coef_.toarray() if hasattr(self.coef_, "toarray") else np.asarray(self.coef_)
+        betas = self.coef_.toarray() if isinstance(self.coef_, csr_matrix) else np.asarray(self.coef_)
 
         # Degrees of freedom: number of nonzero coefficients at each lambda
         dof = np.sum(betas != 0, axis=1)
