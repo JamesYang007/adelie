@@ -1485,14 +1485,21 @@ def standardize(
     -------
     wrap
         Wrapper matrix object.
-
+    
+    Attributes
+    ----------
+    centers : ndarray
+        The center values used for standardization.
+    scales : ndarray
+        The scale values used for standardization.
+    
     See Also
     --------
     adelie.adelie_core.matrix.MatrixNaiveStandardize32
     adelie.adelie_core.matrix.MatrixNaiveStandardize64
     """
     if isinstance(mat, (list, np.ndarray)):
-        mat = np.ndarray(mat, order="F", copy=True)
+        mat = np.array(mat, order="F", copy=True)
         if centers is None:
             centers = np.mean(mat, axis=0)
         mat -= centers[None]
@@ -1532,6 +1539,15 @@ def standardize(
             self._scales = np.array(scales, copy=True, dtype=dtype)
             core_base.__init__(self, self._mat, self._centers, self._scales, n_threads)
             py_base.__init__(self, n_threads=n_threads)
+
+        @property
+        def centers(self):
+            return self._centers  
+
+        @property
+        def scales(self):
+            return self._scales  
+
         
     return _standardize()
 

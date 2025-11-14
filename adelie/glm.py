@@ -179,6 +179,13 @@ def binomial(
             np.float32: core.glm.GlmBinomialProbit32,
         },
     }
+    y_unique = np.unique(y)
+    if not (np.all((y_unique == 0) | (y_unique == 1)) and y_unique.size > 0):
+        raise ValueError(
+            f"Binomial family requires the response y to take only values 0 or 1, "
+            f"but got unique values: {y_unique}. "
+            "Please ensure y is coded as binary (0/1)."
+        )
 
     y, dtype = _coerce_dtype(y, dtype)
 
@@ -197,10 +204,10 @@ def binomial(
 
 
 def cox(
-    start: np.ndarray,
     stop: np.ndarray,
     status: np.ndarray,
     *,
+    start: np.ndarray =None,
     strata: np.ndarray =None,
     weights: np.ndarray =None,
     tie_method: str ="efron",
@@ -287,12 +294,14 @@ def cox(
 
     Parameters
     ----------
-    start : (n,) ndarray
-        Start time vector :math:`s`.
     stop : (n,) ndarray
         Stop time vector :math:`t`.
     status : (n,) ndarray 
         Status vector :math:`\\delta`.
+    start : (n,) ndarray, optional
+        Start time vector :math:`s`.
+        If ``None``, it is set to a vector of zeros.
+        Default is ``None``.
     strata : (n,) ndarray, optional
         Strata vector :math:`S`.
         If ``None``, there is only one stratum.
@@ -335,6 +344,9 @@ def cox(
 
     core_base = dispatcher[dtype]
 
+    if start is None:
+        start = np.zeros(status.size, dtype=dtype)
+
     if strata is None:
         strata = np.zeros(status.size, dtype=int)
 
@@ -359,9 +371,9 @@ def cox(
         def reweight(self, weights=None):
             weights = self.weights if weights is None else weights
             return cox(
-                start=start, 
                 stop=stop,
                 status=status,
+                start=start,
                 strata=strata,
                 weights=weights, 
                 tie_method=tie_method,
