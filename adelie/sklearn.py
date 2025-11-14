@@ -254,7 +254,7 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
 
     def plot_validation_curve(self, X_val, y_val):
         """
-        Plot validation curve showing R^2 and active set size at each lambda.
+        Plot validation curve showing R^2 and number of non-zero coefficients at each lambda.
 
         Parameters
         ----------
@@ -328,7 +328,7 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
         ax2.set_xlabel("Number of non-zero coefficients")
 
         plt.tight_layout()
-        plt.title("Validation Curve Showing Active Set Size at each $\lambda$", pad=20)
+        plt.title("Validation Curve Showing Number of Non-Zero Coefficients at each $\lambda$", pad=20)
         plt.show()
 
 class CSSModelSelection(BaseEstimator, RegressorMixin):
