@@ -1298,6 +1298,93 @@ def snp_unphased(
     return _snp_unphased()
 
 
+def snp_combine_r(
+    io: io.snp_combine_r,
+    *,
+    n_threads: int =1,
+    dtype: Union[np.float32, np.float64] =np.float64,
+):
+    """Creates a SNP unphased, ancestry matrix.
+
+    The SNP unphased, ancestry matrix is a wrapper around
+    the corresponding IO handler :class:`adelie.io.snp_combine_r`
+    exposing some matrix operations.
+
+    .. note::
+        This matrix only works for naive method!
+    
+    Parameters
+    ----------
+    io : snp_phased_ancestry
+        IO handler for SNP unphased, ancestry data.
+    n_threads : int, optional
+        Number of threads.
+        Default is ``1``.
+    dtype : Union[float32, float64], optional
+        Underlying value type.
+        Default is ``np.float64``.
+
+    Returns
+    -------
+    wrap
+        Wrapper matrix object.
+
+    See Also
+    --------
+    adelie.io.snp_combine_r
+    adelie.adelie_core.matrix.MatrixNaiveSNPCombineR32
+    adelie.adelie_core.matrix.MatrixNaiveSNPCombineR64
+    """
+    dispatcher = {
+        np.float64: core.matrix.MatrixNaiveSNPCombineR64,
+        np.float32: core.matrix.MatrixNaiveSNPCombineR32,
+    }
+    core_base = dispatcher[dtype]
+    py_base = PyMatrixNaiveBase
+
+    if not io.is_read:
+        io.read()
+
+    class _snp_combine_r(core_base, py_base):
+        def __init__(self):
+            self._io = io
+            core_base.__init__(self, self._io, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
+
+    return _snp_combine_r()
+
+
+def snp_combine_s(
+    io: io.snp_combine_s,
+    *,
+    n_threads: int =1,
+    dtype: Union[np.float32, np.float64] =np.float64,
+):
+    """Creates a SNP both-ancestry matrix.
+
+    For each SNP j, columns are divided into two blocks of A each:
+    - First A: mutated haplotype counts per ancestry
+    - Next  A: ancestry dosage counts per ancestry
+    """
+    dispatcher = {
+        np.float64: core.matrix.MatrixNaiveSNPCombineS64,
+        np.float32: core.matrix.MatrixNaiveSNPCombineS32,
+    }
+    core_base = dispatcher[dtype]
+    py_base = PyMatrixNaiveBase
+
+    if not io.is_read:
+        io.read()
+
+    class _snp_combine_s(core_base, py_base):
+        def __init__(self):
+            self._io = io
+            core_base.__init__(self, self._io, n_threads)
+            py_base.__init__(self, n_threads=n_threads)
+
+    return _snp_combine_s()
+
+
 def sparse(
     mat: Union[csc_matrix, csr_matrix],
     *,

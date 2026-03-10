@@ -117,3 +117,174 @@ def test_io_snp_phased_ancestry(
     my_dense = handler.to_dense()
     assert np.allclose(my_dense, dense)
     os.remove(filename)
+
+
+@pytest.mark.parametrize("read_mode", ["file", "mmap"])
+@pytest.mark.parametrize("n, s, A", [
+    [1, 1, 1],
+    [200, 32, 4],
+    [2000, 3000, 7],
+    [1421, 927, 8],
+])
+def test_io_snp_combine_r(n, s, A, read_mode, seed=0):
+    data = ad.data.snp_combine_r(n, s, A, seed=seed)
+    calldata = data["X"]
+    ancestries = data["ancestries"]
+
+    # build expected dense: for each SNP j,
+    #  - first column is the genotype calldata[:, j]
+    #  - next A columns are the unphased dosage per ancestry
+    X_expected = np.zeros((n, s * (1 + A)), dtype=np.int8)
+    for j in range(s):
+        # genotype column
+        X_expected[:, j * (1 + A)] = calldata[:, j]
+        # ancestry dosage columns
+        for k in range(A):
+            dosage = (
+                (ancestries[:, 2 * j] == k).astype(np.int8)
+                + (ancestries[:, 2 * j + 1] == k).astype(np.int8)
+            )
+            X_expected[:, j * (1 + A) + 1 + k] = dosage
+
+    filename = "/tmp/dummy_snp_combine_r.snpdat"
+    handler = ad.io.snp_combine_r(filename, read_mode=read_mode)
+
+    # print matrix and dtype
+    print(f"calldata:\n{calldata}")
+    print(f"ancestries:\n{ancestries}")
+    print(f"calldata.dtype:\n{calldata.dtype}")
+    print(f"ancestries.dtype:\n{ancestries.dtype}")
+    
+    # write & read twice
+    w_bytes, _ = handler.write(calldata, ancestries, A, n_threads=2)
+    r_bytes1 = handler.read()
+    r_bytes2 = handler.read()
+    assert w_bytes == r_bytes1 == r_bytes2
+
+    # basic metadata
+    assert handler.rows == n
+    assert handler.snps == s
+    assert handler.ancestries == A
+    assert handler.cols == s * (1 + A)
+
+    # full dense round‐trip
+    dense = handler.to_dense()
+    print(f"dense:\n{dense}")
+    print(f"X_expected:\n{X_expected}")
+    assert np.allclose(dense, X_expected)
+
+    # nnz per column (non‐zero counts)
+    expected_nnz = np.sum(X_expected != 0, axis=0)
+    print(f"expected_nnz:\n{expected_nnz}")
+    print(f"handler.nnz:\n{handler.nnz}")
+    assert np.allclose(handler.nnz, expected_nnz)
+
+    os.remove(filename)
+
+
+@pytest.mark.parametrize("read_mode", ["file", "mmap"])
+@pytest.mark.parametrize("n, s, A", [
+    [1, 1, 1],
+    [37, 13, 3],
+    [200, 32, 4],
+])
+def test_io_snp_combine_s(n, s, A, read_mode, seed=0):
+    # Generate phased haplotype calldata (0/1 per hap) and phased ancestries
+    data = ad.data.snp_phased_ancestry(n, s, A, seed=seed)
+    calldata = data["X"]        # shape (n, 2*s), entries in {0,1}
+    ancestries = data["ancestries"]  # shape (n, 2*s), entries in [0,A)
+
+    # Build expected dense (n, s*(2*A))
+    X_expected = np.zeros((n, s * (2 * A)), dtype=np.int8)
+    for j in range(s):
+        c0 = calldata[:, 2*j]
+        c1 = calldata[:, 2*j + 1]
+        a0 = ancestries[:, 2*j]
+        a1 = ancestries[:, 2*j + 1]
+        for a in range(A):
+            # mutated hap counts per ancestry (first A columns)
+            mut = (c0 == 1).astype(np.int8) * (a0 == a).astype(np.int8) \
+                  + (c1 == 1).astype(np.int8) * (a1 == a).astype(np.int8)
+            X_expected[:, j * (2*A) + a] = mut
+            # ancestry dosage per ancestry (last A columns)
+            dos = (a0 == a).astype(np.int8) + (a1 == a).astype(np.int8)
+            X_expected[:, j * (2*A) + A + a] = dos
+
+    filename = "/tmp/dummy_snp_combine_s.snpdat"
+    handler = ad.io.snp_combine_s(filename, read_mode=read_mode)
+
+    # write & read twice
+    w_bytes, _ = handler.write(calldata, ancestries, A, n_threads=2)
+    r_bytes1 = handler.read()
+    r_bytes2 = handler.read()
+    assert w_bytes == r_bytes1 == r_bytes2
+
+    # basic metadata
+    assert handler.rows == n
+    assert handler.snps == s
+    assert handler.ancestries == A
+    assert handler.cols == s * (2 * A)
+
+    # dense round-trip
+    dense = handler.to_dense(n_threads=2)
+    assert np.allclose(dense, X_expected)
+
+    # nnz per column (non-zero sample counts)
+    expected_nnz = np.sum(X_expected != 0, axis=0)
+    assert np.allclose(handler.nnz, expected_nnz)
+
+    os.remove(filename)
+
+
+@pytest.mark.parametrize("read_mode", ["file", "mmap"])
+@pytest.mark.parametrize("n, s, A", [
+    [37, 13, 3],
+    [200, 32, 4],
+])
+def test_io_snp_combine_s_selected(n, s, A, read_mode, seed=1):
+    data = ad.data.snp_phased_ancestry(n, s, A, seed=seed)
+    calldata = data["X"]
+    ancestries = data["ancestries"]
+
+    # Select a subset of ancestries (preserve order, unique)
+    if A >= 3:
+        selected = np.array([0, A-1], dtype=np.uint32)
+    else:
+        selected = np.array([0], dtype=np.uint32)
+    B = len(selected)
+
+    # Build expected dense (n, s*(2*B)) restricted to selected ancestries
+    X_expected = np.zeros((n, s * (2 * B)), dtype=np.int8)
+    for j in range(s):
+        c0 = calldata[:, 2*j]
+        c1 = calldata[:, 2*j + 1]
+        a0 = ancestries[:, 2*j]
+        a1 = ancestries[:, 2*j + 1]
+        for bi, a in enumerate(selected):
+            # mutated block
+            mut = (c0 == 1).astype(np.int8) * (a0 == a).astype(np.int8) \
+                  + (c1 == 1).astype(np.int8) * (a1 == a).astype(np.int8)
+            X_expected[:, j * (2*B) + bi] = mut
+            # dosage block
+            dos = (a0 == a).astype(np.int8) + (a1 == a).astype(np.int8)
+            X_expected[:, j * (2*B) + B + bi] = dos
+
+    filename = "/tmp/dummy_snp_combine_s_sel.snpdat"
+    handler = ad.io.snp_combine_s(filename, read_mode=read_mode)
+    w_bytes, _ = handler.write(calldata, ancestries, A, n_threads=2, selected_ancestries=selected)
+    r_bytes = handler.read()
+    assert w_bytes == r_bytes
+
+    # Metadata reflects selection
+    assert handler.rows == n
+    assert handler.snps == s
+    assert handler.ancestries == B
+    assert handler.cols == s * (2 * B)
+
+    dense = handler.to_dense(n_threads=2)
+    assert np.allclose(dense, X_expected)
+
+    expected_nnz = np.sum(X_expected != 0, axis=0)
+    assert np.allclose(handler.nnz, expected_nnz)
+
+    os.remove(filename)
