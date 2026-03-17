@@ -25,6 +25,81 @@ def run_cmd(cmd):
     return output.rstrip()
 
 
+def maybe_run_cmd(cmd):
+    try:
+        return run_cmd(cmd)
+    except RuntimeError:
+        return None
+
+
+def append_unique_dirs(dirs, new_dirs):
+    for new_dir in new_dirs:
+        if new_dir and os.path.isdir(new_dir) and new_dir not in dirs:
+            dirs.append(new_dir)
+
+
+def has_eigen_headers(include_dir):
+    return os.path.isfile(os.path.join(include_dir, "Eigen", "Core"))
+
+
+def resolve_eigen_include_dirs(conda_prefix, system_name):
+    include_candidates = []
+
+    for env_var in ["EIGEN3_INCLUDE_DIR", "EIGEN_INCLUDE_DIR"]:
+        include_dir = os.environ.get(env_var)
+        if include_dir:
+            include_candidates.append(include_dir)
+
+    for env_var in ["EIGEN3_PREFIX", "EIGEN_PREFIX"]:
+        prefix = os.environ.get(env_var)
+        if prefix:
+            include_candidates += [
+                prefix,
+                os.path.join(prefix, "include"),
+                os.path.join(prefix, "include", "eigen3"),
+            ]
+
+    if not (conda_prefix is None):
+        if system_name in ["Darwin", "Linux"]:
+            conda_include_path = os.path.join(conda_prefix, "include")
+        else:
+            conda_include_path = os.path.join(conda_prefix, "Library", "include")
+        include_candidates += [
+            conda_include_path,
+            os.path.join(conda_include_path, "eigen3"),
+        ]
+
+    if system_name == "Darwin":
+        brew_eigen_prefix = maybe_run_cmd("brew --prefix eigen")
+        if brew_eigen_prefix:
+            include_candidates += [
+                os.path.join(brew_eigen_prefix, "include"),
+                os.path.join(brew_eigen_prefix, "include", "eigen3"),
+            ]
+
+    if system_name in ["Darwin", "Linux"]:
+        include_candidates += [
+            "/opt/homebrew/include/eigen3",
+            "/usr/local/include/eigen3",
+            "/usr/include/eigen3",
+        ]
+
+    eigen_include_dirs = []
+    for include_dir in include_candidates:
+        if has_eigen_headers(include_dir):
+            append_unique_dirs(eigen_include_dirs, [include_dir])
+
+    if not eigen_include_dirs:
+        raise RuntimeError(
+            "Eigen headers are not detected. "
+            "Set EIGEN3_INCLUDE_DIR to the directory containing 'Eigen/Core', "
+            "activate a conda environment containing eigen, "
+            "or install Homebrew and run 'brew install eigen'."
+        )
+
+    return eigen_include_dirs
+
+
 ParallelCompile("NPY_NUM_BUILD_JOBS").install()
 
 
@@ -71,17 +146,7 @@ else:
 
 system_name = platform.system()
 
-# add include and include/eigen3
-if not (conda_prefix is None):
-    if system_name in ["Darwin", "Linux"]:
-        conda_include_path = os.path.join(conda_prefix, "include")
-    else:
-        conda_include_path = os.path.join(conda_prefix, "Library", "include")
-    eigen_include_path = os.path.join(conda_include_path, "eigen3")
-    include_dirs += [
-        conda_include_path,
-        eigen_include_path,
-    ]
+include_dirs += resolve_eigen_include_dirs(conda_prefix, system_name)
 
 if system_name == "Darwin":
     # if user provides OpenMP install prefix (containing include/ and lib/)
