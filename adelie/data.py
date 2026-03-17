@@ -501,3 +501,148 @@ def snp_phased_ancestry(
         "group_sizes": group_sizes,
         "penalty": penalty,
     }
+
+
+def snp_combine_r(
+    n: int, 
+    s: int, 
+    A: int,
+    *,
+    K: int =1,
+    glm: str ="gaussian",
+    sparsity: float =0.95,
+    one_ratio: float =0.25,
+    two_ratio: float =0.05,
+    zero_penalty: float =0,
+    snr: float =1,
+    seed: int =0,
+):
+    """Creates a SNP unphased, ancestry dataset.
+
+    - The groups and group sizes are generated randomly
+      such that ``G`` groups are created and the sum of the group sizes is ``p``.
+    - The calldata matrix ``X`` has sparsity ratio 
+      ``1 - one_ratio - two_ratio``
+      where ``one_ratio`` of the entries are randomly set to ``1``
+      and ``two_ratio`` are randomly set to ``2``.
+    - The ancestry matrix randomly generates integers in the range ``[0, A)``.
+    - The true coefficients :math:`\\beta` is such that ``sparsity`` proportion of the entries are set to :math:`0`.
+    - The response ``y`` is generated from the GLM specified by ``glm``.
+    - The penalty factors are by default set to ``np.sqrt(group_sizes)``,
+      however if ``zero_penalty > 0``, a random set of penalties will be set to zero,
+      in which case, ``penalty`` is rescaled such that the :math:`\\ell_2` norm squared is ``p``.
+
+    Parameters
+    ----------
+    n : int
+        Number of data points.
+    s : int
+        Number of SNPs.
+    A : int
+        Number of ancestries.
+    K : int, optional
+        Number of classes for multi-response GLMs.
+        Default is ``1``.
+    glm : str, optional
+        GLM name.
+        It must be one of the following:
+
+            - ``"binomial"``
+            - ``"cox"``
+            - ``"gaussian"``
+            - ``"multigaussian"``
+            - ``"multinomial"``
+            - ``"poisson"``
+
+        Default is ``"gaussian"``.
+    sparsity : float, optional
+        Proportion of :math:`\\beta` entries to be zeroed out.
+        Default is ``0.95``.
+    one_ratio : float, optional
+        Proportion of the entries of ``X`` that is set to ``1``.
+        Default is ``0.25``.
+    two_ratio : float, optional
+        Proportion of the entries of ``X`` that is set to ``2``.
+        Default is ``0.05``.
+    zero_penalty : float, optional
+        Proportion of ``penalty`` entries to be zeroed out.
+        Default is ``0``.
+    snr : float, optional
+        Signal-to-noise ratio.
+        Default is ``1``.
+    seed : int, optional
+        Random seed.
+        Default is ``0``.
+
+    Returns
+    -------
+    data : dict
+        A dictionary containing the generated data:
+        
+            - ``"X"``: feature matrix.
+            - ``"ancestries"``: ancestry label of the same shape as ``X``.
+            - ``"y"``: response vector.
+            - ``"groups"``: mapping of group index to the starting column index of ``X``.
+            - ``"group_sizes"``: mapping of group index to the group size.
+            - ``"penalty"``: penalty factor for each group index.
+    """
+    assert n >= 1
+    assert s >= 1
+    assert A >= 1
+    assert sparsity >= 0 and sparsity <= 1
+    assert one_ratio >= 0 and one_ratio <= 1
+    assert two_ratio >= 0 and two_ratio <= 1
+    assert zero_penalty >= 0 and zero_penalty <= 1
+    assert snr > 0
+    assert seed >= 0
+
+    np.random.seed(seed)
+
+    nnz_ratio = one_ratio + two_ratio
+    one_ratio = one_ratio / nnz_ratio
+    two_ratio = two_ratio / nnz_ratio
+    nnz = int(nnz_ratio * n * s)
+    nnz_indices = np.random.choice(n * s, nnz, replace=False)
+    nnz_indices = np.random.permutation(nnz_indices)
+    one_indices = nnz_indices[:int(one_ratio * nnz)]
+    two_indices = nnz_indices[int(one_ratio * nnz):]
+    X = np.zeros((n, s), dtype=np.int8)
+    X.ravel()[one_indices] = 1
+    X.ravel()[two_indices] = 2
+
+    # Generate ancestries for each haplotype at each SNP position
+    # This is completely independent of the mutations
+    ancestries = np.zeros((n, 2 * s), dtype=np.int8)
+    ancestries.ravel()[:] = np.random.choice(A, n * 2 * s, replace=True)
+
+    # Each SNP has (1 + A) columns in the dense matrix:
+    # - 1 column for calldata
+    # - A columns for ancestry dosages
+    groups = (1 + A) * np.arange(s)
+    group_sizes = np.full(s, 1 + A, dtype=int)
+
+    penalty = np.sqrt(group_sizes)
+    penalty[np.random.choice(s, int(zero_penalty * s), replace=False)] = 0
+    penalty /= np.linalg.norm(penalty) / np.sqrt(s * (1 + A))
+
+    beta = np.random.normal(0, 1, (s, K))
+    beta_nnz_indices = np.random.choice(s, int((1-sparsity) * s), replace=False)
+    X_sub = X[:, beta_nnz_indices]
+    beta_sub = beta[beta_nnz_indices]
+
+    eta = X_sub @ beta_sub 
+    glm = _sample_y(
+        glm=glm,
+        eta=eta,
+        beta=beta_sub,
+        snr=snr,
+    )
+
+    return {
+        "X": np.asfortranarray(X), 
+        "ancestries": np.asfortranarray(ancestries),
+        "glm": glm,
+        "groups": groups,
+        "group_sizes": group_sizes,
+        "penalty": penalty,
+    }

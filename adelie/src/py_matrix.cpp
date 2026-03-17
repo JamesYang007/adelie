@@ -1661,6 +1661,74 @@ void matrix_naive_snp_phased_ancestry(py::module_& m, const char* name)
         ;
 }
 
+template <class ValueType>
+void matrix_naive_snp_combine_r(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveSNPCombineR<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using io_t = typename internal_t::io_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive SNP unphased, ancestry matrix."
+        )
+        .def(
+            py::init<
+                const io_t&,
+                size_t
+            >(), 
+            py::arg("io"),
+            py::arg("n_threads")
+        )
+        .def("mean", &internal_t::mean, R"delimiter(
+        Computes the implied column means.
+
+        The implied column means are zero.
+
+        Parameters
+        ----------
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        .def("var", &internal_t::var, R"delimiter(
+        Computes the implied column variances.
+        
+        The implied column variances are one.
+
+        Parameters
+        ----------
+        centers : (p,) ndarray
+            Vector of centers.
+        weights : (n,) ndarray
+            Vector of weights.
+        out : (p,) ndarray
+            Vector to store in-place the result.
+        )delimiter")
+        ;
+}
+
+template <class ValueType>
+void matrix_naive_snp_combine_s(py::module_& m, const char* name)
+{
+    using internal_t = ad::matrix::MatrixNaiveSNPCombineS<ValueType>;
+    using base_t = typename internal_t::base_t;
+    using io_t = typename internal_t::io_t;
+    py::class_<internal_t, base_t>(m, name,
+        "Core matrix class for naive SNP both-ancestry matrix."
+        )
+        .def(
+            py::init<
+                const io_t&,
+                size_t
+            >(), 
+            py::arg("io"),
+            py::arg("n_threads")
+        )
+        .def("mean", &internal_t::mean)
+        .def("var", &internal_t::var)
+        ;
+}
+
 template <class SparseType>
 void matrix_naive_sparse(py::module_& m, const char* name)
 {
@@ -1963,6 +2031,10 @@ void register_matrix(py::module_& m)
     matrix_naive_snp_unphased<float>(m, "MatrixNaiveSNPUnphased32");
     matrix_naive_snp_phased_ancestry<double>(m, "MatrixNaiveSNPPhasedAncestry64");
     matrix_naive_snp_phased_ancestry<float>(m, "MatrixNaiveSNPPhasedAncestry32");
+    matrix_naive_snp_combine_r<double>(m, "MatrixNaiveSNPCombineR64");
+    matrix_naive_snp_combine_r<float>(m, "MatrixNaiveSNPCombineR32");
+    matrix_naive_snp_combine_s<double>(m, "MatrixNaiveSNPCombineS64");
+    matrix_naive_snp_combine_s<float>(m, "MatrixNaiveSNPCombineS32");
 
     matrix_naive_sparse<sparse_type<double, Eigen::ColMajor>>(m, "MatrixNaiveSparse64F");
     matrix_naive_sparse<sparse_type<float, Eigen::ColMajor>>(m, "MatrixNaiveSparse32F");

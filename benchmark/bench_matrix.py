@@ -220,6 +220,8 @@ def bench_io(
         "snp_unphased_axi": utils.bench_snp_unphased_axi,
         "snp_phased_ancestry_dot": utils.bench_snp_phased_ancestry_dot,
         "snp_phased_ancestry_axi": utils.bench_snp_phased_ancestry_axi,
+        "snp_combine_r_dot": utils.bench_snp_combine_r_dot,
+        "snp_combine_r_axi": utils.bench_snp_combine_r_axi,
     }[method]
 
     ad.configs.set_configs("min_bytes", min_bytes)
@@ -232,10 +234,17 @@ def bench_io(
         for j, n in enumerate(n_list):
             filename = "/tmp/bench_snp_tmp.snpdat"
             if "_unphased_" in method:
-                io = ad.io.snp_unphased(filename)
-                data = ad.data.snp_unphased(n, 1, one_ratio=0.35, missing_ratio=0.1, two_ratio=0.05)
-                io.write(data["X"])
-                io.read()
+                if "_ancestry_" in method:
+                    A = 8
+                    io = ad.io.snp_combine_r(filename)
+                    data = ad.data.snp_combine_r(n, 1, A, one_ratio=0.45, two_ratio=0.05)
+                    io.write(data["X"], data["ancestries"], A)
+                    io.read()
+                else:
+                    io = ad.io.snp_unphased(filename)
+                    data = ad.data.snp_unphased(n, 1, one_ratio=0.35, missing_ratio=0.1, two_ratio=0.05)
+                    io.write(data["X"])
+                    io.read()
             elif "_phased_" in method:
                 io = ad.io.snp_phased_ancestry(filename)
                 A = 8
