@@ -50,7 +50,7 @@ def render_dual_groups(
 ):
     return np.cumsum(np.concatenate(
         [[0] + [0 if c is None else c.dual_size for c in constraints]], 
-        dtype=int,
+        dtype=np.int64,
     ))[:-1]
 
 
@@ -68,7 +68,7 @@ def deduce_states(
     )
     screen_begins = np.cumsum(
         np.concatenate([[0], group_sizes[screen_set]]),
-        dtype=int,
+        dtype=np.int64,
     )[:-1]
     return (
         constraints,
@@ -256,7 +256,7 @@ class gaussian_pin_base(base):
 
         # ================ screen_begins check ====================
         expected = np.cumsum(
-            np.concatenate([[0], self.group_sizes[self.screen_set]], dtype=int)
+            np.concatenate([[0], self.group_sizes[self.screen_set]], dtype=np.int64)
         )
         WS = expected[-1]
         expected = expected[:-1]
@@ -333,7 +333,7 @@ class gaussian_pin_base(base):
 
         # ================ active_begins check ====================
         expected = np.cumsum(
-            np.concatenate([[0], self.group_sizes[self.screen_set[active_set]]], dtype=int)
+            np.concatenate([[0], self.group_sizes[self.screen_set[active_set]]], dtype=np.int64)
         )
         WA = expected[-1]
         expected = expected[:-1]
@@ -580,7 +580,7 @@ def gaussian_pin_naive(
         )
 
     p = X.cols()
-    group_sizes = np.concatenate([groups, [p]], dtype=int)
+    group_sizes = np.concatenate([groups, [p]], dtype=np.int64)
     group_sizes = group_sizes[1:] - group_sizes[:-1]
 
     dtype = (
@@ -603,17 +603,17 @@ def gaussian_pin_naive(
             # static inputs require a reference to input
             # or copy if it must be made
             self._X = X
-            self._groups = np.array(groups, copy=True, dtype=int)
-            self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._groups = np.array(groups, copy=True, dtype=np.int64)
+            self._group_sizes = np.array(group_sizes, copy=True, dtype=np.int64)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._weights = np.array(weights, copy=True, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=True, dtype=int)
+            self._screen_set = np.array(screen_set, copy=True, dtype=np.int64)
             self._lmda_path = np.array(lmda_path, copy=True, dtype=dtype)
             # dynamic inputs require a copy to not modify user's inputs
             self._resid = np.array(resid, copy=True, dtype=dtype)
             self._screen_beta = np.array(screen_beta, copy=True, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=True, dtype=bool)
-            self._active_set = np.array(active_set, copy=True, dtype=int)
+            self._active_set = np.array(active_set, copy=True, dtype=np.int64)
 
             (
                 self._constraints,
@@ -879,7 +879,7 @@ def gaussian_pin_cov(
         )
 
     p = A.cols()
-    group_sizes = np.concatenate([groups, [p]], dtype=int)
+    group_sizes = np.concatenate([groups, [p]], dtype=np.int64)
     group_sizes = group_sizes[1:] - group_sizes[:-1]
 
     dtype = (
@@ -902,16 +902,16 @@ def gaussian_pin_cov(
             # static inputs require a reference to input
             # or copy if it must be made
             self._A = A
-            self._groups = np.array(groups, copy=True, dtype=int)
-            self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._groups = np.array(groups, copy=True, dtype=np.int64)
+            self._group_sizes = np.array(group_sizes, copy=True, dtype=np.int64)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=True, dtype=int)
+            self._screen_set = np.array(screen_set, copy=True, dtype=np.int64)
             self._lmda_path = np.array(lmda_path, copy=True, dtype=dtype)
             # dynamic inputs require a copy to not modify user's inputs
             self._screen_beta = np.array(screen_beta, copy=True, dtype=dtype)
             self._screen_grad = np.array(screen_grad, copy=True, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=True, dtype=bool)
-            self._active_set = np.array(active_set, copy=True, dtype=int)
+            self._active_set = np.array(active_set, copy=True, dtype=np.int64)
 
             (
                 self._constraints,
@@ -954,7 +954,7 @@ def gaussian_pin_cov(
             self._screen_subset = np.concatenate([
                 np.arange(groups[i], groups[i] + group_sizes[i])
                 for i in self._screen_set
-            ], dtype=int)
+            ], dtype=np.int64)
             self._screen_subset_order = np.argsort(self._screen_subset)
             self._screen_subset_ordered = self._screen_subset[self._screen_subset_order]
 
@@ -1352,16 +1352,16 @@ def gaussian_cov(
             self._A = A
             self._v = np.array(v, copy=True, dtype=dtype)
             self._constraints = render_constraints(groups.shape[0], constraints, dtype)
-            self._groups = np.array(groups, copy=True, dtype=int)
-            self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._groups = np.array(groups, copy=True, dtype=np.int64)
+            self._group_sizes = np.array(group_sizes, copy=True, dtype=np.int64)
             self._dual_groups = render_dual_groups(self._constraints)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=False, dtype=int)
+            self._screen_set = np.array(screen_set, copy=False, dtype=np.int64)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
             self._grad = np.array(grad, copy=False, dtype=dtype)
-            self._active_set = np.array(active_set, copy=False, dtype=int)
+            self._active_set = np.array(active_set, copy=False, dtype=np.int64)
 
             # MUST call constructor directly and not use super()!
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
@@ -1519,7 +1519,7 @@ class gaussian_naive_base(base):
 
         # ================ screen_begins check ====================
         expected = np.cumsum(
-            np.concatenate([[0], self.group_sizes[self.screen_set]], dtype=int)
+            np.concatenate([[0], self.group_sizes[self.screen_set]], dtype=np.int64)
         )
         WS = expected[-1]
         expected = expected[:-1]
@@ -1553,7 +1553,7 @@ class gaussian_naive_base(base):
                 self.group_sizes[self.screen_set],
             )
             if np.any(self.screen_beta[sb:sb+gs] != 0)
-        ], dtype=int)
+        ], dtype=np.int64)
         self._check(
             np.all(self.screen_is_active[nnz_idxs]),
             "check screen_is_active is only active on non-zeros of screen_beta",
@@ -1572,9 +1572,9 @@ class gaussian_naive_base(base):
             self.X.btmul(g, gs, self.screen_beta[b:b+gs], Xbeta)
 
         if len(screen_indices) == 0:
-            screen_indices = np.array(screen_indices, dtype=int)
+            screen_indices = np.array(screen_indices, dtype=np.int64)
         else:
-            screen_indices = np.concatenate(screen_indices, dtype=int)
+            screen_indices = np.concatenate(screen_indices, dtype=np.int64)
 
         resid = yc - Xbeta
         grad = np.empty(p)
@@ -1948,16 +1948,16 @@ def gaussian_naive(
             self._X = X
             self._X_means = np.array(X_means, copy=True, dtype=dtype)
             self._constraints = render_constraints(groups.shape[0], constraints, dtype)
-            self._groups = np.array(groups, copy=True, dtype=int)
-            self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._groups = np.array(groups, copy=True, dtype=np.int64)
+            self._group_sizes = np.array(group_sizes, copy=True, dtype=np.int64)
             self._dual_groups = render_dual_groups(self._constraints)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._offsets = np.array(offsets, copy=True, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=False, dtype=int)
+            self._screen_set = np.array(screen_set, copy=False, dtype=np.int64)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-            self._active_set = np.array(active_set, copy=False, dtype=int)
+            self._active_set = np.array(active_set, copy=False, dtype=np.int64)
             self._grad = np.array(grad, copy=False, dtype=dtype)
             self._resid = np.array(resid, copy=False, dtype=dtype)
 
@@ -2308,17 +2308,17 @@ def multigaussian_naive(
             self._X_expanded = X
             self._X_means = np.array(X_means, copy=True, dtype=dtype)
             self._constraints = render_constraints(groups.shape[0], constraints, dtype)
-            self._groups = np.array(groups, copy=True, dtype=int)
-            self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._groups = np.array(groups, copy=True, dtype=np.int64)
+            self._group_sizes = np.array(group_sizes, copy=True, dtype=np.int64)
             self._dual_groups = render_dual_groups(self._constraints)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._weights_expanded = np.repeat(self._glm.weights, repeats=n_classes) / n_classes
             self._offsets = np.array(offsets, copy=True, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=False, dtype=int)
+            self._screen_set = np.array(screen_set, copy=False, dtype=np.int64)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-            self._active_set = np.array(active_set, copy=False, dtype=int)
+            self._active_set = np.array(active_set, copy=False, dtype=np.int64)
             self._grad = np.array(grad, copy=False, dtype=dtype)
             self._resid = np.array(resid, copy=False, dtype=dtype)
 
@@ -2675,16 +2675,16 @@ def glm_naive(
             self._glm = glm
             self._X = X
             self._constraints = render_constraints(groups.shape[0], constraints, dtype)
-            self._groups = np.array(groups, copy=True, dtype=int)
-            self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._groups = np.array(groups, copy=True, dtype=np.int64)
+            self._group_sizes = np.array(group_sizes, copy=True, dtype=np.int64)
             self._dual_groups = render_dual_groups(self._constraints)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._offsets = np.array(offsets, copy=True, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=False, dtype=int)
+            self._screen_set = np.array(screen_set, copy=False, dtype=np.int64)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-            self._active_set = np.array(active_set, copy=False, dtype=int)
+            self._active_set = np.array(active_set, copy=False, dtype=np.int64)
             self._grad = np.array(grad, copy=False, dtype=dtype)
             self._eta = np.array(eta, copy=False, dtype=dtype)
             self._resid = np.array(resid, copy=False, dtype=dtype)
@@ -3041,16 +3041,16 @@ def multiglm_naive(
             self._X = X_raw
             self._X_expanded = X
             self._constraints = render_constraints(groups.shape[0], constraints, dtype)
-            self._groups = np.array(groups, copy=True, dtype=int)
-            self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
+            self._groups = np.array(groups, copy=True, dtype=np.int64)
+            self._group_sizes = np.array(group_sizes, copy=True, dtype=np.int64)
             self._dual_groups = render_dual_groups(self._constraints)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._offsets = np.array(offsets, copy=True, dtype=dtype)
             self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=False, dtype=int)
+            self._screen_set = np.array(screen_set, copy=False, dtype=np.int64)
             self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
             self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-            self._active_set = np.array(active_set, copy=False, dtype=int)
+            self._active_set = np.array(active_set, copy=False, dtype=np.int64)
             self._grad = np.array(grad, copy=False, dtype=dtype)
             self._eta = np.array(eta, copy=False, dtype=dtype)
             self._resid = np.array(resid, copy=False, dtype=dtype)
@@ -3228,9 +3228,9 @@ def bvls(
             self._lower = np.array(lower, copy=False, dtype=dtype)
             self._upper = np.array(upper, copy=False, dtype=dtype)
             self._weights = np.array(weights, copy=False, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=True, dtype=int)
+            self._screen_set = np.array(screen_set, copy=True, dtype=np.int64)
             self._is_screen = np.array(is_screen, copy=True, dtype=bool)
-            self._active_set = np.array(active_set, copy=True, dtype=int)
+            self._active_set = np.array(active_set, copy=True, dtype=np.int64)
             self._is_active = np.array(is_active, copy=True, dtype=bool)
             self._beta = np.array(beta, copy=True, dtype=dtype)
             self._resid = np.array(resid, copy=True, dtype=dtype)
@@ -3383,11 +3383,11 @@ def pinball(
             self._S = np.array(S, copy=False, dtype=dtype, order="F")
             self._penalty_neg = np.array(penalty_neg, copy=False, dtype=dtype)
             self._penalty_pos = np.array(penalty_pos, copy=False, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=True, dtype=int)
+            self._screen_set = np.array(screen_set, copy=True, dtype=np.int64)
             self._is_screen = np.array(is_screen, copy=True, dtype=bool)
             self._screen_ASAT_diag = np.array(screen_ASAT_diag, copy=True, dtype=dtype)
             self._screen_AS = np.array(screen_AS, copy=True, dtype=dtype, order="C")
-            self._active_set = np.array(active_set, copy=True, dtype=int)
+            self._active_set = np.array(active_set, copy=True, dtype=np.int64)
             self._is_active = np.array(is_active, copy=True, dtype=bool)
             self._beta = np.array(beta, copy=True, dtype=dtype)
             self._resid = np.array(resid, copy=True, dtype=dtype)
