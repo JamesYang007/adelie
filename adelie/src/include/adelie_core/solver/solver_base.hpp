@@ -364,9 +364,10 @@ inline void screen(
         // previous iteration added all pivot-rule predictions and KKT still failed.
         // In this case, do the most safe thing, which is to add all failed variables.
         if ((screen_set.size() == static_cast<size_t>(old_screen_set_size)) && !all_kkt_passed) {
+            const auto l1_regul = lmda_next * alpha;
             for (int i = 0; i < abs_grad.size(); ++i) {
                 if (is_screen(i)) continue;
-                if (abs_grad[i] > lmda_next * penalty[i] * alpha) {
+                if (abs_grad[i] > l1_regul * penalty[i]) {
                     screen_set.push_back(i);
                 }
             }
@@ -422,11 +423,12 @@ bool kkt(
         return screen_hashset.find(i) != screen_hashset.end();
     };
 
+    const auto l1_regul = lmda * alpha;
     for (int k = 0; k < groups.size(); ++k) {
         if (is_screen(k)) continue;
         const auto pk = penalty[k];
         const auto abs_grad_k = abs_grad[k];
-        if (abs_grad_k > lmda * alpha * pk) return false;
+        if (abs_grad_k > l1_regul * pk) return false;
     }
 
     return true;
