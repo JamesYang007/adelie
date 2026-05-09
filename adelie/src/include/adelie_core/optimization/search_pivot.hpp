@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 
 namespace adelie_core {
 namespace optimization {

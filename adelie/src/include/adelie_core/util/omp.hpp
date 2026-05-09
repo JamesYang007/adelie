@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <adelie_core/util/types.hpp>
 #if defined(_OPENMP)
 #include <omp.h>

@@ -11,7 +11,7 @@ def generate_data(n, p, L, K, beta_type, dtype, seed):
     y = y.astype(dtype)
     betas = np.random.uniform(-1, 1, (L, p*K)).astype(dtype)
     if beta_type == "sparse":
-        betas = scipy.sparse.csr_matrix(betas, dtype=dtype)
+        betas = scipy.sparse.csr_array(betas, dtype=dtype)
     if K == 1:
         y = y.squeeze(axis=1)
         intercepts = np.random.normal(0, 1, (L,)).astype(dtype)
@@ -33,7 +33,7 @@ def predict(X, betas, intercepts):
     L = betas.shape[0]
     K = 1 if len(intercepts.shape) == 1 else intercepts.shape[1]
     if K != 1:
-        if isinstance(betas, scipy.sparse.csr_matrix):
+        if isinstance(betas, scipy.sparse.csr_array):
             betas = betas.toarray()
         betas = betas.reshape((L, p, K))
         Xbetas = np.einsum("ij,ljk->lik", X, betas)
@@ -71,7 +71,7 @@ def test_objective(n, p, L, K, beta_type, dtype, seed=0):
     def _objective(X, glm, betas, intercepts, lmdas):
         etas = predict(X, betas, intercepts)
         losses = np.array([glm.loss(eta) - glm.loss_full() for eta in etas])
-        if isinstance(betas, scipy.sparse.csr_matrix):
+        if isinstance(betas, scipy.sparse.csr_array):
             betas = betas.toarray()
         if K == 1:
             penalty = np.sum(np.abs(betas), axis=-1)

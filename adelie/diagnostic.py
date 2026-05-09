@@ -20,7 +20,7 @@ from .state import (
 )
 from IPython.display import HTML
 from itertools import cycle
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_array, csr_matrix
 from typing import Union
 import numpy as np
 import matplotlib.pyplot as plt
@@ -29,7 +29,7 @@ import matplotlib.animation as animation
 
 def predict(
     X: Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64],
-    betas: Union[np.ndarray, csr_matrix],
+    betas: Union[np.ndarray, csr_array, csr_matrix],
     intercepts: np.ndarray,
     *,
     offsets: np.ndarray =None,
@@ -63,7 +63,7 @@ def predict(
     X : (n, p) Union[ndarray, MatrixNaiveBase32, MatrixNaiveBase64]
         Feature matrix.
         It is typically one of the matrices defined in :mod:`adelie.matrix` submodule or :class:`numpy.ndarray`.
-    betas : (L, p) or (L, p*K) Union[ndarray, csr_matrix]
+    betas : (L, p) or (L, p*K) Union[ndarray, csr_array, csr_matrix]
         Coefficient vectors :math:`\\beta`.
     intercepts : (L,) or (L, K) ndarray
         Intercepts :math:`\\beta_0`.
@@ -112,10 +112,10 @@ def predict(
     if isinstance(betas, np.ndarray):
         for i in range(etas.shape[0]):
             X.btmul(0, X.cols(), betas[i], etas[i].ravel())
-    elif isinstance(betas, csr_matrix):
+    elif isinstance(betas, (csr_array, csr_matrix)):
         X.sp_tmul(betas, etas.reshape((L, -1))) 
     else:
-        raise RuntimeError("beta is not one of np.ndarray or scipy.sparse.csr_matrix.")
+        raise RuntimeError("beta is not one of np.ndarray or scipy.sparse.csr_array/csr_matrix.")
     etas += intercepts[:, None] + offsets
 
     return etas
@@ -124,7 +124,7 @@ def predict(
 def objective(
     X: Union[np.ndarray, MatrixNaiveBase32, MatrixNaiveBase64], 
     glm: Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64],
-    betas: Union[np.ndarray, csr_matrix], 
+    betas: Union[np.ndarray, csr_array, csr_matrix], 
     intercepts: np.ndarray,
     lmdas: np.ndarray, 
     *,
@@ -148,7 +148,7 @@ def objective(
     glm : Union[GlmBase32, GlmBase64, GlmMultiBase32, GlmMultiBase64] 
         GLM object.
         It is typically one of the GLM classes defined in :mod:`adelie.glm` submodule.
-    betas : (L, p) or (L, p*K) Union[ndarray, csr_matrix]
+    betas : (L, p) or (L, p*K) Union[ndarray, csr_array, csr_matrix]
         Coefficient vectors :math:`\\beta`.
     intercepts : (L,) or (L, K) ndarray
         Intercepts :math:`\\beta_0`.
@@ -259,7 +259,7 @@ def objective(
                 np.float32: core.solver.compute_penalty_dense_32,
                 np.float64: core.solver.compute_penalty_dense_64,
             }[dtype]
-        elif isinstance(betas, csr_matrix): 
+        elif isinstance(betas, (csr_array, csr_matrix)):
             penalty_f = {
                 np.float32: core.solver.compute_penalty_sparse_32,
                 np.float64: core.solver.compute_penalty_sparse_64,
@@ -388,8 +388,8 @@ def gradients(
 
 def gradient_norms(
     grads: np.ndarray,
-    betas: csr_matrix,
-    duals: csr_matrix,
+    betas: Union[csr_array, csr_matrix],
+    duals: Union[csr_array, csr_matrix],
     lmdas: np.ndarray,
     *, 
     constraints: list[Union[ConstraintBase32, ConstraintBase64]] =None,
@@ -423,9 +423,9 @@ def gradient_norms(
     ----------
     grads : (L, p) or (L, p, K) ndarray
         Gradients.
-    betas : (L, p) or (L, p*K) csr_matrix
+    betas : (L, p) or (L, p*K) Union[csr_array, csr_matrix]
         Coefficient vectors :math:`\\beta`.
-    duals : (L, d) csr_matrix
+    duals : (L, d) Union[csr_array, csr_matrix]
         Dual vectors :math:`\\mu`.
     lmdas : (L,) ndarray
         Regularization parameters :math:`\\lambda`.
@@ -497,8 +497,8 @@ def gradient_norms(
             dual_groups = render_dual_groups(constraints)
             mu_grads = np.zeros(grads.shape, dtype=dtype)
             for k in range(L):
-                beta_curr = betas[k].toarray()[0].astype(dtype)
-                mu_curr = duals[k].toarray()[0].astype(dtype)
+                beta_curr = betas[k].toarray().ravel().astype(dtype)
+                mu_curr = duals[k].toarray().ravel().astype(dtype)
                 mu_grads_curr = mu_grads[k].astype(dtype)
                 for constraint, g, gs, dg in zip(
                     constraints,
@@ -576,7 +576,7 @@ def gradient_scores(
 
 def coefficient(
     lmda: float,
-    betas: csr_matrix,
+    betas: Union[csr_array, csr_matrix],
     intercepts: np.ndarray,
     lmdas: np.ndarray,
 ):
@@ -604,7 +604,7 @@ def coefficient(
     ----------
     lmda : float
         New regularization parameter at which to find the solution.
-    betas : (L, p) csr_matrix
+    betas : (L, p) Union[csr_array, csr_matrix]
         Coefficient vectors :math:`\\beta`.
     intercepts : (L,) ndarray
         Intercepts.
@@ -613,7 +613,7 @@ def coefficient(
 
     Returns
     -------
-    beta : (1, p) csr_matrix
+    beta : (1, p) csr_array
         Linearly interpolated coefficient vector at :math:`\\lambda`.
     intercept : float
         Linearly interpolated intercept at :math:`\\lambda`.
@@ -621,7 +621,7 @@ def coefficient(
     if len(lmdas) == 0:
         raise RuntimeError("lmdas must be non-empty!")
     if len(lmdas) == 1:
-        return betas, lmdas
+        return betas, intercepts[0]
     order = np.argsort(lmdas)
     idx = np.searchsorted(
         lmdas,
@@ -635,9 +635,9 @@ def coefficient(
             "Returning boundary solution."
         )
         idx = np.clip(idx, 0, lmdas.shape[0]-1)
-        return betas[idx], intercepts[idx]
+        return betas[idx:idx+1], intercepts[idx]
 
-    left, right = betas[idx-1], betas[idx]
+    left, right = betas[idx-1:idx], betas[idx:idx+1]
     weight = (lmda - lmdas[idx]) / (lmdas[idx-1] - lmdas[idx])
     beta = left.multiply(weight) + right.multiply(1-weight)
     left, right = intercepts[idx-1], intercepts[idx]
@@ -647,7 +647,7 @@ def coefficient(
 
 
 def plot_coefficients(
-    betas: csr_matrix,
+    betas: Union[csr_array, csr_matrix],
     lmdas: np.ndarray,
     groups: np.ndarray,
     group_sizes: np.ndarray,
@@ -658,7 +658,7 @@ def plot_coefficients(
 
     Parameters
     ----------
-    betas : (L, p) csr_matrix
+    betas : (L, p) Union[csr_array, csr_matrix]
         Coefficient vectors :math:`\\beta`.
     lmdas : (L,) ndarray
         Regularization parameters :math:`\\lambda`.

@@ -10,7 +10,7 @@ from .matrix import (
     MatrixConstraintBase32,
     MatrixConstraintBase64,
 )
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_array, csr_matrix
 from typing import Union
 import numpy as np
 
@@ -135,7 +135,7 @@ def box(
 
 
 def linear(
-    A: Union[np.ndarray, csr_matrix, MatrixConstraintBase32, MatrixConstraintBase64],
+    A: Union[np.ndarray, csr_array, csr_matrix, MatrixConstraintBase32, MatrixConstraintBase64],
     lower: np.ndarray,
     upper: np.ndarray,
     *,
@@ -155,7 +155,7 @@ def linear(
 
     Parameters
     ----------
-    A : (m, d) Union[ndarray, csr_matrix, MatrixConstraintBase32, MatrixConstraintBase64]
+    A : (m, d) Union[ndarray, csr_array, csr_matrix, MatrixConstraintBase32, MatrixConstraintBase64]
         Constraint matrix :math:`A`.
     lower : (m,) ndarray
         Lower bound :math:`\\ell`.
@@ -163,7 +163,7 @@ def linear(
         Upper bound :math:`u`.
     vars : ndarray, optional
         Equivalent to :math:`\\mathrm{diag}(AA^\\top)`.
-        If ``None`` and ``A`` is ``ndarray`` or ``csr_matrix``, it is computed internally.
+        If ``None`` and ``A`` is ``ndarray`` or sparse, it is computed internally.
         Otherwise, it must be explicitly provided by the user.
         Default is ``None``.
     copy : bool, optional
@@ -241,7 +241,7 @@ def linear(
 
         A, _ = _coerce_dtype(A, dtype)
         A = matrix.dense(A, method="constraint", copy=copy)
-    elif isinstance(A, csr_matrix):
+    elif isinstance(A, (csr_array, csr_matrix)):
         if vars is None:
             vars = (A ** 2).sum(axis=1)
 
@@ -293,7 +293,7 @@ def linear(
             self._A = A
             self._lower = np.array(lower, dtype=dtype)
             self._upper = np.array(upper, dtype=dtype)
-            self._vars = np.array(vars, copy=copy, dtype=dtype)
+            self._vars = np.array(vars, copy=copy or None, dtype=dtype)
             core_base.__init__(
                 self,
                 A=self._A,

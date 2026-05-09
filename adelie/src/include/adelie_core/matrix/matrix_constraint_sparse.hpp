@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <adelie_core/matrix/matrix_constraint_base.hpp>
 
 #ifndef ADELIE_CORE_MATRIX_CONSTRAINT_SPARSE_TP

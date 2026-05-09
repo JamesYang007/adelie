@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <adelie_core/optimization/search_pivot.hpp>
 #include <adelie_core/solver/utils.hpp>
 #include <adelie_core/util/algorithm.hpp>

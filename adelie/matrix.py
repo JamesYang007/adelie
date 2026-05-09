@@ -10,7 +10,9 @@ from .adelie_core.matrix import (
 )
 from sys import platform
 from scipy.sparse import (
+    csc_array,
     csc_matrix,
+    csr_array,
     csr_matrix,
 )
 from typing import Union
@@ -167,7 +169,7 @@ class PyMatrixNaiveBase:
         dtype = _to_dtype(self)
         n, p = self.shape
 
-        if isinstance(v, (csr_matrix, csc_matrix)):
+        if isinstance(v, (csr_array, csc_array, csr_matrix, csc_matrix)):
             v = v.tocsr().transpose()
             out = np.empty((v.shape[0], n), dtype=dtype)
             self.sp_tmul(v, out)
@@ -388,7 +390,7 @@ def concatenate(
 
 
 def convex_relu(
-    mat: Union[np.ndarray, csc_matrix],
+    mat: Union[np.ndarray, csc_array, csc_matrix],
     mask: np.ndarray,
     *,
     gated: bool =False,
@@ -423,7 +425,7 @@ def convex_relu(
 
     Parameters
     ----------
-    mat : (n, d) Union[ndarray, csc_matrix]
+    mat : (n, d) Union[ndarray, csc_array, csc_matrix]
         The base matrix :math:`Z` from which to construct the convex relu matrix.        
     mask : (n, m) ndarray
         The boolean mask matrix whose columns define the diagonal of :math:`D_i`.
@@ -500,12 +502,12 @@ def convex_relu(
 
         class _convex_relu(core_base, py_base):
             def __init__(self):
-                self._mat = np.array(mat, copy=copy)
-                self._mask = np.array(mask, copy=copy, dtype=bool, order="F")
+                self._mat = np.array(mat, copy=copy or None)
+                self._mask = np.array(mask, copy=copy or None, dtype=bool, order="F")
                 core_base.__init__(self, self._mat, self._mask, n_threads)
                 py_base.__init__(self, n_threads=n_threads)
 
-    elif isinstance(mat, csc_matrix):
+    elif isinstance(mat, (csc_array, csc_matrix)):
         mat = mat.copy()
         mat.prune()
         mat.sort_indices()
@@ -526,7 +528,7 @@ def convex_relu(
         class _convex_relu(core_base, py_base):
             def __init__(self):
                 self._mat = mat
-                self._mask = np.array(mask, copy=copy, dtype=bool, order="F")
+                self._mask = np.array(mask, copy=copy or None, dtype=bool, order="F")
                 core_base.__init__(
                     self, 
                     self._mat.shape[0], 
@@ -541,7 +543,7 @@ def convex_relu(
                 py_base.__init__(self, n_threads=n_threads)
 
     else:
-        raise TypeError("mat must be a numpy array or a scipy csc_matrix.")
+        raise TypeError("mat must be a numpy array or a scipy csc_array/csc_matrix.")
 
     return _convex_relu()
 
@@ -673,7 +675,7 @@ def dense(
 
     class _dense(core_base, py_base):
         def __init__(self):
-            self._mat = np.array(mat, copy=copy)
+            self._mat = np.array(mat, copy=copy or None)
             core_base.__init__(self, self._mat, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
@@ -905,7 +907,7 @@ def interaction(
 
     class _interaction(core_base, py_base):
         def __init__(self):
-            self._mat = np.array(mat, copy=copy)
+            self._mat = np.array(mat, copy=copy or None)
             self._pairs = pairs
             self._levels = np.array(levels, copy=True, dtype=int)
             core_base.__init__(self, self._mat, self._pairs, self._levels, n_threads)
@@ -978,7 +980,7 @@ def kronecker_eye(
             "F"
         )
         core_base = dispatcher[dtype][order]
-        mat = np.array(mat, copy=copy)
+        mat = np.array(mat, copy=copy or None)
     else:
         dispatcher = {
             np.float64: core.matrix.MatrixNaiveKroneckerEye64,
@@ -1063,7 +1065,7 @@ def lazy_cov(
 
     class _lazy_cov(core_base, py_base):
         def __init__(self):
-            self._mat = np.array(mat, copy=copy)
+            self._mat = np.array(mat, copy=copy or None)
             core_base.__init__(self, self._mat, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
@@ -1178,7 +1180,7 @@ def one_hot(
 
     class _one_hot(core_base, py_base):
         def __init__(self):
-            self._mat = np.array(mat, copy=copy)
+            self._mat = np.array(mat, copy=copy or None)
             self._levels = np.array(levels, copy=True, dtype=int)
             core_base.__init__(self, self._mat, self._levels, n_threads)
             py_base.__init__(self, n_threads=n_threads)
@@ -1299,7 +1301,7 @@ def snp_unphased(
 
 
 def sparse(
-    mat: Union[csc_matrix, csr_matrix],
+    mat: Union[csc_array, csr_array, csc_matrix, csr_matrix],
     *,
     method: str ="naive",
     copy: bool =False,
@@ -1313,7 +1315,7 @@ def sparse(
     
     Parameters
     ----------
-    mat : Union[csc_matrix, csr_matrix]
+    mat : Union[csc_array, csr_array, csc_matrix, csr_matrix]
         The sparse matrix to view.
     method : str, optional
         Method type. It must be one of the following:
@@ -1345,17 +1347,17 @@ def sparse(
     adelie.adelie_core.matrix.MatrixNaiveSparse32F
     adelie.adelie_core.matrix.MatrixNaiveSparse64F
     """
-    if not (isinstance(mat, csr_matrix) or isinstance(mat, csc_matrix)):
-        raise TypeError("mat must be scipy.sparse.csr_matrix or scipy.sparse.csc_matrix.")
+    if not isinstance(mat, (csr_array, csc_array, csr_matrix, csc_matrix)):
+        raise TypeError("mat must be a scipy.sparse csr_array/csc_array or csr_matrix/csc_matrix.")
 
     if method != "constraint":
-        if isinstance(mat, csr_matrix):
+        if isinstance(mat, (csr_array, csr_matrix)):
             warnings.warn("Converting to CSC format.")
             mat = mat.tocsc(copy=True)
         elif copy:
             mat = mat.copy()
     else:
-        if isinstance(mat, csc_matrix):
+        if isinstance(mat, (csc_array, csc_matrix)):
             warnings.warn("Converting to CSR format.")
             mat = mat.tocsr(copy=True)
         elif copy:

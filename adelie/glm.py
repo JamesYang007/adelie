@@ -15,7 +15,7 @@ def _coerce_dtype(y, dtype):
         np.dtype("float64"): np.float64,
     }
     valid_dtypes = list(dtype_map.keys())
-    y = np.array(y, copy=False, order="C")  # important!
+    y = np.asarray(y, order="C")  # important!
     if dtype is None:
         if not (y.dtype in valid_dtypes):
             raise RuntimeError(

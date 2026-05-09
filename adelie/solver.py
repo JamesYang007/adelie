@@ -28,7 +28,7 @@ from .state import (
     multiglm_naive as state_multiglm_naive,
     pinball as state_pinball,
 ) 
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_array
 from typing import (
     Callable,
     Union,
@@ -646,7 +646,7 @@ def grpnet(
     if not (offsets is None): 
         if offsets.shape != glm.y.shape:
             raise RuntimeError("offsets must be same shape as y if not None.")
-        offsets = np.array(offsets, order="C", copy=False, dtype=dtype)
+        offsets = np.asarray(offsets, dtype=dtype, order="C")
     else:
         offsets = np.zeros(glm.y.shape, dtype=dtype)
 
@@ -1087,7 +1087,7 @@ def bvls(
     if isinstance(X_raw, np.ndarray):
         resid = y - X_raw @ beta
     else:
-        resid = y - (X @ csr_matrix(beta[None]).T)[:, 0]
+        resid = y - (X @ csr_array(beta[None]).T)[:, 0]
     grad = np.empty(p, dtype=dtype)
     loss = 0.5 * np.sum(resid ** 2 * weights)
 

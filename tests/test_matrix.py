@@ -113,8 +113,8 @@ def test_constraint_sparse(m, d, dtype, order, seed=0):
     A = np.random.normal(0, 1, (m, d)).astype(dtype)
     A.flat[np.random.binomial(1, 0.3, A.size)] = 0
     A_sp = {
-        "C": scipy.sparse.csr_matrix,
-        "F": scipy.sparse.csc_matrix,
+        "C": scipy.sparse.csr_array,
+        "F": scipy.sparse.csc_array,
     }[order](A)
     cA = mod.sparse(A_sp, method="constraint", n_threads=3)
     run_constraint(A, cA, dtype)
@@ -236,8 +236,8 @@ def test_cov_sparse(n, p, dtype, order, seed=0):
     A[subset, :] = 0
     A[:, subset] = 0
     A_sp = {
-        "C": scipy.sparse.csr_matrix,
-        "F": scipy.sparse.csc_matrix,
+        "C": scipy.sparse.csr_array,
+        "F": scipy.sparse.csc_array,
     }[order](A)
     cA = mod.sparse(A_sp, method="cov", n_threads=3)
     run_cov(A, cA, dtype)
@@ -406,7 +406,7 @@ def run_naive(
     v = np.random.normal(0, 1, (2, p)).astype(dtype)
     v[:, :p//2] = 0
     expected = v @ X.T
-    v = scipy.sparse.csr_matrix(v)
+    v = scipy.sparse.csr_array(v)
     cX.sp_tmul(v, out)
     assert np.allclose(expected, out, atol=atol)
 
@@ -506,7 +506,7 @@ def test_naive_convex_relu(n, d, m, gated, storage, dtype, n_threads=2, seed=0):
     else:
         X = np.concatenate([Y, -Y], axis=1).astype(dtype)
     if storage == "sparse":
-        Z = scipy.sparse.csc_matrix(Z)
+        Z = scipy.sparse.csc_array(Z)
     cX = mod.convex_relu(Z, mask, gated=gated, n_threads=n_threads)
     run_naive(X, cX, dtype)
 
@@ -823,8 +823,8 @@ def test_naive_sparse(n, p, dtype, order, seed=0):
     X = np.random.normal(0, 1, (n, p)).astype(dtype)
     X.flat[np.random.binomial(1, 0.3, X.size)] = 0
     X_sp = {
-        "C": scipy.sparse.csr_matrix,
-        "F": scipy.sparse.csc_matrix,
+        "C": scipy.sparse.csr_array,
+        "F": scipy.sparse.csc_array,
     }[order](X)
     cX = mod.sparse(X_sp, method="naive", n_threads=3)
     run_naive(X, cX, dtype)

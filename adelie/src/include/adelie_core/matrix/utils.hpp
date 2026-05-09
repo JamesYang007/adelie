@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <cstddef>
 #include <adelie_core/configs.hpp>
 #include <adelie_core/util/macros.hpp>

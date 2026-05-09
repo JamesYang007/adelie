@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <atomic>
 #include <unordered_set>
 #include <vector>
