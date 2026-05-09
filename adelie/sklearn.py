@@ -28,9 +28,10 @@ from scipy.special import (
     softmax,
 )
 from sklearn.base import (
-    BaseEstimator, 
+    BaseEstimator,
     RegressorMixin,
 )
+from sklearn.utils._param_validation import StrOptions
 from typing import (
     Any, 
     Dict, 
@@ -47,7 +48,7 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
     Parameters
     ----------
     solver : str, optional
-        The solver to use. 
+        The solver to use.
         It must be one of the following:
 
             - ``"grpnet"``
@@ -58,7 +59,7 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
     family : str, optional
         The family of the response variable.
         It must be one of the following:
-        
+
             - ``"gaussian"``
             - ``"binomial"``
             - ``"poisson"``
@@ -67,6 +68,13 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
 
         Default is ``"gaussian"``.
     """
+
+    _parameter_constraints: dict = {
+        "solver": [StrOptions({"grpnet", "cv_grpnet"})],
+        "family": [StrOptions({
+            "gaussian", "binomial", "poisson", "multigaussian", "multinomial",
+        })],
+    }
 
     def __init__(
         self,
@@ -235,20 +243,6 @@ class GroupElasticNet(BaseEstimator, RegressorMixin):
         ss_res = np.sum((y - yhat) ** 2)
         ss_tot = np.sum((y - ybar) ** 2)
         return np.clip(1 - ss_res / ss_tot, 0, 1)
-
-    def _validate_params(self):
-        if self.solver not in ["grpnet", "cv_grpnet"]:
-            raise ValueError(f"Unknown solver: {self.solver}")
-
-        if self.family not in [
-            "gaussian",
-            "binomial",
-            "multigaussian",
-            "multinomial",
-            "poisson",
-        ]:
-            raise ValueError(f"Unknown family: {self.family}")
-
 
 class CSSModelSelection(BaseEstimator, RegressorMixin):
     """

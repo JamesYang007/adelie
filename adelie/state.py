@@ -81,6 +81,13 @@ class base:
 
     All Python wrapper classes for core state classes must inherit from this class.
     """
+    @property
+    def betas(self):
+        # The C++ state base (next in MRO after this class) exposes `betas`
+        # via pybind11 as a scipy.sparse.csr_matrix. Wrap as csr_array since
+        # csr_matrix is being deprecated in scipy.
+        return scipy.sparse.csr_array(super().betas)
+
     def _check(self, passed, msg, method, logger, *args, **kwargs):
         if passed:
             logger.info(msg, *args, **kwargs)
@@ -368,7 +375,7 @@ class gaussian_pin_base(base):
             method, logger,
         )
         self._check(
-            isinstance(self.betas, scipy.sparse.csr_matrix),
+            isinstance(self.betas, scipy.sparse.csr_array),
             "check betas type",
             method, logger,
         )
