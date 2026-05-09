@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <adelie_core/io/io_snp_base.hpp>
 #include <adelie_core/util/macros.hpp>
 

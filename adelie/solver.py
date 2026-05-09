@@ -646,7 +646,7 @@ def grpnet(
     if not (offsets is None): 
         if offsets.shape != glm.y.shape:
             raise RuntimeError("offsets must be same shape as y if not None.")
-        offsets = np.array(offsets, order="C", copy=False, dtype=dtype)
+        offsets = np.asarray(offsets, dtype=dtype, order="C")
     else:
         offsets = np.zeros(glm.y.shape, dtype=dtype)
 

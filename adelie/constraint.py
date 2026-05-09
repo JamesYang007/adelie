@@ -293,7 +293,7 @@ def linear(
             self._A = A
             self._lower = np.array(lower, dtype=dtype)
             self._upper = np.array(upper, dtype=dtype)
-            self._vars = np.array(vars, copy=copy, dtype=dtype)
+            self._vars = np.array(vars, copy=copy or None, dtype=dtype)
             core_base.__init__(
                 self,
                 A=self._A,

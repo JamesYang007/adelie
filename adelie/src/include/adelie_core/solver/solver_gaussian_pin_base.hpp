@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <adelie_core/configs.hpp>
 #include <adelie_core/bcd/unconstrained/newton.hpp>
 #include <adelie_core/util/macros.hpp>

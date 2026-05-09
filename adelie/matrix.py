@@ -500,8 +500,8 @@ def convex_relu(
 
         class _convex_relu(core_base, py_base):
             def __init__(self):
-                self._mat = np.array(mat, copy=copy)
-                self._mask = np.array(mask, copy=copy, dtype=bool, order="F")
+                self._mat = np.array(mat, copy=copy or None)
+                self._mask = np.array(mask, copy=copy or None, dtype=bool, order="F")
                 core_base.__init__(self, self._mat, self._mask, n_threads)
                 py_base.__init__(self, n_threads=n_threads)
 
@@ -526,7 +526,7 @@ def convex_relu(
         class _convex_relu(core_base, py_base):
             def __init__(self):
                 self._mat = mat
-                self._mask = np.array(mask, copy=copy, dtype=bool, order="F")
+                self._mask = np.array(mask, copy=copy or None, dtype=bool, order="F")
                 core_base.__init__(
                     self, 
                     self._mat.shape[0], 
@@ -673,7 +673,7 @@ def dense(
 
     class _dense(core_base, py_base):
         def __init__(self):
-            self._mat = np.array(mat, copy=copy)
+            self._mat = np.array(mat, copy=copy or None)
             core_base.__init__(self, self._mat, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
@@ -905,7 +905,7 @@ def interaction(
 
     class _interaction(core_base, py_base):
         def __init__(self):
-            self._mat = np.array(mat, copy=copy)
+            self._mat = np.array(mat, copy=copy or None)
             self._pairs = pairs
             self._levels = np.array(levels, copy=True, dtype=int)
             core_base.__init__(self, self._mat, self._pairs, self._levels, n_threads)
@@ -978,7 +978,7 @@ def kronecker_eye(
             "F"
         )
         core_base = dispatcher[dtype][order]
-        mat = np.array(mat, copy=copy)
+        mat = np.array(mat, copy=copy or None)
     else:
         dispatcher = {
             np.float64: core.matrix.MatrixNaiveKroneckerEye64,
@@ -1063,7 +1063,7 @@ def lazy_cov(
 
     class _lazy_cov(core_base, py_base):
         def __init__(self):
-            self._mat = np.array(mat, copy=copy)
+            self._mat = np.array(mat, copy=copy or None)
             core_base.__init__(self, self._mat, n_threads)
             py_base.__init__(self, n_threads=n_threads)
 
@@ -1178,7 +1178,7 @@ def one_hot(
 
     class _one_hot(core_base, py_base):
         def __init__(self):
-            self._mat = np.array(mat, copy=copy)
+            self._mat = np.array(mat, copy=copy or None)
             self._levels = np.array(levels, copy=True, dtype=int)
             core_base.__init__(self, self._mat, self._levels, n_threads)
             py_base.__init__(self, n_threads=n_threads)

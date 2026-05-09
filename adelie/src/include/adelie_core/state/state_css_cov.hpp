@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <string>
 #include <unordered_set>
 #include <adelie_core/util/functional.hpp>

@@ -655,7 +655,7 @@ def gaussian_pin_naive(
                 evars, v = np.linalg.eigh(XiTXi)
                 self._screen_vars.append(np.maximum(evars, 0))
                 self._screen_X_means.append(Xi_means)
-                self._screen_transforms.append(np.array(v, copy=False, dtype=dtype, order="F"))
+                self._screen_transforms.append(np.asarray(v, dtype=dtype, order="F"))
             self._screen_vars = np.concatenate(self._screen_vars, dtype=dtype)
             self._screen_X_means = np.concatenate(self._screen_X_means, dtype=dtype)
             vecmat_type = (
@@ -1105,7 +1105,7 @@ def _render_multi_inputs(
     n_threads,
     dtype,
 ):
-    offsets = np.array(offsets, order="C", copy=False, dtype=dtype)
+    offsets = np.asarray(offsets, dtype=dtype, order="C")
     n, n_classes = offsets.shape
     X = matrix.kronecker_eye(X, n_classes, n_threads=n_threads)
     if intercept:
@@ -1356,12 +1356,12 @@ def gaussian_cov(
             self._group_sizes = np.array(group_sizes, copy=True, dtype=int)
             self._dual_groups = render_dual_groups(self._constraints)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
-            self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=False, dtype=int)
-            self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
-            self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-            self._grad = np.array(grad, copy=False, dtype=dtype)
-            self._active_set = np.array(active_set, copy=False, dtype=int)
+            self._lmda_path = np.asarray(lmda_path, dtype=dtype)
+            self._screen_set = np.asarray(screen_set, dtype=int)
+            self._screen_beta = np.asarray(screen_beta, dtype=dtype)
+            self._screen_is_active = np.asarray(screen_is_active, dtype=bool)
+            self._grad = np.asarray(grad, dtype=dtype)
+            self._active_set = np.asarray(active_set, dtype=int)
 
             # MUST call constructor directly and not use super()!
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
@@ -1953,13 +1953,13 @@ def gaussian_naive(
             self._dual_groups = render_dual_groups(self._constraints)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._offsets = np.array(offsets, copy=True, dtype=dtype)
-            self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=False, dtype=int)
-            self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
-            self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-            self._active_set = np.array(active_set, copy=False, dtype=int)
-            self._grad = np.array(grad, copy=False, dtype=dtype)
-            self._resid = np.array(resid, copy=False, dtype=dtype)
+            self._lmda_path = np.asarray(lmda_path, dtype=dtype)
+            self._screen_set = np.asarray(screen_set, dtype=int)
+            self._screen_beta = np.asarray(screen_beta, dtype=dtype)
+            self._screen_is_active = np.asarray(screen_is_active, dtype=bool)
+            self._active_set = np.asarray(active_set, dtype=int)
+            self._grad = np.asarray(grad, dtype=dtype)
+            self._resid = np.asarray(resid, dtype=dtype)
 
             # MUST call constructor directly and not use super()!
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
@@ -2314,13 +2314,13 @@ def multigaussian_naive(
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._weights_expanded = np.repeat(self._glm.weights, repeats=n_classes) / n_classes
             self._offsets = np.array(offsets, copy=True, dtype=dtype)
-            self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=False, dtype=int)
-            self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
-            self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-            self._active_set = np.array(active_set, copy=False, dtype=int)
-            self._grad = np.array(grad, copy=False, dtype=dtype)
-            self._resid = np.array(resid, copy=False, dtype=dtype)
+            self._lmda_path = np.asarray(lmda_path, dtype=dtype)
+            self._screen_set = np.asarray(screen_set, dtype=int)
+            self._screen_beta = np.asarray(screen_beta, dtype=dtype)
+            self._screen_is_active = np.asarray(screen_is_active, dtype=bool)
+            self._active_set = np.asarray(active_set, dtype=int)
+            self._grad = np.asarray(grad, dtype=dtype)
+            self._resid = np.asarray(resid, dtype=dtype)
 
             # MUST call constructor directly and not use super()!
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
@@ -2680,14 +2680,14 @@ def glm_naive(
             self._dual_groups = render_dual_groups(self._constraints)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._offsets = np.array(offsets, copy=True, dtype=dtype)
-            self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=False, dtype=int)
-            self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
-            self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-            self._active_set = np.array(active_set, copy=False, dtype=int)
-            self._grad = np.array(grad, copy=False, dtype=dtype)
-            self._eta = np.array(eta, copy=False, dtype=dtype)
-            self._resid = np.array(resid, copy=False, dtype=dtype)
+            self._lmda_path = np.asarray(lmda_path, dtype=dtype)
+            self._screen_set = np.asarray(screen_set, dtype=int)
+            self._screen_beta = np.asarray(screen_beta, dtype=dtype)
+            self._screen_is_active = np.asarray(screen_is_active, dtype=bool)
+            self._active_set = np.asarray(active_set, dtype=int)
+            self._grad = np.asarray(grad, dtype=dtype)
+            self._eta = np.asarray(eta, dtype=dtype)
+            self._resid = np.asarray(resid, dtype=dtype)
 
             # MUST call constructor directly and not use super()!
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
@@ -3046,14 +3046,14 @@ def multiglm_naive(
             self._dual_groups = render_dual_groups(self._constraints)
             self._penalty = np.array(penalty, copy=True, dtype=dtype)
             self._offsets = np.array(offsets, copy=True, dtype=dtype)
-            self._lmda_path = np.array(lmda_path, copy=False, dtype=dtype)
-            self._screen_set = np.array(screen_set, copy=False, dtype=int)
-            self._screen_beta = np.array(screen_beta, copy=False, dtype=dtype)
-            self._screen_is_active = np.array(screen_is_active, copy=False, dtype=bool)
-            self._active_set = np.array(active_set, copy=False, dtype=int)
-            self._grad = np.array(grad, copy=False, dtype=dtype)
-            self._eta = np.array(eta, copy=False, dtype=dtype)
-            self._resid = np.array(resid, copy=False, dtype=dtype)
+            self._lmda_path = np.asarray(lmda_path, dtype=dtype)
+            self._screen_set = np.asarray(screen_set, dtype=int)
+            self._screen_beta = np.asarray(screen_beta, dtype=dtype)
+            self._screen_is_active = np.asarray(screen_is_active, dtype=bool)
+            self._active_set = np.asarray(active_set, dtype=int)
+            self._grad = np.asarray(grad, dtype=dtype)
+            self._eta = np.asarray(eta, dtype=dtype)
+            self._resid = np.asarray(resid, dtype=dtype)
 
             # MUST call constructor directly and not use super()!
             # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#forced-trampoline-class-initialisation
@@ -3224,10 +3224,10 @@ def bvls(
             # static inputs require a reference to input
             # or copy if it must be made
             self._X = X
-            self._X_vars = np.array(X_vars, copy=False, dtype=dtype)
-            self._lower = np.array(lower, copy=False, dtype=dtype)
-            self._upper = np.array(upper, copy=False, dtype=dtype)
-            self._weights = np.array(weights, copy=False, dtype=dtype)
+            self._X_vars = np.asarray(X_vars, dtype=dtype)
+            self._lower = np.asarray(lower, dtype=dtype)
+            self._upper = np.asarray(upper, dtype=dtype)
+            self._weights = np.asarray(weights, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=True, dtype=int)
             self._is_screen = np.array(is_screen, copy=True, dtype=bool)
             self._active_set = np.array(active_set, copy=True, dtype=int)
@@ -3380,9 +3380,9 @@ def pinball(
             # static inputs require a reference to input
             # or copy if it must be made
             self._A = A
-            self._S = np.array(S, copy=False, dtype=dtype, order="F")
-            self._penalty_neg = np.array(penalty_neg, copy=False, dtype=dtype)
-            self._penalty_pos = np.array(penalty_pos, copy=False, dtype=dtype)
+            self._S = np.asarray(S, dtype=dtype, order="F")
+            self._penalty_neg = np.asarray(penalty_neg, dtype=dtype)
+            self._penalty_pos = np.asarray(penalty_pos, dtype=dtype)
             self._screen_set = np.array(screen_set, copy=True, dtype=int)
             self._is_screen = np.array(is_screen, copy=True, dtype=bool)
             self._screen_ASAT_diag = np.array(screen_ASAT_diag, copy=True, dtype=dtype)

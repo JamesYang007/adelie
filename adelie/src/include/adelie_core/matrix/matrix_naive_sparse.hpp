@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <adelie_core/matrix/matrix_naive_base.hpp>
 
 #ifndef ADELIE_CORE_MATRIX_NAIVE_SPARSE_TP

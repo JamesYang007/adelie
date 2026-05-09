@@ -12,7 +12,7 @@
 Adelie is a fast and flexible Python package for solving 
 lasso, elastic net, group lasso, and group elastic net problems. 
 
-- **Installation**: [https://jamesyang007.github.io/adelie/notebooks/installation.html](https://jamesyang007.github.io/adelie/notebooks/installation.html)
+- **Installation**: [https://jamesyang007.github.io/adelie/user_guide/notebooks/installation.html](https://jamesyang007.github.io/adelie/user_guide/notebooks/installation.html)
 - **Documentation**: [https://jamesyang007.github.io/adelie](https://jamesyang007.github.io/adelie/)
 - **Source code**: [https://github.com/JamesYang007/adelie](https://github.com/JamesYang007/adelie)
 - **Issue Tracker**: [https://github.com/JamesYang007/adelie/issues](https://github.com/JamesYang007/adelie/issues)
