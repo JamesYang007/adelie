@@ -21,6 +21,7 @@ from .state import (
 from IPython.display import HTML
 from itertools import cycle
 from scipy.sparse import csr_matrix
+import scipy.sparse
 from typing import Union
 import numpy as np
 import matplotlib.pyplot as plt
@@ -644,6 +645,167 @@ def coefficient(
     intercept = weight * left + (1-weight) * right
 
     return beta, intercept
+
+
+def coefficients(
+    lmdas_new: np.ndarray,
+    betas: csr_matrix,
+    intercepts: np.ndarray,
+    lmdas: np.ndarray,
+):
+    """Vectorised :func:`coefficient` over many query :math:`\\lambda` values.
+
+    Returns exactly what stacking :func:`coefficient` would return,
+
+    .. code-block:: python
+
+        beta_ints = [coefficient(l, betas, intercepts, lmdas) for l in lmdas_new]
+        scipy.sparse.vstack([b for b, _ in beta_ints]), np.array([i for _, i in beta_ints])
+
+    but in a handful of :math:`O(\\mathrm{nnz})` array operations instead of
+    :math:`O(|\\lambda_{new}|)` scipy sparse constructions.  The result is
+    bit-for-bit identical to the reference stacking: every per-element
+    operation (interpolation weight, the two scalings, the addition, the
+    zero-dropping of the sparse add, and the raw boundary row copy) is the
+    same IEEE-754 operation applied in the same order to the same operands --
+    only the Python-level orchestration changes.
+
+    Used by :func:`adelie.cv.cv_grpnet`, where all query values are on the
+    fitted path so the interpolation degenerates to a weight of exactly ``1.0``.
+
+    Parameters
+    ----------
+    lmdas_new : (Q,) ndarray
+        Query regularization parameters.
+    betas : (L, p) csr_matrix
+        Coefficient vectors :math:`\\beta` along the fitted path.
+    intercepts : (L,) ndarray
+        Intercepts along the fitted path.
+    lmdas : (L,) ndarray
+        Regularization parameters of the fitted path (descending).
+
+    Returns
+    -------
+    betas_new : (Q, p) csr_matrix
+        Row ``q`` is the linearly interpolated coefficient vector at ``lmdas_new[q]``.
+    intercepts_new : (Q,) ndarray
+        Linearly interpolated intercepts.
+
+    See Also
+    --------
+    adelie.diagnostic.coefficient
+    """
+    lmdas_new = np.asarray(lmdas_new)
+    if lmdas_new.ndim != 1:
+        raise ValueError("lmdas_new must be one-dimensional!")
+    if len(lmdas) == 0:
+        raise RuntimeError("lmdas must be non-empty!")
+
+    Q = lmdas_new.shape[0]
+    L = lmdas.shape[0]
+
+    # Degenerate / non-canonical inputs: defer to the reference implementation so the
+    # contract "identical to stacking coefficient()" holds unconditionally.
+    if (
+        L == 1
+        or Q == 0
+        or not isinstance(betas, csr_matrix)
+        or betas.shape[0] != L
+        or not betas.has_canonical_format
+    ):
+        beta_ints = [
+            coefficient(lmda=lmda, betas=betas, intercepts=intercepts, lmdas=lmdas)
+            for lmda in lmdas_new
+        ]
+        return (
+            scipy.sparse.vstack([x[0] for x in beta_ints]),
+            np.array([x[1] for x in beta_ints]),
+        )
+
+    # Same bracket search as coefficient(), evaluated for all queries at once.
+    order = np.argsort(lmdas)
+    idx = np.searchsorted(lmdas, lmdas_new, sorter=order)
+    idx = L - idx
+
+    is_boundary = (idx == 0) | (idx == L)
+    n_boundary = int(np.count_nonzero(is_boundary))
+    if n_boundary:
+        logger.logger.warning(
+            f"{n_boundary} lmda(s) not within the range of the saved lambdas. "
+            + "Returning boundary solution."
+        )
+
+    interior = np.flatnonzero(~is_boundary)
+    boundary = np.flatnonzero(is_boundary)
+
+    blocks = []
+    intercepts = np.asarray(intercepts)
+
+    # ---- dtype faithfulness -------------------------------------------------------
+    # The reference evaluates, per query, `left.multiply(weight)` (CSR data * NumPy
+    # float64 *scalar*) and `weight * intercepts[i-1] + (1-weight) * intercepts[i]`.
+    # Which floating-point loop NumPy selects for "array op scalar" depends on the
+    # NumPy major version (1.x value-based casting keeps float32 data in float32;
+    # 2.x / NEP 50 promotes to float64), while "scalar op scalar" (K == 1 intercepts)
+    # always uses plain dtype promotion.  We ask NumPy the same questions with the same
+    # operand kinds so the vectorised arithmetic runs in the identical dtype and the
+    # stacked outputs carry the identical dtype.  For float64 inputs all of this is a
+    # no-op (everything is float64); on-grid queries have weight exactly 1.0 and are
+    # bit-exact in any dtype.
+    if interior.size:
+        idx_i = idx[interior]
+        # weight = (lmda - lmdas[idx]) / (lmdas[idx-1] - lmdas[idx])  (elementwise)
+        weight = (lmdas_new[interior] - lmdas[idx_i]) / (lmdas[idx_i-1] - lmdas[idx_i])
+        cweight = 1-weight
+        w_scalar = weight[0]  # a NumPy scalar of the reference's `weight` type
+        prod_dtype = np.result_type(betas.data, w_scalar)
+        if intercepts.ndim == 1:
+            i_dtype = np.result_type(intercepts.dtype, weight.dtype)   # scalar * scalar
+        else:
+            i_dtype = np.result_type(intercepts, w_scalar)              # (K,) array * scalar
+
+    row_dtypes = []
+    if interior.size:
+        row_dtypes.append(i_dtype)
+    if boundary.size:
+        row_dtypes.append(intercepts.dtype)               # raw rows keep their dtype
+    # np.array([...]) over the per-query intercept rows promotes across row dtypes.
+    intercepts_new = np.empty((Q,) + intercepts.shape[1:], dtype=np.result_type(*row_dtypes))
+
+    if interior.size:
+        left = betas[idx_i-1]  # row gathers preserve per-row index order and explicit zeros
+        right = betas[idx_i]
+        wdata = np.repeat(weight, np.diff(left.indptr)).astype(prod_dtype, copy=False)
+        cwdata = np.repeat(cweight, np.diff(right.indptr)).astype(prod_dtype, copy=False)
+        # left.multiply(weight): data * scalar, per row -> same products, one array op,
+        # in the loop dtype the reference's scalar multiply selects.
+        left.data = left.data * wdata
+        right.data = right.data * cwdata
+        # left + right: scipy's canonical csr_plus_csr row merge (sorted, zeros dropped),
+        # identical per row to the reference's per-row addition.
+        blocks.append(left + right)
+
+        wi = weight.astype(i_dtype, copy=False)
+        cwi = cweight.astype(i_dtype, copy=False)
+        if intercepts.ndim > 1:
+            wi = wi.reshape((-1,) + (1,) * (intercepts.ndim - 1))
+            cwi = cwi.reshape((-1,) + (1,) * (intercepts.ndim - 1))
+        i_left = intercepts[idx_i-1].astype(i_dtype, copy=False)
+        i_right = intercepts[idx_i].astype(i_dtype, copy=False)
+        intercepts_new[interior] = wi * i_left + cwi * i_right
+
+    if boundary.size:
+        idx_b = np.clip(idx[boundary], 0, L-1)
+        blocks.append(betas[idx_b])  # raw row copies: no scaling, no zero-dropping
+        intercepts_new[boundary] = intercepts[idx_b]
+
+    stacked = blocks[0] if len(blocks) == 1 else scipy.sparse.vstack(blocks)
+    if interior.size and boundary.size:
+        # restore query order (rows were emitted interior-first, then boundary)
+        perm = np.empty(Q, dtype=np.intp)
+        perm[np.concatenate([interior, boundary])] = np.arange(Q)
+        stacked = stacked[perm]
+    return stacked, intercepts_new
 
 
 def plot_coefficients(

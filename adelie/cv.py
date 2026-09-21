@@ -1,6 +1,7 @@
 from typing import Union
 from .diagnostic import (
     coefficient,
+    coefficients,
     predict,
 )
 from .glm import (
@@ -281,17 +282,15 @@ def cv_grpnet(
         betas = state.betas
         intercepts = state.intercepts
         lmdas = state.lmdas
-        beta_ints = [
-            coefficient(
-                lmda=lmda,
-                betas=betas,
-                intercepts=intercepts,
-                lmdas=lmdas,
-            )
-            for lmda in full_lmdas
-        ]
-        full_betas = scipy.sparse.vstack([x[0] for x in beta_ints])
-        full_intercepts = np.array([x[1] for x in beta_ints])
+        # Vectorised over full_lmdas: one O(nnz) gather/merge instead of one
+        # scipy sparse construction chain per lambda (bit-identical result; see
+        # adelie.diagnostic.coefficients).
+        full_betas, full_intercepts = coefficients(
+            lmdas_new=full_lmdas,
+            betas=betas,
+            intercepts=intercepts,
+            lmdas=lmdas,
+        )
 
         # compute linear predictions
         etas = predict(
