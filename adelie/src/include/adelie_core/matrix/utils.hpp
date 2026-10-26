@@ -1371,7 +1371,7 @@ void snp_combine_r_block_axi(
                         const int block_size = n_chunks / n_blocks;
                         const int remainder = n_chunks % n_blocks;
 
-                        #pragma omp for schedule(static) nowait
+                        #pragma omp for schedule(static)
                         for (int t = 0; t < n_blocks; ++t) {
                             const auto begin = (
                                 std::min<int>(t, remainder) * (block_size + 1) 
@@ -1395,7 +1395,7 @@ void snp_combine_r_block_axi(
                         const int block_size = n_chunks / n_blocks;
                         const int remainder = n_chunks % n_blocks;
 
-                        #pragma omp for schedule(static) nowait
+                        #pragma omp for schedule(static)
                         for (int t = 0; t < n_blocks; ++t) {
                             const auto begin = (
                                 std::min<int>(t, remainder) * (block_size + 1) 
