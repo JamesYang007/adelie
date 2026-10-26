@@ -970,5 +970,149 @@ def test_naive_rsubset(n, p, subset_prop, dtype, seed=0):
     assert np.allclose(var, expected, atol=1e-6)
 
 
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+@pytest.mark.parametrize("read_mode", ["file", "mmap"])
+@pytest.mark.parametrize("n, s, A", [
+    [10, 20, 4],
+    [1, 13, 3],
+    [144, 1, 2],
+    [10000, 1, 2],
+    [5, 130, 3],
+])
+def test_naive_snp_combine_r(n, s, A, read_mode, dtype, seed=0):
+    """Round-trip IO ⟷ matrix tests for the SNP *unphased*, ancestry format.
+
+    The test mirrors the existing SNP phased/unphased tests:
+
+    1.  Generate a synthetic data-set using :pyfunc:`adelie.data.snp_combine_r`.
+    2.  Serialize it to disk via :pyclass:`adelie.io.snp_combine_r`.
+    3.  Wrap the on-disk representation as a matrix using the
+        :pyfunc:`adelie.matrix.snp_combine_r` helper.
+    4.  Verify that all naive-matrix primitives agree with a dense NumPy
+        reference via the shared ``run_naive`` routine.
+    """
+
+    def create_dense(calldata, ancestries, A):
+        n, s = calldata.shape
+        dense = np.zeros((n, s * (1 + A)), dtype=np.int8)
+        for j in range(s):
+            # genotype column
+            dense[:, j * (1 + A)] = calldata[:, j]
+            # ancestry dosage columns
+            for k in range(A):
+                dosage = (
+                    (ancestries[:, 2 * j] == k).astype(np.int8) +
+                    (ancestries[:, 2 * j + 1] == k).astype(np.int8)
+                )
+                dense[:, j * (1 + A) + 1 + k] = dosage
+        return dense
+
+    # Reduce the *min_bytes* guard so that small test cases exercise all code
+    # paths irrespective of matrix size.
+    min_bytes = ad.configs.Configs.min_bytes
+    ad.configs.set_configs("min_bytes", 0)
+
+    np.random.seed(seed)
+    data = ad.data.snp_combine_r(n, s, A, seed=seed)
+
+    # Reference dense representation (float cast for arithmetic accuracy).
+    X = create_dense(data["X"], data["ancestries"], A).astype(dtype)
+
+    filename = "/tmp/test_snp_combine_r.snpdat"
+    handler = ad.io.snp_combine_r(filename, read_mode)
+    handler.write(data["X"], data["ancestries"], A)
+
+    # Construct the matrix wrapper.
+    cX = mod.snp_combine_r(
+        io=handler,
+        dtype=dtype,
+        n_threads=2,
+    )
+
+    # We can remove the temporary file immediately – the mmap handler keeps a
+    # reference if needed.
+    os.remove(filename)
+
+    # Core comparison suite.
+    run_naive(X, cX, dtype)
+
+    # Additional sanity-checks for *mean* / *var* helpers --------------------
+    w = np.random.uniform(0, 1, cX.shape[0]).astype(dtype)
+
+    mean = np.empty(cX.shape[1], dtype=dtype)
+    cX.mean(w, mean)
+    assert np.allclose(mean, 0)
+
+    var = np.empty(cX.shape[1], dtype=dtype)
+    cX.var(mean, w, var)
+    assert np.allclose(var, 1)
+
+    # Restore global configuration.
+    ad.configs.set_configs("min_bytes", min_bytes)
+
+
 # Reset to default settings
 ad.configs.set_configs("min_bytes", None)
+
+
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+@pytest.mark.parametrize("read_mode", ["file", "mmap"])
+@pytest.mark.parametrize("n, s, A", [
+    [10, 20, 4],
+    [1, 7, 3],
+])
+def test_naive_snp_combine_s(n, s, A, read_mode, dtype, seed=0):
+    """Round-trip IO ⟷ matrix tests for the SNP both-ancestry format."""
+
+    def create_dense(calldata, ancestries, A):
+        n, ss2 = calldata.shape
+        assert ss2 == 2 * s
+        dense = np.zeros((n, s * (2 * A)), dtype=np.int8)
+        for j in range(s):
+            c0 = calldata[:, 2*j]
+            c1 = calldata[:, 2*j + 1]
+            a0 = ancestries[:, 2*j]
+            a1 = ancestries[:, 2*j + 1]
+            for a in range(A):
+                # mutated block
+                mut = (c0 == 1).astype(np.int8) * (a0 == a).astype(np.int8) \
+                      + (c1 == 1).astype(np.int8) * (a1 == a).astype(np.int8)
+                dense[:, j*(2*A) + a] = mut
+                # dosage block
+                dos = (a0 == a).astype(np.int8) + (a1 == a).astype(np.int8)
+                dense[:, j*(2*A) + A + a] = dos
+        return dense
+
+    # Reduce min_bytes guard so small tests exercise parallel code paths
+    min_bytes = ad.configs.Configs.min_bytes
+    ad.configs.set_configs("min_bytes", 0)
+
+    np.random.seed(seed)
+    data = ad.data.snp_phased_ancestry(n, s, A, seed=seed)
+    Xdense = create_dense(data["X"], data["ancestries"], A).astype(dtype)
+
+    filename = "/tmp/test_snp_combine_s.snpdat"
+    handler = ad.io.snp_combine_s(filename, read_mode)
+    handler.write(data["X"], data["ancestries"], A)
+
+    cX = mod.snp_combine_s(
+        io=handler,
+        dtype=dtype,
+        n_threads=2,
+    )
+
+    os.remove(filename)
+
+    run_naive(Xdense, cX, dtype)
+
+    # mean/var follow same semantics as unphased ancestry helpers
+    w = np.random.uniform(0, 1, cX.shape[0]).astype(dtype)
+    mean = np.empty(cX.shape[1], dtype=dtype)
+    cX.mean(w, mean)
+    assert np.allclose(mean, 0)
+
+    var = np.empty(cX.shape[1], dtype=dtype)
+    cX.var(mean, w, var)
+    assert np.allclose(var, 1)
+
+    ad.configs.set_configs("min_bytes", min_bytes)

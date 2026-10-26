@@ -1,5 +1,6 @@
 #include "py_decl.hpp"
 #include <io/io.hpp>
+#include <vector>
 
 namespace py = pybind11;
 namespace ad = adelie_core;
@@ -183,9 +184,189 @@ void io_snp_phased_ancestry(py::module_& m)
         ;
 }
 
+void io_snp_combine_r(py::module_& m)
+{
+    using io_t = ad::io::IOSNPCombineR<>;
+    using base_t = typename io_t::base_t;
+    using string_t = typename io_t::string_t;
+    using colarr_value_t = typename io_t::colarr_value_t;
+    using uint_vec_t = std::vector<uint32_t>;
+    py::class_<io_t, base_t>(m, "IOSNPCombineR")
+        .def(py::init<
+            const string_t&,
+            const string_t&
+        >(),
+            py::arg("filename"),
+            py::arg("read_mode")
+        )
+        .def_property_readonly("rows", &io_t::rows, "Number of rows.")
+        .def_property_readonly("snps", &io_t::snps, "Number of SNPs.")
+        .def_property_readonly("cols", &io_t::cols, "Number of columns.")
+        .def_property_readonly("ancestries", &io_t::ancestries, "Number of ancestries.")
+        .def_property_readonly("nnz", &io_t::nnz, "Number of non-zero entries for each column.")
+        .def("to_dense", &io_t::to_dense, 
+            py::arg("n_threads")=1,
+        R"delimiter(
+        Creates a dense SNP unphased, ancestry matrix from the file.
+
+        Parameters
+        ----------
+        n_threads : int, optional
+            Number of threads.
+            Default is ``1``.
+
+        Returns
+        -------
+        dense : (n, s*(1+A)) ndarray
+            Dense SNP unphased, ancestry matrix.
+            For each SNP j, the columns are:
+            - Column j*(1+A): SNP data
+            - Columns j*(1+A)+1 to j*(1+A)+A: Ancestry dosages
+        )delimiter")
+        .def("write", [](
+            const io_t& io,
+            const Eigen::Ref<const colarr_value_t>& calldata,
+            const Eigen::Ref<const colarr_value_t>& ancestries,
+            size_t A,
+            size_t n_threads
+        ) {
+            std::tuple<size_t, std::unordered_map<std::string, double>> out;
+            std::string error;
+            try {
+                out = io.write(calldata, ancestries, A, n_threads);
+            } catch (const std::exception& e) {
+                error = e.what();
+            }
+            return std::make_tuple(
+                std::get<0>(out),
+                std::get<1>(out),
+                error
+            );
+        },
+            py::arg("calldata").noconvert(),
+            py::arg("ancestries").noconvert(),
+            py::arg("A"),
+            py::arg("n_threads")
+        )
+        .def("write", [](
+            const io_t& io,
+            const Eigen::Ref<const colarr_value_t>& calldata,
+            const Eigen::Ref<const colarr_value_t>& ancestries,
+            size_t A_total,
+            const uint_vec_t& selected_ancestries,
+            size_t n_threads
+        ) {
+            std::tuple<size_t, std::unordered_map<std::string, double>> out;
+            std::string error;
+            try {
+                out = io.write(calldata, ancestries, A_total, selected_ancestries, n_threads);
+            } catch (const std::exception& e) {
+                error = e.what();
+            }
+            return std::make_tuple(
+                std::get<0>(out),
+                std::get<1>(out),
+                error
+            );
+        },
+            py::arg("calldata").noconvert(),
+            py::arg("ancestries").noconvert(),
+            py::arg("A"),
+            py::arg("selected_ancestries"),
+            py::arg("n_threads")
+        )
+        ;
+}
+
+void io_snp_combine_s(py::module_& m)
+{
+    using io_t = ad::io::IOSNPCombineS<>;
+    using base_t = typename io_t::base_t;
+    using string_t = typename io_t::string_t;
+    using colarr_value_t = typename io_t::colarr_value_t;
+    using uint_vec_t = std::vector<uint32_t>;
+    py::class_<io_t, base_t>(m, "IOSNPCombineS")
+        .def(py::init<
+            const string_t&,
+            const string_t&
+        >(),
+            py::arg("filename"),
+            py::arg("read_mode")
+        )
+        .def_property_readonly("rows", &io_t::rows, "Number of rows.")
+        .def_property_readonly("snps", &io_t::snps, "Number of SNPs.")
+        .def_property_readonly("cols", &io_t::cols, "Number of columns.")
+        .def_property_readonly("ancestries", &io_t::ancestries, "Number of ancestries.")
+        .def_property_readonly("nnz", &io_t::nnz, "Number of non-zero entries for each column.")
+        .def("to_dense", &io_t::to_dense, 
+            py::arg("n_threads")=1,
+        R"delimiter(
+        Creates a dense SNP both-ancestry matrix from the file.
+
+        Returns a matrix of shape (n, s*(2*A)) where for each SNP j:
+        - Columns j*(2*A) .. j*(2*A)+(A-1): mutated haplotype counts per ancestry (0..2)
+        - Columns j*(2*A)+A .. j*(2*A)+(2*A-1): ancestry dosage counts per ancestry (0..2)
+        )delimiter")
+        .def("write", [](
+            const io_t& io,
+            const Eigen::Ref<const colarr_value_t>& calldata,
+            const Eigen::Ref<const colarr_value_t>& ancestries,
+            size_t A,
+            size_t n_threads
+        ) {
+            std::tuple<size_t, std::unordered_map<std::string, double>> out;
+            std::string error;
+            try {
+                out = io.write(calldata, ancestries, A, n_threads);
+            } catch (const std::exception& e) {
+                error = e.what();
+            }
+            return std::make_tuple(
+                std::get<0>(out),
+                std::get<1>(out),
+                error
+            );
+        },
+            py::arg("calldata").noconvert(),
+            py::arg("ancestries").noconvert(),
+            py::arg("A"),
+            py::arg("n_threads")
+        )
+        .def("write", [](
+            const io_t& io,
+            const Eigen::Ref<const colarr_value_t>& calldata,
+            const Eigen::Ref<const colarr_value_t>& ancestries,
+            size_t A_total,
+            const uint_vec_t& selected_ancestries,
+            size_t n_threads
+        ) {
+            std::tuple<size_t, std::unordered_map<std::string, double>> out;
+            std::string error;
+            try {
+                out = io.write(calldata, ancestries, A_total, selected_ancestries, n_threads);
+            } catch (const std::exception& e) {
+                error = e.what();
+            }
+            return std::make_tuple(
+                std::get<0>(out),
+                std::get<1>(out),
+                error
+            );
+        },
+            py::arg("calldata").noconvert(),
+            py::arg("ancestries").noconvert(),
+            py::arg("A"),
+            py::arg("selected_ancestries"),
+            py::arg("n_threads")
+        )
+        ;
+}
+
 void register_io(py::module_& m)
 {
     io_snp_base(m);
     io_snp_unphased(m);
     io_snp_phased_ancestry(m);
+    io_snp_combine_r(m);
+    io_snp_combine_s(m);
 }

@@ -98,6 +98,7 @@ adelie.data
     dense
     snp_phased_ancestry
     snp_unphased
+    snp_combine_r
 
 
 adelie.diagnostic
@@ -168,6 +169,7 @@ adelie.io
 
     snp_phased_ancestry
     snp_unphased
+    snp_combine_r
 
 
 adelie.matrix
@@ -195,6 +197,7 @@ adelie.matrix
     one_hot
     snp_phased_ancestry
     snp_unphased
+    snp_combine_r
     sparse
     standardize
     subset

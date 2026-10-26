@@ -18,6 +18,8 @@
 #include <adelie_core/matrix/matrix_naive_kronecker_eye.hpp>
 #include <adelie_core/matrix/matrix_naive_one_hot.hpp>
 #include <adelie_core/matrix/matrix_naive_snp_phased_ancestry.hpp>
+#include <adelie_core/matrix/matrix_naive_snp_combine_r.hpp>
+#include <adelie_core/matrix/matrix_naive_snp_combine_s.hpp>
 #include <adelie_core/matrix/matrix_naive_snp_unphased.hpp>
 #include <adelie_core/matrix/matrix_naive_sparse.hpp>
 #include <adelie_core/matrix/matrix_naive_standardize.hpp>
@@ -105,6 +107,12 @@ extern template class adelie_core::matrix::MatrixNaiveSNPPhasedAncestry<double>;
 
 extern template class adelie_core::matrix::MatrixNaiveSNPUnphased<float>;
 extern template class adelie_core::matrix::MatrixNaiveSNPUnphased<double>;
+
+extern template class adelie_core::matrix::MatrixNaiveSNPCombineR<float>;
+extern template class adelie_core::matrix::MatrixNaiveSNPCombineR<double>;
+
+extern template class adelie_core::matrix::MatrixNaiveSNPCombineS<float>;
+extern template class adelie_core::matrix::MatrixNaiveSNPCombineS<double>;
 
 extern template class adelie_core::matrix::MatrixNaiveSparse<sparse_type<float, Eigen::ColMajor>>;
 extern template class adelie_core::matrix::MatrixNaiveSparse<sparse_type<double, Eigen::ColMajor>>;

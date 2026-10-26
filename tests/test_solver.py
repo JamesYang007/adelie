@@ -826,6 +826,90 @@ def test_solve_gaussian_snp_unphased(
     [100, 100],
     [100, 10000],
 ])
+def test_solve_gaussian_snp_combine_r(
+    n, p,
+    A=8, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=2,
+):
+    """Compares Gaussian solver outputs for SNP-unphased-ancestry matrices
+    against their dense equivalents.
+
+    The test mirrors ``test_solve_gaussian_snp_phased_ancestry`` but for the
+    unphased ancestry format (one ancestry-dosage column per ancestry).
+    """
+    # ------------------------------------------------------------------
+    # 1. Generate synthetic dataset and serialise it to disk
+    # ------------------------------------------------------------------
+    test_data = ad.data.snp_combine_r(n=n, s=p, A=A, sparsity=sparsity, seed=seed)
+    filename = "/tmp/test_snp_combine_r.snpdat"
+    handler = ad.io.snp_combine_r(filename)
+    handler.write(test_data["X"], test_data["ancestries"], A, n_threads)
+    Xs = [
+        ad.matrix.snp_combine_r(
+            io=handler,
+            dtype=np.float64,
+            n_threads=n_threads,
+        )
+    ]
+    handler.read()
+
+    X, y = handler.to_dense(n_threads), test_data.pop("glm").y
+
+    weights = np.random.uniform(1, 2, n)
+    weights /= np.sum(weights)
+
+    test_data["constraints"] = None
+    test_data["y"] = y
+    test_data["weights"] = weights
+    test_data["offsets"] = np.zeros(n)
+    test_data["alpha"] = alpha
+    test_data["X_means"] = np.sum(weights[:, None] * X, axis=0)
+    test_data["y_mean"] = np.sum(weights * y)
+    X_c = X - intercept * test_data["X_means"][None]
+    y_c = y - test_data["y_mean"] * intercept
+    test_data["y_var"] = np.sum(weights * y_c ** 2)
+    test_data["resid"] = y_c
+    test_data["resid_sum"] = np.sum(weights * test_data["resid"])
+    test_data["screen_set"] = np.arange(p)[(test_data["penalty"] <= 0) | (alpha <= 0)]
+    test_data["screen_beta"] = np.zeros(np.sum(test_data["group_sizes"][test_data["screen_set"]]))
+    test_data["screen_is_active"] = np.zeros(test_data["screen_set"].shape[0], dtype=bool)
+    test_data["active_set_size"] = 0
+    test_data["active_set"] = np.empty(p, dtype=int)
+    test_data["grad"] = X_c.T @ (weights * test_data["resid"])
+    test_data["rsq"] = 0
+    test_data["lmda"] = np.inf
+    test_data["tol"] = 1e-7
+    test_data["n_threads"] = n_threads
+
+    test_data.pop("ancestries")
+
+    for Xpy in Xs:
+        test_data["X"] = Xpy
+        state_special = ad.state.gaussian_naive(**test_data).solve()
+        test_data["X"] = ad.matrix.dense(
+            X.astype(np.float64), 
+            method="naive", 
+            n_threads=n_threads
+        )
+        state_dense = ad.state.gaussian_naive(**test_data).solve()
+
+        assert np.allclose(state_special.lmdas, state_dense.lmdas)
+        assert np.allclose(state_special.devs, state_dense.devs)
+        assert np.allclose(state_special.intercepts, state_dense.intercepts)
+        assert np.allclose(
+            state_special.betas.toarray(), state_dense.betas.toarray()
+        )
+
+    os.remove(filename)
+
+
+@pytest.mark.filterwarnings("ignore: Detected matrix to be C-contiguous.")
+@pytest.mark.parametrize("n, p", [
+    [10, 4],
+    [10, 100],
+    [100, 23],
+    [100, 100],
+    [100, 10000],
+])
 def test_solve_gaussian_snp_phased_ancestry(
     n, p, 
     A=8, intercept=True, alpha=1, sparsity=0.5, seed=0, n_threads=2,

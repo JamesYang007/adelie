@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 
 #ifndef ADELIE_CORE_STRONG_INLINE
 #if defined(_MSC_VER)

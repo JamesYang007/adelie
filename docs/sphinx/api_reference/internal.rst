@@ -102,6 +102,10 @@ Internal
     adelie_core.matrix.MatrixNaiveSNPPhasedAncestry64
     adelie_core.matrix.MatrixNaiveSNPUnphased32
     adelie_core.matrix.MatrixNaiveSNPUnphased64
+    adelie_core.matrix.MatrixNaiveSNPCombineR32
+    adelie_core.matrix.MatrixNaiveSNPCombineR64
+    adelie_core.matrix.MatrixNaiveSNPCombineS32
+    adelie_core.matrix.MatrixNaiveSNPCombineS64
     adelie_core.matrix.MatrixNaiveSparse32F
     adelie_core.matrix.MatrixNaiveSparse64F
     adelie_core.matrix.MatrixNaiveStandardize32
